@@ -8,103 +8,98 @@
 
 ```
 
-> **THE UNIVERSAL RUNTIME FOR THE SOVEREIGN INTERFACE.**
+> **A terminal compositor engine for Rust.**
 
 ---
 
-## ⚡ The Manifesto
+## What It Is
 
-The terminal is not a legacy artifact. It is the **Sovereign Interface**.
+`dracon-terminal-engine` is a z-indexed, event-driven terminal runtime. Not a "TUI library" — an engine that owns the terminal, renders compositing layers, parses advanced input protocols, and ships with built-in widgets.
 
-For decades, we have accepted TUI libraries that treat the terminal as a stream of text. They give you widgets. They give you print statements. They give you constraints.
-
-**Terma gives you a Game Engine.**
-
-We do not "print" to the screen. We **inhabit** it. Terma is a high-performance, z-indexed, event-driven runtime designed to build interfaces that feel closer to _Cyberpunk_ than _Curses_.
+**Self-contained.** Contracts and input mapping are baked in — no external contract crates needed.
 
 ---
 
-## � Core Architecture
+## Core
 
-### 1. The Compositor (Z-Index)
+### 1. Compositor (Z-Indexed Layers)
 
-Stop thinking in "rows and columns." Think in **Layers**.
-Terma implements a full composition engine. Spawn a `Plane`, set its Z-Index to 50, and float it above your application.
+Think in **layers**, not rows/columns. Spawn a `Plane`, set its Z-Index, float it above your app.
 
-- **Layer 0**: Background / Wallpaper
-- **Layer 10**: Main Application
-- **Layer 100**: Modal Dialogs & Toasts
-- **Layer 9000**: Debug Overlays
+- **Layer 0**: Background / wallpaper
+- **Layer 10**: Main application
+- **Layer 100**: Modal dialogs & toasts
+- **Layer 9000**: Debug overlays
 
-### 2. God-Tier Input
+### 2. Input
 
-Standard terminals merge `TAB` and `Ctrl+I`. They can't tell `Ctrl+Shift+A` from `Ctrl+A`.
-**Terma knows.**
+- **Kitty Keyboard Protocol**: Chords, modifiers, release events
+- **SGR Mouse**: Click, drag, scroll, extra buttons
+- **Contract types**: `InputEvent`, `KeyCode`, `KeyEvent`, `MouseEvent` — all in `input::mapping`
 
-- **Full Kitty Keyboard Protocol**: We detect chords, modifiers, and release events.
-- **Discrete Mouse**: Tracking click, drag, scroll, and extra buttons (Side/Forward).
+### 3. Visuals
 
-### 3. Visual Supremacy
+- **Images**: High-res PNG/JPG via Kitty protocol
+- **Procedural geometry**: Rounded rects, circles, gradients
+- **TrueColor**: 24-bit by default
 
-- **Images**: Render high-res PNG/JPGs directly in the terminal (Kitty Protocol).
-- **Procedural Geometry**: Draw rounded rectangles, circles, and gradients.
-- **TrueColor**: 24-bit color support by default.
+### 4. Editor Widget
 
-### 4. The Editor (Not just an Input)
+- **Syntax highlighting**: `syntect` with built-in themes
+- **Smart filters**: Live fuzzy-finding
+- **Unlimited undo/redo**
+- **Multi-selection**: Shift+Arrows batch edits
 
-The `TextEditor` widget is a power-user's dream:
+### 5. Ratatui Bridge
 
-- **Syntax Highlighting**: Powered by `syntect` with "Cyberpunk" & "GitHub" themes.
-- **Smart Filters**: Live fuzzy-finding that narrows down content while preserving lines.
-- **Unlimited Undo/Redo**: Because mistakes happen.
-- **Multi-Selection**: Batch edits with Shift+Arrows.
+Drop-in `ratatui` integration via `integration::ratatui`.
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```toml
 [dependencies]
-terma = { git = "https://github.com/DraconDev/terma" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine" }
 ```
 
----
-
-## 💻 The Runtime
+## Quick Start
 
 ```rust
-use terma::prelude::*;
+use dracon_terminal_engine::core::Terma;
+use dracon_terminal_engine::compositor::Plane;
 
-fn main() -> Result<()> {
-    // 1. Initialize the Engine
-    let mut engine = Engine::new();
+fn main() -> std::io::Result<()> {
+    let stdout = std::io::stdout();
+    let mut terminal = Terma::new(stdout)?;
 
-    // 2. Create a Floating Layer
+    // Create a floating layer
     let mut hud = Plane::new(40, 10);
     hud.set_z_index(50);
-    hud.set_style(Style::new().bg(Color::Rgb(20, 20, 25)).fg(Color::Cyan));
-    hud.perimeter(Border::Neons);
     hud.put_str(2, 2, "SYSTEM ONLINE");
 
-    // 3. Mount & Run
-    engine.compositor_mut().add_plane(hud);
-    engine.run_loop()?;
+    // Compose and render
+    // ...
 
     Ok(())
 }
 ```
 
----
+## Modules
 
-## 🚀 System Boot Sequence
+| Module | What |
+|---|---|
+| `contracts` | Input types + traits (`InputEvent`, `UiRenderer`, `UiRuntime`) |
+| `input::mapping` | Event conversion (runtime ↔ contract types) |
+| `core::Terma` | RAII terminal wrapper (raw mode, alt screen, cleanup) |
+| `compositor` | Z-indexed layer engine |
+| `input::parser` | Kitty keyboard + SGR mouse parsing |
+| `widgets::editor` | Code editor with syntax highlighting |
+| `widgets::input` | Text input widget |
+| `integration::ratatui` | Ratatui bridge |
+| `backend::tty` | Low-level terminal control |
+| `visuals` | Images, tiles, icons, rich widgets |
 
-- [x] **Core Runtime**: Event Loop & TTY Management.
-- [x] **Compositor**: Z-Indexed Rendering.
-- [x] **Input**: Enhanced Keyboard & Mouse Protocols.
-- [x] **Hyper-Editor**: Syntax Highlighting & Rich Editing.
+## License
 
----
-
-> _"We are the ghost in the shell."_
->
-> Built by **Dracon** for sovereign terminal systems.
+MIT
