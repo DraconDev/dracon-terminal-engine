@@ -1,0 +1,38 @@
+# Dracon Transparent Encryption
+# Auto-committer gitattributes (Managed by Dracon)
+*.lock binary
+*.png binary
+*.jpg binary
+*.mp4 binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# --- BEGIN DRACON MANAGED BLOCK ---
+# DANGER: Managed by Dracon. Manual changes inside this block will be overwritten.
+# Purpose: settings for filters and binary files
+*.env filter=dracon diff=dracon
+*.gif binary
+*.ico binary
+*.jpg binary
+*.json filter=dracon diff=dracon
+*.lock binary
+*.mp4 binary
+*.png binary
+*.toml filter=dracon diff=dracon
+*.woff binary
+*.woff2 binary
+*.yaml filter=dracon diff=dracon
+*.yml filter=dracon diff=dracon
+# --- END DRACON MANAGED BLOCK ---
+# --- BEGIN DRACON MANAGED BLOCK ---
+*.env filter=dracon
+.env filter=dracon
+.env.* filter=dracon
+config.json filter=dracon
+*.pem filter=dracon
+*.key filter=dracon
+*.age filter=dracon
+test_secret.txt filter=dracon
+# --- END DRACON MANAGED BLOCK ---
