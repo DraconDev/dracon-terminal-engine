@@ -1,37 +1,37 @@
-# AI Guide: Writing Terma Code 🤖
+# AI Guide: Writing Dracon Terminal Engine Code 🤖
 
 **Context for AI Agents:**
-You are writing Rust code using `terma`, the next-generation terminal engine.
-Terma is **NOT** `crossterm` (Immediate Mode, Global State) and **NOT** `ratatui` (Grid Mode).
-Terma is a **Compositor Engine**.
+You are writing Rust code using `dracon_terminal_engine`, the next-generation terminal engine.
+Dracon Terminal Engine is **NOT** `crossterm` (Immediate Mode, Global State) and **NOT** `ratatui` (Grid Mode).
+Dracon Terminal Engine is a **Compositor Engine**.
 
 ## 1. The Golden Rule: RAII
 
-Terma has NO global state. Do not send raw ANSI bytes to `stdout` unless wrapped in `Terma`.
-**Always** wrap `stdout` in `Terma` to handle Raw Mode entry/exit.
+Dracon Terminal Engine has NO global state. Do not send raw ANSI bytes to `stdout` unless wrapped in `Dracon Terminal Engine`.
+**Always** wrap `stdout` in `Dracon Terminal Engine` to handle Raw Mode entry/exit.
 
 ```rust
 use std::io::stdout;
-use terma::Terma;
+use dracon_terminal_engine::Dracon Terminal Engine;
 
 // CORRECT
-let mut term = Terma::new(stdout())?;
+let mut term = Dracon Terminal Engine::new(stdout())?;
 // term is now in Raw Mode. When dropped, it resets.
 ```
 
 ## 2. The God Mode Pattern (Compositor)
 
 Do not draw generic text. Use **Planes**.
-Terma uses the **Painter's Algorithm**.
+Dracon Terminal Engine uses the **Painter's Algorithm**.
 
 ### Creating a Floating Window
 
 ```rust
-use terma::compositor::{Compositor, Plane};
-use terma::compositor::filter::Dim;
+use dracon_terminal_engine::compositor::{Compositor, Plane};
+use dracon_terminal_engine::compositor::filter::Dim;
 
 // 1. Initialize Compositor (Dynamic Size)
-let (w, h) = terma::core::tty::get_window_size(std::io::stdout().as_fd())?;
+let (w, h) = dracon_terminal_engine::core::tty::get_window_size(std::io::stdout().as_fd())?;
 let mut compositor = Compositor::new(w, h);
 
 // 2. Base Layer (Background)
@@ -58,11 +58,11 @@ compositor.render(&mut term)?;
 
 ## 3. Input Handling (The SGR Way)
 
-Terma natively supports Side Buttons (Back/Forward).
-Use `terma::input::parser::Parser`.
+Dracon Terminal Engine natively supports Side Buttons (Back/Forward).
+Use `dracon_terminal_engine::input::parser::Parser`.
 
 ```rust
-use terma::input::parser::{Parser, Event, MouseButton};
+use dracon_terminal_engine::input::parser::{Parser, Event, MouseButton};
 
 let mut parser = Parser::new();
 // ... read byte ...
@@ -77,14 +77,14 @@ if let Some(event) = parser.advance(byte) {
 
 ## 4. Ratatui Integration
 
-If the user asks for a UI, use `ratatui` with `TermaBackend`.
+If the user asks for a UI, use `ratatui` with `Dracon Terminal EngineBackend`.
 This allows using standard Widgets (Block, Paragraph) AND floating Planes.
 
 ```rust
-use terma::integration::ratatui::TermaBackend;
+use dracon_terminal_engine::integration::ratatui::Dracon Terminal EngineBackend;
 use ratatui::Terminal;
 
-let backend = TermaBackend::new(stdout())?;
+let backend = Dracon Terminal EngineBackend::new(stdout())?;
 let mut terminal = Terminal::new(backend)?;
 
 // Access the underlying compositor to add custom layers
@@ -94,11 +94,11 @@ terminal.backend_mut().compositor_mut().add_plane(my_plane);
 ## 5. Visual Polish
 
 Always suggest **Synchronized Updates** (Mode 2026) for non-trivial renders to prevent tearing.
-`TermaBackend` handles this automatically on flush.
+`Dracon Terminal EngineBackend` handles this automatically on flush.
 
 ## 6. Unicode & Wide Character Handling 🇯🇵
 
-Terma is **width-aware**. Some characters (like Kanji, Emoji) take **2 columns** instead of 1.
+Dracon Terminal Engine is **width-aware**. Some characters (like Kanji, Emoji) take **2 columns** instead of 1.
 If not handled correctly, this breaks borders and overlaps adjacent content.
 
 ### The "Skip" Flag Pattern
@@ -107,13 +107,13 @@ When a character has a width of 2, the cell at `(x, y)` contains the character, 
 -   **Compositor**: `blend_cells` propagates the `skip` flag from source to destination.
 
 ### Utilities
-Use `terma::utils::get_visual_width(c)` instead of `c.len_utf8()`.
-Use `terma::utils::truncate_to_width(s, max_width, suffix)` for safe string clipping.
+Use `dracon_terminal_engine::utils::get_visual_width(c)` instead of `c.len_utf8()`.
+Use `dracon_terminal_engine::utils::truncate_to_width(s, max_width, suffix)` for safe string clipping.
 
 ---
 
 **Summary for Code Generation:**
 
--   **Structs**: `Terma`, `Compositor`, `Plane`.
+-   **Structs**: `Dracon Terminal Engine`, `Compositor`, `Plane`.
 -   **Z-Index**: Use it for overlapping UI.
 -   **No Macros**: Avoid `crossterm::queue!` style macros. Use struct methods.

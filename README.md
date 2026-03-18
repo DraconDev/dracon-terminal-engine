@@ -66,12 +66,12 @@ dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-e
 ## Quick Start
 
 ```rust
-use dracon_terminal_engine::core::Terma;
+use dracon_terminal_engine::core::Dracon Terminal Engine;
 use dracon_terminal_engine::compositor::Plane;
 
 fn main() -> std::io::Result<()> {
     let stdout = std::io::stdout();
-    let mut terminal = Terma::new(stdout)?;
+    let mut terminal = Dracon Terminal Engine::new(stdout)?;
 
     // Create a floating layer
     let mut hud = Plane::new(40, 10);
@@ -91,7 +91,7 @@ fn main() -> std::io::Result<()> {
 |---|---|
 | `contracts` | Input types + traits (`InputEvent`, `UiRenderer`, `UiRuntime`) |
 | `input::mapping` | Event conversion (runtime ↔ contract types) |
-| `core::Terma` | RAII terminal wrapper (raw mode, alt screen, cleanup) |
+| `core::Dracon Terminal Engine` | RAII terminal wrapper (raw mode, alt screen, cleanup) |
 | `compositor` | Z-indexed layer engine |
 | `input::parser` | Kitty keyboard + SGR mouse parsing |
 | `widgets::editor` | Code editor with syntax highlighting |
