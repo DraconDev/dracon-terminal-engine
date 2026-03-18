@@ -91,7 +91,7 @@ fn main() -> std::io::Result<()> {
 |---|---|
 | `contracts` | Input types + traits (`InputEvent`, `UiRenderer`, `UiRuntime`) |
 | `input::mapping` | Event conversion (runtime ↔ contract types) |
-| `core::Dracon Terminal Engine` | RAII terminal wrapper (raw mode, alt screen, cleanup) |
+| `core::terminal::Terminal` | RAII terminal wrapper (raw mode, alt screen, cleanup) |
 | `compositor` | Z-indexed layer engine |
 | `input::parser` | Kitty keyboard + SGR mouse parsing |
 | `widgets::editor` | Code editor with syntax highlighting |
