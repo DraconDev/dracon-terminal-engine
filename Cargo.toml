@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "1.1.16"
+version = "1.1.17"
 edition = "2021"
 license = "MIT"
 authors = ["Dracon"]
@@ -11,7 +11,7 @@ categories = ["command-line-interface", "rendering"]
 
 [dependencies]
 libc = "0.2"
-bitflags = "2.4"
+bitflags = { version = "2.4", features = ["serde"] }
 ratatui = { version = "0.29", default-features = false }
 unicode-width = "0.1"
 rand = "0.8"
