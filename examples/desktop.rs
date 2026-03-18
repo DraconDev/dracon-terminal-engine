@@ -6,7 +6,7 @@ use dracon_terminal_engine::{
     compositor::plane::{Cell, Plane},
     input::event::{Event, KeyCode, KeyEvent},
     input::parser::Parser,
-    Terma,
+    Terminal,
 };
 
 struct Window {
@@ -221,7 +221,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut taskbar = Plane::new(999, size.0, 1);
         taskbar.set_absolute_position(0, size.1 - 1);
         taskbar.set_z_index(2000);
-        let status = " [Start]  Terma Desktop v1.0 | Press 'q' to Shutdown";
+        let status = " [Start]  Dracon Terminal v1.0 | Press 'q' to Shutdown";
         for (i, c) in status.chars().enumerate() {
             let mut cell = Cell::default();
             cell.char = c;

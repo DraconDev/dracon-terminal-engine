@@ -2,7 +2,7 @@ use dracon_terminal_engine::{
     input::event::{Event, KeyCode, KeyEvent}, // Correct imports
     input::parser::Parser,
     visuals::image::{ImageOptions, ImageProtocol},
-    Terma,
+    Terminal,
 };
 use std::io::{self, stdout, Read, Write};
 

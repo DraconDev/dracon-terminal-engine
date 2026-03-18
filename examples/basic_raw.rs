@@ -9,7 +9,7 @@ fn main() -> io::Result<()> {
     write!(term, "\x1b[2J")?; // Clear
     write!(term, "\x1b[H")?; // Home
 
-    write!(term, "Welcome to Terma (Raw Mode).\r\n")?;
+    write!(term, "Welcome to Dracon (Raw Mode).\r\n")?;
     write!(
         term,
         "Press any key to exit (actually, this just sleeps for 2s).\r\n"
