@@ -3,17 +3,16 @@
 use std::borrow::Cow;
 
 use bitflags::bitflags;
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UiResize {
     pub width: u16,
     pub height: u16,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiEvent {
     Tick,
@@ -22,7 +21,7 @@ pub enum UiEvent {
     QuitRequested,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum InputEvent {
     Key(KeyEvent),
@@ -34,7 +33,7 @@ pub enum InputEvent {
     Unsupported(Vec<u8>),
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct KeyEvent {
     pub code: KeyCode,
@@ -42,7 +41,7 @@ pub struct KeyEvent {
     pub kind: KeyEventKind,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum KeyEventKind {
     Press,
@@ -50,7 +49,7 @@ pub enum KeyEventKind {
     Release,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum KeyCode {
     Backspace,
@@ -82,7 +81,7 @@ pub enum KeyCode {
     Modifier(ModifierKeyCode),
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MediaKeyCode {
     Play,
@@ -100,7 +99,7 @@ pub enum MediaKeyCode {
     MuteVolume,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ModifierKeyCode {
     LeftShift,
@@ -131,7 +130,7 @@ bitflags! {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct MouseEvent {
     pub kind: MouseEventKind,
@@ -140,7 +139,7 @@ pub struct MouseEvent {
     pub modifiers: KeyModifiers,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MouseEventKind {
     Down(MouseButton),
@@ -153,7 +152,7 @@ pub enum MouseEventKind {
     ScrollRight,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MouseButton {
     Left,
