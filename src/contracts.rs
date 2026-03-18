@@ -5,15 +5,13 @@ use std::borrow::Cow;
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UiResize {
     pub width: u16,
     pub height: u16,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UiEvent {
     Tick,
     Key { key: Cow<'static, str> },
@@ -21,8 +19,7 @@ pub enum UiEvent {
     QuitRequested,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InputEvent {
     Key(KeyEvent),
     Mouse(MouseEvent),
@@ -33,24 +30,21 @@ pub enum InputEvent {
     Unsupported(Vec<u8>),
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct KeyEvent {
     pub code: KeyCode,
     pub modifiers: KeyModifiers,
     pub kind: KeyEventKind,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum KeyEventKind {
     Press,
     Repeat,
     Release,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum KeyCode {
     Backspace,
     Enter,
@@ -81,8 +75,7 @@ pub enum KeyCode {
     Modifier(ModifierKeyCode),
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MediaKeyCode {
     Play,
     Pause,
@@ -99,8 +92,7 @@ pub enum MediaKeyCode {
     MuteVolume,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ModifierKeyCode {
     LeftShift,
     LeftControl,
@@ -119,7 +111,7 @@ pub enum ModifierKeyCode {
 }
 
 bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
     pub struct KeyModifiers: u8 {
         const SHIFT = 0b0000_0001;
         const CONTROL = 0b0000_0010;
@@ -130,8 +122,7 @@ bitflags! {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MouseEvent {
     pub kind: MouseEventKind,
     pub column: u16,
@@ -139,8 +130,7 @@ pub struct MouseEvent {
     pub modifiers: KeyModifiers,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MouseEventKind {
     Down(MouseButton),
     Up(MouseButton),
@@ -152,8 +142,7 @@ pub enum MouseEventKind {
     ScrollRight,
 }
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MouseButton {
     Left,
     Right,
