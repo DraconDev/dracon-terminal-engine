@@ -66,12 +66,12 @@ dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-e
 ## Quick Start
 
 ```rust
-use dracon_terminal_engine::core::Dracon Terminal Engine;
+use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::compositor::Plane;
 
 fn main() -> std::io::Result<()> {
     let stdout = std::io::stdout();
-    let mut terminal = Dracon Terminal Engine::new(stdout)?;
+    let mut terminal = Terminal::new(stdout)?;
 
     // Create a floating layer
     let mut hud = Plane::new(40, 10);
