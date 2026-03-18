@@ -1,7 +1,7 @@
 use dracon_terminal_engine::{
     compositor::plane::Plane,
-    // Terma, // Unused in this demo structure as we use TermaBackend
-    integration::ratatui::TermaBackend,
+    // Terma, // Unused in this demo structure as we use RatatuiBackend
+    integration::ratatui::RatatuiBackend,
 };
 use ratatui::{
     layout::{Constraint, Direction, Layout},
@@ -14,7 +14,7 @@ use std::io::stdout;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Initialize Terma Backend (God Mode)
     let stdout = stdout();
-    let backend = TermaBackend::new(stdout)?;
+    let backend = RatatuiBackend::new(stdout)?;
     let mut terminal = Terminal::new(backend)?;
 
     // 2. Render Loop (Single Frame for Demo)

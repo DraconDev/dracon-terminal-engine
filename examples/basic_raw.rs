@@ -1,9 +1,9 @@
-use dracon_terminal_engine::Terma;
+use dracon_terminal_engine::core::terminal::Terminal;
 use std::io::{self, Write};
 
 fn main() -> io::Result<()> {
     let stdout = io::stdout();
-    let mut term = Terma::new(stdout)?;
+    let mut term = Terminal::new(stdout)?;
 
     // We can write standard ANSI codes directly
     write!(term, "\x1b[2J")?; // Clear

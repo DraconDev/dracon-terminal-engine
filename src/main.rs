@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 
 // Since this is inside the crate, we can use `crate::` or `dracon_terminal_engine::` if linked.
 // Using `crate::` allows us to strict bind to the library sources.
-use dracon_terminal_engine::{compositor::plane::Plane, integration::ratatui::TermaBackend};
+use dracon_terminal_engine::{compositor::plane::Plane, integration::ratatui::RatatuiBackend};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Style},
@@ -18,11 +18,11 @@ use ratatui::{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Print Launch Banner
-    println!("Starting Terma Cyberpunk Dashboard...");
+    println!("Starting Engine Cyberpunk Dashboard...");
     std::thread::sleep(Duration::from_millis(500));
 
     // Initialize
-    let mut terminal = Terminal::new(TermaBackend::new(stdout())?)?;
+    let mut terminal = Terminal::new(RatatuiBackend::new(stdout())?)?;
     let _stdin = io::stdin();
 
     let mut data1 = vec![0.0; 40];
@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .split(f.area());
 
             let header = Paragraph::new(Span::styled(
-                " TERMA CYBERPUNK SHOWCASE ",
+                " DRACON CYBERPUNK SHOWCASE ",
                 Style::default().fg(Color::Black).bg(Color::Cyan),
             ))
             .alignment(ratatui::layout::Alignment::Center)

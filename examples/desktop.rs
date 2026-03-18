@@ -20,7 +20,7 @@ struct Window {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut term = Terma::new(stdout())?;
+    let mut term = Terminal::new(stdout())?;
 
     // Enter Alt Screen for "Desktop" feel
     write!(term, "\x1b[?1049h")?;

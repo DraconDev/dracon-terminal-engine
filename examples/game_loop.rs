@@ -1,7 +1,7 @@
 use dracon_terminal_engine::backend::tty::poll_input;
 use dracon_terminal_engine::compositor::engine::Compositor;
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::core::terma::Terma;
+use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent};
 use dracon_terminal_engine::input::parser::Parser;
 use std::io::{self, Read, Write};
@@ -9,7 +9,7 @@ use std::os::fd::AsFd;
 use std::time::{Duration, Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut term = Terma::new(io::stdout())?;
+    let mut term = Terminal::new(io::stdout())?;
 
     // Enable SGR Mouse (1006) + Any Event (1003)
     write!(term, "\x1b[?1000h\x1b[?1003h\x1b[?1006h\x1b[?25l")?;

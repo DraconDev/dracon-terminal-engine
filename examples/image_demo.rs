@@ -8,7 +8,7 @@ use std::io::{self, stdout, Read, Write};
 
 fn main() -> io::Result<()> {
     let stdout = stdout();
-    let mut term = Terma::new(stdout)?;
+    let mut term = Terminal::new(stdout)?;
 
     write!(term, "\x1b[2J\x1b[H")?;
     write!(term, "Generating High-Res Image (Kitty Protocol)...\r\n")?;

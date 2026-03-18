@@ -1,4 +1,4 @@
-use dracon_terminal_engine::{compositor::plane::Plane, integration::ratatui::TermaBackend};
+use dracon_terminal_engine::{compositor::plane::Plane, integration::ratatui::RatatuiBackend};
 use ratatui::{
     layout::{Constraint, Direction, Layout}, // Removed Rect
     style::{Color, Style},                   // Removed Modifier
@@ -11,7 +11,7 @@ use std::io::{self, stdout};
 use std::time::{Duration, Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut terminal = Terminal::new(TermaBackend::new(stdout())?)?;
+    let mut terminal = Terminal::new(RatatuiBackend::new(stdout())?)?;
     // Removed unused _parser
     let _stdin = io::stdin(); // Prefix with _ for clean compile
 
@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             // Header
             let header = Paragraph::new(Span::styled(
-                " TERMA CYBERPUNK SYSTEM v1.0 ",
+                " DRACON CYBERPUNK SYSTEM v1.0 ",
                 Style::default().fg(Color::Black).bg(Color::Cyan),
             ))
             .alignment(ratatui::layout::Alignment::Center)
@@ -108,7 +108,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             f.render_widget(spark, right_chunks[1]);
         })?;
 
-        // 3. TERMA OVERLAY (God Mode)
+        // 3. DRACON OVERLAY (God Mode)
         let backend = terminal.backend_mut();
         let width = 30;
         let height = 7;

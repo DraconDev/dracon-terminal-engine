@@ -1,6 +1,6 @@
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent};
 use dracon_terminal_engine::input::parser::Parser;
-use dracon_terminal_engine::Terma;
+use dracon_terminal_engine::core::terminal::Terminal;
 use std::io::{self, Read, Write};
 
 fn main() -> io::Result<()> {
@@ -9,7 +9,7 @@ fn main() -> io::Result<()> {
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     let stdout = io::stdout();
-    let mut term = Terma::new(stdout)?;
+    let mut term = Terminal::new(stdout)?;
 
     // Enable SGR Mouse (1006) + Any Event (1003)
     // We strictly write ANSI commands manually to prove low-level control

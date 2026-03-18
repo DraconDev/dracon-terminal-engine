@@ -37,7 +37,7 @@ impl Panel {
 
 impl Widget for Panel {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        // 1. Draw Graphical Border using Terma Tiles
+        // 1. Draw Graphical Border using Tiles
         if let Ok(mut q) = self.tile_queue.lock() {
             let base_id = 8000 + (area.y as u32 * 100) + area.x as u32;
 
