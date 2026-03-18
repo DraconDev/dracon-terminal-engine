@@ -1,6 +1,6 @@
 use crate::compositor::engine::{map_color, Compositor, TilePlacement};
 use crate::compositor::plane::{Cell, Plane};
-use crate::core::terma::Terma;
+use crate::core::terminal::Terminal;
 use crate::visuals::assets::Icon;
 use ratatui::backend::Backend;
 use ratatui::layout::{Position, Size};
@@ -98,14 +98,14 @@ impl<'a> Backend for RatatuiCompositorBackend<'a> {
     }
 }
 
-pub struct TermaBackend<W: io::Write + std::os::fd::AsFd> {
-    inner: Terma<W>,
+pub struct RatatuiBackend<W: io::Write + std::os::fd::AsFd> {
+    inner: Terminal<W>,
     compositor: Compositor,
     pub tile_queue: Arc<Mutex<Vec<TilePlacement>>>,
     last_size_check: std::time::Instant,
 }
 
-impl<W: io::Write + std::os::fd::AsFd> TermaBackend<W> {
+impl<W: io::Write + std::os::fd::AsFd> RatatuiBackend<W> {
     pub fn new(writer: W) -> io::Result<Self> {
         let size = crate::backend::tty::get_window_size(writer.as_fd()).unwrap_or((80, 24));
         let mut compositor = Compositor::new(size.0, size.1);
@@ -131,7 +131,7 @@ impl<W: io::Write + std::os::fd::AsFd> TermaBackend<W> {
         compositor.add_plane(base_plane);
 
         Ok(Self {
-            inner: Terma::new(writer)?,
+            inner: Terminal::new(writer)?,
             compositor,
             tile_queue: Arc::new(Mutex::new(Vec::new())),
             last_size_check: std::time::Instant::now(),
@@ -225,7 +225,7 @@ impl<W: io::Write + std::os::fd::AsFd> TermaBackend<W> {
     }
 }
 
-impl<W: io::Write + std::os::fd::AsFd> Backend for TermaBackend<W> {
+impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
     fn draw<'a, I>(&mut self, content: I) -> io::Result<()>
     where
         I: Iterator<Item = (u16, u16, &'a ratatui::buffer::Cell)>,
