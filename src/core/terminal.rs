@@ -4,12 +4,12 @@ use std::os::fd::{AsFd, BorrowedFd};
 
 /// The main RAII wrapper for the terminal.
 /// When this struct is dropped, the terminal is restored to its original state.
-pub struct Terma<W: Write + AsFd> {
+pub struct Terminal<W: Write + AsFd> {
     original_termios: Termios,
     output: W,
 }
 
-impl<W: Write + AsFd> Drop for Terma<W> {
+impl<W: Write + AsFd> Drop for Terminal<W> {
     fn drop(&mut self) {
         // cleanup: show cursor, disable mouse, leave alt screen, pop kitty keyboard
         let _ = write!(
@@ -22,7 +22,7 @@ impl<W: Write + AsFd> Drop for Terma<W> {
     }
 }
 
-impl<W: Write + AsFd> Terma<W> {
+impl<W: Write + AsFd> Terminal<W> {
     /// Enter "God Mode" (Raw Mode + Alternate Screen).
     pub fn new(mut writer: W) -> io::Result<Self> {
         let fd = writer.as_fd();
@@ -52,7 +52,7 @@ impl<W: Write + AsFd> Terma<W> {
     }
 }
 
-impl<W: Write + AsFd> Write for Terma<W> {
+impl<W: Write + AsFd> Write for Terminal<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.output.write(buf)
     }
@@ -62,7 +62,7 @@ impl<W: Write + AsFd> Write for Terma<W> {
     }
 }
 
-impl<W: Write + AsFd> AsFd for Terma<W> {
+impl<W: Write + AsFd> AsFd for Terminal<W> {
     fn as_fd(&self) -> BorrowedFd<'_> {
         self.output.as_fd()
     }

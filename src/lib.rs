@@ -11,4 +11,4 @@ pub mod utils;
 pub mod visuals;
 pub mod widgets;
 
-pub use core::terma::Terma;
+pub use core::terminal::Terminal;

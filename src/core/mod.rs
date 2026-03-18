@@ -1,1 +1,1 @@
-pub mod terma;
+pub mod terminal;
