@@ -5,13 +5,13 @@ use ratatui::style::{Color, Style};
 use ratatui::widgets::{Block, BorderType, Borders, Widget};
 use std::sync::{Arc, Mutex};
 
-pub struct TermaPanel {
+pub struct Panel {
     title: String,
     tile_queue: Arc<Mutex<Vec<TilePlacement>>>,
     border_color: Color,
 }
 
-impl TermaPanel {
+impl Panel {
     pub fn new(title: impl Into<String>, tile_queue: Arc<Mutex<Vec<TilePlacement>>>) -> Self {
         Self {
             title: title.into(),
@@ -35,7 +35,7 @@ impl TermaPanel {
     }
 }
 
-impl Widget for TermaPanel {
+impl Widget for Panel {
     fn render(self, area: Rect, buf: &mut Buffer) {
         // 1. Draw Graphical Border using Terma Tiles
         if let Ok(mut q) = self.tile_queue.lock() {

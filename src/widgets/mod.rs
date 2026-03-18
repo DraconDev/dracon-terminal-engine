@@ -8,7 +8,7 @@ pub mod panel;
 
 pub use component::Component;
 
-pub use button::TermaButton;
+pub use button::Button;
 pub use context_menu::ContextMenuAction;
 pub use editor::TextEditor;
 pub use hotkey::HotkeyHint;

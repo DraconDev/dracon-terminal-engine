@@ -6,13 +6,13 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::widgets::Widget;
 use std::sync::{Arc, Mutex};
 
-pub struct TermaButton {
+pub struct Button {
     label: String,
     is_active: bool,
     tile_queue: Arc<Mutex<Vec<TilePlacement>>>,
 }
 
-impl TermaButton {
+impl Button {
     pub fn new(
         label: impl Into<String>,
         is_active: bool,
@@ -26,7 +26,7 @@ impl TermaButton {
     }
 }
 
-impl Widget for TermaButton {
+impl Widget for Button {
     fn render(self, area: Rect, buf: &mut Buffer) {
         // 1. Push Tile Placements (The "Visuals")
         if area.width >= 3 {
