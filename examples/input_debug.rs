@@ -1,6 +1,6 @@
+use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent};
 use dracon_terminal_engine::input::parser::Parser;
-use dracon_terminal_engine::core::terminal::Terminal;
 use std::io::{self, Read, Write};
 
 fn main() -> io::Result<()> {

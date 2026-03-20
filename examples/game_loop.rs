@@ -52,7 +52,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // 2. Resize Check
-        if let Ok((new_w, new_h)) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd()) {
+        if let Ok((new_w, new_h)) =
+            dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())
+        {
             if new_w != w || new_h != h {
                 w = new_w;
                 h = new_h;

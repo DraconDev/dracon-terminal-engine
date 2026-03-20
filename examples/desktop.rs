@@ -99,10 +99,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             kind,
                             ..
                         }) => {
-                            let is_press =
-                                matches!(kind, dracon_terminal_engine::input::event::MouseEventKind::Down(_));
-                            let is_drag =
-                                matches!(kind, dracon_terminal_engine::input::event::MouseEventKind::Drag(_));
+                            let is_press = matches!(
+                                kind,
+                                dracon_terminal_engine::input::event::MouseEventKind::Down(_)
+                            );
+                            let is_drag = matches!(
+                                kind,
+                                dracon_terminal_engine::input::event::MouseEventKind::Drag(_)
+                            );
                             let cx = x.saturating_sub(1);
                             let cy = y.saturating_sub(1);
 
@@ -208,7 +212,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         if wx > 1 && wx < win.title.len() as u16 + 2 {
                             c.char = win.title.chars().nth((wx - 2) as usize).unwrap_or(' ');
                             c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
-                            c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                            c.bg =
+                                dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
                     }
                     p.put_cell(wx, wy, c);
