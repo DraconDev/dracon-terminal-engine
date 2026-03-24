@@ -1,7 +1,7 @@
 [package]
 name = "dracon-terminal-engine"
 version = "1.1.17"
-edition = "2021"
+edition.workspace = true
 license = "MIT"
 authors = ["Dracon"]
 description = "A next-generation terminal compositor engine for Rust. Z-indexed layers, TrueColor, SGR mouse, Kitty keyboard, and drop-in Ratatui support."
