@@ -141,7 +141,7 @@ cargo run --example input_debug           # SGR mouse + keyboard parsing
 
 ## Version
 
-**v25.1.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v26.0.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 

@@ -21,3 +21,11 @@ signal-hook = "0.3"
 serde = { workspace = true }
 sysinfo = "0.32"
 syntect = "5.2"
+tokio = { workspace = true, optional = true }
+
+[features]
+default = []
+async = ["tokio"]
+
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+libc = "0.2"

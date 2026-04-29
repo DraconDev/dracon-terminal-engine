@@ -22,6 +22,7 @@
 //! ```
 
 pub mod app;
+pub mod dragdrop;
 pub mod hitzone;
 pub mod scroll;
 pub mod theme;
@@ -30,7 +31,8 @@ pub mod widgets;
 pub mod prelude {
     pub use crate::framework::{
         app::{App, Ctx},
-        hitzone::{DragState, HitZone, HitZoneGroup},
+        dragdrop::{DragGhost, DragManager, DragPhase},
+        hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         scroll::ScrollContainer,
         theme::Theme,
         widgets::*,

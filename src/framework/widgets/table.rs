@@ -82,6 +82,32 @@ impl<T: Clone + ToString> Table<T> {
         self.selected
     }
 
+    pub fn get_selected(&self) -> Option<&T> {
+        self.rows.get(self.selected).map(|r| &r.data)
+    }
+
+    pub fn len(&self) -> usize {
+        self.rows.len()
+    }
+
+    pub fn viewport(&self) -> (usize, usize) {
+        let start = self.offset;
+        let end = (self.offset + self.visible_count).min(self.rows.len());
+        (start, end)
+    }
+
+    pub fn scroll_to(&mut self, index: usize) {
+        if index >= self.rows.len() {
+            return;
+        }
+        self.selected = index;
+        if self.selected < self.offset {
+            self.offset = self.selected;
+        } else if self.selected >= self.offset + self.visible_count {
+            self.offset = self.selected.saturating_sub(self.visible_count) + 1;
+        }
+    }
+
     pub fn set_visible_count(&mut self, count: usize) {
         self.visible_count = count;
     }

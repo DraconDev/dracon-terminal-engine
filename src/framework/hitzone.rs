@@ -197,6 +197,61 @@ impl<T: Clone + 'static> HitZoneGroup<T> {
     }
 }
 
+pub struct ScopedZone<T> {
+    pub id: T,
+    pub x: u16,
+    pub y: u16,
+    pub width: u16,
+    pub height: u16,
+}
+
+impl<T> ScopedZone<T> {
+    pub fn new(id: T, x: u16, y: u16, width: u16, height: u16) -> Self {
+        Self { id, x, y, width, height }
+    }
+
+    pub fn contains(&self, col: u16, row: u16) -> bool {
+        col >= self.x && col < self.x.saturating_add(self.width)
+            && row >= self.y && row < self.y.saturating_add(self.height)
+    }
+}
+
+#[derive(Default)]
+pub struct ScopedZoneRegistry<T> {
+    zones: Vec<ScopedZone<T>>,
+}
+
+impl<T: Clone + 'static> ScopedZoneRegistry<T> {
+    pub fn new() -> Self {
+        Self { zones: Vec::new() }
+    }
+
+    pub fn clear(&mut self) {
+        self.zones.clear();
+    }
+
+    pub fn add(&mut self, zone: ScopedZone<T>) {
+        self.zones.push(zone);
+    }
+
+    pub fn register(&mut self, id: T, x: u16, y: u16, width: u16, height: u16) {
+        self.zones.push(ScopedZone::new(id, x, y, width, height));
+    }
+
+    pub fn dispatch(&self, col: u16, row: u16) -> Option<T> {
+        for zone in &self.zones {
+            if zone.contains(col, row) {
+                return Some(zone.id.clone());
+            }
+        }
+        None
+    }
+
+    pub fn zones(&self) -> &[ScopedZone<T>] {
+        &self.zones
+    }
+}
+
 impl<T: Clone + 'static> Default for HitZoneGroup<T> {
     fn default() -> Self {
         Self::new()

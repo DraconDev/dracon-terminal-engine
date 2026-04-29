@@ -61,6 +61,24 @@ impl<T: Clone + ToString> List<T> {
         self.items.len()
     }
 
+    pub fn viewport(&self) -> (usize, usize) {
+        let start = self.offset;
+        let end = (self.offset + self.visible_count).min(self.items.len());
+        (start, end)
+    }
+
+    pub fn scroll_to(&mut self, index: usize) {
+        if index >= self.items.len() {
+            return;
+        }
+        self.selected = index;
+        if self.selected < self.offset {
+            self.offset = self.selected;
+        } else if self.selected >= self.offset + self.visible_count {
+            self.offset = self.selected.saturating_sub(self.visible_count) + 1;
+        }
+    }
+
     pub fn scroll_state(&self) -> ScrollState {
         ScrollState {
             offset: self.offset,
