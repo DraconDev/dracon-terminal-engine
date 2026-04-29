@@ -8,11 +8,13 @@ use tokio::sync::mpsc;
 #[cfg(feature = "async")]
 use tokio::time::{sleep, Duration};
 
+/// Spawns a task that reads stdin asynchronously and invokes a callback for each input event.
 #[cfg(feature = "async")]
 pub struct AsyncInputReader;
 
 #[cfg(feature = "async")]
 impl AsyncInputReader {
+    /// Spawns the async reader task and returns a handle to it.
     pub fn spawn<F>(mut callback: F) -> tokio::task::JoinHandle<()>
     where
         F: FnMut(crate::input::event::Event) + Send + 'static,
@@ -52,6 +54,7 @@ impl AsyncInputReader {
         })
     }
 
+    /// Spawns the async reader and returns a handle plus a guard for graceful shutdown.
     pub fn spawn_with_shutdown<F>(
         mut callback: F,
     ) -> (tokio::task::JoinHandle<()>, ShutdownGuard)
@@ -102,6 +105,7 @@ impl AsyncInputReader {
     }
 }
 
+/// A guard that keeps the async reader task alive until dropped.
 #[cfg(feature = "async")]
 pub struct ShutdownGuard {
     tx: mpsc::Sender<()>,
@@ -109,6 +113,7 @@ pub struct ShutdownGuard {
 
 #[cfg(feature = "async")]
 impl ShutdownGuard {
+    /// Signals the async reader to shut down.
     pub fn shutdown(self) {
         drop(self.tx);
     }

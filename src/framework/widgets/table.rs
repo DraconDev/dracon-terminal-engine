@@ -18,7 +18,6 @@ pub struct Column {
 pub struct TableRow<T> {
     /// The underlying row data.
     pub data: T,
-    cells: Vec<String>,
 }
 
 /// A sortable, selectable table with header and row hit zones.
@@ -26,13 +25,10 @@ pub struct Table<T> {
     columns: Vec<Column>,
     rows: Vec<TableRow<T>>,
     selected: usize,
-    sort_col: Option<usize>,
-    sort_asc: bool,
     offset: usize,
     visible_count: usize,
     theme: Theme,
     on_select: Option<Box<dyn FnMut(&T)>>,
-    on_sort: Option<Box<dyn FnMut(&T, &T) -> std::cmp::Ordering>>,
 }
 
 impl<T: Clone + ToString> Table<T> {
@@ -42,13 +38,10 @@ impl<T: Clone + ToString> Table<T> {
             columns,
             rows: Vec::new(),
             selected: 0,
-            sort_col: None,
-            sort_asc: true,
             offset: 0,
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
-            on_sort: None,
         }
     }
 
@@ -65,10 +58,7 @@ impl<T: Clone + ToString> Table<T> {
     {
         self.rows = rows
             .into_iter()
-            .map(|data| {
-                let cells = vec![];
-                TableRow { data, cells }
-            })
+            .map(|data| TableRow { data })
             .collect();
         self
     }
@@ -79,15 +69,6 @@ impl<T: Clone + ToString> Table<T> {
         F: FnMut(&T) + 'static,
     {
         self.on_select = Some(Box::new(f));
-        self
-    }
-
-    /// Registers a callback for sorting rows by comparing two items.
-    pub fn on_sort<F>(mut self, f: F) -> Self
-    where
-        F: FnMut(&T, &T) -> std::cmp::Ordering + 'static,
-    {
-        self.on_sort = Some(Box::new(f));
         self
     }
 
@@ -166,16 +147,8 @@ impl<T: Clone + ToString> Table<T> {
                 let idx = start as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = if self.sort_col == Some(i) {
-                        self.theme.accent
-                    } else {
-                        self.theme.fg
-                    };
-                    plane.cells[idx].style = if self.sort_col == Some(i) {
-                        Styles::BOLD
-                    } else {
-                        Styles::empty()
-                    };
+                    plane.cells[idx].fg = self.theme.fg;
+                    plane.cells[idx].style = Styles::empty();
                 }
             }
 

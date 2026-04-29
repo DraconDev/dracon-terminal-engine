@@ -52,7 +52,7 @@ App::new()?
         // ctx.compositor() -> &Compositor
         // ctx.add_plane(plane) -> add a Plane to be rendered
         // ctx.theme() -> &Theme
-        // ctx.fps() -> u32
+        // ctx.fps() -> u64 (measured FPS, not target)
     });
 ```
 
@@ -132,20 +132,26 @@ use dracon_terminal_engine::framework::hitzone::{HitZone, HitZoneGroup};
 let zone = HitZone::new(id, x, y, w, h);
 // Methods:
 zone.contains(col, row)     // bool — was this point inside?
-zone.click_count()          // 1, 2, or 3 (resets after 500ms)
-zone.is_right_click()       // bool
-zone.is_drag()              // bool
-zone.drag_delta()           // (dx, dy) from drag start
+zone.handle_mouse(kind, col, row, modifiers)  // routes event to callbacks
 ```
 
-`HitZoneGroup` dispatches to the matching zone:
+`HitZone` accepts callbacks via builder pattern:
+
+```rust
+let zone = HitZone::new(id, x, y, w, h)
+    .on_click(|kind| { /* ClickKind::Single/Double/Triple */ })
+    .on_right_click(|| { /* right click */ })
+    .on_drag_start(|state| { /* DragState has drag_delta() */ });
+```
+
+`HitZoneGroup` dispatches to the first matching zone by calling its `handle_mouse` method:
 
 ```rust
 let mut group = HitZoneGroup::<usize>::new();
 group.add(HitZone::new(0, 10, 5, 20, 1));  // id=0
 group.add(HitZone::new(1, 35, 5, 20, 1));  // id=1
 
-if let Some(id) = group.dispatch(col, row, &event) {
+if let Some(id) = group.dispatch_mouse(kind, col, row, modifiers) {
     match id {
         0 => { /* first zone clicked */ }
         1 => { /* second zone clicked */ }
@@ -264,6 +270,8 @@ let mut terminal = Terminal::new(backend)?;
 // Access compositor to add custom layers
 terminal.backend_mut().compositor_mut().add_plane(my_plane);
 ```
+
+Note: `RatatuiBackend` wraps the raw-mode Terminal. When `terminal` is dropped, raw mode exits. Use `RatatuiBackend::new(writer)?` directly (no separate `Terminal::new()` call).
 
 ---
 

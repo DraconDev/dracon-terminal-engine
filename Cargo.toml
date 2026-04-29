@@ -6,16 +6,14 @@ license.workspace = true
 authors.workspace = true
 description.workspace = true
 repository.workspace = true
-keywords = ["terminal", "engine", "compositor", "ratatui", "cli", "tui"]
+readme = "README.md"
+keywords = ["terminal", "engine", "compositor", "cli", "tui"]
 categories = ["command-line-interface", "rendering"]
 
 [dependencies]
-libc = "0.2"
 bitflags = { version = "2.4", features = ["serde"] }
 ratatui = { version = "0.29", default-features = false }
 unicode-width = "0.1"
-rand = "0.8"
-log = "0.4"
 chrono = { workspace = true, features = ["serde", "clock"] }
 signal-hook = "0.3"
 serde = { workspace = true }
@@ -23,9 +21,12 @@ sysinfo = "0.32"
 syntect = "5.2"
 tokio = { workspace = true, optional = true }
 
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+rand = "0.8"
+
 [features]
 default = []
 async = ["tokio"]
-
-[target.'cfg(not(target_os = "windows"))'.dependencies]
-libc = "0.2"

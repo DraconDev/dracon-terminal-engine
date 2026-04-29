@@ -11,8 +11,8 @@ pub enum Color {
     Rgb(u8, u8, u8),
 }
 
-/// Text styling flags for terminal cells.
 bitflags! {
+    #[allow(missing_docs)]
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
     pub struct Styles: u8 {
         /// Bold text.

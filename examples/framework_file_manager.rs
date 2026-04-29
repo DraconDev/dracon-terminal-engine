@@ -70,7 +70,7 @@ fn main() -> std::io::Result<()> {
                 ctx.add_plane(Plane::new(zone.id, 1, 1));
             }
 
-            let sel_idx = list.selected_index();
+            let _sel_idx = list.selected_index();
             let mut info_plane = Plane::new(1, side_rect.width, side_rect.height);
             info_plane.z_index = 5;
 

@@ -1,5 +1,7 @@
 //! Modal dialog widget.
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
@@ -87,7 +89,7 @@ impl<'a> Modal<'a> {
             if idx < plane.cells.len() { plane.cells[idx].char = '│'; }
         }
 
-        let title_len = self.title.len().min(self.width as usize - 4);
+        let title_len = self.title.width().min((self.width as usize).saturating_sub(4));
         let title_start = (self.width as usize - title_len) / 2;
         for (i, ch) in self.title.chars().take(title_len).enumerate() {
             let idx = (1 + title_start + i) as usize;
@@ -118,7 +120,7 @@ impl<'a> Modal<'a> {
                 }
             }
 
-            let label_len = label.len().min(btn_width as usize - 2);
+            let label_len = label.width().min((btn_width as usize).saturating_sub(2));
             let label_start = (btn_width as usize - label_len) / 2;
             for (j, ch) in label.chars().take(label_len).enumerate() {
                 let label_idx = (btn_y as usize) * (self.width as usize) + (bx as usize) + (label_start as usize) + j;

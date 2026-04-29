@@ -1,6 +1,6 @@
 //! The terminal application framework.
 //!
-//! Provides [`App`] — a one-import entry point that owns the terminal,
+//! Provides `App` — a one-import entry point that owns the terminal,
 //! compositor, input parsing, and event loop.
 //!
 //! # Example

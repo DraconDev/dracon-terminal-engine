@@ -1,5 +1,7 @@
 //! Selectable list widget with keyboard and mouse navigation.
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
@@ -139,7 +141,7 @@ impl<T: Clone + ToString> List<T> {
             }
 
             let text = item.to_string();
-            let label_len = text.len().min((area.width as usize).saturating_sub(2));
+            let label_len = text.width().min((area.width as usize).saturating_sub(2));
             for (j, ch) in text.chars().take(label_len).enumerate() {
                 let idx = (row * area.width + 1 + j as u16) as usize;
                 if idx < plane.cells.len() {

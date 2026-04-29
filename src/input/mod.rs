@@ -11,7 +11,7 @@ pub mod parser;
 #[doc = "Input reader wrapper."]
 pub mod reader;
 
-#[cfg(feature = "async")]
+#[cfg(feature = "tokio")]
 pub mod async_reader;
 
 pub use parser::Parser;

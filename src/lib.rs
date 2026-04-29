@@ -14,13 +14,13 @@
 //!   visual filters (Dim, Invert, Scanline, Pulse, Glitch).
 //! - **Input** — [`InputReader`] and [`Parser`] decode SGR mouse events and
 //!   extended keyboard sequences (chords, modifiers, extra buttons).
-//! - **Widgets** — [`Editor`] provides a full-featured code editor with syntax
-//!   highlighting via syntect. [`Input`] is a single-line text input widget.
+//! - **Widgets** — `widgets::TextEditor` provides a full-featured code editor with syntax
+//!   highlighting via syntect. `widgets::TextInput` is a single-line text input widget.
 //! - **Integration** — [`ratatui`] bridge lets you drop in any ratatui widget.
-//! - **Visuals** — [`icons`] for file-type icons, [`osc`] for clipboard,
-//!   hyperlinks, bell, and notifications. [`begin_sync`]/[`end_sync`] implement
+//! - **Visuals** — `visuals::icons` for file-type icons, `visuals::osc` for clipboard,
+//!   hyperlinks, bell, and notifications. `begin_sync`/`end_sync` implement
 //!   terminal mode 2026 for synchronized tear-free output.
-//! - **Backend** — [`tty`] wraps low-level POSIX terminal ioctls.
+//! - **Backend** — `backend::tty` wraps low-level POSIX terminal ioctls.
 //! - **System** — [`SystemMonitor`] collects CPU, memory, disk, and process
 //!   metrics.
 //!
@@ -33,7 +33,7 @@
 //! App::new().unwrap()
 //!     .title("My App")
 //!     .fps(30)
-//!     .on_tick(|ctx, tick| {
+//!     .on_tick(|_ctx, _tick| {
 //!         // Called every 250ms by default
 //!     })
 //!     .run(|ctx| {
@@ -71,11 +71,11 @@ pub mod system;
 pub mod utils;
 #[doc = "Visual helpers: icons, OSC strings (clipboard, hyperlink, bell), sync mode 2026."]
 pub mod visuals;
-#[doc = "Built-in widgets (Editor with syntect highlighting, TextInput)."]
+#[doc = "Built-in widgets (TextEditor with syntect highlighting, TextInput)."]
 pub mod widgets;
 
 pub use compositor::{Cell, Color, Compositor, Plane, Styles};
 pub use core::terminal::Terminal;
-pub use framework::prelude;
+pub use framework::prelude; // App, Ctx, List, HitZone, etc.
 pub use input::{InputReader, Parser};
 pub use system::{DiskInfo, ProcessInfo, SystemData, SystemMonitor};

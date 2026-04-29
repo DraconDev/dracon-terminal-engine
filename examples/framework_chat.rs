@@ -55,8 +55,8 @@ fn main() -> std::io::Result<()> {
         },
     ];
 
-    let mut input_text = String::from("");
-    let mut chat_history = messages.clone();
+    let input_text = String::from("");
+    let chat_history = messages.clone();
 
     App::new()?
         .title("Framework Chat")
@@ -69,7 +69,7 @@ fn main() -> std::io::Result<()> {
             let list_height = h.saturating_sub(input_height);
 
             let list_rect = Rect::new(0, 0, w, list_height);
-            let input_rect = Rect::new(0, list_height, w, input_height);
+            let _input_rect = Rect::new(0, list_height, w, input_height);
 
             let mut list = List::new(chat_history.clone());
             list.set_visible_count((list_rect.height as usize).saturating_sub(2).max(1));
@@ -101,8 +101,8 @@ fn main() -> std::io::Result<()> {
             if input_text.is_empty() {
                 text_color = Color::Rgb(100, 100, 100);
             }
-            for (i, ch) in display_text.chars().take((w as usize).saturating_sub(3)).enumerate() {
-                let idx = (x as usize + i);
+            for (i, ch) in display_text.chars().take(w as usize - 3).enumerate() {
+                let idx = x as usize + i;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = ch;
                     input_plane.cells[idx].fg = text_color;

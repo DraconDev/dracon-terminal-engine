@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, Instant};
 use sysinfo::{Disks, ProcessesToUpdate, System};
 
 /// Information about a single mounted or unmounted disk.
@@ -76,6 +77,8 @@ pub struct SystemMonitor {
     disks: Disks,
     networks: sysinfo::Networks,
     users: sysinfo::Users,
+    last_process_refresh: Instant,
+    process_refresh_interval: Duration,
 }
 
 impl Default for SystemMonitor {
@@ -97,6 +100,8 @@ impl SystemMonitor {
             disks,
             networks,
             users,
+            last_process_refresh: Instant::now(),
+            process_refresh_interval: Duration::from_secs(2),
         }
     }
 
@@ -104,7 +109,11 @@ impl SystemMonitor {
     pub fn get_data(&mut self) -> SystemData {
         self.sys.refresh_cpu_usage();
         self.sys.refresh_memory();
-        self.sys.refresh_processes(ProcessesToUpdate::All, true);
+        // Only refresh processes periodically (every 2 seconds by default)
+        if self.last_process_refresh.elapsed() >= self.process_refresh_interval {
+            self.sys.refresh_processes(ProcessesToUpdate::All, true);
+            self.last_process_refresh = Instant::now();
+        }
         self.disks.refresh_list();
         self.networks.refresh_list();
         self.users.refresh_list();

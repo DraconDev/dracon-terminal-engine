@@ -1,5 +1,7 @@
 //! Tab bar widget.
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
@@ -71,7 +73,7 @@ impl TabBar {
                 }
             }
 
-            let label_len = tab.len().min(tab_width as usize - 2);
+            let label_len = tab.width().min((tab_width as usize).saturating_sub(2));
             let start_col = if tab_width > 2 { 1 } else { 0 };
             for (j, ch) in tab.chars().take(label_len).enumerate() {
                 let idx = (start_col + j) as usize;
@@ -91,9 +93,9 @@ impl TabBar {
     }
 
     /// Handles a mouse event. Returns `true` if the event was consumed.
-    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
+    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, _row: u16, width: u16) -> bool {
         let tab_count = self.tabs.len().max(1);
-        let tab_width = (80u16 / tab_count as u16).max(1);
+        let tab_width = (width / tab_count as u16).max(1);
         let idx = col / tab_width;
         if idx >= tab_count as u16 {
             return false;

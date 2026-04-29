@@ -3,6 +3,8 @@
 //! Provides `DragItem`, `DragGhost`, `DropTarget`, and `DragManager` for
 //! declarative drag-and-drop with visual ghost rendering.
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::compositor::{Color, Plane};
 
 /// The current phase of a drag operation.
@@ -42,7 +44,7 @@ impl DragGhost {
     /// Creates a `DragGhost` from a label string, auto-calculating width from the label.
     pub fn new(label: impl Into<String>) -> Self {
         let label = label.into();
-        let width = label.len() as u16 + 2;
+        let width = label.width() as u16 + 2;
         Self { label, width, height: 1 }
     }
 
@@ -54,9 +56,10 @@ impl DragGhost {
     }
 
     /// Renders the ghost into a `Plane` positioned at `(x, y)` with z-index 9000.
-    pub fn render(&self, _x: u16, _y: u16) -> Plane {
+    pub fn render(&self, x: u16, y: u16) -> Plane {
         let mut plane = Plane::new(9999, self.width, self.height);
         plane.set_z_index(9000);
+        plane.set_absolute_position(x, y);
 
         let bg = Color::Ansi(236);
         let fg = Color::Ansi(250);

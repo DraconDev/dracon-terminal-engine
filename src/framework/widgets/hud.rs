@@ -1,5 +1,7 @@
 //! Heads-up display (HUD) widget.
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::compositor::{Cell, Color, Plane, Styles};
 
 /// A heads-up display overlay positioned at the top-left corner.
@@ -60,7 +62,7 @@ impl Hud {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index;
 
-        let text_len = text.len().min(self.width as usize - x as usize);
+        let text_len = text.width().min((self.width as usize).saturating_sub(x as usize));
         let start_idx = (y * self.width + x) as usize;
 
         for (i, ch) in text.chars().take(text_len).enumerate() {
@@ -88,7 +90,7 @@ impl Hud {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index;
 
-        let label_len = label.len().min(width as usize);
+        let label_len = label.width().min(width as usize);
         let start_idx = (y * self.width + x) as usize;
 
         for (i, ch) in label.chars().take(label_len).enumerate() {
