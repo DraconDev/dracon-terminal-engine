@@ -134,11 +134,12 @@ impl Breadcrumbs {
         kind: crate::input::event::MouseEventKind,
         col: u16,
         row: u16,
+        width: u16,
     ) -> Option<usize> {
         if row != 0 {
             return None;
         }
-        for zone in self.zones() {
+        for zone in self.zones(width) {
             if zone.contains(col, row) {
                 match kind {
                     crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
@@ -154,14 +155,14 @@ impl Breadcrumbs {
         None
     }
 
-    fn zones(&self) -> Vec<HitZone<usize>> {
+    fn zones(&self, width: u16) -> Vec<HitZone<usize>> {
         let mut zones = Vec::new();
         let mut x: u16 = 0;
 
         for (i, segment) in self.segments.iter().enumerate() {
             let is_first = i == 0;
 
-            let seg_width = (segment.width() as u16 + 2).min(80u16.saturating_sub(x));
+            let seg_width = (segment.width() as u16 + 2).min(width.saturating_sub(x));
             if seg_width < 3 {
                 break;
             }
