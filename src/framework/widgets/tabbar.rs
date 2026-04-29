@@ -48,7 +48,7 @@ impl TabBar {
             let style = if is_active { Styles::BOLD | Styles::UNDERLINE } else { Styles::empty() };
 
             for col in 0..tab_width {
-                let idx = (col as usize);
+                let idx = col as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: ' ',

@@ -24,6 +24,20 @@ impl SplitPane {
         }
     }
 
+    pub fn from_rect(rect: Rect) -> Self {
+        let orientation = if rect.width >= rect.height {
+            Orientation::Horizontal
+        } else {
+            Orientation::Vertical
+        };
+        Self {
+            ratio: 0.5,
+            orientation,
+            divider_char: '│',
+            min_size: 10,
+        }
+    }
+
     pub fn ratio(mut self, ratio: f32) -> Self {
         self.ratio = ratio.clamp(0.1, 0.9);
         self

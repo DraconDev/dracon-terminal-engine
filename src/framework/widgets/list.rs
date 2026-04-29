@@ -1,7 +1,7 @@
-use crate::framework::hitzone::{HitZone, HitZoneGroup};
-use crate::framework::scroll::{ScrollContainer, ScrollState};
+use crate::framework::hitzone::HitZone;
+use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Cell, Plane, Styles};
 use ratatui::layout::Rect;
 
 pub struct List<T> {

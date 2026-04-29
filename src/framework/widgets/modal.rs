@@ -69,7 +69,7 @@ impl<'a> Modal<'a> {
         for row in 1..self.height.saturating_sub(1) {
             let idx = (row * self.width) as usize;
             if idx < plane.cells.len() { plane.cells[idx].char = '│'; }
-            let idx = ((row * self.width + self.width - 1) as usize);
+            let idx = (row * self.width + self.width - 1) as usize;
             if idx < plane.cells.len() { plane.cells[idx].char = '│'; }
         }
 

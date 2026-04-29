@@ -1,6 +1,6 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ScrollState {

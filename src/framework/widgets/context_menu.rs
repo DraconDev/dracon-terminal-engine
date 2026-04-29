@@ -1,6 +1,6 @@
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Plane, Styles};
+use crate::compositor::Plane;
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

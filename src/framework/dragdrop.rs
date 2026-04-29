@@ -3,7 +3,7 @@
 //! Provides `DragSource`, `DropTarget`, `DragGhost`, and `DragManager` for
 //! declarative drag-and-drop with visual ghost rendering.
 
-use crate::compositor::{Color, Plane, Styles};
+use crate::compositor::{Color, Plane};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DragPhase {
@@ -39,7 +39,7 @@ impl DragGhost {
         self
     }
 
-    pub fn render(&self, x: u16, y: u16) -> Plane {
+    pub fn render(&self, _x: u16, _y: u16) -> Plane {
         let mut plane = Plane::new(9999, self.width, self.height);
         plane.set_z_index(9000);
 
