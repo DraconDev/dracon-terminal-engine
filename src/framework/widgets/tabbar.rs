@@ -1,6 +1,6 @@
 //! Tab bar widget.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;

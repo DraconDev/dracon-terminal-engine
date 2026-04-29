@@ -84,7 +84,7 @@ impl ContextMenu {
 
         let mut zones = Vec::new();
 
-        for (i, (label, action)) in self.items.iter().enumerate() {
+        for (i, (label, _action)) in self.items.iter().enumerate() {
             let row = i as u16;
             let zone = HitZone::new(i, x, y + row, self.width, 1);
             zones.push(zone);

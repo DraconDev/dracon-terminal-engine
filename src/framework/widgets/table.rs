@@ -1,6 +1,6 @@
 //! Sortable, selectable table widget with header and row hit zones.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;
@@ -149,7 +149,6 @@ impl<T: Clone + ToString> Table<T> {
         let mut x: u16 = 0;
         for (i, col) in self.columns.iter().enumerate() {
             let w = col.width.min(area.width.saturating_sub(x));
-            let rect = Rect::new(x, area.y, w, 1);
             header_zones.push(HitZone::new(i, x, area.y, w, 1));
 
             for col_idx in 0..w {

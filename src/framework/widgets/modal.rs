@@ -1,6 +1,6 @@
 //! Modal dialog widget.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;
@@ -106,7 +106,6 @@ impl<'a> Modal<'a> {
         let mut zones = Vec::new();
         for (i, (label, result)) in self.buttons.iter().enumerate() {
             let bx = btn_start + (i as u16) * (btn_width + 1);
-            let btn_rect = Rect::new(x + bx, y + btn_y, btn_width, 1);
 
             let bg = self.theme.active_bg;
             let fg = self.theme.fg;

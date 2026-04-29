@@ -1,7 +1,6 @@
 //! Selectable list widget with keyboard and mouse navigation.
 
 use crate::compositor::{Cell, Plane, Styles};
-use crate::framework::hitzone::HitZone;
 use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;

@@ -20,21 +20,23 @@
 
 ```rust
 use dracon_terminal_engine::framework::prelude::*;
+use ratatui::layout::Rect;
 
-App::new()?
+App::new().unwrap()
     .title("My App")
     .fps(30)
+    .on_tick(|ctx, tick| { /* called every 250ms */ })
     .run(|ctx| {
-        ctx.split_h(|left, right| {
-            left.list(vec!["Files", "Search", "Git"], |item| { });
-            right.text("Hello, world!");
-        });
+        let (w, h) = ctx.compositor().size();
+        let area = Rect::new(0, 0, w, h);
+        let list = List::new(vec!["Files", "Search", "Git"]);
+        ctx.add_plane(list.render(area));
     });
 ```
 
 ---
 
-## Framework (v25)
+## Framework (v26)
 
 The `framework` module provides the complete application runtime:
 
@@ -42,6 +44,10 @@ The `framework` module provides the complete application runtime:
 |---|---|
 | [`App`] | Event loop, terminal, compositor — one call to run |
 | [`Ctx`] | Per-frame context: add planes, access compositor/theme/FPS |
+| [`App::on_tick`] | Periodic callback (every N milliseconds) |
+| [`App::tick_interval`] | Set the tick interval in ms |
+| [`Ctx::split_h`] | Horizontal split into two panes |
+| [`Ctx::split_v`] | Vertical split into two panes |
 | [`List<T>`] | Vertical list with keyboard nav + mouse scroll + selection |
 | [`Table<T>`] | Sortable table with column headers + row click |
 | [`TabBar`] | Horizontal tab strip, click or arrow-key to switch |
@@ -52,7 +58,10 @@ The `framework` module provides the complete application runtime:
 | [`Hud`] | Floating layer (z-indexed overlay) with gauge/text |
 | [`HitZone<T>`] | Declarative interactive region (click/double/drag/hover) |
 | [`HitZoneGroup<T>`] | Batch of hit zones, auto-dispatched |
-| [`ScrollContainer`] | Scrolleable container with offset management |
+| [`ScopedZone<T>`] | Lightweight geometry-only zone for per-frame dispatch |
+| [`ScopedZoneRegistry<T>`] | Registry that clears per frame |
+| [`DragManager<T>`] | Drag-and-drop state machine with ghost rendering |
+| [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 | [`Theme`] | Dark / light / cyberpunk presets |
 
 ---
@@ -79,50 +88,35 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine" }
+dracon-terminal-engine = "26.0.1"
+```
+
+Or from git:
+
+```toml
+[dependencies]
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v26.0.1" }
 ```
 
 ## Quick Start (Framework)
 
 ```rust
 use dracon_terminal_engine::framework::prelude::*;
+use ratatui::layout::Rect;
 
-App::new()?
+App::new().unwrap()
     .title("My App")
     .fps(30)
+    .on_tick(|ctx, tick| {
+        // Called every 250ms by default
+    })
     .run(|ctx| {
         let items = vec!["Home", "Projects", "Settings", "About"];
-        let mut list = List::new(items).on_select(|item| {
-            println!("selected: {item}");
-        });
-        let (w, _) = ctx.compositor().size();
-        let plane = list.render(Rect::new(0, 0, w, 10));
-        ctx.add_plane(plane);
+        let list = List::new(items);
+        let (w, h) = ctx.compositor().size();
+        let area = Rect::new(0, 0, w, h);
+        ctx.add_plane(list.render(area));
     });
-```
-
-## Quick Start (Engine-level)
-
-```rust
-use dracon_terminal_engine::compositor::{Color, Plane, Styles};
-use dracon_terminal_engine::Terminal;
-
-let mut terminal = Terminal::new(std::io::stdout())?;
-let mut hud = Plane::new(0, 40, 10);
-hud.set_z_index(50);
-
-let cell = Cell {
-    char: ' ',
-    fg: Color::Rgb(0, 255, 136),
-    bg: Color::Rgb(0, 30, 20),
-    style: Styles::BOLD,
-    transparent: false,
-    skip: false,
-};
-hud.fill(cell);
-hud.put_str(1, 1, "SYSTEM ONLINE");
-terminal.write_all(hud.render().as_bytes())?;
-std::thread::sleep(std::time::Duration::from_secs(2));
 ```
 
 ## Examples
@@ -141,7 +135,7 @@ cargo run --example input_debug           # SGR mouse + keyboard parsing
 
 ## Version
 
-**v26.0.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v26.0.1** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
