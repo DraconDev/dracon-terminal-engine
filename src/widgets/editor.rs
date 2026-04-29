@@ -71,6 +71,26 @@ impl Default for TextEditor {
 }
 
 impl TextEditor {
+    fn finish_nav_move(&mut self, has_shift: bool, area: Rect) {
+        if has_shift {
+            self.update_selection_end();
+        } else {
+            self.clear_selection();
+        }
+        self.ensure_cursor_visible(area);
+    }
+
+    fn nav_move<F>(&mut self, has_shift: bool, area: Rect, mover: F)
+    where
+        F: FnOnce(&mut TextEditor),
+    {
+        if has_shift {
+            self.maybe_start_selection();
+        }
+        mover(self);
+        self.finish_nav_move(has_shift, area);
+    }
+
     pub fn set_filter(&mut self, query: &str) {
         if self.filter_query == query {
             return;
@@ -264,95 +284,29 @@ impl TextEditor {
 
                 match key.code {
                     KeyCode::Up | KeyCode::Char('p') if has_control => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_up();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_up());
                     }
                     KeyCode::Down | KeyCode::Char('n') if has_control => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_down();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_down());
                     }
                     KeyCode::Up => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_up();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_up());
                     }
                     KeyCode::Down => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_down();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_down());
                     }
                     KeyCode::Left => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_left();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_left());
                     }
                     KeyCode::Right => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_right();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_right());
                     }
                     KeyCode::PageUp => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
                         self.cursor_row = self.cursor_row.saturating_sub(area.height as usize);
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::PageDown => {
                         if has_shift {
@@ -362,13 +316,7 @@ impl TextEditor {
                             self.effective_len().saturating_sub(1),
                             self.cursor_row + area.height as usize,
                         );
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::Home => {
                         if has_shift {
@@ -386,26 +334,14 @@ impl TextEditor {
                         } else {
                             self.cursor_col = first_non_whitespace;
                         }
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::End => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
                         self.cursor_col = self.get_effective_line(self.cursor_row).len();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     _ => {}
                 }
@@ -602,111 +538,28 @@ impl TextEditor {
                         }
                     }
                     KeyCode::Left if has_control || has_alt => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_word_left();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_word_left());
                     }
                     KeyCode::Left => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_left();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_left());
                     }
                     KeyCode::Right if has_control || has_alt => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_word_right();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_word_right());
                     }
                     KeyCode::Right => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_right();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_right());
                     }
-                    // Emacs bindings
                     KeyCode::Char('b') if has_alt => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_word_left();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_word_left());
                     }
                     KeyCode::Char('f') if has_alt => {
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_word_right();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_word_right());
                     }
                     KeyCode::Up | KeyCode::Char('p') if has_control => {
-                        // Ctrl+p is Up
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_up();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_up());
                     }
                     KeyCode::Down | KeyCode::Char('n') if has_control => {
-                        // Ctrl+n is Down
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_down();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_down());
                     }
                     KeyCode::Up => {
                         if has_alt {
@@ -714,17 +567,7 @@ impl TextEditor {
                             self.ensure_cursor_visible(area);
                             return true;
                         }
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_up();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_up());
                     }
                     KeyCode::Down => {
                         if has_alt {
@@ -732,17 +575,7 @@ impl TextEditor {
                             self.ensure_cursor_visible(area);
                             return true;
                         }
-                        if has_shift {
-                            self.maybe_start_selection();
-                        }
-                        self.move_cursor_down();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.nav_move(has_shift, area, |s| s.move_cursor_down());
                     }
 
                     KeyCode::Home if has_control => {
@@ -751,13 +584,7 @@ impl TextEditor {
                         }
                         self.cursor_row = 0;
                         self.cursor_col = 0;
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::End if has_control => {
                         if has_shift {
@@ -765,19 +592,12 @@ impl TextEditor {
                         }
                         self.cursor_row = self.lines.len().saturating_sub(1);
                         self.cursor_col = self.lines[self.cursor_row].len();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::Home => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
-
                         let line = &self.lines[self.cursor_row];
                         let first_non_whitespace = line
                             .chars()
@@ -785,62 +605,36 @@ impl TextEditor {
                             .find(|(_, c)| !c.is_whitespace())
                             .map(|(i, _)| i)
                             .unwrap_or(0);
-
                         if self.cursor_col == first_non_whitespace {
                             self.cursor_col = 0;
                         } else {
                             self.cursor_col = first_non_whitespace;
                         }
-
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::End => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
                         self.cursor_col = self.lines[self.cursor_row].len();
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::PageUp => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
                         self.cursor_row = self.cursor_row.saturating_sub(area.height as usize);
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     KeyCode::PageDown => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
                         self.cursor_row = std::cmp::min(
-                            self.lines.len() - 1,
+                            self.lines.len().saturating_sub(1),
                             self.cursor_row + area.height as usize,
                         );
-                        if has_shift {
-                            self.update_selection_end();
-                        } else {
-                            self.clear_selection();
-                        }
-                        self.ensure_cursor_visible(area);
-                        return true;
+                        self.finish_nav_move(has_shift, area);
                     }
                     _ => {}
                 }
@@ -894,36 +688,17 @@ impl TextEditor {
                 }
 
                 let (target_row, target_col) = if self.wrap {
-                    // In wrap mode, scroll_row is screen line index.
-                    let screen_row = self.scroll_row + rel_row;
-
-                    // Find which source line and which segment this screen row belongs to
-                    let mut current_screen_row = 0;
-                    let mut found = None;
                     let width = content_width as usize;
-
-                    for i in 0..self.effective_len() {
-                        let line = self.get_effective_line(i);
-                        let w = line.width();
-                        let segments = if w == 0 {
-                            1
-                        } else {
-                            (w.saturating_sub(1) / width) + 1
-                        };
-
-                        if screen_row >= current_screen_row
-                            && screen_row < current_screen_row + segments
-                        {
-                            let segment_idx = screen_row - current_screen_row;
+                    let screen_row = self.scroll_row + rel_row;
+                    match self.source_row_from_visual(screen_row, width) {
+                        Some((row, segment_idx, _)) => {
                             let rel_col = (mouse.column - area.x - gutter as u16) as usize;
                             let visual_x = segment_idx * width + rel_col;
-                            let byte_idx = self.get_byte_index_from_visual(i, visual_x);
-                            found = Some((i, byte_idx));
-                            break;
+                            let byte_idx = self.get_byte_index_from_visual(row, visual_x);
+                            (row, byte_idx)
                         }
-                        current_screen_row += segments;
+                        None => (self.cursor_row, self.cursor_col),
                     }
-                    found.unwrap_or((self.cursor_row, self.cursor_col))
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
@@ -970,34 +745,18 @@ impl TextEditor {
                 }
 
                 let (target_row, target_col) = if self.wrap {
-                    let screen_row = self.scroll_row + rel_row;
-                    let mut current_screen_row = 0;
-                    let mut found = None;
                     let width = content_width as usize;
-
-                    for i in 0..self.effective_len() {
-                        let line = self.get_effective_line(i);
-                        let w = line.width();
-                        let segments = if w == 0 {
-                            1
-                        } else {
-                            (w.saturating_sub(1) / width) + 1
-                        };
-
-                        if screen_row >= current_screen_row
-                            && screen_row < current_screen_row + segments
-                        {
-                            let segment_idx = screen_row - current_screen_row;
+                    let screen_row = self.scroll_row + rel_row;
+                    match self.source_row_from_visual(screen_row, width) {
+                        Some((row, segment_idx, _)) => {
                             let rel_col =
                                 (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
                             let visual_x = segment_idx * width + rel_col;
-                            let byte_idx = self.get_byte_index_from_visual(i, visual_x);
-                            found = Some((i, byte_idx));
-                            break;
+                            let byte_idx = self.get_byte_index_from_visual(row, visual_x);
+                            (row, byte_idx)
                         }
-                        current_screen_row += segments;
+                        None => (self.cursor_row, self.cursor_col),
                     }
-                    found.unwrap_or((self.cursor_row, self.cursor_col))
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
@@ -1457,6 +1216,24 @@ impl TextEditor {
         }
 
         visual_row
+    }
+
+    fn source_row_from_visual(&self, visual_row: usize, width: usize) -> Option<(usize, usize, usize)> {
+        let mut current = 0usize;
+        for i in 0..self.effective_len() {
+            let line = self.get_effective_line(i);
+            let w = line.width();
+            let segments = if w == 0 || width == 0 {
+                1
+            } else {
+                (w.saturating_sub(1) / width) + 1
+            };
+            if visual_row >= current && visual_row < current + segments {
+                return Some((i, visual_row - current, segments));
+            }
+            current += segments;
+        }
+        None
     }
 
     pub fn ensure_cursor_visible(&mut self, area: Rect) {
