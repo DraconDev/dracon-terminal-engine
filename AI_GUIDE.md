@@ -2,7 +2,7 @@
 
 You are writing Rust code using `dracon_terminal_engine`, the next-generation terminal engine.
 Dracon Terminal Engine is **NOT** `crossterm` (Immediate Mode, Global State) and **NOT** `ratatui` (Grid Mode).
-It is a **Compositor Engine** — z-indexed layers, TrueColor, SGR mouse, Kitty keyboard.
+It is a **Compositor Engine** — z-indexed layers, TrueColor, SGR mouse.
 
 ## 1. The Golden Rule: RAII
 
@@ -25,46 +25,41 @@ The compositor uses the **Painter's Algorithm** (higher z-index = on top).
 ### Creating a Floating Window
 
 ```rust
-use dracon_terminal_engine::compositor::{Compositor, Plane};
+use dracon_terminal_engine::compositor::{Cell, Color, Compositor, Plane, Styles};
 use dracon_terminal_engine::compositor::filter::Dim;
 
-// Initialize Compositor
-let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())?;
-let mut compositor = Compositor::new(w, h);
+let mut compositor = Compositor::new();
 
 // Base Layer (Background)
-let mut base = Plane::new(0, w, h);
+let mut base = Plane::new(0, 80, 24);
 base.set_z_index(0);
 compositor.add_plane(base);
 
 // Floating Modal (Foreground)
 let mut modal = Plane::new(1, 40, 10);
 modal.set_z_index(100);
-modal.set_absolute_position(20, 5);
+modal.set_position(20, 5);
 modal.set_filter(Box::new(Dim));
 compositor.add_plane(modal);
 
 // Render
-compositor.render(&mut term)?;
+let frame = compositor.render();
 ```
 
 ## 3. Input Handling
 
-Supports Kitty Keyboard Protocol and SGR Mouse (including side buttons Back/Forward).
-Use `dracon_terminal_engine::input::parser::Parser`.
+Supports SGR Mouse (including side buttons Back/Forward, shift/ctrl modifiers).
+Use `dracon_terminal_engine::input::{InputReader, Parser}`.
 
 ```rust
-use dracon_terminal_engine::input::parser::{Parser};
-use dracon_terminal_engine::input::event::{Event, MouseButton};
+use dracon_terminal_engine::input::{InputEvent, InputReader};
+use std::io::stdin;
 
-let mut parser = Parser::new();
-if let Some(event) = parser.advance(byte) {
-    match event {
-        Event::Mouse(me) => match me.kind {
-            MouseEventKind::Down(MouseButton::Back) => { /* Go Back */ },
-            MouseEventKind::Down(MouseButton::Forward) => { /* Go Forward */ },
-            _ => {}
-        },
+let mut reader = InputReader::new(stdin())?;
+if let Some(InputEvent::Mouse(me)) = reader.read()? {
+    match (me.button, me.modifiers) {
+        (MouseButton::Back, _) => { /* Go Back */ }
+        (MouseButton::Forward, _) => { /* Go Forward */ }
         _ => {}
     }
 }
@@ -88,7 +83,15 @@ terminal.backend_mut().compositor_mut().add_plane(my_plane);
 ## 5. Visual Polish
 
 Use **Synchronized Updates** (Mode 2026) for non-trivial renders to prevent tearing.
-`RatatuiBackend` handles this automatically on flush.
+Call `visuals::sync::begin_sync()` before and `end_sync()` after rendering.
+
+```rust
+use dracon_terminal_engine::visuals::sync::{begin_sync, end_sync};
+
+begin_sync(writer)?;
+terminal.write_all(frame.as_bytes())?;
+end_sync(writer)?;
+```
 
 ## 6. Unicode & Wide Character Handling
 
@@ -104,9 +107,17 @@ When a character has width 2, cell `(x, y)` contains the character, and cell `(x
 - `dracon_terminal_engine::utils::get_visual_width(c)` — character display width
 - `dracon_terminal_engine::utils::truncate_to_width(s, max_width, suffix)` — safe string clipping
 
+## Re-exports
+
+The crate re-exports the most common types at the top level for convenience:
+```rust
+use dracon_terminal_engine::{Terminal, Plane, Compositor, Cell, Color, Styles};
+use dracon_terminal_engine::{InputReader, Parser};
+```
+
 ## Summary
 
-- **Structs**: `Terminal`, `Compositor`, `Plane`
+- **Structs**: `Terminal`, `Compositor`, `Plane`, `Cell`
 - **Backend**: `RatatuiBackend` for ratatui integration
 - **Z-Index**: Use it for overlapping UI
 - **No Macros**: Use struct methods, not `crossterm::queue!` style
