@@ -45,7 +45,7 @@ The `framework` module provides the complete application runtime:
 | [`List<T>`] | Vertical list with keyboard nav + mouse scroll + selection |
 | [`Table<T>`] | Sortable table with column headers + row click |
 | [`TabBar`] | Horizontal tab strip, click or arrow-key to switch |
-| [`Breadcrumbs`] | Clickable path segments (from `Path` or `Vec<&str>`) |
+| [`Breadcrumbs`] | Clickable path segments (from `Path` or `Vec<String>`) |
 | [`SplitPane`] | H/V splits with drag-resize divider |
 | [`Modal`] | Auto-centered popup with button hit zones |
 | [`ContextMenu`] | Right-click popup menu |
@@ -128,9 +128,13 @@ std::thread::sleep(std::time::Duration::from_secs(2));
 ## Examples
 
 ```bash
-cargo run --example basic_raw             # minimal Terminal usage
-cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud
+# Framework examples — the recommended path
+cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud + SystemMonitor
 cargo run --example framework_file_manager # File browser with List + Breadcrumbs + SplitPane
+cargo run --example framework_chat        # Chat UI: message list + input bar + theme
+
+# Engine examples — raw compositor usage
+cargo run --example basic_raw             # minimal Terminal usage
 cargo run --example god_mode              # Ratatui + compositor overlay
 cargo run --example input_debug           # SGR mouse + keyboard parsing
 ```

@@ -1,73 +1,258 @@
 # AI Guide: Writing Dracon Terminal Engine Code
 
-You are writing Rust code using `dracon_terminal_engine`, the next-generation terminal engine.
-Dracon Terminal Engine is **NOT** `crossterm` (Immediate Mode, Global State) and **NOT** `ratatui` (Grid Mode).
-It is a **Compositor Engine** — z-indexed layers, TrueColor, SGR mouse.
+You are writing Rust code using `dracon_terminal_engine`, a terminal application **framework** — not a TUI library. One import and AI builds a complete app in minutes.
+
+## The Two Layers
+
+**Framework** (high-level, for building apps):
+```rust
+use dracon_terminal_engine::framework::prelude::*;
+
+App::new()?
+    .title("My App")
+    .fps(30)
+    .run(|ctx| {
+        let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
+        ctx.add_plane(list.render(Rect::new(0, 0, 40, 20)));
+    });
+```
+
+**Engine** (low-level, for advanced use):
+```rust
+use dracon_terminal_engine::{Terminal, Plane, Compositor, Cell, Color};
+let mut term = Terminal::new(stdout())?;
+let mut plane = Plane::new(0, 40, 10);
+plane.set_z_index(50);
+```
+
+---
 
 ## 1. The Golden Rule: RAII
 
-Dracon Terminal Engine has NO global state. Do not send raw ANSI bytes to `stdout` unless wrapped in `Terminal`.
-**Always** wrap `stdout` in `Terminal` to handle Raw Mode entry/exit.
+No global state. **Always** wrap `stdout` in `Terminal` to handle Raw Mode entry/exit. When `Terminal` is dropped, terminal state is restored.
 
 ```rust
-use std::io::stdout;
-use dracon_terminal_engine::core::terminal::Terminal;
-
+use dracon_terminal_engine::Terminal;
 let mut term = Terminal::new(stdout())?;
-// term is now in Raw Mode. When dropped, it restores terminal state.
+// In raw mode. On drop, state is restored.
 ```
 
-## 2. The Compositor Pattern (Layers)
+---
 
-Do not draw generic text. Use **Planes** with z-indices.
-The compositor uses the **Painter's Algorithm** (higher z-index = on top).
+## 2. App — The Framework Entry Point
 
-### Creating a Floating Window
+`App` owns terminal, compositor, input parsing, and the event loop. One call to `run()`:
+
+```rust
+App::new()?
+    .title("My App")        // Sets terminal title
+    .fps(30)                 // Frame rate limiter (default 30)
+    .theme(Theme::dark())    // Or .light() or .cyberpunk()
+    .run(|ctx| {
+        // ctx.compositor() -> &Compositor
+        // ctx.add_plane(plane) -> add a Plane to be rendered
+        // ctx.theme() -> &Theme
+        // ctx.fps() -> u32
+    });
+```
+
+`App::new()` returns `io::Result<App>` — handle the `?`.
+
+---
+
+## 3. Widgets
+
+### List\<T\>
+
+Vertical list with keyboard nav (Up/Down/Home/End/PageUp/PageDown) and mouse scroll. Requires `T: Clone + ToString`.
+
+```rust
+let items = vec!["Home", "Projects", "Settings", "About"];
+let mut list = List::new(items);
+list.set_visible_count(10);
+
+let plane = list.render(Rect::new(0, 0, 40, 20));
+ctx.add_plane(plane);
+
+// Methods:
+list.selected_index()   // usize
+list.get_selected()     // Option<&T>
+list.len()              // usize
+list.on_select(|item| { /* called on Enter/click */ })
+```
+
+### Breadcrumbs
+
+Clickable path segments. Constructor takes `Vec<String>`:
+
+```rust
+let crumbs = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
+let (plane, zones) = Breadcrumbs::new(crumbs).render(area);
+// zones: Vec<HitZone<usize>> — index of clicked segment
+```
+
+Or from a `Path`:
+
+```rust
+let (plane, zones) = Breadcrumbs::from_path(path).render(area);
+```
+
+### SplitPane
+
+H/V splits with ratio:
+
+```rust
+let split = SplitPane::new(Orientation::Vertical).ratio(0.7);
+let (left_rect, right_rect) = split.split(Rect::new(0, 0, w, h));
+```
+
+### Hud
+
+Floating overlay (z-indexed above main content):
+
+```rust
+let hud = Hud::new(100).with_size(30, 5);
+let gauge = hud.render_gauge(x, y, "CPU", 45.0, 100.0, 20);
+ctx.add_plane(gauge);
+```
+
+### TabBar, Modal, Table, ContextMenu
+
+See `src/framework/widgets/` for all widgets.
+
+---
+
+## 4. HitZone — Declarative Interactive Regions
+
+Hit zones track single/double/triple click, right-click, drag, and hover. T is your callback context type.
+
+```rust
+use dracon_terminal_engine::framework::hitzone::{HitZone, HitZoneGroup};
+
+let zone = HitZone::new(id, x, y, w, h);
+// Methods:
+zone.contains(col, row)     // bool — was this point inside?
+zone.click_count()          // 1, 2, or 3 (resets after 500ms)
+zone.is_right_click()       // bool
+zone.is_drag()              // bool
+zone.drag_delta()           // (dx, dy) from drag start
+```
+
+`HitZoneGroup` dispatches to the matching zone:
+
+```rust
+let mut group = HitZoneGroup::<usize>::new();
+group.add(HitZone::new(0, 10, 5, 20, 1));  // id=0
+group.add(HitZone::new(1, 35, 5, 20, 1));  // id=1
+
+if let Some(id) = group.dispatch(col, row, &event) {
+    match id {
+        0 => { /* first zone clicked */ }
+        1 => { /* second zone clicked */ }
+    }
+}
+```
+
+---
+
+## 5. Theme
+
+Three presets: `Theme::dark()` (default), `Theme::light()`, `Theme::cyberpunk()`. Each provides bg/fg/accent/selection/border colors plus scrollbar/hover/active/input variants.
+
+```rust
+let theme = Theme::cyberpunk();
+// Fields:
+theme.bg, theme.fg, theme.accent,
+theme.selection_bg, theme.selection_fg,
+theme.border, theme.scrollbar, theme.hover, theme.active, theme.input
+```
+
+Apply to widgets via `.with_theme()`:
+
+```rust
+let list = List::new(items).with_theme(Theme::dark());
+```
+
+---
+
+## 6. The Compositor Pattern (Engine-level)
+
+Planes have z-indices. Higher z = on top. The compositor uses painter's algorithm.
 
 ```rust
 use dracon_terminal_engine::compositor::{Cell, Color, Compositor, Plane, Styles};
-use dracon_terminal_engine::compositor::filter::Dim;
 
 let mut compositor = Compositor::new();
 
-// Base Layer (Background)
+// Base Layer (z=0)
 let mut base = Plane::new(0, 80, 24);
 base.set_z_index(0);
 compositor.add_plane(base);
 
-// Floating Modal (Foreground)
+// Floating Modal (z=100)
 let mut modal = Plane::new(1, 40, 10);
 modal.set_z_index(100);
 modal.set_position(20, 5);
-modal.set_filter(Box::new(Dim));
 compositor.add_plane(modal);
 
 // Render
 let frame = compositor.render();
 ```
 
-## 3. Input Handling
+**Plane creation**: `Plane::new(id, width, height)` — id is your identifier, width/height are in cells.
 
-Supports SGR Mouse (including side buttons Back/Forward, shift/ctrl modifiers).
-Use `dracon_terminal_engine::input::{InputReader, Parser}`.
+---
+
+## 7. Input Handling
+
+### Framework (App event loop)
+
+The framework passes events to your closure. You handle them via widget methods:
 
 ```rust
-use dracon_terminal_engine::input::{InputEvent, InputReader};
-use std::io::stdin;
+App::new()?.run(|ctx| {
+    let mut list = List::new(items);
+    // Framework calls your closure each frame.
+    // Handle input via widget.handle_key() / widget.handle_mouse()
+});
+```
+
+### Engine-level
+
+```rust
+use dracon_terminal_engine::input::{InputReader, Event, MouseButton};
 
 let mut reader = InputReader::new(stdin())?;
-if let Some(InputEvent::Mouse(me)) = reader.read()? {
+if let Some(Event::Mouse(me)) = reader.read()? {
     match (me.button, me.modifiers) {
-        (MouseButton::Back, _) => { /* Go Back */ }
-        (MouseButton::Forward, _) => { /* Go Forward */ }
+        (MouseButton::Back, _) => { /* go back */ }
+        (MouseButton::Left, KeyModifiers::SHIFT) => { /* shift+click */ }
         _ => {}
     }
 }
 ```
 
-## 4. Ratatui Integration
+**SGR Mouse** supports: click, drag, scroll, extra buttons (Back/Forward), shift/ctrl modifiers.
 
-Use `ratatui` with `RatatuiBackend` for standard widgets (Block, Paragraph) combined with floating Planes.
+---
+
+## 8. Color
+
+Use `Color::Rgb(r, g, b)` for 24-bit color or `Color::Ansi(n)` for 256-color.
+
+```rust
+use dracon_terminal_engine::compositor::Color;
+
+let c = Color::Rgb(0, 255, 136);    // bright green
+let c = Color::Ansi(39);            // cyan
+let c = Color::Reset;                // reset to terminal default
+```
+
+---
+
+## 9. Ratatui Integration
+
+Use `RatatuiBackend` for ratatui widgets combined with floating Planes:
 
 ```rust
 use dracon_terminal_engine::integration::ratatui::RatatuiBackend;
@@ -76,14 +261,15 @@ use ratatui::Terminal;
 let backend = RatatuiBackend::new(stdout())?;
 let mut terminal = Terminal::new(backend)?;
 
-// Access the underlying compositor to add custom layers
+// Access compositor to add custom layers
 terminal.backend_mut().compositor_mut().add_plane(my_plane);
 ```
 
-## 5. Visual Polish
+---
 
-Use **Synchronized Updates** (Mode 2026) for non-trivial renders to prevent tearing.
-Call `visuals::sync::begin_sync()` before and `end_sync()` after rendering.
+## 10. Sync Mode 2026 (Visual Polish)
+
+For tear-free rendering, wrap output in sync mode:
 
 ```rust
 use dracon_terminal_engine::visuals::sync::{begin_sync, end_sync};
@@ -93,31 +279,45 @@ terminal.write_all(frame.as_bytes())?;
 end_sync(writer)?;
 ```
 
-## 6. Unicode & Wide Character Handling
+---
 
-Dracon Terminal Engine is **width-aware**. Characters like Kanji and Emoji take **2 columns**.
-If not handled correctly, this breaks borders and overlaps adjacent content.
+## 11. Unicode & Wide Characters
 
-### The "Skip" Flag Pattern
-When a character has width 2, cell `(x, y)` contains the character, and cell `(x+1, y)` **MUST** be marked `skip = true`.
-- **Renderer**: Skips cells with `skip: true`
-- **Compositor**: `blend_cells` propagates the `skip` flag
+Characters like Kanji and Emoji take 2 columns. Use utilities to stay safe:
 
-### Utilities
-- `dracon_terminal_engine::utils::get_visual_width(c)` — character display width
-- `dracon_terminal_engine::utils::truncate_to_width(s, max_width, suffix)` — safe string clipping
+- `dracon_terminal_engine::utils::get_visual_width(c)` — display width
+- `dracon_terminal_engine::utils::truncate_to_width(s, max_width, suffix)` — safe clipping
 
-## Re-exports
+When a wide char occupies `(x, y)`, cell `(x+1, y)` must have `skip: true`.
 
-The crate re-exports the most common types at the top level for convenience:
+---
+
+## 12. Re-exports
+
+Most common types are re-exported at crate root:
+
 ```rust
+// Framework
+use dracon_terminal_engine::framework::prelude::*;  // App, Ctx, List, Breadcrumbs, SplitPane, Hud, HitZone, Theme, ...
+
+// Engine
 use dracon_terminal_engine::{Terminal, Plane, Compositor, Cell, Color, Styles};
-use dracon_terminal_engine::{InputReader, Parser};
+use dracon_terminal_engine::{InputReader, Parser, SystemMonitor};
 ```
+
+---
 
 ## Summary
 
-- **Structs**: `Terminal`, `Compositor`, `Plane`, `Cell`
-- **Backend**: `RatatuiBackend` for ratatui integration
-- **Z-Index**: Use it for overlapping UI
-- **No Macros**: Use struct methods, not `crossterm::queue!` style
+| Concept | Key API |
+|---|---|
+| Entry point | `App::new()?.title().fps().run(\|ctx\|)` |
+| Add content | `ctx.add_plane(plane)` |
+| List | `List::new(items).on_select(f).render(area)` |
+| Breadcrumbs | `Breadcrumbs::new(crumbs).render(area)` |
+| Split | `SplitPane::new(Horizontal).ratio(0.3).split(area)` |
+| Interactivity | `HitZone::new(id, x, y, w, h)` |
+| Theme | `Theme::dark() / .light() / .cyberpunk()` |
+| Colors | `Color::Rgb(r, g, b)` or `Color::Ansi(n)` |
+| Z-indexed layers | `Plane::new(id, w, h)` + `set_z_index(n)` |
+| Raw mode | `Terminal::new(stdout())?` |
