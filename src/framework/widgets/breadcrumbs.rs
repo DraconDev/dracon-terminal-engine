@@ -12,9 +12,9 @@ pub struct Breadcrumbs {
 }
 
 impl Breadcrumbs {
-    pub fn new(segments: Vec<&str>) -> Self {
+    pub fn new(segments: Vec<String>) -> Self {
         Self {
-            segments: segments.iter().map(|s| s.to_string()).collect(),
+            segments,
             theme: Theme::default(),
             height: 1,
             on_navigate: None,

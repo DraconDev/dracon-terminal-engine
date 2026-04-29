@@ -33,7 +33,7 @@ fn main() -> std::io::Result<()> {
             let list_plane = list.render(left_rect);
             ctx.add_plane(list_plane);
 
-            let (bc_plane, bc_zones) = Breadcrumbs::new(vec!["home", "user", "projects", "app"])
+            let (bc_plane, bc_zones) = Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string(), "app".to_string()])
                 .render(right_rect);
             ctx.add_plane(bc_plane);
             for zone in bc_zones {
