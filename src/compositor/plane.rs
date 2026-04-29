@@ -10,17 +10,13 @@ pub enum Color {
 bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
     pub struct Styles: u8 {
-        const BOLD          = 1 << 0;
-        #[allow(dead_code)]
-        const DIM           = 1 << 1;
-        const ITALIC        = 1 << 2;
-        const UNDERLINE     = 1 << 3;
-        #[allow(dead_code)]
-        const BLINK         = 1 << 4;
-        const REVERSE       = 1 << 5;
-        #[allow(dead_code)]
-        const HIDDEN        = 1 << 6;
-        #[allow(dead_code)]
+        const BOLD       = 1 << 0;
+        const DIM        = 1 << 1;
+        const ITALIC     = 1 << 2;
+        const UNDERLINE  = 1 << 3;
+        const BLINK      = 1 << 4;
+        const REVERSE    = 1 << 5;
+        const HIDDEN     = 1 << 6;
         const STRIKETHROUGH = 1 << 7;
     }
 }
@@ -51,9 +47,6 @@ impl Default for Cell {
 
 use crate::compositor::filter::Filter;
 
-/// A layer in the "God Mode" Compositor.
-/// Planes are Z-indexed and can be moved efficiently.
-#[allow(dead_code)]
 pub struct Plane {
     pub id: usize,
     pub z_index: i32,
@@ -83,13 +76,11 @@ impl Plane {
         }
     }
 
-    #[allow(dead_code)]
     pub fn set_absolute_position(&mut self, x: u16, y: u16) {
         self.x = x;
         self.y = y;
     }
 
-    #[allow(dead_code)]
     pub fn set_z_index(&mut self, z: i32) {
         self.z_index = z;
     }
@@ -113,7 +104,6 @@ impl Plane {
         }
     }
 
-    #[allow(dead_code)]
     pub fn put_cell(&mut self, x: u16, y: u16, mut cell: Cell) {
         if x >= self.width || y >= self.height {
             return;
@@ -147,9 +137,6 @@ impl Plane {
         }
     }
 
-    /// Writes a string handling Unicode width.
-    /// Returns the new X position.
-    #[allow(dead_code)]
     pub fn put_str(&mut self, mut x: u16, y: u16, text: &str) -> u16 {
         use unicode_width::UnicodeWidthChar;
 
@@ -184,13 +171,10 @@ impl Plane {
         x
     }
 
-    /// Set a filter for this plane (e.g. Dim, Invert)
-    #[allow(dead_code)]
     pub fn set_filter(&mut self, filter: Box<dyn Filter>) {
         self.filter = Some(filter);
     }
 
-    #[allow(dead_code)]
     pub fn set_transparent(&mut self, transparent: bool) {
         for cell in &mut self.cells {
             cell.transparent = transparent;

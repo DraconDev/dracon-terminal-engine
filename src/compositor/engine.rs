@@ -9,7 +9,6 @@ pub struct Compositor {
 }
 
 impl Compositor {
-    #[allow(dead_code)]
     pub fn new(width: u16, height: u16) -> Self {
         Self {
             planes: Vec::new(),
@@ -19,11 +18,9 @@ impl Compositor {
         }
     }
 
-    #[allow(dead_code)]
     pub fn tick(&mut self, _delta: f32) {
     }
 
-    #[allow(dead_code)]
     pub fn hit_test(&self, x: u16, y: u16) -> Option<&Plane> {
         for plane in self.planes.iter().rev() {
             if !plane.visible {
@@ -54,7 +51,6 @@ impl Compositor {
         self.sort_planes();
     }
 
-    #[allow(dead_code)]
     pub fn draw_text(&mut self, text: &str, x: u16, y: u16, fg: Color, bg: Color, style: Styles) {
         let mut plane = Plane::new(0, text.len() as u16, 1);
         plane.x = x;
@@ -76,8 +72,6 @@ impl Compositor {
         self.add_plane(plane);
     }
 
-    #[allow(clippy::too_many_arguments)]
-    #[allow(dead_code)]
     pub fn draw_rect(
         &mut self,
         x: u16,
@@ -118,7 +112,6 @@ impl Compositor {
         }
     }
 
-    #[allow(dead_code)]
     pub fn draw_ratatui_line(&mut self, line: &ratatui::text::Line, x: u16, y: u16) {
         let total_len: usize = line.spans.iter().map(|s| s.content.len()).sum();
         if total_len == 0 {
