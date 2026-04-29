@@ -1,6 +1,22 @@
 use bitflags::bitflags;
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct UiResize {
+    pub width: u16,
+    pub height: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum UiEvent {
+    Tick,
+    Key { key: Cow<'static, str> },
+    Resize(UiResize),
+    QuitRequested,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Event {
     Key(KeyEvent),
     Mouse(MouseEvent),
@@ -8,24 +24,24 @@ pub enum Event {
     Paste(String),
     FocusGained,
     FocusLost,
-    Unsupported(Vec<u8>), // Added this to support unknown sequences
+    Unsupported(Vec<u8>),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct KeyEvent {
     pub code: KeyCode,
     pub modifiers: KeyModifiers,
-    pub kind: KeyEventKind, // Added this
+    pub kind: KeyEventKind,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum KeyEventKind {
     Press,
     Repeat,
     Release,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum KeyCode {
     Backspace,
     Enter,
@@ -56,7 +72,7 @@ pub enum KeyCode {
     Modifier(ModifierKeyCode),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MediaKeyCode {
     Play,
     Pause,
@@ -73,7 +89,7 @@ pub enum MediaKeyCode {
     MuteVolume,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ModifierKeyCode {
     LeftShift,
     LeftControl,
@@ -92,7 +108,7 @@ pub enum ModifierKeyCode {
 }
 
 bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
     pub struct KeyModifiers: u8 {
         const SHIFT = 0b0000_0001;
         const CONTROL = 0b0000_0010;
@@ -103,7 +119,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MouseEvent {
     pub kind: MouseEventKind,
     pub column: u16,
@@ -111,7 +127,7 @@ pub struct MouseEvent {
     pub modifiers: KeyModifiers,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MouseEventKind {
     Down(MouseButton),
     Up(MouseButton),
@@ -123,12 +139,88 @@ pub enum MouseEventKind {
     ScrollRight,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MouseButton {
     Left,
     Right,
     Middle,
-    Back,    // Mouse 4
-    Forward, // Mouse 5
+    Back,
+    Forward,
     Other(u8),
+}
+
+impl Event {
+    pub fn to_ui_event(&self) -> Option<UiEvent> {
+        match self {
+            Event::Resize(width, height) => Some(UiEvent::Resize(UiResize {
+                width: *width,
+                height: *height,
+            })),
+            Event::Key(key) => Some(UiEvent::Key {
+                key: Cow::Owned(format_key(key)),
+            }),
+            _ => None,
+        }
+    }
+}
+
+fn format_key(key: &KeyEvent) -> String {
+    let mut out = String::new();
+
+    if key.modifiers.contains(KeyModifiers::CONTROL) {
+        out.push_str("ctrl+");
+    }
+    if key.modifiers.contains(KeyModifiers::ALT) {
+        out.push_str("alt+");
+    }
+    if key.modifiers.contains(KeyModifiers::SHIFT) {
+        out.push_str("shift+");
+    }
+    if key.modifiers.contains(KeyModifiers::SUPER) {
+        out.push_str("super+");
+    }
+    if key.modifiers.contains(KeyModifiers::HYPER) {
+        out.push_str("hyper+");
+    }
+    if key.modifiers.contains(KeyModifiers::META) {
+        out.push_str("meta+");
+    }
+
+    out.push_str(match key.code {
+        KeyCode::Backspace => "backspace",
+        KeyCode::Enter => "enter",
+        KeyCode::Left => "left",
+        KeyCode::Right => "right",
+        KeyCode::Up => "up",
+        KeyCode::Down => "down",
+        KeyCode::Home => "home",
+        KeyCode::End => "end",
+        KeyCode::PageUp => "page_up",
+        KeyCode::PageDown => "page_down",
+        KeyCode::Tab => "tab",
+        KeyCode::BackTab => "backtab",
+        KeyCode::Delete => "delete",
+        KeyCode::Insert => "insert",
+        KeyCode::Null => "null",
+        KeyCode::Esc => "esc",
+        KeyCode::CapsLock => "caps_lock",
+        KeyCode::ScrollLock => "scroll_lock",
+        KeyCode::NumLock => "num_lock",
+        KeyCode::PrintScreen => "print_screen",
+        KeyCode::Pause => "pause",
+        KeyCode::Menu => "menu",
+        KeyCode::KeypadBegin => "keypad_begin",
+        KeyCode::Char(c) => return format!("{out}{c}"),
+        KeyCode::F(n) => return format!("{out}f{n}"),
+        KeyCode::Media(media) => return format!("{out}media::{media:?}"),
+        KeyCode::Modifier(modifier) => return format!("{out}modifier::{modifier:?}"),
+    });
+
+    match key.kind {
+        KeyEventKind::Press => out.push_str(":press"),
+        KeyEventKind::Repeat => out.push_str(":repeat"),
+        KeyEventKind::Release => out.push_str(":release"),
+    }
+
+    out
 }

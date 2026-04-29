@@ -59,6 +59,8 @@ pub mod compositor;
 pub mod contracts;
 #[doc = "Core terminal wrapper (RAII raw mode + alt screen)."]
 pub mod core;
+#[doc = "Framework: App, HitZone, ScrollContainer, widgets, theme — the one-import entry point."]
+pub mod framework;
 #[doc = "Input reader (InputReader) + SGR mouse / chord parser."]
 pub mod input;
 #[doc = "Ratatui integration bridge."]
@@ -76,4 +78,5 @@ pub mod widgets;
 
 pub use compositor::{Cell, Color, Compositor, Plane, Styles};
 pub use core::terminal::Terminal;
+pub use framework::prelude;
 pub use input::{InputReader, Parser};

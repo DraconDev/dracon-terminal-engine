@@ -1,0 +1,208 @@
+use crate::compositor::{Cell, Color, Plane, Styles};
+use ratatui::layout::Rect;
+use std::time::{Duration, Instant};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ScrollState {
+    pub offset: usize,
+    pub content_height: usize,
+    pub viewport_height: usize,
+}
+
+impl ScrollState {
+    pub fn max_offset(&self) -> usize {
+        self.content_height.saturating_sub(self.viewport_height)
+    }
+
+    pub fn page_size(&self) -> usize {
+        self.viewport_height.saturating_sub(1).max(1)
+    }
+
+    pub fn scroll_up(&mut self, n: usize) {
+        self.offset = self.offset.saturating_sub(n);
+    }
+
+    pub fn scroll_down(&mut self, n: usize) {
+        self.offset = (self.offset + n).min(self.max_offset());
+    }
+
+    pub fn scroll_to(&mut self, offset: usize) {
+        self.offset = offset.min(self.max_offset());
+    }
+
+    pub fn scroll_to_top(&mut self) {
+        self.offset = 0;
+    }
+
+    pub fn scroll_to_bottom(&mut self) {
+        self.offset = self.max_offset();
+    }
+
+    pub fn scroll_page_up(&mut self) {
+        self.scroll_up(self.page_size());
+    }
+
+    pub fn scroll_page_down(&mut self) {
+        self.scroll_down(self.page_size());
+    }
+}
+
+impl Default for ScrollState {
+    fn default() -> Self {
+        Self {
+            offset: 0,
+            content_height: 0,
+            viewport_height: 0,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ScrollContainer {
+    state: ScrollState,
+    scrollbar_visible: bool,
+    scrollbar_width: u16,
+}
+
+impl ScrollContainer {
+    pub fn new() -> Self {
+        Self {
+            state: ScrollState::default(),
+            scrollbar_visible: true,
+            scrollbar_width: 1,
+        }
+    }
+
+    pub fn with_content_height(mut self, height: usize) -> Self {
+        self.state.content_height = height;
+        self
+    }
+
+    pub fn with_viewport_height(mut self, height: usize) -> Self {
+        self.state.viewport_height = height;
+        self
+    }
+
+    pub fn with_scrollbar(mut self, visible: bool) -> Self {
+        self.scrollbar_visible = visible;
+        self
+    }
+
+    pub fn state(&self) -> &ScrollState {
+        &self.state
+    }
+
+    pub fn state_mut(&mut self) -> &mut ScrollState {
+        &mut self.state
+    }
+
+    pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::{KeyCode, KeyEventKind};
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        match key.code {
+            KeyCode::Up => {
+                self.state.scroll_up(1);
+                true
+            }
+            KeyCode::Down => {
+                self.state.scroll_down(1);
+                true
+            }
+            KeyCode::PageUp => {
+                self.state.scroll_page_up();
+                true
+            }
+            KeyCode::PageDown => {
+                self.state.scroll_page_down();
+                true
+            }
+            KeyCode::Home => {
+                self.state.scroll_to_top();
+                true
+            }
+            KeyCode::End => {
+                self.state.scroll_to_bottom();
+                true
+            }
+            _ => false,
+        }
+    }
+
+    pub fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
+        use crate::input::event::MouseEventKind;
+        let visible = self.state.content_height > self.state.viewport_height;
+        if !visible {
+            return false;
+        }
+
+        match kind {
+            MouseEventKind::ScrollDown => {
+                self.state.scroll_down(3);
+                true
+            }
+            MouseEventKind::ScrollUp => {
+                self.state.scroll_up(3);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    pub fn render_scrollbar(&self, area: Rect) -> Plane {
+        let total = self.state.content_height;
+        let visible = self.state.viewport_height;
+        let offset = self.state.offset;
+
+        let mut plane = Plane::new(0, self.scrollbar_width as u16, area.height);
+
+        if total <= visible {
+            return plane;
+        }
+
+        let thumb_len = ((visible as f32 / total as f32) * area.height as f32).ceil() as usize;
+        let thumb_len = thumb_len.max(1);
+        let max_offset = total.saturating_sub(visible);
+        let thumb_pos = if max_offset == 0 {
+            0
+        } else {
+            (offset * (area.height as usize - thumb_len)) / max_offset
+        };
+
+        let thumb_char = '█';
+        let track_char = '░';
+
+        for y in 0..area.height as usize {
+            let char = if y >= thumb_pos && y < thumb_pos + thumb_len {
+                thumb_char
+            } else {
+                track_char
+            };
+            let idx = y * self.scrollbar_width as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx] = Cell {
+                    char,
+                    fg: Color::Rgb(100, 100, 100),
+                    bg: Color::Reset,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
+            }
+        }
+
+        plane
+    }
+}
+
+impl Default for ScrollContainer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
