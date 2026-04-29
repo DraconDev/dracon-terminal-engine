@@ -1,9 +1,15 @@
+//! Breadcrumb navigation widget.
+
+use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::{Plane, Styles};
-use std::path::Path;
 use ratatui::layout::Rect;
+use std::path::Path;
 
+/// A path breadcrumb navigation widget.
+///
+/// Renders a "/"-separated sequence of clickable path segments. Clicking a segment
+/// fires the `on_navigate` callback with the segment index.
 pub struct Breadcrumbs {
     segments: Vec<String>,
     theme: Theme,
@@ -12,6 +18,7 @@ pub struct Breadcrumbs {
 }
 
 impl Breadcrumbs {
+    /// Creates a `Breadcrumbs` from a list of segment strings.
     pub fn new(segments: Vec<String>) -> Self {
         Self {
             segments,
@@ -21,6 +28,7 @@ impl Breadcrumbs {
         }
     }
 
+    /// Creates a `Breadcrumbs` from a `Path`, splitting each component into a segment.
     pub fn from_path(path: &Path) -> Self {
         let segments: Vec<String> = path
             .components()
@@ -35,11 +43,14 @@ impl Breadcrumbs {
         }
     }
 
+    /// Sets the theme for rendering.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Registers a callback invoked when the user clicks a breadcrumb segment.
+    /// The callback receives the zero-based index of the clicked segment.
     pub fn on_navigate<F>(mut self, f: F) -> Self
     where
         F: FnMut(usize) + 'static,
@@ -48,6 +59,9 @@ impl Breadcrumbs {
         self
     }
 
+    /// Renders the breadcrumbs into a `Plane` and returns hit zones for each segment.
+    ///
+    /// Returns `(plane, hit_zones)` where hit zones have `id = segment_index`.
     pub fn render(&self, area: Rect) -> (Plane, Vec<HitZone<usize>>) {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
@@ -113,6 +127,7 @@ impl Breadcrumbs {
         (plane, zones)
     }
 
+    /// Handles a mouse event. Returns `Some(segment_index)` if a segment was clicked.
     pub fn handle_mouse(
         &mut self,
         kind: crate::input::event::MouseEventKind,

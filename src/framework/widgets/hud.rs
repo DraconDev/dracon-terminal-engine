@@ -1,5 +1,10 @@
+//! Heads-up display (HUD) widget.
+
 use crate::compositor::{Cell, Color, Plane, Styles};
 
+/// A heads-up display overlay positioned at the top-left corner.
+///
+/// Renders text and progress gauges as planes with a fixed z-index.
 pub struct Hud {
     z_index: i32,
     visible: bool,
@@ -8,6 +13,7 @@ pub struct Hud {
 }
 
 impl Hud {
+    /// Creates a new `Hud` with the given z-index.
     pub fn new(z_index: i32) -> Self {
         Self {
             z_index,
@@ -17,32 +23,39 @@ impl Hud {
         }
     }
 
+    /// Sets the width and height of the HUD plane.
     pub fn with_size(mut self, width: u16, height: u16) -> Self {
         self.width = width;
         self.height = height;
         self
     }
 
+    /// Returns the fixed position of the HUD (always `(0, 0)`).
     pub fn position(&self) -> (u16, u16) {
         (0, 0)
     }
 
+    /// Returns the z-index.
     pub fn z_index(&self) -> i32 {
         self.z_index
     }
 
+    /// Returns whether the HUD is visible.
     pub fn is_visible(&self) -> bool {
         self.visible
     }
 
+    /// Shows the HUD.
     pub fn show(&mut self) {
         self.visible = true;
     }
 
+    /// Hides the HUD.
     pub fn hide(&mut self) {
         self.visible = false;
     }
 
+    /// Renders a text string at offset `(x, y)` with the given foreground and background colors.
     pub fn render_text(&self, x: u16, y: u16, text: &str, fg: Color, bg: Color) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index;
@@ -67,6 +80,10 @@ impl Hud {
         plane
     }
 
+    /// Renders a labeled horizontal progress gauge at offset `(x, y)`.
+    ///
+    /// `value` is compared against `max` to determine the filled portion.
+    /// The gauge uses '█' for filled cells and '░' for empty cells.
     pub fn render_gauge(&self, x: u16, y: u16, label: &str, value: f32, max: f32, width: u16) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index;

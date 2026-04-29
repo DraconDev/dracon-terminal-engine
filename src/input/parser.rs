@@ -23,6 +23,7 @@ impl Default for Parser {
 }
 
 impl Parser {
+    /// Creates a new `Parser` with an empty buffer.
     pub fn new() -> Self {
         Self {
             buffer: Vec::with_capacity(32),
@@ -84,6 +85,7 @@ impl Parser {
         None
     }
 
+    /// Checks if an incomplete escape sequence has timed out, and if so emits an `Esc` key event.
     pub fn check_timeout(&mut self) -> Option<Event> {
         if self.state == ParserState::Normal && !self.buffer.is_empty() && self.buffer[0] == 0x1B {
             self.buffer.clear();

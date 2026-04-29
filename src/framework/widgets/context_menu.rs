@@ -1,20 +1,32 @@
+//! Context menu widget.
+
+use crate::compositor::Plane;
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::Plane;
 use ratatui::layout::Rect;
 
+/// An action type for context menu items.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContextAction {
+    /// Open the target.
     Open,
+    /// Edit the target.
     Edit,
+    /// Delete the target.
     Delete,
+    /// Rename the target.
     Rename,
+    /// Copy the target.
     Copy,
+    /// Cut the target.
     Cut,
+    /// Paste from clipboard.
     Paste,
+    /// Visual separator between items.
     Separator,
 }
 
+/// A popup context menu with labeled actions.
 pub struct ContextMenu {
     items: Vec<(String, ContextAction)>,
     theme: Theme,
@@ -22,6 +34,7 @@ pub struct ContextMenu {
 }
 
 impl ContextMenu {
+    /// Creates a new `ContextMenu` from a list of label/action pairs.
     pub fn new(items: Vec<(&'static str, ContextAction)>) -> Self {
         Self {
             items: items.into_iter().map(|(s, a)| (s.to_string(), a)).collect(),
@@ -30,16 +43,23 @@ impl ContextMenu {
         }
     }
 
+    /// Sets the theme for rendering.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Sets the menu width in cells.
     pub fn with_width(mut self, width: u16) -> Self {
         self.width = width;
         self
     }
 
+    /// Renders the menu anchored at `(anchor_x, anchor_y)`, clamped to `screen`.
+    ///
+    /// Returns `(plane, hit_zones, final_x, final_y)` where hit zones have
+    /// `id = item_index` and the final position may differ from the anchor if
+    /// the menu would overflow the screen.
     pub fn render_at(&self, screen: Rect, anchor_x: u16, anchor_y: u16) -> (Plane, Vec<HitZone<usize>>, u16, u16) {
         let height = self.items.len() as u16;
         let mut x = anchor_x;
@@ -102,6 +122,8 @@ impl ContextMenu {
         (plane, zones, x, y)
     }
 
+    /// Handles a mouse click within the menu bounds.
+    /// Returns `Some(action)` for the clicked item, or `None`.
     pub fn handle_mouse(
         &mut self,
         kind: crate::input::event::MouseEventKind,

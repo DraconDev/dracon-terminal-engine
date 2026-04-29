@@ -1,12 +1,18 @@
-use crate::compositor::{Cell, Color, Plane, Styles};
+//! Split pane widget.
+
+use crate::compositor::{Color, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// The direction in which a split pane divides the screen.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Orientation {
+    /// Split left to right.
     Horizontal,
+    /// Split top to bottom.
     Vertical,
 }
 
+/// A widget that splits a rectangular area into two panes with a configurable ratio.
 pub struct SplitPane {
     ratio: f32,
     orientation: Orientation,
@@ -15,6 +21,7 @@ pub struct SplitPane {
 }
 
 impl SplitPane {
+    /// Creates a new `SplitPane` in the given orientation with a 50/50 split.
     pub fn new(orientation: Orientation) -> Self {
         Self {
             ratio: 0.5,
@@ -24,6 +31,8 @@ impl SplitPane {
         }
     }
 
+    /// Creates a new `SplitPane` inferring orientation from the aspect ratio of `rect`.
+    /// Horizontal if width >= height, otherwise vertical.
     pub fn from_rect(rect: Rect) -> Self {
         let orientation = if rect.width >= rect.height {
             Orientation::Horizontal
@@ -38,21 +47,25 @@ impl SplitPane {
         }
     }
 
+    /// Sets the split ratio (0.1–0.9, default 0.5).
     pub fn ratio(mut self, ratio: f32) -> Self {
         self.ratio = ratio.clamp(0.1, 0.9);
         self
     }
 
+    /// Sets the divider character (default '│').
     pub fn with_divider(mut self, c: char) -> Self {
         self.divider_char = c;
         self
     }
 
+    /// Sets the minimum size in cells for each pane (default 10).
     pub fn with_min_size(mut self, size: u16) -> Self {
         self.min_size = size;
         self
     }
 
+    /// Splits `area` into two `Rect`s according to the current ratio and orientation.
     pub fn split(&self, area: Rect) -> (Rect, Rect) {
         match self.orientation {
             Orientation::Horizontal => {
@@ -72,6 +85,7 @@ impl SplitPane {
         }
     }
 
+    /// Returns the `Rect` occupied by the divider line between the two panes.
     pub fn divider_rect(&self, area: Rect) -> Rect {
         match self.orientation {
             Orientation::Horizontal => {
@@ -85,6 +99,7 @@ impl SplitPane {
         }
     }
 
+    /// Renders the divider as a `Plane` styled with the divider character.
     pub fn render_divider(&self, area: Rect) -> Plane {
         let rect = self.divider_rect(area);
         let mut plane = Plane::new(0, rect.width, rect.height);
@@ -103,6 +118,9 @@ impl SplitPane {
         plane
     }
 
+    /// Handles a mouse drag event to interactively resize the split ratio.
+    ///
+    /// Returns `true` if the event was consumed.
     pub fn handle_resize(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16, area: Rect) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Drag(_) => {

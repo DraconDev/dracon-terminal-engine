@@ -1,9 +1,11 @@
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 
+/// A hotkey hint component for rendering keyboard shortcut indicators.
 pub struct HotkeyHint;
 
 impl HotkeyHint {
+    /// Renders a hotkey hint with a colored key badge and label.
     pub fn render<'a>(key: &'a str, label: &'a str, color: Color) -> Vec<Span<'a>> {
         vec![
             Span::styled(

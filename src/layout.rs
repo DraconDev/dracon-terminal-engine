@@ -27,7 +27,9 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 /// Direction for Stack layout.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Orientation {
+    /// Horizontal layout direction.
     Horizontal,
+    /// Vertical layout direction.
     Vertical,
 }
 
@@ -36,12 +38,16 @@ pub enum Orientation {
 /// Children are positioned sequentially, taking their preferred size or
 /// splitting the available space evenly if no preference is given.
 pub struct Stack<'a> {
+    /// The direction children are arranged.
     pub orientation: Orientation,
+    /// Child components in the stack.
     pub children: Vec<&'a mut dyn Component>,
+    /// Space between children in pixels.
     pub spacing: u16,
 }
 
 impl<'a> Stack<'a> {
+    /// Creates a new Stack with the given orientation.
     pub fn new(orientation: Orientation) -> Self {
         Self {
             orientation,
@@ -50,11 +56,13 @@ impl<'a> Stack<'a> {
         }
     }
 
+    /// Sets the spacing between children.
     pub fn with_spacing(mut self, spacing: u16) -> Self {
         self.spacing = spacing;
         self
     }
 
+    /// Adds a child component to the stack.
     pub fn add_child(&mut self, child: &'a mut dyn Component) {
         self.children.push(child);
     }

@@ -8,9 +8,12 @@ use super::event::Event;
 use super::parser::Parser;
 use crate::backend::tty;
 
+/// Reads terminal input events from stdin and dispatches them to a callback.
 pub struct InputReader;
 
 impl InputReader {
+    /// Spawns a new input reader thread that reads stdin and invokes the callback
+    /// for each parsed input event (key presses, resize events, etc.).
     pub fn spawn<F>(mut callback: F) -> thread::JoinHandle<()>
     where
         F: FnMut(Event) + Send + 'static,

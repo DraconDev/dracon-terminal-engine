@@ -1,45 +1,76 @@
 use serde::{Deserialize, Serialize};
 use sysinfo::{Disks, ProcessesToUpdate, System};
 
+/// Information about a single mounted or unmounted disk.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DiskInfo {
+    /// Display name (mount point or label).
     pub name: String,
+    /// Device path (e.g. `/dev/sda1`).
     pub device: String,
+    /// Used space in bytes.
     pub used_space: f64,
+    /// Available (free) space in bytes.
     pub available_space: f64,
+    /// Total capacity in bytes.
     pub total_space: f64,
+    /// Whether the disk is currently mounted.
     pub is_mounted: bool,
 }
 
+/// Information about a single running process.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProcessInfo {
+    /// Process ID.
     pub pid: u32,
+    /// Process name.
     pub name: String,
+    /// CPU usage percentage.
     pub cpu: f32,
+    /// Memory usage in MiB.
     pub mem: f32,
+    /// Username of the process owner.
     pub user: String,
+    /// Process scheduler state.
     pub status: String,
 }
 
+/// Aggregated system information snapshot.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemData {
+    /// Overall CPU usage percentage (0–100).
     pub cpu_usage: f32,
+    /// Per-core CPU usage percentages.
     pub cpu_cores: Vec<f32>,
+    /// Used memory in GiB.
     pub mem_usage: f64,
+    /// Total memory in GiB.
     pub total_mem: f64,
+    /// Used swap in GiB.
     pub swap_usage: f64,
+    /// Total swap in GiB.
     pub total_swap: f64,
+    /// Disk information list.
     pub disks: Vec<DiskInfo>,
+    /// Top processes by CPU usage.
     pub processes: Vec<ProcessInfo>,
+    /// Total bytes received across all interfaces.
     pub net_in: u64,
+    /// Total bytes transmitted across all interfaces.
     pub net_out: u64,
+    /// System uptime in seconds.
     pub uptime: u64,
+    /// Operating system name.
     pub os_name: String,
+    /// OS version string.
     pub os_version: String,
+    /// Kernel version string.
     pub kernel_version: String,
+    /// Host name.
     pub hostname: String,
 }
 
+/// System resource monitor that periodically refreshes CPU, memory, disks, and process data.
 pub struct SystemMonitor {
     sys: System,
     disks: Disks,
@@ -54,6 +85,7 @@ impl Default for SystemMonitor {
 }
 
 impl SystemMonitor {
+    /// Creates a new `SystemMonitor` and immediately refreshes all system data.
     pub fn new() -> Self {
         let mut sys = System::new_all();
         sys.refresh_all();
@@ -68,6 +100,7 @@ impl SystemMonitor {
         }
     }
 
+    /// Refreshes all system data and returns a `SystemData` snapshot.
     pub fn get_data(&mut self) -> SystemData {
         self.sys.refresh_cpu_usage();
         self.sys.refresh_memory();

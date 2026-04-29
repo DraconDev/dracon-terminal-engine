@@ -1,15 +1,22 @@
+//! Modal dialog widget.
+
+use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// Result returned when the user clicks a button in a modal.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ModalResult {
+    /// User confirmed (e.g. OK button).
     Confirm,
+    /// User cancelled.
     Cancel,
+    /// A custom button with the given identifier.
     Custom(u8),
 }
 
+/// A centered modal dialog with a title, optional buttons, and a border.
 pub struct Modal<'a> {
     title: &'a str,
     width: u16,
@@ -19,6 +26,7 @@ pub struct Modal<'a> {
 }
 
 impl<'a> Modal<'a> {
+    /// Creates a new `Modal` with the given title and default OK/Cancel buttons.
     pub fn new(title: &'a str) -> Self {
         Self {
             title,
@@ -29,22 +37,28 @@ impl<'a> Modal<'a> {
         }
     }
 
+    /// Sets the width and height of the modal.
     pub fn with_size(mut self, width: u16, height: u16) -> Self {
         self.width = width;
         self.height = height;
         self
     }
 
+    /// Sets the theme for rendering.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Sets the button label/result pairs.
     pub fn with_buttons(mut self, buttons: Vec<(&'a str, ModalResult)>) -> Self {
         self.buttons = buttons;
         self
     }
 
+    /// Renders the modal centered on `screen` and returns the plane and button hit zones.
+    ///
+    /// Hit zones have `id = ModalResult` for each button.
     pub fn render(&self, screen: Rect) -> (Plane, Vec<HitZone<ModalResult>>) {
         let x = (screen.width.saturating_sub(self.width)) / 2;
         let y = (screen.height.saturating_sub(self.height)) / 2;
@@ -121,6 +135,8 @@ impl<'a> Modal<'a> {
         (plane, zones)
     }
 
+    /// Handles a mouse click within the modal.
+    /// Returns `Some(result)` if a button was clicked, or `None`.
     pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16, screen: Rect) -> Option<ModalResult> {
         let x = (screen.width.saturating_sub(self.width)) / 2;
         let y = (screen.height.saturating_sub(self.height)) / 2;

@@ -7,11 +7,17 @@ use ratatui::widgets::Widget;
 /// A reusable Text Input widget.
 #[derive(Clone, Debug)]
 pub struct TextInput {
+    /// The current text value of the input.
     pub value: String,
+    /// The position of the cursor within the text (0-indexed).
     pub cursor_position: usize,
+    /// The style used to render the text.
     pub style: Style,
+    /// The style used to render the cursor.
     pub cursor_style: Style,
+    /// The placeholder text shown when the input is empty.
     pub placeholder: String,
+    /// The style used to render the placeholder text.
     pub placeholder_style: Style,
 }
 
@@ -29,26 +35,31 @@ impl Default for TextInput {
 }
 
 impl TextInput {
+    /// Creates a new empty `TextInput` with default styles.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new `TextInput` with the given initial value.
     pub fn with_value(mut self, value: impl Into<String>) -> Self {
         self.value = value.into();
         self.cursor_position = self.value.len();
         self
     }
 
+    /// Sets the placeholder text shown when the input is empty.
     pub fn with_placeholder(mut self, placeholder: impl Into<String>) -> Self {
         self.placeholder = placeholder.into();
         self
     }
 
+    /// Sets the value of the input and moves the cursor to the end.
     pub fn set_value(&mut self, value: String) {
         self.value = value;
         self.cursor_position = self.value.len();
     }
 
+    /// Clears the input value and resets the cursor position.
     pub fn clear(&mut self) {
         self.value.clear();
         self.cursor_position = 0;

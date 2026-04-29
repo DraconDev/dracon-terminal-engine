@@ -4,13 +4,18 @@ use crate::input::event::Event;
 /// Represents the rectangular bounds of a component on screen.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Bounds {
+    /// The x coordinate (column) of the top-left corner.
     pub x: u16,
+    /// The y coordinate (row) of the top-left corner.
     pub y: u16,
+    /// The width in columns.
     pub w: u16,
+    /// The height in rows.
     pub h: u16,
 }
 
 impl Bounds {
+    /// Creates a new Bounds with the given coordinates and dimensions.
     pub fn new(x: u16, y: u16, w: u16, h: u16) -> Self {
         Self { x, y, w, h }
     }

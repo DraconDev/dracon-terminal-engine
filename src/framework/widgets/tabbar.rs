@@ -1,8 +1,11 @@
+//! Tab bar widget.
+
+use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// A horizontal tab bar widget with clickable and keyboard-navigable tabs.
 pub struct TabBar {
     tabs: Vec<String>,
     active: usize,
@@ -10,6 +13,7 @@ pub struct TabBar {
 }
 
 impl TabBar {
+    /// Creates a new `TabBar` from a list of tab labels.
     pub fn new(tabs: Vec<&str>) -> Self {
         Self {
             tabs: tabs.iter().map(|s| s.to_string()).collect(),
@@ -18,21 +22,27 @@ impl TabBar {
         }
     }
 
+    /// Sets the rendering theme.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Returns the index of the currently active tab.
     pub fn active(&self) -> usize {
         self.active
     }
 
+    /// Sets the active tab index, clamped to the valid range.
     pub fn set_active(&mut self, idx: usize) {
         if idx < self.tabs.len() {
             self.active = idx;
         }
     }
 
+    /// Renders the tab bar into a `Plane` and returns hit zones for each tab.
+    ///
+    /// Returns `(plane, hit_zones)` where hit zones have `id = tab_index`.
     pub fn render(&self, area: Rect) -> (Plane, Vec<HitZone<usize>>) {
         let mut plane = Plane::new(0, area.width, area.height);
         let mut zones = Vec::new();
@@ -80,6 +90,7 @@ impl TabBar {
         (plane, zones)
     }
 
+    /// Handles a mouse event. Returns `true` if the event was consumed.
     pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
         let tab_count = self.tabs.len().max(1);
         let tab_width = (80u16 / tab_count as u16).max(1);
@@ -97,6 +108,7 @@ impl TabBar {
         }
     }
 
+    /// Handles a key event for tab navigation. Returns `true` if consumed.
     pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
         if key.kind != KeyEventKind::Press {

@@ -1,19 +1,27 @@
+//! Sortable, selectable table widget with header and row hit zones.
+
+use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// A column definition for a `Table`.
 pub struct Column {
+    /// Header label displayed in the column.
     pub header: String,
+    /// Width in cells.
     pub width: u16,
 }
 
+/// A single row of data paired with its rendered cell strings.
 #[derive(Clone)]
 pub struct TableRow<T> {
+    /// The underlying row data.
     pub data: T,
     cells: Vec<String>,
 }
 
+/// A sortable, selectable table with header and row hit zones.
 pub struct Table<T> {
     columns: Vec<Column>,
     rows: Vec<TableRow<T>>,
@@ -28,6 +36,7 @@ pub struct Table<T> {
 }
 
 impl<T: Clone + ToString> Table<T> {
+    /// Creates a new `Table` with the given column definitions.
     pub fn new(columns: Vec<Column>) -> Self {
         Self {
             columns,
@@ -43,11 +52,13 @@ impl<T: Clone + ToString> Table<T> {
         }
     }
 
+    /// Sets the theme for rendering.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Populates the table with row data. Each item is mapped to a `TableRow`.
     pub fn with_rows(mut self, rows: Vec<T>) -> Self
     where
         T: 'static,
@@ -62,6 +73,7 @@ impl<T: Clone + ToString> Table<T> {
         self
     }
 
+    /// Registers a callback invoked when a row is selected (Enter or click).
     pub fn on_select<F>(mut self, f: F) -> Self
     where
         F: FnMut(&T) + 'static,
@@ -70,6 +82,7 @@ impl<T: Clone + ToString> Table<T> {
         self
     }
 
+    /// Registers a callback for sorting rows by comparing two items.
     pub fn on_sort<F>(mut self, f: F) -> Self
     where
         F: FnMut(&T, &T) -> std::cmp::Ordering + 'static,
@@ -78,24 +91,29 @@ impl<T: Clone + ToString> Table<T> {
         self
     }
 
+    /// Returns the index of the currently selected row.
     pub fn selected_index(&self) -> usize {
         self.selected
     }
 
+    /// Returns a reference to the selected row's data, or `None`.
     pub fn get_selected(&self) -> Option<&T> {
         self.rows.get(self.selected).map(|r| &r.data)
     }
 
+    /// Returns the number of rows.
     pub fn len(&self) -> usize {
         self.rows.len()
     }
 
+    /// Returns `(start, end)` indices of the currently visible rows.
     pub fn viewport(&self) -> (usize, usize) {
         let start = self.offset;
         let end = (self.offset + self.visible_count).min(self.rows.len());
         (start, end)
     }
 
+    /// Scrolls to and selects the row at `index`.
     pub fn scroll_to(&mut self, index: usize) {
         if index >= self.rows.len() {
             return;
@@ -108,6 +126,7 @@ impl<T: Clone + ToString> Table<T> {
         }
     }
 
+    /// Sets how many rows are visible at once.
     pub fn set_visible_count(&mut self, count: usize) {
         self.visible_count = count;
     }
@@ -116,6 +135,9 @@ impl<T: Clone + ToString> Table<T> {
         row.data.to_string()
     }
 
+    /// Renders the table into a `Plane` and returns `(plane, header_zones, row_zones)`.
+    ///
+    /// Header hit zones have `id = column_index`. Row hit zones have `id = row_index`.
     pub fn render(&self, area: Rect) -> (Plane, Vec<HitZone<usize>>, Vec<HitZone<usize>>) {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
@@ -205,11 +227,11 @@ impl<T: Clone + ToString> Table<T> {
         (plane, header_zones, row_zones)
     }
 
+    /// Handles a mouse event. Returns `true` if consumed.
     pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
         if row == 0 {
             for zone in self.columns.iter().enumerate() {
                 let _z = HitZone::new(zone.0, 0, 0, 0, 0);
-                // find header hit
             }
             return false;
         }
@@ -244,6 +266,7 @@ impl<T: Clone + ToString> Table<T> {
         }
     }
 
+    /// Handles a key event. Returns `true` if consumed.
     pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
         if key.kind != KeyEventKind::Press {

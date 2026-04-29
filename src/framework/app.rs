@@ -7,13 +7,27 @@ use crate::input::event::Event;
 use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 use std::io::{self, Read, Write};
 use std::os::fd::AsFd;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use std::cell::RefCell;
 
+/// The main application entry point.
+///
+/// Manages the terminal, compositor, input parsing, and event loop.
+/// Build an `App` with the builder pattern, then call [`App::run`] to start it.
+///
+/// # Example
+///
+/// ```ignore
+/// App::new()?
+///     .title("My App")
+///     .fps(60)
+///     .on_tick(|ctx, tick| { /* update every 250ms */ })
+///     .run(|ctx| { /* render per frame */ });
+/// ```
 pub struct App {
     terminal: Terminal<io::Stdout>,
     compositor: Compositor,
@@ -22,7 +36,7 @@ pub struct App {
     fps: u32,
     theme: Theme,
     running: Arc<AtomicBool>,
-frame_count: Arc<AtomicU64>,
+    frame_count: Arc<AtomicU64>,
     last_frame_time: Instant,
     last_tick_time: Instant,
     tick_interval: Duration,
@@ -32,6 +46,8 @@ frame_count: Arc<AtomicU64>,
 }
 
 impl App {
+    /// Creates a new `App` with a linked terminal.
+    /// Returns an error if the terminal cannot be initialized.
     pub fn new() -> io::Result<Self> {
         let terminal = Terminal::new(io::stdout())?;
         let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
@@ -54,22 +70,27 @@ impl App {
         })
     }
 
+    /// Sets the terminal window title (via OSC escape sequence).
     pub fn title(mut self, title: &str) -> Self {
         self.title = title.to_string();
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
         self
     }
 
+    /// Sets the target frames per second (clamped to 1–120).
     pub fn fps(mut self, fps: u32) -> Self {
         self.fps = fps.max(1).min(120);
         self
     }
 
+    /// Sets the UI theme.
     pub fn theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Registers a callback that fires every `tick_interval` milliseconds.
+    /// The callback receives the context and the tick count.
     pub fn on_tick<F>(self, f: F) -> Self
     where
         F: FnMut(&mut Ctx, u64) + 'static,
@@ -78,11 +99,16 @@ impl App {
         self
     }
 
+    /// Sets the tick interval in milliseconds (default: 250ms).
     pub fn tick_interval(mut self, ms: u64) -> Self {
         self.tick_interval = Duration::from_millis(ms);
         self
     }
 
+    /// Starts the application event loop.
+    ///
+    /// Reads input, fires tick callbacks, and invokes the render callback
+    /// each frame until the user presses Ctrl+C or [`App::stop`] is called.
     pub fn run<F>(mut self, mut f: F) -> io::Result<()>
     where
         F: FnMut(&mut Ctx),
@@ -162,6 +188,7 @@ impl App {
         Ok(())
     }
 
+    /// Stops the event loop on the next iteration.
     pub fn stop(&self) {
         self.running.store(false, Ordering::SeqCst);
     }
@@ -173,6 +200,10 @@ impl Default for App {
     }
 }
 
+/// Application context, passed to every render and tick callback.
+///
+/// Provides access to the compositor, theme, and convenience methods
+/// for splitting the screen and measuring frame rate.
 pub struct Ctx<'a> {
     pub(crate) compositor: &'a mut Compositor,
     pub(crate) theme: &'a Theme,
@@ -181,22 +212,27 @@ pub struct Ctx<'a> {
 }
 
 impl<'a> Ctx<'a> {
+    /// Adds a plane to the compositor.
     pub fn add_plane(&mut self, plane: Plane) {
         self.compositor.add_plane(plane);
     }
 
+    /// Returns an immutable reference to the compositor.
     pub fn compositor(&self) -> &Compositor {
         self.compositor
     }
 
+    /// Returns a mutable reference to the compositor.
     pub fn compositor_mut(&mut self) -> &mut Compositor {
         self.compositor
     }
 
+    /// Clears the entire terminal.
     pub fn clear(&mut self) {
         self.compositor.force_clear();
     }
 
+    /// Returns the measured frames per second based on elapsed time and frame count.
     pub fn fps(&self) -> u64 {
         let elapsed = self.last_frame.elapsed().as_secs_f64();
         if elapsed > 0.0 {
@@ -206,10 +242,14 @@ impl<'a> Ctx<'a> {
         }
     }
 
+    /// Returns a reference to the current theme.
     pub fn theme(&self) -> &Theme {
         self.theme
     }
 
+    /// Splits the screen horizontally into two panes and passes them to the closure.
+    ///
+    /// The closure receives two `SplitPane` instances covering the left and right halves.
     pub fn split_h<F>(&mut self, f: F)
     where
         F: FnOnce(&mut crate::framework::widgets::split::SplitPane, &mut crate::framework::widgets::split::SplitPane),
@@ -222,6 +262,9 @@ impl<'a> Ctx<'a> {
         f(&mut left, &mut right);
     }
 
+    /// Splits the screen vertically into two panes and passes them to the closure.
+    ///
+    /// The closure receives two `SplitPane` instances covering the top and bottom halves.
     pub fn split_v<F>(&mut self, f: F)
     where
         F: FnOnce(&mut crate::framework::widgets::split::SplitPane, &mut crate::framework::widgets::split::SplitPane),

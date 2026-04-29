@@ -18,6 +18,7 @@ pub fn write_hyperlink<W: Write>(writer: &mut W, text: &str, url: &str) -> io::R
     write!(writer, "\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, text)
 }
 
+/// Encodes bytes to base64 without requiring external dependencies.
 pub fn simple_base64_encode(input: &[u8]) -> String {
     // ... (existing implementation)
     const SET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

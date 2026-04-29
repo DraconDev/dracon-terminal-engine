@@ -1,9 +1,14 @@
+//! Selectable list widget with keyboard and mouse navigation.
+
+use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
-use crate::compositor::{Cell, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// A generic selectable list widget.
+///
+/// Renders items with selection highlighting and provides keyboard/mouse navigation.
 pub struct List<T> {
     items: Vec<T>,
     selected: usize,
@@ -16,6 +21,7 @@ pub struct List<T> {
 }
 
 impl<T: Clone + ToString> List<T> {
+    /// Creates a new `List` with the given items and default theme.
     pub fn new(items: Vec<T>) -> Self {
         Self {
             items,
@@ -29,44 +35,53 @@ impl<T: Clone + ToString> List<T> {
         }
     }
 
+    /// Sets the theme for rendering.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self
     }
 
+    /// Sets the height of each item row in cells.
     pub fn with_item_height(mut self, height: u16) -> Self {
         self.item_height = height;
         self
     }
 
+    /// Sets the width of the list in cells.
     pub fn with_width(mut self, width: u16) -> Self {
         self.width = width;
         self
     }
 
+    /// Registers a callback invoked when an item is selected (Enter or click).
     pub fn on_select(mut self, f: impl FnMut(&T) + 'static) -> Self {
         self.on_select = Some(Box::new(f));
         self
     }
 
+    /// Returns the index of the currently selected item.
     pub fn selected_index(&self) -> usize {
         self.selected
     }
 
+    /// Returns a reference to the currently selected item, or `None`.
     pub fn get_selected(&self) -> Option<&T> {
         self.items.get(self.selected)
     }
 
+    /// Returns the total number of items.
     pub fn len(&self) -> usize {
         self.items.len()
     }
 
+    /// Returns `(start, end)` indices of the currently visible items.
     pub fn viewport(&self) -> (usize, usize) {
         let start = self.offset;
         let end = (self.offset + self.visible_count).min(self.items.len());
         (start, end)
     }
 
+    /// Scrolls to and selects the item at `index`.
     pub fn scroll_to(&mut self, index: usize) {
         if index >= self.items.len() {
             return;
@@ -79,6 +94,7 @@ impl<T: Clone + ToString> List<T> {
         }
     }
 
+    /// Returns a `ScrollState` reflecting the current scroll position.
     pub fn scroll_state(&self) -> ScrollState {
         ScrollState {
             offset: self.offset,
@@ -87,10 +103,12 @@ impl<T: Clone + ToString> List<T> {
         }
     }
 
+    /// Sets how many items are visible at once.
     pub fn set_visible_count(&mut self, count: usize) {
         self.visible_count = count;
     }
 
+    /// Renders the list into a `Plane` within the given `area`.
     pub fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
@@ -136,6 +154,7 @@ impl<T: Clone + ToString> List<T> {
         plane
     }
 
+    /// Handles a mouse event. Returns `true` if consumed.
     pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
         if col >= self.width || row >= self.visible_count as u16 {
             return false;
@@ -164,6 +183,7 @@ impl<T: Clone + ToString> List<T> {
         }
     }
 
+    /// Handles a key event. Returns `true` if consumed.
     pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
         if key.kind != KeyEventKind::Press {

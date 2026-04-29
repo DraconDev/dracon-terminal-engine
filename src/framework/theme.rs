@@ -1,25 +1,42 @@
 use crate::compositor::Color;
 
+/// A color scheme defining the visual appearance of the terminal UI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Theme {
+    /// The theme's display name.
     pub name: &'static str,
+    /// Background color.
     pub bg: Color,
+    /// Foreground (text) color.
     pub fg: Color,
+    /// Accent color for highlights and emphasis.
     pub accent: Color,
+    /// Selection background color.
     pub selection_bg: Color,
+    /// Selection foreground (text) color.
     pub selection_fg: Color,
+    /// Border color.
     pub border: Color,
+    /// Scrollbar track color.
     pub scrollbar_track: Color,
+    /// Scrollbar thumb (handle) color.
     pub scrollbar_thumb: Color,
+    /// Background color for hoverable/interactive elements.
     pub hover_bg: Color,
+    /// Background color for active/pressed elements.
     pub active_bg: Color,
+    /// Foreground color for inactive/disabled elements.
     pub inactive_fg: Color,
+    /// Input field background color.
     pub input_bg: Color,
+    /// Input field foreground (text) color.
     pub input_fg: Color,
+    /// Width of scrollbars in pixels.
     pub scrollbar_width: u16,
 }
 
 impl Theme {
+    /// Creates a dark theme with muted colors suitable for low-light environments.
     pub fn dark() -> Self {
         Self {
             name: "dark",
@@ -40,6 +57,7 @@ impl Theme {
         }
     }
 
+    /// Creates a light theme with high contrast suitable for bright environments.
     pub fn light() -> Self {
         Self {
             name: "light",
@@ -60,6 +78,7 @@ impl Theme {
         }
     }
 
+    /// Creates a cyberpunk-themed dark theme with neon green and pink accents.
     pub fn cyberpunk() -> Self {
         Self {
             name: "cyberpunk",

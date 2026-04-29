@@ -25,9 +25,11 @@ pub mod app;
 pub mod dragdrop;
 pub mod hitzone;
 pub mod scroll;
+/// The theme module.
 pub mod theme;
 pub mod widgets;
 
+/// The prelude module.
 pub mod prelude {
     pub use crate::framework::{
         app::{App, Ctx},

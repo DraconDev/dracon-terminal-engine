@@ -1,5 +1,13 @@
+//! Kitty keyboard protocol parser.
+//!
+//! Parses the Kitty keyboard protocol extension sequences.
+
 use super::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
+/// Parses a Kitty keyboard event from its component parts.
+///
+/// Returns `Some(Event::Key(...))` on success, or `None` if the parts
+/// do not represent a valid Kitty keyboard sequence.
 pub fn parse_kitty_keyboard(parts: &[&str]) -> Option<Event> {
     if parts.is_empty() {
         return None;

@@ -1,7 +1,9 @@
 use crate::compositor::plane::{Cell, Color, Plane, Styles};
 use std::io::{self, Write};
 
+/// Composites multiple planes into a single render target.
 pub struct Compositor {
+    /// The planes to composite, ordered by z-index.
     pub planes: Vec<Plane>,
     width: u16,
     height: u16,
@@ -9,6 +11,7 @@ pub struct Compositor {
 }
 
 impl Compositor {
+    /// Creates a new Compositor with the given dimensions.
     pub fn new(width: u16, height: u16) -> Self {
         Self {
             planes: Vec::new(),
@@ -18,9 +21,11 @@ impl Compositor {
         }
     }
 
+    /// Advances the compositor state by one frame.
     pub fn tick(&mut self, _delta: f32) {
     }
 
+    /// Returns the topmost visible plane at the given coordinates, if any.
     pub fn hit_test(&self, x: u16, y: u16) -> Option<&Plane> {
         for plane in self.planes.iter().rev() {
             if !plane.visible {
@@ -42,15 +47,18 @@ impl Compositor {
         None
     }
 
+    /// Returns the width and height of the compositor.
     pub fn size(&self) -> (u16, u16) {
         (self.width, self.height)
     }
 
+    /// Adds a plane to the compositor, inserting it at the correct z-index position.
     pub fn add_plane(&mut self, plane: Plane) {
         self.planes.push(plane);
         self.sort_planes();
     }
 
+    /// Draws text at the specified position with the given colors and style.
     pub fn draw_text(&mut self, text: &str, x: u16, y: u16, fg: Color, bg: Color, style: Styles) {
         let mut plane = Plane::new(0, text.len() as u16, 1);
         plane.x = x;
@@ -72,6 +80,7 @@ impl Compositor {
         self.add_plane(plane);
     }
 
+    /// Draws a filled rectangle at the specified position with the given character, colors, and style.
     pub fn draw_rect(
         &mut self,
         x: u16,
@@ -103,6 +112,7 @@ impl Compositor {
         self.add_plane(plane);
     }
 
+    /// Clears the terminal and resets the internal frame buffer.
     pub fn force_clear(&mut self) {
         if let Some(base) = self.planes.first_mut() {
             base.clear();
@@ -112,6 +122,7 @@ impl Compositor {
         }
     }
 
+    /// Draws a ratatui Line at the specified position.
     pub fn draw_ratatui_line(&mut self, line: &ratatui::text::Line, x: u16, y: u16) {
         let total_len: usize = line.spans.iter().map(|s| s.content.len()).sum();
         if total_len == 0 {
@@ -167,6 +178,7 @@ impl Compositor {
         self.add_plane(plane);
     }
 
+    /// Resizes the compositor to the given dimensions, resetting the frame buffer.
     pub fn resize(&mut self, width: u16, height: u16) {
         self.width = width;
         self.height = height;
@@ -177,6 +189,7 @@ impl Compositor {
         self.planes.sort_by(|a, b| a.z_index.cmp(&b.z_index));
     }
 
+    /// Renders the compositor state to the given writer, outputting terminal escape codes.
     pub fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()> {
         let mut final_buffer = vec![
             Cell {
@@ -378,6 +391,7 @@ fn merge_braille(c1: char, c2: char) -> char {
     std::char::from_u32(0x2800 | (b1 | b2)).unwrap_or(c1)
 }
 
+/// Converts a ratatui Color into a compositor Color.
 pub fn map_color(c: ratatui::style::Color) -> Color {
     use ratatui::style::Color as RColor;
     match c {

@@ -1,52 +1,95 @@
 use crate::utils::{FileCategory, IconMode};
 use serde::{Deserialize, Serialize};
 
+/// Represents an icon type for files, folders, and UI elements.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Icon {
+    /// Folder icon for directories.
     Folder,
+    /// Generic file icon.
     File,
+    /// Star/favorite icon.
     Star,
+    /// Storage device icon.
     Storage,
+    /// Remote/network icon.
     Remote,
+    /// Git version control icon.
     Git,
+    /// Archive/compressed file icon.
     Archive,
+    /// Image file icon.
     Image,
+    /// Audio file icon.
     Audio,
+    /// Video file icon.
     Video,
+    /// Script/executable file icon.
     Script,
+    /// Document file icon.
     Document,
+    /// Search icon.
     Search,
+    /// Split/pane icon.
     Split,
+    /// Single/pane icon.
     Single,
+    /// Back/navigation icon.
     Back,
+    /// Forward/navigation icon.
     Forward,
+    /// Burger/hamburger menu icon.
     Burger,
+    /// Refresh icon.
     Refresh,
+    /// Monitor/display icon.
     Monitor,
+    /// Settings/gear icon.
     Settings,
+    /// Trash/delete icon.
     Trash,
+    /// Home directory icon.
     Home,
+    /// Downloads directory icon.
     Downloads,
+    /// Documents directory icon.
     Documents,
+    /// Pictures directory icon.
     Pictures,
+    /// Music directory icon.
     Music,
+    /// Videos directory icon.
     Videos,
+    /// Rust source file icon.
     Rust,
+    /// JSON file icon.
     Json,
+    /// TOML file icon.
     Toml,
+    /// Markdown file icon.
     Markdown,
+    /// Select all icon.
     SelectAll,
+    /// Toggle hidden files icon.
     ToggleHidden,
+    /// Set wallpaper icon.
     SetWallpaper,
+    /// Paste icon.
     Paste,
+    /// Cut icon.
     Cut,
+    /// Copy icon.
     Copy,
+    /// Duplicate icon.
     Duplicate,
+    /// Delete icon.
     Delete,
+    /// Rename icon.
     Rename,
 }
 
 impl Icon {
+    /// Returns the appropriate icon string for a file path based on its category and type.
     pub fn get_for_path(
         path: &std::path::Path,
         category: FileCategory,
@@ -98,6 +141,7 @@ impl Icon {
         icon.get(icon_mode)
     }
 
+    /// Returns the icon string for this icon in the specified display mode.
     pub fn get(&self, mode: IconMode) -> &'static str {
         match mode {
             IconMode::Nerd => match self {
