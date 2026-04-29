@@ -7,17 +7,16 @@
 //!
 //! ```no_run
 //! use dracon_terminal_engine::framework::prelude::*;
+//! use ratatui::layout::Rect;
 //!
-//! App::new()
+//! App::new().unwrap()
 //!     .title("My App")
 //!     .fps(30)
 //!     .run(|ctx| {
-//!         ctx.split_h(|left, right| {
-//!             left.list(vec!["Item 1", "Item 2", "Item 3"], |item| {
-//!                 println!("selected: {item}");
-//!             });
-//!             right.text("Hello, world!");
-//!         });
+//!         let (w, h) = ctx.compositor().size();
+//!         let area = Rect::new(0, 0, w, h);
+//!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
+//!         ctx.add_plane(list.render(area));
 //!     });
 //! ```
 

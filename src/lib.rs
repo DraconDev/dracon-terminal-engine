@@ -27,29 +27,26 @@
 //! ## Example
 //!
 //! ```no_run
-//! use dracon_terminal_engine::core::terminal::Terminal;
-//! use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+//! use dracon_terminal_engine::framework::prelude::*;
+//! use ratatui::layout::Rect;
 //!
-//! let mut terminal = Terminal::new(std::io::stdout()).unwrap();
-//! let mut hud = Plane::new(0, 40, 10);
-//! hud.set_z_index(50);
-//!
-//! let cell = Cell {
-//!     char: ' ',
-//!     fg: Color::Rgb(0, 255, 136),
-//!     bg: Color::Rgb(0, 30, 20),
-//!     style: Styles::empty(),
-//!     transparent: false,
-//!     skip: false,
-//! };
-//! hud.fill(cell);
-//! hud.put_str(1, 1, "SYSTEM ONLINE");
-//! terminal.write_all(hud.render().as_bytes()).unwrap();
+//! App::new().unwrap()
+//!     .title("My App")
+//!     .fps(30)
+//!     .on_tick(|ctx, tick| {
+//!         // Called every 250ms by default
+//!     })
+//!     .run(|ctx| {
+//!         let (w, h) = ctx.compositor().size();
+//!         let area = Rect::new(0, 0, w, h);
+//!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
+//!         ctx.add_plane(list.render(area));
+//!     });
 //! ```
 //!
 //! ## Version
 //!
-//! v19.2.2
+//! v26.0.1
 
 #[doc = "Terminal backend (POSIX tty ioctls, raw mode setup)."]
 pub mod backend;
