@@ -1,4 +1,8 @@
 //! Scroll state and container widgets.
+//!
+//! Provides [`ScrollState`] for tracking scroll position, content height,
+//! and viewport height. [`ScrollContainer`] wraps content and renders a
+//! scrollbar with customizable colors.
 
 use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
@@ -79,6 +83,8 @@ pub struct ScrollContainer {
     state: ScrollState,
     scrollbar_visible: bool,
     scrollbar_width: u16,
+    scrollbar_track: Color,
+    scrollbar_thumb: Color,
 }
 
 impl ScrollContainer {
@@ -88,6 +94,8 @@ impl ScrollContainer {
             state: ScrollState::default(),
             scrollbar_visible: true,
             scrollbar_width: 1,
+            scrollbar_track: Color::Rgb(30, 30, 40),
+            scrollbar_thumb: Color::Rgb(80, 80, 100),
         }
     }
 
@@ -189,7 +197,7 @@ impl ScrollContainer {
 
         let mut plane = Plane::new(0, self.scrollbar_width as u16, area.height);
 
-        if total <= visible {
+        if total <= visible || !self.scrollbar_visible {
             return plane;
         }
 
@@ -215,7 +223,11 @@ impl ScrollContainer {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char,
-                    fg: Color::Rgb(100, 100, 100),
+                    fg: if y >= thumb_pos && y < thumb_pos + thumb_len {
+                        self.scrollbar_thumb
+                    } else {
+                        self.scrollbar_track
+                    },
                     bg: Color::Reset,
                     style: Styles::empty(),
                     transparent: false,
