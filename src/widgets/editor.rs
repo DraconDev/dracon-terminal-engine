@@ -1,6 +1,7 @@
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
+use crate::utils::{get_clipboard_text, set_clipboard_text};
 use crate::utils::highlight_code;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -9,7 +10,39 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
+use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
+use std::path::PathBuf;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum EditorMode {
+    Normal,
+    Search,
+    Replace,
+    GotoLine,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct EditorConfig {
+    tab_size: u8,
+    show_line_numbers: bool,
+    word_wrap: bool,
+    show_indent_guides: bool,
+    show_status_bar: bool,
+}
+
+impl Default for EditorConfig {
+    fn default() -> Self {
+        Self {
+            tab_size: 4,
+            show_line_numbers: true,
+            word_wrap: false,
+            show_indent_guides: false,
+            show_status_bar: true,
+        }
+    }
+}
 
 /// A tactical multiline text editor widget for quick edits.
 #[derive(Clone, Debug)]
@@ -58,6 +91,20 @@ pub struct TextEditor {
     pub highlighted_cache: RefCell<Vec<Line<'static>>>,
     /// First line number that needs re-highlighting (None = all valid).
     pub first_invalid_line: RefCell<Option<usize>>,
+    /// Path to the currently open file.
+    pub file_path: Option<PathBuf>,
+    /// Whether to show the status bar at the bottom.
+    pub show_status_bar: bool,
+    /// Whether to show indent guides (vertical lines at indentation).
+    pub show_indent_guides: bool,
+    /// Additional cursor positions for multi-cursor editing (row, col).
+    extra_cursors: Vec<(usize, usize)>,
+    /// Current editor mode for search/goto UI.
+    mode: EditorMode,
+    /// Input buffer for search/goto dialogs.
+    mode_input: String,
+    /// Whether we are searching (false) or replacing (true).
+    is_replacing: bool,
 }
 
 impl Default for TextEditor {
@@ -88,11 +135,54 @@ impl Default for TextEditor {
             wrap: false,
             highlighted_cache: RefCell::new(Vec::new()),
             first_invalid_line: RefCell::new(Some(0)),
+            file_path: None,
+            show_status_bar: true,
+            show_indent_guides: false,
+            extra_cursors: Vec::new(),
+            mode: EditorMode::Normal,
+            mode_input: String::new(),
+            is_replacing: false,
         }
     }
 }
 
 impl TextEditor {
+    /// Adds an additional cursor at the given position.
+    /// Ignores duplicates and the primary cursor position.
+    pub fn add_cursor(&mut self, row: usize, col: usize) {
+        if (row, col) != (self.cursor_row, self.cursor_col) {
+            if !self.extra_cursors.contains(&(row, col)) {
+                self.extra_cursors.push((row, col));
+            }
+        }
+    }
+
+    /// Removes the extra cursor at the given position, if it exists.
+    pub fn remove_cursor(&mut self, row: usize, col: usize) {
+        self.extra_cursors.retain(|&(r, c)| !(r == row && c == col));
+    }
+
+    /// Removes all extra cursors, leaving only the primary cursor.
+    pub fn clear_extra_cursors(&mut self) {
+        self.extra_cursors.clear();
+    }
+
+    /// Returns the number of extra cursors (not including the primary cursor).
+    pub fn extra_cursor_count(&self) -> usize {
+        self.extra_cursors.len()
+    }
+
+    /// Returns a reference to the list of extra cursor positions.
+    pub fn get_extra_cursors(&self) -> &Vec<(usize, usize)> {
+        &self.extra_cursors
+    }
+
+    #[allow(dead_code)]
+    fn move_cursor(&mut self, row: usize, col: usize) {
+        self.cursor_row = row;
+        self.cursor_col = col;
+    }
+
     fn finish_nav_move(&mut self, has_shift: bool, area: Rect) {
         if has_shift {
             self.update_selection_end();
@@ -134,13 +224,23 @@ impl TextEditor {
         self.filter_query = query.to_string();
 
         if !self.filter_query.is_empty() {
+            let use_regex = Regex::new(&format!("(?i){}", query)).is_ok();
             self.filtered_indices = self
                 .lines
                 .iter()
                 .enumerate()
                 .filter(|(_, line)| {
-                    line.to_lowercase()
-                        .contains(&self.filter_query.to_lowercase())
+                    if use_regex {
+                        if let Ok(re) = Regex::new(&format!("(?i){}", query)) {
+                            re.is_match(line)
+                        } else {
+                            line.to_lowercase()
+                                .contains(&self.filter_query.to_lowercase())
+                        }
+                    } else {
+                        line.to_lowercase()
+                            .contains(&self.filter_query.to_lowercase())
+                    }
                 })
                 .map(|(i, _)| i)
                 .collect();
@@ -243,6 +343,189 @@ impl TextEditor {
         }
     }
 
+    /// Opens a file and returns a new `TextEditor` with its contents.
+    pub fn open(path: &PathBuf) -> std::io::Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        let mut editor = Self::with_content(&content);
+        editor.file_path = Some(path.clone());
+        editor.modified = false;
+        if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+            editor.language = ext.to_string();
+        }
+        let _ = editor.load_undo_stack();
+        Ok(editor)
+    }
+
+    /// Saves the editor content to the current file path.
+    /// Also saves the undo stack to `.filename.undo`.
+    /// Returns an error if no file path is set.
+    pub fn save(&mut self) -> std::io::Result<()> {
+        if let Some(ref path) = self.file_path {
+            std::fs::write(path, self.get_content())?;
+            self.save_undo_stack()?;
+            self.modified = false;
+            Ok(())
+        } else {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "No file path set. Use save_as() instead.",
+            ))
+        }
+    }
+
+    /// Saves the editor content to a new file path and sets it as the current path.
+    /// Also saves the undo stack to `.new_filename.undo`.
+    pub fn save_as(&mut self, path: &PathBuf) -> std::io::Result<()> {
+        std::fs::write(path, self.get_content())?;
+        self.file_path = Some(path.clone());
+        self.save_undo_stack()?;
+        self.modified = false;
+        Ok(())
+    }
+
+    /// Returns the current file path, if set.
+    pub fn file_path(&self) -> Option<&PathBuf> {
+        self.file_path.as_ref()
+    }
+
+    fn undo_path(&self) -> Option<PathBuf> {
+        self.file_path.as_ref().map(|p| {
+            let mut undo_path = p.clone();
+            let stem = undo_path.file_stem().unwrap_or_default().to_string_lossy();
+            let ext = undo_path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+            let parent = undo_path.parent().unwrap_or(std::path::Path::new("."));
+            let undo_name = format!(".{}.undo", stem);
+            if ext.is_empty() {
+                undo_path = parent.join(&undo_name);
+            } else {
+                undo_path = parent.join(format!(".{}.{}", stem, ext));
+                undo_path.set_extension("undo");
+            }
+            undo_path
+        })
+    }
+
+    fn config_path(&self) -> Option<PathBuf> {
+        self.file_path.as_ref().map(|p| {
+            let mut cfg_path = p.clone();
+            let stem = cfg_path.file_stem().unwrap_or_default().to_string_lossy();
+            let ext = cfg_path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+            let parent = cfg_path.parent().unwrap_or(std::path::Path::new("."));
+            if ext.is_empty() {
+                cfg_path = parent.join(format!(".{}.dte.json", stem));
+            } else {
+                cfg_path = parent.join(format!(".{}.{}", stem, ext));
+                cfg_path.set_extension("dte.json");
+            }
+            cfg_path
+        })
+    }
+
+    /// Loads editor settings from a `.filename.dte.json` config file.
+    pub fn load_config(&mut self) -> std::io::Result<()> {
+        if let Some(cfg_path) = self.config_path() {
+            if cfg_path.exists() {
+                let content = std::fs::read_to_string(cfg_path)?;
+                if let Ok(config) = serde_json::from_str::<EditorConfig>(&content) {
+                    self.show_line_numbers = config.show_line_numbers;
+                    self.wrap = config.word_wrap;
+                    self.show_indent_guides = config.show_indent_guides;
+                    self.show_status_bar = config.show_status_bar;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Saves editor settings to a `.filename.dte.json` config file.
+    pub fn save_config(&self) -> std::io::Result<()> {
+        if let Some(cfg_path) = self.config_path() {
+            let config = EditorConfig {
+                tab_size: 4,
+                show_line_numbers: self.show_line_numbers,
+                word_wrap: self.wrap,
+                show_indent_guides: self.show_indent_guides,
+                show_status_bar: self.show_status_bar,
+            };
+            let content = serde_json::to_string_pretty(&config).unwrap_or_default();
+            std::fs::write(cfg_path, content)?;
+        }
+        Ok(())
+    }
+
+    /// Saves the undo stack to a `.filename.undo` file alongside the original file.
+    pub fn save_undo_stack(&self) -> std::io::Result<()> {
+        if let Some(undo_path) = self.undo_path() {
+            let encoded: Vec<String> = self.history.iter()
+                .map(|lines| lines.join("\n"))
+                .collect();
+            std::fs::write(undo_path, encoded.join("\n---\n"))?;
+        }
+        Ok(())
+    }
+
+    /// Loads the undo stack from a `.filename.undo` file.
+    pub fn load_undo_stack(&mut self) -> std::io::Result<()> {
+        if let Some(undo_path) = self.undo_path() {
+            if undo_path.exists() {
+                let content = std::fs::read_to_string(undo_path)?;
+                self.history = content
+                    .split("\n---\n")
+                    .map(|chunk| chunk.lines().map(|l| l.to_string()).collect())
+                    .collect();
+                if self.history.len() > 100 {
+                    self.history = self.history.split_off(self.history.len() - 100);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Returns the filename (not full path) of the current file, or "Untitled".
+    pub fn filename(&self) -> String {
+        self.file_path
+            .as_ref()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .unwrap_or("Untitled")
+            .to_string()
+    }
+
+    /// Jumps to a specific line number (1-indexed).
+    pub fn goto_line(&mut self, line: usize, area: Rect) {
+        if line > 0 && line <= self.lines.len() {
+            self.cursor_row = line - 1;
+            self.cursor_col = 0;
+            self.ensure_cursor_visible(area);
+        }
+    }
+
+    /// Enables or disables line number rendering.
+    pub fn with_show_line_numbers(&mut self, show: bool) {
+        self.show_line_numbers = show;
+    }
+
+    /// Enables or disables word wrapping.
+    pub fn with_word_wrap(&mut self, wrap: bool) {
+        self.wrap = wrap;
+    }
+
+    /// Enables or disables the status bar.
+    pub fn with_status_bar(&mut self, show: bool) {
+        self.show_status_bar = show;
+    }
+
+    /// Enables or disables indent guide rendering.
+    pub fn with_indent_guides(&mut self, show: bool) {
+        self.show_indent_guides = show;
+    }
+
+    /// Sets the language for syntax highlighting (e.g., "rust", "python").
+    pub fn with_language(&mut self, language: &str) {
+        self.language = language.to_string();
+        self.invalidate_from(0);
+    }
+
     /// Returns the full editor content joined by newlines.
     pub fn get_content(&self) -> String {
         self.lines.join("\n")
@@ -253,8 +536,14 @@ impl TextEditor {
         if find.is_empty() {
             return;
         }
-        for line in &mut self.lines {
-            *line = line.replace(find, replace);
+        if let Ok(re) = Regex::new(find) {
+            for line in &mut self.lines {
+                *line = re.replace_all(line, replace).to_string();
+            }
+        } else {
+            for line in &mut self.lines {
+                *line = line.replace(find, replace);
+            }
         }
         self.modified = true;
         self.invalidate_from(0);
@@ -269,13 +558,30 @@ impl TextEditor {
         let start_row = self.cursor_row;
         let start_col = self.cursor_col;
 
+        let use_regex = Regex::new(find).is_ok();
+
         for r in 0..self.lines.len() {
             let row = (start_row + r) % self.lines.len();
             let line = &self.lines[row];
             let search_from = if r == 0 { start_col } else { 0 };
 
             if search_from < line.len() {
-                if let Some(col) = line[search_from..].find(find) {
+                if use_regex {
+                    if let Ok(re) = Regex::new(find) {
+                        if let Some(mat) = re.find(&line[search_from..]) {
+                            let actual_col = search_from + mat.start();
+                            let mut new_line = line.clone();
+                            new_line.replace_range(actual_col..actual_col + mat.len(), replace);
+                            self.lines[row] = new_line;
+
+                            self.cursor_row = row;
+                            self.cursor_col = actual_col + replace.len();
+                            self.modified = true;
+                            self.invalidate_from(0);
+                            return true;
+                        }
+                    }
+                } else if let Some(col) = line[search_from..].find(find) {
                     let actual_col = search_from + col;
                     let mut new_line = line.clone();
                     new_line.replace_range(actual_col..actual_col + find.len(), replace);
@@ -381,6 +687,58 @@ impl TextEditor {
             return false;
         }
 
+        // Handle search/goto/replace mode
+        if self.mode != EditorMode::Normal {
+            if let Event::Key(key) = event {
+                if key.kind != KeyEventKind::Press {
+                    return false;
+                }
+                match key.code {
+                    KeyCode::Esc => {
+                        self.mode = EditorMode::Normal;
+                        self.mode_input.clear();
+                        return true;
+                    }
+                    KeyCode::Enter => {
+                        match self.mode {
+                            EditorMode::Search => {
+                                let query = self.mode_input.clone();
+                                if !query.is_empty() {
+                                    self.set_filter(&query);
+                                }
+                            }
+                            EditorMode::Replace => {
+                                let query = self.mode_input.clone();
+                                if !query.is_empty() {
+                                    self.set_filter(&query);
+                                }
+                            }
+                            EditorMode::GotoLine => {
+                                let line_str = self.mode_input.clone();
+                                if let Ok(line) = line_str.parse::<usize>() {
+                                    self.goto_line(line, area);
+                                }
+                            }
+                            EditorMode::Normal => {}
+                        }
+                        self.mode = EditorMode::Normal;
+                        self.mode_input.clear();
+                        return true;
+                    }
+                    KeyCode::Backspace => {
+                        self.mode_input.pop();
+                        return true;
+                    }
+                    KeyCode::Char(c) if !key.modifiers.contains(KeyModifiers::CONTROL) && !key.modifiers.contains(KeyModifiers::ALT) => {
+                        self.mode_input.push(c);
+                        return true;
+                    }
+                    _ => {}
+                }
+            }
+            return false;
+        }
+
         match event {
             Event::Key(key) => {
                 if key.kind != KeyEventKind::Press {
@@ -462,6 +820,48 @@ impl TextEditor {
                     KeyCode::Char('a') if has_control => {
                         self.select_all();
                         self.ensure_cursor_visible(area);
+                        return true;
+                    }
+                    KeyCode::Char('c') if has_control => {
+                        if let Some(text) = self.get_selected_text() {
+                            set_clipboard_text(&text);
+                        }
+                        return true;
+                    }
+                    KeyCode::Char('x') if has_control => {
+                        if let Some(text) = self.get_selected_text() {
+                            set_clipboard_text(&text);
+                            self.push_history();
+                            self.delete_selection();
+                            self.modified = true;
+                            self.ensure_cursor_visible(area);
+                        }
+                        return true;
+                    }
+                    KeyCode::Char('v') if has_control => {
+                        if let Some(text) = get_clipboard_text() {
+                            self.push_history();
+                            self.insert_string(&text);
+                            self.modified = true;
+                            self.ensure_cursor_visible(area);
+                        }
+                        return true;
+                    }
+                    KeyCode::Char('f') if has_control => {
+                        self.mode = EditorMode::Search;
+                        self.mode_input.clear();
+                        self.is_replacing = false;
+                        return true;
+                    }
+                    KeyCode::Char('h') if has_control => {
+                        self.mode = EditorMode::Replace;
+                        self.mode_input.clear();
+                        self.is_replacing = true;
+                        return true;
+                    }
+                    KeyCode::Char('g') if has_control => {
+                        self.mode = EditorMode::GotoLine;
+                        self.mode_input.clear();
                         return true;
                     }
                     KeyCode::Char('d') if has_control => {
@@ -608,8 +1008,25 @@ impl TextEditor {
                         }
                         self.nav_move(has_shift, area, |s| s.move_cursor_down());
                     }
-
-                    KeyCode::Home if has_control => {
+                    KeyCode::Char('j') if has_control && has_alt => {
+                        if self.cursor_row < self.lines.len() - 1 {
+                            self.add_cursor(self.cursor_row + 1, self.cursor_col);
+                            self.ensure_cursor_visible(area);
+                        }
+                        return true;
+                    }
+                    KeyCode::Char('k') if has_control && has_alt => {
+                        if self.cursor_row > 0 {
+                            self.add_cursor(self.cursor_row - 1, self.cursor_col);
+                            self.ensure_cursor_visible(area);
+                        }
+                        return true;
+                    }
+                    KeyCode::Char('d') if has_control && has_alt => {
+                        self.clear_extra_cursors();
+                        return true;
+                    }
+                    KeyCode::Char('d') if has_control => {
                         if has_shift {
                             self.maybe_start_selection();
                         }
@@ -1017,12 +1434,123 @@ impl TextEditor {
         if c == '\x1b' {
             return;
         }
-        self.ensure_valid_cursor_col();
-        let line = &mut self.lines[self.cursor_row];
-        line.insert(self.cursor_col, c);
-        self.cursor_col += c.len_utf8();
+
+        let all_cursors: Vec<(usize, usize)> = std::iter::once((self.cursor_row, self.cursor_col))
+            .chain(self.extra_cursors.iter().cloned())
+            .collect();
+
+        let pairs: &[(char, char)] = &[('(', ')'), ('[', ']'), ('{', '}')];
+        let _is_opening = pairs.iter().any(|&(o, _)| o == c);
+
+        let mut affected_rows: Vec<usize> = Vec::new();
+
+        for &(row, col) in &all_cursors {
+            let line = &mut self.lines[row];
+            let mut insert_col = col;
+            let mut inserted_pair = false;
+            for &(open, close) in pairs {
+                if c == open {
+                    line.insert(insert_col, c);
+                    insert_col += c.len_utf8();
+                    line.insert(insert_col, close);
+                    inserted_pair = true;
+                    break;
+                }
+            }
+            if !inserted_pair {
+                line.insert(insert_col, c);
+            }
+            if !affected_rows.contains(&row) {
+                affected_rows.push(row);
+            }
+        }
+
         self.modified = true;
-        self.invalidate_from(self.cursor_row);
+        for row in &affected_rows {
+            self.invalidate_from(*row);
+        }
+
+        if let Some(&(last_row, _)) = all_cursors.last() {
+            self.cursor_row = last_row;
+        }
+    }
+
+    fn find_matching_bracket(&self, row: usize, col: usize) -> Option<(usize, usize)> {
+        if row >= self.lines.len() {
+            return None;
+        }
+        let line = &self.lines[row];
+        if col >= line.len() {
+            return None;
+        }
+
+        let c = line.chars().nth(col)?;
+        let pairs: &[(char, char)] = &[('(', ')'), ('[', ']'), ('{', '}')];
+
+        for &(open, close) in pairs {
+            if c == open {
+                return self.find_closing_bracket(row, col, open, close);
+            } else if c == close {
+                return self.find_opening_bracket(row, col, open, close);
+            }
+        }
+        None
+    }
+
+    fn find_closing_bracket(&self, row: usize, col: usize, open: char, close: char) -> Option<(usize, usize)> {
+        let mut depth = 1;
+        let mut r = row;
+        let mut c = col + open.len_utf8();
+
+        while r < self.lines.len() {
+            let line = &self.lines[r];
+            while c < line.len() {
+                let ch = line.chars().nth(c)?;
+                if ch == open {
+                    depth += 1;
+                } else if ch == close {
+                    depth -= 1;
+                    if depth == 0 {
+                        return Some((r, c));
+                    }
+                }
+                c += ch.len_utf8();
+            }
+            r += 1;
+            c = 0;
+        }
+        None
+    }
+
+    fn find_opening_bracket(&self, row: usize, col: usize, open: char, close: char) -> Option<(usize, usize)> {
+        let mut depth = 1;
+        let mut r = row;
+        let mut c = col.saturating_sub(1);
+
+        while r < self.lines.len() {
+            let line = &self.lines[r];
+            while c > 0 {
+                let ch = line.chars().nth(c)?;
+                if ch == close {
+                    depth += 1;
+                } else if ch == open {
+                    depth -= 1;
+                    if depth == 0 {
+                        return Some((r, c));
+                    }
+                }
+                if c == 0 {
+                    break;
+                }
+                c -= 1;
+            }
+            if r == 0 {
+                break;
+            }
+            r -= 1;
+            c = self.lines[r].len();
+        }
+        None
     }
 
     /// Ensures the cursor column is valid (on a character boundary).
@@ -1596,7 +2124,8 @@ impl TextEditor {
 impl Widget for &TextEditor {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let gutter_w = self.gutter_width();
-        let scrollbar_w = if self.effective_len() > area.height as usize {
+        let status_bar_h: u16 = if self.show_status_bar && area.height >= 2 { 1 } else { 0 };
+        let scrollbar_w = if self.effective_len() > (area.height as usize).saturating_sub(status_bar_h as usize) {
             1
         } else {
             0
@@ -1607,7 +2136,7 @@ impl Widget for &TextEditor {
             area.y,
             area.width
                 .saturating_sub(gutter_w as u16 + scrollbar_w as u16),
-            area.height,
+            area.height.saturating_sub(status_bar_h),
         );
 
         let mut highlighted = {
@@ -1949,6 +2478,82 @@ impl Widget for &TextEditor {
                 StatefulWidget::render(sb, area, buf, &mut ss);
             }
 
+            // Render Status Bar for wrap mode
+            if status_bar_h > 0 {
+                let status_y = area.y + area.height - 1;
+                let status_style = Style::default()
+                    .bg(Color::Rgb(30, 30, 35))
+                    .fg(Color::Rgb(180, 180, 180));
+                let status_bg = Color::Rgb(30, 30, 35);
+
+                for x in area.x..area.x + area.width {
+                    if let Some(cell) = buf.cell_mut((x, status_y)) {
+                        cell.set_bg(status_bg);
+                        cell.set_fg(Color::Rgb(180, 180, 180));
+                        cell.set_symbol(" ");
+                    }
+                }
+
+                let pos_text = format!("Ln {} Col {}", self.cursor_row + 1, self.cursor_col + 1);
+                let filename_text = self.filename();
+                let modified_text = if self.modified { " *" } else { "" };
+                let lang_text = if !self.language.is_empty() {
+                    format!(" [{}]", self.language)
+                } else {
+                    String::new()
+                };
+
+                let right_text = format!("{}{}", modified_text, lang_text);
+
+                if self.mode == EditorMode::Search {
+                    let search_text = format!("Search: {}_", self.mode_input);
+                    let search_style = Style::default()
+                        .bg(Color::Rgb(40, 40, 20))
+                        .fg(Color::Rgb(255, 200, 100));
+                    buf.set_string(area.x, status_y, &search_text, search_style);
+                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                } else if self.mode == EditorMode::Replace {
+                    let replace_text = format!("Replace: {}_", self.mode_input);
+                    let replace_style = Style::default()
+                        .bg(Color::Rgb(40, 20, 20))
+                        .fg(Color::Rgb(255, 100, 100));
+                    buf.set_string(area.x, status_y, &replace_text, replace_style);
+                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                } else if self.mode == EditorMode::GotoLine {
+                    let goto_text = format!("Goto Line: {}_", self.mode_input);
+                    let goto_style = Style::default()
+                        .bg(Color::Rgb(20, 40, 40))
+                        .fg(Color::Rgb(100, 200, 255));
+                    buf.set_string(area.x, status_y, &goto_text, goto_style);
+                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                } else {
+                    buf.set_string(area.x, status_y, &pos_text, status_style);
+
+                    let right_width = right_text.len() as u16;
+                    let right_x = area.x + area.width.saturating_sub(right_width);
+                    buf.set_string(right_x, status_y, &right_text, status_style);
+
+                    if !filename_text.is_empty() && filename_text != "Untitled" {
+                        let total_left_len = pos_text.len() as u16;
+                        let total_right_len = right_text.len() as u16;
+                        let available = area.width.saturating_sub(total_left_len + total_right_len + 4);
+                        if available > filename_text.len() as u16 {
+                            let center_x = area.x + total_left_len + 2;
+                            let filename_style = Style::default()
+                                .bg(Color::Rgb(30, 30, 35))
+                                .fg(Color::Rgb(120, 200, 255));
+                            buf.set_string(center_x, status_y, &filename_text, filename_style);
+                        }
+                    }
+                }
+
+                if let Some(cell) = buf.cell_mut((area.x, status_y)) {
+                    cell.set_bg(status_bg);
+                    cell.set_fg(Color::Rgb(88, 166, 255));
+                    cell.set_symbol("●");
+                }
+            }
+
             return;
         }
 
@@ -2000,6 +2605,25 @@ impl Widget for &TextEditor {
                     "│",
                     sep_style,
                 );
+            }
+
+            // Render Indent Guides
+            if self.show_indent_guides {
+                let indent_width = 4;
+                let max_indent = (content_area.width as usize / indent_width).min(16);
+                for indent_level in 1..=max_indent {
+                    let indent_col = indent_level * indent_width;
+                    if indent_col > self.scroll_col {
+                        let visual_x = indent_col - self.scroll_col;
+                        if visual_x < content_area.width as usize {
+                            let guide_x = content_area.x + visual_x as u16;
+                            let guide_style = Style::default()
+                                .fg(Color::Rgb(50, 55, 65))
+                                .bg(line_bg);
+                            buf.set_string(guide_x, area.y + i as u16, "│", guide_style);
+                        }
+                    }
+                }
             }
 
             // Render Content
@@ -2079,6 +2703,21 @@ impl Widget for &TextEditor {
                     }
                 }
             }
+
+            // Apply Bracket Matching highlight
+            if let Some((match_row, match_col)) = self.find_matching_bracket(self.cursor_row, self.cursor_col) {
+                if real_line_idx == match_row {
+                    let visual_x = self.get_visual_x(match_row, match_col);
+                    if visual_x >= self.scroll_col && visual_x < self.scroll_col + content_area.width as usize {
+                        let cx = content_area.x + (visual_x - self.scroll_col) as u16;
+                        let cy = area.y + i as u16;
+                        if let Some(cell) = buf.cell_mut((cx, cy)) {
+                            cell.set_bg(Color::Rgb(255, 200, 0)); // Yellow bracket match
+                            cell.set_fg(Color::Black);
+                        }
+                    }
+                }
+            }
         }
 
         // Render Scrollbars
@@ -2091,6 +2730,82 @@ impl Widget for &TextEditor {
                 .position(self.scroll_row)
                 .viewport_content_length(area.height as usize);
             StatefulWidget::render(sb, area, buf, &mut ss);
+        }
+
+        // Render Status Bar
+        if status_bar_h > 0 {
+            let status_y = area.y + area.height - 1;
+            let status_style = Style::default()
+                .bg(Color::Rgb(30, 30, 35))
+                .fg(Color::Rgb(180, 180, 180));
+            let status_bg = Color::Rgb(30, 30, 35);
+
+            for x in area.x..area.x + area.width {
+                if let Some(cell) = buf.cell_mut((x, status_y)) {
+                    cell.set_bg(status_bg);
+                    cell.set_fg(Color::Rgb(180, 180, 180));
+                    cell.set_symbol(" ");
+                }
+            }
+
+            let pos_text = format!("Ln {} Col {}", self.cursor_row + 1, self.cursor_col + 1);
+            let filename_text = self.filename();
+            let modified_text = if self.modified { " *" } else { "" };
+            let lang_text = if !self.language.is_empty() {
+                format!(" [{}]", self.language)
+            } else {
+                String::new()
+            };
+
+            let right_text = format!("{}{}", modified_text, lang_text);
+
+            if self.mode == EditorMode::Search {
+                let search_text = format!("Search: {}_", self.mode_input);
+                let search_style = Style::default()
+                    .bg(Color::Rgb(40, 40, 20))
+                    .fg(Color::Rgb(255, 200, 100));
+                buf.set_string(area.x, status_y, &search_text, search_style);
+                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+            } else if self.mode == EditorMode::Replace {
+                let replace_text = format!("Replace: {}_", self.mode_input);
+                let replace_style = Style::default()
+                    .bg(Color::Rgb(40, 20, 20))
+                    .fg(Color::Rgb(255, 100, 100));
+                buf.set_string(area.x, status_y, &replace_text, replace_style);
+                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+            } else if self.mode == EditorMode::GotoLine {
+                let goto_text = format!("Goto Line: {}_", self.mode_input);
+                let goto_style = Style::default()
+                    .bg(Color::Rgb(20, 40, 40))
+                    .fg(Color::Rgb(100, 200, 255));
+                buf.set_string(area.x, status_y, &goto_text, goto_style);
+                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+            } else {
+                buf.set_string(area.x, status_y, &pos_text, status_style);
+
+                let right_width = right_text.width() as u16;
+                let right_x = area.x + area.width.saturating_sub(right_width);
+                buf.set_string(right_x, status_y, &right_text, status_style);
+
+                if !filename_text.is_empty() && filename_text != "Untitled" {
+                    let total_left_len = pos_text.len() as u16;
+                    let total_right_len = right_text.len() as u16;
+                    let available = area.width.saturating_sub(total_left_len + total_right_len + 4);
+                    if available > filename_text.len() as u16 {
+                        let center_x = area.x + total_left_len + 2;
+                        let filename_style = Style::default()
+                            .bg(Color::Rgb(30, 30, 35))
+                            .fg(Color::Rgb(120, 200, 255));
+                        buf.set_string(center_x, status_y, &filename_text, filename_style);
+                    }
+                }
+            }
+
+            if let Some(cell) = buf.cell_mut((area.x, status_y)) {
+                cell.set_bg(status_bg);
+                cell.set_fg(Color::Rgb(88, 166, 255));
+                cell.set_symbol("●");
+            }
         }
 
         // Render Cursor
