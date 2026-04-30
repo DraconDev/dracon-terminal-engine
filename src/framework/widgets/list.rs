@@ -5,12 +5,14 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A generic selectable list widget.
 ///
 /// Renders items with selection highlighting and provides keyboard/mouse navigation.
 pub struct List<T> {
+    id: WidgetId,
     items: Vec<T>,
     selected: usize,
     offset: usize,
@@ -19,12 +21,14 @@ pub struct List<T> {
     on_select: Option<Box<dyn FnMut(&T)>>,
     item_height: u16,
     width: u16,
+    area: std::cell::Cell<Rect>,
 }
 
 impl<T: Clone + ToString> List<T> {
     /// Creates a new `List` with the given items and default theme.
     pub fn new(items: Vec<T>) -> Self {
         Self {
+            id: WidgetId::default_id(),
             items,
             selected: 0,
             offset: 0,
@@ -33,6 +37,23 @@ impl<T: Clone + ToString> List<T> {
             on_select: None,
             item_height: 1,
             width: 40,
+            area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
+        }
+    }
+
+    /// Creates a new `List` with the given widget ID and items.
+    pub fn new_with_id(id: WidgetId, items: Vec<T>) -> Self {
+        Self {
+            id,
+            items,
+            selected: 0,
+            offset: 0,
+            visible_count: 10,
+            theme: Theme::default(),
+            on_select: None,
+            item_height: 1,
+            width: 40,
+            area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
         }
     }
 
@@ -108,9 +129,26 @@ impl<T: Clone + ToString> List<T> {
     pub fn set_visible_count(&mut self, count: usize) {
         self.visible_count = count;
     }
+}
 
-    /// Renders the list into a `Plane` within the given `area`.
-    pub fn render(&self, area: Rect) -> Plane {
+impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        10
+    }
+
+    fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
@@ -155,37 +193,7 @@ impl<T: Clone + ToString> List<T> {
         plane
     }
 
-    /// Handles a mouse event. Returns `true` if consumed.
-    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
-        if col >= self.width || row >= self.visible_count as u16 {
-            return false;
-        }
-        let idx = self.offset + row as usize;
-        if idx >= self.items.len() {
-            return false;
-        }
-        match kind {
-            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                self.selected = idx;
-                if let Some(f) = self.on_select.as_mut() {
-                    f(&self.items[idx]);
-                }
-                true
-            }
-            crate::input::event::MouseEventKind::ScrollDown => {
-                self.offset = (self.offset + 1).min(self.items.len().saturating_sub(self.visible_count));
-                true
-            }
-            crate::input::event::MouseEventKind::ScrollUp => {
-                self.offset = self.offset.saturating_sub(1);
-                true
-            }
-            _ => false,
-        }
-    }
-
-    /// Handles a key event. Returns `true` if consumed.
-    pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
         if key.kind != KeyEventKind::Press {
             return false;
@@ -235,6 +243,34 @@ impl<T: Clone + ToString> List<T> {
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.items[self.selected]);
                 }
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+        if col >= self.width || row >= self.visible_count as u16 {
+            return false;
+        }
+        let idx = self.offset + row as usize;
+        if idx >= self.items.len() {
+            return false;
+        }
+        match kind {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+                self.selected = idx;
+                if let Some(f) = self.on_select.as_mut() {
+                    f(&self.items[idx]);
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::ScrollDown => {
+                self.offset = (self.offset + 1).min(self.items.len().saturating_sub(self.visible_count));
+                true
+            }
+            crate::input::event::MouseEventKind::ScrollUp => {
+                self.offset = self.offset.saturating_sub(1);
                 true
             }
             _ => false,

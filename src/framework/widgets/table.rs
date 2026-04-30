@@ -1,8 +1,11 @@
 //! Sortable, selectable table widget with header and row hit zones.
 
+use std::cell::Cell;
+
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A column definition for a `Table`.
@@ -22,6 +25,7 @@ pub struct TableRow<T> {
 
 /// A sortable, selectable table with header and row hit zones.
 pub struct Table<T> {
+    id: WidgetId,
     columns: Vec<Column>,
     rows: Vec<TableRow<T>>,
     selected: usize,
@@ -29,12 +33,14 @@ pub struct Table<T> {
     visible_count: usize,
     theme: Theme,
     on_select: Option<Box<dyn FnMut(&T)>>,
+    area: Cell<Rect>,
 }
 
 impl<T: Clone + ToString> Table<T> {
     /// Creates a new `Table` with the given column definitions.
     pub fn new(columns: Vec<Column>) -> Self {
         Self {
+            id: WidgetId::default_id(),
             columns,
             rows: Vec::new(),
             selected: 0,
@@ -42,6 +48,22 @@ impl<T: Clone + ToString> Table<T> {
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
+            area: Cell::new(Rect::new(0, 0, 80, 20)),
+        }
+    }
+
+    /// Creates a new `Table` with the given widget ID and column definitions.
+    pub fn new_with_id(id: WidgetId, columns: Vec<Column>) -> Self {
+        Self {
+            id,
+            columns,
+            rows: Vec::new(),
+            selected: 0,
+            offset: 0,
+            visible_count: 10,
+            theme: Theme::default(),
+            on_select: None,
+            area: Cell::new(Rect::new(0, 0, 80, 20)),
         }
     }
 
@@ -115,22 +137,34 @@ impl<T: Clone + ToString> Table<T> {
     fn cell_text(&self, row: &TableRow<T>, _col: usize) -> String {
         row.data.to_string()
     }
+}
 
-    /// Renders the table into a `Plane` and returns `(plane, header_zones, row_zones)`.
-    ///
-    /// Header hit zones have `id = column_index`. Row hit zones have `id = row_index`.
-    pub fn render(&self, area: Rect) -> (Plane, Vec<HitZone<usize>>, Vec<HitZone<usize>>) {
+impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        10
+    }
+
+    fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let mut header_zones = Vec::new();
-        let mut row_zones = Vec::new();
         let row_height: u16 = 1;
-
         let mut x: u16 = 0;
+
         for (i, col) in self.columns.iter().enumerate() {
             let w = col.width.min(area.width.saturating_sub(x));
-            header_zones.push(HitZone::new(i, x, area.y, w, 1));
 
             for col_idx in 0..w {
                 let idx = col_idx as usize;
@@ -153,6 +187,7 @@ impl<T: Clone + ToString> Table<T> {
             }
 
             x += w;
+            let _ = i;
         }
 
         let visible_rows: Vec<_> = self.rows.iter()
@@ -167,10 +202,9 @@ impl<T: Clone + ToString> Table<T> {
             let fg = if is_selected { self.theme.selection_fg } else { self.theme.fg };
 
             let y_off = 1u16 + i as u16;
-                x = 0;
             for (j, col) in self.columns.iter().enumerate() {
                 let w = col.width.min(area.width.saturating_sub(x));
-                row_zones.push(HitZone::new(self.offset + i, x, area.y + y_off, w, row_height));
+                let _hit_zone = HitZone::new(self.offset + i, x, area.y + y_off, w, row_height);
 
                 for col_idx in 0..w {
                     let idx = y as usize * area.width as usize + x as usize + col_idx as usize;
@@ -193,53 +227,14 @@ impl<T: Clone + ToString> Table<T> {
                 }
 
                 x += w;
+                let _ = j;
             }
         }
 
-        (plane, header_zones, row_zones)
+        plane
     }
 
-    /// Handles a mouse event. Returns `true` if consumed.
-    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
-        if row == 0 {
-            for zone in self.columns.iter().enumerate() {
-                let _z = HitZone::new(zone.0, 0, 0, 0, 0);
-            }
-            return false;
-        }
-
-        let rel_row = row.saturating_sub(1);
-        if rel_row >= self.visible_count as u16 {
-            return false;
-        }
-
-        let idx = self.offset + rel_row as usize;
-        if idx >= self.rows.len() {
-            return false;
-        }
-
-        match kind {
-            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                self.selected = idx;
-                if let Some(f) = self.on_select.as_mut() {
-                    f(&self.rows[idx].data);
-                }
-                true
-            }
-            crate::input::event::MouseEventKind::ScrollDown => {
-                self.offset = (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
-                true
-            }
-            crate::input::event::MouseEventKind::ScrollUp => {
-                self.offset = self.offset.saturating_sub(1);
-                true
-            }
-            _ => false,
-        }
-    }
-
-    /// Handles a key event. Returns `true` if consumed.
-    pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
         if key.kind != KeyEventKind::Press {
             return false;
@@ -277,6 +272,41 @@ impl<T: Clone + ToString> Table<T> {
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.rows[self.selected].data);
                 }
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+        if row == 0 {
+            return false;
+        }
+
+        let rel_row = row.saturating_sub(1);
+        if rel_row >= self.visible_count as u16 {
+            return false;
+        }
+
+        let idx = self.offset + rel_row as usize;
+        if idx >= self.rows.len() {
+            return false;
+        }
+
+        match kind {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+                self.selected = idx;
+                if let Some(f) = self.on_select.as_mut() {
+                    f(&self.rows[idx].data);
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::ScrollDown => {
+                self.offset = (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
+                true
+            }
+            crate::input::event::MouseEventKind::ScrollUp => {
+                self.offset = self.offset.saturating_sub(1);
                 true
             }
             _ => false,

@@ -5,6 +5,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 use std::path::Path;
 
@@ -13,20 +14,36 @@ use std::path::Path;
 /// Renders a "/"-separated sequence of clickable path segments. Clicking a segment
 /// fires the `on_navigate` callback with the segment index.
 pub struct Breadcrumbs {
+    id: WidgetId,
     segments: Vec<String>,
     theme: Theme,
     height: u16,
     on_navigate: Option<Box<dyn FnMut(usize)>>,
+    area: std::cell::Cell<Rect>,
 }
 
 impl Breadcrumbs {
     /// Creates a `Breadcrumbs` from a list of segment strings.
     pub fn new(segments: Vec<String>) -> Self {
         Self {
+            id: WidgetId::default_id(),
             segments,
             theme: Theme::default(),
             height: 1,
             on_navigate: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
+        }
+    }
+
+    /// Creates a `Breadcrumbs` with the given widget ID and segment strings.
+    pub fn new_with_id(id: WidgetId, segments: Vec<String>) -> Self {
+        Self {
+            id,
+            segments,
+            theme: Theme::default(),
+            height: 1,
+            on_navigate: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
         }
     }
 
@@ -38,10 +55,12 @@ impl Breadcrumbs {
             .filter(|s| !s.is_empty())
             .collect();
         Self {
+            id: WidgetId::default_id(),
             segments,
             theme: Theme::default(),
             height: 1,
             on_navigate: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
         }
     }
 
@@ -60,15 +79,29 @@ impl Breadcrumbs {
         self.on_navigate = Some(Box::new(f));
         self
     }
+}
 
-    /// Renders the breadcrumbs into a `Plane` and returns hit zones for each segment.
-    ///
-    /// Returns `(plane, hit_zones)` where hit zones have `id = segment_index`.
-    pub fn render(&self, area: Rect) -> (Plane, Vec<HitZone<usize>>) {
+impl crate::framework::widget::Widget for Breadcrumbs {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        10
+    }
+
+    fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let mut zones = Vec::new();
         let mut x: u16 = 0;
 
         for (i, segment) in self.segments.iter().enumerate() {
@@ -80,7 +113,7 @@ impl Breadcrumbs {
                 break;
             }
 
-            zones.push(HitZone::new(i, x, area.y, seg_width, self.height));
+            let _zone = HitZone::new(i, x, area.y, seg_width, self.height);
 
             let fg = if is_last {
                 self.theme.accent
@@ -125,36 +158,31 @@ impl Breadcrumbs {
             }
         }
 
-        (plane, zones)
+        plane
     }
 
-    /// Handles a mouse event. Returns `Some(segment_index)` if a segment was clicked.
-    pub fn handle_mouse(
-        &mut self,
-        kind: crate::input::event::MouseEventKind,
-        col: u16,
-        row: u16,
-        width: u16,
-    ) -> Option<usize> {
+    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
         if row != 0 {
-            return None;
+            return false;
         }
-        for zone in self.zones(width) {
+        for zone in self.zones(self.area.get().width) {
             if zone.contains(col, row) {
                 match kind {
                     crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                         if let Some(f) = self.on_navigate.as_mut() {
                             f(zone.id);
                         }
-                        return Some(zone.id);
+                        return true;
                     }
                     _ => {}
                 }
             }
         }
-        None
+        false
     }
+}
 
+impl Breadcrumbs {
     fn zones(&self, width: u16) -> Vec<HitZone<usize>> {
         let mut zones = Vec::new();
         let mut x: u16 = 0;

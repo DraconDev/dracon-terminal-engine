@@ -3,6 +3,7 @@
 use crate::compositor::Plane;
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// An action type for context menu items.
@@ -28,18 +29,39 @@ pub enum ContextAction {
 
 /// A popup context menu with labeled actions.
 pub struct ContextMenu {
+    id: WidgetId,
     items: Vec<(String, ContextAction)>,
     theme: Theme,
     width: u16,
+    anchor_x: u16,
+    anchor_y: u16,
+    area: std::cell::Cell<Rect>,
 }
 
 impl ContextMenu {
     /// Creates a new `ContextMenu` from a list of label/action pairs.
     pub fn new(items: Vec<(&'static str, ContextAction)>) -> Self {
         Self {
+            id: WidgetId::default_id(),
             items: items.into_iter().map(|(s, a)| (s.to_string(), a)).collect(),
             theme: Theme::default(),
             width: 20,
+            anchor_x: 0,
+            anchor_y: 0,
+            area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
+        }
+    }
+
+    /// Creates a new `ContextMenu` with the given widget ID and label/action pairs.
+    pub fn new_with_id(id: WidgetId, items: Vec<(&'static str, ContextAction)>) -> Self {
+        Self {
+            id,
+            items: items.into_iter().map(|(s, a)| (s.to_string(), a)).collect(),
+            theme: Theme::default(),
+            width: 20,
+            anchor_x: 0,
+            anchor_y: 0,
+            area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
         }
     }
 
@@ -55,15 +77,35 @@ impl ContextMenu {
         self
     }
 
-    /// Renders the menu anchored at `(anchor_x, anchor_y)`, clamped to `screen`.
-    ///
-    /// Returns `(plane, hit_zones, final_x, final_y)` where hit zones have
-    /// `id = item_index` and the final position may differ from the anchor if
-    /// the menu would overflow the screen.
-    pub fn render_at(&self, screen: Rect, anchor_x: u16, anchor_y: u16) -> (Plane, Vec<HitZone<usize>>, u16, u16) {
+    /// Sets the anchor position for the menu.
+    pub fn with_anchor(mut self, x: u16, y: u16) -> Self {
+        self.anchor_x = x;
+        self.anchor_y = y;
+        self
+    }
+}
+
+impl crate::framework::widget::Widget for ContextMenu {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        200
+    }
+
+    fn render(&self, screen: Rect) -> Plane {
         let height = self.items.len() as u16;
-        let mut x = anchor_x;
-        let mut y = anchor_y;
+        let mut x = self.anchor_x;
+        let mut y = self.anchor_y;
 
         if x + self.width > screen.width {
             x = screen.width.saturating_sub(self.width);
@@ -82,12 +124,9 @@ impl ContextMenu {
             cell.fg = self.theme.fg;
         }
 
-        let mut zones = Vec::new();
-
         for (i, (label, _action)) in self.items.iter().enumerate() {
             let row = i as u16;
-            let zone = HitZone::new(i, x, y + row, self.width, 1);
-            zones.push(zone);
+            let _zone = HitZone::new(i, x, y + row, self.width, 1);
 
             let idx = (row * self.width) as usize;
             if idx < plane.cells.len() {
@@ -119,31 +158,22 @@ impl ContextMenu {
             if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; }
         }
 
-        (plane, zones, x, y)
+        plane
     }
 
-    /// Handles a mouse click within the menu bounds.
-    /// Returns `Some(action)` for the clicked item, or `None`.
-    pub fn handle_mouse(
-        &mut self,
-        kind: crate::input::event::MouseEventKind,
-        col: u16,
-        row: u16,
-        anchor_x: u16,
-        anchor_y: u16,
-    ) -> Option<ContextAction> {
-        if col < anchor_x || col >= anchor_x + self.width || row < anchor_y || row >= anchor_y + self.items.len() as u16 {
-            return None;
+    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+        if col < self.anchor_x || col >= self.anchor_x + self.width || row < self.anchor_y || row >= self.anchor_y + self.items.len() as u16 {
+            return false;
         }
 
-        let idx = (row - anchor_y) as usize;
+        let idx = (row - self.anchor_y) as usize;
         if idx >= self.items.len() {
-            return None;
+            return false;
         }
 
         if let crate::input::event::MouseEventKind::Down(_) = kind {
-            return Some(self.items[idx].1.clone());
+            return true;
         }
-        None
+        false
     }
 }

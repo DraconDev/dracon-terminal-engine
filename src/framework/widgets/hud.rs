@@ -3,25 +3,43 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// A heads-up display overlay positioned at the top-left corner.
 ///
 /// Renders text and progress gauges as planes with a fixed z-index.
 pub struct Hud {
-    z_index: i32,
+    id: WidgetId,
+    z_index: u16,
     visible: bool,
     width: u16,
     height: u16,
+    area: std::cell::Cell<Rect>,
 }
 
 impl Hud {
     /// Creates a new `Hud` with the given z-index.
-    pub fn new(z_index: i32) -> Self {
+    pub fn new(z_index: u16) -> Self {
         Self {
+            id: WidgetId::default_id(),
             z_index,
             visible: true,
             width: 30,
             height: 10,
+            area: std::cell::Cell::new(Rect::new(0, 0, 30, 10)),
+        }
+    }
+
+    /// Creates a new `Hud` with the given widget ID and z-index.
+    pub fn new_with_id(id: WidgetId, z_index: u16) -> Self {
+        Self {
+            id,
+            z_index,
+            visible: true,
+            width: 30,
+            height: 10,
+            area: std::cell::Cell::new(Rect::new(0, 0, 30, 10)),
         }
     }
 
@@ -35,11 +53,6 @@ impl Hud {
     /// Returns the fixed position of the HUD (always `(0, 0)`).
     pub fn position(&self) -> (u16, u16) {
         (0, 0)
-    }
-
-    /// Returns the z-index.
-    pub fn z_index(&self) -> i32 {
-        self.z_index
     }
 
     /// Returns whether the HUD is visible.
@@ -60,7 +73,7 @@ impl Hud {
     /// Renders a text string at offset `(x, y)` with the given foreground and background colors.
     pub fn render_text(&self, x: u16, y: u16, text: &str, fg: Color, bg: Color) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
-        plane.z_index = self.z_index;
+        plane.z_index = self.z_index as i32;
 
         let text_len = text.width().min((self.width as usize).saturating_sub(x as usize));
         let start_idx = (y * self.width + x) as usize;
@@ -88,7 +101,7 @@ impl Hud {
     /// The gauge uses '█' for filled cells and '░' for empty cells.
     pub fn render_gauge(&self, x: u16, y: u16, label: &str, value: f32, max: f32, width: u16) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
-        plane.z_index = self.z_index;
+        plane.z_index = self.z_index as i32;
 
         let label_len = label.width().min(width as usize);
         let start_idx = (y * self.width + x) as usize;
@@ -123,5 +136,48 @@ impl Hud {
         }
 
         plane
+    }
+}
+
+impl crate::framework::widget::Widget for Hud {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        self.z_index
+    }
+
+    fn render(&self, _area: Rect) -> Plane {
+        let mut plane = Plane::new(0, self.width, self.height);
+        plane.z_index = self.z_index as i32;
+
+        if !self.visible {
+            for cell in &mut plane.cells {
+                cell.transparent = true;
+            }
+        }
+
+        plane
+    }
+
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::KeyEventKind;
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        false
+    }
+
+    fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+        false
     }
 }

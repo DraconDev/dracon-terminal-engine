@@ -5,6 +5,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// Result returned when the user clicks a button in a modal.
@@ -20,22 +21,51 @@ pub enum ModalResult {
 
 /// A centered modal dialog with a title, optional buttons, and a border.
 pub struct Modal<'a> {
+    id: WidgetId,
     title: &'a str,
     width: u16,
     height: u16,
     theme: Theme,
     buttons: Vec<(&'a str, ModalResult)>,
+    focused_btn: usize,
+    result: Option<ModalResult>,
+    on_confirm: Option<Box<dyn FnMut()>>,
+    on_cancel: Option<Box<dyn FnMut()>>,
+    area: std::cell::Cell<Rect>,
 }
 
 impl<'a> Modal<'a> {
     /// Creates a new `Modal` with the given title and default OK/Cancel buttons.
     pub fn new(title: &'a str) -> Self {
         Self {
+            id: WidgetId::default_id(),
             title,
             width: 40,
             height: 5,
             theme: Theme::default(),
             buttons: vec![("OK", ModalResult::Confirm), ("Cancel", ModalResult::Cancel)],
+            focused_btn: 0,
+            result: None,
+            on_confirm: None,
+            on_cancel: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 40, 5)),
+        }
+    }
+
+    /// Creates a new `Modal` with the given widget ID and title.
+    pub fn new_with_id(id: WidgetId, title: &'a str) -> Self {
+        Self {
+            id,
+            title,
+            width: 40,
+            height: 5,
+            theme: Theme::default(),
+            buttons: vec![("OK", ModalResult::Confirm), ("Cancel", ModalResult::Cancel)],
+            focused_btn: 0,
+            result: None,
+            on_confirm: None,
+            on_cancel: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 40, 5)),
         }
     }
 
@@ -58,12 +88,49 @@ impl<'a> Modal<'a> {
         self
     }
 
-    /// Renders the modal centered on `screen` and returns the plane and button hit zones.
-    ///
-    /// Hit zones have `id = ModalResult` for each button.
-    pub fn render(&self, screen: Rect) -> (Plane, Vec<HitZone<ModalResult>>) {
-        let x = (screen.width.saturating_sub(self.width)) / 2;
-        let y = (screen.height.saturating_sub(self.height)) / 2;
+    /// Sets the callback for when OK is confirmed.
+    pub fn on_confirm(mut self, f: impl FnMut() + 'static) -> Self {
+        self.on_confirm = Some(Box::new(f));
+        self
+    }
+
+    /// Sets the callback for when Cancel is pressed.
+    pub fn on_cancel(mut self, f: impl FnMut() + 'static) -> Self {
+        self.on_cancel = Some(Box::new(f));
+        self
+    }
+
+    /// Returns the result of the modal after it's been dismissed.
+    pub fn get_result(&self) -> Option<ModalResult> {
+        self.result
+    }
+
+    /// Clears the result, allowing the modal to be reused.
+    pub fn clear_result(&mut self) {
+        self.result = None;
+    }
+}
+
+impl<'a> crate::framework::widget::Widget for Modal<'a> {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+
+    fn z_index(&self) -> u16 {
+        100
+    }
+
+    fn render(&self, area: Rect) -> Plane {
+        let x = (area.width.saturating_sub(self.width)) / 2;
+        let y = (area.height.saturating_sub(self.height)) / 2;
 
         let mut plane = Plane::new(0, self.width, self.height);
         plane.x = x;
@@ -105,17 +172,19 @@ impl<'a> Modal<'a> {
         let btn_start = (self.width.saturating_sub(total_btn_width)) / 2;
         let btn_y = self.height - 2;
 
-        let mut zones = Vec::new();
-        for (i, (label, result)) in self.buttons.iter().enumerate() {
+        for (i, (label, _result)) in self.buttons.iter().enumerate() {
             let bx = btn_start + (i as u16) * (btn_width + 1);
 
-            let bg = self.theme.active_bg;
+            let is_focused = i == self.focused_btn;
+            let bg = if is_focused { self.theme.active_bg } else { self.theme.bg };
             let fg = self.theme.fg;
+            let style = if is_focused { Styles::BOLD | Styles::REVERSE } else { Styles::empty() };
             for col in 0..btn_width {
                 let col_idx = btn_y as usize * self.width as usize + bx as usize + col as usize;
                 if col_idx < plane.cells.len() {
                     plane.cells[col_idx].bg = bg;
                     plane.cells[col_idx].fg = fg;
+                    plane.cells[col_idx].style = style;
                     plane.cells[col_idx].char = ' ';
                 }
             }
@@ -126,24 +195,23 @@ impl<'a> Modal<'a> {
                 let label_idx = (btn_y as usize) * (self.width as usize) + (bx as usize) + (label_start as usize) + j;
                 if label_idx < plane.cells.len() {
                     plane.cells[label_idx].char = ch;
-                    plane.cells[label_idx].style = Styles::BOLD;
+                    plane.cells[label_idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
                 }
             }
 
-            zones.push(HitZone::new(*result, bx, btn_y, btn_width, 1));
+            let _zone = HitZone::new(*_result, bx, btn_y, btn_width, 1);
         }
 
-        (plane, zones)
+        plane
     }
 
-    /// Handles a mouse click within the modal.
-    /// Returns `Some(result)` if a button was clicked, or `None`.
-    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16, screen: Rect) -> Option<ModalResult> {
+    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+        let screen = self.area.get();
         let x = (screen.width.saturating_sub(self.width)) / 2;
         let y = (screen.height.saturating_sub(self.height)) / 2;
 
         if col < x || col >= x + self.width || row < y || row >= y + self.height {
-            return None;
+            return false;
         }
 
         let local_col = col - x;
@@ -160,11 +228,74 @@ impl<'a> Modal<'a> {
 
             if in_btn {
                 if let crate::input::event::MouseEventKind::Down(_) = kind {
-                    return Some(*result);
+                    self.focused_btn = i;
+                    self.result = Some(*result);
+                    match result {
+                        ModalResult::Confirm => {
+                            if let Some(ref mut cb) = self.on_confirm {
+                                cb();
+                            }
+                        }
+                        ModalResult::Cancel => {
+                            if let Some(ref mut cb) = self.on_cancel {
+                                cb();
+                            }
+                        }
+                        ModalResult::Custom(_) => {}
+                    }
+                    return true;
                 }
             }
         }
 
-        None
+        false
+    }
+
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::{KeyCode, KeyEventKind};
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        match key.code {
+            KeyCode::Tab => {
+                self.focused_btn = (self.focused_btn + 1) % self.buttons.len();
+                true
+            }
+            KeyCode::BackTab => {
+                if self.focused_btn == 0 {
+                    self.focused_btn = self.buttons.len().saturating_sub(1);
+                } else {
+                    self.focused_btn -= 1;
+                }
+                true
+            }
+            KeyCode::Enter => {
+                if let Some((_, result)) = self.buttons.get(self.focused_btn) {
+                    self.result = Some(*result);
+                    match result {
+                        ModalResult::Confirm => {
+                            if let Some(ref mut cb) = self.on_confirm {
+                                cb();
+                            }
+                        }
+                        ModalResult::Cancel => {
+                            if let Some(ref mut cb) = self.on_cancel {
+                                cb();
+                            }
+                        }
+                        ModalResult::Custom(_) => {}
+                    }
+                }
+                true
+            }
+            KeyCode::Esc => {
+                self.result = Some(ModalResult::Cancel);
+                if let Some(ref mut cb) = self.on_cancel {
+                    cb();
+                }
+                true
+            }
+            _ => false,
+        }
     }
 }
