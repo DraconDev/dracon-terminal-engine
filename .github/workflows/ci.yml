@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         rust: [stable, beta, nightly]
-        # Only run latest stable on macOS and Windows to save CI time
         include:
           - os: macos-latest
             rust: stable
@@ -35,20 +34,15 @@ jobs:
 
       - name: Cache cargo registry
         uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "tools/tui/dracon-terminal-engine -> target"
 
       - name: Check formatting
         run: cargo fmt --all -- --check
-        working-directory: tools/tui/dracon-terminal-engine
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
-        working-directory: tools/tui/dracon-terminal-engine
 
       - name: Run tests
         run: cargo test --all-features -- --test-threads=4
-        working-directory: tools/tui/dracon-terminal-engine
 
   minimal-versions:
     name: Minimal Versions
@@ -61,7 +55,6 @@ jobs:
           rust-toolchain: stable
       - name: Check
         run: cargo +nightly -Zminimal-versions build --all-features
-        working-directory: tools/tui/dracon-terminal-engine
 
   rustsec:
     name: Security Audit

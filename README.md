@@ -29,7 +29,7 @@ App::new().unwrap()
     .title("My App")
     .fps(30)
     .theme(Theme::cyberpunk())
-    .on_tick(|ctx, tick| { /* called every 250ms */ })
+    .on_tick(|_ctx, _tick| { /* called every 250ms */ })
     .run(|ctx| {
         let items = vec!["Files", "Search", "Git", "Settings"];
         let list = List::new(items);

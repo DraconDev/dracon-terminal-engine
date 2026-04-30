@@ -20,28 +20,16 @@ jobs:
         with:
           rust-toolchain: stable
 
-      - name: Configure cargo
-        run: |
-          cat >> ~/.cargo/config.toml << 'EOF'
-          [registries.crates-io]
-          credential-providers = ["git", "cargo:token"]
-          EOF
-        env:
-          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-
       - name: Publish to crates.io
-        run: cargo publish --manifest-path tools/tui/dracon-terminal-engine/Cargo.toml --token ${{ secrets.CARGO_TOKEN }}
-        env:
-          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+        run: cargo publish --token ${{ secrets.CARGO_TOKEN }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            tools/tui/dracon-terminal-engine/LICENSE
-            tools/tui/dracon-terminal-engine/LICENSE-MIT
-            tools/tui/dracon-terminal-engine/LICENSE-APACHE
-            tools/tui/dracon-terminal-engine/README.md
-            tools/tui/dracon-terminal-engine/CHANGELOG.md
+            LICENSE-MIT
+            LICENSE-APACHE
+            README.md
+            CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
