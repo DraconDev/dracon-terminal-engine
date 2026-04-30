@@ -2,6 +2,7 @@
 
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Hud, List, SplitPane};
 use dracon_terminal_engine::SystemMonitor;
 use ratatui::layout::Rect;
@@ -32,12 +33,9 @@ fn main() -> std::io::Result<()> {
             let list_plane = list.render(left_rect);
             ctx.add_plane(list_plane);
 
-            let (bc_plane, bc_zones) = Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string(), "app".to_string()])
+            let bc_plane = Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string(), "app".to_string()])
                 .render(right_rect);
             ctx.add_plane(bc_plane);
-            for zone in bc_zones {
-                ctx.add_plane(Plane::new(zone.id, 1, 1));
-            }
 
             let mut sys = SystemMonitor::new();
             let data = sys.get_data();

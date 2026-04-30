@@ -4,6 +4,7 @@
 //! Mouse: click to select, right-click for context menu, scroll to browse.
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SplitPane;
 use std::path::PathBuf;
 use ratatui::layout::Rect;
@@ -64,11 +65,8 @@ fn main() -> std::io::Result<()> {
             let list_plane = list.render(main_rect);
             ctx.add_plane(list_plane);
 
-            let (bc_plane, bc_zones) = Breadcrumbs::new(crumbs.clone()).render(main_rect);
+            let bc_plane = Breadcrumbs::new(crumbs.clone()).render(main_rect);
             ctx.add_plane(bc_plane);
-            for zone in bc_zones {
-                ctx.add_plane(Plane::new(zone.id, 1, 1));
-            }
 
             let _sel_idx = list.selected_index();
             let mut info_plane = Plane::new(1, side_rect.width, side_rect.height);
