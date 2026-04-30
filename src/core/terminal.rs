@@ -50,6 +50,21 @@ impl<W: Write + AsFd> Terminal<W> {
     pub fn inner(&mut self) -> &mut W {
         &mut self.output
     }
+
+    /// Shows the terminal cursor.
+    pub fn show_cursor(&mut self) -> io::Result<()> {
+        write!(self.output, "\x1b[?25h").map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+    }
+
+    /// Hides the terminal cursor.
+    pub fn hide_cursor(&mut self) -> io::Result<()> {
+        write!(self.output, "\x1b[?25l").map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+    }
+
+    /// Sets the cursor position (1-indexed, as terminals expect).
+    pub fn set_cursor(&mut self, x: u16, y: u16) -> io::Result<()> {
+        write!(self.output, "\x1b[{};{}H", y.saturating_add(1), x.saturating_add(1)).map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+    }
 }
 
 impl<W: Write + AsFd> Write for Terminal<W> {

@@ -28,6 +28,7 @@
 //!
 //! ```no_run
 //! use dracon_terminal_engine::framework::prelude::*;
+//! use dracon_terminal_engine::framework::widget::Widget;
 //! use ratatui::layout::Rect;
 //!
 //! App::new().unwrap()
@@ -46,7 +47,7 @@
 //!
 //! ## Version
 //!
-//! v26.0.2
+//! v27.0.0
 
 #[doc = "Terminal backend (POSIX tty ioctls, raw mode setup)."]
 pub mod backend;
