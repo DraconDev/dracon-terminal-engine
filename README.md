@@ -1,20 +1,24 @@
-```text
+# Dracon Terminal Engine
+
+[![crates.io](https://img.shields.io/crates/v/dracon-terminal-engine.svg)](https://crates.io/crates/dracon-terminal-engine)
+[![docs.rs](https://img.shields.io/docsrs/dracon-terminal-engine)](https://docs.rs/dracon-terminal-engine)
+[![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
+[![License](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
+
+```
   _______   ______   .______      .___ ___.      ___
  |       | |   ___|  |   _  \     |   \/   |     /   \
  |.|   | | |  |__    |  |_)  |    |  \  /  |    /  ^  \
    |   |   |   __|   |      /     |  |\/|  |   /  /_\  \
    |   |   |  |____  |  |\  \----.|  |  |  |  /  _____  \
    |___|   |_______| | _| `._____||__|  |__| /__/     \__\
-
 ```
 
 > **A terminal application framework for Rust — one import, AI builds a complete app.**
 
----
-
 ## What It Is
 
-`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop.
+`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 23+ built-in widgets, 15 themes, dirty rendering, and focus management.
 
 **One import to rule them all:**
 
@@ -24,16 +28,15 @@ use dracon_terminal_engine::framework::prelude::*;
 App::new().unwrap()
     .title("My App")
     .fps(30)
+    .theme(Theme::cyberpunk())
     .on_tick(|ctx, tick| { /* called every 250ms */ })
     .run(|ctx| {
+        let items = vec!["Files", "Search", "Git", "Settings"];
+        let list = List::new(items);
         let (w, h) = ctx.compositor().size();
-        let area = Rect::new(0, 0, w, h);
-        let list = List::new(vec!["Files", "Search", "Git"]);
-        ctx.add_plane(list.render(area));
+        ctx.add_plane(list.render(Rect::new(0, 0, w, h)));
     });
 ```
-
----
 
 ## Framework (v27)
 
@@ -49,54 +52,56 @@ The `framework` module provides the complete application runtime:
 | [`App::on_tick`] | Periodic callback (every N milliseconds) |
 | [`App::tick_interval`] | Set the tick interval in ms |
 
-### Widgets
+### Input & Interaction
 | Widget | What |
-|---|---|
-| [`List<T>`] | Virtual list with keyboard nav, mouse scroll, selection |
-| [`Table<T>`] | Sortable table with column headers + row click |
-| [`TabBar`] | Horizontal tab strip, click or arrow-key to switch |
-| [`Breadcrumbs`] | Clickable path segments |
-| [`SplitPane`] | H/V splits with drag-resize divider |
-| [`Modal`] | Auto-centered popup with button hit zones |
-| [`ContextMenu`] | Right-click popup menu |
-| [`Hud`] | Floating layer (z-indexed overlay) with gauge/text |
-| [`Button`] | Clickable button with press state |
-| [`Checkbox`] | Toggle checkbox with label |
-| [`Toggle`] | On/off toggle switch |
-| [`Radio`] | Radio button group |
-| [`Select`] | Dropdown select list |
-| [`Slider`] | Horizontal value slider |
-| [`ProgressBar`] | Animated progress bar |
-| [`Spinner`] | Animated loading indicator |
-| [`Label`] | Static text label |
-| [`StatusBar`] | Status bar with segments |
-| [`TextEditorAdapter`] | Full TextEditor wrapped as a framework widget |
-| [`TextInputBase`] | Shared text input state |
-| [`SearchInput`] | Search box with clear button |
-| [`PasswordInput`] | Password input with masked characters |
-| [`Tree`] | Recursive tree with expand/collapse |
-| [`Form`] | Form with labeled fields |
-| [`MenuBar`] | Horizontal menu bar |
-| [`Toast`] | Auto-dismiss notification |
-| [`Tooltip`] | Hover tooltip |
-| [`EventLogger`] | Debug event log display |
-| [`Profiler`] | Performance metrics display |
-| [`DebugOverlay`] | Debug overlay |
-| [`WidgetInspector`] | Widget tree inspector |
-
-### Utilities
-| Module | What |
 |---|---|
 | [`HitZone<T>`] | Declarative interactive region (click/double/drag/hover) |
 | [`HitZoneGroup<T>`] | Batch of hit zones, auto-dispatched |
 | [`ScopedZone<T>`] | Lightweight geometry-only zone for per-frame dispatch |
 | [`ScopedZoneRegistry<T>`] | Registry that clears per frame |
 | [`DragManager<T>`] | Drag-and-drop state machine with ghost rendering |
-| [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
+| [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
+
+### 28 Framework Widgets
+| Widget | What |
+|---|---|
+| [`Breadcrumbs`] | Hierarchical path display with clickable segments |
+| [`Button`] | Clickable button with press state and callbacks |
+| [`Checkbox`] | Two-state toggle with check mark |
+| [`ContextMenu`] | Right-click popup menu with nested submenus |
+| [`DebugOverlay`] | FPS, widget count, and debug info overlay |
+| [`EventLogger`] | Scrollable event log panel |
+| [`Form`] | Multi-field form container with validation |
+| [`Hud`] | Top-right HUD with system metrics |
+| [`Label`] | Static text label |
+| [`List`] | Scrollable list with keyboard/touch navigation |
+| [`MenuBar`] | Top menu bar with dropdown menus |
+| [`Modal`] | Modal dialog overlay with backdrop |
+| [`PasswordInput`] | Single-line password input with masking |
+| [`ProgressBar`] | Animated progress indicator |
+| [`Profiler`] | Frame timing profiler with bar chart |
+| [`Radio`] | Radio button group (single selection) |
+| [`SearchInput`] | Text input with search/filter behavior |
+| [`Select`] | Dropdown select/combobox |
+| [`Slider`] | Horizontal slider with value display |
+| [`Spinner`] | Animated loading spinner |
+| [`SplitPane`] | Split view with draggable divider |
+| [`StatusBar`] | Bottom status bar |
+| [`TabBar`] | Tab navigation bar |
+| [`Table`] | Multi-column table with sorting |
+| [`Toast`] | Temporary notification toast messages |
+| [`Toggle`] | Two-state on/off toggle switch |
+| [`Tooltip`] | Hover tooltip overlay |
+| [`Tree`] | Expandable/collapsible tree view |
+| [`WidgetInspector`] | Widget tree inspector |
+
+### Utilities
+| Module | What |
+|---|---|
 | [`DirtyRegionTracker`] | Efficient partial screen updates |
 | [`AnimationManager`] | Tweening animations with easing curves |
-| [`Layout`] | Constraint-based layout engine |
+| [`Layout`] | Constraint-based layout engine (percentage, fixed, min, max, ratio) |
 | [`Theme`] | 15 built-in themes |
 
 ### 15 Built-in Themes
@@ -126,14 +131,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "27.0.0"
+dracon-terminal-engine = "27.0.1"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.0" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.1" }
 ```
 
 ## Quick Start (Framework)
@@ -174,10 +179,23 @@ cargo run --example god_mode              # Ratatui + compositor overlay
 cargo run --example input_debug           # SGR mouse + keyboard parsing
 ```
 
+## Testing
+
+```bash
+# All tests (unit + integration)
+cargo test
+
+# Specific test suites
+cargo test --lib               # Unit tests
+cargo test --test phase1_widget_test    # Widget integration tests
+cargo test --test theme_propagation_test # Theme propagation tests
+cargo test --test scroll_test          # Scroll behavior tests
+```
+
 ## Version
 
-**v27.0.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v27.0.1** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
-MIT
+MIT or Apache-2.0, at your option.

@@ -9,7 +9,8 @@ use crate::input::event::{Event, KeyEvent, MouseEvent, MouseEventKind};
 use crate::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 
-/// Adapter that wraps a [`TextEditor`] to implement the framework's [`Widget`] trait.
+/// Adapter that wraps a [`TextEditor`] to implement the framework's
+/// [`Widget`](crate::framework::widget::Widget) trait.
 ///
 /// This allows the standalone text editor (which implements ratatui's `Widget`)
 /// to be used inside the framework's `App` with focus management, event routing,
@@ -18,6 +19,7 @@ pub struct TextEditorAdapter {
     id: WidgetId,
     editor: TextEditor,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl TextEditorAdapter {
@@ -27,6 +29,7 @@ impl TextEditorAdapter {
             id,
             editor,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
         }
     }
 
@@ -51,12 +54,29 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn z_index(&self) -> u16 {
@@ -118,19 +138,25 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         let area = self.area.get();
-        self.editor.handle_event(&Event::Key(key), area)
+        let result = self.editor.handle_event(&Event::Key(key), area);
+        if result {
+            self.dirty = true;
+        }
+        result
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        // Convert local coordinates (relative to widget area) back to absolute
-        // because the editor expects absolute screen coordinates.
         let mouse = MouseEvent {
             kind,
             column: area.x + col,
             row: area.y + row,
             modifiers: crate::input::event::KeyModifiers::empty(),
         };
-        self.editor.handle_mouse_event(mouse, area)
+        let result = self.editor.handle_mouse_event(mouse, area);
+        if result {
+            self.dirty = true;
+        }
+        result
     }
 }

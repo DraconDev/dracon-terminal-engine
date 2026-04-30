@@ -34,6 +34,7 @@ pub struct Table<T> {
     theme: Theme,
     on_select: Option<Box<dyn FnMut(&T)>>,
     area: Cell<Rect>,
+    dirty: bool,
 }
 
 impl<T: Clone + ToString> Table<T> {
@@ -49,6 +50,7 @@ impl<T: Clone + ToString> Table<T> {
             theme: Theme::default(),
             on_select: None,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
+            dirty: true,
         }
     }
 
@@ -64,6 +66,7 @@ impl<T: Clone + ToString> Table<T> {
             theme: Theme::default(),
             on_select: None,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
+            dirty: true,
         }
     }
 
@@ -109,6 +112,11 @@ impl<T: Clone + ToString> Table<T> {
         self.rows.len()
     }
 
+    /// Returns true if there are no rows.
+    pub fn is_empty(&self) -> bool {
+        self.rows.is_empty()
+    }
+
     /// Returns `(start, end)` indices of the currently visible rows.
     pub fn viewport(&self) -> (usize, usize) {
         let start = self.offset;
@@ -144,16 +152,33 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
     }
 
     fn z_index(&self) -> u16 {
         10
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -246,6 +271,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                     if self.selected >= self.offset + self.visible_count {
                         self.offset = self.selected.saturating_sub(self.visible_count) + 1;
                     }
+                    self.dirty = true;
                 }
                 true
             }
@@ -255,17 +281,20 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                     if self.selected < self.offset {
                         self.offset = self.selected;
                     }
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Home => {
                 self.selected = 0;
                 self.offset = 0;
+                self.dirty = true;
                 true
             }
             KeyCode::End => {
                 self.selected = self.rows.len().saturating_sub(1);
                 self.offset = self.rows.len().saturating_sub(self.visible_count);
+                self.dirty = true;
                 true
             }
             KeyCode::Enter => {
@@ -299,14 +328,17 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.rows[idx].data);
                 }
+                self.dirty = true;
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
                 self.offset = (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
+                self.dirty = true;
                 true
             }
             crate::input::event::MouseEventKind::ScrollUp => {
                 self.offset = self.offset.saturating_sub(1);
+                self.dirty = true;
                 true
             }
             _ => false,

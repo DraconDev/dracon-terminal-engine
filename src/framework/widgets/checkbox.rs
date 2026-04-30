@@ -17,6 +17,7 @@ pub struct Checkbox {
     theme: Theme,
     on_change: Option<Box<dyn FnMut(bool)>>,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Checkbox {
@@ -29,6 +30,7 @@ impl Checkbox {
             theme: Theme::default(),
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
+            dirty: true,
         }
     }
 
@@ -47,16 +49,19 @@ impl Checkbox {
     /// Checks the checkbox.
     pub fn check(&mut self) {
         self.checked = true;
+        self.dirty = true;
     }
 
     /// Unchecks the checkbox.
     pub fn uncheck(&mut self) {
         self.checked = false;
+        self.dirty = true;
     }
 
     /// Toggles the checkbox state.
     pub fn toggle(&mut self) {
         self.checked = !self.checked;
+        self.dirty = true;
     }
 
     /// Returns whether the checkbox is checked.
@@ -70,12 +75,29 @@ impl crate::framework::widget::Widget for Checkbox {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -126,6 +148,7 @@ impl crate::framework::widget::Widget for Checkbox {
                 if let Some(ref mut cb) = self.on_change {
                     cb(self.checked);
                 }
+                self.dirty = true;
                 true
             }
             _ => false,
@@ -139,6 +162,7 @@ impl crate::framework::widget::Widget for Checkbox {
                 if let Some(ref mut cb) = self.on_change {
                     cb(self.checked);
                 }
+                self.dirty = true;
                 true
             }
             _ => false,

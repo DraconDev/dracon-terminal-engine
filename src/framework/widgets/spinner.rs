@@ -16,6 +16,7 @@ pub struct Spinner {
     last_update: Instant,
     theme: Theme,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Spinner {
@@ -28,6 +29,7 @@ impl Spinner {
             last_update: Instant::now(),
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 10, 1)),
+            dirty: true,
         }
     }
 
@@ -51,6 +53,7 @@ impl Spinner {
         if now.duration_since(self.last_update) >= Duration::from_millis(100) {
             self.current_frame = (self.current_frame + 1) % self.frames.len();
             self.last_update = now;
+            self.dirty = true;
         }
     }
 
@@ -65,12 +68,29 @@ impl crate::framework::widget::Widget for Spinner {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {

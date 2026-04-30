@@ -16,6 +16,7 @@ pub struct BaseInput {
     pub area: std::cell::Cell<Rect>,
     pub placeholder: String,
     pub mask_char: Option<char>,
+    pub dirty: bool,
 }
 
 impl BaseInput {
@@ -29,6 +30,7 @@ impl BaseInput {
             area: std::cell::Cell::new(Rect::new(0, 0, 30, 1)),
             placeholder: placeholder.to_string(),
             mask_char: None,
+            dirty: true,
         }
     }
 
@@ -45,11 +47,25 @@ impl BaseInput {
     pub fn clear(&mut self) {
         self.text.clear();
         self.cursor_pos = 0;
+        self.dirty = true;
     }
 
     pub fn cursor_position(&self) -> Option<(u16, u16)> {
         let area = self.area.get();
         Some((area.x + self.cursor_pos as u16, area.y))
+    }
+
+    pub fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+        self.dirty = true;
+    }
+
+    pub fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    pub fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     pub fn render_input(&self, area: Rect) -> Plane {
@@ -100,6 +116,7 @@ impl BaseInput {
                 if self.cursor_pos > 0 && !self.text.is_empty() {
                     self.text.pop();
                     self.cursor_pos = self.cursor_pos.saturating_sub(1);
+                    self.dirty = true;
                 }
                 true
             }
@@ -108,32 +125,38 @@ impl BaseInput {
                 if self.cursor_pos < self.text.len() {
                     self.cursor_pos = self.text.len();
                 }
+                self.dirty = true;
                 true
             }
             KeyCode::Left => {
                 if self.cursor_pos > 0 {
                     self.cursor_pos -= 1;
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Right => {
                 if self.cursor_pos < self.text.len() {
                     self.cursor_pos += 1;
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Delete => {
                 if self.cursor_pos < self.text.len() {
                     self.text.remove(self.cursor_pos);
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Home => {
                 self.cursor_pos = 0;
+                self.dirty = true;
                 true
             }
             KeyCode::End => {
                 self.cursor_pos = self.text.len();
+                self.dirty = true;
                 true
             }
             _ => false,
@@ -143,6 +166,7 @@ impl BaseInput {
     pub fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
         if col < self.text.len() as u16 {
             self.cursor_pos = col as usize;
+            self.dirty = true;
             true
         } else {
             false

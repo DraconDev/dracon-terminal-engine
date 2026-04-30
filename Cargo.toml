@@ -1,13 +1,15 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.0.0"
+version = "27.0.1"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description.workspace = true
-repository.workspace = true
 readme = "README.md"
-keywords = ["terminal", "engine", "compositor", "cli", "tui"]
+description = "A terminal application framework for Rust — App, widgets, compositor, themes"
+repository.workspace = true
+homepage = "https://github.com/DraconDev/dracon-terminal-engine"
+documentation = "https://docs.rs/dracon-terminal-engine"
+keywords = ["terminal", "tui", "framework", "compositor", "cli"]
 categories = ["command-line-interface", "rendering"]
 
 [dependencies]

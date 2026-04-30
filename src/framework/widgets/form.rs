@@ -26,6 +26,7 @@ pub struct Form {
     focused_field: usize,
     theme: Theme,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Form {
@@ -37,6 +38,7 @@ impl Form {
             focused_field: 0,
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
+            dirty: true,
         }
     }
 
@@ -60,6 +62,7 @@ impl Form {
     pub fn set_field_value(&mut self, index: usize, value: &str) {
         if let Some(ref mut field) = self.fields.get_mut(index) {
             field.value = value.to_string();
+            self.dirty = true;
         }
     }
 
@@ -67,6 +70,7 @@ impl Form {
     pub fn set_field_error(&mut self, index: usize, error: &str) {
         if let Some(ref mut field) = self.fields.get_mut(index) {
             field.error = Some(error.to_string());
+            self.dirty = true;
         }
     }
 }
@@ -76,12 +80,29 @@ impl crate::framework::widget::Widget for Form {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -163,30 +184,35 @@ impl crate::framework::widget::Widget for Form {
             KeyCode::Down => {
                 if self.focused_field < self.fields.len().saturating_sub(1) {
                     self.focused_field += 1;
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Up => {
                 if self.focused_field > 0 {
                     self.focused_field -= 1;
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Char(ch) => {
                 if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
                     field.value.push(ch);
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Backspace => {
                 if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
                     field.value.pop();
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Home => {
                 if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
                     field.value.clear();
+                    self.dirty = true;
                 }
                 true
             }
@@ -197,6 +223,7 @@ impl crate::framework::widget::Widget for Form {
     fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
         if (row as usize) < self.fields.len() {
             self.focused_field = row as usize;
+            self.dirty = true;
             true
         } else {
             false

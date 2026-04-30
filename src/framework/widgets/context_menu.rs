@@ -36,6 +36,7 @@ pub struct ContextMenu {
     anchor_x: u16,
     anchor_y: u16,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl ContextMenu {
@@ -49,6 +50,7 @@ impl ContextMenu {
             anchor_x: 0,
             anchor_y: 0,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
+            dirty: true,
         }
     }
 
@@ -62,6 +64,7 @@ impl ContextMenu {
             anchor_x: 0,
             anchor_y: 0,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
+            dirty: true,
         }
     }
 
@@ -74,6 +77,7 @@ impl ContextMenu {
     /// Sets the menu width in cells.
     pub fn with_width(mut self, width: u16) -> Self {
         self.width = width;
+        self.dirty = true;
         self
     }
 
@@ -81,6 +85,7 @@ impl ContextMenu {
     pub fn with_anchor(mut self, x: u16, y: u16) -> Self {
         self.anchor_x = x;
         self.anchor_y = y;
+        self.dirty = true;
         self
     }
 }
@@ -90,12 +95,29 @@ impl crate::framework::widget::Widget for ContextMenu {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn z_index(&self) -> u16 {

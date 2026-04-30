@@ -18,6 +18,7 @@ pub struct Select {
     theme: Theme,
     on_change: Option<Box<dyn FnMut(&str)>>,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Select {
@@ -31,6 +32,7 @@ impl Select {
             theme: Theme::default(),
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
+            dirty: true,
         }
     }
 
@@ -68,12 +70,29 @@ impl crate::framework::widget::Widget for Select {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -141,17 +160,20 @@ impl crate::framework::widget::Widget for Select {
         match key.code {
             KeyCode::Enter => {
                 self.expanded = !self.expanded;
+                self.dirty = true;
                 true
             }
             KeyCode::Down if self.expanded => {
                 if self.selected < self.options.len().saturating_sub(1) {
                     self.selected += 1;
+                    self.dirty = true;
                 }
                 true
             }
             KeyCode::Up if self.expanded => {
                 if self.selected > 0 {
                     self.selected -= 1;
+                    self.dirty = true;
                 }
                 true
             }
@@ -164,12 +186,17 @@ impl crate::framework::widget::Widget for Select {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if row == 0 {
                     self.expanded = !self.expanded;
+                    self.dirty = true;
                     true
                 } else if self.expanded {
                     let item_idx = (row - 1) as usize;
                     if item_idx < self.options.len() {
                         self.selected = item_idx;
                         self.expanded = false;
+                        if let Some(ref mut cb) = self.on_change {
+                            cb(&self.options[self.selected]);
+                        }
+                        self.dirty = true;
                         true
                     } else {
                         false

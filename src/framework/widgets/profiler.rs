@@ -27,6 +27,7 @@ pub struct Profiler {
     /// The theme for this widget.
     theme: Theme,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Profiler {
@@ -37,6 +38,7 @@ impl Profiler {
             metrics: Vec::new(),
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 60, 15)),
+            dirty: true,
         }
     }
 
@@ -49,6 +51,7 @@ impl Profiler {
     /// Sets the metrics to display.
     pub fn set_metrics(&mut self, metrics: Vec<Metric>) {
         self.metrics = metrics;
+        self.dirty = true;
     }
 
     /// Records a metric entry.
@@ -58,6 +61,7 @@ impl Profiler {
             value,
             call_count,
         });
+        self.dirty = true;
     }
 }
 
@@ -66,12 +70,29 @@ impl crate::framework::widget::Widget for Profiler {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn z_index(&self) -> u16 {

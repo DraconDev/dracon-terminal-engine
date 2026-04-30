@@ -17,6 +17,7 @@ pub struct Slider {
     on_change: Option<Box<dyn FnMut(f32)>>,
     last_area_width: std::cell::Cell<u16>,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl Slider {
@@ -31,6 +32,7 @@ impl Slider {
             on_change: None,
             last_area_width: std::cell::Cell::new(80),
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 1)),
+            dirty: true,
         }
     }
 
@@ -57,6 +59,7 @@ impl Slider {
     /// Sets the current value of the slider.
     pub fn set_value(&mut self, value: f32) {
         self.value = value.clamp(self.min, self.max);
+        self.dirty = true;
     }
 
     /// Returns the current value of the slider.
@@ -80,12 +83,29 @@ impl crate::framework::widget::Widget for Slider {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -166,6 +186,7 @@ impl crate::framework::widget::Widget for Slider {
                     if let Some(ref mut cb) = self.on_change {
                         cb(self.value);
                     }
+                    self.dirty = true;
                     true
                 } else {
                     false

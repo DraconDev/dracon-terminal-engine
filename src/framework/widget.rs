@@ -60,7 +60,12 @@ pub trait Widget {
     }
 
     /// Marks the widget as dirty, so the next render pass will re-render it.
+    /// Call this after state changes to ensure the widget re-renders.
     fn mark_dirty(&mut self) {}
+
+    /// Clears the dirty flag after rendering.
+    /// The render loop calls this automatically after a successful render.
+    fn clear_dirty(&mut self) {}
 
     /// Returns the cursor position for text input widgets.
     /// Returns `None` if the widget does not show a cursor.
@@ -82,6 +87,10 @@ pub trait Widget {
 
     /// Called when the widget is removed from the application.
     fn on_unmount(&mut self) {}
+
+    /// Sets the widget's ID.
+    /// Called by `App::add_widget` to sync the App-assigned ID with the widget.
+    fn set_id(&mut self, _id: WidgetId) {}
 
     /// Called when the theme is changed via `App::set_theme()`.
     /// Allows widgets to update their internal theme-dependent state.

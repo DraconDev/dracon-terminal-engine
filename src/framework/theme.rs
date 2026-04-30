@@ -1,6 +1,6 @@
 //! Color themes for terminal UI.
 //!
-//! Provides [`Theme`] with 15 built-in themes: `dark`, `light`, `cyberpunk`,
+//! Provides [`crate::framework::theme::Theme`] with 15 built-in themes: `dark`, `light`, `cyberpunk`,
 //! `dracula`, `nord`, `catppuccin_mocha`, `gruvbox_dark`, `tokyo_night`,
 //! `solarized_dark`, `solarized_light`, `one_dark`, `rose_pine`, `kanagawa`,
 //! `everforest`, `monokai`.

@@ -79,6 +79,7 @@ pub struct MenuBar {
     /// The last recorded area width for layout.
     last_area_width: std::cell::Cell<u16>,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl MenuBar {
@@ -91,12 +92,14 @@ impl MenuBar {
             theme: Theme::default(),
             last_area_width: std::cell::Cell::new(80),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
+            dirty: true,
         }
     }
 
     /// Sets the menu entries for this menu bar.
     pub fn with_entries(mut self, entries: Vec<MenuEntry>) -> Self {
         self.entries = entries;
+        self.dirty = true;
         self
     }
 
@@ -109,6 +112,7 @@ impl MenuBar {
     /// Closes any open menu dropdown.
     pub fn close(&mut self) {
         self.active_entry = None;
+        self.dirty = true;
     }
 }
 
@@ -117,16 +121,33 @@ impl crate::framework::widget::Widget for MenuBar {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
     }
 
     fn z_index(&self) -> u16 {
         60
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -179,6 +200,7 @@ impl crate::framework::widget::Widget for MenuBar {
                     } else {
                         self.active_entry = Some(entry_idx);
                     }
+                    self.dirty = true;
                     true
                 } else {
                     false

@@ -32,6 +32,7 @@ pub struct Modal<'a> {
     on_confirm: Option<Box<dyn FnMut()>>,
     on_cancel: Option<Box<dyn FnMut()>>,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl<'a> Modal<'a> {
@@ -49,6 +50,7 @@ impl<'a> Modal<'a> {
             on_confirm: None,
             on_cancel: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 5)),
+            dirty: true,
         }
     }
 
@@ -66,6 +68,7 @@ impl<'a> Modal<'a> {
             on_confirm: None,
             on_cancel: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 5)),
+            dirty: true,
         }
     }
 
@@ -116,16 +119,33 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
     }
 
     fn z_index(&self) -> u16 {
         100
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -243,6 +263,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
                         }
                         ModalResult::Custom(_) => {}
                     }
+                    self.dirty = true;
                     return true;
                 }
             }
@@ -259,6 +280,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         match key.code {
             KeyCode::Tab => {
                 self.focused_btn = (self.focused_btn + 1) % self.buttons.len();
+                self.dirty = true;
                 true
             }
             KeyCode::BackTab => {
@@ -267,6 +289,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
                 } else {
                     self.focused_btn -= 1;
                 }
+                self.dirty = true;
                 true
             }
             KeyCode::Enter => {

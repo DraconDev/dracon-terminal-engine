@@ -34,7 +34,7 @@
 //! App::new().unwrap()
 //!     .title("My App")
 //!     .fps(30)
-//!     .on_tick(|_ctx, _tick| {
+//!     .on_tick(|ctx, _tick| {
 //!         // Called every 250ms by default
 //!     })
 //!     .run(|ctx| {
@@ -47,7 +47,7 @@
 //!
 //! ## Version
 //!
-//! v27.0.0
+//! v27.0.1
 
 #[doc = "Terminal backend (POSIX tty ioctls, raw mode setup)."]
 pub mod backend;

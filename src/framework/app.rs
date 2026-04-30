@@ -21,7 +21,6 @@ use crate::backend::tty;
 use crate::compositor::{Compositor, Plane};
 use crate::framework::animation::AnimationManager;
 use crate::framework::dirty_regions::DirtyRegionTracker;
-use crate::framework::event_dispatcher::EventDispatcher;
 use crate::framework::focus::FocusManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
@@ -69,8 +68,6 @@ pub struct App {
     on_tick: RefCell<Option<Box<dyn FnMut(&mut Ctx, u64) + 'static>>>,
     widgets: RefCell<Vec<Box<dyn Widget>>>,
     focus_manager: FocusManager,
-    #[allow(unused)]
-    event_dispatcher: EventDispatcher,
     dirty_tracker: DirtyRegionTracker,
     animations: AnimationManager,
     next_widget_id: usize,
@@ -100,7 +97,6 @@ impl App {
             on_tick: RefCell::new(None),
             widgets: RefCell::new(Vec::new()),
             focus_manager: FocusManager::new(),
-            event_dispatcher: EventDispatcher::new(),
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
             next_widget_id: 0,
@@ -161,6 +157,7 @@ impl App {
     /// Returns the assigned `WidgetId`.
     pub fn add_widget(&mut self, mut widget: Box<dyn Widget>, area: Rect) -> WidgetId {
         let id = WidgetId(self.next_widget_id);
+        widget.set_id(id);
         widget.set_area(area);
         widget.on_mount();
         let focusable = widget.focusable();
@@ -335,7 +332,7 @@ impl App {
                     }
                     let area = w.area();
                     let plane = w.render(area);
-                    w.mark_dirty();
+                    w.clear_dirty();
                     self.compositor.add_plane(plane);
                 }
             }
@@ -536,5 +533,29 @@ impl<'a> Ctx<'a> {
         let mut left = crate::framework::widgets::split::SplitPane::from_rect(r1);
         let mut right = crate::framework::widgets::split::SplitPane::from_rect(r2);
         f(&mut left, &mut right);
+    }
+
+    /// Lays out child rectangles using the given constraints within the screen area.
+    ///
+    /// This is a convenience method that uses the [`Layout`] engine to compute
+    /// widget rectangles from constraint specifications (percentage, fixed, min, max, ratio).
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use dracon_terminal_engine::framework::prelude::*;
+    ///
+    /// App::new().unwrap().run(|ctx| {
+    ///     let rects = ctx.layout(vec![
+    ///         Constraint::Percentage(30),
+    ///         Constraint::Percentage(70),
+    ///     ]);
+    ///     // Use rects[0] and rects[1] for widget areas
+    /// });
+    /// ```
+    pub fn layout(&self, constraints: Vec<crate::framework::layout::Constraint>) -> Vec<Rect> {
+        let (w, h) = self.compositor.size();
+        let layout = crate::framework::layout::Layout::new(constraints);
+        layout.layout(Rect::new(0, 0, w, h))
     }
 }

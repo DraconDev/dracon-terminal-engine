@@ -49,6 +49,7 @@ pub struct StatusBar {
     /// The theme for this widget.
     theme: Theme,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl StatusBar {
@@ -59,6 +60,7 @@ impl StatusBar {
             segments: Vec::new(),
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
+            dirty: true,
         }
     }
 
@@ -80,16 +82,33 @@ impl crate::framework::widget::Widget for StatusBar {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
     }
 
     fn z_index(&self) -> u16 {
         50
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {

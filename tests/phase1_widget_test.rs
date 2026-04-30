@@ -138,3 +138,76 @@ fn test_toggle_with_callback() {
     t.toggle();
     assert!(t.is_on());
 }
+
+// ========== Dirty Tracking Integration Tests ==========
+
+#[test]
+fn test_widget_dirty_on_construction() {
+    let mut cb = Checkbox::new(WidgetId::new(1), "Test");
+    assert!(cb.needs_render(), "widget should be dirty after construction");
+}
+
+#[test]
+fn test_widget_clean_after_render() {
+    let mut cb = Checkbox::new(WidgetId::new(1), "Test");
+    cb.render(dummy_area());
+    cb.clear_dirty();
+    assert!(!cb.needs_render(), "widget should be clean after render + clear_dirty");
+}
+
+#[test]
+fn test_state_change_marks_dirty() {
+    let mut cb = Checkbox::new(WidgetId::new(1), "Test");
+    cb.render(dummy_area());
+    cb.clear_dirty();
+    cb.toggle();
+    assert!(cb.needs_render(), "widget should be dirty after state change");
+}
+
+#[test]
+fn test_slider_dirty_after_value_change() {
+    let mut sl = Slider::new(WidgetId::new(6));
+    sl.render(dummy_area());
+    sl.clear_dirty();
+    sl.set_value(0.5);
+    assert!(sl.needs_render(), "slider should be dirty after value change");
+}
+
+#[test]
+fn test_progress_bar_dirty_after_set_progress() {
+    let mut pb = ProgressBar::new(WidgetId::new(3));
+    pb.render(dummy_area());
+    pb.clear_dirty();
+    pb.set_progress(0.7);
+    assert!(pb.needs_render(), "progress bar should be dirty after set_progress");
+}
+
+#[test]
+fn test_radio_dirty_after_select() {
+    let mut r = Radio::new(WidgetId::new(5), "Option 1");
+    r.render(dummy_area());
+    r.clear_dirty();
+    r.select();
+    assert!(r.needs_render(), "radio should be dirty after select");
+}
+
+#[test]
+fn test_mark_dirty_overrides_clean() {
+    let mut sl = Slider::new(WidgetId::new(6));
+    sl.render(dummy_area());
+    sl.clear_dirty();
+    assert!(!sl.needs_render());
+    sl.mark_dirty();
+    assert!(sl.needs_render(), "widget should be dirty after explicit mark_dirty");
+}
+
+#[test]
+fn test_multiple_state_changes_single_dirty() {
+    let mut sl = Slider::new(WidgetId::new(6));
+    sl.render(dummy_area());
+    sl.clear_dirty();
+    sl.set_value(0.1);
+    sl.set_value(0.2);
+    sl.set_value(0.3);
+    assert!(sl.needs_render(), "multiple changes should still result in dirty");
+}

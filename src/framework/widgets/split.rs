@@ -24,6 +24,7 @@ pub struct SplitPane {
     pub divider_color: Color,
     min_size: u16,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
 }
 
 impl SplitPane {
@@ -37,6 +38,7 @@ impl SplitPane {
             divider_color: Color::Rgb(80, 80, 100),
             min_size: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
         }
     }
 
@@ -50,6 +52,7 @@ impl SplitPane {
             divider_color: Color::Rgb(80, 80, 100),
             min_size: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
         }
     }
 
@@ -69,24 +72,28 @@ impl SplitPane {
             divider_color: Color::Rgb(80, 80, 100),
             min_size: 10,
             area: std::cell::Cell::new(rect),
+            dirty: true,
         }
     }
 
     /// Sets the split ratio (0.1–0.9, default 0.5).
     pub fn ratio(mut self, ratio: f32) -> Self {
         self.ratio = ratio.clamp(0.1, 0.9);
+        self.dirty = true;
         self
     }
 
     /// Sets the divider character (default '│').
     pub fn with_divider(mut self, c: char) -> Self {
         self.divider_char = c;
+        self.dirty = true;
         self
     }
 
     /// Sets the minimum size in cells for each pane (default 10).
     pub fn with_min_size(mut self, size: u16) -> Self {
         self.min_size = size;
+        self.dirty = true;
         self
     }
 
@@ -176,16 +183,33 @@ impl crate::framework::widget::Widget for SplitPane {
         self.id
     }
 
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+
     fn area(&self) -> Rect {
         self.area.get()
     }
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.dirty = true;
     }
 
     fn z_index(&self) -> u16 {
         5
+    }
+
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -212,6 +236,7 @@ impl crate::framework::widget::Widget for SplitPane {
                         }
                     }
                 }
+                self.dirty = true;
                 true
             }
             _ => false,
