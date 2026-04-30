@@ -7,6 +7,7 @@
 //!
 //! ```no_run
 //! use dracon_terminal_engine::framework::prelude::*;
+//! use dracon_terminal_engine::framework::widget::Widget;
 //! use ratatui::layout::Rect;
 //!
 //! App::new().unwrap()
@@ -20,20 +21,31 @@
 //!     });
 //! ```
 
+pub mod animation;
 pub mod app;
+pub mod dirty_regions;
 pub mod dragdrop;
+pub mod event_dispatcher;
+pub mod focus;
 pub mod hitzone;
+pub mod layout;
 pub mod scroll;
+pub mod sixel;
 /// The theme module.
 pub mod theme;
+pub mod widget;
 pub mod widgets;
 
 /// The prelude module.
 pub mod prelude {
     pub use crate::framework::{
+        animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx},
+        dirty_regions::{DirtyRegion, DirtyRegionTracker},
         dragdrop::{DragGhost, DragManager, DragPhase},
+        focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
+        layout::{Constraint, Layout},
         scroll::ScrollContainer,
         theme::Theme,
         widgets::*,
