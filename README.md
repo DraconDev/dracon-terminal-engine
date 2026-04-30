@@ -20,7 +20,6 @@
 
 ```rust
 use dracon_terminal_engine::framework::prelude::*;
-use ratatui::layout::Rect;
 
 App::new().unwrap()
     .title("My App")
@@ -36,33 +35,72 @@ App::new().unwrap()
 
 ---
 
-## Framework (v26)
+## Framework (v27)
 
 The `framework` module provides the complete application runtime:
 
+### Core
 | Widget | What |
 |---|---|
 | [`App`] | Event loop, terminal, compositor — one call to run |
-| [`Ctx`] | Per-frame context: add planes, access compositor/theme/FPS |
+| [`Ctx`] | Per-frame context: add planes, compositor, theme, animations, dirty tracking |
+| [`App::add_widget`] | Register a widget with lifecycle callbacks |
+| [`App::set_theme`] | Switch theme and propagate to all widgets |
 | [`App::on_tick`] | Periodic callback (every N milliseconds) |
 | [`App::tick_interval`] | Set the tick interval in ms |
-| [`Ctx::split_h`] | Horizontal split into two panes |
-| [`Ctx::split_v`] | Vertical split into two panes |
-| [`List<T>`] | Vertical list with keyboard nav + mouse scroll + selection |
+
+### Widgets
+| Widget | What |
+|---|---|
+| [`List<T>`] | Virtual list with keyboard nav, mouse scroll, selection |
 | [`Table<T>`] | Sortable table with column headers + row click |
 | [`TabBar`] | Horizontal tab strip, click or arrow-key to switch |
-| [`Breadcrumbs`] | Clickable path segments (from `Path` or `Vec<String>`) |
+| [`Breadcrumbs`] | Clickable path segments |
 | [`SplitPane`] | H/V splits with drag-resize divider |
 | [`Modal`] | Auto-centered popup with button hit zones |
 | [`ContextMenu`] | Right-click popup menu |
 | [`Hud`] | Floating layer (z-indexed overlay) with gauge/text |
+| [`Button`] | Clickable button with press state |
+| [`Checkbox`] | Toggle checkbox with label |
+| [`Toggle`] | On/off toggle switch |
+| [`Radio`] | Radio button group |
+| [`Select`] | Dropdown select list |
+| [`Slider`] | Horizontal value slider |
+| [`ProgressBar`] | Animated progress bar |
+| [`Spinner`] | Animated loading indicator |
+| [`Label`] | Static text label |
+| [`StatusBar`] | Status bar with segments |
+| [`TextEditorAdapter`] | Full TextEditor wrapped as a framework widget |
+| [`TextInputBase`] | Shared text input state |
+| [`SearchInput`] | Search box with clear button |
+| [`PasswordInput`] | Password input with masked characters |
+| [`Tree`] | Recursive tree with expand/collapse |
+| [`Form`] | Form with labeled fields |
+| [`MenuBar`] | Horizontal menu bar |
+| [`Toast`] | Auto-dismiss notification |
+| [`Tooltip`] | Hover tooltip |
+| [`EventLogger`] | Debug event log display |
+| [`Profiler`] | Performance metrics display |
+| [`DebugOverlay`] | Debug overlay |
+| [`WidgetInspector`] | Widget tree inspector |
+
+### Utilities
+| Module | What |
+|---|---|
 | [`HitZone<T>`] | Declarative interactive region (click/double/drag/hover) |
 | [`HitZoneGroup<T>`] | Batch of hit zones, auto-dispatched |
 | [`ScopedZone<T>`] | Lightweight geometry-only zone for per-frame dispatch |
 | [`ScopedZoneRegistry<T>`] | Registry that clears per frame |
 | [`DragManager<T>`] | Drag-and-drop state machine with ghost rendering |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
-| [`Theme`] | Dark / light / cyberpunk presets |
+| [`FocusManager`] | Tab-order focus ring with keyboard navigation |
+| [`DirtyRegionTracker`] | Efficient partial screen updates |
+| [`AnimationManager`] | Tweening animations with easing curves |
+| [`Layout`] | Constraint-based layout engine |
+| [`Theme`] | 15 built-in themes |
+
+### 15 Built-in Themes
+`dark` · `light` · `cyberpunk` · `dracula` · `nord` · `catppuccin_mocha` · `gruvbox_dark` · `tokyo_night` · `solarized_dark` · `solarized_light` · `one_dark` · `rose_pine` · `kanagawa` · `everforest` · `monokai`
 
 ---
 
@@ -75,7 +113,7 @@ The framework is built on these primitives — available directly when needed:
 | `compositor` | `Plane`, `Compositor`, `Cell`, `Color`, `Styles` — z-indexed layer rendering |
 | `input::parser` | SGR mouse + chord parsing |
 | `input::reader` | Non-blocking input reader with EINTR retry |
-| `widgets::editor` | Code editor with syntax highlighting |
+| `widgets::editor` | Code editor with syntax highlighting, undo, filter, multi-cursor |
 | `widgets::input` | Text input widget |
 | `integration::ratatui` | Ratatui bridge |
 | `backend::tty` | Low-level terminal control |
@@ -88,14 +126,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "26.0.1"
+dracon-terminal-engine = "27.0.0"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v26.0.1" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.0" }
 ```
 
 ## Quick Start (Framework)
@@ -107,6 +145,7 @@ use ratatui::layout::Rect;
 App::new().unwrap()
     .title("My App")
     .fps(30)
+    .theme(Theme::cyberpunk())
     .on_tick(|ctx, tick| {
         // Called every 250ms by default
     })
@@ -126,6 +165,8 @@ App::new().unwrap()
 cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud + SystemMonitor
 cargo run --example framework_file_manager # File browser with List + Breadcrumbs + SplitPane
 cargo run --example framework_chat        # Chat UI: message list + input bar + theme
+cargo run --example framework_widgets     # Showcase all 23+ framework widgets
+cargo run --example text_editor_demo      # Standalone TextEditor with theme switching
 
 # Engine examples — raw compositor usage
 cargo run --example basic_raw             # minimal Terminal usage
@@ -135,7 +176,7 @@ cargo run --example input_debug           # SGR mouse + keyboard parsing
 
 ## Version
 
-**v26.0.1** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v27.0.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
