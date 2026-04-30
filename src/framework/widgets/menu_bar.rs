@@ -167,7 +167,7 @@ impl crate::framework::widget::Widget for MenuBar {
             let cell_width = display.width().min(entry_width);
 
             for (j, c) in display.chars().take(cell_width).enumerate() {
-                let idx = (0u16 * plane.width + (i * entry_width + j) as u16) as usize;
+                let idx = i * entry_width + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,

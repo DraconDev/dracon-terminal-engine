@@ -140,7 +140,7 @@ impl crate::framework::widget::Widget for Toast {
         let width = plane.cells.len() / plane.height as usize;
 
         for (i, c) in full_text.chars().take(width).enumerate() {
-            let idx = (0u16 * plane.width + i as u16) as usize;
+            let idx = i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,

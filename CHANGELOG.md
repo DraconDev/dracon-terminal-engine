@@ -7,17 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [27.0.1] - 2026-04-30
 
-### Fixed
+### Infrastructure
 
-- All 23+ framework widgets now correctly call `mark_dirty()` on state changes (Checkbox::toggle/check/uncheck, Slider::set_value, Radio::select/deselect, Toggle::toggle)
-- Fixed parallel test race in theme propagation tests by using per-widget Rc<Cell> tracking instead of shared static registry
-- `Terminal::new()` now falls back to null-mode when stdout is not a TTY (headless/CI environments)
-- `App::add_widget` now calls `widget.set_id(id)` to sync App-assigned IDs with widgets
+- CI/CD: GitHub Actions workflows for CI (clippy, fmt, tests on stable/beta/nightly + macOS/Windows) and release (crates.io publish + GitHub Release)
+- Added issue templates (bug report, feature request) and PR template
+- Added CODE_OF_CONDUCT.md (Contributor Covenant v2.0)
+- Added CONTRIBUTING.md (dev setup, code style, PR process)
+- Added CHANGELOG.md (keepachangelog format)
+- GitHub topics: rust, terminal, tui, framework, cli, compositor, ratatui, syntax-highlighting
+- GitHub description and homepage set
 
 ### Added
 
 - `Ctx::layout()` — constraint-based layout helper for use in `App::run` callbacks
 - 8 new dirty tracking integration tests in `tests/phase1_widget_test.rs`
+- All 29 framework widgets now have dirty tracking (`needs_render()`, `mark_dirty()`, `clear_dirty()`)
+- State-changing methods on widgets (toggle, set_value, select, etc.) now call `mark_dirty()`
+- `App::add_widget` now calls `widget.set_id(id)` to sync App-assigned IDs
+- `Terminal::new()` falls back to null-mode when stdout is not a TTY
+
+### Fixed
+
+- README license badge now points to LICENSE-MIT (was deleted LICENSE pointer file)
+- README widget count: 23 → 29 (corrected)
+- README Quick Start example: unused `tick` param now `_tick`
+- README example description: "23+" → "29" framework widgets
+- Clippy: fixed always-zero multiplication `0u16 * plane.width` in 6 widget files
+- Clippy: fixed always-true assertion in scroll_test.rs
+- Smoke test `test_text_editor_demo_smoke` marked `#[ignore]` (requires real TTY)
+- Fixed parallel test race in theme propagation tests (per-widget Rc<Cell> tracking)
 
 ## [27.0.0] - 2024-12-01
 

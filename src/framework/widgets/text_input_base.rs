@@ -83,7 +83,7 @@ impl BaseInput {
         };
 
         for (i, c) in display.chars().take(width.saturating_sub(2)).enumerate() {
-            let idx = (0u16 * plane.width + i as u16) as usize;
+            let idx = i;
             if idx < plane.cells.len() {
                 let is_cursor = i == self.cursor_pos && !self.text.is_empty();
                 plane.cells[idx] = Cell {

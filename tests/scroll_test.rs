@@ -253,7 +253,7 @@ fn test_scroll_state_scroll_page_down_at_bottom() {
 #[test]
 fn test_scroll_container_new() {
     let sc = ScrollContainer::new();
-    assert!(sc.state().content_height == 0 || true);
+    assert!(sc.state().content_height == 0);
 }
 
 #[test]

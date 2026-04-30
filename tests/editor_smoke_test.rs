@@ -10,6 +10,7 @@ use std::time::Duration;
 use std::thread;
 
 #[test]
+#[ignore = "requires a real TTY; stdout is piped in CI/test environments so this hangs"]
 fn test_text_editor_demo_smoke() {
     let build_status = Command::new("cargo")
         .args(["build", "--example", "text_editor_demo"])

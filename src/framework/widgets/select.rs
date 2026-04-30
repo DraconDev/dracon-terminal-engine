@@ -111,7 +111,7 @@ impl crate::framework::widget::Widget for Select {
         let fg = if self.expanded { self.theme.accent } else { self.theme.fg };
 
         for (i, c) in display.chars().take(width).enumerate() {
-            let idx = (0u16 * plane.width + i as u16) as usize;
+            let idx = i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,

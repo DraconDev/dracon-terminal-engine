@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/dracon-terminal-engine.svg)](https://crates.io/crates/dracon-terminal-engine)
 [![docs.rs](https://img.shields.io/docsrs/dracon-terminal-engine)](https://docs.rs/dracon-terminal-engine)
 [![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE-MIT)
 
 ```
   _______   ______   .______      .___ ___.      ___
@@ -63,7 +63,7 @@ The `framework` module provides the complete application runtime:
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 
-### 28 Framework Widgets
+### 29 Framework Widgets
 | Widget | What |
 |---|---|
 | [`Breadcrumbs`] | Hierarchical path display with clickable segments |
@@ -151,7 +151,7 @@ App::new().unwrap()
     .title("My App")
     .fps(30)
     .theme(Theme::cyberpunk())
-    .on_tick(|ctx, tick| {
+    .on_tick(|_ctx, _tick| {
         // Called every 250ms by default
     })
     .run(|ctx| {
@@ -170,7 +170,7 @@ App::new().unwrap()
 cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud + SystemMonitor
 cargo run --example framework_file_manager # File browser with List + Breadcrumbs + SplitPane
 cargo run --example framework_chat        # Chat UI: message list + input bar + theme
-cargo run --example framework_widgets     # Showcase all 23+ framework widgets
+cargo run --example framework_widgets     # Showcase all 29 framework widgets
 cargo run --example text_editor_demo      # Standalone TextEditor with theme switching
 
 # Engine examples — raw compositor usage
