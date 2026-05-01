@@ -7,12 +7,39 @@
 //! - Dirty tracking across widget composition
 //! - App lifecycle (on_mount/on_unmount) for multiple widgets
 //! - Modal overlay event interception
+//!
+//! # Test Areas
+//!
+//! ## 1. SplitPane + List + Panel (`test_splitpane_*`)
+//! Verifies that a SplitPane can contain different widgets in each panel,
+//! that both panels render independently, and that z-index values are set correctly.
+//!
+//! ## 2. Widget Tree Rendering (`test_widget_tree_*`)
+//! Verifies that render calls propagate through a widget hierarchy and that
+//! area is correctly set on all children in the tree.
+//!
+//! ## 3. Z-index Layering (`test_z_index_*`, `test_hud_z_index_*`)
+//! Verifies that widgets with higher z-index values render on top of lower ones,
+//! and that overlapping areas respect z-ordering.
+//!
+//! ## 4. Dirty Tracking (`test_dirty_*`, `test_widget_set_area_*`)
+//! Verifies that dirty flags control render behavior, that marking dirty triggers
+//! re-renders, and that set_area marks the widget dirty.
+//!
+//! ## 5. App Lifecycle (`test_app_*`)
+//! Verifies that on_mount is called when widgets are added, on_unmount is called
+//! when widgets are removed, and multiple widgets can coexist with proper lifecycle.
+//!
+//! ## 6. Modal Overlay (`test_modal_*`)
+//! Verifies that modal dialogs intercept events, handle keyboard input (Esc/Enter/Tab),
+//! handle mouse clicks on buttons, and properly block events from reaching widgets below.
+
+#![allow(dead_code)]
 
 use std::cell::Cell;
 use std::rc::Rc;
 
-use dracon_terminal_engine::compositor::{Plane, Color};
-use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Hud, List, Modal, ModalResult, SplitPane,
@@ -146,9 +173,11 @@ impl TrackingRenderWidget {
         )
     }
 
-    fn with_children(mut self, children: Vec<Box<dyn Widget>>) -> Self {
-        self.children = children;
-        self
+    fn with_children(self, children: Vec<Box<dyn Widget>>) -> Self {
+        Self {
+            children,
+            ..self
+        }
     }
 }
 
@@ -192,8 +221,8 @@ impl TrackingRenderWidget {
 
 #[test]
 fn test_widget_tree_area_propagation() {
-    let (child1, _child1_area_count, _) = TrackingRenderWidget::new(1);
-    let (child2, _child2_area_count, _) = TrackingRenderWidget::new(2);
+    let (_child1, _child1_area_count, _) = TrackingRenderWidget::new(1);
+    let (_child2, _child2_area_count, _) = TrackingRenderWidget::new(2);
 
     let (parent, parent_render_count, _) = TrackingRenderWidget::new(0);
 
@@ -379,7 +408,7 @@ impl Widget for DirtyTrackingWidget {
 
 #[test]
 fn test_dirty_widget_gets_rendered() {
-    let (mut widget, render_count) = DirtyTrackingWidget::new(1);
+    let (widget, render_count) = DirtyTrackingWidget::new(1);
 
     assert!(widget.needs_render(), "new widget should be dirty");
     widget.render(Rect::new(0, 0, 80, 24));
@@ -592,7 +621,7 @@ fn test_app_remove_first_widget_others_still_mounted() {
     impl SimpleTracker {
         fn new(which: usize) -> Self {
             Self {
-                id: WidgetId::new(which),
+                id: WidgetId::default_id(),
                 area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
                 which,
             }
@@ -602,6 +631,7 @@ fn test_app_remove_first_widget_others_still_mounted() {
     impl Widget for SimpleTracker {
         fn id(&self) -> WidgetId { self.id }
         fn area(&self) -> Rect { self.area.get() }
+        fn set_id(&mut self, id: WidgetId) { self.id = id; }
         fn set_area(&mut self, area: Rect) { self.area.set(area); }
         fn focusable(&self) -> bool { true }
         fn on_mount(&mut self) {
