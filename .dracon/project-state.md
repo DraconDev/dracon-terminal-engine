@@ -1,7 +1,9 @@
 # Project State
 
 ## Current Focus
-The application framework now supports configurable command initialization through a configuration object, replacing the previous hardcoded empty command vector.
+Added unit tests for command configuration in the application framework
 
 ## Completed
-- [x] feat(command configuration): Modified the App initialization to accept command configuration from an external source, improving flexibility in command setup
+- [x] Added test for parsing command configurations from TOML
+- [x] Verified command properties including labels, descriptions, and refresh intervals
+- [x] Ensured proper handling of multiple command definitions in configuration

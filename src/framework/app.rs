@@ -1359,6 +1359,33 @@ let config = AppConfig::from_toml_str(toml).unwrap();
     }
 
     #[test]
+    fn test_app_config_commands() {
+        let toml = r#"
+            title = "Command Test"
+
+            [[commands]]
+            command = "dracon-system status --json"
+            label = "system status"
+            description = "Get system status"
+            refresh_seconds = 5
+
+            [[commands]]
+            command = "dracon-sync repos --json"
+            label = "sync repos"
+            description = "Get repo status"
+            refresh_seconds = 10
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Command Test");
+        assert_eq!(config.commands.len(), 2);
+        assert_eq!(config.commands[0].command, "dracon-system status --json");
+        assert_eq!(config.commands[0].label, "system status");
+        assert_eq!(config.commands[0].refresh_seconds, Some(5));
+        assert_eq!(config.commands[1].command, "dracon-sync repos --json");
+        assert_eq!(config.commands[1].refresh_seconds, Some(10));
+    }
+
+    #[test]
     fn test_app_command_tracking_on_add_widget() {
         use crate::framework::command::BoundCommand;
         let mut app = App::new().unwrap();
