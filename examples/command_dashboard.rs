@@ -69,6 +69,7 @@ fn main() -> std::io::Result<()> {
         );
 
     let status = StatusBadge::new(WidgetId::default_id())
+        .with_status("OK")
         .with_label("System");
 
     // Layout: 3 gauges across top (30% height), key-value grid + badge below
