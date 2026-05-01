@@ -1,7 +1,7 @@
 # Project State
 
 ## Current Focus
-Refactored test variable naming in the `Glitch` filter test to improve clarity and avoid unused variable warnings.
+Refactored test utility function for theme color assertions
 
 ## Completed
-- [x] Renamed `changed` to `_changed` in `test_glitch_at_zero_time_most_cells_unchanged` to indicate intentional unused status
+- [x] Removed redundant `assert_color_eq` helper function from theme tests

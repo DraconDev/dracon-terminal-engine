@@ -3,10 +3,6 @@
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 
-fn assert_color_eq(actual: Color, expected: Color, field: &str) {
-    assert_eq!(actual, expected, "field {} mismatch", field);
-}
-
 fn assert_theme_name(t: &Theme, expected_name: &str) {
     assert_eq!(t.name, expected_name);
 }
