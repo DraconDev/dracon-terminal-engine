@@ -1,8 +1,9 @@
 # Project State
 
 ## Current Focus
-Refactored the `CommandRunner` struct to initialize `exit_code` with a default value of `-1` instead of `None`, ensuring consistent handling of command exit status.
+Refactored error handling in `CommandRunner` to improve robustness when processing command output streams.
 
 ## Completed
-- [x] Changed `exit_code` from `Option<i32>` to `i32` with default value `-1` for better initialization
-- [x] Updated default initialization to set `exit_code` to `-1` instead of `None`
+- [x] Replaced `flatten()` with `filter_map(Result::ok)` in stdout/stderr processing to handle IO errors gracefully
+- [x] Simplified exit code handling by using `unwrap_or(-1)` instead of nested `map` operations
+- [x] Maintained thread-based stream processing while improving error resilience

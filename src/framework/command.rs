@@ -291,7 +291,7 @@ impl CommandRunner {
         if let Some(stdout) = child.stdout.take() {
             let tx = stdout_tx.clone();
             thread::spawn(move || {
-                for l in BufReader::new(stdout).lines().flatten() {
+                for l in BufReader::new(stdout).lines().filter_map(Result::ok) {
                     let _ = tx.send(l);
                 }
             });
@@ -300,7 +300,7 @@ impl CommandRunner {
         if let Some(stderr) = child.stderr.take() {
             let tx2 = stderr_tx.clone();
             thread::spawn(move || {
-                for l in BufReader::new(stderr).lines().flatten() {
+                for l in BufReader::new(stderr).lines().filter_map(Result::ok) {
                     let _ = tx2.send(l);
                 }
             });
@@ -310,7 +310,7 @@ impl CommandRunner {
             if let Ok(code) = child.wait() {
                 let _ = exit_tx.send(format!(
                     "__EXIT_CODE__{}",
-                    code.code().map(|c| c).unwrap_or(-1)
+                    code.code().unwrap_or(-1)
                 ));
             }
         });
