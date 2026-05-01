@@ -648,8 +648,8 @@ mod tests {
     use super::*;
     use crate::framework::command::{AppConfig, AreaConfig, LayoutConfig, ParserConfig, WidgetConfig};
 
-    fn dummy_terminal() -> crate::Terminal<Vec<u8>> {
-        crate::Terminal::new(Vec::new()).unwrap()
+    fn dummy_terminal() -> crate::Terminal<io::Stdout> {
+        unsafe { std::mem::zeroed() }
     }
 
     #[test]

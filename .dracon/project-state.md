@@ -1,8 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactor application framework test setup to replace unsafe, undefined-behavior-prone zeroed terminal mocks with a safe, reusable dummy terminal helper.
+- Replaced unsafe `std::mem::zeroed()` with `io::Stdout` for `Terminal` initialization, addressing safety concerns and potentially improving test stability.
 
 ## Completed
-- [x] Introduce `dummy_terminal()` test helper that initializes a valid `Terminal<Vec<u8>>` instance via proper `Terminal::new` construction
-- [x] Replace all instances of unsafe `std::mem::zeroed()` terminal mocks in app module tests with the new `dummy_terminal()` helper, removing invalid mock terminal initialization
+- [x] `dummy_terminal` function now initializes `Terminal` with `io::Stdout` instead of an unsafe `Vec<u8>`.
+- [x] Removed unsafe constructs from application framework test setup, enhancing code safety.
