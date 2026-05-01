@@ -41,12 +41,12 @@ pub enum LogLevel {
 }
 
 pub struct LogViewer {
-    id: WidgetId,
-    lines: VecDeque<LogLine>,
-    max_lines: usize,
-    auto_scroll: bool,
-    filter: Option<String>,
-    theme: Theme,
+    pub id: WidgetId,
+    pub lines: VecDeque<LogLine>,
+    pub max_lines: usize,
+    pub auto_scroll: bool,
+    pub filter: Option<String>,
+    pub theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,
@@ -180,7 +180,7 @@ impl LogViewer {
         }
     }
 
-    fn level_color(&self, level: LogLevel) -> Color {
+    pub fn level_color(&self, level: LogLevel) -> Color {
         match level {
             LogLevel::Fatal => self.theme.error_fg,
             LogLevel::Error => self.theme.error_fg,
@@ -190,7 +190,7 @@ impl LogViewer {
         }
     }
 
-    fn level_prefix(&self, level: LogLevel) -> &'static str {
+    pub fn level_prefix(&self, level: LogLevel) -> &'static str {
         match level {
             LogLevel::Debug => "[D]",
             LogLevel::Info => "[I]",

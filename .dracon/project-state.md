@@ -1,22 +1,34 @@
 # Project State
 
 ## Current Focus
-Simplified theme switching implementation in the theme switcher demo
+Added comprehensive test coverage for widget components and async command execution patterns
 
 ## Context
-The theme switcher demo was refactored to remove redundant theme change detection logic, making the code more straightforward and maintainable.
+The project is expanding its test suite to ensure reliability of widget components and async command handling. This follows recent work on widget lifecycle testing and form handling.
 
 ## Completed
-- [x] Removed duplicate theme change detection code
-- [x] Simplified the main application loop
-- [x] Updated error handling to use a more specific Result type
+- [x] Made widget fields public for easier testing (KeyValueGrid, LogViewer, PasswordInput, StatusBadge, StreamingText)
+- [x] Added async command runner tests covering:
+  - Basic async command execution
+  - Timeout handling
+  - Separate stdout/stderr capture
+  - Working directory support
+  - Poll vs await semantics
+  - Error handling patterns
+- [x] Added widget-specific test files for:
+  - KeyValueGrid
+  - LogViewer
+  - StatusBadge
+  - StreamingText
+  - TextInputBase
 
 ## In Progress
-- [x] Theme switching implementation is now more concise
+- [ ] Verifying test coverage for edge cases in async command scenarios
 
 ## Blockers
-- None identified
+- Need to ensure all test cases properly handle async context boundaries
 
 ## Next Steps
-1. Verify theme switching still works correctly with the simplified implementation
-2. Consider adding more comprehensive theme switching tests
+1. Review test coverage for any missed edge cases
+2. Integrate new tests into CI pipeline
+3. Begin performance testing of async command patterns

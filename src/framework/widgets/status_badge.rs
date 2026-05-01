@@ -22,10 +22,10 @@ use ratatui::layout::Rect;
 
 #[derive(Debug, Clone)]
 pub struct StatusBadge {
-    id: WidgetId,
-    status: String,
-    label: String,
-    theme: Theme,
+    pub id: WidgetId,
+    pub status: String,
+    pub label: String,
+    pub theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,

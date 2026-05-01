@@ -6,8 +6,8 @@ use ratatui::layout::Rect;
 
 /// A password input widget that masks characters as they're typed.
 pub struct PasswordInput {
-    id: WidgetId,
-    base: super::text_input_base::BaseInput,
+    pub id: WidgetId,
+    pub base: super::text_input_base::BaseInput,
 }
 
 impl PasswordInput {

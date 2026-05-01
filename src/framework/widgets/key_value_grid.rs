@@ -23,10 +23,10 @@ use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 
 pub struct KeyValueGrid {
-    id: WidgetId,
-    pairs: BTreeMap<String, String>,
-    separator: String,
-    theme: Theme,
+    pub id: WidgetId,
+    pub pairs: BTreeMap<String, String>,
+    pub separator: String,
+    pub theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,

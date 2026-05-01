@@ -24,13 +24,13 @@ use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 
 pub struct StreamingText {
-    id: WidgetId,
-    content: String,
-    lines: VecDeque<String>,
-    max_lines: usize,
-    auto_scroll: bool,
-    word_wrap: bool,
-    theme: Theme,
+    pub id: WidgetId,
+    pub content: String,
+    pub lines: VecDeque<String>,
+    pub max_lines: usize,
+    pub auto_scroll: bool,
+    pub word_wrap: bool,
+    pub theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,
