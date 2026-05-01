@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "32.4.0"
+version = "32.5.0"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

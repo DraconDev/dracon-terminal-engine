@@ -146,7 +146,7 @@ impl App {
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
             next_widget_id: 0,
-            commands: RefCell::new(Vec::new()),
+            commands: RefCell::new(config.commands),
             command_tracking: RefCell::new(HashMap::new()),
         };
 
