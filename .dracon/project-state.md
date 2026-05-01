@@ -1,11 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactor mouse event handling and cleanup ratatui integration tests
+Refactor application framework test setup to replace unsafe, undefined-behavior-prone zeroed terminal mocks with a safe, reusable dummy terminal helper.
 
 ## Completed
-- [x] Fix mouse event API by replacing `MouseEventKind::Press` with `MouseEventKind::Down(MouseButton::Left)` in password input widget tests
-- [x] Fix mouse event API by replacing `MouseEventKind::Press` with `MouseEventKind::Down(MouseButton::Left)` in text input base widget tests
-- [x] Remove 175 lines of ratatui integration tests from src/integration/ratatui.rs
-- [x] Add Theme import to password_input.rs to support theme functionality
-- [x] Fix test variable mutability by adding `mut` keyword to app variable in app.rs test
+- [x] Introduce `dummy_terminal()` test helper that initializes a valid `Terminal<Vec<u8>>` instance via proper `Terminal::new` construction
+- [x] Replace all instances of unsafe `std::mem::zeroed()` terminal mocks in app module tests with the new `dummy_terminal()` helper, removing invalid mock terminal initialization
