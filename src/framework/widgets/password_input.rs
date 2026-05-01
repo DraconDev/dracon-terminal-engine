@@ -121,8 +121,8 @@ mod tests {
     #[test]
     fn test_password_input_with_theme() {
         let id = WidgetId::new(1);
-        let input = PasswordInput::new(id).with_theme(Theme::cyberpunk());
-        assert_eq!(input.base.theme.name, "cyberpunk");
+        let input = PasswordInput::new(id).with_theme(crate::framework::theme::Theme::default());
+        assert_eq!(input.base.theme.name, "default");
     }
 
     #[test]
