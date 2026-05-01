@@ -378,7 +378,7 @@ impl Widget for DirtyTrackingWidget {
 
 #[test]
 fn test_dirty_widget_gets_rendered() {
-    let (widget, render_count) = DirtyTrackingWidget::new(1);
+    let (mut widget, render_count) = DirtyTrackingWidget::new(1);
 
     assert!(widget.needs_render(), "new widget should be dirty");
     widget.render(Rect::new(0, 0, 80, 24));
@@ -387,7 +387,7 @@ fn test_dirty_widget_gets_rendered() {
 
 #[test]
 fn test_clean_widget_not_rendered() {
-    let (widget, _render_count) = DirtyTrackingWidget::new(1);
+    let (mut widget, _render_count) = DirtyTrackingWidget::new(1);
 
     widget.render(Rect::new(0, 0, 80, 24));
     widget.clear_dirty();
@@ -399,7 +399,7 @@ fn test_clean_widget_not_rendered() {
 
 #[test]
 fn test_mark_dirty_triggers_rerender() {
-    let (widget, _render_count) = DirtyTrackingWidget::new(1);
+    let (mut widget, _render_count) = DirtyTrackingWidget::new(1);
 
     widget.render(Rect::new(0, 0, 80, 24));
     widget.clear_dirty();
