@@ -911,7 +911,6 @@ mod tests {
         };
 
         ctx.mark_dirty(0, 0, 80, 24);
-        assert!(true);
     }
 
     #[test]

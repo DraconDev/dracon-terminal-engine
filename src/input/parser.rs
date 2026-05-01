@@ -645,13 +645,11 @@ mod tests {
         let seq = b"\x1b[<8;10;20M";
 
         for byte in seq {
-            if let Some(event) = parser.advance(*byte) {
-                if let Event::Mouse(me) = event {
-                    assert_eq!(me.kind, MouseEventKind::Down(MouseButton::Back));
-                    assert_eq!(me.row, 19);
-                    assert_eq!(me.column, 9);
-                    return;
-                }
+            if let Some(Event::Mouse(me)) = parser.advance(*byte) {
+                assert_eq!(me.kind, MouseEventKind::Down(MouseButton::Back));
+                assert_eq!(me.row, 19);
+                assert_eq!(me.column, 9);
+                return;
             }
         }
         panic!("Did not parse SGR Back Button event");
@@ -714,11 +712,9 @@ mod tests {
         let seq = b"\x1b[<9;5;5M";
 
         for byte in seq {
-            if let Some(event) = parser.advance(*byte) {
-                if let Event::Mouse(me) = event {
-                    assert_eq!(me.kind, MouseEventKind::Down(MouseButton::Forward));
-                    return;
-                }
+            if let Some(Event::Mouse(me)) = parser.advance(*byte) {
+                assert_eq!(me.kind, MouseEventKind::Down(MouseButton::Forward));
+                return;
             }
         }
         panic!("Did not parse SGR Forward Button event");

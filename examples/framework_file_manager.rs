@@ -16,13 +16,6 @@ struct FileEntry {
     size: u64,
 }
 
-impl ToString for FileEntry {
-    fn to_string(&self) -> String {
-        let icon = if self.is_dir { ">" } else { "-" };
-        format!("{} {} ({})", icon, self.name, self.size)
-    }
-}
-
 fn read_dir(path: &PathBuf) -> Vec<FileEntry> {
     std::fs::read_dir(path)
         .map(|entries| {

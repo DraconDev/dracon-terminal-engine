@@ -155,15 +155,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Update Animation (Rain)
-        for i in 0..size.0 as usize {
+        drops.iter_mut().enumerate().for_each(|(i, drop)| {
             if rng.gen_bool(0.1) {
-                drops[i] = 0.0;
+                *drop = 0.0;
             }
-            drops[i] += 0.5;
-            if drops[i] > size.1 as f32 {
-                drops[i] = size.1 as f32 + 10.0;
+            *drop += 0.5;
+            if *drop > size.1 as f32 {
+                *drop = size.1 as f32 + 10.0;
             }
-        }
+        });
 
         // Render Frame
         compositor.planes.clear();
@@ -177,12 +177,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if (0..5).contains(&dist) {
                     let char = if dist == 0 { '0' } else { '1' };
                     let fg = if dist == 0 { 46 } else { 22 };
-                    let mut cell = Cell::default();
-                    cell.char = char;
-                    cell.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(fg);
-                    cell.bg = dracon_terminal_engine::compositor::plane::Color::Reset;
+                    let cell = Cell {
+                        char,
+                        fg: dracon_terminal_engine::compositor::plane::Color::Ansi(fg),
+                        bg: dracon_terminal_engine::compositor::plane::Color::Reset,
+                        transparent: false,
+                        skip: false,
+                    };
                     bg.put_cell(x, y, cell);
-                }
             }
         }
         compositor.add_plane(bg);
@@ -227,12 +229,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         taskbar.set_z_index(2000);
         let status = " [Start]  Dracon Terminal v1.0 | Press 'q' to Shutdown";
         for (i, c) in status.chars().enumerate() {
-            let mut cell = Cell::default();
-            cell.char = c;
-            cell.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(0);
-            cell.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(15); // White bar
-            cell.transparent = false;
-            taskbar.put_cell(i as u16, 0, cell);
+            let cell = Cell {
+                        char: c,
+                        fg: dracon_terminal_engine::compositor::plane::Color::Ansi(0),
+                        bg: dracon_terminal_engine::compositor::plane::Color::Ansi(15),
+                        transparent: false,
+                        skip: false,
+                    };
+                    taskbar.put_cell(i as u16, 0, cell);
         }
         compositor.add_plane(taskbar);
 
