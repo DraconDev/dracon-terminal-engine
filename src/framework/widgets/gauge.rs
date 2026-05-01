@@ -113,7 +113,7 @@ impl Gauge {
         }
     }
 
-    fn fill_color(&self) -> Color {
+    pub fn fill_color(&self) -> Color {
         let pct = self.percentage();
         if pct >= self.crit_threshold {
             self.theme.error_fg

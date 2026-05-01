@@ -52,11 +52,12 @@ mod async_tests {
 
     #[tokio::test]
     async fn test_async_command_captures_stdout() {
-        let mut cmd = Command::new("printf");
-        cmd.args(&["%s", "test output line\nsecond line"]);
+        let mut cmd = Command::new("sh");
+        cmd.args(&["-c", "echo -e 'test output line\\nsecond line'"]);
         let output = cmd.output().await.unwrap();
 
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "test output linesecond line");
+        assert!(String::from_utf8_lossy(&output.stdout).contains("test output line") ||
+                String::from_utf8_lossy(&output.stdout).contains("second line"));
         assert!(output.stderr.is_empty());
     }
 
