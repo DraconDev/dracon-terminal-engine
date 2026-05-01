@@ -667,7 +667,7 @@ impl<'a> Ctx<'a> {
 
     /// Lays out child rectangles using the given constraints within the screen area.
     ///
-    /// This is a convenience method that uses the [`Layout`] engine to compute
+    /// This is a convenience method that uses the `Layout` engine to compute
     /// widget rectangles from constraint specifications (percentage, fixed, min, max, ratio).
     ///
     /// # Example
