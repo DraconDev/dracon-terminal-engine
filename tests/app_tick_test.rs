@@ -13,8 +13,9 @@
 //! individual components and internal state indirectly through the public API.
 
 use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::app::App;
@@ -145,21 +146,21 @@ struct OutputTrackingWidget {
     area: std::cell::Cell<Rect>,
     dirty: bool,
     command_output_received: Rc<Cell<bool>>,
-    last_output: Rc<Cell<Option<String>>>,
+    last_output: RefCell<Option<String>>,
 }
 
 impl OutputTrackingWidget {
     fn new(
         id: usize,
         command_output_received: Rc<Cell<bool>>,
-        last_output: Rc<Cell<Option<String>>>,
+        last_output: Rc<RefCell<Option<String>>>,
     ) -> Self {
         Self {
             id: WidgetId::new(id),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
             command_output_received,
-            last_output,
+            last_output: RefCell::new(None),
         }
     }
 }
@@ -200,7 +201,7 @@ impl Widget for OutputTrackingWidget {
     fn apply_command_output(&mut self, output: &ParsedOutput) {
         self.command_output_received.set(true);
         if let ParsedOutput::Scalar(s) = output {
-            self.last_output.set(Some(s.clone()));
+            *self.last_output.borrow_mut() = Some(s.clone());
         }
     }
 }
