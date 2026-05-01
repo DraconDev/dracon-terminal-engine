@@ -1,8 +1,8 @@
 //! Form Demo — demonstrates the framework's form widget with validation.
 //!
 //! This example shows:
-//! - A `Form` widget containing multiple field types
-//! - Focus cycling via `FocusManager` (Tab/Shift+Tab)
+//! - A `SettingsForm` struct wrapping multiple widget types
+//! - Focus cycling via Tab/Shift+Tab
 //! - Field validation with inline error messages
 //! - Submit handling with validation of all fields
 //! - Keyboard navigation (Enter to advance, Escape to clear)
@@ -12,8 +12,8 @@
 //!
 //! | Field | Type | Validation |
 //! |-------|------|------------|
-//! | Username | TextInput | non-empty |
-//! | Email | TextInput | must contain "@" |
+//! | Username | SearchInput | non-empty |
+//! | Email | SearchInput | must contain "@" |
 //! | Password | PasswordInput | min 8 characters |
 //! | Theme | Select | Dark/Light/Cyberpunk |
 //! | Notifications | Toggle | on/off |
@@ -21,11 +21,10 @@
 //!
 //! # Key Patterns
 //!
-//! 1. **Composition**: The `SettingsForm` struct wraps multiple widgets and
-//!    implements `Widget` to compose them into a single form.
+//! 1. **Composition**: `SettingsForm` wraps multiple widgets and implements
+//!    `Widget` to compose them into a single form.
 //!
-//! 2. **Focus cycling**: `FocusManager::tab_next()` / `tab_prev()` cycle focus
-//!    through the field widgets.
+//! 2. **Focus cycling**: Focus moves through fields with Tab/Shift+Tab.
 //!
 //! 3. **Validation**: Each field validates on blur or submit. Errors are stored
 //!    in the form and rendered inline below invalid fields.
@@ -33,8 +32,9 @@
 //! 4. **Submit flow**: Button click triggers validation of all fields. If valid,
 //!    shows a success toast. If invalid, shows error states.
 
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, PasswordInput, SearchInput, Select, Toast, ToastKind, Toggle,
 };
@@ -86,7 +86,7 @@ struct SettingsForm {
 
 impl SettingsForm {
     fn new(id: WidgetId) -> Self {
-        let theme = Select::new(WidgetId::new(id.0 + 3))
+        let theme_select = Select::new(WidgetId::new(id.0 + 3))
             .with_options(vec![
                 "Dark".to_string(),
                 "Light".to_string(),
@@ -98,7 +98,7 @@ impl SettingsForm {
             username: SearchInput::new(WidgetId::new(id.0 + 1)),
             email: SearchInput::new(WidgetId::new(id.0 + 2)),
             password: PasswordInput::new(WidgetId::new(id.0 + 3)),
-            theme,
+            theme: theme_select,
             notifications: Toggle::new(WidgetId::new(id.0 + 4), "Enable notifications"),
             submit: Button::with_id(WidgetId::new(id.0 + 5), "Save Settings"),
             focused_field: FIELD_USERNAME,
@@ -191,6 +191,10 @@ impl SettingsForm {
             _ => None,
         }
     }
+
+    fn theme(&self) -> Theme {
+        Theme::cyberpunk()
+    }
 }
 
 impl Widget for SettingsForm {
@@ -240,124 +244,142 @@ impl Widget for SettingsForm {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        let theme = self.theme();
         let mut plane = Plane::new(0, area.width, area.height);
-        plane.z_index = self.z_index();
+        plane.z_index = self.z_index() as i32;
 
-        let left_col = 15u16;
+        let label_col = 0u16;
+        let input_col = 15u16;
         let input_width = 40u16;
-        let error_offset = 30u16;
 
         let mut y = 0u16;
 
-        plane.cells[0].char = 'U';
-        for (i, c) in "Username: ".chars().take(left_col as usize).enumerate() {
-            let idx = (y * plane.width + i as u16) as usize;
+        let label = "Username: ";
+        for (i, c) in label.chars().take(15).enumerate() {
+            let idx = (y * plane.width + label_col + i as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.focused_field == FIELD_USERNAME {
-                    self.theme.accent
-                } else {
-                    self.theme.fg
+                plane.cells[idx] = Cell {
+                    char: c,
+                    fg: if self.focused_field == FIELD_USERNAME { theme.accent } else { theme.fg },
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
                 };
-                plane.cells[idx].bg = self.theme.bg;
             }
         }
-        let username_plane = self.username.render(Rect::new(left_col, y, input_width, 1));
-        for cell in &username_plane.cells[..username_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+
+        let username_plane = self.username.render(Rect::new(input_col, y, input_width, 1));
+        for (i, cell) in username_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
         }
+
         if let Some(ref err) = self.errors.username {
-            for (i, c) in err.chars().take(input_width as usize).enumerate() {
-                let idx = (y * plane.width + left_col + 2 + i as u16) as usize;
+            let err_str = format!("  {}", err);
+            for (i, c) in err_str.chars().take(input_width as usize).enumerate() {
+                let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = self.theme.error_fg;
+                    plane.cells[idx].fg = theme.error_fg;
                 }
             }
         }
 
         y += 2;
 
-        for (i, c) in "Email: ".chars().take(left_col as usize).enumerate() {
-            let idx = (y * plane.width + i as u16) as usize;
+        let label = "Email: ";
+        for (i, c) in label.chars().take(15).enumerate() {
+            let idx = (y * plane.width + label_col + i as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.focused_field == FIELD_EMAIL {
-                    self.theme.accent
-                } else {
-                    self.theme.fg
+                plane.cells[idx] = Cell {
+                    char: c,
+                    fg: if self.focused_field == FIELD_EMAIL { theme.accent } else { theme.fg },
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
                 };
-                plane.cells[idx].bg = self.theme.bg;
             }
         }
-        let email_plane = self.email.render(Rect::new(left_col, y, input_width, 1));
-        for cell in &email_plane.cells[..email_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+
+        let email_plane = self.email.render(Rect::new(input_col, y, input_width, 1));
+        for (i, cell) in email_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
         }
+
         if let Some(ref err) = self.errors.email {
-            for (i, c) in err.chars().take(input_width as usize).enumerate() {
-                let idx = (y * plane.width + left_col + 2 + i as u16) as usize;
+            let err_str = format!("  {}", err);
+            for (i, c) in err_str.chars().take(input_width as usize).enumerate() {
+                let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = self.theme.error_fg;
+                    plane.cells[idx].fg = theme.error_fg;
                 }
             }
         }
 
         y += 2;
 
-        for (i, c) in "Password: ".chars().take(left_col as usize).enumerate() {
-            let idx = (y * plane.width + i as u16) as usize;
+        let label = "Password: ";
+        for (i, c) in label.chars().take(15).enumerate() {
+            let idx = (y * plane.width + label_col + i as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.focused_field == FIELD_PASSWORD {
-                    self.theme.accent
-                } else {
-                    self.theme.fg
+                plane.cells[idx] = Cell {
+                    char: c,
+                    fg: if self.focused_field == FIELD_PASSWORD { theme.accent } else { theme.fg },
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
                 };
-                plane.cells[idx].bg = self.theme.bg;
             }
         }
-        let password_plane = self.password.render(Rect::new(left_col, y, input_width, 1));
-        for cell in &password_plane.cells[..password_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+
+        let password_plane = self.password.render(Rect::new(input_col, y, input_width, 1));
+        for (i, cell) in password_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
         }
+
         if let Some(ref err) = self.errors.password {
-            for (i, c) in err.chars().take(input_width as usize).enumerate() {
-                let idx = (y * plane.width + left_col + 2 + i as u16) as usize;
+            let err_str = format!("  {}", err);
+            for (i, c) in err_str.chars().take(input_width as usize).enumerate() {
+                let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = self.theme.error_fg;
+                    plane.cells[idx].fg = theme.error_fg;
                 }
             }
         }
 
         y += 2;
 
-        for (i, c) in "Theme: ".chars().take(left_col as usize).enumerate() {
-            let idx = (y * plane.width + i as u16) as usize;
+        let label = "Theme: ";
+        for (i, c) in label.chars().take(15).enumerate() {
+            let idx = (y * plane.width + label_col + i as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.focused_field == FIELD_THEME {
-                    self.theme.accent
-                } else {
-                    self.theme.fg
+                plane.cells[idx] = Cell {
+                    char: c,
+                    fg: if self.focused_field == FIELD_THEME { theme.accent } else { theme.fg },
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
                 };
-                plane.cells[idx].bg = self.theme.bg;
             }
         }
-        let theme_plane = self.theme.render(Rect::new(left_col, y, 20, 4));
-        for cell in &theme_plane.cells[..theme_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+
+        let theme_plane = self.theme.render(Rect::new(input_col, y, 20, 4));
+        for (i, cell) in theme_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
@@ -365,9 +387,9 @@ impl Widget for SettingsForm {
 
         y += 2;
 
-        let toggle_plane = self.notifications.render(Rect::new(left_col, y, 30, 1));
-        for cell in &toggle_plane.cells[..toggle_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+        let toggle_plane = self.notifications.render(Rect::new(input_col, y, 30, 1));
+        for (i, cell) in toggle_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
@@ -375,25 +397,22 @@ impl Widget for SettingsForm {
 
         y += 3;
 
-        let submit_plane = self.submit.render(Rect::new(left_col, y, 20, 1));
-        for cell in &submit_plane.cells[..submit_plane.cells.len().min(plane.cells.len())] {
-            let idx = (y * plane.width + left_col + cell.char as usize) as usize;
+        let submit_plane = self.submit.render(Rect::new(input_col, y, 20, 1));
+        for (i, cell) in submit_plane.cells.iter().enumerate() {
+            let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
                 plane.cells[idx] = *cell;
             }
         }
 
-        y += 3;
+        y += 2;
 
-        for (i, c) in "[Tab] next  [Shift+Tab] prev  [Enter] advance  [Esc] clear"
-            .chars()
-            .take(area.width as usize)
-            .enumerate()
-        {
+        let hint = "[Tab] next  [Shift+Tab] prev  [Enter] advance  [Esc] clear";
+        for (i, c) in hint.chars().take(area.width as usize).enumerate() {
             let idx = (y * plane.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = self.theme.inactive_fg;
+                plane.cells[idx].fg = theme.inactive_fg;
             }
         }
 
@@ -452,39 +471,21 @@ impl Widget for SettingsForm {
         col: u16,
         row: u16,
     ) -> bool {
-        let left_col = 15u16;
+        let input_col = 15u16;
         let input_width = 40u16;
 
-        if row == 0 || row == 1 {
+        if row <= 1 && col >= input_col && col < input_col + input_width {
             self.focused_field = FIELD_USERNAME;
             self.dirty = true;
-            return true;
-        } else if row == 2 || row == 3 {
+            return self.username.handle_mouse(kind, col - input_col, 0);
+        } else if row <= 3 && col >= input_col && col < input_col + input_width {
             self.focused_field = FIELD_EMAIL;
             self.dirty = true;
-            return true;
-        } else if row == 4 || row == 5 {
+            return self.email.handle_mouse(kind, col - input_col, 0);
+        } else if row <= 5 && col >= input_col && col < input_col + input_width {
             self.focused_field = FIELD_PASSWORD;
             self.dirty = true;
-            return true;
-        } else if row >= 6 && row < 10 {
-            self.focused_field = FIELD_THEME;
-            self.dirty = true;
-            return true;
-        } else if row == 10 || row == 11 {
-            self.focused_field = FIELD_NOTIFICATIONS;
-            self.dirty = true;
-            return true;
-        }
-
-        if col >= left_col && col < left_col + input_width {
-            if row <= 1 {
-                return self.username.handle_mouse(kind, col - left_col, 0);
-            } else if row <= 3 {
-                return self.email.handle_mouse(kind, col - left_col, 0);
-            } else if row <= 5 {
-                return self.password.handle_mouse(kind, col - left_col, 0);
-            }
+            return self.password.handle_mouse(kind, col - input_col, 0);
         }
 
         false
@@ -516,14 +517,14 @@ fn main() -> std::io::Result<()> {
         .title("Form Demo - Settings")
         .fps(30)
         .theme(theme)
-        .on_tick(|ctx, _tick| {
-            ctx.mark_dirty();
-        })
+        .on_tick(Box::new(|ctx, _tick| {
+            ctx.mark_all_dirty();
+        }))
         .run(|ctx| {
             let (w, h) = ctx.compositor().size();
 
-            let form_width = 60;
-            let form_height = 15;
+            let form_width = 60u16;
+            let form_height = 15u16;
             let form_x = (w.saturating_sub(form_width)) / 2;
             let form_y = (h.saturating_sub(form_height)) / 2;
 
@@ -537,14 +538,9 @@ fn main() -> std::io::Result<()> {
                 let toast = Toast::new(WidgetId::new(100), &form.toast_message)
                     .with_kind(ToastKind::Success)
                     .with_duration(std::time::Duration::from_secs(3))
-                    .with_theme(theme.clone());
+                    .with_theme(theme);
 
-                let toast_area = Rect::new(
-                    (w.saturating_sub(40)) / 2,
-                    h.saturating_sub(3),
-                    40,
-                    1,
-                );
+                let toast_area = Rect::new((w.saturating_sub(40)) / 2, h.saturating_sub(3), 40, 1);
                 ctx.add_plane(toast.render(toast_area));
             }
         })

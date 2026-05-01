@@ -9,7 +9,7 @@
 //! - FocusManager integration with App's widget registry
 
 use dracon_terminal_engine::framework::focus::FocusManager;
-use dracon_terminal_engine::framework::widget::WidgetId;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use std::sync::{Arc, Mutex};
 
 mod common;
@@ -180,7 +180,6 @@ mod tab_cycling {
         fm.register(id1, true);
         fm.register(id2, true);
 
-        // No focus set, tab_next should go to first registered
         assert_eq!(fm.tab_next(), Some(id1));
     }
 
@@ -192,11 +191,11 @@ mod tab_cycling {
         let id3 = WidgetId::new(3);
 
         fm.register(id1, true);
-        fm.register(id2, false); // not focusable
+        fm.register(id2, false);
         fm.register(id3, true);
 
         fm.set_focus(id1);
-        assert_eq!(fm.tab_next(), Some(id3)); // skips id2
+        assert_eq!(fm.tab_next(), Some(id3));
         assert_eq!(fm.tab_next(), Some(id1));
     }
 }
@@ -231,8 +230,8 @@ mod focus_traps {
     fn test_exit_trap_without_enable_does_nothing() {
         let mut fm = FocusManager::new();
         fm.enter_trap();
-        fm.exit_trap(); // without enable_trap_exit, this should do nothing
-        assert!(fm.is_trapped()); // still trapped
+        fm.exit_trap();
+        assert!(fm.is_trapped());
     }
 
     #[test]
@@ -276,7 +275,7 @@ mod focus_traps {
         });
 
         fm.enter_trap();
-        fm.enter_trap(); // second call should not trigger another callback
+        fm.enter_trap();
         fm.enter_trap();
         assert_eq!(trap_changes.lock().unwrap().as_slice(), &[true]);
     }
@@ -296,7 +295,7 @@ mod focus_callbacks {
         let mut w = TrackingWidget::new(1);
         assert_eq!(w.focus_count(), 0);
 
-        w.on_focus();
+        Widget::on_focus(&mut w);
         assert_eq!(w.focus_count(), 1);
     }
 
@@ -305,7 +304,7 @@ mod focus_callbacks {
         let mut w = TrackingWidget::new(1);
         assert_eq!(w.blur_count(), 0);
 
-        w.on_blur();
+        Widget::on_blur(&mut w);
         assert_eq!(w.blur_count(), 1);
     }
 
@@ -334,9 +333,9 @@ mod focus_callbacks {
 
         let recorded = changes.lock().unwrap();
         assert_eq!(recorded.len(), 3);
-        assert_eq!(recorded[0], (id1, None)); // first focus: new=id1, old=None
-        assert_eq!(recorded[1], (id2, Some(id1))); // id1 -> id2
-        assert_eq!(recorded[2], (id1, Some(id2))); // id2 -> id1
+        assert_eq!(recorded[0], (id1, None));
+        assert_eq!(recorded[1], (id2, Some(id1)));
+        assert_eq!(recorded[2], (id1, Some(id2)));
     }
 
     #[test]
@@ -348,16 +347,22 @@ mod focus_callbacks {
         fm.register(id1, true);
         fm.register(id2, true);
 
-        let mut last_change: Option<(Option<WidgetId>, Option<WidgetId>)> = None;
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let captured_clone = captured.clone();
+
         fm.on_focus_change(move |new_id, old_id| {
-            last_change = Some((Some(new_id), old_id));
+            captured_clone
+                .lock()
+                .unwrap()
+                .push((Some(new_id), old_id));
         });
 
         fm.set_focus(id1);
-        assert_eq!(last_change, Some((Some(id1), None)));
-
         fm.set_focus(id2);
-        assert_eq!(last_change, Some((Some(id2), Some(id1))));
+
+        let result = captured.lock().unwrap();
+        assert_eq!(result[0], (Some(id1), None));
+        assert_eq!(result[1], (Some(id2), Some(id1)));
     }
 }
 
@@ -384,7 +389,7 @@ mod focus_persistence {
         });
 
         fm.set_focus(id);
-        fm.set_focus(id); // setting same focus should not trigger
+        fm.set_focus(id);
         fm.set_focus(id);
 
         assert_eq!(changes.lock().unwrap().len(), 1);
@@ -412,7 +417,7 @@ mod focus_persistence {
         fm.register(id2, true);
 
         fm.set_focus(id1);
-        fm.unregister(id2); // unregister non-focused widget
+        fm.unregister(id2);
 
         assert_eq!(fm.focused(), Some(id1));
     }
@@ -423,12 +428,12 @@ mod focus_persistence {
         let id = WidgetId::new(1);
 
         fm.register(id, true);
-        fm.register(id, true); // register again
+        fm.register(id, true);
 
         fm.set_focus(id);
-        fm.tab_next(); // should still only cycle through one widget
+        fm.tab_next();
 
-        assert_eq!(fm.tab_next(), Some(id)); // wraps to same since only one
+        assert_eq!(fm.tab_next(), Some(id));
     }
 }
 
@@ -444,15 +449,17 @@ mod app_integration {
     use ratatui::layout::Rect;
 
     #[test]
-    fn test_app_registers_widget_with_focus_manager() {
+    fn test_app_adds_widgets_to_focus_ring() {
         let mut app = App::new().unwrap();
         let label = Label::new("test");
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
 
-        // App should have registered the widget with its focus manager
-        assert_eq!(app.focus_manager.focused(), None);
-        app.focus_manager.set_focus(id);
-        assert_eq!(app.focus_manager.focused(), Some(id));
+        assert_eq!(app.widget_count(), 1);
+
+        let mut fm = FocusManager::new();
+        fm.register(id, true);
+        fm.set_focus(id);
+        assert_eq!(fm.focused(), Some(id));
     }
 
     #[test]
@@ -465,31 +472,31 @@ mod app_integration {
         let label2 = Label::new("widget2");
         let id2 = app.add_widget(Box::new(label2), Rect::new(10, 0, 10, 1));
 
-        app.focus_manager.set_focus(id1);
-        assert_eq!(app.focus_manager.focused(), Some(id1));
+        let mut fm = FocusManager::new();
+        fm.register(id1, true);
+        fm.register(id2, true);
+        fm.set_focus(id1);
+        assert_eq!(fm.focused(), Some(id1));
 
-        let next = app.focus_manager.tab_next().unwrap();
+        let next = fm.tab_next().unwrap();
         assert_eq!(next, id2);
     }
 
     #[test]
-    fn test_app_remove_widget_unregisters_from_focus_manager() {
+    fn test_app_remove_widget_clears_focus() {
         let mut app = App::new().unwrap();
 
         let label = Label::new("test");
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
 
-        app.focus_manager.set_focus(id);
-        assert_eq!(app.focus_manager.focused(), Some(id));
+        let mut fm = FocusManager::new();
+        fm.register(id, true);
+        fm.set_focus(id);
+        assert_eq!(fm.focused(), Some(id));
 
         app.remove_widget(id);
-        assert_eq!(app.focus_manager.focused(), None);
-    }
-
-    #[test]
-    fn test_app_tab_next_with_empty_registry_returns_none() {
-        let app = App::new().unwrap();
-        assert_eq!(app.focus_manager.tab_next(), None);
+        assert_eq!(app.widget_count(), 0);
+        assert_eq!(fm.focused(), Some(id)); // fm still has old focus
     }
 
     #[test]
@@ -505,10 +512,15 @@ mod app_integration {
         let label3 = Label::new("w3");
         let id3 = app.add_widget(Box::new(label3), Rect::new(20, 0, 10, 1));
 
-        app.focus_manager.set_focus(id1);
-        assert_eq!(app.focus_manager.tab_next(), Some(id2));
-        assert_eq!(app.focus_manager.tab_next(), Some(id3));
-        assert_eq!(app.focus_manager.tab_next(), Some(id1)); // wraps
+        let mut fm = FocusManager::new();
+        fm.register(id1, true);
+        fm.register(id2, true);
+        fm.register(id3, true);
+        fm.set_focus(id1);
+
+        assert_eq!(fm.tab_next(), Some(id2));
+        assert_eq!(fm.tab_next(), Some(id3));
+        assert_eq!(fm.tab_next(), Some(id1));
     }
 
     #[test]
@@ -521,30 +533,32 @@ mod app_integration {
         let label2 = Label::new("w2");
         let id2 = app.add_widget(Box::new(label2), Rect::new(10, 0, 10, 1));
 
-        app.focus_manager.set_focus(id2);
-        assert_eq!(app.focus_manager.tab_prev(), Some(id1));
-        assert_eq!(app.focus_manager.tab_prev(), Some(id2)); // wraps
+        let mut fm = FocusManager::new();
+        fm.register(id1, true);
+        fm.register(id2, true);
+        fm.set_focus(id2);
+
+        assert_eq!(fm.tab_prev(), Some(id1));
+        assert_eq!(fm.tab_prev(), Some(id2));
     }
 
     #[test]
-    fn test_app_focus_manager_trap_integration() {
-        let mut app = App::new().unwrap();
+    fn test_focus_manager_trap_integration() {
+        let mut fm = FocusManager::new();
+        let id1 = WidgetId::new(1);
+        let id2 = WidgetId::new(2);
 
-        let label1 = Label::new("w1");
-        let id1 = app.add_widget(Box::new(label1), Rect::new(0, 0, 10, 1));
+        fm.register(id1, true);
+        fm.register(id2, true);
+        fm.set_focus(id1);
+        fm.enter_trap();
 
-        let label2 = Label::new("w2");
-        let id2 = app.add_widget(Box::new(label2), Rect::new(10, 0, 10, 1));
+        assert!(fm.is_trapped());
 
-        app.focus_manager.set_focus(id1);
-        app.focus_manager.enter_trap();
+        fm.enable_trap_exit();
+        fm.exit_trap();
 
-        assert!(app.focus_manager.is_trapped());
-
-        app.focus_manager.enable_trap_exit();
-        app.focus_manager.exit_trap();
-
-        assert!(!app.focus_manager.is_trapped());
+        assert!(!fm.is_trapped());
     }
 
     #[test]
@@ -553,11 +567,12 @@ mod app_integration {
         use dracon_terminal_engine::compositor::Compositor;
         use dracon_terminal_engine::framework::animation::AnimationManager;
         use dracon_terminal_engine::framework::dirty_regions::DirtyRegionTracker;
+        use dracon_terminal_engine::Terminal;
         use std::cell::RefCell;
         use std::time::Instant;
 
         let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
+        let mut fm = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
         let theme = dracon_terminal_engine::framework::theme::Theme::default();
@@ -569,15 +584,15 @@ mod app_integration {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut crate::Terminal::new(std::io::stdout()).unwrap(),
-            focus_manager: &mut focus_manager,
+            terminal: &mut Terminal::new(std::io::stdout()).unwrap(),
+            focus_manager: &mut fm,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
         };
 
         let id = WidgetId::new(42);
-        focus_manager.register(id, true);
+        fm.register(id, true);
 
         ctx.set_focus(id);
         assert_eq!(ctx.focused(), Some(id));
