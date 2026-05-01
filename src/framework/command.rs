@@ -351,6 +351,8 @@ pub struct AppConfig {
     pub layout: Option<LayoutConfig>,
     #[serde(default)]
     pub widgets: Vec<WidgetConfig>,
+    #[serde(default)]
+    pub commands: Vec<BoundCommand>,
 }
 
 impl Default for AppConfig {
@@ -361,6 +363,7 @@ impl Default for AppConfig {
             fps: None,
             layout: None,
             widgets: Vec::new(),
+            commands: Vec::new(),
         }
     }
 }
