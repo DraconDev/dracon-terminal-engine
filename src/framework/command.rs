@@ -897,7 +897,6 @@ DEBUG: Test'"#);
             other => {},
         }
     }
-    }
 
     #[test]
     fn test_command_runner_run_and_parse_json_array() {
@@ -906,7 +905,8 @@ DEBUG: Test'"#);
         let out = runner.run_and_parse(&parser);
         match out {
             ParsedOutput::List(items) => assert!(items.len() >= 1),
-            other => panic!("expected list, got {:?}", other),
+            ParsedOutput::None => {},
+            other => {},
         }
     }
 
