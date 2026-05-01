@@ -190,7 +190,7 @@ impl Widget for StreamingText {
         for (screen_row, line_idx) in (start_idx..self.lines.len()).take(area.height as usize).enumerate() {
             if let Some(line) = self.lines.get(line_idx) {
                 let display = if self.word_wrap {
-                    let mut chars = line.chars().peekable();
+                    let chars = line.chars().peekable();
                     let mut col = 0;
                     let mut result = String::new();
                     for c in chars {

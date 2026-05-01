@@ -126,7 +126,7 @@ impl crate::framework::widget::Widget for TabBar {
             let label_len = tab.width().min((tab_width as usize).saturating_sub(2));
             let start_col = if tab_width > 2 { 1 } else { 0 };
             for (j, ch) in tab.chars().take(label_len).enumerate() {
-                let idx = (start_col + j);
+                let idx = start_col + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = fg;

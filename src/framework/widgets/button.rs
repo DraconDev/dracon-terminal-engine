@@ -115,7 +115,7 @@ impl crate::framework::widget::Widget for Button {
             }
         }
 
-        let end_idx = (1 + display.width().min(max_width as usize));
+        let end_idx = 1 + display.width().min(max_width as usize);
         if end_idx < plane.cells.len() {
             plane.cells[end_idx] = Cell {
                 char: ']',

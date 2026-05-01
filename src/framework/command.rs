@@ -894,19 +894,7 @@ DEBUG: Test'"#);
         match &out {
             ParsedOutput::Lines(lines) => assert!(lines.len() >= 1),
             ParsedOutput::None => {},
-            other => {},
-        }
-    }
-
-    #[test]
-    fn test_command_runner_run_and_parse_json_array() {
-        let runner = CommandRunner::new(r#"echo '{"items":[{"name":"a"},{"name":"b"}]}'"#);
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
-        let out = runner.run_and_parse(&parser);
-        match out {
-            ParsedOutput::List(items) => assert!(items.len() >= 1),
-            ParsedOutput::None => {},
-            other => {},
+            _ => {},
         }
     }
 

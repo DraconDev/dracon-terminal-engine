@@ -1,6 +1,5 @@
 //! Password input widget with character masking.
 
-use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use crate::framework::widget::Widget;
 use ratatui::layout::Rect;

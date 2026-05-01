@@ -179,7 +179,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         let title_len = self.title.width().min((self.width as usize).saturating_sub(4));
         let title_start = (self.width as usize - title_len) / 2;
         for (i, ch) in self.title.chars().take(title_len).enumerate() {
-            let idx = (1 + title_start + i);
+            let idx = 1 + title_start + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].style = Styles::BOLD;
