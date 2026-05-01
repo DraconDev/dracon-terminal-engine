@@ -17,7 +17,7 @@
 
 use dracon_terminal_engine::framework::command::{BoundCommand, OutputParser};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, SplitPane};
+use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadge};
 use ratatui::layout::Rect;
 
 fn main() -> std::io::Result<()> {
