@@ -348,7 +348,7 @@ mod async_tests {
 
     #[test]
     fn test_sync_command_runs_normally() {
-        let runner = CommandRunner::new("printf '%s' 'sync test'");
+        let runner = CommandRunner::new("echo sync test");
         let (stdout, _, _) = runner.run_sync();
         assert_eq!(stdout.trim(), "sync test");
     }

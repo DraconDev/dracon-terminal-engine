@@ -30,14 +30,14 @@ pub enum ConfirmResult {
 }
 
 pub struct ConfirmDialog {
-    id: WidgetId,
-    title: String,
-    message: String,
-    confirm_label: String,
-    cancel_label: String,
-    result: Option<ConfirmResult>,
-    danger: bool,
-    theme: Theme,
+    pub id: WidgetId,
+    pub title: String,
+    pub message: String,
+    pub confirm_label: String,
+    pub cancel_label: String,
+    pub result: Option<ConfirmResult>,
+    pub danger: bool,
+    pub theme: Theme,
     focused: bool,
     area: std::cell::Cell<Rect>,
     dirty: bool,
