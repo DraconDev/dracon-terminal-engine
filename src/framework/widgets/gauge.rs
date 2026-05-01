@@ -333,4 +333,29 @@ mod tests {
         g.set_value(42.5);
         assert!((g.value() - 42.5).abs() < 0.001);
     }
+
+    #[test]
+    fn test_gauge_apply_command_output_scalar() {
+        use crate::framework::command::ParsedOutput;
+        let mut g = Gauge::new("CPU");
+        g.apply_command_output(&ParsedOutput::Scalar("75.5".to_string()));
+        assert!((g.value() - 75.5).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_gauge_apply_command_output_ignores_non_scalar() {
+        use crate::framework::command::ParsedOutput;
+        let mut g = Gauge::new("CPU");
+        g.set_value(50.0);
+        g.apply_command_output(&ParsedOutput::None);
+        assert!((g.value() - 50.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_gauge_apply_command_output_parses_invalid_as_zero() {
+        use crate::framework::command::ParsedOutput;
+        let mut g = Gauge::new("CPU");
+        g.apply_command_output(&ParsedOutput::Scalar("not-a-number".to_string()));
+        assert_eq!(g.value(), 0.0);
+    }
 }

@@ -1,8 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactor command execution error handling to propagate failures instead of using default values
+Implementing robust widget command handling with command cleanup and enhanced test coverage for command output parsing.
 
 ## Completed
-- [x] Removed `.unwrap_or_default()` in command execution to enforce proper error handling
-- [x] Updated command runner to throw on failure rather than silently defaulting, ensuring unhandled errors surface through the command chain
+- [x] Remove outdated commands from command tracking when widgets are unregistered to prevent stale executions
+- [x] Add comprehensive tests for Gauge's apply_command_output handling scalar values, ignoring non-scalar outputs, and parsing invalid inputs as zero

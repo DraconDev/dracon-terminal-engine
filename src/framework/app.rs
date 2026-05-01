@@ -247,6 +247,7 @@ impl App {
         }
         self.widgets.borrow_mut().retain(|w| w.id() != id);
         self.focus_manager.unregister(id);
+        self.command_tracking.borrow_mut().remove(&id);
     }
 
     /// Returns an immutable reference to a widget by ID.
@@ -431,14 +432,15 @@ impl App {
             {
                 let now = Instant::now();
                 let mut to_reschedule: Vec<(WidgetId, BoundCommand)> = Vec::new();
-                for (wid, (last_run, cmd)) in self.command_tracking.borrow().iter() {
+                let tracked: HashMap<WidgetId, (Instant, BoundCommand)> =
+                    self.command_tracking.borrow().clone();
+                for (wid, (last_run, cmd)) in tracked.iter() {
                     let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
                     if interval.is_zero() || now.duration_since(*last_run) < interval {
                         continue;
                     }
-                    let widget = self.widget_mut(*wid);
-                    if let Some(mut w) = widget {
-                        let mut runner = CommandRunner::new(&cmd.command);
+                    if let Some(mut w) = self.widget_mut(*wid) {
+                        let runner = CommandRunner::new(&cmd.command);
                         let (stdout, stderr, exit_code) = runner.run_sync();
                         let output = cmd.parse_output(&stdout, &stderr, exit_code);
                         w.apply_command_output(&output);
