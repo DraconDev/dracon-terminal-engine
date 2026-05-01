@@ -1,8 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactored test variable naming in the `Glitch` filter test to improve clarity and avoid unused variables.
+Refactored the `Glitch` filter test to improve assertion clarity by replacing unused variables with a direct assertion that the cell character remains unchanged.
 
 ## Completed
-- [x] Renamed `changed` to `_unused_changed` to indicate it's intentionally unused
-- [x] Replaced direct increment with unused variable assignment to make the test's intent clearer
+- [x] Removed unused `_unused_changed` variable and its associated logic
+- [x] Replaced with a direct `assert_eq!` to verify cell character remains 'X'
