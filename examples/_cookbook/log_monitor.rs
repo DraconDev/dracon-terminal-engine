@@ -9,6 +9,7 @@ use std::time::{Duration, Instant};
 
 use rand::Rng;
 
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{LogViewer, StatusBadge};
@@ -34,23 +35,22 @@ struct LogMonitor {
     total_lines: usize,
     area: Rect,
     dirty: bool,
+    auto_scroll: bool,
 }
 
 impl LogMonitor {
-    fn new(id: WidgetId) -> Self {
-        let mut log_viewer = LogViewer::with_id(WidgetId::new(id.0 + 1));
-        log_viewer.max_lines(500);
-        log_viewer.auto_scroll(true);
-        let mut status = StatusBadge::new(WidgetId::new(id.0 + 2));
-        status.with_label("lines");
+    fn new() -> Self {
+        let log_viewer = LogViewer::with_id(WidgetId::new(2)).max_lines(500);
+        let status = StatusBadge::new(WidgetId::new(3));
         Self {
-            id,
+            id: WidgetId::new(1),
             log_viewer,
             status,
             last_log: Instant::now(),
             total_lines: 0,
             area: Rect::new(0, 0, 80, 20),
             dirty: true,
+            auto_scroll: true,
         }
     }
 
@@ -66,8 +66,8 @@ impl LogMonitor {
 
     fn refresh_status(&mut self) {
         let s = self.last_log.elapsed().as_secs();
-        self.status.set_status(if s < 1 { "just now" } else { &format!("{}s ago", s) });
-        self.status.set_label(&format!("{} lines", self.total_lines));
+        let status_str = if s < 1 { "just now".to_string() } else { format!("{}s ago", s) };
+        self.status.set_status(&status_str);
     }
 
     fn clear(&mut self) {
@@ -99,9 +99,9 @@ impl Widget for LogMonitor {
         self.status.set_area(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
         self.dirty = true;
     }
-    fn needs_render(&self) -> bool { self.dirty || self.log_viewer.needs_render() || self.status.needs_render() }
+    fn needs_render(&self) -> bool { self.dirty }
     fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; self.log_viewer.clear_dirty(); self.status.clear_dirty(); }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
@@ -156,7 +156,7 @@ impl Widget for LogMonitor {
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
             KeyCode::Char('c') => { self.clear(); true }
-            KeyCode::Char('r') => { self.log_viewer.auto_scroll = true; self.dirty = true; true }
+            KeyCode::Char('r') => { self.auto_scroll = true; self.log_viewer.auto_scroll = true; self.dirty = true; true }
             _ => false,
         }
     }
@@ -164,6 +164,7 @@ impl Widget for LogMonitor {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if kind == MouseEventKind::Down(MouseButton::Left) {
             if row >= 2 && row < self.area.height - 1 {
+                self.auto_scroll = false;
                 self.log_viewer.auto_scroll = false;
                 self.dirty = true;
             }
@@ -173,20 +174,20 @@ impl Widget for LogMonitor {
 }
 
 impl Default for LogMonitor {
-    fn default() -> Self { Self::new(WidgetId::new(1)) }
+    fn default() -> Self { Self::new() }
 }
 
 fn main() -> Result<()> {
     println!("Log Monitor — c=clear, r=resume, click=pause/filters");
     std::thread::sleep(Duration::from_millis(300));
 
-    let mut mon = LogMonitor::new(WidgetId::new(1));
+    let mut mon = LogMonitor::new();
 
     App::new()?
         .title("Log Monitor")
         .fps(30)
         .tick_interval(200)
-        .on_tick(|ctx, tick| {
+        .on_tick(move |ctx, tick| {
             if tick % 2 == 0 { mon.tick(); }
             let (w, h) = ctx.compositor().size();
             if mon.area.width != w || mon.area.height != h {

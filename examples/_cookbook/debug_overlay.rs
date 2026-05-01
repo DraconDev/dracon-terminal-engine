@@ -84,7 +84,7 @@ impl DebugOverlayPanel {
             id: WidgetId::new(10),
             label: focused_widget.unwrap_or("List_1").to_string(),
             children: (0..20).map(|i| WidgetNode {
-                id: WidgetId::new(11 + i as u64),
+                id: WidgetId::new(11 + i as usize),
                 label: format!("Item_{}", i + 1),
                 children: vec![],
             }).collect(),

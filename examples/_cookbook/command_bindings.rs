@@ -8,11 +8,11 @@
 //!
 //! | Widget | Mock Command | Parser | Interval |
 //! |--------|-------------|--------|----------|
-//! | Gauge (CPU) | `echo "cpu:67"` | regex | 2s |
-//! | KeyValueGrid | `echo -e "Memory:8.2GB\n..."` | text/kv | 5s |
-//! | StatusBadge | `echo "$((RANDOM % 2 ? 'OK' : 'ERROR'))"` | plain | 10s |
-//! | LogViewer | `echo "[INFO]..."` | severity | 3s |
-//! | StreamingText | `date +"%H:%M:%S"` | plain | 1s |
+//! | Gauge (CPU) | simulated | direct | 2s |
+//! | KeyValueGrid | simulated | direct | 5s |
+//! | StatusBadge | simulated | direct | 10s |
+//! | LogViewer | simulated | direct | 3s |
+//! | StreamingText | simulated | direct | 1s |
 //!
 //! ## Controls
 //!
@@ -21,10 +21,9 @@
 //! - `Ctrl+C` — quit
 
 use std::collections::BTreeMap;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
-use dracon_terminal_engine::framework::command::{BoundCommand, CommandRunner, OutputParser, ParsedOutput};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, LogViewer, StatusBadge, StreamingText};
@@ -41,8 +40,8 @@ struct CommandBindings {
     area: Rect,
     dirty: bool,
     paused: bool,
-    next_refresh: Instant,
     tick: u64,
+    cpu_value: f32,
 }
 
 impl CommandBindings {
@@ -51,75 +50,63 @@ impl CommandBindings {
             id: WidgetId::new(0),
             gauge: Gauge::new("CPU").max(100.0).warn_threshold(70.0).crit_threshold(90.0),
             kv_grid: KeyValueGrid::new().separator(" "),
-            status: StatusBadge::new(WidgetId::new(4)).with_label("Connection"),
-            log_viewer: LogViewer::with_id(WidgetId::new(5)).max_lines(200).auto_scroll(true),
-            streaming: StreamingText::with_id(WidgetId::new(6)).max_lines(50).auto_scroll(true),
+            status: StatusBadge::new(WidgetId::new(4)).with_status("OK").with_label("Connection"),
+            log_viewer: LogViewer::with_id(WidgetId::new(5)).max_lines(200),
+            streaming: StreamingText::with_id(WidgetId::new(6)).max_lines(50),
             theme: Theme::nord(),
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             paused: false,
-            next_refresh: Instant::now(),
             tick: 0,
+            cpu_value: 50.0,
         }
-    }
-
-    fn run_gauge_command(&mut self) {
-        let runner = CommandRunner::new(r#"echo "cpu:67""#);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = ParsedOutput::from_output(&stdout, &stderr, exit_code);
-        if let ParsedOutput::Gauge(v) = output { self.gauge.set_value(v); }
-    }
-
-    fn run_kv_command(&mut self) {
-        let runner = CommandRunner::new(r#"echo -e "Memory:8.2GB\nDisk:45%\nNetwork:120Mbps\nUptime:3d15h""#);
-        let (stdout, _, _) = runner.run_sync();
-        self.kv_grid.clear();
-        for line in stdout.lines() {
-            if let Some((k, v)) = line.split_once(':') {
-                self.kv_grid.set(k.trim(), v.trim());
-            }
-        }
-    }
-
-    fn run_status_command(&mut self) {
-        let runner = CommandRunner::new(r#"echo "OK""#);
-        let (stdout, _, _) = runner.run_sync();
-        self.status.set_status(stdout.trim());
-    }
-
-    fn run_log_command(&mut self) {
-        let runner = CommandRunner::new(r#"echo -e "[INFO] Connected to server\n[WARN] High load detected\n[ERROR] Connection timeout 3s""#);
-        let (stdout, _, _) = runner.run_sync();
-        self.log_viewer.clear();
-        for line in stdout.lines() {
-            self.log_viewer.append_line(line);
-        }
-    }
-
-    fn run_streaming_command(&mut self) {
-        let runner = CommandRunner::new("date +\"Last tick: %H:%M:%S\"");
-        let (stdout, _, _) = runner.run_sync();
-        self.streaming.append_line(stdout.trim());
     }
 
     fn refresh_all(&mut self) {
-        self.run_gauge_command();
-        self.run_kv_command();
-        self.run_status_command();
-        self.run_log_command();
-        self.run_streaming_command();
-        self.next_refresh = Instant::now();
+        self.cpu_value = 30.0 + (self.tick % 50) as f32;
+        self.gauge.set_value(self.cpu_value as f64);
+        let mut pairs = BTreeMap::new();
+        pairs.insert("Memory".to_string(), format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1));
+        pairs.insert("Disk".to_string(), format!("{}%", 40 + (self.tick % 20) as u32));
+        pairs.insert("Network".to_string(), format!("{} Mbps", 100 + (self.tick % 50) as u32));
+        pairs.insert("Uptime".to_string(), format!("{}h", self.tick / 60));
+        self.kv_grid.set_pairs(pairs);
+        let status_text = if self.tick % 20 < 15 { "OK" } else { "WARNING" };
+        self.status.set_status(status_text);
+        self.log_viewer.clear();
+        self.log_viewer.append_line(&format!("[INFO] Tick {} - System nominal", self.tick));
+        self.log_viewer.append_line(&format!("[WARN] Load average: {:.2}", 1.5 + (self.tick % 10) as f32 * 0.1));
+        if self.tick % 10 == 0 {
+            self.log_viewer.append_line(&format!("[ERROR] Simulated connection issue at tick {}", self.tick));
+        }
+        self.streaming.clear();
+        self.streaming.append(&format!("Last tick: {} @ {:.1}s", self.tick, self.cpu_value));
         self.dirty = true;
     }
 
     fn tick(&mut self, elapsed_secs: u64) {
         self.tick += 1;
         if self.paused { return; }
-        if elapsed_secs % 2 == 0 { self.run_gauge_command(); }
-        if elapsed_secs % 5 == 0 { self.run_kv_command(); }
-        if elapsed_secs % 10 == 0 { self.run_status_command(); }
-        if elapsed_secs % 3 == 0 { self.run_log_command(); }
-        self.run_streaming_command();
+        if elapsed_secs % 2 == 0 {
+            self.cpu_value = 30.0 + (self.tick % 50) as f32;
+            self.gauge.set_value(self.cpu_value as f64);
+        }
+        if elapsed_secs % 5 == 0 {
+            let mut pairs = BTreeMap::new();
+            pairs.insert("Memory".to_string(), format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1));
+            pairs.insert("Disk".to_string(), format!("{}%", 40 + (self.tick % 20) as u32));
+            self.kv_grid.set_pairs(pairs);
+        }
+        if elapsed_secs % 10 == 0 {
+            let status_text = if self.tick % 20 < 15 { "OK" } else { "WARNING" };
+            self.status.set_status(status_text);
+        }
+        if elapsed_secs % 3 == 0 {
+            self.log_viewer.clear();
+            self.log_viewer.append_line(&format!("[INFO] Tick {}", self.tick));
+            self.log_viewer.append_line(&format!("[WARN] Load: {:.1}", 1.5 + (self.tick % 10) as f32 * 0.1));
+        }
+        self.streaming.append(&format!("T:{} ", self.tick));
         self.dirty = true;
     }
 }
@@ -144,7 +131,7 @@ impl Widget for CommandBindings {
 
         for idx in 0..p.cells.len() { p.cells[idx].bg = self.theme.bg; p.cells[idx].fg = self.theme.fg; }
 
-        let title = " Command Bindings — Auto-refresh widgets ";
+        let title = " Command Bindings — Auto-refresh ";
         let title_color = Color::Rgb(0, 255, 200);
         let title_width = title.len() as u16;
         let title_x = (area.width.saturating_sub(title_width)) / 2;
@@ -249,14 +236,14 @@ fn main() -> std::io::Result<()> {
     std::thread::sleep(Duration::from_millis(500));
 
     let mut view = CommandBindings::new();
+    view.refresh_all();
 
     App::new()?
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .on_tick(|ctx, tick| {
-            let elapsed = tick;
-            view.tick(elapsed);
+        .on_tick(move |ctx, tick| {
+            view.tick(tick);
             view.mark_dirty();
             let (w, h) = ctx.compositor().size();
             if view.area.width != w || view.area.height != h {
