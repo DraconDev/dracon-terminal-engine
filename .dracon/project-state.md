@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved `FileEntry` display formatting for better debug output and user readability
+Simplified directory reading by removing `FileEntry` struct and its display logic
 
 ## Context
-The `FileEntry` struct was previously using `#[derive(Display)]` which provided basic debug output. This change replaces it with a custom `Display` implementation to show directory indicators, file names, and sizes in a more user-friendly format.
+The `FileEntry` struct was previously used to represent file system entries with detailed metadata (name, directory status, size). This change simplifies the file manager example by focusing only on file/directory names, reducing complexity for demonstration purposes.
 
 ## Completed
-- [x] Replaced `#[derive(Display)]` with custom `Display` implementation
-- [x] Added directory indicator (">" for directories, "-" for files)
-- [x] Included file name and size in display output
+- [x] Removed `FileEntry` struct and its `Display` implementation
+- [x] Simplified `read_dir` to return `Vec<String>` instead of `Vec<FileEntry>`
+- [x] Reduced example complexity while maintaining core functionality
 
 ## In Progress
-- [x] Custom display formatting for file manager entries
+- [ ] None (this is a complete refactoring)
 
 ## Blockers
-- None identified
+- None (this is a straightforward simplification)
 
 ## Next Steps
-1. Verify the new display format works as expected in the file manager UI
-2. Consider adding additional formatting options (like color coding) if needed
+1. Verify the simplified file manager still displays basic directory contents
+2. Consider adding more detailed metadata display if needed for other examples
