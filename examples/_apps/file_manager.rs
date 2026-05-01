@@ -48,6 +48,7 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
+#[derive(Clone)]
 struct MockFs {
     name: &'static str,
     children: Option<Vec<MockFs>>,
@@ -83,6 +84,7 @@ impl MockFs {
     }
 }
 
+#[derive(Clone)]
 struct FileEntry {
     name: String,
     is_dir: bool,
@@ -520,13 +522,13 @@ impl Widget for FileManager {
         if let MouseEventKind::Down(_) = kind {
             if col > tree_rect.width && row > header_height && row < header_height + detail_rect.height {
                 let rel_row = (row - header_height).saturating_sub(1) as usize;
-                let children = self.current_node().children.clone();
-                if let Some(ref children) = children {
+                if let Some(ref children) = self.current_node().children {
                     if rel_row < children.len() {
-                        let child_name = children[rel_row].name.to_string();
-                        let child_is_dir = children[rel_row].is_dir;
-                        self.selected_entry = Some(FileEntry { name: child_name, is_dir: child_is_dir });
-                        if !child_is_dir { self.show_toast(&format!("Opening {}...", children[rel_row].name), ToastKind::Info); }
+                        let child = &children[rel_row];
+                        let name = child.name.to_string();
+                        let is_dir = child.is_dir;
+                        self.selected_entry = Some(FileEntry { name, is_dir });
+                        if !is_dir { self.show_toast(&format!("Opening {}...", child.name), ToastKind::Info); }
                         self.dirty = true;
                         return true;
                     }
