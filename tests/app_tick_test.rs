@@ -532,14 +532,14 @@ fn test_status_badge_apply_command_output_ignores_non_scalar() {
 #[test]
 fn test_output_tracking_widget_receives_output() {
     let command_received = Rc::new(Cell::new(false));
-    let last_output = Rc::new(Cell::new(None));
+    let last_output = Rc::new(RefCell::new(None));
 
     let mut widget = OutputTrackingWidget::new(1, command_received.clone(), last_output.clone());
 
     widget.apply_command_output(&ParsedOutput::Scalar("TestValue".to_string()));
 
     assert!(command_received.get());
-    assert_eq!(last_output.get(), Some("TestValue".to_string()));
+    assert_eq!(*last_output.borrow(), Some("TestValue".to_string()));
 }
 
 #[test]
@@ -561,8 +561,8 @@ fn test_command_output_tracking_multiple_widgets() {
     let received1 = Rc::new(Cell::new(false));
     let received2 = Rc::new(Cell::new(false));
 
-    let mut widget1 = OutputTrackingWidget::new(1, received1.clone(), Rc::new(Cell::new(None)));
-    let mut widget2 = OutputTrackingWidget::new(2, received2.clone(), Rc::new(Cell::new(None)));
+    let mut widget1 = OutputTrackingWidget::new(1, received1.clone(), Rc::new(RefCell::new(None)));
+    let mut widget2 = OutputTrackingWidget::new(2, received2.clone(), Rc::new(RefCell::new(None)));
 
     widget1.apply_command_output(&ParsedOutput::Scalar("widget1".to_string()));
     widget2.apply_command_output(&ParsedOutput::Scalar("widget2".to_string()));
