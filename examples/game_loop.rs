@@ -37,12 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
                 for &byte in &buf[..n] {
-                    if let Some(event) = parser.advance(byte) {
-                        if let Event::Key(KeyEvent {
-                            code: KeyCode::Char('q'),
-                            ..
-                        }) = event
-                        {
+                    if let Some(Event::Key(KeyEvent { code: KeyCode::Char('q'), .. })) = parser.advance(byte) {
                             write!(term, "\x1b[?25h")?;
                             return Ok(());
                         }
