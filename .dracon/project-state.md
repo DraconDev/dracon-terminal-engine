@@ -1,8 +1,11 @@
 # Project State
 
 ## Current Focus
-Refactored documentation formatting in the `Ctx` layout method to improve consistency.
+Added new example commands to the README to demonstrate the project's capabilities
 
 ## Completed
-- [x] Updated docstring to use inline code formatting (`Layout`) instead of markdown links
+- [x] Added `cyberpunk_dashboard` example for Ratatui chart dashboard with simulation
+- [x] Added `demo` example for general engine demo with charts
+- [x] Added `desktop` example for desktop-style window management
+- [x] Added `game_loop` example for 60fps game loop with mouse tracking
 ```

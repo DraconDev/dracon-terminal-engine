@@ -188,6 +188,10 @@ cargo run --example text_editor_demo      # Standalone TextEditor with theme swi
 cargo run --example basic_raw             # minimal Terminal usage
 cargo run --example god_mode              # Ratatui + compositor overlay
 cargo run --example input_debug           # SGR mouse + keyboard parsing
+cargo run --example cyberpunk_dashboard   # Ratatui chart dashboard with simulation
+cargo run --example demo                  # General engine demo with charts
+cargo run --example desktop              # Desktop-style window management
+cargo run --example game_loop             # 60fps game loop with mouse tracking
 ```
 
 ## Testing
