@@ -41,7 +41,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         write!(term, "\x1b[?25h")?;
                         return Ok(());
                     }
-                    }
                 }
             }
         }
