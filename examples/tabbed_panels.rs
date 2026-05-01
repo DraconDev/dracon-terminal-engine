@@ -34,6 +34,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
+use ratatui::layout::Rect;
 use std::collections::BTreeMap;
 
 const TAB_DASHBOARD: usize = 0;
@@ -357,13 +358,10 @@ impl Widget for TabbedApp {
         match self.active_tab() {
             TAB_LOGS => self.logs.list.handle_key(key),
             TAB_SETTINGS => {
-                let mut handled = false;
-                if let Some(widget) = self.settings.theme_select.as_mut() {
-                    if widget.handle_key(key.clone()) {
-                        handled = true;
-                    }
+                if self.settings.theme_select.handle_key(key.clone()) {
+                    return true;
                 }
-                if !handled && self.settings.notifications.handle_key(key.clone()).as_ref().map(|b| *b).unwrap_or(false) {
+                if self.settings.notifications.handle_key(key.clone()) {
                     return true;
                 }
                 self.settings.volume_slider.handle_key(key)
