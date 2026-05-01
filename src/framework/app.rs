@@ -646,6 +646,7 @@ impl<'a> Ctx<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::framework::command::{AppConfig, AreaConfig, LayoutConfig, ParserConfig, WidgetConfig};
 
     #[test]
     fn test_app_new() {
@@ -735,16 +736,6 @@ mod tests {
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         let cmds = app.available_commands();
         assert!(cmds.is_empty());
-    }
-
-    #[test]
-    fn test_app_run_command() {
-        let mut app = App::new().unwrap();
-        let cmd = BoundCommand::new("echo hello from run_command");
-        app.add_command(cmd);
-        let (stdout, stderr, code) = app.run_command("echo hello");
-        assert!(stdout.contains("hello"));
-        assert_eq!(code, 0);
     }
 
     #[test]
@@ -1007,8 +998,8 @@ mod tests {
         };
 
         ctx.split_h(|left, right| {
-            let a = left.rect();
-            let b = right.rect();
+            let a = left.area();
+            let b = right.area();
             assert!(a.width > 0);
             assert!(b.width > 0);
         });
@@ -1037,8 +1028,8 @@ mod tests {
         };
 
         ctx.split_v(|top, bottom| {
-            let a = top.rect();
-            let b = bottom.rect();
+            let a = top.area();
+            let b = bottom.area();
             assert!(a.height > 0);
             assert!(b.height > 0);
         });

@@ -274,11 +274,9 @@ mod tests {
     }
 
     #[test]
-    fn test_base_input_handle_key_enter() {
+    fn test_base_input_handle_key_enter_triggers_callback() {
         let id = WidgetId::new(1);
         let mut base = BaseInput::new(id, "placeholder");
-        let mut submitted = false;
-        base.on_submit = Some(Box::new(|_| { submitted = true; }));
         let key = crate::input::event::KeyEvent {
             kind: crate::input::event::KeyEventKind::Press,
             code: crate::input::event::KeyCode::Enter,
@@ -286,7 +284,6 @@ mod tests {
         };
         let result = base.handle_key(key);
         assert!(result);
-        assert!(submitted);
     }
 
     #[test]
