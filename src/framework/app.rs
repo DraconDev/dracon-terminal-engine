@@ -439,7 +439,7 @@ impl App {
                     let widget = self.widget_mut(*wid);
                     if let Some(mut w) = widget {
                         let mut runner = CommandRunner::new(&cmd.command);
-                        let (stdout, stderr, exit_code) = runner.run_sync().unwrap_or_default();
+                        let (stdout, stderr, exit_code) = runner.run_sync();
                         let output = cmd.parse_output(&stdout, &stderr, exit_code);
                         w.apply_command_output(&output);
                         w.mark_dirty();
