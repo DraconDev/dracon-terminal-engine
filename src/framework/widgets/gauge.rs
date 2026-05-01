@@ -190,6 +190,14 @@ impl Widget for Gauge {
     fn commands(&self) -> Vec<BoundCommand> {
         self.bound_command.iter().cloned().collect()
     }
+
+    fn apply_command_output(&mut self, output: &crate::framework::command::ParsedOutput) {
+        if let crate::framework::command::ParsedOutput::Scalar(s) = output {
+            if let Ok(v) = s.parse::<f64>() {
+                self.set_value(v);
+            }
+        }
+    }
 }
 
 #[cfg(test)]

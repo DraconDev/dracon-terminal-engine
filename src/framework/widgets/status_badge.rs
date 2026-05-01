@@ -154,6 +154,12 @@ impl Widget for StatusBadge {
     fn commands(&self) -> Vec<BoundCommand> {
         self.bound_command.iter().cloned().collect()
     }
+
+    fn apply_command_output(&mut self, output: &crate::framework::command::ParsedOutput) {
+        if let crate::framework::command::ParsedOutput::Scalar(s) = output {
+            self.set_status(s);
+        }
+    }
 }
 
 #[cfg(test)]

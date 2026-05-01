@@ -4,7 +4,7 @@
 //! focus management, and event routing.
 
 use crate::compositor::Plane;
-use crate::framework::command::BoundCommand;
+use crate::framework::command::{BoundCommand, ParsedOutput};
 use crate::input::event::{KeyEvent, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -114,4 +114,13 @@ pub trait Widget {
     fn commands(&self) -> Vec<BoundCommand> {
         Vec::new()
     }
+
+    /// Applies the parsed output of a bound command to this widget.
+    ///
+    /// Called automatically by the app tick loop when a widget's bound command
+    /// is re-run after `refresh_seconds` has elapsed.
+    ///
+    /// The default implementation does nothing — widgets that bind commands
+    /// override this to update their internal state from `ParsedOutput`.
+    fn apply_command_output(&mut self, _output: &ParsedOutput) {}
 }
