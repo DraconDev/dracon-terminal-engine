@@ -1,7 +1,10 @@
 # Project State
 
 ## Current Focus
-Removing unsafe static memory initialization and file-based terminal creation in favor of safer alternatives, aligning with refactoring efforts to eliminate undefined behavior and improve test setup reliability.
+Refactored test infrastructure to eliminate unsafe code and simplify terminal creation for tests
 
 ## Completed
-- [x] Removed `dummy_terminal_ref` function which created an unsafe static terminal instance via file I/O, reducing risks from undefined behavior and simplifying test environment management
+- [x] Replaced unsafe `dummy_terminal()` with safe `make_test_terminal()` using `Terminal::new()` and `/dev/null`
+- [x] Removed unsafe file descriptor operations (`into_raw_fd`, `from_raw_fd`) and associated imports
+- [x] Simplified test terminal setup by using `File::open("/dev/null")` instead of creating temporary files
+- [x] Updated all 14 test functions to use the new `make_test_terminal()?` pattern with proper error handling
