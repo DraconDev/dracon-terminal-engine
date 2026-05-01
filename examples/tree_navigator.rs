@@ -21,40 +21,25 @@
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Breadcrumbs, SplitPane, StatusBar, Tree, TreeNode};
+use dracon_terminal_engine::framework::widgets::{Breadcrumbs, SplitPane, StatusBar, StatusSegment, Tree, TreeNode};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 
-static MOCK_FS: MockNode = MockNode {
-    name: "root",
-    is_dir: true,
-    children: Some(vec![
-        MockNode {
-            name: "src",
-            is_dir: true,
-            children: Some(vec![
-                MockNode { name: "main.rs", is_dir: false, children: None },
-                MockNode { name: "lib.rs", is_dir: false, children: None },
-            ]),
-        },
-        MockNode {
-            name: "tests",
-            is_dir: true,
-            children: Some(vec![
-                MockNode { name: "test_main.rs", is_dir: false, children: None },
-            ]),
-        },
-        MockNode { name: "README.md", is_dir: false, children: None },
-        MockNode { name: "Cargo.toml", is_dir: false, children: None },
-    ]),
-};
-
-struct MockNode {
+struct MockFs {
     name: &'static str,
-    children: Option<Vec<MockNode>>,
+    children: Option<Vec<MockFs>>,
     is_dir: bool,
 }
 
-impl MockNode {
+impl MockFs {
+    fn new_dir(name: &'static str, children: Vec<MockFs>) -> Self {
+        Self { name, children: Some(children), is_dir: true }
+    }
+
+    fn new_file(name: &'static str) -> Self {
+        Self { name, children: None, is_dir: false }
+    }
+
     fn to_tree_node(&self) -> TreeNode {
         let mut node = TreeNode::new(self.name);
         if let Some(ref children) = self.children {
@@ -65,7 +50,7 @@ impl MockNode {
         node
     }
 
-    fn find_by_path(&self, path: &[usize]) -> Option<&MockNode> {
+    fn find_by_path(&self, path: &[usize]) -> Option<&MockFs> {
         if path.is_empty() {
             return Some(self);
         }
@@ -81,209 +66,76 @@ impl MockNode {
         self.children.as_ref().map(|c| c.len()).unwrap_or(0)
     }
 
-    fn all_items_recursive(&self) -> Vec<&MockNode> {
-        let mut items = vec![self];
-        if let Some(ref children) = self.children {
-            for child in children {
-                items.extend(child.all_items_recursive());
-            }
-        }
-        items
-    }
-}
-
-struct TreeNavState {
-    tree: Tree,
-    breadcrumbs: Breadcrumbs,
-    status_bar: StatusBar,
-    current_path: Vec<usize>,
-    path_segments: Vec<String>,
-}
-
-impl TreeNavState {
-    fn new() -> Self {
-        let root_node = MOCK_FS.to_tree_node();
-        let tree = Tree::new(WidgetId::new(1)).with_root(vec![root_node]);
-
-        Self {
-            tree,
-            breadcrumbs: Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string()]),
-            status_bar: StatusBar::new(WidgetId::new(3)),
-            current_path: Vec::new(),
-            path_segments: vec!["home".to_string(), "user".to_string(), "projects".to_string()],
-        }
-    }
-
-    fn update_path(&mut self) {
-        let mut segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
-        for &idx in &self.current_path {
-            if let Some(node) = MOCK_FS.find_by_path(&self.current_path[..]) {
-                segments.push(node.name.to_string());
-            }
-            let _ = idx;
-        }
-        self.path_segments = segments;
-        self.breadcrumbs = Breadcrumbs::new(self.path_segments.clone());
-    }
-
-    fn selected_node(&self) -> Option<&MockNode> {
-        MOCK_FS.find_by_path(&self.current_path)
-    }
-
-    fn parent_path(&self) -> Vec<usize> {
-        if self.current_path.is_empty() {
-            Vec::new()
-        } else {
-            self.current_path[..self.current_path.len() - 1].to_vec()
-        }
-    }
-
-    fn item_count(&self) -> usize {
-        if let Some(node) = self.selected_node() {
-            node.child_count()
-        } else {
-            MOCK_FS.child_count()
-        }
-    }
-
     fn total_items(&self) -> usize {
-        MOCK_FS.all_items_recursive().len()
+        1 + self.children.as_ref().map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>()).unwrap_or(0)
     }
 }
 
-impl Widget for TreeNavState {
-    fn id(&self) -> WidgetId {
-        WidgetId::new(0)
-    }
+static MOCK_FS: MockFs = MockFs::new_dir("root", vec![
+    MockFs::new_dir("src", vec![
+        MockFs::new_file("main.rs"),
+        MockFs::new_file("lib.rs"),
+    ]),
+    MockFs::new_dir("tests", vec![
+        MockFs::new_file("test_main.rs"),
+    ]),
+    MockFs::new_file("README.md"),
+    MockFs::new_file("Cargo.toml"),
+]);
 
-    fn set_id(&mut self, id: WidgetId) {}
+fn main() -> std::io::Result<()> {
+    let theme = Theme::cyberpunk();
 
-    fn area(&self) -> Rect {
-        Rect::new(0, 0, 80, 24)
-    }
+    let root_node = MOCK_FS.to_tree_node();
+    let mut tree = Tree::new(WidgetId::new(1)).with_root(vec![root_node]);
 
-    fn set_area(&mut self, area: Rect) {}
+    App::new()?
+        .title("Tree Navigator")
+        .fps(30)
+        .theme(theme)
+        .run(move |ctx| {
+            let (w, h) = ctx.compositor().size();
 
-    fn z_index(&self) -> u16 {
-        0
-    }
+            let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
+            let header_height = 1u16;
+            let footer_height = 1u16;
+            let content_height = h.saturating_sub(header_height + footer_height);
 
-    fn needs_render(&self) -> bool {
-        true
-    }
+            let header_rect = Rect::new(0, 0, w, header_height);
+            let content_rect = Rect::new(0, header_height, w, content_height);
+            let footer_rect = Rect::new(0, h - footer_height, w, footer_height);
 
-    fn mark_dirty(&mut self) {}
+            let (tree_rect, detail_rect) = split.split(content_rect);
 
-    fn clear_dirty(&mut self) {}
+            let mut path_segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
+            let breadcrumbs = Breadcrumbs::new(path_segments.clone());
+            let bc_plane = breadcrumbs.render(header_rect);
+            ctx.add_plane(bc_plane);
 
-    fn focusable(&self) -> bool {
-        true
-    }
+            let tree_plane = tree.render(tree_rect);
+            ctx.add_plane(tree_plane);
 
-    fn render(&self, area: Rect) -> Plane {
-        let mut plane = Plane::new(0, area.width, area.height);
-        plane.z_index = 0;
+            let detail_plane = render_detail(&tree, &MOCK_FS, detail_rect);
+            ctx.add_plane(detail_plane);
 
-        for cell in plane.cells.iter_mut() {
-            cell.bg = Color::Ansi(17);
-        }
+            let tree_path = tree.selected_path.clone();
+            let item_count = if tree_path.is_empty() {
+                MOCK_FS.child_count()
+            } else if let Some(node) = MOCK_FS.find_by_path(&tree_path) {
+                node.child_count()
+            } else {
+                MOCK_FS.child_count()
+            };
 
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, detail_rect) = split.split(Rect::new(0, 0, area.width, area.height - 1));
-
-        let bc_plane = self.breadcrumbs.render(Rect::new(0, 0, area.width, 1));
-        for (i, cell) in bc_plane.cells.iter().enumerate() {
-            let idx = i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
-
-        let tree_plane = self.tree.render(tree_rect);
-        let mut tree_plane = tree_plane;
-        tree_plane.set_z_index(10);
-        for (i, cell) in tree_plane.cells.iter().enumerate() {
-            let idx = (1 * area.width) as usize + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
-
-        let detail_plane = render_detail_panel(self, detail_rect);
-        for (i, cell) in detail_plane.cells.iter().enumerate() {
-            let base_y = (tree_rect.height + 1) as usize;
-            let idx = (base_y * area.width as usize) + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
-
-        let status_rect = Rect::new(0, area.height - 1, area.width, 1);
-        let status_plane = self.status_bar.render(status_rect);
-        for (i, cell) in status_plane.cells.iter().enumerate() {
-            let idx = ((area.height - 1) * area.width) as usize + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
-
-        plane
-    }
-
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
-        use crate::input::event::{KeyCode, KeyEventKind};
-        if key.kind != KeyEventKind::Press {
-            return false;
-        }
-
-        match key.code {
-            KeyCode::Backspace => {
-                if !self.current_path.is_empty() {
-                    self.current_path.pop();
-                    self.update_path();
-                    return true;
-                }
-            }
-            _ => {}
-        }
-
-        if self.tree.handle_key(key.clone()) {
-            let sel = self.tree.selected_path.clone();
-            self.current_path = sel;
-            self.update_path();
-            return true;
-        }
-
-        false
-    }
-
-    fn handle_mouse(
-        &mut self,
-        kind: crate::input::event::MouseEventKind,
-        col: u16,
-        row: u16,
-    ) -> bool {
-        if row == 0 {
-            return self.breadcrumbs.handle_mouse(kind, col, row);
-        }
-
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, _) = split.split(Rect::new(0, 0, 80, 23));
-
-        if col < tree_rect.width && row > 0 && row < tree_rect.height {
-            if self.tree.handle_mouse(kind, col, row - 1) {
-                let sel = self.tree.selected_path.clone();
-                self.current_path = sel;
-                self.update_path();
-                return true;
-            }
-        }
-
-        false
-    }
+            let status_text = format!("{} items | Total: {} | arrows: navigate, Enter: expand, Backspace: up", item_count, MOCK_FS.total_items());
+            let status_bar = StatusBar::new(WidgetId::new(2))
+                .add_segment(StatusSegment::new(&status_text).with_fg(Color::Rgb(180, 180, 180)).with_bg(Color::Ansi(236)));
+            let status_plane = status_bar.render(footer_rect);
+            ctx.add_plane(status_plane);
+        })
 }
 
-fn render_detail_panel(state: &TreeNavState, area: Rect) -> Plane {
+fn render_detail(tree: &Tree, fs: &MockFs, area: Rect) -> Plane {
     let mut plane = Plane::new(1, area.width, area.height);
     plane.z_index = 5;
 
@@ -291,9 +143,9 @@ fn render_detail_panel(state: &TreeNavState, area: Rect) -> Plane {
         cell.bg = Color::Ansi(17);
     }
 
-    let mut y = 1u16;
+    let path = tree.selected_path.clone();
 
-    let print = |plane: &mut Plane, y: u16, text: &str, fg: Color| {
+    let print_line = |plane: &mut Plane, y: u16, text: &str, fg: Color| {
         for (i, c) in text.chars().take(area.width as usize - 2).enumerate() {
             let idx = (y * plane.width + 1 + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -303,22 +155,21 @@ fn render_detail_panel(state: &TreeNavState, area: Rect) -> Plane {
         }
     };
 
-    print(plane, y, "DETAILS", Color::Rgb(0, 255, 136));
+    let mut y = 1u16;
+    print_line(&mut plane, y, "DETAILS", Color::Rgb(0, 255, 136));
     y += 2;
 
-    if let Some(node) = state.selected_node() {
+    if let Some(node) = fs.find_by_path(&path) {
         let icon = if node.is_dir { "[DIR]" } else { "[FILE]" };
-        print(plane, y, &format!("{} {}", icon, node.name), Color::Rgb(255, 255, 255));
+        print_line(&mut plane, y, &format!("{} {}", icon, node.name), Color::Rgb(255, 255, 255));
         y += 1;
 
         if node.is_dir {
             if let Some(ref children) = node.children {
-                print(plane, y, &format!("{} items", children.len()), Color::Rgb(150, 150, 150));
+                print_line(&mut plane, y, &format!("{} items", children.len()), Color::Rgb(150, 150, 150));
                 y += 2;
-
-                print(plane, y, "Contents:", Color::Rgb(100, 180, 255));
+                print_line(&mut plane, y, "Contents:", Color::Rgb(100, 180, 255));
                 y += 1;
-
                 for child in children {
                     let child_icon = if child.is_dir { "[DIR]" } else { "[FILE]" };
                     let child_name = format!("  {} {}", child_icon, child.name);
@@ -327,7 +178,7 @@ fn render_detail_panel(state: &TreeNavState, area: Rect) -> Plane {
                     } else {
                         Color::Rgb(200, 200, 200)
                     };
-                    print(plane, y, &child_name, fg);
+                    print_line(&mut plane, y, &child_name, fg);
                     y += 1;
                     if y >= area.height - 1 {
                         break;
@@ -335,47 +186,13 @@ fn render_detail_panel(state: &TreeNavState, area: Rect) -> Plane {
                 }
             }
         } else {
-            print(plane, y, "Type: Source file", Color::Rgb(150, 150, 150));
+            print_line(&mut plane, y, "Type: Source file", Color::Rgb(150, 150, 150));
             y += 1;
-            print(plane, y, "Size: ~1KB (mock)", Color::Rgb(150, 150, 150));
+            print_line(&mut plane, y, "Size: ~1KB (mock)", Color::Rgb(150, 150, 150));
         }
     } else {
-        print(plane, y, "No selection", Color::Rgb(150, 150, 150));
-    }
-
-    let total = state.total_items();
-    let count = state.item_count();
-    let status_text = format!("{} items | Total: {} | ? for help", count, total);
-    for (i, c) in status_text.chars().enumerate() {
-        let idx = ((area.height - 1) * plane.width + 1 + i as u16) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx].char = c;
-            plane.cells[idx].fg = Color::Rgb(180, 180, 180);
-            plane.cells[idx].bg = Color::Ansi(236);
-        }
+        print_line(&mut plane, y, "No selection", Color::Rgb(150, 150, 150));
     }
 
     plane
-}
-
-fn main() -> std::io::Result<()> {
-    let theme = Theme::cyberpunk();
-
-    App::new()?
-        .title("Tree Navigator")
-        .fps(30)
-        .theme(theme)
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
-            let area = Rect::new(0, 0, w, h);
-
-            let mut state = TreeNavState::new();
-            state.status_bar = StatusBar::new(WidgetId::new(3))
-                .add_segment(StatusSegment::new("3 items").with_fg(Color::Rgb(180, 180, 180)).with_bg(Color::Ansi(236)));
-
-            let plane = state.render(area);
-            ctx.add_plane(plane);
-
-            ctx.handle_events_for(&mut state);
-        })
 }
