@@ -661,20 +661,6 @@ mod tests {
         unsafe { crate::Terminal::from_raw_fd(fd) }.unwrap()
     }
 
-    fn dummy_terminal_ref() -> &'static mut crate::Terminal<File> {
-        static mut TERMINAL: Option<crate::Terminal<File>> = None;
-        if unsafe { TERMINAL.is_none() } {
-            let file = OpenOptions::new()
-                .write(true)
-                .create(true)
-                .open("/tmp/dummy_terminal_ref_term.txt")
-                .unwrap();
-            let fd = file.into_raw_fd();
-            unsafe { TERMINAL = Some(crate::Terminal::from_raw_fd(fd).unwrap()) };
-        }
-        unsafe { TERMINAL.as_mut().unwrap() }
-    }
-
     #[test]
     fn test_app_new() {
         let app = App::new();
