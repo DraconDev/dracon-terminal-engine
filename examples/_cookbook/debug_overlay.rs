@@ -209,7 +209,7 @@ impl Widget for DebugOverlayPanel {
         false
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, _kind: MouseEventKind, col: u16, row: u16) -> bool {
         if self.visible && row == 0 && col >= self.area().width.saturating_sub(9) { self.toggle(); return true; }
         false
     }
@@ -250,7 +250,7 @@ fn main() -> io::Result<()> {
             ctx.add_plane(footer_plane);
 
             let status_items = ["Profiler: OFF", "WidgetInspector: OFF", "EventLog: OFF"];
-            let status_y = h.saturating_sub(1);
+            let _status_y = h.saturating_sub(1);
             let mut status_plane = Plane::new(0, w, 1);
             status_plane.z_index = 5;
             let status_text = status_items.join("  ");
