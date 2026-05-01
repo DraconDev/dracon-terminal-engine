@@ -1,8 +1,11 @@
 # Project State
 
 ## Current Focus
-Adding unit tests for the `apply_command_output` method in the `StatusBadge` widget to validate correct status updates when handling scalar and non-scalar command outputs.
+Implementing robust widget command handling with lifecycle tracking and output parsing improvements across core components.
 
 ## Completed
-- [x] Implemented test `test_status_badge_apply_command_output_scalar` to verify status updates with scalar outputs (e.g., "OK")
-- [x] Implemented test `test_status_badge_apply_command_output_ignores_non_scalar` to ensure non-scalar outputs do not modify the status
+- [x] Add unit tests for app widget lifecycle command tracking (`test_app_command_tracking_on_add_widget`, `test_app_command_tracking_removed_on_widget_remove`) to verify command history management when adding/removing widgets
+- [x] Implement comprehensive tests for command output parsing in key-value grid widget handling both text and structured log entries
+- [x] Add parsing test coverage for log viewer widget processing multiline text and formatted LoggedLine entries
+- [x] Validate streaming text widget command response handling for scalar and multiline textual output formats
+- [x] Refactor test infrastructure to unify command response handling verification across widgets and application framework

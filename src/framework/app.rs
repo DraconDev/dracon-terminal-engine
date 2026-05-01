@@ -1357,4 +1357,26 @@ let config = AppConfig::from_toml_str(toml).unwrap();
         assert!(config.options.contains_key("width"));
         assert!(config.options.contains_key("height"));
     }
+
+    #[test]
+    fn test_app_command_tracking_on_add_widget() {
+        use crate::framework::command::BoundCommand;
+        let mut app = App::new().unwrap();
+        let cmd = BoundCommand::new("echo test").refresh(5);
+        let label = crate::framework::widgets::Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let tracking = app.command_tracking.borrow();
+        assert!(tracking.is_empty());
+    }
+
+    #[test]
+    fn test_app_command_tracking_removed_on_widget_remove() {
+        use crate::framework::command::BoundCommand;
+        let mut app = App::new().unwrap();
+        let cmd = BoundCommand::new("echo test").refresh(5);
+        let mut label = crate::framework::widgets::Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        app.remove_widget(id);
+        assert!(app.command_tracking.borrow().is_empty());
+    }
 }

@@ -373,4 +373,21 @@ mod tests {
         assert_eq!(st.lines[0], "line 2");
         assert_eq!(st.lines[2], "line 4");
     }
+
+    #[test]
+    fn test_streaming_text_apply_command_output_scalar() {
+        use crate::framework::command::ParsedOutput;
+        let mut st = StreamingText::new();
+        st.apply_command_output(&ParsedOutput::Scalar("hello".to_string()));
+        assert_eq!(st.lines.len(), 1);
+        assert_eq!(st.lines[0], "hello");
+    }
+
+    #[test]
+    fn test_streaming_text_apply_command_output_text() {
+        use crate::framework::command::ParsedOutput;
+        let mut st = StreamingText::new();
+        st.apply_command_output(&ParsedOutput::Text("line1\nline2".to_string()));
+        assert_eq!(st.lines.len(), 2);
+    }
 }

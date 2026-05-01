@@ -478,4 +478,23 @@ mod tests {
         assert_eq!(lv.level_prefix(LogLevel::Error), "[E]");
         assert_eq!(lv.level_prefix(LogLevel::Info), "[I]");
     }
+
+    #[test]
+    fn test_log_viewer_apply_command_output_text() {
+        use crate::framework::command::ParsedOutput;
+        let mut lv = LogViewer::new();
+        lv.apply_command_output(&ParsedOutput::Text("ERROR test error\nINFO test info".to_string()));
+        assert_eq!(lv.lines.len(), 2);
+    }
+
+    #[test]
+    fn test_log_viewer_apply_command_output_lines() {
+        use crate::framework::command::{LoggedLine, ParsedOutput};
+        let mut lv = LogViewer::new();
+        lv.apply_command_output(&ParsedOutput::Lines(vec![
+            LoggedLine::new("FATAL crash", "fatal"),
+            LoggedLine::new("ERROR failure", "error"),
+        ]));
+        assert_eq!(lv.lines.len(), 2);
+    }
 }

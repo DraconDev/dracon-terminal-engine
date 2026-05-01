@@ -320,4 +320,13 @@ mod tests {
         assert_eq!(keys[0], "apple");
         assert_eq!(keys[1], "zebra");
     }
+
+    #[test]
+    fn test_key_value_grid_apply_command_output() {
+        use crate::framework::command::ParsedOutput;
+        let mut grid = KeyValueGrid::new();
+        grid.apply_command_output(&ParsedOutput::Text("CPU: i9\nRAM: 64GB".to_string()));
+        assert_eq!(grid.pairs.get("CPU").unwrap(), "i9");
+        assert_eq!(grid.pairs.get("RAM").unwrap(), "64GB");
+    }
 }
