@@ -1,7 +1,8 @@
 # Project State
 
 ## Current Focus
-Removed redundant closing brace in the game loop's quit condition check to improve code readability.
+Improved test robustness for the `Glitch` filter by adding a statistical assertion that verifies very few cells change at time=0, rather than checking each cell individually.
 
 ## Completed
-- [x] refactor(game loop): removed redundant closing brace in the game loop's quit condition check
+- [x] Refactored `Glitch` filter test to track changed cells instead of asserting each cell remains unchanged
+- [x] Added statistical assertion that fewer than 5 cells should change at time=0
