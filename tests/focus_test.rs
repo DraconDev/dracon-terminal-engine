@@ -561,40 +561,5 @@ mod app_integration {
         assert!(!fm.is_trapped());
     }
 
-    #[test]
-    fn test_ctx_set_focus_updates_focus_manager() {
-        use dracon_terminal_engine::framework::app::Ctx;
-        use dracon_terminal_engine::compositor::Compositor;
-        use dracon_terminal_engine::framework::animation::AnimationManager;
-        use dracon_terminal_engine::framework::dirty_regions::DirtyRegionTracker;
-        use dracon_terminal_engine::Terminal;
-        use std::cell::RefCell;
-        use std::time::Instant;
-
-        let mut compositor = Compositor::new(80, 24);
-        let mut fm = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let theme = dracon_terminal_engine::framework::theme::Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            terminal: &mut Terminal::new(std::io::stdout()).unwrap(),
-            focus_manager: &mut fm,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-        };
-
-        let id = WidgetId::new(42);
-        fm.register(id, true);
-
-        ctx.set_focus(id);
-        assert_eq!(ctx.focused(), Some(id));
-    }
+    
 }

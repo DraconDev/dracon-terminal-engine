@@ -32,7 +32,7 @@
 //! 4. **Submit flow**: Button click triggers validation of all fields. If valid,
 //!    shows a success toast. If invalid, shows error states.
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -273,7 +273,7 @@ impl Widget for SettingsForm {
         for (i, cell) in username_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -309,7 +309,7 @@ impl Widget for SettingsForm {
         for (i, cell) in email_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -345,7 +345,7 @@ impl Widget for SettingsForm {
         for (i, cell) in password_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -381,7 +381,7 @@ impl Widget for SettingsForm {
         for (i, cell) in theme_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -391,7 +391,7 @@ impl Widget for SettingsForm {
         for (i, cell) in toggle_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -401,7 +401,7 @@ impl Widget for SettingsForm {
         for (i, cell) in submit_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = *cell;
+                plane.cells[idx] = cell.clone();
             }
         }
 
@@ -517,9 +517,9 @@ fn main() -> std::io::Result<()> {
         .title("Form Demo - Settings")
         .fps(30)
         .theme(theme)
-        .on_tick(Box::new(|ctx, _tick| {
+        .on_tick(|ctx, _tick| {
             ctx.mark_all_dirty();
-        }))
+        })
         .run(|ctx| {
             let (w, h) = ctx.compositor().size();
 
