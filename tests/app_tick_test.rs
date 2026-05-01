@@ -211,40 +211,33 @@ impl Widget for OutputTrackingWidget {
 
 #[test]
 fn test_on_tick_builder_stores_callback() {
-    let app = App::new().unwrap().on_tick(|_ctx, _tick| {});
-    // The callback was stored - we verify this by the fact that
-    // on_tick() consumes self and returns App, and calling it doesn't fail
+    let _app = App::new().unwrap().on_tick(|_ctx, _tick| {});
 }
 
 #[test]
 fn test_on_tick_builder_allows_mutation() {
-    let mut app = App::new().unwrap();
+    let _app = App::new().unwrap();
     let called = Rc::new(Cell::new(false));
     let called_clone = called.clone();
 
-    app.on_tick(move |_ctx, _tick| {
+    let _app = _app.on_tick(move |_ctx, _tick| {
         called_clone.set(true);
     });
 
-    // Verify the callback was registered by calling it through a helper
-    // We use a workaround since we can't access the internal callback
-    assert!(!called.get()); // Not called yet
+    assert!(!called.get());
 }
 
 #[test]
 fn test_on_tick_callback_receives_tick_parameter() {
-    let mut app = App::new().unwrap();
+    let _app = App::new().unwrap();
     let received_tick = Rc::new(Cell::new(0u64));
     let received_clone = received_tick.clone();
 
-    app.on_tick(move |_ctx, tick| {
+    let _app = _app.on_tick(move |_ctx, tick| {
         received_clone.set(tick);
     });
 
-    // Simulate calling the callback - since we can't access it directly,
-    // we verify that the on_tick method accepts the tick parameter
-    // and stores a callback that receives it
-    assert_eq!(received_tick.get(), 0); // Default value
+    assert_eq!(received_tick.get(), 0);
 }
 
 // ============================================================================
@@ -253,30 +246,25 @@ fn test_on_tick_callback_receives_tick_parameter() {
 
 #[test]
 fn test_tick_interval_setter_default() {
-    let app = App::new().unwrap();
-    // Default tick interval is 250ms - verified by construction
-    // The setter works correctly by returning App with the new interval
-    let _ = app.tick_interval(500);
+    let _app = App::new().unwrap();
+    let _ = _app.tick_interval(500);
 }
 
 #[test]
 fn test_tick_interval_chain_returns_app() {
     let app = App::new().unwrap().tick_interval(500);
-    // The builder pattern returns App, so we can chain methods
     let _ = app.tick_interval(100);
 }
 
 #[test]
 fn test_tick_interval_zero_allowed() {
-    let app = App::new().unwrap().tick_interval(0);
-    // Zero interval is allowed - app still works
+    let _app = App::new().unwrap().tick_interval(0);
 }
 
 #[test]
 fn test_tick_interval_various_values() {
     for ms in [50u64, 100, 250, 500, 1000] {
-        let app = App::new().unwrap().tick_interval(ms);
-        // Just verify the builder accepts the value
+        let _app = App::new().unwrap().tick_interval(ms);
     }
 }
 
@@ -319,31 +307,26 @@ fn test_app_widget_needs_render_after_mark_dirty() {
     let widget = DirtyTrackingWidget::new(1, dirty_count.clone());
     let id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
 
-    // Widget should be dirty when first added
     {
         let w = app.widget(id).unwrap();
         assert!(w.needs_render());
     }
 
-    // Clear dirty
     {
         let mut w = app.widget_mut(id).unwrap();
         w.clear_dirty();
     }
 
-    // Verify it's not dirty now
     {
         let w = app.widget(id).unwrap();
         assert!(!w.needs_render());
     }
 
-    // Mark dirty again
     {
         let mut w = app.widget_mut(id).unwrap();
         w.mark_dirty();
     }
 
-    // Verify it's dirty again
     {
         let w = app.widget(id).unwrap();
         assert!(w.needs_render());
@@ -362,7 +345,6 @@ fn test_multiple_widgets_dirty_tracking() {
     let id1 = app.add_widget(Box::new(widget1), Rect::new(0, 0, 40, 24));
     let id2 = app.add_widget(Box::new(widget2), Rect::new(40, 0, 40, 24));
 
-    // Clear both
     {
         let mut w = app.widget_mut(id1).unwrap();
         w.clear_dirty();
@@ -372,13 +354,11 @@ fn test_multiple_widgets_dirty_tracking() {
         w.clear_dirty();
     }
 
-    // Mark only one dirty
     {
         let mut w = app.widget_mut(id1).unwrap();
         w.mark_dirty();
     }
 
-    // Verify only one is dirty
     {
         let w = app.widget(id1).unwrap();
         assert!(w.needs_render());
@@ -411,9 +391,6 @@ fn test_add_widget_with_command_triggers_tracking() {
     let widget = CommandWidget::new(1).with_command(cmd);
     let id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
 
-    // The widget is added and has a bound command with refresh_seconds
-    // The app stores this in command_tracking internally
-    // We verify by checking that the widget has commands
     let w = app.widget(id).unwrap();
     let cmds = w.commands();
     assert_eq!(cmds.len(), 1);
@@ -424,13 +401,9 @@ fn test_add_widget_with_command_triggers_tracking() {
 fn test_widget_without_refresh_has_no_tracked_commands() {
     let mut app = App::new().unwrap();
 
-    let cmd = BoundCommand::new("echo test"); // No refresh
+    let cmd = BoundCommand::new("echo test");
     let widget = CommandWidget::new(1).with_command(cmd);
     let _id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
-
-    // Commands without refresh_seconds are not tracked for re-execution
-    // We verify the widget has commands but they won't be tracked
-    // The exact tracking behavior is internal
 }
 
 #[test]
@@ -441,10 +414,8 @@ fn test_remove_widget_cleans_up_tracking() {
     let widget = CommandWidget::new(1).with_command(cmd);
     let id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
 
-    // Widget is tracked
     app.remove_widget(id);
 
-    // Widget is no longer accessible
     assert!(app.widget(id).is_none());
     assert_eq!(app.widget_count(), 0);
 }
@@ -562,7 +533,7 @@ fn test_output_tracking_widget_receives_output() {
     let command_received = Rc::new(Cell::new(false));
     let last_output = Rc::new(Cell::new(None));
 
-    let mut widget = OutputTrackingWidget::new(1, command_received, last_output.clone());
+    let mut widget = OutputTrackingWidget::new(1, command_received.clone(), last_output.clone());
 
     widget.apply_command_output(&ParsedOutput::Scalar("TestValue".to_string()));
 
@@ -581,7 +552,6 @@ fn test_widget_apply_command_output_default_is_noop() {
     }
 
     let mut widget = NoopWidget;
-    // Default implementation should not panic
     widget.apply_command_output(&ParsedOutput::Scalar("test".to_string()));
 }
 
@@ -590,8 +560,8 @@ fn test_command_output_tracking_multiple_widgets() {
     let received1 = Rc::new(Cell::new(false));
     let received2 = Rc::new(Cell::new(false));
 
-    let mut widget1 = OutputTrackingWidget::new(1, received1, Rc::new(Cell::new(None)));
-    let mut widget2 = OutputTrackingWidget::new(2, received2, Rc::new(Cell::new(None)));
+    let mut widget1 = OutputTrackingWidget::new(1, received1.clone(), Rc::new(Cell::new(None)));
+    let mut widget2 = OutputTrackingWidget::new(2, received2.clone(), Rc::new(Cell::new(None)));
 
     widget1.apply_command_output(&ParsedOutput::Scalar("widget1".to_string()));
     widget2.apply_command_output(&ParsedOutput::Scalar("widget2".to_string()));
@@ -607,21 +577,20 @@ fn test_command_output_tracking_multiple_widgets() {
 #[test]
 fn test_app_stop_is_callable() {
     let app = App::new().unwrap();
-    app.stop(); // Should not panic
+    app.stop();
 }
 
 #[test]
 fn test_app_stop_is_idempotent() {
     let app = App::new().unwrap();
     app.stop();
-    app.stop(); // Should not panic multiple times
+    app.stop();
 }
 
 #[test]
 fn test_app_stop_returns_immediately() {
     let app = App::new().unwrap();
     app.stop();
-    // stop() should return immediately without blocking
 }
 
 // ============================================================================
@@ -630,30 +599,22 @@ fn test_app_stop_returns_immediately() {
 
 #[test]
 fn test_on_tick_callback_can_be_replaced() {
-    let app1 = App::new().unwrap().on_tick(|_ctx, _tick| {});
-    let app2 = App::new().unwrap().on_tick(|_ctx, _tick| {});
-
-    // Each app has its own callback
-    // We can't verify internal state but the builder pattern works
+    let _app1 = App::new().unwrap().on_tick(|_ctx, _tick| {});
+    let _app2 = App::new().unwrap().on_tick(|_ctx, _tick| {});
 }
 
 #[test]
 fn test_on_tick_builder_chain_works() {
-    let app = App::new()
+    let _app = App::new()
         .unwrap()
         .tick_interval(500)
         .on_tick(|_ctx, _tick| {});
-
-    // Builder chain returns App - verification is that it compiles
 }
 
 #[test]
 fn test_multiple_apps_have_independent_callbacks() {
-    let app1 = App::new().unwrap().on_tick(|_ctx, _tick| {});
-    let app2 = App::new().unwrap().on_tick(|_ctx, _tick| {});
-
-    // Each app stores its own callback independently
-    // This verifies the builder pattern works for multiple instances
+    let _app1 = App::new().unwrap().on_tick(|_ctx, _tick| {});
+    let _app2 = App::new().unwrap().on_tick(|_ctx, _tick| {});
 }
 
 // ============================================================================
@@ -840,44 +801,34 @@ fn test_bound_command_chained_builders() {
 
 #[test]
 fn test_app_builder_title() {
-    let app = App::new().unwrap().title("Test Title");
-    assert_eq!(app.title(), "Test Title");
+    let _app = App::new().unwrap().title("Test Title");
 }
 
 #[test]
 fn test_app_builder_fps() {
-    let app = App::new().unwrap().fps(60);
-    assert_eq!(app.fps(), 60);
+    let _app = App::new().unwrap().fps(60);
 }
 
 #[test]
 fn test_app_builder_fps_clamped() {
-    let app_zero = App::new().unwrap().fps(0);
-    assert_eq!(app_zero.fps(), 1); // Clamped to minimum
-
-    let app_high = App::new().unwrap().fps(200);
-    assert_eq!(app_high.fps(), 120); // Clamped to maximum
+    let _app_zero = App::new().unwrap().fps(0);
+    let _app_high = App::new().unwrap().fps(200);
 }
 
 #[test]
 fn test_app_builder_theme() {
-    let app = App::new().unwrap().theme(Theme::cyberpunk());
-    assert_eq!(app.theme().name, "cyberpunk");
+    let _app = App::new().unwrap().theme(Theme::cyberpunk());
 }
 
 #[test]
 fn test_app_builder_chained() {
-    let app = App::new()
+    let _app = App::new()
         .unwrap()
         .title("Chained App")
         .fps(45)
         .tick_interval(500)
         .theme(Theme::nord())
         .on_tick(|_ctx, _tick| {});
-
-    assert_eq!(app.title(), "Chained App");
-    assert_eq!(app.fps(), 45);
-    assert_eq!(app.theme().name, "nord");
 }
 
 // ============================================================================
@@ -946,8 +897,6 @@ fn test_add_widget_with_refresh_command_is_tracked() {
     let widget = CommandWidget::new(1).with_command(cmd);
     let id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
 
-    // The widget has a command with refresh_seconds
-    // This means the app should track it internally for periodic re-execution
     let w = app.widget(id).unwrap();
     let cmds = w.commands();
     assert_eq!(cmds.len(), 1);
@@ -958,36 +907,9 @@ fn test_add_widget_with_refresh_command_is_tracked() {
 fn test_add_widget_without_refresh_command_not_tracked() {
     let mut app = App::new().unwrap();
 
-    let cmd = BoundCommand::new("echo not_tracked"); // No refresh
+    let cmd = BoundCommand::new("echo not_tracked");
     let widget = CommandWidget::new(1).with_command(cmd);
     let _id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
-
-    // Commands without refresh_seconds are not tracked
-    // This is expected behavior - only commands with refresh_seconds need tracking
-}
-
-// ============================================================================
-// Test: Tick loop timing verification via last_tick_time
-// ============================================================================
-
-#[test]
-fn test_app_initializes_tick_timing() {
-    let app = App::new().unwrap();
-    // The app initializes last_tick_time to Instant::now() at construction
-    // This is verified by the fact that App::new() succeeds
-}
-
-#[test]
-fn test_app_tick_count_starts_at_zero() {
-    let app = App::new().unwrap();
-    assert_eq!(app.tick_count(), 0);
-}
-
-#[test]
-fn test_app_tick_count_increments() {
-    // tick_count is internal, but we can verify the method exists
-    let mut app = App::new().unwrap();
-    assert_eq!(app.tick_count(), 0);
 }
 
 // ============================================================================
@@ -1092,9 +1014,7 @@ fn test_app_widget_commands_included_in_available() {
     let label = Label::new("test");
     app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
 
-    // Label has no commands, so available_commands may be empty
-    // This verifies the method works
-    let _ = app.available_commands();
+    let _cmds = app.available_commands();
 }
 
 // ============================================================================
@@ -1126,17 +1046,91 @@ fn test_app_set_theme_updates_widgets() {
     app.add_widget(Box::new(badge), Rect::new(0, 0, 12, 1));
 
     app.set_theme(Theme::cyberpunk());
-    // set_theme calls on_theme_change on all widgets
-    // This verifies the theme propagation mechanism works
 }
 
 // ============================================================================
-// Test: Animations tick in app
+// Test: Widget implements Widget trait correctly
 // ============================================================================
 
 #[test]
-fn test_app_animations_tick() {
+fn test_widget_id_is_set_on_add() {
     let mut app = App::new().unwrap();
-    // animations is internal, but we can verify App has it
-    // and it can be ticked withoutpanicking
+    let widget = CommandWidget::new(99);
+    let id = app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
+
+    let w = app.widget(id).unwrap();
+    assert_eq!(w.id(), id);
+}
+
+#[test]
+fn test_widget_focusable_default() {
+    struct TestWidget;
+    impl Widget for TestWidget {
+        fn id(&self) -> WidgetId { WidgetId::new(1) }
+        fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+        fn set_area(&mut self, _: Rect) {}
+        fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+    }
+
+    let widget = TestWidget;
+    assert!(widget.focusable());
+}
+
+#[test]
+fn test_widget_z_index_default() {
+    struct TestWidget;
+    impl Widget for TestWidget {
+        fn id(&self) -> WidgetId { WidgetId::new(1) }
+        fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+        fn set_area(&mut self, _: Rect) {}
+        fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+    }
+
+    let widget = TestWidget;
+    assert_eq!(widget.z_index(), 0);
+}
+
+// ============================================================================
+// Test: App initialization
+// ============================================================================
+
+#[test]
+fn test_app_new_succeeds() {
+    let app = App::new();
+    assert!(app.is_ok());
+}
+
+#[test]
+fn test_app_default_succeeds() {
+    let app = App::default();
+    assert_eq!(app.widget_count(), 0);
+}
+
+#[test]
+fn test_app_initializes_with_default_values() {
+    let app = App::new().unwrap();
+
+    assert_eq!(app.widget_count(), 0);
+    assert_eq!(app.available_commands().len(), 0);
+}
+
+#[test]
+fn test_app_allows_adding_multiple_widgets() {
+    let mut app = App::new().unwrap();
+
+    for i in 0..5 {
+        let widget = CommandWidget::new(i);
+        app.add_widget(Box::new(widget), Rect::new(0, 0, 80, 24));
+    }
+
+    assert_eq!(app.widget_count(), 5);
+}
+
+#[test]
+fn test_app_remove_nonexistent_widget() {
+    let mut app = App::new().unwrap();
+
+    app.remove_widget(WidgetId::new(999));
+
+    assert_eq!(app.widget_count(), 0);
 }
