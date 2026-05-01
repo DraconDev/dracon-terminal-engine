@@ -16,7 +16,7 @@
 //!
 //! **Behavior:** Type to filter • Click Sort to cycle none→asc→desc • Up/Down navigate.
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SearchInput;
