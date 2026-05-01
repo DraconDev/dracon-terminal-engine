@@ -9,11 +9,9 @@ use std::time::{Duration, Instant};
 
 use rand::Rng;
 
-use dracon_terminal_engine::framework::app::App;
-use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::log_viewer::LogViewer;
-use dracon_terminal_engine::framework::widgets::status_badge::StatusBadge;
+use dracon_terminal_engine::framework::widgets::{LogViewer, StatusBadge};
 use ratatui::layout::Rect;
 
 const LOGS: &[(&str, &str)] = &[
@@ -34,19 +32,24 @@ struct LogMonitor {
     status: StatusBadge,
     last_log: Instant,
     total_lines: usize,
-    area: std::cell::Cell<Rect>,
+    area: Rect,
     dirty: bool,
 }
 
 impl LogMonitor {
     fn new(id: WidgetId) -> Self {
+        let mut log_viewer = LogViewer::with_id(WidgetId::new(id.0 + 1));
+        log_viewer.max_lines(500);
+        log_viewer.auto_scroll(true);
+        let mut status = StatusBadge::new(WidgetId::new(id.0 + 2));
+        status.with_label("lines");
         Self {
             id,
-            log_viewer: LogViewer::with_id(WidgetId::new(id.value + 1)).max_lines(500).auto_scroll(true),
-            status: StatusBadge::new(WidgetId::new(id.value + 2)).with_label("lines"),
+            log_viewer,
+            status,
             last_log: Instant::now(),
             total_lines: 0,
-            area: std::cell::Cell::new(Rect::new(0, 0, 80, 20)),
+            area: Rect::new(0, 0, 80, 20),
             dirty: true,
         }
     }
@@ -72,6 +75,11 @@ impl LogMonitor {
         self.total_lines = 0;
         self.dirty = true;
     }
+
+    fn tick(&mut self) {
+        self.push_log();
+        self.refresh_status();
+    }
 }
 
 fn format_time() -> String {
@@ -83,9 +91,9 @@ fn format_time() -> String {
 impl Widget for LogMonitor {
     fn id(&self) -> WidgetId { self.id }
     fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area.get() }
+    fn area(&self) -> Rect { self.area }
     fn set_area(&mut self, area: Rect) {
-        self.area.set(area);
+        self.area = area;
         let la = Rect::new(area.x, area.y + 2, area.width, area.height - 4);
         self.log_viewer.set_area(la);
         self.status.set_area(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
@@ -95,21 +103,20 @@ impl Widget for LogMonitor {
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; self.log_viewer.clear_dirty(); self.status.clear_dirty(); }
 
-    fn render(&self, area: Rect) -> dracon_terminal_engine::compositor::Plane {
-        use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+    fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
 
         // Header
         let title = " Log Monitor ";
         for (i, c) in title.chars().enumerate().take(area.width as usize - 2) {
             let idx = (i + 2) as usize;
-            p.cells[idx] = Cell { char: c, fg: Color::Cyan, bg: Color::Reset, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell { char: c, fg: Color::Rgb(0, 255, 200), bg: Color::Reset, style: Styles::BOLD, transparent: false, skip: false };
         }
 
         // Filters
         let fx = area.width.saturating_sub(36);
         let labels = ["[INFO]", "[WARN]", "[ERROR]", "[DEBUG]"];
-        let colors = [Color::Green, Color::Yellow, Color::Red, Color::Gray];
+        let colors = [Color::Rgb(0, 255, 150), Color::Rgb(255, 255, 0), Color::Rgb(255, 85, 85), Color::Rgb(180, 180, 180)];
         for (i, (&l, &c)) in labels.iter().zip(colors.iter()).enumerate() {
             for (j, ch) in l.chars().enumerate() {
                 let idx = (fx + i as u16 * 7 + j as u16) as usize;
@@ -122,7 +129,7 @@ impl Widget for LogMonitor {
         // Separator
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx] = Cell { char: '─', fg: Color::DarkGray, bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false }; }
+            if idx < p.cells.len() { p.cells[idx] = Cell { char: '─', fg: Color::Rgb(60, 60, 70), bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false }; }
         }
 
         // Log viewer
@@ -145,8 +152,7 @@ impl Widget for LogMonitor {
         p
     }
 
-    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
             KeyCode::Char('c') => { self.clear(); true }
@@ -155,13 +161,9 @@ impl Widget for LogMonitor {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
-        use dracon_terminal_engine::input::event::MouseEventKind;
-        if kind == MouseEventKind::Down(ratatui::mouse::MouseButton::Left) {
-            if row == 0 && col >= self.area.get().width.saturating_sub(36) {
-                let idx = ((col - self.area.get().width.saturating_sub(36)) / 7) as usize;
-                if idx < 4 { self.dirty = true; }
-            } else if row >= 2 && row < self.area.get().height - 1 {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if kind == MouseEventKind::Down(MouseButton::Left) {
+            if row >= 2 && row < self.area.height - 1 {
                 self.log_viewer.auto_scroll = false;
                 self.dirty = true;
             }
@@ -178,22 +180,22 @@ fn main() -> Result<()> {
     println!("Log Monitor — c=clear, r=resume, click=pause/filters");
     std::thread::sleep(Duration::from_millis(300));
 
-    let mut app = App::new()?.title("Log Monitor").fps(30).tick_interval(200);
-    app.set_theme(Theme::dark());
     let mut mon = LogMonitor::new(WidgetId::new(1));
 
-    app.on_tick(move |ctx, tick| {
-        if tick % 2 == 0 { mon.push_log(); }
-        mon.refresh_status();
-        mon.mark_dirty();
-    }).run(move |ctx| {
-        let (w, h) = ctx.compositor().size();
-        if mon.area.get().width != w || mon.area.get().height != h {
-            mon.set_area(Rect::new(0, 0, w, h));
-        }
-        if mon.needs_render() {
-            ctx.add_plane(mon.render(mon.area()));
-            mon.clear_dirty();
-        }
-    })
+    App::new()?
+        .title("Log Monitor")
+        .fps(30)
+        .tick_interval(200)
+        .on_tick(|ctx, tick| {
+            if tick % 2 == 0 { mon.tick(); }
+            let (w, h) = ctx.compositor().size();
+            if mon.area.width != w || mon.area.height != h {
+                mon.set_area(Rect::new(0, 0, w, h));
+            }
+            if mon.needs_render() {
+                ctx.add_plane(mon.render(mon.area));
+                mon.clear_dirty();
+            }
+        })
+        .run(|_| {})
 }
