@@ -221,6 +221,10 @@ impl Widget for StreamingText {
     fn commands(&self) -> Vec<BoundCommand> {
         self.bound_command.iter().cloned().collect()
     }
+
+    fn apply_command_output(&mut self, output: &crate::framework::command::ParsedOutput) {
+        self.append_output(output.clone());
+    }
 }
 
 #[cfg(test)]
