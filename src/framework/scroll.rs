@@ -197,7 +197,7 @@ impl ScrollContainer {
         let thumb_pos = if max_offset == 0 {
             0
         } else {
-            (offset * (area.height as usize - thumb_len)) / max_offset
+            (offset * (area.height as usize - thumb_len)).checked_div(max_offset).unwrap()
         };
 
         let thumb_char = '█';
