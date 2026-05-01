@@ -24,13 +24,13 @@ use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 
 pub struct Gauge {
-    id: WidgetId,
-    label: String,
-    value: f64,
-    max: f64,
-    warn_threshold: f64,
-    crit_threshold: f64,
-    theme: Theme,
+    pub id: WidgetId,
+    pub label: String,
+    pub value: f64,
+    pub max: f64,
+    pub warn_threshold: f64,
+    pub crit_threshold: f64,
+    pub theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,
