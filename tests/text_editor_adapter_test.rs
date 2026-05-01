@@ -161,7 +161,7 @@ fn test_adapter_render_fills_cells() {
     assert!(!plane.cells[idx_h].transparent);
 
     // Second character 'i' at column 4
-    let idx_i = (gutter + 1);
+    let idx_i = gutter + 1;
     assert_eq!(plane.cells[idx_i].char, 'i');
     assert!(!plane.cells[idx_i].transparent);
 }
