@@ -579,61 +579,52 @@ fn test_app_multiple_widgets_all_get_on_mount() {
 
 #[test]
 fn test_app_remove_first_widget_others_still_mounted() {
-    use std::sync::Mutex;
+    let mut app = App::new().unwrap();
 
-    let state = Mutex::new((
-        false, // w1_mounted
-        false, // w1_unmounted
-        false, // w2_mounted
-    ));
+    static UNMOUNTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    static MOUNTED2: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
-    {
-        struct SimpleMountTracker {
-            id: WidgetId,
-            area: std::cell::Cell<Rect>,
-            state: *const Mutex<(bool, bool, bool)>,
-            which: usize,
-        }
-
-        impl SimpleMountTracker {
-            fn new(state: *const Mutex<(bool, bool, bool)>, which: usize) -> Self {
-                Self {
-                    id: WidgetId::new(which),
-                    area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
-                    state,
-                    which,
-                }
-            }
-        }
-
-        impl Widget for SimpleMountTracker {
-            fn id(&self) -> WidgetId { self.id }
-            fn area(&self) -> Rect { self.area.get() }
-            fn set_area(&mut self, area: Rect) { self.area.set(area); }
-            fn focusable(&self) -> bool { true }
-            fn on_mount(&mut self) {
-                let mut s = unsafe { &*self.state }.lock().unwrap();
-                if self.which == 1 { s.0 = true; }
-                if self.which == 2 { s.2 = true; }
-            }
-            fn on_unmount(&mut self) {
-                let mut s = unsafe { &*self.state }.lock().unwrap();
-                if self.which == 1 { s.1 = true; }
-            }
-            fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
-        }
-
-        let mut app = App::new().unwrap();
-
-        let id1 = app.add_widget(Box::new(SimpleMountTracker::new(&state, 1)), Rect::new(0, 0, 80, 24));
-        app.add_widget(Box::new(SimpleMountTracker::new(&state, 2)), Rect::new(0, 0, 80, 24));
-
-        app.remove_widget(id1);
+    struct SimpleTracker {
+        id: WidgetId,
+        area: std::cell::Cell<Rect>,
+        which: usize,
     }
 
-    let s = state.lock().unwrap();
-    assert!(s.1, "widget 1 should be unmounted");
-    assert!(s.2, "widget 2 should still be mounted");
+    impl SimpleTracker {
+        fn new(which: usize) -> Self {
+            Self {
+                id: WidgetId::new(which),
+                area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+                which,
+            }
+        }
+    }
+
+    impl Widget for SimpleTracker {
+        fn id(&self) -> WidgetId { self.id }
+        fn area(&self) -> Rect { self.area.get() }
+        fn set_area(&mut self, area: Rect) { self.area.set(area); }
+        fn focusable(&self) -> bool { true }
+        fn on_mount(&mut self) {
+            if self.which == 2 {
+                MOUNTED2.store(true, std::sync::atomic::Ordering::SeqCst);
+            }
+        }
+        fn on_unmount(&mut self) {
+            if self.which == 1 {
+                UNMOUNTED.store(true, std::sync::atomic::Ordering::SeqCst);
+            }
+        }
+        fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
+    }
+
+    let id1 = app.add_widget(Box::new(SimpleTracker::new(1)), Rect::new(0, 0, 80, 24));
+    app.add_widget(Box::new(SimpleTracker::new(2)), Rect::new(0, 0, 80, 24));
+
+    app.remove_widget(id1);
+
+    assert!(UNMOUNTED.load(std::sync::atomic::Ordering::SeqCst), "widget 1 should be unmounted");
+    assert!(MOUNTED2.load(std::sync::atomic::Ordering::SeqCst), "widget 2 should still be mounted");
 }
 
 #[test]
