@@ -632,7 +632,7 @@ impl Widget for Showcase {
         }
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
         if self.show_modal {
             self.show_modal = false;
             self.dirty = true;
