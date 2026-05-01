@@ -80,6 +80,7 @@ impl Compositor {
     }
 
     /// Draws a filled rectangle at the specified position with the given character, colors, and style.
+    #[allow(clippy::too_many_arguments)]
     pub fn draw_rect(
         &mut self,
         x: u16,

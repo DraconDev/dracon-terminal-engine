@@ -89,6 +89,7 @@ impl KeyValueGrid {
         self.dirty = true;
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn render_row(
         &self,
         key: &str,

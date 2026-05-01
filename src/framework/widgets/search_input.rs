@@ -15,7 +15,6 @@ pub struct SearchInput {
 impl SearchInput {
     /// Creates a new search input with the given ID.
     pub fn new(id: WidgetId) -> Self {
-        let id = id;
         let base = super::text_input_base::BaseInput::new(id, "Search...");
         Self { id, base }
     }
