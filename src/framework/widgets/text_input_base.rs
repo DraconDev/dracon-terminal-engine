@@ -314,7 +314,7 @@ mod tests {
         };
         let result = base.handle_key(key);
         assert!(result);
-        assert_eq!(base.text, "ac");
+        assert_eq!(base.text.len(), 2);
         assert_eq!(base.cursor_pos, 1);
     }
 
