@@ -41,7 +41,7 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::{Constraint, Layout, Rect};
 use std::collections::BTreeMap;
-use std::cell::RefCell;
+use std::sync::{Arc, Mutex};
 
 const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night"];
 
@@ -119,21 +119,17 @@ impl SystemMonitor {
 
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % THEMES.len();
-        let new_theme = match THEMES[self.theme_index] {
+    }
+
+    fn get_theme(&self) -> Theme {
+        match THEMES[self.theme_index] {
             "nord" => Theme::nord(),
             "dracula" => Theme::dracula(),
             "cyberpunk" => Theme::cyberpunk(),
             "gruvbox-dark" => Theme::gruvbox_dark(),
             "tokyo-night" => Theme::tokyo_night(),
             _ => Theme::nord(),
-        };
-        self.cpu_gauge = self.cpu_gauge.clone().with_theme(new_theme);
-        self.mem_gauge = self.mem_gauge.clone().with_theme(new_theme);
-        self.disk_gauge = self.disk_gauge.clone().with_theme(new_theme);
-        self.net_gauge = self.net_gauge.clone().with_theme(new_theme);
-        self.process_grid = self.process_grid.clone().with_theme(new_theme);
-        self.status_badge = self.status_badge.clone().with_theme(new_theme);
-        self.uptime_text = self.uptime_text.clone().with_theme(new_theme);
+        }
     }
 
     fn refresh_stats(&mut self) {
@@ -284,8 +280,8 @@ impl Widget for SystemMonitor {
     fn clear_dirty(&mut self) {}
 
     fn render(&self, area: Rect) -> Plane {
+        let theme = self.get_theme();
         let mut plane = Plane::new(0, area.width, area.height);
-        let theme = Theme::nord();
 
         render_header(&mut plane, area.width, &theme, THEMES[self.theme_index]);
 
@@ -487,25 +483,25 @@ fn copy_plane_cells(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: us
 }
 
 fn main() -> std::io::Result<()> {
-    let monitor = RefCell::new(SystemMonitor::new());
-    monitor.borrow_mut().generate_processes();
-    monitor.borrow_mut().refresh_stats();
+    let monitor = Arc::new(Mutex::new(SystemMonitor::new()));
+    monitor.lock().unwrap().generate_processes();
+    monitor.lock().unwrap().refresh_stats();
 
-    let monitor_clone = monitor.clone();
+    let mon = monitor.clone();
 
     App::new()?
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
         .on_tick(move |_ctx, tick| {
-            let mut m = monitor_clone.borrow_mut();
+            let mut m = mon.lock().unwrap();
             m.refresh_stats();
             if tick % 3 == 0 {
                 m.generate_processes();
             }
         })
-        .run(|ctx| {
-            let mut m = monitor.borrow_mut();
+        .run(move |ctx| {
+            let mut m = monitor.lock().unwrap();
             let (w, h) = ctx.compositor().size();
             let area = Rect::new(0, 0, w, h);
             m.set_area(area);
