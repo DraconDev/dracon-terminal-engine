@@ -1,9 +1,11 @@
 # Project State
 
 ## Current Focus
-Optimize test setup configurations in the application framework by removing unused test cases and simplifying bindings.
+Refactor mouse event handling and cleanup ratatui integration tests
 
 ## Completed
-- [x] Removed unused test cases from `app.rs` focusing on essential configurations
-- [x] Simplified widget configuration test by eliminating empty conditions in `app.rs`
-- [x] Adjusted `mapping.rs` test to accurately represent `MouseEventKind` and its variants
+- [x] Fix mouse event API by replacing `MouseEventKind::Press` with `MouseEventKind::Down(MouseButton::Left)` in password input widget tests
+- [x] Fix mouse event API by replacing `MouseEventKind::Press` with `MouseEventKind::Down(MouseButton::Left)` in text input base widget tests
+- [x] Remove 175 lines of ratatui integration tests from src/integration/ratatui.rs
+- [x] Add Theme import to password_input.rs to support theme functionality
+- [x] Fix test variable mutability by adding `mut` keyword to app variable in app.rs test

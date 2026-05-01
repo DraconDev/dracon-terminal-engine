@@ -713,7 +713,7 @@ mod tests {
 
     #[test]
     fn test_app_widget_not_found() {
-        let app = App::new().unwrap();
+        let mut app = App::new().unwrap();
         let id = WidgetId(99999);
         assert!(app.widget(id).is_none());
         assert!(app.widget_mut(id).is_none());

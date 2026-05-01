@@ -1,5 +1,6 @@
 //! Password input widget with character masking.
 
+use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use crate::framework::widget::Widget;
 use ratatui::layout::Rect;
@@ -303,7 +304,7 @@ mod tests {
         input.base.text = "password".to_string();
         input.base.cursor_pos = 0;
         let result = input.handle_mouse(
-            crate::input::event::MouseEventKind::Press,
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left),
             4,
             0,
         );

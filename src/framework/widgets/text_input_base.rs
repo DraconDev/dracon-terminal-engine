@@ -435,7 +435,7 @@ mod tests {
         base.text = "abcdef".to_string();
         base.cursor_pos = 0;
         let result = base.handle_mouse(
-            crate::input::event::MouseEventKind::Press,
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left),
             3,
             0,
         );
@@ -451,7 +451,7 @@ mod tests {
         base.text = "ab".to_string();
         base.cursor_pos = 0;
         let result = base.handle_mouse(
-            crate::input::event::MouseEventKind::Press,
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left),
             10,
             0,
         );
