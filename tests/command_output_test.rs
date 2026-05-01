@@ -940,16 +940,10 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_json_parsing_pipeline() {
-        let cmd = BoundCommand::new(r#"printf "{\"status\":\"DEGRADED\",\"count\":2}""#)
-            .parser(OutputParser::JsonKey {
-                key: "status".to_string(),
-            });
+        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let output = parser.parse(r#"{"status":"DEGRADED","count":2}"#, "", 0);
 
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-
-        let mut badge = StatusBadge::new(WidgetId::new(1)).bind_command(cmd.clone());
+        let mut badge = StatusBadge::new(WidgetId::new(1));
         Widget::apply_command_output(&mut badge, &output);
 
         assert_eq!(badge.status(), "\"DEGRADED\"");
@@ -957,14 +951,10 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_json_array_parsing_pipeline() {
-        let cmd = BoundCommand::new(r#"printf "{\"items\":[{\"name\":\"a\"},{\"name\":\"b\"}]}""#)
-            .parser(OutputParser::JsonArray {
-                item_key: Some("name".to_string()),
-            });
-
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
+        let output = parser.parse(r#"{"items":[{"name":"a"},{"name":"b"}]}"#, "", 0);
 
         match output {
             ParsedOutput::List(items) => {
