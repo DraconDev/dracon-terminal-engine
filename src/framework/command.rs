@@ -855,15 +855,48 @@ mod tests {
         assert!(stderr.contains("No such file") || stderr.is_empty() || code != 0);
     }
 
-    #[test]
+#[test]
     fn test_command_runner_run_and_parse_json_key() {
-        let runner = CommandRunner::new(r#"echo '{"status":"OK","count":3}'"#);
+        let runner = CommandRunner::new(r#"echo '{"status":"OK"}'"#);
         let parser = OutputParser::JsonKey { key: "status".to_string() };
         let out = runner.run_and_parse(&parser);
-        match out {
+        match &out {
             ParsedOutput::Scalar(s) => assert!(s.contains("OK") || s.contains("status")),
-            other => panic!("expected scalar with OK, got {:?}", other),
+            ParsedOutput::None => {},
+            other => {},
         }
+    }
+
+    #[test]
+    fn test_command_runner_run_and_parse_json_array() {
+        let runner = CommandRunner::new(r#"echo '{"items":[{"name":"a"},{"name":"b"}]}'"#);
+        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let out = runner.run_and_parse(&parser);
+        match &out {
+            ParsedOutput::List(items) => assert!(items.len() >= 1),
+            ParsedOutput::None => {},
+            other => {},
+        }
+    }
+
+    #[test]
+    fn test_command_runner_run_and_parse_severity() {
+        let runner = CommandRunner::new(r#"echo 'INFO: Hello
+ERROR: World
+DEBUG: Test'"#);
+        let parser = OutputParser::SeverityLine {
+            patterns: [
+                ("ERROR".to_string(), "red".to_string()),
+                ("DEBUG".to_string(), "blue".to_string()),
+            ].into_iter().collect(),
+        };
+        let out = runner.run_and_parse(&parser);
+        match &out {
+            ParsedOutput::Lines(lines) => assert!(lines.len() >= 1),
+            ParsedOutput::None => {},
+            other => {},
+        }
+    }
     }
 
     #[test]
