@@ -314,7 +314,7 @@ impl Widget for Showcase {
         let col_widths = [12u16, 20, 30, 30];
         let mut x_pos = 1u16;
         let header_y = 2;
-        for (i, (h, w)) in headers.iter().zip(col_widths.iter()).enumerate() {
+        for (_i, (h, w)) in headers.iter().zip(col_widths.iter()).enumerate() {
             let end_x = (x_pos + w).min(area.width - 1);
             for x in x_pos..end_x {
                 let idx = (header_y * area.width + x) as usize;
@@ -359,7 +359,7 @@ impl Widget for Showcase {
         } else {
             self.selected.saturating_sub(visible_count / 2)
         };
-        let end_idx = (start_idx + visible_count).min(total);
+        let _end_idx = (start_idx + visible_count).min(total);
 
         for row in 0..visible_count {
             let idx = start_idx + row;
