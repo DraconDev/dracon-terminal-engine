@@ -25,7 +25,7 @@
 
 use dracon_terminal_engine::framework::command::{BoundCommand, OutputParser};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadge};
 use ratatui::layout::Rect;
 
@@ -69,7 +69,6 @@ fn main() -> std::io::Result<()> {
         );
 
     let status = StatusBadge::new(WidgetId::default_id())
-        .with_status("OK")
         .with_label("System");
 
     // Layout: 3 gauges across top (30% height), key-value grid + badge below
