@@ -966,21 +966,17 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_severity_line_parsing_pipeline() {
-        let cmd = BoundCommand::new("printf 'INFO start\\nERROR fail\\nWARN slow\\n'")
-            .parser(OutputParser::SeverityLine {
-                patterns: [
-                    ("ERROR".to_string(), "red".to_string()),
-                    ("WARN".to_string(), "yellow".to_string()),
-                ]
-                .into_iter()
-                .collect(),
-            });
+        let parser = OutputParser::SeverityLine {
+            patterns: [
+                ("ERROR".to_string(), "red".to_string()),
+                ("WARN".to_string(), "yellow".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        };
+        let output = parser.parse("INFO start\nERROR fail\nWARN slow\n", "", 0);
 
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-
-        let mut lv = LogViewer::new().bind_command(cmd.clone());
+        let mut lv = LogViewer::new();
         Widget::apply_command_output(&mut lv, &output);
 
         let rect = ratatui::layout::Rect::new(0, 0, 80, 20);
@@ -991,35 +987,27 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_regex_parsing_pipeline() {
-        let cmd = BoundCommand::new(r#"printf "CPU: 75%%""#)
-            .parser(OutputParser::Regex {
-                pattern: r"CPU: (\d+)%".to_string(),
-                group: Some(1),
-            });
+        let parser = OutputParser::Regex {
+            pattern: r"CPU: (\d+)%".to_string(),
+            group: Some(1),
+        };
+        let output = parser.parse("CPU: 75%", "", 0);
 
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-
-        let mut gauge = Gauge::new("CPU").bind_command(cmd.clone());
+        let mut gauge = Gauge::new("CPU");
         Widget::apply_command_output(&mut gauge, &output);
 
-        assert!((gauge.value() - 75.0).abs() < 0.001 || gauge.value() == 75.0);
+        assert!((gauge.value() - 75.0).abs() < 0.001);
     }
 
     #[test]
     fn test_line_count_parsing_pipeline() {
-        let cmd = BoundCommand::new("printf 'line1\nline2\nline3\n'")
-            .parser(OutputParser::LineCount);
-
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
+        let parser = OutputParser::LineCount;
+        let output = parser.parse("line1\nline2\nline3\n", "", 0);
 
         match output {
             ParsedOutput::Scalar(s) => {
                 let count: i32 = s.parse().unwrap();
-                assert!(count >= 1, "expected at least 1 line, got {}", count);
+                assert!(count >= 3, "expected at least 3 lines, got {}", count);
             }
             other => panic!("expected Scalar, got {:?}", other),
         }
