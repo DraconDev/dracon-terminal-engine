@@ -66,7 +66,7 @@ impl Parser {
             }
             ParserState::Normal => {
                 // Quick path for ASCII printable only (7-bit clean)
-                if self.buffer.is_empty() && byte < 128 && byte >= 0x20 && byte != 0x7F {
+                if self.buffer.is_empty() && (0x20..128).contains(&byte) && byte != 0x7F {
                     return Some(Event::Key(KeyEvent {
                         code: KeyCode::Char(byte as char),
                         modifiers: KeyModifiers::empty(),
@@ -483,9 +483,9 @@ impl Parser {
                         kind: KeyEventKind::Press,
                     }))
                 }
-                27 => {
+                27
                     // modifyOtherKeys format: 27;modifier;char~
-                    if parts.len() > 2 {
+                    if parts.len() > 2 => {
                         let mod_val = parts[1].parse::<u8>().ok()?.saturating_sub(1);
                         let char_code = parts[2].parse::<u32>().ok()?;
                         let mut m = KeyModifiers::empty();
@@ -507,7 +507,6 @@ impl Parser {
                             }));
                         }
                     }
-                }
                 _ => {}
             };
         }
@@ -599,7 +598,7 @@ impl Parser {
             }));
         }
 
-        let button = if b >= 8 && b <= 9 {
+        let button = if (8..=9).contains(&b) {
             match b {
                 8 | 128 => MouseButton::Back,
                 _ => MouseButton::Forward,

@@ -150,11 +150,10 @@ impl TextEditor {
     /// Adds an additional cursor at the given position.
     /// Ignores duplicates and the primary cursor position.
     pub fn add_cursor(&mut self, row: usize, col: usize) {
-        if (row, col) != (self.cursor_row, self.cursor_col) {
-            if !self.extra_cursors.contains(&(row, col)) {
+        if (row, col) != (self.cursor_row, self.cursor_col)
+            && !self.extra_cursors.contains(&(row, col)) {
                 self.extra_cursors.push((row, col));
             }
-        }
     }
 
     /// Removes the extra cursor at the given position, if it exists.

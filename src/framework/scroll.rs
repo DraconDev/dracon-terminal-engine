@@ -9,6 +9,7 @@ use ratatui::layout::Rect;
 
 /// Holds scroll position, content height, and viewport height for virtual scrolling.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub struct ScrollState {
     /// Number of rows scrolled off the top.
     pub offset: usize,
@@ -65,15 +66,6 @@ impl ScrollState {
     }
 }
 
-impl Default for ScrollState {
-    fn default() -> Self {
-        Self {
-            offset: 0,
-            content_height: 0,
-            viewport_height: 0,
-        }
-    }
-}
 
 /// A scrollable container with an optional scrollbar.
 ///
@@ -195,7 +187,7 @@ impl ScrollContainer {
         let visible = self.state.viewport_height;
         let offset = self.state.offset;
 
-        let mut plane = Plane::new(0, self.scrollbar_width as u16, area.height);
+        let mut plane = Plane::new(0, self.scrollbar_width, area.height);
 
         if total <= visible || !self.scrollbar_visible {
             return plane;

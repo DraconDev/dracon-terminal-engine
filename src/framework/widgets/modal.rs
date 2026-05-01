@@ -179,7 +179,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         let title_len = self.title.width().min((self.width as usize).saturating_sub(4));
         let title_start = (self.width as usize - title_len) / 2;
         for (i, ch) in self.title.chars().take(title_len).enumerate() {
-            let idx = (1 + title_start + i) as usize;
+            let idx = (1 + title_start + i);
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].style = Styles::BOLD;
@@ -212,7 +212,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
             let label_len = label.width().min((btn_width as usize).saturating_sub(2));
             let label_start = (btn_width as usize - label_len) / 2;
             for (j, ch) in label.chars().take(label_len).enumerate() {
-                let label_idx = (btn_y as usize) * (self.width as usize) + (bx as usize) + (label_start as usize) + j;
+                let label_idx = (btn_y as usize) * (self.width as usize) + (bx as usize) + label_start + j;
                 if label_idx < plane.cells.len() {
                     plane.cells[label_idx].char = ch;
                     plane.cells[label_idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };

@@ -20,6 +20,7 @@
 use crate::backend::tty;
 use crate::compositor::{Compositor, Plane};
 use crate::framework::animation::AnimationManager;
+use crate::framework::command::{AppConfig, BoundCommand, CommandRunner};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::focus::FocusManager;
 use crate::framework::theme::Theme;
@@ -71,6 +72,7 @@ pub struct App {
     dirty_tracker: DirtyRegionTracker,
     animations: AnimationManager,
     next_widget_id: usize,
+    commands: RefCell<Vec<BoundCommand>>,
 }
 
 impl App {
@@ -100,7 +102,66 @@ impl App {
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
             next_widget_id: 0,
+            commands: RefCell::new(Vec::new()),
         })
+    }
+
+    /// Creates an App from a TOML configuration file.
+    ///
+    /// This is the primary entry point for command-driven apps.
+    /// The TOML file defines the layout, widgets, and their command bindings.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// App::from_toml("/home/user/.config/dracon/myapp.toml")?
+    ///     .title("My Dashboard")
+    ///     .run(|ctx| { /* render */ });
+    /// ```
+    pub fn from_toml(path: &std::path::Path) -> io::Result<Self> {
+        let config = AppConfig::from_toml(path)?;
+        let terminal = Terminal::new(io::stdout())?;
+        let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
+
+        let mut app = Self {
+            terminal,
+            compositor: Compositor::new(w, h),
+            parser: Parser::new(),
+            title: config.title.clone(),
+            fps: config.fps.unwrap_or(30),
+            theme: Theme::default(),
+            running: Arc::new(AtomicBool::new(true)),
+            frame_count: Arc::new(AtomicU64::new(0)),
+            last_frame_time: Instant::now(),
+            last_tick_time: Instant::now(),
+            tick_interval: Duration::from_millis(250),
+            resize_flag: Arc::new(AtomicBool::new(false)),
+            tick_count: 0,
+            on_tick: RefCell::new(None),
+            widgets: RefCell::new(Vec::new()),
+            focus_manager: FocusManager::new(),
+            dirty_tracker: DirtyRegionTracker::new(),
+            animations: AnimationManager::new(),
+            next_widget_id: 0,
+            commands: RefCell::new(Vec::new()),
+        };
+
+        write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
+        Ok(app)
+    }
+
+    /// Adds a command to the global command registry (for AI enumeration).
+    pub fn add_command(&mut self, cmd: BoundCommand) {
+        self.commands.borrow_mut().push(cmd);
+    }
+
+    /// Returns all registered commands across all widgets.
+    pub fn available_commands(&self) -> Vec<BoundCommand> {
+        let mut cmds = self.commands.borrow().clone();
+        for widget in self.widgets.borrow().iter() {
+            cmds.extend(widget.commands());
+        }
+        cmds
     }
 
     /// Sets the terminal window title (via OSC escape sequence).
@@ -348,6 +409,7 @@ impl App {
                         focus_manager: &mut self.focus_manager,
                         animations: &mut self.animations,
                         dirty_tracker: &mut self.dirty_tracker,
+                        commands: &self.commands,
                     }, self.tick_count);
                     self.tick_count += 1;
                     self.last_tick_time = Instant::now();
@@ -363,6 +425,7 @@ impl App {
                 focus_manager: &mut self.focus_manager,
                 animations: &mut self.animations,
                 dirty_tracker: &mut self.dirty_tracker,
+                commands: &self.commands,
             });
 
             self.compositor.render(&mut self.terminal)?;
@@ -417,6 +480,7 @@ pub struct Ctx<'a> {
     pub(crate) focus_manager: &'a mut FocusManager,
     pub(crate) animations: &'a mut AnimationManager,
     pub(crate) dirty_tracker: &'a mut DirtyRegionTracker,
+    pub(crate) commands: &'a RefCell<Vec<BoundCommand>>,
 }
 
 impl<'a> Ctx<'a> {
@@ -452,12 +516,12 @@ impl<'a> Ctx<'a> {
 
     /// Returns the animation manager for managing toasts, progress bars, etc.
     pub fn animations(&self) -> &AnimationManager {
-        &self.animations
+        self.animations
     }
 
     /// Returns a mutable reference to the animation manager.
     pub fn animations_mut(&mut self) -> &mut AnimationManager {
-        &mut self.animations
+        self.animations
     }
 
     /// Marks a screen region as dirty, so it will be re-rendered on the next frame.
@@ -557,5 +621,24 @@ impl<'a> Ctx<'a> {
         let (w, h) = self.compositor.size();
         let layout = crate::framework::layout::Layout::new(constraints);
         layout.layout(Rect::new(0, 0, w, h))
+    }
+
+    /// Runs a command synchronously and returns its output.
+    ///
+    /// This is the primary way widgets execute CLI commands.
+    /// AI can also call this directly via `ctx.run_command("dracon-sync status")`.
+    ///
+    /// Returns `(stdout, stderr, exit_code)`.
+    pub fn run_command(&self, cmd: &str) -> (String, String, i32) {
+        let runner = CommandRunner::new(cmd);
+        runner.run_sync()
+    }
+
+    /// Returns all available commands registered with the app.
+    ///
+    /// This is the primary AI surface — an AI can query this to know
+    /// every action the TUI can perform.
+    pub fn available_commands(&self) -> Vec<BoundCommand> {
+        self.commands.borrow().clone()
     }
 }

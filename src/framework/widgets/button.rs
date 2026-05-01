@@ -102,7 +102,7 @@ impl crate::framework::widget::Widget for Button {
         };
 
         for (i, c) in display.chars().take(max_width as usize).enumerate() {
-            let idx = 1 + i as usize;
+            let idx = 1 + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
@@ -115,7 +115,7 @@ impl crate::framework::widget::Widget for Button {
             }
         }
 
-        let end_idx = (1 + display.width().min(max_width as usize)) as usize;
+        let end_idx = (1 + display.width().min(max_width as usize));
         if end_idx < plane.cells.len() {
             plane.cells[end_idx] = Cell {
                 char: ']',

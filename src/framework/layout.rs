@@ -134,7 +134,7 @@ impl Layout {
         let ratio_total: u32 = ratios.iter().map(|(_, n, _)| *n as u32).sum();
         for (i, n, d) in ratios.iter() {
             if *d > 0 && ratio_total > 0 {
-                let size = (remaining as u32 * *n as u32 / ratio_total as u32) as u16;
+                let size = (remaining as u32 * *n as u32 / ratio_total) as u16;
                 sizes[*i] = sizes[*i].max(size);
             }
         }

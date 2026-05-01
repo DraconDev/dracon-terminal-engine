@@ -4,18 +4,15 @@
 //! focus management, and event routing.
 
 use crate::compositor::Plane;
+use crate::framework::command::BoundCommand;
 use crate::input::event::{KeyEvent, MouseEventKind};
 use ratatui::layout::Rect;
 
 /// Unique identifier for a widget (for event routing and state management).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Default)]
 pub struct WidgetId(pub usize);
 
-impl Default for WidgetId {
-    fn default() -> Self {
-        Self(0)
-    }
-}
 
 impl WidgetId {
     /// Creates a new `WidgetId` with the given numeric value.
@@ -106,5 +103,15 @@ pub trait Widget {
     /// Returns `true` if the event was consumed.
     fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
         false
+    }
+
+    /// Returns the list of commands this widget can execute.
+    ///
+    /// Each command binds to a CLI command and specifies how to parse its output.
+    /// AI can enumerate these to know what actions are available.
+    ///
+    /// The default implementation returns an empty list.
+    fn commands(&self) -> Vec<BoundCommand> {
+        Vec::new()
     }
 }

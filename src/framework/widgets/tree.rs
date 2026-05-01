@@ -94,8 +94,8 @@ impl Tree {
 
     fn node_at_row(&self, row: u16) -> Option<Vec<usize>> {
         let mut current_row = 0u16;
-        fn traverse<'a>(
-            nodes: &'a [TreeNode],
+        fn traverse(
+            nodes: &[TreeNode],
             row: u16,
             current_row: &mut u16,
             path: &mut Vec<usize>,

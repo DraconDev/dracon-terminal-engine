@@ -103,7 +103,7 @@ impl crate::framework::widget::Widget for Label {
         plane.z_index = 0;
 
         for (i, c) in self.text.chars().take(area.width as usize).enumerate() {
-            let idx = i as usize;
+            let idx = i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = crate::compositor::Cell {
                     char: c,

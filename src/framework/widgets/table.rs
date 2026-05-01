@@ -232,7 +232,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 let _hit_zone = HitZone::new(self.offset + i, x, area.y + y_off, w, row_height);
 
                 for col_idx in 0..w {
-                    let idx = y as usize * area.width as usize + x as usize + col_idx as usize;
+                    let idx = y * area.width as usize + x as usize + col_idx as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].bg = bg;
                         plane.cells[idx].fg = fg;
@@ -243,7 +243,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 let text = self.cell_text(row, j);
                 let label_len = text.len().min(w as usize - 1).saturating_sub(1);
                 for (k, ch) in text.chars().take(label_len).enumerate() {
-                    let idx = y as usize * area.width as usize + x as usize + 1 + k;
+                    let idx = y * area.width as usize + x as usize + 1 + k;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = ch;
                         plane.cells[idx].fg = fg;

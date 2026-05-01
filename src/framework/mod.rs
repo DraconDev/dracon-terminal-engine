@@ -23,6 +23,7 @@
 
 pub mod animation;
 pub mod app;
+pub mod command;
 pub mod dirty_regions;
 pub mod dragdrop;
 pub mod event_dispatcher;
@@ -41,6 +42,10 @@ pub mod prelude {
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx},
+        command::{
+            BoundCommand, CommandRunner, LoggedLine, OutputParser, ParsedOutput,
+            AppConfig, LayoutConfig, WidgetConfig, AreaConfig, ParserConfig,
+        },
         dirty_regions::{DirtyRegion, DirtyRegionTracker},
         dragdrop::{DragGhost, DragManager, DragPhase},
         focus::FocusManager,

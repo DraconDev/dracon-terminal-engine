@@ -188,14 +188,11 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         }
         for zone in self.zones(self.area.get().width) {
             if zone.contains(col, row) {
-                match kind {
-                    crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                        if let Some(f) = self.on_navigate.as_mut() {
-                            f(zone.id);
-                        }
-                        return true;
+                if let crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) = kind {
+                    if let Some(f) = self.on_navigate.as_mut() {
+                        f(zone.id);
                     }
-                    _ => {}
+                    return true;
                 }
             }
         }

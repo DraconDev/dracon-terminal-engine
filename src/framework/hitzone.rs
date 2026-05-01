@@ -178,21 +178,19 @@ impl<T: Clone + 'static> HitZone<T> {
                     }
                 }
             }
-            MouseEventKind::Drag(_) => {
-                if self.drag_active {
+            MouseEventKind::Drag(_)
+                if self.drag_active => {
                     if let Some(f) = self.on_drag_move.as_mut() {
                         f(DragState::Moved { x: col, y: row });
                     }
                 }
-            }
-            MouseEventKind::Up(_) => {
-                if self.drag_active {
+            MouseEventKind::Up(_)
+                if self.drag_active => {
                     self.drag_active = false;
                     if let Some(f) = self.on_drag_end.as_mut() {
                         f(DragState::Ended { x: col, y: row });
                     }
                 }
-            }
             _ => {}
         }
     }

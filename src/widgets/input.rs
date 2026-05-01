@@ -87,20 +87,18 @@ impl TextInput {
                     return true;
                 }
                 // Ctrl+u: Clear to start
-                KeyCode::Char('u') if has_control => {
-                    if self.cursor_position > 0 {
+                KeyCode::Char('u') if has_control
+                    && self.cursor_position > 0 => {
                         self.value = self.value.chars().skip(self.cursor_position).collect();
                         self.cursor_position = 0;
                         return true;
                     }
-                }
                 // Ctrl+k: Clear to end
-                KeyCode::Char('k') if has_control => {
-                    if self.cursor_position < self.value.len() {
+                KeyCode::Char('k') if has_control
+                    && self.cursor_position < self.value.len() => {
                         self.value = self.value.chars().take(self.cursor_position).collect();
                         return true;
                     }
-                }
                 // Ctrl+w / Ctrl+Backspace / Alt+Backspace: Delete word backwards
                 KeyCode::Char('w') if has_control => {
                     return self.delete_word_backwards();
@@ -123,47 +121,41 @@ impl TextInput {
                     return true;
                 }
                 // Ctrl+f: Move right
-                KeyCode::Char('f') if has_control => {
-                    if self.cursor_position < self.value.len() {
+                KeyCode::Char('f') if has_control
+                    && self.cursor_position < self.value.len() => {
                         self.cursor_position += self.value[self.cursor_position..].chars().next().map(|c| c.len_utf8()).unwrap_or(0);
                         return true;
                     }
-                }
                 // Ctrl+b: Move left
-                KeyCode::Char('b') if has_control => {
-                    if self.cursor_position > 0 {
+                KeyCode::Char('b') if has_control
+                    && self.cursor_position > 0 => {
                         let prev = self.value[..self.cursor_position].chars().last().map(|c| c.len_utf8()).unwrap_or(0);
                         self.cursor_position -= prev;
                         return true;
                     }
-                }
-                KeyCode::Backspace => {
-                    if self.cursor_position > 0 {
+                KeyCode::Backspace
+                    if self.cursor_position > 0 => {
                         self.value.remove(self.cursor_position - 1);
                         self.cursor_position -= 1;
                         return true;
                     }
-                }
-                KeyCode::Delete => {
-                    if self.cursor_position < self.value.len() {
+                KeyCode::Delete
+                    if self.cursor_position < self.value.len() => {
                         self.value.remove(self.cursor_position);
                         return true;
                     }
-                }
-                KeyCode::Left => {
-                    if self.cursor_position > 0 {
+                KeyCode::Left
+                    if self.cursor_position > 0 => {
                         let prev = self.value[..self.cursor_position].chars().last().map(|c| c.len_utf8()).unwrap_or(0);
                         self.cursor_position -= prev;
                         return true;
                     }
-                }
-                KeyCode::Right => {
-                    if self.cursor_position < self.value.len() {
+                KeyCode::Right
+                    if self.cursor_position < self.value.len() => {
                         let next = self.value[self.cursor_position..].chars().next().map(|c| c.len_utf8()).unwrap_or(0);
                         self.cursor_position += next;
                         return true;
                     }
-                }
                 KeyCode::Home => {
                     self.cursor_position = 0;
                     return true;
