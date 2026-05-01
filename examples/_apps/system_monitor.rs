@@ -32,11 +32,11 @@
 //! cargo run --example system_monitor
 //! ```
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{
-    Gauge, KeyValueGrid, Orientation, SplitPane, StatusBadge, StreamingText,
+    Gauge, KeyValueGrid, StatusBadge, StreamingText,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::{Constraint, Layout, Rect};
@@ -260,13 +260,13 @@ impl Widget for SystemMonitor {
         WidgetId::new(0)
     }
 
-    fn set_id(&mut self, id: WidgetId) {}
+    fn set_id(&mut self, _id: WidgetId) {}
 
     fn area(&self) -> Rect {
         Rect::new(0, 0, 80, 24)
     }
 
-    fn set_area(&mut self, area: Rect) {}
+    fn set_area(&mut self, _area: Rect) {}
 
     fn needs_render(&self) -> bool {
         true
@@ -294,7 +294,6 @@ impl Widget for SystemMonitor {
             .split(content_rect);
 
         let top_row = Rect::new(grid_rects[0].x, grid_rects[0].y, grid_rects[0].width, grid_rects[0].height / 2);
-        let bottom_row = Rect::new(grid_rects[0].x, grid_rects[0].y + grid_rects[0].height / 2, grid_rects[0].width, grid_rects[0].height / 2);
 
         let cpu_plane = self.cpu_gauge.render(top_row);
         copy_plane_cells(&mut plane, &cpu_plane, top_row.x as usize, top_row.y as usize);
@@ -323,7 +322,7 @@ impl Widget for SystemMonitor {
         plane
     }
 
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
             return false;
         }
@@ -336,7 +335,7 @@ impl Widget for SystemMonitor {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
         false
     }
 
@@ -354,7 +353,7 @@ fn render_header(plane: &mut Plane, width: u16, theme: &Theme, theme_name: &str)
     let right_label = format!("[Theme: {}]", theme_name);
     let title_len = title.len();
     let right_len = right_label.len();
-    let available = width as usize.saturating_sub(title_len + right_len + 2);
+    let available = (width as usize).saturating_sub(title_len + right_len + 2);
     let padding = available / 2;
 
     let mut offset = 0;
@@ -424,7 +423,6 @@ fn render_footer(plane: &mut Plane, width: u16, footer_y: usize, theme: &Theme) 
     }
 
     let badge_text = "✓ System healthy";
-    let uptime_text = format!("Uptime: {}", format_uptime(0));
     let offset = 1;
     for (i, c) in badge_text.chars().enumerate().take(width as usize - offset) {
         let idx = ((footer_y + 1) * plane.width as usize + offset + i).min(plane.cells.len().saturating_sub(1));
@@ -468,13 +466,13 @@ fn main() -> std::io::Result<()> {
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
-        .on_tick(|ctx, tick| {
+        .on_tick(move |_ctx, tick| {
             monitor.refresh_stats();
             if tick % 3 == 0 {
                 monitor.generate_processes();
             }
         })
-        .run(|ctx| {
+        .run(move |ctx| {
             let (w, h) = ctx.compositor().size();
             let area = Rect::new(0, 0, w, h);
             monitor.set_area(area);
