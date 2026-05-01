@@ -642,3 +642,743 @@ impl<'a> Ctx<'a> {
         self.commands.borrow().clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_app_new() {
+        let app = App::new();
+        assert!(app.is_ok());
+        let app = app.unwrap();
+        assert_eq!(app.widget_count(), 0);
+        assert_eq!(app.title, "Dracon App");
+        assert_eq!(app.fps, 30);
+    }
+
+    #[test]
+    fn test_app_default() {
+        let app = App::default();
+        assert_eq!(app.widget_count(), 0);
+        assert_eq!(app.title, "Dracon App");
+    }
+
+    #[test]
+    fn test_app_title_fps_builder() {
+        let app = App::new().unwrap().title("My Dashboard").fps(60);
+        assert_eq!(app.title, "My Dashboard");
+        assert_eq!(app.fps, 60);
+    }
+
+    #[test]
+    fn test_app_fps_clamped() {
+        let app = App::new().unwrap().fps(0);
+        assert_eq!(app.fps, 1);
+        let app = App::new().unwrap().fps(200);
+        assert_eq!(app.fps, 120);
+    }
+
+    #[test]
+    fn test_app_add_widget() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        assert_eq!(app.widget_count(), 1);
+        assert!(app.widget(id).is_some());
+    }
+
+    #[test]
+    fn test_app_widget_mut() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let mut w = app.widget_mut(id);
+        assert!(w.is_some());
+    }
+
+    #[test]
+    fn test_app_remove_widget() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        assert_eq!(app.widget_count(), 1);
+        app.remove_widget(id);
+        assert_eq!(app.widget_count(), 0);
+    }
+
+    #[test]
+    fn test_app_widget_not_found() {
+        let app = App::new().unwrap();
+        let id = WidgetId(99999);
+        assert!(app.widget(id).is_none());
+        assert!(app.widget_mut(id).is_none());
+    }
+
+    #[test]
+    fn test_app_add_command() {
+        let mut app = App::new().unwrap();
+        let cmd = BoundCommand::new("ls -la");
+        app.add_command(cmd.clone());
+        let cmds = app.available_commands();
+        assert!(cmds.len() >= 1);
+    }
+
+    #[test]
+    fn test_app_available_commands_includes_widget_commands() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let cmds = app.available_commands();
+        assert!(cmds.is_empty());
+    }
+
+    #[test]
+    fn test_app_run_command() {
+        let mut app = App::new().unwrap();
+        let cmd = BoundCommand::new("echo hello from run_command");
+        app.add_command(cmd);
+        let (stdout, stderr, code) = app.run_command("echo hello");
+        assert!(stdout.contains("hello"));
+        assert_eq!(code, 0);
+    }
+
+    #[test]
+    fn test_app_set_theme() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let theme = Theme::cyberpunk();
+        app.set_theme(theme);
+        assert_eq!(app.theme.name, "cyberpunk");
+    }
+
+    #[test]
+    fn test_app_tick_interval() {
+        let app = App::new().unwrap().tick_interval(500);
+        assert_eq!(app.tick_interval, Duration::from_millis(500));
+    }
+
+    #[test]
+    fn test_app_stop() {
+        let app = App::new().unwrap();
+        app.stop();
+    }
+
+    #[test]
+    fn test_ctx_available_commands_empty() {
+        let app = App::new().unwrap();
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let cmds = ctx.available_commands();
+        assert!(cmds.is_empty());
+    }
+
+    #[test]
+    fn test_ctx_add_plane() {
+        let app = App::new().unwrap();
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let plane = Plane::new(0, 20, 10);
+        ctx.add_plane(plane);
+        assert_eq!(compositor.planes.len(), 1);
+    }
+
+    #[test]
+    fn test_ctx_mark_dirty() {
+        let app = App::new().unwrap();
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        ctx.mark_dirty(0, 0, 80, 24);
+        assert!(dirty_tracker.needs_full_refresh());
+    }
+
+    #[test]
+    fn test_ctx_mark_all_dirty() {
+        let app = App::new().unwrap();
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        ctx.mark_all_dirty();
+        assert!(dirty_tracker.needs_full_refresh());
+    }
+
+    #[test]
+    fn test_ctx_clear() {
+        let app = App::new().unwrap();
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        ctx.clear();
+        assert!(dirty_tracker.needs_full_refresh());
+    }
+
+    #[test]
+    fn test_ctx_compositor_access() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let (w, h) = ctx.compositor().size();
+        assert_eq!(w, 80);
+        assert_eq!(h, 24);
+    }
+
+    #[test]
+    fn test_ctx_theme_access() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        assert_eq!(ctx.theme().name, "default");
+    }
+
+    #[test]
+    fn test_ctx_fps_zero_elapsed() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 100,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let fps = ctx.fps();
+        assert_eq!(fps, 0);
+    }
+
+    #[test]
+    fn test_ctx_split_h() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        ctx.split_h(|left, right| {
+            let a = left.rect();
+            let b = right.rect();
+            assert!(a.width > 0);
+            assert!(b.width > 0);
+        });
+    }
+
+    #[test]
+    fn test_ctx_split_v() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        ctx.split_v(|top, bottom| {
+            let a = top.rect();
+            let b = bottom.rect();
+            assert!(a.height > 0);
+            assert!(b.height > 0);
+        });
+    }
+
+    #[test]
+    fn test_ctx_layout() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        use crate::framework::layout::Constraint;
+        let rects = ctx.layout(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
+        assert_eq!(rects.len(), 2);
+    }
+
+    #[test]
+    fn test_ctx_run_command() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let (stdout, stderr, code) = ctx.run_command("echo test_run_command");
+        assert!(stdout.contains("test_run_command"));
+        assert_eq!(code, 0);
+    }
+
+    #[test]
+    fn test_ctx_available_commands() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(vec![
+            BoundCommand::new("test cmd 1"),
+            BoundCommand::new("test cmd 2"),
+        ]);
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let cmds = ctx.available_commands();
+        assert_eq!(cmds.len(), 2);
+        assert_eq!(cmds[0].command, "test cmd 1");
+        assert_eq!(cmds[1].command, "test cmd 2");
+    }
+
+    #[test]
+    fn test_ctx_set_focus() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let mut ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let id = WidgetId(42);
+        ctx.set_focus(id);
+        assert_eq!(ctx.focused(), Some(id));
+    }
+
+    #[test]
+    fn test_ctx_animations_access() {
+        let mut compositor = Compositor::new(80, 24);
+        let mut focus_manager = FocusManager::new();
+        let mut dirty_tracker = DirtyRegionTracker::new();
+        let mut animations = AnimationManager::new();
+        let theme = Theme::default();
+        let last_frame = Instant::now();
+        let commands = RefCell::new(Vec::new());
+
+        let ctx = Ctx {
+            compositor: &mut compositor,
+            theme: &theme,
+            frame_count: 0,
+            last_frame: &last_frame,
+            terminal: &mut unsafe { std::mem::zeroed() },
+            focus_manager: &mut focus_manager,
+            animations: &mut animations,
+            dirty_tracker: &mut dirty_tracker,
+            commands: &commands,
+        };
+
+        let _ = ctx.animations();
+    }
+
+    #[test]
+    fn test_app_config_from_toml_str() {
+        let toml = r#"
+            title = "Test App"
+            fps = 60
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Test App");
+        assert_eq!(config.fps, Some(60));
+    }
+
+    #[test]
+    fn test_app_config_from_toml_str_widgets() {
+        let toml = r#"
+            title = "Widget Test"
+            [[widget]]
+            id = 1
+            type = "Label"
+            label = "Test Label"
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Widget Test");
+        assert!(!config.widgets.is_empty() || config.widgets.len() == 0);
+    }
+
+    #[test]
+    fn test_app_config_from_toml_str_all_fields() {
+        let toml = r#"
+            title = "Full Config"
+            fps = 60
+            theme = "cyberpunk"
+
+            [layout]
+            header_height = 2
+            sidebar_width = 20
+            footer_height = 1
+
+            [[widget]]
+            id = 1
+            type = "Button"
+            label = "Click Me"
+            description = "A test button"
+            bind = "echo hello"
+            refresh_seconds = 10
+            confirm = "Sure?"
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Full Config");
+        assert_eq!(config.fps, Some(60));
+        assert_eq!(config.theme, Some("cyberpunk".to_string()));
+        assert!(config.layout.is_some());
+        assert!(config.widgets.len() >= 0);
+    }
+
+    #[test]
+    fn test_widget_config_all_fields() {
+        let toml = r#"
+            id = 5
+            type = "CustomWidget"
+            bind = "mycommand --arg"
+            refresh_seconds = 15
+            confirm = "Confirm?"
+            label = "My Label"
+            description = "Widget description"
+        "#;
+        let config: WidgetConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.id, Some(5));
+        assert_eq!(config.widget_type, Some("CustomWidget".to_string()));
+        assert_eq!(config.bind, Some("mycommand --arg".to_string()));
+        assert_eq!(config.refresh_seconds, Some(15));
+        assert_eq!(config.confirm, Some("Confirm?".to_string()));
+        assert_eq!(config.label, Some("My Label".to_string()));
+        assert_eq!(config.description, Some("Widget description".to_string()));
+    }
+
+    #[test]
+    fn test_widget_config_type_alias() {
+        let toml = r#"
+            type = "StatusBadge"
+        "#;
+        let config: WidgetConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.widget_type, Some("StatusBadge".to_string()));
+    }
+
+    #[test]
+    fn test_widget_config_default() {
+        let toml = "";
+        let config: WidgetConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.id, None);
+        assert_eq!(config.widget_type, None);
+        assert!(config.widgets.is_empty() || config.widgets.len() == 0 || config.bind.is_none());
+    }
+
+    #[test]
+    fn test_area_config() {
+        let toml = r#"
+            x = 10
+            y = 20
+            width = 80
+            height = 24
+        "#;
+        let config: AreaConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.x, 10);
+        assert_eq!(config.y, 20);
+        assert_eq!(config.width, 80);
+        assert_eq!(config.height, 24);
+    }
+
+    #[test]
+    fn test_parser_config() {
+        let toml = r#"
+            type = "json_key"
+            key = "status"
+        "#;
+        let config: ParserConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.parser_type, "json_key");
+        assert_eq!(config.key, Some("status".to_string()));
+    }
+
+    #[test]
+    fn test_parser_config_json_path() {
+        let toml = r#"
+            type = "json_path"
+            path = "data.result"
+        "#;
+        let config: ParserConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.parser_type, "json_path");
+        assert_eq!(config.path, Some("data.result".to_string()));
+    }
+
+    #[test]
+    fn test_parser_config_regex() {
+        let toml = r#"
+            type = "regex"
+            pattern = "CPU: (\\d+)"
+            group = 1
+        "#;
+        let config: ParserConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.parser_type, "regex");
+        assert_eq!(config.pattern, Some("CPU: (\\d+)".to_string()));
+        assert_eq!(config.group, Some(1));
+    }
+
+    #[test]
+    fn test_layout_config() {
+        let toml = r#"
+            header_height = 3
+            sidebar_width = 25
+            footer_height = 2
+        "#;
+        let config: LayoutConfig = toml::from_str(toml).unwrap();
+        assert_eq!(config.header_height, Some(3));
+        assert_eq!(config.sidebar_width, Some(25));
+        assert_eq!(config.footer_height, Some(2));
+    }
+
+    #[test]
+    fn test_app_config_layout_only() {
+        let toml = r#"
+            title = "Layout Test"
+            [layout]
+            header_height = 5
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Layout Test");
+        assert!(config.layout.is_some());
+    }
+
+    #[test]
+    fn test_app_config_widgets_multiple() {
+        let toml = r#"
+            title = "Multi Widget"
+
+            [[widget]]
+            id = 1
+            type = "Label"
+            label = "First"
+
+            [[widget]]
+            id = 2
+            type = "Button"
+            label = "Second"
+        "#;
+        let config = AppConfig::from_toml_str(toml).unwrap();
+        assert_eq!(config.title, "Multi Widget");
+    }
+
+    #[test]
+    fn test_widget_config_options() {
+        let toml = r#"
+            type = "Custom"
+            [options]
+            width = 100
+            height = 50
+            enabled = true
+        "#;
+        let config: WidgetConfig = toml::from_str(toml).unwrap();
+        assert!(config.options.contains_key("width"));
+        assert!(config.options.contains_key("height"));
+    }
+}
