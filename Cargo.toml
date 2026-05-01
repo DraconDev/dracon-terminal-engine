@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.20.0"
+version = "27.21.0"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -36,6 +36,14 @@ tempfile = "3.10"
 [[example]]
 name = "system_monitor"
 path = "examples/_apps/system_monitor.rs"
+
+[[example]]
+name = "file_manager"
+path = "examples/_apps/file_manager.rs"
+
+[[example]]
+name = "chat_client"
+path = "examples/_apps/chat_client.rs"
 
 [features]
 default = []
