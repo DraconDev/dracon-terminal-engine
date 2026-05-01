@@ -155,7 +155,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Update Animation (Rain)
-        drops.iter_mut().enumerate().for_each(|(i, drop)| {
+        drops.iter_mut().for_each(|drop| {
             if rng.gen_bool(0.1) {
                 *drop = 0.0;
             }

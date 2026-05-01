@@ -64,6 +64,7 @@ fn test_text_editor_demo_smoke() {
 
     let code = status.code();
     if code == Some(0) || code == Some(1) {
+        let _ = child.wait();
         return;
     }
     let mut stderr_buf = Vec::new();
