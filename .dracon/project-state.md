@@ -1,8 +1,10 @@
 # Project State
 
 ## Current Focus
-- Replaced unsafe `std::mem::zeroed()` with `io::Stdout` for `Terminal` initialization, addressing safety concerns and potentially improving test stability.
+Refactoring test infrastructure to replace unsafe `std::mem::zeroed()` with proper terminal initialization using actual file descriptors
 
 ## Completed
-- [x] `dummy_terminal` function now initializes `Terminal` with `io::Stdout` instead of an unsafe `Vec<u8>`.
-- [x] Removed unsafe constructs from application framework test setup, enhancing code safety.
+- [x] Replace unsafe `std::mem::zeroed()` terminal initialization with safe file-based terminal creation using `/tmp/dummy_terminal_term.txt`
+- [x] Add `dummy_terminal_ref()` function that provides static mutable terminal reference for shared test state
+- [x] Update `dummy_terminal()` return type from `Terminal<io::Stdout>` to `Terminal<File>` with proper file descriptor handling
+- [x] Implement proper resource management using `into_raw_fd()` and `from_raw_fd()` for terminal creation
