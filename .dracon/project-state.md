@@ -1,7 +1,7 @@
 # Project State
 
 ## Current Focus
-Refactored assertion logic in the `App` struct's layout validation to combine two separate assertions into a single combined check.
+Refactored test variable naming in the `Glitch` filter test to improve clarity and avoid unused variable warnings.
 
 ## Completed
-- [x] Combined two separate assertions (`a.height > 0` and `b.height > 0`) into a single combined assertion (`a.height > 0 && b.height > 0`) for better readability and maintainability
+- [x] Renamed `changed` to `_changed` in `test_glitch_at_zero_time_most_cells_unchanged` to indicate intentional unused status
