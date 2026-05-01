@@ -3,14 +3,12 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
-use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
-/// A generic selectable list widget.
-///
-/// Renders items with selection highlighting and provides keyboard/mouse navigation.
+type SelectCallback<T> = Option<Box<dyn FnMut(&T)>>;
+
 pub struct List<T> {
     id: WidgetId,
     items: Vec<T>,
@@ -18,7 +16,7 @@ pub struct List<T> {
     offset: usize,
     visible_count: usize,
     theme: Theme,
-    on_select: Option<Box<dyn FnMut(&T)>>,
+    on_select: SelectCallback<T>,
     item_height: u16,
     width: u16,
     area: std::cell::Cell<Rect>,
