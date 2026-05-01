@@ -7,25 +7,16 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::List;
 use ratatui::layout::Rect;
 
+#[derive(Clone)]
 struct Message {
     sender: String,
     text: String,
     timestamp: String,
 }
 
-impl Clone for Message {
-    fn clone(&self) -> Self {
-        Message {
-            sender: self.sender.clone(),
-            text: self.text.clone(),
-            timestamp: self.timestamp.clone(),
-        }
-    }
-}
-
-impl ToString for Message {
-    fn to_string(&self) -> String {
-        format!("[{}] {}: {}", self.timestamp, self.sender, self.text)
+impl std::fmt::Display for Message {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}] {}: {}", self.timestamp, self.sender, self.text)
     }
 }
 
