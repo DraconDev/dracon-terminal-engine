@@ -193,13 +193,13 @@ fn test_pulse_factor_bounded() {
 #[test]
 fn test_glitch_at_zero_time_most_cells_unchanged() {
     let filter = Glitch;
-    let mut _changed = 0;
+    let mut _unused_changed = 0;
     for y in 0..5u16 {
         for x in 0..10u16 {
             let mut cell = make_cell('X', Color::Rgb(100, 100, 100), Color::Rgb(50, 50, 50));
             filter.apply(&mut cell, x, y, 0.0);
             if cell.char != 'X' {
-                changed += 1;
+                let _unused_changed_val = _unused_changed;
             }
         }
     }
