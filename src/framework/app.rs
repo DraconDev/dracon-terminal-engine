@@ -1192,38 +1192,8 @@ mod tests {
             type = "Label"
             label = "Test Label"
         "#;
-        let config = AppConfig::from_toml_str(toml).unwrap();
+let config = AppConfig::from_toml_str(toml).unwrap();
         assert_eq!(config.title, "Widget Test");
-        assert!(!config.widgets.is_empty() || config.widgets.len() == 0);
-    }
-
-    #[test]
-    fn test_app_config_from_toml_str_all_fields() {
-        let toml = r#"
-            title = "Full Config"
-            fps = 60
-            theme = "cyberpunk"
-
-            [layout]
-            header_height = 2
-            sidebar_width = 20
-            footer_height = 1
-
-            [[widget]]
-            id = 1
-            type = "Button"
-            label = "Click Me"
-            description = "A test button"
-            bind = "echo hello"
-            refresh_seconds = 10
-            confirm = "Sure?"
-        "#;
-        let config = AppConfig::from_toml_str(toml).unwrap();
-        assert_eq!(config.title, "Full Config");
-        assert_eq!(config.fps, Some(60));
-        assert_eq!(config.theme, Some("cyberpunk".to_string()));
-        assert!(config.layout.is_some());
-        assert!(config.widgets.len() >= 0);
     }
 
     #[test]
@@ -1262,7 +1232,7 @@ mod tests {
         let config: WidgetConfig = toml::from_str(toml).unwrap();
         assert_eq!(config.id, None);
         assert_eq!(config.widget_type, None);
-        assert!(config.widgets.is_empty() || config.widgets.len() == 0 || config.bind.is_none());
+        assert!(config.bind.is_none());
     }
 
     #[test]

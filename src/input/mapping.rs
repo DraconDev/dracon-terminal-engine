@@ -79,9 +79,9 @@ mod tests {
 
     #[test]
     fn test_to_ui_event_mouse() {
-        use crate::input::event::{MouseEvent, MouseEventKind};
+        use crate::input::event::{MouseEvent, MouseEventKind, MouseButton};
         let event = Event::Mouse(MouseEvent {
-            kind: MouseEventKind::Press,
+            kind: MouseEventKind::Down(MouseButton::Left),
             column: 10,
             row: 5,
             modifiers: crate::input::event::KeyModifiers::empty(),
