@@ -34,13 +34,14 @@
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, StatusBadge, StreamingText,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::{Constraint, Layout, Rect};
 use std::collections::BTreeMap;
+use std::cell::RefCell;
 
 const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night"];
 
@@ -118,8 +119,7 @@ impl SystemMonitor {
 
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % THEMES.len();
-        let theme_name = THEMES[self.theme_index];
-        let new_theme = match theme_name {
+        let new_theme = match THEMES[self.theme_index] {
             "nord" => Theme::nord(),
             "dracula" => Theme::dracula(),
             "cyberpunk" => Theme::cyberpunk(),
@@ -127,13 +127,13 @@ impl SystemMonitor {
             "tokyo-night" => Theme::tokyo_night(),
             _ => Theme::nord(),
         };
-        self.cpu_gauge.with_theme(new_theme);
-        self.mem_gauge.with_theme(new_theme);
-        self.disk_gauge.with_theme(new_theme);
-        self.net_gauge.with_theme(new_theme);
-        self.process_grid.with_theme(new_theme);
-        self.status_badge.with_theme(new_theme);
-        self.uptime_text.with_theme(new_theme);
+        self.cpu_gauge = self.cpu_gauge.clone().with_theme(new_theme);
+        self.mem_gauge = self.mem_gauge.clone().with_theme(new_theme);
+        self.disk_gauge = self.disk_gauge.clone().with_theme(new_theme);
+        self.net_gauge = self.net_gauge.clone().with_theme(new_theme);
+        self.process_grid = self.process_grid.clone().with_theme(new_theme);
+        self.status_badge = self.status_badge.clone().with_theme(new_theme);
+        self.uptime_text = self.uptime_text.clone().with_theme(new_theme);
     }
 
     fn refresh_stats(&mut self) {
@@ -164,8 +164,7 @@ impl SystemMonitor {
         self.net_gauge.set_value(self.stats.network_down.min(100.0) as f64);
 
         self.uptime_text.clear();
-        let uptime_str = format_uptime(self.stats.uptime_seconds);
-        self.uptime_text.append(&uptime_str);
+        self.uptime_text.append(&format_uptime(self.stats.uptime_seconds));
 
         self.process_grid.set_pairs(self.build_process_pairs());
     }
@@ -174,13 +173,21 @@ impl SystemMonitor {
         let mut pairs = BTreeMap::new();
         pairs.insert("Name".to_string(), "CPU%".to_string());
         for p in &self.stats.processes {
-            let cpu_str = format!("{:.1}", p.cpu);
-            pairs.insert(p.name.to_string(), cpu_str);
+            pairs.insert(p.name.to_string(), format!("{:.1}", p.cpu));
         }
-        pairs.insert("Memory".to_string(), format!("{:.1}/{:.0} GB", self.stats.memory_used, self.stats.memory_total));
+        pairs.insert(
+            "Memory".to_string(),
+            format!("{:.1}/{:.0} GB", self.stats.memory_used, self.stats.memory_total),
+        );
         pairs.insert("Disk".to_string(), format!("{:.0}%", self.stats.disk_percent));
-        pairs.insert("Net Down".to_string(), format!("{:.0} Mbps", self.stats.network_down));
-        pairs.insert("Net Up".to_string(), format!("{:.0} Mbps", self.stats.network_up));
+        pairs.insert(
+            "Net Down".to_string(),
+            format!("{:.0} Mbps", self.stats.network_down),
+        );
+        pairs.insert(
+            "Net Up".to_string(),
+            format!("{:.0} Mbps", self.stats.network_up),
+        );
         pairs
     }
 
@@ -293,20 +300,36 @@ impl Widget for SystemMonitor {
             ])
             .split(content_rect);
 
-        let top_row = Rect::new(grid_rects[0].x, grid_rects[0].y, grid_rects[0].width, grid_rects[0].height / 2);
+        let top_row =
+            Rect::new(grid_rects[0].x, grid_rects[0].y, grid_rects[0].width, grid_rects[0].height / 2);
 
         let cpu_plane = self.cpu_gauge.render(top_row);
         copy_plane_cells(&mut plane, &cpu_plane, top_row.x as usize, top_row.y as usize);
 
-        let mem_rect = Rect::new(grid_rects[1].x, grid_rects[1].y, grid_rects[1].width, grid_rects[1].height / 2);
+        let mem_rect = Rect::new(
+            grid_rects[1].x,
+            grid_rects[1].y,
+            grid_rects[1].width,
+            grid_rects[1].height / 2,
+        );
         let mem_plane = self.mem_gauge.render(mem_rect);
         copy_plane_cells(&mut plane, &mem_plane, mem_rect.x as usize, mem_rect.y as usize);
 
-        let disk_rect = Rect::new(grid_rects[0].x, grid_rects[0].y + grid_rects[0].height / 2, grid_rects[0].width, grid_rects[0].height / 2);
+        let disk_rect = Rect::new(
+            grid_rects[0].x,
+            grid_rects[0].y + grid_rects[0].height / 2,
+            grid_rects[0].width,
+            grid_rects[0].height / 2,
+        );
         let disk_plane = self.disk_gauge.render(disk_rect);
         copy_plane_cells(&mut plane, &disk_plane, disk_rect.x as usize, disk_rect.y as usize);
 
-        let net_rect = Rect::new(grid_rects[1].x, grid_rects[1].y + grid_rects[1].height / 2, grid_rects[1].width, grid_rects[1].height / 2);
+        let net_rect = Rect::new(
+            grid_rects[1].x,
+            grid_rects[1].y + grid_rects[1].height / 2,
+            grid_rects[1].width,
+            grid_rects[1].height / 2,
+        );
         let net_plane = self.net_gauge.render(net_rect);
         copy_plane_cells(&mut plane, &net_plane, net_rect.x as usize, net_rect.y as usize);
 
@@ -314,7 +337,12 @@ impl Widget for SystemMonitor {
         let process_height = (content_height / 2).saturating_sub(1);
         let process_rect = Rect::new(0, process_top, area.width, process_height);
         let process_plane = self.process_grid.render(process_rect);
-        copy_plane_cells(&mut plane, &process_plane, process_rect.x as usize, process_rect.y as usize);
+        copy_plane_cells(
+            &mut plane,
+            &process_plane,
+            process_rect.x as usize,
+            process_rect.y as usize,
+        );
 
         let footer_y = (area.height - 2) as usize;
         render_footer(&mut plane, area.width, footer_y, &theme);
@@ -425,7 +453,8 @@ fn render_footer(plane: &mut Plane, width: u16, footer_y: usize, theme: &Theme) 
     let badge_text = "✓ System healthy";
     let offset = 1;
     for (i, c) in badge_text.chars().enumerate().take(width as usize - offset) {
-        let idx = ((footer_y + 1) * plane.width as usize + offset + i).min(plane.cells.len().saturating_sub(1));
+        let idx = ((footer_y + 1) * plane.width as usize + offset + i)
+            .min(plane.cells.len().saturating_sub(1));
         plane.cells[idx] = Cell {
             char: c,
             fg: theme.success_fg,
@@ -458,25 +487,29 @@ fn copy_plane_cells(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: us
 }
 
 fn main() -> std::io::Result<()> {
-    let mut monitor = SystemMonitor::new();
-    monitor.generate_processes();
-    monitor.refresh_stats();
+    let monitor = RefCell::new(SystemMonitor::new());
+    monitor.borrow_mut().generate_processes();
+    monitor.borrow_mut().refresh_stats();
+
+    let monitor_clone = monitor.clone();
 
     App::new()?
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
         .on_tick(move |_ctx, tick| {
-            monitor.refresh_stats();
+            let mut m = monitor_clone.borrow_mut();
+            m.refresh_stats();
             if tick % 3 == 0 {
-                monitor.generate_processes();
+                m.generate_processes();
             }
         })
-        .run(move |ctx| {
+        .run(|ctx| {
+            let mut m = monitor.borrow_mut();
             let (w, h) = ctx.compositor().size();
             let area = Rect::new(0, 0, w, h);
-            monitor.set_area(area);
-            let plane = monitor.render(area);
+            m.set_area(area);
+            let plane = m.render(area);
             ctx.add_plane(plane);
         })
 }
