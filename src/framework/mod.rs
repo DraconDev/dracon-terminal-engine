@@ -52,7 +52,7 @@ pub mod prelude {
         focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         layout::{Constraint, Layout},
-        scroll::ScrollContainer,
+        scroll::{ScrollContainer, ScrollState},
         theme::Theme,
         widgets::*,
     };

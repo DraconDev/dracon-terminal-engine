@@ -1,8 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactored widget callback types to improve type safety and code organization
+Refactored the `ScrollContainer` widget to include `ScrollState` in its public API, improving type safety and code organization.
 
 ## Completed
-- [x] Refactored `List` widget to use direct `Option<Box<dyn FnMut(&T)>>` for selection callbacks
-- [x] Refactored `Select` widget to use direct `Option<Box<dyn FnMut(&str)>>` for change callbacks
+- [x] Added `ScrollState` to the public API of `ScrollContainer` for better state management
+- [x] Removed the standalone `ScrollContainer` export in favor of the module-level export
