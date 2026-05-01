@@ -462,9 +462,7 @@ mod tests {
     fn test_base_input_on_submit_builder() {
         let id = WidgetId::new(1);
         let base = BaseInput::new(id, "placeholder");
-        let result = base.on_submit(|text| {
-            assert_eq!(text, "test");
-        });
+        let result = base.on_submit(|_text| {});
         assert!(result.on_submit.is_some());
     }
 
