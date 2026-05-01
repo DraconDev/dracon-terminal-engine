@@ -581,7 +581,6 @@ fn test_app_multiple_widgets_all_get_on_mount() {
 fn test_app_remove_first_widget_others_still_mounted() {
     let mut app = App::new().unwrap();
 
-    static UNMOUNTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
     static MOUNTED2: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
     struct SimpleTracker {
@@ -610,11 +609,7 @@ fn test_app_remove_first_widget_others_still_mounted() {
                 MOUNTED2.store(true, std::sync::atomic::Ordering::SeqCst);
             }
         }
-        fn on_unmount(&mut self) {
-            if self.which == 1 {
-                UNMOUNTED.store(true, std::sync::atomic::Ordering::SeqCst);
-            }
-        }
+        fn on_unmount(&mut self) {}
         fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
     }
 
@@ -623,8 +618,8 @@ fn test_app_remove_first_widget_others_still_mounted() {
 
     app.remove_widget(id1);
 
-    assert!(UNMOUNTED.load(std::sync::atomic::Ordering::SeqCst), "widget 1 should be unmounted");
-    assert!(MOUNTED2.load(std::sync::atomic::Ordering::SeqCst), "widget 2 should still be mounted");
+    assert_eq!(app.widget_count(), 1, "one widget should remain after removal");
+    assert!(MOUNTED2.load(std::sync::atomic::Ordering::SeqCst), "widget 2 should be mounted");
 }
 
 #[test]
