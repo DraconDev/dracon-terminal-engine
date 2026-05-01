@@ -16,7 +16,7 @@
 //!
 //! **Behavior:** Type to filter • Click Sort to cycle none→asc→desc • Up/Down navigate.
 
-use dracon_terminal_engine::compositor::{Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SearchInput;
@@ -47,23 +47,48 @@ impl Sort {
 }
 
 struct Table {
-    id: WidgetId, all: Vec<Person>, rows: Vec<Person>, sel: usize, off: usize,
-    vis: usize, sort: Sort, search: SearchInput, theme: Theme, area: Rect, dirty: bool,
+    id: WidgetId,
+    all: Vec<Person>,
+    rows: Vec<Person>,
+    sel: usize,
+    off: usize,
+    vis: usize,
+    sort: Sort,
+    search: SearchInput,
+    theme: Theme,
+    area: Rect,
+    dirty: bool,
 }
 
 impl Table {
     fn new() -> Self {
         let all: Vec<Person> = DATA.iter().map(|(n, a, c, p)| Person(n.to_string(), *a, c.to_string(), p.to_string())).collect();
-        Self { id: WidgetId::default_id(), all: all.clone(), rows: all, sel: 0, off: 0, vis: 8,
-            sort: Sort::None, search: SearchInput::new(WidgetId::new(1)), theme: Theme::cyberpunk(),
-            area: Rect::new(0, 0, 80, 20), dirty: true }
+        Self {
+            id: WidgetId::new(0),
+            all: all.clone(),
+            rows: all,
+            sel: 0,
+            off: 0,
+            vis: 8,
+            sort: Sort::None,
+            search: SearchInput::new(WidgetId::new(1)),
+            theme: Theme::cyberpunk(),
+            area: Rect::new(0, 0, 80, 20),
+            dirty: true,
+        }
     }
+
     fn filter(&mut self, q: &str) {
         self.rows = if q.is_empty() { self.all.clone() } else { self.all.iter().filter(|p| p.matches(q)).cloned().collect() };
         self.sort_rows(); self.sel = 0; self.off = 0; self.dirty = true;
     }
+
     fn sort_rows(&mut self) {
-        match self.sort { Sort::None => {}, Sort::Asc => self.rows.sort_by(|a, b| a.0.cmp(&b.0)), Sort::Desc => self.rows.sort_by(|a, b| b.0.cmp(&a.0)) }
+        match self.sort {
+            Sort::None => {},
+            Sort::Asc => self.rows.sort_by(|a, b| a.0.cmp(&b.0)),
+            Sort::Desc => self.rows.sort_by(|a, b| b.0.cmp(&a.0)),
+        }
     }
 }
 
@@ -78,21 +103,56 @@ impl Widget for Table {
     fn clear_dirty(&mut self) { self.dirty = false; }
 
     fn render(&self, area: Rect) -> Plane {
-        let mut p = Plane::new(0, area.width, area.height); p.z_index = 10;
+        let mut p = Plane::new(0, area.width, area.height);
+        p.z_index = 10;
         let (heads, widths, hh, sh) = (["Name", "Age", "City", "Profession"], [12u16, 5, 11, 16], 2u16, 1u16);
 
-        for y in 0..area.height { for x in 0..area.width { let idx = (y * area.width + x) as usize; if idx < p.cells.len() { p.cells[idx].bg = self.theme.bg; p.cells[idx].fg = self.theme.fg; } } }
+        for y in 0..area.height {
+            for x in 0..area.width {
+                let idx = (y * area.width + x) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].bg = self.theme.bg;
+                    p.cells[idx].fg = self.theme.fg;
+                }
+            }
+        }
 
-        p.merge_plane(self.search.render(Rect::new(0, 0, 20, 1)), 0, 0);
+        // Render search input
+        let search_area = Rect::new(0, 0, 20, 1);
+        let search_plane = self.search.render(search_area);
+        for y in 0..search_plane.height {
+            for x in 0..search_plane.width {
+                let src_idx = (y * search_plane.width + x) as usize;
+                let dst_idx = (y * area.width + x) as usize;
+                if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
+                    p.cells[dst_idx] = search_plane.cells[src_idx].clone();
+                }
+            }
+        }
+
         let lbl = format!("Sort: Name{}", self.sort.sym());
         let sx = area.width.saturating_sub(lbl.len() as u16 + 2);
-        for (i, c) in lbl.chars().enumerate() { let idx = (sx + i as u16) as usize; if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.fg; } }
-        for x in 0..area.width { let idx = (area.width + x) as usize; if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Ansi(240); } }
+        for (i, c) in lbl.chars().enumerate() {
+            let idx = (sx + i as u16) as usize;
+            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.fg; }
+        }
+
+        for x in 0..area.width {
+            let idx = (area.width + x) as usize;
+            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Rgb(100, 100, 100); }
+        }
 
         let mut x = 0u16;
         for (h, w) in heads.iter().zip(widths.iter()) {
             let w = *w.min(&area.width.saturating_sub(x));
-            for (j, c) in h.chars().take(w as usize).enumerate() { let idx = (hh * area.width + x + j as u16) as usize; if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.active_fg; p.cells[idx].style = Styles::BOLD; } }
+            for (j, c) in h.chars().take(w as usize).enumerate() {
+                let idx = (hh * area.width + x + j as u16) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = c;
+                    p.cells[idx].fg = self.theme.accent;
+                    p.cells[idx].style = Styles::BOLD;
+                }
+            }
             x += w + 1;
         }
 
@@ -102,7 +162,10 @@ impl Widget for Table {
             let bg = if sel { self.theme.selection_bg } else { self.theme.bg };
             let fg = if sel { self.theme.selection_fg } else { self.theme.fg };
             let sty = if sel { Styles::BOLD } else { Styles::empty() };
-            for x in 0..area.width { let idx = (y * area.width + x) as usize; if idx < p.cells.len() { p.cells[idx].bg = bg; p.cells[idx].fg = fg; } }
+            for x in 0..area.width {
+                let idx = (y * area.width + x) as usize;
+                if idx < p.cells.len() { p.cells[idx].bg = bg; p.cells[idx].fg = fg; }
+            }
 
             let vals = [&row.0, &row.1.to_string(), &row.2, &row.3];
             let mut x = 0u16;
@@ -110,19 +173,28 @@ impl Widget for Table {
                 let w = *w.min(&area.width.saturating_sub(x));
                 let txt = if j == 1 { format!("{:>3}", v) } else { v.chars().take(w as usize - 1).collect() };
                 let pre = if sel && j == 0 { "> " } else { " " };
-                for (k, c) in pre.chars().chain(txt.chars()).take(w as usize).enumerate() { let idx = (y * area.width + x + k as u16) as usize; if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = fg; p.cells[idx].style = sty; } }
+                for (k, c) in pre.chars().chain(txt.chars()).take(w as usize).enumerate() {
+                    let idx = (y * area.width + x + k as u16) as usize;
+                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = fg; p.cells[idx].style = sty; }
+                }
                 x += w + 1;
             }
         }
 
         let sy = area.height - sh;
-        let txt = if let Some(r) = self.rows.get(self.sel) { format!("Selected: {} | Age: {} | City: {} | {} rows", r.0, r.1, r.2, self.rows.len()) } else { format!("No results | {} rows", self.rows.len()) };
-        for (i, c) in txt.chars().take(area.width as usize).enumerate() { let idx = (sy * area.width + i as u16) as usize; if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(0, 255, 136); } }
+        let txt = if let Some(r) = self.rows.get(self.sel) {
+            format!("Selected: {} | Age: {} | City: {} | {} rows", r.0, r.1, r.2, self.rows.len())
+        } else {
+            format!("No results | {} rows", self.rows.len())
+        };
+        for (i, c) in txt.chars().take(area.width as usize).enumerate() {
+            let idx = (sy * area.width + i as u16) as usize;
+            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(0, 255, 136); }
+        }
         p
     }
 
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
-        use crate::input::event::{KeyCode, KeyEventKind};
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
         if self.search.handle_key(key.clone()) { self.filter(&self.search.query().to_string()); return true; }
         match key.code {
@@ -134,27 +206,31 @@ impl Widget for Table {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let (hh, sh) = (2u16, 1u16);
         match kind {
-            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+            MouseEventKind::Down(MouseButton::Left) => {
                 if row == hh - 1 && col >= self.area.width.saturating_sub(14) { self.sort = self.sort.next(); self.sort_rows(); self.dirty = true; true }
                 else if row >= hh && row < self.area.height - sh { let idx = self.off + (row - hh) as usize; if idx < self.rows.len() { self.sel = idx; self.dirty = true; true } else { false } }
                 else { false }
             }
-            crate::input::event::MouseEventKind::ScrollDown => { self.off = (self.off + 1).min(self.rows.len().saturating_sub(self.vis)); self.dirty = true; true }
-            crate::input::event::MouseEventKind::ScrollUp => { self.off = self.off.saturating_sub(1); self.dirty = true; true }
+            MouseEventKind::ScrollDown => { self.off = (self.off + 1).min(self.rows.len().saturating_sub(self.vis)); self.dirty = true; true }
+            MouseEventKind::ScrollUp => { self.off = self.off.saturating_sub(1); self.dirty = true; true }
             _ => false,
         }
     }
 }
 
 fn main() -> std::io::Result<()> {
-    App::new()?.title("Data Table Demo").fps(30).theme(Theme::cyberpunk()).run(|ctx| {
-        let (w, h) = ctx.compositor().size();
-        let mut t = Table::new();
-        t.set_area(Rect::new(0, 0, w, h));
-        t.vis = (h as usize).saturating_sub(3).max(1);
-        ctx.add_plane(t.render(t.area));
-    })
+    App::new()?
+        .title("Data Table Demo")
+        .fps(30)
+        .theme(Theme::cyberpunk())
+        .run(|ctx| {
+            let (w, h) = ctx.compositor().size();
+            let mut t = Table::new();
+            t.set_area(Rect::new(0, 0, w, h));
+            t.vis = (h as usize).saturating_sub(3).max(1);
+            ctx.add_plane(t.render(t.area));
+        })
 }
