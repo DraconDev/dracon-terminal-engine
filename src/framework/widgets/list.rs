@@ -7,8 +7,6 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
-type SelectCallback<T> = Option<Box<dyn FnMut(&T)>>;
-
 pub struct List<T> {
     id: WidgetId,
     items: Vec<T>,
@@ -16,7 +14,7 @@ pub struct List<T> {
     offset: usize,
     visible_count: usize,
     theme: Theme,
-    on_select: SelectCallback<T>,
+    on_select: Option<Box<dyn FnMut(&T)>>,
     item_height: u16,
     width: u16,
     area: std::cell::Cell<Rect>,

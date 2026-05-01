@@ -9,8 +9,6 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
-type ChangeCallback = Option<Box<dyn FnMut(&str)>>;
-
 /// A dropdown select widget for choosing from a list of options.
 pub struct Select {
     id: WidgetId,
@@ -18,7 +16,7 @@ pub struct Select {
     selected: usize,
     expanded: bool,
     theme: Theme,
-    on_change: ChangeCallback,
+    on_change: Option<Box<dyn FnMut(&str)>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
 }
