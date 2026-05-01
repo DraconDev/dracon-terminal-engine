@@ -253,7 +253,6 @@ pub struct CommandRunner {
     child_id: Option<u32>,
     stdout_rx: Option<Receiver<String>>,
     stderr_rx: Option<Receiver<String>>,
-    exit_code: i32,
 }
 
 impl CommandRunner {
@@ -263,7 +262,6 @@ impl CommandRunner {
             child_id: None,
             stdout_rx: None,
             stderr_rx: None,
-            exit_code: -1,
         }
     }
 

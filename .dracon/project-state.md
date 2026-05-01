@@ -1,9 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactored error handling in `CommandRunner` to improve robustness when processing command output streams.
+Refactored the `CommandRunner` struct to remove the `exit_code` field and its initialization, simplifying the command execution tracking.
 
 ## Completed
-- [x] Replaced `flatten()` with `filter_map(Result::ok)` in stdout/stderr processing to handle IO errors gracefully
-- [x] Simplified exit code handling by using `unwrap_or(-1)` instead of nested `map` operations
-- [x] Maintained thread-based stream processing while improving error resilience
+- [x] Removed the `exit_code` field from the `CommandRunner` struct to streamline command execution tracking
+- [x] Eliminated the initialization of `exit_code` with a default value of `-1`
