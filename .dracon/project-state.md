@@ -1,27 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved file entry display formatting in the framework file manager example
+Improved error handling in the editor smoke test by consolidating stderr capture logic
 
 ## Context
-The previous implementation had a simple directory reading function that returned basic file names. This change enhances the file information display by:
-1. Creating a structured `FileEntry` type to store file metadata
-2. Implementing proper display formatting for better debugging and user visibility
+The smoke test was failing to properly capture and display stderr output when the text editor demo process exited unexpectedly. This made debugging harder by not showing the full error context.
 
 ## Completed
-- [x] Added `FileEntry` struct with name, directory flag, and size fields
-- [x] Implemented `Display` trait for formatted output showing:
-  - Directory indicator (">" for directories, "-" for files)
-  - File name
-  - File size in bytes
-- [x] Updated `read_dir` function to return `Vec<FileEntry>` instead of `Vec<String>`
+- [x] Consolidated stderr capture logic into a single block
+- [x] Maintained consistent error message formatting
+- [x] Kept the same error handling behavior but with cleaner code
 
 ## In Progress
-- [ ] None (this is a complete feature implementation)
+- [ ] No active work in progress
 
 ## Blockers
-- None (this is a self-contained improvement)
+- None identified
 
 ## Next Steps
-1. Verify the new display format works correctly in the file manager UI
-2. Consider adding additional file metadata (permissions, modification time) if needed
+1. Verify the test now properly captures stderr output
+2. Consider adding more detailed error context if needed
