@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Refactored the Split Resizer example with improved state management and rendering efficiency.
+Added a showcase example that catalogs all framework examples with navigation and metadata
 
 ## Context
-The previous implementation had direct mutable access to the app state, which could lead to potential borrowing issues. The refactoring addresses this by using `Rc<RefCell<T>>` for thread-safe state management and ensures proper cleanup of borrowed references during rendering.
+To provide a unified entry point for exploring all framework examples, making it easier for users to discover and run specific examples
 
 ## Completed
-- [x] Added `Rc<RefCell<T>>` for thread-safe state management
-- [x] Improved rendering efficiency by properly scoping borrowed references
-- [x] Maintained all existing functionality while improving code safety
+- [x] Added showcase.rs example with interactive navigation
+- [x] Included metadata for all examples (name, category, description, widgets used)
+- [x] Implemented keyboard navigation (arrow keys, Enter, q)
+- [x] Added run command display for each example
+- [x] Organized examples into categories (cookbook, apps, existing)
 
 ## In Progress
-- [x] Refactored state management for the Split Resizer example
+- [ ] None (complete implementation)
 
 ## Blockers
-- None identified
+- None (feature complete)
 
 ## Next Steps
-1. Verify no regressions in the Split Resizer functionality
-2. Review other examples for similar state management patterns
+1. Update documentation to reference the showcase example
+2. Consider adding example filtering by widget type or category
