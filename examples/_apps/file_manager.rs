@@ -45,7 +45,7 @@ impl MockFs {
     fn child_count(&self) -> usize { self.children.as_ref().map(|c| c.len()).unwrap_or(0) }
 }
 
-#[derive(Clone)] struct FileEntry { name: String, is_dir: bool }
+#[derive(Clone)] struct FileEntry { name: String, _is_dir: bool }
 struct FileManager {
     id: WidgetId, fs: MockFs, tree: Tree, breadcrumbs: Breadcrumbs,
     tree_path: Vec<usize>, selected: Option<FileEntry>,
@@ -128,7 +128,7 @@ impl FileManager {
         match name {
             "main.rs" => ("1.2 KB".into(), "2025-01-10".into()),
             "lib.rs" => ("3.4 KB".into(), "2025-01-12".into()),
-            "README.md" | "README.md" => ("4.1 KB".into(), "2025-01-08".into()),
+            "README.md" => ("4.1 KB".into(), "2025-01-08".into()),
             "CHANGELOG.md" => ("8.7 KB".into(), "2025-01-15".into()),
             "test_main.rs" => ("0.8 KB".into(), "2025-01-05".into()),
             "Cargo.toml" => ("2.3 KB".into(), "2025-01-15".into()),
@@ -270,7 +270,7 @@ impl Widget for FileManager {
                         name = node.name.into();
                         is_dir = node.is_dir;
                     }
-                    self.selected = Some(FileEntry { name, is_dir });
+                    self.selected = Some(FileEntry { name, _is_dir: is_dir });
                     self.dirty = true;
                     true
                 } else { false }
@@ -302,7 +302,7 @@ impl Widget for FileManager {
                     }
                 }
                 if let Some(name) = child_name {
-                    self.selected = Some(FileEntry { name, is_dir: child_is_dir });
+                    self.selected = Some(FileEntry { name, _is_dir: child_is_dir });
                     if needs_toast { self.show_toast(&format!("Opening {}...", self.selected.as_ref().unwrap().name), ToastKind::Info); }
                     self.dirty = true; return true;
                 }

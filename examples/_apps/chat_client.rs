@@ -56,6 +56,7 @@ struct ChatState {
     scroll_offset: usize,
 }
 
+#[allow(dead_code)]
 impl ChatState {
     fn new() -> Self {
         Self {
