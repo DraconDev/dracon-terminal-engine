@@ -9,7 +9,7 @@ use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
@@ -228,6 +228,44 @@ impl Showcase {
 
 impl Default for Showcase {
     fn default() -> Self { Self::new() }
+}
+
+struct ShowcaseWidget(Rc<RefCell<Showcase>>);
+
+impl ShowcaseWidget {
+    fn new(inner: Rc<RefCell<Showcase>>) -> Self {
+        Self(inner)
+    }
+}
+
+impl Widget for ShowcaseWidget {
+    fn id(&self) -> WidgetId { self.0.borrow().id() }
+    fn set_id(&mut self, id: WidgetId) { self.0.borrow_mut().set_id(id); }
+    fn area(&self) -> Rect { self.0.borrow().area() }
+    fn set_area(&mut self, area: Rect) { self.0.borrow_mut().set_area(area); }
+    fn z_index(&self) -> u16 { self.0.borrow().z_index() }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) { self.0.borrow_mut().mark_dirty(); }
+    fn clear_dirty(&mut self) { self.0.borrow_mut().clear_dirty(); }
+    fn focusable(&self) -> bool { self.0.borrow().focusable() }
+
+    fn render(&self, area: Rect) -> Plane {
+        self.0.borrow().render(area)
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.0.borrow_mut().handle_key(key)
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.0.borrow_mut().handle_mouse(kind, col, row)
+    }
+
+    fn on_mount(&mut self) { self.0.borrow_mut().on_mount(); }
+    fn on_unmount(&mut self) { self.0.borrow_mut().on_unmount(); }
+    fn on_focus(&mut self) { self.0.borrow_mut().on_focus(); }
+    fn on_blur(&mut self) { self.0.borrow_mut().on_blur(); }
+    fn on_theme_change(&mut self, theme: &Theme) { self.0.borrow_mut().on_theme_change(theme); }
 }
 
 impl Widget for Showcase {
@@ -588,8 +626,7 @@ impl Widget for Showcase {
                 true
             }
             KeyCode::Char('q') => {
-                // Exit is handled by the main loop checking a flag
-                true
+                std::process::exit(0);
             }
             _ => false,
         }
@@ -642,32 +679,21 @@ fn main() -> io::Result<()> {
     println!("Starting showcase...");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    let app = Rc::new(RefCell::new(Showcase::new()));
-    app.borrow_mut().theme_idx = 0;
+    let showcase = Rc::new(RefCell::new(Showcase::new()));
+    showcase.borrow_mut().theme_idx = 0;
 
-    let app_tick = app.clone();
-    let app_run = app.clone();
+    let showcase_tick = showcase.clone();
 
-    App::new()?
+    let mut app = App::new()?
         .title("Example Showcase")
         .fps(30)
-        .theme(Theme::nord())
-        .on_tick(move |ctx, _tick| {
-            let mut a = app_tick.borrow_mut();
-            ctx.mark_all_dirty();
-            let (w, h) = ctx.compositor().size();
-            if a.area.width != w || a.area.height != h {
-                a.set_area(Rect::new(0, 0, w, h));
-            }
-        })
-        .run(move |ctx| {
-            let mut a = app_run.borrow_mut();
-            if a.needs_render() {
-                let area = a.area();
-                let plane = a.render(area);
-                a.clear_dirty();
-                drop(a);
-                ctx.add_plane(plane);
-            }
-        })
+        .theme(Theme::nord());
+    app.add_widget(Box::new(ShowcaseWidget::new(showcase)), Rect::new(0, 0, 80, 24));
+    app.on_tick(move |ctx, _tick| {
+        let mut s = showcase_tick.borrow_mut();
+        let (w, h) = ctx.compositor().size();
+        if s.area.width != w || s.area.height != h {
+            s.set_area(Rect::new(0, 0, w, h));
+        }
+    }).run(|_ctx| {})
 }
