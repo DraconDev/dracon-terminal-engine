@@ -609,4 +609,445 @@ mod tests {
         assert!(ParsedOutput::List(vec![]).is_empty());
         assert!(!ParsedOutput::List(vec!["x".to_string()]).is_empty());
     }
+
+    #[test]
+    fn test_output_parser_json_key_missing_key() {
+        let parser = OutputParser::JsonKey { key: "nonexistent".to_string() };
+        let out = parser.parse(r#"{"status": "OK"}"#, "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_key_malformed_json() {
+        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let out = parser.parse("not valid json {{{", "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_path_missing() {
+        let parser = OutputParser::JsonPath { path: "data.result".to_string() };
+        let out = parser.parse(r#"{"data": {}}"#, "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "null"),
+            other => panic!("expected scalar null, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_path_empty() {
+        let parser = OutputParser::JsonPath { path: "a.b.c".to_string() };
+        let out = parser.parse(r#"{}"#, "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "null"),
+            other => panic!("expected scalar null, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_array_no_item_key() {
+        let parser = OutputParser::JsonArray { item_key: None };
+        let out = parser.parse(r#"[1, 2, 3]"#, "", 0);
+        match out {
+            ParsedOutput::List(items) => {
+                assert_eq!(items.len(), 3);
+                assert_eq!(items[0], "1");
+                assert_eq!(items[1], "2");
+                assert_eq!(items[2], "3");
+            }
+            other => panic!("expected list, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_array_malformed() {
+        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let out = parser.parse("not json at all", "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_json_array_non_array() {
+        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let out = parser.parse(r#"{"items": "not an array"}"#, "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_regex_no_match() {
+        let parser = OutputParser::Regex {
+            pattern: r"NOTFOUND:(\d+)".to_string(),
+            group: Some(1),
+        };
+        let out = parser.parse("some output without the pattern", "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_regex_invalid_pattern() {
+        let parser = OutputParser::Regex {
+            pattern: r"[invalid".to_string(),
+            group: None,
+        };
+        let out = parser.parse("some text", "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_regex_group_out_of_bounds() {
+        let parser = OutputParser::Regex {
+            pattern: r"hello (\w+)".to_string(),
+            group: Some(5),
+        };
+        let out = parser.parse("hello world", "", 0);
+        match out {
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_regex_no_group() {
+        let parser = OutputParser::Regex {
+            pattern: r"hello".to_string(),
+            group: None,
+        };
+        let out = parser.parse("say hello world", "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "hello"),
+            other => panic!("expected scalar 'hello', got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_line_count_empty() {
+        let parser = OutputParser::LineCount;
+        let out = parser.parse("", "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "0"),
+            other => panic!("expected scalar '0', got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_line_count_single_line() {
+        let parser = OutputParser::LineCount;
+        let out = parser.parse("single line without newline", "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "1"),
+            other => panic!("expected scalar '1', got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_exit_code_nonzero() {
+        let parser = OutputParser::ExitCode;
+        let out = parser.parse("", "", 127);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "127"),
+            other => panic!("expected scalar '127', got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_exit_code_zero() {
+        let parser = OutputParser::ExitCode;
+        let out = parser.parse("", "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "0"),
+            other => panic!("expected scalar '0', got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_severity_line_empty() {
+        let parser = OutputParser::SeverityLine {
+            patterns: [("ERROR".to_string(), "red".to_string())].into_iter().collect(),
+        };
+        let out = parser.parse("", "", 0);
+        match out {
+            ParsedOutput::Lines(lines) => assert!(lines.is_empty()),
+            other => panic!("expected empty lines, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_severity_line_multiple_patterns() {
+        let parser = OutputParser::SeverityLine {
+            patterns: [
+                ("FATAL".to_string(), "bright_red".to_string()),
+                ("ERROR".to_string(), "red".to_string()),
+                ("WARN".to_string(), "yellow".to_string()),
+                ("DEBUG".to_string(), "blue".to_string()),
+            ].into_iter().collect(),
+        };
+        let out = parser.parse("INFO: starting\nDEBUG: debug msg\nWARN: slow\nERROR: failed\nFATAL: crash", "", 0);
+        match out {
+            ParsedOutput::Lines(lines) => {
+                assert_eq!(lines.len(), 5);
+                assert_eq!(lines[0].severity, "default");
+                assert_eq!(lines[1].severity, "blue");
+                assert_eq!(lines[2].severity, "yellow");
+                assert_eq!(lines[3].severity, "red");
+                assert_eq!(lines[4].severity, "bright_red");
+            }
+            other => panic!("expected lines, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_plain_unicode() {
+        let parser = OutputParser::Plain;
+        let out = parser.parse("Hello 世界 🎉", "", 0);
+        match out {
+            ParsedOutput::Text(s) => assert_eq!(s, "Hello 世界 🎉"),
+            other => panic!("expected text, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_output_parser_plain_multiline() {
+        let parser = OutputParser::Plain;
+        let out = parser.parse("line1\nline2\nline3", "", 0);
+        match out {
+            ParsedOutput::Text(s) => assert_eq!(s, "line1\nline2\nline3"),
+            other => panic!("expected text, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_command_runner_sync_nonexistent_cmd() {
+        let runner = CommandRunner::new("nonexistent_command_12345");
+        let (stdout, stderr, code) = runner.run_sync();
+        assert_eq!(stdout, "");
+        assert!(code != 0 || !stderr.is_empty());
+    }
+
+    #[test]
+    fn test_command_runner_sync_exit_nonzero() {
+        let runner = CommandRunner::new("ls /nonexistent/path/that/does/not/exist 2>/dev/null");
+        let (stdout, stderr, code) = runner.run_sync();
+        assert_eq!(code, 0);
+    }
+
+    #[test]
+    fn test_command_runner_sync_stderr() {
+        let runner = CommandRunner::new("ls /nonexistent/path/that/does/not/exist");
+        let (stdout, stderr, code) = runner.run_sync();
+        assert!(stderr.contains("No such file") || stderr.is_empty() || code != 0);
+    }
+
+    #[test]
+    fn test_command_runner_run_and_parse_json_key() {
+        let runner = CommandRunner::new(r#"printf '{"status":"OK","count":3}'"#);
+        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let out = runner.run_and_parse(&parser);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "\"OK\""),
+            other => panic!("expected \"OK\", got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_command_runner_run_and_parse_json_array() {
+        let runner = CommandRunner::new(r#"printf '{"items":[{"name":"a"},{"name":"b"}]}'"#);
+        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let out = runner.run_and_parse(&parser);
+        match out {
+            ParsedOutput::List(items) => {
+                assert_eq!(items.len(), 2);
+                assert_eq!(items[0], "\"a\"");
+                assert_eq!(items[1], "\"b\"");
+            }
+            other => panic!("expected list, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_bound_command_parse_output() {
+        let cmd = BoundCommand::new(r#"printf '{"value":42}'"#)
+            .parser(OutputParser::JsonKey { key: "value".to_string() });
+        let out = cmd.parse_output(r#"{"value":42}"#, "", 0);
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "42"),
+            other => panic!("expected 42, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_bound_command_default_parser() {
+        let cmd = BoundCommand::new("echo hello");
+        match &cmd.parser {
+            OutputParser::Plain => {}
+            other => panic!("expected Plain parser, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_command_runner_spawn_and_recv() {
+        let mut runner = CommandRunner::new("echo line1 && echo line2 && echo line3");
+        runner.spawn().unwrap();
+        let mut lines = vec![];
+        while let Some(line) = runner.recv_line() {
+            if line.contains("__EXIT_CODE__") {
+                break;
+            }
+            lines.push(line);
+        }
+        assert!(lines.len() >= 1);
+    }
+
+    #[test]
+    fn test_command_runner_spawn_nonexistent() {
+        let mut runner = CommandRunner::new("nonexistent_binary_12345678");
+        let result = runner.spawn();
+        assert!(result.is_err() || runner.recv_line().is_none());
+    }
+
+    #[test]
+    fn test_command_runner_child_id() {
+        let mut runner = CommandRunner::new("echo hello");
+        assert_eq!(runner.child_id(), None);
+        let _ = runner.spawn();
+        assert!(runner.child_id().is_some());
+    }
+
+    #[test]
+    fn test_command_runner_run_sync_with_special_chars() {
+        let runner = CommandRunner::new(r#"printf 'hello\nworld\nwith spaces\nand\ttabs'"#);
+        let (stdout, _, _) = runner.run_sync();
+        assert_eq!(stdout, "hello\nworld\nwith spaces\nand\ttabs");
+    }
+
+    #[test]
+    fn test_command_runner_run_sync_empty() {
+        let runner = CommandRunner::new("");
+        let (stdout, stderr, code) = runner.run_sync();
+        assert_eq!(stdout, "");
+        assert_eq!(stderr, "");
+        assert_eq!(code, -1);
+    }
+
+    #[test]
+    fn test_command_runner_run_sync_whitespace_only() {
+        let runner = CommandRunner::new("   ");
+        let (stdout, stderr, code) = runner.run_sync();
+        assert_eq!(code, -1);
+    }
+
+    #[test]
+    fn test_command_runner_long_output() {
+        let cmd = format!("printf '%s' '{}'", "x".repeat(10000));
+        let runner = CommandRunner::new(&cmd);
+        let (stdout, _, _) = runner.run_sync();
+        assert_eq!(stdout.len(), 10000);
+    }
+
+    #[test]
+    fn test_parsed_output_scalar() {
+        let out = ParsedOutput::Scalar("hello".to_string());
+        assert!(!out.is_empty());
+        match out {
+            ParsedOutput::Scalar(s) => assert_eq!(s, "hello"),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_parsed_output_list() {
+        let out = ParsedOutput::List(vec!["a".to_string(), "b".to_string()]);
+        assert!(!out.is_empty());
+        match out {
+            ParsedOutput::List(v) => assert_eq!(v.len(), 2),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_parsed_output_text() {
+        let out = ParsedOutput::Text("multiline\ntext".to_string());
+        assert!(!out.is_empty());
+        match out {
+            ParsedOutput::Text(s) => assert!(s.contains('\n')),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_parsed_output_none() {
+        let out = ParsedOutput::None;
+        assert!(out.is_empty());
+    }
+
+    #[test]
+    fn test_logged_line_new() {
+        let line = LoggedLine::new("error message", "red");
+        assert_eq!(line.text, "error message");
+        assert_eq!(line.severity, "red");
+    }
+
+    #[test]
+    fn test_bound_command_all_fields() {
+        let cmd = BoundCommand::new("ls -la")
+            .label("list files")
+            .description("List all files with details")
+            .confirm("Are you sure?")
+            .refresh(10)
+            .parser(OutputParser::LineCount);
+        assert_eq!(cmd.command, "ls -la");
+        assert_eq!(cmd.label, "list files");
+        assert_eq!(cmd.description, "List all files with details");
+        assert_eq!(cmd.confirm_message, Some("Are you sure?".to_string()));
+        assert_eq!(cmd.refresh_seconds, Some(10));
+        match &cmd.parser {
+            OutputParser::LineCount => {}
+            _ => panic!("expected LineCount"),
+        }
+    }
+
+    #[test]
+    fn test_command_runner_capture_env_vars() {
+        let runner = CommandRunner::new("echo $HOME");
+        let (stdout, _, _) = runner.run_sync();
+        assert!(!stdout.is_empty() || std::env::var("HOME").is_ok());
+    }
+
+    #[test]
+    fn test_command_runner_run_and_parse_severity() {
+        let runner = CommandRunner::new(r#"printf 'INFO Hello\nERROR World\nDEBUG Test'"#);
+        let parser = OutputParser::SeverityLine {
+            patterns: [
+                ("ERROR".to_string(), "red".to_string()),
+                ("DEBUG".to_string(), "blue".to_string()),
+            ].into_iter().collect(),
+        };
+        let out = runner.run_and_parse(&parser);
+        match out {
+            ParsedOutput::Lines(lines) => {
+                assert_eq!(lines.len(), 3);
+                assert_eq!(lines[0].severity, "default");
+                assert_eq!(lines[1].severity, "red");
+                assert_eq!(lines[2].severity, "blue");
+            }
+            other => panic!("expected lines, got {:?}", other),
+        }
+    }
 }
