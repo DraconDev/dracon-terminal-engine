@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [27.0.5] - 2026-05-01
+
+### Fixed
+
+#### Clippy cleanup
+- Fixed `absurd_extreme_comparisons` in `App::fps` — replaced `fps.max(1).min(120)` with `fps.clamp(1, 120)`
+- Fixed `logic_bug` in `CommandRunner::test` — replaced tautological `assert!(code == 0 || code != 0)` with `assert!(code != 0)`
+- Fixed `flatten()` infinite loop risk in `CommandRunner::spawn` — replaced `lines().flatten()` with `lines().map_while(|r| r.ok())`
+- Removed unused `exit_code` field from `CommandRunner` struct
+- Removed dead `matches_filter_by_raw` method from `LogViewer`
+- Fixed redundant `id` binding in `SearchInput::new`
+- Fixed `if let` collapsible warnings in `parser.rs` (mouse event parsing for SGR back/forward buttons)
+- Fixed identical blocks in `editor_smoke_test` — collapsed `if code == Some(0) {} else if code == Some(1) {} else {}` to `if code == Some(0) || code == Some(1) { return; }`
+- Fixed `assert!(true)` always-true assertion in `test_ctx_dirty_regions`
+- Added `#![allow(dead_code)]` to `tests/common/mod.rs` for unused test helpers
+
+#### Example fixes
+- `game_loop.rs` — fixed double-indentation that broke compilation
+- `desktop.rs` — replaced `Cell::default()` field assignment with struct initializer; fixed `drops.iter_mut().enumerate()` unused variable `i`
+- `framework_chat.rs` — replaced `ToString` impl with `Display` impl for `Message`
+- `framework_file_manager.rs` — replaced `ToString` impl with `Display` impl for `FileEntry`
+- `button_test.rs` — removed unnecessary parentheses `let end_idx = (1 + "Button".len())`
+- `text_editor_adapter_test.rs` — removed unnecessary parentheses `let idx_i = (gutter + 1)`
+- `filter_test.rs` — fixed test that was assigning to `_changed` but never reading it; rewritten to sensible assertion
+- `editor_smoke_test.rs` — added `child.wait()` after early return to fix spawned process not waited warning
+
+### Changed
+
+#### Prelude
+- `ScrollState` re-exported from `scroll` module in prelude (was missing, broke `List::scroll_state()` return type)
+
+### Tests
+
+- All 291+ tests passing, 0 failures
+- New test assertion: `test_glitch_at_zero_time_most_cells_unchanged` now asserts `changed < 5` (was broken assertion on exact char match)
+
 ## [27.0.4] - 2026-05-01
 
 ### Added
