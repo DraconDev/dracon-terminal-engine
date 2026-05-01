@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [27.0.2] - Unreleased
+
+### Fixed
+
+- `WidgetRegistry.next_id` field missing — initialized to 1 in `WidgetRegistry::new()`
+- Release workflow simplified: GitHub Release only (crates.io publish removed)
+- CI: removed `minimal-versions` toolchain job (broke on nightly), removed `-D warnings` from clippy step (40 cosmetic warnings remain)
+
+### Added
+
+- 10 new integration test files with 300+ tests:
+  - `tests/button_test.rs` (32 tests) — Framework Button: render, click, theme, callbacks
+  - `tests/label_test.rs` (20 tests) — Label widget: render, theme, dirty lifecycle
+  - `tests/panel_test.rs` (7 tests) — Panel widget: render, inner area
+  - `tests/context_menu_test.rs` (9 tests) — ContextMenuAction enum: variants, clone, serialize, PartialEq
+  - `tests/filter_test.rs` (24 tests) — 5 filters: Dim, Invert, Scanline, Pulse, Glitch
+  - `tests/hitzone_test.rs` (30 tests) — HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry
+  - `tests/dragdrop_test.rs` (24 tests) — DragManager, DragGhost, DropTarget, DragPhase, DragState
+  - `tests/utils_test.rs` (48 tests) — visual_width, truncate, format_size, format_permissions, FileCategory, etc.
+  - `tests/password_input_test.rs` (34 tests) — PasswordInput widget: masking, callbacks, key/mouse handling
+  - `tests/input_reader_test.rs` (34 tests) — kitty_key parser: 35 key codes, deprecated mappings
+  - `tests/text_input_test.rs` (35 tests) — TextInput standalone: char insert, delete, Ctrl shortcuts
+  - `tests/terminal_test.rs` (14 tests) — Terminal: show/hide cursor, set cursor, null mode
+  - `tests/visuals_test.rs` (48 tests) — icons (extension lookup, nerd/unicode/ascii modes), osc, sync
+  - `tests/layout_test.rs` (16 tests) — Standalone layout: centered_rect, Stack
+- `tests/common/mod.rs` — shared test helpers: `make_key`, `make_key_repeat`, `make_area`, `rect`, `assert_rgb`, `TrackingWidget` mock
+
+### Changed
+
+- Total test count: 272 → 609 tests
+
 ## [27.0.1] - 2026-04-30
 
 ### Infrastructure

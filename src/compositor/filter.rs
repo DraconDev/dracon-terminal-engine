@@ -61,7 +61,7 @@ pub struct Scanline;
 
 impl Filter for Scanline {
     fn apply(&self, cell: &mut Cell, _x: u16, y: u16, _time: f32) {
-        if y % 2 == 0 {
+        if y.is_multiple_of(2) {
             cell.fg = dim_color(cell.fg, 0.8);
             cell.bg = dim_color(cell.bg, 0.8);
         }

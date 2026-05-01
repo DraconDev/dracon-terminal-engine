@@ -42,6 +42,7 @@ impl WidgetContainer {
 
 pub struct WidgetRegistry {
     containers: Vec<WidgetContainer>,
+    next_id: usize,
 }
 
 impl Default for WidgetRegistry {
@@ -55,6 +56,7 @@ impl WidgetRegistry {
     pub fn new() -> Self {
         Self {
             containers: Vec::new(),
+            next_id: 1,
         }
     }
 

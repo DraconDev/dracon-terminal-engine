@@ -69,17 +69,17 @@ impl<W: Write + AsFd> Terminal<W> {
 
     /// Shows the terminal cursor.
     pub fn show_cursor(&mut self) -> io::Result<()> {
-        write!(self.output, "\x1b[?25h").map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+        write!(self.output, "\x1b[?25h").map_err(io::Error::other)
     }
 
     /// Hides the terminal cursor.
     pub fn hide_cursor(&mut self) -> io::Result<()> {
-        write!(self.output, "\x1b[?25l").map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+        write!(self.output, "\x1b[?25l").map_err(io::Error::other)
     }
 
     /// Sets the cursor position (1-indexed, as terminals expect).
     pub fn set_cursor(&mut self, x: u16, y: u16) -> io::Result<()> {
-        write!(self.output, "\x1b[{};{}H", y.saturating_add(1), x.saturating_add(1)).map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+        write!(self.output, "\x1b[{};{}H", y.saturating_add(1), x.saturating_add(1)).map_err(io::Error::other)
     }
 }
 

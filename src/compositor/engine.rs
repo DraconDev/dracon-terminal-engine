@@ -186,7 +186,7 @@ impl Compositor {
     }
 
     fn sort_planes(&mut self) {
-        self.planes.sort_by(|a, b| a.z_index.cmp(&b.z_index));
+        self.planes.sort_by_key(|a| a.z_index);
     }
 
     /// Renders the compositor state to the given writer, outputting terminal escape codes.
@@ -204,7 +204,7 @@ impl Compositor {
         for i in 0..self.planes.len() {
             layers.push((self.planes[i].z_index, i));
         }
-        layers.sort_by(|a, b| a.0.cmp(&b.0));
+        layers.sort_by_key(|a| a.0);
 
         for (_, plane_idx) in layers {
             let plane = &self.planes[plane_idx];
