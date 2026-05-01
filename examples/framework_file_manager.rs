@@ -9,11 +9,18 @@ use dracon_terminal_engine::framework::widgets::SplitPane;
 use ratatui::layout::Rect;
 use std::path::PathBuf;
 
-#[derive(Clone, Display)]
+#[derive(Clone)]
 struct FileEntry {
     name: String,
     is_dir: bool,
     size: u64,
+}
+
+impl std::fmt::Display for FileEntry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let icon = if self.is_dir { ">" } else { "-" };
+        write!(f, "{} {} ({})", icon, self.name, self.size)
+    }
 }
 
 fn read_dir(path: &PathBuf) -> Vec<FileEntry> {
