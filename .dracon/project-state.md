@@ -1,7 +1,7 @@
 # Project State
 
 ## Current Focus
-Refactored the `fps` method in the `App` struct to use `clamp` instead of manual min/max operations for better readability and maintainability.
+Refactored assertion logic in the `App` struct's layout validation to combine two separate assertions into a single combined check.
 
 ## Completed
-- [x] Replaced `fps.max(1).min(120)` with `fps.clamp(1, 120)` in the `App::fps` method
+- [x] Combined two separate assertions (`a.height > 0` and `b.height > 0`) into a single combined assertion (`a.height > 0 && b.height > 0`) for better readability and maintainability
