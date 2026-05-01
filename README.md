@@ -44,24 +44,6 @@ App::new().unwrap()
 
 The `framework` module provides the complete application runtime:
 
-### Core
-| Widget | What |
-|---|---|
-| [`App`] | Event loop, terminal, compositor — one call to run |
-| [`Ctx`] | Per-frame context: add planes, compositor, theme, animations, dirty tracking |
-| [`App::add_widget`] | Register a widget with lifecycle callbacks |
-| [`App::set_theme`] | Switch theme and propagate to all widgets |
-| [`App::on_tick`] | Periodic callback (every N milliseconds) |
-| [`App::tick_interval`] | Set the tick interval in ms |
-| [`App::from_toml`] | Create app from TOML config file |
-| [`App::add_command`] | Register a CLI command for AI enumeration |
-| [`App::available_commands`] | List all available commands (AI surface) |
-| [`App::run_command`] | Execute a CLI command and get (stdout, stderr, exit_code) |
-| [`Ctx::run_command`] | Execute CLI from tick/render callbacks |
-| [`Ctx::available_commands`] | List commands from within callbacks |
-
-### Command-driven architecture
-
 Every widget can bind a CLI command. AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`:
 
 ```rust
