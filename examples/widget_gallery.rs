@@ -99,7 +99,6 @@ impl WidgetGallery {
 
     fn render_nav(&self, area: Rect) -> Plane {
         let mut list = self.nav_list();
-        let mut list = list;
         list.set_area(area);
         list.scroll_to(self.selected);
         list.render(area)
