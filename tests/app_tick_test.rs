@@ -163,6 +163,10 @@ impl OutputTrackingWidget {
             last_output: RefCell::new(None),
         }
     }
+
+    fn get_last_output(&self) -> Option<String> {
+        self.last_output.borrow().clone()
+    }
 }
 
 impl Widget for OutputTrackingWidget {
@@ -539,7 +543,7 @@ fn test_output_tracking_widget_receives_output() {
     widget.apply_command_output(&ParsedOutput::Scalar("TestValue".to_string()));
 
     assert!(command_received.get());
-    assert_eq!(*last_output.borrow(), Some("TestValue".to_string()));
+    assert_eq!(widget.get_last_output(), Some("TestValue".to_string()));
 }
 
 #[test]
