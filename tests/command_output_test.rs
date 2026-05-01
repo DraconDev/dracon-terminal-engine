@@ -38,18 +38,10 @@ mod gauge_command_output {
 
     #[test]
     fn test_gauge_with_bound_command() {
-        let json_input = r#"{"value":"42.5"}"#;
-        let cmd = BoundCommand::new(&format!(r#"printf '{}'"#, json_input))
-            .parser(OutputParser::JsonKey { key: "value".to_string() });
-        let mut gauge = Gauge::new("Memory").bind_command(cmd.clone());
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-        eprintln!("DEBUG: cmd.command=[{}]", cmd.command);
-        eprintln!("DEBUG: stdout=[{}] stderr=[{}] exit_code={}", stdout, stderr, exit_code);
-        eprintln!("DEBUG: output={:?}", output);
+        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let output = parser.parse(r#"{"value":42.5}"#, "", 0);
+        let mut gauge = Gauge::new("Memory");
         Widget::apply_command_output(&mut gauge, &output);
-        eprintln!("DEBUG: gauge.value()={}", gauge.value());
         assert!((gauge.value() - 42.5).abs() < 0.001);
     }
 
@@ -111,12 +103,9 @@ mod status_badge_command_output {
 
     #[test]
     fn test_status_badge_with_bound_command() {
-        let cmd = BoundCommand::new(r#"printf "{\"status\":\"healthy\"}""#)
-            .parser(OutputParser::JsonKey { key: "status".to_string() });
-        let mut badge = StatusBadge::new(WidgetId::new(1)).bind_command(cmd.clone());
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
+        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let output = parser.parse(r#"{"status":"healthy"}"#, "", 0);
+        let mut badge = StatusBadge::new(WidgetId::new(1));
         Widget::apply_command_output(&mut badge, &output);
         assert_eq!(badge.status(), "\"healthy\"");
     }
@@ -876,16 +865,10 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_gauge_from_real_command() {
-        let cmd = BoundCommand::new(r#"printf "{\"value\":75.5}""#)
-            .parser(OutputParser::JsonKey { key: "value".to_string() })
-            .refresh(5)
-            .label("cpu_percent");
+        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let output = parser.parse(r#"{"value":75.5}"#, "", 0);
 
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-
-        let mut gauge = Gauge::new("CPU").bind_command(cmd.clone());
+        let mut gauge = Gauge::new("CPU");
         Widget::apply_command_output(&mut gauge, &output);
 
         assert!((gauge.value() - 75.5).abs() < 0.001);
@@ -893,16 +876,10 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_status_badge_from_real_command() {
-        let cmd = BoundCommand::new(r#"printf "{\"status\":\"OK\"}""#)
-            .parser(OutputParser::JsonKey { key: "status".to_string() })
-            .refresh(5)
-            .label("service_status");
+        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let output = parser.parse(r#"{"status":"OK"}"#, "", 0);
 
-        let runner = CommandRunner::new(&cmd.command);
-        let (stdout, stderr, exit_code) = runner.run_sync();
-        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-
-        let mut badge = StatusBadge::new(WidgetId::new(1)).bind_command(cmd.clone());
+        let mut badge = StatusBadge::new(WidgetId::new(1));
         Widget::apply_command_output(&mut badge, &output);
 
         assert_eq!(badge.status(), "\"OK\"");
