@@ -284,4 +284,21 @@ mod tests {
         assert_eq!(area.width, 20);
         assert_eq!(area.height, 2);
     }
+
+    #[test]
+    fn test_status_badge_apply_command_output_scalar() {
+        use crate::framework::command::ParsedOutput;
+        let mut badge = StatusBadge::new(WidgetId::new(1));
+        badge.apply_command_output(&ParsedOutput::Scalar("OK".to_string()));
+        assert_eq!(badge.status, "OK");
+    }
+
+    #[test]
+    fn test_status_badge_apply_command_output_ignores_non_scalar() {
+        use crate::framework::command::ParsedOutput;
+        let mut badge = StatusBadge::new(WidgetId::new(1));
+        badge.set_status("OK");
+        badge.apply_command_output(&ParsedOutput::None);
+        assert_eq!(badge.status, "OK");
+    }
 }

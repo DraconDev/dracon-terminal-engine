@@ -1,8 +1,8 @@
 # Project State
 
 ## Current Focus
-Implementing robust widget command handling with command cleanup and enhanced test coverage for command output parsing.
+Adding unit tests for the `apply_command_output` method in the `StatusBadge` widget to validate correct status updates when handling scalar and non-scalar command outputs.
 
 ## Completed
-- [x] Remove outdated commands from command tracking when widgets are unregistered to prevent stale executions
-- [x] Add comprehensive tests for Gauge's apply_command_output handling scalar values, ignoring non-scalar outputs, and parsing invalid inputs as zero
+- [x] Implemented test `test_status_badge_apply_command_output_scalar` to verify status updates with scalar outputs (e.g., "OK")
+- [x] Implemented test `test_status_badge_apply_command_output_ignores_non_scalar` to ensure non-scalar outputs do not modify the status
