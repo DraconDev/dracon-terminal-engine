@@ -32,6 +32,7 @@ use ratatui::layout::Rect;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
+use std::collections::HashMap;
 use std::io::{self, Read, Write};
 use std::os::fd::AsFd;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -73,6 +74,7 @@ pub struct App {
     animations: AnimationManager,
     next_widget_id: usize,
     commands: RefCell<Vec<BoundCommand>>,
+    command_tracking: RefCell<HashMap<WidgetId, (Instant, BoundCommand)>>,
 }
 
 impl App {
@@ -103,6 +105,7 @@ impl App {
             animations: AnimationManager::new(),
             next_widget_id: 0,
             commands: RefCell::new(Vec::new()),
+            command_tracking: RefCell::new(HashMap::new()),
         })
     }
 
@@ -144,6 +147,7 @@ impl App {
             animations: AnimationManager::new(),
             next_widget_id: 0,
             commands: RefCell::new(Vec::new()),
+            command_tracking: RefCell::new(HashMap::new()),
         };
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
@@ -222,9 +226,17 @@ impl App {
         widget.set_area(area);
         widget.on_mount();
         let focusable = widget.focusable();
+        let cmds = widget.commands();
         self.widgets.borrow_mut().push(widget);
         self.focus_manager.register(id, focusable);
         self.next_widget_id += 1;
+
+        for cmd in cmds {
+            if cmd.refresh_seconds.is_some() {
+                self.command_tracking.borrow_mut().insert(id, (Instant::now(), cmd));
+            }
+        }
+
         id
     }
 
@@ -413,6 +425,29 @@ impl App {
                     }, self.tick_count);
                     self.tick_count += 1;
                     self.last_tick_time = Instant::now();
+                }
+            }
+
+            {
+                let now = Instant::now();
+                let mut to_reschedule: Vec<(WidgetId, BoundCommand)> = Vec::new();
+                for (wid, (last_run, cmd)) in self.command_tracking.borrow().iter() {
+                    let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
+                    if interval.is_zero() || now.duration_since(*last_run) < interval {
+                        continue;
+                    }
+                    let widget = self.widget_mut(*wid);
+                    if let Some(mut w) = widget {
+                        let mut runner = CommandRunner::new(&cmd.command);
+                        let (stdout, stderr, exit_code) = runner.run_sync().unwrap_or_default();
+                        let output = cmd.parse_output(&stdout, &stderr, exit_code);
+                        w.apply_command_output(&output);
+                        w.mark_dirty();
+                        to_reschedule.push((*wid, cmd.clone()));
+                    }
+                }
+                for (wid, cmd) in to_reschedule {
+                    self.command_tracking.borrow_mut().insert(wid, (Instant::now(), cmd));
                 }
             }
 
