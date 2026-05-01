@@ -522,17 +522,24 @@ impl Widget for FileManager {
         if let MouseEventKind::Down(_) = kind {
             if col > tree_rect.width && row > header_height && row < header_height + detail_rect.height {
                 let rel_row = (row - header_height).saturating_sub(1) as usize;
-                let children_opt = self.current_node().children.clone();
-                if let Some(children) = children_opt {
+                let mut entry_name: Option<String> = None;
+                let mut entry_is_dir = false;
+                let mut needs_toast = false;
+
+                if let Some(ref children) = self.current_node().children {
                     if rel_row < children.len() {
-                        let entry = FileEntry { name: children[rel_row].name.to_string(), is_dir: children[rel_row].is_dir };
-                        let show_toast = !children[rel_row].is_dir;
-                        drop(children_opt);
-                        self.selected_entry = Some(entry);
-                        if show_toast { self.show_toast(&format!("Opening {}...", self.selected_entry.as_ref().unwrap().name), ToastKind::Info); }
-                        self.dirty = true;
-                        return true;
+                        let child = &children[rel_row];
+                        entry_name = Some(child.name.to_string());
+                        entry_is_dir = child.is_dir;
+                        needs_toast = !child.is_dir;
                     }
+                }
+
+                if let Some(name) = entry_name {
+                    self.selected_entry = Some(FileEntry { name, is_dir: entry_is_dir });
+                    if needs_toast { self.show_toast(&format!("Opening {}...", self.selected_entry.as_ref().unwrap().name), ToastKind::Info); }
+                    self.dirty = true;
+                    return true;
                 }
             }
             self.show_context_menu(col, row);
