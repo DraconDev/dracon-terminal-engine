@@ -305,13 +305,15 @@ impl Widget for LogMonitor {
 
     fn handle_mouse(
         &mut self,
-        mouse: dracon_terminal_engine::input::event::MouseEvent,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
     ) -> bool {
         use dracon_terminal_engine::input::event::MouseEventKind;
 
-        if mouse.kind == MouseEventKind::Down(ratatui::mouse::MouseButton::Left) {
-            let rel_y = mouse.row.saturating_sub(self.area.get().y);
-            let rel_x = mouse.column.saturating_sub(self.area.get().x);
+        if kind == MouseEventKind::Down(ratatui::mouse::MouseButton::Left) {
+            let rel_y = row;
+            let rel_x = col;
 
             if rel_y == 0 {
                 let filter_start = self.area.get().width.saturating_sub(40);
@@ -349,52 +351,49 @@ impl Widget for LogMonitor {
     }
 }
 
-fn main() -> Result<()> {
-    let theme = Theme::dark();
-
-    App::new()?
-        .title("Log Monitor")
-        .fps(30)
-        .theme(theme)
-        .on_tick(|ctx, tick| {
-            let monitor = ctx.state_mut();
-            if tick % 3 == 0 {
-                monitor.generate_log();
-            }
-            monitor.update_status();
-            ctx.mark_all_dirty();
-        })
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
-            let mut monitor = ctx.state_mut();
-
-            if monitor.area.get().width != w || monitor.area.get().height != h {
-                monitor.set_area(Rect::new(0, 0, w, h));
-            }
-
-            let plane = monitor.render(monitor.area());
-            ctx.add_plane(plane);
-        })
-}
-
-impl App {
-    fn state_mut(&mut self) -> &mut LogMonitor {
-        unsafe {
-            let ptr = self as *mut App as *mut LogMonitor;
-            &mut *ptr
-        }
-    }
-}
-
 impl Default for LogMonitor {
     fn default() -> Self {
         Self::new(WidgetId::new(1))
     }
 }
 
-impl Drop for App {
-    fn drop(&mut self) {
-        println!("\nLog Monitor Ended");
-        println!("Total lines logged: {}", self.state_mut().line_count);
-    }
+fn main() -> Result<()> {
+    println!("Log Monitor");
+    println!("============");
+    println!("Controls:");
+    println!("  c - Clear logs");
+    println!("  r - Resume auto-scroll");
+    println!("  Click - Pause auto-scroll / toggle filters");
+    println!();
+
+    std::thread::sleep(Duration::from_millis(300));
+
+    let mut app = App::new()?.title("Log Monitor").fps(30);
+
+    let theme = Theme::dark();
+    app.set_theme(theme);
+
+    let mut monitor = LogMonitor::new(WidgetId::new(1));
+
+    app.tick_interval(200)
+        .on_tick(move |ctx, tick| {
+            if tick % 2 == 0 {
+                monitor.generate_log();
+            }
+            monitor.update_status();
+            monitor.mark_dirty();
+        })
+        .run(move |ctx| {
+            let (w, h) = ctx.compositor().size();
+
+            if monitor.area.get().width != w || monitor.area.get().height != h {
+                monitor.set_area(Rect::new(0, 0, w, h));
+            }
+
+            if monitor.needs_render() {
+                let plane = monitor.render(monitor.area());
+                ctx.add_plane(plane);
+                monitor.clear_dirty();
+            }
+        })
 }
