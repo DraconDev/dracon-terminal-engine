@@ -149,9 +149,7 @@ impl KeyValueGrid {
         }
 
         if row % 2 == 1 {
-            for i in val_start..cells.len() {
-                cells[i].bg = alt_bg;
-            }
+            cells[val_start..].iter_mut().for_each(|cell| cell.bg = alt_bg);
         }
 
         cells

@@ -289,7 +289,7 @@ impl CommandRunner {
         if let Some(stdout) = child.stdout.take() {
             let tx = stdout_tx.clone();
             thread::spawn(move || {
-                for l in BufReader::new(stdout).lines().filter_map(|r| r.ok()) {
+                for l in BufReader::new(stdout).lines().map_while(|r| r.ok()) {
                     let _ = tx.send(l);
                 }
             });
@@ -298,7 +298,7 @@ impl CommandRunner {
         if let Some(stderr) = child.stderr.take() {
             let tx2 = stderr_tx.clone();
             thread::spawn(move || {
-                for l in BufReader::new(stderr).lines().filter_map(|r| r.ok()) {
+                for l in BufReader::new(stderr).lines().map_while(|r| r.ok()) {
                     let _ = tx2.send(l);
                 }
             });
