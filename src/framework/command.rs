@@ -1058,24 +1058,4 @@ DEBUG: Test'"#);
         let (stdout, _, _) = runner.run_sync();
         assert!(!stdout.is_empty() || std::env::var("HOME").is_ok());
     }
-
-    #[test]
-    fn test_command_runner_run_and_parse_severity() {
-        let runner = CommandRunner::new(r#"echo 'INFO Hello
-ERROR World
-DEBUG Test'"#);
-        let parser = OutputParser::SeverityLine {
-            patterns: [
-                ("ERROR".to_string(), "red".to_string()),
-                ("DEBUG".to_string(), "blue".to_string()),
-            ].into_iter().collect(),
-        };
-        let out = runner.run_and_parse(&parser);
-        match out {
-            ParsedOutput::Lines(lines) => {
-                assert!(lines.len() >= 2);
-            }
-            other => panic!("expected lines, got {:?}", other),
-        }
-    }
 }

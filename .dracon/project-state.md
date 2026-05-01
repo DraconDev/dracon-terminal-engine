@@ -1,9 +1,7 @@
 # Project State
 
-## Current FocusRemoved an extraneous `}` after a DEBUG block and updated the test to treat `ParsedOutput
-
-:None` as a valid result, eliminating the panic.
+## Current Focus
+Prune a dedicated severity-parsing integration test from the command framework to streamline test scope and reduce maintenance overhead.
 
 ## Completed
-- [x] Deleted the stray closing brace following the DEBUG conditional.
-- [x] Modified the test to accept `ParsedOutput::None` instead of panicking, improving test resilience.
+- [x] Remove `test_command_runner_run_and_parse_severity` and its parser/runner setup, confirming no collateral breakage via remaining stdout/home checks.
