@@ -1,24 +1,23 @@
 # Project State
 
 ## Current Focus
-Added a showcase example that catalogs all framework examples with navigation and metadata
+Expanded documentation of all framework examples with a new showcase entry point
 
 ## Context
-To provide a unified entry point for exploring all framework examples, making it easier for users to discover and run specific examples
+The README was updated to better organize and document the growing collection of framework examples, making it easier for users to discover and run specific examples.
 
 ## Completed
-- [x] Added showcase.rs example with interactive navigation
-- [x] Included metadata for all examples (name, category, description, widgets used)
-- [x] Implemented keyboard navigation (arrow keys, Enter, q)
-- [x] Added run command display for each example
-- [x] Organized examples into categories (cookbook, apps, existing)
+- [x] Added a new "Interactive Showcase" section as the primary entry point
+- [x] Organized examples into three clear categories: showcase, cookbook, and apps
+- [x] Updated version number to v27.24.0
+- [x] Improved formatting and consistency of example commands
 
 ## In Progress
-- [ ] None (complete implementation)
+- [ ] No active work in progress shown in this diff
 
 ## Blockers
-- None (feature complete)
+- None identified in this diff
 
 ## Next Steps
-1. Update documentation to reference the showcase example
-2. Consider adding example filtering by widget type or category
+1. Verify all example commands work as documented
+2. Consider adding a visual example gallery screenshot

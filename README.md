@@ -174,24 +174,61 @@ App::new().unwrap()
 
 ## Examples
 
-```bash
-# Framework examples — the recommended path
-cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud + SystemMonitor
-cargo run --example framework_file_manager # File browser with List + Breadcrumbs + SplitPane
-cargo run --example framework_chat        # Chat UI: message list + input bar + theme
-cargo run --example framework_widgets     # Showcase all 35 framework widgets
-cargo run --example command_dashboard    # Command-driven dashboard with auto-refresh
-cargo run --example from_toml            # TOML-driven app configuration
-cargo run --example text_editor_demo      # Standalone TextEditor with theme switching
+### Interactive Showcase (Start Here)
 
-# Engine examples — raw compositor usage
-cargo run --example basic_raw             # minimal Terminal usage
-cargo run --example god_mode              # Ratatui + compositor overlay
-cargo run --example input_debug           # SGR mouse + keyboard parsing
-cargo run --example cyberpunk_dashboard   # Ratatui chart dashboard with simulation
-cargo run --example demo                  # General engine demo with charts
-cargo run --example desktop              # Desktop-style window management
-cargo run --example game_loop             # 60fps game loop with mouse tracking
+```bash
+cargo run --example showcase   # Browse & launch all 23 examples
+```
+
+### `_cookbook/` — Focused Recipe Examples
+
+```bash
+cargo run --example widget_gallery     # All interactive widgets: Checkbox, Radio, Slider, Spinner, Toggle, Select, SearchInput, ProgressBar, Button
+cargo run --example tree_navigator    # Hierarchical navigation: Tree + Breadcrumbs + SplitPane + StatusBar
+cargo run --example log_monitor       # Real-time log viewer: LogViewer + StatusBadge with severity filtering
+cargo run --example tabbed_panels      # Tab switching: Tabbar with per-tab widget state (Gauges, List, Settings, Stats)
+cargo run --example data_table         # Sortable/filterable table with search input
+cargo run --example split_resizer      # Drag-to-resize nested SplitPane
+cargo run --example command_bindings   # All 5 command-bound widgets: Gauge, KeyValueGrid, StatusBadge, LogViewer, StreamingText
+cargo run --example menu_system       # MenuBar + ContextMenu with keyboard shortcuts
+cargo run --example debug_overlay      # Debug tools: DebugOverlay + Profiler + WidgetInspector + EventLogger (F12 toggle)
+```
+
+### `_apps/` — Full Application Examples
+
+```bash
+cargo run --example system_monitor     # htop-like dashboard: CPU/Memory/Disk/Network gauges + KeyValueGrid + StreamingText
+cargo run --example file_manager       # Full file manager: Tree + Table + Breadcrumbs + SplitPane + ContextMenu
+cargo run --example chat_client        # Rich chat UI: List + TextInput + Toast + Modal + emoji picker
+cargo run --example dashboard_builder  # All 5 command widgets in grid layout with auto-refresh
+```
+
+### Other Framework Examples
+
+```bash
+cargo run --example form_demo          # Settings form with validation and Tab-cycling
+cargo run --example theme_switcher     # Live theme cycling through all 15 themes
+cargo run --example modal_demo         # ConfirmDialog + help overlay with keyboard shortcuts
+cargo run --example widget_tutorial    # Build a custom ColorPicker widget from scratch
+cargo run --example framework_demo     # App + List + Breadcrumbs + SplitPane + Hud
+cargo run --example framework_chat     # Chat UI: message list + input bar + theme
+cargo run --example framework_file_manager # File browser with List + Breadcrumbs
+cargo run --example framework_widgets  # Instantiate all 35 widgets and print debug info
+cargo run --example command_dashboard  # Command-driven dashboard with Gauge + KeyValueGrid + StatusBadge
+cargo run --example from_toml          # TOML-driven app configuration
+cargo run --example text_editor_demo  # Standalone TextEditor with theme switching
+```
+
+### Engine Examples — Raw Compositor Usage
+
+```bash
+cargo run --example basic_raw         # Minimal Terminal usage
+cargo run --example god_mode           # Ratatui + compositor overlay
+cargo run --example input_debug        # SGR mouse + keyboard parsing
+cargo run --example cyberpunk_dashboard # Ratatui chart dashboard
+cargo run --example demo               # General engine demo with charts
+cargo run --example desktop            # Desktop-style window management
+cargo run --example game_loop          # 60fps game loop with mouse tracking
 ```
 
 ## Testing
@@ -209,7 +246,7 @@ cargo test --test scroll_test          # Scroll behavior tests
 
 ## Version
 
-**v27.0.5** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v27.24.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
