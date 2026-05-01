@@ -5,36 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [27.0.2] - Unreleased
+## [27.0.2] - 2026-05-01
+
+### Added
+
+#### Command-driven TOML architecture
+
+- `src/framework/command.rs` — CommandRunner, BoundCommand, OutputParser, ParsedOutput
+- `BoundCommand` — (cmd, parser, confirm, refresh_interval, label, description) — serde-serializable to TOML
+- `OutputParser` variants — JsonKey, JsonPath, JsonArray, Regex, LineCount, ExitCode, SeverityLine, Plain
+- `ParsedOutput` — Scalar, List, Lines(Vec<LoggedLine>), Text, None
+- `AppConfig`, `WidgetConfig`, `LayoutConfig`, `AreaConfig`, `ParserConfig` — all TOML-serializable structs
+- `AppConfig::from_toml(path)` and `AppConfig::from_toml_str(content)` — TOML-driven app creation
+- `App::from_toml(path)` — create entire app from TOML config file
+- `App::add_command(cmd)` — register command to global registry
+- `App::available_commands()` — enumerate all commands across all widgets (AI surface)
+- `App::run_command(cmd)` — execute CLI command synchronously, returns (stdout, stderr, exit_code)
+- `Ctx::run_command(cmd)` — execute CLI from tick/render callbacks
+- `Ctx::available_commands()` — enumerate commands from Ctx callbacks
+
+#### Widget trait extension
+
+- `Widget::commands(&self) -> Vec<BoundCommand>` — default returns empty vec
+- All 6 new widgets implement commands() returning their bound command
+- AI can call `ctx.available_commands()` to enumerate every action the TUI can perform
+
+#### 6 new widgets
+
+| Widget | File | Purpose |
+|--------|------|---------|
+| `ConfirmDialog` | `confirm_dialog.rs` | Modal yes/no with danger styling, border color changes on danger |
+| `KeyValueGrid` | `key_value_grid.rs` | Displays JSON/Scalar as "KEY   VALUE" rows, BTreeMap sorted, alternating row colors |
+| `Gauge` | `gauge.rs` | Filled progress bar with warn/crit thresholds (70%/90%), color changes with level |
+| `LogViewer` | `log_viewer.rs` | Auto-scrolling log with severity detection (Fatal/Error/Warn/Debug/Info) and filter support |
+| `StreamingText` | `streaming_text.rs` | Live-updating text with word-wrap, auto-scroll, max_lines |
+| `StatusBadge` | `status_badge.rs` | Colored `[OK]` / `[WARN]` / `[ERROR]` badge from CLI status output |
 
 ### Fixed
 
 - `WidgetRegistry.next_id` field missing — initialized to 1 in `WidgetRegistry::new()`
 - Release workflow simplified: GitHub Release only (crates.io publish removed)
-- CI: removed `minimal-versions` toolchain job (broke on nightly), removed `-D warnings` from clippy step (40 cosmetic warnings remain)
-
-### Added
-
-- 10 new integration test files with 300+ tests:
-  - `tests/button_test.rs` (32 tests) — Framework Button: render, click, theme, callbacks
-  - `tests/label_test.rs` (20 tests) — Label widget: render, theme, dirty lifecycle
-  - `tests/panel_test.rs` (7 tests) — Panel widget: render, inner area
-  - `tests/context_menu_test.rs` (9 tests) — ContextMenuAction enum: variants, clone, serialize, PartialEq
-  - `tests/filter_test.rs` (24 tests) — 5 filters: Dim, Invert, Scanline, Pulse, Glitch
-  - `tests/hitzone_test.rs` (30 tests) — HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry
-  - `tests/dragdrop_test.rs` (24 tests) — DragManager, DragGhost, DropTarget, DragPhase, DragState
-  - `tests/utils_test.rs` (48 tests) — visual_width, truncate, format_size, format_permissions, FileCategory, etc.
-  - `tests/password_input_test.rs` (34 tests) — PasswordInput widget: masking, callbacks, key/mouse handling
-  - `tests/input_reader_test.rs` (34 tests) — kitty_key parser: 35 key codes, deprecated mappings
-  - `tests/text_input_test.rs` (35 tests) — TextInput standalone: char insert, delete, Ctrl shortcuts
-  - `tests/terminal_test.rs` (14 tests) — Terminal: show/hide cursor, set cursor, null mode
-  - `tests/visuals_test.rs` (48 tests) — icons (extension lookup, nerd/unicode/ascii modes), osc, sync
-  - `tests/layout_test.rs` (16 tests) — Standalone layout: centered_rect, Stack
-- `tests/common/mod.rs` — shared test helpers: `make_key`, `make_key_repeat`, `make_area`, `rect`, `assert_rgb`, `TrackingWidget` mock
+- CI: removed `minimal-versions` toolchain job (broke on nightly), removed `-D warnings` from clippy step
 
 ### Changed
 
-- Total test count: 272 → 609 tests
+- Total test count: 609 → 650+ tests (new widget tests added)
+- Widget count: 29 → 35 framework widgets
+- `toml = "0.8"` dependency added for TOML serialization
 
 ## [27.0.1] - 2026-04-30
 

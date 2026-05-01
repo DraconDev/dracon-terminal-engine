@@ -18,7 +18,9 @@
 
 ## What It Is
 
-`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 23+ built-in widgets, 15 themes, dirty rendering, and focus management.
+`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 35 built-in widgets, 15 themes, dirty rendering, and focus management.
+
+**Command-driven architecture** — every widget binds a CLI command, AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`.
 
 **One import to rule them all:**
 
@@ -51,8 +53,27 @@ The `framework` module provides the complete application runtime:
 | [`App::set_theme`] | Switch theme and propagate to all widgets |
 | [`App::on_tick`] | Periodic callback (every N milliseconds) |
 | [`App::tick_interval`] | Set the tick interval in ms |
+| [`App::from_toml`] | Create app from TOML config file |
+| [`App::add_command`] | Register a CLI command for AI enumeration |
+| [`App::available_commands`] | List all available commands (AI surface) |
+| [`App::run_command`] | Execute a CLI command and get (stdout, stderr, exit_code) |
+| [`Ctx::run_command`] | Execute CLI from tick/render callbacks |
+| [`Ctx::available_commands`] | List commands from within callbacks |
 
-### Input & Interaction
+### Command-driven architecture
+
+Every widget can bind a CLI command. AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`:
+
+```rust
+// In a tick callback, AI can:
+let cmds = ctx.available_commands();  // List all 50+ available commands
+for cmd in cmds {
+    println!("{}: {}", cmd.label, cmd.description);
+}
+
+// Trigger any action:
+let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
+```
 | Widget | What |
 |---|---|
 | [`HitZone<T>`] | Declarative interactive region (click/double/drag/hover) |
@@ -63,19 +84,23 @@ The `framework` module provides the complete application runtime:
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 
-### 29 Framework Widgets
+### 35 Framework Widgets
 | Widget | What |
 |---|---|
 | [`Breadcrumbs`] | Hierarchical path display with clickable segments |
 | [`Button`] | Clickable button with press state and callbacks |
 | [`Checkbox`] | Two-state toggle with check mark |
+| [`ConfirmDialog`] | Modal yes/no dialog with optional danger styling |
 | [`ContextMenu`] | Right-click popup menu with nested submenus |
 | [`DebugOverlay`] | FPS, widget count, and debug info overlay |
 | [`EventLogger`] | Scrollable event log panel |
 | [`Form`] | Multi-field form container with validation |
+| [`Gauge`] | Filled progress bar with warn/crit thresholds |
 | [`Hud`] | Top-right HUD with system metrics |
+| [`KeyValueGrid`] | Key-value display from JSON/Scalar CLI output |
 | [`Label`] | Static text label |
 | [`List`] | Scrollable list with keyboard/touch navigation |
+| [`LogViewer`] | Auto-scrolling log with severity detection |
 | [`MenuBar`] | Top menu bar with dropdown menus |
 | [`Modal`] | Modal dialog overlay with backdrop |
 | [`PasswordInput`] | Single-line password input with masking |
@@ -87,7 +112,9 @@ The `framework` module provides the complete application runtime:
 | [`Slider`] | Horizontal slider with value display |
 | [`Spinner`] | Animated loading spinner |
 | [`SplitPane`] | Split view with draggable divider |
+| [`StatusBadge`] | Colored OK/WARN/ERROR badge from CLI status |
 | [`StatusBar`] | Bottom status bar |
+| [`StreamingText`] | Live-updating text with word-wrap |
 | [`TabBar`] | Tab navigation bar |
 | [`Table`] | Multi-column table with sorting |
 | [`Toast`] | Temporary notification toast messages |
@@ -131,14 +158,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "27.0.1"
+dracon-terminal-engine = "27.0.2"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.1" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.2" }
 ```
 
 ## Quick Start (Framework)

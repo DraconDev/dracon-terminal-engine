@@ -1,0 +1,78 @@
+# Example TOML config for dracon-terminal-engine
+# Run with: cargo run --example from_toml
+
+title = "System Monitor Dashboard"
+theme = "nord"
+fps = 30
+
+[layout]
+header_height = 1
+sidebar_width = 30
+footer_height = 1
+
+# System status badge
+[[widget]]
+type = "StatusBadge"
+id = 1
+bind = "uptime -p"
+refresh = 60
+
+# CPU gauge
+[[widget]]
+type = "Gauge"
+id = 2
+label = "CPU"
+bind = "cat /proc/loadavg | awk '{print $1 * 100}'"
+refresh = 2
+
+# Memory gauge
+[[widget]]
+type = "Gauge"
+id = 3
+label = "Memory"
+bind = "free | grep Mem | awk '{print ($3/$2)*100}'"
+max = 100
+refresh = 5
+
+# Key-value info grid
+[[widget]]
+type = "KeyValueGrid"
+id = 4
+bind = "echo 'Host: $(hostname)\nUptime: $(uptime -p)\nLoad: $(cat /proc/loadavg | awk '{print $1, $2, $3}')'"
+refresh = 10
+
+# Disk usage
+[[widget]]
+type = "Gauge"
+id = 5
+label = "Disk /"
+bind = "df / | tail -1 | awk '{print $5}' | tr -d '%'"
+max = 100
+warn_threshold = 70
+crit_threshold = 90
+refresh = 60
+
+# Log viewer
+[[widget]]
+type = "LogViewer"
+id = 6
+bind = "journalctl -n 50 --no-pager"
+max_lines = 100
+auto_scroll = true
+
+# Confirm dialog (example of danger binding)
+[[widget]]
+type = "ConfirmDialog"
+id = 7
+title = "Run system update?"
+message = "This will update all packages on the system."
+confirm_label = "Update"
+cancel_label = "Cancel"
+bind = "echo 'update-all --confirm'"
+danger = false
+
+# Status bar
+[[widget]]
+type = "StatusBar"
+id = 8
+refresh = 10

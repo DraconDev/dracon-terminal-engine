@@ -161,7 +161,103 @@ if let Some(id) = group.dispatch_mouse(kind, col, row, modifiers) {
 
 ---
 
-## 5. Theme
+## 5. Command-driven architecture
+
+Every widget binds a CLI command. AI can enumerate all available actions and trigger them.
+
+### The AI surface
+
+```rust
+// List every action the TUI can perform
+let cmds = ctx.available_commands();
+for cmd in &cmds {
+    println!("{}: {} ({})", cmd.label, cmd.description, cmd.command);
+}
+```
+
+### Execute a command
+
+```rust
+// Run any CLI command directly
+let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
+if code == 0 {
+    // Parse stdout for display
+} else {
+    // Show error from stderr
+}
+```
+
+### Command binding
+
+A `BoundCommand` carries everything needed to run and parse CLI output:
+
+```rust
+let cmd = BoundCommand::new("df -h")
+    .label("disk usage")
+    .description("Show disk space info")
+    .parser(OutputParser::Plain);
+
+let gauge = Gauge::new("Disk")
+    .bind_command(cmd);
+```
+
+### Output parsers
+
+| Parser | Use case |
+|--------|----------|
+| `OutputParser::JsonKey { key: "status" }` | Extract single field from JSON |
+| `OutputParser::JsonPath { path: "data.cpu" }` | Navigate nested JSON path |
+| `OutputParser::Regex { pattern: "([0-9]+)%", group: 1 }` | Extract via regex capture |
+| `OutputParser::ExitCode` | Map process exit code to status |
+| `OutputParser::SeverityLine` | Detect ERROR/WARN/INFO from log lines |
+| `OutputParser::Plain` | Raw text output |
+
+### TOML configuration
+
+Entire apps can be defined in TOML — no Rust code needed for new dashboards:
+
+```toml
+title = "My Dashboard"
+theme = "nord"
+fps = 30
+
+[[widget]]
+type = "StatusBadge"
+id = 1
+bind = "dracon-sync status --json"
+parser = { type = "json_key", key = "status" }
+refresh = 5
+
+[[widget]]
+type = "Gauge"
+id = 2
+bind = "dracon-sync cpu --percent"
+refresh = 2
+```
+
+```rust
+// Load app from TOML
+let app = App::from_toml("/path/to/dashboard.toml")?;
+```
+
+### Ctx in callbacks
+
+`ctx.run_command()` and `ctx.available_commands()` work in tick callbacks and render closures:
+
+```rust
+App::new()?
+    .on_tick(|ctx, tick| {
+        if tick % 60 == 0 {  // Every 15 seconds at 4Hz tick
+            let (out, _, _) = ctx.run_command("uptime");
+            // Update widget state from output
+        }
+    })
+    .run(|ctx| { /* render */ });
+```
+
+---
+
+## 6. Theme
 
 Three presets: `Theme::dark()` (default), `Theme::light()`, `Theme::cyberpunk()`. Each provides bg/fg/accent/selection/border colors plus scrollbar/hover/active/input variants.
 
@@ -181,7 +277,7 @@ let list = List::new(items).with_theme(Theme::dark());
 
 ---
 
-## 6. The Compositor Pattern (Engine-level)
+## 7. The Compositor Pattern (Engine-level)
 
 Planes have z-indices. Higher z = on top. The compositor uses painter's algorithm.
 
@@ -209,7 +305,7 @@ let frame = compositor.render();
 
 ---
 
-## 7. Input Handling
+## 8. Input Handling
 
 ### Framework (App event loop)
 
@@ -242,7 +338,7 @@ if let Some(Event::Mouse(me)) = reader.read()? {
 
 ---
 
-## 8. Color
+## 9. Color
 
 Use `Color::Rgb(r, g, b)` for 24-bit color or `Color::Ansi(n)` for 256-color.
 
@@ -256,7 +352,7 @@ let c = Color::Reset;                // reset to terminal default
 
 ---
 
-## 9. Ratatui Integration
+## 10. Ratatui Integration
 
 Use `RatatuiBackend` for ratatui widgets combined with floating Planes:
 
@@ -275,7 +371,7 @@ Note: `RatatuiBackend` wraps the raw-mode Terminal. When `terminal` is dropped, 
 
 ---
 
-## 10. Sync Mode 2026 (Visual Polish)
+## 11. Sync Mode 2026 (Visual Polish)
 
 For tear-free rendering, wrap output in sync mode:
 
@@ -289,7 +385,7 @@ end_sync(writer)?;
 
 ---
 
-## 11. Unicode & Wide Characters
+## 12. Unicode & Wide Characters
 
 Characters like Kanji and Emoji take 2 columns. Use utilities to stay safe:
 
@@ -300,7 +396,7 @@ When a wide char occupies `(x, y)`, cell `(x+1, y)` must have `skip: true`.
 
 ---
 
-## 12. Re-exports
+## 13. Re-exports
 
 Most common types are re-exported at crate root:
 
@@ -319,7 +415,7 @@ use dracon_terminal_engine::{InputReader, Parser, SystemMonitor};
 
 | Concept | Key API |
 |---|---|
-| Entry point | `App::new()?.title().fps().run(\|ctx\|)` |
+| Entry point | `App::new()?.title().fps().run(\|ctx\|)` or `App::from_toml(path)` |
 | Add content | `ctx.add_plane(plane)` |
 | List | `List::new(items).on_select(f).render(area)` |
 | Breadcrumbs | `Breadcrumbs::new(crumbs).render(area)` |
@@ -329,3 +425,5 @@ use dracon_terminal_engine::{InputReader, Parser, SystemMonitor};
 | Colors | `Color::Rgb(r, g, b)` or `Color::Ansi(n)` |
 | Z-indexed layers | `Plane::new(id, w, h)` + `set_z_index(n)` |
 | Raw mode | `Terminal::new(stdout())?` |
+| Commands | `ctx.run_command("cli")` / `ctx.available_commands()` |
+| TOML config | `App::from_toml("config.toml")?` |
