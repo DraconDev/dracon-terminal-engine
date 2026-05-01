@@ -20,3 +20,73 @@ pub fn to_runtime_event(event: &Event) -> crate::input::event::Event {
 pub fn to_ui_event(event: &Event) -> Option<UiEvent> {
     event.to_ui_event()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_runtime_event_identity() {
+        let event = Event::Key(crate::input::event::KeyEvent {
+            kind: crate::input::event::KeyEventKind::Press,
+            code: crate::input::event::KeyCode::Char('a'),
+            modifiers: crate::input::event::KeyModifiers::empty(),
+        });
+        #[allow(deprecated)]
+        let result = from_runtime_event(event.clone());
+        match result {
+            Event::Key(k) => {
+                assert!(matches!(k.code, crate::input::event::KeyCode::Char('a')));
+            }
+            _ => panic!("expected Key event"),
+        }
+    }
+
+    #[test]
+    fn test_to_runtime_event_identity() {
+        let event = Event::Key(crate::input::event::KeyEvent {
+            kind: crate::input::event::KeyEventKind::Press,
+            code: crate::input::event::KeyCode::Char('b'),
+            modifiers: crate::input::event::KeyModifiers::empty(),
+        });
+        #[allow(deprecated)]
+        let result = to_runtime_event(&event);
+        match result {
+            Event::Key(k) => {
+                assert!(matches!(k.code, crate::input::event::KeyCode::Char('b')));
+            }
+            _ => panic!("expected Key event"),
+        }
+    }
+
+    #[test]
+    fn test_to_ui_event_key() {
+        let event = Event::Key(crate::input::event::KeyEvent {
+            kind: crate::input::event::KeyEventKind::Press,
+            code: crate::input::event::KeyCode::Char('c'),
+            modifiers: crate::input::event::KeyModifiers::empty(),
+        });
+        let result = to_ui_event(&event);
+        assert!(result.is_some());
+    }
+
+    #[test]
+    fn test_to_ui_event_resize() {
+        let event = Event::Resize(80, 24);
+        let result = to_ui_event(&event);
+        assert!(result.is_some());
+    }
+
+    #[test]
+    fn test_to_ui_event_mouse() {
+        use crate::input::event::{MouseEvent, MouseEventKind};
+        let event = Event::Mouse(MouseEvent {
+            kind: MouseEventKind::Press,
+            column: 10,
+            row: 5,
+            modifiers: crate::input::event::KeyModifiers::empty(),
+        });
+        let result = to_ui_event(&event);
+        assert!(result.is_some());
+    }
+}
