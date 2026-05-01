@@ -181,10 +181,15 @@ impl LoggedLine {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BoundCommand {
     pub command: String,
+    #[serde(default)]
     pub parser: OutputParser,
+    #[serde(default)]
     pub confirm_message: Option<String>,
+    #[serde(default)]
     pub refresh_seconds: Option<u64>,
+    #[serde(default)]
     pub label: String,
+    #[serde(default)]
     pub description: String,
 }
 
