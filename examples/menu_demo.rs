@@ -33,6 +33,7 @@ struct MenuApp {
     context_menu: Option<ContextMenu>,
     toasts: Vec<Toast>,
     active_menu: Option<usize>,
+    ctx_selected: Option<usize>,
 }
 
 impl MenuApp {
@@ -55,7 +56,7 @@ impl MenuApp {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(Color::Rgb(100, 255, 100)))
             .add_segment(StatusSegment::new("Ctrl+N|O|S: New|Open|Save | Ctrl+Q: Quit").with_fg(Color::Rgb(180, 180, 180)));
-        Self { id, menu_bar, list: List::new(items), status_bar, context_menu: None, toasts: Vec::new(), active_menu: None }
+        Self { id, menu_bar, list: List::new(items), status_bar, context_menu: None, toasts: Vec::new(), active_menu: None, ctx_selected: None }
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
@@ -80,16 +81,20 @@ impl MenuApp {
         self.active_menu = None;
     }
 
-    fn do_ctx(&mut self, action: ContextAction) {
-        match action {
-            ContextAction::Copy => self.toast("Item copied", ToastKind::Info),
-            ContextAction::Paste => self.toast("Item pasted", ToastKind::Info),
-            ContextAction::Delete => self.toast("Item deleted", ToastKind::Warning),
-            ContextAction::Rename => self.toast("Rename mode", ToastKind::Info),
-            ContextAction::Open => self.toast("Opening...", ToastKind::Info),
-            _ => {}
+    fn do_ctx(&mut self, idx: usize) {
+        let items = vec![("Copy Item", ContextAction::Copy), ("Paste Item", ContextAction::Paste), ("Rename Item", ContextAction::Rename), ("Delete Item", ContextAction::Delete), ("Properties", ContextAction::Open)];
+        if idx < items.len() {
+            match items[idx].1 {
+                ContextAction::Copy => self.toast("Item copied", ToastKind::Info),
+                ContextAction::Paste => self.toast("Item pasted", ToastKind::Info),
+                ContextAction::Delete => self.toast("Item deleted", ToastKind::Warning),
+                ContextAction::Rename => self.toast("Rename mode", ToastKind::Info),
+                ContextAction::Open => self.toast("Opening...", ToastKind::Info),
+                _ => {}
+            }
         }
         self.context_menu = None;
+        self.ctx_selected = None;
     }
 }
 
@@ -174,7 +179,7 @@ impl Widget for MenuApp {
         if key.kind != KeyEventKind::Press { return false; }
 
         if self.context_menu.is_some() {
-            if let KeyCode::Esc = key.code { self.context_menu = None; }
+            if let KeyCode::Esc = key.code { self.context_menu = None; self.ctx_selected = None; }
             return true;
         }
 
@@ -216,6 +221,14 @@ impl Widget for MenuApp {
         let (hdr, ftr) = (1u16, 1u16);
         let content_h = 24u16 - hdr - ftr;
 
+        if self.context_menu.is_some() {
+            if let MouseEventKind::Down(MouseButton::Left) = kind {
+                self.context_menu = None;
+                self.ctx_selected = None;
+                return true;
+            }
+        }
+
         if let MouseEventKind::Down(MouseButton::Right) = kind {
             let list_rect = Rect::new(2, hdr + 1, 76, content_h - 2);
             if col >= list_rect.x && col < list_rect.x + list_rect.width && row >= list_rect.y && row < list_rect.y + list_rect.height {
@@ -234,10 +247,8 @@ impl Widget for MenuApp {
             if cm.handle_mouse(kind, col, row) {
                 if let MouseEventKind::Down(MouseButton::Left) = kind {
                     let local_row = row.saturating_sub(cm.anchor_y) as usize;
-                    if local_row < cm.items.len() {
-                        let action = &cm.items[local_row].1;
-                        if !matches!(action, ContextAction::Separator) { self.do_ctx(action.clone()); }
-                    }
+                    self.ctx_selected = Some(local_row);
+                    self.do_ctx(local_row);
                 }
                 return true;
             }

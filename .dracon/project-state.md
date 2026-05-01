@@ -1,30 +1,29 @@
 # Project State
 
 ## Current Focus
-Added comprehensive system monitoring dashboard with auto-refreshing metrics and theme switching
+Added comprehensive command binding examples for auto-refreshing widgets
 
 ## Context
-The project is expanding its example collection with practical applications. The system monitor demonstrates core widget functionality in a real-world dashboard pattern.
+This implements a cookbook example demonstrating how to bind various widgets to CLI commands with custom parsers and refresh intervals, showcasing the framework's core value proposition.
 
 ## Completed
-- [x] Added system monitor dashboard with CPU, memory, disk, and network gauges
-- [x] Implemented process list with sortable columns
-- [x] Added theme cycling capability (5 themes)
-- [x] Created auto-refresh mechanism (2-second updates)
-- [x] Added status indicators for system health
-- [x] Implemented uptime counter
-- [x] Added cookbook examples for debug overlay, menu system, and split resizer
-- [x] Updated menu demo example
-- [x] Modified tabbed panels example
-- [x] Removed redundant tree navigator example
+- [x] Added new `command_bindings.rs` example with 5 widget types bound to mock commands
+- [x] Implemented Gauge widget with CPU usage simulation
+- [x] Added KeyValueGrid showing system metrics
+- [x] Created StatusBadge with connection status simulation
+- [x] Implemented LogViewer with severity-based coloring
+- [x] Added StreamingText showing timestamp updates
+- [x] Included keyboard controls for manual refresh and pause/resume
+- [x] Modified menu system to include command bindings example
+- [x] Updated menu demo to reference new example
 
 ## In Progress
-- [x] System monitor implementation is complete with all requested features
+- [ ] None (feature complete)
 
 ## Blockers
-- None identified for this set of changes
+- None (feature implementation complete)
 
 ## Next Steps
-1. Review system monitor for potential performance optimizations
-2. Consider adding additional monitoring metrics
-3. Explore additional dashboard layout variations
+1. Review and test the command bindings example
+2. Consider adding more complex command examples
+3. Explore additional widget command binding scenarios
