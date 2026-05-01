@@ -18,9 +18,8 @@ use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::app::App;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Gauge, List, StatusBadge};
 use ratatui::layout::Rect;
-use std::io;
+use std::io::Result;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const ALL_THEMES: &[(&str, fn() -> Theme)] = &[
@@ -708,7 +707,7 @@ impl Widget for WidgetDemoPanel {
     }
 }
 
-fn main() -> io::Result<()> {
+fn main() -> Result<()> {
     let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
 
     let header = ThemeHeader::new(WidgetId::new(1));
@@ -729,25 +728,7 @@ fn main() -> io::Result<()> {
     let demo = WidgetDemoPanel::new(WidgetId::new(6));
     let _demo_id = app.add_widget(Box::new(demo), Rect::new(0, 17, 80, 12));
 
-    let mut last_theme_idx = CURRENT_THEME_INDEX.load(Ordering::SeqCst);
-
-    app.on_tick(move |ctx, _tick| {
-        let current_idx = CURRENT_THEME_INDEX.load(Ordering::SeqCst);
-        if current_idx != last_theme_idx {
-            last_theme_idx = current_idx;
-            let theme = get_current_theme();
-            ctx.mark_all_dirty();
-        }
-    });
-
-    app.run(|ctx| {
-        let current_idx = CURRENT_THEME_INDEX.load(Ordering::SeqCst);
-        if current_idx != last_theme_idx {
-            last_theme_idx = current_idx;
-            let theme = get_current_theme();
-            ctx.mark_all_dirty();
-        }
-    })?;
+    let _ = app.run(|_ctx| {});
 
     println!("\nTheme Switcher Demo Ended");
     println!("All 15 themes demonstrated:");
