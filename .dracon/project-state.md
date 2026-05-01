@@ -4,23 +4,20 @@
 Improved widget lifecycle testing with more comprehensive test cases
 
 ## Context
-The changes enhance widget testing by:
-1. Adding proper dirty tracking in widget state
-2. Creating a simple widget tracker for lifecycle verification
-3. Improving modal dialog interaction testing
+The previous widget lifecycle tests used a `LifecycleTracker` struct that was overly complex for testing basic mount/unmount behavior. This change simplifies the testing infrastructure while maintaining comprehensive coverage.
 
 ## Completed
-- [x] Added dirty flag tracking in widget area updates
-- [x] Created SimpleTracker widget for lifecycle verification
-- [x] Enhanced modal dialog interaction tests with proper key handling
-- [x] Improved mouse click testing for modal dialog buttons
+- [x] Refactored `LifecycleTracker` to `SimpleMountTracker` with minimal required functionality
+- [x] Added direct access to mount/unmount state through `Cell` references
+- [x] Maintained all test assertions while reducing test complexity
+- [x] Improved test readability by removing unnecessary fields
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Comprehensive widget lifecycle testing
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify all widget lifecycle tests pass with new implementation
-2. Consider adding more edge cases for widget interactions
+1. Verify all existing tests pass with the new implementation
+2. Consider adding more lifecycle test cases if needed

@@ -581,16 +581,48 @@ fn test_app_multiple_widgets_all_get_on_mount() {
 fn test_app_remove_first_widget_others_still_mounted() {
     let mut app = App::new().unwrap();
 
-    let (w1, m1, u1, _, _) = LifecycleTracker::new(1);
-    let (w2, m2, _, _, _) = LifecycleTracker::new(2);
+    struct SimpleMountTracker {
+        id: WidgetId,
+        area: std::cell::Cell<Rect>,
+        was_mounted: std::cell::Cell<bool>,
+        was_unmounted: std::cell::Cell<bool>,
+    }
 
-    let id1 = app.add_widget(Box::new(w1), Rect::new(0, 0, 80, 24));
-    app.add_widget(Box::new(w2), Rect::new(0, 0, 80, 24));
+    impl SimpleMountTracker {
+        fn new(id_val: usize) -> Self {
+            Self {
+                id: WidgetId::new(id_val),
+                area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+                was_mounted: std::cell::Cell::new(false),
+                was_unmounted: std::cell::Cell::new(false),
+            }
+        }
+    }
+
+    impl Widget for SimpleMountTracker {
+        fn id(&self) -> WidgetId { self.id }
+        fn area(&self) -> Rect { self.area.get() }
+        fn set_area(&mut self, area: Rect) { self.area.set(area); }
+        fn focusable(&self) -> bool { true }
+        fn on_mount(&mut self) { self.was_mounted.set(true); }
+        fn on_unmount(&mut self) { self.was_unmounted.set(true); }
+        fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
+    }
+
+    let tracker1 = SimpleMountTracker::new(1);
+    let tracker2 = SimpleMountTracker::new(2);
+
+    let mounted_ref1 = tracker1.was_mounted.clone();
+    let unmounted_ref1 = tracker1.was_unmounted.clone();
+    let mounted_ref2 = tracker2.was_mounted.clone();
+
+    let id1 = app.add_widget(Box::new(tracker1), Rect::new(0, 0, 80, 24));
+    app.add_widget(Box::new(tracker2), Rect::new(0, 0, 80, 24));
 
     app.remove_widget(id1);
 
-    assert!(u1.get(), "widget 1 should be unmounted");
-    assert!(m2.get(), "widget 2 should still be mounted");
+    assert!(unmounted_ref1.get(), "widget 1 should be unmounted");
+    assert!(mounted_ref2.get(), "widget 2 should still be mounted");
 }
 
 #[test]
