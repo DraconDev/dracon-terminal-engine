@@ -177,7 +177,7 @@ impl App {
 
     /// Sets the target frames per second (clamped to 1–120).
     pub fn fps(mut self, fps: u32) -> Self {
-        self.fps = fps.max(1).min(120);
+        self.fps = fps.clamp(1, 120);
         self
     }
 
