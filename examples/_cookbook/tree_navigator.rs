@@ -28,11 +28,6 @@ use dracon_terminal_engine::framework::widgets::{Breadcrumbs, SplitPane, StatusB
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 
-struct MockEntry {
-    name: &'static str,
-    is_dir: bool,
-}
-
 struct MockFs {
     name: &'static str,
     children: Option<Vec<MockFs>>,
@@ -75,7 +70,6 @@ struct TreeNav {
     id: WidgetId,
     tree: Tree,
     breadcrumbs: Breadcrumbs,
-    status_bar: StatusBar,
     fs: MockFs,
     current_path: Vec<usize>,
 }
@@ -108,7 +102,6 @@ impl TreeNav {
             id: WidgetId::new(0),
             tree,
             breadcrumbs,
-            status_bar: StatusBar::new(WidgetId::new(2)),
             fs,
             current_path: Vec::new(),
         }
@@ -227,7 +220,7 @@ impl Widget for TreeNav {
             KeyCode::Backspace => {
                 if !self.current_path.is_empty() {
                     self.current_path.pop();
-                    self.tree.selected_path = self.current_path.clone();
+                    self.tree.set_selected_path(self.current_path.clone());
                     self.update_breadcrumbs();
                     return true;
                 }
@@ -236,7 +229,7 @@ impl Widget for TreeNav {
         }
 
         if self.tree.handle_key(key) {
-            self.current_path = self.tree.selected_path.clone();
+            self.current_path = self.tree.get_selected_path().to_vec();
             self.update_breadcrumbs();
             true
         } else {
@@ -263,7 +256,7 @@ impl Widget for TreeNav {
 
         if col < tree_rect.width && row > header_height && row < header_height + tree_rect.height {
             if self.tree.handle_mouse(kind, col, row - header_height) {
-                self.current_path = self.tree.selected_path.clone();
+                self.current_path = self.tree.get_selected_path().to_vec();
                 self.update_breadcrumbs();
                 return true;
             }
