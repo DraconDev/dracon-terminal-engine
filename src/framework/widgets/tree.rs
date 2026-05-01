@@ -78,6 +78,15 @@ impl Tree {
         self
     }
 
+    pub fn set_selected_path(&mut self, path: Vec<usize>) {
+        self.selected_path = path;
+        self.dirty = true;
+    }
+
+    pub fn get_selected_path(&self) -> &[usize] {
+        &self.selected_path
+    }
+
     fn get_selected_node<'a>(
         &self,
         nodes: &'a [TreeNode],
