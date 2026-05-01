@@ -3,6 +3,7 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
+use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;

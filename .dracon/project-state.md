@@ -1,8 +1,7 @@
 # Project State
 
 ## Current Focus
-Refactored the `ScrollContainer` widget to include `ScrollState` in its public API, improving type safety and code organization.
+Added `ScrollState` dependency to the `List` widget to support scrollable lists.
 
 ## Completed
-- [x] Added `ScrollState` to the public API of `ScrollContainer` for better state management
-- [x] Removed the standalone `ScrollContainer` export in favor of the module-level export
+- [x] Added `ScrollState` import to enable scroll functionality in the `List` widget
