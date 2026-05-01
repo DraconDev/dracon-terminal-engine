@@ -1127,7 +1127,7 @@ mod tests {
         ctx.split_v(|top, bottom| {
             let a = top.area();
             let b = bottom.area();
-            assert!(a.height > 0 && b.height > 0);
+            assert!(a.area().height > 0 && b.area().height > 0);
         });
     }
 
