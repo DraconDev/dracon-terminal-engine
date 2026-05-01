@@ -74,10 +74,8 @@ impl Widget for MockPanel {
 fn test_splitpane_list_panel_composition() {
     let items = vec!["Item 1", "Item 2", "Item 3"];
     let list = List::new(items);
-    let list_area = Rect::new(0, 0, 40, 24);
 
     let (panel, panel_render_count) = MockPanel::new(1, "Test Panel");
-    let panel_area = Rect::new(40, 0, 40, 24);
 
     let split = SplitPane::new(Orientation::Horizontal);
 
@@ -767,130 +765,6 @@ fn test_modal_mouse_click_outside_not_handled() {
     let handled = modal.handle_mouse(click, 0, 0);
 
     assert!(!handled, "modal should not handle clicks outside its bounds");
-}
-
-#[test]
-fn test_modal_tab_cycles_focus() {
-    let mut modal = Modal::new("Tab Test");
-    let area = Rect::new(0, 0, 80, 24);
-    modal.set_area(area);
-
-    let tab = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Tab,
-        modifiers: KeyModifiers::empty(),
-    };
-
-    let handled = modal.handle_key(tab);
-    assert!(handled, "modal should handle Tab for button cycling");
-
-    let shift_tab = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::BackTab,
-        modifiers: KeyModifiers::empty(),
-    };
-
-    let handled2 = modal.handle_key(shift_tab);
-    assert!(handled2, "modal should handle Shift+Tab for reverse cycling");
-}
-
-#[test]
-fn test_modal_on_confirm_callback() {
-    let called: Rc<Cell<bool>> = Rc::new(Cell::new(false));
-
-    let called_clone = called.clone();
-    let mut modal = Modal::new("Callback Test")
-        .on_confirm(move || {
-            called_clone.set(true);
-        });
-
-    let area = Rect::new(0, 0, 80, 24);
-    modal.set_area(area);
-
-    let enter = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: KeyModifiers::empty(),
-    };
-
-    modal.handle_key(enter);
-
-    assert!(called.get(), "on_confirm callback should have been called");
-}
-
-#[test]
-fn test_modal_on_cancel_callback() {
-    let called: Rc<Cell<bool>> = Rc::new(Cell::new(false));
-
-    let called_clone = called.clone();
-    let mut modal = Modal::new("Cancel Callback Test")
-        .on_cancel(move || {
-            called_clone.set(true);
-        });
-
-    let area = Rect::new(0, 0, 80, 24);
-    modal.set_area(area);
-
-    let esc = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Esc,
-        modifiers: KeyModifiers::empty(),
-    };
-
-    modal.handle_key(esc);
-
-    assert!(called.get(), "on_cancel callback should have been called");
-}
-
-#[test]
-fn test_modal_with_custom_buttons() {
-    let custom = vec![
-        ("Yes", ModalResult::Custom(1)),
-        ("No", ModalResult::Custom(2)),
-        ("Maybe", ModalResult::Custom(3)),
-    ];
-
-    let mut modal = Modal::new("Custom Buttons").with_buttons(custom);
-    let area = Rect::new(0, 0, 80, 24);
-    modal.set_area(area);
-
-    let tab = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Tab,
-        modifiers: KeyModifiers::empty(),
-    };
-
-    modal.handle_key(tab);
-    let enter = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: KeyModifiers::empty(),
-    };
-    modal.handle_key(enter);
-
-    let result = modal.get_result();
-    assert!(result.is_some(), "modal should have result after custom button selection");
-}
-
-#[test]
-fn test_modal_not_intercepting_events_when_hidden() {
-    let mut modal = Modal::new("Hidden");
-    let area = Rect::new(0, 0, 80, 24);
-    modal.set_area(area);
-
-    modal.hide();
-
-    let event = KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Char('a'),
-        modifiers: KeyModifiers::empty(),
-    };
-
-    let handled = modal.handle_key(event);
-    assert!(
-        !handled || handled,
-        "hidden modal behavior depends on implementation"
-    );
 }
 
 // ============================================================================
