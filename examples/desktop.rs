@@ -183,6 +183,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         bg: dracon_terminal_engine::compositor::plane::Color::Reset,
                         transparent: false,
                         skip: false,
+                        style: Default::default(),
                     };
                     bg.put_cell(x, y, cell);
                 }
