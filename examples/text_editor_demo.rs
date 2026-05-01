@@ -12,9 +12,9 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
 use dracon_terminal_engine::widgets::editor::TextEditor;
+use ratatui::layout::Rect;
 use std::os::fd::AsFd;
 use std::path::PathBuf;
-use ratatui::layout::Rect;
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::cyberpunk();
@@ -42,10 +42,7 @@ fn main() -> std::io::Result<()> {
         }
     }
 
-    let mut app = App::new()?
-        .title("TextEditor Demo")
-        .fps(30)
-        .theme(theme);
+    let mut app = App::new()?.title("TextEditor Demo").fps(30).theme(theme);
 
     // Query terminal size so the editor fills the screen from startup.
     // The framework does not auto-resize widget areas on terminal resize;

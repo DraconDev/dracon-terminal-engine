@@ -68,10 +68,7 @@ impl LogViewer {
     }
 
     pub fn with_id(id: WidgetId) -> Self {
-        Self {
-            id,
-            ..Self::new()
-        }
+        Self { id, ..Self::new() }
     }
 
     pub fn max_lines(mut self, max: usize) -> Self {
@@ -259,7 +256,14 @@ impl Widget for LogViewer {
             for (i, c) in msg.chars().enumerate() {
                 let idx = char_index + i;
                 if idx < plane.cells.len() {
-                    plane.cells[idx] = Cell { char: c, fg: self.theme.inactive_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                    plane.cells[idx] = Cell {
+                        char: c,
+                        fg: self.theme.inactive_fg,
+                        bg: self.theme.bg,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
             return plane;
@@ -272,7 +276,10 @@ impl Widget for LogViewer {
             0
         };
 
-        for (screen_row, line_idx) in (start_idx..self.lines.len()).take(area.height as usize).enumerate() {
+        for (screen_row, line_idx) in (start_idx..self.lines.len())
+            .take(area.height as usize)
+            .enumerate()
+        {
             if let Some(line) = self.lines.get(line_idx) {
                 let level_color = self.level_color(line.level);
                 let prefix = self.level_prefix(line.level);
@@ -281,7 +288,14 @@ impl Widget for LogViewer {
 
                 for c in prefix.chars() {
                     if col < area.width as usize {
-                        plane.cells[screen_row * area.width as usize + col] = Cell { char: c, fg: level_color, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                        plane.cells[screen_row * area.width as usize + col] = Cell {
+                            char: c,
+                            fg: level_color,
+                            bg: self.theme.bg,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                         col += 1;
                     }
                 }
@@ -289,20 +303,45 @@ impl Widget for LogViewer {
                 if col < area.width as usize && !line.timestamp.is_empty() {
                     for c in line.timestamp.chars().take(8) {
                         if col < area.width as usize {
-                            plane.cells[screen_row * area.width as usize + col] = Cell { char: c, fg: self.theme.inactive_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                            plane.cells[screen_row * area.width as usize + col] = Cell {
+                                char: c,
+                                fg: self.theme.inactive_fg,
+                                bg: self.theme.bg,
+                                style: Styles::empty(),
+                                transparent: false,
+                                skip: false,
+                            };
                             col += 1;
                         }
                     }
                 }
 
                 if col < area.width as usize {
-                    plane.cells[screen_row * area.width as usize + col] = Cell { char: ' ', fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                    plane.cells[screen_row * area.width as usize + col] = Cell {
+                        char: ' ',
+                        fg: self.theme.fg,
+                        bg: self.theme.bg,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                     col += 1;
                 }
 
-                for c in line.message.chars().take((area.width as usize).saturating_sub(col)) {
+                for c in line
+                    .message
+                    .chars()
+                    .take((area.width as usize).saturating_sub(col))
+                {
                     if col < area.width as usize {
-                        plane.cells[screen_row * area.width as usize + col] = Cell { char: c, fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                        plane.cells[screen_row * area.width as usize + col] = Cell {
+                            char: c,
+                            fg: self.theme.fg,
+                            bg: self.theme.bg,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                         col += 1;
                     }
                 }
@@ -483,7 +522,9 @@ mod tests {
     fn test_log_viewer_apply_command_output_text() {
         use crate::framework::command::ParsedOutput;
         let mut lv = LogViewer::new();
-        lv.apply_command_output(&ParsedOutput::Text("ERROR test error\nINFO test info".to_string()));
+        lv.apply_command_output(&ParsedOutput::Text(
+            "ERROR test error\nINFO test info".to_string(),
+        ));
         assert_eq!(lv.lines.len(), 2);
     }
 

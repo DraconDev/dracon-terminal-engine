@@ -1,12 +1,12 @@
 //! Integration tests for Phase 2-4 widgets.
 
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    DebugOverlay, EventLogger, Form, MenuBar, MenuEntry, MenuItem,
-    Profiler, SearchInput, Select, Slider, StatusBar, StatusSegment,
-    Toast, ToastKind, Tooltip, Tree, TreeNode, WidgetInspector, WidgetNode,
+    DebugOverlay, EventLogger, Form, MenuBar, MenuEntry, MenuItem, Profiler, SearchInput, Select,
+    Slider, StatusBar, StatusSegment, Toast, ToastKind, Tooltip, Tree, TreeNode, WidgetInspector,
+    WidgetNode,
 };
-use dracon_terminal_engine::framework::theme::Theme;
 use ratatui::layout::Rect;
 
 fn dummy_area() -> Rect {
@@ -25,9 +25,7 @@ fn test_tree_render() {
 
 #[test]
 fn test_tree_with_nodes() {
-    let root = vec![
-        TreeNode::new("Root"),
-    ];
+    let root = vec![TreeNode::new("Root")];
     let tree = Tree::new(WidgetId::new(1)).with_root(root);
     let plane = tree.render(dummy_area());
     assert!(plane.width > 0);
@@ -59,16 +57,14 @@ fn test_form_render() {
 
 #[test]
 fn test_select_render() {
-    let select = Select::new(WidgetId::new(4))
-        .with_options(vec!["A".to_string(), "B".to_string()]);
+    let select = Select::new(WidgetId::new(4)).with_options(vec!["A".to_string(), "B".to_string()]);
     let plane = select.render(dummy_area());
     assert!(plane.width > 0);
 }
 
 #[test]
 fn test_select_selected_index() {
-    let select = Select::new(WidgetId::new(4))
-        .with_options(vec!["A".to_string(), "B".to_string()]);
+    let select = Select::new(WidgetId::new(4)).with_options(vec!["A".to_string(), "B".to_string()]);
     assert_eq!(select.selected_index(), 0);
     assert_eq!(select.selected_label(), Some("A"));
 }
@@ -124,8 +120,7 @@ fn test_toast_not_expired_immediately() {
 
 #[test]
 fn test_status_bar_render() {
-    let sb = StatusBar::new(WidgetId::new(8))
-        .add_segment(StatusSegment::new("Ready"));
+    let sb = StatusBar::new(WidgetId::new(8)).add_segment(StatusSegment::new("Ready"));
     let plane = sb.render(dummy_area());
     assert!(plane.width > 0);
 }
@@ -133,9 +128,7 @@ fn test_status_bar_render() {
 #[test]
 fn test_menu_bar_render() {
     let mb = MenuBar::new(WidgetId::new(9))
-        .with_entries(vec![
-            MenuEntry::new("File").add_item(MenuItem::new("Open")),
-        ]);
+        .with_entries(vec![MenuEntry::new("File").add_item(MenuItem::new("Open"))]);
     let plane = mb.render(dummy_area());
     assert!(plane.width > 0);
 }
@@ -169,9 +162,7 @@ fn test_widget_inspector_render() {
 #[test]
 fn test_widget_inspector_with_hierarchy() {
     let mut inspector = WidgetInspector::new(WidgetId::new(11));
-    let nodes = vec![
-        WidgetNode::new(WidgetId::new(1), "Root"),
-    ];
+    let nodes = vec![WidgetNode::new(WidgetId::new(1), "Root")];
     inspector.set_hierarchy(nodes);
     let plane = inspector.render(dummy_area());
     assert!(plane.width > 0);

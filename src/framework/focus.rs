@@ -111,7 +111,8 @@ impl FocusManager {
     }
 
     fn navigate(&mut self, delta: isize) -> Option<WidgetId> {
-        let focusable_ids: Vec<WidgetId> = self.tab_order
+        let focusable_ids: Vec<WidgetId> = self
+            .tab_order
             .iter()
             .filter(|id| self.focusable.get(id).copied().unwrap_or(false))
             .cloned()
@@ -121,10 +122,13 @@ impl FocusManager {
             return None;
         }
 
-        let current = self.focused.and_then(|f| focusable_ids.iter().position(|&id| id == f));
+        let current = self
+            .focused
+            .and_then(|f| focusable_ids.iter().position(|&id| id == f));
         let next = match current {
             Some(idx) => {
-                let new_idx = ((idx as isize + delta + focusable_ids.len() as isize) % focusable_ids.len() as isize) as usize;
+                let new_idx = ((idx as isize + delta + focusable_ids.len() as isize)
+                    % focusable_ids.len() as isize) as usize;
                 focusable_ids[new_idx]
             }
             None => focusable_ids[0],

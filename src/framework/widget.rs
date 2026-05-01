@@ -9,10 +9,8 @@ use crate::input::event::{KeyEvent, MouseEventKind};
 use ratatui::layout::Rect;
 
 /// Unique identifier for a widget (for event routing and state management).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WidgetId(pub usize);
-
 
 impl WidgetId {
     /// Creates a new `WidgetId` with the given numeric value.

@@ -89,8 +89,13 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
 
     fn cursor_position(&self) -> Option<(u16, u16)> {
         let area = self.area.get();
-        let visual_x = self.editor.get_visual_x(self.editor.cursor_row, self.editor.cursor_col);
-        let screen_row = self.editor.cursor_row.saturating_sub(self.editor.scroll_row) as u16;
+        let visual_x = self
+            .editor
+            .get_visual_x(self.editor.cursor_row, self.editor.cursor_col);
+        let screen_row = self
+            .editor
+            .cursor_row
+            .saturating_sub(self.editor.scroll_row) as u16;
         let screen_col = visual_x.saturating_sub(self.editor.scroll_col) as u16;
         // Clamp to visible area to avoid reporting coordinates outside the widget
         let clamped_col = screen_col.min(area.width.saturating_sub(1));

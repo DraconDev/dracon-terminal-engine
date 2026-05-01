@@ -6,8 +6,8 @@
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SplitPane;
-use std::path::PathBuf;
 use ratatui::layout::Rect;
+use std::path::PathBuf;
 
 #[derive(Clone)]
 struct FileEntry {
@@ -86,12 +86,24 @@ fn main() -> std::io::Result<()> {
             };
 
             print(&mut info_plane, "INFORMATION", Color::Rgb(0, 255, 136));
-            print(&mut info_plane, &format!("Items: {}", list.len()), Color::Rgb(180, 180, 180));
+            print(
+                &mut info_plane,
+                &format!("Items: {}", list.len()),
+                Color::Rgb(180, 180, 180),
+            );
 
             if let Some(entry) = list.get_selected() {
-                print(&mut info_plane, &format!("Name: {}", entry.name), Color::Rgb(255, 255, 255));
+                print(
+                    &mut info_plane,
+                    &format!("Name: {}", entry.name),
+                    Color::Rgb(255, 255, 255),
+                );
                 if entry.is_dir {
-                    print(&mut info_plane, "Type: Directory", Color::Rgb(100, 200, 255));
+                    print(
+                        &mut info_plane,
+                        "Type: Directory",
+                        Color::Rgb(100, 200, 255),
+                    );
                 } else {
                     let size_str = if entry.size < 1024 {
                         format!("{}B", entry.size)
@@ -102,7 +114,11 @@ fn main() -> std::io::Result<()> {
                     } else {
                         format!("{}GB", entry.size / 1024 / 1024 / 1024)
                     };
-                    print(&mut info_plane, &format!("Size: {}", size_str), Color::Rgb(200, 150, 100));
+                    print(
+                        &mut info_plane,
+                        &format!("Size: {}", size_str),
+                        Color::Rgb(200, 150, 100),
+                    );
                 }
             }
 

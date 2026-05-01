@@ -133,18 +133,31 @@ impl Widget for StatusBadge {
 
     fn render(&self, area: Rect) -> Plane {
         let status_upper = self.status.to_uppercase();
-        let (fg, bg, label) = if status_upper.contains("OK") || status_upper.contains("GREEN") || status_upper == "1" {
-            (self.theme.success_fg, self.theme.bg, "OK")
-        } else if status_upper.contains("WARN") || status_upper.contains("WARNING") || status_upper.contains("YELLOW") {
-            (self.theme.warning_fg, self.theme.bg, "WARN")
-        } else if status_upper.contains("ERROR") || status_upper.contains("FAIL") || status_upper.contains("RED") || status_upper == "0" {
-            (self.theme.error_fg, self.theme.bg, "ERROR")
-        } else if status_upper.is_empty() {
-            (self.theme.inactive_fg, self.theme.bg, "EMPTY")
-        } else {
-            let l: &str = if self.label.is_empty() { status_upper.as_str() } else { &self.label };
-            (self.theme.fg, self.theme.bg, l)
-        };
+        let (fg, bg, label) =
+            if status_upper.contains("OK") || status_upper.contains("GREEN") || status_upper == "1"
+            {
+                (self.theme.success_fg, self.theme.bg, "OK")
+            } else if status_upper.contains("WARN")
+                || status_upper.contains("WARNING")
+                || status_upper.contains("YELLOW")
+            {
+                (self.theme.warning_fg, self.theme.bg, "WARN")
+            } else if status_upper.contains("ERROR")
+                || status_upper.contains("FAIL")
+                || status_upper.contains("RED")
+                || status_upper == "0"
+            {
+                (self.theme.error_fg, self.theme.bg, "ERROR")
+            } else if status_upper.is_empty() {
+                (self.theme.inactive_fg, self.theme.bg, "EMPTY")
+            } else {
+                let l: &str = if self.label.is_empty() {
+                    status_upper.as_str()
+                } else {
+                    &self.label
+                };
+                (self.theme.fg, self.theme.bg, l)
+            };
 
         let mut plane = self.render_badge(label, fg, bg, area.width);
         plane.z_index = 0;

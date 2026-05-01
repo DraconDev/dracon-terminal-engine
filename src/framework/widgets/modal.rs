@@ -44,7 +44,10 @@ impl<'a> Modal<'a> {
             width: 40,
             height: 5,
             theme: Theme::default(),
-            buttons: vec![("OK", ModalResult::Confirm), ("Cancel", ModalResult::Cancel)],
+            buttons: vec![
+                ("OK", ModalResult::Confirm),
+                ("Cancel", ModalResult::Cancel),
+            ],
             focused_btn: 0,
             result: None,
             on_confirm: None,
@@ -62,7 +65,10 @@ impl<'a> Modal<'a> {
             width: 40,
             height: 5,
             theme: Theme::default(),
-            buttons: vec![("OK", ModalResult::Confirm), ("Cancel", ModalResult::Cancel)],
+            buttons: vec![
+                ("OK", ModalResult::Confirm),
+                ("Cancel", ModalResult::Cancel),
+            ],
             focused_btn: 0,
             result: None,
             on_confirm: None,
@@ -165,18 +171,29 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         let border_char: char = '─';
         for col in 0..self.width {
             let idx = col as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = border_char; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = border_char;
+            }
             let idx = ((self.height - 1) * self.width + col) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '─'; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+            }
         }
         for row in 1..self.height.saturating_sub(1) {
             let idx = (row * self.width) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '│'; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+            }
             let idx = (row * self.width + self.width - 1) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '│'; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+            }
         }
 
-        let title_len = self.title.width().min((self.width as usize).saturating_sub(4));
+        let title_len = self
+            .title
+            .width()
+            .min((self.width as usize).saturating_sub(4));
         let title_start = (self.width as usize - title_len) / 2;
         for (i, ch) in self.title.chars().take(title_len).enumerate() {
             let idx = 1 + title_start + i;
@@ -188,7 +205,8 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         }
 
         let btn_width: u16 = 8;
-        let total_btn_width = btn_width * self.buttons.len() as u16 + (self.buttons.len() as u16 - 1);
+        let total_btn_width =
+            btn_width * self.buttons.len() as u16 + (self.buttons.len() as u16 - 1);
         let btn_start = (self.width.saturating_sub(total_btn_width)) / 2;
         let btn_y = self.height - 2;
 
@@ -196,9 +214,17 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
             let bx = btn_start + (i as u16) * (btn_width + 1);
 
             let is_focused = i == self.focused_btn;
-            let bg = if is_focused { self.theme.active_bg } else { self.theme.bg };
+            let bg = if is_focused {
+                self.theme.active_bg
+            } else {
+                self.theme.bg
+            };
             let fg = self.theme.fg;
-            let style = if is_focused { Styles::BOLD | Styles::REVERSE } else { Styles::empty() };
+            let style = if is_focused {
+                Styles::BOLD | Styles::REVERSE
+            } else {
+                Styles::empty()
+            };
             for col in 0..btn_width {
                 let col_idx = btn_y as usize * self.width as usize + bx as usize + col as usize;
                 if col_idx < plane.cells.len() {
@@ -212,10 +238,15 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
             let label_len = label.width().min((btn_width as usize).saturating_sub(2));
             let label_start = (btn_width as usize - label_len) / 2;
             for (j, ch) in label.chars().take(label_len).enumerate() {
-                let label_idx = (btn_y as usize) * (self.width as usize) + (bx as usize) + label_start + j;
+                let label_idx =
+                    (btn_y as usize) * (self.width as usize) + (bx as usize) + label_start + j;
                 if label_idx < plane.cells.len() {
                     plane.cells[label_idx].char = ch;
-                    plane.cells[label_idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[label_idx].style = if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
 
@@ -225,7 +256,12 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         let screen = self.area.get();
         let x = (screen.width.saturating_sub(self.width)) / 2;
         let y = (screen.height.saturating_sub(self.height)) / 2;
@@ -238,7 +274,8 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         let local_row = row - y;
 
         let btn_width: u16 = 8;
-        let total_btn_width = btn_width * self.buttons.len() as u16 + (self.buttons.len() as u16 - 1);
+        let total_btn_width =
+            btn_width * self.buttons.len() as u16 + (self.buttons.len() as u16 - 1);
         let btn_start = (self.width.saturating_sub(total_btn_width)) / 2;
         let btn_y = self.height - 2;
 

@@ -2,11 +2,11 @@
 //!
 //! An animated loading spinner with configurable frame sequence.
 
-use std::time::{Duration, Instant};
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
+use std::time::{Duration, Instant};
 
 /// A spinner widget.
 pub struct Spinner {

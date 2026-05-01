@@ -5,11 +5,11 @@ mod common;
 
 use dracon_terminal_engine::utils::{
     delete_word_backwards, format_datetime_smart, format_permissions, format_size,
-    get_file_category, get_open_with_suggestions, get_visual_width, is_binary_content,
-    truncate_to_width, squarify, guess_icon_mode, FileCategory, IconMode, SelectionState,
+    get_file_category, get_open_with_suggestions, get_visual_width, guess_icon_mode,
+    is_binary_content, squarify, truncate_to_width, FileCategory, IconMode, SelectionState,
 };
-use std::time::{Duration, SystemTime};
 use ratatui::style::Color as RatatuiColor;
+use std::time::{Duration, SystemTime};
 
 #[test]
 fn test_get_visual_width_ascii() {

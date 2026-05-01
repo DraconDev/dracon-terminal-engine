@@ -89,7 +89,11 @@ impl crate::framework::widget::Widget for Button {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
 
-        let display = if self.label.is_empty() { "Button" } else { &self.label };
+        let display = if self.label.is_empty() {
+            "Button"
+        } else {
+            &self.label
+        };
         let max_width = area.width.saturating_sub(2);
 
         plane.cells[0] = Cell {
@@ -143,9 +147,15 @@ impl crate::framework::widget::Widget for Button {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         let area = self.area.get();
-        if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+        if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height
+        {
             if let crate::input::event::MouseEventKind::Down(_) = kind {
                 if let Some(ref mut cb) = self.on_click {
                     cb();

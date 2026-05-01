@@ -233,7 +233,9 @@ impl App {
 
         for cmd in cmds {
             if cmd.refresh_seconds.is_some() {
-                self.command_tracking.borrow_mut().insert(id, (Instant::now(), cmd));
+                self.command_tracking
+                    .borrow_mut()
+                    .insert(id, (Instant::now(), cmd));
             }
         }
 
@@ -318,10 +320,12 @@ impl App {
                             }
                             Event::Key(k) => {
                                 if k.code == crate::input::event::KeyCode::Char('c')
-                                    && k.modifiers.contains(crate::input::event::KeyModifiers::CONTROL)
+                                    && k.modifiers
+                                        .contains(crate::input::event::KeyModifiers::CONTROL)
                                 {
                                     let focused = self.focus_manager.focused();
-                                    let dominated = focused.and_then(|id| self.widget_mut(id))
+                                    let dominated = focused
+                                        .and_then(|id| self.widget_mut(id))
                                         .map(|mut w| w.handle_key(*k))
                                         .unwrap_or(false);
                                     if !dominated {
@@ -329,7 +333,9 @@ impl App {
                                     }
                                 } else if k.code == crate::input::event::KeyCode::Tab {
                                     let old = self.focus_manager.focused();
-                                    if k.modifiers.contains(crate::input::event::KeyModifiers::SHIFT) {
+                                    if k.modifiers
+                                        .contains(crate::input::event::KeyModifiers::SHIFT)
+                                    {
                                         let _ = self.focus_manager.tab_prev();
                                     } else {
                                         let _ = self.focus_manager.tab_next();
@@ -360,10 +366,16 @@ impl App {
                                     let widgets = self.widgets.borrow();
                                     let mut sorted: Vec<_> = widgets.iter().collect();
                                     sorted.sort_by_key(|w| w.z_index());
-                                    sorted.into_iter().find(|w| {
-                                        let a = w.area();
-                                        col >= a.x && col < a.x + a.width && row >= a.y && row < a.y + a.height
-                                    }).map(|w| w.id())
+                                    sorted
+                                        .into_iter()
+                                        .find(|w| {
+                                            let a = w.area();
+                                            col >= a.x
+                                                && col < a.x + a.width
+                                                && row >= a.y
+                                                && row < a.y + a.height
+                                        })
+                                        .map(|w| w.id())
                                 };
                                 if let Some(id) = target_id {
                                     let old = self.focus_manager.focused();
@@ -413,17 +425,20 @@ impl App {
 
             if self.last_tick_time.elapsed() >= self.tick_interval {
                 if let Some(ref mut tick_fn) = *self.on_tick.borrow_mut() {
-                    tick_fn(&mut Ctx {
-                        compositor: &mut self.compositor,
-                        theme: &self.theme,
-                        frame_count: frame_count.load(Ordering::SeqCst),
-                        last_frame: &self.last_frame_time,
-                        terminal: &mut self.terminal,
-                        focus_manager: &mut self.focus_manager,
-                        animations: &mut self.animations,
-                        dirty_tracker: &mut self.dirty_tracker,
-                        commands: &self.commands,
-                    }, self.tick_count);
+                    tick_fn(
+                        &mut Ctx {
+                            compositor: &mut self.compositor,
+                            theme: &self.theme,
+                            frame_count: frame_count.load(Ordering::SeqCst),
+                            last_frame: &self.last_frame_time,
+                            terminal: &mut self.terminal,
+                            focus_manager: &mut self.focus_manager,
+                            animations: &mut self.animations,
+                            dirty_tracker: &mut self.dirty_tracker,
+                            commands: &self.commands,
+                        },
+                        self.tick_count,
+                    );
                     self.tick_count += 1;
                     self.last_tick_time = Instant::now();
                 }
@@ -449,7 +464,9 @@ impl App {
                     }
                 }
                 for (wid, cmd) in to_reschedule {
-                    self.command_tracking.borrow_mut().insert(wid, (Instant::now(), cmd));
+                    self.command_tracking
+                        .borrow_mut()
+                        .insert(wid, (Instant::now(), cmd));
                 }
             }
 
@@ -611,10 +628,16 @@ impl<'a> Ctx<'a> {
     /// The closure receives two `SplitPane` instances covering the left and right halves.
     pub fn split_h<F>(&mut self, f: F)
     where
-        F: FnOnce(&mut crate::framework::widgets::split::SplitPane, &mut crate::framework::widgets::split::SplitPane),
+        F: FnOnce(
+            &mut crate::framework::widgets::split::SplitPane,
+            &mut crate::framework::widgets::split::SplitPane,
+        ),
     {
         let (w, h) = self.compositor.size();
-        let split = crate::framework::widgets::split::SplitPane::new(crate::framework::widgets::split::Orientation::Horizontal).ratio(0.5);
+        let split = crate::framework::widgets::split::SplitPane::new(
+            crate::framework::widgets::split::Orientation::Horizontal,
+        )
+        .ratio(0.5);
         let (r1, r2) = split.split(Rect::new(0, 0, w, h));
         let mut left = crate::framework::widgets::split::SplitPane::from_rect(r1);
         let mut right = crate::framework::widgets::split::SplitPane::from_rect(r2);
@@ -626,10 +649,16 @@ impl<'a> Ctx<'a> {
     /// The closure receives two `SplitPane` instances covering the top and bottom halves.
     pub fn split_v<F>(&mut self, f: F)
     where
-        F: FnOnce(&mut crate::framework::widgets::split::SplitPane, &mut crate::framework::widgets::split::SplitPane),
+        F: FnOnce(
+            &mut crate::framework::widgets::split::SplitPane,
+            &mut crate::framework::widgets::split::SplitPane,
+        ),
     {
         let (w, h) = self.compositor.size();
-        let split = crate::framework::widgets::split::SplitPane::new(crate::framework::widgets::split::Orientation::Vertical).ratio(0.5);
+        let split = crate::framework::widgets::split::SplitPane::new(
+            crate::framework::widgets::split::Orientation::Vertical,
+        )
+        .ratio(0.5);
         let (r1, r2) = split.split(Rect::new(0, 0, w, h));
         let mut left = crate::framework::widgets::split::SplitPane::from_rect(r1);
         let mut right = crate::framework::widgets::split::SplitPane::from_rect(r2);
@@ -683,7 +712,9 @@ impl<'a> Ctx<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::framework::command::{AppConfig, AreaConfig, LayoutConfig, ParserConfig, WidgetConfig};
+    use crate::framework::command::{
+        AppConfig, AreaConfig, LayoutConfig, ParserConfig, WidgetConfig,
+    };
 
     fn make_test_terminal() -> io::Result<crate::Terminal<io::Stdout>> {
         crate::Terminal::new(io::stdout())
@@ -857,7 +888,7 @@ mod tests {
         assert_eq!(compositor.planes.len(), 1);
     }
 
-#[test]
+    #[test]
     fn test_ctx_mark_dirty() {
         let mut compositor = Compositor::new(80, 24);
         let mut focus_manager = FocusManager::new();
@@ -1039,7 +1070,6 @@ mod tests {
         };
 
         let fps = ctx.fps();
-        assert!(fps >= 0);
     }
 
     #[test]
@@ -1207,7 +1237,7 @@ mod tests {
             type = "Label"
             label = "Test Label"
         "#;
-let config = AppConfig::from_toml_str(toml).unwrap();
+        let config = AppConfig::from_toml_str(toml).unwrap();
         assert_eq!(config.title, "Widget Test");
     }
 

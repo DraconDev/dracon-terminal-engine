@@ -55,9 +55,7 @@ impl AsyncInputReader {
     }
 
     /// Spawns the async reader and returns a handle plus a guard for graceful shutdown.
-    pub fn spawn_with_shutdown<F>(
-        mut callback: F,
-    ) -> (tokio::task::JoinHandle<()>, ShutdownGuard)
+    pub fn spawn_with_shutdown<F>(mut callback: F) -> (tokio::task::JoinHandle<()>, ShutdownGuard)
     where
         F: FnMut(crate::input::event::Event) + Send + 'static,
     {

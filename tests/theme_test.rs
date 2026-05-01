@@ -588,7 +588,11 @@ fn test_all_themes_have_scrollbar_width_1() {
         Theme::everforest(),
         Theme::monokai(),
     ] {
-        assert_eq!(theme.scrollbar_width, 1, "scrollbar_width for {} should be 1", theme.name);
+        assert_eq!(
+            theme.scrollbar_width, 1,
+            "scrollbar_width for {} should be 1",
+            theme.name
+        );
     }
 }
 
@@ -613,7 +617,11 @@ fn test_theme_bg_is_never_reset() {
         Theme::everforest(),
         Theme::monokai(),
     ] {
-        assert!(!matches!(theme.bg, Color::Reset), "theme {} has bg=Reset", theme.name);
+        assert!(
+            !matches!(theme.bg, Color::Reset),
+            "theme {} has bg=Reset",
+            theme.name
+        );
     }
 }
 
@@ -628,11 +636,17 @@ fn test_theme_accent_differs_from_fg() {
 #[test]
 fn test_theme_error_fg_differs_from_fg() {
     let t = Theme::dark();
-    assert_ne!(t.error_fg, t.fg, "error_fg should differ from fg in dark theme");
+    assert_ne!(
+        t.error_fg, t.fg,
+        "error_fg should differ from fg in dark theme"
+    );
 }
 
 #[test]
 fn test_theme_success_fg_differs_from_fg() {
     let t = Theme::light();
-    assert_ne!(t.success_fg, t.fg, "success_fg should differ from fg in light theme");
+    assert_ne!(
+        t.success_fg, t.fg,
+        "success_fg should differ from fg in light theme"
+    );
 }

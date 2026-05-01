@@ -33,14 +33,20 @@ fn main() -> std::io::Result<()> {
             let list_plane = list.render(left_rect);
             ctx.add_plane(list_plane);
 
-            let bc_plane = Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string(), "app".to_string()])
-                .render(right_rect);
+            let bc_plane = Breadcrumbs::new(vec![
+                "home".to_string(),
+                "user".to_string(),
+                "projects".to_string(),
+                "app".to_string(),
+            ])
+            .render(right_rect);
             ctx.add_plane(bc_plane);
 
             let mut sys = SystemMonitor::new();
             let data = sys.get_data();
 
-            let mut info_plane = Plane::new(0, right_rect.width, right_rect.height.saturating_sub(2));
+            let mut info_plane =
+                Plane::new(0, right_rect.width, right_rect.height.saturating_sub(2));
             info_plane.z_index = 5;
 
             let mut y = 2u16;
@@ -56,10 +62,26 @@ fn main() -> std::io::Result<()> {
                 y += 1;
             };
 
-            print_line(&mut info_plane, &format!("CPU: {:.1}%", data.cpu_usage), Color::Rgb(0, 200, 120));
-            print_line(&mut info_plane, &format!("Memory: {:.1} / {:.1} GB", data.mem_usage, data.total_mem), Color::Rgb(100, 180, 255));
-            print_line(&mut info_plane, &format!("Swap: {:.1} / {:.1} GB", data.swap_usage, data.total_swap), Color::Rgb(180, 180, 200));
-            print_line(&mut info_plane, &format!("Uptime: {}s", data.uptime), Color::Rgb(150, 150, 150));
+            print_line(
+                &mut info_plane,
+                &format!("CPU: {:.1}%", data.cpu_usage),
+                Color::Rgb(0, 200, 120),
+            );
+            print_line(
+                &mut info_plane,
+                &format!("Memory: {:.1} / {:.1} GB", data.mem_usage, data.total_mem),
+                Color::Rgb(100, 180, 255),
+            );
+            print_line(
+                &mut info_plane,
+                &format!("Swap: {:.1} / {:.1} GB", data.swap_usage, data.total_swap),
+                Color::Rgb(180, 180, 200),
+            );
+            print_line(
+                &mut info_plane,
+                &format!("Uptime: {}s", data.uptime),
+                Color::Rgb(150, 150, 150),
+            );
             print_line(&mut info_plane, "", Color::Reset);
 
             if let Some(disk) = data.disks.first() {
@@ -68,7 +90,11 @@ fn main() -> std::io::Result<()> {
                 } else {
                     0
                 };
-                print_line(&mut info_plane, &format!("Disk: {} ({}%)", disk.name, pct), Color::Rgb(255, 180, 100));
+                print_line(
+                    &mut info_plane,
+                    &format!("Disk: {} ({}%)", disk.name, pct),
+                    Color::Rgb(255, 180, 100),
+                );
             }
 
             let hud = Hud::new(100).with_size(30, 5);

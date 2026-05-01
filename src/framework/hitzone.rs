@@ -125,13 +125,21 @@ impl<T: Clone + 'static> HitZone<T> {
 
     /// Returns `true` if `(col, row)` lies within this zone's rectangle.
     pub fn contains(&self, col: u16, row: u16) -> bool {
-        col >= self.x && col < self.x.saturating_add(self.width)
-            && row >= self.y && row < self.y.saturating_add(self.height)
+        col >= self.x
+            && col < self.x.saturating_add(self.width)
+            && row >= self.y
+            && row < self.y.saturating_add(self.height)
     }
 
     /// Routes a mouse event to the appropriate callback.
     /// Automatically detects single/double/triple click.
-    pub fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16, _modifiers: KeyModifiers) {
+    pub fn handle_mouse(
+        &mut self,
+        kind: MouseEventKind,
+        col: u16,
+        row: u16,
+        _modifiers: KeyModifiers,
+    ) {
         if !self.contains(col, row) {
             return;
         }
@@ -149,7 +157,8 @@ impl<T: Clone + 'static> HitZone<T> {
                 }
 
                 let now = Instant::now();
-                let is_double = self.last_click_time
+                let is_double = self
+                    .last_click_time
                     .zip(self.last_click_pos)
                     .map(|(t, (px, py))| {
                         t.elapsed() < self.double_click_timeout
@@ -178,25 +187,29 @@ impl<T: Clone + 'static> HitZone<T> {
                     }
                 }
             }
-            MouseEventKind::Drag(_)
-                if self.drag_active => {
-                    if let Some(f) = self.on_drag_move.as_mut() {
-                        f(DragState::Moved { x: col, y: row });
-                    }
+            MouseEventKind::Drag(_) if self.drag_active => {
+                if let Some(f) = self.on_drag_move.as_mut() {
+                    f(DragState::Moved { x: col, y: row });
                 }
-            MouseEventKind::Up(_)
-                if self.drag_active => {
-                    self.drag_active = false;
-                    if let Some(f) = self.on_drag_end.as_mut() {
-                        f(DragState::Ended { x: col, y: row });
-                    }
+            }
+            MouseEventKind::Up(_) if self.drag_active => {
+                self.drag_active = false;
+                if let Some(f) = self.on_drag_end.as_mut() {
+                    f(DragState::Ended { x: col, y: row });
                 }
+            }
             _ => {}
         }
     }
 
     /// Like `handle_mouse` but returns `Some(self.id.clone())` if the event hit this zone.
-    pub fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16, modifiers: KeyModifiers) -> Option<T> {
+    pub fn dispatch_mouse(
+        &mut self,
+        kind: MouseEventKind,
+        col: u16,
+        row: u16,
+        modifiers: KeyModifiers,
+    ) -> Option<T> {
         if !self.contains(col, row) {
             return None;
         }
@@ -240,7 +253,13 @@ impl<T: Clone + 'static> HitZoneGroup<T> {
 
     /// Iterates zones in order and dispatches to the first containing the event point.
     /// Returns `Some(id)` of the hit zone, or `None`.
-    pub fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16, modifiers: KeyModifiers) -> Option<T> {
+    pub fn dispatch_mouse(
+        &mut self,
+        kind: MouseEventKind,
+        col: u16,
+        row: u16,
+        modifiers: KeyModifiers,
+    ) -> Option<T> {
         for zone in self.zones.iter_mut() {
             if zone.contains(col, row) {
                 zone.handle_mouse(kind, col, row, modifiers);
@@ -268,13 +287,21 @@ pub struct ScopedZone<T> {
 impl<T> ScopedZone<T> {
     /// Creates a new `ScopedZone` with the given id and geometry.
     pub fn new(id: T, x: u16, y: u16, width: u16, height: u16) -> Self {
-        Self { id, x, y, width, height }
+        Self {
+            id,
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
     /// Returns `true` if `(col, row)` lies within this zone's rectangle.
     pub fn contains(&self, col: u16, row: u16) -> bool {
-        col >= self.x && col < self.x.saturating_add(self.width)
-            && row >= self.y && row < self.y.saturating_add(self.height)
+        col >= self.x
+            && col < self.x.saturating_add(self.width)
+            && row >= self.y
+            && row < self.y.saturating_add(self.height)
     }
 }
 

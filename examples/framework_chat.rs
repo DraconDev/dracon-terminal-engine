@@ -51,7 +51,8 @@ fn main() -> std::io::Result<()> {
         },
         Message {
             sender: "Dave".to_string(),
-            text: "Just built a file manager with Breadcrumbs + List + SplitPane. Took 20 minutes.".to_string(),
+            text: "Just built a file manager with Breadcrumbs + List + SplitPane. Took 20 minutes."
+                .to_string(),
             timestamp: now.clone(),
         },
     ];

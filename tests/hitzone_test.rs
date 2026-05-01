@@ -54,7 +54,12 @@ fn test_hit_zone_on_click_callback_single() {
         let mut zone = HitZone::new(1u32, 5, 10, 20, 5).on_click(move |k| {
             kind_clone.set(Some(k));
         });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
     }
     assert_eq!(kind.get(), Some(ClickKind::Single));
 }
@@ -67,7 +72,12 @@ fn test_hit_zone_on_right_click() {
         let mut zone = HitZone::new(1u32, 5, 10, 20, 5).on_right_click(move || {
             called_clone.set(true);
         });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Right), 10, 12, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Right),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
     }
     assert!(called.get());
 }
@@ -79,7 +89,12 @@ fn test_hit_zone_dispatch_mouse_returns_id() {
     let mut zone = HitZone::new(99u32, 5, 10, 20, 5).on_click(move |k| {
         kind_clone.set(Some(k));
     });
-    let result = zone.dispatch_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
+    let result = zone.dispatch_mouse(
+        MouseEventKind::Down(MouseButton::Left),
+        10,
+        12,
+        KeyModifiers::empty(),
+    );
     assert_eq!(result, Some(99));
 }
 
@@ -90,7 +105,12 @@ fn test_hit_zone_dispatch_mouse_outside_returns_none() {
     let mut zone = HitZone::new(99u32, 5, 10, 20, 5).on_click(move |k| {
         kind_clone.set(Some(k));
     });
-    let result = zone.dispatch_mouse(MouseEventKind::Down(MouseButton::Left), 100, 100, KeyModifiers::empty());
+    let result = zone.dispatch_mouse(
+        MouseEventKind::Down(MouseButton::Left),
+        100,
+        100,
+        KeyModifiers::empty(),
+    );
     assert_eq!(result, None);
 }
 
@@ -104,7 +124,12 @@ fn test_hit_zone_drag_start() {
                 started_clone.set(true);
             }
         });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
     }
     assert!(started.get());
 }
@@ -121,9 +146,24 @@ fn test_hit_zone_drag_move() {
                     positions_clone.set(positions_clone.get() + 1);
                 }
             });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
-        zone.handle_mouse(MouseEventKind::Drag(MouseButton::Left), 15, 13, KeyModifiers::empty());
-        zone.handle_mouse(MouseEventKind::Drag(MouseButton::Left), 20, 14, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
+        zone.handle_mouse(
+            MouseEventKind::Drag(MouseButton::Left),
+            15,
+            13,
+            KeyModifiers::empty(),
+        );
+        zone.handle_mouse(
+            MouseEventKind::Drag(MouseButton::Left),
+            20,
+            14,
+            KeyModifiers::empty(),
+        );
     }
     assert_eq!(positions.get(), 2);
 }
@@ -140,9 +180,24 @@ fn test_hit_zone_drag_end() {
                     ended_clone.set(true);
                 }
             });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
-        zone.handle_mouse(MouseEventKind::Drag(MouseButton::Left), 15, 13, KeyModifiers::empty());
-        zone.handle_mouse(MouseEventKind::Up(MouseButton::Left), 20, 14, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
+        zone.handle_mouse(
+            MouseEventKind::Drag(MouseButton::Left),
+            15,
+            13,
+            KeyModifiers::empty(),
+        );
+        zone.handle_mouse(
+            MouseEventKind::Up(MouseButton::Left),
+            20,
+            14,
+            KeyModifiers::empty(),
+        );
     }
     assert!(ended.get());
 }
@@ -152,12 +207,21 @@ fn test_hit_zone_double_click_detection() {
     let click_kinds = Rc::new(Cell::new(0));
     let click_kinds_clone = click_kinds.clone();
     {
-        let mut zone = HitZone::new(1u32, 5, 10, 20, 5)
-            .on_click(move |_| {
-                click_kinds_clone.set(click_kinds_clone.get() + 1);
-            });
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 12, KeyModifiers::empty());
+        let mut zone = HitZone::new(1u32, 5, 10, 20, 5).on_click(move |_| {
+            click_kinds_clone.set(click_kinds_clone.get() + 1);
+        });
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            10,
+            12,
+            KeyModifiers::empty(),
+        );
     }
     assert_eq!(click_kinds.get(), 2);
 }
@@ -201,7 +265,12 @@ fn test_hit_zone_group_dispatch_finds_first() {
             kind_clone.set(Some(k));
         }))
         .zone(HitZone::new(2u32, 30, 10, 20, 5).on_click(|_| {}));
-    let result = group.dispatch_mouse(MouseEventKind::Down(MouseButton::Left), 35, 12, KeyModifiers::empty());
+    let result = group.dispatch_mouse(
+        MouseEventKind::Down(MouseButton::Left),
+        35,
+        12,
+        KeyModifiers::empty(),
+    );
     assert_eq!(result, Some(2));
 }
 
@@ -214,7 +283,12 @@ fn test_hit_zone_group_dispatch_miss() {
             kind_clone.set(Some(k));
         }))
         .zone(HitZone::new(2u32, 30, 10, 20, 5).on_click(|_| {}));
-    let result = group.dispatch_mouse(MouseEventKind::Down(MouseButton::Left), 100, 100, KeyModifiers::empty());
+    let result = group.dispatch_mouse(
+        MouseEventKind::Down(MouseButton::Left),
+        100,
+        100,
+        KeyModifiers::empty(),
+    );
     assert_eq!(result, None);
 }
 
@@ -325,9 +399,16 @@ fn test_hit_zone_hit_right_click_does_not_trigger_left() {
     let left_called = Rc::new(Cell::new(false));
     let left_clone = left_called.clone();
     let mut zone = HitZone::new(1u32, 5, 10, 20, 5)
-        .on_click(move |_| { left_clone.set(true); })
+        .on_click(move |_| {
+            left_clone.set(true);
+        })
         .on_right_click(|| {});
-    zone.handle_mouse(MouseEventKind::Down(MouseButton::Right), 10, 12, KeyModifiers::empty());
+    zone.handle_mouse(
+        MouseEventKind::Down(MouseButton::Right),
+        10,
+        12,
+        KeyModifiers::empty(),
+    );
     assert!(!left_called.get());
 }
 
@@ -338,13 +419,20 @@ fn test_hit_zone_ignores_non_left_buttons() {
     let mut zone = HitZone::new(1u32, 5, 10, 20, 5).on_click(move |k| {
         kind_clone.set(Some(k));
     });
-    zone.handle_mouse(MouseEventKind::Down(MouseButton::Middle), 10, 12, KeyModifiers::empty());
+    zone.handle_mouse(
+        MouseEventKind::Down(MouseButton::Middle),
+        10,
+        12,
+        KeyModifiers::empty(),
+    );
     assert!(kind.get().is_none());
 }
 
 #[test]
 fn test_hit_zone_group_zones_mut() {
     let mut group = HitZoneGroup::new();
-    group.zones_mut().push(HitZone::new(1u32, 0, 0, 10, 1).on_click(|_| {}));
+    group
+        .zones_mut()
+        .push(HitZone::new(1u32, 0, 0, 10, 1).on_click(|_| {}));
     assert_eq!(group.zones().len(), 1);
 }

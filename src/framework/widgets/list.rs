@@ -177,7 +177,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let visible_items: Vec<_> = self.items.iter()
+        let visible_items: Vec<_> = self
+            .items
+            .iter()
             .skip(self.offset)
             .take(self.visible_count)
             .collect();
@@ -185,9 +187,21 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         for (i, item) in visible_items.iter().enumerate() {
             let row = i as u16;
             let is_selected = self.offset + i == self.selected;
-            let bg = if is_selected { self.theme.selection_bg } else { self.theme.bg };
-            let fg = if is_selected { self.theme.selection_fg } else { self.theme.fg };
-            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+            let bg = if is_selected {
+                self.theme.selection_bg
+            } else {
+                self.theme.bg
+            };
+            let fg = if is_selected {
+                self.theme.selection_fg
+            } else {
+                self.theme.fg
+            };
+            let style = if is_selected {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
 
             for col in 0..area.width {
                 let idx = (row * area.width + col) as usize;
@@ -257,7 +271,8 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 true
             }
             KeyCode::PageDown => {
-                self.selected = (self.selected + self.visible_count).min(self.items.len().saturating_sub(1));
+                self.selected =
+                    (self.selected + self.visible_count).min(self.items.len().saturating_sub(1));
                 if self.selected >= self.offset + self.visible_count {
                     self.offset = self.selected.saturating_sub(self.visible_count) + 1;
                 }
@@ -280,7 +295,12 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         if col >= self.width || row >= self.visible_count as u16 {
             return false;
         }
@@ -298,7 +318,8 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                self.offset = (self.offset + 1).min(self.items.len().saturating_sub(self.visible_count));
+                self.offset =
+                    (self.offset + 1).min(self.items.len().saturating_sub(self.visible_count));
                 self.dirty = true;
                 true
             }

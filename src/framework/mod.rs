@@ -39,12 +39,13 @@ pub mod widgets;
 
 /// The prelude module.
 pub mod prelude {
+    pub use crate::compositor::{Cell, Color, Compositor, Plane, Styles};
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx},
         command::{
-            BoundCommand, CommandRunner, LoggedLine, OutputParser, ParsedOutput,
-            AppConfig, LayoutConfig, WidgetConfig, AreaConfig, ParserConfig,
+            AppConfig, AreaConfig, BoundCommand, CommandRunner, LayoutConfig, LoggedLine,
+            OutputParser, ParsedOutput, ParserConfig, WidgetConfig,
         },
         dirty_regions::{DirtyRegion, DirtyRegionTracker},
         dragdrop::{DragGhost, DragManager, DragPhase},
@@ -55,7 +56,8 @@ pub mod prelude {
         theme::Theme,
         widgets::*,
     };
-    pub use crate::compositor::{Cell, Color, Compositor, Plane, Styles};
-    pub use crate::input::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEvent};
+    pub use crate::input::event::{
+        Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEvent,
+    };
     pub use crate::Terminal;
 }

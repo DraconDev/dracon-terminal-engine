@@ -1,10 +1,10 @@
 //! Integration tests for framework widgets.
 
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Checkbox, ProgressBar, Radio, Slider, Spinner, Toggle,
 };
-use dracon_terminal_engine::framework::theme::Theme;
 use ratatui::layout::Rect;
 
 fn dummy_area() -> Rect {
@@ -118,8 +118,7 @@ fn test_slider_clamp() {
 
 #[test]
 fn test_widget_with_theme() {
-    let cb = Checkbox::new(WidgetId::new(7), "Themed")
-        .with_theme(Theme::dark());
+    let cb = Checkbox::new(WidgetId::new(7), "Themed").with_theme(Theme::dark());
     let plane = cb.render(dummy_area());
     assert!(plane.width > 0);
 }
@@ -133,8 +132,7 @@ fn test_widget_id_uniqueness() {
 
 #[test]
 fn test_toggle_with_callback() {
-    let mut t = Toggle::new(WidgetId::new(8), "Toggle me")
-        .on_change(|_| {});
+    let mut t = Toggle::new(WidgetId::new(8), "Toggle me").on_change(|_| {});
     t.toggle();
     assert!(t.is_on());
 }
@@ -144,7 +142,10 @@ fn test_toggle_with_callback() {
 #[test]
 fn test_widget_dirty_on_construction() {
     let mut cb = Checkbox::new(WidgetId::new(1), "Test");
-    assert!(cb.needs_render(), "widget should be dirty after construction");
+    assert!(
+        cb.needs_render(),
+        "widget should be dirty after construction"
+    );
 }
 
 #[test]
@@ -152,7 +153,10 @@ fn test_widget_clean_after_render() {
     let mut cb = Checkbox::new(WidgetId::new(1), "Test");
     cb.render(dummy_area());
     cb.clear_dirty();
-    assert!(!cb.needs_render(), "widget should be clean after render + clear_dirty");
+    assert!(
+        !cb.needs_render(),
+        "widget should be clean after render + clear_dirty"
+    );
 }
 
 #[test]
@@ -161,7 +165,10 @@ fn test_state_change_marks_dirty() {
     cb.render(dummy_area());
     cb.clear_dirty();
     cb.toggle();
-    assert!(cb.needs_render(), "widget should be dirty after state change");
+    assert!(
+        cb.needs_render(),
+        "widget should be dirty after state change"
+    );
 }
 
 #[test]
@@ -170,7 +177,10 @@ fn test_slider_dirty_after_value_change() {
     sl.render(dummy_area());
     sl.clear_dirty();
     sl.set_value(0.5);
-    assert!(sl.needs_render(), "slider should be dirty after value change");
+    assert!(
+        sl.needs_render(),
+        "slider should be dirty after value change"
+    );
 }
 
 #[test]
@@ -179,7 +189,10 @@ fn test_progress_bar_dirty_after_set_progress() {
     pb.render(dummy_area());
     pb.clear_dirty();
     pb.set_progress(0.7);
-    assert!(pb.needs_render(), "progress bar should be dirty after set_progress");
+    assert!(
+        pb.needs_render(),
+        "progress bar should be dirty after set_progress"
+    );
 }
 
 #[test]
@@ -198,7 +211,10 @@ fn test_mark_dirty_overrides_clean() {
     sl.clear_dirty();
     assert!(!sl.needs_render());
     sl.mark_dirty();
-    assert!(sl.needs_render(), "widget should be dirty after explicit mark_dirty");
+    assert!(
+        sl.needs_render(),
+        "widget should be dirty after explicit mark_dirty"
+    );
 }
 
 #[test]
@@ -209,5 +225,8 @@ fn test_multiple_state_changes_single_dirty() {
     sl.set_value(0.1);
     sl.set_value(0.2);
     sl.set_value(0.3);
-    assert!(sl.needs_render(), "multiple changes should still result in dirty");
+    assert!(
+        sl.needs_render(),
+        "multiple changes should still result in dirty"
+    );
 }

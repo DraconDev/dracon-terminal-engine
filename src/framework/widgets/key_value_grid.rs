@@ -46,10 +46,7 @@ impl KeyValueGrid {
     }
 
     pub fn with_id(id: WidgetId) -> Self {
-        Self {
-            id,
-            ..Self::new()
-        }
+        Self { id, ..Self::new() }
     }
 
     pub fn separator(mut self, sep: &str) -> Self {
@@ -82,7 +79,8 @@ impl KeyValueGrid {
             ParsedOutput::Text(s) => {
                 for line in s.lines() {
                     if let Some((k, v)) = line.split_once(':') {
-                        self.pairs.insert(k.trim().to_string(), v.trim().to_string());
+                        self.pairs
+                            .insert(k.trim().to_string(), v.trim().to_string());
                     }
                 }
             }
@@ -91,7 +89,16 @@ impl KeyValueGrid {
         self.dirty = true;
     }
 
-    fn render_row(&self, key: &str, value: &str, row: usize, area: Rect, key_fg: Color, val_fg: Color, alt_bg: Color) -> Vec<Cell> {
+    fn render_row(
+        &self,
+        key: &str,
+        value: &str,
+        row: usize,
+        area: Rect,
+        key_fg: Color,
+        val_fg: Color,
+        alt_bg: Color,
+    ) -> Vec<Cell> {
         let mut cells = Vec::with_capacity(area.width as usize);
         let key_str = format!("{}{}", key, self.separator);
         let max_key_len = 20usize;
@@ -104,7 +111,14 @@ impl KeyValueGrid {
 
         for c in display_key.chars() {
             if cells.len() < area.width as usize {
-                cells.push(Cell { char: c, fg: key_fg, bg: self.theme.bg, style: Styles::BOLD, transparent: false, skip: false });
+                cells.push(Cell {
+                    char: c,
+                    fg: key_fg,
+                    bg: self.theme.bg,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
+                });
             }
         }
 
@@ -112,12 +126,26 @@ impl KeyValueGrid {
         let val_start = cells.len();
         for c in value.chars().take(remaining) {
             if cells.len() < area.width as usize {
-                cells.push(Cell { char: c, fg: val_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+                cells.push(Cell {
+                    char: c,
+                    fg: val_fg,
+                    bg: self.theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                });
             }
         }
 
         while cells.len() < area.width as usize {
-            cells.push(Cell { char: ' ', fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+            cells.push(Cell {
+                char: ' ',
+                fg: self.theme.fg,
+                bg: self.theme.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            });
         }
 
         if row % 2 == 1 {
@@ -196,7 +224,14 @@ impl Widget for KeyValueGrid {
             for (i, c) in empty_msg.chars().enumerate() {
                 let idx = char_index + i;
                 if idx < plane.cells.len() {
-                    plane.cells[idx] = Cell { char: c, fg: self.theme.inactive_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                    plane.cells[idx] = Cell {
+                        char: c,
+                        fg: self.theme.inactive_fg,
+                        bg: self.theme.bg,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }

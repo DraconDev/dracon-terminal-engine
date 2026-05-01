@@ -6,8 +6,8 @@
 
 use std::io::Read;
 use std::process::{Command, Stdio};
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 #[test]
 #[ignore = "requires a real TTY; stdout is piped in CI/test environments so this hangs"]
@@ -21,7 +21,10 @@ fn test_text_editor_demo_smoke() {
         .status()
         .expect("failed to run cargo build for text_editor_demo");
 
-    assert!(build_status.success(), "cargo build for text_editor_demo failed");
+    assert!(
+        build_status.success(),
+        "cargo build for text_editor_demo failed"
+    );
 
     let mut child = Command::new("cargo")
         .args(["run", "--example", "text_editor_demo"])

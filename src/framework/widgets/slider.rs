@@ -117,7 +117,8 @@ impl crate::framework::widget::Widget for Slider {
         let height = plane.height as usize;
 
         let track_width = width.saturating_sub(4);
-        let thumb_pos = ((self.value - self.min) / (self.max - self.min) * track_width as f32).round() as usize;
+        let thumb_pos =
+            ((self.value - self.min) / (self.max - self.min) * track_width as f32).round() as usize;
         let thumb_pos = thumb_pos.min(track_width);
 
         let fill_char = '-';
@@ -127,7 +128,11 @@ impl crate::framework::widget::Widget for Slider {
             if (idx as usize) < plane.cells.len() {
                 plane.cells[idx as usize] = Cell {
                     char: fill_char,
-                    fg: if is_filled { self.theme.accent } else { self.theme.inactive_fg },
+                    fg: if is_filled {
+                        self.theme.accent
+                    } else {
+                        self.theme.inactive_fg
+                    },
                     bg: self.theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -173,9 +178,15 @@ impl crate::framework::widget::Widget for Slider {
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        _row: u16,
+    ) -> bool {
         match kind {
-            crate::input::event::MouseEventKind::Down(_) | crate::input::event::MouseEventKind::Drag(_) => {
+            crate::input::event::MouseEventKind::Down(_)
+            | crate::input::event::MouseEventKind::Drag(_) => {
                 let width = self.last_area_width.get();
                 let track_width = width.saturating_sub(4);
                 let rel_x = col.saturating_sub(1);

@@ -79,7 +79,13 @@ impl<W: Write + AsFd> Terminal<W> {
 
     /// Sets the cursor position (1-indexed, as terminals expect).
     pub fn set_cursor(&mut self, x: u16, y: u16) -> io::Result<()> {
-        write!(self.output, "\x1b[{};{}H", y.saturating_add(1), x.saturating_add(1)).map_err(io::Error::other)
+        write!(
+            self.output,
+            "\x1b[{};{}H",
+            y.saturating_add(1),
+            x.saturating_add(1)
+        )
+        .map_err(io::Error::other)
     }
 }
 

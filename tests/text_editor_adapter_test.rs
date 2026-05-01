@@ -5,7 +5,9 @@
 
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 
@@ -100,7 +102,8 @@ fn test_adapter_cursor_position_with_area_offset() {
 
 #[test]
 fn test_adapter_cursor_position_clamped_to_area() {
-    let mut editor = TextEditor::with_content("0123456789012345678901234567890123456789012345678901234567890");
+    let mut editor =
+        TextEditor::with_content("0123456789012345678901234567890123456789012345678901234567890");
     editor.cursor_row = 0;
     editor.cursor_col = 50;
 
@@ -245,29 +248,23 @@ fn test_adapter_handle_mouse_out_of_area() {
 
     // Click at local position (20, 20) - outside the widget area
     // The adapter still forwards it; the editor checks bounds
-    let consumed = adapter.handle_mouse(
-        MouseEventKind::Down(MouseButton::Left),
-        20,
-        20,
-    );
+    let consumed = adapter.handle_mouse(MouseEventKind::Down(MouseButton::Left), 20, 20);
     // Editor should reject out-of-bounds clicks
     assert!(!consumed);
 }
 
 #[test]
 fn test_adapter_handle_mouse_scroll() {
-    let mut editor = TextEditor::with_content("line0\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9");
+    let mut editor = TextEditor::with_content(
+        "line0\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9",
+    );
     editor.scroll_row = 0;
 
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 40, 5));
 
     // Scroll down
-    let consumed = adapter.handle_mouse(
-        MouseEventKind::ScrollDown,
-        0,
-        0,
-    );
+    let consumed = adapter.handle_mouse(MouseEventKind::ScrollDown, 0, 0);
     assert!(consumed);
     // Scroll should have moved the view
     assert!(adapter.editor().scroll_row > 0);

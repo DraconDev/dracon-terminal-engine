@@ -88,8 +88,16 @@ impl BaseInput {
                 let is_cursor = i == self.cursor_pos && !self.text.is_empty();
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if is_cursor { self.theme.bg } else { self.theme.fg },
-                    bg: if is_cursor { self.theme.fg } else { self.theme.input_bg },
+                    fg: if is_cursor {
+                        self.theme.bg
+                    } else {
+                        self.theme.fg
+                    },
+                    bg: if is_cursor {
+                        self.theme.fg
+                    } else {
+                        self.theme.input_bg
+                    },
                     style: Styles::empty(),
                     transparent: false,
                     skip: false,
@@ -163,7 +171,12 @@ impl BaseInput {
         }
     }
 
-    pub fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
+    pub fn handle_mouse(
+        &mut self,
+        _kind: crate::input::event::MouseEventKind,
+        col: u16,
+        _row: u16,
+    ) -> bool {
         if col < self.text.len() as u16 {
             self.cursor_pos = col as usize;
             self.dirty = true;

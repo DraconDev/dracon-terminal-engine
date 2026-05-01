@@ -109,7 +109,10 @@ fn test_splitpane_theme_change_idempotent() {
     split.on_theme_change(&Theme::dark());
     let second = split.divider_color;
 
-    assert_eq!(first, second, "calling on_theme_change twice with same theme should be idempotent");
+    assert_eq!(
+        first, second,
+        "calling on_theme_change twice with same theme should be idempotent"
+    );
 }
 
 // === Mock Widget on_theme_change tracking ===
@@ -166,13 +169,27 @@ impl TrackingWidget {
 }
 
 impl Widget for TrackingWidget {
-    fn id(&self) -> WidgetId { self.id }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn needs_render(&self) -> bool { self.dirty_flag.get() }
-    fn mark_dirty(&mut self) { self.dirty_flag.set(true); }
-    fn clear_dirty(&mut self) { self.dirty_flag.set(false); }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty_flag.get()
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty_flag.set(true);
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_flag.set(false);
+    }
     fn render(&self, area: Rect) -> Plane {
         Plane::new(0, area.width, area.height)
     }
@@ -195,9 +212,21 @@ fn test_app_set_theme_calls_on_theme_change_on_all_widgets() {
 
     app.set_theme(Theme::nord());
 
-    assert_eq!(count1.get(), 1, "widget 1 should have received 1 theme change");
-    assert_eq!(count2.get(), 1, "widget 2 should have received 1 theme change");
-    assert_eq!(count3.get(), 1, "widget 3 should have received 1 theme change");
+    assert_eq!(
+        count1.get(),
+        1,
+        "widget 1 should have received 1 theme change"
+    );
+    assert_eq!(
+        count2.get(),
+        1,
+        "widget 2 should have received 1 theme change"
+    );
+    assert_eq!(
+        count3.get(),
+        1,
+        "widget 3 should have received 1 theme change"
+    );
 }
 
 #[test]
@@ -210,7 +239,11 @@ fn test_app_set_theme_multiple_times_accumulates() {
     app.set_theme(Theme::light());
     app.set_theme(Theme::cyberpunk());
 
-    assert_eq!(count.get(), 3, "widget should have received 3 theme change calls");
+    assert_eq!(
+        count.get(),
+        3,
+        "widget should have received 3 theme change calls"
+    );
 }
 
 #[test]
@@ -220,7 +253,11 @@ fn test_app_widget_persists_after_theme_change() {
 
     assert_eq!(app.widget_count(), 1, "one widget should be added");
     app.set_theme(Theme::cyberpunk());
-    assert_eq!(app.widget_count(), 1, "widget count should remain 1 after theme change");
+    assert_eq!(
+        app.widget_count(),
+        1,
+        "widget count should remain 1 after theme change"
+    );
 }
 
 #[test]
@@ -233,8 +270,15 @@ fn test_app_remove_widget_after_theme_change() {
     app.set_theme(Theme::nord());
     app.remove_widget(id1);
 
-    assert_eq!(app.widget_count(), 1, "one widget should remain after removal");
-    assert!(app.widget(id1).is_none(), "removed widget should not be found");
+    assert_eq!(
+        app.widget_count(),
+        1,
+        "one widget should remain after removal"
+    );
+    assert!(
+        app.widget(id1).is_none(),
+        "removed widget should not be found"
+    );
 }
 
 // === Default Widget trait on_theme_change ===
@@ -282,10 +326,7 @@ fn test_all_themes_produce_different_divider_colors() {
         Theme::monokai(),
     ];
 
-    let colors: Vec<_> = themes
-        .iter()
-        .map(|t| t.inactive_fg)
-        .collect();
+    let colors: Vec<_> = themes.iter().map(|t| t.inactive_fg).collect();
 
     for (i, c1) in colors.iter().enumerate() {
         for (j, c2) in colors.iter().enumerate() {

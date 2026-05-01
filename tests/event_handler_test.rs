@@ -1,9 +1,11 @@
 //! Integration tests for widget event handling (handle_key, handle_mouse).
 
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{List, SearchInput, Slider};
 use dracon_terminal_engine::framework::widgets::split::Orientation;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::framework::widgets::{List, SearchInput, Slider};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 fn make_key(code: KeyCode) -> KeyEvent {

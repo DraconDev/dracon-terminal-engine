@@ -22,8 +22,7 @@ impl Compositor {
     }
 
     /// Advances the compositor state by one frame.
-    pub fn tick(&mut self, _delta: f32) {
-    }
+    pub fn tick(&mut self, _delta: f32) {}
 
     /// Returns the topmost visible plane at the given coordinates, if any.
     pub fn hit_test(&self, x: u16, y: u16) -> Option<&Plane> {

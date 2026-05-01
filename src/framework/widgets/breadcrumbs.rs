@@ -141,12 +141,20 @@ impl crate::framework::widget::Widget for Breadcrumbs {
             } else {
                 self.theme.fg
             };
-            let style = if is_last { Styles::BOLD } else { Styles::empty() };
+            let style = if is_last {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
 
             for col in 0..seg_width {
                 let idx = col as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].bg = if is_last { self.theme.active_bg } else { self.theme.bg };
+                    plane.cells[idx].bg = if is_last {
+                        self.theme.active_bg
+                    } else {
+                        self.theme.bg
+                    };
                     plane.cells[idx].fg = fg;
                     plane.cells[idx].char = ' ';
                 }
@@ -182,13 +190,21 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         if row != 0 {
             return false;
         }
         for zone in self.zones(self.area.get().width) {
             if zone.contains(col, row) {
-                if let crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) = kind {
+                if let crate::input::event::MouseEventKind::Down(
+                    crate::input::event::MouseButton::Left,
+                ) = kind
+                {
                     if let Some(f) = self.on_navigate.as_mut() {
                         f(zone.id);
                     }

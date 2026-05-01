@@ -506,7 +506,9 @@ fn test_editor_mouse_out_of_bounds() {
 
 #[test]
 fn test_editor_mouse_scroll() {
-    let mut editor = TextEditor::with_content("line0\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9");
+    let mut editor = TextEditor::with_content(
+        "line0\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9",
+    );
     assert_eq!(editor.scroll_row, 0);
 
     let area = make_area(20, 5);

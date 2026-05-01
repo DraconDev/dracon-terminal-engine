@@ -123,7 +123,11 @@ impl crate::framework::widget::Widget for Form {
                 field.value.clone()
             };
 
-            let fg = if is_focused { self.theme.accent } else { self.theme.fg };
+            let fg = if is_focused {
+                self.theme.accent
+            } else {
+                self.theme.fg
+            };
             let err_fg = self.theme.error_fg;
 
             for (j, c) in label_text.chars().take(width).enumerate() {
@@ -141,7 +145,11 @@ impl crate::framework::widget::Widget for Form {
             }
 
             let value_start = label_text.width();
-            for (j, c) in value_text.chars().take(width.saturating_sub(value_start)).enumerate() {
+            for (j, c) in value_text
+                .chars()
+                .take(width.saturating_sub(value_start))
+                .enumerate()
+            {
                 let idx = (i as u16 * plane.width + (value_start + j) as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
@@ -156,7 +164,11 @@ impl crate::framework::widget::Widget for Form {
             }
 
             if let Some(ref error) = field.error {
-                for (j, c) in error.chars().take(width.saturating_sub(value_start)).enumerate() {
+                for (j, c) in error
+                    .chars()
+                    .take(width.saturating_sub(value_start))
+                    .enumerate()
+                {
                     let idx = (i as u16 * plane.width + (value_start + j) as u16) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx] = Cell {
@@ -220,7 +232,12 @@ impl crate::framework::widget::Widget for Form {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        _kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
         if (row as usize) < self.fields.len() {
             self.focused_field = row as usize;
             self.dirty = true;

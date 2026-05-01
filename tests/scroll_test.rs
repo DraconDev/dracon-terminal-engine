@@ -1,7 +1,9 @@
 //! Tests for ScrollState and ScrollContainer.
 
 use dracon_terminal_engine::framework::scroll::{ScrollContainer, ScrollState};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 fn make_key(code: KeyCode) -> KeyEvent {
@@ -422,7 +424,10 @@ fn test_scroll_container_render_scrollbar_content_equals_viewport() {
     let plane = sc.render_scrollbar(Rect::new(0, 0, 1, 20));
 
     for cell in &plane.cells {
-        assert_eq!(cell.char, ' ', "scrollbar should be empty when no scrolling needed");
+        assert_eq!(
+            cell.char, ' ',
+            "scrollbar should be empty when no scrolling needed"
+        );
     }
 }
 
@@ -464,7 +469,14 @@ fn test_scroll_container_render_scrollbar_thumb_in_middle() {
     let thumb_cells: Vec<_> = plane.cells.iter().filter(|c| c.char == '█').collect();
     assert!(!thumb_cells.is_empty());
     let first_thumb_idx = plane.cells.iter().position(|c| c.char == '█').unwrap();
-    let _last_thumb_idx = plane.cells.len() - 1 - plane.cells.iter().rev().position(|c| c.char == '█').unwrap();
+    let _last_thumb_idx = plane.cells.len()
+        - 1
+        - plane
+            .cells
+            .iter()
+            .rev()
+            .position(|c| c.char == '█')
+            .unwrap();
 
     let expected_pos = (40 * 19) / 80;
     assert!(
@@ -499,7 +511,10 @@ fn test_scroll_container_render_scrollbar_with_custom_colors() {
     let plane = sc.render_scrollbar(Rect::new(0, 0, 1, 20));
 
     for cell in &plane.cells {
-        assert!(!matches!(cell.fg, dracon_terminal_engine::compositor::Color::Reset));
+        assert!(!matches!(
+            cell.fg,
+            dracon_terminal_engine::compositor::Color::Reset
+        ));
     }
 }
 

@@ -36,37 +36,26 @@ fn main() -> std::io::Result<()> {
         .theme(Theme::nord());
 
     // Create gauges bound to real commands
-    let cpu_gauge = Gauge::new("CPU %")
-        .max(100.0)
-        .bind_command(
-            BoundCommand::new("cat /proc/loadavg")
-                .parser(OutputParser::Regex {
-                    pattern: r"^([0-9.]+)".into(),
-                    group: Some(0),
-                })
-                .refresh(2),
-        );
+    let cpu_gauge = Gauge::new("CPU %").max(100.0).bind_command(
+        BoundCommand::new("cat /proc/loadavg")
+            .parser(OutputParser::Regex {
+                pattern: r"^([0-9.]+)".into(),
+                group: Some(0),
+            })
+            .refresh(2),
+    );
 
-    let mem_gauge = Gauge::new("Memory %")
-        .max(100.0)
-        .bind_command(
-            BoundCommand::new("free | grep Mem | awk '{print int($3/$2*100)}'")
-                .refresh(5),
-        );
+    let mem_gauge = Gauge::new("Memory %").max(100.0).bind_command(
+        BoundCommand::new("free | grep Mem | awk '{print int($3/$2*100)}'").refresh(5),
+    );
 
-    let disk_gauge = Gauge::new("Disk %")
-        .max(100.0)
-        .bind_command(
-            BoundCommand::new("df -h / | tail -1 | awk '{print $5}' | tr -d '%'")
-                .refresh(30),
-        );
+    let disk_gauge = Gauge::new("Disk %").max(100.0).bind_command(
+        BoundCommand::new("df -h / | tail -1 | awk '{print $5}' | tr -d '%'").refresh(30),
+    );
 
-    let kv_grid = KeyValueGrid::new()
-        .separator("  ")
-        .bind_command(
-            BoundCommand::new("uname -snr")
-                .refresh(0), // 0 = never auto-refresh (static data)
-        );
+    let kv_grid = KeyValueGrid::new().separator("  ").bind_command(
+        BoundCommand::new("uname -snr").refresh(0), // 0 = never auto-refresh (static data)
+    );
 
     let status = StatusBadge::new(WidgetId::default_id())
         .with_status("OK")

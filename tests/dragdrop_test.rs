@@ -3,9 +3,7 @@
 mod common;
 use common::make_area;
 
-use dracon_terminal_engine::framework::dragdrop::{
-    DragGhost, DragManager, DragPhase, DropTarget,
-};
+use dracon_terminal_engine::framework::dragdrop::{DragGhost, DragManager, DragPhase, DropTarget};
 use dracon_terminal_engine::framework::hitzone::DragState;
 
 #[test]

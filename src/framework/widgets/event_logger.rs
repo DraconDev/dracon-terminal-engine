@@ -2,11 +2,11 @@
 //!
 //! Shows a scrolling list of recent input events for debugging.
 
-use std::collections::VecDeque;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
+use std::collections::VecDeque;
 
 /// A recorded input event for display.
 pub struct LoggedEvent {
@@ -114,7 +114,13 @@ impl crate::framework::widget::Widget for EventLogger {
 
         let width = plane.cells.len() / plane.height as usize;
 
-        let events: Vec<_> = self.events.iter().rev().take(area.height as usize).rev().collect();
+        let events: Vec<_> = self
+            .events
+            .iter()
+            .rev()
+            .take(area.height as usize)
+            .rev()
+            .collect();
 
         for (i, event) in events.iter().enumerate() {
             let line = format!("{}: {}", event.timestamp, event.description);

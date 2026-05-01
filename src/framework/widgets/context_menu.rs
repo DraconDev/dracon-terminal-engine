@@ -169,22 +169,39 @@ impl crate::framework::widget::Widget for ContextMenu {
 
         for col in 0..self.width {
             let top_idx = col as usize;
-            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; }
+            if top_idx < plane.cells.len() {
+                plane.cells[top_idx].char = '─';
+            }
             let bot_idx = ((height - 1) * self.width + col) as usize;
-            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; }
+            if bot_idx < plane.cells.len() {
+                plane.cells[bot_idx].char = '─';
+            }
         }
         for r in 1..height.saturating_sub(1) {
             let left_idx = (r * self.width) as usize;
-            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; }
+            if left_idx < plane.cells.len() {
+                plane.cells[left_idx].char = '│';
+            }
             let right_idx = (r * self.width + self.width - 1) as usize;
-            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; }
+            if right_idx < plane.cells.len() {
+                plane.cells[right_idx].char = '│';
+            }
         }
 
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
-        if col < self.anchor_x || col >= self.anchor_x + self.width || row < self.anchor_y || row >= self.anchor_y + self.items.len() as u16 {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
+        if col < self.anchor_x
+            || col >= self.anchor_x + self.width
+            || row < self.anchor_y
+            || row >= self.anchor_y + self.items.len() as u16
+        {
             return false;
         }
 

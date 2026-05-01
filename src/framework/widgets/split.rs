@@ -109,15 +109,19 @@ impl SplitPane {
                 let w1 = ((area.width as f32 * self.ratio).round() as u16).max(self.min_size);
                 let w2 = area.width.saturating_sub(w1).max(self.min_size);
                 let w1 = area.width.saturating_sub(w2);
-                (Rect::new(area.x, area.y, w1, area.height),
-                 Rect::new(area.x + w1, area.y, w2, area.height))
+                (
+                    Rect::new(area.x, area.y, w1, area.height),
+                    Rect::new(area.x + w1, area.y, w2, area.height),
+                )
             }
             Orientation::Vertical => {
                 let h1 = ((area.height as f32 * self.ratio).round() as u16).max(self.min_size);
                 let h2 = area.height.saturating_sub(h1).max(self.min_size);
                 let h1 = area.height.saturating_sub(h2);
-                (Rect::new(area.x, area.y, area.width, h1),
-                 Rect::new(area.x, area.y + h1, area.width, h2))
+                (
+                    Rect::new(area.x, area.y, area.width, h1),
+                    Rect::new(area.x, area.y + h1, area.width, h2),
+                )
             }
         }
     }
@@ -158,7 +162,13 @@ impl SplitPane {
     /// Handles a mouse drag event to interactively resize the split ratio.
     ///
     /// Returns `true` if the event was consumed.
-    pub fn handle_resize(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16, area: Rect) -> bool {
+    pub fn handle_resize(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+        area: Rect,
+    ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Drag(_) => {
                 match self.orientation {
@@ -218,7 +228,12 @@ impl crate::framework::widget::Widget for SplitPane {
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Drag(_) => {
                 let current_area = self.area.get();

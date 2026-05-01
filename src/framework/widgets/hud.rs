@@ -78,7 +78,9 @@ impl Hud {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index as i32;
 
-        let text_len = text.width().min((self.width as usize).saturating_sub(x as usize));
+        let text_len = text
+            .width()
+            .min((self.width as usize).saturating_sub(x as usize));
         let start_idx = (y * self.width + x) as usize;
 
         for (i, ch) in text.chars().take(text_len).enumerate() {
@@ -102,7 +104,15 @@ impl Hud {
     ///
     /// `value` is compared against `max` to determine the filled portion.
     /// The gauge uses '█' for filled cells and '░' for empty cells.
-    pub fn render_gauge(&self, x: u16, y: u16, label: &str, value: f32, max: f32, width: u16) -> Plane {
+    pub fn render_gauge(
+        &self,
+        x: u16,
+        y: u16,
+        label: &str,
+        value: f32,
+        max: f32,
+        width: u16,
+    ) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index as i32;
 
@@ -197,7 +207,12 @@ impl crate::framework::widget::Widget for Hud {
         false
     }
 
-    fn handle_mouse(&mut self, _kind: crate::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        _kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        _row: u16,
+    ) -> bool {
         false
     }
 }

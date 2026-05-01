@@ -78,7 +78,11 @@ impl Tree {
         self
     }
 
-    fn get_selected_node<'a>(&self, nodes: &'a [TreeNode], path: &[usize]) -> Option<(&'a TreeNode, usize)> {
+    fn get_selected_node<'a>(
+        &self,
+        nodes: &'a [TreeNode],
+        path: &[usize],
+    ) -> Option<(&'a TreeNode, usize)> {
         if path.is_empty() {
             return None;
         }
@@ -278,7 +282,12 @@ impl crate::framework::widget::Widget for Tree {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if let Some(path) = self.node_at_row(row) {

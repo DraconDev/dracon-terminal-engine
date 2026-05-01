@@ -3,10 +3,10 @@
 mod common;
 use common::make_area;
 
+use dracon_terminal_engine::compositor::Styles;
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::label::Label;
-use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::compositor::Styles;
 
 #[test]
 fn test_label_new() {

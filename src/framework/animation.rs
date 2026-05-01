@@ -23,7 +23,13 @@ impl Easing {
             Easing::Linear => t,
             Easing::EaseIn => t * t,
             Easing::EaseOut => t * (2.0 - t),
-            Easing::EaseInOut => if t < 0.5 { 2.0 * t * t } else { -1.0 + (4.0 - 2.0 * t) * t },
+            Easing::EaseInOut => {
+                if t < 0.5 {
+                    2.0 * t * t
+                } else {
+                    -1.0 + (4.0 - 2.0 * t) * t
+                }
+            }
         }
     }
 }
@@ -156,8 +162,7 @@ mod tests {
 
     #[test]
     fn test_animation_easing() {
-        let anim = Animation::new(0.0, 1.0, Duration::from_secs(1))
-            .with_easing(Easing::EaseIn);
+        let anim = Animation::new(0.0, 1.0, Duration::from_secs(1)).with_easing(Easing::EaseIn);
         let _ = anim.value();
         assert!(!anim.is_done());
     }

@@ -8,8 +8,7 @@ use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
 
 /// Holds scroll position, content height, and viewport height for virtual scrolling.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ScrollState {
     /// Number of rows scrolled off the top.
     pub offset: usize,
@@ -65,7 +64,6 @@ impl ScrollState {
         self.scroll_down(self.page_size());
     }
 }
-
 
 /// A scrollable container with an optional scrollbar.
 ///

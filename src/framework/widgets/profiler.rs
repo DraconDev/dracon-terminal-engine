@@ -2,11 +2,11 @@
 //!
 //! Shows timing and resource usage data for UI operations.
 
-use std::time::Duration;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
+use std::time::Duration;
 
 /// A performance metric entry.
 pub struct Metric {
@@ -107,13 +107,22 @@ impl crate::framework::widget::Widget for Profiler {
 
         let total_time: Duration = self.metrics.iter().map(|m| m.value).sum();
 
-        for (i, metric) in self.metrics.iter().take(area.height as usize - 1).enumerate() {
+        for (i, metric) in self
+            .metrics
+            .iter()
+            .take(area.height as usize - 1)
+            .enumerate()
+        {
             let percentage = if total_time.as_nanos() > 0 {
-                (metric.value.as_nanos() as f64 / total_time.as_nanos() as f64 * 100.0).round() as u32
+                (metric.value.as_nanos() as f64 / total_time.as_nanos() as f64 * 100.0).round()
+                    as u32
             } else {
                 0
             };
-            let line = format!("{}: {:?} ({}%, {} calls)", metric.name, metric.value, percentage, metric.call_count);
+            let line = format!(
+                "{}: {:?} ({}%, {} calls)",
+                metric.name, metric.value, percentage, metric.call_count
+            );
             for (j, c) in line.chars().take(width).enumerate() {
                 let idx = (i as u16 * plane.width + j as u16) as usize;
                 if idx < plane.cells.len() {

@@ -3,8 +3,6 @@
 //! Tracks which screen regions have changed and need redrawing,
 //! enabling targeted rendering instead of fullscreen refreshes.
 
-
-
 /// A rectangular dirty region.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DirtyRegion {
@@ -21,7 +19,12 @@ pub struct DirtyRegion {
 impl DirtyRegion {
     /// Creates a new dirty region.
     pub fn new(x: u16, y: u16, width: u16, height: u16) -> Self {
-        Self { x, y, width, height }
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
     /// Returns true if this region intersects with another.

@@ -108,7 +108,11 @@ impl crate::framework::widget::Widget for Select {
         };
 
         let _cell_width = display.width().min(width);
-        let fg = if self.expanded { self.theme.accent } else { self.theme.fg };
+        let fg = if self.expanded {
+            self.theme.accent
+        } else {
+            self.theme.fg
+        };
 
         for (i, c) in display.chars().take(width).enumerate() {
             let idx = i;
@@ -138,9 +142,21 @@ impl crate::framework::widget::Widget for Select {
                     if idx < plane.cells.len() {
                         plane.cells[idx] = Cell {
                             char: c,
-                            fg: if is_selected { self.theme.accent } else { self.theme.fg },
-                            bg: if is_selected { self.theme.selection_bg } else { self.theme.bg },
-                            style: if is_selected { Styles::BOLD } else { Styles::empty() },
+                            fg: if is_selected {
+                                self.theme.accent
+                            } else {
+                                self.theme.fg
+                            },
+                            bg: if is_selected {
+                                self.theme.selection_bg
+                            } else {
+                                self.theme.bg
+                            },
+                            style: if is_selected {
+                                Styles::BOLD
+                            } else {
+                                Styles::empty()
+                            },
                             transparent: false,
                             skip: false,
                         };
@@ -181,7 +197,12 @@ impl crate::framework::widget::Widget for Select {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if row == 0 {

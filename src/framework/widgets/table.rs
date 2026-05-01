@@ -81,10 +81,7 @@ impl<T: Clone + ToString> Table<T> {
     where
         T: 'static,
     {
-        self.rows = rows
-            .into_iter()
-            .map(|data| TableRow { data })
-            .collect();
+        self.rows = rows.into_iter().map(|data| TableRow { data }).collect();
         self
     }
 
@@ -215,7 +212,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             let _ = i;
         }
 
-        let visible_rows: Vec<_> = self.rows.iter()
+        let visible_rows: Vec<_> = self
+            .rows
+            .iter()
             .skip(self.offset)
             .take(self.visible_count)
             .collect();
@@ -223,8 +222,16 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         for (i, row) in visible_rows.iter().enumerate() {
             let y = 1 + i;
             let is_selected = self.offset + i == self.selected;
-            let bg = if is_selected { self.theme.selection_bg } else { self.theme.bg };
-            let fg = if is_selected { self.theme.selection_fg } else { self.theme.fg };
+            let bg = if is_selected {
+                self.theme.selection_bg
+            } else {
+                self.theme.bg
+            };
+            let fg = if is_selected {
+                self.theme.selection_fg
+            } else {
+                self.theme.fg
+            };
 
             let y_off = 1u16 + i as u16;
             for (j, col) in self.columns.iter().enumerate() {
@@ -247,7 +254,11 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = ch;
                         plane.cells[idx].fg = fg;
-                        plane.cells[idx].style = if is_selected { Styles::BOLD } else { Styles::empty() };
+                        plane.cells[idx].style = if is_selected {
+                            Styles::BOLD
+                        } else {
+                            Styles::empty()
+                        };
                     }
                 }
 
@@ -307,7 +318,12 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
         if row == 0 {
             return false;
         }
@@ -332,7 +348,8 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                self.offset = (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
+                self.offset =
+                    (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
                 self.dirty = true;
                 true
             }

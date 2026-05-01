@@ -3,7 +3,9 @@
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
-use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 
@@ -121,7 +123,10 @@ fn test_render_with_line_numbers() {
 
     assert!(plane.cells.len() > 0);
     let non_space: Vec<_> = plane.cells.iter().filter(|c| c.char != ' ').collect();
-    assert!(!non_space.is_empty(), "rendered plane should have visible content");
+    assert!(
+        !non_space.is_empty(),
+        "rendered plane should have visible content"
+    );
 }
 
 #[test]
@@ -131,10 +136,14 @@ fn test_render_cell_colors_are_mapped() {
     let plane = adapter.render(rect(0, 0, 20, 5));
 
     let x_cell = plane.cells.iter().find(|c| c.char == 'X');
-    assert!(x_cell.is_some(), "rendered plane should have the character X");
+    assert!(
+        x_cell.is_some(),
+        "rendered plane should have the character X"
+    );
 
     for cell in &plane.cells {
-        assert!(!matches!(cell.fg, Color::Reset) || cell.char == ' ',
+        assert!(
+            !matches!(cell.fg, Color::Reset) || cell.char == ' ',
             "visible cells should have non-Reset fg (or be transparent space)"
         );
     }
@@ -201,7 +210,10 @@ fn test_handle_key_release_returns_false() {
     };
     let result = adapter.handle_key(release_key);
 
-    assert!(!result, "Release key kind should not be consumed (event ignored by editor)");
+    assert!(
+        !result,
+        "Release key kind should not be consumed (event ignored by editor)"
+    );
 }
 
 #[test]
@@ -241,7 +253,8 @@ fn test_handle_mouse_out_of_bounds_coords() {
 
 #[test]
 fn test_handle_mouse_scroll_propagates() {
-    let mut editor = TextEditor::with_content("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8");
+    let mut editor =
+        TextEditor::with_content("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -304,7 +317,11 @@ fn test_on_focus_and_blur_sequence_does_not_panic() {
 fn test_editor_accessor_returns_editor() {
     let editor = TextEditor::with_content("hello");
     let adapter = TextEditorAdapter::new(WidgetId::new(1), editor.clone());
-    assert_eq!(adapter.editor().lines.len(), 2, "with_content adds trailing newline");
+    assert_eq!(
+        adapter.editor().lines.len(),
+        2,
+        "with_content adds trailing newline"
+    );
 }
 
 #[test]

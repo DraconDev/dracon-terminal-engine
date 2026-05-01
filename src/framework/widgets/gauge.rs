@@ -106,7 +106,11 @@ impl Gauge {
     }
 
     pub fn percentage(&self) -> f64 {
-        if self.max == 0.0 { 0.0 } else { (self.value / self.max) * 100.0 }
+        if self.max == 0.0 {
+            0.0
+        } else {
+            (self.value / self.max) * 100.0
+        }
     }
 
     fn fill_color(&self) -> Color {
@@ -125,17 +129,45 @@ impl Gauge {
         let fg = self.fill_color();
 
         let mut cells = Vec::with_capacity(width as usize);
-        cells.push(Cell { char: '[', fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+        cells.push(Cell {
+            char: '[',
+            fg: self.theme.fg,
+            bg: self.theme.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        });
 
         for i in 0..(width - 2) as usize {
             if i < fill_width {
-                cells.push(Cell { char: '█', fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+                cells.push(Cell {
+                    char: '█',
+                    fg,
+                    bg: self.theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                });
             } else {
-                cells.push(Cell { char: '░', fg: self.theme.inactive_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+                cells.push(Cell {
+                    char: '░',
+                    fg: self.theme.inactive_fg,
+                    bg: self.theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                });
             }
         }
 
-        cells.push(Cell { char: ']', fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false });
+        cells.push(Cell {
+            char: ']',
+            fg: self.theme.fg,
+            bg: self.theme.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        });
         cells
     }
 }
@@ -175,7 +207,14 @@ impl Widget for Gauge {
 
         let label_text = format!("{}: {:.1}%", self.label, self.percentage());
         for (i, c) in label_text.chars().take(area.width as usize).enumerate() {
-            plane.cells[i] = Cell { char: c, fg: self.theme.fg, bg: self.theme.bg, style: Styles::BOLD, transparent: false, skip: false };
+            plane.cells[i] = Cell {
+                char: c,
+                fg: self.theme.fg,
+                bg: self.theme.bg,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
 
         let bar_row = 1usize;

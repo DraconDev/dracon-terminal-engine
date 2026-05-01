@@ -1,8 +1,8 @@
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
-use crate::utils::{get_clipboard_text, set_clipboard_text};
 use crate::utils::highlight_code;
+use crate::utils::{get_clipboard_text, set_clipboard_text};
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
@@ -151,9 +151,10 @@ impl TextEditor {
     /// Ignores duplicates and the primary cursor position.
     pub fn add_cursor(&mut self, row: usize, col: usize) {
         if (row, col) != (self.cursor_row, self.cursor_col)
-            && !self.extra_cursors.contains(&(row, col)) {
-                self.extra_cursors.push((row, col));
-            }
+            && !self.extra_cursors.contains(&(row, col))
+        {
+            self.extra_cursors.push((row, col));
+        }
     }
 
     /// Removes the extra cursor at the given position, if it exists.
@@ -391,7 +392,10 @@ impl TextEditor {
         self.file_path.as_ref().map(|p| {
             let mut undo_path = p.clone();
             let stem = undo_path.file_stem().unwrap_or_default().to_string_lossy();
-            let ext = undo_path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+            let ext = undo_path
+                .extension()
+                .map(|e| e.to_string_lossy().to_string())
+                .unwrap_or_default();
             let parent = undo_path.parent().unwrap_or(std::path::Path::new("."));
             let undo_name = format!(".{}.undo", stem);
             if ext.is_empty() {
@@ -408,7 +412,10 @@ impl TextEditor {
         self.file_path.as_ref().map(|p| {
             let mut cfg_path = p.clone();
             let stem = cfg_path.file_stem().unwrap_or_default().to_string_lossy();
-            let ext = cfg_path.extension().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+            let ext = cfg_path
+                .extension()
+                .map(|e| e.to_string_lossy().to_string())
+                .unwrap_or_default();
             let parent = cfg_path.parent().unwrap_or(std::path::Path::new("."));
             if ext.is_empty() {
                 cfg_path = parent.join(format!(".{}.dte.json", stem));
@@ -455,9 +462,7 @@ impl TextEditor {
     /// Saves the undo stack to a `.filename.undo` file alongside the original file.
     pub fn save_undo_stack(&self) -> std::io::Result<()> {
         if let Some(undo_path) = self.undo_path() {
-            let encoded: Vec<String> = self.history.iter()
-                .map(|lines| lines.join("\n"))
-                .collect();
+            let encoded: Vec<String> = self.history.iter().map(|lines| lines.join("\n")).collect();
             std::fs::write(undo_path, encoded.join("\n---\n"))?;
         }
         Ok(())
@@ -728,7 +733,10 @@ impl TextEditor {
                         self.mode_input.pop();
                         return true;
                     }
-                    KeyCode::Char(c) if !key.modifiers.contains(KeyModifiers::CONTROL) && !key.modifiers.contains(KeyModifiers::ALT) => {
+                    KeyCode::Char(c)
+                        if !key.modifiers.contains(KeyModifiers::CONTROL)
+                            && !key.modifiers.contains(KeyModifiers::ALT) =>
+                    {
                         self.mode_input.push(c);
                         return true;
                     }
@@ -1496,7 +1504,13 @@ impl TextEditor {
         None
     }
 
-    fn find_closing_bracket(&self, row: usize, col: usize, open: char, close: char) -> Option<(usize, usize)> {
+    fn find_closing_bracket(
+        &self,
+        row: usize,
+        col: usize,
+        open: char,
+        close: char,
+    ) -> Option<(usize, usize)> {
         let mut depth = 1;
         let mut r = row;
         let mut c = col + open.len_utf8();
@@ -1521,7 +1535,13 @@ impl TextEditor {
         None
     }
 
-    fn find_opening_bracket(&self, row: usize, col: usize, open: char, close: char) -> Option<(usize, usize)> {
+    fn find_opening_bracket(
+        &self,
+        row: usize,
+        col: usize,
+        open: char,
+        close: char,
+    ) -> Option<(usize, usize)> {
         let mut depth = 1;
         let mut r = row;
         let mut c = col.saturating_sub(1);
@@ -1784,7 +1804,11 @@ impl TextEditor {
         visual_row
     }
 
-    fn source_row_from_visual(&self, visual_row: usize, width: usize) -> Option<(usize, usize, usize)> {
+    fn source_row_from_visual(
+        &self,
+        visual_row: usize,
+        width: usize,
+    ) -> Option<(usize, usize, usize)> {
         let mut current = 0usize;
         for i in 0..self.effective_len() {
             let line = self.get_effective_line(i);
@@ -2123,8 +2147,14 @@ impl TextEditor {
 impl Widget for &TextEditor {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let gutter_w = self.gutter_width();
-        let status_bar_h: u16 = if self.show_status_bar && area.height >= 2 { 1 } else { 0 };
-        let scrollbar_w = if self.effective_len() > (area.height as usize).saturating_sub(status_bar_h as usize) {
+        let status_bar_h: u16 = if self.show_status_bar && area.height >= 2 {
+            1
+        } else {
+            0
+        };
+        let scrollbar_w = if self.effective_len()
+            > (area.height as usize).saturating_sub(status_bar_h as usize)
+        {
             1
         } else {
             0
@@ -2510,21 +2540,36 @@ impl Widget for &TextEditor {
                         .bg(Color::Rgb(40, 40, 20))
                         .fg(Color::Rgb(255, 200, 100));
                     buf.set_string(area.x, status_y, &search_text, search_style);
-                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                    buf.set_string(
+                        area.x + area.width.saturating_sub(pos_text.len() as u16),
+                        status_y,
+                        &pos_text,
+                        status_style,
+                    );
                 } else if self.mode == EditorMode::Replace {
                     let replace_text = format!("Replace: {}_", self.mode_input);
                     let replace_style = Style::default()
                         .bg(Color::Rgb(40, 20, 20))
                         .fg(Color::Rgb(255, 100, 100));
                     buf.set_string(area.x, status_y, &replace_text, replace_style);
-                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                    buf.set_string(
+                        area.x + area.width.saturating_sub(pos_text.len() as u16),
+                        status_y,
+                        &pos_text,
+                        status_style,
+                    );
                 } else if self.mode == EditorMode::GotoLine {
                     let goto_text = format!("Goto Line: {}_", self.mode_input);
                     let goto_style = Style::default()
                         .bg(Color::Rgb(20, 40, 40))
                         .fg(Color::Rgb(100, 200, 255));
                     buf.set_string(area.x, status_y, &goto_text, goto_style);
-                    buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                    buf.set_string(
+                        area.x + area.width.saturating_sub(pos_text.len() as u16),
+                        status_y,
+                        &pos_text,
+                        status_style,
+                    );
                 } else {
                     buf.set_string(area.x, status_y, &pos_text, status_style);
 
@@ -2535,7 +2580,9 @@ impl Widget for &TextEditor {
                     if !filename_text.is_empty() && filename_text != "Untitled" {
                         let total_left_len = pos_text.len() as u16;
                         let total_right_len = right_text.len() as u16;
-                        let available = area.width.saturating_sub(total_left_len + total_right_len + 4);
+                        let available = area
+                            .width
+                            .saturating_sub(total_left_len + total_right_len + 4);
                         if available > filename_text.len() as u16 {
                             let center_x = area.x + total_left_len + 2;
                             let filename_style = Style::default()
@@ -2616,9 +2663,8 @@ impl Widget for &TextEditor {
                         let visual_x = indent_col - self.scroll_col;
                         if visual_x < content_area.width as usize {
                             let guide_x = content_area.x + visual_x as u16;
-                            let guide_style = Style::default()
-                                .fg(Color::Rgb(50, 55, 65))
-                                .bg(line_bg);
+                            let guide_style =
+                                Style::default().fg(Color::Rgb(50, 55, 65)).bg(line_bg);
                             buf.set_string(guide_x, area.y + i as u16, "│", guide_style);
                         }
                     }
@@ -2704,10 +2750,14 @@ impl Widget for &TextEditor {
             }
 
             // Apply Bracket Matching highlight
-            if let Some((match_row, match_col)) = self.find_matching_bracket(self.cursor_row, self.cursor_col) {
+            if let Some((match_row, match_col)) =
+                self.find_matching_bracket(self.cursor_row, self.cursor_col)
+            {
                 if real_line_idx == match_row {
                     let visual_x = self.get_visual_x(match_row, match_col);
-                    if visual_x >= self.scroll_col && visual_x < self.scroll_col + content_area.width as usize {
+                    if visual_x >= self.scroll_col
+                        && visual_x < self.scroll_col + content_area.width as usize
+                    {
                         let cx = content_area.x + (visual_x - self.scroll_col) as u16;
                         let cy = area.y + i as u16;
                         if let Some(cell) = buf.cell_mut((cx, cy)) {
@@ -2764,21 +2814,36 @@ impl Widget for &TextEditor {
                     .bg(Color::Rgb(40, 40, 20))
                     .fg(Color::Rgb(255, 200, 100));
                 buf.set_string(area.x, status_y, &search_text, search_style);
-                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                buf.set_string(
+                    area.x + area.width.saturating_sub(pos_text.len() as u16),
+                    status_y,
+                    &pos_text,
+                    status_style,
+                );
             } else if self.mode == EditorMode::Replace {
                 let replace_text = format!("Replace: {}_", self.mode_input);
                 let replace_style = Style::default()
                     .bg(Color::Rgb(40, 20, 20))
                     .fg(Color::Rgb(255, 100, 100));
                 buf.set_string(area.x, status_y, &replace_text, replace_style);
-                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                buf.set_string(
+                    area.x + area.width.saturating_sub(pos_text.len() as u16),
+                    status_y,
+                    &pos_text,
+                    status_style,
+                );
             } else if self.mode == EditorMode::GotoLine {
                 let goto_text = format!("Goto Line: {}_", self.mode_input);
                 let goto_style = Style::default()
                     .bg(Color::Rgb(20, 40, 40))
                     .fg(Color::Rgb(100, 200, 255));
                 buf.set_string(area.x, status_y, &goto_text, goto_style);
-                buf.set_string(area.x + area.width.saturating_sub(pos_text.len() as u16), status_y, &pos_text, status_style);
+                buf.set_string(
+                    area.x + area.width.saturating_sub(pos_text.len() as u16),
+                    status_y,
+                    &pos_text,
+                    status_style,
+                );
             } else {
                 buf.set_string(area.x, status_y, &pos_text, status_style);
 
@@ -2789,7 +2854,9 @@ impl Widget for &TextEditor {
                 if !filename_text.is_empty() && filename_text != "Untitled" {
                     let total_left_len = pos_text.len() as u16;
                     let total_right_len = right_text.len() as u16;
-                    let available = area.width.saturating_sub(total_left_len + total_right_len + 4);
+                    let available = area
+                        .width
+                        .saturating_sub(total_left_len + total_right_len + 4);
                     if available > filename_text.len() as u16 {
                         let center_x = area.x + total_left_len + 2;
                         let filename_style = Style::default()

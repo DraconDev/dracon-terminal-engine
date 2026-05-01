@@ -124,13 +124,13 @@ impl crate::framework::widget::Widget for Checkbox {
             let idx = (start_y as u16 * plane.width + (start_x as u16 + i as u16)) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
-                        char: c,
-                        fg,
-                        bg: self.theme.bg,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
+                    char: c,
+                    fg,
+                    bg: self.theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
 
@@ -155,7 +155,12 @@ impl crate::framework::widget::Widget for Checkbox {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        _row: u16,
+    ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 self.toggle();

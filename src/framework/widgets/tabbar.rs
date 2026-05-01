@@ -105,9 +105,21 @@ impl crate::framework::widget::Widget for TabBar {
             let x = (i as u16) * tab_width;
             let is_active = i == self.active;
 
-            let bg = if is_active { self.theme.active_bg } else { self.theme.bg };
-            let fg = if is_active { self.theme.accent } else { self.theme.inactive_fg };
-            let style = if is_active { Styles::BOLD | Styles::UNDERLINE } else { Styles::empty() };
+            let bg = if is_active {
+                self.theme.active_bg
+            } else {
+                self.theme.bg
+            };
+            let fg = if is_active {
+                self.theme.accent
+            } else {
+                self.theme.inactive_fg
+            };
+            let style = if is_active {
+                Styles::BOLD | Styles::UNDERLINE
+            } else {
+                Styles::empty()
+            };
 
             for col in 0..tab_width {
                 let idx = col as usize;
@@ -165,7 +177,12 @@ impl crate::framework::widget::Widget for TabBar {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, _row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        _row: u16,
+    ) -> bool {
         let tab_count = self.tabs.len().max(1);
         let tab_width = (self.area.get().width / tab_count as u16).max(1);
         let idx = col / tab_width;

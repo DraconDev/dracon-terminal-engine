@@ -1,7 +1,9 @@
-use dracon_terminal_engine::framework::widgets::{List, Table, TabBar, Breadcrumbs, SplitPane, Hud, Modal, ContextMenu};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::context_menu::ContextAction;
 use dracon_terminal_engine::framework::widgets::split::Orientation;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::{
+    Breadcrumbs, ContextMenu, Hud, List, Modal, SplitPane, TabBar, Table,
+};
 use ratatui::layout::Rect;
 
 #[test]
@@ -59,8 +61,14 @@ fn test_table_new() {
 fn test_table_render() {
     use dracon_terminal_engine::framework::widgets::table::Column;
     let cols = vec![
-        Column { header: "Name".to_string(), width: 20 },
-        Column { header: "Age".to_string(), width: 10 },
+        Column {
+            header: "Name".to_string(),
+            width: 20,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 10,
+        },
     ];
     let table: Table<String> = Table::new(cols);
     let area = Rect::new(0, 0, 80, 20);

@@ -171,8 +171,16 @@ impl crate::framework::widget::Widget for MenuBar {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: if is_active { self.theme.bg } else { self.theme.fg },
-                        bg: if is_active { self.theme.accent } else { self.theme.bg },
+                        fg: if is_active {
+                            self.theme.bg
+                        } else {
+                            self.theme.fg
+                        },
+                        bg: if is_active {
+                            self.theme.accent
+                        } else {
+                            self.theme.bg
+                        },
                         style: Styles::empty(),
                         transparent: false,
                         skip: false,
@@ -184,7 +192,12 @@ impl crate::framework::widget::Widget for MenuBar {
         plane
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         if row != 0 {
             return false;
         }

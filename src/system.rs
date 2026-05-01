@@ -250,34 +250,34 @@ impl SystemMonitor {
                 let mountpoint = parts.get(3).unwrap_or(&"");
                 let label = parts.get(4).unwrap_or(&"");
 
-                    if !fstype.is_empty() && mountpoint.is_empty() {
-                        if let Ok(size) = size_str.parse::<f64>() {
-                            if size > 100_000_000.0 {
-                                let dev_path = format!("/dev/{}", name);
-                                let display_name = if !label.is_empty() {
-                                    label.to_string()
+                if !fstype.is_empty() && mountpoint.is_empty() {
+                    if let Ok(size) = size_str.parse::<f64>() {
+                        if size > 100_000_000.0 {
+                            let dev_path = format!("/dev/{}", name);
+                            let display_name = if !label.is_empty() {
+                                label.to_string()
+                            } else {
+                                let gb = size / 1_073_741_824.0;
+                                if gb >= 1.0 {
+                                    format!("{:.0}G Drive", gb)
                                 } else {
-                                    let gb = size / 1_073_741_824.0;
-                                    if gb >= 1.0 {
-                                        format!("{:.0}G Drive", gb)
-                                    } else {
-                                        format!("{:.0}M Drive", size / 1_048_576.0)
-                                    }
-                                };
-
-                                if fstype != "swap" && !fstype.contains("member") {
-                                    final_disks.push(DiskInfo {
-                                        name: display_name,
-                                        device: dev_path,
-                                        used_space: 0.0,
-                                        available_space: size,
-                                        total_space: size,
-                                        is_mounted: false,
-                                    });
+                                    format!("{:.0}M Drive", size / 1_048_576.0)
                                 }
+                            };
+
+                            if fstype != "swap" && !fstype.contains("member") {
+                                final_disks.push(DiskInfo {
+                                    name: display_name,
+                                    device: dev_path,
+                                    used_space: 0.0,
+                                    available_space: size,
+                                    total_space: size,
+                                    is_mounted: false,
+                                });
                             }
                         }
                     }
+                }
             }
         }
         final_disks

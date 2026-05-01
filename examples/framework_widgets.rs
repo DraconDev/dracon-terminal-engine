@@ -1,11 +1,11 @@
 //! Demonstrates framework widgets working together.
 
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Checkbox, Form, ProgressBar, Radio, Slider, Spinner,
-    SearchInput, Select, Toast, ToastKind, Toggle, Tooltip,
+    Checkbox, Form, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toast, ToastKind,
+    Toggle, Tooltip,
 };
-use dracon_terminal_engine::framework::theme::Theme;
 
 fn main() {
     println!("Framework Widgets Demo");
@@ -16,7 +16,10 @@ fn main() {
 
     let cb = Checkbox::new(WidgetId::new(1), "Enable feature");
     let plane = cb.render(ratatui::layout::Rect::new(0, 0, 40, 3));
-    println!("Checkbox rendered (width={}, height={})", plane.width, plane.height);
+    println!(
+        "Checkbox rendered (width={}, height={})",
+        plane.width, plane.height
+    );
 
     let mut toggle = Toggle::new(WidgetId::new(2), "Mode");
     toggle.toggle();
@@ -41,7 +44,8 @@ fn main() {
     let search = SearchInput::new(WidgetId::new(7));
     println!("Search input query: '{}'", search.query());
 
-    let select = Select::new(WidgetId::new(8)).with_options(vec!["One".to_string(), "Two".to_string()]);
+    let select =
+        Select::new(WidgetId::new(8)).with_options(vec!["One".to_string(), "Two".to_string()]);
     println!("Select label: {:?}", select.selected_label());
 
     let toast = Toast::new(WidgetId::new(10), "Operation complete").with_kind(ToastKind::Success);
@@ -50,7 +54,9 @@ fn main() {
     let tooltip = Tooltip::new(WidgetId::new(11), "Help text here");
     println!("Tooltip text: '{}'", tooltip.text());
 
-    let form = Form::new(WidgetId::new(13)).add_field("Username").add_field("Password");
+    let form = Form::new(WidgetId::new(13))
+        .add_field("Username")
+        .add_field("Password");
     println!("Form widget created with id: {:?}", form.id());
 
     println!();

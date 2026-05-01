@@ -1,12 +1,12 @@
 //! Shared test utilities and helpers used across integration tests.
 
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::compositor::Color;
+use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use ratatui::layout::Rect;
 use std::cell::Cell;
 use std::rc::Rc;
-use ratatui::layout::Rect;
 
 /// Creates a press KeyEvent for the given KeyCode.
 pub fn make_key(code: KeyCode) -> KeyEvent {

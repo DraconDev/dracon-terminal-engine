@@ -2,8 +2,8 @@
 //!
 //! A single-line text input optimized for search queries.
 
-use crate::framework::widget::WidgetId;
 use crate::framework::widget::Widget;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A search input widget with a query buffer and submit callback.
@@ -86,7 +86,12 @@ impl Widget for SearchInput {
         self.base.handle_key(key)
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         self.base.handle_mouse(kind, col, row)
     }
 }

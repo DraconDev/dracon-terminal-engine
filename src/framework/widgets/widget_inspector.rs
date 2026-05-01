@@ -2,9 +2,9 @@
 //!
 //! Shows the tree structure of active widgets with their IDs and states.
 
-use crate::framework::widget::WidgetId;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A node in the widget hierarchy for inspection.

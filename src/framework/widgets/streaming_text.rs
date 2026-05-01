@@ -53,10 +53,7 @@ impl StreamingText {
     }
 
     pub fn with_id(id: WidgetId) -> Self {
-        Self {
-            id,
-            ..Self::new()
-        }
+        Self { id, ..Self::new() }
     }
 
     pub fn max_lines(mut self, max: usize) -> Self {
@@ -174,7 +171,14 @@ impl Widget for StreamingText {
             for (i, c) in msg.chars().enumerate() {
                 let idx = char_index + i;
                 if idx < plane.cells.len() {
-                    plane.cells[idx] = Cell { char: c, fg: self.theme.inactive_fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                    plane.cells[idx] = Cell {
+                        char: c,
+                        fg: self.theme.inactive_fg,
+                        bg: self.theme.bg,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
             return plane;
@@ -187,7 +191,10 @@ impl Widget for StreamingText {
             0
         };
 
-        for (screen_row, line_idx) in (start_idx..self.lines.len()).take(area.height as usize).enumerate() {
+        for (screen_row, line_idx) in (start_idx..self.lines.len())
+            .take(area.height as usize)
+            .enumerate()
+        {
             if let Some(line) = self.lines.get(line_idx) {
                 let display = if self.word_wrap {
                     let chars = line.chars().peekable();
@@ -209,7 +216,14 @@ impl Widget for StreamingText {
                 for (i, c) in display.chars().enumerate().take(area.width as usize) {
                     let idx = screen_row * area.width as usize + i;
                     if idx < plane.cells.len() {
-                        plane.cells[idx] = Cell { char: c, fg: self.theme.fg, bg: self.theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                        plane.cells[idx] = Cell {
+                            char: c,
+                            fg: self.theme.fg,
+                            bg: self.theme.bg,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                     }
                 }
             }

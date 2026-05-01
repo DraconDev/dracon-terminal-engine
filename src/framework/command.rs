@@ -43,20 +43,29 @@ use std::thread;
 // OUTPUT PARSER
 // ═══════════════════════════════════════════════════════════════
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub enum OutputParser {
-    JsonKey { key: String },
-    JsonPath { path: String },
-    JsonArray { item_key: Option<String> },
-    Regex { pattern: String, group: Option<usize> },
+    JsonKey {
+        key: String,
+    },
+    JsonPath {
+        path: String,
+    },
+    JsonArray {
+        item_key: Option<String>,
+    },
+    Regex {
+        pattern: String,
+        group: Option<usize>,
+    },
     LineCount,
     ExitCode,
-    SeverityLine { patterns: HashMap<String, String> },
+    SeverityLine {
+        patterns: HashMap<String, String>,
+    },
     #[default]
     Plain,
 }
-
 
 impl OutputParser {
     pub fn parse(&self, stdout: &str, _stderr: &str, exit_code: i32) -> ParsedOutput {
@@ -87,7 +96,9 @@ impl OutputParser {
                             .iter()
                             .map(|v| {
                                 if let Some(k) = item_key {
-                                    v.get(k).map(|x| x.to_string()).unwrap_or_else(|| v.to_string())
+                                    v.get(k)
+                                        .map(|x| x.to_string())
+                                        .unwrap_or_else(|| v.to_string())
                                 } else {
                                     v.to_string()
                                 }
@@ -113,9 +124,7 @@ impl OutputParser {
                 let count = stdout.lines().count();
                 ParsedOutput::Scalar(count.to_string())
             }
-            OutputParser::ExitCode => {
-                ParsedOutput::Scalar(exit_code.to_string())
-            }
+            OutputParser::ExitCode => ParsedOutput::Scalar(exit_code.to_string()),
             OutputParser::SeverityLine { patterns } => {
                 let lines: Vec<LoggedLine> = stdout
                     .lines()
@@ -299,7 +308,10 @@ impl CommandRunner {
 
         thread::spawn(move || {
             if let Ok(code) = child.wait() {
-                let _ = exit_tx.send(format!("__EXIT_CODE__{}", code.code().map(|c| c).unwrap_or(-1)));
+                let _ = exit_tx.send(format!(
+                    "__EXIT_CODE__{}",
+                    code.code().map(|c| c).unwrap_or(-1)
+                ));
             }
         });
 
@@ -315,10 +327,7 @@ impl CommandRunner {
             return (String::new(), String::new(), -1);
         }
 
-        let output = match Command::new(parts[0])
-            .args(&parts[1..])
-            .output()
-        {
+        let output = match Command::new(parts[0]).args(&parts[1..]).output() {
             Ok(o) => o,
             Err(_) => return (String::new(), String::new(), -1),
         };
@@ -373,8 +382,7 @@ impl Default for AppConfig {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct WidgetConfig {
     #[serde(default)]
     pub id: Option<usize>,
@@ -398,8 +406,7 @@ pub struct WidgetConfig {
     pub options: HashMap<String, serde_json::Value>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct LayoutConfig {
     #[serde(default)]
     pub header_height: Option<u16>,
@@ -408,8 +415,6 @@ pub struct LayoutConfig {
     #[serde(default)]
     pub footer_height: Option<u16>,
 }
-
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AreaConfig {
@@ -439,8 +444,7 @@ impl AppConfig {
     }
 
     pub fn from_toml_str(content: &str) -> std::io::Result<Self> {
-        toml::from_str(content)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+        toml::from_str(content).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
     }
 
     pub fn load_user_config(name: &str) -> std::io::Result<Self> {
@@ -483,7 +487,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_key() {
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let out = parser.parse(r#"{"status": "OK", "count": 5}"#, "", 0);
         match out {
             ParsedOutput::Scalar(s) => assert_eq!(s, "\"OK\""),
@@ -493,7 +499,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_path() {
-        let parser = OutputParser::JsonPath { path: "data.result".to_string() };
+        let parser = OutputParser::JsonPath {
+            path: "data.result".to_string(),
+        };
         let out = parser.parse(r#"{"data": {"result": "value"}}"#, "", 0);
         match out {
             ParsedOutput::Scalar(s) => assert_eq!(s, "\"value\""),
@@ -503,7 +511,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_array() {
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
         let out = parser.parse(r#"[{"name": "a"}, {"name": "b"}]"#, "", 0);
         match out {
             ParsedOutput::List(items) => {
@@ -541,9 +551,12 @@ mod tests {
     #[test]
     fn test_output_parser_severity_line() {
         let parser = OutputParser::SeverityLine {
-            patterns: [("ERROR".to_string(), "red".to_string()), ("WARN".to_string(), "yellow".to_string())]
-                .into_iter()
-                .collect(),
+            patterns: [
+                ("ERROR".to_string(), "red".to_string()),
+                ("WARN".to_string(), "yellow".to_string()),
+            ]
+            .into_iter()
+            .collect(),
         };
         let out = parser.parse("INFO: starting\nERROR: failed\nWARN: slow", "", 0);
         match out {
@@ -620,7 +633,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_key_missing_key() {
-        let parser = OutputParser::JsonKey { key: "nonexistent".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "nonexistent".to_string(),
+        };
         let out = parser.parse(r#"{"status": "OK"}"#, "", 0);
         match out {
             ParsedOutput::None => {}
@@ -630,7 +645,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_key_malformed_json() {
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let out = parser.parse("not valid json {{{", "", 0);
         match out {
             ParsedOutput::None => {}
@@ -640,7 +657,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_path_missing() {
-        let parser = OutputParser::JsonPath { path: "data.result".to_string() };
+        let parser = OutputParser::JsonPath {
+            path: "data.result".to_string(),
+        };
         let out = parser.parse(r#"{"data": {}}"#, "", 0);
         match out {
             ParsedOutput::Scalar(s) => assert!(!s.is_empty()),
@@ -650,7 +669,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_path_empty() {
-        let parser = OutputParser::JsonPath { path: "a.b.c".to_string() };
+        let parser = OutputParser::JsonPath {
+            path: "a.b.c".to_string(),
+        };
         let out = parser.parse(r#"{}"#, "", 0);
         match out {
             ParsedOutput::Scalar(s) => assert!(s.contains("null") || s.is_empty() || s == "{}"),
@@ -675,7 +696,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_array_malformed() {
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
         let out = parser.parse("not json at all", "", 0);
         match out {
             ParsedOutput::None => {}
@@ -685,7 +708,9 @@ mod tests {
 
     #[test]
     fn test_output_parser_json_array_non_array() {
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
         let out = parser.parse(r#"{"items": "not an array"}"#, "", 0);
         match out {
             ParsedOutput::None => {}
@@ -788,7 +813,9 @@ mod tests {
     #[test]
     fn test_output_parser_severity_line_empty() {
         let parser = OutputParser::SeverityLine {
-            patterns: [("ERROR".to_string(), "red".to_string())].into_iter().collect(),
+            patterns: [("ERROR".to_string(), "red".to_string())]
+                .into_iter()
+                .collect(),
         };
         let out = parser.parse("", "", 0);
         match out {
@@ -805,9 +832,15 @@ mod tests {
                 ("ERROR".to_string(), "red".to_string()),
                 ("WARN".to_string(), "yellow".to_string()),
                 ("DEBUG".to_string(), "blue".to_string()),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
         };
-        let out = parser.parse("INFO: starting\nDEBUG: debug msg\nWARN: slow\nERROR: failed\nFATAL: crash", "", 0);
+        let out = parser.parse(
+            "INFO: starting\nDEBUG: debug msg\nWARN: slow\nERROR: failed\nFATAL: crash",
+            "",
+            0,
+        );
         match out {
             ParsedOutput::Lines(lines) => {
                 assert_eq!(lines.len(), 5);
@@ -853,7 +886,7 @@ mod tests {
     fn test_command_runner_sync_exit_nonzero() {
         let runner = CommandRunner::new("ls /nonexistent/path/that/does/not/exist 2>/dev/null");
         let (stdout, stderr, code) = runner.run_sync();
-        assert!(code == 0 || code != 0);
+        assert!(code != 0);
     }
 
     #[test]
@@ -863,53 +896,62 @@ mod tests {
         assert!(stderr.contains("No such file") || stderr.is_empty() || code != 0);
     }
 
-#[test]
+    #[test]
     fn test_command_runner_run_and_parse_json_key() {
         let runner = CommandRunner::new(r#"echo '{"status":"OK"}'"#);
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let out = runner.run_and_parse(&parser);
         match &out {
             ParsedOutput::Scalar(s) => assert!(s.contains("OK") || s.contains("status")),
-            ParsedOutput::None => {},
-            other => {},
+            ParsedOutput::None => {}
+            other => {}
         }
     }
 
     #[test]
     fn test_command_runner_run_and_parse_json_array() {
         let runner = CommandRunner::new(r#"echo '{"items":[{"name":"a"},{"name":"b"}]}'"#);
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
         let out = runner.run_and_parse(&parser);
         match &out {
             ParsedOutput::List(items) => assert!(items.len() >= 1),
-            ParsedOutput::None => {},
-            other => {},
+            ParsedOutput::None => {}
+            other => {}
         }
     }
 
     #[test]
     fn test_command_runner_run_and_parse_severity() {
-        let runner = CommandRunner::new(r#"echo 'INFO: Hello
+        let runner = CommandRunner::new(
+            r#"echo 'INFO: Hello
 ERROR: World
-DEBUG: Test'"#);
+DEBUG: Test'"#,
+        );
         let parser = OutputParser::SeverityLine {
             patterns: [
                 ("ERROR".to_string(), "red".to_string()),
                 ("DEBUG".to_string(), "blue".to_string()),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
         };
         let out = runner.run_and_parse(&parser);
         match &out {
             ParsedOutput::Lines(lines) => assert!(lines.len() >= 1),
-            ParsedOutput::None => {},
-            _ => {},
+            ParsedOutput::None => {}
+            _ => {}
         }
     }
 
     #[test]
     fn test_bound_command_parse_output() {
-        let cmd = BoundCommand::new(r#"printf '{"value":42}'"#)
-            .parser(OutputParser::JsonKey { key: "value".to_string() });
+        let cmd = BoundCommand::new(r#"printf '{"value":42}'"#).parser(OutputParser::JsonKey {
+            key: "value".to_string(),
+        });
         let out = cmd.parse_output(r#"{"value":42}"#, "", 0);
         match out {
             ParsedOutput::Scalar(s) => assert_eq!(s, "42"),

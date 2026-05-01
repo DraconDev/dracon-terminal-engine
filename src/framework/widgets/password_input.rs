@@ -1,7 +1,7 @@
 //! Password input widget with character masking.
 
-use crate::framework::widget::WidgetId;
 use crate::framework::widget::Widget;
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A password input widget that masks characters as they're typed.
@@ -100,7 +100,12 @@ impl Widget for PasswordInput {
         self.base.handle_key(key)
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         self.base.handle_mouse(kind, col, row)
     }
 }

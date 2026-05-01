@@ -2,11 +2,11 @@
 //!
 //! A transient notification that appears briefly and auto-dismisses.
 
-use std::time::{Duration, Instant};
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
+use std::time::{Duration, Instant};
 
 /// Severity level for toast notifications.
 pub enum ToastKind {

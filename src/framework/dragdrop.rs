@@ -45,7 +45,11 @@ impl DragGhost {
     pub fn new(label: impl Into<String>) -> Self {
         let label = label.into();
         let width = label.width() as u16 + 2;
-        Self { label, width, height: 1 }
+        Self {
+            label,
+            width,
+            height: 1,
+        }
     }
 
     /// Overrides the width and height of the ghost.
@@ -131,7 +135,13 @@ impl<T: Clone + 'static> DragManager<T> {
 
     /// Registers a drop target rectangle with the given geometry and ID.
     pub fn register_target(&mut self, id: T, x: u16, y: u16, width: u16, height: u16) {
-        self.targets.push(DropTarget { id, x, y, width, height });
+        self.targets.push(DropTarget {
+            id,
+            x,
+            y,
+            width,
+            height,
+        });
     }
 
     /// Begins a drag operation with the given data, source id, and ghost.
@@ -150,10 +160,16 @@ impl<T: Clone + 'static> DragManager<T> {
     /// Ends the drag operation. Checks if the ghost overlaps any registered target.
     /// Returns `Some(target_id)` if dropped on a target, `None` otherwise.
     pub fn end_drag(&mut self) -> Option<T> {
-        let target = self.targets.iter().find(|t| {
-            self.ghost_x >= t.x && self.ghost_x < t.x.saturating_add(t.width)
-                && self.ghost_y >= t.y && self.ghost_y < t.y.saturating_add(t.height)
-        }).cloned();
+        let target = self
+            .targets
+            .iter()
+            .find(|t| {
+                self.ghost_x >= t.x
+                    && self.ghost_x < t.x.saturating_add(t.width)
+                    && self.ghost_y >= t.y
+                    && self.ghost_y < t.y.saturating_add(t.height)
+            })
+            .cloned();
 
         let result = target.map(|t| t.id);
 
@@ -188,7 +204,9 @@ impl<T: Clone + 'static> DragManager<T> {
 
     /// Renders and returns the ghost `Plane` if a ghost exists, otherwise `None`.
     pub fn ghost_plane(&self) -> Option<Plane> {
-        self.ghost.as_ref().map(|g| g.render(self.ghost_x, self.ghost_y))
+        self.ghost
+            .as_ref()
+            .map(|g| g.render(self.ghost_x, self.ghost_y))
     }
 }
 
