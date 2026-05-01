@@ -35,7 +35,8 @@ use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
 use ratatui::layout::Rect;
-use std::collections::BTreeMap;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const TAB_DASHBOARD: usize = 0;
 const TAB_LOGS: usize = 1;
@@ -114,20 +115,9 @@ struct StatsState {
 
 impl StatsState {
     fn new(base_id: WidgetId) -> Self {
-        let mut pairs = BTreeMap::new();
-        pairs.insert("CPU".to_string(), "Intel i7-12700K".to_string());
-        pairs.insert("Memory".to_string(), "32GB DDR5".to_string());
-        pairs.insert("Disk".to_string(), "1TB NVMe".to_string());
-        pairs.insert("Uptime".to_string(), "42 days".to_string());
-        pairs.insert("Load".to_string(), "0.42, 0.38, 0.35".to_string());
-        pairs.insert("Processes".to_string(), "247".to_string());
         Self {
             grid: KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::default()),
         }
-    }
-
-    fn set_pairs(&mut self, pairs: BTreeMap<String, String>) {
-        self.grid.set_pairs(pairs);
     }
 }
 
@@ -137,7 +127,6 @@ struct TabbedApp {
     logs: LogsState,
     settings: SettingsState,
     stats: StatsState,
-    tick_count: u64,
 }
 
 impl TabbedApp {
@@ -149,7 +138,6 @@ impl TabbedApp {
             logs: LogsState::new(WidgetId::new(20)),
             settings: SettingsState::new(WidgetId::new(30)),
             stats: StatsState::new(WidgetId::new(40)),
-            tick_count: 0,
         }
     }
 
@@ -158,7 +146,7 @@ impl TabbedApp {
     }
 }
 
-fn render_dashboard(plane: &mut Plane, dashboard: &DashboardState, area: Rect, theme: Theme) {
+fn render_dashboard(plane: &mut Plane, dashboard: &DashboardState, area: Rect) {
     let half_w = area.width / 2;
     let half_h = area.height / 2;
 
@@ -276,14 +264,14 @@ impl Widget for TabbedApp {
         WidgetId::new(1)
     }
 
-    fn set_id(&mut self, id: WidgetId) {
+    fn set_id(&mut self, _id: WidgetId) {
     }
 
     fn area(&self) -> Rect {
         Rect::new(0, 0, 80, 24)
     }
 
-    fn set_area(&mut self, area: Rect) {
+    fn set_area(&mut self, _area: Rect) {
     }
 
     fn z_index(&self) -> u16 {
@@ -326,14 +314,14 @@ impl Widget for TabbedApp {
         let content_area = Rect::new(0, tabbar_height + 1, area.width, area.height - tabbar_height - 1);
 
         match self.active_tab() {
-            TAB_DASHBOARD => render_dashboard(&mut plane, &self.dashboard, content_area, theme),
+            TAB_DASHBOARD => render_dashboard(&mut plane, &self.dashboard, content_area),
             TAB_LOGS => render_logs(&mut plane, &self.logs, content_area),
             TAB_SETTINGS => render_settings(&mut plane, &self.settings, content_area, theme),
             TAB_STATS => render_stats(&mut plane, &self.stats, content_area),
             _ => {}
         }
 
-        let hint = format!("[←/→] Switch tabs | Active: {}", match self.active_tab() {
+        let hint = format!("[Left/Right] Switch tabs | Active: {}", match self.active_tab() {
             TAB_DASHBOARD => "Dashboard",
             TAB_LOGS => "Logs",
             TAB_SETTINGS => "Settings",
@@ -395,26 +383,25 @@ impl Widget for TabbedApp {
 fn main() -> std::io::Result<()> {
     let theme = Theme::cyberpunk();
 
-    let mut app = TabbedApp::new();
+    let app = Rc::new(RefCell::new(TabbedApp::new()));
+    let app_for_tick = Rc::clone(&app);
 
     App::new()?
         .title("Tabbed Panels Demo")
         .fps(30)
         .theme(theme)
-        .on_tick(|ctx, tick| {
-            app.tick_count = tick;
-
+        .on_tick(move |ctx, tick| {
+            let mut app = app_for_tick.borrow_mut();
             let cpu = 45.0 + (tick as f64 % 20.0);
             let memory = 60.0 + (tick as f64 % 15.0);
             let disk = 30.0 + (tick as f64 % 10.0);
             let network = 20.0 + (tick as f64 % 25.0);
             app.dashboard.set_values(cpu, memory, disk, network);
-
             ctx.mark_all_dirty();
         })
-        .run(|ctx| {
+        .run(move |ctx| {
             let (w, h) = ctx.compositor().size();
-
+            let app = app.borrow();
             let tabbed_plane = app.render(Rect::new(0, 0, w, h));
             ctx.add_plane(tabbed_plane);
         })

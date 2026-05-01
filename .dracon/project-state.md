@@ -1,22 +1,30 @@
 # Project State
 
 ## Current Focus
-Refactored keyboard handling in the TabbedApp widget for better encapsulation and cleaner code structure.
+Added comprehensive system monitoring dashboard with auto-refreshing metrics and theme switching
 
 ## Context
-The previous implementation had nested conditional logic for handling keyboard events in the settings tab, which made the code harder to maintain. This refactoring simplifies the flow by directly returning from the handler when appropriate.
+The project is expanding its example collection with practical applications. The system monitor demonstrates core widget functionality in a real-world dashboard pattern.
 
 ## Completed
-- [x] Removed redundant `handled` variable and nested conditionals
-- [x] Simplified keyboard event handling in the settings tab
-- [x] Improved code readability by reducing nesting levels
+- [x] Added system monitor dashboard with CPU, memory, disk, and network gauges
+- [x] Implemented process list with sortable columns
+- [x] Added theme cycling capability (5 themes)
+- [x] Created auto-refresh mechanism (2-second updates)
+- [x] Added status indicators for system health
+- [x] Implemented uptime counter
+- [x] Added cookbook examples for debug overlay, menu system, and split resizer
+- [x] Updated menu demo example
+- [x] Modified tabbed panels example
+- [x] Removed redundant tree navigator example
 
 ## In Progress
-- [ ] No active work in progress
+- [x] System monitor implementation is complete with all requested features
 
 ## Blockers
-- None identified
+- None identified for this set of changes
 
 ## Next Steps
-1. Verify the refactored behavior matches the original functionality
-2. Consider additional widget refactorings based on this pattern
+1. Review system monitor for potential performance optimizations
+2. Consider adding additional monitoring metrics
+3. Explore additional dashboard layout variations

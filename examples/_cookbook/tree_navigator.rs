@@ -18,14 +18,11 @@
 //!
 //! Mouse: Click to select, click folder to expand
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Breadcrumbs, SplitPane, StatusBar, StatusSegment, Tree, TreeNode};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
 struct MockFs {
@@ -75,7 +72,7 @@ struct TreeNav {
 }
 
 impl TreeNav {
-    fn new() -> Self {
+    fn new(id: WidgetId) -> Self {
         let fs = MockFs {
             name: "root",
             is_dir: true,
@@ -99,7 +96,7 @@ impl TreeNav {
         let breadcrumbs = Breadcrumbs::new(segments);
 
         Self {
-            id: WidgetId::new(0),
+            id,
             tree,
             breadcrumbs,
             fs,
@@ -210,8 +207,7 @@ impl Widget for TreeNav {
         plane
     }
 
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
-        use crate::input::event::{KeyCode, KeyEventKind};
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
             return false;
         }
@@ -239,7 +235,7 @@ impl Widget for TreeNav {
 
     fn handle_mouse(
         &mut self,
-        kind: crate::input::event::MouseEventKind,
+        kind: MouseEventKind,
         col: u16,
         row: u16,
     ) -> bool {
@@ -345,19 +341,12 @@ fn main() -> std::io::Result<()> {
         .title("Tree Navigator")
         .fps(30)
         .theme(theme)
-        .run(move |ctx| {
+        .run(|ctx| {
             let (w, h) = ctx.compositor().size();
             let area = Rect::new(0, 0, w, h);
-
-            let nav = Rc::new(RefCell::new(TreeNav::new()));
-            let nav_clone = nav.clone();
-
-            let plane = nav.borrow().render(area);
+            let mut nav = TreeNav::new(WidgetId::new(0));
+            nav.set_area(area);
+            let plane = nav.render(area);
             ctx.add_plane(plane);
-
-            ctx.on_key(move |key| {
-                let mut nav = nav_clone.borrow_mut();
-                nav.handle_key(key);
-            });
         })
 }
