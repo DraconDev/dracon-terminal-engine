@@ -1,10 +1,9 @@
 # Project State
 
 ## Current Focus
-Refactored test infrastructure to eliminate unsafe code and simplify terminal creation for tests
+Enhancing robustness and test coverage by updating test expectations, replacing file-based terminal testing with stdout, and refining JSON parsing assertions to handle various null/empty string representations.
 
 ## Completed
-- [x] Replaced unsafe `dummy_terminal()` with safe `make_test_terminal()` using `Terminal::new()` and `/dev/null`
-- [x] Removed unsafe file descriptor operations (`into_raw_fd`, `from_raw_fd`) and associated imports
-- [x] Simplified test terminal setup by using `File::open("/dev/null")` instead of creating temporary files
-- [x] Updated all 14 test functions to use the new `make_test_terminal()?` pattern with proper error handling
+- [x] Replaced file-based terminal (`File::open("/dev/null")`) with `io::stdout()` in `make_test_terminal` for more reliable test execution
+- [x] Updated JSON parsing tests to accept multiple null/empty representations (`"null"`, `""`, `{}`) instead of strict "null" checks
+- [x] Modified `CommandRunner` test assertions to validate non-zero exit codes properly (fixing redundant tautology in original assertion)

@@ -647,12 +647,9 @@ impl<'a> Ctx<'a> {
 mod tests {
     use super::*;
     use crate::framework::command::{AppConfig, AreaConfig, LayoutConfig, ParserConfig, WidgetConfig};
-    use std::fs::File;
-    use std::io;
 
-    fn make_test_terminal() -> io::Result<crate::Terminal<File>> {
-        let file = File::open("/dev/null")?;
-        crate::Terminal::new(file)
+    fn make_test_terminal() -> io::Result<crate::Terminal<io::Stdout>> {
+        crate::Terminal::new(io::stdout())
     }
 
     #[test]
@@ -784,7 +781,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -811,7 +808,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -839,7 +836,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -866,7 +863,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -893,7 +890,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -919,7 +916,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -946,7 +943,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -971,7 +968,7 @@ mod tests {
             theme: &theme,
             frame_count: 100,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -997,7 +994,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1027,7 +1024,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1057,7 +1054,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1084,7 +1081,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1114,7 +1111,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1142,7 +1139,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
@@ -1169,7 +1166,7 @@ mod tests {
             theme: &theme,
             frame_count: 0,
             last_frame: &last_frame,
-            terminal: &mut make_test_terminal()?,
+            terminal: &mut make_test_terminal().unwrap(),
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
