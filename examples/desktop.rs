@@ -174,7 +174,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for y in 0..size.1 {
                 let drop_y = drops[x as usize] as i32;
                 let dist = drop_y - y as i32;
-                if dist >= 0 && dist < 5 {
+                if (0..5).contains(&dist) {
                     let char = if dist == 0 { '0' } else { '1' };
                     let fg = if dist == 0 { 46 } else { 22 };
                     let mut cell = Cell::default();
@@ -208,14 +208,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Reset;
                     }
 
-                    if header {
-                        if wx > 1 && wx < win.title.len() as u16 + 2 {
+                    if header
+                        && wx > 1 && wx < win.title.len() as u16 + 2 {
                             c.char = win.title.chars().nth((wx - 2) as usize).unwrap_or(' ');
                             c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
                             c.bg =
                                 dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
-                    }
                     p.put_cell(wx, wy, c);
                 }
             }

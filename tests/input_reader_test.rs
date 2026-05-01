@@ -4,7 +4,6 @@ mod common;
 
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
 use dracon_terminal_engine::input::kitty_key::parse_kitty_keyboard;
-use std::io;
 
 #[test]
 fn test_from_runtime_event_identity() {

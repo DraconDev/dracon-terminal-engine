@@ -590,7 +590,7 @@ mod tests {
     #[test]
     fn test_command_runner_sync_invalid_cmd() {
         let runner = CommandRunner::new("");
-        let (stdout, stderr, code) = runner.run_sync();
+        let (stdout, _stderr, code) = runner.run_sync();
         assert_eq!(stdout, "");
         assert_eq!(code, -1);
     }
@@ -885,14 +885,14 @@ mod tests {
     #[test]
     fn test_command_runner_sync_exit_nonzero() {
         let runner = CommandRunner::new("ls /nonexistent/path/that/does/not/exist 2>/dev/null");
-        let (stdout, stderr, code) = runner.run_sync();
+        let (_stdout, _stderr, code) = runner.run_sync();
         assert!(code != 0);
     }
 
     #[test]
     fn test_command_runner_sync_stderr() {
         let runner = CommandRunner::new("ls /nonexistent/path/that/does/not/exist");
-        let (stdout, stderr, code) = runner.run_sync();
+        let (_stdout, stderr, code) = runner.run_sync();
         assert!(stderr.contains("No such file") || stderr.is_empty() || code != 0);
     }
 
@@ -906,7 +906,7 @@ mod tests {
         match &out {
             ParsedOutput::Scalar(s) => assert!(s.contains("OK") || s.contains("status")),
             ParsedOutput::None => {}
-            other => {}
+            _other => {}
         }
     }
 
@@ -918,9 +918,9 @@ mod tests {
         };
         let out = runner.run_and_parse(&parser);
         match &out {
-            ParsedOutput::List(items) => assert!(items.len() >= 1),
+            ParsedOutput::List(items) => assert!(!items.is_empty()),
             ParsedOutput::None => {}
-            other => {}
+            _other => {}
         }
     }
 
@@ -941,7 +941,7 @@ DEBUG: Test'"#,
         };
         let out = runner.run_and_parse(&parser);
         match &out {
-            ParsedOutput::Lines(lines) => assert!(lines.len() >= 1),
+            ParsedOutput::Lines(lines) => assert!(!lines.is_empty()),
             ParsedOutput::None => {}
             _ => {}
         }
@@ -979,7 +979,7 @@ DEBUG: Test'"#,
             }
             lines.push(line);
         }
-        assert!(lines.len() >= 1 || lines.is_empty());
+        assert!(!lines.is_empty() || lines.is_empty());
     }
 
     #[test]
@@ -1016,7 +1016,7 @@ DEBUG: Test'"#,
     #[test]
     fn test_command_runner_run_sync_whitespace_only() {
         let runner = CommandRunner::new("   ");
-        let (stdout, stderr, code) = runner.run_sync();
+        let (_stdout, _stderr, code) = runner.run_sync();
         assert_eq!(code, -1);
     }
 

@@ -1,12 +1,11 @@
 //! Tests for HitZone system.
 
 mod common;
-use common::make_area;
 
 use dracon_terminal_engine::framework::hitzone::{
     ClickKind, DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyModifiers, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyModifiers, MouseButton, MouseEventKind};
 use std::cell::Cell;
 use std::rc::Rc;
 

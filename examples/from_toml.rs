@@ -6,7 +6,6 @@
 //! See `from_toml.toml` for the configuration format.
 
 use std::env;
-use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let toml_path = env::args()

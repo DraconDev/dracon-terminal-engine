@@ -1,10 +1,10 @@
 //! Edge case tests for TextEditorAdapter.
 
-use dracon_terminal_engine::compositor::{Color, Plane, Styles};
+use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
 use dracon_terminal_engine::input::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
@@ -53,11 +53,11 @@ fn test_cursor_position_both_scroll_and_area_offset() {
     let (x, y) = pos.unwrap();
 
     assert!(
-        x >= 10 && x < 10 + 30,
+        (10..10 + 30).contains(&x),
         "cursor x should be within area x range"
     );
     assert!(
-        y >= 20 && y < 20 + 15,
+        (20..20 + 15).contains(&y),
         "cursor y should be within area y range"
     );
 }
@@ -121,7 +121,7 @@ fn test_render_with_line_numbers() {
     let adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     let plane = adapter.render(rect(0, 0, 40, 10));
 
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
     let non_space: Vec<_> = plane.cells.iter().filter(|c| c.char != ' ').collect();
     assert!(
         !non_space.is_empty(),
@@ -172,7 +172,7 @@ fn test_render_plane_area_matches() {
 
 #[test]
 fn test_handle_key_press_is_forwarded() {
-    let mut editor = TextEditor::with_content("abc");
+    let editor = TextEditor::with_content("abc");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -183,7 +183,7 @@ fn test_handle_key_press_is_forwarded() {
 
 #[test]
 fn test_handle_key_repeat_is_forwarded() {
-    let mut editor = TextEditor::with_content("abc");
+    let editor = TextEditor::with_content("abc");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -199,7 +199,7 @@ fn test_handle_key_repeat_is_forwarded() {
 
 #[test]
 fn test_handle_key_release_returns_false() {
-    let mut editor = TextEditor::with_content("abc");
+    let editor = TextEditor::with_content("abc");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -218,7 +218,7 @@ fn test_handle_key_release_returns_false() {
 
 #[test]
 fn test_handle_key_typing_char_advances() {
-    let mut editor = TextEditor::with_content("");
+    let editor = TextEditor::with_content("");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -233,7 +233,7 @@ fn test_handle_key_typing_char_advances() {
 
 #[test]
 fn test_handle_mouse_left_press_at_origin() {
-    let mut editor = TextEditor::with_content("hello");
+    let editor = TextEditor::with_content("hello");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 
@@ -253,7 +253,7 @@ fn test_handle_mouse_out_of_bounds_coords() {
 
 #[test]
 fn test_handle_mouse_scroll_propagates() {
-    let mut editor =
+    let editor =
         TextEditor::with_content("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
@@ -270,7 +270,7 @@ fn test_handle_mouse_scroll_propagates() {
 
 #[test]
 fn test_handle_mouse_left_drag() {
-    let mut editor = TextEditor::with_content("hello world");
+    let editor = TextEditor::with_content("hello world");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 30, 5));
 

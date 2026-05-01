@@ -190,7 +190,7 @@ fn test_framework_button_empty_label_fallback() {
     let area = make_area(20, 3);
     let plane = btn.render(area);
     assert_eq!(plane.cells[0].char, '[');
-    let end_idx = (1 + "Button".len()) as usize;
+    let end_idx = (1 + "Button".len());
     assert_eq!(plane.cells[end_idx].char, ']');
 }
 

@@ -538,7 +538,7 @@ fn test_theme_default_is_dark() {
 #[test]
 fn test_theme_clone() {
     let a = Theme::cyberpunk();
-    let b = a.clone();
+    let b = a;
     assert_eq!(a.name, b.name);
     assert_eq!(a.bg, b.bg);
     assert_eq!(a.fg, b.fg);

@@ -116,11 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         backend.compositor_mut().planes.retain(|p| p.id == 0);
 
         // Input Simulation
-        if tick > 50 && tick < 150 {
-            alert_visible = true;
-        } else {
-            alert_visible = false;
-        }
+        alert_visible = tick > 50 && tick < 150;
 
         if alert_visible {
             let mut alert = Plane::new(99, width, height);

@@ -156,12 +156,12 @@ fn test_adapter_render_fills_cells() {
     assert_eq!(gutter, 3);
 
     // First text character 'h' starts at column 3 (after gutter)
-    let idx_h = gutter as usize;
+    let idx_h = gutter;
     assert_eq!(plane.cells[idx_h].char, 'h');
     assert!(!plane.cells[idx_h].transparent);
 
     // Second character 'i' at column 4
-    let idx_i = (gutter + 1) as usize;
+    let idx_i = (gutter + 1);
     assert_eq!(plane.cells[idx_i].char, 'i');
     assert!(!plane.cells[idx_i].transparent);
 }

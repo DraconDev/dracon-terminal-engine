@@ -768,7 +768,7 @@ mod tests {
         let mut app = App::new().unwrap();
         let label = Label::new("test");
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
-        let mut w = app.widget_mut(id);
+        let w = app.widget_mut(id);
         assert!(w.is_some());
     }
 
@@ -797,7 +797,7 @@ mod tests {
         let cmd = BoundCommand::new("ls -la");
         app.add_command(cmd.clone());
         let cmds = app.available_commands();
-        assert!(cmds.len() >= 1);
+        assert!(!cmds.is_empty());
     }
 
     #[test]
@@ -805,7 +805,7 @@ mod tests {
         use crate::framework::widgets::Label;
         let mut app = App::new().unwrap();
         let label = Label::new("test");
-        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let _id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         let cmds = app.available_commands();
         assert!(cmds.is_empty());
     }
@@ -835,7 +835,7 @@ mod tests {
 
     #[test]
     fn test_ctx_available_commands_empty() {
-        let app = App::new().unwrap();
+        let _app = App::new().unwrap();
         let mut compositor = Compositor::new(80, 24);
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
@@ -862,7 +862,7 @@ mod tests {
 
     #[test]
     fn test_ctx_add_plane() {
-        let app = App::new().unwrap();
+        let _app = App::new().unwrap();
         let mut compositor = Compositor::new(80, 24);
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
@@ -968,7 +968,7 @@ mod tests {
 
     #[test]
     fn test_ctx_mark_all_dirty() {
-        let app = App::new().unwrap();
+        let _app = App::new().unwrap();
         let mut compositor = Compositor::new(80, 24);
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
@@ -995,7 +995,7 @@ mod tests {
 
     #[test]
     fn test_ctx_clear() {
-        let app = App::new().unwrap();
+        let _app = App::new().unwrap();
         let mut compositor = Compositor::new(80, 24);
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
@@ -1069,7 +1069,7 @@ mod tests {
             commands: &commands,
         };
 
-        let fps = ctx.fps();
+        let _fps = ctx.fps();
     }
 
     #[test]
@@ -1181,7 +1181,7 @@ mod tests {
             commands: &commands,
         };
 
-        let (stdout, stderr, code) = ctx.run_command("echo test_run_command");
+        let (stdout, _stderr, code) = ctx.run_command("echo test_run_command");
         assert!(stdout.contains("test_run_command"));
         assert_eq!(code, 0);
     }
@@ -1419,9 +1419,9 @@ mod tests {
     fn test_app_command_tracking_on_add_widget() {
         use crate::framework::command::BoundCommand;
         let mut app = App::new().unwrap();
-        let cmd = BoundCommand::new("echo test").refresh(5);
+        let _cmd = BoundCommand::new("echo test").refresh(5);
         let label = crate::framework::widgets::Label::new("test");
-        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let _id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         let tracking = app.command_tracking.borrow();
         assert!(tracking.is_empty());
     }
@@ -1430,8 +1430,8 @@ mod tests {
     fn test_app_command_tracking_removed_on_widget_remove() {
         use crate::framework::command::BoundCommand;
         let mut app = App::new().unwrap();
-        let cmd = BoundCommand::new("echo test").refresh(5);
-        let mut label = crate::framework::widgets::Label::new("test");
+        let _cmd = BoundCommand::new("echo test").refresh(5);
+        let label = crate::framework::widgets::Label::new("test");
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         app.remove_widget(id);
         assert!(app.command_tracking.borrow().is_empty());

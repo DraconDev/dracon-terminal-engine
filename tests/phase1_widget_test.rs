@@ -141,7 +141,7 @@ fn test_toggle_with_callback() {
 
 #[test]
 fn test_widget_dirty_on_construction() {
-    let mut cb = Checkbox::new(WidgetId::new(1), "Test");
+    let cb = Checkbox::new(WidgetId::new(1), "Test");
     assert!(
         cb.needs_render(),
         "widget should be dirty after construction"
