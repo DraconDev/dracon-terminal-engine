@@ -1,10 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactored the `List` widget to improve type safety and code organization by extracting the selection callback into a dedicated type alias.
+Refactored the `Select` widget to improve type safety and code organization by introducing a dedicated `ChangeCallback` type alias for the on-change handler.
 
 ## Completed
-- [x] Extracted `SelectCallback<T>` type alias for better type safety
-- [x] Removed unused `ScrollState` import
-- [x] Simplified the `List` struct documentation
-- [x] Improved code organization by moving related types to the top of the file
+- [x] Introduced `ChangeCallback` type alias for better type safety in the `Select` widget's on-change handler
+- [x] Updated the `Select` struct to use the new `ChangeCallback` type instead of the raw closure type
