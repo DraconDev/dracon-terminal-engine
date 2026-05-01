@@ -180,14 +180,6 @@ impl LogViewer {
         }
     }
 
-    fn matches_filter_by_raw(&self, raw: &str) -> bool {
-        if let Some(ref f) = self.filter {
-            raw.contains(f)
-        } else {
-            true
-        }
-    }
-
     fn level_color(&self, level: LogLevel) -> Color {
         match level {
             LogLevel::Fatal => self.theme.error_fg,

@@ -1,5 +1,7 @@
 //! Shared test utilities and helpers used across integration tests.
 
+#![allow(dead_code)]
+
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
