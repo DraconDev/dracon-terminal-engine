@@ -140,14 +140,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "27.0.2"
+dracon-terminal-engine = "27.0.4"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.2" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.4" }
 ```
 
 ## Quick Start (Framework)
@@ -179,7 +179,9 @@ App::new().unwrap()
 cargo run --example framework_demo        # App + List + Breadcrumbs + SplitPane + Hud + SystemMonitor
 cargo run --example framework_file_manager # File browser with List + Breadcrumbs + SplitPane
 cargo run --example framework_chat        # Chat UI: message list + input bar + theme
-cargo run --example framework_widgets     # Showcase all 29 framework widgets
+cargo run --example framework_widgets     # Showcase all 35 framework widgets
+cargo run --example command_dashboard    # Command-driven dashboard with auto-refresh
+cargo run --example from_toml            # TOML-driven app configuration
 cargo run --example text_editor_demo      # Standalone TextEditor with theme switching
 
 # Engine examples — raw compositor usage
@@ -203,7 +205,7 @@ cargo test --test scroll_test          # Scroll behavior tests
 
 ## Version
 
-**v27.0.1** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v27.0.4** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
