@@ -40,164 +40,61 @@
 
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, ContextAction, ContextMenu, SplitPane, StatusBar, StatusSegment, Toast, ToastKind,
     Tree, TreeNode,
 };
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
-static MOCK_FS: FileNode = FileNode {
-    name: "root",
-    is_dir: true,
-    children: Some(&[
-        FileNode {
-            name: "src",
-            is_dir: true,
-            size: "",
-            modified: "",
-            children: Some(&[
-                FileNode {
-                    name: "main.rs",
-                    is_dir: false,
-                    size: "1.2 KB",
-                    modified: "2025-01-10",
-                    children: None,
-                },
-                FileNode {
-                    name: "lib.rs",
-                    is_dir: false,
-                    size: "3.4 KB",
-                    modified: "2025-01-12",
-                    children: None,
-                },
-            ]),
-        },
-        FileNode {
-            name: "docs",
-            is_dir: true,
-            size: "",
-            modified: "",
-            children: Some(&[
-                FileNode {
-                    name: "README.md",
-                    is_dir: false,
-                    size: "4.1 KB",
-                    modified: "2025-01-08",
-                    children: None,
-                },
-                FileNode {
-                    name: "CHANGELOG.md",
-                    is_dir: false,
-                    size: "8.7 KB",
-                    modified: "2025-01-15",
-                    children: None,
-                },
-            ]),
-        },
-        FileNode {
-            name: "tests",
-            is_dir: true,
-            size: "",
-            modified: "",
-            children: Some(&[FileNode {
-                name: "test_main.rs",
-                is_dir: false,
-                size: "0.8 KB",
-                modified: "2025-01-05",
-                children: None,
-            }]),
-        },
-        FileNode {
-            name: "Cargo.toml",
-            is_dir: false,
-            size: "2.3 KB",
-            modified: "2025-01-15",
-            children: None,
-        },
-        FileNode {
-            name: "README.md",
-            is_dir: false,
-            size: "4.1 KB",
-            modified: "2025-01-08",
-            children: None,
-        },
-        FileNode {
-            name: ".gitignore",
-            is_dir: false,
-            size: "0.1 KB",
-            modified: "2025-01-01",
-            children: None,
-        },
-    ]),
-};
-
-struct FileNode {
+struct MockFs {
     name: &'static str,
+    children: Option<Vec<MockFs>>,
     is_dir: bool,
-    children: Option<&'static [FileNode]>,
-    size: &'static str,
-    modified: &'static str,
 }
 
-impl FileNode {
+impl MockFs {
     fn icon(&self) -> &'static str {
         if self.is_dir { "📁" } else { "📄" }
     }
 
-    fn to_tree_node(&self, depth: usize) -> TreeNode {
+    fn to_tree_node(&self) -> TreeNode {
         let label = format!("{}{}", self.icon(), self.name);
         let mut node = TreeNode::new(&label);
-        node.expanded = depth == 0;
-        if let Some(children) = self.children {
+        if let Some(ref children) = self.children {
             for child in children {
-                node.add_child(child.to_tree_node(depth + 1));
+                node.add_child(child.to_tree_node());
             }
         }
         node
     }
 
-    fn find_by_path(&self, path: &[usize]) -> Option<&FileNode> {
-        if path.is_empty() {
-            return Some(self);
-        }
-        let children = self.children?;
+    fn find_by_path(&self, path: &[usize]) -> Option<&MockFs> {
+        if path.is_empty() { return Some(self); }
+        let children = self.children.as_ref()?;
         let idx = path[0];
-        if idx >= children.len() {
-            return None;
-        }
+        if idx >= children.len() { return None; }
         children[idx].find_by_path(&path[1..])
     }
 
     fn child_count(&self) -> usize {
-        self.children.map(|c| c.len()).unwrap_or(0)
+        self.children.as_ref().map(|c| c.len()).unwrap_or(0)
     }
 }
 
 struct FileEntry {
     name: String,
     is_dir: bool,
-    size: String,
-    modified: String,
 }
 
-impl std::fmt::Display for FileEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let icon = if self.is_dir { "📁" } else { "📄" };
-        write!(f, "{} {}  {}  {}", icon, self.name, self.size, self.modified)
-    }
-}
-
-enum FocusPanel {
-    Tree,
-    Table,
-    ContextMenu,
-}
+enum FocusPanel { Tree, Table, ContextMenu }
 
 struct FileManager {
     id: WidgetId,
-    fs: &'static FileNode,
+    fs: MockFs,
     tree: Tree,
+    breadcrumbs: Breadcrumbs,
     tree_path: Vec<usize>,
     selected_entry: Option<FileEntry>,
     context_menu: Option<ContextMenu>,
@@ -209,13 +106,36 @@ struct FileManager {
 
 impl FileManager {
     fn new(id: WidgetId) -> Self {
-        let root_node = MOCK_FS.to_tree_node(0);
+        let fs = MockFs {
+            name: "root",
+            is_dir: true,
+            children: Some(vec![
+                MockFs { name: "src", is_dir: true, children: Some(vec![
+                    MockFs { name: "main.rs", is_dir: false, children: None },
+                    MockFs { name: "lib.rs", is_dir: false, children: None },
+                ])},
+                MockFs { name: "docs", is_dir: true, children: Some(vec![
+                    MockFs { name: "README.md", is_dir: false, children: None },
+                    MockFs { name: "CHANGELOG.md", is_dir: false, children: None },
+                ])},
+                MockFs { name: "tests", is_dir: true, children: Some(vec![
+                    MockFs { name: "test_main.rs", is_dir: false, children: None },
+                ])},
+                MockFs { name: "Cargo.toml", is_dir: false, children: None },
+                MockFs { name: "README.md", is_dir: false, children: None },
+                MockFs { name: ".gitignore", is_dir: false, children: None },
+            ]),
+        };
+
+        let root_node = fs.to_tree_node();
         let tree = Tree::new(WidgetId::new(1)).with_root(vec![root_node]);
+        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), vec!["~".to_string(), "projects".to_string(), "dracon-terminal-engine".to_string()]);
 
         Self {
             id,
-            fs: &MOCK_FS,
+            fs,
             tree,
+            breadcrumbs,
             tree_path: Vec::new(),
             selected_entry: None,
             context_menu: None,
@@ -226,8 +146,19 @@ impl FileManager {
         }
     }
 
-    fn current_node(&self) -> &FileNode {
-        self.fs.find_by_path(&self.tree_path).unwrap_or(self.fs)
+    fn current_node(&self) -> &MockFs {
+        self.fs.find_by_path(&self.tree_path).unwrap_or(&self.fs)
+    }
+
+    fn update_breadcrumbs(&mut self) {
+        let mut segments = vec!["~".to_string(), "projects".to_string(), "dracon-terminal-engine".to_string()];
+        for &idx in &self.tree_path {
+            if let Some(node) = self.fs.find_by_path(&self.tree_path[..=idx]) {
+                segments.push(node.name.to_string());
+            }
+        }
+        self.breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments);
+        self.dirty = true;
     }
 
     fn go_up(&mut self) {
@@ -235,18 +166,18 @@ impl FileManager {
             self.tree_path.pop();
             self.tree.set_selected_path(self.tree_path.clone());
             self.selected_entry = None;
-            self.dirty = true;
+            self.update_breadcrumbs();
         }
     }
 
     fn open_tree_selection(&mut self) {
         if let Some(path) = self.tree.get_selected_path().last().copied() {
-            if let Some(node) = self.current_node().children.and_then(|c| c.get(path)) {
+            if let Some(node) = self.current_node().children.as_ref().and_then(|c| c.get(path)) {
                 if node.is_dir {
                     self.tree_path.push(path);
                     self.tree.set_selected_path(self.tree_path.clone());
                     self.selected_entry = None;
-                    self.dirty = true;
+                    self.update_breadcrumbs();
                 } else {
                     self.show_toast(&format!("Opening {}...", node.name), ToastKind::Info);
                 }
@@ -293,6 +224,28 @@ impl FileManager {
         self.dirty = true;
     }
 
+    fn get_selected_file_entry(&self) -> Option<FileEntry> {
+        let path = self.tree.get_selected_path();
+        if path.is_empty() { return None; }
+        self.fs.find_by_path(path).map(|node| FileEntry {
+            name: node.name.to_string(),
+            is_dir: node.is_dir,
+        })
+    }
+
+    fn size_and_modified_for(&self, name: &str) -> (String, String) {
+        match name {
+            "main.rs" => ("1.2 KB".to_string(), "2025-01-10".to_string()),
+            "lib.rs" => ("3.4 KB".to_string(), "2025-01-12".to_string()),
+            "README.md" => ("4.1 KB".to_string(), "2025-01-08".to_string()),
+            "CHANGELOG.md" => ("8.7 KB".to_string(), "2025-01-15".to_string()),
+            "test_main.rs" => ("0.8 KB".to_string(), "2025-01-05".to_string()),
+            "Cargo.toml" => ("2.3 KB".to_string(), "2025-01-15".to_string()),
+            ".gitignore" => ("0.1 KB".to_string(), "2025-01-01".to_string()),
+            _ => ("—".to_string(), "—".to_string()),
+        }
+    }
+
     fn render_details(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(1, area.width, area.height);
         plane.z_index = 5;
@@ -320,11 +273,12 @@ impl FileManager {
         y += 2;
 
         if let Some(ref entry) = self.selected_entry {
+            let (size, modified) = self.size_and_modified_for(&entry.name);
             print_line(&mut plane, y, &format!("Name: {}", entry.name), Color::Rgb(255, 255, 255), false);
             y += 1;
-            print_line(&mut plane, y, &format!("Size: {}", entry.size), Color::Rgb(200, 150, 100), false);
+            print_line(&mut plane, y, &format!("Size: {}", size), Color::Rgb(200, 150, 100), false);
             y += 1;
-            print_line(&mut plane, y, &format!("Modified: {}", entry.modified), Color::Rgb(180, 180, 180), false);
+            print_line(&mut plane, y, &format!("Modified: {}", modified), Color::Rgb(180, 180, 180), false);
             y += 1;
             print_line(&mut plane, y, "Permissions: rw-r--r--", Color::Rgb(180, 180, 180), false);
             y += 2;
@@ -333,26 +287,12 @@ impl FileManager {
                 print_line(&mut plane, y, "Preview:", Color::Rgb(0, 255, 136), true);
                 y += 1;
 
-                let preview1 = if entry.name == "Cargo.toml" {
-                    "[package]"
-                } else {
-                    "# preview"
-                };
-                let preview2 = if entry.name == "Cargo.toml" {
-                    "name = \"dracon-terminal-engine\""
-                } else {
-                    "content..."
-                };
-                let preview3 = if entry.name == "Cargo.toml" {
-                    "version = \"27.0.5\""
-                } else {
-                    ""
-                };
+                let preview1 = if entry.name == "Cargo.toml" { "[package]" } else { "# preview" };
+                let preview2 = if entry.name == "Cargo.toml" { "name = \"dracon-terminal-engine\"" } else { "content..." };
+                let preview3 = if entry.name == "Cargo.toml" { "version = \"27.0.5\"" } else { "" };
 
-                print_line(&mut plane, y, preview1, Color::Rgb(150, 150, 150), false);
-                y += 1;
-                print_line(&mut plane, y, preview2, Color::Rgb(150, 150, 150), false);
-                y += 1;
+                print_line(&mut plane, y, preview1, Color::Rgb(150, 150, 150), false); y += 1;
+                print_line(&mut plane, y, preview2, Color::Rgb(150, 150, 150), false); y += 1;
                 print_line(&mut plane, y, preview3, Color::Rgb(150, 150, 150), false);
             }
         } else {
@@ -370,7 +310,7 @@ impl FileManager {
 
         let current = self.current_node();
         let children = match current.children {
-            Some(c) => c,
+            Some(ref c) => c,
             None => return plane,
         };
 
@@ -378,27 +318,20 @@ impl FileManager {
             cell.bg = Color::Ansi(17);
         }
 
-        let header_height = 1u16;
-        let print_header = |plane: &mut Plane, y: u16, text: &str| {
-            for (i, c) in text.chars().take(area.width as usize).enumerate() {
-                let idx = (y * plane.width + i as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = c;
-                    plane.cells[idx].fg = Color::Rgb(0, 255, 136);
-                    plane.cells[idx].style = Styles::BOLD;
-                }
+        for (i, c) in "Name                  Size      Modified".chars().take(area.width as usize).enumerate() {
+            let idx = i;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = Color::Rgb(0, 255, 136);
+                plane.cells[idx].style = Styles::BOLD;
             }
-        };
+        }
 
-        print_header(&mut plane, 0, "Name                  Size      Modified");
-
-        let mut y = header_height;
-        for (i, child) in children.iter().enumerate() {
-            if y >= area.height {
-                break;
-            }
-            let icon = child.icon();
-            let line = format!("{}{:<20} {:<10} {:<12}", icon, child.name, child.size, child.modified);
+        let mut y = 1u16;
+        for child in children.iter() {
+            if y >= area.height { break; }
+            let (size, modified) = self.size_and_modified_for(child.name);
+            let line = format!("{}{:<20} {:<10} {:<12}", child.icon(), child.name, size, modified);
             let fg = if child.is_dir { Color::Rgb(100, 200, 255) } else { Color::Rgb(200, 200, 200) };
 
             for (j, c) in line.chars().take(area.width as usize).enumerate() {
@@ -413,55 +346,17 @@ impl FileManager {
 
         plane
     }
-
-    fn get_selected_file_entry(&self) -> Option<FileEntry> {
-        let path = self.tree.get_selected_path();
-        if path.is_empty() {
-            return None;
-        }
-        self.fs.find_by_path(path).map(|node| FileEntry {
-            name: node.name.to_string(),
-            is_dir: node.is_dir,
-            size: node.size.to_string(),
-            modified: node.modified.to_string(),
-        })
-    }
 }
 
 impl Widget for FileManager {
-    fn id(&self) -> WidgetId {
-        self.id
-    }
-
-    fn set_id(&mut self, id: WidgetId) {
-        self.id = id;
-    }
-
-    fn area(&self) -> Rect {
-        self.area.get()
-    }
-
-    fn set_area(&mut self, area: Rect) {
-        self.area.set(area);
-        self.dirty = true;
-    }
-
-    fn z_index(&self) -> u16 {
-        0
-    }
-
-    fn needs_render(&self) -> bool {
-        self.dirty || self.tree.needs_render()
-    }
-
-    fn mark_dirty(&mut self) {
-        self.dirty = true;
-    }
-
-    fn clear_dirty(&mut self) {
-        self.dirty = false;
-        self.tree.clear_dirty();
-    }
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area.get() }
+    fn set_area(&mut self, area: Rect) { self.area.set(area); self.dirty = true; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { self.dirty || self.tree.needs_render() }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; self.tree.clear_dirty(); }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -483,47 +378,29 @@ impl Widget for FileManager {
         let (tree_rect, detail_rect) = split.split(content_rect);
         let divider_plane = split.render_divider(content_rect);
 
-        let segments = {
-            let mut segs = vec!["~".to_string(), "projects".to_string(), "dracon-terminal-engine".to_string()];
-            for &idx in &self.tree_path {
-                if let Some(node) = self.fs.find_by_path(&self.tree_path[..=idx]) {
-                    segs.push(node.name.to_string());
-                }
-            }
-            segs
-        };
-        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments);
-        let bc_plane = breadcrumbs.render(header_rect);
+        let bc_plane = self.breadcrumbs.render(header_rect);
         for (i, cell) in bc_plane.cells.iter().enumerate() {
-            if i < plane.cells.len() {
-                plane.cells[i] = cell.clone();
-            }
+            if i < plane.cells.len() { plane.cells[i] = cell.clone(); }
         }
 
         let tree_plane = self.tree.render(tree_rect);
         for (i, cell) in tree_plane.cells.iter().enumerate() {
             let base = (header_height * area.width) as usize;
             let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
+            if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
         }
 
         for (i, cell) in divider_plane.cells.iter().enumerate() {
             let base = (header_height * area.width) as usize;
             let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
+            if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
         }
 
         let table_plane = self.render_table(detail_rect);
         for (i, cell) in table_plane.cells.iter().enumerate() {
             let base = (header_height * area.width) as usize;
             let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
+            if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
         }
 
         let details_plane = self.render_details(Rect::new(
@@ -536,9 +413,7 @@ impl Widget for FileManager {
             let base = ((header_height + content_height / 2) * area.width) as usize;
             let offset = ((detail_rect.width / 2) * area.width) as usize;
             let idx = base + offset + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
+            if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
         }
 
         let item_count = self.current_node().child_count();
@@ -550,9 +425,7 @@ impl Widget for FileManager {
         for (i, cell) in status_plane.cells.iter().enumerate() {
             let base = ((area.height - footer_height) * area.width) as usize;
             let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
+            if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
         }
 
         if let Some(ref menu) = self.context_menu {
@@ -563,9 +436,7 @@ impl Widget for FileManager {
                 let row = i / menu_plane.width as usize;
                 let col = i % menu_plane.width as usize;
                 let target_idx = ((y + row) * area.width as usize) + x + col;
-                if target_idx < plane.cells.len() {
-                    plane.cells[target_idx] = cell.clone();
-                }
+                if target_idx < plane.cells.len() { plane.cells[target_idx] = cell.clone(); }
             }
         }
 
@@ -574,21 +445,17 @@ impl Widget for FileManager {
             for (i, cell) in toast_plane.cells.iter().enumerate() {
                 let base = ((area.height - 2) * area.width) as usize;
                 let idx = base + (area.width as usize - 40) + i;
-                if idx < plane.cells.len() {
-                    plane.cells[idx] = cell.clone();
-                }
+                if idx < plane.cells.len() { plane.cells[idx] = cell.clone(); }
             }
         }
 
         plane
     }
 
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press {
-            return false;
-        }
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press { return false; }
 
-        if let Some(ref mut menu) = self.context_menu {
+        if let Some(ref mut _menu) = self.context_menu {
             if key.code == KeyCode::Esc || key.code == KeyCode::Enter {
                 self.context_menu = None;
                 self.focus = FocusPanel::Table;
@@ -599,26 +466,14 @@ impl Widget for FileManager {
         }
 
         if let Some(ref mut toast) = self.toast {
-            if toast.is_expired() {
-                self.toast = None;
-                self.dirty = true;
-            }
+            if toast.is_expired() { self.toast = None; self.dirty = true; }
             return false;
         }
 
         match key.code {
-            KeyCode::Backspace => {
-                self.go_up();
-                true
-            }
-            KeyCode::Enter => {
-                self.open_tree_selection();
-                true
-            }
-            KeyCode::Char('c') => {
-                self.show_context_menu(30, 10);
-                true
-            }
+            KeyCode::Backspace => { self.go_up(); true }
+            KeyCode::Enter => { self.open_tree_selection(); true }
+            KeyCode::Char('c') => { self.show_context_menu(30, 10); true }
             _ => {
                 if self.tree.handle_key(key) {
                     self.tree_path = self.tree.get_selected_path().to_vec();
@@ -634,33 +489,21 @@ impl Widget for FileManager {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if let Some(ref mut menu) = self.context_menu {
             if menu.handle_mouse(kind.clone(), col, row) {
-                if let MouseEventKind::Down(_) = kind {
-                    self.context_menu = None;
-                    self.focus = FocusPanel::Table;
-                }
+                if let MouseEventKind::Down(_) = kind { self.context_menu = None; self.focus = FocusPanel::Table; }
                 return true;
             }
-            if let MouseEventKind::Down(_) = kind {
-                self.context_menu = None;
-                self.show_context_menu(col, row);
-                return true;
-            }
+            if let MouseEventKind::Down(_) = kind { self.context_menu = None; self.show_context_menu(col, row); return true; }
         }
 
         if let Some(ref mut toast) = self.toast {
-            if toast.is_expired() {
-                self.toast = None;
-                self.dirty = true;
-            }
+            if toast.is_expired() { self.toast = None; self.dirty = true; }
         }
 
         let header_height = 1u16;
         let footer_height = 1u16;
         let content_height = 24u16.saturating_sub(header_height + footer_height);
 
-        if row == 0 {
-            return self.breadcrumbs.handle_mouse(kind, col, row);
-        }
+        if row == 0 { return self.breadcrumbs.handle_mouse(kind, col, row); }
 
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.30);
         let (tree_rect, detail_rect) = split.split(Rect::new(0, header_height, 80, content_height));
@@ -677,32 +520,18 @@ impl Widget for FileManager {
         if let MouseEventKind::Down(_) = kind {
             if col > tree_rect.width && row > header_height && row < header_height + detail_rect.height {
                 let rel_row = (row - header_height).saturating_sub(1) as usize;
-                let current = self.current_node();
-                if let Some(children) = current.children {
+                let children = self.current_node().children.clone();
+                if let Some(ref children) = children {
                     if rel_row < children.len() {
-                        let child = children[rel_row];
-                        self.selected_entry = Some(FileEntry {
-                            name: child.name.to_string(),
-                            is_dir: child.is_dir,
-                            size: child.size.to_string(),
-                            modified: child.modified.to_string(),
-                        });
-                        if !child.is_dir {
-                            self.show_toast(&format!("Opening {}...", child.name), ToastKind::Info);
-                        }
+                        let child_name = children[rel_row].name.to_string();
+                        let child_is_dir = children[rel_row].is_dir;
+                        self.selected_entry = Some(FileEntry { name: child_name, is_dir: child_is_dir });
+                        if !child_is_dir { self.show_toast(&format!("Opening {}...", children[rel_row].name), ToastKind::Info); }
                         self.dirty = true;
                         return true;
                     }
                 }
             }
-
-            if col > tree_rect.width && row > header_height + content_height / 2 {
-                self.show_context_menu(col, row);
-                return true;
-            }
-        }
-
-        if let MouseEventKind::Down(_) = kind {
             self.show_context_menu(col, row);
             return true;
         }
