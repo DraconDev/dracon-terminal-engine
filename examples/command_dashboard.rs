@@ -8,12 +8,20 @@
 //! ## Pattern
 //!
 //! ```rust,ignore
+//! // Create gauge with a bound command that auto-refreshes every 5 seconds
 //! let gauge = Gauge::new("CPU")
 //!     .bind_command(BoundCommand::new("cat /proc/loadavg").refresh(5));
-//! app.add_widget(Box::new(gauge), area);
+//! let id = app.add_widget(Box::new(gauge), area);
+//!
+//! // The app tick loop re-runs the command and calls apply_command_output automatically
 //! ```
 //!
-//! The framework handles spawning the command, parsing output, and updating the widget.
+//! ## Key concepts
+//!
+//! - `BoundCommand` binds a CLI command + parser + refresh interval
+//! - `OutputParser` extracts values from command output (regex, JSON key, etc.)
+//! - `App::add_widget` registers the widget for auto-refresh tracking
+//! - `apply_command_output` is called on each widget when its command re-runs
 
 use dracon_terminal_engine::framework::command::{BoundCommand, OutputParser};
 use dracon_terminal_engine::framework::prelude::*;
@@ -22,62 +30,54 @@ use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadg
 use ratatui::layout::Rect;
 
 fn main() -> std::io::Result<()> {
-    App::new()?
+    let mut app = App::new()?
         .title("Command Dashboard")
         .fps(30)
-        .theme(Theme::nord())
-        .on_tick(|ctx, _tick| {
-            let (w, h) = ctx.compositor().size();
-            let header_height = 4u16;
-            let col_w = w / 3;
+        .theme(Theme::nord());
 
-            let cpu_area = Rect::new(0, 0, col_w, header_height);
-            let mem_area = Rect::new(col_w, 0, col_w, header_height);
-            let disk_area = Rect::new(col_w * 2, 0, w - col_w * 2, header_height);
+    // Create gauges bound to real commands
+    let cpu_gauge = Gauge::new("CPU %")
+        .max(100.0)
+        .bind_command(
+            BoundCommand::new("cat /proc/loadavg")
+                .parser(OutputParser::Regex {
+                    pattern: r"^([0-9.]+)".into(),
+                    group: Some(0),
+                })
+                .refresh(2),
+        );
 
-            let cpu_gauge = Gauge::new("CPU %").max(100.0);
-            ctx.add_plane(cpu_gauge.render(cpu_area));
+    let mem_gauge = Gauge::new("Memory %")
+        .max(100.0)
+        .bind_command(
+            BoundCommand::new("free | grep Mem | awk '{print int($3/$2*100)}'")
+                .refresh(5),
+        );
 
-            let mem_gauge = Gauge::new("Memory %").max(100.0);
-            ctx.add_plane(mem_gauge.render(mem_area));
+    let disk_gauge = Gauge::new("Disk %")
+        .max(100.0)
+        .bind_command(
+            BoundCommand::new("df -h / | tail -1 | awk '{print $5}' | tr -d '%'")
+                .refresh(30),
+        );
 
-            let disk_gauge = Gauge::new("Disk %").max(100.0);
-            ctx.add_plane(disk_gauge.render(disk_area));
-        })
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
+    let kv_grid = KeyValueGrid::new()
+        .separator("  ")
+        .bind_command(
+            BoundCommand::new("uname -snr")
+                .refresh(0), // 0 = never auto-refresh (static data)
+        );
 
-            // --- Gauge bound to a real command ---
-            // Re-runs `cat /proc/loadavg` every 2 seconds, parses scalar (e.g. "0.52")
-            let cpu_gauge = Gauge::new("CPU")
-                .bind_command(
-                    BoundCommand::new("cat /proc/loadavg")
-                        .parser(OutputParser::Regex {
-                            pattern: r"^([0-9.]+)".into(),
-                            group: Some(0),
-                        })
-                        .refresh(2),
-                );
-            ctx.add_plane(cpu_gauge.render(Rect::new(0, 0, 30, 3)));
+    let status = StatusBadge::new(WidgetId::default_id())
+        .with_status("OK")
+        .with_label("System");
 
-            // --- Gauge with fixed value (no command) ---
-            let mut mem_gauge = Gauge::new("Memory").max(100.0);
-            mem_gauge.set_value(64.0);
-            ctx.add_plane(mem_gauge.render(Rect::new(30, 0, 30, 3)));
+    // Layout: 3 gauges across top (30% height), key-value grid + badge below
+    app.add_widget(Box::new(cpu_gauge), Rect::new(0, 0, 26, 3));
+    app.add_widget(Box::new(mem_gauge), Rect::new(26, 0, 27, 3));
+    app.add_widget(Box::new(disk_gauge), Rect::new(53, 0, 27, 3));
+    app.add_widget(Box::new(kv_grid), Rect::new(0, 3, 60, 6));
+    app.add_widget(Box::new(status), Rect::new(60, 3, 20, 1));
 
-            // --- KeyValueGrid showing system info from a shell command ---
-            // Parses `uname -a` output into key:value lines
-            let kv_grid = KeyValueGrid::new()
-                .bind_command(
-                    BoundCommand::new("echo 'OS: NixOS\nKernel: 6.12.1\nShell: zsh 5.9'")
-                        .refresh(0), // 0 = never auto-refresh
-                );
-            ctx.add_plane(kv_grid.render(Rect::new(0, 3, 60, 5)));
-
-            // --- Status badge ---
-            let status_badge = StatusBadge::new(WidgetId::default_id())
-                .with_status("OK")
-                .with_label("System");
-            ctx.add_plane(status_badge.render(Rect::new(0, 8, 15, 1)));
-        })
+    app.run(|_ctx| {})
 }
