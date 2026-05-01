@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [27.0.4] - 2026-05-01
+
+### Added
+
+- `examples/command_dashboard.rs` — working command-driven dashboard example demonstrating `Gauge`, `KeyValueGrid`, and `StatusBadge` with bound CLI commands and auto-refresh
+- `App::from_toml()` now loads `commands` array from TOML into the global command registry
+- `AppConfig` gained `commands: Vec<BoundCommand>` field — global commands can be defined in TOML alongside layout and widgets
+- `BoundCommand` fields (`parser`, `confirm_message`, `refresh_seconds`, `label`, `description`) now all have `#[serde(default)]` so they are optional in TOML
+
+### Tests
+
+- `test_app_config_commands` — parses TOML with `[[commands]]` array
+
+## [27.0.3] - 2026-05-01
+
+### Added
+
+- `Widget::apply_command_output(&mut self, &ParsedOutput)` — default no-op trait method; called by the app tick loop when a widget's bound command is re-run after `refresh_seconds` has elapsed
+- 5 widgets implement `apply_command_output`: `Gauge` (Scalar→f64), `StatusBadge` (Scalar→status), `KeyValueGrid` (Text/Scalar→pairs), `LogViewer` (Text/Lines→append), `StreamingText` (Text/Scalar/Lines→append)
+- `App::command_tracking: HashMap<WidgetId, (Instant, BoundCommand)>` — tracks last-run time per widget's bound command
+- Tick loop auto-re-executes commands whose `refresh_seconds` interval has elapsed, calls `apply_command_output` on the widget, marks it dirty
+- `App::add_widget` populates `command_tracking` for any widget whose command has a `refresh_seconds` value
+- `App::remove_widget` cleans up `command_tracking` entry for the removed widget
+
+### Tests
+
+- `test_gauge_apply_command_output_scalar` — parses "75.5" → value 75.5
+- `test_gauge_apply_command_output_ignores_non_scalar` — None output leaves value unchanged
+- `test_gauge_apply_command_output_parses_invalid_as_zero` — invalid string → 0
+- `test_status_badge_apply_command_output_scalar` — sets status from Scalar
+- `test_status_badge_apply_command_output_ignores_non_scalar` — None output leaves status unchanged
+- `test_key_value_grid_apply_command_output` — Text parses "KEY: value" lines into pairs
+- `test_log_viewer_apply_command_output_text` — Text appends lines
+- `test_log_viewer_apply_command_output_lines` — Lines appends LogLine entries
+- `test_streaming_text_apply_command_output_scalar` — Scalar appends as single line
+- `test_streaming_text_apply_command_output_text` — Text appends lines
+- `test_app_command_tracking_on_add_widget` — Label (no refresh) → not tracked
+- `test_app_command_tracking_removed_on_widget_remove` — tracking cleaned up on remove
+
 ## [27.0.2] - 2026-05-01
 
 ### Added
