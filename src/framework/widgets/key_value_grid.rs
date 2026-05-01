@@ -199,8 +199,7 @@ impl Widget for KeyValueGrid {
         let key_fg = self.theme.fg;
         let val_fg = self.theme.inactive_fg;
 
-        let mut row = 0;
-        for (key, value) in &self.pairs {
+        for (row, (key, value)) in self.pairs.iter().enumerate() {
             if row >= area.height as usize {
                 break;
             }
@@ -211,7 +210,6 @@ impl Widget for KeyValueGrid {
                     plane.cells[idx] = cell;
                 }
             }
-            row += 1;
         }
 
         if self.pairs.is_empty() {
