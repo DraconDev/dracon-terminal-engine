@@ -1,26 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved code quality through Clippy fixes, bug fixes, and test improvements
+Bump `dracon-terminal-engine` dependency to v27.0.5
 
 ## Context
-The team is focusing on improving code quality and fixing edge cases in the editor and framework examples. This commit addresses several Clippy warnings, logical bugs, and test assertions that were either incorrect or could be improved.
+This change updates the dependency on the terminal engine to incorporate bug fixes and improvements from the latest version.
 
 ## Completed
-- [x] Fixed Clippy warnings across multiple modules (absurd comparisons, logic bugs, redundant code)
-- [x] Improved test robustness with better assertions and process handling
-- [x] Added missing `ScrollState` re-export to prelude
-- [x] Removed dead code and unused variables
-- [x] Fixed compilation errors in example code
-- [x] Improved type safety in widget callbacks
+- [x] Updated dependency version in Cargo.toml
+- [x] Updated version reference in README.md
+- [x] Updated version reference in lib.rs documentation
 
 ## In Progress
-- [ ] No active work in progress shown in this commit
+- [x] Dependency version bump complete
 
 ## Blockers
-- None identified in this commit
+- None identified
 
 ## Next Steps
-1. Continue addressing remaining Clippy warnings
-2. Review and improve test coverage for new features
-3. Address any remaining compilation issues in examples
+1. Verify compatibility with existing codebase
+2. Update CHANGELOG.md with dependency changes

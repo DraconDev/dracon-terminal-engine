@@ -140,14 +140,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "27.0.4"
+dracon-terminal-engine = "27.0.5"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.4" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.5" }
 ```
 
 ## Quick Start (Framework)
@@ -209,7 +209,7 @@ cargo test --test scroll_test          # Scroll behavior tests
 
 ## Version
 
-**v27.0.4** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v27.0.5** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
