@@ -1,7 +1,8 @@
 # Project State
 
 ## Current Focus
-Refactored assertion logic in the `App` struct's layout validation to improve clarity and correctness.
+Refactored error handling in the `CommandRunner` struct to improve robustness by updating the line filtering logic in stdout/stderr processing.
 
 ## Completed
-- [x] Fixed incorrect assertion in layout validation by properly chaining the `area()` method calls
+- [x] Updated stdout/stderr line filtering to use explicit closure syntax (`|r| r.ok()`) instead of `Result::ok()` for better readability and consistency
+- [x] Maintained the same functional behavior while improving code clarity in the command execution pipeline
