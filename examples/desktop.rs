@@ -185,6 +185,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         skip: false,
                     };
                     bg.put_cell(x, y, cell);
+                }
             }
         }
         compositor.add_plane(bg);
