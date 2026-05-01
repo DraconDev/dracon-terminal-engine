@@ -38,14 +38,13 @@
 //! - Click table row to select
 //! - Right-click anywhere for context menu
 
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, ContextAction, ContextMenu, SplitPane, StatusBar, StatusSegment, Toast, ToastKind,
     Tree, TreeNode,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
 static MOCK_FS: FileNode = FileNode {

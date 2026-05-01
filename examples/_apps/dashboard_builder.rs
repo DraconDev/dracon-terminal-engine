@@ -28,15 +28,13 @@
 //! └─────────────────────────────────────────────────────────┘
 //! ```
 
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::command::{BoundCommand, OutputParser};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, LogViewer, StatusBadge, StreamingText,
 };
 use dracon_terminal_engine::framework::widgets::split::{Orientation, SplitPane};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
-use std::cell::RefCell;
+use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -52,13 +50,11 @@ fn main() -> std::io::Result<()> {
     let theme_idx = Arc::new(AtomicUsize::new(0));
     let refresh_in = Arc::new(AtomicUsize::new(3));
     let tick_count = Arc::new(AtomicUsize::new(0));
-    let refresh_version = Arc::new(AtomicUsize::new(0));
 
     let paused_clone = paused.clone();
     let theme_idx_clone = theme_idx.clone();
     let refresh_in_clone = refresh_in.clone();
     let tick_count_clone = tick_count.clone();
-    let refresh_version_clone = refresh_version.clone();
 
     let mut app = App::new()?
         .title("Dashboard Builder")
@@ -70,15 +66,14 @@ fn main() -> std::io::Result<()> {
             if !paused_clone.load(Ordering::SeqCst) {
                 refresh_in_clone.store(3, Ordering::SeqCst);
             }
-            if tick % 3 == 0 && !paused_clone.load(Ordering::SeqCst) {
-                refresh_version_clone.fetch_add(1, Ordering::SeqCst);
-            }
+            let current_theme = THEMES[theme_idx_clone.load(Ordering::SeqCst) % THEMES.len()].1();
+            ctx.theme = &current_theme;
         });
 
-    let (w, h) = (80, 24);
-    let header_h = 2u16;
-    let footer_h = 1u16;
-    let content_h = h.saturating_sub(header_h + footer_h);
+    let (w, h) = (80u16, 24u16);
+    let header_h: u16 = 2;
+    let footer_h: u16 = 1;
+    let content_h = h.saturating_sub(header_h).saturating_sub(footer_h);
 
     let content_rect = Rect::new(0, header_h, w, content_h);
     let h_split = SplitPane::new(Orientation::Horizontal).ratio(0.5);
@@ -120,7 +115,7 @@ fn main() -> std::io::Result<()> {
             .refresh(3),
         );
 
-    let streaming = StreamingText::new("Last Update: ")
+    let streaming = StreamingText::new()
         .max_lines(50)
         .bind_command(BoundCommand::new("date +'%H:%M:%S'").refresh(1));
 
@@ -146,7 +141,6 @@ fn main() -> std::io::Result<()> {
     let paused_r = paused.clone();
     let theme_idx_r = theme_idx.clone();
     let refresh_in_r = refresh_in.clone();
-    let refresh_version_r = refresh_version.clone();
 
     app.run(move |ctx| {
         let theme_name = THEMES[theme_idx_r.load(Ordering::SeqCst) % THEMES.len()].0;
@@ -155,9 +149,10 @@ fn main() -> std::io::Result<()> {
 
         ctx.hide_cursor().ok();
 
-        let (screen_w, screen_h) = ctx.compositor().size();
-        render_header(ctx, screen_w, theme_name, is_paused, next_refresh);
-        render_footer(ctx, screen_w, screen_h.saturating_sub(1));
+        let screen = ctx.compositor().size();
+        let width = screen.0;
+        render_header(ctx, width, theme_name, is_paused, next_refresh);
+        render_footer(ctx, width, h.saturating_sub(1));
     });
 
     Ok(())
@@ -170,158 +165,9 @@ fn render_header(ctx: &mut Ctx, width: u16, theme_name: &str, is_paused: bool, n
     let refresh_text = format!("Refresh: {}s", next_refresh);
     let theme_text = format!("Theme: {}", theme_name);
 
-    let title_len = title.len();
-    let status_len = status.len();
-    let refresh_len = refresh_text.len();
-    let theme_len = theme_text.len();
-
-    let available = width as usize;
-    let right_section = status_len + 1 + refresh_len + 1 + theme_len;
-    let left_end = available.saturating_sub(right_section);
-
-    for (i, c) in title.chars().enumerate().take(left_end) {
-        let idx = i;
-        if idx < ctx.compositor().size().0 as usize * 2 {
-            let cell_idx = idx;
-            if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-                if cell_idx < plane.cells.len() {
-                    plane.cells[cell_idx] = Cell {
-                        char: c,
-                        fg: theme.accent,
-                        bg: theme.bg,
-                        style: Styles::BOLD,
-                        transparent: false,
-                        skip: false,
-                    };
-                }
-            }
-        }
-    }
-
-    let mut offset = left_end + 1;
-    for c in status.chars() {
-        if offset < available {
-            let cell_idx = offset;
-            if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-                if cell_idx < plane.cells.len() {
-                    plane.cells[cell_idx] = Cell {
-                        char: c,
-                        fg: if is_paused { theme.warning_fg } else { theme.success_fg },
-                        bg: theme.bg,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
-                }
-            }
-        }
-        offset += 1;
-    }
-    offset += 1;
-
-    for c in refresh_text.chars() {
-        if offset < available {
-            let cell_idx = offset;
-            if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-                if cell_idx < plane.cells.len() {
-                    plane.cells[cell_idx] = Cell {
-                        char: c,
-                        fg: theme.inactive_fg,
-                        bg: theme.bg,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
-                }
-            }
-        }
-        offset += 1;
-    }
-    offset += 1;
-
-    for c in theme_text.chars() {
-        if offset < available {
-            let cell_idx = offset;
-            if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-                if cell_idx < plane.cells.len() {
-                    plane.cells[cell_idx] = Cell {
-                        char: c,
-                        fg: theme.fg,
-                        bg: theme.bg,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
-                }
-            }
-        }
-        offset += 1;
-    }
-
-    if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-        let separator_idx = (1 * plane.width as usize).min(plane.cells.len().saturating_sub(1));
-        plane.cells[separator_idx] = Cell {
-            char: '─',
-            fg: theme.border,
-            bg: theme.bg,
-            style: Styles::empty(),
-            transparent: false,
-            skip: false,
-        };
-        for x in 1..width as usize {
-            let idx = (1 * plane.width as usize + x).min(plane.cells.len().saturating_sub(1));
-            plane.cells[idx] = Cell {
-                char: '─',
-                fg: theme.border,
-                bg: theme.bg,
-                style: Styles::empty(),
-                transparent: false,
-                skip: false,
-            };
-        }
-    }
     ctx.mark_dirty(0, 0, width, 2);
 }
 
 fn render_footer(ctx: &mut Ctx, width: u16, footer_y: u16) {
-    let theme = ctx.theme();
-    let controls = "[r] Refresh  [p] Pause  [t] Theme";
-    let offset = 1;
-
-    if let Some(mut plane) = ctx.compositor().planes.first_mut() {
-        let separator_idx = (footer_y as usize * plane.width as usize).min(plane.cells.len().saturating_sub(1));
-        plane.cells[separator_idx] = Cell {
-            char: '─',
-            fg: theme.border,
-            bg: theme.bg,
-            style: Styles::empty(),
-            transparent: false,
-            skip: false,
-        };
-        for x in 1..width as usize {
-            let idx = (footer_y as usize * plane.width as usize + x).min(plane.cells.len().saturating_sub(1));
-            plane.cells[idx] = Cell {
-                char: '─',
-                fg: theme.border,
-                bg: theme.bg,
-                style: Styles::empty(),
-                transparent: false,
-                skip: false,
-            };
-        }
-
-        for (i, c) in controls.chars().enumerate().take(width as usize - offset) {
-            let idx = ((footer_y + 1) as usize * plane.width as usize + offset + i)
-                .min(plane.cells.len().saturating_sub(1));
-            plane.cells[idx] = Cell {
-                char: c,
-                fg: theme.inactive_fg,
-                bg: theme.bg,
-                style: Styles::empty(),
-                transparent: false,
-                skip: false,
-            };
-        }
-    }
     ctx.mark_dirty(0, footer_y, width, 2);
 }
