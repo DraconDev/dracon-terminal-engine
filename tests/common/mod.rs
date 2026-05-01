@@ -84,6 +84,8 @@ pub struct TrackingWidget {
     pub id: dracon_terminal_engine::framework::widget::WidgetId,
     pub theme_changes: Rc<Cell<usize>>,
     pub current_theme: Rc<Cell<Option<&'static str>>>,
+    pub focus_count: Rc<Cell<usize>>,
+    pub blur_count: Rc<Cell<usize>>,
     pub area: std::cell::Cell<Rect>,
 }
 
@@ -93,12 +95,22 @@ impl TrackingWidget {
             id: dracon_terminal_engine::framework::widget::WidgetId::new(id),
             theme_changes: Rc::new(Cell::new(0)),
             current_theme: Rc::new(Cell::new(None)),
+            focus_count: Rc::new(Cell::new(0)),
+            blur_count: Rc::new(Cell::new(0)),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
 
     pub fn theme_change_count(&self) -> usize {
         self.theme_changes.get()
+    }
+
+    pub fn focus_count(&self) -> usize {
+        self.focus_count.get()
+    }
+
+    pub fn blur_count(&self) -> usize {
+        self.blur_count.get()
     }
 }
 
@@ -122,5 +134,13 @@ impl Widget for TrackingWidget {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme_changes.set(self.theme_changes.get() + 1);
         self.current_theme.set(Some(theme.name));
+    }
+
+    fn on_focus(&mut self) {
+        self.focus_count.set(self.focus_count.get() + 1);
+    }
+
+    fn on_blur(&mut self) {
+        self.blur_count.set(self.blur_count.get() + 1);
     }
 }
