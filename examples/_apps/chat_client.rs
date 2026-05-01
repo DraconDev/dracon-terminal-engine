@@ -492,72 +492,74 @@ fn main() -> io::Result<()> {
 
         if chat.show_emoji_modal {
             let mut modal_plane = chat.emoji_modal.render(Rect::new(0, 0, w, h));
-            modal_plane.z_index = 100;
-            ctx.add_plane(modal_plane);
-
-            let emojis = ["😀", "😃", "😄", "😁", "😊", "🙂", "🙃", "😍", "🤔", "🤨", "😅", "😂", "🤣"];
-            let start_x = ((w as i32 - 30) / 2) as u16;
-            let start_y = ((h as i32 - 10) / 2) as u16;
-            for (i, emoji) in emojis.iter().enumerate() {
-                let x = start_x + (i as u16 % 7) * 4;
-                let y = start_y + (i as u16 / 7) * 2;
-                if y < h && x < w {
-                    for (j, c) in emoji.chars().enumerate() {
-                        let idx = (y * w + x + j as u16) as usize;
-                        if idx < modal_plane.cells.len() {
-                            modal_plane.cells[idx].char = c;
-                            modal_plane.cells[idx].fg = Color::Ansi(3);
+            {
+                let emojis = ["😀", "😃", "😄", "😁", "😊", "🙂", "🙃", "😍", "🤔", "🤨", "😅", "😂", "🤣"];
+                let start_x = ((w as i32 - 30) / 2) as u16;
+                let start_y = ((h as i32 - 10) / 2) as u16;
+                for (i, emoji) in emojis.iter().enumerate() {
+                    let x = start_x + (i as u16 % 7) * 4;
+                    let y = start_y + (i as u16 / 7) * 2;
+                    if y < h && x < w {
+                        for (j, c) in emoji.chars().enumerate() {
+                            let idx = (y * w + x + j as u16) as usize;
+                            if idx < modal_plane.cells.len() {
+                                modal_plane.cells[idx].char = c;
+                                modal_plane.cells[idx].fg = Color::Ansi(3);
+                            }
                         }
                     }
                 }
-            }
 
-            let hint = "Click emoji or ESC";
-            let hint_x = start_x + 8;
-            let hint_y = start_y + 6;
-            for (j, c) in hint.chars().enumerate() {
-                let idx = (hint_y * w + hint_x + j as u16) as usize;
-                if idx < modal_plane.cells.len() {
-                    modal_plane.cells[idx].char = c;
-                    modal_plane.cells[idx].fg = Color::Ansi(8);
+                let hint = "Click emoji or ESC";
+                let hint_x = start_x + 8;
+                let hint_y = start_y + 6;
+                for (j, c) in hint.chars().enumerate() {
+                    let idx = (hint_y * w + hint_x + j as u16) as usize;
+                    if idx < modal_plane.cells.len() {
+                        modal_plane.cells[idx].char = c;
+                        modal_plane.cells[idx].fg = Color::Ansi(8);
+                    }
                 }
             }
+            modal_plane.z_index = 100;
+            ctx.add_plane(modal_plane);
         }
 
         if chat.show_settings_modal {
             let mut modal_plane = chat.settings_modal.render(Rect::new(0, 0, w, h));
+            {
+                let settings_x = ((w as i32 - 35) / 2) as u16;
+                let settings_y = ((h as i32 - 10) / 2) as u16;
+
+                let notif_text = format!("Notifications: {}", if chat.notifications_enabled { "ON" } else { "OFF" });
+                for (i, c) in notif_text.chars().enumerate() {
+                    let idx = ((settings_y + 2) * w + settings_x + 2 + i as u16) as usize;
+                    if idx < modal_plane.cells.len() {
+                        modal_plane.cells[idx].char = c;
+                        modal_plane.cells[idx].fg = if chat.notifications_enabled { Color::Ansi(2) } else { Color::Ansi(1) };
+                    }
+                }
+
+                let theme_text = format!("Theme: {}", chat.theme_mode);
+                for (i, c) in theme_text.chars().enumerate() {
+                    let idx = ((settings_y + 3) * w + settings_x + 2 + i as u16) as usize;
+                    if idx < modal_plane.cells.len() {
+                        modal_plane.cells[idx].char = c;
+                        modal_plane.cells[idx].fg = Color::Ansi(6);
+                    }
+                }
+
+                let clear_text = "Clear Chat History";
+                for (i, c) in clear_text.chars().enumerate() {
+                    let idx = ((settings_y + 5) * w + settings_x + 8 + i as u16) as usize;
+                    if idx < modal_plane.cells.len() {
+                        modal_plane.cells[idx].char = c;
+                        modal_plane.cells[idx].fg = Color::Ansi(1);
+                    }
+                }
+            }
             modal_plane.z_index = 100;
             ctx.add_plane(modal_plane);
-
-            let settings_x = ((w as i32 - 35) / 2) as u16;
-            let settings_y = ((h as i32 - 10) / 2) as u16;
-
-            let notif_text = format!("Notifications: {}", if chat.notifications_enabled { "ON" } else { "OFF" });
-            for (i, c) in notif_text.chars().enumerate() {
-                let idx = ((settings_y + 2) * w + settings_x + 2 + i as u16) as usize;
-                if idx < modal_plane.cells.len() {
-                    modal_plane.cells[idx].char = c;
-                    modal_plane.cells[idx].fg = if chat.notifications_enabled { Color::Ansi(2) } else { Color::Ansi(1) };
-                }
-            }
-
-            let theme_text = format!("Theme: {}", chat.theme_mode);
-            for (i, c) in theme_text.chars().enumerate() {
-                let idx = ((settings_y + 3) * w + settings_x + 2 + i as u16) as usize;
-                if idx < modal_plane.cells.len() {
-                    modal_plane.cells[idx].char = c;
-                    modal_plane.cells[idx].fg = Color::Ansi(6);
-                }
-            }
-
-            let clear_text = "Clear Chat History";
-            for (i, c) in clear_text.chars().enumerate() {
-                let idx = ((settings_y + 5) * w + settings_x + 8 + i as u16) as usize;
-                if idx < modal_plane.cells.len() {
-                    modal_plane.cells[idx].char = c;
-                    modal_plane.cells[idx].fg = Color::Ansi(1);
-                }
-            }
         }
 
         if chat.show_toast {
