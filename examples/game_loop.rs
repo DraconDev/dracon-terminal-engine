@@ -38,9 +38,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Ok(n) = stdin.read(&mut buf) {
                 for &byte in &buf[..n] {
                     if let Some(Event::Key(KeyEvent { code: KeyCode::Char('q'), .. })) = parser.advance(byte) {
-                            write!(term, "\x1b[?25h")?;
-                            return Ok(());
-                        }
+                        write!(term, "\x1b[?25h")?;
+                        return Ok(());
+                    }
                     }
                 }
             }
