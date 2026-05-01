@@ -1,24 +1,26 @@
 # Project State
 
 ## Current Focus
-Added modal dialog system with keyboard shortcuts and comprehensive test coverage
+Enhanced modal dialog system with improved keyboard shortcut handling and help overlay
 
 ## Context
-This change implements modal dialog functionality including confirmation dialogs, help overlays, and global keyboard shortcuts. The new modal system addresses the need for user confirmation flows and contextual help in terminal applications.
+The modal dialog system was refactored to better handle focus trapping, keyboard shortcuts, and visual layering. The help overlay now provides comprehensive keyboard shortcut documentation with proper z-index management.
 
 ## Completed
-- [x] Added modal dialog system with focus trapping and z-index layering
-- [x] Implemented keyboard shortcuts (q, Ctrl+S, ?) at application level
-- [x] Created comprehensive test coverage for modal behavior
-- [x] Added resize test cases for modal dialogs
-- [x] Updated widget lifecycle testing to include modal scenarios
+- [x] Implemented `HelpOverlay` widget with keyboard shortcut documentation
+- [x] Added proper z-index layering (100 for help, 110 for confirm dialog)
+- [x] Enhanced modal focus trapping with `FocusManager` integration
+- [x] Added keyboard shortcut handling at both global and widget levels
+- [x] Improved modal rendering with proper content alignment
+- [x] Added visual distinction for important shortcuts in help overlay
 
 ## In Progress
-- [ ] None (all modal functionality is implemented)
+- [x] Comprehensive modal dialog system with proper focus management
 
 ## Blockers
-- None (modal system is complete)
+- None identified in this commit
 
 ## Next Steps
-1. Add more modal variants (alert, prompt, custom content)
-2. Implement modal animations for smoother transitions
+1. Add more modal variants (warning, error, info)
+2. Implement modal animation transitions
+3. Add modal persistence across app restarts
