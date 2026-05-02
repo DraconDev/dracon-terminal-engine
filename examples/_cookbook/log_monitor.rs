@@ -5,7 +5,10 @@
 //!
 //! Controls: `c` clear, `r` resume scroll, click to pause/toggle filters.
 
+use std::cell::RefCell;
 use std::io::Result;
+use std::os::fd::AsFd;
+use std::rc::Rc;
 use std::time::{Duration, Instant};
 
 use rand::Rng;

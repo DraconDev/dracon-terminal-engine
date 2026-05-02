@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved input handling and window size detection in the split resizer example
+Added file descriptor handling for log monitoring in the cookbook example
 
 ## Context
-The split resizer example needed better input routing and window size detection to work more reliably across different terminal environments.
+The log monitor example needs proper file descriptor handling for cross-platform compatibility
 
 ## Completed
-- [x] Added proper input routing through an InputRouter widget
-- [x] Implemented window size detection using stdout file descriptor
-- [x] Refactored key/mouse event handling to use Rc<RefCell> for shared state
-- [x] Updated tabbed panels example to use similar window size detection
+- [x] Added `std::os::fd::AsFd` trait import for file descriptor operations
+- [x] Added `std::rc::Rc` and `std::cell::RefCell` for reference-counted file handling
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Implementing actual file descriptor usage in the log monitor
 
 ## Blockers
-- None identified
+- Need to determine specific file descriptor operations required for log monitoring
 
 ## Next Steps
-1. Verify the split resizer works consistently across different terminal sizes
-2. Consider adding more robust error handling for window size detection
+1. Implement file descriptor operations in the log monitor
+2. Add error handling for file descriptor operations
