@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Fixed z-index initialization in Tree Navigator widget
+Added keyboard input handling for the `on_tick` + `add_plane` pattern
 
 ## Context
-The change modifies how the Plane is initialized in the Tree Navigator widget, specifically adjusting the z-index parameter from 1 to 0.
+The change addresses a common pattern where developers need keyboard input in applications using the `on_tick` + `add_plane` rendering approach. The previous implementation required manual `InputRouter` boilerplate, which this change eliminates.
 
 ## Completed
-- [x] Changed Plane initialization from `Plane::new(1, area.width, area.height)` to `Plane::new(0, area.width, area.height)`
+- [x] Added `on_input` method to `App` that creates a hidden full-screen widget
+- [x] Implemented `InputHandler` widget that routes keyboard events to a closure
+- [x] Added `KeyEvent` import to support keyboard input handling
+- [x] Documented the new API with an example usage
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None (this is a complete feature implementation)
 
 ## Blockers
-- None identified for this specific change
+- None (this is a standalone feature)
 
 ## Next Steps
-1. Verify the visual impact of this change in the Tree Navigator widget
-2. Test the widget's rendering behavior with the new z-index value
+1. Update documentation to highlight the new `on_input` method
+2. Add integration tests for the new input handling pattern

@@ -25,7 +25,7 @@ use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::focus::FocusManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
-use crate::input::event::Event;
+use crate::input::event::{Event, KeyEvent};
 use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
@@ -220,6 +220,38 @@ impl App {
     /// Sets the tick interval in milliseconds (default: 250ms).
     pub fn tick_interval(mut self, ms: u64) -> Self {
         self.tick_interval = Duration::from_millis(ms);
+        self
+    }
+
+    /// Registers a keyboard input handler for the on_tick + add_plane pattern.
+    ///
+    /// Creates a hidden full-screen widget that receives keyboard focus and
+    /// delegates KeyEvent to the given closure. This eliminates the need for
+    /// manual `InputRouter` boilerplate when using `on_tick` + `ctx.add_plane()`.
+    ///
+    /// The closure should return `true` if the event was handled.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let app = Rc::new(RefCell::new(MyApp::new()));
+    /// let app_clone = app.clone();
+    /// App::new()?
+    ///     .on_input(move |key| app_clone.borrow_mut().handle_key(key))
+    ///     .on_tick(move |ctx, tick| { /* render via ctx.add_plane() */ })
+    ///     .run(|_| {});
+    /// ```
+    pub fn on_input<F>(mut self, handler: F) -> Self
+    where
+        F: FnMut(KeyEvent) -> bool + 'static,
+    {
+        let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
+        let input_widget = InputHandler {
+            handler: Box::new(handler),
+            id: WidgetId::new(self.next_widget_id),
+            area: Rect::new(0, 0, w, h),
+        };
+        self.add_widget(Box::new(input_widget), Rect::new(0, 0, w, h));
         self
     }
 
@@ -774,6 +806,31 @@ impl<'a> Ctx<'a> {
     /// Stops the application event loop on the next iteration.
     pub fn stop(&mut self) {
         self.running.store(false, Ordering::SeqCst);
+    }
+}
+
+/// Hidden widget that routes keyboard events to a closure.
+/// Created by [`App::on_input`] to enable input for the `on_tick` + `add_plane` pattern.
+struct InputHandler {
+    handler: Box<dyn FnMut(KeyEvent) -> bool>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for InputHandler {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        (self.handler)(key)
     }
 }
 
