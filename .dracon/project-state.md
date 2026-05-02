@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Removal of example applications to streamline the project and focus on core functionality
 
 ## Context
-This change was triggered by recent dependency updates across the project, particularly related to the theme system implementation and documentation improvements.
+The examples were demonstrating specific features but were becoming outdated and not aligned with the current framework direction. Removing them simplifies maintenance and reduces technical debt.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
-- [x] Ensured all dependencies are properly versioned for the theme system implementation
+- [x] Removed `command_dashboard.rs` example
+- [x] Removed `cyberpunk_dashboard.rs` example
+- [x] Removed `framework_chat.rs` example
+- [x] Removed `framework_demo.rs` example
 
 ## In Progress
-- [x] Ongoing work on theme system implementation and documentation
+- [x] Example cleanup complete
 
 ## Blockers
-- No blockers identified for this specific change
+- None
 
 ## Next Steps
-1. Continue theme system implementation across all UI widgets
-2. Finalize documentation updates for the theme system
+1. Update documentation to reflect the removed examples
+2. Create new examples that demonstrate current framework capabilities
