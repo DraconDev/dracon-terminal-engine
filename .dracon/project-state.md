@@ -1,16 +1,16 @@
 # Project State
 
 ## Current Focus
-Refactored plane rendering logic in the tabbed panels example with a new copy_plane utility function
+Improved input handling and window size detection in the split resizer example
 
 ## Context
-The tabbed panels example was refactoring to improve code organization and reduce duplication in the rendering logic. The previous implementation had repetitive code for copying widget planes into the main plane.
+The split resizer example needed better input routing and window size detection to work more reliably across different terminal environments.
 
 ## Completed
-- [x] Created a reusable `copy_plane` function to handle plane copying with bounds checking
-- [x] Removed duplicate plane copying code in all tab render functions
-- [x] Added theme background filling for the main plane
-- [x] Improved code organization with clear section comments
+- [x] Added proper input routing through an InputRouter widget
+- [x] Implemented window size detection using stdout file descriptor
+- [x] Refactored key/mouse event handling to use Rc<RefCell> for shared state
+- [x] Updated tabbed panels example to use similar window size detection
 
 ## In Progress
 - [ ] No active work in progress
@@ -19,5 +19,5 @@ The tabbed panels example was refactoring to improve code organization and reduc
 - None identified
 
 ## Next Steps
-1. Verify the refactored code maintains all visual functionality
-2. Consider adding more plane manipulation utilities if needed
+1. Verify the split resizer works consistently across different terminal sizes
+2. Consider adding more robust error handling for window size detection

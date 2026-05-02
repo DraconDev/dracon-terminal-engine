@@ -8,15 +8,16 @@
 //! - Click on tab to switch
 //! - Active tab highlighted with different color/style
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
+use std::os::fd::AsFd;
 use std::rc::Rc;
 
 const TAB_DASHBOARD: usize = 0;

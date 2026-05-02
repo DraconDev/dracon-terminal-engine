@@ -11,6 +11,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::os::fd::AsFd;
 
 const DA: f32 = 0.30;
 const DB: f32 = 0.50;
@@ -162,21 +163,64 @@ impl SplitResizerApp {
     }
 }
 
+/// Thin wrapper that routes keyboard/mouse events to a Rc<RefCell<SplitResizerApp>>.
+/// Registered in the widget system so input dispatch works, but does not render
+/// (rendering is handled by the on_tick callback calling ctx.add_plane()).
+struct InputRouter {
+    target: Rc<RefCell<SplitResizerApp>>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for InputRouter {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.target.borrow_mut().handle_mouse(kind, col, row)
+    }
+}
+
 fn main() -> Result<()> {
     println!("Split Resizer — drag dividers | ←/→:A | ↑/↓:B | r:reset");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
-    let app = Rc::new(RefCell::new(SplitResizerApp::new(WidgetId::new(1))));
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
-    let app_rc = app.clone();
-    App::new()?
+    let app = Rc::new(RefCell::new(SplitResizerApp::new(WidgetId::new(1))));
+    let app_for_tick = Rc::clone(&app);
+    let app_for_input = Rc::clone(&app);
+
+    let mut app_ctx = App::new()?
         .title("Split Resizer")
         .fps(30)
-        .tick_interval(200)
+        .tick_interval(200);
+
+    let router = InputRouter {
+        target: app_for_input,
+        id: WidgetId::new(100),
+        area: Rect::new(0, 0, w, h),
+    };
+    app_ctx.add_widget(Box::new(router), Rect::new(0, 0, w, h));
+
+    app_ctx
         .on_tick(move |ctx, tick| {
-            if tick % 2 == 0 { app_rc.borrow_mut().tick(); }
+            if tick % 2 == 0 { app_for_tick.borrow_mut().tick(); }
             let (w, h) = ctx.compositor().size();
-            let mut a = app_rc.borrow_mut();
+            let mut a = app_for_tick.borrow_mut();
             if a.area.width != w || a.area.height != h { a.set_area(Rect::new(0, 0, w, h)); }
             if a.needs_render() {
                 let area = a.area();
