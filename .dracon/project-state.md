@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Refactored `SystemMonitor` in `FrameworkDemo` to use `RefCell` for mutable access.
+Fix child process terminal corruption in showcase example by adding terminal suspend/resume functionality
 
 ## Context
-The change addresses thread-safety concerns in the framework demo by introducing interior mutability for the `SystemMonitor` component.
+Showcase launches child TUI examples with `Command::spawn()`, which inherits the parent's raw terminal state (alternate screen, raw mode, mouse capture, hidden cursor), causing instant corruption/breakage.
 
 ## Completed
-- [x] Wrapped `SystemMonitor` in `RefCell` to enable mutable access
-- [x] Updated `get_data()` call to use `borrow_mut()`
-- [x] Maintained existing functionality while improving thread-safety
+- [x] Added `suspend()` and `resume()` methods to `Terminal` to properly handle terminal state transitions
+- [x] Modified showcase to use suspend/resume around child process execution
+- [x] Implemented proper child process cleanup and terminal state restoration
 
 ## In Progress
-- [ ] None
+- [x] Verification of terminal state transitions during child process execution
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify thread-safety improvements in demo
-2. Consider broader application of this pattern to other mutable components
+1. Verify child process terminal state transitions work correctly
+2. Add error handling for terminal state operations
+3. Consider adding timeout for child process execution

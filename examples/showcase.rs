@@ -7,7 +7,7 @@
 //! Run with: cargo run --example showcase
 
 use std::os::fd::AsFd;
-use std::process::Command;
+use std::sync::{Arc, Mutex};
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -59,10 +59,11 @@ struct Showcase {
     should_quit: bool,
     last_click_time: std::time::Instant,
     last_click_row: u16,
+    pending_cmd: Arc<Mutex<Option<String>>>,
 }
 
 impl Showcase {
-    fn new(area: Rect) -> Self {
+    fn new(area: Rect, pending: Arc<Mutex<Option<String>>>) -> Self {
         Self {
             id: WidgetId::new(0),
             examples: ExampleMeta::all(),
@@ -72,6 +73,7 @@ impl Showcase {
             should_quit: false,
             last_click_time: std::time::Instant::now(),
             last_click_row: u16::MAX,
+            pending_cmd: pending,
         }
     }
 
@@ -81,14 +83,7 @@ impl Showcase {
 
     fn launch_selected(&self) {
         let ex = &self.examples[self.selected];
-        let mut parts = ex.run_cmd.split_whitespace();
-        let program = parts.next().unwrap();
-        let args: Vec<&str> = parts.collect();
-
-        Command::new(program)
-            .args(&args)
-            .spawn()
-            .ok();
+        *self.pending_cmd.lock().unwrap() = Some(ex.run_cmd.to_string());
     }
 }
 
@@ -302,7 +297,20 @@ fn main() -> std::io::Result<()> {
         (80u16, 24u16)
     };
 
+    let pending = Arc::new(Mutex::new(None));
+    let showcase = Showcase::new(Rect::new(0, 0, w, h), pending.clone());
+
     let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
-    app.add_widget(Box::new(Showcase::new(Rect::new(0, 0, w, h))), Rect::new(0, 0, w, h));
-    app.on_tick(|_ctx, _| {}).run(|_ctx| {})
+    app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
+    
+    app.on_tick(move |ctx, _| {
+        if let Some(cmd) = pending.lock().unwrap().take() {
+            let _ = ctx.terminal.suspend();
+            let _ = std::process::Command::new("sh")
+                .arg("-c")
+                .arg(&cmd)
+                .status();
+            let _ = ctx.terminal.resume();
+        }
+    }).run(|_ctx| {})
 }

@@ -87,6 +87,32 @@ impl<W: Write + AsFd> Terminal<W> {
         )
         .map_err(io::Error::other)
     }
+
+    /// Temporarily restore terminal to normal mode for child processes.
+    pub fn suspend(&mut self) -> io::Result<()> {
+        let _ = write!(
+            self.output,
+            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007h\x1b[?7h\x1b[?1049l"
+        );
+        let _ = self.output.flush();
+        let _ = set_terminal_attr(self.output.as_fd(), &self.original_termios);
+        Ok(())
+    }
+
+    /// Re-enter raw mode + alternate screen after suspend().
+    pub fn resume(&mut self) -> io::Result<()> {
+        let fd = self.output.as_fd();
+        let mut termios = self.original_termios;
+        make_raw(&mut termios);
+        set_terminal_attr(fd, &termios)?;
+        write!(
+            self.output,
+            "\x1b[>1u\x1b[?1049h\x1b[?1003h\x1b[?1006h\x1b[?1007l\x1b[?7l\x1b[?25l"
+        )?;
+        write!(self.output, "\x1b[2J\x1b[H")?;
+        self.output.flush()?;
+        Ok(())
+    }
 }
 
 impl<W: Write + AsFd> Write for Terminal<W> {
