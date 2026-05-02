@@ -122,6 +122,7 @@ impl Widget for FrameworkDemo {
 
         p
     }
+}
 
 fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
