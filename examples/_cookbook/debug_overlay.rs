@@ -27,7 +27,7 @@ use std::time::{Duration, Instant};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{EventLogger, List, Profiler, WidgetInspector, WidgetNode};
+use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector, WidgetNode};
 use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;

@@ -37,7 +37,7 @@ use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, PasswordInput, SearchInput, Select, Toast, ToastKind, Toggle,
+    Button, PasswordInput, SearchInput, Select, Toggle,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;

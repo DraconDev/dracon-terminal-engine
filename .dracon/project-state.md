@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Improved terminal management for child processes in the framework
+Clean up unused imports and widget rendering in framework examples
 
 ## Context
-The showcase example was experiencing terminal corruption when running child processes. This required proper terminal state management during process execution.
+The changes address code quality improvements in the framework examples by removing unused imports and cleaning up widget rendering patterns.
 
 ## Completed
-- [x] Added `suspend_terminal()` and `resume_terminal()` methods to `Ctx` for proper terminal state management
-- [x] Updated showcase example to use new terminal management methods
-- [x] Fixed terminal corruption during child process execution
+- [x] Removed unused `List` import from debug_overlay.rs
+- [x] Removed unused `Toast` import from form_demo.rs
+- [x] Cleaned up unused imports in framework_demo.rs
+- [x] Standardized widget rendering by consistently ignoring return values with `_`
 
 ## In Progress
-- [x] Terminal state management implementation
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify terminal state management works across different terminal emulators
-2. Document the new terminal management API in framework documentation
+1. Verify all examples still compile and run correctly
+2. Consider additional code quality improvements in other examples
