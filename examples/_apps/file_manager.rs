@@ -287,10 +287,12 @@ impl Widget for FileManager {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if let Some(ref mut m) = self.context_menu { if m.handle_mouse(kind.clone(), col, row) { if let MouseEventKind::Down(_) = kind { self.context_menu = None; } return true; } }
         if let Some(ref mut t) = self.toast { if t.is_expired() { self.toast = None; self.dirty = true; } }
-        let hh = 1u16; let fh = 1u16; let ch = 24u16.saturating_sub(hh + fh);
+        let hh = 1u16; let fh = 1u16;
+        let area = self.area.get();
+        let ch = area.height.saturating_sub(hh + fh);
         if row == 0 { return self.breadcrumbs.handle_mouse(kind, col, row); }
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.30);
-        let (tree_rect, detail_rect) = split.split(Rect::new(0, hh, 80, ch));
+        let (tree_rect, detail_rect) = split.split(Rect::new(0, hh, area.width, ch));
         if col <= tree_rect.width && row > hh && row < hh + tree_rect.height {
             if self.tree.handle_mouse(kind, col, row - hh) { self.tree_path = self.tree.get_selected_path().to_vec(); self.dirty = true; return true; }
         }
@@ -323,10 +325,17 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut fm = FileManager::new(WidgetId::new(0));
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let mut fm = FileManager::new(WidgetId::new(0), should_quit);
     fm.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("File Manager").fps(30).theme(Theme::dark());
     app.add_widget(Box::new(fm), Rect::new(0, 0, w, h));
-    app.run(|_ctx| {})
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(|_ctx| {})
 }
