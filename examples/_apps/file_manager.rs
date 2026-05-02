@@ -370,11 +370,12 @@ impl Widget for FileManager {
             }
             KeyCode::Enter | KeyCode::Right => {
                 let path = self.tree.get_selected_path().to_vec();
-                if let Some(node) = self.root.find_by_path(&path) {
-                    self.selected_path = Some(node.path.clone());
+                let node_info = self.root.find_by_path(&path).map(|n| (n.path.clone(), n.is_dir));
+                if let Some((node_path, is_dir)) = node_info {
+                    self.selected_path = Some(node_path);
                     self.tree_path = path;
                     self.update_breadcrumbs();
-                    if node.is_dir {
+                    if is_dir {
                         // Toggle expansion
                     }
                 }
