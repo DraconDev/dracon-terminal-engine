@@ -121,12 +121,15 @@ impl Widget for Table {
             }
         }
 
-        // Render search input
+        // Render search input (skip transparent cells to preserve parent background)
         let search_area = Rect::new(0, 0, 20, 1);
         let search_plane = self.search.render(search_area);
         for y in 0..search_plane.height {
             for x in 0..search_plane.width {
                 let src_idx = (y * search_plane.width + x) as usize;
+                if search_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = (y * area.width + x) as usize;
                 if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = search_plane.cells[src_idx].clone();

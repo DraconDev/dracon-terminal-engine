@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Replace `qdbus` with `dbus-send` to avoid crashes in Konsole terminal spawning
+Improved rendering of transparent cells in UI components
 
 ## Context
-The previous implementation using `qdbus` was crashing on some Qt/KDE versions. The new approach uses the more stable `dbus-send` command which doesn't link against Qt and provides more reliable session management.
+The changes address rendering issues where transparent cells weren't properly handled, particularly in the data table and tree navigator components. This ensures proper background visibility in these UI elements.
 
 ## Completed
-- [x] Replaced `qdbus` with `dbus-send` for terminal spawning
-- [x] Added proper parsing of `dbus-send` output to extract session IDs
-- [x] Maintained all existing functionality while improving reliability
+- [x] Fixed transparent cell handling in data table search input
+- [x] Improved plane copying logic in tree navigator to skip transparent cells
+- [x] Optimized cell index calculations in both components
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress beyond these changes
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify stability across different KDE/Qt versions
-2. Monitor for any regression in terminal spawning behavior
+1. Verify visual consistency across all UI components
+2. Test with different terminal backgrounds to ensure proper transparency

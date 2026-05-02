@@ -183,20 +183,22 @@ impl Widget for TreeNav {
         let (tree_rect, detail_rect) = split.split(content_rect);
 
         // Helper to copy a sub-plane into the main plane at the correct position
-        let copy_plane = |dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16| {
-            let dw = dest.width as usize;
-            for sy in 0..src.height {
-                for sx in 0..src.width {
-                    let src_idx = (sy * src.width + sx) as usize;
-                    let dx = dest_x + sx;
-                    let dy = dest_y + sy;
-                    if dx < dest.width && dy < dest.height {
-                        let dest_idx = (dy as usize) * dw + (dx as usize);
-                        dest.cells[dest_idx] = src.cells[src_idx].clone();
-                    }
+    let copy_plane = |dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16| {
+        for sy in 0..src.height {
+            for sx in 0..src.width {
+                let src_idx = (sy * src.width + sx) as usize;
+                if src.cells[src_idx].transparent {
+                    continue;
+                }
+                let dx = dest_x + sx;
+                let dy = dest_y + sy;
+                if dx < dest.width && dy < dest.height {
+                    let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
+                    dest.cells[dest_idx] = src.cells[src_idx].clone();
                 }
             }
-        };
+        }
+    };
 
         // Breadcrumbs at top row
         let bc_plane = self.breadcrumbs.render(header_rect);
