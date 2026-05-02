@@ -196,9 +196,9 @@ impl Widget for KeyValueGrid {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
 
-        let alt_bg = Color::Ansi(236);
+        let alt_bg = self.theme.surface;
         let key_fg = self.theme.fg;
-        let val_fg = self.theme.inactive_fg;
+        let val_fg = self.theme.fg_muted;
 
         for (row, (key, value)) in self.pairs.iter().enumerate() {
             if row >= area.height as usize {
@@ -223,7 +223,7 @@ impl Widget for KeyValueGrid {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: self.theme.inactive_fg,
+                        fg: self.theme.fg_muted,
                         bg: self.theme.bg,
                         style: Styles::empty(),
                         transparent: false,

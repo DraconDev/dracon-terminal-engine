@@ -106,14 +106,14 @@ impl crate::framework::widget::Widget for TabBar {
             let is_active = i == self.active;
 
             let bg = if is_active {
-                self.theme.active_bg
+                self.theme.primary_active
             } else {
                 self.theme.bg
             };
             let fg = if is_active {
-                self.theme.accent
+                self.theme.primary
             } else {
-                self.theme.inactive_fg
+                self.theme.fg_muted
             };
             let style = if is_active {
                 Styles::BOLD | Styles::UNDERLINE

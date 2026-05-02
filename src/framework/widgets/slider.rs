@@ -168,7 +168,7 @@ impl crate::framework::widget::Widget for Slider {
             plane.cells[thumb_idx as usize] = Cell {
                 char: 'O',
                 fg: self.theme.bg,
-                bg: self.theme.accent,
+                bg: self.theme.primary,
                 style: Styles::BOLD,
                 transparent: false,
                 skip: false,

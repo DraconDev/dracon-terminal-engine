@@ -124,11 +124,11 @@ impl crate::framework::widget::Widget for Form {
             };
 
             let fg = if is_focused {
-                self.theme.accent
+                self.theme.primary
             } else {
                 self.theme.fg
             };
-            let err_fg = self.theme.error_fg;
+            let err_fg = self.theme.error;
 
             for (j, c) in label_text.chars().take(width).enumerate() {
                 let idx = (i as u16 * plane.width + j as u16) as usize;

@@ -173,7 +173,7 @@ impl Widget for StreamingText {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: self.theme.inactive_fg,
+                        fg: self.theme.fg_muted,
                         bg: self.theme.bg,
                         style: Styles::empty(),
                         transparent: false,

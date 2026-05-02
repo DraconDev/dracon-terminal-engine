@@ -116,11 +116,11 @@ impl Gauge {
     pub fn fill_color(&self) -> Color {
         let pct = self.percentage();
         if pct >= self.crit_threshold {
-            self.theme.error_fg
+            self.theme.error
         } else if pct >= self.warn_threshold {
-            self.theme.warning_fg
+            self.theme.warning
         } else {
-            self.theme.success_fg
+            self.theme.success
         }
     }
 
@@ -151,7 +151,7 @@ impl Gauge {
             } else {
                 cells.push(Cell {
                     char: '░',
-                    fg: self.theme.inactive_fg,
+                    fg: self.theme.fg_muted,
                     bg: self.theme.bg,
                     style: Styles::empty(),
                     transparent: false,

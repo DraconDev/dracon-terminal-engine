@@ -103,9 +103,9 @@ impl crate::framework::widget::Widget for Toggle {
         let start_y = height.saturating_sub(1) / 2;
 
         let bg = if self.state {
-            self.theme.success_fg
+            self.theme.success
         } else {
-            self.theme.inactive_fg
+            self.theme.fg_muted
         };
 
         for (i, c) in full_text.chars().take(width).enumerate() {

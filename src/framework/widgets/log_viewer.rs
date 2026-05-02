@@ -182,11 +182,11 @@ impl LogViewer {
 
     pub fn level_color(&self, level: LogLevel) -> Color {
         match level {
-            LogLevel::Fatal => self.theme.error_fg,
-            LogLevel::Error => self.theme.error_fg,
-            LogLevel::Warn => self.theme.warning_fg,
+            LogLevel::Fatal => self.theme.error,
+            LogLevel::Error => self.theme.error,
+            LogLevel::Warn => self.theme.warning,
             LogLevel::Info => self.theme.fg,
-            LogLevel::Debug => self.theme.inactive_fg,
+            LogLevel::Debug => self.theme.fg_muted,
         }
     }
 
@@ -250,7 +250,7 @@ impl Widget for LogViewer {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: self.theme.inactive_fg,
+                        fg: self.theme.fg_muted,
                         bg: self.theme.bg,
                         style: Styles::empty(),
                         transparent: false,
@@ -297,7 +297,7 @@ impl Widget for LogViewer {
                         if col < area.width as usize {
                             plane.cells[screen_row * area.width as usize + col] = Cell {
                                 char: c,
-                                fg: self.theme.inactive_fg,
+                                fg: self.theme.fg_muted,
                                 bg: self.theme.bg,
                                 style: Styles::empty(),
                                 transparent: false,

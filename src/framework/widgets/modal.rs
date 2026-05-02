@@ -200,7 +200,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].style = Styles::BOLD;
-                plane.cells[idx].fg = self.theme.accent;
+                plane.cells[idx].fg = self.theme.primary;
             }
         }
 
@@ -215,7 +215,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
 
             let is_focused = i == self.focused_btn;
             let bg = if is_focused {
-                self.theme.active_bg
+                self.theme.primary_active
             } else {
                 self.theme.bg
             };

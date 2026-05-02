@@ -108,7 +108,7 @@ impl crate::framework::widget::Widget for Spinner {
         if idx < plane.cells.len() {
             plane.cells[idx] = Cell {
                 char: frame,
-                fg: self.theme.accent,
+                fg: self.theme.primary,
                 bg: self.theme.bg,
                 style: Styles::empty(),
                 transparent: false,

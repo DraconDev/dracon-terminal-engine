@@ -84,9 +84,9 @@ impl Toast {
     fn fg_color(&self) -> Color {
         match self.kind {
             ToastKind::Info => self.theme.fg,
-            ToastKind::Success => self.theme.success_fg,
-            ToastKind::Warning => self.theme.warning_fg,
-            ToastKind::Error => self.theme.error_fg,
+            ToastKind::Success => self.theme.success,
+            ToastKind::Warning => self.theme.warning,
+            ToastKind::Error => self.theme.error,
         }
     }
 }

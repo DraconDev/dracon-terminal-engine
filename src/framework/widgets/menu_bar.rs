@@ -177,7 +177,7 @@ impl crate::framework::widget::Widget for MenuBar {
                             self.theme.fg
                         },
                         bg: if is_active {
-                            self.theme.accent
+                            self.theme.primary
                         } else {
                             self.theme.bg
                         },

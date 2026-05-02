@@ -259,6 +259,6 @@ impl crate::framework::widget::Widget for SplitPane {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.divider_color = theme.inactive_fg;
+        self.divider_color = theme.outline;
     }
 }

@@ -102,7 +102,7 @@ impl crate::framework::widget::Widget for DebugOverlay {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: self.theme.error_fg,
+                        fg: self.theme.error,
                         bg: Color::Reset,
                         style: Styles::empty(),
                         transparent: true,

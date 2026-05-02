@@ -315,7 +315,7 @@ impl Widget for ConfirmDialog {
                 plane.cells[idx] = Cell {
                     char: c,
                     fg: if self.danger && self.focused {
-                        self.theme.error_fg
+                        self.theme.error
                     } else {
                         btn_fg
                     },

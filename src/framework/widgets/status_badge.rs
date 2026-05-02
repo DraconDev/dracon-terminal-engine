@@ -136,20 +136,20 @@ impl Widget for StatusBadge {
         let (fg, bg, label) =
             if status_upper.contains("OK") || status_upper.contains("GREEN") || status_upper == "1"
             {
-                (self.theme.success_fg, self.theme.bg, "OK")
+                (self.theme.success, self.theme.bg, "OK")
             } else if status_upper.contains("WARN")
                 || status_upper.contains("WARNING")
                 || status_upper.contains("YELLOW")
             {
-                (self.theme.warning_fg, self.theme.bg, "WARN")
+                (self.theme.warning, self.theme.bg, "WARN")
             } else if status_upper.contains("ERROR")
                 || status_upper.contains("FAIL")
                 || status_upper.contains("RED")
                 || status_upper == "0"
             {
-                (self.theme.error_fg, self.theme.bg, "ERROR")
+                (self.theme.error, self.theme.bg, "ERROR")
             } else if status_upper.is_empty() {
-                (self.theme.inactive_fg, self.theme.bg, "EMPTY")
+                (self.theme.fg_muted, self.theme.bg, "EMPTY")
             } else {
                 let l: &str = if self.label.is_empty() {
                     status_upper.as_str()
