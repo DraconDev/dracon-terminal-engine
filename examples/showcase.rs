@@ -262,6 +262,9 @@ impl Widget for Showcase {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
+        
+        // Clear status message on any key press
+        self.status_message = None;
 
         match key.code {
             KeyCode::Down | KeyCode::Char('j') => {
