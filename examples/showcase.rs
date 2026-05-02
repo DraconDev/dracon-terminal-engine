@@ -1,336 +1,539 @@
 #![allow(missing_docs)]
-//! Dracon Terminal Engine — Example Showcase
+//! Dracon Terminal Engine — Example Showcase Launcher
 //!
-//! Interactive launcher for all framework examples.
-//! Navigate with arrow keys, press Enter to see run command, q to quit.
+//! Interactive grid-based launcher for all framework examples.
+//! Features: category filtering, real-time search, animated selection,
+//! card-based layout with mini previews, and keyboard shortcuts.
 //!
-//! Run with: cargo run --example showcase
+//! Controls:
+//!   arrows / hjkl — navigate cards
+//!   Enter — launch selected example
+//!   / — focus search bar
+//!   Tab — cycle categories
+//!   t — cycle theme
+//!   q — quit
 
-use std::os::fd::AsFd;
-use std::sync::{Arc, Mutex};
+use std::io::Read;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::io::{Read, Write};
-use dracon_terminal_engine::compositor::{Color, Plane, Styles};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
+
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════════
 
 struct ExampleMeta {
     name: &'static str,
     category: &'static str,
     description: &'static str,
     binary_name: &'static str,
+    preview: &'static [&'static str],
 }
 
 impl ExampleMeta {
     fn all() -> Vec<Self> {
         vec![
-            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets in one App", binary_name: "widget_gallery" },
-            ExampleMeta { name: "tree_navigator", category: "cookbook", description: "Hierarchical navigation with Tree", binary_name: "tree_navigator" },
-            ExampleMeta { name: "log_monitor", category: "cookbook", description: "Real-time log viewer with filtering", binary_name: "log_monitor" },
-            ExampleMeta { name: "tabbed_panels", category: "cookbook", description: "Tab switching with per-tab state", binary_name: "tabbed_panels" },
-            ExampleMeta { name: "data_table", category: "cookbook", description: "Sortable table with search/filter", binary_name: "data_table" },
-            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Nested SplitPane with drag-to-resize", binary_name: "split_resizer" },
-            ExampleMeta { name: "command_bindings", category: "cookbook", description: "5 command-bound widgets with auto-refresh", binary_name: "command_bindings" },
-            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu with shortcuts", binary_name: "menu_system" },
-            ExampleMeta { name: "debug_overlay", category: "cookbook", description: "Debug tools overlay with F12 toggle", binary_name: "debug_overlay" },
-            ExampleMeta { name: "system_monitor", category: "apps", description: "htop-like dashboard with live gauges", binary_name: "system_monitor" },
-            ExampleMeta { name: "file_manager", category: "apps", description: "Full file manager UI with Tree + Table", binary_name: "file_manager" },
-            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with emoji picker", binary_name: "chat_client" },
-            ExampleMeta { name: "dashboard_builder", category: "apps", description: "All command widgets in grid layout", binary_name: "dashboard_builder" },
-            ExampleMeta { name: "form_demo", category: "existing", description: "Settings form with validation", binary_name: "form_demo" },
-            ExampleMeta { name: "theme_switcher", category: "existing", description: "Live theme cycling through all 15 themes", binary_name: "theme_switcher" },
-            ExampleMeta { name: "modal_demo", category: "existing", description: "ConfirmDialog + help overlay", binary_name: "modal_demo" },
-            ExampleMeta { name: "widget_tutorial", category: "existing", description: "Build a custom ColorPicker widget", binary_name: "widget_tutorial" },
-            ExampleMeta { name: "form_widget", category: "existing", description: "Form builder with labeled fields", binary_name: "form_widget" },
-            ExampleMeta { name: "table_widget", category: "existing", description: "Sortable data table", binary_name: "table_widget" },
-            ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
-            ExampleMeta { name: "desktop", category: "existing", description: "Desktop environment mockup", binary_name: "desktop" },
-            ExampleMeta { name: "game_loop", category: "existing", description: "Interactive game loop demo", binary_name: "game_loop" },
-            ExampleMeta { name: "text_editor_demo", category: "existing", description: "Text editor widget demo", binary_name: "text_editor_demo" },
-            ExampleMeta { name: "input_debug", category: "existing", description: "Input event debugger", binary_name: "input_debug" },
+            // Apps
+            ExampleMeta { name: "system_monitor", category: "apps", description: "htop-like dashboard with live gauges", binary_name: "system_monitor", preview: &["┌ CPU ████████░░ 75%", "├ MEM ██████░░░░ 60%", "├ NET ▓▓▓▓▓▓▓▓▓▓", "└ PROC 142 running",] },
+            ExampleMeta { name: "file_manager", category: "apps", description: "Full file manager UI with Tree + Table", binary_name: "file_manager", preview: &["> src/", "  ├ lib.rs", "  ├ main.rs", "  └ Cargo.toml",] },
+            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with emoji picker", binary_name: "chat_client", preview: &["[10:42] Alice: Hey!", "[10:43] Bob: 👋 Hi", "[10:44] Alice: 🎉", "> _",] },
+            ExampleMeta { name: "dashboard_builder", category: "apps", description: "All command widgets in grid layout", binary_name: "dashboard_builder", preview: &["┌───┐ ┌───┐ ┌───┐", "│ 75│ │ 42│ │ 88│", "└───┘ └───┘ └───┘", "  CPU  MEM  DISK",] },
+            // Cookbook
+            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets in one App", binary_name: "widget_gallery", preview: &["[✓] Checkbox", "(•) Radio", "[||||] Slider", "Loading ████",] },
+            ExampleMeta { name: "tree_navigator", category: "cookbook", description: "Hierarchical navigation with Tree", binary_name: "tree_navigator", preview: &["> home/", "  > user/", "    > src/", "      main.rs",] },
+            ExampleMeta { name: "log_monitor", category: "cookbook", description: "Real-time log viewer with filtering", binary_name: "log_monitor", preview: &["[INFO] Starting", "[WARN] High mem", "[ERR] Timeout", "[INFO] Done",] },
+            ExampleMeta { name: "tabbed_panels", category: "cookbook", description: "Tab switching with per-tab state", binary_name: "tabbed_panels", preview: &["[Tab1][Tab2][Tab3]", "┌──────────────┐", "│ Dashboard    │", "│ CPU: 45%     │",] },
+            ExampleMeta { name: "data_table", category: "cookbook", description: "Sortable table with search/filter", binary_name: "data_table", preview: &["Name   │ Role  │", "───────┼───────", "Alice  │ Admin │", "Bob    │ User  │",] },
+            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Nested SplitPane with drag-to-resize", binary_name: "split_resizer", preview: &["┌─────┬─────┐", "│  A  │  B  │", "├─────┼─────┤", "│  C  │  D  │",] },
+            ExampleMeta { name: "command_bindings", category: "cookbook", description: "5 command-bound widgets with auto-refresh", binary_name: "command_bindings", preview: &["Load: 0.45 0.32", "CPU:  ████░░", "Mem:  ██████", "Net:  ▓▓▓▓▓▓",] },
+            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu with shortcuts", binary_name: "menu_system", preview: &["[File][Edit][View]", "┌──────────┐", "│ New      │", "│ Open     │",] },
+            ExampleMeta { name: "debug_overlay", category: "cookbook", description: "Debug tools overlay with F12 toggle", binary_name: "debug_overlay", preview: &["FPS: 60", "Frame: 16ms", "Widgets: 12", "Events: 45",] },
+            // Tools
+            ExampleMeta { name: "form_demo", category: "tools", description: "Settings form with validation", binary_name: "form_demo", preview: &["Username: alice", "Email: a@b.com", "Password: ****", "[Submit]",] },
+            ExampleMeta { name: "modal_demo", category: "tools", description: "ConfirmDialog + help overlay", binary_name: "modal_demo", preview: &["┌─────────────┐", "│ Confirm?    │", "│ [Yes] [No]  │", "└─────────────┘",] },
+            ExampleMeta { name: "theme_switcher", category: "tools", description: "Live theme cycling through all 15 themes", binary_name: "theme_switcher", preview: &["Theme: Nord", "┌──────────┐", "│ ■ ■ ■ ■  │", "│ ■ ■ ■ ■  │",] },
+            ExampleMeta { name: "widget_tutorial", category: "tools", description: "Build a custom ColorPicker widget", binary_name: "widget_tutorial", preview: &["ColorPicker:", "┌──────────┐", "│ 🟥🟩🟦🟨 │", "│ 🟪🟧⬜⬛ │",] },
+            ExampleMeta { name: "text_editor_demo", category: "tools", description: "Text editor widget demo", binary_name: "text_editor_demo", preview: &["fn main() {", "  println!(", "    \"Hello\"", "  );",] },
+            ExampleMeta { name: "desktop", category: "tools", description: "Desktop environment mockup", binary_name: "desktop", preview: &["┌────┐ ┌────┐", "│Win1│ │Win2│", "│    │ │    │", "└────┘ └────┘",] },
+            ExampleMeta { name: "game_loop", category: "tools", description: "Interactive game loop demo", binary_name: "game_loop", preview: &["  @     *", "     *   ", "  *   @  ", "    @    ",] },
+            ExampleMeta { name: "input_debug", category: "tools", description: "Input event debugger", binary_name: "input_debug", preview: &["Key: Enter", "Code: 13", "Kind: Press", "Mod: Ctrl",] },
+            ExampleMeta { name: "framework_file_manager", category: "tools", description: "File browser", binary_name: "framework_file_manager", preview: &["> src/", "  lib.rs", "  main.rs", "  Cargo.toml",] },
+            ExampleMeta { name: "form_widget", category: "tools", description: "Form builder with labeled fields", binary_name: "form_widget", preview: &["Name:     ____", "Email:    ____", "Password: ****", "[Submit]",] },
+            ExampleMeta { name: "table_widget", category: "tools", description: "Sortable data table", binary_name: "table_widget", preview: &["Name  │ Role │", "──────┼──────", "Alice │ Admin", "Bob   │ User",] },
         ]
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHOWCASE STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
 struct Showcase {
-    id: WidgetId,
     examples: Vec<ExampleMeta>,
+    filtered: Vec<usize>,
     selected: usize,
-    area: Rect,
+    category_filter: Option<&'static str>,
+    search_query: String,
+    search_active: bool,
     theme_idx: usize,
     should_quit: Arc<AtomicBool>,
-    last_click_time: std::time::Instant,
-    last_click_row: u16,
     pending_binary: Arc<Mutex<Option<String>>>,
-    status_message: Option<String>,
+    status_message: Option<(String, Instant)>,
+    anim_frame: u8,
+    last_anim: Instant,
 }
 
 impl Showcase {
-    fn new(area: Rect, pending: Arc<Mutex<Option<String>>>, should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>) -> Self {
+        let examples = ExampleMeta::all();
+        let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
-            id: WidgetId::new(0),
-            examples: ExampleMeta::all(),
+            examples,
+            filtered,
             selected: 0,
-            area,
+            category_filter: None,
+            search_query: String::new(),
+            search_active: false,
             theme_idx: 0,
             should_quit,
-            last_click_time: std::time::Instant::now(),
-            last_click_row: u16::MAX,
             pending_binary: pending,
             status_message: None,
+            anim_frame: 0,
+            last_anim: Instant::now(),
         }
     }
 
     fn themes() -> Vec<Theme> {
-        vec![Theme::nord(), Theme::dark(), Theme::cyberpunk(), Theme::dracula()]
+        vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::gruvbox_dark(), Theme::tokyo_night()]
+    }
+
+    fn current_theme(&self) -> Theme {
+        Self::themes()[self.theme_idx % Self::themes().len()]
+    }
+
+    fn apply_filter(&mut self) {
+        self.filtered = self.examples.iter().enumerate()
+            .filter(|(_, ex)| {
+                let matches_category = self.category_filter.map_or(true, |cat| ex.category == cat);
+                let matches_search = if self.search_query.is_empty() {
+                    true
+                } else {
+                    let q = self.search_query.to_lowercase();
+                    ex.name.to_lowercase().contains(&q) ||
+                    ex.description.to_lowercase().contains(&q) ||
+                    ex.category.to_lowercase().contains(&q)
+                };
+                matches_category && matches_search
+            })
+            .map(|(i, _)| i)
+            .collect();
+        self.selected = self.selected.min(self.filtered.len().saturating_sub(1));
+    }
+
+    fn selected_example(&self) -> Option<&ExampleMeta> {
+        self.filtered.get(self.selected).and_then(|&idx| self.examples.get(idx))
     }
 
     fn launch_selected(&mut self) {
-        let ex = &self.examples[self.selected];
-        *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
-        self.status_message = Some(format!("Launching {}...", ex.name));
+        if let Some(ex) = self.selected_example() {
+            *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
+            self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));
+        }
+    }
+
+    fn tick_animation(&mut self) {
+        if self.last_anim.elapsed() > Duration::from_millis(200) {
+            self.anim_frame = (self.anim_frame + 1) % 4;
+            self.last_anim = Instant::now();
+        }
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, selected: bool) {
+    let w = area.width as usize;
+    let h = area.height as usize;
+    if w < 2 || h < 2 { return; }
+
+    let chars = if selected {
+        ('╭', '╮', '╰', '╯', '─', '│', '▓')
+    } else {
+        ('┌', '┐', '└', '┘', '─', '│', '░')
+    };
+
+    // Corners
+    set_cell(plane, 0, 0, chars.0, fg, bg);
+    set_cell(plane, w - 1, 0, chars.1, fg, bg);
+    set_cell(plane, 0, h - 1, chars.2, fg, bg);
+    set_cell(plane, w - 1, h - 1, chars.3, fg, bg);
+
+    // Top/bottom edges
+    for x in 1..w - 1 {
+        set_cell(plane, x, 0, chars.4, fg, bg);
+        set_cell(plane, x, h - 1, chars.4, fg, bg);
+    }
+
+    // Left/right edges
+    for y in 1..h - 1 {
+        set_cell(plane, 0, y, chars.5, fg, bg);
+        set_cell(plane, w - 1, y, chars.5, fg, bg);
+    }
+
+    // Fill background
+    for y in 1..h - 1 {
+        for x in 1..w - 1 {
+            set_cell(plane, x, y, ' ', fg, bg);
+        }
+    }
+}
+
+fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Color) {
+    let idx = y * plane.width as usize + x;
+    if idx < plane.cells.len() {
+        plane.cells[idx] = Cell {
+            char: ch,
+            fg,
+            bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+    }
+}
+
+fn draw_text(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, bold: bool) {
+    for (i, ch) in text.chars().enumerate() {
+        let idx = y * plane.width as usize + x + i;
+        if idx < plane.cells.len() {
+            plane.cells[idx] = Cell {
+                char: ch,
+                fg,
+                bg,
+                style: if bold { Styles::BOLD } else { Styles::empty() },
+                transparent: false,
+                skip: false,
+            };
+        }
+    }
+}
+
+fn category_color(t: Theme, cat: &str) -> Color {
+    match cat {
+        "apps" => t.warning,
+        "cookbook" => t.info,
+        "tools" => t.secondary,
+        _ => t.fg_muted,
+    }
+}
+
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, anim_frame: u8, t: Theme) -> Plane {
+    let card_w = 28u16;
+    let card_h = 14u16;
+    let mut plane = Plane::new(0, card_w, card_h);
+
+    let is_selected = idx == selected_idx;
+    let cat_color = category_color(t, ex.category);
+
+    // Border
+    let border_fg = if is_selected {
+        match anim_frame {
+            0 => t.primary,
+            1 => t.primary_hover,
+            2 => t.secondary,
+            _ => t.primary,
+        }
+    } else {
+        t.outline
+    };
+    let bg = if is_selected { t.surface_elevated } else { t.surface };
+    draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected);
+
+    // Category badge (top)
+    let badge = format!(" {} ", ex.category.to_uppercase());
+    let badge_x = 2usize;
+    let badge_y = 1usize;
+    for (i, ch) in badge.chars().enumerate() {
+        let px = badge_x + i;
+        if px < plane.width as usize - 2 {
+            set_cell(&mut plane, px, badge_y, ch, t.fg_on_accent, cat_color);
+        }
+    }
+
+    // Name (bold)
+    let name_y = 3usize;
+    let name_truncated = if ex.name.len() > 24 { &ex.name[..24] } else { ex.name };
+    draw_text(&mut plane, 2, name_y, name_truncated, t.fg, bg, true);
+
+    // Description
+    let desc_y = 4usize;
+    let desc = if ex.description.len() > 24 { &ex.description[..24] } else { ex.description };
+    draw_text(&mut plane, 2, desc_y, desc, t.fg_muted, bg, false);
+
+    // Preview (mini ASCII art)
+    for (i, line) in ex.preview.iter().enumerate() {
+        let py = 6 + i;
+        if py < card_h as usize - 1 {
+            let preview_line = if line.len() > 24 { &line[..24] } else { line };
+            draw_text(&mut plane, 2, py, preview_line, t.fg_subtle, bg, false);
+        }
+    }
+
+    // Selection indicator
+    if is_selected {
+        let indicator = "►";
+        draw_text(&mut plane, 1, card_h as usize / 2, indicator, t.primary, bg, true);
+    }
+
+    plane
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WIDGET IMPL
+// ═══════════════════════════════════════════════════════════════════════════════
+
 impl Widget for Showcase {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 10 }
+    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    fn set_area(&mut self, area: Rect) { let _ = area; }
+    fn z_index(&self) -> u16 { 0 }
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool { true }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = Self::themes()[self.theme_idx];
-        let mut p = Plane::new(0, area.width, area.height);
-        p.z_index = 10;
+        let mut plane = Plane::new(0, area.width, area.height);
+        let t = self.current_theme();
 
-        for i in 0..p.cells.len() {
-            p.cells[i].transparent = false;
-            p.cells[i].bg = t.bg;
-            p.cells[i].fg = t.fg;
+        // Background fill
+        for cell in plane.cells.iter_mut() {
+            cell.bg = t.bg;
+            cell.fg = t.fg;
+            cell.transparent = false;
         }
 
-        let title = " Dracon — Example Showcase ";
-        for (i, c) in title.chars().enumerate() {
-            if i < p.cells.len() {
-                p.cells[i].char = c;
-                p.cells[i].fg = t.primary;
-                p.cells[i].style = Styles::BOLD;
-            }
+        // Title bar
+        let title = " Dracon Terminal Engine ";
+        let title_x = (area.width as usize - title.len()) / 2;
+        draw_text(&mut plane, title_x, 0, title, t.primary, t.bg, true);
+
+        // Search bar
+        let search_y = 2usize;
+        let search_prompt = if self.search_active { "> " } else { "  " };
+        let search_text = format!("{}Search: {}_", search_prompt, self.search_query);
+        let search_fg = if self.search_active { t.primary } else { t.fg_muted };
+        draw_text(&mut plane, 2, search_y, &search_text, search_fg, t.surface, false);
+        // Fill rest of search bar
+        for x in search_text.len() + 2..area.width as usize - 2 {
+            set_cell(&mut plane, x, search_y, ' ', search_fg, t.surface);
         }
 
-        let sep_y = 2u16;
-        for x in 0..area.width {
-            let idx = (sep_y * area.width + x) as usize;
-            if idx < p.cells.len() {
-                p.cells[idx].char = '─';
-                p.cells[idx].fg = t.outline;
-            }
+        // Category sidebar
+        let sidebar_w = 12usize;
+        let categories = ["all", "apps", "cookbook", "tools"];
+        for (i, cat) in categories.iter().enumerate() {
+            let cat_y = 4 + i * 2;
+            let is_active = self.category_filter.map_or(*cat == "all", |f| f == *cat);
+            let (fg, bg_cat) = if is_active {
+                (t.fg_on_accent, t.primary_active)
+            } else {
+                (t.fg_muted, t.bg)
+            };
+            let label = format!(" {} ", cat.to_uppercase());
+            draw_text(&mut plane, 1, cat_y, &label, fg, bg_cat, is_active);
+
+            // Count badge
+            let count = if *cat == "all" {
+                self.examples.len()
+            } else {
+                self.examples.iter().filter(|e| e.category == *cat).count()
+            };
+            let count_str = format!("{}", count);
+            draw_text(&mut plane, 10, cat_y, &count_str, fg, bg_cat, false);
         }
 
-        let headers = ["Category", "Example", "Description"];
-        let col_widths = [12u16, 20, 30];
-        let mut x_pos = 1u16;
-        let header_y = 1u16;
-        for (h, w) in headers.iter().zip(col_widths.iter()) {
-            for (j, c) in h.chars().enumerate() {
-                let idx = (header_y * area.width + x_pos + j as u16) as usize;
-                if idx < p.cells.len() {
-                    p.cells[idx].char = c;
-                    p.cells[idx].fg = t.primary;
-                    p.cells[idx].style = Styles::BOLD;
+        // Grid of cards
+        let grid_start_x = sidebar_w + 2;
+        let grid_start_y = 4usize;
+        let card_w = 28usize;
+        let card_h = 14usize;
+        let cols = ((area.width as usize - grid_start_x) / (card_w + 2)).max(1);
+
+        for (grid_idx, &ex_idx) in self.filtered.iter().enumerate() {
+            if let Some(ex) = self.examples.get(ex_idx) {
+                let col = grid_idx % cols;
+                let row = grid_idx / cols;
+                let x = grid_start_x + col * (card_w + 2);
+                let y = grid_start_y + row * (card_h + 1);
+
+                if x + card_w > area.width as usize || y + card_h > area.height as usize - 2 {
+                    continue;
                 }
-            }
-            x_pos += w + 1;
-        }
 
-        let list_start = 3u16;
-        let visible_count = (area.height as usize).saturating_sub(5);
-
-        for row in 0..visible_count {
-            let idx = self.selected.saturating_sub(visible_count / 2) + row;
-            if idx >= self.examples.len() { break; }
-
-            let ex = &self.examples[idx];
-            let y = list_start + row as u16;
-            let is_selected = idx == self.selected;
-
-            if is_selected {
-                for x in 0..area.width {
-                    let ci = (y * area.width + x) as usize;
-                    if ci < p.cells.len() {
-                        p.cells[ci].bg = t.primary_active;
-                        p.cells[ci].fg = t.fg_on_accent;
+                let card = render_card(ex, grid_idx, self.selected, self.anim_frame, t);
+                for cy in 0..card_h {
+                    for cx in 0..card_w {
+                        let src_idx = (cy * card_w + cx) as usize;
+                        let dst_idx = ((y + cy as usize) * area.width as usize + x + cx as usize) as usize;
+                        if src_idx < card.cells.len() && dst_idx < plane.cells.len() {
+                            if !card.cells[src_idx].transparent {
+                                plane.cells[dst_idx] = card.cells[src_idx].clone();
+                            }
+                        }
                     }
                 }
             }
+        }
 
-            let prefix = if is_selected { "> " } else { "  " };
-            for (j, c) in prefix.chars().enumerate() {
-                let ci = (y * area.width + 1 + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { t.primary } else { t.fg_muted };
-                }
-            }
+        // Scroll indicator
+        let total_cards = self.filtered.len();
+        let visible_cards = cols * ((area.height as usize - grid_start_y - 2) / (card_h + 1)).max(1);
+        if total_cards > visible_cards {
+            let scroll_text = format!("{} more", total_cards - visible_cards);
+            draw_text(&mut plane, area.width as usize - scroll_text.len() - 2, area.height as usize - 3, &scroll_text, t.fg_muted, t.bg, false);
+        }
 
-            let cat_color = match ex.category {
-                "cookbook" => t.info,
-                "apps" => t.warning,
-                _ => t.fg_muted,
-            };
-            for (j, c) in ex.category.chars().take(10).enumerate() {
-                let ci = (y * area.width + 3 + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = cat_color;
-                    p.cells[ci].style = Styles::BOLD;
-                }
-            }
+        // Status bar
+        let status_y = area.height as usize - 1;
+        for x in 0..area.width as usize {
+            set_cell(&mut plane, x, status_y, ' ', t.fg, t.surface_elevated);
+        }
 
-            let name_x = 15u16;
-            for (j, c) in ex.name.chars().take(18).enumerate() {
-                let ci = (y * area.width + name_x + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { t.fg_on_accent } else { t.fg };
-                }
-            }
+        let hints = ["↑↓←→ nav", "Enter launch", "/ search", "Tab category", "t theme", "q quit"];
+        let mut hint_x = 2usize;
+        for hint in hints.iter() {
+            draw_text(&mut plane, hint_x, status_y, hint, t.primary, t.surface_elevated, false);
+            hint_x += hint.len() + 3;
+        }
 
-            let desc_x = 35u16;
-            for (j, c) in ex.description.chars().take(28).enumerate() {
-                let ci = (y * area.width + desc_x + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { t.selection_fg } else { t.fg_muted };
-                }
+        // Status message (temporary)
+        if let Some((ref msg, time)) = self.status_message {
+            if time.elapsed() < Duration::from_secs(2) {
+                let msg_x = 2usize;
+                let msg_y = area.height as usize - 2;
+                draw_text(&mut plane, msg_x, msg_y, msg, t.warning, t.bg, true);
             }
         }
 
-        let status_y = area.height.saturating_sub(1);
-        for x in 0..area.width {
-            let ci = (status_y * area.width + x) as usize;
-            if ci < p.cells.len() {
-                p.cells[ci].bg = t.surface_elevated;
-            }
-        }
-
-        let hints = ["navigate: arrows", "open: Enter/dbl-click", "theme: t", "quit: q"];
-        let hint_xs = [1u16, 18, 35, 50];
-        for (hint, hx) in hints.iter().zip(hint_xs.iter()) {
-            for (j, c) in hint.chars().enumerate() {
-                let ci = (status_y * area.width + hx + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = t.primary;
-                }
-            }
-        }
-
-        let count = format!("{}/{}", self.selected + 1, self.examples.len());
-        let count_x = (area.width as isize - count.len() as isize - 2).max(0) as u16;
-        for (j, c) in count.chars().enumerate() {
-            let ci = (status_y * area.width + count_x + j as u16) as usize;
-            if ci < p.cells.len() {
-                p.cells[ci].char = c;
-                p.cells[ci].fg = t.secondary;
-            }
-        }
-
-        // Display temporary status message (launched example, error, etc.)
-        if let Some(ref msg) = self.status_message {
-            let msg_text = msg.chars().take(area.width as usize - 4).collect::<String>();
-            let msg_x = 2u16;
-            let msg_y = status_y.saturating_sub(1);
-            for (j, c) in msg_text.chars().enumerate() {
-                let ci = (msg_y * area.width + msg_x + j as u16) as usize;
-                if ci < p.cells.len() {
-                    p.cells[ci].char = c;
-                    p.cells[ci].fg = t.warning;
-                }
-            }
-        }
-
-        p
+        plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
 
-        match key.code {
-            KeyCode::Down => {
-                if self.selected + 1 < self.examples.len() { self.selected += 1; }
-                true
-            }
-            KeyCode::Up => {
-                if self.selected > 0 { self.selected -= 1; }
-                true
-            }
-            KeyCode::Home => { self.selected = 0; true }
-            KeyCode::End => { self.selected = self.examples.len().saturating_sub(1); true }
-            KeyCode::Enter => { self.launch_selected(); true }
-            KeyCode::Char('t') => { self.theme_idx = (self.theme_idx + 1) % Self::themes().len(); true }
-            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
-            _ => false,
-        }
-    }
-
-    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
-        let list_start = 3u16;
-        let visible_count = (self.area.height as usize).saturating_sub(5) as u16;
-
-        match kind {
-            MouseEventKind::Down(MouseButton::Left) => {
-                if row >= list_start && row < list_start + visible_count {
-                    let clicked = (row - list_start) as usize;
-                    let start = self.selected.saturating_sub((visible_count / 2) as usize);
-                    let idx = start + clicked;
-                    if idx < self.examples.len() {
-                        let now = std::time::Instant::now();
-                        let elapsed = now.duration_since(self.last_click_time);
-                        if elapsed.as_millis() < 500 && self.last_click_row == row {
-                            self.launch_selected();
-                        } else {
-                            self.selected = idx;
-                        }
-                        self.last_click_time = now;
-                        self.last_click_row = row;
-                        return true;
-                    }
+        // Search mode
+        if self.search_active {
+            match key.code {
+                KeyCode::Esc => {
+                    self.search_active = false;
+                    self.search_query.clear();
+                    self.apply_filter();
+                    true
                 }
+                KeyCode::Backspace => {
+                    self.search_query.pop();
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Char(ch) => {
+                    self.search_query.push(ch);
+                    self.apply_filter();
+                    true
+                }
+                _ => false,
             }
-            _ => {}
+        } else {
+            match key.code {
+                KeyCode::Char('q') => {
+                    self.should_quit.store(true, Ordering::SeqCst);
+                    true
+                }
+                KeyCode::Char('t') => {
+                    self.theme_idx = (self.theme_idx + 1) % Self::themes().len();
+                    true
+                }
+                KeyCode::Char('/') => {
+                    self.search_active = true;
+                    true
+                }
+                KeyCode::Tab => {
+                    let categories = [None, Some("apps"), Some("cookbook"), Some("tools")];
+                    let current = categories.iter().position(|&c| c == self.category_filter).unwrap_or(0);
+                    self.category_filter = categories[(current + 1) % categories.len()];
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Down | KeyCode::Char('j') => {
+                    if self.selected + 1 < self.filtered.len() {
+                        self.selected += 1;
+                    }
+                    true
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    if self.selected > 0 {
+                        self.selected -= 1;
+                    }
+                    true
+                }
+                KeyCode::Right | KeyCode::Char('l') => {
+                    let cols = 3; // approximate
+                    if self.selected + cols < self.filtered.len() {
+                        self.selected += cols;
+                    }
+                    true
+                }
+                KeyCode::Left | KeyCode::Char('h') => {
+                    let cols = 3; // approximate
+                    if self.selected >= cols {
+                        self.selected -= cols;
+                    }
+                    true
+                }
+                KeyCode::Enter => {
+                    self.launch_selected();
+                    true
+                }
+                _ => false,
+            }
         }
-        false
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════════════════════════════
+
 fn main() -> std::io::Result<()> {
-    let (w, h) = if let Ok((cw, ch)) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd()) {
-        (cw, ch)
-    } else {
-        (80u16, 24u16)
-    };
+    println!("Dracon Terminal Engine — Example Showcase");
+    println!("Grid launcher with search, categories, and live previews");
+    std::thread::sleep(Duration::from_millis(500));
 
     let pending = Arc::new(Mutex::new(None));
     let should_quit = Arc::new(AtomicBool::new(false));
-    let showcase = Showcase::new(Rect::new(0, 0, w, h), pending.clone(), should_quit.clone());
+    let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
-    app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
+    let showcase = Showcase::new(should_quit, pending.clone());
 
-    app.on_tick(move |ctx, _| {
-        // Check if user requested quit via 'q'
-        if should_quit.load(Ordering::SeqCst) {
+    let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
+    app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
+
+    app.on_tick(move |ctx, _tick| {
+        if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
             return;
         }
-        
+
+        // Handle pending binary launch
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
                 Ok(p) => p.parent().unwrap().to_path_buf(),
@@ -338,12 +541,10 @@ fn main() -> std::io::Result<()> {
             };
             let binary_path = exe_dir.join(&binary_name);
 
-            // Suspend showcase terminal so the user can see build/run output
             let _ = ctx.suspend_terminal();
 
-            // Auto-build if binary is missing
+            // Auto-build if missing
             if !binary_path.exists() {
-                // Find crate root by walking up from exe dir looking for Cargo.toml
                 let find_crate_root = || -> Option<std::path::PathBuf> {
                     let mut dir = exe_dir.clone();
                     loop {
@@ -357,65 +558,26 @@ fn main() -> std::io::Result<()> {
                 };
 
                 if let Some(crate_root) = find_crate_root() {
-                    let build_result = std::process::Command::new("cargo")
+                    let _ = std::process::Command::new("cargo")
                         .args(["build", "--example", &binary_name])
                         .current_dir(&crate_root)
                         .status();
-                    match build_result {
-                        Ok(s) if s.success() => {
-                            // Built successfully — binary should now exist
-                        }
-                        _ => {
-                            let _ = std::fs::write("/tmp/showcase_error.log",
-                                format!("Failed to build example: {}\n", binary_name));
-                            let _ = std::io::stdout().write_all(
-                                b"\nPress Enter to return to showcase...");
-                            let _ = std::io::stdout().flush();
-                            let mut buf = [0u8; 1];
-                            let _ = std::io::stdin().read(&mut buf);
-                            let _ = ctx.resume_terminal();
-                            ctx.mark_all_dirty();
-                            return;
-                        }
-                    }
-                } else {
-                    let _ = std::fs::write("/tmp/showcase_error.log",
-                        format!("Binary not found and could not find crate root: {}\n", binary_path.display()));
-                    let _ = std::io::stdout().write_all(
-                        b"\nPress Enter to return to showcase...");
-                    let _ = std::io::stdout().flush();
-                    let mut buf = [0u8; 1];
-                    let _ = std::io::stdin().read(&mut buf);
-                    let _ = ctx.resume_terminal();
-                    ctx.mark_all_dirty();
-                    return;
                 }
             }
 
-            // Run example inline and wait for it to finish
-            let child_result = std::process::Command::new(&binary_path)
+            let _ = std::process::Command::new(&binary_path)
                 .current_dir(&exe_dir)
                 .status();
-                
-            if let Err(e) = child_result {
-                let _ = std::fs::write("/tmp/showcase_error.log", 
-                    format!("Failed to run example: {}\n", e));
-                let _ = std::io::stdout().write_all(
-                    format!("\nError: could not launch {} (see /tmp/showcase_error.log)\nPress Enter to return...", binary_name).as_bytes());
-                let _ = std::io::stdout().flush();
-                let mut buf = [0u8; 1];
-                let _ = std::io::stdin().read(&mut buf);
-            }
-            
-            // Drain any residual stdin (keys pressed in child may linger)
+
             let mut drain_buf = [0u8; 256];
             let _ = std::io::stdin().read(&mut drain_buf);
-            
-            // Resume showcase terminal (re-enter raw mode, alt screen)
+
             let _ = ctx.resume_terminal();
-            
-            // Force full re-render
             ctx.mark_all_dirty();
         }
-    }).run(|_ctx| {})
+    }).run(|ctx| {
+        let (w, h) = ctx.compositor().size();
+        // Re-render with current size
+        let _ = (w, h);
+    })
 }
