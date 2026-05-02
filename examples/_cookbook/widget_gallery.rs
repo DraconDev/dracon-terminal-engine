@@ -432,19 +432,13 @@ impl Widget for WidgetGallery {
 fn main() -> std::io::Result<()> {
     let theme = Theme::nord();
 
-    App::new()?
-        .title("Widget Gallery")
-        .fps(30)
-        .theme(theme)
-        .on_tick(|_ctx, _tick| {})
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
-            let area = Rect::new(0, 0, w, h);
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
-            let mut gallery = WidgetGallery::new();
-            gallery.set_area(area);
+    let mut gallery = WidgetGallery::new();
+    gallery.set_area(Rect::new(0, 0, w, h));
 
-            let plane = gallery.render(area);
-            ctx.add_plane(plane);
-        })
+    let mut app = App::new()?.title("Widget Gallery").fps(30).theme(theme);
+    app.add_widget(Box::new(gallery), Rect::new(0, 0, w, h));
+    app.on_tick(|_ctx, _tick| {}).run(|_ctx| {})
 }
