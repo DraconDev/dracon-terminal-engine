@@ -115,7 +115,7 @@ impl crate::framework::widget::Widget for Checkbox {
         let start_y = height.saturating_sub(1) / 2;
 
         let fg = if self.checked {
-            self.theme.success_fg
+            self.theme.success
         } else {
             self.theme.fg
         };

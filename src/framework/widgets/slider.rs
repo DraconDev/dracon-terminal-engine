@@ -129,9 +129,9 @@ impl crate::framework::widget::Widget for Slider {
                 plane.cells[idx as usize] = Cell {
                     char: fill_char,
                     fg: if is_filled {
-                        self.theme.accent
+                        self.theme.primary
                     } else {
-                        self.theme.inactive_fg
+                        self.theme.fg_muted
                     },
                     bg: self.theme.bg,
                     style: Styles::empty(),

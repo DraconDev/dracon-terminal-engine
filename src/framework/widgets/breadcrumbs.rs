@@ -137,7 +137,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
             let _zone = HitZone::new(i, x, area.y, seg_width, self.height);
 
             let fg = if is_last {
-                self.theme.accent
+                self.theme.primary
             } else {
                 self.theme.fg
             };
@@ -151,7 +151,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 let idx = (x + col) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = if is_last {
-                        self.theme.active_bg
+                        self.theme.primary_active
                     } else {
                         self.theme.bg
                     };
@@ -164,7 +164,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 let sep_idx = x as usize;
                 if sep_idx < plane.cells.len() {
                     plane.cells[sep_idx].char = '/';
-                    plane.cells[sep_idx].fg = self.theme.inactive_fg;
+                    plane.cells[sep_idx].fg = self.theme.fg_muted;
                 }
                 x += 1;
             }

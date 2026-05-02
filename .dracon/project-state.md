@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Expanded the theme system with a more comprehensive semantic color palette and theme kind differentiation
+Consistent theme color usage across UI widgets for improved visual hierarchy
 
 ## Context
-The theme system was previously limited to basic colors. This change introduces a more structured approach inspired by Material Design principles, with clear color roles for surfaces, text hierarchy, interactive states, and semantic feedback.
+The recent theme system expansion introduced semantic color variables, but some widgets were still using hardcoded accent colors. This change standardizes color usage across all widgets to maintain visual consistency.
 
 ## Completed
-- [x] Added `ThemeKind` enum to distinguish between dark and light themes
-- [x] Expanded color palette with 25 distinct color roles organized by purpose
-- [x] Added surface/elevation system with `bg`, `surface`, and `surface_elevated` colors
-- [x] Implemented text hierarchy with `fg`, `fg_muted`, and `fg_subtle` colors
-- [x] Added interactive color states for primary and secondary actions
-- [x] Included semantic colors for error, success, warning, and info states
-- [x] Added disabled state colors
-- [x] Improved scrollbar styling with hover states
-- [x] Added comprehensive documentation for the color system
+- [x] Breadcrumbs: Changed last item color from accent to primary, separator color from inactive_fg to fg_muted
+- [x] Checkbox: Changed checked state color from success_fg to success
+- [x] ConfirmDialog: Changed danger state border color from error_fg to error
+- [x] Profiler: Changed total line color from accent to primary
+- [x] ProgressBar: Changed filled bar color from accent to primary
+- [x] Radio: Changed selected state color from accent to primary
+- [x] Select: Changed expanded state color from accent to primary
+- [x] Slider: Changed filled track color from accent to primary, empty track color from inactive_fg to fg_muted
 
 ## In Progress
 - [ ] No active work in progress
@@ -24,6 +23,5 @@ The theme system was previously limited to basic colors. This change introduces 
 - None identified
 
 ## Next Steps
-1. Update UI components to utilize the new semantic color roles
-2. Add theme customization options in the settings UI
-3. Implement dynamic theme switching based on system preferences
+1. Verify visual consistency across all widgets
+2. Update any remaining widgets using hardcoded colors

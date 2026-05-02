@@ -202,12 +202,12 @@ impl Widget for ConfirmDialog {
         let mut plane = Plane::new(0, area.width, area.height);
 
         let border_fg = if self.danger {
-            self.theme.error_fg
+            self.theme.error
         } else {
             self.theme.fg
         };
         let btn_fg = if self.focused {
-            self.theme.accent
+            self.theme.primary
         } else {
             self.theme.fg
         };

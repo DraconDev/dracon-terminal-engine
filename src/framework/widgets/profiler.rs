@@ -143,10 +143,10 @@ impl crate::framework::widget::Widget for Profiler {
         for (j, c) in total_line.chars().take(width).enumerate() {
             let idx = (row as u16 * plane.width + j as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell {
-                    char: c,
-                    fg: self.theme.accent,
-                    bg: self.theme.bg,
+plane.cells[idx] = Cell {
+                        char: c,
+                        fg: self.theme.primary,
+                        bg: self.theme.bg,
                     style: Styles::BOLD,
                     transparent: false,
                     skip: false,

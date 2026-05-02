@@ -109,7 +109,7 @@ impl crate::framework::widget::Widget for Radio {
         let start_y = height.saturating_sub(1) / 2;
 
         let fg = if self.selected {
-            self.theme.accent
+            self.theme.primary
         } else {
             self.theme.fg
         };

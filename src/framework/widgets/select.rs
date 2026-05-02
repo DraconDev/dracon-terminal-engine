@@ -109,7 +109,7 @@ impl crate::framework::widget::Widget for Select {
 
         let _cell_width = display.width().min(width);
         let fg = if self.expanded {
-            self.theme.accent
+            self.theme.primary
         } else {
             self.theme.fg
         };
@@ -143,7 +143,7 @@ impl crate::framework::widget::Widget for Select {
                         plane.cells[idx] = Cell {
                             char: c,
                             fg: if is_selected {
-                                self.theme.accent
+                                self.theme.primary
                             } else {
                                 self.theme.fg
                             },

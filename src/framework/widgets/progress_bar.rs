@@ -92,7 +92,7 @@ impl crate::framework::widget::Widget for ProgressBar {
                 plane.cells[idx] = Cell {
                     char: ' ',
                     fg: Color::Reset,
-                    bg: self.theme.accent,
+                    bg: self.theme.primary,
                     style: Styles::empty(),
                     transparent: false,
                     skip: false,
