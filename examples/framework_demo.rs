@@ -3,7 +3,7 @@
 
 use std::cell::RefCell;
 use std::os::fd::AsFd;
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Hud, List, Orientation, SplitPane};
@@ -17,6 +17,25 @@ struct FrameworkDemo {
     breadcrumbs: Breadcrumbs,
     sys: RefCell<SystemMonitor>,
     area: Rect,
+    quit: Arc<AtomicBool>,
+}
+
+impl FrameworkDemo {
+    fn new(id: WidgetId, quit: Arc<AtomicBool>) -> Self {
+        let breadcrumbs = Breadcrumbs::new(vec![
+            "home".to_string(),
+            "user".to_string(),
+            "projects".to_string(),
+            "app".to_string(),
+        ]);
+        Self {
+            id,
+            breadcrumbs,
+            sys: RefCell::new(SystemMonitor::new()),
+            area: Rect::new(0, 0, 80, 24),
+            quit,
+        }
+    }
 }
 
 impl FrameworkDemo {
