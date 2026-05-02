@@ -303,16 +303,23 @@ fn main() -> std::io::Result<()> {
 
     let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
-    
+
     app.on_tick(move |ctx, _| {
-        if let Some(cmd) = pending.lock().unwrap().take() {
-            let _ = ctx.suspend_terminal();
-            
+        if let Some(binary_name) = pending.lock().unwrap().take() {
+            let binary_path = format!("./target/debug/examples/{}", binary_name);
+
+            if !std::path::Path::new(&binary_path).exists() {
+                eprintln!("\n\rError: {} not found. Run 'cargo build --examples' first.", binary_name);
+                ctx.mark_all_dirty();
+                return;
+            }
+
+            let full_cmd = format!("konsole --new-tab -e {} 2>&1", binary_path);
             let exit_status = std::process::Command::new("sh")
                 .arg("-c")
-                .arg(&cmd)
+                .arg(&full_cmd)
                 .status();
-            
+
             match exit_status {
                 Ok(es) if !es.success() => {
                     eprintln!("\n\rExample exited with code: {:?}", es.code());
@@ -322,9 +329,9 @@ fn main() -> std::io::Result<()> {
                 }
                 _ => {}
             }
-            
+
             drop(std::io::stdin().read(&mut [0u8; 256]));
-            
+
             let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
