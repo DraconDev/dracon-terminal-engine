@@ -16,6 +16,8 @@ use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::cyberpunk();
@@ -53,6 +55,22 @@ fn main() -> std::io::Result<()> {
     let adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     app.add_widget(Box::new(adapter), Rect::new(0, 0, w, h));
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+    app = app
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        });
     app.run(|ctx| {
         ctx.hide_cursor().ok();
     })

@@ -24,6 +24,8 @@
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
@@ -243,12 +245,26 @@ fn main() -> std::io::Result<()> {
     let view_for_tick = Rc::clone(&view);
     let view_for_input = Rc::clone(&view);
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     App::new()?
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .on_input(move |key| view_for_input.borrow_mut().handle_key(key))
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                view_for_input.borrow_mut().handle_key(key)
+            }
+        })
         .on_tick(move |ctx, tick| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+                return;
+            }
             let mut view = view_for_tick.borrow_mut();
             view.tick(tick);
             view.mark_dirty();

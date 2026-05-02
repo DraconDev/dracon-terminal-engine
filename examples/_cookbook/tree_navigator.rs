@@ -20,6 +20,8 @@
 //! Mouse: Click to select, click folder to expand
 
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -360,7 +362,24 @@ fn main() -> std::io::Result<()> {
     nav.set_area(Rect::new(0, 0, w, h));
     nav.theme = theme;
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app = App::new()?.title("Tree Navigator").fps(30).theme(theme);
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
+    app = app
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        });
     app.run(|_ctx| {})
 }

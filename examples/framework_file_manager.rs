@@ -9,6 +9,8 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SplitPane;
 use ratatui::layout::Rect;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 #[derive(Clone)]
 struct FileEntry {
@@ -51,10 +53,26 @@ fn main() -> std::io::Result<()> {
         .map(|c| c.as_os_str().to_string_lossy().into_owned())
         .collect();
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     App::new()?
         .title("File Manager")
         .fps(30)
         .theme(theme)
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
         .run(move |ctx| {
             let (w, h) = ctx.compositor().size();
             let split = SplitPane::new(Orientation::Vertical).ratio(0.7);

@@ -29,6 +29,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadge};
 use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn main() -> std::io::Result<()> {
     let mut app = App::new()?
@@ -69,5 +71,21 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(kv_grid), Rect::new(0, 3, 60, 6));
     app.add_widget(Box::new(status), Rect::new(60, 3, 20, 1));
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+    app = app
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        });
     app.run(|_ctx| {})
 }

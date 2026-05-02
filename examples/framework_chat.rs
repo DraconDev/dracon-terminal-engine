@@ -7,6 +7,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::List;
 use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 #[derive(Clone)]
 struct Message {
@@ -52,10 +54,26 @@ fn main() -> std::io::Result<()> {
     let input_text = String::from("");
     let chat_history = messages.clone();
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     App::new()?
         .title("Framework Chat")
         .fps(30)
         .theme(theme)
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
         .run(move |ctx| {
             let (w, h) = ctx.compositor().size();
 

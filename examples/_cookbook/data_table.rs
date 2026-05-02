@@ -23,6 +23,8 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SearchInput;
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 const DATA: &[(&str, u32, &str, &str)] = &[
     ("Alice", 28, "New York", "Software Engineer"), ("Bob", 34, "London", "Data Scientist"),
@@ -231,7 +233,24 @@ fn main() -> std::io::Result<()> {
     t.set_area(Rect::new(0, 0, w, h));
     t.vis = (h as usize).saturating_sub(3).max(1);
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app = App::new()?.title("Data Table Demo").fps(30).theme(Theme::cyberpunk());
     app.add_widget(Box::new(t), Rect::new(0, 0, w, h));
+    app = app
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        });
     app.run(|_ctx| {})
 }

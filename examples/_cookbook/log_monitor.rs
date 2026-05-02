@@ -9,6 +9,8 @@ use std::cell::RefCell;
 use std::io::Result;
 use std::os::fd::AsFd;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use rand::Rng;
@@ -222,6 +224,9 @@ fn main() -> Result<()> {
     let mon_for_tick = Rc::clone(&mon);
     let mon_for_input = Rc::clone(&mon);
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app_ctx = App::new()?
         .title("Log Monitor")
         .fps(30)
@@ -235,7 +240,19 @@ fn main() -> Result<()> {
     app_ctx.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app_ctx
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
         .on_tick(move |ctx, tick| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+                return;
+            }
             let mut mon = mon_for_tick.borrow_mut();
             if tick % 2 == 0 { mon.tick(); }
             let (w, h) = ctx.compositor().size();

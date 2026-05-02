@@ -38,6 +38,8 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 // ============================================================================
 // PART 1: THE PRESET COLORS
@@ -618,6 +620,24 @@ fn main() -> std::io::Result<()> {
     // ---- Add a footer showing theme name ----
     let footer = dracon_terminal_engine::framework::widgets::Label::new("Theme: nord | Press Ctrl+C to exit");
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
+
+    // ---- Quit support ----
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+    app = app
+        .on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        });
 
     // ---- Run the app ----
     //

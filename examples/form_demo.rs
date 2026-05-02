@@ -42,6 +42,8 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// Field indices for focus management.
 const FIELD_USERNAME: usize = 0;
@@ -519,7 +521,23 @@ fn main() -> std::io::Result<()> {
     let mut form = SettingsForm::new(WidgetId::new(0));
     form.set_area(Rect::new(0, 0, w, h));
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app = App::new()?.title("Settings Form").fps(30).theme(Theme::dracula());
     app.add_widget(Box::new(form), Rect::new(0, 0, w, h));
-    app.on_tick(|_ctx, _tick| {}).run(|_ctx| {})
+    app.on_input(move |key| {
+            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+                should_quit.store(true, Ordering::SeqCst);
+                true
+            } else {
+                false
+            }
+        })
+        .on_tick(move |ctx, _tick| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
+        .run(|_ctx| {})
 }
