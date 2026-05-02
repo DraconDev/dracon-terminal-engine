@@ -276,7 +276,7 @@ impl Widget for SettingsForm {
         let username_plane = self.username.render(Rect::new(input_col, y, input_width, 1));
         for (i, cell) in username_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }
@@ -312,7 +312,7 @@ impl Widget for SettingsForm {
         let email_plane = self.email.render(Rect::new(input_col, y, input_width, 1));
         for (i, cell) in email_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }
@@ -348,7 +348,7 @@ impl Widget for SettingsForm {
         let password_plane = self.password.render(Rect::new(input_col, y, input_width, 1));
         for (i, cell) in password_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }
@@ -384,7 +384,7 @@ impl Widget for SettingsForm {
         let theme_plane = self.theme.render(Rect::new(input_col, y, 20, 4));
         for (i, cell) in theme_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }
@@ -394,7 +394,7 @@ impl Widget for SettingsForm {
         let toggle_plane = self.notifications.render(Rect::new(input_col, y, 30, 1));
         for (i, cell) in toggle_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }

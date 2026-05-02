@@ -142,6 +142,7 @@ impl Widget for LogMonitor {
         let la = Rect::new(area.x, area.y + 2, area.width, area.height - 4);
         let lp = self.log_viewer.render(la);
         for (i, c) in lp.cells.iter().enumerate().take(p.cells.len() - 2 * area.width as usize) {
+            if c.transparent { continue; }
             let row = i / area.width as usize;
             let col = i % area.width as usize;
             let target = (row + 2) * area.width as usize + col;
@@ -152,6 +153,7 @@ impl Widget for LogMonitor {
         let sp = self.status.render(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
         let sr = (area.height - 1) as usize * area.width as usize;
         for (i, c) in sp.cells.iter().enumerate().take(area.width as usize) {
+            if c.transparent { continue; }
             let idx = sr + i;
             if idx < p.cells.len() { p.cells[idx] = c.clone(); }
         }

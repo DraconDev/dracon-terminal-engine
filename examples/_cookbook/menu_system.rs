@@ -176,14 +176,14 @@ impl Widget for MenuApp {
         let content_h = area.height.saturating_sub(hdr + ftr);
 
         let menu_plane = self.render_menu_bar(Rect::new(0, 0, area.width, hdr));
-        for (i, c) in menu_plane.cells.iter().enumerate() { plane.cells[i] = c.clone(); }
+        for (i, c) in menu_plane.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
 
         if let Some(idx) = self.active_menu {
             let dp = self.render_dropdown(idx, area);
             let base = (hdr * area.width) as usize;
             for (i, c) in dp.cells.iter().enumerate() {
                 let idx = base + i;
-                if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
             }
         }
 
@@ -192,18 +192,18 @@ impl Widget for MenuApp {
         let base = (hdr * area.width) as usize;
         for (i, c) in list_plane.cells.iter().enumerate() {
             let idx = base + i;
-            if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+            if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
         }
 
         if let Some(ref cm) = self.context_menu {
             let cm_plane = cm.render(area);
-            for (i, c) in cm_plane.cells.iter().enumerate() { plane.cells[i] = c.clone(); }
+            for (i, c) in cm_plane.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
         }
 
         for toast in &self.toasts {
             if !toast.is_expired() {
                 let tp = toast.render(Rect::new(0, 0, area.width, 1));
-                for (i, c) in tp.cells.iter().enumerate() { plane.cells[i] = c.clone(); }
+                for (i, c) in tp.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
                 break;
             }
         }
@@ -212,7 +212,7 @@ impl Widget for MenuApp {
         let base = ((area.height - ftr) * area.width) as usize;
         for (i, c) in status_plane.cells.iter().enumerate() {
             let idx = base + i;
-            if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+            if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
         }
         plane
     }
