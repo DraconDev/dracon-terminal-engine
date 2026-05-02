@@ -146,7 +146,7 @@ impl Widget for Table {
 
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Rgb(100, 100, 100); }
+            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Rgb(100, 100, 100); p.cells[idx].transparent = false; }
         }
 
         let mut x = 0u16;
@@ -171,7 +171,7 @@ impl Widget for Table {
             let sty = if sel { Styles::BOLD } else { Styles::empty() };
             for x in 0..area.width {
                 let idx = (y * area.width + x) as usize;
-                if idx < p.cells.len() { p.cells[idx].bg = bg; p.cells[idx].fg = fg; }
+                if idx < p.cells.len() { p.cells[idx].bg = bg; p.cells[idx].fg = fg; p.cells[idx].transparent = false; }
             }
 
             let vals = [&row.0, &row.1.to_string(), &row.2, &row.3];
