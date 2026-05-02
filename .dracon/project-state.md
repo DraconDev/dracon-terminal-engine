@@ -1,13 +1,13 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Removed duplicate framework_file_manager example from showcase
 
 ## Context
-This change updates the dependency versions in the project's lockfile to ensure consistent builds and resolve any potential version conflicts.
+The showcase.rs file contained a duplicate example entry for the framework_file_manager, which was likely an accidental addition during recent theme system work
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Removed duplicate example entry from showcase.rs
 
 ## In Progress
 - [x] No active work in progress related to this change
@@ -16,5 +16,6 @@ This change updates the dependency versions in the project's lockfile to ensure 
 - None
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the project with the new dependency versions to ensure stability
+1. Verify all examples are properly categorized and unique
+2. Ensure the showcase remains consistent with the theme system changes
+```

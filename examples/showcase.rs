@@ -46,7 +46,6 @@ impl ExampleMeta {
             ExampleMeta { name: "framework_demo", category: "existing", description: "App + List + Breadcrumbs + SplitPane", binary_name: "framework_demo" },
             ExampleMeta { name: "framework_chat", category: "existing", description: "Simple chat interface", binary_name: "framework_chat" },
             ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
-            ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
             ExampleMeta { name: "cyberpunk_dashboard", category: "existing", description: "Cyberpunk-themed dashboard", binary_name: "cyberpunk_dashboard" },
             ExampleMeta { name: "desktop", category: "existing", description: "Desktop environment mockup", binary_name: "desktop" },
             ExampleMeta { name: "game_loop", category: "existing", description: "Interactive game loop demo", binary_name: "game_loop" },
