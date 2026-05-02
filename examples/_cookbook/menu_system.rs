@@ -189,21 +189,37 @@ impl Widget for MenuApp {
 
         let list_rect = Rect::new(2, hdr + 1, area.width - 4, content_h.saturating_sub(2));
         let list_plane = self.list.render(list_rect);
-        let base = (hdr * area.width) as usize;
+        let base = ((hdr + 1) * area.width + 2) as usize;
         for (i, c) in list_plane.cells.iter().enumerate() {
-            let idx = base + i;
+            let dest_x = i as u16 % list_plane.width;
+            let dest_y = i as u16 / list_plane.width;
+            let idx = (dest_y * area.width + dest_x + 2) as usize;
             if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
         }
 
         if let Some(ref cm) = self.context_menu {
             let cm_plane = cm.render(area);
-            for (i, c) in cm_plane.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
+            for (y, row) in cm_plane.cells.chunks(cm_plane.width as usize).enumerate() {
+                for (x, c) in row.iter().enumerate() {
+                    if !c.transparent {
+                        let idx = (y as u16 * area.width + x as u16) as usize;
+                        if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                    }
+                }
+            }
         }
 
         for toast in &self.toasts {
             if !toast.is_expired() {
                 let tp = toast.render(Rect::new(0, 0, area.width, 1));
-                for (i, c) in tp.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
+                for (y, row) in tp.cells.chunks(tp.width as usize).enumerate() {
+                    for (x, c) in row.iter().enumerate() {
+                        if !c.transparent {
+                            let idx = (y as u16 * area.width + x as u16) as usize;
+                            if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                        }
+                    }
+                }
                 break;
             }
         }
