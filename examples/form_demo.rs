@@ -41,6 +41,7 @@ use dracon_terminal_engine::framework::widgets::{
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
+use std::os::fd::AsFd;
 
 /// Field indices for focus management.
 const FIELD_USERNAME: usize = 0;

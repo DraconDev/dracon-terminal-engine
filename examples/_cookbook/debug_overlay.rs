@@ -30,7 +30,10 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{EventLogger, List, Profiler, WidgetInspector, WidgetNode};
 use ratatui::layout::Rect;
 
+use std::os::fd::AsFd;
+
 struct DebugOverlayPanel {
+    id: WidgetId,
     profiler: Profiler,
     inspector: WidgetInspector,
     event_logger: EventLogger,
