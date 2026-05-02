@@ -288,7 +288,7 @@ impl TreeNav {
     }
 
     fn render_detail(&self, area: Rect) -> Plane {
-        let mut plane = Plane::new(1, area.width, area.height);
+        let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 5;
 
         for cell in plane.cells.iter_mut() {

@@ -1,24 +1,20 @@
 # Project State
 
 ## Current Focus
-Added configurable widget area support to the Tree Navigator widget
+Fixed z-index initialization in Tree Navigator widget
 
 ## Context
-The Tree Navigator widget previously had a hardcoded area size of 80x24. This change makes the widget area configurable, allowing it to adapt to different screen sizes and layouts.
+The change modifies how the Plane is initialized in the Tree Navigator widget, specifically adjusting the z-index parameter from 1 to 0.
 
 ## Completed
-- [x] Added `area` field to store widget dimensions
-- [x] Made `area()` method return the stored area instead of hardcoded value
-- [x] Implemented `set_area()` to allow dynamic resizing
-- [x] Updated content height calculation to use the widget's area
-- [x] Adjusted tree rectangle calculation to use the widget's width
+- [x] Changed Plane initialization from `Plane::new(1, area.width, area.height)` to `Plane::new(0, area.width, area.height)`
 
 ## In Progress
-- [x] Configurable widget area support
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Test the widget with different screen sizes
-2. Verify proper rendering with dynamic resizing
+1. Verify the visual impact of this change in the Tree Navigator widget
+2. Test the widget's rendering behavior with the new z-index value
