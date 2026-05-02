@@ -287,7 +287,6 @@ impl App {
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
 
         let mut stdin = io::stdin();
-        let mut buf = [0u8; 1024];
         let frame_duration = Duration::from_secs_f64(1.0 / self.fps as f64);
 
         while running.load(Ordering::SeqCst) {
@@ -304,13 +303,117 @@ impl App {
                 }
             }
 
-            while let Ok(n) = stdin.read(&mut buf) {
-                if n == 0 {
-                    break;
+            let stdin_fd = stdin.as_fd();
+            match tty::poll_input(stdin_fd, 20) {
+                Ok(true) => {
+                    let mut chunk_buf = [0u8; 1024];
+                    while let Ok(n) = stdin.read(&mut chunk_buf) {
+                        if n == 0 {
+                            break;
+                        }
+                        for byte in chunk_buf.iter().take(n) {
+                            if let Some(event) = self.parser.advance(*byte) {
+                                match &event {
+                                    Event::Resize(w, h) => {
+                                        self.compositor.resize(*w, *h);
+                                        self.dirty_tracker.mark_all_dirty();
+                                        for w in self.widgets.borrow_mut().iter_mut() {
+                                            w.mark_dirty();
+                                        }
+                                    }
+                                    Event::Key(k) => {
+                                        if k.code == crate::input::event::KeyCode::Char('c')
+                                            && k.modifiers
+                                                .contains(crate::input::event::KeyModifiers::CONTROL)
+                                        {
+                                            let focused = self.focus_manager.focused();
+                                            let dominated = focused
+                                                .and_then(|id| self.widget_mut(id))
+                                                .map(|mut w| w.handle_key(*k))
+                                                .unwrap_or(false);
+                                            if !dominated {
+                                                running.store(false, Ordering::SeqCst);
+                                            }
+                                        } else if k.code == crate::input::event::KeyCode::Tab {
+                                            let old = self.focus_manager.focused();
+                                            if k.modifiers
+                                                .contains(crate::input::event::KeyModifiers::SHIFT)
+                                            {
+                                                let _ = self.focus_manager.tab_prev();
+                                            } else {
+                                                let _ = self.focus_manager.tab_next();
+                                            }
+                                            let new = self.focus_manager.focused();
+                                            if new != old {
+                                                if let Some(old_id) = old {
+                                                    if let Some(mut w) = self.widget_mut(old_id) {
+                                                        w.on_blur();
+                                                    }
+                                                }
+                                                if let Some(new_id) = new {
+                                                    if let Some(mut w) = self.widget_mut(new_id) {
+                                                        w.on_focus();
+                                                    }
+                                                }
+                                            }
+                                        } else if let Some(focused) = self.focus_manager.focused() {
+                                            if let Some(mut widget) = self.widget_mut(focused) {
+                                                let _ = widget.handle_key(*k);
+                                            }
+                                        }
+                                    }
+                                    Event::Mouse(mouse_event) => {
+                                        let col = mouse_event.column;
+                                        let row = mouse_event.row;
+                                        let target_id = {
+                                            let widgets = self.widgets.borrow();
+                                            let mut sorted: Vec<_> = widgets.iter().collect();
+                                            sorted.sort_by_key(|w| w.z_index());
+                                            sorted
+                                                .into_iter()
+                                                .find(|w| {
+                                                    let a = w.area();
+                                                    col >= a.x
+                                                        && col < a.x + a.width
+                                                        && row >= a.y
+                                                        && row < a.y + a.height
+                                                })
+                                                .map(|w| w.id())
+                                        };
+                                        if let Some(id) = target_id {
+                                            let old = self.focus_manager.focused();
+                                            if old != Some(id) {
+                                                if let Some(old_id) = old {
+                                                    if let Some(mut w) = self.widget_mut(old_id) {
+                                                        w.on_blur();
+                                                    }
+                                                }
+                                                self.focus_manager.set_focus(id);
+                                                if let Some(mut w) = self.widget_mut(id) {
+                                                    w.on_focus();
+                                                }
+                                            }
+                                            if let Some(mut widget) = self.widget_mut(id) {
+                                                let a = widget.area();
+                                                let local_col = col.saturating_sub(a.x);
+                                                let local_row = row.saturating_sub(a.y);
+                                                let _ = widget.handle_mouse(
+                                                    mouse_event.kind,
+                                                    local_col,
+                                                    local_row,
+                                                );
+                                            }
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
                 }
-                for byte in buf.iter().take(n) {
-                    if let Some(event) = self.parser.advance(*byte) {
-                        match &event {
+                Ok(false) => {
+                    if let Some(evt) = self.parser.check_timeout() {
+                        match &evt {
                             Event::Resize(w, h) => {
                                 self.compositor.resize(*w, *h);
                                 self.dirty_tracker.mark_all_dirty();
@@ -323,35 +426,13 @@ impl App {
                                     && k.modifiers
                                         .contains(crate::input::event::KeyModifiers::CONTROL)
                                 {
-                                    let focused = self.focus_manager.focused();
-                                    let dominated = focused
+                                    let dominated = self.focus_manager
+                                        .focused()
                                         .and_then(|id| self.widget_mut(id))
                                         .map(|mut w| w.handle_key(*k))
                                         .unwrap_or(false);
                                     if !dominated {
                                         running.store(false, Ordering::SeqCst);
-                                    }
-                                } else if k.code == crate::input::event::KeyCode::Tab {
-                                    let old = self.focus_manager.focused();
-                                    if k.modifiers
-                                        .contains(crate::input::event::KeyModifiers::SHIFT)
-                                    {
-                                        let _ = self.focus_manager.tab_prev();
-                                    } else {
-                                        let _ = self.focus_manager.tab_next();
-                                    }
-                                    let new = self.focus_manager.focused();
-                                    if new != old {
-                                        if let Some(old_id) = old {
-                                            if let Some(mut w) = self.widget_mut(old_id) {
-                                                w.on_blur();
-                                            }
-                                        }
-                                        if let Some(new_id) = new {
-                                            if let Some(mut w) = self.widget_mut(new_id) {
-                                                w.on_focus();
-                                            }
-                                        }
                                     }
                                 } else if let Some(focused) = self.focus_manager.focused() {
                                     if let Some(mut widget) = self.widget_mut(focused) {
@@ -359,53 +440,11 @@ impl App {
                                     }
                                 }
                             }
-                            Event::Mouse(mouse_event) => {
-                                let col = mouse_event.column;
-                                let row = mouse_event.row;
-                                let target_id = {
-                                    let widgets = self.widgets.borrow();
-                                    let mut sorted: Vec<_> = widgets.iter().collect();
-                                    sorted.sort_by_key(|w| w.z_index());
-                                    sorted
-                                        .into_iter()
-                                        .find(|w| {
-                                            let a = w.area();
-                                            col >= a.x
-                                                && col < a.x + a.width
-                                                && row >= a.y
-                                                && row < a.y + a.height
-                                        })
-                                        .map(|w| w.id())
-                                };
-                                if let Some(id) = target_id {
-                                    let old = self.focus_manager.focused();
-                                    if old != Some(id) {
-                                        if let Some(old_id) = old {
-                                            if let Some(mut w) = self.widget_mut(old_id) {
-                                                w.on_blur();
-                                            }
-                                        }
-                                        self.focus_manager.set_focus(id);
-                                        if let Some(mut w) = self.widget_mut(id) {
-                                            w.on_focus();
-                                        }
-                                    }
-                                    if let Some(mut widget) = self.widget_mut(id) {
-                                        let a = widget.area();
-                                        let local_col = col.saturating_sub(a.x);
-                                        let local_row = row.saturating_sub(a.y);
-                                        let _ = widget.handle_mouse(
-                                            mouse_event.kind,
-                                            local_col,
-                                            local_row,
-                                        );
-                                    }
-                                }
-                            }
                             _ => {}
                         }
                     }
                 }
+                Err(_) => {}
             }
 
             {

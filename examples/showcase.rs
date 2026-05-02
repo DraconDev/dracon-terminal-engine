@@ -6,6 +6,7 @@
 //!
 //! Run with: cargo run --example showcase
 
+use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -330,11 +331,13 @@ impl Widget for Showcase {
 }
 
 fn main() -> std::io::Result<()> {
-    let (w, h) = (80u16, 24u16);
+    let (w, h) = if let Ok((cw, ch)) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd()) {
+        (cw, ch)
+    } else {
+        (80u16, 24u16)
+    };
 
     let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(Showcase::new(Rect::new(0, 0, w, h))), Rect::new(0, 0, w, h));
-    app.on_tick(|ctx, _| {
-        ctx.stop();
-    }).run(|_ctx| {})
+    app.on_tick(|_ctx, _| {}).run(|_ctx| {})
 }
