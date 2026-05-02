@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Updated theme color values for consistent hover states across all themes
+Implement theme change handling across all UI widgets
 
 ## Context
-This change standardizes the blue channel in hover states to 255 (from previous inconsistent values) to ensure visual consistency across all themes
+The framework now has a more comprehensive theme system, and all widgets need to properly respond to theme changes to maintain consistent visual hierarchy and color usage.
 
 ## Completed
-- [x] Updated primary_hover color values in all themes to use blue=255
-- [x] Maintained existing hue and saturation while normalizing brightness
+- [x] Added `on_theme_change` implementation to all widgets to update their theme references
+- [x] Fixed one minor issue in the Form widget's event handling
 
 ## In Progress
-- [x] Theme color consistency improvements
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify visual consistency across all UI widgets
-2. Document the new color standardization in theme guidelines
+1. Verify all widgets visually update correctly when themes change
+2. Add theme change tests for each widget type

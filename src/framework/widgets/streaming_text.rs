@@ -239,4 +239,8 @@ impl Widget for StreamingText {
     fn apply_command_output(&mut self, output: &crate::framework::command::ParsedOutput) {
         self.append_output(output.clone());
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

@@ -243,4 +243,8 @@ impl Widget for KeyValueGrid {
     fn apply_command_output(&mut self, output: &crate::framework::command::ParsedOutput) {
         self.update_from_output(output.clone());
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

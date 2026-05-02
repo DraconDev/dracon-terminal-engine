@@ -353,4 +353,8 @@ impl Widget for ConfirmDialog {
     fn commands(&self) -> Vec<BoundCommand> {
         self.bound_command.iter().cloned().collect()
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

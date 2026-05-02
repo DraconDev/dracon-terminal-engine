@@ -173,4 +173,8 @@ impl Widget for StatusBadge {
             self.set_status(s);
         }
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }
