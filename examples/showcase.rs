@@ -60,6 +60,8 @@ struct Showcase {
     last_click_time: std::time::Instant,
     last_click_row: u16,
     pending_binary: Arc<Mutex<Option<String>>>,
+    status_message: Option<String>,
+    status_time: std::time::Instant,
 }
 
 impl Showcase {
@@ -74,6 +76,8 @@ impl Showcase {
             last_click_time: std::time::Instant::now(),
             last_click_row: u16::MAX,
             pending_binary: pending,
+            status_message: None,
+            status_time: std::time::Instant::now(),
         }
     }
 
@@ -81,9 +85,11 @@ impl Showcase {
         vec![Theme::nord(), Theme::dark(), Theme::cyberpunk(), Theme::dracula()]
     }
 
-    fn launch_selected(&self) {
+    fn launch_selected(&mut self) {
         let ex = &self.examples[self.selected];
         *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
+        self.status_message = Some(format!("Launching {}...", ex.name));
+        self.status_time = std::time::Instant::now();
     }
 }
 
@@ -303,7 +309,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
 
-    app.on_tick(move |_ctx, _| {
+    app.on_tick(move |ctx, _| {
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
                 Ok(p) => p.parent().unwrap().to_path_buf(),
@@ -311,27 +317,41 @@ fn main() -> std::io::Result<()> {
             };
             let binary_path = exe_dir.join(&binary_name);
             
-            let _ = std::fs::write("/tmp/showcase_debug.log", 
-                format!("Launching: {}\nExists: {}\nDir: {}\n", 
-                    binary_path.display(), 
-                    binary_path.exists(),
-                    exe_dir.display()));
-
             if !binary_path.exists() {
+                let _ = std::fs::write("/tmp/showcase_error.log", 
+                    format!("Binary not found: {}\nRun: cargo build --examples\n", binary_path.display()));
                 return;
             }
 
-            let result = std::process::Command::new("konsole")
-                .arg("--new-tab")
-                .arg("-e")
-                .arg(&binary_path)
-                .current_dir(&exe_dir)
-                .spawn();
+            // Suspend showcase terminal (restore canonical mode, exit alt screen)
+            let _ = ctx.suspend_terminal();
             
-            if let Err(e) = result {
-                let _ = std::fs::write("/tmp/showcase_error.log", 
-                    format!("Spawn error: {}\n", e));
+            // Run example inline and wait for it to finish
+            let child_result = std::process::Command::new(&binary_path)
+                .current_dir(&exe_dir)
+                .status();
+                
+            match &child_result {
+                Ok(status) if !status.success() => {
+                    let _ = std::fs::write("/tmp/showcase_error.log", 
+                        format!("Example exited with code: {:?}\n", status.code()));
+                }
+                Err(e) => {
+                    let _ = std::fs::write("/tmp/showcase_error.log", 
+                        format!("Failed to run example: {}\n", e));
+                }
+                _ => {}
             }
+            
+            // Drain any residual stdin (keys pressed in child may linger)
+            let mut drain_buf = [0u8; 256];
+            let _ = std::io::stdin().read(&mut drain_buf);
+            
+            // Resume showcase terminal (re-enter raw mode, alt screen)
+            let _ = ctx.resume_terminal();
+            
+            // Force full re-render
+            ctx.mark_all_dirty();
         }
     }).run(|_ctx| {})
 }
