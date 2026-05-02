@@ -1,6 +1,7 @@
 #![allow(missing_docs)]
 //! Framework demo — shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
 
+use std::cell::RefCell;
 use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
@@ -13,7 +14,7 @@ use ratatui::layout::Rect;
 struct FrameworkDemo {
     id: WidgetId,
     breadcrumbs: Breadcrumbs,
-    sys: SystemMonitor,
+    sys: RefCell<SystemMonitor>,
     area: Rect,
 }
 
@@ -28,7 +29,7 @@ impl FrameworkDemo {
         Self {
             id,
             breadcrumbs,
-            sys: SystemMonitor::new(),
+            sys: RefCell::new(SystemMonitor::new()),
             area: Rect::new(0, 0, 80, 24),
         }
     }
@@ -65,7 +66,7 @@ impl Widget for FrameworkDemo {
 
         let bc_plane = self.breadcrumbs.render(right_rect);
 
-        let data = self.sys.get_data();
+        let data = self.sys.borrow_mut().get_data();
 
         let mut info_plane = Plane::new(0, right_rect.width, right_rect.height.saturating_sub(2));
         info_plane.z_index = 5;

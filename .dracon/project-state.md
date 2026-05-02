@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Added a missing closing brace in the `FrameworkDemo` widget implementation.
+Refactored `SystemMonitor` in `FrameworkDemo` to use `RefCell` for mutable access.
 
 ## Context
-The change fixes a syntax error introduced during recent framework refactoring work. The `FrameworkDemo` widget implementation was missing a closing brace for the `impl Widget` block.
+The change addresses thread-safety concerns in the framework demo by introducing interior mutability for the `SystemMonitor` component.
 
 ## Completed
-- [x] Added missing closing brace in `FrameworkDemo` widget implementation
+- [x] Wrapped `SystemMonitor` in `RefCell` to enable mutable access
+- [x] Updated `get_data()` call to use `borrow_mut()`
+- [x] Maintained existing functionality while improving thread-safety
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify the framework demo example continues to function correctly
-2. Continue with other framework refactoring tasks
+1. Verify thread-safety improvements in demo
+2. Consider broader application of this pattern to other mutable components
