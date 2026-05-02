@@ -25,7 +25,8 @@
 //! ```
 
 use std::os::fd::AsFd;
-use std::sync::{Arc, AtomicBool};
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
