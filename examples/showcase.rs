@@ -18,35 +18,35 @@ struct ExampleMeta {
     name: &'static str,
     category: &'static str,
     description: &'static str,
-    run_cmd: &'static str,
+    binary_name: &'static str,
 }
 
 impl ExampleMeta {
     fn all() -> Vec<Self> {
         vec![
-            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets in one App", run_cmd: "cargo run --example widget_gallery" },
-            ExampleMeta { name: "tree_navigator", category: "cookbook", description: "Hierarchical navigation with Tree", run_cmd: "cargo run --example tree_navigator" },
-            ExampleMeta { name: "log_monitor", category: "cookbook", description: "Real-time log viewer with filtering", run_cmd: "cargo run --example log_monitor" },
-            ExampleMeta { name: "tabbed_panels", category: "cookbook", description: "Tab switching with per-tab state", run_cmd: "cargo run --example tabbed_panels" },
-            ExampleMeta { name: "data_table", category: "cookbook", description: "Sortable table with search/filter", run_cmd: "cargo run --example data_table" },
-            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Nested SplitPane with drag-to-resize", run_cmd: "cargo run --example split_resizer" },
-            ExampleMeta { name: "command_bindings", category: "cookbook", description: "5 command-bound widgets with auto-refresh", run_cmd: "cargo run --example command_bindings" },
-            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu with shortcuts", run_cmd: "cargo run --example menu_system" },
-            ExampleMeta { name: "debug_overlay", category: "cookbook", description: "Debug tools overlay with F12 toggle", run_cmd: "cargo run --example debug_overlay" },
-            ExampleMeta { name: "system_monitor", category: "apps", description: "htop-like dashboard with live gauges", run_cmd: "cargo run --example system_monitor" },
-            ExampleMeta { name: "file_manager", category: "apps", description: "Full file manager UI with Tree + Table", run_cmd: "cargo run --example file_manager" },
-            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with emoji picker", run_cmd: "cargo run --example chat_client" },
-            ExampleMeta { name: "dashboard_builder", category: "apps", description: "All command widgets in grid layout", run_cmd: "cargo run --example dashboard_builder" },
-            ExampleMeta { name: "form_demo", category: "existing", description: "Settings form with validation", run_cmd: "cargo run --example form_demo" },
-            ExampleMeta { name: "theme_switcher", category: "existing", description: "Live theme cycling through all 15 themes", run_cmd: "cargo run --example theme_switcher" },
-            ExampleMeta { name: "modal_demo", category: "existing", description: "ConfirmDialog + help overlay", run_cmd: "cargo run --example modal_demo" },
-            ExampleMeta { name: "widget_tutorial", category: "existing", description: "Build a custom ColorPicker widget", run_cmd: "cargo run --example widget_tutorial" },
-            ExampleMeta { name: "command_dashboard", category: "existing", description: "Auto-refresh dashboard", run_cmd: "cargo run --example command_dashboard" },
-            ExampleMeta { name: "framework_demo", category: "existing", description: "App + List + Breadcrumbs + SplitPane", run_cmd: "cargo run --example framework_demo" },
-            ExampleMeta { name: "framework_chat", category: "existing", description: "Simple chat interface", run_cmd: "cargo run --example framework_chat" },
-            ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", run_cmd: "cargo run --example framework_file_manager" },
-            ExampleMeta { name: "framework_widgets", category: "existing", description: "Instantiate all widgets and print debug", run_cmd: "cargo run --example framework_widgets" },
-            ExampleMeta { name: "cyberpunk_dashboard", category: "existing", description: "Cyberpunk-themed dashboard", run_cmd: "cargo run --example cyberpunk_dashboard" },
+            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets in one App", binary_name: "widget_gallery" },
+            ExampleMeta { name: "tree_navigator", category: "cookbook", description: "Hierarchical navigation with Tree", binary_name: "tree_navigator" },
+            ExampleMeta { name: "log_monitor", category: "cookbook", description: "Real-time log viewer with filtering", binary_name: "log_monitor" },
+            ExampleMeta { name: "tabbed_panels", category: "cookbook", description: "Tab switching with per-tab state", binary_name: "tabbed_panels" },
+            ExampleMeta { name: "data_table", category: "cookbook", description: "Sortable table with search/filter", binary_name: "data_table" },
+            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Nested SplitPane with drag-to-resize", binary_name: "split_resizer" },
+            ExampleMeta { name: "command_bindings", category: "cookbook", description: "5 command-bound widgets with auto-refresh", binary_name: "command_bindings" },
+            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu with shortcuts", binary_name: "menu_system" },
+            ExampleMeta { name: "debug_overlay", category: "cookbook", description: "Debug tools overlay with F12 toggle", binary_name: "debug_overlay" },
+            ExampleMeta { name: "system_monitor", category: "apps", description: "htop-like dashboard with live gauges", binary_name: "system_monitor" },
+            ExampleMeta { name: "file_manager", category: "apps", description: "Full file manager UI with Tree + Table", binary_name: "file_manager" },
+            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with emoji picker", binary_name: "chat_client" },
+            ExampleMeta { name: "dashboard_builder", category: "apps", description: "All command widgets in grid layout", binary_name: "dashboard_builder" },
+            ExampleMeta { name: "form_demo", category: "existing", description: "Settings form with validation", binary_name: "form_demo" },
+            ExampleMeta { name: "theme_switcher", category: "existing", description: "Live theme cycling through all 15 themes", binary_name: "theme_switcher" },
+            ExampleMeta { name: "modal_demo", category: "existing", description: "ConfirmDialog + help overlay", binary_name: "modal_demo" },
+            ExampleMeta { name: "widget_tutorial", category: "existing", description: "Build a custom ColorPicker widget", binary_name: "widget_tutorial" },
+            ExampleMeta { name: "command_dashboard", category: "existing", description: "Auto-refresh dashboard", binary_name: "command_dashboard" },
+            ExampleMeta { name: "framework_demo", category: "existing", description: "App + List + Breadcrumbs + SplitPane", binary_name: "framework_demo" },
+            ExampleMeta { name: "framework_chat", category: "existing", description: "Simple chat interface", binary_name: "framework_chat" },
+            ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
+            ExampleMeta { name: "framework_widgets", category: "existing", description: "Instantiate all widgets and print debug", binary_name: "framework_widgets" },
+            ExampleMeta { name: "cyberpunk_dashboard", category: "existing", description: "Cyberpunk-themed dashboard", binary_name: "cyberpunk_dashboard" },
         ]
     }
 }
@@ -84,7 +84,7 @@ impl Showcase {
 
     fn launch_selected(&self) {
         let ex = &self.examples[self.selected];
-        *self.pending_cmd.lock().unwrap() = Some(ex.run_cmd.to_string());
+        *self.pending_cmd.lock().unwrap() = Some(ex.binary_name.to_string());
     }
 }
 

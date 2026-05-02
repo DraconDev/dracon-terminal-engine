@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved error handling and terminal state management for child process execution in the showcase example.
+Refactored example showcase to use binary names instead of run commands
 
 ## Context
-The showcase example previously lacked proper error handling for child process execution and terminal state restoration. This change addresses these issues to ensure robust terminal management when running external commands.
+The showcase example was previously using hardcoded `cargo run --example` commands to launch examples, which is less maintainable than using direct binary names. This change makes the example launching more flexible and consistent.
 
 ## Completed
-- [x] Added error handling for command execution failures
-- [x] Improved terminal state restoration after child process execution
-- [x] Added explicit terminal state synchronization
+- [x] Changed `run_cmd` field to `binary_name` in `ExampleMeta` struct
+- [x] Updated all example definitions to use `binary_name` instead of `run_cmd`
+- [x] Modified the launch mechanism to use the binary name directly
 
 ## In Progress
-- [x] Child process execution with proper error handling
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify terminal state restoration works across different terminal types
-2. Add more comprehensive error reporting for different failure scenarios
+1. Verify all examples can be launched successfully with the new binary name approach
+2. Consider adding error handling for cases where binary execution fails
