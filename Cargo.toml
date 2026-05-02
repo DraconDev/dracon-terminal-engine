@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.86.4"
+version = "27.86.6"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -132,6 +132,10 @@ path = "examples/form_widget.rs"
 [[example]]
 name = "table_widget"
 path = "examples/table_widget.rs"
+
+[[example]]
+name = "ide"
+path = "examples/ide.rs"
 
 [features]
 default = []

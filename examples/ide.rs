@@ -137,8 +137,8 @@ impl IdeApp {
             ),
         ];
 
-        let tab_labels_ref: Vec<&str> = tabs.iter().map(|t| t.display_title().as_str()).collect();
-        let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_labels_ref);
+        let tab_titles = vec!["main.rs", "lib.rs"];
+        let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_titles);
 
         let file_tree = build_sample_tree();
 
