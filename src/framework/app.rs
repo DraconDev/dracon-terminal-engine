@@ -535,6 +535,7 @@ pub struct Ctx<'a> {
     pub(crate) animations: &'a mut AnimationManager,
     pub(crate) dirty_tracker: &'a mut DirtyRegionTracker,
     pub(crate) commands: &'a RefCell<Vec<BoundCommand>>,
+    pub(crate) running: &'a AtomicBool,
 }
 
 impl<'a> Ctx<'a> {
@@ -706,6 +707,11 @@ impl<'a> Ctx<'a> {
     /// every action the TUI can perform.
     pub fn available_commands(&self) -> Vec<BoundCommand> {
         self.commands.borrow().clone()
+    }
+
+    /// Stops the application event loop on the next iteration.
+    pub fn stop(&mut self) {
+        self.running.store(false, Ordering::SeqCst);
     }
 }
 

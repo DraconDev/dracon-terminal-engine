@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added terminal synchronization cleanup in Compositor's Drop implementation
+Added application lifecycle control to the framework context
 
 ## Context
-Previously, the terminal could get stuck buffering output when the Compositor was dropped, as it was not properly exiting synchronized update mode. This change ensures clean terminal state on shutdown.
+The framework needs a way to programmatically stop the application event loop from within the context, enabling graceful termination from event handlers or other framework components.
 
 ## Completed
-- [x] Implemented Drop trait for Compositor
-- [x] Added terminal synchronization cleanup with ANSI escape sequence
-- [x] Ensured proper stdout flush after mode change
+- [x] Added `running` field to `Ctx` to track application state
+- [x] Implemented `stop()` method to safely terminate the event loop
 
 ## In Progress
-- [x] Terminal state management during Compositor lifecycle
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify no terminal artifacts remain after application exit
-2. Consider adding similar cleanup for other terminal modes if needed
+1. Update event loop implementation to respect the `running` flag
+2. Add integration tests for the new lifecycle control
