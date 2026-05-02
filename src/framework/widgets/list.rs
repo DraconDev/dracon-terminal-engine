@@ -328,4 +328,8 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
             _ => false,
         }
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

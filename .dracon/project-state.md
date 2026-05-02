@@ -4,18 +4,26 @@
 Implement theme change handling across all UI widgets
 
 ## Context
-The framework now has a more comprehensive theme system, and all widgets need to properly respond to theme changes to maintain consistent visual hierarchy and color usage.
+This change enables dynamic theme updates for all framework widgets, allowing the UI to respond to theme changes without requiring full re-renders.
 
 ## Completed
-- [x] Added `on_theme_change` implementation to all widgets to update their theme references
-- [x] Fixed one minor issue in the Form widget's event handling
+- [x] Added `on_theme_change` implementation for Breadcrumbs widget
+- [x] Added `on_theme_change` implementation for Checkbox widget
+- [x] Added `on_theme_change` implementation for List widget
+- [x] Added `on_theme_change` implementation for Profiler widget
+- [x] Added `on_theme_change` implementation for ProgressBar widget
+- [x] Added `on_theme_change` implementation for Radio widget
+- [x] Added `on_theme_change` implementation for Select widget
+- [x] Added `on_theme_change` implementation for Slider widget
+- [x] Added `on_theme_change` implementation for StatusBar widget
+- [x] Added `on_theme_change` implementation for Tree widget
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] Testing theme change propagation across all widgets
 
 ## Blockers
-- None identified
+- Need to verify theme consistency across all widget states (hover, active, disabled)
 
 ## Next Steps
-1. Verify all widgets visually update correctly when themes change
-2. Add theme change tests for each widget type
+1. Implement theme change propagation tests
+2. Add theme change event handling to framework event system

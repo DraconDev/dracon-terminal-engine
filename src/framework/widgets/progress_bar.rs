@@ -128,4 +128,8 @@ impl crate::framework::widget::Widget for ProgressBar {
 
         plane
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

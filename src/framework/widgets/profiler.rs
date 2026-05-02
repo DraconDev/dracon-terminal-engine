@@ -156,4 +156,8 @@ plane.cells[idx] = Cell {
 
         plane
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }
