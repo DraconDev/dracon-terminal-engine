@@ -170,7 +170,8 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(Dashboard::new(should_quit)), Rect::new(0, 0, 80, 24));
 
     app.run(move |ctx| {
+        let (w, h) = ctx.compositor().size();
         ctx.hide_cursor().ok();
-        ctx.mark_dirty(0, 0, 80, 24);
+        ctx.mark_dirty(0, 0, w, h);
     })
 }
