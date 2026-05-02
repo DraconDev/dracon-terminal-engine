@@ -22,12 +22,11 @@
 //! Press F12 to toggle the debug overlay panel.
 
 use std::io;
-use std::time::{Duration, Instant};
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector, WidgetNode};
+use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector};
 use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;
@@ -38,10 +37,6 @@ struct DebugOverlayPanel {
     inspector: WidgetInspector,
     event_logger: EventLogger,
     visible: bool,
-    start_time: Instant,
-    frame_count: u64,
-    last_fps_update: Instant,
-    fps: f64,
 }
 
 impl DebugOverlayPanel {
@@ -52,49 +47,11 @@ impl DebugOverlayPanel {
             inspector: WidgetInspector::new(WidgetId::new(180)),
             event_logger: EventLogger::new(WidgetId::new(170)),
             visible: false,
-            start_time: Instant::now(),
-            frame_count: 0,
-            last_fps_update: Instant::now(),
-            fps: 60.0,
         }
     }
 
     fn toggle(&mut self) {
         self.visible = !self.visible;
-    }
-
-    fn update_profiler(&mut self) {
-        let now = Instant::now();
-        self.frame_count += 1;
-
-        if now.duration_since(self.last_fps_update).as_secs() >= 1 {
-            let elapsed = now.duration_since(self.start_time).as_secs() as f64;
-            self.fps = self.frame_count as f64 / elapsed.max(1.0);
-            self.last_fps_update = now;
-        }
-
-        let frame_time = Duration::from_millis(16);
-        let memory = 45 + (self.frame_count % 20) as u64;
-
-        self.profiler.set_metrics(vec![
-            Metric { name: "FPS".to_string(), value: Duration::from_secs_f64(1000.0 / self.fps.max(1.0)), call_count: self.fps as u64 },
-            Metric { name: "Frame".to_string(), value: frame_time, call_count: self.frame_count },
-            Metric { name: "Ticks".to_string(), value: Duration::from_secs(self.frame_count / 60), call_count: self.frame_count },
-            Metric { name: "Memory".to_string(), value: Duration::from_millis(memory), call_count: memory },
-        ]);
-    }
-
-    fn update_inspector(&mut self, focused_widget: Option<&str>) {
-        let nodes = vec![WidgetNode {
-            id: WidgetId::new(10),
-            label: focused_widget.unwrap_or("List_1").to_string(),
-            children: (0..20).map(|i| WidgetNode {
-                id: WidgetId::new(11 + i as usize),
-                label: format!("Item_{}", i + 1),
-                children: vec![],
-            }).collect(),
-        }];
-        self.inspector.set_hierarchy(nodes);
     }
 }
 
