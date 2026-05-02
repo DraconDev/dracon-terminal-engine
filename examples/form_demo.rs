@@ -516,7 +516,7 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut form = SettingsForm::new();
+    let mut form = SettingsForm::new(WidgetId::new(0));
     form.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("Settings Form").fps(30).theme(Theme::dracula());
