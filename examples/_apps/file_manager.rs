@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! File Manager UI — demonstrates Tree + Table + Breadcrumbs + StatusBar + SplitPane + ContextMenu.
 //!
 //! Layout:

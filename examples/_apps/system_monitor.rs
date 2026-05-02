@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! System Monitor — htop-like dashboard with auto-refreshing gauges.
 //!
 //! Demonstrates Gauge, KeyValueGrid, StatusBadge, StreamingText, and SplitPane widgets

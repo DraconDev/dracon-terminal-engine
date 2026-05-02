@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Dracon Terminal Engine — Example Showcase
 //!
 //! Interactive launcher for all framework examples.

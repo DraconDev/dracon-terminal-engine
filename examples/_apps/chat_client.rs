@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Chat Client — rich chat UI demo using List, TextInput, Toast, Modal, and StatusBar.
 //!
 //! Features: Custom message rendering, unread highlighting, emoji picker, settings modal,
