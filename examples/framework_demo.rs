@@ -12,7 +12,6 @@ use ratatui::layout::Rect;
 
 struct FrameworkDemo {
     id: WidgetId,
-    list: List<String>,
     breadcrumbs: Breadcrumbs,
     sys: SystemMonitor,
     area: Rect,
@@ -20,16 +19,6 @@ struct FrameworkDemo {
 
 impl FrameworkDemo {
     fn new(id: WidgetId) -> Self {
-        let list = List::new(vec![
-            "System Monitor",
-            "File Browser",
-            "Network Stats",
-            "Process List",
-            "Disk Usage",
-            "Memory Info",
-            "CPU Graph",
-            "Settings",
-        ]);
         let breadcrumbs = Breadcrumbs::new(vec![
             "home".to_string(),
             "user".to_string(),
@@ -38,7 +27,6 @@ impl FrameworkDemo {
         ]);
         Self {
             id,
-            list,
             breadcrumbs,
             sys: SystemMonitor::new(),
             area: Rect::new(0, 0, 80, 24),
