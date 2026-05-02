@@ -12,20 +12,20 @@ fn assert_rgb(t: &Theme, field: &str, r: u8, g: u8, b: u8) {
     let actual = match field {
         "bg" => t.bg,
         "fg" => t.fg,
-        "accent" => t.accent,
+        "primary" => t.primary,
+        "secondary" => t.secondary,
+        "surface" => t.surface,
+        "fg_muted" => t.fg_muted,
+        "outline" => t.outline,
+        "error" => t.error,
+        "success" => t.success,
+        "warning" => t.warning,
         "selection_bg" => t.selection_bg,
         "selection_fg" => t.selection_fg,
-        "border" => t.border,
         "scrollbar_track" => t.scrollbar_track,
         "scrollbar_thumb" => t.scrollbar_thumb,
-        "hover_bg" => t.hover_bg,
-        "active_bg" => t.active_bg,
-        "inactive_fg" => t.inactive_fg,
         "input_bg" => t.input_bg,
         "input_fg" => t.input_fg,
-        "error_fg" => t.error_fg,
-        "success_fg" => t.success_fg,
-        "warning_fg" => t.warning_fg,
         "disabled_fg" => t.disabled_fg,
         _ => panic!("unknown field: {}", field),
     };
@@ -51,83 +51,13 @@ fn test_theme_dark_fg() {
 }
 
 #[test]
-fn test_theme_dark_accent() {
-    assert_rgb(&Theme::dark(), "accent", 0, 200, 120);
+fn test_theme_dark_primary() {
+    assert_rgb(&Theme::dark(), "primary", 0, 200, 120);
 }
 
 #[test]
-fn test_theme_dark_selection_bg() {
-    assert_rgb(&Theme::dark(), "selection_bg", 50, 80, 60);
-}
-
-#[test]
-fn test_theme_dark_selection_fg() {
-    assert_rgb(&Theme::dark(), "selection_fg", 200, 255, 220);
-}
-
-#[test]
-fn test_theme_dark_border() {
-    assert_rgb(&Theme::dark(), "border", 60, 60, 80);
-}
-
-#[test]
-fn test_theme_dark_scrollbar_track() {
-    assert_rgb(&Theme::dark(), "scrollbar_track", 30, 30, 40);
-}
-
-#[test]
-fn test_theme_dark_scrollbar_thumb() {
-    assert_rgb(&Theme::dark(), "scrollbar_thumb", 80, 80, 100);
-}
-
-#[test]
-fn test_theme_dark_hover_bg() {
-    assert_rgb(&Theme::dark(), "hover_bg", 30, 30, 45);
-}
-
-#[test]
-fn test_theme_dark_active_bg() {
-    assert_rgb(&Theme::dark(), "active_bg", 40, 40, 60);
-}
-
-#[test]
-fn test_theme_dark_inactive_fg() {
-    assert_rgb(&Theme::dark(), "inactive_fg", 100, 100, 120);
-}
-
-#[test]
-fn test_theme_dark_input_bg() {
-    assert_rgb(&Theme::dark(), "input_bg", 20, 20, 30);
-}
-
-#[test]
-fn test_theme_dark_input_fg() {
-    assert_rgb(&Theme::dark(), "input_fg", 220, 220, 240);
-}
-
-#[test]
-fn test_theme_dark_scrollbar_width() {
-    assert_eq!(Theme::dark().scrollbar_width, 1);
-}
-
-#[test]
-fn test_theme_dark_error_fg() {
-    assert_rgb(&Theme::dark(), "error_fg", 255, 80, 80);
-}
-
-#[test]
-fn test_theme_dark_success_fg() {
-    assert_rgb(&Theme::dark(), "success_fg", 80, 255, 120);
-}
-
-#[test]
-fn test_theme_dark_warning_fg() {
-    assert_rgb(&Theme::dark(), "warning_fg", 255, 180, 80);
-}
-
-#[test]
-fn test_theme_dark_disabled_fg() {
-    assert_rgb(&Theme::dark(), "disabled_fg", 80, 80, 100);
+fn test_theme_dark_surface() {
+    assert_rgb(&Theme::dark(), "surface", 24, 24, 36);
 }
 
 // === light theme ===
@@ -148,38 +78,8 @@ fn test_theme_light_fg() {
 }
 
 #[test]
-fn test_theme_light_accent() {
-    assert_rgb(&Theme::light(), "accent", 0, 120, 180);
-}
-
-#[test]
-fn test_theme_light_selection_bg() {
-    assert_rgb(&Theme::light(), "selection_bg", 180, 220, 240);
-}
-
-#[test]
-fn test_theme_light_selection_fg() {
-    assert_rgb(&Theme::light(), "selection_fg", 0, 0, 0);
-}
-
-#[test]
-fn test_theme_light_border() {
-    assert_rgb(&Theme::light(), "border", 180, 180, 180);
-}
-
-#[test]
-fn test_theme_light_inactive_fg() {
-    assert_rgb(&Theme::light(), "inactive_fg", 150, 150, 150);
-}
-
-#[test]
-fn test_theme_light_error_fg() {
-    assert_rgb(&Theme::light(), "error_fg", 200, 40, 40);
-}
-
-#[test]
-fn test_theme_light_success_fg() {
-    assert_rgb(&Theme::light(), "success_fg", 40, 160, 40);
+fn test_theme_light_primary() {
+    assert_rgb(&Theme::light(), "primary", 0, 100, 180);
 }
 
 // === cyberpunk theme ===
@@ -200,18 +100,18 @@ fn test_theme_cyberpunk_fg() {
 }
 
 #[test]
-fn test_theme_cyberpunk_accent() {
-    assert_rgb(&Theme::cyberpunk(), "accent", 255, 0, 100);
+fn test_theme_cyberpunk_primary() {
+    assert_rgb(&Theme::cyberpunk(), "primary", 255, 0, 100);
 }
 
 #[test]
-fn test_theme_cyberpunk_success_fg() {
-    assert_rgb(&Theme::cyberpunk(), "success_fg", 0, 255, 180);
+fn test_theme_cyberpunk_success() {
+    assert_rgb(&Theme::cyberpunk(), "success", 0, 255, 180);
 }
 
 #[test]
-fn test_theme_cyberpunk_error_fg() {
-    assert_rgb(&Theme::cyberpunk(), "error_fg", 255, 0, 80);
+fn test_theme_cyberpunk_error() {
+    assert_rgb(&Theme::cyberpunk(), "error", 255, 0, 80);
 }
 
 // === dracula theme ===
@@ -232,18 +132,18 @@ fn test_theme_dracula_fg() {
 }
 
 #[test]
-fn test_theme_dracula_accent() {
-    assert_rgb(&Theme::dracula(), "accent", 98, 114, 164);
+fn test_theme_dracula_primary() {
+    assert_rgb(&Theme::dracula(), "primary", 98, 114, 164);
 }
 
 #[test]
-fn test_theme_dracula_success_fg() {
-    assert_rgb(&Theme::dracula(), "success_fg", 80, 250, 123);
+fn test_theme_dracula_success() {
+    assert_rgb(&Theme::dracula(), "success", 80, 250, 123);
 }
 
 #[test]
-fn test_theme_dracula_error_fg() {
-    assert_rgb(&Theme::dracula(), "error_fg", 255, 85, 85);
+fn test_theme_dracula_error() {
+    assert_rgb(&Theme::dracula(), "error", 255, 85, 85);
 }
 
 // === nord theme ===
@@ -264,18 +164,18 @@ fn test_theme_nord_fg() {
 }
 
 #[test]
-fn test_theme_nord_accent() {
-    assert_rgb(&Theme::nord(), "accent", 136, 192, 208);
+fn test_theme_nord_primary() {
+    assert_rgb(&Theme::nord(), "primary", 136, 192, 208);
 }
 
 #[test]
-fn test_theme_nord_error_fg() {
-    assert_rgb(&Theme::nord(), "error_fg", 191, 97, 106);
+fn test_theme_nord_error() {
+    assert_rgb(&Theme::nord(), "error", 191, 97, 106);
 }
 
 #[test]
-fn test_theme_nord_success_fg() {
-    assert_rgb(&Theme::nord(), "success_fg", 163, 190, 140);
+fn test_theme_nord_success() {
+    assert_rgb(&Theme::nord(), "success", 163, 190, 140);
 }
 
 // === catppuccin_mocha theme ===
@@ -296,13 +196,13 @@ fn test_theme_catppuccin_mocha_fg() {
 }
 
 #[test]
-fn test_theme_catppuccin_mocha_accent() {
-    assert_rgb(&Theme::catppuccin_mocha(), "accent", 137, 180, 250);
+fn test_theme_catppuccin_mocha_primary() {
+    assert_rgb(&Theme::catppuccin_mocha(), "primary", 137, 180, 250);
 }
 
 #[test]
-fn test_theme_catppuccin_mocha_error_fg() {
-    assert_rgb(&Theme::catppuccin_mocha(), "error_fg", 243, 139, 168);
+fn test_theme_catppuccin_mocha_error() {
+    assert_rgb(&Theme::catppuccin_mocha(), "error", 243, 139, 168);
 }
 
 // === gruvbox_dark theme ===
@@ -323,13 +223,13 @@ fn test_theme_gruvbox_dark_fg() {
 }
 
 #[test]
-fn test_theme_gruvbox_dark_accent() {
-    assert_rgb(&Theme::gruvbox_dark(), "accent", 214, 93, 14);
+fn test_theme_gruvbox_dark_primary() {
+    assert_rgb(&Theme::gruvbox_dark(), "primary", 214, 93, 14);
 }
 
 #[test]
-fn test_theme_gruvbox_dark_error_fg() {
-    assert_rgb(&Theme::gruvbox_dark(), "error_fg", 204, 36, 36);
+fn test_theme_gruvbox_dark_error() {
+    assert_rgb(&Theme::gruvbox_dark(), "error", 204, 36, 36);
 }
 
 // === tokyo_night theme ===
@@ -350,13 +250,13 @@ fn test_theme_tokyo_night_fg() {
 }
 
 #[test]
-fn test_theme_tokyo_night_accent() {
-    assert_rgb(&Theme::tokyo_night(), "accent", 98, 130, 234);
+fn test_theme_tokyo_night_primary() {
+    assert_rgb(&Theme::tokyo_night(), "primary", 98, 130, 234);
 }
 
 #[test]
-fn test_theme_tokyo_night_error_fg() {
-    assert_rgb(&Theme::tokyo_night(), "error_fg", 255, 85, 85);
+fn test_theme_tokyo_night_error() {
+    assert_rgb(&Theme::tokyo_night(), "error", 255, 85, 85);
 }
 
 // === solarized_dark theme ===
@@ -377,8 +277,8 @@ fn test_theme_solarized_dark_fg() {
 }
 
 #[test]
-fn test_theme_solarized_dark_accent() {
-    assert_rgb(&Theme::solarized_dark(), "accent", 38, 139, 210);
+fn test_theme_solarized_dark_primary() {
+    assert_rgb(&Theme::solarized_dark(), "primary", 38, 139, 210);
 }
 
 // === solarized_light theme ===
@@ -399,8 +299,8 @@ fn test_theme_solarized_light_fg() {
 }
 
 #[test]
-fn test_theme_solarized_light_accent() {
-    assert_rgb(&Theme::solarized_light(), "accent", 38, 139, 210);
+fn test_theme_solarized_light_primary() {
+    assert_rgb(&Theme::solarized_light(), "primary", 38, 139, 210);
 }
 
 // === one_dark theme ===
@@ -421,13 +321,13 @@ fn test_theme_one_dark_fg() {
 }
 
 #[test]
-fn test_theme_one_dark_accent() {
-    assert_rgb(&Theme::one_dark(), "accent", 97, 175, 239);
+fn test_theme_one_dark_primary() {
+    assert_rgb(&Theme::one_dark(), "primary", 97, 175, 239);
 }
 
 #[test]
-fn test_theme_one_dark_error_fg() {
-    assert_rgb(&Theme::one_dark(), "error_fg", 224, 108, 108);
+fn test_theme_one_dark_error() {
+    assert_rgb(&Theme::one_dark(), "error", 224, 108, 108);
 }
 
 // === rose_pine theme ===
@@ -448,8 +348,8 @@ fn test_theme_rose_pine_fg() {
 }
 
 #[test]
-fn test_theme_rose_pine_accent() {
-    assert_rgb(&Theme::rose_pine(), "accent", 210, 160, 160);
+fn test_theme_rose_pine_primary() {
+    assert_rgb(&Theme::rose_pine(), "primary", 210, 160, 160);
 }
 
 // === kanagawa theme ===
@@ -470,8 +370,8 @@ fn test_theme_kanagawa_fg() {
 }
 
 #[test]
-fn test_theme_kanagawa_accent() {
-    assert_rgb(&Theme::kanagawa(), "accent", 166, 122, 102);
+fn test_theme_kanagawa_primary() {
+    assert_rgb(&Theme::kanagawa(), "primary", 166, 122, 102);
 }
 
 // === everforest theme ===
@@ -492,8 +392,8 @@ fn test_theme_everforest_fg() {
 }
 
 #[test]
-fn test_theme_everforest_accent() {
-    assert_rgb(&Theme::everforest(), "accent", 148, 181, 97);
+fn test_theme_everforest_primary() {
+    assert_rgb(&Theme::everforest(), "primary", 148, 181, 97);
 }
 
 // === monokai theme ===
@@ -514,8 +414,8 @@ fn test_theme_monokai_fg() {
 }
 
 #[test]
-fn test_theme_monokai_accent() {
-    assert_rgb(&Theme::monokai(), "accent", 102, 217, 239);
+fn test_theme_monokai_primary() {
+    assert_rgb(&Theme::monokai(), "primary", 102, 217, 239);
 }
 
 // === Default ===
@@ -526,7 +426,7 @@ fn test_theme_default_is_dark() {
     assert_theme_name(&default, "dark");
     assert_eq!(default.bg, Theme::dark().bg);
     assert_eq!(default.fg, Theme::dark().fg);
-    assert_eq!(default.accent, Theme::dark().accent);
+    assert_eq!(default.primary, Theme::dark().primary);
 }
 
 // === Trait derives ===
@@ -592,7 +492,7 @@ fn test_all_themes_have_scrollbar_width_1() {
     }
 }
 
-// === No color is Color::Reset in built-in themes (except Reset variant exists for a reason) ===
+// === No color is Color::Reset in built-in themes ===
 
 #[test]
 fn test_theme_bg_is_never_reset() {
@@ -624,25 +524,42 @@ fn test_theme_bg_is_never_reset() {
 // === Semantic colors differ from bg/fg (sanity check) ===
 
 #[test]
-fn test_theme_accent_differs_from_fg() {
+fn test_theme_primary_differs_from_fg() {
     let t = Theme::dark();
-    assert_ne!(t.accent, t.fg, "accent should differ from fg in dark theme");
+    assert_ne!(t.primary, t.fg, "primary should differ from fg in dark theme");
 }
 
 #[test]
-fn test_theme_error_fg_differs_from_fg() {
+fn test_theme_error_differs_from_fg() {
     let t = Theme::dark();
     assert_ne!(
-        t.error_fg, t.fg,
-        "error_fg should differ from fg in dark theme"
+        t.error, t.fg,
+        "error should differ from fg in dark theme"
     );
 }
 
 #[test]
-fn test_theme_success_fg_differs_from_fg() {
+fn test_theme_success_differs_from_fg() {
     let t = Theme::light();
     assert_ne!(
-        t.success_fg, t.fg,
-        "success_fg should differ from fg in light theme"
+        t.success, t.fg,
+        "success should differ from fg in light theme"
     );
+}
+
+// === ThemeKind tests ===
+
+#[test]
+fn test_theme_dark_is_dark_kind() {
+    assert_eq!(Theme::dark().kind, dracon_terminal_engine::framework::theme::ThemeKind::Dark);
+}
+
+#[test]
+fn test_theme_light_is_light_kind() {
+    assert_eq!(Theme::light().kind, dracon_terminal_engine::framework::theme::ThemeKind::Light);
+}
+
+#[test]
+fn test_cyberpunk_is_dark_kind() {
+    assert_eq!(Theme::cyberpunk().kind, dracon_terminal_engine::framework::theme::ThemeKind::Dark);
 }

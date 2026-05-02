@@ -78,8 +78,8 @@ impl Widget for Dashboard {
         let stream_rect = Rect::new(grid_rects[1].x + grid_rects[1].width / 2, grid_rects[1].y + grid_rects[1].height / 2, grid_rects[1].width / 2, grid_rects[1].height / 2);
         copy_plane_cells(&mut plane, &self.streaming.render(stream_rect), stream_rect.x as usize, stream_rect.y as usize);
 
-        render_separator(&mut plane, 1, area.width, theme.border);
-        render_separator(&mut plane, area.height.saturating_sub(2), area.width, theme.border);
+        render_separator(&mut plane, 1, area.width, theme.outline);
+        render_separator(&mut plane, area.height.saturating_sub(2), area.width, theme.outline);
         render_header_text(&mut plane, &theme, "Dashboard Builder", "[ACTIVE]", "Refresh: 3s", "Theme: Nord");
         render_footer_text(&mut plane, area.width, area.height.saturating_sub(1), &theme);
         plane
@@ -123,13 +123,13 @@ fn render_header_text(plane: &mut Plane, theme: &Theme, title: &str, status: &st
     let left_end = (plane.width as usize).saturating_sub(right_len);
     let mut offset = 0;
     for c in title.chars().take(left_end) {
-        if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.accent, bg: theme.bg, style: Styles::BOLD, transparent: false, skip: false }; }
+        if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.primary, bg: theme.bg, style: Styles::BOLD, transparent: false, skip: false }; }
         offset += 1;
     }
     offset = left_end + 1;
-    for c in status.chars() { if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.success_fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false }; } offset += 1; }
+    for c in status.chars() { if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.success, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false }; } offset += 1; }
     offset += 1;
-    for c in refresh.chars() { if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.inactive_fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false }; } offset += 1; }
+    for c in refresh.chars() { if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false }; } offset += 1; }
     offset += 1;
     for c in theme_str.chars() { if offset < plane.cells.len() { plane.cells[offset] = Cell { char: c, fg: theme.fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false }; } offset += 1; }
 }
@@ -139,7 +139,7 @@ fn render_footer_text(plane: &mut Plane, width: u16, footer_y: u16, theme: &Them
     let offset = 1;
     for (i, c) in controls.chars().enumerate().take(width as usize - offset) {
         let idx = ((footer_y as usize + 1) * plane.width as usize + offset + i).min(plane.cells.len().saturating_sub(1));
-        plane.cells[idx] = Cell { char: c, fg: theme.inactive_fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+        plane.cells[idx] = Cell { char: c, fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
     }
 }
 

@@ -101,4 +101,8 @@ impl crate::framework::widget::Widget for Tooltip {
 
         plane
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
+    }
 }

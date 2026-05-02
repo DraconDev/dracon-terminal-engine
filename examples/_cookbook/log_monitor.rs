@@ -116,13 +116,13 @@ impl Widget for LogMonitor {
         let title = " Log Monitor ";
         for (i, c) in title.chars().enumerate().take(area.width as usize - 2) {
             let idx = (i + 2) as usize;
-            p.cells[idx] = Cell { char: c, fg: Color::Rgb(0, 255, 200), bg: Color::Reset, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell { char: c, fg: self.log_viewer.theme.primary, bg: Color::Reset, style: Styles::BOLD, transparent: false, skip: false };
         }
 
         // Filters
         let fx = area.width.saturating_sub(36);
         let labels = ["[INFO]", "[WARN]", "[ERROR]", "[DEBUG]"];
-        let colors = [Color::Rgb(0, 255, 150), Color::Rgb(255, 255, 0), Color::Rgb(255, 85, 85), Color::Rgb(180, 180, 180)];
+        let colors = [self.log_viewer.theme.info, self.log_viewer.theme.warning, self.log_viewer.theme.error, self.log_viewer.theme.fg_muted];
         for (i, (&l, &c)) in labels.iter().zip(colors.iter()).enumerate() {
             for (j, ch) in l.chars().enumerate() {
                 let idx = (fx + i as u16 * 7 + j as u16) as usize;
@@ -135,7 +135,7 @@ impl Widget for LogMonitor {
         // Separator
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx] = Cell { char: '─', fg: Color::Rgb(60, 60, 70), bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false }; }
+            if idx < p.cells.len() { p.cells[idx] = Cell { char: '─', fg: self.log_viewer.theme.outline, bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false }; }
         }
 
         // Log viewer

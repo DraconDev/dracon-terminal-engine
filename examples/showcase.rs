@@ -46,8 +46,12 @@ impl ExampleMeta {
             ExampleMeta { name: "framework_demo", category: "existing", description: "App + List + Breadcrumbs + SplitPane", binary_name: "framework_demo" },
             ExampleMeta { name: "framework_chat", category: "existing", description: "Simple chat interface", binary_name: "framework_chat" },
             ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
-            ExampleMeta { name: "framework_widgets", category: "existing", description: "Instantiate all widgets and print debug", binary_name: "framework_widgets" },
+            ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
             ExampleMeta { name: "cyberpunk_dashboard", category: "existing", description: "Cyberpunk-themed dashboard", binary_name: "cyberpunk_dashboard" },
+            ExampleMeta { name: "desktop", category: "existing", description: "Desktop environment mockup", binary_name: "desktop" },
+            ExampleMeta { name: "game_loop", category: "existing", description: "Interactive game loop demo", binary_name: "game_loop" },
+            ExampleMeta { name: "text_editor_demo", category: "existing", description: "Text editor widget demo", binary_name: "text_editor_demo" },
+            ExampleMeta { name: "input_debug", category: "existing", description: "Input event debugger", binary_name: "input_debug" },
         ]
     }
 }
@@ -104,21 +108,21 @@ impl Widget for Showcase {
     fn focusable(&self) -> bool { true }
 
     fn render(&self, area: Rect) -> Plane {
-        let theme = Self::themes()[self.theme_idx];
+        let t = Self::themes()[self.theme_idx];
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
 
         for i in 0..p.cells.len() {
             p.cells[i].transparent = false;
-            p.cells[i].bg = theme.bg;
-            p.cells[i].fg = theme.fg;
+            p.cells[i].bg = t.bg;
+            p.cells[i].fg = t.fg;
         }
 
         let title = " Dracon — Example Showcase ";
         for (i, c) in title.chars().enumerate() {
             if i < p.cells.len() {
                 p.cells[i].char = c;
-                p.cells[i].fg = Color::Rgb(0, 255, 200);
+                p.cells[i].fg = t.primary;
                 p.cells[i].style = Styles::BOLD;
             }
         }
@@ -128,7 +132,7 @@ impl Widget for Showcase {
             let idx = (sep_y * area.width + x) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = '─';
-                p.cells[idx].fg = Color::Rgb(60, 65, 75);
+                p.cells[idx].fg = t.outline;
             }
         }
 
@@ -141,7 +145,7 @@ impl Widget for Showcase {
                 let idx = (header_y * area.width + x_pos + j as u16) as usize;
                 if idx < p.cells.len() {
                     p.cells[idx].char = c;
-                    p.cells[idx].fg = Color::Rgb(0, 200, 150);
+                    p.cells[idx].fg = t.primary;
                     p.cells[idx].style = Styles::BOLD;
                 }
             }
@@ -163,8 +167,8 @@ impl Widget for Showcase {
                 for x in 0..area.width {
                     let ci = (y * area.width + x) as usize;
                     if ci < p.cells.len() {
-                        p.cells[ci].bg = Color::Rgb(0, 80, 70);
-                        p.cells[ci].fg = Color::Rgb(255, 255, 255);
+                        p.cells[ci].bg = t.primary_active;
+                        p.cells[ci].fg = t.fg_on_accent;
                     }
                 }
             }
@@ -174,14 +178,14 @@ impl Widget for Showcase {
                 let ci = (y * area.width + 1 + j as u16) as usize;
                 if ci < p.cells.len() {
                     p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { Color::Rgb(0, 255, 200) } else { theme.fg };
+                    p.cells[ci].fg = if is_selected { t.primary } else { t.fg_muted };
                 }
             }
 
             let cat_color = match ex.category {
-                "cookbook" => Color::Rgb(100, 150, 255),
-                "apps" => Color::Rgb(255, 150, 100),
-                _ => Color::Rgb(150, 150, 150),
+                "cookbook" => t.info,
+                "apps" => t.warning,
+                _ => t.fg_muted,
             };
             for (j, c) in ex.category.chars().take(10).enumerate() {
                 let ci = (y * area.width + 3 + j as u16) as usize;
@@ -197,7 +201,7 @@ impl Widget for Showcase {
                 let ci = (y * area.width + name_x + j as u16) as usize;
                 if ci < p.cells.len() {
                     p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { Color::Rgb(255, 255, 255) } else { Color::Rgb(200, 200, 200) };
+                    p.cells[ci].fg = if is_selected { t.fg_on_accent } else { t.fg };
                 }
             }
 
@@ -206,7 +210,7 @@ impl Widget for Showcase {
                 let ci = (y * area.width + desc_x + j as u16) as usize;
                 if ci < p.cells.len() {
                     p.cells[ci].char = c;
-                    p.cells[ci].fg = if is_selected { Color::Rgb(200, 230, 255) } else { Color::Rgb(140, 140, 140) };
+                    p.cells[ci].fg = if is_selected { t.selection_fg } else { t.fg_muted };
                 }
             }
         }
@@ -215,7 +219,7 @@ impl Widget for Showcase {
         for x in 0..area.width {
             let ci = (status_y * area.width + x) as usize;
             if ci < p.cells.len() {
-                p.cells[ci].bg = Color::Rgb(20, 25, 30);
+                p.cells[ci].bg = t.surface_elevated;
             }
         }
 
@@ -226,7 +230,7 @@ impl Widget for Showcase {
                 let ci = (status_y * area.width + hx + j as u16) as usize;
                 if ci < p.cells.len() {
                     p.cells[ci].char = c;
-                    p.cells[ci].fg = Color::Rgb(0, 200, 150);
+                    p.cells[ci].fg = t.primary;
                 }
             }
         }
@@ -237,7 +241,7 @@ impl Widget for Showcase {
             let ci = (status_y * area.width + count_x + j as u16) as usize;
             if ci < p.cells.len() {
                 p.cells[ci].char = c;
-                p.cells[ci].fg = Color::Rgb(100, 150, 200);
+                p.cells[ci].fg = t.secondary;
             }
         }
 
@@ -250,7 +254,7 @@ impl Widget for Showcase {
                 let ci = (msg_y * area.width + msg_x + j as u16) as usize;
                 if ci < p.cells.len() {
                     p.cells[ci].char = c;
-                    p.cells[ci].fg = Color::Rgb(255, 200, 100);
+                    p.cells[ci].fg = t.warning;
                 }
             }
         }

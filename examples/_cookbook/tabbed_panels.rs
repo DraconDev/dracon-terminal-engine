@@ -273,7 +273,7 @@ impl Widget for TabbedApp {
         for col in 0..area.width as usize {
             let idx = (separator_y as usize) * (area.width as usize) + col;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell { char: '─', fg: theme.inactive_fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                plane.cells[idx] = Cell { char: '─', fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
             }
         }
 
@@ -297,7 +297,7 @@ impl Widget for TabbedApp {
         for (i, c) in hint.chars().take(area.width as usize).enumerate() {
             let idx = ((area.height - 1) as usize) * (area.width as usize) + i;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell { char: c, fg: theme.inactive_fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                plane.cells[idx] = Cell { char: c, fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
             }
         }
 

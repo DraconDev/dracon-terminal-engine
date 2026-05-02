@@ -264,7 +264,7 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_USERNAME { theme.accent } else { theme.fg },
+                    fg: if self.focused_field == FIELD_USERNAME { theme.primary } else { theme.fg },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -287,7 +287,7 @@ impl Widget for SettingsForm {
                 let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = theme.error_fg;
+                    plane.cells[idx].fg = theme.error;
                 }
             }
         }
@@ -300,7 +300,7 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_EMAIL { theme.accent } else { theme.fg },
+                    fg: if self.focused_field == FIELD_EMAIL { theme.primary } else { theme.fg },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -323,7 +323,7 @@ impl Widget for SettingsForm {
                 let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = theme.error_fg;
+                    plane.cells[idx].fg = theme.error;
                 }
             }
         }
@@ -336,7 +336,7 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_PASSWORD { theme.accent } else { theme.fg },
+                    fg: if self.focused_field == FIELD_PASSWORD { theme.primary } else { theme.fg },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -359,7 +359,7 @@ impl Widget for SettingsForm {
                 let idx = (y * plane.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = theme.error_fg;
+                    plane.cells[idx].fg = theme.error;
                 }
             }
         }
@@ -372,7 +372,7 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_THEME { theme.accent } else { theme.fg },
+                    fg: if self.focused_field == FIELD_THEME { theme.primary } else { theme.fg },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -416,7 +416,7 @@ impl Widget for SettingsForm {
             let idx = (y * plane.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = theme.inactive_fg;
+                plane.cells[idx].fg = theme.fg_muted;
             }
         }
 

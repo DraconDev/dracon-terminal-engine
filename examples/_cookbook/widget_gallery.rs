@@ -122,7 +122,7 @@ impl WidgetGallery {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: theme.accent,
+                    fg: theme.primary,
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -239,7 +239,7 @@ impl WidgetGallery {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: theme.inactive_fg,
+                    fg: theme.fg_muted,
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,

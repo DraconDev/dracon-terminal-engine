@@ -217,8 +217,8 @@ impl Widget for TreeNav {
             self.item_count(), self.fs.total_items());
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new(&status_text)
-                .with_fg(Color::Rgb(180, 180, 180))
-                .with_bg(Color::Ansi(236)));
+                .with_fg(self.theme.fg_muted)
+                .with_bg(self.theme.surface));
         let status_plane = status_bar.render(footer_rect);
         copy_plane(&mut plane, &status_plane, 0, footer_rect.y);
 
@@ -312,27 +312,27 @@ impl TreeNav {
         };
 
         let mut y = 1u16;
-        print_line(&mut plane, y, "DETAILS", Color::Rgb(0, 255, 136));
+        print_line(&mut plane, y, "DETAILS", self.theme.primary);
         y += 2;
 
         if let Some(node) = self.fs.find_by_path(&self.current_path) {
             let icon = if node.is_dir { "[DIR]" } else { "[FILE]" };
-            print_line(&mut plane, y, &format!("{} {}", icon, node.name), Color::Rgb(255, 255, 255));
+            print_line(&mut plane, y, &format!("{} {}", icon, node.name), self.theme.fg);
             y += 1;
 
             if node.is_dir {
                 if let Some(ref children) = node.children {
-                    print_line(&mut plane, y, &format!("{} items", children.len()), Color::Rgb(150, 150, 150));
+                    print_line(&mut plane, y, &format!("{} items", children.len()), self.theme.fg_muted);
                     y += 2;
-                    print_line(&mut plane, y, "Contents:", Color::Rgb(100, 180, 255));
+                    print_line(&mut plane, y, "Contents:", self.theme.info);
                     y += 1;
                     for child in children {
                         let child_icon = if child.is_dir { "[DIR]" } else { "[FILE]" };
                         let child_name = format!("  {} {}", child_icon, child.name);
                         let fg = if child.is_dir {
-                            Color::Rgb(100, 200, 255)
+                            self.theme.info
                         } else {
-                            Color::Rgb(200, 200, 200)
+                            self.theme.fg
                         };
                         print_line(&mut plane, y, &child_name, fg);
                         y += 1;
@@ -342,12 +342,12 @@ impl TreeNav {
                     }
                 }
             } else {
-                print_line(&mut plane, y, "Type: Source file", Color::Rgb(150, 150, 150));
+                print_line(&mut plane, y, "Type: Source file", self.theme.fg_muted);
                 y += 1;
-                print_line(&mut plane, y, "Size: ~1KB (mock)", Color::Rgb(150, 150, 150));
+                print_line(&mut plane, y, "Size: ~1KB (mock)", self.theme.fg_muted);
             }
         } else {
-            print_line(&mut plane, y, "No selection", Color::Rgb(150, 150, 150));
+            print_line(&mut plane, y, "No selection", self.theme.fg_muted);
         }
 
         plane

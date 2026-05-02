@@ -3,6 +3,7 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
@@ -17,6 +18,7 @@ pub struct Hud {
     height: u16,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    theme: Theme,
 }
 
 impl Hud {
@@ -30,6 +32,7 @@ impl Hud {
             height: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 30, 10)),
             dirty: true,
+            theme: Theme::default(),
         }
     }
 
@@ -43,6 +46,7 @@ impl Hud {
             height: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 30, 10)),
             dirty: true,
+            theme: Theme::default(),
         }
     }
 
@@ -50,6 +54,12 @@ impl Hud {
     pub fn with_size(mut self, width: u16, height: u16) -> Self {
         self.width = width;
         self.height = height;
+        self
+    }
+
+    /// Sets the theme for this widget.
+    pub fn with_theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
         self
     }
 
@@ -71,6 +81,27 @@ impl Hud {
     /// Hides the HUD.
     pub fn hide(&mut self) {
         self.visible = false;
+    }
+
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::KeyEventKind;
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        false
+    }
+
+    fn handle_mouse(
+        &mut self,
+        _kind: crate::input::event::MouseEventKind,
+        _col: u16,
+        _row: u16,
+    ) -> bool {
+        false
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
     }
 
     /// Renders a text string at offset `(x, y)` with the given foreground and background colors.
@@ -123,7 +154,7 @@ impl Hud {
             let idx = start_idx + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
-                plane.cells[idx].fg = Color::Rgb(200, 200, 220);
+                plane.cells[idx].fg = self.theme.fg_muted;
                 plane.cells[idx].bg = Color::Reset;
             }
         }
@@ -140,9 +171,9 @@ impl Hud {
             if idx < plane.cells.len() {
                 plane.cells[idx].char = if i < filled { '█' } else { '░' };
                 plane.cells[idx].fg = if i < filled {
-                    Color::Rgb(0, 200, 120)
+                    self.theme.success
                 } else {
-                    Color::Rgb(60, 60, 80)
+                    self.theme.outline
                 };
                 plane.cells[idx].bg = Color::Reset;
             }

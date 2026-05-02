@@ -79,7 +79,7 @@ fn test_confirm_dialog_render_title() {
 fn test_confirm_dialog_danger_border_color() {
     let dlg = ConfirmDialog::new("Danger", "Very bad").danger(true);
     let plane = dlg.render(Rect::new(0, 0, 30, 7));
-    assert_eq!(plane.cells[0].fg, dlg.theme.error_fg);
+    assert_eq!(plane.cells[0].fg, dlg.theme.error);
 }
 
 #[test]

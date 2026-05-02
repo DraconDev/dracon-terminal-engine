@@ -69,8 +69,8 @@ fn test_splitpane_on_theme_change_updates_divider_color() {
 
     assert_eq!(
         split.divider_color,
-        Theme::cyberpunk().inactive_fg,
-        "divider_color should update to theme.inactive_fg"
+        Theme::cyberpunk().outline,
+        "divider_color should update to theme.outline"
     );
 }
 
@@ -82,7 +82,7 @@ fn test_splitpane_on_theme_change_dracula() {
 
     assert_eq!(
         split.divider_color,
-        Theme::dracula().inactive_fg,
+        Theme::dracula().outline,
         "divider_color should update for dracula theme"
     );
 }
@@ -95,7 +95,7 @@ fn test_splitpane_on_theme_change_light() {
 
     assert_eq!(
         split.divider_color,
-        Theme::light().inactive_fg,
+        Theme::light().outline,
         "divider_color should update for light theme"
     );
 }
@@ -326,14 +326,14 @@ fn test_all_themes_produce_different_divider_colors() {
         Theme::monokai(),
     ];
 
-    let colors: Vec<_> = themes.iter().map(|t| t.inactive_fg).collect();
+    let colors: Vec<_> = themes.iter().map(|t| t.fg_muted).collect();
 
     for (i, c1) in colors.iter().enumerate() {
         for (j, c2) in colors.iter().enumerate() {
             if i != j {
                 assert_ne!(
                     c1, c2,
-                    "themes at index {} and {} have same inactive_fg: {:?}",
+                    "themes at index {} and {} have same fg_muted: {:?}",
                     i, j, c1
                 );
             }

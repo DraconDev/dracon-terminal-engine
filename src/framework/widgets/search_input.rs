@@ -93,4 +93,8 @@ impl Widget for SearchInput {
     ) -> bool {
         self.base.handle_mouse(kind, col, row)
     }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.base.theme = *theme;
+    }
 }

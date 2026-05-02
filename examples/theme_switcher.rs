@@ -17,7 +17,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::app::App;
-use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::framework::theme::{Theme, ThemeKind};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 use std::io::Result;
@@ -47,72 +47,126 @@ static CURRENT_THEME_INDEX: AtomicUsize = AtomicUsize::new(0);
 fn vscode_dark() -> Theme {
     Theme {
         name: "vscode-dark",
+        kind: ThemeKind::Dark,
         bg: Color::Rgb(30, 30, 30),
+        surface: Color::Rgb(38, 38, 38),
+        surface_elevated: Color::Rgb(48, 48, 48),
         fg: Color::Rgb(204, 204, 204),
-        accent: Color::Rgb(0, 122, 204),
+        fg_muted: Color::Rgb(140, 140, 140),
+        fg_subtle: Color::Rgb(100, 100, 100),
+        fg_on_accent: Color::Rgb(255, 255, 255),
+        primary: Color::Rgb(0, 122, 204),
+        primary_hover: Color::Rgb(30, 142, 224),
+        primary_active: Color::Rgb(0, 102, 184),
+        secondary: Color::Rgb(204, 204, 204),
+        secondary_hover: Color::Rgb(224, 224, 224),
+        secondary_active: Color::Rgb(184, 184, 184),
+        outline: Color::Rgb(63, 63, 63),
+        outline_variant: Color::Rgb(50, 50, 50),
+        divider: Color::Rgb(55, 55, 55),
+        error: Color::Rgb(235, 75, 75),
+        error_bg: Color::Rgb(60, 20, 20),
+        success: Color::Rgb(73, 201, 73),
+        success_bg: Color::Rgb(20, 50, 20),
+        warning: Color::Rgb(227, 180, 60),
+        warning_bg: Color::Rgb(55, 45, 20),
+        info: Color::Rgb(0, 122, 204),
+        info_bg: Color::Rgb(20, 40, 60),
         selection_bg: Color::Rgb(62, 62, 62),
         selection_fg: Color::Rgb(255, 255, 255),
-        border: Color::Rgb(63, 63, 63),
-        scrollbar_track: Color::Rgb(40, 40, 40),
-        scrollbar_thumb: Color::Rgb(90, 90, 90),
-        hover_bg: Color::Rgb(50, 50, 50),
-        active_bg: Color::Rgb(60, 60, 60),
-        inactive_fg: Color::Rgb(127, 127, 127),
         input_bg: Color::Rgb(35, 35, 35),
         input_fg: Color::Rgb(204, 204, 204),
-        scrollbar_width: 1,
-        error_fg: Color::Rgb(235, 75, 75),
-        success_fg: Color::Rgb(73, 201, 73),
-        warning_fg: Color::Rgb(227, 180, 60),
+        input_border: Color::Rgb(63, 63, 63),
+        scrollbar_track: Color::Rgb(40, 40, 40),
+        scrollbar_thumb: Color::Rgb(90, 90, 90),
+        scrollbar_thumb_hover: Color::Rgb(110, 110, 110),
         disabled_fg: Color::Rgb(90, 90, 90),
+        disabled_bg: Color::Rgb(45, 45, 45),
+        scrollbar_width: 1,
     }
 }
 
 fn vscode_light() -> Theme {
     Theme {
         name: "vscode-light",
+        kind: ThemeKind::Light,
         bg: Color::Rgb(255, 255, 255),
+        surface: Color::Rgb(255, 255, 255),
+        surface_elevated: Color::Rgb(250, 250, 250),
         fg: Color::Rgb(30, 30, 30),
-        accent: Color::Rgb(0, 122, 204),
+        fg_muted: Color::Rgb(100, 100, 100),
+        fg_subtle: Color::Rgb(140, 140, 140),
+        fg_on_accent: Color::Rgb(255, 255, 255),
+        primary: Color::Rgb(0, 122, 204),
+        primary_hover: Color::Rgb(30, 142, 224),
+        primary_active: Color::Rgb(0, 102, 184),
+        secondary: Color::Rgb(100, 100, 180),
+        secondary_hover: Color::Rgb(120, 120, 200),
+        secondary_active: Color::Rgb(80, 80, 160),
+        outline: Color::Rgb(200, 200, 200),
+        outline_variant: Color::Rgb(220, 220, 220),
+        divider: Color::Rgb(210, 210, 210),
+        error: Color::Rgb(229, 62, 62),
+        error_bg: Color::Rgb(255, 235, 235),
+        success: Color::Rgb(73, 201, 73),
+        success_bg: Color::Rgb(235, 250, 235),
+        warning: Color::Rgb(227, 180, 60),
+        warning_bg: Color::Rgb(255, 245, 220),
+        info: Color::Rgb(0, 122, 204),
+        info_bg: Color::Rgb(220, 240, 255),
         selection_bg: Color::Rgb(173, 214, 255),
         selection_fg: Color::Rgb(0, 0, 0),
-        border: Color::Rgb(200, 200, 200),
-        scrollbar_track: Color::Rgb(245, 245, 245),
-        scrollbar_thumb: Color::Rgb(160, 160, 160),
-        hover_bg: Color::Rgb(230, 230, 230),
-        active_bg: Color::Rgb(200, 200, 200),
-        inactive_fg: Color::Rgb(150, 150, 150),
         input_bg: Color::Rgb(255, 255, 255),
         input_fg: Color::Rgb(30, 30, 30),
-        scrollbar_width: 1,
-        error_fg: Color::Rgb(229, 62, 62),
-        success_fg: Color::Rgb(73, 201, 73),
-        warning_fg: Color::Rgb(227, 180, 60),
+        input_border: Color::Rgb(200, 200, 200),
+        scrollbar_track: Color::Rgb(245, 245, 245),
+        scrollbar_thumb: Color::Rgb(160, 160, 160),
+        scrollbar_thumb_hover: Color::Rgb(140, 140, 140),
         disabled_fg: Color::Rgb(150, 150, 150),
+        disabled_bg: Color::Rgb(235, 235, 240),
+        scrollbar_width: 1,
     }
 }
 
 fn autumn() -> Theme {
     Theme {
         name: "autumn",
+        kind: ThemeKind::Dark,
         bg: Color::Rgb(40, 35, 30),
+        surface: Color::Rgb(48, 42, 36),
+        surface_elevated: Color::Rgb(55, 50, 45),
         fg: Color::Rgb(220, 200, 180),
-        accent: Color::Rgb(200, 140, 80),
+        fg_muted: Color::Rgb(160, 145, 125),
+        fg_subtle: Color::Rgb(120, 105, 90),
+        fg_on_accent: Color::Rgb(40, 35, 30),
+        primary: Color::Rgb(200, 140, 80),
+        primary_hover: Color::Rgb(220, 160, 100),
+        primary_active: Color::Rgb(180, 120, 60),
+        secondary: Color::Rgb(180, 140, 100),
+        secondary_hover: Color::Rgb(200, 160, 120),
+        secondary_active: Color::Rgb(160, 120, 80),
+        outline: Color::Rgb(120, 100, 80),
+        outline_variant: Color::Rgb(100, 85, 70),
+        divider: Color::Rgb(90, 78, 65),
+        error: Color::Rgb(200, 100, 80),
+        error_bg: Color::Rgb(50, 25, 22),
+        success: Color::Rgb(140, 180, 100),
+        success_bg: Color::Rgb(35, 48, 28),
+        warning: Color::Rgb(200, 160, 80),
+        warning_bg: Color::Rgb(50, 42, 25),
+        info: Color::Rgb(180, 160, 200),
+        info_bg: Color::Rgb(45, 40, 55),
         selection_bg: Color::Rgb(80, 65, 50),
         selection_fg: Color::Rgb(240, 225, 200),
-        border: Color::Rgb(120, 100, 80),
-        scrollbar_track: Color::Rgb(35, 30, 25),
-        scrollbar_thumb: Color::Rgb(100, 85, 70),
-        hover_bg: Color::Rgb(55, 45, 35),
-        active_bg: Color::Rgb(70, 60, 50),
-        inactive_fg: Color::Rgb(150, 130, 110),
         input_bg: Color::Rgb(30, 25, 20),
         input_fg: Color::Rgb(220, 200, 180),
-        scrollbar_width: 1,
-        error_fg: Color::Rgb(200, 100, 80),
-        success_fg: Color::Rgb(140, 180, 100),
-        warning_fg: Color::Rgb(200, 160, 80),
+        input_border: Color::Rgb(120, 100, 80),
+        scrollbar_track: Color::Rgb(35, 30, 25),
+        scrollbar_thumb: Color::Rgb(100, 85, 70),
+        scrollbar_thumb_hover: Color::Rgb(120, 105, 90),
         disabled_fg: Color::Rgb(100, 90, 75),
+        disabled_bg: Color::Rgb(48, 42, 38),
+        scrollbar_width: 1,
     }
 }
 
@@ -192,7 +246,7 @@ impl Widget for ThemeHeader {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: ' ',
-                        fg: if y == 1 { theme.accent } else { theme.fg },
+                        fg: if y == 1 { theme.primary } else { theme.fg },
                         bg: theme.bg,
                         style: Styles::empty(),
                         transparent: false,
@@ -394,7 +448,7 @@ impl Widget for ThemePreviewPanel {
                     let is_border = x == 0 || x == area.width - 1 || y == 0 || y == area.height - 1;
                     plane.cells[idx] = Cell {
                         char: if is_border { '#' } else { ' ' },
-                        fg: theme.border,
+                        fg: theme.outline,
                         bg: theme.bg,
                         style: Styles::empty(),
                         transparent: false,
@@ -413,14 +467,14 @@ impl Widget for ThemePreviewPanel {
             let idx = 1 * area.width as usize + x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = theme.accent;
+                plane.cells[idx].fg = theme.primary;
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
 
         let badge_row = 3;
         let badge_texts = ["OK", "WARN", "ERROR", "OK"];
-        let badge_fgs = [theme.success_fg, theme.warning_fg, theme.error_fg, theme.success_fg];
+        let badge_fgs = [theme.success, theme.warning, theme.error, theme.success];
 
         for (i, (text, fg)) in badge_texts.iter().zip(badge_fgs.iter()).enumerate() {
             let x = 2 + (i as u16 * 7);
@@ -469,7 +523,7 @@ impl Widget for ThemePreviewPanel {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: if i < fill { '█' } else { '░' },
-                        fg: if i < fill { theme.success_fg } else { theme.inactive_fg },
+                        fg: if i < fill { theme.success } else { theme.fg_muted },
                         bg: theme.bg,
                         style: Styles::empty(),
                         transparent: false,
@@ -554,17 +608,17 @@ impl Widget for WidgetDemoPanel {
             let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = theme.accent;
+                plane.cells[idx].fg = theme.primary;
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
 
         let row1 = 2;
         let badges = [
-            ("OK", theme.success_fg),
-            ("WARNING", theme.warning_fg),
-            ("ERROR", theme.error_fg),
-            ("OK", theme.success_fg),
+            ("OK", theme.success),
+            ("WARNING", theme.warning),
+            ("ERROR", theme.error),
+            ("OK", theme.success),
         ];
         for (i, (text, fg)) in badges.iter().enumerate() {
             let x = 2 + (i as u16 * 14);
@@ -624,7 +678,7 @@ impl Widget for WidgetDemoPanel {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: if i < fill { '█' } else { '░' },
-                    fg: if i < fill { theme.success_fg } else { theme.inactive_fg },
+                    fg: if i < fill { theme.success } else { theme.fg_muted },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -677,7 +731,7 @@ impl Widget for WidgetDemoPanel {
                 let idx = breadcrumb_row as usize * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '/';
-                    plane.cells[idx].fg = theme.inactive_fg;
+                    plane.cells[idx].fg = theme.fg_muted;
                 }
                 x += 1;
             }
@@ -687,7 +741,7 @@ impl Widget for WidgetDemoPanel {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_last {
-                        theme.accent
+                        theme.primary
                     } else {
                         theme.fg
                     };
@@ -697,7 +751,7 @@ impl Widget for WidgetDemoPanel {
                         Styles::empty()
                     };
                     plane.cells[idx].bg = if is_last {
-                        theme.active_bg
+                        theme.primary_active
                     } else {
                         theme.bg
                     };

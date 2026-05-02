@@ -232,11 +232,6 @@ _ => false,
         }
     }
 
-    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
-    }
-}
-
     fn handle_mouse(
         &mut self,
         _kind: crate::input::event::MouseEventKind,
@@ -250,5 +245,9 @@ _ => false,
         } else {
             false
         }
+    }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
     }
 }

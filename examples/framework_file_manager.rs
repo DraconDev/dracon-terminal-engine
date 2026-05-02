@@ -45,7 +45,7 @@ fn read_dir(path: &PathBuf) -> Vec<FileEntry> {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::dark();
+    let theme = Theme::cyberpunk();
 
     let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let crumbs: Vec<String> = current_dir
@@ -74,6 +74,7 @@ fn main() -> std::io::Result<()> {
             }
         })
         .run(move |ctx| {
+            let t = *ctx.theme();
             let (w, h) = ctx.compositor().size();
             let split = SplitPane::new(Orientation::Vertical).ratio(0.7);
             let (main_rect, side_rect) = split.split(Rect::new(0, 0, w, h));
@@ -87,9 +88,9 @@ fn main() -> std::io::Result<()> {
             let bc_plane = Breadcrumbs::new(crumbs.clone()).render(main_rect);
             ctx.add_plane(bc_plane);
 
-            let _sel_idx = list.selected_index();
             let mut info_plane = Plane::new(1, side_rect.width, side_rect.height);
             info_plane.z_index = 5;
+            for c in info_plane.cells.iter_mut() { c.bg = t.surface; c.fg = t.fg; }
 
             let mut y = 1u16;
             let mut print = |plane: &mut Plane, text: &str, fg: Color| {
@@ -104,25 +105,13 @@ fn main() -> std::io::Result<()> {
                 y += 1;
             };
 
-            print(&mut info_plane, "INFORMATION", Color::Rgb(0, 255, 136));
-            print(
-                &mut info_plane,
-                &format!("Items: {}", list.len()),
-                Color::Rgb(180, 180, 180),
-            );
+            print(&mut info_plane, "INFORMATION", t.primary);
+            print(&mut info_plane, &format!("Items: {}", list.len()), t.fg_muted);
 
             if let Some(entry) = list.get_selected() {
-                print(
-                    &mut info_plane,
-                    &format!("Name: {}", entry.name),
-                    Color::Rgb(255, 255, 255),
-                );
+                print(&mut info_plane, &format!("Name: {}", entry.name), t.fg_on_accent);
                 if entry.is_dir {
-                    print(
-                        &mut info_plane,
-                        "Type: Directory",
-                        Color::Rgb(100, 200, 255),
-                    );
+                    print(&mut info_plane, "Type: Directory", t.info);
                 } else {
                     let size_str = if entry.size < 1024 {
                         format!("{}B", entry.size)
@@ -133,11 +122,7 @@ fn main() -> std::io::Result<()> {
                     } else {
                         format!("{}GB", entry.size / 1024 / 1024 / 1024)
                     };
-                    print(
-                        &mut info_plane,
-                        &format!("Size: {}", size_str),
-                        Color::Rgb(200, 150, 100),
-                    );
+                    print(&mut info_plane, &format!("Size: {}", size_str), t.warning);
                 }
             }
 

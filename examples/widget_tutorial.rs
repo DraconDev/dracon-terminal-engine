@@ -391,7 +391,7 @@ impl Widget for ColorPicker {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: self.theme.inactive_fg,
+                    fg: self.theme.fg_muted,
                     bg: self.theme.bg,
                     style: Styles::DIM,
                     transparent: false,
@@ -411,7 +411,7 @@ impl Widget for ColorPicker {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: self.theme.accent,
+                    fg: self.theme.primary,
                     bg: self.theme.bg,
                     style: Styles::empty(),
                     transparent: false,

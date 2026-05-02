@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.76.0"
+version = "27.77.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -88,6 +88,58 @@ path = "examples/_cookbook/debug_overlay.rs"
 [[example]]
 name = "showcase"
 path = "examples/showcase.rs"
+
+[[example]]
+name = "command_dashboard"
+path = "examples/command_dashboard.rs"
+
+[[example]]
+name = "cyberpunk_dashboard"
+path = "examples/cyberpunk_dashboard.rs"
+
+[[example]]
+name = "desktop"
+path = "examples/desktop.rs"
+
+[[example]]
+name = "form_demo"
+path = "examples/form_demo.rs"
+
+[[example]]
+name = "framework_chat"
+path = "examples/framework_chat.rs"
+
+[[example]]
+name = "framework_demo"
+path = "examples/framework_demo.rs"
+
+[[example]]
+name = "framework_file_manager"
+path = "examples/framework_file_manager.rs"
+
+[[example]]
+name = "game_loop"
+path = "examples/game_loop.rs"
+
+[[example]]
+name = "input_debug"
+path = "examples/input_debug.rs"
+
+[[example]]
+name = "modal_demo"
+path = "examples/modal_demo.rs"
+
+[[example]]
+name = "text_editor_demo"
+path = "examples/text_editor_demo.rs"
+
+[[example]]
+name = "theme_switcher"
+path = "examples/theme_switcher.rs"
+
+[[example]]
+name = "widget_tutorial"
+path = "examples/widget_tutorial.rs"
 
 [features]
 default = []

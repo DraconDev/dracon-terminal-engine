@@ -150,8 +150,8 @@ fn test_log_viewer_with_theme() {
 #[test]
 fn test_log_viewer_level_color() {
     let lv = LogViewer::new();
-    assert_eq!(lv.level_color(LogLevel::Error), lv.theme.error_fg);
-    assert_eq!(lv.level_color(LogLevel::Warn), lv.theme.warning_fg);
+    assert_eq!(lv.level_color(LogLevel::Error), lv.theme.error);
+    assert_eq!(lv.level_color(LogLevel::Warn), lv.theme.warning);
 }
 
 #[test]

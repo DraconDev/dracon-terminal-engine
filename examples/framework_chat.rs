@@ -104,14 +104,14 @@ fn main() -> std::io::Result<()> {
                 let idx = x as usize;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = ch;
-                    input_plane.cells[idx].fg = Color::Rgb(0, 255, 136);
+                    input_plane.cells[idx].fg = ctx.theme().primary;
                 }
                 x += 1;
             }
 
-            let mut text_color = Color::Rgb(200, 200, 200);
+            let mut text_color = ctx.theme().fg;
             if input_text.is_empty() {
-                text_color = Color::Rgb(100, 100, 100);
+                text_color = ctx.theme().fg_muted;
             }
             for (i, ch) in display_text.chars().take(w as usize - 3).enumerate() {
                 let idx = x as usize + i;
@@ -127,7 +127,7 @@ fn main() -> std::io::Result<()> {
                 let idx = (border_y * w + col) as usize;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = '─';
-                    input_plane.cells[idx].fg = Color::Rgb(60, 60, 80);
+                    input_plane.cells[idx].fg = ctx.theme().outline;
                 }
             }
 

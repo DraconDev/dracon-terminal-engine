@@ -146,7 +146,7 @@ impl Widget for Table {
 
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Rgb(100, 100, 100); p.cells[idx].transparent = false; }
+            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = self.theme.outline; p.cells[idx].transparent = false; }
         }
 
         let mut x = 0u16;
@@ -156,7 +156,7 @@ impl Widget for Table {
                 let idx = (hh * area.width + x + j as u16) as usize;
                 if idx < p.cells.len() {
                     p.cells[idx].char = c;
-                    p.cells[idx].fg = self.theme.accent;
+                    p.cells[idx].fg = self.theme.primary;
                     p.cells[idx].style = Styles::BOLD;
                 }
             }
@@ -196,7 +196,7 @@ impl Widget for Table {
         };
         for (i, c) in txt.chars().take(area.width as usize).enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(0, 255, 136); p.cells[idx].transparent = false; }
+            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.primary; p.cells[idx].transparent = false; }
         }
         p
     }

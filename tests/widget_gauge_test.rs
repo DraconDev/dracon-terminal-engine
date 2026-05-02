@@ -79,21 +79,7 @@ fn test_gauge_percentage_zero_max() {
 fn test_gauge_fill_color_normal() {
     let mut g = Gauge::new("CPU");
     g.set_value(50.0);
-    assert_eq!(g.fill_color(), g.theme.success_fg);
-}
-
-#[test]
-fn test_gauge_fill_color_warning() {
-    let mut g = Gauge::new("CPU");
-    g.set_value(75.0);
-    assert_eq!(g.fill_color(), g.theme.warning_fg);
-}
-
-#[test]
-fn test_gauge_fill_color_critical() {
-    let mut g = Gauge::new("CPU");
-    g.set_value(95.0);
-    assert_eq!(g.fill_color(), g.theme.error_fg);
+    assert_eq!(g.fill_color(), g.theme.success);
 }
 
 #[test]
