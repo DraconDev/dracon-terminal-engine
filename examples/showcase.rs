@@ -328,6 +328,12 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {
+        // Check if showcase requested quit
+        if showcase_ref.lock().unwrap().should_quit {
+            ctx.stop();
+            return;
+        }
+        
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
                 Ok(p) => p.parent().unwrap().to_path_buf(),
