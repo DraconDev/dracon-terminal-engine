@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored graceful shutdown mechanism to use atomic boolean for thread-safe quit signaling
+Updated navigation controls in the showcase example to use arrow keys instead of j/k
 
 ## Context
-The previous implementation used a boolean flag that wasn't thread-safe, which could lead to race conditions. This change ensures proper synchronization between threads when handling shutdown requests.
+The showcase example was previously using j/k for navigation, which is less intuitive for users familiar with standard terminal interfaces. This change aligns with common UI conventions.
 
 ## Completed
-- [x] Replaced boolean flag with `Arc<AtomicBool>` for thread-safe shutdown signaling
-- [x] Updated quit key handler to use atomic store operation
-- [x] Removed redundant status time tracking that was no longer needed
+- [x] Changed navigation keys from j/k to arrow keys (up/down)
+- [x] Removed status message clearing on key press (previously a chore commit)
 
 ## In Progress
-- [ ] Verify all threads properly check the atomic flag for shutdown
+- [x] Navigation key update is complete
 
 ## Blockers
-- Need to ensure all background threads properly respect the atomic shutdown flag
+- None identified
 
 ## Next Steps
-1. Verify all background threads check the atomic flag
-2. Add integration tests for graceful shutdown scenarios
+1. Verify the new navigation works as expected in all scenarios
+2. Consider adding visual feedback for key presses

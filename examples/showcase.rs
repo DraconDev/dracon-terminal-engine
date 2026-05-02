@@ -219,7 +219,7 @@ impl Widget for Showcase {
             }
         }
 
-        let hints = ["navigate: j/k", "open: Enter/dbl-click", "theme: t", "quit: q"];
+        let hints = ["navigate: arrows", "open: Enter/dbl-click", "theme: t", "quit: q"];
         let hint_xs = [1u16, 18, 35, 50];
         for (hint, hx) in hints.iter().zip(hint_xs.iter()) {
             for (j, c) in hint.chars().enumerate() {
@@ -260,16 +260,13 @@ impl Widget for Showcase {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
-        
-        // Clear status message on any key press
-        self.status_message = None;
 
         match key.code {
-            KeyCode::Down | KeyCode::Char('j') => {
+            KeyCode::Down => {
                 if self.selected + 1 < self.examples.len() { self.selected += 1; }
                 true
             }
-            KeyCode::Up | KeyCode::Char('k') => {
+            KeyCode::Up => {
                 if self.selected > 0 { self.selected -= 1; }
                 true
             }
