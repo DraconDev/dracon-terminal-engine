@@ -305,12 +305,12 @@ fn main() -> std::io::Result<()> {
     
     app.on_tick(move |ctx, _| {
         if let Some(cmd) = pending.lock().unwrap().take() {
-            let _ = ctx.terminal.suspend();
+            let _ = ctx.suspend_terminal();
             let _ = std::process::Command::new("sh")
                 .arg("-c")
                 .arg(&cmd)
                 .status();
-            let _ = ctx.terminal.resume();
+            let _ = ctx.resume_terminal();
         }
     }).run(|_ctx| {})
 }

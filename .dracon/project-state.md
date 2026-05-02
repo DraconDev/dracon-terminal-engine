@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Fix child process terminal corruption in showcase example by adding terminal suspend/resume functionality
+Improved terminal management for child processes in the framework
 
 ## Context
-Showcase launches child TUI examples with `Command::spawn()`, which inherits the parent's raw terminal state (alternate screen, raw mode, mouse capture, hidden cursor), causing instant corruption/breakage.
+The showcase example was experiencing terminal corruption when running child processes. This required proper terminal state management during process execution.
 
 ## Completed
-- [x] Added `suspend()` and `resume()` methods to `Terminal` to properly handle terminal state transitions
-- [x] Modified showcase to use suspend/resume around child process execution
-- [x] Implemented proper child process cleanup and terminal state restoration
+- [x] Added `suspend_terminal()` and `resume_terminal()` methods to `Ctx` for proper terminal state management
+- [x] Updated showcase example to use new terminal management methods
+- [x] Fixed terminal corruption during child process execution
 
 ## In Progress
-- [x] Verification of terminal state transitions during child process execution
+- [x] Terminal state management implementation
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify child process terminal state transitions work correctly
-2. Add error handling for terminal state operations
-3. Consider adding timeout for child process execution
+1. Verify terminal state management works across different terminal emulators
+2. Document the new terminal management API in framework documentation

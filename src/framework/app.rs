@@ -600,6 +600,16 @@ impl<'a> Ctx<'a> {
         self.terminal.set_cursor(col, row)
     }
 
+    /// Temporarily restore terminal to normal mode for child processes.
+    pub fn suspend_terminal(&mut self) -> io::Result<()> {
+        self.terminal.suspend()
+    }
+
+    /// Re-enter raw mode + alternate screen after suspend_terminal().
+    pub fn resume_terminal(&mut self) -> io::Result<()> {
+        self.terminal.resume()
+    }
+
     /// Sets the focused widget by ID.
     pub fn set_focus(&mut self, id: WidgetId) {
         self.focus_manager.set_focus(id);
