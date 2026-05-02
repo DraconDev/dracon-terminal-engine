@@ -92,7 +92,6 @@ path = "examples/showcase.rs"
 [[example]]
 name = "desktop"
 path = "examples/desktop.rs"
-path = "examples/desktop.rs"
 
 [[example]]
 name = "form_demo"
@@ -100,7 +99,6 @@ path = "examples/form_demo.rs"
 
 [[example]]
 name = "framework_file_manager"
-path = "examples/framework_file_manager.rs"
 path = "examples/framework_file_manager.rs"
 
 [[example]]
