@@ -7,34 +7,14 @@
 //! - Left/Right arrows to switch tabs
 //! - Click on tab to switch
 //! - Active tab highlighted with different color/style
-//!
-//! # Layout
-//!
-//! ```text
-//! ┌─────────────────────────────────────────────────────────┐
-//! │ [Dashboard] [Logs] [Settings] [Stats]                  │
-//! ├─────────────────────────────────────────────────────────┤
-//! │                                                         │
-//! │   Tab Content Area (changes based on selected tab)      │
-//! │                                                         │
-//! └─────────────────────────────────────────────────────────┘
-//! ```
-//!
-//! # Tab Content
-//!
-//! | Tab | Content | Widget Types |
-//! |-----|---------|--------------|
-//! | Dashboard | 2x2 grid of Gauge widgets | CPU, Memory, Disk, Net |
-//! | Logs | Selectable list | ~10 mock log entries |
-//! | Settings | Form-like layout | Select, Toggle, Slider |
-//! | Stats | Key-value grid | System info pairs |
 
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -43,6 +23,24 @@ const TAB_DASHBOARD: usize = 0;
 const TAB_LOGS: usize = 1;
 const TAB_SETTINGS: usize = 2;
 const TAB_STATS: usize = 3;
+
+/// Copies a source plane into a destination plane at the given offset,
+/// skipping cells with char == '\0'.
+fn copy_plane(dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16) {
+    for sy in 0..src.height {
+        for sx in 0..src.width {
+            let src_idx = (sy * src.width + sx) as usize;
+            let dx = dest_x + sx;
+            let dy = dest_y + sy;
+            if dx < dest.width && dy < dest.height {
+                let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
+                if dest_idx < dest.cells.len() && src.cells[src_idx].char != '\0' {
+                    dest.cells[dest_idx] = src.cells[src_idx].clone();
+                }
+            }
+        }
+    }
+}
 
 struct DashboardState {
     cpu: Gauge,
@@ -157,49 +155,21 @@ fn render_dashboard(plane: &mut Plane, dashboard: &DashboardState, area: Rect) {
     let net_area = Rect::new(area.x + half_w, area.y + half_h, half_w, half_h);
 
     let cpu_plane = dashboard.cpu.render(cpu_area);
-    for (i, cell) in cpu_plane.cells.iter().enumerate().take(cpu_area.width as usize * cpu_area.height as usize) {
-        let idx = i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &cpu_plane, cpu_area.x, cpu_area.y);
 
     let mem_plane = dashboard.memory.render(mem_area);
-    let mem_offset = half_w as usize;
-    for (i, cell) in mem_plane.cells.iter().enumerate().take(mem_area.width as usize * mem_area.height as usize) {
-        let idx = mem_offset + i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &mem_plane, mem_area.x, mem_area.y);
 
     let disk_plane = dashboard.disk.render(disk_area);
-    let disk_offset = (half_h as usize) * (area.width as usize);
-    for (i, cell) in disk_plane.cells.iter().enumerate().take(disk_area.width as usize * disk_area.height as usize) {
-        let idx = disk_offset + i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &disk_plane, disk_area.x, disk_area.y);
 
     let net_plane = dashboard.network.render(net_area);
-    let net_offset = (half_h as usize) * (area.width as usize) + half_w as usize;
-    for (i, cell) in net_plane.cells.iter().enumerate().take(net_area.width as usize * net_area.height as usize) {
-        let idx = net_offset + i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &net_plane, net_area.x, net_area.y);
 }
 
 fn render_logs(plane: &mut Plane, logs: &LogsState, area: Rect) {
     let list_plane = logs.list.render(area);
-    for (i, cell) in list_plane.cells.iter().enumerate().take(area.width as usize * area.height as usize) {
-        let idx = i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &list_plane, area.x, area.y);
 }
 
 fn render_settings(plane: &mut Plane, settings: &SettingsState, area: Rect, theme: Theme) {
@@ -216,30 +186,15 @@ fn render_settings(plane: &mut Plane, settings: &SettingsState, area: Rect, them
         }
     }
     let theme_plane = settings.theme_select.render(Rect::new(input_col, y, 20, 4));
-    for (i, cell) in theme_plane.cells.iter().enumerate() {
-        let idx = (y * plane.width + input_col + i as u16) as usize;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &theme_plane, input_col, y);
     y += 2;
 
     let toggle_plane = settings.notifications.render(Rect::new(input_col, y, 25, 1));
-    for (i, cell) in toggle_plane.cells.iter().enumerate() {
-        let idx = (y * plane.width + input_col + i as u16) as usize;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &toggle_plane, input_col, y);
     y += 3;
 
     let slider_plane = settings.volume_slider.render(Rect::new(input_col, y, 40, 1));
-    for (i, cell) in slider_plane.cells.iter().enumerate() {
-        let idx = (y * plane.width + input_col + i as u16) as usize;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &slider_plane, input_col, y);
 
     let volume_label = "Volume:";
     for (i, c) in volume_label.chars().enumerate() {
@@ -252,12 +207,7 @@ fn render_settings(plane: &mut Plane, settings: &SettingsState, area: Rect, them
 
 fn render_stats(plane: &mut Plane, stats: &StatsState, area: Rect) {
     let grid_plane = stats.grid.render(area);
-    for (i, cell) in grid_plane.cells.iter().enumerate().take(area.width as usize * area.height as usize) {
-        let idx = i;
-        if idx < plane.cells.len() && cell.char != '\0' {
-            plane.cells[idx] = cell.clone();
-        }
-    }
+    copy_plane(plane, &grid_plane, area.x, area.y);
 }
 
 impl Widget for TabbedApp {
@@ -293,17 +243,21 @@ impl Widget for TabbedApp {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
+        // Fill with theme background
         let theme = Theme::cyberpunk();
-        let tabbar_height = 3u16;
-
-        let tabbar_plane = self.tabbar.render(Rect::new(0, 0, area.width, tabbar_height));
-        for (i, cell) in tabbar_plane.cells.iter().enumerate().take(area.width as usize * tabbar_height as usize) {
-            let idx = i;
-            if idx < plane.cells.len() && cell.char != '\0' {
-                plane.cells[idx] = cell.clone();
-            }
+        for cell in plane.cells.iter_mut() {
+            cell.bg = theme.bg;
+            cell.fg = theme.fg;
+            cell.transparent = false;
         }
 
+        let tabbar_height = 3u16;
+
+        // Render tab bar
+        let tabbar_plane = self.tabbar.render(Rect::new(0, 0, area.width, tabbar_height));
+        copy_plane(&mut plane, &tabbar_plane, 0, 0);
+
+        // Separator line
         let separator_y = tabbar_height;
         for col in 0..area.width as usize {
             let idx = (separator_y as usize) * (area.width as usize) + col;
@@ -340,6 +294,9 @@ impl Widget for TabbedApp {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         if self.tabbar.handle_key(key.clone()) {
             return true;
         }
@@ -359,7 +316,7 @@ impl Widget for TabbedApp {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let tabbar_height = 3u16;
         if row < tabbar_height {
             return self.tabbar.handle_mouse(kind, col, row);
@@ -381,16 +338,59 @@ impl Widget for TabbedApp {
     }
 }
 
+/// Thin wrapper that routes keyboard/mouse events to a Rc<RefCell<TabbedApp>>.
+/// Registered in the widget system so input dispatch works, but does not render
+/// (rendering is handled by the on_tick callback calling ctx.add_plane()).
+struct InputRouter {
+    target: Rc<RefCell<TabbedApp>>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for InputRouter {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.target.borrow_mut().handle_mouse(kind, col, row)
+    }
+}
+
 fn main() -> std::io::Result<()> {
     let theme = Theme::cyberpunk();
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
     let app = Rc::new(RefCell::new(TabbedApp::new()));
     let app_for_tick = Rc::clone(&app);
+    let app_for_input = Rc::clone(&app);
 
-    App::new()?
+    let mut app_ctx = App::new()?
         .title("Tabbed Panels Demo")
         .fps(30)
-        .theme(theme)
+        .theme(theme);
+
+    // Register an InputRouter so keyboard/mouse events reach TabbedApp
+    let router = InputRouter {
+        target: app_for_input,
+        id: WidgetId::new(100),
+        area: Rect::new(0, 0, w, h),
+    };
+    app_ctx.add_widget(Box::new(router), Rect::new(0, 0, w, h));
+
+    app_ctx
         .on_tick(move |ctx, tick| {
             let mut app = app_for_tick.borrow_mut();
             let cpu = 45.0 + (tick as f64 % 20.0);
@@ -401,9 +401,9 @@ fn main() -> std::io::Result<()> {
             ctx.mark_all_dirty();
         })
         .run(move |ctx| {
-            let (w, h) = ctx.compositor().size();
-            let app = app.borrow();
-            let tabbed_plane = app.render(Rect::new(0, 0, w, h));
+            let (cw, ch) = ctx.compositor().size();
+            let a = app.borrow();
+            let tabbed_plane = a.render(Rect::new(0, 0, cw, ch));
             ctx.add_plane(tabbed_plane);
         })
 }
