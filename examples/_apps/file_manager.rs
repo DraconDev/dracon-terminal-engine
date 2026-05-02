@@ -221,26 +221,26 @@ impl Widget for FileManager {
         let div_plane = split.render_divider(content_rect);
 
         let bc_plane = self.breadcrumbs.render(header_rect);
-        for (i, c) in bc_plane.cells.iter().enumerate() { if i < plane.cells.len() { plane.cells[i] = c.clone(); } }
+        for (i, c) in bc_plane.cells.iter().enumerate() { if !c.transparent && i < plane.cells.len() { plane.cells[i] = c.clone(); } }
 
         let tree_plane = self.tree.render(tree_rect);
-        for (i, c) in tree_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
-        for (i, c) in div_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
+        for (i, c) in tree_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
+        for (i, c) in div_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
 
         let table_plane = self.render_table(detail_rect);
-        for (i, c) in table_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
+        for (i, c) in table_plane.cells.iter().enumerate() { let idx = (hh * area.width) as usize + i; if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
 
         let det_plane = self.render_details(Rect::new(detail_rect.x + detail_rect.width/2, detail_rect.y + ch/2, detail_rect.width/2, detail_rect.height/2));
         for (i, c) in det_plane.cells.iter().enumerate() {
             let base = ((hh + ch/2) * area.width) as usize + ((detail_rect.width/2) * area.width) as usize + i;
-            if base < plane.cells.len() { plane.cells[base] = c.clone(); }
+            if !c.transparent && base < plane.cells.len() { plane.cells[base] = c.clone(); }
         }
 
         let cnt = self.current_node().child_count();
         let sel_txt = if self.selected.is_some() { "1 selected" } else { "0 selected" };
         let status = StatusBar::new(WidgetId::new(10)).add_segment(StatusSegment::new(&format!("{} items | {} | Press ? for shortcuts", cnt, sel_txt)).with_fg(Color::Rgb(180,180,180)).with_bg(Color::Ansi(236)));
         let st_plane = status.render(footer_rect);
-        for (i, c) in st_plane.cells.iter().enumerate() { let idx = ((area.height - fh) * area.width) as usize + i; if idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
+        for (i, c) in st_plane.cells.iter().enumerate() { let idx = ((area.height - fh) * area.width) as usize + i; if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
 
         if let Some(ref m) = self.context_menu {
             let m_plane = m.render(area);
@@ -248,12 +248,12 @@ impl Widget for FileManager {
                 let y = m_plane.y as usize; let x = m_plane.x as usize;
                 let row = i / m_plane.width as usize; let col = i % m_plane.width as usize;
                 let idx = ((y + row) * area.width as usize) + x + col;
-                if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
             }
         }
         if let Some(ref t) = self.toast {
             let t_plane = t.render(Rect::new(area.width.saturating_sub(40), area.height - 2, 40, 1));
-            for (i, c) in t_plane.cells.iter().enumerate() { let idx = ((area.height - 2) * area.width) as usize + (area.width as usize - 40) + i; if idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
+            for (i, c) in t_plane.cells.iter().enumerate() { let idx = ((area.height - 2) * area.width) as usize + (area.width as usize - 40) + i; if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); } }
         }
         plane
     }
