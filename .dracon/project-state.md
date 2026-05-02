@@ -1,16 +1,18 @@
 # Project State
 
 ## Current Focus
-Refactored terminal window size handling and widget initialization in the form demo example.
+Refactored the debug overlay example to use terminal window size detection and simplified widget initialization.
 
 ## Context
-The changes simplify the form demo example by removing hardcoded window dimensions and instead using dynamic terminal size detection. This aligns with recent terminal window size refactoring efforts across the codebase.
+This change aligns with recent terminal window size detection refactoring efforts and improves the debug overlay example by:
+- Removing hardcoded window dimensions
+- Simplifying widget initialization
+- Making the example more robust for different terminal sizes
 
 ## Completed
-- [x] Removed hardcoded window dimensions in form_demo.rs
-- [x] Added dynamic terminal size detection using file descriptor
-- [x] Simplified widget initialization in form_demo.rs
-- [x] Updated DebugOverlayPanel to properly handle widget IDs
+- [x] Removed hardcoded window dimensions in favor of dynamic detection
+- [x] Simplified widget initialization by using the new terminal size detection
+- [x] Cleaned up the example code by removing redundant UI elements
 
 ## In Progress
 - [ ] No active work in progress
@@ -19,5 +21,5 @@ The changes simplify the form demo example by removing hardcoded window dimensio
 - None identified
 
 ## Next Steps
-1. Verify dynamic resizing works across different terminal sizes
-2. Ensure toast notifications properly position themselves with new layout
+1. Verify the debug overlay works correctly with different terminal sizes
+2. Consider adding more debug visualization options to the overlay

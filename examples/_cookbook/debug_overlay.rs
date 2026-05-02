@@ -221,55 +221,13 @@ impl Widget for DebugOverlayPanel {
 }
 
 fn main() -> io::Result<()> {
-    println!("Debug Overlay Demo");
-    println!("==================");
-    println!("Press F12 to toggle debug overlay");
-    println!("Arrow keys and mouse clicks are logged");
-    println!();
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
-    std::thread::sleep(Duration::from_millis(300));
+    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42));
+    debug_panel.set_area(Rect::new(0, 0, w, h));
 
-    let mut debug_panel = DebugOverlayPanel::new();
-    debug_panel.update_inspector(Some("List_1"));
-
-    App::new()?
-        .title("Debug Overlay Demo")
-        .fps(60)
-        .theme(Theme::dark())
-        .run(|ctx| {
-            ctx.mark_all_dirty();
-
-            let (w, h) = ctx.compositor().size();
-            let items: Vec<String> = (1..=20).map(|i| format!("List Item {}", i)).collect();
-            let mut list = List::new(items);
-            let list_area = Rect::new(2, 2, 40, 18);
-            list.mark_dirty();
-            let list_plane = list.render(list_area);
-            ctx.add_plane(list_plane);
-
-            let footer = "[Toggle Debug: F12]";
-            let mut footer_plane = Plane::new(0, footer.len() as u16 + 4, 1);
-            for (i, c) in footer.chars().enumerate() {
-                if i < footer_plane.cells.len() { footer_plane.cells[i].char = c; }
-            }
-            ctx.add_plane(footer_plane);
-
-            let status_items = ["Profiler: OFF", "WidgetInspector: OFF", "EventLog: OFF"];
-            let _status_y = h.saturating_sub(1);
-            let mut status_plane = Plane::new(0, w, 1);
-            status_plane.z_index = 5;
-            let status_text = status_items.join("  ");
-            for (i, c) in status_text.chars().enumerate() {
-                let idx = (0 * status_plane.width + i as u16) as usize;
-                if idx < status_plane.cells.len() { status_plane.cells[idx].char = c; }
-            }
-            ctx.add_plane(status_plane);
-
-            debug_panel.update_profiler();
-
-            let debug_area = Rect::new(0, 0, w, h);
-            debug_panel.set_area(debug_area);
-            let debug_plane = debug_panel.render(debug_area);
-            ctx.add_plane(debug_plane);
-        })
+    let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(Theme::dark());
+    app.add_widget(Box::new(debug_panel), Rect::new(0, 0, w, h));
+    app.run(|_ctx| {})
 }
