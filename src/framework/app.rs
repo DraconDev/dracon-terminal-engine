@@ -309,7 +309,7 @@ impl App {
                     let mut chunk_buf = [0u8; 1024];
                     if let Ok(n) = stdin.read(&mut chunk_buf) {
                         if n == 0 {
-                            break;
+                            // EOF - shouldn't happen for stdin
                         }
                         for byte in chunk_buf.iter().take(n) {
                             if let Some(event) = self.parser.advance(*byte) {
