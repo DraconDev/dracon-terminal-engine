@@ -197,6 +197,7 @@ impl App {
     /// update internal theme-dependent state without requiring manual
     /// configuration of each widget.
     pub fn set_theme(&mut self, theme: Theme) -> &mut Self {
+        self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
         self.dirty_tracker.mark_all_dirty();
         for widget in self.widgets.borrow_mut().iter_mut() {
