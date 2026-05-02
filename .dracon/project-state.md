@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Added graceful shutdown mechanism for the widget gallery example
+Added graceful shutdown support to the widget gallery example
 
 ## Context
-The widget gallery example previously lacked a proper way to exit the application. This change adds a mechanism to safely terminate the app when needed.
+The widget gallery example needed a way to properly handle shutdown requests, particularly for the 'q' and Esc keys which should trigger a clean exit.
 
 ## Completed
-- [x] Added `Arc<AtomicBool>` for thread-safe running state tracking
-- [x] Implemented shutdown handler in `on_tick` callback
-- [x] Properly propagates shutdown signal to the application context
+- [x] Added `quit_requested` field to track shutdown state
+- [x] Implemented key handling for 'q' and Esc keys to trigger shutdown
+- [x] Updated constructor to accept shutdown signal reference
 
 ## In Progress
-- [x] Graceful shutdown implementation
+- [ ] None (feature is complete)
 
 ## Blockers
-- None identified
+- None (feature is complete)
 
 ## Next Steps
-1. Verify shutdown works across all widget gallery examples
-2. Consider adding keyboard shortcut for manual shutdown
+1. Verify shutdown behavior in integration tests
+2. Document the graceful shutdown mechanism in the example's README

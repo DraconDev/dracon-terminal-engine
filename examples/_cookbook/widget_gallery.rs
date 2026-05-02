@@ -62,10 +62,11 @@ struct WidgetGallery {
     button: Button,
     area: Rect,
     dirty: bool,
+    quit_requested: Arc<AtomicBool>,
 }
 
 impl WidgetGallery {
-    fn new() -> Self {
+    fn new(quit: Arc<AtomicBool>) -> Self {
         let id = WidgetId::new(1);
         Self {
             id,
@@ -82,6 +83,7 @@ impl WidgetGallery {
             button: Button::with_id(WidgetId::new(18), "Click Me!"),
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
+            quit_requested: quit,
         }
     }
 
@@ -352,7 +354,7 @@ impl Widget for WidgetGallery {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        use KeyCode::{Down, Enter, Up};
+        use KeyCode::{Char, Down, Enter, Esc, Up};
         if key.kind != KeyEventKind::Press {
             return false;
         }
@@ -369,6 +371,10 @@ impl Widget for WidgetGallery {
                     self.selected -= 1;
                     self.dirty = true;
                 }
+                true
+            }
+            Char('q') | Esc => {
+                self.quit_requested.store(true, std::sync::atomic::Ordering::SeqCst);
                 true
             }
             Enter => {
