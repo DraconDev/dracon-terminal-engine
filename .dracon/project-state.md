@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Removed unused `Styles` import and refactored breadcrumb widget initialization in framework demo example.
+Update Cargo.lock to reflect dependency version changes
 
 ## Context
-The framework demo example was refactoring quit handling and UI rendering. This change removes unused code and simplifies the widget initialization.
+This change was prompted by recent dependency updates across the project, ensuring the lockfile remains consistent with the current dependency versions.
 
 ## Completed
-- [x] Removed unused `Styles` import from framework demo example
-- [x] Removed redundant `new()` constructor implementation for `FrameworkDemo`
+- [x] Updated Cargo.lock to reflect latest dependency versions
 
 ## In Progress
-- [x] Ongoing work on consistent quit handling across examples
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify framework demo example still functions correctly
-2. Continue implementing consistent quit handling across all examples
+1. Verify all dependencies are properly resolved
+2. Test the project with the updated lockfile to ensure no compatibility issues
