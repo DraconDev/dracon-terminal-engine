@@ -156,6 +156,7 @@ impl Widget for CommandBindings {
         for y in 0..gauge_plane.height {
             for x in 0..gauge_plane.width {
                 let src_idx = (y * gauge_plane.width + x) as usize;
+                if gauge_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 2) * area.width + x) as usize;
                 if src_idx < gauge_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = gauge_plane.cells[src_idx].clone();
@@ -169,6 +170,7 @@ impl Widget for CommandBindings {
         for y in 0..status_plane.height {
             for x in 0..status_plane.width {
                 let src_idx = (y * status_plane.width + x) as usize;
+                if status_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 6) * area.width + x) as usize;
                 if src_idx < status_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = status_plane.cells[src_idx].clone();
@@ -182,6 +184,7 @@ impl Widget for CommandBindings {
         for y in 0..kv_plane.height {
             for x in 0..kv_plane.width {
                 let src_idx = (y * kv_plane.width + x) as usize;
+                if kv_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 2) * area.width + x + 26) as usize;
                 if src_idx < kv_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = kv_plane.cells[src_idx].clone();
@@ -195,6 +198,7 @@ impl Widget for CommandBindings {
         for y in 0..log_plane.height {
             for x in 0..log_plane.width {
                 let src_idx = (y * log_plane.width + x) as usize;
+                if log_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 6) * area.width + x + 26) as usize;
                 if src_idx < log_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = log_plane.cells[src_idx].clone();
@@ -208,6 +212,7 @@ impl Widget for CommandBindings {
         for y in 0..stream_plane.height {
             for x in 0..stream_plane.width {
                 let src_idx = (y * stream_plane.width + x) as usize;
+                if stream_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + area.height - 3) * area.width + x) as usize;
                 if src_idx < stream_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = stream_plane.cells[src_idx].clone();
