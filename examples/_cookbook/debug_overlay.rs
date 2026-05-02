@@ -130,6 +130,7 @@ impl Widget for DebugOverlayPanel {
         for y in 0..prof_plane.height {
             for x in 0..prof_plane.width {
                 let src_idx = (y * prof_plane.width + x) as usize;
+                if prof_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 2) * plane.width + x + 1) as usize;
                 if src_idx < prof_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = prof_plane.cells[src_idx].clone();
@@ -142,6 +143,7 @@ impl Widget for DebugOverlayPanel {
         for y in 0..insp_plane.height {
             for x in 0..insp_plane.width {
                 let src_idx = (y * insp_plane.width + x) as usize;
+                if insp_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 2) * plane.width + x + 27) as usize;
                 if src_idx < insp_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = insp_plane.cells[src_idx].clone();
@@ -154,6 +156,7 @@ impl Widget for DebugOverlayPanel {
         for y in 0..log_plane.height {
             for x in 0..log_plane.width {
                 let src_idx = (y * log_plane.width + x) as usize;
+                if log_plane.cells[src_idx].transparent { continue; }
                 let dst_idx = ((y + 11) * plane.width + x + 1) as usize;
                 if src_idx < log_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = log_plane.cells[src_idx].clone();
