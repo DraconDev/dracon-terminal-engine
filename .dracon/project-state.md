@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Removed `InputRouter` widget and integrated keyboard input handling directly into the `App` context.
+Added configurable area and quit flag support to the menu system example.
 
 ## Context
-The `InputRouter` was an intermediate layer that routed keyboard events to the `CommandBindings` widget. This was redundant since the `App` context already supports direct keyboard input handling through the `on_input` callback.
+This change enhances the menu system example by allowing it to track its display area and provide a mechanism to signal when it should quit, which is useful for integration with larger applications or systems that need to manage multiple components.
 
 ## Completed
-- [x] Removed the `InputRouter` widget and its associated methods
-- [x] Integrated keyboard input handling directly into the `App` context using `on_input`
-- [x] Simplified the initialization of the `App` context
+- [x] Added `area` field to track the menu system's display region
+- [x] Added `should_quit` flag with atomic operations for thread-safe quit signaling
 
 ## In Progress
-- [ ] None
+- [x] Implementation of area tracking and quit flag functionality
 
 ## Blockers
-- None
+- None identified for this specific change
 
 ## Next Steps
-1. Verify that keyboard input handling works correctly with the new approach
-2. Update any documentation that referenced the `InputRouter` widget
+1. Implement area-based rendering logic for the menu system
+2. Integrate quit flag handling with the menu system's event loop

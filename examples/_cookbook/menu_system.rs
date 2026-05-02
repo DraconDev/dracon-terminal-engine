@@ -26,6 +26,8 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 struct MenuLabel(&'static str);
 
@@ -38,6 +40,8 @@ struct MenuApp {
     menu_bar: Vec<MenuLabel>,
     active_menu: Option<usize>,
     selected_idx: Option<usize>,
+    area: Rect,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl MenuApp {
