@@ -232,7 +232,11 @@ impl Widget for FileManager {
 
         let det_plane = self.render_details(Rect::new(detail_rect.x + detail_rect.width/2, detail_rect.y + ch/2, detail_rect.width/2, detail_rect.height/2));
         for (i, c) in det_plane.cells.iter().enumerate() {
-            let base = ((hh + ch/2) * area.width) as usize + ((detail_rect.width/2) * area.width) as usize + i;
+            let det_x = i % det_plane.width as usize;
+            let det_y = i / det_plane.width as usize;
+            let plane_x = detail_rect.x as usize + detail_rect.width as usize / 2 + det_x;
+            let plane_y = detail_rect.y as usize + ch as usize / 2 + det_y;
+            let base = plane_y * area.width as usize + plane_x;
             if !c.transparent && base < plane.cells.len() { plane.cells[base] = c.clone(); }
         }
 
