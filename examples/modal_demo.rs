@@ -35,7 +35,7 @@ use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, ConfirmDialog, Label, Modal, Toast, ToastKind,
+    Button, ConfirmDialog, ConfirmResult, Label, Modal, Toast, ToastKind,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
@@ -423,7 +423,7 @@ fn main() -> io::Result<()> {
             ctx.add_plane(toast.render(toast_area));
             demo.show_save_toast = false;
         }
-    });
+    })?;
 
     println!("\nModal demo exited cleanly");
     Ok(())
