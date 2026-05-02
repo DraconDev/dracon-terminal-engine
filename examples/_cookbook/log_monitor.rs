@@ -181,17 +181,62 @@ impl Default for LogMonitor {
     fn default() -> Self { Self::new() }
 }
 
+/// Thin wrapper that routes keyboard/mouse events to a Rc<RefCell<LogMonitor>>.
+/// Registered in the widget system so input dispatch works, but does not render
+/// (rendering is handled by the on_tick callback calling ctx.add_plane()).
+struct InputRouter {
+    target: Rc<RefCell<LogMonitor>>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for InputRouter {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.target.borrow_mut().handle_mouse(kind, col, row)
+    }
+}
+
 fn main() -> Result<()> {
     println!("Log Monitor — c=clear, r=resume, click=pause/filters");
     std::thread::sleep(Duration::from_millis(300));
 
-    let mut mon = LogMonitor::new();
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
-    App::new()?
+    let mon = Rc::new(RefCell::new(LogMonitor::new()));
+    let mon_for_tick = Rc::clone(&mon);
+    let mon_for_input = Rc::clone(&mon);
+
+    let mut app_ctx = App::new()?
         .title("Log Monitor")
         .fps(30)
-        .tick_interval(200)
+        .tick_interval(200);
+
+    let router = InputRouter {
+        target: mon_for_input,
+        id: WidgetId::new(100),
+        area: Rect::new(0, 0, w, h),
+    };
+    app_ctx.add_widget(Box::new(router), Rect::new(0, 0, w, h));
+
+    app_ctx
         .on_tick(move |ctx, tick| {
+            let mut mon = mon_for_tick.borrow_mut();
             if tick % 2 == 0 { mon.tick(); }
             let (w, h) = ctx.compositor().size();
             if mon.area.width != w || mon.area.height != h {

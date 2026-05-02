@@ -1,21 +1,24 @@
 # Project State
 
 ## Current Focus
-Added file descriptor handling for log monitoring in the cookbook example
+Improved input handling and widget management in cookbook examples
 
 ## Context
-The log monitor example needs proper file descriptor handling for cross-platform compatibility
+The changes refactor input handling in the cookbook examples to use a more robust pattern with `Rc<RefCell<>>` wrappers, which allows for better state management and input routing across different widgets.
 
 ## Completed
-- [x] Added `std::os::fd::AsFd` trait import for file descriptor operations
-- [x] Added `std::rc::Rc` and `std::cell::RefCell` for reference-counted file handling
+- [x] Added `InputRouter` wrapper for `CommandBindings` to handle keyboard events
+- [x] Added `InputRouter` wrapper for `LogMonitor` to handle both keyboard and mouse events
+- [x] Refactored widget initialization to use shared state references
+- [x] Improved window size detection for initial widget placement
+- [x] Enhanced input handling in both examples with proper event routing
 
 ## In Progress
-- [x] Implementing actual file descriptor usage in the log monitor
+- [ ] No active work in progress
 
 ## Blockers
-- Need to determine specific file descriptor operations required for log monitoring
+- None identified
 
 ## Next Steps
-1. Implement file descriptor operations in the log monitor
-2. Add error handling for file descriptor operations
+1. Verify input handling works consistently across different terminal sizes
+2. Test edge cases for input routing with multiple widgets
