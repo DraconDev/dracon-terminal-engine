@@ -311,6 +311,7 @@ impl Compositor {
         write!(writer, "\x1b[?2026l")?;
 
         self.last_frame = final_buffer;
+        self.planes.clear();
         writer.flush()?;
         Ok(())
     }
