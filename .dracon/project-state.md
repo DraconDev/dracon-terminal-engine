@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Improved transparent cell rendering in file manager by fixing cell indexing logic.
+Update Cargo.lock to reflect dependency version changes
 
 ## Context
-This change addresses incorrect cell indexing when rendering transparent cells in the file manager's details panel. The previous implementation had a hardcoded offset calculation that didn't properly account for the panel's position and dimensions.
+This change was prompted by recent improvements in transparent cell rendering across the UI components, which required updated dependencies to ensure compatibility and proper functionality.
 
 ## Completed
-- [x] Fixed cell indexing calculation for transparent cells in file manager details panel
-- [x] Improved position calculation by properly accounting for panel coordinates and dimensions
+- [x] Updated Cargo.lock to reflect dependency version changes
 
 ## In Progress
-- [x] Testing edge cases for different panel sizes and positions
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify rendering consistency across different terminal sizes
-2. Document the new rendering approach in the architecture docs
+1. Verify that all dependencies are properly resolved
+2. Test the application to ensure transparent cell rendering works as expected with the updated dependencies
