@@ -42,6 +42,8 @@ impl ExampleMeta {
             ExampleMeta { name: "theme_switcher", category: "existing", description: "Live theme cycling through all 15 themes", binary_name: "theme_switcher" },
             ExampleMeta { name: "modal_demo", category: "existing", description: "ConfirmDialog + help overlay", binary_name: "modal_demo" },
             ExampleMeta { name: "widget_tutorial", category: "existing", description: "Build a custom ColorPicker widget", binary_name: "widget_tutorial" },
+            ExampleMeta { name: "form_widget", category: "existing", description: "Form builder with labeled fields", binary_name: "form_widget" },
+            ExampleMeta { name: "table_widget", category: "existing", description: "Sortable data table", binary_name: "table_widget" },
             ExampleMeta { name: "framework_file_manager", category: "existing", description: "File browser", binary_name: "framework_file_manager" },
             ExampleMeta { name: "desktop", category: "existing", description: "Desktop environment mockup", binary_name: "desktop" },
             ExampleMeta { name: "game_loop", category: "existing", description: "Interactive game loop demo", binary_name: "game_loop" },
