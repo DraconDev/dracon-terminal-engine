@@ -72,6 +72,7 @@ struct TreeNav {
     fs: MockFs,
     current_path: Vec<usize>,
     theme: Theme,
+    area: Rect,
 }
 
 impl TreeNav {
@@ -105,6 +106,7 @@ impl TreeNav {
             fs,
             current_path: Vec::new(),
             theme: Theme::default(),
+            area: Rect::new(0, 0, 80, 24),
         }
     }
 
@@ -129,10 +131,12 @@ impl Widget for TreeNav {
     }
 
     fn area(&self) -> Rect {
-        Rect::new(0, 0, 80, 24)
+        self.area
     }
 
-    fn set_area(&mut self, _area: Rect) {}
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
 
     fn z_index(&self) -> u16 {
         0
@@ -251,14 +255,14 @@ impl Widget for TreeNav {
     ) -> bool {
         let header_height = 1u16;
         let footer_height = 1u16;
-        let content_height = 24u16.saturating_sub(header_height + footer_height);
+        let content_height = self.area.height.saturating_sub(header_height + footer_height);
 
         if row == 0 {
             return self.breadcrumbs.handle_mouse(kind, col, row);
         }
 
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, _) = split.split(Rect::new(0, header_height, 80, content_height));
+        let (tree_rect, _) = split.split(Rect::new(0, header_height, self.area.width, content_height));
 
         if col < tree_rect.width && row > header_height && row < header_height + tree_rect.height {
             if self.tree.handle_mouse(kind, col, row - header_height) {

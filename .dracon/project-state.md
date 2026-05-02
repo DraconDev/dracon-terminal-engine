@@ -1,24 +1,24 @@
 # Project State
 
 ## Current Focus
-Improved input handling and widget management in cookbook examples
+Added configurable widget area support to the Tree Navigator widget
 
 ## Context
-The changes refactor input handling in the cookbook examples to use a more robust pattern with `Rc<RefCell<>>` wrappers, which allows for better state management and input routing across different widgets.
+The Tree Navigator widget previously had a hardcoded area size of 80x24. This change makes the widget area configurable, allowing it to adapt to different screen sizes and layouts.
 
 ## Completed
-- [x] Added `InputRouter` wrapper for `CommandBindings` to handle keyboard events
-- [x] Added `InputRouter` wrapper for `LogMonitor` to handle both keyboard and mouse events
-- [x] Refactored widget initialization to use shared state references
-- [x] Improved window size detection for initial widget placement
-- [x] Enhanced input handling in both examples with proper event routing
+- [x] Added `area` field to store widget dimensions
+- [x] Made `area()` method return the stored area instead of hardcoded value
+- [x] Implemented `set_area()` to allow dynamic resizing
+- [x] Updated content height calculation to use the widget's area
+- [x] Adjusted tree rectangle calculation to use the widget's width
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Configurable widget area support
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify input handling works consistently across different terminal sizes
-2. Test edge cases for input routing with multiple widgets
+1. Test the widget with different screen sizes
+2. Verify proper rendering with dynamic resizing
