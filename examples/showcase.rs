@@ -315,11 +315,20 @@ fn main() -> std::io::Result<()> {
                 return;
             }
 
-            let _ = std::process::Command::new("konsole")
-                .arg("--new-window")
+            let result = std::process::Command::new("konsole")
+                .arg("--new-tab")
                 .arg("-e")
                 .arg(&binary_path)
+                .current_dir(&exe_dir)
                 .spawn();
+            
+            if let Err(e) = result {
+                let _ = std::fs::write("/tmp/showcase_error.log", 
+                    format!("Binary: {}\nExists: {}\nKonsole error: {}\n", 
+                        binary_path.display(), 
+                        binary_path.exists(),
+                        e));
+            }
         }
     }).run(|_ctx| {})
 }
