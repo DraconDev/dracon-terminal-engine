@@ -66,6 +66,7 @@ impl ExampleMeta {
             ExampleMeta { name: "framework_file_manager", category: "tools", description: "File browser", binary_name: "framework_file_manager", preview: &["> src/", "  lib.rs", "  main.rs", "  Cargo.toml",] },
             ExampleMeta { name: "form_widget", category: "tools", description: "Form builder with labeled fields", binary_name: "form_widget", preview: &["Name:     ____", "Email:    ____", "Password: ****", "[Submit]",] },
             ExampleMeta { name: "table_widget", category: "tools", description: "Sortable data table", binary_name: "table_widget", preview: &["Name  │ Role │", "──────┼──────", "Alice │ Admin", "Bob   │ User",] },
+            ExampleMeta { name: "ide", category: "apps", description: "Mini IDE with all widgets", binary_name: "ide", preview: &["[File][Edit][View]", "├─src/ ┌────────┐", "│ main │fn main│", "│ lib  │{      │", "└──────┴────────┘",] },
         ]
     }
 }
