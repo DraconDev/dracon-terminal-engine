@@ -1,14 +1,14 @@
 #![allow(missing_docs)]
 //! Table Widget Example — demonstrates sortable, selectable data table.
 //!
-//! Shows a table with sortable columns, row selection, and keyboard navigation.
+//! Shows a table with columns, row selection, and keyboard navigation.
 //!
-//! Controls: arrows to navigate, Enter to select, s to sort, q to quit.
+//! Controls: arrows to navigate, Enter to select, q to quit.
 
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Column, Table, TableRow};
+use dracon_terminal_engine::framework::widgets::{Column, Table};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -18,7 +18,7 @@ use std::sync::Arc;
 struct User {
     name: String,
     role: String,
-    active: bool,
+    status: String,
 }
 
 impl std::fmt::Display for User {
@@ -39,19 +39,24 @@ impl TableApp {
             Column { header: "Role".to_string(), width: 15 },
             Column { header: "Status".to_string(), width: 10 },
         ];
+
+        let rows = vec![
+            User { name: "Alice".to_string(), role: "Admin".to_string(), status: "Active".to_string() },
+            User { name: "Bob".to_string(), role: "User".to_string(), status: "Active".to_string() },
+            User { name: "Charlie".to_string(), role: "Editor".to_string(), status: "Away".to_string() },
+            User { name: "Diana".to_string(), role: "Admin".to_string(), status: "Active".to_string() },
+            User { name: "Eve".to_string(), role: "User".to_string(), status: "Active".to_string() },
+            User { name: "Frank".to_string(), role: "Viewer".to_string(), status: "Offline".to_string() },
+            User { name: "Grace".to_string(), role: "Editor".to_string(), status: "Active".to_string() },
+        ];
+
         let mut table = Table::new(columns)
             .with_theme(theme)
-            .with_visible_count(10);
-
-        table.rows = vec![
-            TableRow { data: User { name: "Alice".to_string(), role: "Admin".to_string(), active: true } },
-            TableRow { data: User { name: "Bob".to_string(), role: "User".to_string(), active: true } },
-            TableRow { data: User { name: "Charlie".to_string(), role: "Editor".to_string(), active: false } },
-            TableRow { data: User { name: "Diana".to_string(), role: "Admin".to_string(), active: true } },
-            TableRow { data: User { name: "Eve".to_string(), role: "User".to_string(), active: true } },
-            TableRow { data: User { name: "Frank".to_string(), role: "Viewer".to_string(), active: false } },
-            TableRow { data: User { name: "Grace".to_string(), role: "Editor".to_string(), active: true } },
-        ];
+            .with_rows(rows)
+            .on_select(|user| {
+                let _ = user;
+            });
+        table.set_visible_count(10);
 
         Self { table, should_quit }
     }
