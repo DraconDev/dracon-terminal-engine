@@ -67,7 +67,7 @@ pub use status_badge::StatusBadge;
 pub use status_bar::{StatusBar, StatusSegment};
 pub use streaming_text::StreamingText;
 pub use tabbar::TabBar;
-pub use table::Table;
+pub use table::{Column, Table, TableRow};
 pub use text_editor_adapter::TextEditorAdapter;
 pub use toast::{Toast, ToastKind};
 pub use toggle::Toggle;

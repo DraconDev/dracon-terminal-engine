@@ -1,23 +1,20 @@
 # Project State
 
 ## Current Focus
-Added interactive form and table widget examples to demonstrate UI components with keyboard navigation and theming support.
+Expose `Column` and `TableRow` types from the `Table` widget module.
 
 ## Context
-These examples showcase core UI patterns needed for terminal applications, building on the recently implemented theme system. They provide concrete implementations of form handling and data display that can be reused across applications.
+The `Table` widget was previously only exposing the `Table` type, but now needs to expose its internal types (`Column` and `TableRow`) to allow for more flexible table construction and manipulation.
 
 ## Completed
-- [x] Added form widget example with field validation and focus management
-- [x] Added table widget example with sorting, selection, and keyboard navigation
-- [x] Implemented consistent theme integration across both examples
-- [x] Added example-specific documentation with keyboard controls
+- [x] Added `Column` and `TableRow` to the public re-exports from the `Table` module
 
 ## In Progress
-- [ ] None - these examples are complete
+- [ ] None
 
 ## Blockers
-- None - these examples are self-contained and complete
+- None
 
 ## Next Steps
-1. Create additional widget examples to demonstrate remaining UI patterns
-2. Document how to extend these examples for custom applications
+1. Update any code that directly uses `Table`'s internal types to use the newly exported types
+2. Verify all table-related examples and tests still work with the updated API
