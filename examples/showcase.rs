@@ -8,7 +8,6 @@
 
 use std::os::fd::AsFd;
 use std::sync::{Arc, Mutex};
-use std::io::Read;
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -304,51 +303,23 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?.title("Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(showcase), Rect::new(0, 0, w, h));
 
-    app.on_tick(move |ctx, _| {
+    app.on_tick(move |_ctx, _| {
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
                 Ok(p) => p.parent().unwrap().to_path_buf(),
-                Err(_) => {
-                    ctx.mark_all_dirty();
-                    return;
-                }
+                Err(_) => return,
             };
             let binary_path = exe_dir.join(&binary_name);
 
             if !binary_path.exists() {
-                ctx.mark_all_dirty();
                 return;
             }
 
-            let _ = ctx.suspend_terminal();
-
-            let use_konsole = std::env::var("KONSOLE_VERSION").is_ok();
-            let exit_status = if use_konsole {
-                std::process::Command::new("konsole")
-                    .arg("--new-tab")
-                    .arg("-e")
-                    .arg(&binary_path)
-                    .arg("&")
-                    .status()
-            } else {
-                std::process::Command::new(&binary_path)
-                    .status()
-            };
-
-            match exit_status {
-                Ok(es) if !es.success() => {
-                    let _ = ctx.resume_terminal();
-                }
-                Err(_) => {
-                    let _ = ctx.resume_terminal();
-                }
-                _ => {
-                    drop(std::io::stdin().read(&mut [0u8; 256]));
-                    let _ = ctx.resume_terminal();
-                }
-            }
-
-            ctx.mark_all_dirty();
+            let _ = std::process::Command::new("konsole")
+                .arg("--new-window")
+                .arg("-e")
+                .arg(&binary_path)
+                .spawn();
         }
     }).run(|_ctx| {})
 }
