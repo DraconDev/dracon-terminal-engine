@@ -289,8 +289,7 @@ fn build_sample_tree() -> Tree {
             TreeNode { label: "README.md".into(), expanded: false, children: vec![] },
         ],
     };
-    let mut tree = Tree::new(vec![root]);
-    tree.set_visible_count(20);
+    let mut tree = Tree::new(WidgetId::new(10)).with_root(vec![root]).with_theme(Theme::default());
     tree
 }
 
@@ -483,11 +482,11 @@ impl Widget for IdeApp {
                 self.cycle_theme();
                 true
             }
-            KeyCode::Char('o') if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Char('o') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.toast("Open file dialog (mock)", ToastKind::Info);
                 true
             }
-            KeyCode::Char('s') if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Char('s') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 if let Some(tab) = self.active_tab_mut() {
                     tab.modified = false;
                 }
@@ -495,18 +494,18 @@ impl Widget for IdeApp {
                 self.toast("File saved", ToastKind::Success);
                 true
             }
-            KeyCode::Char('f') if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Char('f') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.show_search = !self.show_search;
                 true
             }
-            KeyCode::Char('t') if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 let new_id = self.tabs.len();
                 self.tabs.push(EditorTab::new(new_id, &format!("untitled-{}.rs", new_id + 1)));
                 self.active_tab = new_id;
                 self.sync_tab_bar();
                 true
             }
-            KeyCode::Char('w') if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Char('w') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 if self.tabs.len() > 1 {
                     self.tabs.remove(self.active_tab);
                     self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
@@ -519,7 +518,7 @@ impl Widget for IdeApp {
                 true
             }
             // Tab navigation
-            KeyCode::Tab if key.modifiers.contains(ModifierKey::Ctrl) => {
+            KeyCode::Tab if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.active_tab = (self.active_tab + 1) % self.tabs.len();
                 self.tab_bar.set_active(self.active_tab);
                 self.update_breadcrumbs();
@@ -543,10 +542,10 @@ impl Widget for IdeApp {
         // Context menu on right-click
         if kind == MouseEventKind::Down(MouseButton::Right) {
             self.context_menu = Some(ContextMenu::new_with_id(WidgetId::new(50), vec![
-                ContextAction::new("Cut"),
-                ContextAction::new("Copy"),
-                ContextAction::new("Paste"),
-                ContextAction::new("Go to Definition"),
+                ("Cut", ContextAction::Cut),
+                ("Copy", ContextAction::Copy),
+                ("Paste", ContextAction::Paste),
+                ("Go to Definition", ContextAction::Open),
             ]));
             return true;
         }
