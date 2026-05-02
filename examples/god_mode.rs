@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use dracon_terminal_engine::{
     compositor::plane::Plane,
     // Terminal, // Unused in this demo structure as we use RatatuiBackend

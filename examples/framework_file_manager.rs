@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! File manager demo — shows List + Breadcrumbs + SplitPane + ContextMenu.
 //!
 //! Keyboard: arrows navigate, Enter opens, Backspace goes up, 'c' contextual menu.

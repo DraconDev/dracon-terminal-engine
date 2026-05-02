@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Widget Gallery — interactive showcase of all framework widgets.
 //!
 //! Demonstrates every interactive widget in a single, runnable App.

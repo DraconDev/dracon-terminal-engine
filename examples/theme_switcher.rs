@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Theme Switcher Demo — demonstrates live theme switching with visual feedback.
 //!
 //! ## Features

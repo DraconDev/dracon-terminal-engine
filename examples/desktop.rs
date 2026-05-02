@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use rand::Rng;
 use std::io::{self, stdout, Read, Write};
 

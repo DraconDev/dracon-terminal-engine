@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Command Bindings — Auto-refresh widgets via CLI commands.
 //!
 //! Demonstrates all 5 command-bound widgets with mock commands that update

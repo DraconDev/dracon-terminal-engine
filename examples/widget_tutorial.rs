@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # Widget Tutorial: Building a Custom ColorPicker Widget
 //!
 //! This example demonstrates how to build a complete custom widget from scratch

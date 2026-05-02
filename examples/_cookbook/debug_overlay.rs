@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Debug overlay example demonstrating diagnostic tools.
 //!
 //! ## Features Shown

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Demonstrates framework widgets working together.
 
 use dracon_terminal_engine::framework::theme::Theme;

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Tree Navigator — hierarchical file browsing with Tree + Breadcrumbs + SplitPane.
 //!
 //! Demonstrates:

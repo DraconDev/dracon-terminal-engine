@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Form Demo — demonstrates the framework's form widget with validation.
 //!
 //! This example shows:

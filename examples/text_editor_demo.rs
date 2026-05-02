@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! TextEditor example — demonstrates TextEditor widget in App context.
 //!
 //! Opens a file and displays it in an editable text editor within the App.

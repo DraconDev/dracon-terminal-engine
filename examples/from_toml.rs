@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Example: loading app config from TOML
 //!
 //! Run with: cargo run --example from_toml

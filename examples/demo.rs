@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 // TRANSFORMED FROM examples/cyberpunk_dashboard.rs
 // to src/main.rs for "Default Run" capability
 

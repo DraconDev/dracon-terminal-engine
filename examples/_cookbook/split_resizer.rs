@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Split Resizer — Nested SplitPane with mouse drag resize.
 //! Controls: click divider=select, drag=resize, ←/→=A split, ↑/↓:B split, r=reset
 

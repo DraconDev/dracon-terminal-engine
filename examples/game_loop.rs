@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use dracon_terminal_engine::backend::tty::poll_input;
 use dracon_terminal_engine::compositor::engine::Compositor;
 use dracon_terminal_engine::compositor::plane::Plane;

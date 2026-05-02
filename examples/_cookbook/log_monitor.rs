@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Log Monitor — Real-time log viewer with severity parsing and filtering.
 //!
 //! Demonstrates LogViewer + auto-scroll + severity filtering + StatusBadge.

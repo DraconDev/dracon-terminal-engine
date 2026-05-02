@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Command-driven dashboard example — shows auto-refreshing widgets.
 //!
 //! Run with: cargo run --example command_dashboard

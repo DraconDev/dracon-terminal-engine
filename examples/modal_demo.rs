@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Demonstrates modal dialogs and keyboard shortcuts.
 //!
 //! ## Features Shown

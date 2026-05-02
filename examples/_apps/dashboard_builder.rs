@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Dashboard Builder — showcases all command-bound widgets in a grid layout.
 //!
 //! Run with: cargo run --example dashboard_builder

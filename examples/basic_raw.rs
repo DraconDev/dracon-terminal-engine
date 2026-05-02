@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use dracon_terminal_engine::core::terminal::Terminal;
 use std::io::{self, Write};
 

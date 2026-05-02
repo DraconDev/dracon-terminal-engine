@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use dracon_terminal_engine::{compositor::plane::Plane, integration::ratatui::RatatuiBackend};
 use ratatui::{
     layout::{Constraint, Direction, Layout}, // Removed Rect

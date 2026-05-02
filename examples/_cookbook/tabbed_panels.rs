@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Tabbed Panels — demonstrates TabBar with per-tab widget state.
 //!
 //! This example shows:

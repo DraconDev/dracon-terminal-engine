@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Framework demo — shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
 
 use dracon_terminal_engine::compositor::{Color, Plane};

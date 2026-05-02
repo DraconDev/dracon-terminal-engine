@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Menu System — MenuBar, ContextMenu, and keyboard shortcuts.
 //!
 //! Demonstrates:

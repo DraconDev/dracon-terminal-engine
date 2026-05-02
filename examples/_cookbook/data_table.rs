@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Data Table Demo — sortable table with SearchInput filter.
 //!
 //! **Layout:**
