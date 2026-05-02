@@ -271,17 +271,62 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
     plane
 }
 
+struct ChatInputRouter {
+    target: Rc<RefCell<ChatState>>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for ChatInputRouter {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.target.borrow_mut().handle_mouse(kind, col, row)
+    }
+}
+
 fn main() -> io::Result<()> {
     println!("Chat Client Demo - Enter to send | Click 📎 for emojis | Click ⚙ for settings");
     std::thread::sleep(Duration::from_millis(300));
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let chat = Rc::new(RefCell::new(ChatState::new(should_quit)));
+    let chat_for_render = Rc::clone(&chat);
+    let chat_for_input = Rc::clone(&chat);
+
     let mut app = App::new()?.title("Chat Client").fps(30);
     app.set_theme(Theme::dark());
-    let mut chat = ChatState::new();
 
-    let _ = app.run(move |ctx| {
-        if ctx.needs_full_refresh() { ctx.mark_all_dirty(); }
+    let router = ChatInputRouter {
+        target: chat_for_input,
+        id: WidgetId::new(100),
+        area: Rect::new(0, 0, 80, 24),
+    };
+    app.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
+
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(move |ctx| {
+        let mut chat = chat_for_render.borrow_mut();
         let (w, h) = ctx.compositor().size();
+        chat.area = Rect::new(0, 0, w, h);
         ctx.add_plane(render_chat(&chat, Rect::new(0, 0, w, h)));
 
         if chat.show_emoji_modal {
@@ -309,7 +354,7 @@ fn main() -> io::Result<()> {
             ctx.add_plane(Toast::new(WidgetId::new(200), "Message sent!").with_kind(ToastKind::Success).with_duration(Duration::from_secs(2)).with_theme(Theme::dark()).render(Rect::new(30, h - 4, 20, 1)));
             chat.show_toast = false;
         }
-    });
+    })?;
 
     println!("\nChat client exited cleanly");
     Ok(())
