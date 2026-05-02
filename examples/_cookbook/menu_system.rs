@@ -25,6 +25,7 @@ use dracon_terminal_engine::framework::widgets::{
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
+use std::os::fd::AsFd;
 
 struct MenuLabel(&'static str);
 

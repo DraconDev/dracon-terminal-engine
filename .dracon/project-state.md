@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored the tree navigator example to use terminal window size detection and proper widget initialization.
+Added file descriptor support for terminal synchronization in the menu system example
 
 ## Context
-The previous implementation hardcoded the window size and used a manual rendering approach. This change aligns with recent framework refactorings that standardize widget initialization and terminal synchronization.
+This change enables proper terminal synchronization by adding file descriptor support, which is necessary for reliable terminal operations in the menu system example.
 
 ## Completed
-- [x] Replaced hardcoded window size with dynamic terminal size detection
-- [x] Simplified widget initialization using `App::add_widget`
-- [x] Removed manual plane management in favor of framework-controlled rendering
-- [x] Updated to use the new widget system introduced in recent framework changes
+- [x] Added `std::os::fd::AsFd` import to enable file descriptor operations
+- [x] Prepared the menu system example for terminal synchronization features
 
 ## In Progress
-- [x] No active work in progress beyond the refactoring
+- [ ] Implementing actual terminal synchronization using the file descriptor
 
 ## Blockers
-- None identified
+- Need to implement the actual synchronization logic using the file descriptor
 
 ## Next Steps
-1. Verify the new implementation works with all terminal sizes
-2. Update related examples to follow the same pattern
+1. Implement terminal synchronization using the file descriptor
+2. Verify synchronization works correctly in the menu system example
