@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Added file descriptor support for terminal synchronization in the menu system example
+Refactored terminal window size detection and widget initialization in cookbook examples
 
 ## Context
-This change enables proper terminal synchronization by adding file descriptor support, which is necessary for reliable terminal operations in the menu system example.
+These changes standardize how terminal window size is determined across examples by using the same file descriptor-based approach introduced in recent commits. This improves consistency and reduces code duplication.
 
 ## Completed
-- [x] Added `std::os::fd::AsFd` import to enable file descriptor operations
-- [x] Prepared the menu system example for terminal synchronization features
+- [x] Replaced compositor-based size detection with direct terminal size detection using file descriptors
+- [x] Simplified widget initialization by removing redundant context usage
+- [x] Standardized widget area calculation across both examples
 
 ## In Progress
-- [ ] Implementing actual terminal synchronization using the file descriptor
+- [x] All cookbook examples now use consistent terminal size detection
 
 ## Blockers
-- Need to implement the actual synchronization logic using the file descriptor
+- None identified
 
 ## Next Steps
-1. Implement terminal synchronization using the file descriptor
-2. Verify synchronization works correctly in the menu system example
+1. Review other examples for similar refactoring opportunities
+2. Consider adding window resize handling to these examples

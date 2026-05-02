@@ -327,12 +327,13 @@ impl Widget for MenuApp {
 }
 
 fn main() -> std::io::Result<()> {
-    App::new()?.title("Menu System Demo").fps(30).run(|ctx| {
-        let (w, h) = ctx.compositor().size();
-        let area = Rect::new(0, 0, w, h);
-        let mut app = MenuApp::new(WidgetId::new(0));
-        app.set_area(area);
-        app.toasts.retain(|t| !t.is_expired());
-        ctx.add_plane(app.render(area));
-    })
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
+
+    let mut app_widget = MenuApp::new(WidgetId::new(0));
+    app_widget.set_area(Rect::new(0, 0, w, h));
+
+    let mut app = App::new()?.title("Menu System Demo").fps(30);
+    app.add_widget(Box::new(app_widget), Rect::new(0, 0, w, h));
+    app.run(|_ctx| {})
 }
