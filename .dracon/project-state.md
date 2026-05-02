@@ -1,25 +1,23 @@
 # Project State
 
 ## Current Focus
-Enhanced modal dialog system with proper input handling and dynamic area support
+Enhanced modal dialog confirmation handling with explicit result states
 
 ## Context
-The modal demo example needed improvements to handle keyboard/mouse input properly and support dynamic window resizing while maintaining modal dialog positioning.
+The modal dialog system needed clearer handling of confirmation results to properly distinguish between confirmed and cancelled states, improving user feedback and state management.
 
 ## Completed
-- [x] Added `ModalDemoRouter` widget to properly route input events to the modal demo
-- [x] Implemented dynamic area calculation based on window size
-- [x] Added proper quit handling through atomic flag
-- [x] Updated widget positioning to respect terminal dimensions
-- [x] Maintained modal dialog positioning while supporting resizing
+- [x] Explicitly check for `ConfirmResult::Confirmed` and `ConfirmResult::Cancelled` instead of boolean values
+- [x] Added proper state reset after confirmation/cancellation
+- [x] Consistent handling for both keyboard and mouse interactions
+- [x] Clearer toast message display for confirmed actions
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Enhanced modal dialog confirmation handling
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify input handling works across different terminal sizes
-2. Test modal dialog behavior during rapid resizing
-3. Document the new input routing pattern for other examples
+1. Verify consistent behavior across all modal interactions
+2. Consider adding visual feedback for cancelled actions

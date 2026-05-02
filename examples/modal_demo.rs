@@ -213,12 +213,13 @@ impl<'a> ModalDemoApp<'a> {
         // Delegate to confirm dialog if visible
         if self.show_confirm {
             if self.confirm_dialog.handle_key(key) {
-                if let Some(result) = self.confirm_dialog.confirmed() {
+                if self.confirm_dialog.confirmed() == Some(ConfirmResult::Confirmed) {
                     self.show_confirm = false;
-                    if result {
-                        self.show_save_toast = true;
-                        self.toast_message = "Action confirmed!".to_string();
-                    }
+                    self.show_save_toast = true;
+                    self.toast_message = "Action confirmed!".to_string();
+                    self.confirm_dialog.clear_result();
+                } else if self.confirm_dialog.confirmed() == Some(ConfirmResult::Cancelled) {
+                    self.show_confirm = false;
                     self.confirm_dialog.clear_result();
                 }
                 return true;
@@ -261,12 +262,13 @@ impl<'a> ModalDemoApp<'a> {
         if self.show_confirm {
             if self.confirm_dialog.handle_mouse(kind, col, row) {
                 if let MouseEventKind::Down(_) = kind {
-                    if let Some(result) = self.confirm_dialog.confirmed() {
+                    if self.confirm_dialog.confirmed() == Some(ConfirmResult::Confirmed) {
                         self.show_confirm = false;
-                        if result {
-                            self.show_save_toast = true;
-                            self.toast_message = "Action confirmed!".to_string();
-                        }
+                        self.show_save_toast = true;
+                        self.toast_message = "Action confirmed!".to_string();
+                        self.confirm_dialog.clear_result();
+                    } else if self.confirm_dialog.confirmed() == Some(ConfirmResult::Cancelled) {
+                        self.show_confirm = false;
                         self.confirm_dialog.clear_result();
                     }
                 }
