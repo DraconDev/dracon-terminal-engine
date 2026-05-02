@@ -137,8 +137,8 @@ impl IdeApp {
             ),
         ];
 
-        let tab_labels: Vec<String> = tabs.iter().map(|t| t.display_title()).collect();
-        let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_labels.clone());
+        let tab_labels_ref: Vec<&str> = tabs.iter().map(|t| t.display_title().as_str()).collect();
+        let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_labels_ref);
 
         let file_tree = build_sample_tree();
 
@@ -649,7 +649,7 @@ impl IdeApp {
     }
 
     fn sync_tab_bar(&mut self) {
-        let labels: Vec<String> = self.tabs.iter().map(|t| t.display_title()).collect();
+        let labels: Vec<&str> = self.tabs.iter().map(|t| t.title.as_str()).collect();
         self.tab_bar = TabBar::new_with_id(WidgetId::new(2), labels);
         self.tab_bar.set_active(self.active_tab);
         self.tab_bar.on_theme_change(&self.theme);
