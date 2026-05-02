@@ -404,7 +404,7 @@ impl Widget for SettingsForm {
         let submit_plane = self.submit.render(Rect::new(input_col, y, 20, 1));
         for (i, cell) in submit_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
-            if idx < plane.cells.len() && cell.char != '\0' {
+            if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
                 plane.cells[idx] = cell.clone();
             }
         }
