@@ -24,7 +24,11 @@
 //! 2. If widget doesn't handle it, event is not consumed (bubbles up)
 //! 3. For modal composition, higher-z-index widgets render on top
 
+use std::cell::RefCell;
 use std::io;
+use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::Plane;
@@ -33,7 +37,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, ConfirmDialog, Label, Modal, Toast, ToastKind,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
 struct HelpOverlay<'a> {
