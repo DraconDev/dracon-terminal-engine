@@ -202,6 +202,7 @@ struct Showcase {
     dirty: bool,
     show_modal: bool,
     theme_idx: usize,
+    should_quit: bool,
 }
 
 impl Showcase {
@@ -214,6 +215,7 @@ impl Showcase {
             dirty: true,
             show_modal: false,
             theme_idx: 0,
+            should_quit: false,
         }
     }
 
@@ -628,7 +630,9 @@ impl Widget for Showcase {
                 true
             }
             KeyCode::Char('q') => {
-                std::process::exit(0);
+                self.should_quit = true;
+                self.dirty = true;
+                true
             }
             _ => false,
         }
@@ -693,6 +697,10 @@ fn main() -> io::Result<()> {
     app.add_widget(Box::new(ShowcaseWidget::new(showcase)), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _tick| {
         let mut s = showcase_tick.borrow_mut();
+        if s.should_quit {
+            ctx.stop();
+            return;
+        }
         let (w, h) = ctx.compositor().size();
         if s.area.width != w || s.area.height != h {
             s.set_area(Rect::new(0, 0, w, h));

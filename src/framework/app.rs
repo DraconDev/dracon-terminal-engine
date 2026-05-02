@@ -436,6 +436,7 @@ impl App {
                             animations: &mut self.animations,
                             dirty_tracker: &mut self.dirty_tracker,
                             commands: &self.commands,
+                            running: &self.running,
                         },
                         self.tick_count,
                     );
@@ -480,6 +481,7 @@ impl App {
                 animations: &mut self.animations,
                 dirty_tracker: &mut self.dirty_tracker,
                 commands: &self.commands,
+                running: &self.running,
             });
 
             self.compositor.render(&mut self.terminal)?;
