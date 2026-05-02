@@ -196,7 +196,7 @@ impl Widget for Table {
         };
         for (i, c) in txt.chars().take(area.width as usize).enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(0, 255, 136); }
+            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(0, 255, 136); p.cells[idx].transparent = false; }
         }
         p
     }
