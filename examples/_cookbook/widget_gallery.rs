@@ -446,7 +446,7 @@ fn main() -> std::io::Result<()> {
     let running = Arc::new(AtomicBool::new(true));
     let running_clone = running.clone();
 
-    let mut gallery = WidgetGallery::new();
+    let mut gallery = WidgetGallery::new(running_clone.clone());
     gallery.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("Widget Gallery").fps(30).theme(theme);

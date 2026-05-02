@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Added graceful shutdown support to the widget gallery example
+Integrate graceful shutdown support into the widget gallery example
 
 ## Context
-The widget gallery example needed a way to properly handle shutdown requests, particularly for the 'q' and Esc keys which should trigger a clean exit.
+This change implements the graceful shutdown mechanism for the widget gallery example, which was recently added as a feature. The widget gallery now needs to properly handle shutdown signals to ensure clean termination.
 
 ## Completed
-- [x] Added `quit_requested` field to track shutdown state
-- [x] Implemented key handling for 'q' and Esc keys to trigger shutdown
-- [x] Updated constructor to accept shutdown signal reference
+- [x] Pass the running flag to WidgetGallery::new() to enable graceful shutdown support
 
 ## In Progress
-- [ ] None (feature is complete)
+- [x] Integration of graceful shutdown mechanism
 
 ## Blockers
-- None (feature is complete)
+- None identified
 
 ## Next Steps
-1. Verify shutdown behavior in integration tests
-2. Document the graceful shutdown mechanism in the example's README
+1. Verify graceful shutdown behavior in the widget gallery
+2. Update documentation to reflect graceful shutdown capabilities
