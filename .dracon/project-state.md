@@ -1,25 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored the debug overlay example to use terminal window size detection and simplified widget initialization.
+Refactored the framework demo example to use strongly-typed list items.
 
 ## Context
-This change aligns with recent terminal window size detection refactoring efforts and improves the debug overlay example by:
-- Removing hardcoded window dimensions
-- Simplifying widget initialization
-- Making the example more robust for different terminal sizes
+The framework demo was updated to use a generic `List<String>` instead of a non-generic `List` to provide better type safety and clarity in the example code.
 
 ## Completed
-- [x] Removed hardcoded window dimensions in favor of dynamic detection
-- [x] Simplified widget initialization by using the new terminal size detection
-- [x] Cleaned up the example code by removing redundant UI elements
+- [x] Changed `List` to `List<String>` in the framework demo example
+- [x] Added `std::os::fd::AsFd` import for potential future terminal synchronization improvements
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the debug overlay works correctly with different terminal sizes
-2. Consider adding more debug visualization options to the overlay
+1. Verify the example continues to work correctly with the type change
+2. Consider if additional type safety improvements are needed in other examples

@@ -1,6 +1,7 @@
 #![allow(missing_docs)]
 //! Framework demo — shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
 
+use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -11,7 +12,7 @@ use ratatui::layout::Rect;
 
 struct FrameworkDemo {
     id: WidgetId,
-    list: List,
+    list: List<String>,
     breadcrumbs: Breadcrumbs,
     sys: SystemMonitor,
     area: Rect,
