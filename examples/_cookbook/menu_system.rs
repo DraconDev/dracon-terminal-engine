@@ -253,7 +253,7 @@ impl Widget for MenuApp {
                 KeyCode::Char('n') => { self.toast("New file created", ToastKind::Success); true }
                 KeyCode::Char('o') => { self.toast("Opened file dialog", ToastKind::Info); true }
                 KeyCode::Char('s') => { self.toast("Saved!", ToastKind::Success); true }
-                KeyCode::Char('q') => { self.toast("Goodbye!", ToastKind::Info); true }
+                KeyCode::Char('q') => { self.toast("Goodbye!", ToastKind::Info); self.should_quit.store(true, Ordering::SeqCst); true }
                 KeyCode::Char('c') => { self.toast("Copied to clipboard", ToastKind::Info); true }
                 KeyCode::Char('v') => { self.toast("Pasted from clipboard", ToastKind::Info); true }
                 KeyCode::Char('a') => { self.toast("All items selected", ToastKind::Info); true }
@@ -270,7 +270,7 @@ impl Widget for MenuApp {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let (hdr, ftr) = (1u16, 1u16);
-        let content_h = 24u16.saturating_sub(hdr + ftr);
+        let content_h = self.area.height.saturating_sub(hdr + ftr);
 
         if self.context_menu.is_some() {
             if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
@@ -283,7 +283,7 @@ impl Widget for MenuApp {
         if row == 0 {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
                 let total = self.menu_bar.len();
-                let entry_w = (80usize / total.max(1)) as u16;
+                let entry_w = (self.area.width as usize / total.max(1)) as u16;
                 let menu_idx = (col / entry_w) as usize;
                 if menu_idx < total {
                     if self.active_menu == Some(menu_idx) {
@@ -298,7 +298,7 @@ impl Widget for MenuApp {
         }
 
         if let MouseEventKind::Down(MouseButton::Right) = kind {
-            let list_rect = Rect::new(2, hdr + 1, 76, content_h.saturating_sub(2));
+            let list_rect = Rect::new(2, hdr + 1, self.area.width.saturating_sub(4), content_h.saturating_sub(2));
             if col >= list_rect.x && col < list_rect.x + list_rect.width && row >= list_rect.y && row < list_rect.y + list_rect.height {
                 self.context_menu = Some(ContextMenu::new_with_id(WidgetId::new(50), vec![
                     ("Copy Item", ContextAction::Copy),
@@ -322,7 +322,7 @@ impl Widget for MenuApp {
             }
         }
 
-        let list_rect = Rect::new(2, hdr + 1, 76, content_h.saturating_sub(2));
+        let list_rect = Rect::new(2, hdr + 1, self.area.width.saturating_sub(4), content_h.saturating_sub(2));
         if col >= list_rect.x && col < list_rect.x + list_rect.width && row >= list_rect.y && row < list_rect.y + list_rect.height {
             return self.list.handle_mouse(kind, col - list_rect.x, row - list_rect.y);
         }
@@ -334,10 +334,17 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut app_widget = MenuApp::new(WidgetId::new(0));
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit);
     app_widget.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("Menu System Demo").fps(30);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, w, h));
-    app.run(|_ctx| {})
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(|_ctx| {})
 }
