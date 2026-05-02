@@ -513,37 +513,13 @@ impl Widget for SettingsForm {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::cyberpunk();
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
 
-    App::new()?
-        .title("Form Demo - Settings")
-        .fps(30)
-        .theme(theme)
-        .on_tick(|ctx, _tick| {
-            ctx.mark_all_dirty();
-        })
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
+    let mut form = SettingsForm::new();
+    form.set_area(Rect::new(0, 0, w, h));
 
-            let form_width = 60u16;
-            let form_height = 15u16;
-            let form_x = (w.saturating_sub(form_width)) / 2;
-            let form_y = (h.saturating_sub(form_height)) / 2;
-
-            let mut form = SettingsForm::new(WidgetId::new(1));
-            form.set_area(Rect::new(form_x, form_y, form_width, form_height));
-
-            let form_plane = form.render(form.area());
-            ctx.add_plane(form_plane);
-
-            if form.show_toast {
-                let toast = Toast::new(WidgetId::new(100), &form.toast_message)
-                    .with_kind(ToastKind::Success)
-                    .with_duration(std::time::Duration::from_secs(3))
-                    .with_theme(theme);
-
-                let toast_area = Rect::new((w.saturating_sub(40)) / 2, h.saturating_sub(3), 40, 1);
-                ctx.add_plane(toast.render(toast_area));
-            }
-        })
+    let mut app = App::new()?.title("Settings Form").fps(30).theme(Theme::dracula());
+    app.add_widget(Box::new(form), Rect::new(0, 0, w, h));
+    app.on_tick(|_ctx, _tick| {}).run(|_ctx| {})
 }

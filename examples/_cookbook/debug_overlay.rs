@@ -45,8 +45,9 @@ struct DebugOverlayPanel {
 }
 
 impl DebugOverlayPanel {
-    fn new() -> Self {
+    fn new(id: WidgetId) -> Self {
         Self {
+            id,
             profiler: Profiler::new(WidgetId::new(160)),
             inspector: WidgetInspector::new(WidgetId::new(180)),
             event_logger: EventLogger::new(WidgetId::new(170)),
@@ -98,8 +99,8 @@ impl DebugOverlayPanel {
 }
 
 impl Widget for DebugOverlayPanel {
-    fn id(&self) -> WidgetId { WidgetId::new(200) }
-    fn set_id(&mut self, _id: WidgetId) {}
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
     fn set_area(&mut self, area: Rect) {
         self.profiler.set_area(Rect::new(0, 1, 25, 8));
