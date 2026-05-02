@@ -84,9 +84,12 @@ impl App {
         let terminal = Terminal::new(io::stdout())?;
         let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
 
+        let mut compositor = Compositor::new(w, h);
+        compositor.set_clear_color(Theme::default().bg);
+
         Ok(Self {
             terminal,
-            compositor: Compositor::new(w, h),
+            compositor,
             parser: Parser::new(),
             title: String::from("Dracon App"),
             fps: 30,
