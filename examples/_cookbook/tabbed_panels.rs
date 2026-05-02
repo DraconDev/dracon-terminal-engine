@@ -306,8 +306,8 @@ impl Widget for TabbedApp {
             return false;
         }
 
-        // Quit on 'q' or Ctrl+Q
-        if key.code == KeyCode::Char('q') || key.code == KeyCode::Ctrl('q') {
+        // Quit on 'q'
+        if key.code == KeyCode::Char('q') {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }

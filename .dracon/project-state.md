@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added configurable quit handling to the tabbed panels example
+Simplified quit handling in the tabbed panels example
 
 ## Context
-The tabbed panels example needed consistent quit behavior across all cookbook examples, similar to the chat client and menu system implementations.
+The change removes the Ctrl+Q quit shortcut in favor of just the 'q' key, making the quit behavior more consistent with other examples in the project.
 
 ## Completed
-- [x] Added 'q' and Ctrl+Q keybindings to quit the application
-- [x] Implemented proper quit flag propagation through the application lifecycle
-- [x] Added quit check in the on_tick handler to properly terminate the application
+- [x] Removed Ctrl+Q quit shortcut in tabbed panels example
+- [x] Kept only 'q' as the quit key
 
 ## In Progress
-- [ ] None
+- [x] Evaluating whether other examples should follow this pattern
 
 ## Blockers
-- None
+- Need to verify if other examples should maintain the Ctrl+Q shortcut for consistency
 
 ## Next Steps
-1. Verify quit behavior works consistently across all examples
-2. Consider adding a global quit handler pattern for all examples
+1. Review other examples to ensure consistent quit behavior
+2. Document the decision in the project guidelines
