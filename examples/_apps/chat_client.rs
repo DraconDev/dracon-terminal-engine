@@ -17,14 +17,18 @@
 //! │ [Alice, Bob] | 3 unread | Press Enter to send           │
 //! └─────────────────────────────────────────────────────────┘
 
+use std::cell::RefCell;
 use std::io;
+use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Modal, Toast, ToastKind};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind, MouseButton};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 #[derive(Clone)]
@@ -55,11 +59,13 @@ struct ChatState {
     theme_mode: &'static str,
     show_toast: bool,
     scroll_offset: usize,
+    area: Rect,
+    should_quit: Arc<AtomicBool>,
 }
 
 #[allow(dead_code)]
 impl ChatState {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         Self {
             messages: MESSAGES.iter().cloned().map(|m| m.clone()).collect(),
             input_text: String::new(),
@@ -72,6 +78,8 @@ impl ChatState {
             theme_mode: "Dark",
             show_toast: false,
             scroll_offset: 0,
+            area: Rect::new(0, 0, 80, 24),
+            should_quit,
         }
     }
 
@@ -100,6 +108,10 @@ impl ChatState {
                 self.show_settings_modal = false;
                 true
             }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
             KeyCode::Enter if !self.show_emoji_modal && !self.show_settings_modal => { self.send_message(); true }
             KeyCode::Backspace if !self.input_text.is_empty() => { self.input_text.pop(); self.cursor_pos = self.input_text.len(); true }
             KeyCode::Char(ch) if !self.show_emoji_modal && !self.show_settings_modal => { self.input_text.push(ch); self.cursor_pos = self.input_text.len(); true }
@@ -108,7 +120,8 @@ impl ChatState {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let (h, input_h, status_h, header_h) = (24u16, 3u16, 1u16, 1u16);
+        let (input_h, status_h, header_h) = (3u16, 1u16, 1u16);
+        let h = self.area.height;
         let list_h = h - input_h - status_h - header_h;
         let input_row = header_h + list_h;
 
