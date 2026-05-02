@@ -242,6 +242,24 @@ impl Widget for Showcase {
             }
         }
 
+        // Display temporary status message (launched example, error, etc.)
+        if let Some(ref msg) = self.status_message {
+            if self.status_time.elapsed().as_secs() < 3 {
+                let msg_text = msg.chars().take(area.width as usize - 4).collect::<String>();
+                let msg_x = 2u16;
+                let msg_y = status_y.saturating_sub(1);
+                for (j, c) in msg_text.chars().enumerate() {
+                    let ci = (msg_y * area.width + msg_x + j as u16) as usize;
+                    if ci < p.cells.len() {
+                        p.cells[ci].char = c;
+                        p.cells[ci].fg = Color::Rgb(255, 200, 100);
+                    }
+                }
+            } else {
+                self.status_message = None;
+            }
+        }
+
         p
     }
 
