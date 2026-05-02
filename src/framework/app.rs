@@ -186,6 +186,7 @@ impl App {
 
     /// Sets the UI theme.
     pub fn theme(mut self, theme: Theme) -> Self {
+        self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
         self
     }
