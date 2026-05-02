@@ -8,6 +8,7 @@
 
 use std::os::fd::AsFd;
 use std::sync::{Arc, Mutex};
+use std::io::Read;
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -306,11 +307,26 @@ fn main() -> std::io::Result<()> {
     app.on_tick(move |ctx, _| {
         if let Some(cmd) = pending.lock().unwrap().take() {
             let _ = ctx.suspend_terminal();
-            let _ = std::process::Command::new("sh")
+            
+            let exit_status = std::process::Command::new("sh")
                 .arg("-c")
                 .arg(&cmd)
                 .status();
+            
+            match exit_status {
+                Ok(es) if !es.success() => {
+                    eprintln!("\n\rExample exited with code: {:?}", es.code());
+                }
+                Err(e) => {
+                    eprintln!("\n\rFailed to run example: {}", e);
+                }
+                _ => {}
+            }
+            
+            drop(std::io::stdin().read(&mut [0u8; 256]));
+            
             let _ = ctx.resume_terminal();
+            ctx.mark_all_dirty();
         }
     }).run(|_ctx| {})
 }
