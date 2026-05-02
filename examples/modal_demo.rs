@@ -163,10 +163,12 @@ struct ModalDemoApp<'a> {
     help_overlay: HelpOverlay<'a>,
     confirm_btn: Button,
     help_btn: Button,
+    area: Rect,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl<'a> ModalDemoApp<'a> {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         let label = Label::new(
             "Modal Demo\n\
              ──────────\n\
@@ -198,7 +200,109 @@ impl<'a> ModalDemoApp<'a> {
             help_overlay,
             confirm_btn,
             help_btn,
+            area: Rect::new(0, 0, 80, 24),
+            should_quit,
         }
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+
+        // Delegate to confirm dialog if visible
+        if self.show_confirm {
+            if self.confirm_dialog.handle_key(key) {
+                if let Some(result) = self.confirm_dialog.confirmed() {
+                    self.show_confirm = false;
+                    if result {
+                        self.show_save_toast = true;
+                        self.toast_message = "Action confirmed!".to_string();
+                    }
+                    self.confirm_dialog.clear_result();
+                }
+                return true;
+            }
+            if key.code == KeyCode::Esc {
+                self.show_confirm = false;
+                return true;
+            }
+            return false;
+        }
+
+        // Delegate to help overlay if visible
+        if self.help_visible {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.help_visible = false;
+                return true;
+            }
+            return self.help_overlay.handle_key(key);
+        }
+
+        // Global shortcuts
+        match key.code {
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('?') => {
+                self.help_visible = true;
+                true
+            }
+            KeyCode::Enter => {
+                self.show_confirm = true;
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if self.show_confirm {
+            if self.confirm_dialog.handle_mouse(kind, col, row) {
+                if let MouseEventKind::Down(_) = kind {
+                    if let Some(result) = self.confirm_dialog.confirmed() {
+                        self.show_confirm = false;
+                        if result {
+                            self.show_save_toast = true;
+                            self.toast_message = "Action confirmed!".to_string();
+                        }
+                        self.confirm_dialog.clear_result();
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        if self.help_visible {
+            return self.help_overlay.handle_mouse(kind, col, row);
+        }
+
+        // Check button clicks
+        let confirm_btn_area = Rect::new(2, 16, 25, 1);
+        let help_btn_area = Rect::new(30, 16, 18, 1);
+
+        if let MouseEventKind::Down(_) = kind {
+            if col >= confirm_btn_area.x
+                && col < confirm_btn_area.x + confirm_btn_area.width
+                && row >= confirm_btn_area.y
+                && row < confirm_btn_area.y + confirm_btn_area.height
+            {
+                self.show_confirm = true;
+                return true;
+            }
+            if col >= help_btn_area.x
+                && col < help_btn_area.x + help_btn_area.width
+                && row >= help_btn_area.y
+                && row < help_btn_area.y + help_btn_area.height
+            {
+                self.help_visible = true;
+                return true;
+            }
+        }
+
+        false
     }
 }
 
