@@ -286,6 +286,7 @@ impl Widget for Showcase {
 
         // Background
         for i in 0..p.cells.len() {
+            p.cells[i].transparent = false;
             p.cells[i].bg = theme.bg;
             p.cells[i].fg = theme.fg;
         }
