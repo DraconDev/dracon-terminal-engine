@@ -1,30 +1,22 @@
 # Project State
 
 ## Current Focus
-Added consistent quit handling and improved UI rendering in the framework demo example
+Refactored quit handling in framework demo example to use shared atomic flag
 
 ## Context
-This change implements consistent quit functionality across all examples by adding proper key handling and improves the UI rendering by:
-1. Refactoring the list creation to use a more compact vector initialization
-2. Adding proper quit key display in the bottom-right corner
-3. Implementing proper mouse and key event handling
-4. Fixing the info panel rendering to properly position within its allocated space
+This change aligns the framework demo with the consistent quit handling pattern introduced in recent commits, making quit behavior uniform across all examples.
 
 ## Completed
-- [x] Added 'q' key quit functionality with atomic flag
-- [x] Refactored list initialization to use more compact vector syntax
-- [x] Added quit key display in bottom-right corner
-- [x] Implemented proper key and mouse event handling
-- [x] Fixed info panel rendering to properly position within its allocated space
-- [x] Updated system data references to use more descriptive variable names
+- [x] Refactored quit handling to use shared `should_quit` atomic flag
+- [x] Removed redundant input handler for 'q' key press
+- [x] Simplified app initialization by removing separate quit check
 
 ## In Progress
-- [ ] No active work in progress
+- [x] All framework examples now use consistent quit handling pattern
 
 ## Blockers
 - None identified
 
 ## Next Steps
 1. Verify consistent quit behavior across all examples
-2. Review UI rendering improvements for visual consistency
-3. Consider adding more visual feedback for quit action
+2. Update documentation to reflect unified quit handling approach

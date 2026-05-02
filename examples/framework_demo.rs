@@ -189,19 +189,10 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let mut app = App::new()?.title("Framework Demo").fps(30).theme(Theme::cyberpunk());
-    app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0))), Rect::new(0, 0, w, h));
-    app.on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
-        .run(|_ctx| {})
+    app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0), should_quit)), Rect::new(0, 0, w, h));
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(|_ctx| {})
 }
