@@ -21,7 +21,14 @@ impl Compositor {
             width,
             height,
             last_frame: vec![Cell::default(); (width as u32 * height as u32) as usize],
+            clear_color: Color::Rgb(0, 0, 0),
         }
+    }
+
+    /// Sets the background color for cells not covered by any plane.
+    /// Set this to the theme background to avoid black gaps.
+    pub fn set_clear_color(&mut self, color: Color) {
+        self.clear_color = color;
     }
 
     /// Advances the compositor state by one frame.
@@ -196,7 +203,7 @@ impl Compositor {
     pub fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()> {
         let mut final_buffer = vec![
             Cell {
-                bg: Color::Rgb(0, 0, 0),
+                bg: self.clear_color,
                 transparent: false,
                 ..Cell::default()
             };
