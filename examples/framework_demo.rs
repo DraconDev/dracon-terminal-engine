@@ -50,7 +50,16 @@ impl Widget for FrameworkDemo {
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
         let (left_rect, right_rect) = split.split(area);
 
-        let mut list = self.list.clone();
+        let mut list = List::new(vec![
+            "System Monitor",
+            "File Browser",
+            "Network Stats",
+            "Process List",
+            "Disk Usage",
+            "Memory Info",
+            "CPU Graph",
+            "Settings",
+        ]);
         list.set_visible_count((left_rect.height as usize).saturating_sub(2).max(1));
         let list_plane = list.render(left_rect);
 
@@ -113,16 +122,6 @@ impl Widget for FrameworkDemo {
 
         p
     }
-
-    fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
-        match key.code {
-            KeyCode::Down => { self.list.next(); true }
-            KeyCode::Up => { self.list.prev(); true }
-            _ => false,
-        }
-    }
-}
 
 fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
