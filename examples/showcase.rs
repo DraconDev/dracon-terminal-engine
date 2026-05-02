@@ -310,6 +310,12 @@ fn main() -> std::io::Result<()> {
                 Err(_) => return,
             };
             let binary_path = exe_dir.join(&binary_name);
+            
+            let _ = std::fs::write("/tmp/showcase_debug.log", 
+                format!("Launching: {}\nExists: {}\nDir: {}\n", 
+                    binary_path.display(), 
+                    binary_path.exists(),
+                    exe_dir.display()));
 
             if !binary_path.exists() {
                 return;
@@ -324,10 +330,7 @@ fn main() -> std::io::Result<()> {
             
             if let Err(e) = result {
                 let _ = std::fs::write("/tmp/showcase_error.log", 
-                    format!("Binary: {}\nExists: {}\nKonsole error: {}\n", 
-                        binary_path.display(), 
-                        binary_path.exists(),
-                        e));
+                    format!("Spawn error: {}\n", e));
             }
         }
     }).run(|_ctx| {})
