@@ -336,13 +336,6 @@ impl Widget for ModalDemoRouter {
 }
 
 fn main() -> io::Result<()> {
-    println!("Modal Demo");
-    println!("==========");
-    println!("Click buttons to interact with modals");
-    println!();
-
-    std::thread::sleep(Duration::from_millis(300));
-
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
@@ -425,6 +418,6 @@ fn main() -> io::Result<()> {
         }
     })?;
 
-    println!("\nModal demo exited cleanly");
+    eprintln!("\nModal demo exited cleanly");
     Ok(())
 }
