@@ -1,24 +1,25 @@
 # Project State
 
 ## Current Focus
-Enhanced modal dialog system with keyboard and mouse input handling in the demo example
+Enhanced modal dialog system with proper input handling and dynamic area support
 
 ## Context
-The modal demo example needed improved input handling to support both keyboard shortcuts and mouse interactions, as well as proper quit handling through a shared atomic flag.
+The modal demo example needed improvements to handle keyboard/mouse input properly and support dynamic window resizing while maintaining modal dialog positioning.
 
 ## Completed
-- [x] Added keyboard input handling for modal dialogs (Enter, Esc, ?, q)
-- [x] Implemented mouse click detection for modal buttons
-- [x] Integrated shared quit flag for application termination
-- [x] Added configurable widget areas for modal components
-- [x] Enhanced modal state management with proper dialog flow
+- [x] Added `ModalDemoRouter` widget to properly route input events to the modal demo
+- [x] Implemented dynamic area calculation based on window size
+- [x] Added proper quit handling through atomic flag
+- [x] Updated widget positioning to respect terminal dimensions
+- [x] Maintained modal dialog positioning while supporting resizing
 
 ## In Progress
-- [x] Complete input handling implementation for all modal states
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify cross-platform input handling consistency
-2. Add visual feedback for mouse hover states on buttons
+1. Verify input handling works across different terminal sizes
+2. Test modal dialog behavior during rapid resizing
+3. Document the new input routing pattern for other examples
