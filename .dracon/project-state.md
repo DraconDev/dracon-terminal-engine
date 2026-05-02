@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Optimize compositor rendering to prevent unnecessary black screen flushes.
+Added clear_color field to Compositor to prevent black gaps when rendering.
 
 ## Context
-The previous implementation would render even when no planes were present, causing a black screen when `flush()` was called without a preceding `draw()`. This change ensures rendering only occurs when there are actual planes to render.
+The Compositor was rendering black gaps where no planes were present, which was visually unappealing. This change allows setting a background color that matches the theme, ensuring consistent rendering.
 
 ## Completed
-- [x] Added conditional check for empty planes before rendering
-- [x] Prevents black screen on flush when no planes exist
+- [x] Added clear_color field to Compositor struct
+- [x] Documented the field's purpose
 
 ## In Progress
-- [x] Test coverage for edge cases (empty planes, multiple flushes)
+- [ ] Implementing the clear_color usage in the rendering logic
 
 ## Blockers
-- None identified
+- Need to update the rendering logic to use the clear_color for uncovered cells
 
 ## Next Steps
-1. Verify test coverage for all edge cases
-2. Document the behavior change in the API documentation
+1. Implement clear_color usage in the rendering logic
+2. Add tests to verify the background color behavior

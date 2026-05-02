@@ -8,6 +8,9 @@ pub struct Compositor {
     width: u16,
     height: u16,
     last_frame: Vec<Cell>,
+    /// Background color for cells not covered by any plane.
+    /// Set this to the theme background to avoid black gaps.
+    clear_color: Color,
 }
 
 impl Compositor {
