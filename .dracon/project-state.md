@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Refactored debug overlay panel to remove FPS and memory profiling functionality
+Added graceful shutdown mechanism for the widget gallery example
 
 ## Context
-The debug overlay panel was previously tracking FPS, frame time, and memory metrics, but these were either hardcoded or not properly implemented. This refactoring removes these metrics to simplify the component and focus on its core functionality.
+The widget gallery example previously lacked a proper way to exit the application. This change adds a mechanism to safely terminate the app when needed.
 
 ## Completed
-- [x] Removed unused imports for `Instant`, `Duration`, and profiling-related types
-- [x] Eliminated FPS calculation and memory profiling code
-- [x] Simplified `DebugOverlayPanel` struct by removing profiling fields
-- [x] Cleaned up initialization code that was setting up profiling metrics
+- [x] Added `Arc<AtomicBool>` for thread-safe running state tracking
+- [x] Implemented shutdown handler in `on_tick` callback
+- [x] Properly propagates shutdown signal to the application context
 
 ## In Progress
-- [ ] None
+- [x] Graceful shutdown implementation
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Determine if the removed profiling functionality should be moved to a separate component
-2. Verify that the debug overlay still provides useful information without the profiling metrics
+1. Verify shutdown works across all widget gallery examples
+2. Consider adding keyboard shortcut for manual shutdown

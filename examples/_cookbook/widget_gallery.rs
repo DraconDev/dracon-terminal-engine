@@ -25,6 +25,7 @@
 //! ```
 
 use std::os::fd::AsFd;
+use std::sync::{Arc, AtomicBool};
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -436,10 +437,17 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
+    let running = Arc::new(AtomicBool::new(true));
+    let running_clone = running.clone();
+
     let mut gallery = WidgetGallery::new();
     gallery.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("Widget Gallery").fps(30).theme(theme);
     app.add_widget(Box::new(gallery), Rect::new(0, 0, w, h));
-    app.on_tick(|_ctx, _tick| {}).run(|_ctx| {})
+    app.on_tick(move |ctx, _| {
+        if !running_clone.load(std::sync::atomic::Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(|_ctx| {})
 }
