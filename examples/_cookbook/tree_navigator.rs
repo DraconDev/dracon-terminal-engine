@@ -19,6 +19,7 @@
 //!
 //! Mouse: Click to select, click folder to expand
 
+use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -338,16 +339,13 @@ impl TreeNav {
 fn main() -> std::io::Result<()> {
     let theme = Theme::cyberpunk();
 
-    App::new()?
-        .title("Tree Navigator")
-        .fps(30)
-        .theme(theme)
-        .run(|ctx| {
-            let (w, h) = ctx.compositor().size();
-            let area = Rect::new(0, 0, w, h);
-            let mut nav = TreeNav::new(WidgetId::new(0));
-            nav.set_area(area);
-            let plane = nav.render(area);
-            ctx.add_plane(plane);
-        })
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
+
+    let mut nav = TreeNav::new(WidgetId::new(0));
+    nav.set_area(Rect::new(0, 0, w, h));
+
+    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(theme);
+    app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
+    app.run(|_ctx| {})
 }
