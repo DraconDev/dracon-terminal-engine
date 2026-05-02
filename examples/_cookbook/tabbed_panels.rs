@@ -19,6 +19,8 @@ use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::os::fd::AsFd;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 const TAB_DASHBOARD: usize = 0;
 const TAB_LOGS: usize = 1;
@@ -127,10 +129,12 @@ struct TabbedApp {
     logs: LogsState,
     settings: SettingsState,
     stats: StatsState,
+    area: Rect,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl TabbedApp {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         let tabbar = TabBar::new_with_id(WidgetId::new(1), vec!["Dashboard", "Logs", "Settings", "Stats"]);
         Self {
             tabbar,
@@ -138,6 +142,8 @@ impl TabbedApp {
             logs: LogsState::new(WidgetId::new(20)),
             settings: SettingsState::new(WidgetId::new(30)),
             stats: StatsState::new(WidgetId::new(40)),
+            area: Rect::new(0, 0, 80, 24),
+            should_quit,
         }
     }
 
@@ -220,10 +226,11 @@ impl Widget for TabbedApp {
     }
 
     fn area(&self) -> Rect {
-        Rect::new(0, 0, 80, 24)
+        self.area
     }
 
-    fn set_area(&mut self, _area: Rect) {
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
     }
 
     fn z_index(&self) -> u16 {

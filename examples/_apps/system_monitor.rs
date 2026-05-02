@@ -41,8 +41,9 @@ use dracon_terminal_engine::framework::widgets::{
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::{Constraint, Layout, Rect};
+use std::cell::RefCell;
 use std::collections::BTreeMap;
-use std::sync::{Arc, Mutex};
+use std::rc::Rc;
 
 const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night"];
 
@@ -483,26 +484,63 @@ fn copy_plane_cells(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: us
     }
 }
 
+struct SystemMonitorRouter {
+    target: Rc<RefCell<SystemMonitor>>,
+    id: WidgetId,
+    area: Rect,
+}
+
+impl Widget for SystemMonitorRouter {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+}
+
 fn main() -> std::io::Result<()> {
-    let monitor = Arc::new(Mutex::new(SystemMonitor::new()));
-    monitor.lock().unwrap().generate_processes();
-    monitor.lock().unwrap().refresh_stats();
+    let monitor = Rc::new(RefCell::new(SystemMonitor::new()));
+    {
+        let mut m = monitor.borrow_mut();
+        m.generate_processes();
+        m.refresh_stats();
+    }
 
-    let mon = monitor.clone();
+    let mon_for_tick = Rc::clone(&monitor);
+    let mon_for_input = Rc::clone(&monitor);
+    let mon_for_render = Rc::clone(&monitor);
 
-    App::new()?
+    let mut app = App::new()?
         .title("System Monitor")
         .fps(30)
-        .tick_interval(2000)
+        .tick_interval(2000);
+
+    let router = SystemMonitorRouter {
+        target: mon_for_input,
+        id: WidgetId::new(100),
+        area: Rect::new(0, 0, 80, 24),
+    };
+    app.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
+
+    app
         .on_tick(move |_ctx, tick| {
-            let mut m = mon.lock().unwrap();
+            let mut m = mon_for_tick.borrow_mut();
             m.refresh_stats();
             if tick % 3 == 0 {
                 m.generate_processes();
             }
         })
         .run(move |ctx| {
-            let mut m = monitor.lock().unwrap();
+            let mut m = mon_for_render.borrow_mut();
             let (w, h) = ctx.compositor().size();
             let area = Rect::new(0, 0, w, h);
             m.set_area(area);
