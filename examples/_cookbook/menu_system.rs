@@ -114,7 +114,7 @@ impl MenuApp {
     fn render_menu_bar(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, 1);
         plane.z_index = 60;
-        for cell in plane.cells.iter_mut() { cell.bg = Color::Ansi(236); cell.fg = Color::Rgb(200, 200, 200); }
+        for cell in plane.cells.iter_mut() { cell.bg = self.theme.surface_elevated; cell.fg = self.theme.fg; }
 
         let total = self.menu_bar.len();
         let entry_w = (area.width as usize / total.max(1)) as u16;
@@ -140,7 +140,7 @@ impl MenuApp {
 
         let mut plane = Plane::new(0, w, h);
         plane.z_index = 70;
-        for cell in plane.cells.iter_mut() { cell.bg = Color::Ansi(236); cell.fg = Color::Rgb(200, 200, 200); }
+        for cell in plane.cells.iter_mut() { cell.bg = self.theme.surface_elevated; cell.fg = self.theme.fg; }
 
         for i in 0..self.menu_item_count(menu_idx) {
             let item_label = self.get_menu_item(menu_idx, i);
@@ -171,7 +171,7 @@ impl Widget for MenuApp {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
-        for cell in plane.cells.iter_mut() { cell.bg = Color::Ansi(17); }
+        for cell in plane.cells.iter_mut() { cell.bg = self.theme.bg; }
 
         let (hdr, ftr) = (1u16, 1u16);
         let content_h = area.height.saturating_sub(hdr + ftr);
@@ -354,10 +354,11 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit);
+    let theme = Theme::nord();
+    let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit, theme);
     app_widget.set_area(Rect::new(0, 0, w, h));
 
-    let mut app = App::new()?.title("Menu System Demo").fps(30);
+    let mut app = App::new()?.title("Menu System Demo").fps(30).theme(theme);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, w, h));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

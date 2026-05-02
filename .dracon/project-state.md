@@ -1,25 +1,24 @@
 # Project State
 
 ## Current Focus
-Integrate theme support into the menu system example
+Integrate theme support into the menu system example by replacing hardcoded colors with theme-based values.
 
 ## Context
-This change implements theme support in the menu system example by:
-1. Adding a `Theme` field to the `MenuApp` struct
-2. Using theme colors for status bar segments
-3. Passing the theme through the constructor
+This change follows the recent theme system implementation and expands its usage to the menu system example. The goal is to ensure all UI components consistently use theme colors for better visual harmony and maintainability.
 
 ## Completed
-- [x] Added `Theme` field to `MenuApp` struct
-- [x] Updated status bar segments to use theme colors
-- [x] Modified constructor to accept and store the theme
+- [x] Replace hardcoded menu bar colors with theme values (`surface_elevated` and `fg`)
+- [x] Replace hardcoded dropdown menu colors with theme values
+- [x] Replace hardcoded background color with theme's `bg` value
+- [x] Initialize `MenuApp` with a theme parameter
+- [x] Set the application theme when creating the `App` instance
 
 ## In Progress
-- [x] Theme integration in menu system example
+- [x] Theme integration is now complete for the menu system example
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify theme consistency across all menu system UI elements
-2. Test theme switching functionality in the example
+1. Verify theme consistency across all menu system components
+2. Document the theme integration approach for future reference
