@@ -14,7 +14,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::os::fd::AsFd;
@@ -305,6 +305,12 @@ impl Widget for TabbedApp {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+
+        // Quit on 'q' or Ctrl+Q
+        if key.code == KeyCode::Char('q') || key.code == KeyCode::Ctrl('q') {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
         if self.tabbar.handle_key(key.clone()) {
             return true;
         }
@@ -381,7 +387,10 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let app = Rc::new(RefCell::new(TabbedApp::new()));
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let app = Rc::new(RefCell::new(TabbedApp::new(should_quit)));
     let app_for_tick = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
@@ -400,6 +409,11 @@ fn main() -> std::io::Result<()> {
 
     app_ctx
         .on_tick(move |ctx, tick| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+                return;
+            }
+
             let mut app = app_for_tick.borrow_mut();
             let cpu = 45.0 + (tick as f64 % 20.0);
             let memory = 60.0 + (tick as f64 % 15.0);
