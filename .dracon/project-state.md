@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Added keyboard input handling for the `on_tick` + `add_plane` pattern
+Removed `InputRouter` widget and integrated keyboard input handling directly into the `App` context.
 
 ## Context
-The change addresses a common pattern where developers need keyboard input in applications using the `on_tick` + `add_plane` rendering approach. The previous implementation required manual `InputRouter` boilerplate, which this change eliminates.
+The `InputRouter` was an intermediate layer that routed keyboard events to the `CommandBindings` widget. This was redundant since the `App` context already supports direct keyboard input handling through the `on_input` callback.
 
 ## Completed
-- [x] Added `on_input` method to `App` that creates a hidden full-screen widget
-- [x] Implemented `InputHandler` widget that routes keyboard events to a closure
-- [x] Added `KeyEvent` import to support keyboard input handling
-- [x] Documented the new API with an example usage
+- [x] Removed the `InputRouter` widget and its associated methods
+- [x] Integrated keyboard input handling directly into the `App` context using `on_input`
+- [x] Simplified the initialization of the `App` context
 
 ## In Progress
-- [ ] None (this is a complete feature implementation)
+- [ ] None
 
 ## Blockers
-- None (this is a standalone feature)
+- None
 
 ## Next Steps
-1. Update documentation to highlight the new `on_input` method
-2. Add integration tests for the new input handling pattern
+1. Verify that keyboard input handling works correctly with the new approach
+2. Update any documentation that referenced the `InputRouter` widget

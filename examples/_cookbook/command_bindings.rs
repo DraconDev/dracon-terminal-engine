@@ -23,7 +23,6 @@
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
-use std::os::fd::AsFd;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -235,55 +234,20 @@ impl Widget for CommandBindings {
     }
 }
 
-/// Thin wrapper that routes keyboard events to a Rc<RefCell<CommandBindings>>.
-struct InputRouter {
-    target: Rc<RefCell<CommandBindings>>,
-    id: WidgetId,
-    area: Rect,
-}
-
-impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
-
-    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        self.target.borrow_mut().handle_key(key)
-    }
-}
-
 fn main() -> std::io::Result<()> {
     println!("Command Bindings — s=refresh all, p=pause, Ctrl+C=quit\nStarting...");
     std::thread::sleep(Duration::from_millis(500));
-
-    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
-        .unwrap_or((80, 24));
 
     let view = Rc::new(RefCell::new(CommandBindings::new()));
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
     let view_for_input = Rc::clone(&view);
 
-    let mut app_ctx = App::new()?
+    App::new()?
         .title("Command Bindings")
         .fps(20)
-        .tick_interval(1000);
-
-    let router = InputRouter {
-        target: view_for_input,
-        id: WidgetId::new(100),
-        area: Rect::new(0, 0, w, h),
-    };
-    app_ctx.add_widget(Box::new(router), Rect::new(0, 0, w, h));
-
-    app_ctx
+        .tick_interval(1000)
+        .on_input(move |key| view_for_input.borrow_mut().handle_key(key))
         .on_tick(move |ctx, tick| {
             let mut view = view_for_tick.borrow_mut();
             view.tick(tick);
