@@ -33,11 +33,14 @@ fn copy_plane(dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16) {
     for sy in 0..src.height {
         for sx in 0..src.width {
             let src_idx = (sy * src.width + sx) as usize;
+            if src.cells[src_idx].transparent {
+                continue;
+            }
             let dx = dest_x + sx;
             let dy = dest_y + sy;
             if dx < dest.width && dy < dest.height {
                 let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
-                if dest_idx < dest.cells.len() && src.cells[src_idx].char != '\0' {
+                if dest_idx < dest.cells.len() {
                     dest.cells[dest_idx] = src.cells[src_idx].clone();
                 }
             }

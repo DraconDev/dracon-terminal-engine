@@ -113,7 +113,7 @@ impl Widget for FrameworkDemo {
         for y in 0..area.height {
             for x in 0..area.width {
                 let src_idx = (y * area.width + x) as usize;
-                if src_idx < list_plane.cells.len() {
+                if src_idx < list_plane.cells.len() && !list_plane.cells[src_idx].transparent {
                     let dest_idx = (y * area.width + x) as usize;
                     if dest_idx < p.cells.len() {
                         p.cells[dest_idx] = list_plane.cells[src_idx].clone();
