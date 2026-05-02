@@ -829,48 +829,66 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                 "Konsole detected: service={}, window={}",
                 service, window
             ));
-            let mut dbus_cmd = "qdbus";
-            if !command_exists("qdbus") && command_exists("qdbus6") {
-                dbus_cmd = "qdbus6";
-            }
+
+            // Use dbus-send instead of qdbus — qdbus is known to crash
+            // on some Qt/KDE versions. dbus-send is a low-level tool that
+            // does not link against Qt and avoids the crash.
+            let dbus_cmd = "dbus-send";
             log(&format!("Using DBus command: {}", dbus_cmd));
 
-            let args = vec![
+            let dest = &service;
+
+            // Step 1: Create new session via dbus-send
+            // dbus-send returns "int32 N" not just "N" like qdbus
+            let session_args = vec![
                 "--session".to_string(),
-                service.clone(),
-                window,
+                format!("--dest={}", dest),
+                "--type=method_call".to_string(),
+                "--print-reply".to_string(),
+                window.clone(),
                 "org.kde.konsole.Window.newSession".to_string(),
-                "".to_string(),
-                path.to_string_lossy().to_string(),
+                format!("string:\"\""),
+                format!("string:{}", path.to_string_lossy()),
             ];
 
-            match std::process::Command::new(dbus_cmd).args(&args).output() {
+            match std::process::Command::new(dbus_cmd).args(&session_args).output() {
                 Ok(output) => {
                     if output.status.success() {
-                        let session_id = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                        let stdout = String::from_utf8_lossy(&output.stdout);
+                        // dbus-send --print-reply returns something like:
+                        //   method return time=1234.567 sender=... destination=... int32 44
+                        // We need to extract "44" from the last int32 token
+                        let session_id = stdout
+                            .split_whitespace()
+                            .filter_map(|tok| tok.parse::<u32>().ok())
+                            .last()
+                            .map(|id| id.to_string())
+                            .unwrap_or_default();
                         log(&format!("New session created, ID: {}", session_id));
+
                         if !session_id.is_empty() {
                             if let Some(cmd_str) = command {
                                 let session_path = format!("/Sessions/{}", session_id);
-                                let _ = std::process::Command::new("qdbus")
+                                let _ = std::process::Command::new(dbus_cmd)
                                     .args([
                                         "--session",
-                                        &service,
+                                        &format!("--dest={}", dest),
+                                        "--type=method_call",
                                         &session_path,
                                         "org.kde.konsole.Session.runCommand",
-                                        cmd_str,
+                                        &format!("string:{}", cmd_str),
                                     ])
                                     .spawn();
                             }
                         }
 
                         // Try to raise the window
-                        let main_win = "/konsole/MainWindow_1";
                         let _ = std::process::Command::new(dbus_cmd)
                             .args([
                                 "--session",
-                                &service,
-                                main_win,
+                                &format!("--dest={}", dest),
+                                "--type=method_call",
+                                &format!("/konsole/MainWindow_1"),
                                 "org.qtproject.Qt.QWidget.raise",
                             ])
                             .spawn();
@@ -878,7 +896,7 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                         return true;
                     } else {
                         log(&format!(
-                            "DBus command failed: {}",
+                            "dbus-send command failed: {}",
                             String::from_utf8_lossy(&output.stderr)
                         ));
                     }
