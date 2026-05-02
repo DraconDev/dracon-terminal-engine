@@ -29,6 +29,8 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 #[derive(Clone)] struct MockFs { name: &'static str, children: Option<Vec<MockFs>>, is_dir: bool }
 impl MockFs {
@@ -52,10 +54,11 @@ struct FileManager {
     id: WidgetId, fs: MockFs, tree: Tree, breadcrumbs: Breadcrumbs,
     tree_path: Vec<usize>, selected: Option<FileEntry>,
     context_menu: Option<ContextMenu>, toast: Option<Toast>, area: std::cell::Cell<Rect>, dirty: bool,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl FileManager {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, should_quit: Arc<AtomicBool>) -> Self {
         let fs = MockFs { name: "root", is_dir: true, children: Some(vec![
             MockFs { name: "src", is_dir: true, children: Some(vec![
                 MockFs { name: "main.rs", is_dir: false, children: None },
@@ -78,7 +81,7 @@ impl FileManager {
             vec!["~".into(), "projects".into(), "dracon-terminal-engine".into()]);
 
         Self { id, fs, tree, breadcrumbs, tree_path: Vec::new(), selected: None,
-               context_menu: None, toast: None, area: std::cell::Cell::new(Rect::new(0,0,80,24)), dirty: true }
+               context_menu: None, toast: None, area: std::cell::Cell::new(Rect::new(0,0,80,24)), dirty: true, should_quit }
     }
 
     fn current_node(&self) -> &MockFs { self.fs.find_by_path(&self.tree_path).unwrap_or(&self.fs) }
@@ -260,6 +263,7 @@ impl Widget for FileManager {
         if self.context_menu.is_some() { if key.code == KeyCode::Esc || key.code == KeyCode::Enter { self.context_menu = None; self.dirty = true; } return true; }
         if let Some(ref mut t) = self.toast { if t.is_expired() { self.toast = None; self.dirty = true; } return false; }
         match key.code {
+            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
             KeyCode::Backspace => { self.go_up(); true }
             KeyCode::Enter => { self.open_selection(); true }
             KeyCode::Char('c') => { self.show_context_menu(30, 10); true }
