@@ -9,7 +9,7 @@
 use std::os::fd::AsFd;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::io::Read;
+use std::io::{Read, Write};
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -336,31 +336,74 @@ fn main() -> std::io::Result<()> {
                 Err(_) => return,
             };
             let binary_path = exe_dir.join(&binary_name);
-            
+
+            // Suspend showcase terminal so the user can see build/run output
+            let _ = ctx.suspend_terminal();
+
+            // Auto-build if binary is missing
             if !binary_path.exists() {
-                let _ = std::fs::write("/tmp/showcase_error.log", 
-                    format!("Binary not found: {}\nRun: cargo build --examples\n", binary_path.display()));
-                return;
+                // Find crate root by walking up from exe dir looking for Cargo.toml
+                let find_crate_root = || -> Option<std::path::PathBuf> {
+                    let mut dir = exe_dir.clone();
+                    loop {
+                        if dir.join("Cargo.toml").exists() {
+                            return Some(dir);
+                        }
+                        if !dir.pop() {
+                            return None;
+                        }
+                    }
+                };
+
+                if let Some(crate_root) = find_crate_root() {
+                    let build_result = std::process::Command::new("cargo")
+                        .args(["build", "--example", &binary_name])
+                        .current_dir(&crate_root)
+                        .status();
+                    match build_result {
+                        Ok(s) if s.success() => {
+                            // Built successfully — binary should now exist
+                        }
+                        _ => {
+                            let _ = std::fs::write("/tmp/showcase_error.log",
+                                format!("Failed to build example: {}\n", binary_name));
+                            let _ = std::io::stdout().write_all(
+                                b"\nPress Enter to return to showcase...");
+                            let _ = std::io::stdout().flush();
+                            let mut buf = [0u8; 1];
+                            let _ = std::io::stdin().read(&mut buf);
+                            let _ = ctx.resume_terminal();
+                            ctx.mark_all_dirty();
+                            return;
+                        }
+                    }
+                } else {
+                    let _ = std::fs::write("/tmp/showcase_error.log",
+                        format!("Binary not found and could not find crate root: {}\n", binary_path.display()));
+                    let _ = std::io::stdout().write_all(
+                        b"\nPress Enter to return to showcase...");
+                    let _ = std::io::stdout().flush();
+                    let mut buf = [0u8; 1];
+                    let _ = std::io::stdin().read(&mut buf);
+                    let _ = ctx.resume_terminal();
+                    ctx.mark_all_dirty();
+                    return;
+                }
             }
 
-            // Suspend showcase terminal (restore canonical mode, exit alt screen)
-            let _ = ctx.suspend_terminal();
-            
             // Run example inline and wait for it to finish
             let child_result = std::process::Command::new(&binary_path)
                 .current_dir(&exe_dir)
                 .status();
                 
-            match &child_result {
-                Ok(status) if !status.success() => {
-                    let _ = std::fs::write("/tmp/showcase_error.log", 
-                        format!("Example exited with code: {:?}\n", status.code()));
-                }
-                Err(e) => {
-                    let _ = std::fs::write("/tmp/showcase_error.log", 
-                        format!("Failed to run example: {}\n", e));
-                }
-                _ => {}
+            if let Err(e) = child_result {
+                let _ = std::fs::write("/tmp/showcase_error.log", 
+                    format!("Failed to run example: {}\n", e));
+                let _ = std::io::stdout().write_all(
+                    format!("\nError: could not launch {} (see /tmp/showcase_error.log)\nPress Enter to return...", binary_name).as_bytes());
+                let _ = std::io::stdout().flush();
+                let mut buf = [0u8; 1];
+                let _ = std::io::stdin().read(&mut buf);
             }
             
             // Drain any residual stdin (keys pressed in child may linger)
