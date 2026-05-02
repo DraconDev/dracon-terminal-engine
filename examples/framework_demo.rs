@@ -71,22 +71,17 @@ impl Widget for FrameworkDemo {
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
         let (left_rect, right_rect) = split.split(area);
 
-        let mut list = List::new(vec![
-            "System Monitor",
-            "File Browser",
-            "Network Stats",
-            "Process List",
-            "Disk Usage",
-            "Memory Info",
-            "CPU Graph",
-            "Settings",
-        ]);
+        let items = vec![
+            "System Monitor", "File Browser", "Network Stats", "Process List",
+            "Disk Usage", "Memory Info", "CPU Graph", "Settings",
+        ];
+        let mut list = List::new(items);
         list.set_visible_count((left_rect.height as usize).saturating_sub(2).max(1));
         let list_plane = list.render(left_rect);
 
-        let _ = self.breadcrumbs.render(right_rect);
+        self.breadcrumbs.render(right_rect);
 
-        let data = self.sys.borrow_mut().get_data();
+        let sys_data = self.sys.borrow_mut().get_data();
 
         let mut info_plane = Plane::new(0, right_rect.width, right_rect.height.saturating_sub(2));
         info_plane.z_index = 5;
@@ -104,23 +99,21 @@ impl Widget for FrameworkDemo {
             y += 1;
         };
 
-        print_line(&mut info_plane, &format!("CPU: {:.1}%", data.cpu_usage), Color::Rgb(0, 200, 120));
-        print_line(&mut info_plane, &format!("Memory: {:.1} / {:.1} GB", data.mem_usage, data.total_mem), Color::Rgb(100, 180, 255));
-        print_line(&mut info_plane, &format!("Swap: {:.1} / {:.1} GB", data.swap_usage, data.total_swap), Color::Rgb(180, 180, 200));
-        print_line(&mut info_plane, &format!("Uptime: {}s", data.uptime), Color::Rgb(150, 150, 150));
+        print_line(&mut info_plane, &format!("CPU: {:.1}%", sys_data.cpu_usage), Color::Rgb(0, 200, 120));
+        print_line(&mut info_plane, &format!("Memory: {:.1} / {:.1} GB", sys_data.mem_usage, sys_data.total_mem), Color::Rgb(100, 180, 255));
+        print_line(&mut info_plane, &format!("Swap: {:.1} / {:.1} GB", sys_data.swap_usage, sys_data.total_swap), Color::Rgb(180, 180, 200));
+        print_line(&mut info_plane, &format!("Uptime: {}s", sys_data.uptime), Color::Rgb(150, 150, 150));
         print_line(&mut info_plane, "", Color::Reset);
 
-        if let Some(disk) = data.disks.first() {
+        if let Some(disk) = sys_data.disks.first() {
             let pct = if disk.total_space > 0.0 {
                 (disk.used_space / disk.total_space * 100.0) as u16
-            } else {
-                0
-            };
+            } else { 0 };
             print_line(&mut info_plane, &format!("Disk: {} ({}%)", disk.name, pct), Color::Rgb(255, 180, 100));
         }
 
         let hud = Hud::new(100).with_size(30, 5);
-        let _ = hud.render_gauge(0, 0, "CPU", data.cpu_usage, 100.0, 20);
+        let _ = hud.render_gauge(0, 0, "CPU", sys_data.cpu_usage, 100.0, 20);
 
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
@@ -129,9 +122,9 @@ impl Widget for FrameworkDemo {
             p.cells[i].transparent = false;
         }
 
-        for y in 0..area.height {
-            for x in 0..area.width {
-                let src_idx = (y * area.width + x) as usize;
+        for y in 0..left_rect.height {
+            for x in 0..left_rect.width {
+                let src_idx = (y * left_rect.width + x) as usize;
                 if src_idx < list_plane.cells.len() && !list_plane.cells[src_idx].transparent {
                     let dest_idx = (y * area.width + x) as usize;
                     if dest_idx < p.cells.len() {
@@ -141,7 +134,50 @@ impl Widget for FrameworkDemo {
             }
         }
 
+        let info_h = right_rect.height.saturating_sub(2);
+        for y in 0..info_h {
+            for x in 0..right_rect.width {
+                let src_idx = (y * right_rect.width + x) as usize;
+                if src_idx < info_plane.cells.len() && !info_plane.cells[src_idx].transparent {
+                    let dest_x = right_rect.x + x;
+                    let dest_y = right_rect.y + y;
+                    let dest_idx = (dest_y * area.width + dest_x) as usize;
+                    if dest_idx < p.cells.len() {
+                        p.cells[dest_idx] = info_plane.cells[src_idx].clone();
+                    }
+                }
+            }
+        }
+
+        let quit_bg = Color::Rgb(20, 20, 30);
+        let quit_fg = Color::Rgb(100, 100, 120);
+        let quit_text = " q: quit ";
+        let quit_len = quit_text.len() as u16;
+        let quit_x = area.width.saturating_sub(quit_len + 2);
+        for (i, c) in quit_text.chars().enumerate() {
+            let idx = ((area.height - 1) * area.width + quit_x + i as u16) as usize;
+            if idx < p.cells.len() {
+                p.cells[idx].char = c;
+                p.cells[idx].fg = quit_fg;
+                p.cells[idx].bg = quit_bg;
+                p.cells[idx].transparent = false;
+            }
+        }
+
         p
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
+            self.quit.store(true, Ordering::SeqCst);
+            true
+        } else {
+            false
+        }
+    }
+
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        false
     }
 }
 
