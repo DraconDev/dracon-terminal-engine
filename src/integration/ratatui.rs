@@ -136,7 +136,11 @@ impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        self.compositor.render(self.inner.inner())?;
+        // Only render when there are planes (prevents black screen when
+        // flush() is called without a preceding draw()).
+        if !self.compositor.planes.is_empty() {
+            self.compositor.render(self.inner.inner())?;
+        }
         self.inner.flush()
     }
 }
