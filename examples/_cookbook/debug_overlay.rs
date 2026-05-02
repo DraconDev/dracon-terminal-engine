@@ -39,16 +39,18 @@ struct DebugOverlayPanel {
     inspector: WidgetInspector,
     event_logger: EventLogger,
     visible: bool,
+    theme: Theme,
 }
 
 impl DebugOverlayPanel {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, theme: Theme) -> Self {
         Self {
             id,
             profiler: Profiler::new(WidgetId::new(160)),
             inspector: WidgetInspector::new(WidgetId::new(180)),
             event_logger: EventLogger::new(WidgetId::new(170)),
             visible: false,
+            theme,
         }
     }
 
@@ -88,8 +90,8 @@ impl Widget for DebugOverlayPanel {
                     let separator = y == 9 && x == 26;
                     plane.cells[idx] = Cell {
                         char: if separator { '+' } else if border { '-' } else { ' ' },
-                        fg: if border { Color::Rgb(0, 255, 200) } else { Color::Reset },
-                        bg: if border { Color::Rgb(0, 150, 255) } else { Color::Reset },
+                        fg: if border { self.theme.primary } else { Color::Reset },
+                        bg: if border { self.theme.surface_elevated } else { Color::Reset },
                         style: if border { Styles::BOLD } else { Styles::empty() },
                         transparent: false,
                         skip: false,
@@ -108,7 +110,7 @@ impl Widget for DebugOverlayPanel {
             for idx in [(y * plane.width + 0) as usize, (y * plane.width + 25) as usize, (y * plane.width + area.width.saturating_sub(1)) as usize].iter() {
                 if *idx < plane.cells.len() {
                     plane.cells[*idx].char = '|';
-                    plane.cells[*idx].fg = Color::Rgb(0, 255, 200);
+                    plane.cells[*idx].fg = self.theme.primary;
                 }
             }
         }
@@ -186,13 +188,14 @@ fn main() -> io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42));
+    let theme = Theme::dark();
+    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme);
     debug_panel.set_area(Rect::new(0, 0, w, h));
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(Theme::dark());
+    let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(theme);
     app.add_widget(Box::new(debug_panel), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {
