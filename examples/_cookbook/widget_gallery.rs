@@ -24,6 +24,7 @@
 //! cargo run --example widget_gallery
 //! ```
 
+use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
