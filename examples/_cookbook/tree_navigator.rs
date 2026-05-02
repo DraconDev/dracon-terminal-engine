@@ -71,6 +71,7 @@ struct TreeNav {
     breadcrumbs: Breadcrumbs,
     fs: MockFs,
     current_path: Vec<usize>,
+    theme: Theme,
 }
 
 impl TreeNav {
@@ -103,6 +104,7 @@ impl TreeNav {
             breadcrumbs,
             fs,
             current_path: Vec::new(),
+            theme: Theme::default(),
         }
     }
 
@@ -144,6 +146,10 @@ impl Widget for TreeNav {
 
     fn clear_dirty(&mut self) {}
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+    }
+
     fn focusable(&self) -> bool {
         true
     }
@@ -152,8 +158,11 @@ impl Widget for TreeNav {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
 
+        // Fill entire plane with theme background
         for cell in plane.cells.iter_mut() {
-            cell.bg = Color::Ansi(17);
+            cell.bg = self.theme.bg;
+            cell.fg = self.theme.fg;
+            cell.transparent = false;
         }
 
         let header_height = 1u16;
@@ -167,44 +176,43 @@ impl Widget for TreeNav {
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
         let (tree_rect, detail_rect) = split.split(content_rect);
 
+        // Helper to copy a sub-plane into the main plane at the correct position
+        let copy_plane = |dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16| {
+            let dw = dest.width as usize;
+            for sy in 0..src.height {
+                for sx in 0..src.width {
+                    let src_idx = (sy * src.width + sx) as usize;
+                    let dx = dest_x + sx;
+                    let dy = dest_y + sy;
+                    if dx < dest.width && dy < dest.height {
+                        let dest_idx = (dy as usize) * dw + (dx as usize);
+                        dest.cells[dest_idx] = src.cells[src_idx].clone();
+                    }
+                }
+            }
+        };
+
+        // Breadcrumbs at top row
         let bc_plane = self.breadcrumbs.render(header_rect);
-        for (i, cell) in bc_plane.cells.iter().enumerate() {
-            let idx = i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
+        copy_plane(&mut plane, &bc_plane, 0, 0);
 
+        // Tree in left pane
         let tree_plane = self.tree.render(tree_rect);
-        for (i, cell) in tree_plane.cells.iter().enumerate() {
-            let base = (header_height * area.width) as usize;
-            let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
+        copy_plane(&mut plane, &tree_plane, tree_rect.x, tree_rect.y);
 
+        // Detail in right pane — FIXED: now uses detail_rect.x as X offset
         let detail_plane = self.render_detail(detail_rect);
-        for (i, cell) in detail_plane.cells.iter().enumerate() {
-            let base = (header_height * area.width) as usize;
-            let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
+        copy_plane(&mut plane, &detail_plane, detail_rect.x, detail_rect.y);
 
+        // Status bar at bottom
         let status_text = format!("{} items | Total: {} | arrows: navigate, Enter: expand, Backspace: up",
             self.item_count(), self.fs.total_items());
         let status_bar = StatusBar::new(WidgetId::new(2))
-            .add_segment(StatusSegment::new(&status_text).with_fg(Color::Rgb(180, 180, 180)).with_bg(Color::Ansi(236)));
+            .add_segment(StatusSegment::new(&status_text)
+                .with_fg(Color::Rgb(180, 180, 180))
+                .with_bg(Color::Ansi(236)));
         let status_plane = status_bar.render(footer_rect);
-        for (i, cell) in status_plane.cells.iter().enumerate() {
-            let base = ((area.height - footer_height) * area.width) as usize;
-            let idx = base + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = cell.clone();
-            }
-        }
+        copy_plane(&mut plane, &status_plane, 0, footer_rect.y);
 
         plane
     }
@@ -280,7 +288,9 @@ impl TreeNav {
         plane.z_index = 5;
 
         for cell in plane.cells.iter_mut() {
-            cell.bg = Color::Ansi(17);
+            cell.bg = self.theme.bg;
+            cell.fg = self.theme.fg;
+            cell.transparent = false;
         }
 
         let print_line = |plane: &mut Plane, y: u16, text: &str, fg: Color| {
@@ -344,6 +354,7 @@ fn main() -> std::io::Result<()> {
 
     let mut nav = TreeNav::new(WidgetId::new(0));
     nav.set_area(Rect::new(0, 0, w, h));
+    nav.theme = theme;
 
     let mut app = App::new()?.title("Tree Navigator").fps(30).theme(theme);
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
