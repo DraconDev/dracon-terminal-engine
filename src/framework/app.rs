@@ -523,7 +523,13 @@ impl App {
                 running: &self.running,
             });
 
-            self.compositor.render(&mut self.terminal)?;
+            // Only render when there are planes to composite.
+            // Prevents a black screen when no widget needs rendering:
+            // with empty planes, the compositor's final_buffer is all-black
+            // and the diff against the previous frame overwrites every cell.
+            if !self.compositor.planes.is_empty() {
+                self.compositor.render(&mut self.terminal)?;
+            }
 
             self.animations.tick();
 
