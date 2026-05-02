@@ -148,7 +148,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
             };
 
             for col in 0..seg_width {
-                let idx = col as usize;
+                let idx = (x + col) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = if is_last {
                         self.theme.active_bg
