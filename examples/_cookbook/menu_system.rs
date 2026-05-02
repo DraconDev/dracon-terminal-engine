@@ -45,13 +45,13 @@ struct MenuApp {
 }
 
 impl MenuApp {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, should_quit: Arc<AtomicBool>) -> Self {
         let items = vec!["documents".to_string(), "images".to_string(), "projects".to_string(), "downloads".to_string(), "music".to_string(), "videos".to_string()];
         let menu_bar = vec![MenuLabel("File"), MenuLabel("Edit"), MenuLabel("View"), MenuLabel("Help")];
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(Color::Rgb(100, 255, 100)))
             .add_segment(StatusSegment::new("Ctrl+N|O|S: New|Open|Save | Ctrl+Q: Quit").with_fg(Color::Rgb(180, 180, 180)));
-        Self { id, list: List::new(items), status_bar, context_menu: None, toasts: Vec::new(), menu_bar, active_menu: None, selected_idx: None }
+        Self { id, list: List::new(items), status_bar, context_menu: None, toasts: Vec::new(), menu_bar, active_menu: None, selected_idx: None, area: Rect::new(0, 0, 80, 24), should_quit }
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
