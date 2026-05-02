@@ -125,6 +125,14 @@ path = "examples/theme_switcher.rs"
 name = "widget_tutorial"
 path = "examples/widget_tutorial.rs"
 
+[[example]]
+name = "form_widget"
+path = "examples/form_widget.rs"
+
+[[example]]
+name = "table_widget"
+path = "examples/table_widget.rs"
+
 [features]
 default = []
 async = ["tokio"]
