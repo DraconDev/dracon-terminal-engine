@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Clear the compositor planes after rendering a frame
+Added terminal synchronization cleanup in Compositor's Drop implementation
 
 ## Context
-This change ensures the compositor's internal state is properly reset after each frame is rendered, preventing potential memory leaks or stale data from affecting subsequent frames.
+Previously, the terminal could get stuck buffering output when the Compositor was dropped, as it was not properly exiting synchronized update mode. This change ensures clean terminal state on shutdown.
 
 ## Completed
-- [x] Added `self.planes.clear()` to reset the compositor's plane collection after each frame
+- [x] Implemented Drop trait for Compositor
+- [x] Added terminal synchronization cleanup with ANSI escape sequence
+- [x] Ensured proper stdout flush after mode change
 
 ## In Progress
-- [x] Frame rendering and state management improvements
+- [x] Terminal state management during Compositor lifecycle
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify no visual artifacts occur after this change
-2. Review memory usage patterns to confirm no leaks remain
+1. Verify no terminal artifacts remain after application exit
+2. Consider adding similar cleanup for other terminal modes if needed
