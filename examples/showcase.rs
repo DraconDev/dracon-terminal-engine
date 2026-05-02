@@ -66,19 +66,18 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(area: Rect, pending: Arc<Mutex<Option<String>>>) -> Self {
+    fn new(area: Rect, pending: Arc<Mutex<Option<String>>>, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id: WidgetId::new(0),
             examples: ExampleMeta::all(),
             selected: 0,
             area,
             theme_idx: 0,
-            should_quit: false,
+            should_quit,
             last_click_time: std::time::Instant::now(),
             last_click_row: u16::MAX,
             pending_binary: pending,
             status_message: None,
-            status_time: std::time::Instant::now(),
         }
     }
 
@@ -90,7 +89,6 @@ impl Showcase {
         let ex = &self.examples[self.selected];
         *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
         self.status_message = Some(format!("Launching {}...", ex.name));
-        self.status_time = std::time::Instant::now();
     }
 }
 
@@ -279,7 +277,7 @@ impl Widget for Showcase {
             KeyCode::End => { self.selected = self.examples.len().saturating_sub(1); true }
             KeyCode::Enter => { self.launch_selected(); true }
             KeyCode::Char('t') => { self.theme_idx = (self.theme_idx + 1) % Self::themes().len(); true }
-            KeyCode::Char('q') => { self.should_quit = true; true }
+            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
             _ => false,
         }
     }
