@@ -1,29 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved input handling and window size detection in the showcase example
+Refactored input handling in the application framework to process a single chunk of input rather than looping indefinitely.
 
 ## Context
-The changes enhance the showcase example by:
-1. Dynamically detecting terminal window size
-2. Implementing proper input event handling
-3. Adding mouse interaction support
-4. Improving focus management
+The previous implementation used a `while` loop to continuously read input chunks, which could lead to unnecessary processing if no new input was available. This change optimizes the input handling by only processing one chunk at a time when input is detected.
 
 ## Completed
-- [x] Added dynamic window size detection in showcase example
-- [x] Implemented comprehensive input event handling in App framework
-- [x] Added mouse interaction support with proper focus management
-- [x] Enhanced keyboard event handling (Ctrl+C, Tab navigation)
-- [x] Improved resize event handling with proper widget updates
+- [x] Changed `while let Ok(n)` to `if let Ok(n)` to process only one input chunk per poll
+- [x] Maintained the same functionality while reducing unnecessary iterations
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Input handling refactoring is complete
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify cross-platform compatibility of window size detection
-2. Add unit tests for new input handling logic
-3. Document new input handling features in framework documentation
+1. Verify no regressions in input handling behavior
+2. Consider adding input batching for performance-critical applications
