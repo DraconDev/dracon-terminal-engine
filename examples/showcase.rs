@@ -7,6 +7,7 @@
 //! Run with: cargo run --example showcase
 
 use std::os::fd::AsFd;
+use std::process::Command;
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -54,9 +55,10 @@ struct Showcase {
     examples: Vec<ExampleMeta>,
     selected: usize,
     area: Rect,
-    show_modal: bool,
     theme_idx: usize,
     should_quit: bool,
+    last_click_time: std::time::Instant,
+    last_click_row: u16,
 }
 
 impl Showcase {
@@ -66,14 +68,27 @@ impl Showcase {
             examples: ExampleMeta::all(),
             selected: 0,
             area,
-            show_modal: false,
             theme_idx: 0,
             should_quit: false,
+            last_click_time: std::time::Instant::now(),
+            last_click_row: u16::MAX,
         }
     }
 
     fn themes() -> Vec<Theme> {
         vec![Theme::nord(), Theme::dark(), Theme::cyberpunk(), Theme::dracula()]
+    }
+
+    fn launch_selected(&self) {
+        let ex = &self.examples[self.selected];
+        let mut parts = ex.run_cmd.split_whitespace();
+        let program = parts.next().unwrap();
+        let args: Vec<&str> = parts.collect();
+
+        Command::new(program)
+            .args(&args)
+            .spawn()
+            .ok();
     }
 }
 
@@ -204,7 +219,7 @@ impl Widget for Showcase {
             }
         }
 
-        let hints = ["navigate: /", "see cmd: Enter", "theme: t", "quit: q"];
+        let hints = ["navigate: j/k", "open: Enter/dbl-click", "theme: t", "quit: q"];
         let hint_xs = [1u16, 18, 35, 50];
         for (hint, hx) in hints.iter().zip(hint_xs.iter()) {
             for (j, c) in hint.chars().enumerate() {
@@ -226,67 +241,11 @@ impl Widget for Showcase {
             }
         }
 
-        if self.show_modal {
-            for i in 0..p.cells.len() {
-                p.cells[i].bg = Color::Ansi(0);
-                p.cells[i].transparent = false;
-            }
-
-            let mw = 50u16;
-            let mh = 8u16;
-            let mx = (area.width.saturating_sub(mw)) / 2;
-            let my = (area.height.saturating_sub(mh)) / 2;
-
-            for y in 0..mh {
-                for x in 0..mw {
-                    let ci = ((my + y) * area.width + mx + x) as usize;
-                    if ci < p.cells.len() {
-                        p.cells[ci].bg = Color::Rgb(15, 20, 25);
-                        p.cells[ci].fg = Color::Rgb(200, 200, 200);
-                    }
-                }
-            }
-
-            for x in 0..mw {
-                let top = (my * area.width + mx + x) as usize;
-                let bot = ((my + mh - 1) * area.width + mx + x) as usize;
-                if top < p.cells.len() { p.cells[top].char = '─'; p.cells[top].fg = Color::Rgb(0, 200, 150); }
-                if bot < p.cells.len() { p.cells[bot].char = '─'; p.cells[bot].fg = Color::Rgb(0, 200, 150); }
-            }
-            for y in 0..mh {
-                let l = (my + y) * area.width + mx;
-                let r = l + mw - 1;
-                if (l as usize) < p.cells.len() { p.cells[l as usize].char = '│'; p.cells[l as usize].fg = Color::Rgb(0, 200, 150); }
-                if (r as usize) < p.cells.len() { p.cells[r as usize].char = '│'; p.cells[r as usize].fg = Color::Rgb(0, 200, 150); }
-            }
-
-            let ex = &self.examples[self.selected];
-            let lines = [
-                format!("  Run: {}  ", ex.run_cmd),
-                "  Press any key to close  ".to_string(),
-            ];
-            for (i, line) in lines.iter().enumerate() {
-                let ly = my + 2 + i as u16;
-                for (j, c) in line.chars().enumerate() {
-                    let ci = (ly * area.width + mx + 2 + j as u16) as usize;
-                    if ci < p.cells.len() {
-                        p.cells[ci].char = c;
-                        p.cells[ci].fg = Color::Rgb(0, 255, 200);
-                    }
-                }
-            }
-        }
-
         p
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
-
-        if self.show_modal {
-            self.show_modal = false;
-            return true;
-        }
 
         match key.code {
             KeyCode::Down | KeyCode::Char('j') => {
@@ -299,7 +258,7 @@ impl Widget for Showcase {
             }
             KeyCode::Home => { self.selected = 0; true }
             KeyCode::End => { self.selected = self.examples.len().saturating_sub(1); true }
-            KeyCode::Enter => { self.show_modal = true; true }
+            KeyCode::Enter => { self.launch_selected(); true }
             KeyCode::Char('t') => { self.theme_idx = (self.theme_idx + 1) % Self::themes().len(); true }
             KeyCode::Char('q') => { self.should_quit = true; true }
             _ => false,
@@ -307,24 +266,30 @@ impl Widget for Showcase {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
-        if self.show_modal {
-            self.show_modal = false;
-            return true;
-        }
-
         let list_start = 3u16;
         let visible_count = (self.area.height as usize).saturating_sub(5) as u16;
 
-        if kind == MouseEventKind::Down(MouseButton::Left) {
-            if row >= list_start && row < list_start + visible_count {
-                let clicked = (row - list_start) as usize;
-                let start = self.selected.saturating_sub((visible_count / 2) as usize);
-                let idx = start + clicked;
-                if idx < self.examples.len() {
-                    self.selected = idx;
-                    return true;
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                if row >= list_start && row < list_start + visible_count {
+                    let clicked = (row - list_start) as usize;
+                    let start = self.selected.saturating_sub((visible_count / 2) as usize);
+                    let idx = start + clicked;
+                    if idx < self.examples.len() {
+                        let now = std::time::Instant::now();
+                        let elapsed = now.duration_since(self.last_click_time);
+                        if elapsed.as_millis() < 500 && self.last_click_row == row {
+                            self.launch_selected();
+                        } else {
+                            self.selected = idx;
+                        }
+                        self.last_click_time = now;
+                        self.last_click_row = row;
+                        return true;
+                    }
                 }
             }
+            _ => {}
         }
         false
     }
