@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Added interactive form and table widget examples to demonstrate UI components with keyboard navigation and theming support.
 
 ## Context
-This change updates the dependency versions in the project to ensure compatibility and security. It follows recent work on theme system integration and example cleanup.
+These examples showcase core UI patterns needed for terminal applications, building on the recently implemented theme system. They provide concrete implementations of form handling and data display that can be reused across applications.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency version changes
+- [x] Added form widget example with field validation and focus management
+- [x] Added table widget example with sorting, selection, and keyboard navigation
+- [x] Implemented consistent theme integration across both examples
+- [x] Added example-specific documentation with keyboard controls
 
 ## In Progress
-- [x] Dependency version updates and project cleanup
+- [ ] None - these examples are complete
 
 ## Blockers
-- None reported
+- None - these examples are self-contained and complete
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Continue with theme system implementation and example showcase updates
+1. Create additional widget examples to demonstrate remaining UI patterns
+2. Document how to extend these examples for custom applications
