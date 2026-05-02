@@ -1,27 +1,23 @@
 # Project State
 
 ## Current Focus
-Enhanced file manager with configurable quit handling and dynamic area support
+Added configurable quit handling to the theme switcher example
 
 ## Context
-This change builds on recent work adding configurable quit handling across examples. It implements the same pattern in the file manager by:
-1. Adding a quit flag to the FileManager struct
-2. Implementing proper area handling for layout calculations
-3. Connecting the quit flag to the application's tick handler
+This change implements a consistent quit mechanism across examples by adding a shared quit flag that can be triggered from any widget. The theme switcher now responds to 'q' keypress to quit, following the pattern established in other examples.
 
 ## Completed
-- [x] Added configurable quit handling to FileManager
-- [x] Implemented dynamic area support for layout calculations
-- [x] Connected quit flag to application's tick handler
-- [x] Updated layout calculations to use proper area dimensions
+- [x] Added `Arc<AtomicBool>` quit flag to ThemeHeader
+- [x] Implemented 'q' key handler to set quit flag
+- [x] Added on_tick handler to check quit flag and stop app
+- [x] Maintained existing 't' key theme switching functionality
 
 ## In Progress
-- [x] All core functionality implemented
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Test quit handling across different terminal sizes
-2. Verify layout behavior with edge cases (very small/large terminals)
-3. Document the new quit handling pattern in examples
+1. Verify consistent quit behavior across all examples
+2. Document the new quit handling pattern in examples/README.md

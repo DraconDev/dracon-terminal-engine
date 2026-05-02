@@ -21,7 +21,8 @@ use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 use std::io::Result;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
 
 const ALL_THEMES: &[(&str, fn() -> Theme)] = &[
     ("Dark", Theme::dark),
@@ -129,14 +130,16 @@ struct ThemeHeader {
     id: WidgetId,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl ThemeHeader {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 3)),
             dirty: true,
+            should_quit,
         }
     }
 }
@@ -216,7 +219,10 @@ impl Widget for ThemeHeader {
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        if let KeyCode::Char('t') = key.code {
+        if let KeyCode::Char('q') = key.code {
+            self.should_quit.store(true, Ordering::SeqCst);
+            true
+        } else if let KeyCode::Char('t') = key.code {
             cycle_theme();
             self.dirty = true;
             true
@@ -709,9 +715,12 @@ impl Widget for WidgetDemoPanel {
 }
 
 fn main() -> Result<()> {
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
 
-    let header = ThemeHeader::new(WidgetId::new(1));
+    let header = ThemeHeader::new(WidgetId::new(1), should_quit);
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 0, 80, 3));
 
     let tracking = TrackingWidget::new(WidgetId::new(2));
@@ -729,7 +738,11 @@ fn main() -> Result<()> {
     let demo = WidgetDemoPanel::new(WidgetId::new(6));
     let _demo_id = app.add_widget(Box::new(demo), Rect::new(0, 17, 80, 12));
 
-    let _ = app.run(|_ctx| {});
+    let _ = app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    }).run(|_ctx| {});
 
     println!("\nTheme Switcher Demo Ended");
     println!("All 15 themes demonstrated:");
