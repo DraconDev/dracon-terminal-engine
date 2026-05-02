@@ -60,7 +60,7 @@ struct Showcase {
     should_quit: bool,
     last_click_time: std::time::Instant,
     last_click_row: u16,
-    pending_cmd: Arc<Mutex<Option<String>>>,
+    pending_binary: Arc<Mutex<Option<String>>>,
 }
 
 impl Showcase {
@@ -74,7 +74,7 @@ impl Showcase {
             should_quit: false,
             last_click_time: std::time::Instant::now(),
             last_click_row: u16::MAX,
-            pending_cmd: pending,
+            pending_binary: pending,
         }
     }
 
@@ -84,7 +84,7 @@ impl Showcase {
 
     fn launch_selected(&self) {
         let ex = &self.examples[self.selected];
-        *self.pending_cmd.lock().unwrap() = Some(ex.binary_name.to_string());
+        *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
     }
 }
 
@@ -306,33 +306,48 @@ fn main() -> std::io::Result<()> {
 
     app.on_tick(move |ctx, _| {
         if let Some(binary_name) = pending.lock().unwrap().take() {
-            let binary_path = format!("./target/debug/examples/{}", binary_name);
+            let exe_dir = match std::env::current_exe() {
+                Ok(p) => p.parent().unwrap().to_path_buf(),
+                Err(_) => {
+                    ctx.mark_all_dirty();
+                    return;
+                }
+            };
+            let binary_path = exe_dir.join(&binary_name);
 
-            if !std::path::Path::new(&binary_path).exists() {
-                eprintln!("\n\rError: {} not found. Run 'cargo build --examples' first.", binary_name);
+            if !binary_path.exists() {
                 ctx.mark_all_dirty();
                 return;
             }
 
-            let full_cmd = format!("konsole --new-tab -e {} 2>&1", binary_path);
-            let exit_status = std::process::Command::new("sh")
-                .arg("-c")
-                .arg(&full_cmd)
-                .status();
+            let _ = ctx.suspend_terminal();
+
+            let use_konsole = std::env::var("KONSOLE_VERSION").is_ok();
+            let exit_status = if use_konsole {
+                std::process::Command::new("konsole")
+                    .arg("--new-tab")
+                    .arg("-e")
+                    .arg(&binary_path)
+                    .arg("&")
+                    .status()
+            } else {
+                std::process::Command::new(&binary_path)
+                    .status()
+            };
 
             match exit_status {
                 Ok(es) if !es.success() => {
-                    eprintln!("\n\rExample exited with code: {:?}", es.code());
+                    let _ = ctx.resume_terminal();
                 }
-                Err(e) => {
-                    eprintln!("\n\rFailed to run example: {}", e);
+                Err(_) => {
+                    let _ = ctx.resume_terminal();
                 }
-                _ => {}
+                _ => {
+                    drop(std::io::stdin().read(&mut [0u8; 256]));
+                    let _ = ctx.resume_terminal();
+                }
             }
 
-            drop(std::io::stdin().read(&mut [0u8; 256]));
-
-            let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
     }).run(|_ctx| {})
