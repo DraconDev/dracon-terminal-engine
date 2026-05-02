@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added a fake running flag for test contexts to control application lifecycle in tests.
+Terminal synchronization cleanup refactoring
 
 ## Context
-This change enables test contexts to simulate application lifecycle control, which was recently added to the framework. It allows tests to verify behavior when the application is marked as running or not running.
+The previous commit added terminal synchronization cleanup in the Compositor's Drop implementation, but this change moves that functionality to the Terminal's Drop implementation for better encapsulation.
 
 ## Completed
-- [x] Added `FAKE_RUNNING` flag to test contexts
-- [x] Integrated the flag into test framework contexts
+- [x] Moved terminal synchronization cleanup from Compositor to Terminal
+- [x] Updated terminal cleanup sequence to include synchronization exit
 
 ## In Progress
-- [x] Verifying test coverage with the new flag
+- [x] Refactoring terminal cleanup sequence
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Write integration tests for the new flag
-2. Document the test context configuration options
+1. Verify terminal state restoration works correctly
+2. Ensure no synchronization-related issues appear in applications

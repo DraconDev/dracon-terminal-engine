@@ -317,14 +317,6 @@ impl Compositor {
     }
 }
 
-impl Drop for Compositor {
-    fn drop(&mut self) {
-        // Exit synchronized update mode so the terminal isn't stuck buffering output.
-        let _ = write!(std::io::stdout(), "\x1b[?2026l");
-        let _ = std::io::stdout().flush();
-    }
-}
-
 fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
     if src.transparent || alpha <= 0.0 {
         return;
