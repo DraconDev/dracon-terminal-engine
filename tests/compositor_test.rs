@@ -118,7 +118,7 @@ fn test_compositor_add_plane() {
 
 #[test]
 fn test_compositor_empty_planes_not_rendered() {
-    let mut comp = Compositor::new(80, 24);
+    let comp = Compositor::new(80, 24);
     // With no planes added, there's nothing to render.
     // The app framework must skip render() when planes are empty
     // to prevent a black screen flash.
