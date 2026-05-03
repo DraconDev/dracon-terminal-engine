@@ -614,6 +614,17 @@ impl Widget for Showcase {
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
 
+        // Help overlay takes priority
+        if self.show_help {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char('?') => {
+                    self.show_help = false;
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
         // Context menu takes priority
         if self.context_menu.is_some() {
             match key.code {
