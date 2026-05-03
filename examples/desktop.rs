@@ -21,6 +21,92 @@ struct Window {
     minimized: bool,
 }
 
+struct WindowContent {
+    ch: char,
+    fg: dracon_terminal_engine::compositor::plane::Color,
+    bg: dracon_terminal_engine::compositor::plane::Color,
+}
+
+fn get_window_content(id: usize, x: u16, y: u16, width: u16) -> WindowContent {
+    let reset = dracon_terminal_engine::compositor::plane::Color::Reset;
+    let green = dracon_terminal_engine::compositor::plane::Color::Ansi(46);
+    let yellow = dracon_terminal_engine::compositor::plane::Color::Ansi(220);
+    let red = dracon_terminal_engine::compositor::plane::Color::Ansi(196);
+    let cyan = dracon_terminal_engine::compositor::plane::Color::Ansi(51);
+    let white = dracon_terminal_engine::compositor::plane::Color::Ansi(252);
+    let gray = dracon_terminal_engine::compositor::plane::Color::Ansi(240);
+
+    match id {
+        1 => {
+            // Terminal window - show a fake command prompt
+            let lines = [
+                "user@dracon:~$ ls",
+                "Desktop  Documents  Downloads",
+                "user@dracon:~$ neofetch",
+                "OS: DraconOS",
+                "Kernel: 6.8.0",
+                "Shell: zsh 5.9",
+                "WM: DraconWM",
+                "user@dracon:~$ _",
+            ];
+            if y < lines.len() as u16 {
+                let line = lines[y as usize];
+                if x < line.len() as u16 {
+                    let ch = line.chars().nth(x as usize).unwrap_or(' ');
+                    let fg = if line.starts_with("user@") { green }
+                        else if line.contains("OS:") || line.contains("Kernel:") { cyan }
+                        else if line.contains("Shell:") || line.contains("WM:") { yellow }
+                        else { white };
+                    return WindowContent { ch, fg, bg: reset };
+                }
+            }
+            WindowContent { ch: ' ', fg: gray, bg: reset }
+        }
+        2 => {
+            // System window - show fake stats
+            let lines = [
+                ("CPU: ████████░░ 78%", 8),
+                ("MEM: ██████░░░░ 62%", 6),
+                ("DISK: ████░░░░░░ 40%", 4),
+                ("", 0),
+                ("Tasks: 142", 0),
+                ("Uptime: 3d 12h", 0),
+            ];
+            if y < lines.len() as u16 {
+                let (line, bar_end) = lines[y as usize];
+                if x < line.len() as u16 {
+                    let ch = line.chars().nth(x as usize).unwrap_or(' ');
+                    let fg = if x >= 6 && x < 6 + bar_end && ch == '█' { green }
+                        else if ch == '█' { yellow }
+                        else if ch == '%' { cyan }
+                        else { white };
+                    return WindowContent { ch, fg, bg: reset };
+                }
+            }
+            WindowContent { ch: ' ', fg: gray, bg: reset }
+        }
+        3 => {
+            // Alert window
+            let lines = [
+                "⚠ Warning",
+                "",
+                "Disk usage",
+                "above 85%",
+            ];
+            if y < lines.len() as u16 {
+                let line = lines[y as usize];
+                if x < line.len() as u16 {
+                    let ch = line.chars().nth(x as usize).unwrap_or(' ');
+                    let fg = if line.starts_with('⚠') { red } else { yellow };
+                    return WindowContent { ch, fg, bg: reset };
+                }
+            }
+            WindowContent { ch: ' ', fg: gray, bg: reset }
+        }
+        _ => WindowContent { ch: ' ', fg: gray, bg: reset }
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut term = Terminal::new(stdout())?;
 
