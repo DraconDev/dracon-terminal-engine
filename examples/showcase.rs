@@ -868,7 +868,6 @@ impl Widget for Showcase {
             });
         prim_x = 2usize;
         for (i, (key, state)) in prim_controls.iter().enumerate() {
-            let total_w = key.len() + 1 + state.len();
             let hovered = hovered_idx == Some(i);
             let key_fg = if hovered { t.primary } else { t.fg_muted };
             let state_fg = if hovered { t.primary } else { t.fg };
