@@ -112,7 +112,7 @@ struct IdeApp {
 
     // Command palette
     command_palette: CommandPalette,
-    cmd_bridge: Rc<RefCell<Option<&'static str>>>,
+    cmd_bridge: Rc<RefCell<Option<String>>>,
 
     // Animation
     anim_frame: u8,
@@ -540,19 +540,13 @@ impl Widget for IdeApp {
             let _handled = self.command_palette.handle_key(key);
             // Check if a command was executed via the bridge
             let cmd = self.cmd_bridge.borrow_mut().take();
-            if let Some(cmd_id) = cmd {
+            if let Some(ref cmd_id) = cmd {
                 self.dispatch_palette_command(cmd_id);
             }
             return true;
         }
 
         // Modal takes priority
-        if self.show_settings {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('q') => { self.show_settings = false; return true; }
-                _ => return true,
-            }
-        }
 
         // Context menu
         if self.context_menu.is_some() {
