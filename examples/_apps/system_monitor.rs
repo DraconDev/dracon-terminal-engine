@@ -535,16 +535,68 @@ fn main() -> std::io::Result<()> {
         ctx.add_plane(disk_plane);
         ctx.add_plane(net_plane);
 
+        // Process list (left half, below gauges) — manual rendering with selection highlight
         let process_rect = Rect::new(0, gauges_h, w / 2, h.saturating_sub(gauges_h + 2));
-        let process_plane = m.process_grid.render(process_rect);
-        ctx.add_plane(process_plane);
+        let mut proc_plane = Plane::new(0, process_rect.width, process_rect.height);
+        let t = m.get_theme();
+        for cell in proc_plane.cells.iter_mut() {
+            cell.bg = t.bg;
+            cell.fg = t.fg;
+        }
 
-        let status_rect = Rect::new(w / 2, gauges_h, w / 2, 4);
-        let status_plane = m.status_badge.render(status_rect);
-        ctx.add_plane(status_plane);
+        // Header row
+        draw_text_plane(&mut proc_plane, 0, 0, " PID  NAME            CPU%", t.fg_muted, t.bg, true);
 
-        let uptime_rect = Rect::new(w / 2, gauges_h + 4, w / 2, h.saturating_sub(gauges_h + 6));
-        let uptime_plane = m.uptime_text.render(uptime_rect);
-        ctx.add_plane(uptime_plane);
+        // Process rows
+        let max_visible = process_rect.height as usize - 1;
+        for i in 0..max_visible {
+            let proc_idx = m.process_scroll_offset + i;
+            if proc_idx >= m.stats.processes.len() { break; }
+            let proc = &m.stats.processes[proc_idx];
+            let is_selected = m.selected_process == Some(proc_idx);
+            let line = format!("{:>5} {:<15} {:>5.1}%", proc.pid, &proc.name[..proc.name.len().min(15)], proc.cpu_percent);
+            let (fg, bg) = if is_selected {
+                (t.fg_on_accent, t.primary_active)
+            } else {
+                (t.fg, Color::Reset)
+            };
+            draw_text_plane(&mut proc_plane, 0, 1 + i, &line, fg, bg, is_selected);
+        }
+
+        ctx.add_plane(proc_plane);
+
+        // Right panel: selected process detail or status
+        if let Some(sel_idx) = m.selected_process {
+            if let Some(proc) = m.stats.processes.get(sel_idx) {
+                let detail_rect = Rect::new(w / 2, gauges_h, w / 2, h.saturating_sub(gauges_h));
+                let mut detail_plane = Plane::new(0, detail_rect.width, detail_rect.height);
+                for cell in detail_plane.cells.iter_mut() {
+                    cell.bg = t.bg;
+                    cell.fg = t.fg;
+                }
+                let lines = [
+                    &format!(" Process: {}", proc.name),
+                    &format!(" PID: {}", proc.pid),
+                    &format!(" CPU: {:.1}%", proc.cpu_percent),
+                    "",
+                    " Scroll: ↑↓ wheel",
+                    " Click: select/deselect",
+                ];
+                for (i, line) in lines.iter().enumerate() {
+                    let fg = if i == 0 { t.primary } else { t.fg_muted };
+                    draw_text_plane(&mut detail_plane, 1, i as u16, line, fg, t.bg, i == 0);
+                }
+                ctx.add_plane(detail_plane);
+            }
+        } else {
+            // Default: status badge + uptime
+            let status_rect = Rect::new(w / 2, gauges_h, w / 2, 4);
+            let status_plane = m.status_badge.render(status_rect);
+            ctx.add_plane(status_plane);
+
+            let uptime_rect = Rect::new(w / 2, gauges_h + 4, w / 2, h.saturating_sub(gauges_h + 6));
+            let uptime_plane = m.uptime_text.render(uptime_rect);
+            ctx.add_plane(uptime_plane);
+        }
     }).run(|_| {})
 }

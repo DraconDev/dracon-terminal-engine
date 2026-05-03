@@ -1,20 +1,25 @@
 # Project State
 
 ## Current Focus
-Fixed a typo in the system monitor's gauge height variable name.
+Enhanced system monitor with manual process list rendering and interactive selection
 
 ## Context
-The system monitor example was recently enhanced with mouse interaction support and process selection functionality. This change was part of the broader effort to improve input handling in the framework.
+The system monitor example is being improved to provide better process visibility and interaction. This change replaces the previous process grid with a manually rendered list that supports selection highlighting and detailed process information.
 
 ## Completed
-- [x] Corrected the typo from `gaiges_h` to `gauges_h` in the system monitor's mouse interaction handler
+- [x] Replaced process grid with manual rendering for better control
+- [x] Added process selection highlighting with theme-aware colors
+- [x] Implemented process detail view when selected
+- [x] Added scrollable process list with offset tracking
+- [x] Included interactive instructions in the detail view
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Manual rendering of process list with selection support
 
 ## Blockers
-- None identified
+- None identified in this change
 
 ## Next Steps
-1. Verify the system monitor's gauge rendering remains consistent after the variable name change
-2. Continue testing the mouse interaction features in the system monitor example
+1. Test mouse interaction with the new process list
+2. Verify scroll behavior with large process lists
+3. Ensure proper theme integration for all states
