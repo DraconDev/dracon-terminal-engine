@@ -104,7 +104,7 @@ impl SqliteBrowser {
         self.dirty = true;
     }
 
-    fn read_tables(&self) -> Vec<String> {
+    fn read_tables(&mut self) -> Vec<String> {
         let output = Command::new("sqlite3")
             .args([&self.db_path, ".tables"])
             .output();
