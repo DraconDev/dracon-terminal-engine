@@ -110,6 +110,7 @@ struct FileManager {
     root: FsNode,
     tree: Tree,
     breadcrumbs: Breadcrumbs,
+    split: SplitPane,
     tree_path: Vec<usize>,
     selected_path: Option<PathBuf>,
     context_menu: Option<ContextMenu>,
@@ -119,6 +120,7 @@ struct FileManager {
     should_quit: Arc<AtomicBool>,
     theme: Theme,
     show_help: bool,
+    is_dragging_split: bool,
 }
 
 impl FileManager {

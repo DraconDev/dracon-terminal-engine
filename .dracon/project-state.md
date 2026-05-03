@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added split pane functionality to the file manager example
 
 ## Context
-This change was triggered by recent refactoring work in the showcase example, particularly around interactive zone tracking and hover state detection. The dependency updates ensure compatibility with the latest versions of dependencies used in these features.
+This change enables resizable panes in the file manager UI, allowing users to adjust the layout between the file tree and content view.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency version changes
+- [x] Added `split` field to track pane division
+- [x] Added `is_dragging_split` flag to manage drag state
 
 ## In Progress
-- [x] No active work in progress beyond this dependency update
+- [ ] Implement actual split pane rendering and interaction logic
 
 ## Blockers
-- None identified for this specific change
+- Need to implement the visual split pane component and drag handling
 
 ## Next Steps
-1. Continue with ongoing refactoring of hover detection and interactive zone systems
-2. Review and potentially update other documentation related to these systems
-```
+1. Implement split pane rendering and drag interaction
+2. Add keyboard shortcuts for resizing panes
