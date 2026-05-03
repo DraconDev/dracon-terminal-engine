@@ -283,7 +283,8 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     let cat_color = category_color(t, ex.category);
 
     let border_fg = if is_selected {
-        t.primary
+        let pulse = (phase * 2.0).sin() * 0.5 + 0.5;
+        if pulse > 0.5 { t.primary } else { t.primary_hover }
     } else if is_hovered {
         t.primary_hover
     } else {
