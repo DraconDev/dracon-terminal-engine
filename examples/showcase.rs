@@ -962,6 +962,11 @@ impl Widget for Showcase {
                         }
                     }
                 }
+                // Register zone for this card
+                const CARD_BASE: usize = 500;
+                let mut zones = self.zones.borrow_mut();
+                zones.register(CARD_BASE + grid_idx, x as u16, y as u16, card_w as u16, card_h as u16);
+                drop(zones);
             }
         }
 
