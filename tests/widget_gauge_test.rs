@@ -16,8 +16,14 @@ fn test_gauge_new() {
 
 #[test]
 fn test_gauge_with_id() {
-    let g = Gauge::with_id(dracon_terminal_engine::framework::widget::WidgetId::new(7), "RAM");
-    assert_eq!(g.id, dracon_terminal_engine::framework::widget::WidgetId::new(7));
+    let g = Gauge::with_id(
+        dracon_terminal_engine::framework::widget::WidgetId::new(7),
+        "RAM",
+    );
+    assert_eq!(
+        g.id,
+        dracon_terminal_engine::framework::widget::WidgetId::new(7)
+    );
     assert_eq!(g.label, "RAM");
 }
 

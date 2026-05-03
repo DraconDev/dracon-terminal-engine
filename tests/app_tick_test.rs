@@ -541,10 +541,16 @@ fn test_output_tracking_widget_receives_output() {
 fn test_widget_apply_command_output_default_is_noop() {
     struct NoopWidget;
     impl Widget for NoopWidget {
-        fn id(&self) -> WidgetId { WidgetId::new(1) }
-        fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+        fn id(&self) -> WidgetId {
+            WidgetId::new(1)
+        }
+        fn area(&self) -> Rect {
+            Rect::new(0, 0, 80, 24)
+        }
         fn set_area(&mut self, _: Rect) {}
-        fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+        fn render(&self, area: Rect) -> Plane {
+            Plane::new(0, area.width, area.height)
+        }
     }
 
     let mut widget = NoopWidget;
@@ -1067,10 +1073,16 @@ fn test_widget_id_is_set_on_add() {
 fn test_widget_focusable_default() {
     struct TestWidget;
     impl Widget for TestWidget {
-        fn id(&self) -> WidgetId { WidgetId::new(1) }
-        fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+        fn id(&self) -> WidgetId {
+            WidgetId::new(1)
+        }
+        fn area(&self) -> Rect {
+            Rect::new(0, 0, 80, 24)
+        }
         fn set_area(&mut self, _: Rect) {}
-        fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+        fn render(&self, area: Rect) -> Plane {
+            Plane::new(0, area.width, area.height)
+        }
     }
 
     let widget = TestWidget;
@@ -1081,10 +1093,16 @@ fn test_widget_focusable_default() {
 fn test_widget_z_index_default() {
     struct TestWidget;
     impl Widget for TestWidget {
-        fn id(&self) -> WidgetId { WidgetId::new(1) }
-        fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+        fn id(&self) -> WidgetId {
+            WidgetId::new(1)
+        }
+        fn area(&self) -> Rect {
+            Rect::new(0, 0, 80, 24)
+        }
         fn set_area(&mut self, _: Rect) {}
-        fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+        fn render(&self, area: Rect) -> Plane {
+            Plane::new(0, area.width, area.height)
+        }
     }
 
     let widget = TestWidget;

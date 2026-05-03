@@ -526,16 +526,16 @@ fn test_theme_bg_is_never_reset() {
 #[test]
 fn test_theme_primary_differs_from_fg() {
     let t = Theme::dark();
-    assert_ne!(t.primary, t.fg, "primary should differ from fg in dark theme");
+    assert_ne!(
+        t.primary, t.fg,
+        "primary should differ from fg in dark theme"
+    );
 }
 
 #[test]
 fn test_theme_error_differs_from_fg() {
     let t = Theme::dark();
-    assert_ne!(
-        t.error, t.fg,
-        "error should differ from fg in dark theme"
-    );
+    assert_ne!(t.error, t.fg, "error should differ from fg in dark theme");
 }
 
 #[test]
@@ -551,15 +551,24 @@ fn test_theme_success_differs_from_fg() {
 
 #[test]
 fn test_theme_dark_is_dark_kind() {
-    assert_eq!(Theme::dark().kind, dracon_terminal_engine::framework::theme::ThemeKind::Dark);
+    assert_eq!(
+        Theme::dark().kind,
+        dracon_terminal_engine::framework::theme::ThemeKind::Dark
+    );
 }
 
 #[test]
 fn test_theme_light_is_light_kind() {
-    assert_eq!(Theme::light().kind, dracon_terminal_engine::framework::theme::ThemeKind::Light);
+    assert_eq!(
+        Theme::light().kind,
+        dracon_terminal_engine::framework::theme::ThemeKind::Light
+    );
 }
 
 #[test]
 fn test_cyberpunk_is_dark_kind() {
-    assert_eq!(Theme::cyberpunk().kind, dracon_terminal_engine::framework::theme::ThemeKind::Dark);
+    assert_eq!(
+        Theme::cyberpunk().kind,
+        dracon_terminal_engine::framework::theme::ThemeKind::Dark
+    );
 }

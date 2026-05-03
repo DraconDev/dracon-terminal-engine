@@ -36,19 +36,56 @@ struct TableApp {
 impl TableApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let columns = vec![
-            Column { header: "Name".to_string(), width: 20 },
-            Column { header: "Role".to_string(), width: 15 },
-            Column { header: "Status".to_string(), width: 10 },
+            Column {
+                header: "Name".to_string(),
+                width: 20,
+            },
+            Column {
+                header: "Role".to_string(),
+                width: 15,
+            },
+            Column {
+                header: "Status".to_string(),
+                width: 10,
+            },
         ];
 
         let rows = vec![
-            User { name: "Alice".to_string(), role: "Admin".to_string(), status: "Active".to_string() },
-            User { name: "Bob".to_string(), role: "User".to_string(), status: "Active".to_string() },
-            User { name: "Charlie".to_string(), role: "Editor".to_string(), status: "Away".to_string() },
-            User { name: "Diana".to_string(), role: "Admin".to_string(), status: "Active".to_string() },
-            User { name: "Eve".to_string(), role: "User".to_string(), status: "Active".to_string() },
-            User { name: "Frank".to_string(), role: "Viewer".to_string(), status: "Offline".to_string() },
-            User { name: "Grace".to_string(), role: "Editor".to_string(), status: "Active".to_string() },
+            User {
+                name: "Alice".to_string(),
+                role: "Admin".to_string(),
+                status: "Active".to_string(),
+            },
+            User {
+                name: "Bob".to_string(),
+                role: "User".to_string(),
+                status: "Active".to_string(),
+            },
+            User {
+                name: "Charlie".to_string(),
+                role: "Editor".to_string(),
+                status: "Away".to_string(),
+            },
+            User {
+                name: "Diana".to_string(),
+                role: "Admin".to_string(),
+                status: "Active".to_string(),
+            },
+            User {
+                name: "Eve".to_string(),
+                role: "User".to_string(),
+                status: "Active".to_string(),
+            },
+            User {
+                name: "Frank".to_string(),
+                role: "Viewer".to_string(),
+                status: "Offline".to_string(),
+            },
+            User {
+                name: "Grace".to_string(),
+                role: "Editor".to_string(),
+                status: "Active".to_string(),
+            },
         ];
 
         let mut table = Table::new(columns)
@@ -64,21 +101,40 @@ impl TableApp {
 }
 
 impl Widget for TableApp {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.table.area() }
-    fn set_area(&mut self, area: Rect) { self.table.set_area(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.table.area()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.table.set_area(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, area: Rect) -> Plane { self.table.render(area) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, area: Rect) -> Plane {
+        self.table.render(area)
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
-            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
             _ => self.table.handle_key(key),
         }
     }
@@ -96,7 +152,9 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(theme)
         .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) { ctx.stop(); }
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
         })
         .run(|ctx| {
             let (w, h) = ctx.compositor().size();

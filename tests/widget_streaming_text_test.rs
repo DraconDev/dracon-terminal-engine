@@ -18,7 +18,10 @@ fn test_streaming_text_new() {
 #[test]
 fn test_streaming_text_with_id() {
     let st = StreamingText::with_id(dracon_terminal_engine::framework::widget::WidgetId::new(4));
-    assert_eq!(st.id, dracon_terminal_engine::framework::widget::WidgetId::new(4));
+    assert_eq!(
+        st.id,
+        dracon_terminal_engine::framework::widget::WidgetId::new(4)
+    );
 }
 
 #[test]

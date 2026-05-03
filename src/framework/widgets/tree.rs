@@ -198,7 +198,12 @@ impl crate::framework::widget::Widget for Tree {
             if *row >= plane.height as usize {
                 return;
             }
-            let line = format!("{}{}{}", prefix, if node.expanded { "- " } else { "+ " }, node.label);
+            let line = format!(
+                "{}{}{}",
+                prefix,
+                if node.expanded { "- " } else { "+ " },
+                node.label
+            );
             let _label_len = line.width().min(width);
             for (i, c) in line.chars().take(width).enumerate() {
                 let idx = (*row as u16 * plane.width + i as u16) as usize;

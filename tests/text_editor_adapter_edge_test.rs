@@ -253,8 +253,7 @@ fn test_handle_mouse_out_of_bounds_coords() {
 
 #[test]
 fn test_handle_mouse_scroll_propagates() {
-    let editor =
-        TextEditor::with_content("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8");
+    let editor = TextEditor::with_content("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(rect(0, 0, 20, 5));
 

@@ -321,10 +321,7 @@ mod focus_callbacks {
         let changes_clone = changes.clone();
 
         fm.on_focus_change(move |new_id, old_id| {
-            changes_clone
-                .lock()
-                .unwrap()
-                .push((new_id, old_id));
+            changes_clone.lock().unwrap().push((new_id, old_id));
         });
 
         fm.set_focus(id1);
@@ -351,10 +348,7 @@ mod focus_callbacks {
         let captured_clone = captured.clone();
 
         fm.on_focus_change(move |new_id, old_id| {
-            captured_clone
-                .lock()
-                .unwrap()
-                .push((Some(new_id), old_id));
+            captured_clone.lock().unwrap().push((Some(new_id), old_id));
         });
 
         fm.set_focus(id1);
@@ -560,6 +554,4 @@ mod app_integration {
 
         assert!(!fm.is_trapped());
     }
-
-    
 }

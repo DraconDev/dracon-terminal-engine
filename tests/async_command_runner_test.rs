@@ -10,7 +10,9 @@
 //! - Error handling
 //! - OutputParser integration
 
-use dracon_terminal_engine::framework::command::{BoundCommand, CommandRunner, OutputParser, ParsedOutput};
+use dracon_terminal_engine::framework::command::{
+    BoundCommand, CommandRunner, OutputParser, ParsedOutput,
+};
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "async")]
@@ -29,9 +31,15 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
         let elapsed = start.elapsed();
 
-        assert!(elapsed < Duration::from_millis(500),
-            "spawn should not block, elapsed={:?}", elapsed);
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "hello async world");
+        assert!(
+            elapsed < Duration::from_millis(500),
+            "spawn should not block, elapsed={:?}",
+            elapsed
+        );
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            "hello async world"
+        );
         assert_eq!(output.status.code(), Some(0));
     }
 
@@ -43,10 +51,16 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
         let elapsed = start.elapsed();
 
-        assert!(elapsed >= Duration::from_millis(80),
-            "sleep 100ms should take at least 80ms, elapsed={:?}", elapsed);
-        assert!(elapsed < Duration::from_secs(1),
-            "should complete well under 1 second, elapsed={:?}", elapsed);
+        assert!(
+            elapsed >= Duration::from_millis(80),
+            "sleep 100ms should take at least 80ms, elapsed={:?}",
+            elapsed
+        );
+        assert!(
+            elapsed < Duration::from_secs(1),
+            "should complete well under 1 second, elapsed={:?}",
+            elapsed
+        );
         assert_eq!(output.status.code(), Some(0));
     }
 
@@ -56,8 +70,10 @@ mod async_tests {
         cmd.args(&["-c", "echo -e 'test output line\\nsecond line'"]);
         let output = cmd.output().await.unwrap();
 
-        assert!(String::from_utf8_lossy(&output.stdout).contains("test output line") ||
-                String::from_utf8_lossy(&output.stdout).contains("second line"));
+        assert!(
+            String::from_utf8_lossy(&output.stdout).contains("test output line")
+                || String::from_utf8_lossy(&output.stdout).contains("second line")
+        );
         assert!(output.stderr.is_empty());
     }
 
@@ -68,7 +84,11 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
 
         let stderr = String::from_utf8_lossy(&output.stderr);
-        assert!(stderr.contains("error message") || stderr.is_empty() || output.status.code() == Some(0));
+        assert!(
+            stderr.contains("error message")
+                || stderr.is_empty()
+                || output.status.code() == Some(0)
+        );
     }
 
     #[tokio::test]
@@ -81,7 +101,12 @@ mod async_tests {
         let stderr = String::from_utf8_lossy(&output.stderr);
 
         assert!(stdout.contains("stdout content") || stdout.contains("stdout"));
-        assert!(stderr.contains("stderr content") || stderr.contains("stderr") || stderr.is_empty() || output.status.code() == Some(0));
+        assert!(
+            stderr.contains("stderr content")
+                || stderr.contains("stderr")
+                || stderr.is_empty()
+                || output.status.code() == Some(0)
+        );
     }
 
     #[tokio::test]
@@ -90,7 +115,8 @@ mod async_tests {
             let mut cmd = Command::new("sleep");
             cmd.arg("2");
             cmd.output().await
-        }).await;
+        })
+        .await;
 
         assert!(result.is_err(), "timeout should kill the sleep command");
     }
@@ -101,14 +127,18 @@ mod async_tests {
             let mut cmd = Command::new("sleep");
             cmd.arg("5");
             cmd.output().await
-        }).await;
+        })
+        .await;
 
         assert!(result.is_err());
 
         let mut cmd = Command::new("echo");
         cmd.arg("still working");
         let output = cmd.output().await.unwrap();
-        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "still working");
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout).trim(),
+            "still working"
+        );
     }
 
     #[tokio::test]
@@ -168,7 +198,10 @@ mod async_tests {
             .unwrap();
 
         let poll_result = child.try_wait();
-        assert!(poll_result.unwrap().is_none(), "process should still be running");
+        assert!(
+            poll_result.unwrap().is_none(),
+            "process should still be running"
+        );
 
         let status = child.wait().await.unwrap();
         assert!(status.success());
@@ -201,7 +234,8 @@ mod async_tests {
             let mut cmd = Command::new("sleep");
             cmd.arg("3");
             cmd.output().await
-        }).await;
+        })
+        .await;
 
         assert!(result.is_err(), "timeout should cause error");
     }
@@ -214,7 +248,9 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
 
-        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "value".to_string(),
+        };
         let parsed = parser.parse(&stdout, "", 0);
 
         match parsed {
@@ -231,7 +267,9 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
 
-        let parser = OutputParser::JsonArray { item_key: Some("name".to_string()) };
+        let parser = OutputParser::JsonArray {
+            item_key: Some("name".to_string()),
+        };
         let parsed = parser.parse(&stdout, "", 0);
 
         match parsed {
@@ -243,7 +281,10 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_output_parser_severity_line() {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", "printf 'INFO: starting\\nERROR: failed\\nWARN: slow\\n'"]);
+        cmd.args(&[
+            "-c",
+            "printf 'INFO: starting\\nERROR: failed\\nWARN: slow\\n'",
+        ]);
 
         let output = cmd.output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -252,7 +293,9 @@ mod async_tests {
             patterns: [
                 ("ERROR".to_string(), "red".to_string()),
                 ("WARN".to_string(), "yellow".to_string()),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
         };
         let parsed = parser.parse(&stdout, "", 0);
 
@@ -283,13 +326,17 @@ mod async_tests {
             .unwrap();
 
         if let Some(ref mut stdin) = child.stdin {
-            AsyncWriteExt::write_all(stdin, b"input data").await.unwrap();
+            AsyncWriteExt::write_all(stdin, b"input data")
+                .await
+                .unwrap();
             AsyncWriteExt::shutdown(stdin).await.unwrap();
         }
 
         let output = child.wait_with_output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
-        assert!(stdout.contains("input data") || stdout.is_empty() || output.status.code() == Some(0));
+        assert!(
+            stdout.contains("input data") || stdout.is_empty() || output.status.code() == Some(0)
+        );
     }
 
     #[tokio::test]
@@ -313,8 +360,11 @@ mod async_tests {
         cmd.args(&["%s", "x".repeat(1000).as_str()]);
         let output = cmd.output().await.unwrap();
 
-        assert!(output.stdout.len() >= 900 && output.stdout.len() <= 1100,
-            "expected ~1000 chars, got {}", output.stdout.len());
+        assert!(
+            output.stdout.len() >= 900 && output.stdout.len() <= 1100,
+            "expected ~1000 chars, got {}",
+            output.stdout.len()
+        );
     }
 
     #[tokio::test]
@@ -331,7 +381,12 @@ mod async_tests {
         let output = cmd.output().await.unwrap();
 
         let stdout = String::from_utf8_lossy(&output.stdout);
-        assert!(stdout.contains("Hello") || stdout.contains("世界") || stdout.contains("🎉") || stdout.contains("Hello"));
+        assert!(
+            stdout.contains("Hello")
+                || stdout.contains("世界")
+                || stdout.contains("🎉")
+                || stdout.contains("Hello")
+        );
     }
 }
 
@@ -359,8 +414,11 @@ mod async_tests {
         let runner = CommandRunner::new("sleep 0.05");
         let (_, _, _) = runner.run_sync();
         let elapsed = start.elapsed();
-        assert!(elapsed >= Duration::from_millis(40),
-            "sleep should take at least 40ms, elapsed={:?}", elapsed);
+        assert!(
+            elapsed >= Duration::from_millis(40),
+            "sleep should take at least 40ms, elapsed={:?}",
+            elapsed
+        );
     }
 
     #[test]
@@ -373,7 +431,9 @@ mod async_tests {
     #[test]
     fn test_sync_command_with_parser() {
         let runner = CommandRunner::new(r#"printf '{"value":42}'"#);
-        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "value".to_string(),
+        };
         let output = runner.run_and_parse(&parser);
 
         match output {
@@ -389,7 +449,9 @@ mod async_tests {
             patterns: [
                 ("ERROR".to_string(), "red".to_string()),
                 ("WARN".to_string(), "yellow".to_string()),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
         };
         let output = runner.run_and_parse(&parser);
 

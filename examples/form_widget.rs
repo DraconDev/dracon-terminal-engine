@@ -29,26 +29,48 @@ impl FormApp {
             .add_field("Email")
             .add_field("Password")
             .add_field("Confirm Password");
-        Self { form: Rc::new(RefCell::new(form)), should_quit }
+        Self {
+            form: Rc::new(RefCell::new(form)),
+            should_quit,
+        }
     }
 }
 
 impl Widget for FormApp {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.form.borrow().area() }
-    fn set_area(&mut self, area: Rect) { self.form.borrow_mut().set_area(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.form.borrow().area()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.form.borrow_mut().set_area(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, area: Rect) -> Plane { self.form.borrow().render(area) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, area: Rect) -> Plane {
+        self.form.borrow().render(area)
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
-            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
             _ => self.form.borrow_mut().handle_key(key),
         }
     }
@@ -64,8 +86,12 @@ fn main() -> std::io::Result<()> {
 
     let mut app_widget = App::new()?.title("Form Widget Demo").fps(30).theme(theme);
 
-    app_widget.add_widget(Box::new(FormApp::new(quit_check, theme)), Rect::new(0, 0, 80, 24));
+    app_widget.add_widget(
+        Box::new(FormApp::new(quit_check, theme)),
+        Rect::new(0, 0, 80, 24),
+    );
 
-    app_widget.on_input(move |key| app_for_input.borrow_mut().handle_key(key))
+    app_widget
+        .on_input(move |key| app_for_input.borrow_mut().handle_key(key))
         .run(|_ctx| {})
 }

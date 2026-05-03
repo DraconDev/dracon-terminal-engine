@@ -113,7 +113,11 @@ fn test_app_add_widget_sets_area() {
     let area = w.area();
     assert_eq!(area.width, 80);
     assert_eq!(area.height, 24);
-    assert_eq!(set_area_count.get(), 1, "set_area should be called once on add_widget");
+    assert_eq!(
+        set_area_count.get(),
+        1,
+        "set_area should be called once on add_widget"
+    );
 }
 
 #[test]
@@ -130,8 +134,14 @@ fn test_app_widget_area_updated_via_widget_mut() {
 
     let w = app.widget(id).unwrap();
     let area = w.area();
-    assert_eq!(area.width, 100, "Widget width should be updated via set_area");
-    assert_eq!(area.height, 40, "Widget height should be updated via set_area");
+    assert_eq!(
+        area.width, 100,
+        "Widget width should be updated via set_area"
+    );
+    assert_eq!(
+        area.height, 40,
+        "Widget height should be updated via set_area"
+    );
     assert_eq!(set_area_count.get(), 2, "set_area should be called again");
 }
 
@@ -149,7 +159,10 @@ fn test_app_widget_dirty_tracking() {
 
     {
         let w = app.widget(id).unwrap();
-        assert!(!w.needs_render(), "Widget should not need render after clear_dirty");
+        assert!(
+            !w.needs_render(),
+            "Widget should not need render after clear_dirty"
+        );
     }
 
     {
@@ -159,7 +172,10 @@ fn test_app_widget_dirty_tracking() {
 
     {
         let w = app.widget(id).unwrap();
-        assert!(w.needs_render(), "Widget should need render after mark_dirty");
+        assert!(
+            w.needs_render(),
+            "Widget should need render after mark_dirty"
+        );
     }
 }
 
@@ -185,7 +201,10 @@ fn test_app_resize_marks_widgets_dirty_simulation() {
     }
 
     let w = app.widget(id).unwrap();
-    assert!(w.needs_render(), "Widget should be dirty after resize event simulation");
+    assert!(
+        w.needs_render(),
+        "Widget should be dirty after resize event simulation"
+    );
 }
 
 // ============================================================================
@@ -251,13 +270,11 @@ fn test_splitpane_children_get_resized_areas_immediately() {
     let resized_split = split.split(Rect::new(0, 0, 100, 24));
 
     assert_ne!(
-        initial_split.0.width,
-        resized_split.0.width,
+        initial_split.0.width, resized_split.0.width,
         "Left pane width should change after resize"
     );
     assert_ne!(
-        initial_split.1.width,
-        resized_split.1.width,
+        initial_split.1.width, resized_split.1.width,
         "Right pane width should change after resize"
     );
 }
@@ -323,7 +340,10 @@ fn test_child_widgets_get_proportional_sub_areas() {
     let area = w.area();
     assert_eq!(area.x, 0);
     assert_eq!(area.y, 0);
-    assert_eq!(area.width, 80, "Widget should get full terminal width after resize");
+    assert_eq!(
+        area.width, 80,
+        "Widget should get full terminal width after resize"
+    );
     assert_eq!(area.height, 24);
 }
 
@@ -410,7 +430,10 @@ fn test_render_clears_dirty_flag() {
 
     {
         let w = app.widget(id).unwrap();
-        assert!(!w.needs_render(), "Widget should not need render after clear_dirty");
+        assert!(
+            !w.needs_render(),
+            "Widget should not need render after clear_dirty"
+        );
     }
 }
 
@@ -444,7 +467,10 @@ fn test_subsequent_resize_resets_dirty() {
     }
 
     let w = app.widget(id).unwrap();
-    assert!(w.needs_render(), "Widget should be dirty after second resize");
+    assert!(
+        w.needs_render(),
+        "Widget should be dirty after second resize"
+    );
 }
 
 #[test]
@@ -490,7 +516,11 @@ fn test_set_area_to_same_dimensions_calls_set_area() {
         w.set_area(Rect::new(0, 0, 80, 24));
     }
 
-    assert_eq!(set_area_count.get(), 2, "set_area should be called even for same-size resize");
+    assert_eq!(
+        set_area_count.get(),
+        2,
+        "set_area should be called even for same-size resize"
+    );
 }
 
 #[test]
@@ -512,7 +542,10 @@ fn test_set_area_same_size_still_marks_dirty() {
     }
 
     let w = app.widget(id).unwrap();
-    assert!(w.needs_render(), "Widget should be dirty even for same-size resize");
+    assert!(
+        w.needs_render(),
+        "Widget should be dirty even for same-size resize"
+    );
 }
 
 // ============================================================================
@@ -540,9 +573,21 @@ fn test_all_widgets_receive_resize_simulation() {
         w.set_area(Rect::new(0, 0, 100, 40));
     }
 
-    assert_eq!(set_area_count1.get(), 2, "Widget 1 should have set_area called on resize");
-    assert_eq!(set_area_count2.get(), 2, "Widget 2 should have set_area called on resize");
-    assert_eq!(set_area_count3.get(), 2, "Widget 3 should have set_area called on resize");
+    assert_eq!(
+        set_area_count1.get(),
+        2,
+        "Widget 1 should have set_area called on resize"
+    );
+    assert_eq!(
+        set_area_count2.get(),
+        2,
+        "Widget 2 should have set_area called on resize"
+    );
+    assert_eq!(
+        set_area_count3.get(),
+        2,
+        "Widget 3 should have set_area called on resize"
+    );
 
     let w1 = app.widget(id1).unwrap();
     let w2 = app.widget(id2).unwrap();
@@ -574,8 +619,16 @@ fn test_each_widget_gets_correct_area_based_on_z_index() {
     let w1 = app.widget(id1).unwrap();
     let w2 = app.widget(id2).unwrap();
 
-    assert_eq!(w1.area().width, 100, "Widget 1 should get full width after resize");
-    assert_eq!(w2.area().width, 100, "Widget 2 should get full width after resize");
+    assert_eq!(
+        w1.area().width,
+        100,
+        "Widget 1 should get full width after resize"
+    );
+    assert_eq!(
+        w2.area().width,
+        100,
+        "Widget 2 should get full width after resize"
+    );
 }
 
 #[test]

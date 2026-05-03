@@ -16,7 +16,10 @@ fn test_key_value_grid_new() {
 #[test]
 fn test_key_value_grid_with_id() {
     let grid = KeyValueGrid::with_id(dracon_terminal_engine::framework::widget::WidgetId::new(3));
-    assert_eq!(grid.id, dracon_terminal_engine::framework::widget::WidgetId::new(3));
+    assert_eq!(
+        grid.id,
+        dracon_terminal_engine::framework::widget::WidgetId::new(3)
+    );
 }
 
 #[test]

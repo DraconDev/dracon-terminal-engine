@@ -228,7 +228,7 @@ impl crate::framework::widget::Widget for Form {
                 }
                 true
             }
-_ => false,
+            _ => false,
         }
     }
 

@@ -851,7 +851,10 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                 format!("string:{}", path.to_string_lossy()),
             ];
 
-            match std::process::Command::new(dbus_cmd).args(&session_args).output() {
+            match std::process::Command::new(dbus_cmd)
+                .args(&session_args)
+                .output()
+            {
                 Ok(output) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);

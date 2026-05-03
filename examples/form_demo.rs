@@ -90,12 +90,11 @@ struct SettingsForm {
 
 impl SettingsForm {
     fn new(id: WidgetId) -> Self {
-        let theme_select = Select::new(WidgetId::new(id.0 + 3))
-            .with_options(vec![
-                "Dark".to_string(),
-                "Light".to_string(),
-                "Cyberpunk".to_string(),
-            ]);
+        let theme_select = Select::new(WidgetId::new(id.0 + 3)).with_options(vec![
+            "Dark".to_string(),
+            "Light".to_string(),
+            "Cyberpunk".to_string(),
+        ]);
 
         Self {
             id,
@@ -141,7 +140,8 @@ impl SettingsForm {
             FIELD_PASSWORD => {
                 let pwd = self.password.password();
                 if pwd.len() < 8 {
-                    self.errors.password = Some("Password must be at least 8 characters".to_string());
+                    self.errors.password =
+                        Some("Password must be at least 8 characters".to_string());
                     false
                 } else {
                     self.errors.password = None;
@@ -228,9 +228,13 @@ impl Widget for SettingsForm {
     }
 
     fn needs_render(&self) -> bool {
-        self.dirty || self.username.needs_render() || self.email.needs_render()
-            || self.password.needs_render() || self.theme.needs_render()
-            || self.notifications.needs_render() || self.submit.needs_render()
+        self.dirty
+            || self.username.needs_render()
+            || self.email.needs_render()
+            || self.password.needs_render()
+            || self.theme.needs_render()
+            || self.notifications.needs_render()
+            || self.submit.needs_render()
     }
 
     fn mark_dirty(&mut self) {
@@ -264,7 +268,11 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_USERNAME { theme.primary } else { theme.fg },
+                    fg: if self.focused_field == FIELD_USERNAME {
+                        theme.primary
+                    } else {
+                        theme.fg
+                    },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -273,7 +281,9 @@ impl Widget for SettingsForm {
             }
         }
 
-        let username_plane = self.username.render(Rect::new(input_col, y, input_width, 1));
+        let username_plane = self
+            .username
+            .render(Rect::new(input_col, y, input_width, 1));
         for (i, cell) in username_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
@@ -300,7 +310,11 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_EMAIL { theme.primary } else { theme.fg },
+                    fg: if self.focused_field == FIELD_EMAIL {
+                        theme.primary
+                    } else {
+                        theme.fg
+                    },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -336,7 +350,11 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_PASSWORD { theme.primary } else { theme.fg },
+                    fg: if self.focused_field == FIELD_PASSWORD {
+                        theme.primary
+                    } else {
+                        theme.fg
+                    },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -345,7 +363,9 @@ impl Widget for SettingsForm {
             }
         }
 
-        let password_plane = self.password.render(Rect::new(input_col, y, input_width, 1));
+        let password_plane = self
+            .password
+            .render(Rect::new(input_col, y, input_width, 1));
         for (i, cell) in password_plane.cells.iter().enumerate() {
             let idx = (y * plane.width + input_col + i as u16) as usize;
             if idx < plane.cells.len() && !cell.transparent && cell.char != '\0' {
@@ -372,7 +392,11 @@ impl Widget for SettingsForm {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.focused_field == FIELD_THEME { theme.primary } else { theme.fg },
+                    fg: if self.focused_field == FIELD_THEME {
+                        theme.primary
+                    } else {
+                        theme.fg
+                    },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -524,20 +548,23 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.title("Settings Form").fps(30).theme(Theme::dracula());
+    let mut app = App::new()?
+        .title("Settings Form")
+        .fps(30)
+        .theme(Theme::dracula());
     app.add_widget(Box::new(form), Rect::new(0, 0, w, h));
     app.on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
-        .on_tick(move |ctx, _tick| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
-        .run(|_ctx| {})
+        if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            should_quit.store(true, Ordering::SeqCst);
+            true
+        } else {
+            false
+        }
+    })
+    .on_tick(move |ctx, _tick| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_ctx| {})
 }

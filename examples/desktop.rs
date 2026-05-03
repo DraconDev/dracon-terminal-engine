@@ -53,14 +53,23 @@ fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
                 let line = lines[y as usize];
                 if x < line.len() as u16 {
                     let ch = line.chars().nth(x as usize).unwrap_or(' ');
-                    let fg = if line.starts_with("user@") { green }
-                        else if line.contains("OS:") || line.contains("Kernel:") { cyan }
-                        else if line.contains("Shell:") || line.contains("WM:") { yellow }
-                        else { white };
+                    let fg = if line.starts_with("user@") {
+                        green
+                    } else if line.contains("OS:") || line.contains("Kernel:") {
+                        cyan
+                    } else if line.contains("Shell:") || line.contains("WM:") {
+                        yellow
+                    } else {
+                        white
+                    };
                     return WindowContent { ch, fg, bg: reset };
                 }
             }
-            WindowContent { ch: ' ', fg: gray, bg: reset }
+            WindowContent {
+                ch: ' ',
+                fg: gray,
+                bg: reset,
+            }
         }
         2 => {
             // System window - show fake stats
@@ -76,23 +85,27 @@ fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
                 let (line, bar_end) = lines[y as usize];
                 if x < line.len() as u16 {
                     let ch = line.chars().nth(x as usize).unwrap_or(' ');
-                    let fg = if x >= 6 && x < 6 + bar_end && ch == '█' { green }
-                        else if ch == '█' { yellow }
-                        else if ch == '%' { cyan }
-                        else { white };
+                    let fg = if x >= 6 && x < 6 + bar_end && ch == '█' {
+                        green
+                    } else if ch == '█' {
+                        yellow
+                    } else if ch == '%' {
+                        cyan
+                    } else {
+                        white
+                    };
                     return WindowContent { ch, fg, bg: reset };
                 }
             }
-            WindowContent { ch: ' ', fg: gray, bg: reset }
+            WindowContent {
+                ch: ' ',
+                fg: gray,
+                bg: reset,
+            }
         }
         3 => {
             // Alert window
-            let lines = [
-                "⚠ Warning",
-                "",
-                "Disk usage",
-                "above 85%",
-            ];
+            let lines = ["⚠ Warning", "", "Disk usage", "above 85%"];
             if y < lines.len() as u16 {
                 let line = lines[y as usize];
                 if x < line.len() as u16 {
@@ -101,9 +114,17 @@ fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
                     return WindowContent { ch, fg, bg: reset };
                 }
             }
-            WindowContent { ch: ' ', fg: gray, bg: reset }
+            WindowContent {
+                ch: ' ',
+                fg: gray,
+                bg: reset,
+            }
         }
-        _ => WindowContent { ch: ' ', fg: gray, bg: reset }
+        _ => WindowContent {
+            ch: ' ',
+            fg: gray,
+            bg: reset,
+        },
     }
 }
 
@@ -205,7 +226,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 // Check for minimize button click on title bar (right side)
                                 let mut minimized_click = None;
                                 for (idx, win) in windows.iter().enumerate() {
-                                    if cy == win.y && cx >= win.x + win.width.saturating_sub(4) && cx < win.x + win.width - 1 {
+                                    if cy == win.y
+                                        && cx >= win.x + win.width.saturating_sub(4)
+                                        && cx < win.x + win.width - 1
+                                    {
                                         minimized_click = Some(idx);
                                         break;
                                     }
@@ -234,7 +258,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 // Hit Test for normal windows
                                 let mut focused = None;
                                 for (idx, win) in windows.iter_mut().enumerate().rev() {
-                                    if win.minimized { continue; }
+                                    if win.minimized {
+                                        continue;
+                                    }
                                     if cx >= win.x
                                         && cx < win.x + win.width
                                         && cy >= win.y
@@ -314,7 +340,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // 2. Windows
         for (i, win) in windows.iter().enumerate() {
-            if win.minimized { continue; }
+            if win.minimized {
+                continue;
+            }
             let _z_label = format!("[z:{}]", i + 1);
             let mut p = Plane::new(i + 1, win.width, win.height);
             p.set_absolute_position(win.x, win.y);
@@ -332,19 +360,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     let mut c = Cell::default();
                     if is_border {
-                        c.char = if is_top && is_left { '╭' }
-                            else if is_top && is_right { '╮' }
-                            else if is_bottom && is_left { '╰' }
-                            else if is_bottom && is_right { '╯' }
-                            else if is_top || is_bottom { '─' }
-                            else { '│' };
+                        c.char = if is_top && is_left {
+                            '╭'
+                        } else if is_top && is_right {
+                            '╮'
+                        } else if is_bottom && is_left {
+                            '╰'
+                        } else if is_bottom && is_right {
+                            '╯'
+                        } else if is_top || is_bottom {
+                            '─'
+                        } else {
+                            '│'
+                        };
                         c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                     } else if is_content && wy > 1 {
                         // Window content area
                         let content_y = wy - 2;
                         let content_x = wx - 1;
-                        let content = get_window_content(win._id, content_x, content_y, win.width - 2);
+                        let content =
+                            get_window_content(win._id, content_x, content_y, win.width - 2);
                         c.char = content.ch;
                         c.fg = content.fg;
                         c.bg = content.bg;
@@ -365,16 +401,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         if btn_idx < 3 {
                             c.char = btn_chars[btn_idx];
                             c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
-                            c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                            c.bg =
+                                dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
                     }
                     // Z-order label after title
-                    if is_header && wx > win.title.len() as u16 + 2 && wx < win.width.saturating_sub(4) {
+                    if is_header
+                        && wx > win.title.len() as u16 + 2
+                        && wx < win.width.saturating_sub(4)
+                    {
                         let label_start = win.title.len() as u16 + 2;
                         let label_idx = wx - label_start;
                         if label_idx == 0 {
                             c.char = ' ';
-                            c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                            c.bg =
+                                dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
                     }
                     p.put_cell(wx, wy, c);
@@ -391,7 +432,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let hours = secs / 3600;
         let mins = (secs % 3600) / 60;
         let clock = format!("{:02}:{:02}", hours, mins);
-        let status = format!(" [Start]  Dracon Desktop  |  {}  | q: quit  |  Minimized:", clock);
+        let status = format!(
+            " [Start]  Dracon Desktop  |  {}  | q: quit  |  Minimized:",
+            clock
+        );
         let mut minimized_labels = String::new();
         for (_idx, win) in windows.iter().enumerate() {
             if win.minimized {
@@ -401,7 +445,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let full_status = if minimized_labels.is_empty() {
             status
         } else {
-            format!("{} {}", &status[..status.len().min(size.0 as usize - minimized_labels.len() as usize - 2)], minimized_labels)
+            format!(
+                "{} {}",
+                &status[..status
+                    .len()
+                    .min(size.0 as usize - minimized_labels.len() as usize - 2)],
+                minimized_labels
+            )
         };
         // Taskbar rendering
         let mut taskbar = Plane::new(999, size.0, 1);

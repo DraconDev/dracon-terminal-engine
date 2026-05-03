@@ -381,8 +381,9 @@ impl App {
                                     }
                                     Event::Key(k) => {
                                         if k.code == crate::input::event::KeyCode::Char('c')
-                                            && k.modifiers
-                                                .contains(crate::input::event::KeyModifiers::CONTROL)
+                                            && k.modifiers.contains(
+                                                crate::input::event::KeyModifiers::CONTROL,
+                                            )
                                         {
                                             let focused = self.focus_manager.focused();
                                             let dominated = focused
@@ -484,7 +485,8 @@ impl App {
                                     && k.modifiers
                                         .contains(crate::input::event::KeyModifiers::CONTROL)
                                 {
-                                    let dominated = self.focus_manager
+                                    let dominated = self
+                                        .focus_manager
                                         .focused()
                                         .and_then(|id| self.widget_mut(id))
                                         .map(|mut w| w.handle_key(*k))
@@ -839,16 +841,32 @@ struct InputHandler {
 }
 
 impl Widget for InputHandler {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         (self.handler)(key)

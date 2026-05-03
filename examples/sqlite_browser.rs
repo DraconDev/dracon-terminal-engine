@@ -17,7 +17,7 @@ use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    SearchInput, SplitPane, StatusBar, StatusSegment, Table, Column, Toast, ToastKind,
+    Column, SearchInput, SplitPane, StatusBar, StatusSegment, Table, Toast, ToastKind,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
@@ -39,7 +39,11 @@ impl std::fmt::Display for RowData {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-enum Panel { Tables, Query, Results }
+enum Panel {
+    Tables,
+    Query,
+    Results,
+}
 
 struct SqliteBrowser {
     should_quit: Arc<AtomicBool>,
@@ -71,7 +75,10 @@ impl SqliteBrowser {
 
         let status_bar = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new("SQLite Browser").with_fg(theme.primary))
-            .add_segment(StatusSegment::new("Tab: switch | e: edit | r: refresh | q: quit").with_fg(theme.fg_muted));
+            .add_segment(
+                StatusSegment::new("Tab: switch | e: edit | r: refresh | q: quit")
+                    .with_fg(theme.fg_muted),
+            );
 
         let mut app = Self {
             should_quit,
@@ -151,7 +158,10 @@ impl SqliteBrowser {
             let _ = Command::new("sqlite3").args(&args).output();
         }
 
-        self.toast("Using mock database (sqlite3 not available)", ToastKind::Warning);
+        self.toast(
+            "Using mock database (sqlite3 not available)",
+            ToastKind::Warning,
+        );
         vec!["users".to_string(), "posts".to_string()]
     }
 
@@ -167,17 +177,34 @@ impl SqliteBrowser {
             }
             Ok(o) => {
                 let err = String::from_utf8_lossy(&o.stderr);
-                self.results_columns = vec![Column { header: "Error".to_string(), width: 50 }];
-                self.results_rows = vec![RowData { cells: vec![err.to_string()] }];
+                self.results_columns = vec![Column {
+                    header: "Error".to_string(),
+                    width: 50,
+                }];
+                self.results_rows = vec![RowData {
+                    cells: vec![err.to_string()],
+                }];
                 self.toast("Query error", ToastKind::Error);
             }
             Err(_) => {
-                self.results_columns = vec![Column { header: "Info".to_string(), width: 50 }];
-                self.results_rows = vec![RowData { cells: vec!["SQLite not available. Install sqlite3.".to_string()] }];
+                self.results_columns = vec![Column {
+                    header: "Info".to_string(),
+                    width: 50,
+                }];
+                self.results_rows = vec![RowData {
+                    cells: vec!["SQLite not available. Install sqlite3.".to_string()],
+                }];
             }
         }
 
-        let columns: Vec<Column> = self.results_columns.iter().map(|c| Column { header: c.header.clone(), width: c.width }).collect();
+        let columns: Vec<Column> = self
+            .results_columns
+            .iter()
+            .map(|c| Column {
+                header: c.header.clone(),
+                width: c.width,
+            })
+            .collect();
         let rows: Vec<RowData> = self.results_rows.clone();
         let mut table = Table::new(columns).with_theme(self.theme).with_rows(rows);
         table.set_visible_count(20);
@@ -195,13 +222,24 @@ impl SqliteBrowser {
 
         // Parse header
         let header: Vec<String> = lines[0].split(',').map(|s| s.trim().to_string()).collect();
-        self.results_columns = header.iter().map(|h| Column { header: h.clone(), width: (h.len() + 4).max(10) as u16 }).collect();
+        self.results_columns = header
+            .iter()
+            .map(|h| Column {
+                header: h.clone(),
+                width: (h.len() + 4).max(10) as u16,
+            })
+            .collect();
 
         // Parse rows
-        self.results_rows = lines.iter().skip(1).filter(|l| !l.is_empty()).map(|line| {
-            let cells: Vec<String> = line.split(',').map(|s| s.trim().to_string()).collect();
-            RowData { cells }
-        }).collect();
+        self.results_rows = lines
+            .iter()
+            .skip(1)
+            .filter(|l| !l.is_empty())
+            .map(|line| {
+                let cells: Vec<String> = line.split(',').map(|s| s.trim().to_string()).collect();
+                RowData { cells }
+            })
+            .collect();
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
@@ -215,15 +253,32 @@ impl SqliteBrowser {
 }
 
 impl Widget for SqliteBrowser {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
@@ -244,7 +299,11 @@ impl Widget for SqliteBrowser {
 
         // Left panel: tables
         let left_active = matches!(self.active_panel, Panel::Tables);
-        let left_bg = if left_active { t.surface_elevated } else { t.surface };
+        let left_bg = if left_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in 0..left_rect.height {
             for x in 0..left_rect.width {
                 let idx = (y * area.width + x) as usize;
@@ -259,9 +318,21 @@ impl Widget for SqliteBrowser {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let bg = if is_selected { t.primary_active } else { left_bg };
+            let bg = if is_selected {
+                t.primary_active
+            } else {
+                left_bg
+            };
             let prefix = if is_selected { "> " } else { "  " };
-            draw_text(&mut plane, 2, row, &format!("{}{}", prefix, table), fg, bg, is_selected);
+            draw_text(
+                &mut plane,
+                2,
+                row,
+                &format!("{}{}", prefix, table),
+                fg,
+                bg,
+                is_selected,
+            );
         }
 
         // Separator
@@ -280,7 +351,11 @@ impl Widget for SqliteBrowser {
 
         // Query section
         let query_active = matches!(self.active_panel, Panel::Query);
-        let query_bg = if query_active { t.surface_elevated } else { t.surface };
+        let query_bg = if query_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in 0..query_h {
             for x in 0..right_rect.width {
                 let idx = (y * area.width + left_rect.width + 1 + x) as usize;
@@ -290,17 +365,37 @@ impl Widget for SqliteBrowser {
             }
         }
 
-        draw_text(&mut plane, left_rect.width + 3, 0, "Query", t.primary, query_bg, true);
+        draw_text(
+            &mut plane,
+            left_rect.width + 3,
+            0,
+            "Query",
+            t.primary,
+            query_bg,
+            true,
+        );
         let query_text = if self.editing_query {
             format!("{}_", self.search_input.query())
         } else {
             self.query.clone()
         };
-        draw_text(&mut plane, left_rect.width + 3, 1, &query_text, t.fg, query_bg, false);
+        draw_text(
+            &mut plane,
+            left_rect.width + 3,
+            1,
+            &query_text,
+            t.fg,
+            query_bg,
+            false,
+        );
 
         // Results section
         let results_active = matches!(self.active_panel, Panel::Results);
-        let results_bg = if results_active { t.surface_elevated } else { t.surface };
+        let results_bg = if results_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in results_y..content_h {
             for x in 0..right_rect.width {
                 let idx = (y * area.width + left_rect.width + 1 + x) as usize;
@@ -310,12 +405,27 @@ impl Widget for SqliteBrowser {
             }
         }
 
-        draw_text(&mut plane, left_rect.width + 3, results_y, "Results", t.primary, results_bg, true);
+        draw_text(
+            &mut plane,
+            left_rect.width + 3,
+            results_y,
+            "Results",
+            t.primary,
+            results_bg,
+            true,
+        );
 
         if let Some(ref table) = self.results_table {
-            let table_plane = table.render(Rect::new(left_rect.width + 2, results_y + 1, right_rect.width.saturating_sub(2), results_h.saturating_sub(1)));
+            let table_plane = table.render(Rect::new(
+                left_rect.width + 2,
+                results_y + 1,
+                right_rect.width.saturating_sub(2),
+                results_h.saturating_sub(1),
+            ));
             for (i, c) in table_plane.cells.iter().enumerate() {
-                if c.transparent { continue; }
+                if c.transparent {
+                    continue;
+                }
                 let row = i / table_plane.width as usize;
                 let col = i % table_plane.width as usize;
                 let dst_x = left_rect.width + 2 + col as u16;
@@ -326,12 +436,22 @@ impl Widget for SqliteBrowser {
                 }
             }
         } else {
-            draw_text(&mut plane, left_rect.width + 3, results_y + 2, "No results", t.fg_muted, results_bg, false);
+            draw_text(
+                &mut plane,
+                left_rect.width + 3,
+                results_y + 2,
+                "No results",
+                t.fg_muted,
+                results_bg,
+                false,
+            );
         }
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
-        let status_plane = self.status_bar.render(Rect::new(0, status_y, area.width, status_h));
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, status_y, area.width, status_h));
         for (i, c) in status_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
                 let base = (status_y * area.width) as usize;
@@ -359,7 +479,9 @@ impl Widget for SqliteBrowser {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.editing_query {
             match key.code {
@@ -377,14 +499,23 @@ impl Widget for SqliteBrowser {
                 }
                 _ => {
                     let handled = self.search_input.handle_key(key);
-                    if handled { self.dirty = true; }
+                    if handled {
+                        self.dirty = true;
+                    }
                     handled
                 }
             }
         } else {
             match key.code {
-                KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
-                KeyCode::Char('r') => { self.refresh(); self.toast("Refreshed", ToastKind::Info); true }
+                KeyCode::Char('q') => {
+                    self.should_quit.store(true, Ordering::SeqCst);
+                    true
+                }
+                KeyCode::Char('r') => {
+                    self.refresh();
+                    self.toast("Refreshed", ToastKind::Info);
+                    true
+                }
                 KeyCode::Char('e') => {
                     self.editing_query = true;
                     self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme);
@@ -403,16 +534,36 @@ impl Widget for SqliteBrowser {
                 }
                 KeyCode::Down | KeyCode::Char('j') => {
                     match self.active_panel {
-                        Panel::Tables => if self.selected_table + 1 < self.tables.len() { self.selected_table += 1; self.dirty = true; }
-                        Panel::Results => if let Some(ref mut table) = self.results_table { table.handle_key(key); self.dirty = true; }
+                        Panel::Tables => {
+                            if self.selected_table + 1 < self.tables.len() {
+                                self.selected_table += 1;
+                                self.dirty = true;
+                            }
+                        }
+                        Panel::Results => {
+                            if let Some(ref mut table) = self.results_table {
+                                table.handle_key(key);
+                                self.dirty = true;
+                            }
+                        }
                         _ => {}
                     }
                     true
                 }
                 KeyCode::Up | KeyCode::Char('k') => {
                     match self.active_panel {
-                        Panel::Tables => if self.selected_table > 0 { self.selected_table -= 1; self.dirty = true; }
-                        Panel::Results => if let Some(ref mut table) = self.results_table { table.handle_key(key); self.dirty = true; }
+                        Panel::Tables => {
+                            if self.selected_table > 0 {
+                                self.selected_table -= 1;
+                                self.dirty = true;
+                            }
+                        }
+                        Panel::Results => {
+                            if let Some(ref mut table) = self.results_table {
+                                table.handle_key(key);
+                                self.dirty = true;
+                            }
+                        }
                         _ => {}
                     }
                     true
@@ -456,7 +607,9 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let db_path = std::env::args().nth(1).unwrap_or_else(|| ":memory:".to_string());
+    let db_path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| ":memory:".to_string());
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
@@ -468,8 +621,11 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(browser), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {
-        if quit_check.load(Ordering::SeqCst) { ctx.stop(); }
-    }).run(|_ctx| {})?;
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_ctx| {})?;
 
     println!("\nSQLite Browser exited cleanly");
     Ok(())

@@ -49,20 +49,147 @@ impl ExampleMeta {
     fn all() -> Vec<Self> {
         vec![
             // Apps
-            ExampleMeta { name: "system_monitor", category: "apps", description: "Live system gauges with auto-refresh", binary_name: "system_monitor", preview: &["CPU [████████░░] 80%", "MEM [██████░░░░] 60%", "DISK [████░░░░░░] 40%", "NET  [██████████] 100%",] },
-            ExampleMeta { name: "ide", category: "apps", description: "Full IDE with menus, tabs, tree, editor", binary_name: "ide", preview: &["[File][Edit][View]", "+-src/ +--------+", "| main |fn main|", "| lib  |{      |",] },
-            ExampleMeta { name: "file_manager", category: "apps", description: "File browser with Tree + Table", binary_name: "file_manager", preview: &["v home/", "  v user/", "    v src/", "      > main.rs",] },
-            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with panels", binary_name: "chat_client", preview: &["[10:42] Alice: Hey!", "[10:43] Bob: Hi", "[10:44] Alice: Hi!", "> _",] },
-            ExampleMeta { name: "git_tui", category: "apps", description: "Real Git status/log/diff/branches", binary_name: "git_tui", preview: &["[Status][Log][Diff]", " M src/main.rs", " A Cargo.toml", "?? README.md",] },
+            ExampleMeta {
+                name: "system_monitor",
+                category: "apps",
+                description: "Live system gauges with auto-refresh",
+                binary_name: "system_monitor",
+                preview: &[
+                    "CPU [████████░░] 80%",
+                    "MEM [██████░░░░] 60%",
+                    "DISK [████░░░░░░] 40%",
+                    "NET  [██████████] 100%",
+                ],
+            },
+            ExampleMeta {
+                name: "ide",
+                category: "apps",
+                description: "Full IDE with menus, tabs, tree, editor",
+                binary_name: "ide",
+                preview: &[
+                    "[File][Edit][View]",
+                    "+-src/ +--------+",
+                    "| main |fn main|",
+                    "| lib  |{      |",
+                ],
+            },
+            ExampleMeta {
+                name: "file_manager",
+                category: "apps",
+                description: "File browser with Tree + Table",
+                binary_name: "file_manager",
+                preview: &["v home/", "  v user/", "    v src/", "      > main.rs"],
+            },
+            ExampleMeta {
+                name: "chat_client",
+                category: "apps",
+                description: "Rich chat UI with panels",
+                binary_name: "chat_client",
+                preview: &[
+                    "[10:42] Alice: Hey!",
+                    "[10:43] Bob: Hi",
+                    "[10:44] Alice: Hi!",
+                    "> _",
+                ],
+            },
+            ExampleMeta {
+                name: "git_tui",
+                category: "apps",
+                description: "Real Git status/log/diff/branches",
+                binary_name: "git_tui",
+                preview: &[
+                    "[Status][Log][Diff]",
+                    " M src/main.rs",
+                    " A Cargo.toml",
+                    "?? README.md",
+                ],
+            },
             // Cookbook
-            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets demo", binary_name: "widget_gallery", preview: &["[x] Checkbox", "(o) Radio", "[----] Slider", "Loading [####] ",] },
-            ExampleMeta { name: "command_bindings", category: "cookbook", description: "Live CLI-bound widgets", binary_name: "command_bindings", preview: &["Load: 0.45 0.32", "CPU:  [####--]", "Mem:  [######]", "Net:  [------]",] },
-            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Drag-to-resize SplitPane", binary_name: "split_resizer", preview: &["+-----+-----+", "|  A  |  B  |", "+--+--+-----+", "|  C  |  D  |",] },
-            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu", binary_name: "menu_system", preview: &["[File][Edit][View]", "+-----------+", "| New        |", "| Open       |",] },
+            ExampleMeta {
+                name: "widget_gallery",
+                category: "cookbook",
+                description: "All interactive widgets demo",
+                binary_name: "widget_gallery",
+                preview: &[
+                    "[x] Checkbox",
+                    "(o) Radio",
+                    "[----] Slider",
+                    "Loading [####] ",
+                ],
+            },
+            ExampleMeta {
+                name: "command_bindings",
+                category: "cookbook",
+                description: "Live CLI-bound widgets",
+                binary_name: "command_bindings",
+                preview: &[
+                    "Load: 0.45 0.32",
+                    "CPU:  [####--]",
+                    "Mem:  [######]",
+                    "Net:  [------]",
+                ],
+            },
+            ExampleMeta {
+                name: "split_resizer",
+                category: "cookbook",
+                description: "Drag-to-resize SplitPane",
+                binary_name: "split_resizer",
+                preview: &[
+                    "+-----+-----+",
+                    "|  A  |  B  |",
+                    "+--+--+-----+",
+                    "|  C  |  D  |",
+                ],
+            },
+            ExampleMeta {
+                name: "menu_system",
+                category: "cookbook",
+                description: "MenuBar + ContextMenu",
+                binary_name: "menu_system",
+                preview: &[
+                    "[File][Edit][View]",
+                    "+-----------+",
+                    "| New        |",
+                    "| Open       |",
+                ],
+            },
             // Tools
-            ExampleMeta { name: "theme_switcher", category: "tools", description: "Live theme cycling (15 themes)", binary_name: "theme_switcher", preview: &["Theme: Nord", "+----------+", "| # # # #   |", "| # # # #   |",] },
-            ExampleMeta { name: "modal_demo", category: "tools", description: "Modal dialogs + focus trapping", binary_name: "modal_demo", preview: &["+---------------+", "| Confirm?     |", "| [Yes] [No]   |", "+---------------+",] },
-            ExampleMeta { name: "desktop", category: "tools", description: "Draggable windows + taskbar", binary_name: "desktop", preview: &["+------++------+", "| Win1 || Win2  |", "|      ||      |", "+------++------+",] },
+            ExampleMeta {
+                name: "theme_switcher",
+                category: "tools",
+                description: "Live theme cycling (15 themes)",
+                binary_name: "theme_switcher",
+                preview: &[
+                    "Theme: Nord",
+                    "+----------+",
+                    "| # # # #   |",
+                    "| # # # #   |",
+                ],
+            },
+            ExampleMeta {
+                name: "modal_demo",
+                category: "tools",
+                description: "Modal dialogs + focus trapping",
+                binary_name: "modal_demo",
+                preview: &[
+                    "+---------------+",
+                    "| Confirm?     |",
+                    "| [Yes] [No]   |",
+                    "+---------------+",
+                ],
+            },
+            ExampleMeta {
+                name: "desktop",
+                category: "tools",
+                description: "Draggable windows + taskbar",
+                binary_name: "desktop",
+                preview: &[
+                    "+------++------+",
+                    "| Win1 || Win2  |",
+                    "|      ||      |",
+                    "+------++------+",
+                ],
+            },
         ]
     }
 }
@@ -110,7 +237,11 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>) -> Self {
+    fn new(
+        should_quit: Arc<AtomicBool>,
+        pending: Arc<Mutex<Option<String>>>,
+        fps: Arc<AtomicU64>,
+    ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -176,16 +307,19 @@ impl Showcase {
         if let Some(idx) = self.pending_theme.take() {
             self.theme = Self::themes()[idx % Self::themes().len()].1;
         }
-        self.filtered = self.examples.iter().enumerate()
+        self.filtered = self
+            .examples
+            .iter()
+            .enumerate()
             .filter(|(_, ex)| {
                 let matches_category = self.category_filter.map_or(true, |cat| ex.category == cat);
                 let matches_search = if self.search_query.is_empty() {
                     true
                 } else {
                     let q = self.search_query.to_lowercase();
-                    ex.name.to_lowercase().contains(&q) ||
-                    ex.description.to_lowercase().contains(&q) ||
-                    ex.category.to_lowercase().contains(&q)
+                    ex.name.to_lowercase().contains(&q)
+                        || ex.description.to_lowercase().contains(&q)
+                        || ex.category.to_lowercase().contains(&q)
                 };
                 matches_category && matches_search
             })
@@ -195,7 +329,9 @@ impl Showcase {
     }
 
     fn selected_example(&self) -> Option<&ExampleMeta> {
-        self.filtered.get(self.selected).and_then(|&idx| self.examples.get(idx))
+        self.filtered
+            .get(self.selected)
+            .and_then(|&idx| self.examples.get(idx))
     }
 
     fn launch_selected(&mut self) {
@@ -213,7 +349,9 @@ impl Showcase {
 fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, selected: bool) {
     let w = area.width as usize;
     let h = area.height as usize;
-    if w < 2 || h < 2 { return; }
+    if w < 2 || h < 2 {
+        return;
+    }
 
     let chars = if selected {
         ('╭', '╮', '╰', '╯', '─', '│', '▓')
@@ -286,7 +424,16 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, card_w: u16, card_h: u16) -> Plane {
+fn render_card(
+    ex: &ExampleMeta,
+    idx: usize,
+    selected_idx: usize,
+    hovered_idx: Option<usize>,
+    t: Theme,
+    phase: f64,
+    card_w: u16,
+    card_h: u16,
+) -> Plane {
     let mut plane = Plane::new(0, card_w, card_h);
     let card_w_usize = card_w as usize;
     let card_h_usize = card_h as usize;
@@ -300,14 +447,30 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
 
     let border_fg = if is_selected {
         let pulse = (card_phase * 2.0).sin() * 0.5 + 0.5;
-        if pulse > 0.5 { t.primary } else { t.primary_hover }
+        if pulse > 0.5 {
+            t.primary
+        } else {
+            t.primary_hover
+        }
     } else if is_hovered {
         t.primary_hover
     } else {
         t.outline
     };
-    let bg = if is_selected { t.surface_elevated } else if is_hovered { t.surface } else { t.surface };
-    draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected || is_hovered);
+    let bg = if is_selected {
+        t.surface_elevated
+    } else if is_hovered {
+        t.surface
+    } else {
+        t.surface
+    };
+    draw_rounded_border(
+        &mut plane,
+        Rect::new(0, 0, card_w, card_h),
+        border_fg,
+        bg,
+        is_selected || is_hovered,
+    );
 
     let badge = format!(" {} ", ex.category.to_uppercase());
     let badge_x = 2usize;
@@ -372,11 +535,19 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
     ];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = 6 + i;
-        if y > 11 { break; }
+        if y > 11 {
+            break;
+        }
         let bar_w = 14;
         let val = value.max(0.0).min(100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
-        let color = if val > 80.0 { t.error } else if val > 60.0 { t.warning } else { t.success };
+        let color = if val > 80.0 {
+            t.error
+        } else if val > 60.0 {
+            t.warning
+        } else {
+            t.success
+        };
         draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
         set_cell(plane, 6, y, '[', t.fg_muted, t.surface);
         for j in 0..bar_w {
@@ -397,8 +568,16 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
 
     for y in 6..12 {
         for x in 1..w {
-            let bg = if x <= split_x { t.surface_elevated } else { t.surface };
-            let fg = if x <= split_x { t.fg_muted } else { t.fg_subtle };
+            let bg = if x <= split_x {
+                t.surface_elevated
+            } else {
+                t.surface
+            };
+            let fg = if x <= split_x {
+                t.fg_muted
+            } else {
+                t.fg_subtle
+            };
             set_cell(plane, x, y, ' ', fg, bg);
         }
     }
@@ -416,20 +595,43 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
 fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
-        format!("CPU:  [{}{}]", "█".repeat((phase * 4.0).sin() as usize * 2 + 2), "░".repeat(6)),
-        format!("Mem:  [{}{}]", "█".repeat((phase * 3.0).sin() as usize * 2 + 3), "░".repeat(5)),
-        format!("Net:  [{}{}]", "█".repeat((phase * 2.0).sin() as usize * 2 + 1), "░".repeat(7)),
+        format!(
+            "CPU:  [{}{}]",
+            "█".repeat((phase * 4.0).sin() as usize * 2 + 2),
+            "░".repeat(6)
+        ),
+        format!(
+            "Mem:  [{}{}]",
+            "█".repeat((phase * 3.0).sin() as usize * 2 + 3),
+            "░".repeat(5)
+        ),
+        format!(
+            "Net:  [{}{}]",
+            "█".repeat((phase * 2.0).sin() as usize * 2 + 1),
+            "░".repeat(7)
+        ),
     ];
     for (i, line) in lines.iter().enumerate() {
         let py = 6 + i;
-        if py > 11 { break; }
+        if py > 11 {
+            break;
+        }
         let truncated: String = line.chars().take(24).collect();
         draw_text(plane, 2, py, &truncated, t.fg_subtle, t.surface, false);
     }
 }
 
 fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
-    let colors = [t.primary, t.primary_hover, t.success, t.warning, t.error, t.info, t.fg, t.bg];
+    let colors = [
+        t.primary,
+        t.primary_hover,
+        t.success,
+        t.warning,
+        t.error,
+        t.info,
+        t.fg,
+        t.bg,
+    ];
     let cols = 4;
     let swatch_size = 3;
     for (i, color) in colors.iter().enumerate() {
@@ -437,7 +639,9 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) 
         let row = i / cols;
         let x = 2 + col * (swatch_size + 1);
         let y = 6 + row * 2;
-        if y > 11 { break; }
+        if y > 11 {
+            break;
+        }
         for dx in 0..swatch_size {
             set_cell(plane, x + dx, y, ' ', t.fg, *color);
             set_cell(plane, x + dx, y + 1, ' ', t.fg, *color);
@@ -451,7 +655,9 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
     let checks = ["[x] Alpha", "[ ] Beta", "[x] Gamma"];
     for (i, check) in checks.iter().enumerate() {
         let py = 6 + i;
-        if py > 10 { break; }
+        if py > 10 {
+            break;
+        }
         let text: String = check.chars().take(12).collect();
         draw_text(plane, 2, py, &text, t.fg_subtle, t.surface, false);
     }
@@ -462,11 +668,25 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
     let thumb = thumb.min(slider_w - 1);
     draw_text(plane, 2, slider_y, "[", t.fg_muted, t.surface, false);
     for i in 0..slider_w {
-        let ch = if i == thumb { '#' } else if i < thumb { '=' } else { '-' };
+        let ch = if i == thumb {
+            '#'
+        } else if i < thumb {
+            '='
+        } else {
+            '-'
+        };
         let fg = if i == thumb { t.primary } else { t.fg_muted };
         set_cell(plane, 3 + i, slider_y, ch, fg, t.surface);
     }
-    draw_text(plane, 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
+    draw_text(
+        plane,
+        3 + slider_w,
+        slider_y,
+        "]",
+        t.fg_muted,
+        t.surface,
+        false,
+    );
 }
 
 fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
@@ -501,7 +721,11 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
             let py = 6 + view_idx;
             if py < 13 {
                 let text: String = line.chars().take(20).collect();
-                let fg = if line.contains("active") { t.primary } else { t.fg_subtle };
+                let fg = if line.contains("active") {
+                    t.primary
+                } else {
+                    t.fg_subtle
+                };
                 draw_text(plane, 2, py, &text, fg, t.surface, false);
             }
         }
@@ -513,21 +737,37 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
     let thumb_pos = if max_offset == 0 {
         0
     } else {
-        (offset * (track_h.saturating_sub(thumb_len))).checked_div(max_offset).unwrap_or(0)
+        (offset * (track_h.saturating_sub(thumb_len)))
+            .checked_div(max_offset)
+            .unwrap_or(0)
     };
 
     for y in 0..track_h {
         let cy = 6 + y;
-        if cy >= 13 { break; }
-        let ch = if y >= thumb_pos && y < thumb_pos + thumb_len { '█' } else { '░' };
-        let fg = if y >= thumb_pos && y < thumb_pos + thumb_len { t.primary } else { t.fg_muted };
+        if cy >= 13 {
+            break;
+        }
+        let ch = if y >= thumb_pos && y < thumb_pos + thumb_len {
+            '█'
+        } else {
+            '░'
+        };
+        let fg = if y >= thumb_pos && y < thumb_pos + thumb_len {
+            t.primary
+        } else {
+            t.fg_muted
+        };
         set_cell(plane, track_x, cy, ch, fg, t.surface);
     }
 }
 
 fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     // Tab bar with active/inactive tabs
-    let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
+    let tabs = [
+        (" main.rs ", true),
+        (" lib.rs ", false),
+        (" mod.rs ", false),
+    ];
     let mut tab_x = 1usize;
     let mut active_tab_start = 0usize;
     let mut active_tab_len = 0usize;
@@ -543,7 +783,14 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     }
     // Underline for active tab
     for dx in 0..active_tab_len {
-        set_cell(plane, active_tab_start + dx, 5 + 1, '▔', t.primary_active, t.surface);
+        set_cell(
+            plane,
+            active_tab_start + dx,
+            5 + 1,
+            '▔',
+            t.primary_active,
+            t.surface,
+        );
     }
 
     // Code lines with line numbers
@@ -555,7 +802,9 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     ];
     for (i, (num, code)) in lines.iter().enumerate() {
         let py = 6 + i;
-        if py > 10 { break; }
+        if py > 10 {
+            break;
+        }
         draw_text(plane, 1, py, num, t.fg_muted, t.surface, false);
         draw_text(plane, 3, py, code, t.fg, t.surface, false);
     }
@@ -586,15 +835,21 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
         let wy = wy.min(11);
 
         set_cell(plane, wx, wy, '┌', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.surface); }
+        for dx in 1..w - 1 {
+            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
+        }
         set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
         for dy in 1..h - 1 {
             set_cell(plane, wx, wy + dy, '│', *color, t.surface);
-            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface); }
+            for dx in 1..w - 1 {
+                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
+            }
             set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
         }
         set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface); }
+        for dx in 1..w - 1 {
+            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
+        }
         set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
     }
 }
@@ -616,16 +871,22 @@ fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
         let wy = wy.min(11);
 
         set_cell(plane, wx, wy, '┌', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.surface); }
+        for dx in 1..w - 1 {
+            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
+        }
         set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
         for dy in 1..h - 1 {
             set_cell(plane, wx, wy + dy, '│', *color, t.surface);
-            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface); }
+            for dx in 1..w - 1 {
+                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
+            }
             set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
         }
         set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface); }
-set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
+        for dx in 1..w - 1 {
+            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
+        }
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
 
         draw_text(plane, wx + 2, wy + 1, label, *color, t.surface, true);
     }
@@ -633,15 +894,47 @@ set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
 
 fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     // Branch header
-    draw_text(plane, 2, 6, " main ", t.fg_on_accent, t.primary_active, true);
-    draw_text(plane, 2, 7, "Status: 3 files changed", t.fg, t.surface, false);
+    draw_text(
+        plane,
+        2,
+        6,
+        " main ",
+        t.fg_on_accent,
+        t.primary_active,
+        true,
+    );
+    draw_text(
+        plane,
+        2,
+        7,
+        "Status: 3 files changed",
+        t.fg,
+        t.surface,
+        false,
+    );
 
     // Animated diff lines cycling through different statuses
     let phases = [
-        [(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)],
-        [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)],
-        [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)],
-        [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)],
+        [
+            (" M src/main.rs", t.warning),
+            (" A Cargo.toml", t.success),
+            ("?? README.md", t.error),
+        ],
+        [
+            (" M Cargo.toml", t.warning),
+            (" D old.rs", t.error),
+            (" A new.rs", t.success),
+        ],
+        [
+            ("?? config.yml", t.error),
+            (" M lib.rs", t.warning),
+            (" A test.rs", t.success),
+        ],
+        [
+            (" D removed.rs", t.error),
+            (" M updated.rs", t.warning),
+            ("?? unknown.py", t.error),
+        ],
     ];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
     let lines = &phases[phase_idx];
@@ -661,12 +954,24 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w:
         (3, "    README.md", false, -1),
     ];
     let expand_phase = ((phase * 0.5).sin() * 4.0).round() as usize % 4;
-    let visible_depth = if expand_phase == 0 { 1 } else if expand_phase == 1 { 2 } else if expand_phase == 2 { 3 } else { 4 };
+    let visible_depth = if expand_phase == 0 {
+        1
+    } else if expand_phase == 1 {
+        2
+    } else if expand_phase == 2 {
+        3
+    } else {
+        4
+    };
 
     for (i, (indent, name, is_dir, _)) in items.iter().enumerate() {
-        if *indent as usize > visible_depth { continue; }
+        if *indent as usize > visible_depth {
+            continue;
+        }
         let py = 6 + i;
-        if py > 12 { break; }
+        if py > 12 {
+            break;
+        }
         let icon = if *is_dir { "v" } else { ">" };
         let text = format!("{}{}", icon, name);
         let fg = if *is_dir { t.warning } else { t.fg_subtle };
@@ -716,30 +1021,127 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
     let modal_y = 6usize;
 
     let pulse = (phase * 2.0).sin() * 0.5 + 0.5;
-    let border_color = if pulse > 0.5 { t.primary } else { t.primary_hover };
+    let border_color = if pulse > 0.5 {
+        t.primary
+    } else {
+        t.primary_hover
+    };
 
-    set_cell(plane, modal_x, modal_y, '┌', border_color, t.surface_elevated);
-    for dx in 1..modal_w - 1 { set_cell(plane, modal_x + dx, modal_y, '─', border_color, t.surface_elevated); }
-    set_cell(plane, modal_x + modal_w - 1, modal_y, '┐', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x,
+        modal_y,
+        '┌',
+        border_color,
+        t.surface_elevated,
+    );
+    for dx in 1..modal_w - 1 {
+        set_cell(
+            plane,
+            modal_x + dx,
+            modal_y,
+            '─',
+            border_color,
+            t.surface_elevated,
+        );
+    }
+    set_cell(
+        plane,
+        modal_x + modal_w - 1,
+        modal_y,
+        '┐',
+        border_color,
+        t.surface_elevated,
+    );
 
     for dy in 1..modal_h - 1 {
-        set_cell(plane, modal_x, modal_y + dy, '│', border_color, t.surface_elevated);
-        for dx in 1..modal_w - 1 { set_cell(plane, modal_x + dx, modal_y + dy, ' ', t.fg, t.surface_elevated); }
-        set_cell(plane, modal_x + modal_w - 1, modal_y + dy, '│', border_color, t.surface_elevated);
+        set_cell(
+            plane,
+            modal_x,
+            modal_y + dy,
+            '│',
+            border_color,
+            t.surface_elevated,
+        );
+        for dx in 1..modal_w - 1 {
+            set_cell(
+                plane,
+                modal_x + dx,
+                modal_y + dy,
+                ' ',
+                t.fg,
+                t.surface_elevated,
+            );
+        }
+        set_cell(
+            plane,
+            modal_x + modal_w - 1,
+            modal_y + dy,
+            '│',
+            border_color,
+            t.surface_elevated,
+        );
     }
 
-    set_cell(plane, modal_x, modal_y + modal_h - 1, '└', border_color, t.surface_elevated);
-    for dx in 1..modal_w - 1 { set_cell(plane, modal_x + dx, modal_y + modal_h - 1, '─', border_color, t.surface_elevated); }
-    set_cell(plane, modal_x + modal_w - 1, modal_y + modal_h - 1, '┘', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x,
+        modal_y + modal_h - 1,
+        '└',
+        border_color,
+        t.surface_elevated,
+    );
+    for dx in 1..modal_w - 1 {
+        set_cell(
+            plane,
+            modal_x + dx,
+            modal_y + modal_h - 1,
+            '─',
+            border_color,
+            t.surface_elevated,
+        );
+    }
+    set_cell(
+        plane,
+        modal_x + modal_w - 1,
+        modal_y + modal_h - 1,
+        '┘',
+        border_color,
+        t.surface_elevated,
+    );
 
     let text = " Confirm? ";
     let text_x = modal_x + (modal_w - text.len()) / 2;
-    draw_text(plane, text_x, modal_y + 2, text, t.fg, t.surface_elevated, true);
+    draw_text(
+        plane,
+        text_x,
+        modal_y + 2,
+        text,
+        t.fg,
+        t.surface_elevated,
+        true,
+    );
 
     let yes_text = "[ Yes ]";
     let no_text = "[ No  ]";
-    draw_text(plane, modal_x + 4, modal_y + 4, yes_text, t.primary, t.surface_elevated, true);
-    draw_text(plane, modal_x + 14, modal_y + 4, no_text, t.fg_muted, t.surface_elevated, false);
+    draw_text(
+        plane,
+        modal_x + 4,
+        modal_y + 4,
+        yes_text,
+        t.primary,
+        t.surface_elevated,
+        true,
+    );
+    draw_text(
+        plane,
+        modal_x + 14,
+        modal_y + 4,
+        no_text,
+        t.fg_muted,
+        t.surface_elevated,
+        false,
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -749,15 +1151,27 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
 // ═══════════════════════════════════════════════════════════════════════════════
 
 impl Widget for Showcase {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
@@ -794,7 +1208,15 @@ impl Widget for Showcase {
         let clock_text = now.format("%H:%M:%S").to_string();
         let clock_x = title_x + title_text.len() + 2;
         if clock_x + clock_text.len() < area.width as usize - 10 {
-            draw_text(&mut plane, clock_x, title_y, &clock_text, t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                clock_x,
+                title_y,
+                &clock_text,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // FPS counter (right-aligned)
@@ -803,17 +1225,27 @@ impl Widget for Showcase {
             let fps_text = format!("{} FPS", fps_val);
             let fps_x = area.width as usize - fps_text.len() - 2;
             if fps_x > title_x + title_text.len() {
-                draw_text(&mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false);
+                draw_text(
+                    &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false,
+                );
             }
         }
-        
+
         // FPS toggle checkbox
         let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
         let toggle_x = area.width as usize - fps_toggle.len() - 2;
-        draw_text(&mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false,
+        );
         // Zone: FPS toggle
         let mut zones = self.zones.borrow_mut();
-        zones.register(400, toggle_x as u16, title_y as u16, fps_toggle.len() as u16, 1);
+        zones.register(
+            400,
+            toggle_x as u16,
+            title_y as u16,
+            fps_toggle.len() as u16,
+            1,
+        );
         drop(zones);
 
         // Theme palette bar
@@ -823,39 +1255,67 @@ impl Widget for Showcase {
         let gap = 1usize;
         let max_visible = (area.width as usize).saturating_sub(4) / (square_w + gap);
         let visible_themes = max_visible.min(themes.len());
-        let palette_start_x = ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
+        let palette_start_x =
+            ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
         const PALETTE_BASE: usize = 200;
         // Determine hovered palette swatch
-        let hovered_palette = self.mouse_pos
+        let hovered_palette = self
+            .mouse_pos
             .filter(|(_, my)| *my as usize == palette_y)
             .and_then(|(mx, _)| {
                 let x = mx as usize;
                 if x >= palette_start_x && x < palette_start_x + visible_themes * (square_w + gap) {
                     let rel = x - palette_start_x;
                     let idx = rel / (square_w + gap);
-                    if rel % (square_w + gap) < square_w { Some(idx) } else { None }
+                    if rel % (square_w + gap) < square_w {
+                        Some(idx)
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
             })
             .filter(|idx| *idx < themes.len());
         for (i, (_name, theme)) in themes.iter().enumerate() {
-            if i >= visible_themes { break; }
+            if i >= visible_themes {
+                break;
+            }
             let x = palette_start_x + i * (square_w + gap);
             let is_active = theme.name == self.theme.name;
             let is_hovered = hovered_palette == Some(i);
-            let bg = if is_hovered { theme.primary_hover } else if is_active { theme.primary_active } else { theme.primary };
-            let fg = if is_hovered || is_active { theme.fg_on_accent } else { theme.fg_muted };
+            let bg = if is_hovered {
+                theme.primary_hover
+            } else if is_active {
+                theme.primary_active
+            } else {
+                theme.primary
+            };
+            let fg = if is_hovered || is_active {
+                theme.fg_on_accent
+            } else {
+                theme.fg_muted
+            };
             // Draw 2-char wide colored square
             for dx in 0..square_w {
                 if x + dx < area.width as usize {
-                    let ch = if dx == 0 && is_active && !is_hovered { '▶' } else { ' ' };
+                    let ch = if dx == 0 && is_active && !is_hovered {
+                        '▶'
+                    } else {
+                        ' '
+                    };
                     set_cell(&mut plane, x + dx, palette_y, ch, fg, bg);
                 }
             }
             // Register zone for this palette swatch
             let mut zones = self.zones.borrow_mut();
-            zones.register(PALETTE_BASE + i, x as u16, palette_y as u16, square_w as u16, 1);
+            zones.register(
+                PALETTE_BASE + i,
+                x as u16,
+                palette_y as u16,
+                square_w as u16,
+                1,
+            );
             drop(zones);
         }
 
@@ -868,7 +1328,15 @@ impl Widget for Showcase {
             themes.len()
         );
         let stats_start = 2usize;
-        draw_text(&mut plane, stats_start, stats_y, &stats_text, t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            stats_start,
+            stats_y,
+            &stats_text,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
         for x in stats_start + stats_text.len()..area.width as usize - 2 {
             set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
         }
@@ -878,9 +1346,21 @@ impl Widget for Showcase {
         let search_icon = if self.search_active { ">" } else { ":" };
         let search_prompt = if self.search_active { ">" } else { " " };
         let search_text = format!("{} {} [{}]", search_icon, search_prompt, self.search_query);
-        let search_fg = if self.search_active { t.primary } else { t.fg_muted };
+        let search_fg = if self.search_active {
+            t.primary
+        } else {
+            t.fg_muted
+        };
         let search_text_chars = search_text.chars().count() + 1;
-        draw_text(&mut plane, 2, search_y, &search_text, search_fg, t.surface, false);
+        draw_text(
+            &mut plane,
+            2,
+            search_y,
+            &search_text,
+            search_fg,
+            t.surface,
+            false,
+        );
         // Fill rest of search bar
         for x in search_text_chars + 2..area.width as usize - 2 {
             set_cell(&mut plane, x, search_y, ' ', search_fg, t.surface);
@@ -902,20 +1382,40 @@ impl Widget for Showcase {
             } else {
                 format!("  {} results", self.filtered.len())
             };
-            let feedback_color = if self.filtered.is_empty() { t.error } else { t.fg_muted };
-            draw_text(&mut plane, 2, 5, &feedback_text, feedback_color, t.bg, false);
+            let feedback_color = if self.filtered.is_empty() {
+                t.error
+            } else {
+                t.fg_muted
+            };
+            draw_text(
+                &mut plane,
+                2,
+                5,
+                &feedback_text,
+                feedback_color,
+                t.bg,
+                false,
+            );
         }
 
         // Primitives bar
         let prim_y = 4usize;
-        let state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
+        let state_0 = if self.primitive_toggle {
+            "[*] Toggle"
+        } else {
+            "[ ] Toggle"
+        };
         let state_1 = {
             let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
             let filled: String = (0..pos).map(|_| '=').collect();
             let empty: String = (pos..10).map(|_| "-").collect();
             format!("[{}{}]", filled, empty)
         };
-        let state_2 = if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" };
+        let state_2 = if self.primitive_checkbox {
+            "[x] Check"
+        } else {
+            "[ ] Check"
+        };
         let state_3 = {
             let sel = self.primitive_radio;
             let opts = ["(1)", "(2)", "(3)"];
@@ -925,7 +1425,11 @@ impl Widget for Showcase {
             }
             s
         };
-        let state_4 = if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" };
+        let state_4 = if self.primitive_button {
+            "[CLICKED!]"
+        } else {
+            "[ Button ]"
+        };
         let prim_controls: [(&str, &str); 5] = [
             ("[1]", state_0),
             ("[2]", &state_1),
@@ -939,16 +1443,23 @@ impl Widget for Showcase {
         const PRIM_BASE: usize = 100;
         for (i, (key, state)) in prim_controls.iter().enumerate() {
             let total_w = key.len() + 1 + state.len();
-            zones.register(PRIM_BASE + i, prim_x as u16, prim_y as u16, total_w as u16, 1);
+            zones.register(
+                PRIM_BASE + i,
+                prim_x as u16,
+                prim_y as u16,
+                total_w as u16,
+                1,
+            );
             prim_x += total_w + 3;
         }
         // Determine hover from zones
-        let hovered_prim = self.mouse_pos
+        let hovered_prim = self
+            .mouse_pos
             .and_then(|(mx, my)| zones.dispatch(mx, my))
             .filter(|id| *id >= PRIM_BASE && *id < PRIM_BASE + 5)
             .map(|id| id - PRIM_BASE);
         drop(zones); // release borrow before using plane
-        // Draw primitives with hover highlight
+                     // Draw primitives with hover highlight
         prim_x = 2usize;
         for (i, (key, state)) in prim_controls.iter().enumerate() {
             let hovered = hovered_prim == Some(i);
@@ -968,7 +1479,8 @@ impl Widget for Showcase {
         let categories = ["all", "apps", "cookbook", "tools"];
         const CAT_BASE: usize = 300;
         // Determine hovered sidebar category
-        let hovered_cat = self.mouse_pos
+        let hovered_cat = self
+            .mouse_pos
             .filter(|(mx, my)| {
                 let y = *my as usize;
                 (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + 8
@@ -993,9 +1505,31 @@ impl Widget for Showcase {
                 "tools" => ("◦", " TOOLS "),
                 _ => ("•", *cat),
             };
-            let icon_fg = if is_hovered { t.primary } else if is_active { t.primary } else { t.fg_muted };
-            draw_text(&mut plane, 1, cat_y, icon, icon_fg, bg_cat, is_active || is_hovered);
-            draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active || is_hovered);
+            let icon_fg = if is_hovered {
+                t.primary
+            } else if is_active {
+                t.primary
+            } else {
+                t.fg_muted
+            };
+            draw_text(
+                &mut plane,
+                1,
+                cat_y,
+                icon,
+                icon_fg,
+                bg_cat,
+                is_active || is_hovered,
+            );
+            draw_text(
+                &mut plane,
+                3,
+                cat_y,
+                label,
+                fg,
+                bg_cat,
+                is_active || is_hovered,
+            );
             // Register zone for this category
             let mut zones = self.zones.borrow_mut();
             zones.register(CAT_BASE + i, 0, cat_y as u16, sidebar_w as u16, 1);
@@ -1016,16 +1550,16 @@ impl Widget for Showcase {
         let grid_start_y = sidebar_start_y + 1;
         let available_w = area.width as usize - grid_start_x;
         let available_h = area.height as usize - grid_start_y - 2;
-        
+
         // Responsive card sizing
         let (card_w, card_h) = if available_w >= 90 {
-            (32usize, 16usize)  // Large terminal
+            (32usize, 16usize) // Large terminal
         } else if available_w >= 60 {
-            (28usize, 14usize)  // Medium terminal
+            (28usize, 14usize) // Medium terminal
         } else {
-            (24usize, 12usize)  // Small terminal
+            (24usize, 12usize) // Small terminal
         };
-        
+
         self.cols.set((available_w / (card_w + 2)).max(1));
         let cols = self.cols.get();
 
@@ -1040,11 +1574,21 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_start.elapsed().as_secs_f64(), card_w as u16, card_h as u16);
+                let card = render_card(
+                    ex,
+                    grid_idx,
+                    self.selected,
+                    self.hovered_card,
+                    t,
+                    self.card_start.elapsed().as_secs_f64(),
+                    card_w as u16,
+                    card_h as u16,
+                );
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
-                        let dst_idx = ((y + cy as usize) * area.width as usize + x + cx as usize) as usize;
+                        let dst_idx =
+                            ((y + cy as usize) * area.width as usize + x + cx as usize) as usize;
                         if src_idx < card.cells.len() && dst_idx < plane.cells.len() {
                             if !card.cells[src_idx].transparent {
                                 plane.cells[dst_idx] = card.cells[src_idx].clone();
@@ -1055,7 +1599,13 @@ impl Widget for Showcase {
                 // Register zone for this card
                 const CARD_BASE: usize = 500;
                 let mut zones = self.zones.borrow_mut();
-                zones.register(CARD_BASE + grid_idx, x as u16, y as u16, card_w as u16, card_h as u16);
+                zones.register(
+                    CARD_BASE + grid_idx,
+                    x as u16,
+                    y as u16,
+                    card_w as u16,
+                    card_h as u16,
+                );
                 drop(zones);
             }
         }
@@ -1082,10 +1632,25 @@ impl Widget for Showcase {
             set_cell(&mut plane, x, status_y, ' ', t.fg, t.surface_elevated);
         }
 
-        let hints = ["↑↓←→ nav", "Enter launch", "/ search", "Tab category", "t theme", "q quit"];
+        let hints = [
+            "↑↓←→ nav",
+            "Enter launch",
+            "/ search",
+            "Tab category",
+            "t theme",
+            "q quit",
+        ];
         let mut hint_x = 2usize;
         for hint in hints.iter() {
-            draw_text(&mut plane, hint_x, status_y, hint, t.primary, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                hint_x,
+                status_y,
+                hint,
+                t.primary,
+                t.surface_elevated,
+                false,
+            );
             hint_x += hint.len() + 3;
         }
 
@@ -1094,7 +1659,15 @@ impl Widget for Showcase {
             let coords = format!("{}:{}", mx, my);
             let coords_x = area.width as usize - coords.len() - 2;
             if coords_x > hint_x {
-                draw_text(&mut plane, coords_x, status_y, &coords, t.fg_muted, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    coords_x,
+                    status_y,
+                    &coords,
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
             }
         }
 
@@ -1104,7 +1677,7 @@ impl Widget for Showcase {
                 let msg_y = area.height as usize / 2;
                 let msg_x = ((area.width as usize).saturating_sub(msg.len() + 6)) / 2;
                 let msg_w = msg.len() + 6;
-                
+
                 // Toast background
                 for cx in 0..msg_w {
                     if msg_x + cx < area.width as usize {
@@ -1113,7 +1686,7 @@ impl Widget for Showcase {
                         set_cell(&mut plane, msg_x + cx, msg_y + 1, ' ', t.fg, t.warning);
                     }
                 }
-                
+
                 // Toast border
                 for cx in 0..msg_w {
                     if msg_x + cx < area.width as usize {
@@ -1122,12 +1695,33 @@ impl Widget for Showcase {
                     }
                 }
                 set_cell(&mut plane, msg_x, msg_y - 1, '┌', t.warning, t.warning);
-                set_cell(&mut plane, msg_x + msg_w - 1, msg_y - 1, '┐', t.warning, t.warning);
+                set_cell(
+                    &mut plane,
+                    msg_x + msg_w - 1,
+                    msg_y - 1,
+                    '┐',
+                    t.warning,
+                    t.warning,
+                );
                 set_cell(&mut plane, msg_x, msg_y + 1, '└', t.warning, t.warning);
-                set_cell(&mut plane, msg_x + msg_w - 1, msg_y + 1, '┘', t.warning, t.warning);
+                set_cell(
+                    &mut plane,
+                    msg_x + msg_w - 1,
+                    msg_y + 1,
+                    '┘',
+                    t.warning,
+                    t.warning,
+                );
                 set_cell(&mut plane, msg_x, msg_y, '│', t.warning, t.warning);
-                set_cell(&mut plane, msg_x + msg_w - 1, msg_y, '│', t.warning, t.warning);
-                
+                set_cell(
+                    &mut plane,
+                    msg_x + msg_w - 1,
+                    msg_y,
+                    '│',
+                    t.warning,
+                    t.warning,
+                );
+
                 // Message text
                 draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, true);
             }
@@ -1147,34 +1741,106 @@ impl Widget for Showcase {
                         format!("  Filter: {}", ex.category),
                         "  Cancel".to_string(),
                     ];
-                    
 
                     // Menu background
                     for cy in 0..menu_h {
                         for cx in 0..menu_w {
-                            set_cell(&mut plane, menu_x + cx, menu_y + cy, ' ', t.fg, t.surface_elevated);
+                            set_cell(
+                                &mut plane,
+                                menu_x + cx,
+                                menu_y + cy,
+                                ' ',
+                                t.fg,
+                                t.surface_elevated,
+                            );
                         }
                     }
 
                     // Border
                     for cx in 0..menu_w {
-                        set_cell(&mut plane, menu_x + cx, menu_y, '─', t.outline, t.surface_elevated);
-                        set_cell(&mut plane, menu_x + cx, menu_y + menu_h - 1, '─', t.outline, t.surface_elevated);
+                        set_cell(
+                            &mut plane,
+                            menu_x + cx,
+                            menu_y,
+                            '─',
+                            t.outline,
+                            t.surface_elevated,
+                        );
+                        set_cell(
+                            &mut plane,
+                            menu_x + cx,
+                            menu_y + menu_h - 1,
+                            '─',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
                     for cy in 0..menu_h {
-                        set_cell(&mut plane, menu_x, menu_y + cy, '│', t.outline, t.surface_elevated);
-                        set_cell(&mut plane, menu_x + menu_w - 1, menu_y + cy, '│', t.outline, t.surface_elevated);
+                        set_cell(
+                            &mut plane,
+                            menu_x,
+                            menu_y + cy,
+                            '│',
+                            t.outline,
+                            t.surface_elevated,
+                        );
+                        set_cell(
+                            &mut plane,
+                            menu_x + menu_w - 1,
+                            menu_y + cy,
+                            '│',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
-                    set_cell(&mut plane, menu_x, menu_y, '┌', t.outline, t.surface_elevated);
-                    set_cell(&mut plane, menu_x + menu_w - 1, menu_y, '┐', t.outline, t.surface_elevated);
-                    set_cell(&mut plane, menu_x, menu_y + menu_h - 1, '└', t.outline, t.surface_elevated);
-                    set_cell(&mut plane, menu_x + menu_w - 1, menu_y + menu_h - 1, '┘', t.outline, t.surface_elevated);
+                    set_cell(
+                        &mut plane,
+                        menu_x,
+                        menu_y,
+                        '┌',
+                        t.outline,
+                        t.surface_elevated,
+                    );
+                    set_cell(
+                        &mut plane,
+                        menu_x + menu_w - 1,
+                        menu_y,
+                        '┐',
+                        t.outline,
+                        t.surface_elevated,
+                    );
+                    set_cell(
+                        &mut plane,
+                        menu_x,
+                        menu_y + menu_h - 1,
+                        '└',
+                        t.outline,
+                        t.surface_elevated,
+                    );
+                    set_cell(
+                        &mut plane,
+                        menu_x + menu_w - 1,
+                        menu_y + menu_h - 1,
+                        '┘',
+                        t.outline,
+                        t.surface_elevated,
+                    );
 
                     // Menu items
                     for (i, item) in menu_items.iter().enumerate() {
                         let selected = i == self.context_menu_selected;
-                        let fg = if selected { t.bg } else if i == 0 { t.primary } else { t.fg };
-                        let bg = if selected { t.primary } else { t.surface_elevated };
+                        let fg = if selected {
+                            t.bg
+                        } else if i == 0 {
+                            t.primary
+                        } else {
+                            t.fg
+                        };
+                        let bg = if selected {
+                            t.primary
+                        } else {
+                            t.surface_elevated
+                        };
                         draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, bg, false);
                     }
                 }
@@ -1188,37 +1854,86 @@ impl Widget for Showcase {
                 let tooltip_y = (ty as usize).saturating_sub(2);
                 let tooltip_w = text.len() + 4;
                 let tooltip_h = 3usize;
-                
+
                 // Background
                 for cy in 0..tooltip_h {
                     for cx in 0..tooltip_w {
-                        if tooltip_x + cx < area.width as usize && tooltip_y + cy < area.height as usize {
-                            set_cell(&mut plane, tooltip_x + cx, tooltip_y + cy, ' ', t.fg, t.surface_elevated);
+                        if tooltip_x + cx < area.width as usize
+                            && tooltip_y + cy < area.height as usize
+                        {
+                            set_cell(
+                                &mut plane,
+                                tooltip_x + cx,
+                                tooltip_y + cy,
+                                ' ',
+                                t.fg,
+                                t.surface_elevated,
+                            );
                         }
                     }
                 }
-                
+
                 // Border
                 for cx in 0..tooltip_w {
                     if tooltip_x + cx < area.width as usize && tooltip_y < area.height as usize {
-                        set_cell(&mut plane, tooltip_x + cx, tooltip_y, '─', t.outline, t.surface_elevated);
+                        set_cell(
+                            &mut plane,
+                            tooltip_x + cx,
+                            tooltip_y,
+                            '─',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
-                    if tooltip_x + cx < area.width as usize && tooltip_y + tooltip_h - 1 < area.height as usize {
-                        set_cell(&mut plane, tooltip_x + cx, tooltip_y + tooltip_h - 1, '─', t.outline, t.surface_elevated);
+                    if tooltip_x + cx < area.width as usize
+                        && tooltip_y + tooltip_h - 1 < area.height as usize
+                    {
+                        set_cell(
+                            &mut plane,
+                            tooltip_x + cx,
+                            tooltip_y + tooltip_h - 1,
+                            '─',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
                 }
                 for cy in 0..tooltip_h {
                     if tooltip_x < area.width as usize && tooltip_y + cy < area.height as usize {
-                        set_cell(&mut plane, tooltip_x, tooltip_y + cy, '│', t.outline, t.surface_elevated);
+                        set_cell(
+                            &mut plane,
+                            tooltip_x,
+                            tooltip_y + cy,
+                            '│',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
-                    if tooltip_x + tooltip_w - 1 < area.width as usize && tooltip_y + cy < area.height as usize {
-                        set_cell(&mut plane, tooltip_x + tooltip_w - 1, tooltip_y + cy, '│', t.outline, t.surface_elevated);
+                    if tooltip_x + tooltip_w - 1 < area.width as usize
+                        && tooltip_y + cy < area.height as usize
+                    {
+                        set_cell(
+                            &mut plane,
+                            tooltip_x + tooltip_w - 1,
+                            tooltip_y + cy,
+                            '│',
+                            t.outline,
+                            t.surface_elevated,
+                        );
                     }
                 }
-                
+
                 // Text
                 if tooltip_y + 1 < area.height as usize {
-                    draw_text(&mut plane, tooltip_x + 2, tooltip_y + 1, text, t.fg, t.surface_elevated, false);
+                    draw_text(
+                        &mut plane,
+                        tooltip_x + 2,
+                        tooltip_y + 1,
+                        text,
+                        t.fg,
+                        t.surface_elevated,
+                        false,
+                    );
                 }
             }
         }
@@ -1229,24 +1944,45 @@ impl Widget for Showcase {
             let help_h = 16usize;
             let help_x = ((area.width as usize).saturating_sub(help_w)) / 2;
             let help_y = ((area.height as usize).saturating_sub(help_h)) / 2;
-            
+
             // Background
             for cy in 0..help_h {
                 for cx in 0..help_w {
                     if help_x + cx < area.width as usize && help_y + cy < area.height as usize {
-                        set_cell(&mut plane, help_x + cx, help_y + cy, ' ', t.fg, t.surface_elevated);
+                        set_cell(
+                            &mut plane,
+                            help_x + cx,
+                            help_y + cy,
+                            ' ',
+                            t.fg,
+                            t.surface_elevated,
+                        );
                     }
                 }
             }
-            
+
             // Border
-            draw_rounded_border(&mut plane, Rect::new(help_x as u16, help_y as u16, help_w as u16, help_h as u16), t.primary, t.surface_elevated, true);
-            
+            draw_rounded_border(
+                &mut plane,
+                Rect::new(help_x as u16, help_y as u16, help_w as u16, help_h as u16),
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
+
             // Title
             let title = " Keyboard Shortcuts ";
             let title_x = help_x + (help_w - title.len()) / 2;
-            draw_text(&mut plane, title_x, help_y + 1, title, t.primary, t.surface_elevated, true);
-            
+            draw_text(
+                &mut plane,
+                title_x,
+                help_y + 1,
+                title,
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
+
             // Content
             let lines = [
                 ("↑↓←→", "Navigate cards"),
@@ -1269,8 +2005,24 @@ impl Widget for Showcase {
                 let y = help_y + 3 + i;
                 if y < area.height as usize - 1 {
                     if !key_text.is_empty() {
-                        draw_text(&mut plane, help_x + 3, y, key_text, t.primary, t.surface_elevated, false);
-                        draw_text(&mut plane, help_x + 18, y, desc, t.fg, t.surface_elevated, false);
+                        draw_text(
+                            &mut plane,
+                            help_x + 3,
+                            y,
+                            key_text,
+                            t.primary,
+                            t.surface_elevated,
+                            false,
+                        );
+                        draw_text(
+                            &mut plane,
+                            help_x + 18,
+                            y,
+                            desc,
+                            t.fg,
+                            t.surface_elevated,
+                            false,
+                        );
                     }
                 }
             }
@@ -1284,43 +2036,103 @@ impl Widget for Showcase {
                     let modal_h = 12usize;
                     let modal_x = ((area.width as usize).saturating_sub(modal_w)) / 2;
                     let modal_y = ((area.height as usize).saturating_sub(modal_h)) / 2;
-                    
+
                     // Background
                     for cy in 0..modal_h {
                         for cx in 0..modal_w {
-                            if modal_x + cx < area.width as usize && modal_y + cy < area.height as usize {
-                                set_cell(&mut plane, modal_x + cx, modal_y + cy, ' ', t.fg, t.surface_elevated);
+                            if modal_x + cx < area.width as usize
+                                && modal_y + cy < area.height as usize
+                            {
+                                set_cell(
+                                    &mut plane,
+                                    modal_x + cx,
+                                    modal_y + cy,
+                                    ' ',
+                                    t.fg,
+                                    t.surface_elevated,
+                                );
                             }
                         }
                     }
-                    
+
                     // Border
-                    draw_rounded_border(&mut plane, Rect::new(modal_x as u16, modal_y as u16, modal_w as u16, modal_h as u16), t.primary, t.surface_elevated, true);
-                    
+                    draw_rounded_border(
+                        &mut plane,
+                        Rect::new(
+                            modal_x as u16,
+                            modal_y as u16,
+                            modal_w as u16,
+                            modal_h as u16,
+                        ),
+                        t.primary,
+                        t.surface_elevated,
+                        true,
+                    );
+
                     // Title
                     let title = format!(" {} ", ex.name);
                     let title_x = modal_x + (modal_w - title.len()) / 2;
-                    draw_text(&mut plane, title_x, modal_y + 1, &title, t.primary, t.surface_elevated, true);
-                    
+                    draw_text(
+                        &mut plane,
+                        title_x,
+                        modal_y + 1,
+                        &title,
+                        t.primary,
+                        t.surface_elevated,
+                        true,
+                    );
+
                     // Category badge
                     let badge = format!(" {} ", ex.category.to_uppercase());
-                    draw_text(&mut plane, modal_x + 2, modal_y + 3, &badge, t.fg_on_accent, category_color(t, ex.category), false);
-                    
+                    draw_text(
+                        &mut plane,
+                        modal_x + 2,
+                        modal_y + 3,
+                        &badge,
+                        t.fg_on_accent,
+                        category_color(t, ex.category),
+                        false,
+                    );
+
                     // Description
                     let desc: String = ex.description.chars().take(modal_w - 4).collect();
-                    draw_text(&mut plane, modal_x + 2, modal_y + 5, &desc, t.fg, t.surface_elevated, false);
-                    
+                    draw_text(
+                        &mut plane,
+                        modal_x + 2,
+                        modal_y + 5,
+                        &desc,
+                        t.fg,
+                        t.surface_elevated,
+                        false,
+                    );
+
                     // Preview lines
                     for (i, line) in ex.preview.iter().enumerate() {
                         let py = modal_y + 7 + i;
                         if py < modal_y + modal_h - 2 && py < area.height as usize {
                             let preview_line: String = line.chars().take(modal_w - 4).collect();
-                            draw_text(&mut plane, modal_x + 2, py, &preview_line, t.fg_subtle, t.surface_elevated, false);
+                            draw_text(
+                                &mut plane,
+                                modal_x + 2,
+                                py,
+                                &preview_line,
+                                t.fg_subtle,
+                                t.surface_elevated,
+                                false,
+                            );
                         }
                     }
-                    
+
                     // Footer
-                    draw_text(&mut plane, modal_x + 2, modal_y + modal_h - 2, "Press Space or Esc to close", t.fg_muted, t.surface_elevated, false);
+                    draw_text(
+                        &mut plane,
+                        modal_x + 2,
+                        modal_y + modal_h - 2,
+                        "Press Space or Esc to close",
+                        t.fg_muted,
+                        t.surface_elevated,
+                        false,
+                    );
                 }
             }
         }
@@ -1360,7 +2172,9 @@ impl Widget for Showcase {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         // Help overlay takes priority
         if self.show_help {
@@ -1397,14 +2211,16 @@ impl Widget for Showcase {
                     } else if selected == 1 {
                         if let Some(ex) = self.selected_example() {
                             println!("{}", ex.binary_name);
-                            self.status_message = Some((format!("Copied: {}", ex.binary_name), Instant::now()));
+                            self.status_message =
+                                Some((format!("Copied: {}", ex.binary_name), Instant::now()));
                         }
                     } else if selected == 2 {
                         let category = self.selected_example().map(|ex| ex.category);
                         if let Some(cat) = category {
                             self.category_filter = Some(cat);
                             self.apply_filter();
-                            self.status_message = Some((format!("Filtered: {}", cat), Instant::now()));
+                            self.status_message =
+                                Some((format!("Filtered: {}", cat), Instant::now()));
                         }
                     }
                     return true;
@@ -1464,7 +2280,10 @@ impl Widget for Showcase {
                 }
                 KeyCode::Char('t') => {
                     let themes = Self::themes();
-                    let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
+                    let current = themes
+                        .iter()
+                        .position(|(_, t)| t.name == self.theme.name)
+                        .unwrap_or(0);
                     self.pending_theme = Some((current + 1) % themes.len());
                     self.apply_filter();
                     true
@@ -1479,7 +2298,10 @@ impl Widget for Showcase {
                 }
                 KeyCode::Tab => {
                     let categories = [None, Some("apps"), Some("cookbook"), Some("tools")];
-                    let current = categories.iter().position(|&c| c == self.category_filter).unwrap_or(0);
+                    let current = categories
+                        .iter()
+                        .position(|&c| c == self.category_filter)
+                        .unwrap_or(0);
                     self.category_filter = categories[(current + 1) % categories.len()];
                     self.apply_filter();
                     true
@@ -1531,7 +2353,9 @@ impl Widget for Showcase {
                 KeyCode::Left => {
                     let cols = self.cols.get().max(1);
                     if !self.filtered.is_empty() {
-                        self.selected = (self.selected + self.filtered.len() - cols % self.filtered.len()) % self.filtered.len();
+                        self.selected = (self.selected + self.filtered.len()
+                            - cols % self.filtered.len())
+                            % self.filtered.len();
                     }
                     true
                 }
@@ -1581,19 +2405,34 @@ impl Widget for Showcase {
                             return true;
                         }
                         // Primitives bar controls (PRIM_BASE + i)
-                        id if id >= PRIM_BASE && id < PRIM_BASE + 5 => {
-                            match id - PRIM_BASE {
-                                0 => { self.primitive_toggle = !self.primitive_toggle; return true; }
-                                1 => { self.primitive_slider = (self.primitive_slider + 0.1).min(1.0); return true; }
-                                2 => { self.primitive_checkbox = !self.primitive_checkbox; return true; }
-                                3 => { self.primitive_radio = (self.primitive_radio + 1) % 3; return true; }
-                                4 => { self.primitive_button = true; self.primitive_button_time = Some(Instant::now()); return true; }
-                                _ => {}
+                        id if id >= PRIM_BASE && id < PRIM_BASE + 5 => match id - PRIM_BASE {
+                            0 => {
+                                self.primitive_toggle = !self.primitive_toggle;
+                                return true;
                             }
-                        }
+                            1 => {
+                                self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                                return true;
+                            }
+                            2 => {
+                                self.primitive_checkbox = !self.primitive_checkbox;
+                                return true;
+                            }
+                            3 => {
+                                self.primitive_radio = (self.primitive_radio + 1) % 3;
+                                return true;
+                            }
+                            4 => {
+                                self.primitive_button = true;
+                                self.primitive_button_time = Some(Instant::now());
+                                return true;
+                            }
+                            _ => {}
+                        },
                         // Sidebar categories (CAT_BASE + i)
                         id if id >= CAT_BASE && id < CAT_BASE + 4 => {
-                            let cats: [Option<&str>; 4] = [None, Some("apps"), Some("cookbook"), Some("tools")];
+                            let cats: [Option<&str>; 4] =
+                                [None, Some("apps"), Some("cookbook"), Some("tools")];
                             self.category_filter = cats[id - CAT_BASE];
                             self.apply_filter();
                             return true;
@@ -1603,10 +2442,12 @@ impl Widget for Showcase {
                             let card_idx = id - CARD_BASE;
                             if card_idx < self.filtered.len() {
                                 let now = Instant::now();
-                                let is_double_click = self.last_click_time
+                                let is_double_click = self
+                                    .last_click_time
                                     .zip(self.last_click_idx)
                                     .map(|(time, idx)| {
-                                        idx == card_idx && now.duration_since(time).as_millis() < 300
+                                        idx == card_idx
+                                            && now.duration_since(time).as_millis() < 300
                                     })
                                     .unwrap_or(false);
                                 if is_double_click {
@@ -1689,7 +2530,8 @@ impl Widget for Showcase {
                                     if time.elapsed().as_millis() >= 500 {
                                         if let Some(&ex_idx) = self.filtered.get(card_idx) {
                                             if let Some(ex) = self.examples.get(ex_idx) {
-                                                self.tooltip_text = Some(ex.description.to_string());
+                                                self.tooltip_text =
+                                                    Some(ex.description.to_string());
                                                 self.tooltip_pos = Some((col, row));
                                             }
                                         }
@@ -1728,7 +2570,10 @@ fn main() -> std::io::Result<()> {
 
     let showcase = Showcase::new(should_quit, pending.clone(), fps_counter);
 
-    let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
+    let mut app = App::new()?
+        .title("Dracon Showcase")
+        .fps(30)
+        .theme(Theme::nord());
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _tick| {
@@ -1782,7 +2627,8 @@ fn main() -> std::io::Result<()> {
             let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
-    }).run(|_ctx| {
+    })
+    .run(|_ctx| {
         // Render loop handled by framework
     })
 }

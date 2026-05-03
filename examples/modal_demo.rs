@@ -315,16 +315,32 @@ struct ModalDemoRouter {
 }
 
 impl Widget for ModalDemoRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
@@ -360,7 +376,8 @@ fn main() -> io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
         }
-    }).run(move |ctx| {
+    })
+    .run(move |ctx| {
         let mut demo = demo_for_render.borrow_mut();
 
         if ctx.needs_full_refresh() {
@@ -370,7 +387,12 @@ fn main() -> io::Result<()> {
         let (w, h) = ctx.compositor().size();
         demo.area = Rect::new(0, 0, w, h);
 
-        let label_area = Rect::new(2, 2, 55.min(w.saturating_sub(4)), 12.min(h.saturating_sub(4)));
+        let label_area = Rect::new(
+            2,
+            2,
+            55.min(w.saturating_sub(4)),
+            12.min(h.saturating_sub(4)),
+        );
         demo.label.mark_dirty();
         let label_plane = demo.label.render(label_area);
         ctx.add_plane(label_plane);
@@ -380,7 +402,12 @@ fn main() -> io::Result<()> {
         let btn_plane = demo.confirm_btn.render(confirm_btn_area);
         ctx.add_plane(btn_plane);
 
-        let help_btn_area = Rect::new(30.min(w.saturating_sub(20)), 16.min(h.saturating_sub(2)), 18, 1);
+        let help_btn_area = Rect::new(
+            30.min(w.saturating_sub(20)),
+            16.min(h.saturating_sub(2)),
+            18,
+            1,
+        );
         demo.help_btn.mark_dirty();
         let help_btn_plane = demo.help_btn.render(help_btn_area);
         ctx.add_plane(help_btn_plane);
@@ -407,12 +434,7 @@ fn main() -> io::Result<()> {
                 .with_duration(Duration::from_secs(2))
                 .with_theme(Theme::dark());
 
-            let toast_area = Rect::new(
-                (w.saturating_sub(40)) / 2,
-                h.saturating_sub(3),
-                40,
-                1,
-            );
+            let toast_area = Rect::new((w.saturating_sub(40)) / 2, h.saturating_sub(3), 40, 1);
             ctx.add_plane(toast.render(toast_area));
             demo.show_save_toast = false;
         }

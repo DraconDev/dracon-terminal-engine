@@ -262,7 +262,9 @@ fn test_base_input_handle_mouse() {
     base.text = "abcdef".to_string();
     base.cursor_pos = 0;
     let result = base.handle_mouse(
-        dracon_terminal_engine::input::event::MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left),
+        dracon_terminal_engine::input::event::MouseEventKind::Down(
+            dracon_terminal_engine::input::event::MouseButton::Left,
+        ),
         3,
         0,
     );
@@ -278,7 +280,9 @@ fn test_base_input_handle_mouse_past_text() {
     base.text = "ab".to_string();
     base.cursor_pos = 0;
     let result = base.handle_mouse(
-        dracon_terminal_engine::input::event::MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left),
+        dracon_terminal_engine::input::event::MouseEventKind::Down(
+            dracon_terminal_engine::input::event::MouseButton::Left,
+        ),
         10,
         0,
     );

@@ -216,12 +216,24 @@ impl crate::framework::widget::Widget for CommandPalette {
             let t_idx = (oy * area.width + x) as usize;
             let b_idx = ((oy + h - 1) * area.width + x) as usize;
             if t_idx < plane.cells.len() {
-                plane.cells[t_idx].char = if x == ox { border_chars[0] } else if x == ox + w - 1 { border_chars[2] } else { border_chars[1] };
+                plane.cells[t_idx].char = if x == ox {
+                    border_chars[0]
+                } else if x == ox + w - 1 {
+                    border_chars[2]
+                } else {
+                    border_chars[1]
+                };
                 plane.cells[t_idx].fg = t.outline;
                 plane.cells[t_idx].bg = t.surface_elevated;
             }
             if b_idx < plane.cells.len() {
-                plane.cells[b_idx].char = if x == ox { border_chars[5] } else if x == ox + w - 1 { border_chars[7] } else { border_chars[6] };
+                plane.cells[b_idx].char = if x == ox {
+                    border_chars[5]
+                } else if x == ox + w - 1 {
+                    border_chars[7]
+                } else {
+                    border_chars[6]
+                };
                 plane.cells[b_idx].fg = t.outline;
                 plane.cells[b_idx].bg = t.surface_elevated;
             }
@@ -230,7 +242,13 @@ impl crate::framework::widget::Widget for CommandPalette {
             for x in [ox, ox + w - 1] {
                 let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = if y == oy { border_chars[0] } else if y == oy + h - 1 { border_chars[5] } else { border_chars[3] };
+                    plane.cells[idx].char = if y == oy {
+                        border_chars[0]
+                    } else if y == oy + h - 1 {
+                        border_chars[5]
+                    } else {
+                        border_chars[3]
+                    };
                     plane.cells[idx].fg = t.outline;
                     plane.cells[idx].bg = t.surface_elevated;
                 }
@@ -238,16 +256,48 @@ impl crate::framework::widget::Widget for CommandPalette {
         }
 
         // Title
-        Self::draw_text(&mut plane, ox + 2, oy + 1, "Command Palette", t.primary, t.surface_elevated, true);
+        Self::draw_text(
+            &mut plane,
+            ox + 2,
+            oy + 1,
+            "Command Palette",
+            t.primary,
+            t.surface_elevated,
+            true,
+        );
 
         // Search input
         let search_y = oy + 2;
         let search_prefix = "> ";
-        Self::draw_text(&mut plane, ox + 2, search_y, search_prefix, t.primary, t.surface_elevated, true);
+        Self::draw_text(
+            &mut plane,
+            ox + 2,
+            search_y,
+            search_prefix,
+            t.primary,
+            t.surface_elevated,
+            true,
+        );
         if !self.search_query.is_empty() {
-            Self::draw_text(&mut plane, ox + 2 + search_prefix.len() as u16, search_y, &self.search_query, t.fg, t.surface_elevated, false);
+            Self::draw_text(
+                &mut plane,
+                ox + 2 + search_prefix.len() as u16,
+                search_y,
+                &self.search_query,
+                t.fg,
+                t.surface_elevated,
+                false,
+            );
         } else {
-            Self::draw_text(&mut plane, ox + 2 + search_prefix.len() as u16, search_y, "type to filter...", t.fg_muted, t.surface_elevated, false);
+            Self::draw_text(
+                &mut plane,
+                ox + 2 + search_prefix.len() as u16,
+                search_y,
+                "type to filter...",
+                t.fg_muted,
+                t.surface_elevated,
+                false,
+            );
         }
         // Cursor
         let cursor_x = ox + 2 + search_prefix.len() as u16 + self.search_query.len() as u16;
@@ -309,8 +359,20 @@ impl crate::framework::widget::Widget for CommandPalette {
 
         // Count hint
         let hint_y = oy + h - 2;
-        let hint_text = format!(" {} / {} items ", max_visible.min(filtered.len()), filtered.len());
-        Self::draw_text(&mut plane, ox + w.saturating_sub(hint_text.len() as u16 + 2), hint_y, &hint_text, t.fg_muted, t.surface_elevated, false);
+        let hint_text = format!(
+            " {} / {} items ",
+            max_visible.min(filtered.len()),
+            filtered.len()
+        );
+        Self::draw_text(
+            &mut plane,
+            ox + w.saturating_sub(hint_text.len() as u16 + 2),
+            hint_y,
+            &hint_text,
+            t.fg_muted,
+            t.surface_elevated,
+            false,
+        );
 
         drop(zones);
         plane
@@ -351,7 +413,9 @@ impl crate::framework::widget::Widget for CommandPalette {
             }
             KeyCode::Enter => {
                 let filtered = self.filtered_commands();
-                let cmd_id = filtered.get(self.selected_index.min(filtered.len().saturating_sub(1))).map(|c| c.id);
+                let cmd_id = filtered
+                    .get(self.selected_index.min(filtered.len().saturating_sub(1)))
+                    .map(|c| c.id);
                 self.hide();
                 if let Some(id) = cmd_id {
                     if let Some(ref mut f) = self.on_execute {
@@ -393,7 +457,9 @@ impl crate::framework::widget::Widget for CommandPalette {
                 if let Some(cmd_idx) = cmd_id {
                     self.selected_index = cmd_idx;
                     let filtered = self.filtered_commands();
-                    let cmd_id = filtered.get(cmd_idx.min(filtered.len().saturating_sub(1))).map(|c| c.id);
+                    let cmd_id = filtered
+                        .get(cmd_idx.min(filtered.len().saturating_sub(1)))
+                        .map(|c| c.id);
                     self.hide();
                     if let Some(id) = cmd_id {
                         if let Some(ref mut f) = self.on_execute {
@@ -403,7 +469,10 @@ impl crate::framework::widget::Widget for CommandPalette {
                     return true;
                 }
                 // Click outside hides palette
-                let (w, h) = (self.width.min(self.area.get().width), self.height.min(self.area.get().height));
+                let (w, h) = (
+                    self.width.min(self.area.get().width),
+                    self.height.min(self.area.get().height),
+                );
                 let ox = (self.area.get().width.saturating_sub(w)) / 2;
                 let oy = (self.area.get().height.saturating_sub(h)) / 3;
                 if col < ox || col >= ox + w || row < oy || row >= oy + h {

@@ -13,9 +13,7 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{
-    Gauge, KeyValueGrid, StatusBadge, StreamingText,
-};
+use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadge, StreamingText};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -24,7 +22,13 @@ use std::fs;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
-const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night"];
+const THEMES: &[&str] = &[
+    "nord",
+    "dracula",
+    "cyberpunk",
+    "gruvbox-dark",
+    "tokyo-night",
+];
 
 struct ProcessInfo {
     pid: u32,
@@ -263,7 +267,11 @@ impl SystemMonitor {
                 return (a, b, c);
             }
         }
-        (rand_float(0.1, 2.0), rand_float(0.1, 1.5), rand_float(0.1, 1.0))
+        (
+            rand_float(0.1, 2.0),
+            rand_float(0.1, 1.5),
+            rand_float(0.1, 1.0),
+        )
     }
 
     fn read_uptime(&self) -> u64 {
@@ -327,7 +335,9 @@ impl SystemMonitor {
             }
         }
 
-        self.stats.processes.sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
+        self.stats
+            .processes
+            .sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
         self.stats.processes.truncate(8);
     }
 
@@ -347,7 +357,11 @@ impl SystemMonitor {
 
         self.read_top_processes();
 
-        let cpu_status = if self.stats.cpu_percent >= 80.0 { "HIGH CPU" } else { "Normal" };
+        let cpu_status = if self.stats.cpu_percent >= 80.0 {
+            "HIGH CPU"
+        } else {
+            "Normal"
+        };
         let mem_pct = (self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as u32;
         let mem_status = if mem_pct >= 90 { "HIGH MEM" } else { "Normal" };
         let final_status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" {
@@ -358,7 +372,8 @@ impl SystemMonitor {
         self.status_badge.set_status(final_status);
 
         self.cpu_gauge.set_value(self.stats.cpu_percent as f64);
-        self.mem_gauge.set_value((self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as f64);
+        self.mem_gauge
+            .set_value((self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as f64);
 
         let disk_activity = (self.stats.disk_read_mb + self.stats.disk_write_mb).min(100.0) as f64;
         self.disk_gauge.set_value(disk_activity);
@@ -367,7 +382,8 @@ impl SystemMonitor {
         self.net_gauge.set_value(net_activity);
 
         self.uptime_text.clear();
-        self.uptime_text.append(&format_uptime(self.stats.uptime_seconds));
+        self.uptime_text
+            .append(&format_uptime(self.stats.uptime_seconds));
 
         self.process_grid.set_pairs(self.build_process_pairs());
     }
@@ -381,10 +397,16 @@ impl SystemMonitor {
             } else {
                 p.name.clone()
             };
-            pairs.insert(format!("{} ({})", name, p.pid), format!("{:.1}%", p.cpu_percent));
+            pairs.insert(
+                format!("{} ({})", name, p.pid),
+                format!("{:.1}%", p.cpu_percent),
+            );
         }
         let (la1, la5, la15) = self.stats.load_avg;
-        pairs.insert("Load Avg".to_string(), format!("{:.2} {:.2} {:.2}", la1, la5, la15));
+        pairs.insert(
+            "Load Avg".to_string(),
+            format!("{:.2} {:.2} {:.2}", la1, la5, la15),
+        );
         pairs
     }
 }
@@ -414,7 +436,15 @@ fn format_uptime(seconds: u64) -> String {
     }
 }
 
-fn draw_text_plane(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
+fn draw_text_plane(
+    plane: &mut Plane,
+    x: u16,
+    y: u16,
+    text: &str,
+    fg: Color,
+    bg: Color,
+    bold: bool,
+) {
     for (i, ch) in text.chars().enumerate() {
         let idx = (y * plane.width + x + i as u16) as usize;
         if idx < plane.cells.len() {
@@ -437,19 +467,35 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, _id: WidgetId) { }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
             KeyCode::Char('t') => {
                 let mut m = self.monitor.borrow_mut();
@@ -464,7 +510,9 @@ impl Widget for InputRouter {
                 m.uptime_text.on_theme_change(&t);
                 true
             }
-            KeyCode::Char('q') => { std::process::exit(0); }
+            KeyCode::Char('q') => {
+                std::process::exit(0);
+            }
             _ => false,
         }
     }
@@ -481,7 +529,11 @@ impl Widget for InputRouter {
                 MouseEventKind::Down(MouseButton::Left) => {
                     let idx = m.process_scroll_offset + proc_row;
                     if idx < m.stats.processes.len() {
-                        m.selected_process = if m.selected_process == Some(idx) { None } else { Some(idx) };
+                        m.selected_process = if m.selected_process == Some(idx) {
+                            None
+                        } else {
+                            Some(idx)
+                        };
                         return true;
                     }
                 }
@@ -560,16 +612,31 @@ fn main() -> std::io::Result<()> {
         }
 
         // Header row
-        draw_text_plane(&mut proc_plane, 0, 0, " PID  NAME            CPU%", t.fg_muted, t.bg, true);
+        draw_text_plane(
+            &mut proc_plane,
+            0,
+            0,
+            " PID  NAME            CPU%",
+            t.fg_muted,
+            t.bg,
+            true,
+        );
 
         // Process rows
         let max_visible = process_rect.height as usize - 1;
         for i in 0..max_visible {
             let proc_idx = m.process_scroll_offset + i;
-            if proc_idx >= m.stats.processes.len() { break; }
+            if proc_idx >= m.stats.processes.len() {
+                break;
+            }
             let proc = &m.stats.processes[proc_idx];
             let is_selected = m.selected_process == Some(proc_idx);
-            let line = format!("{:>5} {:<15} {:>5.1}%", proc.pid, &proc.name[..proc.name.len().min(15)], proc.cpu_percent);
+            let line = format!(
+                "{:>5} {:<15} {:>5.1}%",
+                proc.pid,
+                &proc.name[..proc.name.len().min(15)],
+                proc.cpu_percent
+            );
             let (fg, bg) = if is_selected {
                 (t.fg_on_accent, t.primary_active)
             } else {
@@ -613,5 +680,6 @@ fn main() -> std::io::Result<()> {
             let uptime_plane = m.uptime_text.render(uptime_rect);
             ctx.add_plane(uptime_plane);
         }
-    }).run(|_| {})
+    })
+    .run(|_| {})
 }

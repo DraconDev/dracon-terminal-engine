@@ -199,7 +199,9 @@ fn test_password_input_handle_mouse() {
     input.base.text = "password".to_string();
     input.base.cursor_pos = 0;
     let result = input.handle_mouse(
-        dracon_terminal_engine::input::event::MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left),
+        dracon_terminal_engine::input::event::MouseEventKind::Down(
+            dracon_terminal_engine::input::event::MouseButton::Left,
+        ),
         4,
         0,
     );

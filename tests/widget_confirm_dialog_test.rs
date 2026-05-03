@@ -14,8 +14,15 @@ fn test_confirm_dialog_new() {
 
 #[test]
 fn test_confirm_dialog_with_id() {
-    let dlg = ConfirmDialog::with_id(dracon_terminal_engine::framework::widget::WidgetId::new(5), "Title", "Msg");
-    assert_eq!(dlg.id, dracon_terminal_engine::framework::widget::WidgetId::new(5));
+    let dlg = ConfirmDialog::with_id(
+        dracon_terminal_engine::framework::widget::WidgetId::new(5),
+        "Title",
+        "Msg",
+    );
+    assert_eq!(
+        dlg.id,
+        dracon_terminal_engine::framework::widget::WidgetId::new(5)
+    );
 }
 
 #[test]

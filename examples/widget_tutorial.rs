@@ -59,14 +59,54 @@ impl PresetColor {
     /// All available preset colors for the ColorPicker.
     /// Each color has a human-readable name and RGB values.
     const PRESETS: &'static [PresetColor] = &[
-        PresetColor { name: "Red",    r: 255, g: 0,   b: 0   },
-        PresetColor { name: "Green",  r: 0,   g: 255, b: 0   },
-        PresetColor { name: "Blue",   r: 0,   g: 0,   b: 255 },
-        PresetColor { name: "Yellow", r: 255, g: 255, b: 0   },
-        PresetColor { name: "Purple", r: 128, g: 0,   b: 128 },
-        PresetColor { name: "Cyan",   r: 0,   g: 255, b: 255 },
-        PresetColor { name: "Orange", r: 255, g: 165, b: 0   },
-        PresetColor { name: "Pink",   r: 255, g: 192, b: 203 },
+        PresetColor {
+            name: "Red",
+            r: 255,
+            g: 0,
+            b: 0,
+        },
+        PresetColor {
+            name: "Green",
+            r: 0,
+            g: 255,
+            b: 0,
+        },
+        PresetColor {
+            name: "Blue",
+            r: 0,
+            g: 0,
+            b: 255,
+        },
+        PresetColor {
+            name: "Yellow",
+            r: 255,
+            g: 255,
+            b: 0,
+        },
+        PresetColor {
+            name: "Purple",
+            r: 128,
+            g: 0,
+            b: 128,
+        },
+        PresetColor {
+            name: "Cyan",
+            r: 0,
+            g: 255,
+            b: 255,
+        },
+        PresetColor {
+            name: "Orange",
+            r: 255,
+            g: 165,
+            b: 0,
+        },
+        PresetColor {
+            name: "Pink",
+            r: 255,
+            g: 192,
+            b: 203,
+        },
     ];
 
     /// Returns the Color representation for use in Cell rendering.
@@ -210,11 +250,11 @@ impl ColorPicker {
 
         // Swatch zone: left portion is clickable to cycle color.
         let swatch_zone = HitZone::new(
-            0,                              // ID for swatch zone
-            area.x,                         // left edge
-            area.y,                         // top edge
-            6,                              // width: "█████ " = 6 chars
-            area.height,                    // full height
+            0,           // ID for swatch zone
+            area.x,      // left edge
+            area.y,      // top edge
+            6,           // width: "█████ " = 6 chars
+            area.height, // full height
         )
         .on_click(|_click_kind| {
             // The actual cycle logic is in handle_mouse, but this
@@ -232,7 +272,6 @@ impl ColorPicker {
 /// Implementing the Widget trait for ColorPicker.
 /// This is the core contract every framework widget must fulfill.
 impl Widget for ColorPicker {
-
     // ------------------------------------------------------------------------
     // id() and set_id()
     // ------------------------------------------------------------------------
@@ -365,7 +404,11 @@ impl Widget for ColorPicker {
         let start_x = (area.width as i32 - rgb_text.len() as i32) / 2;
         let start_x = start_x.max(0) as usize;
 
-        for (i, c) in rgb_text.chars().take(area.width as usize - start_x).enumerate() {
+        for (i, c) in rgb_text
+            .chars()
+            .take(area.width as usize - start_x)
+            .enumerate()
+        {
             let idx = rgb_row * area.width as usize + start_x + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
@@ -382,7 +425,11 @@ impl Widget for ColorPicker {
         // ---- ROW 3: Instructions (subtle, smaller text) ----
         // Shows how to interact with the widget.
         let instruction_row = 3usize;
-        let instruction = if area.width >= 20 { "←/→ or Click to change" } else { "←/→" };
+        let instruction = if area.width >= 20 {
+            "←/→ or Click to change"
+        } else {
+            "←/→"
+        };
         let instr_len = instruction.len().min(area.width as usize);
         let instr_start = ((area.width as usize - instr_len) / 2).max(0);
 
@@ -406,7 +453,11 @@ impl Widget for ColorPicker {
         let index_text = format!("{}/{}", self.selected_index + 1, PresetColor::PRESETS.len());
         let index_start = ((area.width as usize - index_text.len()) / 2).max(0);
 
-        for (i, c) in index_text.chars().take(area.width as usize - index_start).enumerate() {
+        for (i, c) in index_text
+            .chars()
+            .take(area.width as usize - index_start)
+            .enumerate()
+        {
             let idx = index_row * area.width as usize + index_start + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
@@ -511,12 +562,7 @@ impl Widget for ColorPicker {
     /// Coordinates are local to the widget (0,0 is top-left of widget area).
     ///
     /// Returns true if the event was consumed.
-    fn handle_mouse(
-        &mut self,
-        kind: MouseEventKind,
-        local_col: u16,
-        _local_row: u16,
-    ) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, local_col: u16, _local_row: u16) -> bool {
         // Handle left-click on the swatch area (col 0-5) to cycle color.
         if let MouseEventKind::Down(_) = kind {
             // Check if click is in the swatch area (left 6 columns).
@@ -543,7 +589,10 @@ impl Widget for ColorPicker {
 
     /// Applies parsed output from a bound command.
     /// ColorPicker doesn't use commands, so this is a no-op.
-    fn apply_command_output(&mut self, _output: &dracon_terminal_engine::framework::command::ParsedOutput) {
+    fn apply_command_output(
+        &mut self,
+        _output: &dracon_terminal_engine::framework::command::ParsedOutput,
+    ) {
         // No-op: ColorPicker doesn't bind to commands.
     }
 }
@@ -608,17 +657,33 @@ fn main() -> std::io::Result<()> {
     let picker_height = 6u16;
 
     // Add each picker to the app - the app assigns IDs and calls on_mount()
-    let _id1 = app.add_widget(Box::new(red_picker), Rect::new(0,  0, picker_width, picker_height));
-    let _id2 = app.add_widget(Box::new(green_picker), Rect::new(26, 0, picker_width, picker_height));
-    let _id3 = app.add_widget(Box::new(blue_picker), Rect::new(0,  7, picker_width, picker_height));
-    let _id4 = app.add_widget(Box::new(yellow_picker), Rect::new(26, 7, picker_width, picker_height));
+    let _id1 = app.add_widget(
+        Box::new(red_picker),
+        Rect::new(0, 0, picker_width, picker_height),
+    );
+    let _id2 = app.add_widget(
+        Box::new(green_picker),
+        Rect::new(26, 0, picker_width, picker_height),
+    );
+    let _id3 = app.add_widget(
+        Box::new(blue_picker),
+        Rect::new(0, 7, picker_width, picker_height),
+    );
+    let _id4 = app.add_widget(
+        Box::new(yellow_picker),
+        Rect::new(26, 7, picker_width, picker_height),
+    );
 
     // ---- Add a header label using the framework's built-in Label widget ----
-    let header = dracon_terminal_engine::framework::widgets::Label::new("←/→ to change color | Click swatch to cycle | Tab to navigate");
+    let header = dracon_terminal_engine::framework::widgets::Label::new(
+        "←/→ to change color | Click swatch to cycle | Tab to navigate",
+    );
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 14, 80, 1));
 
     // ---- Add a footer showing theme name ----
-    let footer = dracon_terminal_engine::framework::widgets::Label::new("Theme: nord | Press Ctrl+C to exit");
+    let footer = dracon_terminal_engine::framework::widgets::Label::new(
+        "Theme: nord | Press Ctrl+C to exit",
+    );
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
 
     // ---- Quit support ----

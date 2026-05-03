@@ -496,7 +496,8 @@ impl Widget for ThemePreviewPanel {
 
         if 1 < area.height {
             let left_bracket_idx = gauge_row as usize * area.width as usize + 1;
-            let right_bracket_idx = gauge_row as usize * area.width as usize + area.width as usize - 2;
+            let right_bracket_idx =
+                gauge_row as usize * area.width as usize + area.width as usize - 2;
             if left_bracket_idx < plane.cells.len() {
                 plane.cells[left_bracket_idx] = Cell {
                     char: '[',
@@ -523,7 +524,11 @@ impl Widget for ThemePreviewPanel {
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: if i < fill { '█' } else { '░' },
-                        fg: if i < fill { theme.success } else { theme.fg_muted },
+                        fg: if i < fill {
+                            theme.success
+                        } else {
+                            theme.fg_muted
+                        },
                         bg: theme.bg,
                         style: Styles::empty(),
                         transparent: false,
@@ -678,7 +683,11 @@ impl Widget for WidgetDemoPanel {
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: if i < fill { '█' } else { '░' },
-                    fg: if i < fill { theme.success } else { theme.fg_muted },
+                    fg: if i < fill {
+                        theme.success
+                    } else {
+                        theme.fg_muted
+                    },
                     bg: theme.bg,
                     style: Styles::empty(),
                     transparent: false,
@@ -740,11 +749,7 @@ impl Widget for WidgetDemoPanel {
                 let idx = breadcrumb_row as usize * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = if is_last {
-                        theme.primary
-                    } else {
-                        theme.fg
-                    };
+                    plane.cells[idx].fg = if is_last { theme.primary } else { theme.fg };
                     plane.cells[idx].style = if is_last {
                         Styles::BOLD
                     } else {
@@ -792,11 +797,13 @@ fn main() -> Result<()> {
     let demo = WidgetDemoPanel::new(WidgetId::new(6));
     let _demo_id = app.add_widget(Box::new(demo), Rect::new(0, 17, 80, 12));
 
-    let _ = app.on_tick(move |ctx, _| {
-        if quit_check.load(Ordering::SeqCst) {
-            ctx.stop();
-        }
-    }).run(|_ctx| {});
+    let _ = app
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
+        .run(|_ctx| {});
 
     println!("\nTheme Switcher Demo Ended");
     println!("All 15 themes demonstrated:");

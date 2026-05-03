@@ -17,7 +17,10 @@ fn test_log_viewer_new() {
 #[test]
 fn test_log_viewer_with_id() {
     let lv = LogViewer::with_id(dracon_terminal_engine::framework::widget::WidgetId::new(2));
-    assert_eq!(lv.id, dracon_terminal_engine::framework::widget::WidgetId::new(2));
+    assert_eq!(
+        lv.id,
+        dracon_terminal_engine::framework::widget::WidgetId::new(2)
+    );
 }
 
 #[test]

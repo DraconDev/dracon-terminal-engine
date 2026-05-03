@@ -40,6 +40,7 @@ pub mod widgets;
 /// The prelude module.
 pub mod prelude {
     pub use crate::compositor::{Cell, Color, Compositor, Plane, Styles};
+    pub use crate::framework::widget::WidgetId;
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx},
@@ -56,10 +57,9 @@ pub mod prelude {
         theme::Theme,
         widgets::*,
     };
-    pub use crate::framework::widget::WidgetId;
     pub use crate::input::event::{
-        Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton,
-        MouseEvent, MouseEventKind,
+        Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent,
+        MouseEventKind,
     };
     pub use crate::Terminal;
 }

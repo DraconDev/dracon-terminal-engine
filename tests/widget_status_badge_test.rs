@@ -9,25 +9,31 @@ use ratatui::layout::Rect;
 #[test]
 fn test_status_badge_new() {
     let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1));
-    assert_eq!(badge.id(), dracon_terminal_engine::framework::widget::WidgetId::new(1));
+    assert_eq!(
+        badge.id(),
+        dracon_terminal_engine::framework::widget::WidgetId::new(1)
+    );
     assert_eq!(badge.status, "UNKNOWN");
 }
 
 #[test]
 fn test_status_badge_with_status() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("OK");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("OK");
     assert_eq!(badge.status, "OK");
 }
 
 #[test]
 fn test_status_badge_with_label() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_label("Disk OK");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_label("Disk OK");
     assert_eq!(badge.label, "Disk OK");
 }
 
 #[test]
 fn test_status_badge_render_ok() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("OK");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("OK");
     let plane = badge.render(Rect::new(0, 0, 6, 1));
     assert_eq!(plane.cells[0].char, '[');
     assert_eq!(plane.cells[1].char, 'O');
@@ -37,7 +43,8 @@ fn test_status_badge_render_ok() {
 
 #[test]
 fn test_status_badge_render_error() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("ERROR");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("ERROR");
     let plane = badge.render(Rect::new(0, 0, 10, 1));
     assert_eq!(plane.cells[0].char, '[');
     assert_eq!(plane.cells[1].char, 'E');
@@ -46,7 +53,8 @@ fn test_status_badge_render_error() {
 
 #[test]
 fn test_status_badge_render_warn() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("WARNING");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("WARNING");
     let plane = badge.render(Rect::new(0, 0, 10, 1));
     assert_eq!(plane.cells[0].char, '[');
     assert_eq!(plane.cells[1].char, 'W');
@@ -54,14 +62,16 @@ fn test_status_badge_render_warn() {
 
 #[test]
 fn test_status_badge_numeric_ok() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("1");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("1");
     let plane = badge.render(Rect::new(0, 0, 6, 1));
     assert_eq!(plane.cells[1].char, 'O');
 }
 
 #[test]
 fn test_status_badge_numeric_zero() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("0");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("0");
     let plane = badge.render(Rect::new(0, 0, 10, 1));
     assert_eq!(plane.cells[1].char, 'E');
 }
@@ -80,7 +90,8 @@ fn test_status_badge_dirty_lifecycle() {
 fn test_status_badge_commands() {
     use dracon_terminal_engine::framework::command::BoundCommand;
     let cmd = BoundCommand::new("test-cmd --json").label("test");
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).bind_command(cmd);
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .bind_command(cmd);
     let cmds = badge.commands();
     assert_eq!(cmds.len(), 1);
     assert_eq!(cmds[0].command, "test-cmd --json");
@@ -88,7 +99,8 @@ fn test_status_badge_commands() {
 
 #[test]
 fn test_status_badge_empty_status() {
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_status("");
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_status("");
     let plane = badge.render(Rect::new(0, 0, 10, 1));
     assert_eq!(plane.cells[1].char, 'E');
     assert_eq!(plane.cells[2].char, 'M');
@@ -111,7 +123,8 @@ fn test_status_badge_z_index() {
 #[test]
 fn test_status_badge_with_theme() {
     let theme = Theme::cyberpunk();
-    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1)).with_theme(theme);
+    let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
+        .with_theme(theme);
     assert_eq!(badge.theme.name, "cyberpunk");
 }
 

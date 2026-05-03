@@ -90,7 +90,10 @@ fn main() -> std::io::Result<()> {
 
             let mut info_plane = Plane::new(1, side_rect.width, side_rect.height);
             info_plane.z_index = 5;
-            for c in info_plane.cells.iter_mut() { c.bg = t.surface; c.fg = t.fg; }
+            for c in info_plane.cells.iter_mut() {
+                c.bg = t.surface;
+                c.fg = t.fg;
+            }
 
             let mut y = 1u16;
             let mut print = |plane: &mut Plane, text: &str, fg: Color| {
@@ -106,10 +109,18 @@ fn main() -> std::io::Result<()> {
             };
 
             print(&mut info_plane, "INFORMATION", t.primary);
-            print(&mut info_plane, &format!("Items: {}", list.len()), t.fg_muted);
+            print(
+                &mut info_plane,
+                &format!("Items: {}", list.len()),
+                t.fg_muted,
+            );
 
             if let Some(entry) = list.get_selected() {
-                print(&mut info_plane, &format!("Name: {}", entry.name), t.fg_on_accent);
+                print(
+                    &mut info_plane,
+                    &format!("Name: {}", entry.name),
+                    t.fg_on_accent,
+                );
                 if entry.is_dir {
                     print(&mut info_plane, "Type: Directory", t.info);
                 } else {

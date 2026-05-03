@@ -40,18 +40,14 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use dracon_terminal_engine::compositor::Plane;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{
-    Hud, List, Modal, ModalResult, SplitPane,
-};
-use dracon_terminal_engine::framework::widgets::split::Orientation;
 use dracon_terminal_engine::framework::app::App;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widgets::split::Orientation;
+use dracon_terminal_engine::framework::widgets::{Hud, List, Modal, ModalResult, SplitPane};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
-
-
-
-
 
 /// A mock panel widget for testing composition with SplitPane.
 struct MockPanel {
@@ -111,11 +107,17 @@ fn test_splitpane_list_panel_composition() {
     assert!(right_area.width > 0, "right panel should have width");
 
     let list_plane = list.render(left_area);
-    assert_eq!(list_plane.width, left_area.width, "list should fill left panel");
+    assert_eq!(
+        list_plane.width, left_area.width,
+        "list should fill left panel"
+    );
     assert_eq!(list_plane.z_index, 10, "list has z_index 10");
 
     let panel_plane = panel.render(right_area);
-    assert_eq!(panel_plane.width, right_area.width, "panel should fill right panel");
+    assert_eq!(
+        panel_plane.width, right_area.width,
+        "panel should fill right panel"
+    );
 
     assert_eq!(
         panel_render_count.get(),
@@ -174,10 +176,7 @@ impl TrackingRenderWidget {
     }
 
     fn with_children(self, children: Vec<Box<dyn Widget>>) -> Self {
-        Self {
-            children,
-            ..self
-        }
+        Self { children, ..self }
     }
 }
 
@@ -422,7 +421,10 @@ fn test_clean_widget_not_rendered() {
     widget.render(Rect::new(0, 0, 80, 24));
     widget.clear_dirty();
 
-    assert!(!widget.needs_render(), "widget should not be dirty after clear_dirty");
+    assert!(
+        !widget.needs_render(),
+        "widget should not be dirty after clear_dirty"
+    );
 
     let _plane = widget.render(Rect::new(0, 0, 80, 24));
 }
@@ -437,7 +439,10 @@ fn test_mark_dirty_triggers_rerender() {
     assert!(!widget.needs_render(), "widget should be clean");
 
     widget.mark_dirty();
-    assert!(widget.needs_render(), "widget should be dirty after mark_dirty");
+    assert!(
+        widget.needs_render(),
+        "widget should be dirty after mark_dirty"
+    );
 }
 
 #[test]
@@ -480,7 +485,15 @@ struct LifecycleTracker {
 }
 
 impl LifecycleTracker {
-    fn new(id: usize) -> (Self, Rc<Cell<bool>>, Rc<Cell<bool>>, Rc<Cell<bool>>, Rc<Cell<bool>>) {
+    fn new(
+        id: usize,
+    ) -> (
+        Self,
+        Rc<Cell<bool>>,
+        Rc<Cell<bool>>,
+        Rc<Cell<bool>>,
+        Rc<Cell<bool>>,
+    ) {
         let mounted = Rc::new(Cell::new(false));
         let unmounted = Rc::new(Cell::new(false));
         let focused = Rc::new(Cell::new(false));
@@ -576,11 +589,21 @@ fn test_app_remove_widget_calls_on_unmount() {
     }
 
     impl Widget for SimpleTracker {
-        fn id(&self) -> WidgetId { self.id }
-        fn area(&self) -> Rect { self.area.get() }
-        fn set_area(&mut self, area: Rect) { self.area.set(area); }
-        fn on_unmount(&mut self) { self.was_unmounted.set(true); }
-        fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
+        fn id(&self) -> WidgetId {
+            self.id
+        }
+        fn area(&self) -> Rect {
+            self.area.get()
+        }
+        fn set_area(&mut self, area: Rect) {
+            self.area.set(area);
+        }
+        fn on_unmount(&mut self) {
+            self.was_unmounted.set(true);
+        }
+        fn render(&self, _area: Rect) -> Plane {
+            Plane::new(0, 80, 24)
+        }
     }
 
     let tracker = SimpleTracker::new();
@@ -629,18 +652,30 @@ fn test_app_remove_first_widget_others_still_mounted() {
     }
 
     impl Widget for SimpleTracker {
-        fn id(&self) -> WidgetId { self.id }
-        fn area(&self) -> Rect { self.area.get() }
-        fn set_id(&mut self, id: WidgetId) { self.id = id; }
-        fn set_area(&mut self, area: Rect) { self.area.set(area); }
-        fn focusable(&self) -> bool { true }
+        fn id(&self) -> WidgetId {
+            self.id
+        }
+        fn area(&self) -> Rect {
+            self.area.get()
+        }
+        fn set_id(&mut self, id: WidgetId) {
+            self.id = id;
+        }
+        fn set_area(&mut self, area: Rect) {
+            self.area.set(area);
+        }
+        fn focusable(&self) -> bool {
+            true
+        }
         fn on_mount(&mut self) {
             if self.which == 2 {
                 MOUNTED2.store(true, std::sync::atomic::Ordering::SeqCst);
             }
         }
         fn on_unmount(&mut self) {}
-        fn render(&self, _area: Rect) -> Plane { Plane::new(0, 80, 24) }
+        fn render(&self, _area: Rect) -> Plane {
+            Plane::new(0, 80, 24)
+        }
     }
 
     let id1 = app.add_widget(Box::new(SimpleTracker::new(1)), Rect::new(0, 0, 80, 24));
@@ -648,8 +683,15 @@ fn test_app_remove_first_widget_others_still_mounted() {
 
     app.remove_widget(id1);
 
-    assert_eq!(app.widget_count(), 1, "one widget should remain after removal");
-    assert!(MOUNTED2.load(std::sync::atomic::Ordering::SeqCst), "widget 2 should be mounted");
+    assert_eq!(
+        app.widget_count(),
+        1,
+        "one widget should remain after removal"
+    );
+    assert!(
+        MOUNTED2.load(std::sync::atomic::Ordering::SeqCst),
+        "widget 2 should be mounted"
+    );
 }
 
 #[test]
@@ -721,7 +763,10 @@ fn test_app_widget_lifecycle_order() {
     let id1 = app.add_widget(Box::new(w1), Rect::new(0, 0, 80, 24));
     let id2 = app.add_widget(Box::new(w2), Rect::new(0, 0, 80, 24));
 
-    assert!(m1.get() < m2.get() || m1.get() == m2.get(), "mount order should be consistent");
+    assert!(
+        m1.get() < m2.get() || m1.get() == m2.get(),
+        "mount order should be consistent"
+    );
 
     app.remove_widget(id1);
     app.remove_widget(id2);
@@ -770,7 +815,10 @@ fn test_modal_visible_blocks_events_below() {
     };
 
     let modal_handled = modal.handle_key(esc);
-    assert!(modal_handled, "modal should handle key events (Esc) when visible");
+    assert!(
+        modal_handled,
+        "modal should handle key events (Esc) when visible"
+    );
 }
 
 #[test]
@@ -814,7 +862,10 @@ fn test_modal_enter_key_creates_confirm_result() {
 
     let result = modal.get_result();
     assert!(result.is_some(), "modal should have a result after Enter");
-    assert!(matches!(result, Some(ModalResult::Confirm)), "expected ModalResult::Confirm");
+    assert!(
+        matches!(result, Some(ModalResult::Confirm)),
+        "expected ModalResult::Confirm"
+    );
 }
 
 #[test]
@@ -843,7 +894,10 @@ fn test_modal_mouse_click_outside_not_handled() {
     let click = MouseEventKind::Down(MouseButton::Left);
     let handled = modal.handle_mouse(click, 0, 0);
 
-    assert!(!handled, "modal should not handle clicks outside its bounds");
+    assert!(
+        !handled,
+        "modal should not handle clicks outside its bounds"
+    );
 }
 
 // ============================================================================
@@ -885,7 +939,10 @@ fn test_splitpane_with_list_in_left_and_hud_in_right() {
     let hud_plane = hud.render(right_area);
 
     assert_eq!(list_plane.z_index, 10, "list z_index should be 10");
-    assert!(hud_plane.z_index > list_plane.z_index, "hud should be above list");
+    assert!(
+        hud_plane.z_index > list_plane.z_index,
+        "hud should be above list"
+    );
 }
 
 #[test]
@@ -914,5 +971,8 @@ fn test_widget_set_area_clears_dirty_flag() {
 
     widget.set_area(Rect::new(0, 0, 80, 24));
 
-    assert!(widget.needs_render(), "widget should be dirty after set_area");
+    assert!(
+        widget.needs_render(),
+        "widget should be dirty after set_area"
+    );
 }

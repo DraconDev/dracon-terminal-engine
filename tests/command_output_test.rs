@@ -8,8 +8,8 @@
 use dracon_terminal_engine::framework::command::{
     BoundCommand, CommandRunner, LoggedLine, OutputParser, ParsedOutput,
 };
-use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, LogViewer, StatusBadge, StreamingText,
 };
@@ -32,13 +32,18 @@ mod gauge_command_output {
         Widget::apply_command_output(&mut gauge, &ParsedOutput::None);
         Widget::apply_command_output(&mut gauge, &ParsedOutput::Text("hello".to_string()));
         Widget::apply_command_output(&mut gauge, &ParsedOutput::List(vec!["a".to_string()]));
-        Widget::apply_command_output(&mut gauge, &ParsedOutput::Lines(vec![LoggedLine::new("test", "info")]));
+        Widget::apply_command_output(
+            &mut gauge,
+            &ParsedOutput::Lines(vec![LoggedLine::new("test", "info")]),
+        );
         assert!((gauge.value() - 50.0).abs() < 0.001);
     }
 
     #[test]
     fn test_gauge_with_bound_command() {
-        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "value".to_string(),
+        };
         let output = parser.parse(r#"{"value":42.5}"#, "", 0);
         let mut gauge = Gauge::new("Memory");
         Widget::apply_command_output(&mut gauge, &output);
@@ -55,7 +60,10 @@ mod gauge_command_output {
     #[test]
     fn test_gauge_invalid_number_handling() {
         let mut gauge = Gauge::new("Test");
-        Widget::apply_command_output(&mut gauge, &ParsedOutput::Scalar("not-a-number".to_string()));
+        Widget::apply_command_output(
+            &mut gauge,
+            &ParsedOutput::Scalar("not-a-number".to_string()),
+        );
         assert_eq!(gauge.value(), 0.0);
     }
 }
@@ -103,7 +111,9 @@ mod status_badge_command_output {
 
     #[test]
     fn test_status_badge_with_bound_command() {
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let output = parser.parse(r#"{"status":"healthy"}"#, "", 0);
         let mut badge = StatusBadge::new(WidgetId::new(1));
         Widget::apply_command_output(&mut badge, &output);
@@ -132,15 +142,17 @@ mod key_value_grid_command_output {
     fn count_rendered_pairs(grid: &KeyValueGrid) -> usize {
         let rect = ratatui::layout::Rect::new(0, 0, 60, 10);
         let plane = grid.render(rect);
-        plane.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count()
+        plane
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count()
     }
 
     #[test]
     fn test_key_value_grid_text_format_updates_pairs() {
         let mut grid = KeyValueGrid::new();
-        grid.update_from_output(ParsedOutput::Text(
-            "KEY1: value1\nKEY2: value2".to_string(),
-        ));
+        grid.update_from_output(ParsedOutput::Text("KEY1: value1\nKEY2: value2".to_string()));
         let rendered_chars = count_rendered_pairs(&grid);
         assert!(rendered_chars > 0, "should have rendered some content");
     }
@@ -163,7 +175,10 @@ mod key_value_grid_command_output {
         let rendered_chars = count_rendered_pairs(&grid);
         let empty_grid = KeyValueGrid::new();
         let empty_chars = count_rendered_pairs(&empty_grid);
-        assert_eq!(rendered_chars, empty_chars, "Lines format should produce same output as empty grid");
+        assert_eq!(
+            rendered_chars, empty_chars,
+            "Lines format should produce same output as empty grid"
+        );
     }
 
     #[test]
@@ -181,9 +196,7 @@ mod key_value_grid_command_output {
     #[test]
     fn test_key_value_grid_whitespace_trimmed() {
         let mut grid = KeyValueGrid::new();
-        grid.update_from_output(ParsedOutput::Text(
-            "KEY  :  value  \nKEY2:val2".to_string(),
-        ));
+        grid.update_from_output(ParsedOutput::Text("KEY  :  value  \nKEY2:val2".to_string()));
         let rendered_chars = count_rendered_pairs(&grid);
         assert!(rendered_chars > 0, "should have rendered trimmed content");
     }
@@ -193,12 +206,20 @@ mod key_value_grid_command_output {
         let grid1 = KeyValueGrid::new();
         let rect = ratatui::layout::Rect::new(0, 0, 60, 10);
         let plane1 = grid1.render(rect);
-        let chars1 = plane1.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count();
+        let chars1 = plane1
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count();
 
         let mut grid2 = KeyValueGrid::new();
         grid2.update_from_output(ParsedOutput::Text("KEY: value".to_string()));
         let plane2 = grid2.render(rect);
-        let chars2 = plane2.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count();
+        let chars2 = plane2
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count();
 
         assert!(chars2 > chars1, "update should add content");
     }
@@ -213,7 +234,13 @@ mod log_viewer_command_output {
         let plane = lv.render(rect);
         let mut count = 0;
         for cell in plane.cells.iter() {
-            if cell.char == '[' || cell.char == 'I' || cell.char == 'E' || cell.char == 'W' || cell.char == 'D' || cell.char == 'F' {
+            if cell.char == '['
+                || cell.char == 'I'
+                || cell.char == 'E'
+                || cell.char == 'W'
+                || cell.char == 'D'
+                || cell.char == 'F'
+            {
                 count += 1;
             }
         }
@@ -277,7 +304,10 @@ mod log_viewer_command_output {
             "line1\nline2\nline3\nline4\nline5".to_string(),
         ));
         let rendered = log_viewer_line_count(&lv);
-        assert!(rendered <= 15, "should be limited to 3 lines (prefix chars ~= 3 * 5)");
+        assert!(
+            rendered <= 15,
+            "should be limited to 3 lines (prefix chars ~= 3 * 5)"
+        );
     }
 
     #[test]
@@ -322,17 +352,27 @@ mod streaming_text_command_output {
         ]));
         let rect = ratatui::layout::Rect::new(0, 0, 80, 15);
         let plane = st.render(rect);
-        let chars = plane.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count();
+        let chars = plane
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count();
         assert!(chars >= 2, "Lines format should render content");
     }
 
     #[test]
     fn test_streaming_text_max_lines_truncation() {
         let mut st = StreamingText::new().max_lines(3);
-        st.append_output(ParsedOutput::Text("line1\nline2\nline3\nline4\nline5".to_string()));
+        st.append_output(ParsedOutput::Text(
+            "line1\nline2\nline3\nline4\nline5".to_string(),
+        ));
         let rect = ratatui::layout::Rect::new(0, 0, 80, 15);
         let plane = st.render(rect);
-        let chars = plane.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count();
+        let chars = plane
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count();
         assert!(chars >= 3 * 5, "should limit rendered content to max_lines");
     }
 
@@ -724,10 +764,13 @@ mod bound_command_builder {
 
     #[test]
     fn test_bound_command_confirm() {
-        let cmd = BoundCommand::new("rm -rf /")
-            .confirm("Are you sure? This will delete everything!");
+        let cmd =
+            BoundCommand::new("rm -rf /").confirm("Are you sure? This will delete everything!");
 
-        assert_eq!(cmd.confirm_message, Some("Are you sure? This will delete everything!".to_string()));
+        assert_eq!(
+            cmd.confirm_message,
+            Some("Are you sure? This will delete everything!".to_string())
+        );
     }
 
     #[test]
@@ -742,10 +785,9 @@ mod bound_command_builder {
 
     #[test]
     fn test_bound_command_parse_output() {
-        let cmd = BoundCommand::new("echo '{\"value\":42}'")
-            .parser(OutputParser::JsonKey {
-                key: "value".to_string(),
-            });
+        let cmd = BoundCommand::new("echo '{\"value\":42}'").parser(OutputParser::JsonKey {
+            key: "value".to_string(),
+        });
 
         let out = cmd.parse_output(r#"{"value":42}"#, "", 0);
         match out {
@@ -858,13 +900,22 @@ mod bound_command_builder {
 mod end_to_end_command_pipeline {
     use super::*;
 
-    fn count_rendered_content(rect: ratatui::layout::Rect, plane: &dracon_terminal_engine::compositor::Plane) -> usize {
-        plane.cells.iter().filter(|c| c.char != ' ' && c.char != '(').count()
+    fn count_rendered_content(
+        rect: ratatui::layout::Rect,
+        plane: &dracon_terminal_engine::compositor::Plane,
+    ) -> usize {
+        plane
+            .cells
+            .iter()
+            .filter(|c| c.char != ' ' && c.char != '(')
+            .count()
     }
 
     #[test]
     fn test_gauge_from_real_command() {
-        let parser = OutputParser::JsonKey { key: "value".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "value".to_string(),
+        };
         let output = parser.parse(r#"{"value":75.5}"#, "", 0);
 
         let mut gauge = Gauge::new("CPU");
@@ -875,7 +926,9 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_status_badge_from_real_command() {
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let output = parser.parse(r#"{"status":"OK"}"#, "", 0);
 
         let mut badge = StatusBadge::new(WidgetId::new(1));
@@ -906,8 +959,7 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_log_viewer_from_real_command() {
-        let cmd = BoundCommand::new("printf 'ERROR fail\\nINFO ok\\n'")
-            .parser(OutputParser::Plain);
+        let cmd = BoundCommand::new("printf 'ERROR fail\\nINFO ok\\n'").parser(OutputParser::Plain);
 
         let runner = CommandRunner::new(&cmd.command);
         let (stdout, stderr, exit_code) = runner.run_sync();
@@ -924,8 +976,7 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_streaming_text_from_real_command() {
-        let cmd = BoundCommand::new("printf 'log1\\nlog2\\nlog3\\n'")
-            .parser(OutputParser::Plain);
+        let cmd = BoundCommand::new("printf 'log1\\nlog2\\nlog3\\n'").parser(OutputParser::Plain);
 
         let runner = CommandRunner::new(&cmd.command);
         let (stdout, stderr, exit_code) = runner.run_sync();
@@ -939,7 +990,9 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_json_parsing_pipeline() {
-        let parser = OutputParser::JsonKey { key: "status".to_string() };
+        let parser = OutputParser::JsonKey {
+            key: "status".to_string(),
+        };
         let output = parser.parse(r#"{"status":"DEGRADED","count":2}"#, "", 0);
 
         let mut badge = StatusBadge::new(WidgetId::new(1));
@@ -957,7 +1010,11 @@ mod end_to_end_command_pipeline {
 
         match output {
             ParsedOutput::List(items) => {
-                assert!(items.len() >= 2, "expected at least 2 items, got {}", items.len());
+                assert!(
+                    items.len() >= 2,
+                    "expected at least 2 items, got {}",
+                    items.len()
+                );
             }
             other => panic!("expected List, got {:?}", other),
         }
@@ -1014,8 +1071,7 @@ mod end_to_end_command_pipeline {
 
     #[test]
     fn test_exit_code_parsing_pipeline() {
-        let cmd = BoundCommand::new("ls /tmp")
-            .parser(OutputParser::ExitCode);
+        let cmd = BoundCommand::new("ls /tmp").parser(OutputParser::ExitCode);
 
         let runner = CommandRunner::new(&cmd.command);
         let (stdout, stderr, exit_code) = runner.run_sync();

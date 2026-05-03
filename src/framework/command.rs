@@ -306,10 +306,7 @@ impl CommandRunner {
 
         thread::spawn(move || {
             if let Ok(code) = child.wait() {
-                let _ = exit_tx.send(format!(
-                    "__EXIT_CODE__{}",
-                    code.code().unwrap_or(-1)
-                ));
+                let _ = exit_tx.send(format!("__EXIT_CODE__{}", code.code().unwrap_or(-1)));
             }
         });
 

@@ -14,7 +14,9 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment, TabBar, Toast, ToastKind};
+use dracon_terminal_engine::framework::widgets::{
+    StatusBar, StatusSegment, TabBar, Toast, ToastKind,
+};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
@@ -24,7 +26,12 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 #[derive(Clone, Copy, PartialEq)]
-enum GitView { Status, Log, Diff, Branches }
+enum GitView {
+    Status,
+    Log,
+    Diff,
+    Branches,
+}
 
 struct GitFile {
     status: char,
@@ -80,7 +87,9 @@ impl GitTui {
 
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
-            .add_segment(StatusSegment::new("1-4: views | r: refresh | q: quit").with_fg(theme.fg_muted));
+            .add_segment(
+                StatusSegment::new("1-4: views | r: refresh | q: quit").with_fg(theme.fg_muted),
+            );
 
         let mut app = Self {
             should_quit,
@@ -120,7 +129,8 @@ impl GitTui {
             .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
             .unwrap_or_default();
 
-        output.lines()
+        output
+            .lines()
             .filter(|l| l.len() >= 3)
             .map(|l| GitFile {
                 status: l.chars().next().unwrap_or('?'),
@@ -137,7 +147,8 @@ impl GitTui {
             .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
             .unwrap_or_default();
 
-        output.lines()
+        output
+            .lines()
             .filter(|l| !l.is_empty())
             .map(|l| {
                 let parts: Vec<&str> = l.splitn(4, '|').collect();
@@ -159,13 +170,22 @@ impl GitTui {
             .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
             .unwrap_or_default();
 
-        output.lines()
+        output
+            .lines()
             .filter(|l| !l.is_empty())
             .map(|l| {
                 let current = l.starts_with("* ");
-                let name = if current { l[2..].to_string() } else { l.trim().to_string() };
+                let name = if current {
+                    l[2..].to_string()
+                } else {
+                    l.trim().to_string()
+                };
                 let remote = name.starts_with("remotes/");
-                GitBranch { name, current, remote }
+                GitBranch {
+                    name,
+                    current,
+                    remote,
+                }
             })
             .collect()
     }
@@ -207,15 +227,32 @@ impl GitTui {
 }
 
 impl Widget for GitTui {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
@@ -257,7 +294,9 @@ impl Widget for GitTui {
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
-        let status_plane = self.status_bar.render(Rect::new(0, status_y, area.width, status_h));
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, status_y, area.width, status_h));
         for (i, c) in status_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
                 let base = (status_y * area.width) as usize;
@@ -285,15 +324,45 @@ impl Widget for GitTui {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         match key.code {
-            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
-            KeyCode::Char('r') => { self.refresh(); self.toast("Refreshed", ToastKind::Info); true }
-            KeyCode::Char('1') => { self.view = GitView::Status; self.tab_bar.set_active(0); self.dirty = true; true }
-            KeyCode::Char('2') => { self.view = GitView::Log; self.tab_bar.set_active(1); self.dirty = true; true }
-            KeyCode::Char('3') => { self.view = GitView::Diff; self.tab_bar.set_active(2); self.diff_content = self.read_full_diff(); self.dirty = true; true }
-            KeyCode::Char('4') => { self.view = GitView::Branches; self.tab_bar.set_active(3); self.dirty = true; true }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('r') => {
+                self.refresh();
+                self.toast("Refreshed", ToastKind::Info);
+                true
+            }
+            KeyCode::Char('1') => {
+                self.view = GitView::Status;
+                self.tab_bar.set_active(0);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('2') => {
+                self.view = GitView::Log;
+                self.tab_bar.set_active(1);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('3') => {
+                self.view = GitView::Diff;
+                self.tab_bar.set_active(2);
+                self.diff_content = self.read_full_diff();
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('4') => {
+                self.view = GitView::Branches;
+                self.tab_bar.set_active(3);
+                self.dirty = true;
+                true
+            }
             KeyCode::Char('d') => {
                 if self.view == GitView::Status {
                     if let Some(file) = self.files.get(self.selected_file) {
@@ -307,18 +376,48 @@ impl Widget for GitTui {
             }
             KeyCode::Down | KeyCode::Char('j') => {
                 match self.view {
-                    GitView::Status => if self.selected_file + 1 < self.files.len() { self.selected_file += 1; self.dirty = true; }
-                    GitView::Log => if self.selected_commit + 1 < self.commits.len() { self.selected_commit += 1; self.dirty = true; }
-                    GitView::Branches => if self.selected_branch + 1 < self.branches.len() { self.selected_branch += 1; self.dirty = true; }
+                    GitView::Status => {
+                        if self.selected_file + 1 < self.files.len() {
+                            self.selected_file += 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Log => {
+                        if self.selected_commit + 1 < self.commits.len() {
+                            self.selected_commit += 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Branches => {
+                        if self.selected_branch + 1 < self.branches.len() {
+                            self.selected_branch += 1;
+                            self.dirty = true;
+                        }
+                    }
                     _ => {}
                 }
                 true
             }
             KeyCode::Up | KeyCode::Char('k') => {
                 match self.view {
-                    GitView::Status => if self.selected_file > 0 { self.selected_file -= 1; self.dirty = true; }
-                    GitView::Log => if self.selected_commit > 0 { self.selected_commit -= 1; self.dirty = true; }
-                    GitView::Branches => if self.selected_branch > 0 { self.selected_branch -= 1; self.dirty = true; }
+                    GitView::Status => {
+                        if self.selected_file > 0 {
+                            self.selected_file -= 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Log => {
+                        if self.selected_commit > 0 {
+                            self.selected_commit -= 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Branches => {
+                        if self.selected_branch > 0 {
+                            self.selected_branch -= 1;
+                            self.dirty = true;
+                        }
+                    }
                     _ => {}
                 }
                 true
@@ -332,7 +431,10 @@ impl Widget for GitTui {
                                 .output();
                             match output {
                                 Ok(o) if o.status.success() => {
-                                    self.toast(&format!("Switched to {}", branch.name), ToastKind::Success);
+                                    self.toast(
+                                        &format!("Switched to {}", branch.name),
+                                        ToastKind::Success,
+                                    );
                                     self.refresh();
                                 }
                                 _ => self.toast("Checkout failed", ToastKind::Error),
@@ -382,18 +484,48 @@ impl Widget for GitTui {
         match kind {
             MouseEventKind::ScrollDown => {
                 match self.view {
-                    GitView::Status => if self.selected_file + 1 < self.files.len() { self.selected_file += 1; self.dirty = true; }
-                    GitView::Log => if self.selected_commit + 1 < self.commits.len() { self.selected_commit += 1; self.dirty = true; }
-                    GitView::Branches => if self.selected_branch + 1 < self.branches.len() { self.selected_branch += 1; self.dirty = true; }
+                    GitView::Status => {
+                        if self.selected_file + 1 < self.files.len() {
+                            self.selected_file += 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Log => {
+                        if self.selected_commit + 1 < self.commits.len() {
+                            self.selected_commit += 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Branches => {
+                        if self.selected_branch + 1 < self.branches.len() {
+                            self.selected_branch += 1;
+                            self.dirty = true;
+                        }
+                    }
                     _ => {}
                 }
                 return true;
             }
             MouseEventKind::ScrollUp => {
                 match self.view {
-                    GitView::Status => if self.selected_file > 0 { self.selected_file -= 1; self.dirty = true; }
-                    GitView::Log => if self.selected_commit > 0 { self.selected_commit -= 1; self.dirty = true; }
-                    GitView::Branches => if self.selected_branch > 0 { self.selected_branch -= 1; self.dirty = true; }
+                    GitView::Status => {
+                        if self.selected_file > 0 {
+                            self.selected_file -= 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Log => {
+                        if self.selected_commit > 0 {
+                            self.selected_commit -= 1;
+                            self.dirty = true;
+                        }
+                    }
+                    GitView::Branches => {
+                        if self.selected_branch > 0 {
+                            self.selected_branch -= 1;
+                            self.dirty = true;
+                        }
+                    }
                     _ => {}
                 }
                 return true;
@@ -454,28 +586,68 @@ impl GitTui {
 
         let sub_y = y + 2;
         if self.files.is_empty() {
-            draw_text(plane, 2, sub_y, "Working tree clean", t.success, t.bg, false);
+            draw_text(
+                plane,
+                2,
+                sub_y,
+                "Working tree clean",
+                t.success,
+                t.bg,
+                false,
+            );
         } else {
-            let staged: Vec<_> = self.files.iter().filter(|f| f.status == 'A' || f.status == 'M').collect();
-            let modified: Vec<_> = self.files.iter().filter(|f| f.status == 'M' || f.status == ' ').collect();
+            let staged: Vec<_> = self
+                .files
+                .iter()
+                .filter(|f| f.status == 'A' || f.status == 'M')
+                .collect();
+            let modified: Vec<_> = self
+                .files
+                .iter()
+                .filter(|f| f.status == 'M' || f.status == ' ')
+                .collect();
             let untracked: Vec<_> = self.files.iter().filter(|f| f.status == '?').collect();
 
             let mut row = sub_y;
             if !staged.is_empty() {
-                draw_text(plane, 2, row, &format!("Staged ({}):", staged.len()), t.success, t.bg, true);
+                draw_text(
+                    plane,
+                    2,
+                    row,
+                    &format!("Staged ({}):", staged.len()),
+                    t.success,
+                    t.bg,
+                    true,
+                );
                 row += 1;
                 for (i, file) in staged.iter().enumerate() {
                     let is_selected = self.view == GitView::Status && self.selected_file == i;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
                     let bg = if is_selected { t.primary_active } else { t.bg };
-                    draw_text(plane, 4, row, &format!("{} {}", file.status, file.path), fg, bg, is_selected);
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {}", file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
                     row += 1;
                 }
                 row += 1;
             }
 
             if !modified.is_empty() {
-                draw_text(plane, 2, row, &format!("Modified ({}):", modified.len()), t.warning, t.bg, true);
+                draw_text(
+                    plane,
+                    2,
+                    row,
+                    &format!("Modified ({}):", modified.len()),
+                    t.warning,
+                    t.bg,
+                    true,
+                );
                 row += 1;
                 let offset = staged.len();
                 for (i, file) in modified.iter().enumerate() {
@@ -483,14 +655,30 @@ impl GitTui {
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
                     let bg = if is_selected { t.primary_active } else { t.bg };
-                    draw_text(plane, 4, row, &format!("{} {}", file.status, file.path), fg, bg, is_selected);
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {}", file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
                     row += 1;
                 }
                 row += 1;
             }
 
             if !untracked.is_empty() {
-                draw_text(plane, 2, row, &format!("Untracked ({}):", untracked.len()), t.fg_muted, t.bg, true);
+                draw_text(
+                    plane,
+                    2,
+                    row,
+                    &format!("Untracked ({}):", untracked.len()),
+                    t.fg_muted,
+                    t.bg,
+                    true,
+                );
                 row += 1;
                 let offset = staged.len() + modified.len();
                 for (i, file) in untracked.iter().enumerate() {
@@ -498,7 +686,15 @@ impl GitTui {
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
                     let bg = if is_selected { t.primary_active } else { t.bg };
-                    draw_text(plane, 4, row, &format!("{} {}", file.status, file.path), fg, bg, is_selected);
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {}", file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
                     row += 1;
                 }
             }
@@ -516,8 +712,17 @@ impl GitTui {
             let bg = if is_selected { t.primary_active } else { t.bg };
 
             let hash = &commit.hash;
-            let msg = if commit.message.len() > 40 { &commit.message[..40] } else { &commit.message };
-            let line = format!("{} │ {} │ {}", hash, &commit.date[..10.min(commit.date.len())], msg);
+            let msg = if commit.message.len() > 40 {
+                &commit.message[..40]
+            } else {
+                &commit.message
+            };
+            let line = format!(
+                "{} │ {} │ {}",
+                hash,
+                &commit.date[..10.min(commit.date.len())],
+                msg
+            );
             draw_text(plane, 2, row, &line, fg, bg, is_selected);
         }
     }
@@ -537,13 +742,21 @@ impl GitTui {
                 (t.error, false)
             } else if line.starts_with("@@") {
                 (t.info, true)
-            } else if line.starts_with("diff ") || line.starts_with("index ") || line.starts_with("--- ") || line.starts_with("+++ ") {
+            } else if line.starts_with("diff ")
+                || line.starts_with("index ")
+                || line.starts_with("--- ")
+                || line.starts_with("+++ ")
+            {
                 (t.fg_muted, true)
             } else {
                 (t.fg, false)
             };
 
-            let truncated = if line.len() > plane.width as usize - 4 { &line[..plane.width as usize - 4] } else { line };
+            let truncated = if line.len() > plane.width as usize - 4 {
+                &line[..plane.width as usize - 4]
+            } else {
+                line
+            };
             draw_text(plane, 2, row, truncated, fg, t.bg, bold);
         }
 
@@ -566,10 +779,24 @@ impl GitTui {
             row += 1;
             for (i, branch) in locals.iter().enumerate() {
                 let is_selected = self.view == GitView::Branches && self.selected_branch == i;
-                let fg = if branch.current { t.success } else if is_selected { t.fg_on_accent } else { t.fg };
+                let fg = if branch.current {
+                    t.success
+                } else if is_selected {
+                    t.fg_on_accent
+                } else {
+                    t.fg
+                };
                 let bg = if is_selected { t.primary_active } else { t.bg };
                 let marker = if branch.current { "* " } else { "  " };
-                draw_text(plane, 4, row, &format!("{}{}", marker, branch.name), fg, bg, branch.current || is_selected);
+                draw_text(
+                    plane,
+                    4,
+                    row,
+                    &format!("{}{}", marker, branch.name),
+                    fg,
+                    bg,
+                    branch.current || is_selected,
+                );
                 row += 1;
             }
             row += 1;
@@ -582,9 +809,21 @@ impl GitTui {
             for (i, branch) in remotes.iter().enumerate() {
                 let idx = offset + i;
                 let is_selected = self.view == GitView::Branches && self.selected_branch == idx;
-                let fg = if is_selected { t.fg_on_accent } else { t.fg_muted };
+                let fg = if is_selected {
+                    t.fg_on_accent
+                } else {
+                    t.fg_muted
+                };
                 let bg = if is_selected { t.primary_active } else { t.bg };
-                draw_text(plane, 4, row, &format!("  {}", branch.name), fg, bg, is_selected);
+                draw_text(
+                    plane,
+                    4,
+                    row,
+                    &format!("  {}", branch.name),
+                    fg,
+                    bg,
+                    is_selected,
+                );
                 row += 1;
             }
         }
@@ -625,8 +864,11 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(git), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {
-        if quit_check.load(Ordering::SeqCst) { ctx.stop(); }
-    }).run(|_ctx| {})?;
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_ctx| {})?;
 
     println!("\nGit TUI exited cleanly");
     Ok(())
