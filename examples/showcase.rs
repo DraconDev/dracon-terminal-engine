@@ -91,6 +91,7 @@ struct Showcase {
     mouse_pos: Option<(u16, u16)>,
     context_menu: Option<(usize, u16, u16)>,
     context_menu_selected: usize,
+    primitives_hovered: Option<usize>,
     tooltip_text: Option<String>,
     tooltip_timer: Option<Instant>,
     tooltip_pos: Option<(u16, u16)>,
