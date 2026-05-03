@@ -89,6 +89,7 @@ struct Showcase {
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
     area: Rect,
+    cols: usize,
 }
 
 impl Showcase {
