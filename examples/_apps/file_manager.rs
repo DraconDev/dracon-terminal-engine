@@ -135,17 +135,7 @@ impl FileManager {
         let segments: Vec<String> = cwd.components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
-        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments)
-            .on_navigate({
-                let root_path = cwd.clone();
-                move |idx| {
-                    // Navigate to breadcrumb segment: reconstruct path up to index
-                    let components: Vec<_> = root_path.components().collect();
-                    let target_path: PathBuf = components[..=idx].iter().collect();
-                    // The callback can't directly mutate FileManager state,
-                    // but we can log or use a channel
-                }
-            });
+        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments);
 
         Self {
             id,

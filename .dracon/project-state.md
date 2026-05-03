@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Added split pane functionality to the file manager example with breadcrumb navigation support
+Removed breadcrumb navigation callback in file manager example
 
 ## Context
-This change implements a horizontal split pane in the file manager example to improve layout organization. The breadcrumb navigation now includes clickable segments that can reconstruct paths when selected.
+The breadcrumb navigation functionality was temporarily removed to simplify the example code while maintaining the visual breadcrumb display. This change was made to reduce complexity in the example while keeping the core UI element intact.
 
 ## Completed
-- [x] Added horizontal split pane with 35% default ratio
-- [x] Implemented breadcrumb navigation with path reconstruction
-- [x] Added basic split pane state tracking (is_dragging_split)
+- [x] Removed breadcrumb navigation callback logic
+- [x] Kept breadcrumb display functionality
 
 ## In Progress
-- [ ] Implement actual split pane dragging functionality
-- [ ] Add proper path navigation from breadcrumbs
+- [x] No active work in progress related to this change
 
 ## Blockers
-- Need to implement the actual split pane resizing logic
-- Breadcrumb navigation requires state management integration
+- None identified
 
 ## Next Steps
-1. Implement split pane resizing behavior
-2. Connect breadcrumb navigation to file system operations
+1. Determine if breadcrumb navigation will be reimplemented in future iterations
+2. Review if other example components need similar simplification
