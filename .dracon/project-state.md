@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Added z-index visualization to showcase example with animated overlap
+Added scroll preview visualization to showcase example with animated scrollbar and content
 
 ## Context
-This change enhances the showcase example by adding visual representation of z-index stacking order in UI elements. The previous slider preview was extended to include overlapping window examples with clear z-index labels.
+This implements a visual demonstration of scrollable content with an animated scrollbar thumb that moves in sync with the visible content area. It builds on previous work adding interactive UI primitives and refactoring UI rendering.
 
 ## Completed
-- [x] Added z-index visualization with animated overlapping windows
-- [x] Included z-index labels (z:3, z:2) to demonstrate stacking order
-- [x] Maintained consistent theme colors for visual clarity
+- [x] Added scroll preview visualization showing 15 lines of content
+- [x] Implemented animated scrollbar thumb that tracks visible content
+- [x] Added visual distinction for active line
+- [x] Implemented scrollbar track with proportional thumb size
+- [x] Added phase-based animation for scroll position
 
 ## In Progress
-- [x] Implementation of z-index visualization is complete
+- [x] Scroll preview visualization implementation
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify visual consistency with other showcase elements
-2. Consider adding interactive z-index manipulation controls
+1. Add interactive scroll controls to showcase example
+2. Integrate with existing interactive UI primitives
