@@ -90,7 +90,7 @@ struct Showcase {
     show_help: bool,
     modal_preview: bool,
     show_fps: bool,
-    card_phase: std::cell::Cell<f64>,
+    card_start: Instant,
 }
 
 impl Showcase {
@@ -123,7 +123,7 @@ impl Showcase {
             show_help: false,
             modal_preview: false,
             show_fps: true,
-            card_phase: std::cell::Cell::new(0.0),
+            card_start: Instant::now(),
         }
     }
 
@@ -663,7 +663,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_phase.get());
+                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_start.elapsed().as_secs_f64());
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
