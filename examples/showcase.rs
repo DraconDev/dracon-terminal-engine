@@ -21,7 +21,7 @@ use std::time::{Duration, Instant};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -89,7 +89,7 @@ struct Showcase {
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
     area: Rect,
-    cols: usize,
+    cols: std::cell::Cell<usize>,
 }
 
 impl Showcase {
@@ -108,7 +108,7 @@ impl Showcase {
             pending_binary: pending,
             status_message: None,
             area: Rect::new(0, 0, 80, 24),
-            cols: 3,
+            cols: std::cell::Cell::new(3),
         }
     }
 
@@ -523,6 +523,67 @@ impl Widget for Showcase {
                 }
                 _ => false,
             }
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let sidebar_w = 12usize;
+        let sidebar_start_y = 5usize;
+        let grid_start_x = sidebar_w + 2;
+        let grid_start_y = sidebar_start_y + 1;
+        let card_w = 28usize;
+        let card_h = 14usize;
+
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let y = row as usize;
+                let x = col as usize;
+
+                if y >= sidebar_start_y && y < sidebar_start_y + 8 && x < sidebar_w {
+                    let idx = (y - sidebar_start_y) / 2;
+                    let cats: [Option<&str>; 4] = [None, Some("apps"), Some("cookbook"), Some("tools")];
+                    if idx < cats.len() {
+                        self.category_filter = cats[idx];
+                        self.apply_filter();
+                        return true;
+                    }
+                }
+
+                if y == 2 && x >= 2 && x < 30 {
+                    self.search_active = true;
+                    return true;
+                }
+
+                if x >= grid_start_x && y >= grid_start_y {
+                    let gx = x - grid_start_x;
+                    let gy = y - grid_start_y;
+                    let col_idx = gx / (card_w + 2);
+                    let row_idx = gy / (card_h + 1);
+                    let card_idx = row_idx * self.cols + col_idx;
+                    if card_idx < self.filtered.len() {
+                        self.selected = card_idx;
+                        return true;
+                    }
+                }
+                false
+            }
+            MouseEventKind::ScrollDown => {
+                if self.selected + 1 < self.filtered.len() {
+                    self.selected += 1;
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEventKind::ScrollUp => {
+                if self.selected > 0 {
+                    self.selected -= 1;
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
     }
 }
