@@ -890,12 +890,14 @@ impl IdeApp {
                 let idx = (row * plane.width + col) as usize;
                 if idx >= plane.cells.len() || col >= plane.width { break; }
 
-                let (fg, style) = if is_keyword(line, j) {
-                    (t.primary, Styles::BOLD)
+                let (fg, style) = if is_comment(line, j) {
+                    (t.fg_muted, Styles::empty())
                 } else if is_string_literal(line, j) {
                     (t.success, Styles::empty())
-                } else if is_comment(line, j) {
-                    (t.fg_muted, Styles::empty())
+                } else if is_keyword(line, j) {
+                    (t.primary, Styles::BOLD)
+                } else if is_number(line, j) {
+                    (t.warning, Styles::empty())
                 } else {
                     (t.fg, Styles::empty())
                 };

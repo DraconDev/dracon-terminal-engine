@@ -1,27 +1,22 @@
 # Project State
 
 ## Current Focus
-Added comprehensive text editing functionality to the IDE example
+Enhanced syntax highlighting in the IDE example by adding number highlighting and reordering syntax rules
 
 ## Context
-The IDE example needed basic text editing capabilities to demonstrate a functional editor interface. This implementation provides core text manipulation features that are essential for any text editor.
+The IDE example needed improved syntax highlighting to better distinguish different code elements. The previous implementation prioritized keywords over comments, which made comments appear less prominent. This change reorders the syntax rules to prioritize comments and adds number highlighting for better visual distinction.
 
 ## Completed
-- [x] Character insertion with proper cursor positioning
-- [x] Backspace handling with line joining functionality
-- [x] Enter key for line breaks
-- [x] Arrow key navigation (up/down/left/right)
-- [x] Home/End key support
-- [x] Cursor position tracking across line operations
-- [x] Modified flag tracking for unsaved changes
+- [x] Reordered syntax rules to prioritize comments over keywords
+- [x] Added number highlighting with warning color
+- [x] Maintained existing string literal and keyword highlighting
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Syntax highlighting improvements for the IDE example
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Add clipboard support (cut/copy/paste)
-2. Implement text selection functionality
-3. Add undo/redo capabilities
+1. Test the new syntax highlighting in various code scenarios
+2. Consider adding additional syntax elements (operators, functions) if needed
