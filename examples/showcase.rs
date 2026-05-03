@@ -517,11 +517,7 @@ impl Widget for Showcase {
                 }
                 KeyCode::Right | KeyCode::Char('l') => {
                     let cols = self.cols.get().max(1);
-                    if self.filtered.is_empty() {
-                        true
-                    } else if self.selected + cols < self.filtered.len() {
-                        self.selected += cols;
-                    } else {
+                    if !self.filtered.is_empty() {
                         self.selected = (self.selected + cols) % self.filtered.len();
                     }
                     true
