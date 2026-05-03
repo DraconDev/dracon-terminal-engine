@@ -279,7 +279,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let clock = format!("{:02}:{:02}", hours, mins);
         let status = format!(" [Start]  Dracon Desktop  |  {}  | q: quit  |  Minimized:", clock);
         let mut minimized_labels = String::new();
-        for (idx, win) in windows.iter().enumerate() {
+        for (_idx, win) in windows.iter().enumerate() {
             if win.minimized {
                 minimized_labels.push_str(&format!(" [{}]", &win.title.trim()));
             }
