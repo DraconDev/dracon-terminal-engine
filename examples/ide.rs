@@ -536,9 +536,10 @@ impl Widget for IdeApp {
 
         // Command palette takes priority when visible
         if self.command_palette.is_visible() {
-            let handled = self.command_palette.handle_key(key);
+            let _handled = self.command_palette.handle_key(key);
             // Check if a command was executed via the bridge
-            if let Some(cmd_id) = self.cmd_bridge.borrow_mut().take() {
+            let cmd = self.cmd_bridge.borrow_mut().take();
+            if let Some(cmd_id) = cmd {
                 self.dispatch_palette_command(cmd_id);
             }
             return true;
@@ -636,7 +637,8 @@ impl Widget for IdeApp {
         // Command palette intercepts all mouse events when visible
         if self.command_palette.is_visible() {
             let handled = self.command_palette.handle_mouse(kind, col, row);
-            if let Some(cmd_id) = self.cmd_bridge.borrow_mut().take() {
+            let cmd = self.cmd_bridge.borrow_mut().take();
+            if let Some(cmd_id) = cmd {
                 self.dispatch_palette_command(cmd_id);
             }
             return handled;
