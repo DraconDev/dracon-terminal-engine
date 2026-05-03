@@ -1,24 +1,24 @@
 # Project State
 
 ## Current Focus
-Improved the Showcase widget's category sidebar with visual enhancements and consistent layout
+Simplified the showcase title display with cleaner visual hierarchy
 
 ## Context
-This change enhances the visual presentation of the category sidebar in the Showcase widget, making it more distinct and visually appealing while maintaining consistent layout with the rest of the UI.
+The showcase widget's title display was previously using decorative borders and complex positioning. This change simplifies the visual presentation while maintaining the same information.
 
 ## Completed
-- [x] Added icons to each category for better visual distinction
-- [x] Improved category label formatting with consistent spacing
-- [x] Aligned category count badges with the new layout
-- [x] Standardized vertical positioning of all sidebar elements
-- [x] Enhanced active/inactive state visual differentiation
+- [x] Removed decorative borders from the showcase title
+- [x] Simplified title positioning using center alignment
+- [x] Added a subtle separator line below the title
+- [x] Adjusted vertical spacing of the stats bar
+- [x] Fixed potential panic in category rendering by dereferencing the category name
 
 ## In Progress
-- [x] Visual styling improvements for the category sidebar
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify the new layout works across different terminal sizes
-2. Ensure the visual enhancements maintain good contrast for all themes
+1. Verify the simplified title display works across different terminal sizes
+2. Consider adding more visual hierarchy to the category sidebar

@@ -306,33 +306,25 @@ impl Widget for Showcase {
         }
 
         // Title bar with decorative border
-        let title_border_top = "╔══════════════════════════════════════════════════════════════════╗";
-        let title_border_bottom = "╚══════════════════════════════════════════════════════════════════╝";
-        let title_text = "  ██████╗ ███████╗ ██████╗ ███████╗██╗     ███████╗  ";
-        let title_x = (area.width as usize - title_border_top.len()) / 2;
+        let title_text = " Dracon Terminal Engine ";
+        let title_x = ((area.width as usize).saturating_sub(title_text.len())) / 2;
         let title_y = 1usize;
 
-        for (i, ch) in title_border_top.chars().enumerate() {
+        for (i, ch) in title_text.chars().enumerate() {
             let px = title_x + i;
             if px < area.width as usize {
                 set_cell(&mut plane, px, title_y, ch, t.primary, t.bg);
             }
         }
-        for (i, ch) in title_text.chars().enumerate() {
-            let px = title_x + 2 + i;
-            if px < area.width as usize {
-                set_cell(&mut plane, px, title_y + 1, ch, t.primary, t.bg);
-            }
-        }
-        for (i, ch) in title_border_bottom.chars().enumerate() {
-            let px = title_x + i;
-            if px < area.width as usize {
-                set_cell(&mut plane, px, title_y + 2, ch, t.primary, t.bg);
-            }
+
+        // Subtle separator line
+        let sep_y = 2usize;
+        for x in 2..area.width as usize - 2 {
+            set_cell(&mut plane, x, sep_y, '─', t.outline, t.bg);
         }
 
         // Stats bar
-        let stats_y = 4usize;
+        let stats_y = 3usize;
         let stats_text = format!(
             " {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
@@ -374,7 +366,7 @@ impl Widget for Showcase {
                 "apps" => ("▣", " APPS "),
                 "cookbook" => ("◉", " COOKBOOK "),
                 "tools" => ("◦", " TOOLS "),
-                _ => ("•", cat),
+                _ => ("•", *cat),
             };
             draw_text(&mut plane, 1, cat_y, icon, if is_active { t.primary } else { t.fg_muted }, bg_cat, is_active);
             draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active);
