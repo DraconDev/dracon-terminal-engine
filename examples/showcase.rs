@@ -324,7 +324,8 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
         "widget_gallery" => render_widget_preview(&mut plane, t, phase),
         "ide" => render_ide_preview(&mut plane, t, phase),
         "desktop" => render_desktop_preview(&mut plane, t, phase),
-        "scroll_resizer" | "menu_system" => render_scroll_preview(&mut plane, t, phase),
+        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, phase),
+        "git_tui" => render_zindex_preview(&mut plane, t, phase),
         _ => {
             for (i, line) in ex.preview.iter().enumerate() {
                 let py = 6 + i;
@@ -443,62 +444,34 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64) {
         let fg = if i == thumb { t.primary } else { t.fg_muted };
         set_cell(plane, 3 + i, slider_y, ch, fg, t.surface);
     }
-    draw_text(plane, 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
-}
-
-fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64) {
-    let lines = [
-        "  line 0  ▸ active",
-        "  line 1",
-        "  line 2",
-        "  line 3",
-        "  line 4",
-        "  line 5",
-        "  line 6",
-        "  line 7",
-        "  line 8",
-        "  line 9",
-        "  line 10",
-        "  line 11",
-        "  line 12",
-        "  line 13",
-        "  line 14",
+    // Render overlapping windows with z-index labels
+    let wins = [
+        (2, 7, 14, 5, t.primary, "z:3"),
+        (8, 6, 14, 5, t.warning, "z:2"),
+        (5, 8, 14, 5, t.info, "z:1"),
     ];
+    let phase = phase * 0.3;
+    for (i, (x, y, w, h, color, label)) in wins.iter().enumerate() {
+        let ox = ((phase * (i as f64 + 1.0) * 20.0).sin() * 1.5) as i16;
+        let oy = ((phase * (i as f64 + 1.0) * 15.0).sin() * 1.0) as i16;
+        let wx = (*x as i16 + ox).max(1) as usize;
+        let wy = (*y as i16 + oy).max(6) as usize;
+        let wx = wx.min(19);
+        let wy = wy.min(11);
 
-    let view_h = 6usize;
-    let offset = ((phase * 2.0).sin() * 4.0).round() as usize;
-    let offset = offset.min(lines.len().saturating_sub(view_h));
-
-    let track_x = 24usize;
-    let track_h = view_h;
-
-    for (i, line) in lines.iter().enumerate() {
-        let view_idx = i.saturating_sub(offset);
-        if view_idx < view_h {
-            let py = 6 + view_idx;
-            if py < 13 {
-                let text: String = line.chars().take(20).collect();
-                let fg = if line.contains("active") { t.primary } else { t.fg_subtle };
-                draw_text(plane, 2, py, &text, fg, t.surface, false);
-            }
+        set_cell(plane, wx, wy, '┌', *color, t.bg);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.bg); }
+        set_cell(plane, wx + w - 1, wy, '┐', *color, t.bg);
+        for dy in 1..h - 1 {
+            set_cell(plane, wx, wy + dy, '│', *color, t.bg);
+            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.bg); }
+            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.bg);
         }
-    }
+        set_cell(plane, wx, wy + h - 1, '└', *color, t.bg);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.bg); }
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.bg);
 
-    let thumb_len = ((view_h as f32 / lines.len() as f32) * track_h as f32).ceil() as usize;
-    let thumb_len = thumb_len.max(1);
-    let max_offset = lines.len().saturating_sub(view_h);
-    let thumb_pos = if max_offset == 0 {
-        0
-    } else {
-        (offset * (track_h.saturating_sub(thumb_len))).checked_div(max_offset).unwrap_or(0)
-    };
-
-    for y in 0..track_h {
-        let cy = 6 + y;
-        if cy >= 13 { break; }
-        let ch = if y >= thumb_pos && y < thumb_pos + thumb_len { '█' } else { '░' };
-        let fg = if y >= thumb_pos && y < thumb_pos + thumb_len { t.primary } else { t.fg_muted };
-        set_cell(plane, track_x, cy, ch, fg, t.surface);
+        draw_text(plane, wx + 2, wy + 1, label, *color, t.bg, true);
     }
 }
 

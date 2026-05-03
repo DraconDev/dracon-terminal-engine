@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Added scroll preview visualization to showcase example with animated scroll state management
+Added z-index visualization to showcase example with animated overlapping windows
 
 ## Context
-This change extends the showcase example to demonstrate scroll functionality by adding a dedicated scroll preview visualization. It builds on previous work with scroll state management and interactive UI primitives.
+This change enhances the showcase example by demonstrating z-index handling in UI components, complementing the existing scroll preview functionality.
 
 ## Completed
-- [x] Added scroll preview visualization for "scroll_resizer" and "menu_system" examples
-- [x] Updated scroll state type reference from local crate to external library
-- [x] Maintained consistent initialization of scroll state with proper content/viewport dimensions
+- [x] Added new `render_zindex_preview` function to visualize z-index with animated overlapping windows
+- [x] Modified example selection logic to include "git_tui" example
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [ ] No active work in progress beyond these changes
+- [ ] None (this is a complete feature addition)
 
 ## Blockers
-- None identified for this specific change
+- None (this is a standalone feature)
 
 ## Next Steps
-1. Verify scroll preview visualization works correctly in the showcase
-2. Consider adding more scroll-related examples if needed
+1. Add more z-index examples to showcase different stacking scenarios
+2. Consider adding interactive controls for z-index manipulation
