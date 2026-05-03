@@ -42,6 +42,7 @@ pub mod widget_inspector;
 pub use breadcrumbs::Breadcrumbs;
 pub use button::Button;
 pub use checkbox::Checkbox;
+pub use command_palette::{CommandItem, CommandPalette};
 pub use confirm_dialog::{ConfirmDialog, ConfirmResult};
 pub use context_menu::{ContextAction, ContextMenu};
 pub use debug_overlay::DebugOverlay;
