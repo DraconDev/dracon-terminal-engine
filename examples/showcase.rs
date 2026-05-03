@@ -88,6 +88,7 @@ struct Showcase {
     should_quit: Arc<AtomicBool>,
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
+    area: Rect,
 }
 
 impl Showcase {
