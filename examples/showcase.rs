@@ -80,6 +80,7 @@ struct Showcase {
     last_click_idx: Option<usize>,
     fps: Arc<AtomicU64>,
     hovered_card: Option<usize>,
+    mouse_pos: Option<(u16, u16)>,
 }
 
 impl Showcase {

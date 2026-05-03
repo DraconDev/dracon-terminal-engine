@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Updated showcase examples with more detailed visual previews and new example categories
+Added mouse position tracking to showcase example for interactive feedback
 
 ## Context
-The showcase examples were being updated to provide more realistic visual representations of the framework's capabilities, making it easier for users to understand what each example demonstrates.
+This change enables more detailed interactive feedback in the showcase example by tracking the mouse position, which will be used to enhance visual effects and user interactions.
 
 ## Completed
-- [x] Updated system_monitor example with more detailed gauge visualizations
-- [x] Added new IDE example showing file tree and editor preview
-- [x] Added Git TUI example demonstrating real Git operations
-- [x] Simplified and reorganized the example list by category
-- [x] Updated Cargo.lock to reflect dependency changes
+- [x] Added `mouse_pos` field to `Showcase` struct to store current mouse coordinates
+- [x] Prepared infrastructure for mouse position-based interactions
 
 ## In Progress
-- [ ] No active work in progress shown in this diff
+- [ ] Implement mouse position-based visual effects and interactions
 
 ## Blockers
-- None identified in this diff
+- Need to implement actual interaction logic using the tracked mouse position
 
 ## Next Steps
-1. Continue refining example previews for better user understanding
-2. Add more interactive features to showcase examples
+1. Implement visual feedback based on mouse position
+2. Add interactive elements that respond to mouse movement
