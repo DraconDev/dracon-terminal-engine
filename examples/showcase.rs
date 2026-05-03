@@ -68,6 +68,7 @@ impl ExampleMeta {
             ExampleMeta { name: "table_widget", category: "tools", description: "Sortable data table", binary_name: "table_widget", preview: &["Name  │ Role │", "──────┼──────", "Alice │ Admin", "Bob   │ User",] },
             ExampleMeta { name: "ide", category: "apps", description: "Mini IDE with all widgets", binary_name: "ide", preview: &["[File][Edit][View]", "├─src/ ┌────────┐", "│ main │fn main│", "│ lib  │{      │", "└──────┴────────┘",] },
             ExampleMeta { name: "git_tui", category: "apps", description: "Real Git interface with status/log/diff/branches", binary_name: "git_tui", preview: &["[Status][Log][Diff]", " M src/main.rs", " A Cargo.toml", "?? README.md", "2 files changed",] },
+            ExampleMeta { name: "sqlite_browser", category: "apps", description: "Database browser with query editor", binary_name: "sqlite_browser", preview: &["Tables  │ Query    │", "users   │ SELECT * │", "posts   │ FROM     │", "        │ users    │",] },
         ]
     }
 }
