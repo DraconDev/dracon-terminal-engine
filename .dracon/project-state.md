@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Refactored the file manager example by removing unused `Instant` import and adding error propagation
+Removed unused imports from the split_resizer example
 
 ## Context
-The file manager example was being cleaned up as part of the broader project refactoring effort. The unused `Instant` import was removed to reduce clutter, and error handling was improved by properly propagating errors from the application's event loop.
+The split_resizer example was refactored to clean up unused dependencies and imports, following a pattern of similar cleanup work in other examples.
 
 ## Completed
-- [x] Removed unused `std::time::Instant` import from file manager example
-- [x] Added proper error propagation in the file manager's event loop
+- [x] Removed unused `std::sync::atomic::{AtomicBool, Ordering}` import
+- [x] Removed unused `std::sync::Arc` import
+- [x] Removed unused `std::os::fd::AsFd` import
+- [x] Removed unused `Color` import from dracon_terminal_engine
 
 ## In Progress
-- [ ] No active work in progress related to this change
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Review other examples for similar refactoring opportunities
-2. Continue with the broader project cleanup efforts
+1. Verify the example still compiles and runs correctly
+2. Check if any other examples could benefit from similar cleanup
