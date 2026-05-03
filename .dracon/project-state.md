@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added a new `GitCommit` struct to the Git TUI example with dead code allowed.
+Added error handling to the Git TUI application's event loop
 
 ## Context
-This change prepares the groundwork for future Git TUI functionality by defining a basic commit structure, even though it's currently unused.
+The Git TUI example was previously silently ignoring potential errors during the application's run phase. This change ensures proper error propagation and handling.
 
 ## Completed
-- [x] Added `GitCommit` struct with hash and author fields
-- [x] Marked struct with `#[allow(dead_code)]` to suppress warnings
+- [x] Added `?` operator to propagate errors from the `run` method
+- [x] Maintained the same functionality while adding proper error handling
 
 ## In Progress
-- [ ] Implement actual Git commit handling functionality
+- [x] Error handling implementation for the Git TUI application
 
 ## Blockers
-- No immediate blockers, but the struct needs integration with Git operations
+- None identified
 
 ## Next Steps
-1. Implement methods to populate and use the `GitCommit` struct
-2. Connect the struct to actual Git repository operations
+1. Verify error handling works correctly with various Git operations
+2. Consider adding more specific error messages for Git-specific failures
