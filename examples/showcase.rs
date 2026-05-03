@@ -918,7 +918,7 @@ impl Widget for Showcase {
         let hovered_cat = self.mouse_pos
             .filter(|(mx, my)| {
                 let y = *my as usize;
-                *mx as usize < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + 8
+                (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + 8
             })
             .map(|(_, my)| (my as usize - sidebar_start_y) / 2)
             .filter(|idx| *idx < categories.len());
