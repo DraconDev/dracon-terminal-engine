@@ -663,7 +663,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t);
+                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_phase);
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
