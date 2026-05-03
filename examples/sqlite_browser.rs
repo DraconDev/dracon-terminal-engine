@@ -38,6 +38,7 @@ impl std::fmt::Display for RowData {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
 enum Panel { Tables, Query, Results }
 
 struct SqliteBrowser {
