@@ -96,8 +96,6 @@ struct Showcase {
     primitive_checkbox: bool,
     primitive_radio: usize,
     primitive_button: bool,
-    scroll_state: dracon_terminal_engine::framework::scroll::ScrollState,
-    scroll_content_offset: usize,
     show_debug: bool,
 }
 
@@ -137,12 +135,6 @@ impl Showcase {
             primitive_checkbox: true,
             primitive_radio: 0,
             primitive_button: false,
-            scroll_state: dracon_terminal_engine::framework::scroll::ScrollState {
-                offset: 0,
-                content_height: 20,
-                viewport_height: 6,
-            },
-            scroll_content_offset: 0,
             show_debug: false,
         }
     }

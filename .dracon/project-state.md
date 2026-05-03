@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added debug overlay toggle in showcase example via 'd' key
+Removed scroll state management from the showcase example
 
 ## Context
-This change enhances the showcase example by providing a visual debugging tool for developers to inspect UI state and layout information.
+The scroll preview visualization was previously implemented with scroll state management, but this feature is no longer needed in the showcase example. The scroll state fields were being used for visualization purposes but are now redundant.
 
 ## Completed
-- [x] Added keyboard shortcut 'd' to toggle debug overlay
-- [x] Integrated debug visualization into showcase example
+- [x] Removed scroll state fields from the Showcase struct
+- [x] Removed scroll state initialization in the default implementation
 
 ## In Progress
-- [x] Debug overlay implementation and toggle functionality
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Expand debug overlay features to include more UI state information
-2. Add configuration options for debug overlay appearance
+1. Verify the showcase example still displays correctly without scroll visualization
+2. Consider if any other visualization features need similar cleanup
