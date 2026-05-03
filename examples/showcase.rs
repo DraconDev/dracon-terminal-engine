@@ -634,13 +634,10 @@ impl Widget for Showcase {
         let prim_states: [&str; 5] = [
             if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" },
             {
-                let pos = (self.primitive_slider * 10.0).round() as usize;
-                let pos = pos.min(10);
+                let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
                 let filled: String = (0..pos).map(|_| '=').collect();
                 let empty: String = (pos..10).map(|_| "-").collect();
-                let combined = format!("{}{}", filled, empty);
-                let combined: String = combined.chars().take(12).collect();
-                &*Box::leak(combined.into_boxed_str())
+                Box::leak(format!("[{}{}]", filled, empty).into_boxed_str())
             },
             if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" },
             {
