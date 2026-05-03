@@ -662,6 +662,55 @@ impl Widget for Showcase {
             }
         }
 
+        // Modal preview
+        if self.modal_preview {
+            if let Some(&ex_idx) = self.filtered.get(self.selected) {
+                if let Some(ex) = self.examples.get(ex_idx) {
+                    let modal_w = 50usize;
+                    let modal_h = 12usize;
+                    let modal_x = ((area.width as usize).saturating_sub(modal_w)) / 2;
+                    let modal_y = ((area.height as usize).saturating_sub(modal_h)) / 2;
+                    
+                    // Background
+                    for cy in 0..modal_h {
+                        for cx in 0..modal_w {
+                            if modal_x + cx < area.width as usize && modal_y + cy < area.height as usize {
+                                set_cell(&mut plane, modal_x + cx, modal_y + cy, ' ', t.fg, t.surface_elevated);
+                            }
+                        }
+                    }
+                    
+                    // Border
+                    draw_rounded_border(&mut plane, Rect::new(modal_x as u16, modal_y as u16, modal_w as u16, modal_h as u16), t.primary, t.surface_elevated, true);
+                    
+                    // Title
+                    let title = format!(" {} ", ex.name);
+                    let title_x = modal_x + (modal_w - title.len()) / 2;
+                    draw_text(&mut plane, title_x, modal_y + 1, &title, t.primary, t.surface_elevated, true);
+                    
+                    // Category badge
+                    let badge = format!(" {} ", ex.category.to_uppercase());
+                    draw_text(&mut plane, modal_x + 2, modal_y + 3, &badge, t.fg_on_accent, category_color(t, ex.category), false);
+                    
+                    // Description
+                    let desc: String = ex.description.chars().take(modal_w - 4).collect();
+                    draw_text(&mut plane, modal_x + 2, modal_y + 5, &desc, t.fg, t.surface_elevated, false);
+                    
+                    // Preview lines
+                    for (i, line) in ex.preview.iter().enumerate() {
+                        let py = modal_y + 7 + i;
+                        if py < modal_y + modal_h - 2 && py < area.height as usize {
+                            let preview_line: String = line.chars().take(modal_w - 4).collect();
+                            draw_text(&mut plane, modal_x + 2, py, &preview_line, t.fg_subtle, t.surface_elevated, false);
+                        }
+                    }
+                    
+                    // Footer
+                    draw_text(&mut plane, modal_x + 2, modal_y + modal_h - 2, "Press Space or Esc to close", t.fg_muted, t.surface_elevated, false);
+                }
+            }
+        }
+
         plane
     }
 
