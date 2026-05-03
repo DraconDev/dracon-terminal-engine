@@ -914,10 +914,21 @@ impl Widget for Showcase {
         let sidebar_start_y = 6usize;
         let categories = ["all", "apps", "cookbook", "tools"];
         const CAT_BASE: usize = 300;
+        // Determine hovered sidebar category
+        let hovered_cat = self.mouse_pos
+            .filter(|(mx, my)| {
+                let y = *my as usize;
+                *mx as usize < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + 8
+            })
+            .map(|(_, my)| (my as usize - sidebar_start_y) / 2)
+            .filter(|idx| *idx < categories.len());
         for (i, cat) in categories.iter().enumerate() {
             let cat_y = sidebar_start_y + i * 2;
             let is_active = self.category_filter.map_or(*cat == "all", |f| f == *cat);
-            let (fg, bg_cat) = if is_active {
+            let is_hovered = hovered_cat == Some(i);
+            let (fg, bg_cat) = if is_hovered {
+                (t.fg, t.surface_elevated)
+            } else if is_active {
                 (t.fg_on_accent, t.primary_active)
             } else {
                 (t.fg_muted, t.bg)
