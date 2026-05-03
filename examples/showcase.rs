@@ -1294,7 +1294,7 @@ impl Widget for Showcase {
                 }
 
                 // Primitives bar click
-                if y == prim_y {
+                if y == 4 {
                     if x >= 2 && x < 16 {
                         self.primitive_toggle = !self.primitive_toggle;
                         return true;
