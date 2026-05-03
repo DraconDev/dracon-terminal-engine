@@ -547,6 +547,12 @@ impl Widget for IdeApp {
         }
 
         // Modal takes priority
+        if self.show_settings {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char('q') => { self.show_settings = false; return true; }
+                _ => return true,
+            }
+        }
 
         // Context menu
         if self.context_menu.is_some() {
