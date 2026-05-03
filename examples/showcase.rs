@@ -501,6 +501,15 @@ impl Widget for Showcase {
             hint_x += hint.len() + 3;
         }
 
+        // Mouse coordinates (right side)
+        if let Some((mx, my)) = self.mouse_pos {
+            let coords = format!("{}:{}", mx, my);
+            let coords_x = area.width as usize - coords.len() - 2;
+            if coords_x > hint_x {
+                draw_text(&mut plane, coords_x, status_y, &coords, t.fg_muted, t.surface_elevated, false);
+            }
+        }
+
         // Status message (temporary)
         if let Some((ref msg, time)) = self.status_message {
             if time.elapsed() < Duration::from_secs(2) {
