@@ -81,6 +81,7 @@ struct Showcase {
     fps: Arc<AtomicU64>,
     hovered_card: Option<usize>,
     mouse_pos: Option<(u16, u16)>,
+    context_menu: Option<(usize, u16, u16)>,
 }
 
 impl Showcase {
