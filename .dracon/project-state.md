@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Added column count tracking to showcase example for better widget layout management
+Improved column count tracking in the showcase example for better widget layout calculations.
 
 ## Context
-This change was prompted by the need to improve widget organization in the showcase example. The previous implementation didn't explicitly track how many columns of widgets should be displayed, making layout management less flexible.
+The previous implementation used a hardcoded value (3) for column calculations in keyboard navigation, which didn't account for dynamic window resizing. This change ensures the column count is calculated once during rendering and reused for consistent navigation behavior.
 
 ## Completed
-- [x] Added `cols: 3` field to `Showcase` struct to explicitly track column count
-- [x] Initialized default column count of 3 for showcase layout
+- [x] Added `self.cols` field to track calculated column count
+- [x] Updated keyboard navigation to use the stored column count instead of hardcoded value
+- [x] Maintained backward compatibility with the existing grid layout calculations
 
 ## In Progress
-- [ ] Implement dynamic column count adjustment based on window size
-- [ ] Add configuration options for column count in showcase example
+- [x] Column count tracking implementation
 
 ## Blockers
-- Need to determine optimal default column count for different screen sizes
-- Requires coordination with widget resizing logic to ensure proper layout
+- None identified
 
 ## Next Steps
-1. Implement dynamic column count adjustment based on window size
-2. Add configuration options for column count in showcase example
+1. Verify the new column count tracking works with different window sizes
+2. Consider adding visual indicators for the current column count in the UI
