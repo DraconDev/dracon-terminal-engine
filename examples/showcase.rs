@@ -647,7 +647,7 @@ impl Widget for Showcase {
                 for (j, _o) in opts.iter().enumerate() {
                     s.push_str(if j == sel { "(*)" } else { "( )" });
                 }
-                &s[..]
+                Box::leak(s.into_boxed_str())
             },
             if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" },
         ];
