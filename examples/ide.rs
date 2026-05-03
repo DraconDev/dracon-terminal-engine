@@ -464,6 +464,16 @@ impl Widget for IdeApp {
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
 
+        // Command palette takes priority when visible
+        if self.command_palette.is_visible() {
+            let handled = self.command_palette.handle_key(key);
+            // Check if a command was executed via the bridge
+            if let Some(cmd_id) = self.cmd_bridge.borrow_mut().take() {
+                self.dispatch_palette_command(cmd_id);
+            }
+            return true;
+        }
+
         // Modal takes priority
         if self.show_settings {
             match key.code {
