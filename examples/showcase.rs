@@ -518,16 +518,21 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64) {
     // Tab bar with active/inactive tabs
     let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
     let mut tab_x = 1usize;
-    for (i, (label, active)) in tabs.iter().enumerate() {
+    let mut active_tab_start = 0usize;
+    let mut active_tab_len = 0usize;
+    for (label, active) in &tabs {
         let fg = if *active { t.fg_on_accent } else { t.fg_muted };
         let bg = if *active { t.primary_active } else { t.surface };
         draw_text(plane, tab_x, 5, label, fg, bg, *active);
+        if *active {
+            active_tab_start = tab_x;
+            active_tab_len = label.len();
+        }
         tab_x += label.len() + 1;
     }
     // Underline for active tab
-    let active_tab_len = tabs[0].0.len();
     for dx in 0..active_tab_len {
-        set_cell(plane, 1 + dx, 5 + 1, '▔', t.primary_active, t.surface);
+        set_cell(plane, active_tab_start + dx, 5 + 1, '▔', t.primary_active, t.surface);
     }
 
     // Code lines with line numbers
