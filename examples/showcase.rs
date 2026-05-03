@@ -420,7 +420,7 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let thumb = thumb.min(slider_w - 1);
     draw_text(plane, 2, slider_y, "[", t.fg_muted, t.surface, false);
     for i in 0..slider_w {
-        let ch = if i == thumb { '#' } else if i < thumb { '=' else { '-' };
+        let ch = if i == thumb { '#' } else if i < thumb { '=' } else { '-' };
         let fg = if i == thumb { t.primary } else { t.fg_muted };
         set_cell(plane, 3 + i, slider_y, ch, fg, t.surface);
     }
