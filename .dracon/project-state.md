@@ -1,22 +1,25 @@
 # Project State
 
 ## Current Focus
-Refactored primitive control hover detection using scoped zone registry
+Enhanced primitive control hover detection in showcase example with visual feedback
 
 ## Context
-The showcase example was previously using manual coordinate calculations to detect primitive control hover states. This was error-prone and difficult to maintain.
+This change improves the interactive UI of the showcase example by:
+1. Adding visual feedback for primitive controls when hovered
+2. Refactoring the zone registry to properly scope per-frame state
+3. Making the hover states more visually distinct
 
 ## Completed
-- [x] Replaced manual coordinate tracking with scoped zone registry
-- [x] Simplified hover detection logic using zone dispatch
-- [x] Improved maintainability by centralizing hit detection in zone system
+- [x] Added scoped zone registry clearing at start of each frame
+- [x] Implemented hover-sensitive text coloring for primitive controls
+- [x] Refactored primitive control rendering to use indexed hover states
 
 ## In Progress
-- [x] Zone registration and hover detection are now properly integrated
+- [ ] Testing hover behavior across different terminal sizes
 
 ## Blockers
-- None identified
+- Need to verify hover detection works with nested UI components
 
 ## Next Steps
-1. Verify zone-based hover detection works consistently across all primitive controls
-2. Document the new zone registry system for future use
+1. Verify hover behavior works with nested UI components
+2. Add visual feedback for primitive control activation states

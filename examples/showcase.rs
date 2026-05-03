@@ -721,6 +721,9 @@ impl Widget for Showcase {
             cell.transparent = false;
         }
 
+        // Clear and rebuild zone registry for this frame
+        self.zones.borrow_mut().clear();
+
         // Title bar with decorative border
         let title_text = " Dracon Terminal Engine ";
         let title_x = 2usize;
@@ -870,7 +873,17 @@ impl Widget for Showcase {
         drop(zones); // release borrow before using plane
         // Draw primitives with hover highlight
         prim_x = 2usize;
-        self.zones.borrow_mut().register();
+        for (i, (key, state)) in prim_controls.iter().enumerate() {
+            let hovered = hovered_prim == Some(i);
+            let key_fg = if hovered { t.primary } else { t.fg_muted };
+            let state_fg = if hovered { t.primary } else { t.fg };
+            draw_text(&mut plane, prim_x, prim_y, key, key_fg, t.bg, false);
+            prim_x += key.len();
+            draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
+            prim_x += 1;
+            draw_text(&mut plane, prim_x, prim_y, state, state_fg, t.bg, false);
+            prim_x += state.len() + 3;
+        }
 
         // Category sidebar
         let sidebar_w = 14usize;
