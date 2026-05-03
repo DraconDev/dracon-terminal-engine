@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added interactive zone tracking for FPS toggle and theme palette in showcase example
 
 ## Context
-This change was triggered by recent updates to the project's dependencies, which required a version bump to ensure compatibility with the latest versions of the dependencies.
+This implements the scoped zone registry system to track interactive UI elements, enabling hover detection and click handling for the FPS toggle and theme palette controls.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added zone registration for FPS toggle button
+- [x] Added zone registration for each theme palette swatch
+- [x] Implemented constant base ID for palette zones (200)
+- [x] Properly scoped zone registration with borrow_mut/drop pattern
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] Testing zone interaction handling
 
 ## Blockers
-- None
+- Need to implement actual interaction handling for registered zones
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with other ongoing development tasks
-```
+1. Implement interaction handlers for registered zones
+2. Add visual feedback for hovered zones

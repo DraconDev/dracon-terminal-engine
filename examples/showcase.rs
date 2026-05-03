@@ -758,6 +758,10 @@ impl Widget for Showcase {
         let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
         let toggle_x = area.width as usize - fps_toggle.len() - 2;
         draw_text(&mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false);
+        // Zone: FPS toggle
+        let mut zones = self.zones.borrow_mut();
+        zones.register(400, toggle_x as u16, title_y as u16, fps_toggle.len() as u16, 1);
+        drop(zones);
 
         // Theme palette bar
         let palette_y = 1usize;
@@ -767,6 +771,7 @@ impl Widget for Showcase {
         let max_visible = (area.width as usize).saturating_sub(4) / (square_w + gap);
         let visible_themes = max_visible.min(themes.len());
         let palette_start_x = ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
+        const PALETTE_BASE: usize = 200;
         for (i, (_name, theme)) in themes.iter().enumerate() {
             if i >= visible_themes { break; }
             let x = palette_start_x + i * (square_w + gap);
@@ -780,6 +785,10 @@ impl Widget for Showcase {
                     set_cell(&mut plane, x + dx, palette_y, ch, fg, bg);
                 }
             }
+            // Register zone for this palette swatch
+            let mut zones = self.zones.borrow_mut();
+            zones.register(PALETTE_BASE + i, x as u16, palette_y as u16, square_w as u16, 1);
+            drop(zones);
         }
 
         // Stats bar
