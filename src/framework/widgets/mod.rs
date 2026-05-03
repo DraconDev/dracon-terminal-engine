@@ -3,6 +3,7 @@
 pub mod breadcrumbs;
 pub mod button;
 pub mod checkbox;
+pub mod command_palette;
 pub mod confirm_dialog;
 pub mod context_menu;
 pub mod debug_overlay;
