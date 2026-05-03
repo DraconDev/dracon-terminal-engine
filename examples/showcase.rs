@@ -106,7 +106,7 @@ struct Showcase {
     primitive_button: bool,
     show_debug: bool,
     primitive_button_time: Option<Instant>,
-    zones: RefCell<ScopedZoneRegistry<&'static str>>,
+    zones: RefCell<ScopedZoneRegistry<usize>>,
 }
 
 impl Showcase {
