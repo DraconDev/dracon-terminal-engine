@@ -316,15 +316,6 @@ impl SystemMonitor {
                                 pid,
                                 name,
                                 cpu_percent: cpu_usage,
-                                mem_mb: mem_kb,
-                                state: match *state {
-                                    "R" => "Running",
-                                    "S" => "Sleeping",
-                                    "D" => "Disk",
-                                    "Z" => "Zombie",
-                                    "T" => "Stopped",
-                                    _ => "Unknown",
-                                }.to_string(),
                             });
                         }
                     }

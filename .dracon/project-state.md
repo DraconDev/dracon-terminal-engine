@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Simplified the system monitor example by removing an unused CPU count field.
+Simplified the system monitor example by removing unused process state information.
 
 ## Context
-The system monitor example was being simplified to reduce complexity and improve maintainability. The unused `cpu_count` field was identified as unnecessary for the current implementation.
+The system monitor example was being simplified to reduce complexity and focus on core functionality. The unused process state field was removed as part of this cleanup effort.
 
 ## Completed
-- [x] Removed the `cpu_count` field from the `SystemStats` struct in the system monitor example
+- [x] Removed unused process state field from system monitor example
+- [x] Updated Cargo.lock to reflect dependency version changes
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Ongoing simplification of example code
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify the system monitor example continues to function correctly without the removed field
-2. Continue with other ongoing documentation and refactoring tasks
+1. Continue reviewing and simplifying other example code
+2. Update documentation to reflect the simplified examples
