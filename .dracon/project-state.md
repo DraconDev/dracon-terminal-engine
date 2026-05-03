@@ -1,26 +1,20 @@
 # Project State
 
 ## Current Focus
-Added mouse interaction support for process selection and scrolling in the system monitor example
+Fixed a typo in the system monitor's gauge height variable name.
 
 ## Context
-This change enhances the system monitor's interactivity by allowing users to:
-- Select processes by clicking in the process list area
-- Scroll through processes using mouse wheel
-- Clear selection by clicking in the right half of the UI
+The system monitor example was recently enhanced with mouse interaction support and process selection functionality. This change was part of the broader effort to improve input handling in the framework.
 
 ## Completed
-- [x] Added mouse event handling for process selection
-- [x] Implemented scroll wheel support for process list navigation
-- [x] Added selection clearing via right-click
-- [x] Maintained existing keyboard interaction functionality
+- [x] Corrected the typo from `gaiges_h` to `gauges_h` in the system monitor's mouse interaction handler
 
 ## In Progress
-- [x] Mouse interaction implementation for system monitor
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Test mouse interaction across different terminal sizes
-2. Consider adding visual feedback for selected processes
+1. Verify the system monitor's gauge rendering remains consistent after the variable name change
+2. Continue testing the mouse interaction features in the system monitor example

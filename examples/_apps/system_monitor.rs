@@ -455,7 +455,7 @@ impl Widget for InputRouter {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let mut m = self.monitor.borrow_mut();
-        let gaiges_h = 6u16;
+        let gauges_h = 6u16;
         let (w, h) = (self.area.get().width, self.area.get().height);
 
         // Process list area: left half, below gauges
