@@ -174,7 +174,6 @@ impl IdeApp {
             active_tab: 0,
             tab_bar,
             file_tree,
-            editor_content: String::new(),
             show_search: false,
             search_input,
             status_bar,
