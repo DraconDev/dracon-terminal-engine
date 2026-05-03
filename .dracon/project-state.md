@@ -1,24 +1,22 @@
 # Project State
 
 ## Current Focus
-Added scroll preview visualization to showcase example with animated scrollbar and content
+Added scroll preview visualization to showcase example with animated scroll state management
 
 ## Context
-This implements a visual demonstration of scrollable content with an interactive scrollbar, building on the interactive UI primitives work. It shows how scroll state is visually represented in the showcase.
+This change extends the showcase example to demonstrate scroll functionality by adding a dedicated scroll preview visualization. It builds on previous work with scroll state management and interactive UI primitives.
 
 ## Completed
-- [x] Added scroll preview with animated content that scrolls vertically
-- [x] Implemented proportional scrollbar thumb that moves with content
-- [x] Added visual distinction for active line
-- [x] Included scrollbar track with muted background
-- [x] Animated scroll position using phase parameter
+- [x] Added scroll preview visualization for "scroll_resizer" and "menu_system" examples
+- [x] Updated scroll state type reference from local crate to external library
+- [x] Maintained consistent initialization of scroll state with proper content/viewport dimensions
 
 ## In Progress
-- [x] Scroll preview visualization implementation
+- [ ] No active work in progress beyond these changes
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Integrate with existing showcase cards
-2. Add interactive scroll controls to showcase
+1. Verify scroll preview visualization works correctly in the showcase
+2. Consider adding more scroll-related examples if needed

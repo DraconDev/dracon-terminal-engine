@@ -96,7 +96,7 @@ struct Showcase {
     primitive_checkbox: bool,
     primitive_radio: usize,
     primitive_button: bool,
-    scroll_state: crate::framework::scroll::ScrollState,
+    scroll_state: dracon_terminal_engine::framework::scroll::ScrollState,
     scroll_content_offset: usize,
 }
 
@@ -136,7 +136,7 @@ impl Showcase {
             primitive_checkbox: true,
             primitive_radio: 0,
             primitive_button: false,
-            scroll_state: crate::framework::scroll::ScrollState {
+            scroll_state: dracon_terminal_engine::framework::scroll::ScrollState {
                 offset: 0,
                 content_height: 20,
                 viewport_height: 6,
@@ -324,6 +324,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
         "widget_gallery" => render_widget_preview(&mut plane, t, phase),
         "ide" => render_ide_preview(&mut plane, t, phase),
         "desktop" => render_desktop_preview(&mut plane, t, phase),
+        "scroll_resizer" | "menu_system" => render_scroll_preview(&mut plane, t, phase),
         _ => {
             for (i, line) in ex.preview.iter().enumerate() {
                 let py = 6 + i;
