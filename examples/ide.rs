@@ -166,6 +166,24 @@ impl IdeApp {
 
         let breadcrumbs = Breadcrumbs::new(vec!["workspace".into(), "src".into(), "main.rs".into()]);
 
+        let palette_commands = vec![
+            CommandItem { id: "new-tab", name: "New Tab", category: "file" },
+            CommandItem { id: "open", name: "Open File", category: "file" },
+            CommandItem { id: "save", name: "Save", category: "file" },
+            CommandItem { id: "save-all", name: "Save All", category: "file" },
+            CommandItem { id: "close-tab", name: "Close Tab", category: "file" },
+            CommandItem { id: "search", name: "Search", category: "edit" },
+            CommandItem { id: "replace", name: "Find and Replace", category: "edit" },
+            CommandItem { id: "cut", name: "Cut", category: "edit" },
+            CommandItem { id: "copy", name: "Copy", category: "edit" },
+            CommandItem { id: "paste", name: "Paste", category: "edit" },
+            CommandItem { id: "cycle-theme", name: "Cycle Theme", category: "view" },
+            CommandItem { id: "toggle-profiler", name: "Toggle Profiler", category: "view" },
+            CommandItem { id: "toggle-search", name: "Toggle Search Panel", category: "view" },
+            CommandItem { id: "show-shortcuts", name: "Keyboard Shortcuts", category: "help" },
+            CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
+        ];
+
         Self {
             should_quit,
             theme,
