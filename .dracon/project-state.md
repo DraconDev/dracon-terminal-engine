@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added selection time tracking to showcase example
+Removed selection time tracking from the showcase example
 
 ## Context
-This change enables tracking when a selection occurs in the interactive showcase, which will be used for performance measurement and user interaction analysis.
+The showcase example was previously tracking selection time, but this feature was removed as part of ongoing refactoring and simplification of the example code.
 
 ## Completed
-- [x] Added `selection_time` field to track when selections occur
-- [x] Initialized with `Instant::now()` to capture current timestamp
+- [x] Removed `selection_time` field from `Showcase` struct
+- [x] Removed initialization of `selection_time` in `new()` method
 
 ## In Progress
-- [x] Selection time tracking implementation
+- [ ] None (this was a cleanup operation)
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Implement usage of selection time for performance metrics
-2. Add visualization of selection timing in the showcase UI
+1. Verify showcase example still functions correctly without selection time tracking
+2. Consider whether other tracking features should be similarly simplified

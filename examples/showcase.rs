@@ -87,7 +87,6 @@ struct Showcase {
     tooltip_pos: Option<(u16, u16)>,
     show_help: bool,
     modal_preview: bool,
-    selection_time: Instant,
 }
 
 impl Showcase {
@@ -119,7 +118,6 @@ impl Showcase {
             tooltip_pos: None,
             show_help: false,
             modal_preview: false,
-            selection_time: Instant::now(),
         }
     }
 
