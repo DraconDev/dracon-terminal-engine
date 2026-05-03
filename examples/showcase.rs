@@ -19,6 +19,7 @@
 //!   right-click — context menu (Launch / Copy name / Filter by category)
 //!   q       — quit
 
+use std::cell::RefCell;
 use std::io::Read;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
