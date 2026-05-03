@@ -1071,7 +1071,7 @@ impl Widget for Showcase {
             }
             for cx in 0..dbg_w {
                 if dbg_x + cx < area.width as usize {
-                    set_cell(&mut plane, dbg_x + cx, dbg_y, '─', t.error, t.error);
+                    set_cell(&mut plane, dbg_x + cx, dbg_y, '─', t.bg, t.error);
                 }
             }
             draw_text(&mut plane, dbg_x + 2, dbg_y, dbg_text, t.bg, t.error, true);

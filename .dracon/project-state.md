@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Removed scroll state management from the showcase example
+Improved debug overlay visualization in the showcase example
 
 ## Context
-The scroll preview visualization was previously implemented with scroll state management, but this feature is no longer needed in the showcase example. The scroll state fields were being used for visualization purposes but are now redundant.
+This change enhances the debug overlay by using the background color (`t.bg`) instead of the error color (`t.error`) for the horizontal line in the debug visualization. This makes the debug overlay more visually distinct while maintaining its purpose of highlighting UI boundaries.
 
 ## Completed
-- [x] Removed scroll state fields from the Showcase struct
-- [x] Removed scroll state initialization in the default implementation
+- [x] Changed debug overlay horizontal line color from error to background color
+- [x] Maintained consistent styling with the debug text
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Debug overlay visualization improvements
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify the showcase example still displays correctly without scroll visualization
-2. Consider if any other visualization features need similar cleanup
+1. Verify visual consistency with other debug elements
+2. Test with different themes to ensure proper contrast
