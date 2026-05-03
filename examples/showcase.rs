@@ -384,8 +384,8 @@ impl Widget for Showcase {
         let grid_start_y = sidebar_start_y + 1;
         let card_w = 28usize;
         let card_h = 14usize;
-        self.cols = ((area.width as usize - grid_start_x) / (card_w + 2)).max(1);
-        let cols = self.cols;
+        self.cols.set(((area.width as usize - grid_start_x) / (card_w + 2)).max(1));
+        let cols = self.cols.get();
 
         for (grid_idx, &ex_idx) in self.filtered.iter().enumerate() {
             if let Some(ex) = self.examples.get(ex_idx) {
@@ -504,14 +504,14 @@ impl Widget for Showcase {
                     true
                 }
                 KeyCode::Right | KeyCode::Char('l') => {
-                    let cols = self.cols.max(1);
+                    let cols = self.cols.get().max(1);
                     if self.selected + cols < self.filtered.len() {
                         self.selected += cols;
                     }
                     true
                 }
                 KeyCode::Left | KeyCode::Char('h') => {
-                    let cols = self.cols.max(1);
+                    let cols = self.cols.get().max(1);
                     if self.selected >= cols {
                         self.selected -= cols;
                     }
