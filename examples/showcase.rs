@@ -605,7 +605,7 @@ impl Widget for Showcase {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let sidebar_w = 12usize;
-        let sidebar_start_y = 5usize;
+        let sidebar_start_y = 6usize;
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
         let card_w = 28usize;
@@ -615,6 +615,24 @@ impl Widget for Showcase {
             MouseEventKind::Down(MouseButton::Left) => {
                 let y = row as usize;
                 let x = col as usize;
+
+                // Theme palette click
+                if y == 1 {
+                    let themes = Self::themes();
+                    let square_w = 2usize;
+                    let gap = 1usize;
+                    let total_width = themes.len() * (square_w + gap);
+                    let palette_start_x = ((self.area.width as usize).saturating_sub(total_width)) / 2;
+                    if x >= palette_start_x {
+                        let rel_x = x - palette_start_x;
+                        let idx = rel_x / (square_w + gap);
+                        if idx < themes.len() && rel_x % (square_w + gap) < square_w {
+                            self.pending_theme = Some(idx);
+                            self.apply_filter();
+                            return true;
+                        }
+                    }
+                }
 
                 if y >= sidebar_start_y && y < sidebar_start_y + 8 && x < sidebar_w {
                     let idx = (y - sidebar_start_y) / 2;
@@ -626,7 +644,7 @@ impl Widget for Showcase {
                     }
                 }
 
-                if y == 2 && x >= 2 && x < 30 {
+                if y == 3 && x >= 2 && x < 30 {
                     self.search_active = true;
                     return true;
                 }
