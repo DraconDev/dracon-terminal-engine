@@ -343,7 +343,7 @@ impl Widget for FileManager {
         let detail_h = content_h.saturating_sub(2);
 
         if detail_w > 0 && detail_h > 0 {
-            if let Some(ref sel_path) = self.selected_path {
+            if let Some(ref _sel_path) = self.selected_path {
                 if let Some(node) = self.root.find_by_path(&self.tree_path) {
                     // Detail pane border
                     render_box(&mut plane, detail_x - 1, hh, detail_w + 1, detail_h, t.outline, t.surface_elevated);
