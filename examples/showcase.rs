@@ -145,13 +145,6 @@ impl Showcase {
             self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));
         }
     }
-
-    fn tick_animation(&mut self) {
-        if self.last_anim.elapsed() > Duration::from_millis(200) {
-            self.anim_frame = (self.anim_frame + 1) % 4;
-            self.last_anim = Instant::now();
-        }
-    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
