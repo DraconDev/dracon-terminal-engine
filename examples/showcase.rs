@@ -646,8 +646,7 @@ fn main() -> std::io::Result<()> {
     let showcase = Showcase::new(should_quit, pending.clone());
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
-    let showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
-    app.set_focus(showcase_id);
+    let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _tick| {
         if quit_check.load(Ordering::SeqCst) {

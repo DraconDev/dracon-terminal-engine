@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added automatic focus handling for new widgets in the framework.
+Removed explicit focus setting for showcase widget to enable automatic focus handling
 
 ## Context
-When widgets are added to the application, they should automatically receive focus if no other widget is currently focused. This improves user experience by ensuring interactive elements are immediately usable.
+This change aligns with recent framework improvements for automatic focus management. The showcase example was previously manually setting focus on the widget, which is now redundant.
 
 ## Completed
-- [x] Added automatic focus assignment for new widgets
-- [x] Triggered `on_focus()` callback when auto-focusing
-- [x] Only auto-focuses if no other widget is currently focused
+- [x] Removed explicit `set_focus` call for showcase widget
+- [x] Renamed unused variable to `_showcase_id` to indicate intentional non-use
 
 ## In Progress
-- [x] Widget focus management implementation
+- [x] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify focus behavior with different widget types
-2. Consider adding configuration options for focus behavior
+1. Verify automatic focus behavior works as expected in showcase
+2. Consider similar cleanup in other example files if needed
