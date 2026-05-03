@@ -1072,6 +1072,26 @@ impl Widget for Showcase {
                     self.apply_filter();
                     true
                 }
+                KeyCode::Char('1') => {
+                    self.primitive_toggle = !self.primitive_toggle;
+                    true
+                }
+                KeyCode::Char('2') => {
+                    self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                    true
+                }
+                KeyCode::Char('3') => {
+                    self.primitive_checkbox = !self.primitive_checkbox;
+                    true
+                }
+                KeyCode::Char('4') => {
+                    self.primitive_radio = (self.primitive_radio + 1) % 3;
+                    true
+                }
+                KeyCode::Char('5') => {
+                    self.primitive_button = true;
+                    true
+                }
                 KeyCode::Down => {
                     if self.selected + 1 < self.filtered.len() {
                         self.selected += 1;
