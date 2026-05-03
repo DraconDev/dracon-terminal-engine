@@ -330,7 +330,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     draw_text(&mut plane, 2, desc_y, &desc, t.fg_muted, bg, false);
 
     let preview_start_y = 6usize;
-    let preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
+    let _preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
 
     match ex.name {
         "system_monitor" => render_live_gauge_preview(&mut plane, t, card_phase, card_w),
