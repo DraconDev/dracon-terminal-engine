@@ -631,7 +631,7 @@ set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
     }
 }
 
-fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     // Branch header
     draw_text(plane, 2, 6, " main ", t.fg_on_accent, t.primary_active, true);
     draw_text(plane, 2, 7, "Status: 3 files changed", t.fg, t.surface, false);
