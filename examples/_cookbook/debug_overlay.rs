@@ -60,19 +60,32 @@ impl DebugOverlayPanel {
 }
 
 impl Widget for DebugOverlayPanel {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        Rect::new(0, 0, 80, 24)
+    }
     fn set_area(&mut self, area: Rect) {
         self.profiler.set_area(Rect::new(0, 1, 25, 8));
         self.inspector.set_area(Rect::new(26, 1, 25, 8));
-        self.event_logger.set_area(Rect::new(0, 10, area.width, area.height.saturating_sub(11)));
+        self.event_logger
+            .set_area(Rect::new(0, 10, area.width, area.height.saturating_sub(11)));
     }
-    fn z_index(&self) -> u16 { 200 }
-    fn needs_render(&self) -> bool { self.visible }
+    fn z_index(&self) -> u16 {
+        200
+    }
+    fn needs_render(&self) -> bool {
+        self.visible
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { self.visible }
+    fn focusable(&self) -> bool {
+        self.visible
+    }
 
     fn render(&self, area: Rect) -> Plane {
         if !self.visible {
@@ -89,10 +102,28 @@ impl Widget for DebugOverlayPanel {
                     let border = y == 0 || y == 9 || y == area.height - 1;
                     let separator = y == 9 && x == 26;
                     plane.cells[idx] = Cell {
-                        char: if separator { '+' } else if border { '-' } else { ' ' },
-                        fg: if border { self.theme.primary } else { Color::Reset },
-                        bg: if border { self.theme.surface_elevated } else { Color::Reset },
-                        style: if border { Styles::BOLD } else { Styles::empty() },
+                        char: if separator {
+                            '+'
+                        } else if border {
+                            '-'
+                        } else {
+                            ' '
+                        },
+                        fg: if border {
+                            self.theme.primary
+                        } else {
+                            Color::Reset
+                        },
+                        bg: if border {
+                            self.theme.surface_elevated
+                        } else {
+                            Color::Reset
+                        },
+                        style: if border {
+                            Styles::BOLD
+                        } else {
+                            Styles::empty()
+                        },
                         transparent: false,
                         skip: false,
                     };
@@ -101,13 +132,28 @@ impl Widget for DebugOverlayPanel {
         }
 
         for x in 0..area.width {
-            let idx = (0 * plane.width + x) as usize; if idx < plane.cells.len() { plane.cells[idx].char = '-'; }
-            let idx = (9 * plane.width + x) as usize; if idx < plane.cells.len() { plane.cells[idx].char = '-'; }
-            let idx = ((area.height - 1) * plane.width + x) as usize; if idx < plane.cells.len() { plane.cells[idx].char = '-'; }
+            let idx = (0 * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '-';
+            }
+            let idx = (9 * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '-';
+            }
+            let idx = ((area.height - 1) * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '-';
+            }
         }
 
         for y in 0..area.height {
-            for idx in [(y * plane.width + 0) as usize, (y * plane.width + 25) as usize, (y * plane.width + area.width.saturating_sub(1)) as usize].iter() {
+            for idx in [
+                (y * plane.width + 0) as usize,
+                (y * plane.width + 25) as usize,
+                (y * plane.width + area.width.saturating_sub(1)) as usize,
+            ]
+            .iter()
+            {
                 if *idx < plane.cells.len() {
                     plane.cells[*idx].char = '|';
                     plane.cells[*idx].fg = self.theme.primary;
@@ -116,15 +162,24 @@ impl Widget for DebugOverlayPanel {
         }
 
         let header = "Debug Overlay";
-        for (i, c) in header.chars().enumerate().take((area.width as usize).saturating_sub(10)) {
+        for (i, c) in header
+            .chars()
+            .enumerate()
+            .take((area.width as usize).saturating_sub(10))
+        {
             let idx = (0 * plane.width + 2 + i as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].style = Styles::BOLD; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].style = Styles::BOLD;
+            }
         }
 
         let close = "[x] Close";
         for (i, c) in close.chars().enumerate() {
             let idx = (0 * plane.width + area.width.saturating_sub(10) + i as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+            }
         }
 
         let profiler_area = Rect::new(1, 2, 23, 6);
@@ -132,7 +187,9 @@ impl Widget for DebugOverlayPanel {
         for y in 0..prof_plane.height {
             for x in 0..prof_plane.width {
                 let src_idx = (y * prof_plane.width + x) as usize;
-                if prof_plane.cells[src_idx].transparent { continue; }
+                if prof_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 2) * plane.width + x + 1) as usize;
                 if src_idx < prof_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = prof_plane.cells[src_idx].clone();
@@ -145,7 +202,9 @@ impl Widget for DebugOverlayPanel {
         for y in 0..insp_plane.height {
             for x in 0..insp_plane.width {
                 let src_idx = (y * insp_plane.width + x) as usize;
-                if insp_plane.cells[src_idx].transparent { continue; }
+                if insp_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 2) * plane.width + x + 27) as usize;
                 if src_idx < insp_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = insp_plane.cells[src_idx].clone();
@@ -153,12 +212,19 @@ impl Widget for DebugOverlayPanel {
             }
         }
 
-        let logger_area = Rect::new(1, 11, area.width.saturating_sub(2), area.height.saturating_sub(12));
+        let logger_area = Rect::new(
+            1,
+            11,
+            area.width.saturating_sub(2),
+            area.height.saturating_sub(12),
+        );
         let log_plane = self.event_logger.render(logger_area);
         for y in 0..log_plane.height {
             for x in 0..log_plane.width {
                 let src_idx = (y * log_plane.width + x) as usize;
-                if log_plane.cells[src_idx].transparent { continue; }
+                if log_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 11) * plane.width + x + 1) as usize;
                 if src_idx < log_plane.cells.len() && dst_idx < plane.cells.len() {
                     plane.cells[dst_idx] = log_plane.cells[src_idx].clone();
@@ -170,16 +236,27 @@ impl Widget for DebugOverlayPanel {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
-        if let KeyCode::F(12) = key.code { self.toggle(); return true; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        if let KeyCode::F(12) = key.code {
+            self.toggle();
+            return true;
+        }
         if self.visible {
-            if let KeyCode::Esc = key.code { self.toggle(); return true; }
+            if let KeyCode::Esc = key.code {
+                self.toggle();
+                return true;
+            }
         }
         false
     }
 
     fn handle_mouse(&mut self, _kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.visible && row == 0 && col >= self.area().width.saturating_sub(9) { self.toggle(); return true; }
+        if self.visible && row == 0 && col >= self.area().width.saturating_sub(9) {
+            self.toggle();
+            return true;
+        }
         false
     }
 }

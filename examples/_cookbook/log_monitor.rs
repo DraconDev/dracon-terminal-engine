@@ -64,7 +64,8 @@ impl LogMonitor {
         let mut rng = rand::thread_rng();
         let (lvl, msg) = LOGS[rng.gen_range(0..LOGS.len())];
         let t = format_time();
-        self.log_viewer.append_line(&format!("[{}] {} - {}", t, lvl, msg));
+        self.log_viewer
+            .append_line(&format!("[{}] {} - {}", t, lvl, msg));
         self.last_log = Instant::now();
         self.total_lines += 1;
         self.dirty = true;
@@ -72,7 +73,11 @@ impl LogMonitor {
 
     fn refresh_status(&mut self) {
         let s = self.last_log.elapsed().as_secs();
-        let status_str = if s < 1 { "just now".to_string() } else { format!("{}s ago", s) };
+        let status_str = if s < 1 {
+            "just now".to_string()
+        } else {
+            format!("{}s ago", s)
+        };
         self.status.set_status(&status_str);
     }
 
@@ -89,25 +94,44 @@ impl LogMonitor {
 }
 
 fn format_time() -> String {
-    let d = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap();
-    let (h, m, s) = (d.as_secs() / 3600 % 24, d.as_secs() / 60 % 60, d.as_secs() % 60);
+    let d = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap();
+    let (h, m, s) = (
+        d.as_secs() / 3600 % 24,
+        d.as_secs() / 60 % 60,
+        d.as_secs() % 60,
+    );
     format!("{:02}:{:02}:{:02}.{:03}", h, m, s, d.subsec_millis())
 }
 
 impl Widget for LogMonitor {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
     fn set_area(&mut self, area: Rect) {
         self.area = area;
         let la = Rect::new(area.x, area.y + 2, area.width, area.height - 4);
         self.log_viewer.set_area(la);
-        self.status.set_area(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
+        self.status
+            .set_area(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
         self.dirty = true;
     }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
@@ -116,18 +140,37 @@ impl Widget for LogMonitor {
         let title = " Log Monitor ";
         for (i, c) in title.chars().enumerate().take(area.width as usize - 2) {
             let idx = (i + 2) as usize;
-            p.cells[idx] = Cell { char: c, fg: self.log_viewer.theme.primary, bg: Color::Reset, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell {
+                char: c,
+                fg: self.log_viewer.theme.primary,
+                bg: Color::Reset,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
 
         // Filters
         let fx = area.width.saturating_sub(36);
         let labels = ["[INFO]", "[WARN]", "[ERROR]", "[DEBUG]"];
-        let colors = [self.log_viewer.theme.info, self.log_viewer.theme.warning, self.log_viewer.theme.error, self.log_viewer.theme.fg_muted];
+        let colors = [
+            self.log_viewer.theme.info,
+            self.log_viewer.theme.warning,
+            self.log_viewer.theme.error,
+            self.log_viewer.theme.fg_muted,
+        ];
         for (i, (&l, &c)) in labels.iter().zip(colors.iter()).enumerate() {
             for (j, ch) in l.chars().enumerate() {
                 let idx = (fx + i as u16 * 7 + j as u16) as usize;
                 if idx < p.cells.len() {
-                    p.cells[idx] = Cell { char: ch, fg: c, bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: ch,
+                        fg: c,
+                        bg: Color::Reset,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }
@@ -135,36 +178,70 @@ impl Widget for LogMonitor {
         // Separator
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx] = Cell { char: '─', fg: self.log_viewer.theme.outline, bg: Color::Reset, style: Styles::empty(), transparent: false, skip: false }; }
+            if idx < p.cells.len() {
+                p.cells[idx] = Cell {
+                    char: '─',
+                    fg: self.log_viewer.theme.outline,
+                    bg: Color::Reset,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
+            }
         }
 
         // Log viewer
         let la = Rect::new(area.x, area.y + 2, area.width, area.height - 4);
         let lp = self.log_viewer.render(la);
-        for (i, c) in lp.cells.iter().enumerate().take(p.cells.len() - 2 * area.width as usize) {
-            if c.transparent { continue; }
+        for (i, c) in lp
+            .cells
+            .iter()
+            .enumerate()
+            .take(p.cells.len() - 2 * area.width as usize)
+        {
+            if c.transparent {
+                continue;
+            }
             let row = i / area.width as usize;
             let col = i % area.width as usize;
             let target = (row + 2) * area.width as usize + col;
-            if target < p.cells.len() { p.cells[target] = c.clone(); }
+            if target < p.cells.len() {
+                p.cells[target] = c.clone();
+            }
         }
 
         // Status bar
-        let sp = self.status.render(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
+        let sp = self
+            .status
+            .render(Rect::new(area.x, area.y + area.height - 1, area.width, 1));
         let sr = (area.height - 1) as usize * area.width as usize;
         for (i, c) in sp.cells.iter().enumerate().take(area.width as usize) {
-            if c.transparent { continue; }
+            if c.transparent {
+                continue;
+            }
             let idx = sr + i;
-            if idx < p.cells.len() { p.cells[idx] = c.clone(); }
+            if idx < p.cells.len() {
+                p.cells[idx] = c.clone();
+            }
         }
         p
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
-            KeyCode::Char('c') => { self.clear(); true }
-            KeyCode::Char('r') => { self.auto_scroll = true; self.log_viewer.auto_scroll = true; self.dirty = true; true }
+            KeyCode::Char('c') => {
+                self.clear();
+                true
+            }
+            KeyCode::Char('r') => {
+                self.auto_scroll = true;
+                self.log_viewer.auto_scroll = true;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
@@ -177,12 +254,16 @@ impl Widget for LogMonitor {
                 self.dirty = true;
             }
             true
-        } else { false }
+        } else {
+            false
+        }
     }
 }
 
 impl Default for LogMonitor {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// Thin wrapper that routes keyboard/mouse events to a Rc<RefCell<LogMonitor>>.
@@ -195,16 +276,32 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
@@ -229,10 +326,7 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_ctx = App::new()?
-        .title("Log Monitor")
-        .fps(30)
-        .tick_interval(200);
+    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200);
 
     let router = InputRouter {
         target: mon_for_input,
@@ -256,7 +350,9 @@ fn main() -> Result<()> {
                 return;
             }
             let mut mon = mon_for_tick.borrow_mut();
-            if tick % 2 == 0 { mon.tick(); }
+            if tick % 2 == 0 {
+                mon.tick();
+            }
             let (w, h) = ctx.compositor().size();
             if mon.area.width != w || mon.area.height != h {
                 mon.set_area(Rect::new(0, 0, w, h));

@@ -24,18 +24,18 @@
 //! cargo run --example widget_gallery
 //! ```
 
-use std::os::fd::AsFd;
-use std::sync::atomic::AtomicBool;
-use std::sync::Arc;
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, List, Orientation, ProgressBar, Radio, Select, SearchInput, Slider,
-    Spinner, SplitPane, Toggle,
+    Button, Checkbox, List, Orientation, ProgressBar, Radio, SearchInput, Select, Slider, Spinner,
+    SplitPane, Toggle,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::os::fd::AsFd;
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 
 const WIDGET_NAMES: &[&str] = &[
     "Checkbox",
@@ -77,8 +77,11 @@ impl WidgetGallery {
             slider: Slider::new(WidgetId::new(12)).with_range(0.0, 100.0),
             spinner: Spinner::new(WidgetId::new(13)),
             toggle: Toggle::new(WidgetId::new(14), "Dark Mode"),
-            select: Select::new(WidgetId::new(15))
-                .with_options(vec!["Red".to_string(), "Green".to_string(), "Blue".to_string()]),
+            select: Select::new(WidgetId::new(15)).with_options(vec![
+                "Red".to_string(),
+                "Green".to_string(),
+                "Blue".to_string(),
+            ]),
             search: SearchInput::new(WidgetId::new(16)),
             progress: ProgressBar::new(WidgetId::new(17)),
             button: Button::with_id(WidgetId::new(18), "Click Me!"),
@@ -146,7 +149,8 @@ impl WidgetGallery {
                 self.copy_plane(&mut plane, &radio_plane, 2, content_top);
             }
             2 => {
-                let slider_area = Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
+                let slider_area =
+                    Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
                 let slider_plane = self.slider.render(slider_area);
                 self.copy_plane(&mut plane, &slider_plane, 2, content_top);
                 let val_text = format!("Value: {:.0}", self.slider.value());
@@ -194,7 +198,8 @@ impl WidgetGallery {
                 self.copy_plane(&mut plane, &select_plane, 2, content_top);
             }
             6 => {
-                let search_area = Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
+                let search_area =
+                    Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
                 let search_plane = self.search.render(search_area);
                 self.copy_plane(&mut plane, &search_plane, 2, content_top);
             }
@@ -343,13 +348,28 @@ impl Widget for WidgetGallery {
         plane.z_index = 0;
 
         let nav_plane = self.render_nav(nav_rect);
-        self.copy_plane(&mut plane, &nav_plane, nav_rect.x as usize, nav_rect.y as usize);
+        self.copy_plane(
+            &mut plane,
+            &nav_plane,
+            nav_rect.x as usize,
+            nav_rect.y as usize,
+        );
 
         let divider_plane = split.render_divider(area);
-        self.copy_plane(&mut plane, &divider_plane, divider_plane.x as usize, divider_plane.y as usize);
+        self.copy_plane(
+            &mut plane,
+            &divider_plane,
+            divider_plane.x as usize,
+            divider_plane.y as usize,
+        );
 
         let content_plane = self.render_content(content_rect);
-        self.copy_plane(&mut plane, &content_plane, content_rect.x as usize, content_rect.y as usize);
+        self.copy_plane(
+            &mut plane,
+            &content_plane,
+            content_rect.x as usize,
+            content_rect.y as usize,
+        );
 
         plane
     }
@@ -375,7 +395,8 @@ impl Widget for WidgetGallery {
                 true
             }
             Char('q') | Esc => {
-                self.quit_requested.store(true, std::sync::atomic::Ordering::SeqCst);
+                self.quit_requested
+                    .store(true, std::sync::atomic::Ordering::SeqCst);
                 true
             }
             Enter => {
@@ -399,8 +420,10 @@ impl Widget for WidgetGallery {
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
         let (nav_rect, content_rect) = split.split(self.area);
 
-        if col >= nav_rect.x && col < nav_rect.x + nav_rect.width
-            && row >= nav_rect.y && row < nav_rect.y + nav_rect.height
+        if col >= nav_rect.x
+            && col < nav_rect.x + nav_rect.width
+            && row >= nav_rect.y
+            && row < nav_rect.y + nav_rect.height
         {
             let rel_row = (row - nav_rect.y) as usize;
             if rel_row < WIDGET_NAMES.len() {
@@ -410,8 +433,10 @@ impl Widget for WidgetGallery {
             }
         }
 
-        if col >= content_rect.x && col < content_rect.x + content_rect.width
-            && row >= content_rect.y && row < content_rect.y + content_rect.height
+        if col >= content_rect.x
+            && col < content_rect.x + content_rect.width
+            && row >= content_rect.y
+            && row < content_rect.y + content_rect.height
         {
             let rel_col = col - content_rect.x;
             let rel_row = row - content_rect.y;
@@ -456,5 +481,6 @@ fn main() -> std::io::Result<()> {
         if !running_clone.load(std::sync::atomic::Ordering::SeqCst) {
             ctx.stop();
         }
-    }).run(|_ctx| {})
+    })
+    .run(|_ctx| {})
 }

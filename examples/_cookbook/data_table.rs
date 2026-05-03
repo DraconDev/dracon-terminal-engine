@@ -27,27 +27,51 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 const DATA: &[(&str, u32, &str, &str)] = &[
-    ("Alice", 28, "New York", "Software Engineer"), ("Bob", 34, "London", "Data Scientist"),
-    ("Carol", 22, "Tokyo", "Product Manager"), ("David", 31, "Berlin", "DevOps Engineer"),
-    ("Eve", 29, "Sydney", "UX Designer"), ("Frank", 45, "Toronto", "Engineering Manager"),
-    ("Grace", 27, "Singapore", "Frontend Developer"), ("Heidi", 33, "Paris", "Backend Developer"),
-    ("Ivan", 41, "Amsterdam", "CTO"), ("Judy", 26, "Seoul", "Mobile Developer"),
+    ("Alice", 28, "New York", "Software Engineer"),
+    ("Bob", 34, "London", "Data Scientist"),
+    ("Carol", 22, "Tokyo", "Product Manager"),
+    ("David", 31, "Berlin", "DevOps Engineer"),
+    ("Eve", 29, "Sydney", "UX Designer"),
+    ("Frank", 45, "Toronto", "Engineering Manager"),
+    ("Grace", 27, "Singapore", "Frontend Developer"),
+    ("Heidi", 33, "Paris", "Backend Developer"),
+    ("Ivan", 41, "Amsterdam", "CTO"),
+    ("Judy", 26, "Seoul", "Mobile Developer"),
 ];
 
-#[derive(Clone)] struct Person(String, u32, String, String);
+#[derive(Clone)]
+struct Person(String, u32, String, String);
 
 impl Person {
     fn matches(&self, q: &str) -> bool {
         let q = q.to_lowercase();
-        self.0.to_lowercase().contains(&q) || self.2.to_lowercase().contains(&q)
-            || self.3.to_lowercase().contains(&q) || self.1.to_string().contains(&q)
+        self.0.to_lowercase().contains(&q)
+            || self.2.to_lowercase().contains(&q)
+            || self.3.to_lowercase().contains(&q)
+            || self.1.to_string().contains(&q)
     }
 }
 
-enum Sort { None, Asc, Desc }
+enum Sort {
+    None,
+    Asc,
+    Desc,
+}
 impl Sort {
-    fn next(&self) -> Self { match self { Sort::None => Sort::Asc, Sort::Asc => Sort::Desc, Sort::Desc => Sort::None } }
-    fn sym(&self) -> &'static str { match self { Sort::None => "", Sort::Asc => "▲", Sort::Desc => "▼" } }
+    fn next(&self) -> Self {
+        match self {
+            Sort::None => Sort::Asc,
+            Sort::Asc => Sort::Desc,
+            Sort::Desc => Sort::None,
+        }
+    }
+    fn sym(&self) -> &'static str {
+        match self {
+            Sort::None => "",
+            Sort::Asc => "▲",
+            Sort::Desc => "▼",
+        }
+    }
 }
 
 struct Table {
@@ -66,7 +90,10 @@ struct Table {
 
 impl Table {
     fn new() -> Self {
-        let all: Vec<Person> = DATA.iter().map(|(n, a, c, p)| Person(n.to_string(), *a, c.to_string(), p.to_string())).collect();
+        let all: Vec<Person> = DATA
+            .iter()
+            .map(|(n, a, c, p)| Person(n.to_string(), *a, c.to_string(), p.to_string()))
+            .collect();
         Self {
             id: WidgetId::new(0),
             all: all.clone(),
@@ -83,13 +110,20 @@ impl Table {
     }
 
     fn filter(&mut self, q: &str) {
-        self.rows = if q.is_empty() { self.all.clone() } else { self.all.iter().filter(|p| p.matches(q)).cloned().collect() };
-        self.sort_rows(); self.sel = 0; self.off = 0; self.dirty = true;
+        self.rows = if q.is_empty() {
+            self.all.clone()
+        } else {
+            self.all.iter().filter(|p| p.matches(q)).cloned().collect()
+        };
+        self.sort_rows();
+        self.sel = 0;
+        self.off = 0;
+        self.dirty = true;
     }
 
     fn sort_rows(&mut self) {
         match self.sort {
-            Sort::None => {},
+            Sort::None => {}
             Sort::Asc => self.rows.sort_by(|a, b| a.0.cmp(&b.0)),
             Sort::Desc => self.rows.sort_by(|a, b| b.0.cmp(&a.0)),
         }
@@ -97,19 +131,41 @@ impl Table {
 }
 
 impl Widget for Table {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn z_index(&self) -> u16 { 10 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        10
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
-        let (heads, widths, hh, sh) = (["Name", "Age", "City", "Profession"], [12u16, 5, 11, 16], 2u16, 1u16);
+        let (heads, widths, hh, sh) = (
+            ["Name", "Age", "City", "Profession"],
+            [12u16, 5, 11, 16],
+            2u16,
+            1u16,
+        );
 
         for y in 0..area.height {
             for x in 0..area.width {
@@ -141,12 +197,19 @@ impl Widget for Table {
         let sx = area.width.saturating_sub(lbl.len() as u16 + 2);
         for (i, c) in lbl.chars().enumerate() {
             let idx = (sx + i as u16) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.fg; }
+            if idx < p.cells.len() {
+                p.cells[idx].char = c;
+                p.cells[idx].fg = self.theme.fg;
+            }
         }
 
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = self.theme.outline; p.cells[idx].transparent = false; }
+            if idx < p.cells.len() {
+                p.cells[idx].char = '─';
+                p.cells[idx].fg = self.theme.outline;
+                p.cells[idx].transparent = false;
+            }
         }
 
         let mut x = 0u16;
@@ -166,23 +229,43 @@ impl Widget for Table {
         for (i, row) in self.rows.iter().skip(self.off).take(self.vis).enumerate() {
             let y = hh + i as u16;
             let sel = self.off + i == self.sel;
-            let bg = if sel { self.theme.selection_bg } else { self.theme.bg };
-            let fg = if sel { self.theme.selection_fg } else { self.theme.fg };
+            let bg = if sel {
+                self.theme.selection_bg
+            } else {
+                self.theme.bg
+            };
+            let fg = if sel {
+                self.theme.selection_fg
+            } else {
+                self.theme.fg
+            };
             let sty = if sel { Styles::BOLD } else { Styles::empty() };
             for x in 0..area.width {
                 let idx = (y * area.width + x) as usize;
-                if idx < p.cells.len() { p.cells[idx].bg = bg; p.cells[idx].fg = fg; p.cells[idx].transparent = false; }
+                if idx < p.cells.len() {
+                    p.cells[idx].bg = bg;
+                    p.cells[idx].fg = fg;
+                    p.cells[idx].transparent = false;
+                }
             }
 
             let vals = [&row.0, &row.1.to_string(), &row.2, &row.3];
             let mut x = 0u16;
             for (j, (v, w)) in vals.iter().zip(widths.iter()).enumerate() {
                 let w = *w.min(&area.width.saturating_sub(x));
-                let txt = if j == 1 { format!("{:>3}", v) } else { v.chars().take(w as usize - 1).collect() };
+                let txt = if j == 1 {
+                    format!("{:>3}", v)
+                } else {
+                    v.chars().take(w as usize - 1).collect()
+                };
                 let pre = if sel && j == 0 { "> " } else { " " };
                 for (k, c) in pre.chars().chain(txt.chars()).take(w as usize).enumerate() {
                     let idx = (y * area.width + x + k as u16) as usize;
-                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = fg; p.cells[idx].style = sty; }
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = c;
+                        p.cells[idx].fg = fg;
+                        p.cells[idx].style = sty;
+                    }
                 }
                 x += w + 1;
             }
@@ -190,25 +273,68 @@ impl Widget for Table {
 
         let sy = area.height - sh;
         let txt = if let Some(r) = self.rows.get(self.sel) {
-            format!("Selected: {} | Age: {} | City: {} | {} rows", r.0, r.1, r.2, self.rows.len())
+            format!(
+                "Selected: {} | Age: {} | City: {} | {} rows",
+                r.0,
+                r.1,
+                r.2,
+                self.rows.len()
+            )
         } else {
             format!("No results | {} rows", self.rows.len())
         };
         for (i, c) in txt.chars().take(area.width as usize).enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.primary; p.cells[idx].transparent = false; }
+            if idx < p.cells.len() {
+                p.cells[idx].char = c;
+                p.cells[idx].fg = self.theme.primary;
+                p.cells[idx].transparent = false;
+            }
         }
         p
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
-        if self.search.handle_key(key.clone()) { self.filter(&self.search.query().to_string()); return true; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        if self.search.handle_key(key.clone()) {
+            self.filter(&self.search.query().to_string());
+            return true;
+        }
         match key.code {
-            KeyCode::Down => { if self.sel + 1 < self.rows.len() { self.sel += 1; if self.sel >= self.off + self.vis { self.off = self.sel - self.vis + 1; } self.dirty = true; } true }
-            KeyCode::Up => { if self.sel > 0 { self.sel -= 1; if self.sel < self.off { self.off = self.sel; } self.dirty = true; } true }
-            KeyCode::Home => { self.sel = 0; self.off = 0; self.dirty = true; true }
-            KeyCode::End => { self.sel = self.rows.len().saturating_sub(1); self.off = self.off.max(self.sel + 1 - self.vis); self.dirty = true; true }
+            KeyCode::Down => {
+                if self.sel + 1 < self.rows.len() {
+                    self.sel += 1;
+                    if self.sel >= self.off + self.vis {
+                        self.off = self.sel - self.vis + 1;
+                    }
+                    self.dirty = true;
+                }
+                true
+            }
+            KeyCode::Up => {
+                if self.sel > 0 {
+                    self.sel -= 1;
+                    if self.sel < self.off {
+                        self.off = self.sel;
+                    }
+                    self.dirty = true;
+                }
+                true
+            }
+            KeyCode::Home => {
+                self.sel = 0;
+                self.off = 0;
+                self.dirty = true;
+                true
+            }
+            KeyCode::End => {
+                self.sel = self.rows.len().saturating_sub(1);
+                self.off = self.off.max(self.sel + 1 - self.vis);
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
@@ -217,12 +343,34 @@ impl Widget for Table {
         let (hh, sh) = (2u16, 1u16);
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                if row == hh - 1 && col >= self.area.width.saturating_sub(14) { self.sort = self.sort.next(); self.sort_rows(); self.dirty = true; true }
-                else if row >= hh && row < self.area.height - sh { let idx = self.off + (row - hh) as usize; if idx < self.rows.len() { self.sel = idx; self.dirty = true; true } else { false } }
-                else { false }
+                if row == hh - 1 && col >= self.area.width.saturating_sub(14) {
+                    self.sort = self.sort.next();
+                    self.sort_rows();
+                    self.dirty = true;
+                    true
+                } else if row >= hh && row < self.area.height - sh {
+                    let idx = self.off + (row - hh) as usize;
+                    if idx < self.rows.len() {
+                        self.sel = idx;
+                        self.dirty = true;
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
             }
-            MouseEventKind::ScrollDown => { self.off = (self.off + 1).min(self.rows.len().saturating_sub(self.vis)); self.dirty = true; true }
-            MouseEventKind::ScrollUp => { self.off = self.off.saturating_sub(1); self.dirty = true; true }
+            MouseEventKind::ScrollDown => {
+                self.off = (self.off + 1).min(self.rows.len().saturating_sub(self.vis));
+                self.dirty = true;
+                true
+            }
+            MouseEventKind::ScrollUp => {
+                self.off = self.off.saturating_sub(1);
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
@@ -239,7 +387,10 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.title("Data Table Demo").fps(30).theme(Theme::cyberpunk());
+    let mut app = App::new()?
+        .title("Data Table Demo")
+        .fps(30)
+        .theme(Theme::cyberpunk());
     app.add_widget(Box::new(t), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

@@ -19,15 +19,17 @@
 //!
 //! Mouse: Click to select, click folder to expand
 
-use std::os::fd::AsFd;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Breadcrumbs, SplitPane, StatusBar, StatusSegment, Tree, TreeNode};
+use dracon_terminal_engine::framework::widgets::{
+    Breadcrumbs, SplitPane, StatusBar, StatusSegment, Tree, TreeNode,
+};
 use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 struct MockFs {
     name: &'static str,
@@ -63,7 +65,11 @@ impl MockFs {
     }
 
     fn total_items(&self) -> usize {
-        1 + self.children.as_ref().map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>()).unwrap_or(0)
+        1 + self
+            .children
+            .as_ref()
+            .map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>())
+            .unwrap_or(0)
     }
 }
 
@@ -83,22 +89,52 @@ impl TreeNav {
             name: "root",
             is_dir: true,
             children: Some(vec![
-                MockFs { name: "src", is_dir: true, children: Some(vec![
-                    MockFs { name: "main.rs", is_dir: false, children: None },
-                    MockFs { name: "lib.rs", is_dir: false, children: None },
-                ])},
-                MockFs { name: "tests", is_dir: true, children: Some(vec![
-                    MockFs { name: "test_main.rs", is_dir: false, children: None },
-                ])},
-                MockFs { name: "README.md", is_dir: false, children: None },
-                MockFs { name: "Cargo.toml", is_dir: false, children: None },
+                MockFs {
+                    name: "src",
+                    is_dir: true,
+                    children: Some(vec![
+                        MockFs {
+                            name: "main.rs",
+                            is_dir: false,
+                            children: None,
+                        },
+                        MockFs {
+                            name: "lib.rs",
+                            is_dir: false,
+                            children: None,
+                        },
+                    ]),
+                },
+                MockFs {
+                    name: "tests",
+                    is_dir: true,
+                    children: Some(vec![MockFs {
+                        name: "test_main.rs",
+                        is_dir: false,
+                        children: None,
+                    }]),
+                },
+                MockFs {
+                    name: "README.md",
+                    is_dir: false,
+                    children: None,
+                },
+                MockFs {
+                    name: "Cargo.toml",
+                    is_dir: false,
+                    children: None,
+                },
             ]),
         };
 
         let root_node = fs.to_tree_node();
         let tree = Tree::new(WidgetId::new(1)).with_root(vec![root_node]);
 
-        let segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
+        let segments = vec![
+            "home".to_string(),
+            "user".to_string(),
+            "projects".to_string(),
+        ];
         let breadcrumbs = Breadcrumbs::new(segments);
 
         Self {
@@ -183,22 +219,22 @@ impl Widget for TreeNav {
         let (tree_rect, detail_rect) = split.split(content_rect);
 
         // Helper to copy a sub-plane into the main plane at the correct position
-    let copy_plane = |dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16| {
-        for sy in 0..src.height {
-            for sx in 0..src.width {
-                let src_idx = (sy * src.width + sx) as usize;
-                if src.cells[src_idx].transparent {
-                    continue;
-                }
-                let dx = dest_x + sx;
-                let dy = dest_y + sy;
-                if dx < dest.width && dy < dest.height {
-                    let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
-                    dest.cells[dest_idx] = src.cells[src_idx].clone();
+        let copy_plane = |dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16| {
+            for sy in 0..src.height {
+                for sx in 0..src.width {
+                    let src_idx = (sy * src.width + sx) as usize;
+                    if src.cells[src_idx].transparent {
+                        continue;
+                    }
+                    let dx = dest_x + sx;
+                    let dy = dest_y + sy;
+                    if dx < dest.width && dy < dest.height {
+                        let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
+                        dest.cells[dest_idx] = src.cells[src_idx].clone();
+                    }
                 }
             }
-        }
-    };
+        };
 
         // Breadcrumbs at top row
         let bc_plane = self.breadcrumbs.render(header_rect);
@@ -213,12 +249,16 @@ impl Widget for TreeNav {
         copy_plane(&mut plane, &detail_plane, detail_rect.x, detail_rect.y);
 
         // Status bar at bottom
-        let status_text = format!("{} items | Total: {} | arrows: navigate, Enter: expand, Backspace: up",
-            self.item_count(), self.fs.total_items());
-        let status_bar = StatusBar::new(WidgetId::new(2))
-            .add_segment(StatusSegment::new(&status_text)
+        let status_text = format!(
+            "{} items | Total: {} | arrows: navigate, Enter: expand, Backspace: up",
+            self.item_count(),
+            self.fs.total_items()
+        );
+        let status_bar = StatusBar::new(WidgetId::new(2)).add_segment(
+            StatusSegment::new(&status_text)
                 .with_fg(self.theme.fg_muted)
-                .with_bg(self.theme.surface));
+                .with_bg(self.theme.surface),
+        );
         let status_plane = status_bar.render(footer_rect);
         copy_plane(&mut plane, &status_plane, 0, footer_rect.y);
 
@@ -251,22 +291,21 @@ impl Widget for TreeNav {
         }
     }
 
-    fn handle_mouse(
-        &mut self,
-        kind: MouseEventKind,
-        col: u16,
-        row: u16,
-    ) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let header_height = 1u16;
         let footer_height = 1u16;
-        let content_height = self.area.height.saturating_sub(header_height + footer_height);
+        let content_height = self
+            .area
+            .height
+            .saturating_sub(header_height + footer_height);
 
         if row == 0 {
             return self.breadcrumbs.handle_mouse(kind, col, row);
         }
 
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, _) = split.split(Rect::new(0, header_height, self.area.width, content_height));
+        let (tree_rect, _) =
+            split.split(Rect::new(0, header_height, self.area.width, content_height));
 
         if col < tree_rect.width && row > header_height && row < header_height + tree_rect.height {
             if self.tree.handle_mouse(kind, col, row - header_height) {
@@ -282,7 +321,11 @@ impl Widget for TreeNav {
 
 impl TreeNav {
     fn update_breadcrumbs(&mut self) {
-        let mut segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
+        let mut segments = vec![
+            "home".to_string(),
+            "user".to_string(),
+            "projects".to_string(),
+        ];
         for &idx in &self.current_path {
             if let Some(node) = self.fs.find_by_path(&self.current_path[..=idx]) {
                 segments.push(node.name.to_string());
@@ -317,12 +360,22 @@ impl TreeNav {
 
         if let Some(node) = self.fs.find_by_path(&self.current_path) {
             let icon = if node.is_dir { "[DIR]" } else { "[FILE]" };
-            print_line(&mut plane, y, &format!("{} {}", icon, node.name), self.theme.fg);
+            print_line(
+                &mut plane,
+                y,
+                &format!("{} {}", icon, node.name),
+                self.theme.fg,
+            );
             y += 1;
 
             if node.is_dir {
                 if let Some(ref children) = node.children {
-                    print_line(&mut plane, y, &format!("{} items", children.len()), self.theme.fg_muted);
+                    print_line(
+                        &mut plane,
+                        y,
+                        &format!("{} items", children.len()),
+                        self.theme.fg_muted,
+                    );
                     y += 2;
                     print_line(&mut plane, y, "Contents:", self.theme.info);
                     y += 1;

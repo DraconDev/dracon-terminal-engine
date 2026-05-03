@@ -31,7 +31,9 @@ use std::time::Duration;
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, LogViewer, StatusBadge, StreamingText};
+use dracon_terminal_engine::framework::widgets::{
+    Gauge, KeyValueGrid, LogViewer, StatusBadge, StreamingText,
+};
 use ratatui::layout::Rect;
 
 struct CommandBindings {
@@ -53,9 +55,14 @@ impl CommandBindings {
     fn new() -> Self {
         Self {
             id: WidgetId::new(0),
-            gauge: Gauge::new("CPU").max(100.0).warn_threshold(70.0).crit_threshold(90.0),
+            gauge: Gauge::new("CPU")
+                .max(100.0)
+                .warn_threshold(70.0)
+                .crit_threshold(90.0),
             kv_grid: KeyValueGrid::new().separator(" "),
-            status: StatusBadge::new(WidgetId::new(4)).with_status("OK").with_label("Connection"),
+            status: StatusBadge::new(WidgetId::new(4))
+                .with_status("OK")
+                .with_label("Connection"),
             log_viewer: LogViewer::with_id(WidgetId::new(5)).max_lines(200),
             streaming: StreamingText::with_id(WidgetId::new(6)).max_lines(50),
             theme: Theme::nord(),
@@ -71,35 +78,62 @@ impl CommandBindings {
         self.cpu_value = 30.0 + (self.tick % 50) as f32;
         self.gauge.set_value(self.cpu_value as f64);
         let mut pairs = BTreeMap::new();
-        pairs.insert("Memory".to_string(), format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1));
-        pairs.insert("Disk".to_string(), format!("{}%", 40 + (self.tick % 20) as u32));
-        pairs.insert("Network".to_string(), format!("{} Mbps", 100 + (self.tick % 50) as u32));
+        pairs.insert(
+            "Memory".to_string(),
+            format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1),
+        );
+        pairs.insert(
+            "Disk".to_string(),
+            format!("{}%", 40 + (self.tick % 20) as u32),
+        );
+        pairs.insert(
+            "Network".to_string(),
+            format!("{} Mbps", 100 + (self.tick % 50) as u32),
+        );
         pairs.insert("Uptime".to_string(), format!("{}h", self.tick / 60));
         self.kv_grid.set_pairs(pairs);
         let status_text = if self.tick % 20 < 15 { "OK" } else { "WARNING" };
         self.status.set_status(status_text);
         self.log_viewer.clear();
-        self.log_viewer.append_line(&format!("[INFO] Tick {} - System nominal", self.tick));
-        self.log_viewer.append_line(&format!("[WARN] Load average: {:.2}", 1.5 + (self.tick % 10) as f32 * 0.1));
+        self.log_viewer
+            .append_line(&format!("[INFO] Tick {} - System nominal", self.tick));
+        self.log_viewer.append_line(&format!(
+            "[WARN] Load average: {:.2}",
+            1.5 + (self.tick % 10) as f32 * 0.1
+        ));
         if self.tick % 10 == 0 {
-            self.log_viewer.append_line(&format!("[ERROR] Simulated connection issue at tick {}", self.tick));
+            self.log_viewer.append_line(&format!(
+                "[ERROR] Simulated connection issue at tick {}",
+                self.tick
+            ));
         }
         self.streaming.clear();
-        self.streaming.append(&format!("Last tick: {} @ {:.1}s", self.tick, self.cpu_value));
+        self.streaming.append(&format!(
+            "Last tick: {} @ {:.1}s",
+            self.tick, self.cpu_value
+        ));
         self.dirty = true;
     }
 
     fn tick(&mut self, elapsed_secs: u64) {
         self.tick += 1;
-        if self.paused { return; }
+        if self.paused {
+            return;
+        }
         if elapsed_secs % 2 == 0 {
             self.cpu_value = 30.0 + (self.tick % 50) as f32;
             self.gauge.set_value(self.cpu_value as f64);
         }
         if elapsed_secs % 5 == 0 {
             let mut pairs = BTreeMap::new();
-            pairs.insert("Memory".to_string(), format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1));
-            pairs.insert("Disk".to_string(), format!("{}%", 40 + (self.tick % 20) as u32));
+            pairs.insert(
+                "Memory".to_string(),
+                format!("{:.1} GB", 8.0 + (self.tick % 10) as f32 * 0.1),
+            );
+            pairs.insert(
+                "Disk".to_string(),
+                format!("{}%", 40 + (self.tick % 20) as u32),
+            );
             self.kv_grid.set_pairs(pairs);
         }
         if elapsed_secs % 10 == 0 {
@@ -108,8 +142,12 @@ impl CommandBindings {
         }
         if elapsed_secs % 3 == 0 {
             self.log_viewer.clear();
-            self.log_viewer.append_line(&format!("[INFO] Tick {}", self.tick));
-            self.log_viewer.append_line(&format!("[WARN] Load: {:.1}", 1.5 + (self.tick % 10) as f32 * 0.1));
+            self.log_viewer
+                .append_line(&format!("[INFO] Tick {}", self.tick));
+            self.log_viewer.append_line(&format!(
+                "[WARN] Load: {:.1}",
+                1.5 + (self.tick % 10) as f32 * 0.1
+            ));
         }
         self.streaming.append(&format!("T:{} ", self.tick));
         self.dirty = true;
@@ -117,24 +155,46 @@ impl CommandBindings {
 }
 
 impl Default for CommandBindings {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Widget for CommandBindings {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn z_index(&self) -> u16 { 10 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        10
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
 
-        for idx in 0..p.cells.len() { p.cells[idx].bg = self.theme.bg; p.cells[idx].fg = self.theme.fg; }
+        for idx in 0..p.cells.len() {
+            p.cells[idx].bg = self.theme.bg;
+            p.cells[idx].fg = self.theme.fg;
+        }
 
         let title = " Command Bindings — Auto-refresh ";
         let title_color = Color::Rgb(0, 255, 200);
@@ -142,12 +202,19 @@ impl Widget for CommandBindings {
         let title_x = (area.width.saturating_sub(title_width)) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = (i as u16 + title_x) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = title_color; p.cells[idx].style = Styles::BOLD; }
+            if idx < p.cells.len() {
+                p.cells[idx].char = c;
+                p.cells[idx].fg = title_color;
+                p.cells[idx].style = Styles::BOLD;
+            }
         }
 
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
-            if idx < p.cells.len() { p.cells[idx].char = '─'; p.cells[idx].fg = Color::Rgb(100, 100, 100); }
+            if idx < p.cells.len() {
+                p.cells[idx].char = '─';
+                p.cells[idx].fg = Color::Rgb(100, 100, 100);
+            }
         }
 
         // Gauge
@@ -156,7 +223,9 @@ impl Widget for CommandBindings {
         for y in 0..gauge_plane.height {
             for x in 0..gauge_plane.width {
                 let src_idx = (y * gauge_plane.width + x) as usize;
-                if gauge_plane.cells[src_idx].transparent { continue; }
+                if gauge_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 2) * area.width + x) as usize;
                 if src_idx < gauge_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = gauge_plane.cells[src_idx].clone();
@@ -170,7 +239,9 @@ impl Widget for CommandBindings {
         for y in 0..status_plane.height {
             for x in 0..status_plane.width {
                 let src_idx = (y * status_plane.width + x) as usize;
-                if status_plane.cells[src_idx].transparent { continue; }
+                if status_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 6) * area.width + x) as usize;
                 if src_idx < status_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = status_plane.cells[src_idx].clone();
@@ -184,7 +255,9 @@ impl Widget for CommandBindings {
         for y in 0..kv_plane.height {
             for x in 0..kv_plane.width {
                 let src_idx = (y * kv_plane.width + x) as usize;
-                if kv_plane.cells[src_idx].transparent { continue; }
+                if kv_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 2) * area.width + x + 26) as usize;
                 if src_idx < kv_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = kv_plane.cells[src_idx].clone();
@@ -198,7 +271,9 @@ impl Widget for CommandBindings {
         for y in 0..log_plane.height {
             for x in 0..log_plane.width {
                 let src_idx = (y * log_plane.width + x) as usize;
-                if log_plane.cells[src_idx].transparent { continue; }
+                if log_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + 6) * area.width + x + 26) as usize;
                 if src_idx < log_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = log_plane.cells[src_idx].clone();
@@ -212,7 +287,9 @@ impl Widget for CommandBindings {
         for y in 0..stream_plane.height {
             for x in 0..stream_plane.width {
                 let src_idx = (y * stream_plane.width + x) as usize;
-                if stream_plane.cells[src_idx].transparent { continue; }
+                if stream_plane.cells[src_idx].transparent {
+                    continue;
+                }
                 let dst_idx = ((y + area.height - 3) * area.width + x) as usize;
                 if src_idx < stream_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = stream_plane.cells[src_idx].clone();
@@ -225,17 +302,29 @@ impl Widget for CommandBindings {
         let status_text = format!(" Auto-refresh: {} | s=refresh p=pause ", paused_str);
         for (i, c) in status_text.chars().enumerate() {
             let idx = status_line_y * area.width as usize + i;
-            if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = Color::Rgb(100, 100, 100); }
+            if idx < p.cells.len() {
+                p.cells[idx].char = c;
+                p.cells[idx].fg = Color::Rgb(100, 100, 100);
+            }
         }
 
         p
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
-            KeyCode::Char('s') => { self.refresh_all(); true }
-            KeyCode::Char('p') => { self.paused = !self.paused; self.dirty = true; true }
+            KeyCode::Char('s') => {
+                self.refresh_all();
+                true
+            }
+            KeyCode::Char('p') => {
+                self.paused = !self.paused;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }

@@ -106,8 +106,11 @@ struct SettingsState {
 impl SettingsState {
     fn new(base_id: WidgetId) -> Self {
         Self {
-            theme_select: Select::new(WidgetId::new(base_id.0 + 1))
-                .with_options(vec!["Dark".to_string(), "Light".to_string(), "Cyberpunk".to_string()]),
+            theme_select: Select::new(WidgetId::new(base_id.0 + 1)).with_options(vec![
+                "Dark".to_string(),
+                "Light".to_string(),
+                "Cyberpunk".to_string(),
+            ]),
             notifications: Toggle::new(WidgetId::new(base_id.0 + 2), "Enable notifications"),
             volume_slider: Slider::new(WidgetId::new(base_id.0 + 3)).with_range(0.0, 100.0),
         }
@@ -138,7 +141,10 @@ struct TabbedApp {
 
 impl TabbedApp {
     fn new(should_quit: Arc<AtomicBool>) -> Self {
-        let tabbar = TabBar::new_with_id(WidgetId::new(1), vec!["Dashboard", "Logs", "Settings", "Stats"]);
+        let tabbar = TabBar::new_with_id(
+            WidgetId::new(1),
+            vec!["Dashboard", "Logs", "Settings", "Stats"],
+        );
         Self {
             tabbar,
             dashboard: DashboardState::new(WidgetId::new(10)),
@@ -192,25 +198,43 @@ fn render_settings(plane: &mut Plane, settings: &SettingsState, area: Rect, them
     for (i, c) in label.chars().enumerate() {
         let idx = (y * plane.width + label_col + i as u16) as usize;
         if idx < plane.cells.len() {
-            plane.cells[idx] = Cell { char: c, fg: theme.fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+            plane.cells[idx] = Cell {
+                char: c,
+                fg: theme.fg,
+                bg: theme.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
     }
     let theme_plane = settings.theme_select.render(Rect::new(input_col, y, 20, 4));
     copy_plane(plane, &theme_plane, input_col, y);
     y += 2;
 
-    let toggle_plane = settings.notifications.render(Rect::new(input_col, y, 25, 1));
+    let toggle_plane = settings
+        .notifications
+        .render(Rect::new(input_col, y, 25, 1));
     copy_plane(plane, &toggle_plane, input_col, y);
     y += 3;
 
-    let slider_plane = settings.volume_slider.render(Rect::new(input_col, y, 40, 1));
+    let slider_plane = settings
+        .volume_slider
+        .render(Rect::new(input_col, y, 40, 1));
     copy_plane(plane, &slider_plane, input_col, y);
 
     let volume_label = "Volume:";
     for (i, c) in volume_label.chars().enumerate() {
         let idx = (y * plane.width + label_col + i as u16) as usize;
         if idx < plane.cells.len() {
-            plane.cells[idx] = Cell { char: c, fg: theme.fg, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+            plane.cells[idx] = Cell {
+                char: c,
+                fg: theme.fg,
+                bg: theme.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
     }
 }
@@ -225,8 +249,7 @@ impl Widget for TabbedApp {
         WidgetId::new(1)
     }
 
-    fn set_id(&mut self, _id: WidgetId) {
-    }
+    fn set_id(&mut self, _id: WidgetId) {}
 
     fn area(&self) -> Rect {
         self.area
@@ -244,11 +267,9 @@ impl Widget for TabbedApp {
         true
     }
 
-    fn mark_dirty(&mut self) {
-    }
+    fn mark_dirty(&mut self) {}
 
-    fn clear_dirty(&mut self) {
-    }
+    fn clear_dirty(&mut self) {}
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -265,7 +286,9 @@ impl Widget for TabbedApp {
         let tabbar_height = 3u16;
 
         // Render tab bar
-        let tabbar_plane = self.tabbar.render(Rect::new(0, 0, area.width, tabbar_height));
+        let tabbar_plane = self
+            .tabbar
+            .render(Rect::new(0, 0, area.width, tabbar_height));
         copy_plane(&mut plane, &tabbar_plane, 0, 0);
 
         // Separator line
@@ -273,11 +296,23 @@ impl Widget for TabbedApp {
         for col in 0..area.width as usize {
             let idx = (separator_y as usize) * (area.width as usize) + col;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell { char: '─', fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                plane.cells[idx] = Cell {
+                    char: '─',
+                    fg: theme.fg_muted,
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
 
-        let content_area = Rect::new(0, tabbar_height + 1, area.width, area.height - tabbar_height - 1);
+        let content_area = Rect::new(
+            0,
+            tabbar_height + 1,
+            area.width,
+            area.height - tabbar_height - 1,
+        );
 
         match self.active_tab() {
             TAB_DASHBOARD => render_dashboard(&mut plane, &self.dashboard, content_area),
@@ -287,17 +322,27 @@ impl Widget for TabbedApp {
             _ => {}
         }
 
-        let hint = format!("[Left/Right] Switch tabs | Active: {}", match self.active_tab() {
-            TAB_DASHBOARD => "Dashboard",
-            TAB_LOGS => "Logs",
-            TAB_SETTINGS => "Settings",
-            TAB_STATS => "Stats",
-            _ => "Unknown",
-        });
+        let hint = format!(
+            "[Left/Right] Switch tabs | Active: {}",
+            match self.active_tab() {
+                TAB_DASHBOARD => "Dashboard",
+                TAB_LOGS => "Logs",
+                TAB_SETTINGS => "Settings",
+                TAB_STATS => "Stats",
+                _ => "Unknown",
+            }
+        );
         for (i, c) in hint.chars().take(area.width as usize).enumerate() {
             let idx = ((area.height - 1) as usize) * (area.width as usize) + i;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell { char: c, fg: theme.fg_muted, bg: theme.bg, style: Styles::empty(), transparent: false, skip: false };
+                plane.cells[idx] = Cell {
+                    char: c,
+                    fg: theme.fg_muted,
+                    bg: theme.bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
 
@@ -328,7 +373,7 @@ impl Widget for TabbedApp {
                     return true;
                 }
                 self.settings.volume_slider.handle_key(key)
-            },
+            }
             _ => false,
         }
     }
@@ -340,16 +385,23 @@ impl Widget for TabbedApp {
         }
 
         match self.active_tab() {
-            TAB_LOGS => self.logs.list.handle_mouse(kind, col, row - tabbar_height - 1),
+            TAB_LOGS => self
+                .logs
+                .list
+                .handle_mouse(kind, col, row - tabbar_height - 1),
             TAB_SETTINGS => {
                 if row == tabbar_height + 2 && col >= 20 && col < 40 {
-                    self.settings.theme_select.handle_mouse(kind, col - 20, row - tabbar_height - 1)
+                    self.settings
+                        .theme_select
+                        .handle_mouse(kind, col - 20, row - tabbar_height - 1)
                 } else if row == tabbar_height + 4 && col >= 20 && col < 45 {
                     self.settings.volume_slider.handle_mouse(kind, col - 20, 0)
                 } else {
-                    self.settings.notifications.handle_mouse(kind, col, row - tabbar_height - 1)
+                    self.settings
+                        .notifications
+                        .handle_mouse(kind, col, row - tabbar_height - 1)
                 }
-            },
+            }
             _ => false,
         }
     }
@@ -365,16 +417,32 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
@@ -397,10 +465,7 @@ fn main() -> std::io::Result<()> {
     let app_for_tick = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?
-        .title("Tabbed Panels Demo")
-        .fps(30)
-        .theme(theme);
+    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(theme);
 
     // Register an InputRouter so keyboard/mouse events reach TabbedApp
     let router = InputRouter {

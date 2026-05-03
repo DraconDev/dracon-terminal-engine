@@ -47,16 +47,47 @@ struct MenuApp {
 
 impl MenuApp {
     fn new(id: WidgetId, should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
-        let items = vec!["documents".to_string(), "images".to_string(), "projects".to_string(), "downloads".to_string(), "music".to_string(), "videos".to_string()];
-        let menu_bar = vec![MenuLabel("File"), MenuLabel("Edit"), MenuLabel("View"), MenuLabel("Help")];
+        let items = vec![
+            "documents".to_string(),
+            "images".to_string(),
+            "projects".to_string(),
+            "downloads".to_string(),
+            "music".to_string(),
+            "videos".to_string(),
+        ];
+        let menu_bar = vec![
+            MenuLabel("File"),
+            MenuLabel("Edit"),
+            MenuLabel("View"),
+            MenuLabel("Help"),
+        ];
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
-            .add_segment(StatusSegment::new("Ctrl+N|O|S: New|Open|Save | Ctrl+Q: Quit").with_fg(theme.fg_muted));
-        Self { id, list: List::new(items), status_bar, context_menu: None, toasts: Vec::new(), menu_bar, active_menu: None, selected_idx: None, area: Rect::new(0, 0, 80, 24), should_quit, theme }
+            .add_segment(
+                StatusSegment::new("Ctrl+N|O|S: New|Open|Save | Ctrl+Q: Quit")
+                    .with_fg(theme.fg_muted),
+            );
+        Self {
+            id,
+            list: List::new(items),
+            status_bar,
+            context_menu: None,
+            toasts: Vec::new(),
+            menu_bar,
+            active_menu: None,
+            selected_idx: None,
+            area: Rect::new(0, 0, 80, 24),
+            should_quit,
+            theme,
+        }
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
-        self.toasts.push(Toast::new(WidgetId::new(100 + self.toasts.len()), msg).with_kind(kind).with_duration(std::time::Duration::from_secs(2)));
+        self.toasts.push(
+            Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
+                .with_kind(kind)
+                .with_duration(std::time::Duration::from_secs(2)),
+        );
     }
 
     fn menu_item_count(&self, menu_idx: usize) -> usize {
@@ -71,10 +102,30 @@ impl MenuApp {
 
     fn get_menu_item(&self, menu_idx: usize, item_idx: usize) -> &'static str {
         match menu_idx {
-            0 => match item_idx { 0 => "New (Ctrl+N)", 1 => "Open (Ctrl+O)", 2 => "Save (Ctrl+S)", 3 => "Exit (Ctrl+Q)", _ => "" },
-            1 => match item_idx { 0 => "Copy (Ctrl+C)", 1 => "Paste (Ctrl+V)", 2 => "Select All (Ctrl+A)", _ => "" },
-            2 => match item_idx { 0 => "Toggle Sidebar", 1 => "Zoom In", 2 => "Zoom Out", _ => "" },
-            3 => match item_idx { 0 => "About", 1 => "Documentation", _ => "" },
+            0 => match item_idx {
+                0 => "New (Ctrl+N)",
+                1 => "Open (Ctrl+O)",
+                2 => "Save (Ctrl+S)",
+                3 => "Exit (Ctrl+Q)",
+                _ => "",
+            },
+            1 => match item_idx {
+                0 => "Copy (Ctrl+C)",
+                1 => "Paste (Ctrl+V)",
+                2 => "Select All (Ctrl+A)",
+                _ => "",
+            },
+            2 => match item_idx {
+                0 => "Toggle Sidebar",
+                1 => "Zoom In",
+                2 => "Zoom Out",
+                _ => "",
+            },
+            3 => match item_idx {
+                0 => "About",
+                1 => "Documentation",
+                _ => "",
+            },
             _ => "",
         }
     }
@@ -114,7 +165,10 @@ impl MenuApp {
     fn render_menu_bar(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, 1);
         plane.z_index = 60;
-        for cell in plane.cells.iter_mut() { cell.bg = self.theme.surface_elevated; cell.fg = self.theme.fg; }
+        for cell in plane.cells.iter_mut() {
+            cell.bg = self.theme.surface_elevated;
+            cell.fg = self.theme.fg;
+        }
 
         let total = self.menu_bar.len();
         let entry_w = (area.width as usize / total.max(1)) as u16;
@@ -126,7 +180,9 @@ impl MenuApp {
             let display = format!("{}{}{}", prefix, m.0, suffix);
             for (j, ch) in display.chars().enumerate() {
                 let idx = (i as u16 * entry_w + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                }
             }
         }
         plane
@@ -140,51 +196,80 @@ impl MenuApp {
 
         let mut plane = Plane::new(0, w, h);
         plane.z_index = 70;
-        for cell in plane.cells.iter_mut() { cell.bg = self.theme.surface_elevated; cell.fg = self.theme.fg; }
+        for cell in plane.cells.iter_mut() {
+            cell.bg = self.theme.surface_elevated;
+            cell.fg = self.theme.fg;
+        }
 
         for i in 0..self.menu_item_count(menu_idx) {
             let item_label = self.get_menu_item(menu_idx, i);
             for (j, ch) in item_label.chars().take(w as usize - 2).enumerate() {
                 let idx = (i as u16 * w + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                }
             }
         }
 
         for col in 0..w {
-            if (col as usize) < plane.cells.len() { plane.cells[col as usize].char = '─'; }
+            if (col as usize) < plane.cells.len() {
+                plane.cells[col as usize].char = '─';
+            }
         }
         plane
     }
 }
 
 impl Widget for MenuApp {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
-        for cell in plane.cells.iter_mut() { cell.bg = self.theme.bg; }
+        for cell in plane.cells.iter_mut() {
+            cell.bg = self.theme.bg;
+        }
 
         let (hdr, ftr) = (1u16, 1u16);
         let content_h = area.height.saturating_sub(hdr + ftr);
 
         let menu_plane = self.render_menu_bar(Rect::new(0, 0, area.width, hdr));
-        for (i, c) in menu_plane.cells.iter().enumerate() { if !c.transparent { plane.cells[i] = c.clone(); } }
+        for (i, c) in menu_plane.cells.iter().enumerate() {
+            if !c.transparent {
+                plane.cells[i] = c.clone();
+            }
+        }
 
         if let Some(idx) = self.active_menu {
             let dp = self.render_dropdown(idx, area);
             let base_idx = (hdr * area.width) as usize;
             for (i, c) in dp.cells.iter().enumerate() {
                 let idx = base_idx + i;
-                if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                if !c.transparent && idx < plane.cells.len() {
+                    plane.cells[idx] = c.clone();
+                }
             }
         }
 
@@ -194,7 +279,9 @@ impl Widget for MenuApp {
             let dest_x = i as u16 % list_plane.width;
             let dest_y = i as u16 / list_plane.width;
             let idx = (dest_y * area.width + dest_x + 2) as usize;
-            if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+            if !c.transparent && idx < plane.cells.len() {
+                plane.cells[idx] = c.clone();
+            }
         }
 
         if let Some(ref cm) = self.context_menu {
@@ -203,7 +290,9 @@ impl Widget for MenuApp {
                 for (x, c) in row.iter().enumerate() {
                     if !c.transparent {
                         let idx = (y as u16 * area.width + x as u16) as usize;
-                        if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                        if idx < plane.cells.len() {
+                            plane.cells[idx] = c.clone();
+                        }
                     }
                 }
             }
@@ -216,7 +305,9 @@ impl Widget for MenuApp {
                     for (x, c) in row.iter().enumerate() {
                         if !c.transparent {
                             let idx = (y as u16 * area.width + x as u16) as usize;
-                            if idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+                            if idx < plane.cells.len() {
+                                plane.cells[idx] = c.clone();
+                            }
                         }
                     }
                 }
@@ -224,26 +315,38 @@ impl Widget for MenuApp {
             }
         }
 
-        let status_plane = self.status_bar.render(Rect::new(0, area.height - ftr, area.width, ftr));
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, area.height - ftr, area.width, ftr));
         let status_base = ((area.height - ftr) * area.width) as usize;
         for (i, c) in status_plane.cells.iter().enumerate() {
             let idx = status_base + i;
-            if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
+            if !c.transparent && idx < plane.cells.len() {
+                plane.cells[idx] = c.clone();
+            }
         }
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.context_menu.is_some() {
-            if let KeyCode::Esc = key.code { self.context_menu = None; self.selected_idx = None; }
+            if let KeyCode::Esc = key.code {
+                self.context_menu = None;
+                self.selected_idx = None;
+            }
             return true;
         }
 
         if let Some(menu_idx) = self.active_menu {
             match key.code {
-                KeyCode::Esc => { self.active_menu = None; true }
+                KeyCode::Esc => {
+                    self.active_menu = None;
+                    true
+                }
                 KeyCode::Enter => {
                     if let Some(item_idx) = self.selected_idx {
                         self.do_menu(menu_idx, item_idx);
@@ -252,7 +355,9 @@ impl Widget for MenuApp {
                 }
                 KeyCode::Down | KeyCode::Up => {
                     let item_count = self.menu_item_count(menu_idx);
-                    if item_count == 0 { return true; }
+                    if item_count == 0 {
+                        return true;
+                    }
                     let current = self.selected_idx.unwrap_or(0);
                     let next = match key.code {
                         KeyCode::Down => (current + 1).min(item_count - 1),
@@ -262,17 +367,42 @@ impl Widget for MenuApp {
                     self.selected_idx = Some(next);
                     true
                 }
-                _ => { self.active_menu = None; false }
+                _ => {
+                    self.active_menu = None;
+                    false
+                }
             }
         } else if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
-                KeyCode::Char('n') => { self.toast("New file created", ToastKind::Success); true }
-                KeyCode::Char('o') => { self.toast("Opened file dialog", ToastKind::Info); true }
-                KeyCode::Char('s') => { self.toast("Saved!", ToastKind::Success); true }
-                KeyCode::Char('q') => { self.toast("Goodbye!", ToastKind::Info); self.should_quit.store(true, Ordering::SeqCst); true }
-                KeyCode::Char('c') => { self.toast("Copied to clipboard", ToastKind::Info); true }
-                KeyCode::Char('v') => { self.toast("Pasted from clipboard", ToastKind::Info); true }
-                KeyCode::Char('a') => { self.toast("All items selected", ToastKind::Info); true }
+                KeyCode::Char('n') => {
+                    self.toast("New file created", ToastKind::Success);
+                    true
+                }
+                KeyCode::Char('o') => {
+                    self.toast("Opened file dialog", ToastKind::Info);
+                    true
+                }
+                KeyCode::Char('s') => {
+                    self.toast("Saved!", ToastKind::Success);
+                    true
+                }
+                KeyCode::Char('q') => {
+                    self.toast("Goodbye!", ToastKind::Info);
+                    self.should_quit.store(true, Ordering::SeqCst);
+                    true
+                }
+                KeyCode::Char('c') => {
+                    self.toast("Copied to clipboard", ToastKind::Info);
+                    true
+                }
+                KeyCode::Char('v') => {
+                    self.toast("Pasted from clipboard", ToastKind::Info);
+                    true
+                }
+                KeyCode::Char('a') => {
+                    self.toast("All items selected", ToastKind::Info);
+                    true
+                }
                 _ => false,
             }
         } else if let KeyCode::Esc = key.code {
@@ -314,15 +444,30 @@ impl Widget for MenuApp {
         }
 
         if let MouseEventKind::Down(MouseButton::Right) = kind {
-            let list_rect = Rect::new(2, hdr + 1, self.area.width.saturating_sub(4), content_h.saturating_sub(2));
-            if col >= list_rect.x && col < list_rect.x + list_rect.width && row >= list_rect.y && row < list_rect.y + list_rect.height {
-                self.context_menu = Some(ContextMenu::new_with_id(WidgetId::new(50), vec![
-                    ("Copy Item", ContextAction::Copy),
-                    ("Paste Item", ContextAction::Paste),
-                    ("Rename Item", ContextAction::Rename),
-                    ("Delete Item", ContextAction::Delete),
-                    ("Properties", ContextAction::Open),
-                ]).with_anchor(col, row));
+            let list_rect = Rect::new(
+                2,
+                hdr + 1,
+                self.area.width.saturating_sub(4),
+                content_h.saturating_sub(2),
+            );
+            if col >= list_rect.x
+                && col < list_rect.x + list_rect.width
+                && row >= list_rect.y
+                && row < list_rect.y + list_rect.height
+            {
+                self.context_menu = Some(
+                    ContextMenu::new_with_id(
+                        WidgetId::new(50),
+                        vec![
+                            ("Copy Item", ContextAction::Copy),
+                            ("Paste Item", ContextAction::Paste),
+                            ("Rename Item", ContextAction::Rename),
+                            ("Delete Item", ContextAction::Delete),
+                            ("Properties", ContextAction::Open),
+                        ],
+                    )
+                    .with_anchor(col, row),
+                );
                 return true;
             }
         }
@@ -338,9 +483,20 @@ impl Widget for MenuApp {
             }
         }
 
-        let list_rect = Rect::new(2, hdr + 1, self.area.width.saturating_sub(4), content_h.saturating_sub(2));
-        if col >= list_rect.x && col < list_rect.x + list_rect.width && row >= list_rect.y && row < list_rect.y + list_rect.height {
-            return self.list.handle_mouse(kind, col - list_rect.x, row - list_rect.y);
+        let list_rect = Rect::new(
+            2,
+            hdr + 1,
+            self.area.width.saturating_sub(4),
+            content_h.saturating_sub(2),
+        );
+        if col >= list_rect.x
+            && col < list_rect.x + list_rect.width
+            && row >= list_rect.y
+            && row < list_rect.y + list_rect.height
+        {
+            return self
+                .list
+                .handle_mouse(kind, col - list_rect.x, row - list_rect.y);
         }
         false
     }
@@ -363,5 +519,6 @@ fn main() -> std::io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
         }
-    }).run(|_ctx| {})
+    })
+    .run(|_ctx| {})
 }
