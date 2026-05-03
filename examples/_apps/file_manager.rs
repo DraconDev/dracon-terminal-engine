@@ -24,7 +24,7 @@ use std::os::fd::AsFd;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 struct FsNode {
     name: String,
@@ -476,7 +476,7 @@ fn main() -> std::io::Result<()> {
 
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) { ctx.stop(); }
-    }).run(|_ctx| {});
+    }).run(|_ctx| {})?;
 
     println!("\nFile manager exited cleanly");
     Ok(())
