@@ -996,11 +996,11 @@ impl Widget for Showcase {
                     let menu_y = (my as usize).min(area.height as usize - 6);
                     let menu_w = 18usize;
                     let menu_h = 6usize;
-                    let menu_items = [
-                        "Launch",
-                        &format!("Copy: {}", ex.binary_name),
-                        &format!("Filter: {}", ex.category),
-                        "Cancel",
+                    let menu_items: [String; 4] = [
+                        "▶ Launch".to_string(),
+                        format!("  Copy: {}", ex.binary_name),
+                        format!("  Filter: {}", ex.category),
+                        "  Cancel".to_string(),
                     ];
                     let menu_item_count = menu_items.len();
 
@@ -1027,9 +1027,8 @@ impl Widget for Showcase {
 
                     // Menu items
                     for (i, item) in menu_items.iter().enumerate() {
-                        let item_text = if i == 0 { &format!("▶ {}", item) } else { item };
                         let fg = if i == 0 { t.primary } else { t.fg };
-                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item_text, fg, t.surface_elevated, false);
+                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, t.surface_elevated, false);
                     }
                 }
             }
