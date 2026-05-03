@@ -654,8 +654,11 @@ impl Widget for Showcase {
         let square_w = 2usize;
         let gap = 1usize;
         let total_width = themes.len() * (square_w + gap);
-        let palette_start_x = ((area.width as usize).saturating_sub(total_width)) / 2;
+        let max_visible = (area.width as usize).saturating_sub(4) / (square_w + gap);
+        let visible_themes = max_visible.min(themes.len());
+        let palette_start_x = ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
         for (i, (_name, theme)) in themes.iter().enumerate() {
+            if i >= visible_themes { break; }
             let x = palette_start_x + i * (square_w + gap);
             let is_active = theme.name == self.theme.name;
             let bg = if is_active { theme.primary_active } else { theme.primary };
@@ -1274,12 +1277,14 @@ impl Widget for Showcase {
                     let themes = Self::themes();
                     let square_w = 2usize;
                     let gap = 1usize;
-                    let total_width = themes.len() * (square_w + gap);
+                    let max_visible = (self.area.width as usize).saturating_sub(4) / (square_w + gap);
+                    let visible_themes = max_visible.min(themes.len());
+                    let total_width = visible_themes * (square_w + gap);
                     let palette_start_x = ((self.area.width as usize).saturating_sub(total_width)) / 2;
-                    if x >= palette_start_x {
+                    if x >= palette_start_x && x < palette_start_x + total_width {
                         let rel_x = x - palette_start_x;
                         let idx = rel_x / (square_w + gap);
-                        if idx < themes.len() && rel_x % (square_w + gap) < square_w {
+                        if idx < visible_themes && rel_x % (square_w + gap) < square_w {
                             self.pending_theme = Some(idx);
                             self.apply_filter();
                             return true;
