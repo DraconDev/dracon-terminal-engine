@@ -898,6 +898,7 @@ impl Widget for Showcase {
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
         let categories = ["all", "apps", "cookbook", "tools"];
+        const CAT_BASE: usize = 300;
         for (i, cat) in categories.iter().enumerate() {
             let cat_y = sidebar_start_y + i * 2;
             let is_active = self.category_filter.map_or(*cat == "all", |f| f == *cat);
@@ -915,6 +916,10 @@ impl Widget for Showcase {
             };
             draw_text(&mut plane, 1, cat_y, icon, if is_active { t.primary } else { t.fg_muted }, bg_cat, is_active);
             draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active);
+            // Register zone for this category
+            let mut zones = self.zones.borrow_mut();
+            zones.register(CAT_BASE + i, 0, cat_y as u16, sidebar_w as u16, 1);
+            drop(zones);
 
             // Count badge
             let count = if *cat == "all" {

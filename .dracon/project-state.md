@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Added interactive zone tracking for FPS toggle and theme palette in showcase example
+Added interactive zone tracking for category filters in the showcase example
 
 ## Context
-This implements the scoped zone registry system to track interactive UI elements, enabling hover detection and click handling for the FPS toggle and theme palette controls.
+This change enables clickable category filters in the showcase UI by registering interactive zones for each category button. It builds on the scoped zone registry system introduced in previous commits.
 
 ## Completed
-- [x] Added zone registration for FPS toggle button
-- [x] Added zone registration for each theme palette swatch
-- [x] Implemented constant base ID for palette zones (200)
-- [x] Properly scoped zone registration with borrow_mut/drop pattern
+- [x] Added constant `CAT_BASE` to uniquely identify category zones
+- [x] Registered interactive zones for each category filter button
+- [x] Implemented zone registration with proper coordinates and dimensions
 
 ## In Progress
-- [ ] Testing zone interaction handling
+- [ ] Testing zone interaction handling for category filters
 
 ## Blockers
-- Need to implement actual interaction handling for registered zones
+- Need to implement zone interaction handler for category filtering
 
 ## Next Steps
-1. Implement interaction handlers for registered zones
-2. Add visual feedback for hovered zones
+1. Implement zone interaction handler for category filtering
+2. Add visual feedback when category zones are hovered
