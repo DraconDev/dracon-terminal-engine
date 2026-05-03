@@ -107,6 +107,7 @@ impl Showcase {
             fps,
             hovered_card: None,
             mouse_pos: None,
+            context_menu: None,
         }
     }
 
