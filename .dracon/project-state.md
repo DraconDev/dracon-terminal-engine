@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added help overlay toggle to showcase example with keyboard interaction support
+Added help overlay toggle to showcase example with keyboard interaction
 
 ## Context
-This change enhances the showcase example by adding a help overlay that can be toggled with keyboard input, improving user guidance and interaction.
+This change enhances the showcase example by allowing users to toggle a help overlay using the '?' key, providing immediate access to usage instructions without navigating away from the interface.
 
 ## Completed
-- [x] Added help overlay toggle with keyboard support (Esc or '?' to close)
-- [x] Implemented priority handling for help overlay over other UI elements
+- [x] Added keyboard shortcut ('?') to toggle help overlay
+- [x] Implemented state tracking for help overlay visibility
 
 ## In Progress
-- [x] Help overlay implementation with keyboard interaction
+- [ ] None (feature is complete)
 
 ## Blockers
-- None identified
+- None (feature is fully implemented)
 
 ## Next Steps
-1. Test help overlay behavior with various keyboard inputs
-2. Add visual indicators for help overlay state
+1. Verify help overlay content is comprehensive
+2. Consider adding visual feedback when help is toggled

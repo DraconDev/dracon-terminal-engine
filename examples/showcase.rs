@@ -671,6 +671,10 @@ impl Widget for Showcase {
                     self.should_quit.store(true, Ordering::SeqCst);
                     true
                 }
+                KeyCode::Char('?') => {
+                    self.show_help = true;
+                    true
+                }
                 KeyCode::Char('t') => {
                     let themes = Self::themes();
                     let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
