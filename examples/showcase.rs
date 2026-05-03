@@ -459,8 +459,6 @@ fn render_card(
     };
     let bg = if is_selected {
         t.surface_elevated
-    } else if is_hovered {
-        t.surface
     } else {
         t.surface
     };
