@@ -82,6 +82,9 @@ struct Showcase {
     hovered_card: Option<usize>,
     mouse_pos: Option<(u16, u16)>,
     context_menu: Option<(usize, u16, u16)>,
+    tooltip_text: Option<String>,
+    tooltip_timer: Option<Instant>,
+    tooltip_pos: Option<(u16, u16)>,
 }
 
 impl Showcase {
