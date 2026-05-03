@@ -1293,6 +1293,30 @@ impl Widget for Showcase {
                     }
                 }
 
+                // Primitives bar click
+                if y == prim_y {
+                    if x >= 2 && x < 16 {
+                        self.primitive_toggle = !self.primitive_toggle;
+                        return true;
+                    }
+                    if x >= 20 && x < 36 {
+                        self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                        return true;
+                    }
+                    if x >= 40 && x < 53 {
+                        self.primitive_checkbox = !self.primitive_checkbox;
+                        return true;
+                    }
+                    if x >= 58 && x < 71 {
+                        self.primitive_radio = (self.primitive_radio + 1) % 3;
+                        return true;
+                    }
+                    if x >= 76 && x < 90 {
+                        self.primitive_button = true;
+                        return true;
+                    }
+                }
+
                 if y >= sidebar_start_y && y < sidebar_start_y + 8 && x < sidebar_w {
                     let idx = (y - sidebar_start_y) / 2;
                     let cats: [Option<&str>; 4] = [None, Some("apps"), Some("cookbook"), Some("tools")];
