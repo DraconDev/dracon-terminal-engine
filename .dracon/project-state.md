@@ -1,25 +1,23 @@
 # Project State
 
 ## Current Focus
-Enhanced context menu functionality in the showcase example with improved category filtering and status messaging.
+Enhanced showcase example with new UI controls and interactive features
 
 ## Context
-The changes improve the context menu interaction by:
-1. Simplifying the category filtering logic
-2. Adding visual feedback for context menu selections
-3. Maintaining consistent status messaging
+The showcase example was updated to provide more interactive capabilities for users to explore framework features. This aligns with recent work on context menus and primitive UI controls.
 
 ## Completed
-- [x] Refactored category filtering to use `map` for cleaner code
-- [x] Added `context_menu_selected` tracking for visual feedback
-- [x] Maintained consistent status messages for user actions
+- [x] Added live data previews to showcase example cards
+- [x] Enhanced keyboard controls with new shortcuts (d, ?, Space, 1-5)
+- [x] Added right-click context menu with Launch/Copy name/Filter options
+- [x] Improved primitive UI controls with better layout and interactions
 
 ## In Progress
-- [x] Context menu visual feedback enhancements
+- [x] Integration of new UI component previews (from recent commits)
 
 ## Blockers
 - None identified in this commit
 
 ## Next Steps
-1. Test the improved context menu interactions
-2. Verify status message consistency across all actions
+1. Verify all new UI controls work as expected in the showcase
+2. Document the new keyboard shortcuts in the showcase help system

@@ -3,15 +3,21 @@
 //!
 //! Interactive grid-based launcher for all framework examples.
 //! Features: category filtering, real-time search, animated selection,
-//! card-based layout with mini previews, and keyboard shortcuts.
+//! card-based layout with mini previews, live data previews, keyboard shortcuts,
+//! and an interactive primitives bar demonstrating engine building blocks.
 //!
 //! Controls:
-//!   arrows — navigate cards
-//!   Enter — launch selected example
-//!   / — focus search bar
-//!   Tab — cycle categories
-//!   t — cycle theme
-//!   q — quit
+//!   arrows  — navigate cards
+//!   Enter   — launch selected example
+//!   /       — focus search bar
+//!   Tab     — cycle categories
+//!   t       — cycle theme
+//!   d       — toggle debug overlay
+//!   ?       — toggle help
+//!   Space   — preview card (modal)
+//!   1-5     — interact with primitives bar
+//!   right-click — context menu (Launch / Copy name / Filter by category)
+//!   q       — quit
 
 use std::io::Read;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
