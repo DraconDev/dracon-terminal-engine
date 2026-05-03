@@ -286,7 +286,7 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, card_w: u16, card_h: u16) -> Plane {
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, _card_w: u16, card_h: u16) -> Plane {
     let mut plane = Plane::new(0, card_w, card_h);
     let card_w_usize = card_w as usize;
     let card_h_usize = card_h as usize;
@@ -363,7 +363,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     plane
 }
 
-fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let items = [
         ("CPU", (phase * 30.0).sin() * 40.0 + 50.0),
         ("MEM", (phase * 20.0).sin() * 30.0 + 60.0),
@@ -390,7 +390,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u1
     }
 }
 
-fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let split_x = (4.0 + (phase * 0.5).sin() * 3.0).round() as usize;
     let split_x = split_x.min(25);
     let w = 26;
@@ -413,7 +413,7 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     draw_text(plane, w / 2 - 3, 11, &label, t.fg_muted, t.bg, false);
 }
 
-fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
         format!("CPU:  [{}{}]", "█".repeat((phase * 4.0).sin() as usize * 2 + 2), "░".repeat(6)),
@@ -428,7 +428,7 @@ fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) 
     }
 }
 
-fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, card_w: u16) {
+fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
     let colors = [t.primary, t.primary_hover, t.success, t.warning, t.error, t.info, t.fg, t.bg];
     let cols = 4;
     let swatch_size = 3;
@@ -447,7 +447,7 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, card_w: u16) {
     draw_text(plane, 2, 11, &name, t.fg_muted, t.bg, false);
 }
 
-fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let checks = ["[x] Alpha", "[ ] Beta", "[x] Gamma"];
     for (i, check) in checks.iter().enumerate() {
         let py = 6 + i;
@@ -469,7 +469,7 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     draw_text(plane, 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
 }
 
-fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let lines = [
         "  line 0  ▸ active",
         "  line 1",
@@ -525,7 +525,7 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     }
 }
 
-fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     // Tab bar with active/inactive tabs
     let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
     let mut tab_x = 1usize;
@@ -566,7 +566,7 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     }
 }
 
-fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let wins = [
         (1, 6, 8, 4, t.primary),
         (11, 7, 8, 4, t.warning),
@@ -631,7 +631,7 @@ set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
     }
 }
 
-fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     // Branch header
     draw_text(plane, 2, 6, " main ", t.fg_on_accent, t.primary_active, true);
     draw_text(plane, 2, 7, "Status: 3 files changed", t.fg, t.surface, false);
@@ -650,7 +650,7 @@ fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) 
     }
 }
 
-fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let items = [
         (0, "home/", true, 0),
         (1, "user/", true, 1),
@@ -674,7 +674,7 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: 
     }
 }
 
-fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let menus = ["File", "Edit", "View", "Help"];
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
     let menu_w = 8;
@@ -709,7 +709,7 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u
     }
 }
 
-fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
+fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let modal_w = 24usize;
     let modal_h = 8usize;
     let modal_x = 2usize;
