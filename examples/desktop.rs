@@ -27,7 +27,7 @@ struct WindowContent {
     bg: dracon_terminal_engine::compositor::plane::Color,
 }
 
-fn get_window_content(id: usize, x: u16, y: u16, width: u16) -> WindowContent {
+fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
     let reset = dracon_terminal_engine::compositor::plane::Color::Reset;
     let green = dracon_terminal_engine::compositor::plane::Color::Ansi(46);
     let yellow = dracon_terminal_engine::compositor::plane::Color::Ansi(220);
