@@ -547,6 +547,10 @@ impl Widget for IdeApp {
                 self.show_profiler = !self.show_profiler;
                 true
             }
+            KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.open_command_palette();
+                true
+            }
             // Tab navigation
             KeyCode::Tab if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.active_tab = (self.active_tab + 1) % self.tabs.len();
