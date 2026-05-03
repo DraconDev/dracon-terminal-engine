@@ -139,7 +139,7 @@ impl Widget for LogMonitor {
         // Header
         let title = " Log Monitor ";
         for (i, c) in title.chars().enumerate().take(area.width as usize - 2) {
-            let idx = (i + 2) as usize;
+            let idx = (i + 2);
             p.cells[idx] = Cell {
                 char: c,
                 fg: self.log_viewer.theme.primary,

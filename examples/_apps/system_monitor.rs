@@ -308,7 +308,7 @@ impl SystemMonitor {
                         if rest.len() >= 3 {
                             let utime: u64 = rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
                             let stime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
-                            let _state = rest.get(0).unwrap_or(&"?");
+                            let _state = rest.first().unwrap_or(&"?");
 
                             let cpu_usage = (utime + stime) as f32 / 100.0;
 
@@ -375,10 +375,10 @@ impl SystemMonitor {
         self.mem_gauge
             .set_value((self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as f64);
 
-        let disk_activity = (self.stats.disk_read_mb + self.stats.disk_write_mb).min(100.0) as f64;
+        let disk_activity = (self.stats.disk_read_mb + self.stats.disk_write_mb).min(100.0);
         self.disk_gauge.set_value(disk_activity);
 
-        let net_activity = (self.stats.network_rx_mb + self.stats.network_tx_mb).min(100.0) as f64;
+        let net_activity = (self.stats.network_rx_mb + self.stats.network_tx_mb).min(100.0);
         self.net_gauge.set_value(net_activity);
 
         self.uptime_text.clear();
