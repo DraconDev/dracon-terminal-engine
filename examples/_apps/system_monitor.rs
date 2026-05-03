@@ -49,7 +49,6 @@ impl SystemStats {
     fn new() -> Self {
         Self {
             cpu_percent: 0.0,
-            cpu_count: 1,
             memory_used_mb: 0.0,
             memory_total_mb: 4096.0,
             disk_read_mb: 0.0,

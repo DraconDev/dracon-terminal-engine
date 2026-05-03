@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Simplified the system monitor example by removing unused fields and improving widget ID handling.
+Simplified the system monitor example by removing an unused CPU count field.
 
 ## Context
-The system monitor example was refactored to reduce complexity by removing unused fields from data structures and improving the `InputRouter` widget's ID handling.
+The system monitor example was being simplified to reduce complexity and improve maintainability. The unused `cpu_count` field was identified as unnecessary for the current implementation.
 
 ## Completed
-- [x] Removed unused `mem_mb` and `state` fields from `ProcessInfo`
-- [x] Removed unused `cpu_count` field from `SystemStats`
-- [x] Improved `InputRouter` widget by making the `set_id` parameter unused with `_id`
+- [x] Removed the `cpu_count` field from the `SystemStats` struct in the system monitor example
 
 ## In Progress
-- [ ] None
+- [x] No active work in progress related to this change
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify the system monitor still functions correctly with the removed fields
-2. Consider further simplification opportunities in the system monitor example
+1. Verify the system monitor example continues to function correctly without the removed field
+2. Continue with other ongoing documentation and refactoring tasks
