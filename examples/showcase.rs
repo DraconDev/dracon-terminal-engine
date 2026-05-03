@@ -118,8 +118,24 @@ impl Showcase {
         }
     }
 
-    fn themes() -> Vec<Theme> {
-        vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::gruvbox_dark(), Theme::tokyo_night()]
+    fn themes() -> Vec<(&'static str, Theme)> {
+        vec![
+            ("dark", Theme::dark()),
+            ("light", Theme::light()),
+            ("cyberpunk", Theme::cyberpunk()),
+            ("dracula", Theme::dracula()),
+            ("nord", Theme::nord()),
+            ("catppuccin", Theme::catppuccin_mocha()),
+            ("gruvbox", Theme::gruvbox_dark()),
+            ("tokyo-night", Theme::tokyo_night()),
+            ("solarized-dark", Theme::solarized_dark()),
+            ("solarized-light", Theme::solarized_light()),
+            ("one-dark", Theme::one_dark()),
+            ("rose-pine", Theme::rose_pine()),
+            ("kanagawa", Theme::kanagawa()),
+            ("everforest", Theme::everforest()),
+            ("monokai", Theme::monokai()),
+        ]
     }
 
     fn apply_filter(&mut self) {
