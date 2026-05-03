@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Improved debug overlay rendering in the cookbook example
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, likely to incorporate the latest compatible versions of project dependencies.
+The debug overlay was rendering incorrectly due to improper index calculations when drawing the top border. The changes simplify the index calculations to ensure proper rendering of the debug overlay.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Fixed top border rendering by simplifying index calculations
+- [x] Improved horizontal ruler rendering by removing unnecessary multiplication
+- [x] Enhanced text rendering by correcting index calculations for text placement
 
 ## In Progress
-- [x] Dependency version updates
+- [x] Verification of debug overlay rendering across different terminal sizes
 
 ## Blockers
-- None reported
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application with the new dependency versions
+1. Verify debug overlay rendering in various terminal configurations
+2. Consider additional debug visualization features for future iterations

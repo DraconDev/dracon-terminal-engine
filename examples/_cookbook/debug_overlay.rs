@@ -132,7 +132,7 @@ impl Widget for DebugOverlayPanel {
         }
 
         for x in 0..area.width {
-            let idx = (0 * plane.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '-';
             }
@@ -167,7 +167,7 @@ impl Widget for DebugOverlayPanel {
             .enumerate()
             .take((area.width as usize).saturating_sub(10))
         {
-            let idx = (0 * plane.width + 2 + i as u16) as usize;
+            let idx = (2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].style = Styles::BOLD;
