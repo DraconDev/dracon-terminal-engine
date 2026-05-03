@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Changed the scoped zone registry type from `&'static str` to `usize` in the showcase example.
+Refactored primitive control hover detection using scoped zone registry
 
 ## Context
-This change was made to support more flexible zone identification in the UI component tracking system. The previous string-based approach was being replaced with a more efficient numeric identifier system.
+The showcase example was previously using manual coordinate calculations to detect primitive control hover states. This was error-prone and difficult to maintain.
 
 ## Completed
-- [x] Changed `ScopedZoneRegistry` type parameter from `&'static str` to `usize` in the showcase example
+- [x] Replaced manual coordinate tracking with scoped zone registry
+- [x] Simplified hover detection logic using zone dispatch
+- [x] Improved maintainability by centralizing hit detection in zone system
 
 ## In Progress
-- [x] Implementation of the new zone identification system
+- [x] Zone registration and hover detection are now properly integrated
 
 ## Blockers
-- Need to verify compatibility with existing UI components that rely on zone tracking
+- None identified
 
 ## Next Steps
-1. Update all zone references in the showcase example to use the new numeric identifiers
-2. Verify that the zone tracking system continues to function correctly with the new type
+1. Verify zone-based hover detection works consistently across all primitive controls
+2. Document the new zone registry system for future use

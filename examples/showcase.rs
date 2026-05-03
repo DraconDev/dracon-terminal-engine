@@ -853,34 +853,24 @@ impl Widget for Showcase {
             ("[4]", &state_3),
             ("[5]", state_4),
         ];
+        // Compute positions and register zones
         let mut prim_x = 2usize;
-        let mut prim_hit_starts: [usize; 5] = [0; 5];
-        let mut prim_hit_ends: [usize; 5] = [0; 5];
+        let mut zones = self.zones.borrow_mut();
+        const PRIM_BASE: usize = 100;
         for (i, (key, state)) in prim_controls.iter().enumerate() {
             let total_w = key.len() + 1 + state.len();
-            prim_hit_starts[i] = prim_x;
-            prim_hit_ends[i] = prim_x + total_w;
+            zones.register(PRIM_BASE + i, prim_x as u16, prim_y as u16, total_w as u16, 1);
             prim_x += total_w + 3;
         }
-        let hovered_idx = self.mouse_pos
-            .filter(|(_, py)| *py as usize == prim_y)
-            .and_then(|(px, _)| {
-                let mx = px as usize;
-                prim_hit_starts.iter().zip(prim_hit_ends.iter())
-                    .position(|(start, end)| mx >= *start && mx < *end)
-            });
+        // Determine hover from zones
+        let hovered_prim = self.mouse_pos
+            .and_then(|(mx, my)| zones.dispatch(mx, my))
+            .filter(|id| *id >= PRIM_BASE && *id < PRIM_BASE + 5)
+            .map(|id| id - PRIM_BASE);
+        drop(zones); // release borrow before using plane
+        // Draw primitives with hover highlight
         prim_x = 2usize;
-        for (i, (key, state)) in prim_controls.iter().enumerate() {
-            let hovered = hovered_idx == Some(i);
-            let key_fg = if hovered { t.primary } else { t.fg_muted };
-            let state_fg = if hovered { t.primary } else { t.fg };
-            draw_text(&mut plane, prim_x, prim_y, key, key_fg, t.bg, false);
-            prim_x += key.len();
-            draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
-            prim_x += 1;
-            draw_text(&mut plane, prim_x, prim_y, state, state_fg, t.bg, false);
-            prim_x += state.len() + 3;
-        }
+        self.zones.borrow_mut().register();
 
         // Category sidebar
         let sidebar_w = 14usize;
