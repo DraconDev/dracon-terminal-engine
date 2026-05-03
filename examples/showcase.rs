@@ -1410,26 +1410,45 @@ impl Widget for Showcase {
 
                 // Primitives bar click
                 if y == 4 {
-                    if x >= 2 && x < 16 {
-                        self.primitive_toggle = !self.primitive_toggle;
-                        return true;
-                    }
-                    if x >= 20 && x < 36 {
-                        self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
-                        return true;
-                    }
-                    if x >= 40 && x < 53 {
-                        self.primitive_checkbox = !self.primitive_checkbox;
-                        return true;
-                    }
-                    if x >= 58 && x < 71 {
-                        self.primitive_radio = (self.primitive_radio + 1) % 3;
-                        return true;
-                    }
-                    if x >= 76 && x < 90 {
-                        self.primitive_button = true;
-                        self.primitive_button_time = Some(Instant::now());
-                        return true;
+                    let state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
+                    let state_1 = {
+                        let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
+                        let filled: String = (0..pos).map(|_| '=').collect();
+                        let empty: String = (pos..10).map(|_| "-").collect();
+                        format!("[{}{}]", filled, empty)
+                    };
+                    let state_2 = if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" };
+                    let state_3 = {
+                        let sel = self.primitive_radio;
+                        let opts = ["(1)", "(2)", "(3)"];
+                        let mut s = String::new();
+                        for (j, _o) in opts.iter().enumerate() {
+                            s.push_str(if j == sel { "(*)" } else { "( )" });
+                        }
+                        s
+                    };
+                    let state_4 = if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" };
+                    let prim_controls: [(&str, &str); 5] = [
+                        ("[1]", state_0),
+                        ("[2]", &state_1),
+                        ("[3]", state_2),
+                        ("[4]", &state_3),
+                        ("[5]", state_4),
+                    ];
+                    let mut prim_x = 2usize;
+                    for (i, (key, state)) in prim_controls.iter().enumerate() {
+                        let total_w = key.len() + 1 + state.len();
+                        if x >= prim_x && x < prim_x + total_w {
+                            match i {
+                                0 => { self.primitive_toggle = !self.primitive_toggle; return true; }
+                                1 => { self.primitive_slider = (self.primitive_slider + 0.1).min(1.0); return true; }
+                                2 => { self.primitive_checkbox = !self.primitive_checkbox; return true; }
+                                3 => { self.primitive_radio = (self.primitive_radio + 1) % 3; return true; }
+                                4 => { self.primitive_button = true; self.primitive_button_time = Some(Instant::now()); return true; }
+                                _ => {}
+                            }
+                        }
+                        prim_x += total_w + 3;
                     }
                 }
 
