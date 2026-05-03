@@ -366,15 +366,10 @@ impl Widget for Showcase {
 
         // Search feedback: match count or no results
         if self.search_active && !self.search_query.is_empty() {
-            let feedback = if self.filtered.is_empty() {
-                "  No results!"
-            } else {
-                format!("  {} results", self.filtered.len())
-            };
-            let feedback_text = if self.filtered.len() == 1 {
-                format!("  1 result")
-            } else if self.filtered.is_empty() {
+            let feedback_text = if self.filtered.is_empty() {
                 "  No results!".to_string()
+            } else if self.filtered.len() == 1 {
+                "  1 result".to_string()
             } else {
                 format!("  {} results", self.filtered.len())
             };
