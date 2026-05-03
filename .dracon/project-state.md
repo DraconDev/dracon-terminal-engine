@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Implement dynamic area management for the Showcase widget by storing and updating its display area.
+Refactor `Showcase` widget to use thread-safe `Rect` storage for dynamic area management.
 
 ## Context
-The Showcase widget now needs to properly track and manage its display area, which was previously hardcoded. This change enables the widget to adapt to different screen sizes and positions.
+The `Showcase` widget needs to support dynamic resizing across threads. The previous implementation used a direct `Rect` field, which couldn't be safely shared between threads. This change enables concurrent access to the widget's display area.
 
 ## Completed
-- [x] Added `area` field to the Showcase struct to store the display area
-- [x] Implemented proper area getter and setter methods
-- [x] Removed hardcoded area values from the widget implementation
+- [x] Converted `area: Rect` to `area: Arc<Mutex<Rect>>` for thread-safe access
+- [x] Enabled dynamic area updates across threads
 
 ## In Progress
-- [x] Dynamic area management for the Showcase widget
+- [ ] Verify thread-safety in all widget rendering paths
 
 ## Blockers
-- None identified
+- Need to ensure all widget methods properly handle the mutex lock
 
 ## Next Steps
-1. Test the dynamic area management with different screen sizes
-2. Integrate with the existing layout system to ensure proper rendering
+1. Update all widget methods to properly handle the mutex
+2. Add integration tests for thread-safe area updates
