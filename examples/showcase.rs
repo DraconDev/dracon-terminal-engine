@@ -97,6 +97,7 @@ struct Showcase {
     primitive_radio: usize,
     primitive_button: bool,
     show_debug: bool,
+    primitive_button_time: Option<Instant>,
 }
 
 impl Showcase {
@@ -136,6 +137,7 @@ impl Showcase {
             primitive_radio: 0,
             primitive_button: false,
             show_debug: false,
+            primitive_button_time: None,
         }
     }
 
@@ -1211,6 +1213,7 @@ impl Widget for Showcase {
                 }
                 KeyCode::Char('5') => {
                     self.primitive_button = true;
+                    self.primitive_button_time = Some(Instant::now());
                     true
                 }
                 KeyCode::Down => {
