@@ -564,6 +564,22 @@ impl Widget for Showcase {
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
 
+        // Context menu takes priority
+        if self.context_menu.is_some() {
+            match key.code {
+                KeyCode::Esc => {
+                    self.context_menu = None;
+                    return true;
+                }
+                KeyCode::Enter => {
+                    self.context_menu = None;
+                    self.launch_selected();
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
         // Search mode
         if self.search_active {
             match key.code {
