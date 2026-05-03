@@ -119,7 +119,6 @@ struct FileManager {
     should_quit: Arc<AtomicBool>,
     theme: Theme,
     show_help: bool,
-    last_click: Instant,
 }
 
 impl FileManager {
@@ -150,7 +149,6 @@ impl FileManager {
             should_quit,
             theme,
             show_help: false,
-            last_click: Instant::now(),
         }
     }
 
@@ -219,7 +217,7 @@ impl Widget for FileManager {
 
         // Split pane
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, detail_rect) = split.split(Rect::new(0, hh, area.width, content_h));
+        let (tree_rect, _detail_rect) = split.split(Rect::new(0, hh, area.width, content_h));
 
         // Tree
         let tree_plane = self.tree.render(tree_rect);
@@ -243,7 +241,7 @@ impl Widget for FileManager {
         }
 
         // Detail pane
-        if let Some(ref path) = self.selected_path {
+        if let Some(ref _path) = self.selected_path {
             if let Some(node) = self.root.find_by_path(&self.tree_path) {
                 let dx = tree_rect.width + 2;
                 let dy = hh + 1;
