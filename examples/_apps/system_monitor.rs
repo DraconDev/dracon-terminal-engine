@@ -479,7 +479,6 @@ impl Widget for InputRouter {
             let proc_row = (row - gauges_h) as usize;
             match kind {
                 MouseEventKind::Down(MouseButton::Left) => {
-                    let visible_count = (h.saturating_sub(gauges_h + 2)) as usize;
                     let idx = m.process_scroll_offset + proc_row;
                     if idx < m.stats.processes.len() {
                         m.selected_process = if m.selected_process == Some(idx) { None } else { Some(idx) };

@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Fixed type mismatch in process list rendering coordinates
+Removed redundant process list rendering calculation in system monitor
 
 ## Context
-The system monitor example was rendering process list items with a type mismatch between the index and coordinate parameters in the `draw_text_plane` call.
+The system monitor's process list rendering had a redundant calculation for visible process count that was no longer needed after recent refactoring of the process selection logic.
 
 ## Completed
-- [x] Fixed type mismatch by casting `i` to `u16` in the process list rendering coordinates
+- [x] Removed redundant `visible_count` calculation in process selection handler
+- [x] Simplified process selection logic by removing unused variable
 
 ## In Progress
-- [x] No active work in progress beyond this fix
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the fix doesn't introduce new rendering issues
-2. Consider adding more comprehensive type checking for similar UI components
+1. Verify no regression in process list rendering
+2. Continue with ongoing work on system monitor UI improvements
