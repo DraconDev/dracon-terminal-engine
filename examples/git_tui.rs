@@ -31,6 +31,7 @@ struct GitFile {
     path: String,
 }
 
+#[allow(dead_code)]
 struct GitCommit {
     hash: String,
     author: String,

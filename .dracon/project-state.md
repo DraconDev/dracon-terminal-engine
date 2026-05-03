@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored the Git TUI status rendering to remove unused height parameter.
+Added a new `GitCommit` struct to the Git TUI example with dead code allowed.
 
 ## Context
-The `render_status` function in the Git TUI example was modified to eliminate an unused parameter, improving code clarity and reducing potential confusion.
+This change prepares the groundwork for future Git TUI functionality by defining a basic commit structure, even though it's currently unused.
 
 ## Completed
-- [x] Removed unused `h` parameter from `render_status` function
-- [x] Renamed remaining parameter to `_h` to explicitly mark it as unused
+- [x] Added `GitCommit` struct with hash and author fields
+- [x] Marked struct with `#[allow(dead_code)]` to suppress warnings
 
 ## In Progress
-- [ ] None
+- [ ] Implement actual Git commit handling functionality
 
 ## Blockers
-- None
+- No immediate blockers, but the struct needs integration with Git operations
 
 ## Next Steps
-1. Verify no functionality was affected by this change
-2. Check if other similar unused parameters exist in the Git TUI code
+1. Implement methods to populate and use the `GitCommit` struct
+2. Connect the struct to actual Git repository operations
