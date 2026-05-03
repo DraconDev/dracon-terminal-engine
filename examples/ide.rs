@@ -266,6 +266,59 @@ impl IdeApp {
         }
     }
 
+    fn open_command_palette(&mut self) {
+        let (w, h) = (self.area.width, self.area.height);
+        let pw = 45.min(w.saturating_sub(4));
+        let ph = 18.min(h.saturating_sub(4));
+        let ox = (w - pw) / 2;
+        let oy = h / 6;
+        self.command_palette.set_area(Rect::new(ox, oy, pw, ph));
+        self.command_palette.show();
+    }
+
+    fn dispatch_palette_command(&mut self, cmd_id: &str) {
+        match cmd_id {
+            "new-tab" => {
+                let new_id = self.tabs.len();
+                self.tabs.push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1)));
+                self.active_tab = new_id;
+                self.sync_tab_bar();
+            }
+            "open" => self.toast("Open file dialog (mock)", ToastKind::Info),
+            "save" => {
+                if let Some(tab) = self.active_tab_mut() {
+                    tab.modified = false;
+                }
+                self.update_status();
+                self.toast("File saved", ToastKind::Success);
+            }
+            "close-tab" => {
+                if self.tabs.len() > 1 {
+                    self.tabs.remove(self.active_tab);
+                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                    self.sync_tab_bar();
+                }
+            }
+            "search" | "toggle-search" => {
+                self.show_search = !self.show_search;
+            }
+            "cut" => self.toast("Cut (mock)", ToastKind::Info),
+            "copy" => self.toast("Copy (mock)", ToastKind::Info),
+            "paste" => self.toast("Paste (mock)", ToastKind::Info),
+            "cycle-theme" => self.cycle_theme(),
+            "toggle-profiler" => {
+                self.show_profiler = !self.show_profiler;
+            }
+            "show-shortcuts" => {
+                self.toast("Shortcuts: Ctrl+P palette, Ctrl+T tab, Ctrl+F search, Ctrl+S save", ToastKind::Info);
+            }
+            "about" => {
+                self.toast("Dracon IDE v28.125 — A terminal-native IDE demo", ToastKind::Info);
+            }
+            _ => {}
+        }
+    }
+
     fn tick(&mut self) {
         if self.last_anim.elapsed() > Duration::from_millis(300) {
             self.anim_frame = (self.anim_frame + 1) % 4;
