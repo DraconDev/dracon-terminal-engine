@@ -469,7 +469,7 @@ fn main() -> std::io::Result<()> {
 
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) { ctx.stop(); }
-    }).run(|_ctx| {});
+    }).run(|_ctx| {})?;
 
     println!("\nSQLite Browser exited cleanly");
     Ok(())
