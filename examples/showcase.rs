@@ -108,6 +108,7 @@ impl Showcase {
             pending_binary: pending,
             status_message: None,
             area: Rect::new(0, 0, 80, 24),
+            cols: 3,
         }
     }
 
