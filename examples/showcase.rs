@@ -413,7 +413,7 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     draw_text(plane, w / 2 - 3, 11, &label, t.fg_muted, t.bg, false);
 }
 
-fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
         format!("CPU:  [{}{}]", "█".repeat((phase * 4.0).sin() as usize * 2 + 2), "░".repeat(6)),
