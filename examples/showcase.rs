@@ -1450,10 +1450,10 @@ impl Widget for Showcase {
         self.mouse_pos = Some((col, row));
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
-        let grid_start_x = sidebar_w + 2;
-        let grid_start_y = sidebar_start_y + 1;
-        let card_w = 28usize;
-        let card_h = 14usize;
+        let _grid_start_x = sidebar_w + 2;
+        let _grid_start_y = sidebar_start_y + 1;
+        let _card_w = 28usize;
+        let _card_h = 14usize;
 
         const PRIM_BASE: usize = 100;
         const PALETTE_BASE: usize = 200;
