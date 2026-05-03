@@ -503,6 +503,58 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64) {
     }
 }
 
+fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64) {
+    let lines = [
+        "fn main() {",
+        "    let x = 42;",
+        "    println!(\"{}\", x);",
+        "}",
+    ];
+    for (i, line) in lines.iter().enumerate() {
+        let py = 6 + i;
+        if py > 10 { break; }
+        let text: String = line.chars().take(22).collect();
+        draw_text(plane, 2, py, &text, t.fg_subtle, t.surface, false);
+    }
+    let cursor_visible = (phase * 3.0).fract() < 0.6;
+    if cursor_visible {
+        set_cell(plane, 18, 8, '▌', t.primary, t.surface);
+    }
+}
+
+fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64) {
+    let wins = [
+        (1, 6, 8, 4, t.primary),
+        (11, 7, 8, 4, t.warning),
+        (6, 9, 10, 3, t.info),
+    ];
+    let offsets = [
+        ((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16),
+        ((phase * 18.0).sin() as i16, (phase * 12.0).sin() as i16),
+        (0, 0),
+    ];
+    for (i, (x, y, w, h, color)) in wins.iter().enumerate() {
+        let ox = offsets[i].0 as i16;
+        let oy = offsets[i].1 as i16;
+        let wx = (*x as i16 + ox).max(1) as usize;
+        let wy = (*y as i16 + oy).max(6) as usize;
+        let wx = wx.min(20);
+        let wy = wy.min(11);
+
+        set_cell(plane, wx, wy, '┌', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.surface); }
+        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
+        for dy in 1..h - 1 {
+            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
+            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface); }
+            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
+        }
+        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface); }
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
+    }
+}
+
 fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let wins = [
         (2, 7, 14, 5, t.primary, "z:3"),
