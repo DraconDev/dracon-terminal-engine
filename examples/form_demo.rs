@@ -62,7 +62,6 @@ struct ValidationErrors {
     password: Option<String>,
 }
 
-
 /// A settings form widget composed of multiple input widgets.
 struct SettingsForm {
     id: WidgetId,

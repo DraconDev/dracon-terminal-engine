@@ -376,42 +376,36 @@ impl Widget for GitTui {
             }
             KeyCode::Down | KeyCode::Char('j') => {
                 match self.view {
-                    GitView::Status
-                        if self.selected_file + 1 < self.files.len() => {
-                            self.selected_file += 1;
-                            self.dirty = true;
-                        }
-                    GitView::Log
-                        if self.selected_commit + 1 < self.commits.len() => {
-                            self.selected_commit += 1;
-                            self.dirty = true;
-                        }
-                    GitView::Branches
-                        if self.selected_branch + 1 < self.branches.len() => {
-                            self.selected_branch += 1;
-                            self.dirty = true;
-                        }
+                    GitView::Status if self.selected_file + 1 < self.files.len() => {
+                        self.selected_file += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit + 1 < self.commits.len() => {
+                        self.selected_commit += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch + 1 < self.branches.len() => {
+                        self.selected_branch += 1;
+                        self.dirty = true;
+                    }
                     _ => {}
                 }
                 true
             }
             KeyCode::Up | KeyCode::Char('k') => {
                 match self.view {
-                    GitView::Status
-                        if self.selected_file > 0 => {
-                            self.selected_file -= 1;
-                            self.dirty = true;
-                        }
-                    GitView::Log
-                        if self.selected_commit > 0 => {
-                            self.selected_commit -= 1;
-                            self.dirty = true;
-                        }
-                    GitView::Branches
-                        if self.selected_branch > 0 => {
-                            self.selected_branch -= 1;
-                            self.dirty = true;
-                        }
+                    GitView::Status if self.selected_file > 0 => {
+                        self.selected_file -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit > 0 => {
+                        self.selected_commit -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch > 0 => {
+                        self.selected_branch -= 1;
+                        self.dirty = true;
+                    }
                     _ => {}
                 }
                 true
@@ -478,42 +472,36 @@ impl Widget for GitTui {
         match kind {
             MouseEventKind::ScrollDown => {
                 match self.view {
-                    GitView::Status
-                        if self.selected_file + 1 < self.files.len() => {
-                            self.selected_file += 1;
-                            self.dirty = true;
-                        }
-                    GitView::Log
-                        if self.selected_commit + 1 < self.commits.len() => {
-                            self.selected_commit += 1;
-                            self.dirty = true;
-                        }
-                    GitView::Branches
-                        if self.selected_branch + 1 < self.branches.len() => {
-                            self.selected_branch += 1;
-                            self.dirty = true;
-                        }
+                    GitView::Status if self.selected_file + 1 < self.files.len() => {
+                        self.selected_file += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit + 1 < self.commits.len() => {
+                        self.selected_commit += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch + 1 < self.branches.len() => {
+                        self.selected_branch += 1;
+                        self.dirty = true;
+                    }
                     _ => {}
                 }
                 return true;
             }
             MouseEventKind::ScrollUp => {
                 match self.view {
-                    GitView::Status
-                        if self.selected_file > 0 => {
-                            self.selected_file -= 1;
-                            self.dirty = true;
-                        }
-                    GitView::Log
-                        if self.selected_commit > 0 => {
-                            self.selected_commit -= 1;
-                            self.dirty = true;
-                        }
-                    GitView::Branches
-                        if self.selected_branch > 0 => {
-                            self.selected_branch -= 1;
-                            self.dirty = true;
-                        }
+                    GitView::Status if self.selected_file > 0 => {
+                        self.selected_file -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit > 0 => {
+                        self.selected_commit -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch > 0 => {
+                        self.selected_branch -= 1;
+                        self.dirty = true;
+                    }
                     _ => {}
                 }
                 return true;

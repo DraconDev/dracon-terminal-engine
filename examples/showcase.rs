@@ -1584,10 +1584,12 @@ impl Widget for Showcase {
                     for cx in 0..card_w {
                         let src_idx = cy * card_w + cx;
                         let dst_idx = (y + cy) * area.width as usize + x + cx;
-                        if src_idx < card.cells.len() && dst_idx < plane.cells.len()
-                            && !card.cells[src_idx].transparent {
-                                plane.cells[dst_idx] = card.cells[src_idx].clone();
-                            }
+                        if src_idx < card.cells.len()
+                            && dst_idx < plane.cells.len()
+                            && !card.cells[src_idx].transparent
+                        {
+                            plane.cells[dst_idx] = card.cells[src_idx].clone();
+                        }
                     }
                 }
                 // Register zone for this card
@@ -1997,27 +1999,26 @@ impl Widget for Showcase {
             ];
             for (i, (key_text, desc)) in lines.iter().enumerate() {
                 let y = help_y + 3 + i;
-                if y < area.height as usize - 1
-                    && !key_text.is_empty() {
-                        draw_text(
-                            &mut plane,
-                            help_x + 3,
-                            y,
-                            key_text,
-                            t.primary,
-                            t.surface_elevated,
-                            false,
-                        );
-                        draw_text(
-                            &mut plane,
-                            help_x + 18,
-                            y,
-                            desc,
-                            t.fg,
-                            t.surface_elevated,
-                            false,
-                        );
-                    }
+                if y < area.height as usize - 1 && !key_text.is_empty() {
+                    draw_text(
+                        &mut plane,
+                        help_x + 3,
+                        y,
+                        key_text,
+                        t.primary,
+                        t.surface_elevated,
+                        false,
+                    );
+                    draw_text(
+                        &mut plane,
+                        help_x + 18,
+                        y,
+                        desc,
+                        t.fg,
+                        t.surface_elevated,
+                        false,
+                    );
+                }
             }
         }
 
@@ -2483,16 +2484,14 @@ impl Widget for Showcase {
                 self.context_menu = None;
                 false
             }
-            MouseEventKind::ScrollDown
-                if self.selected + 1 < self.filtered.len() => {
-                    self.selected += 1;
-                    true
-                }
-            MouseEventKind::ScrollUp
-                if self.selected > 0 => {
-                    self.selected -= 1;
-                    true
-                }
+            MouseEventKind::ScrollDown if self.selected + 1 < self.filtered.len() => {
+                self.selected += 1;
+                true
+            }
+            MouseEventKind::ScrollUp if self.selected > 0 => {
+                self.selected -= 1;
+                true
+            }
             MouseEventKind::Moved => {
                 if let Some(btn_time) = self.primitive_button_time {
                     if btn_time.elapsed() >= Duration::from_secs(1) {

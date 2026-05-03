@@ -295,11 +295,13 @@ impl IdeApp {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [Theme::nord(),
+        let themes = [
+            Theme::nord(),
             Theme::cyberpunk(),
             Theme::dracula(),
             Theme::gruvbox_dark(),
-            Theme::tokyo_night()];
+            Theme::tokyo_night(),
+        ];
         let idx = themes
             .iter()
             .position(|t| t.name == self.theme.name)
@@ -382,12 +384,11 @@ impl IdeApp {
                 self.update_status();
                 self.toast("File saved", ToastKind::Success);
             }
-            "close-tab"
-                if self.tabs.len() > 1 => {
-                    self.tabs.remove(self.active_tab);
-                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
-                    self.sync_tab_bar();
-                }
+            "close-tab" if self.tabs.len() > 1 => {
+                self.tabs.remove(self.active_tab);
+                self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                self.sync_tab_bar();
+            }
             "search" | "toggle-search" => {
                 self.show_search = !self.show_search;
             }
@@ -491,7 +492,7 @@ fn build_sample_tree() -> Tree {
             },
         ],
     };
-    
+
     Tree::new(WidgetId::new(10))
         .with_root(vec![root])
         .with_theme(Theme::default())

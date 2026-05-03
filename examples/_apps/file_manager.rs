@@ -240,10 +240,7 @@ impl FileManager {
     }
 
     fn update_breadcrumbs(&mut self) {
-        let path = self
-            .selected_path
-            .as_ref()
-            .unwrap_or(&self.root.path);
+        let path = self.selected_path.as_ref().unwrap_or(&self.root.path);
         let segments: Vec<String> = path
             .components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
