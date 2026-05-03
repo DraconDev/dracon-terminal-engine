@@ -84,6 +84,7 @@ struct Showcase {
     hovered_card: Option<usize>,
     mouse_pos: Option<(u16, u16)>,
     context_menu: Option<(usize, u16, u16)>,
+    context_menu_selected: usize,
     tooltip_text: Option<String>,
     tooltip_timer: Option<Instant>,
     tooltip_pos: Option<(u16, u16)>,
@@ -124,6 +125,7 @@ impl Showcase {
             hovered_card: None,
             mouse_pos: None,
             context_menu: None,
+            context_menu_selected: 0,
             tooltip_text: None,
             tooltip_timer: None,
             tooltip_pos: None,
@@ -1228,14 +1230,37 @@ impl Widget for Showcase {
 
         // Context menu takes priority
         if self.context_menu.is_some() {
+            let menu_len = 4;
             match key.code {
                 KeyCode::Esc => {
                     self.context_menu = None;
                     return true;
                 }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    self.context_menu_selected = self.context_menu_selected.saturating_sub(1);
+                    return true;
+                }
+                KeyCode::Down | KeyCode::Char('j') => {
+                    self.context_menu_selected = (self.context_menu_selected + 1).min(menu_len - 1);
+                    return true;
+                }
                 KeyCode::Enter => {
+                    let selected = self.context_menu_selected;
                     self.context_menu = None;
-                    self.launch_selected();
+                    if selected == 0 {
+                        self.launch_selected();
+                    } else if selected == 1 {
+                        if let Some(ex) = self.selected_example() {
+                            println!("{}", ex.binary_name);
+                            self.status_message = Some((format!("Copied: {}", ex.binary_name), Instant::now()));
+                        }
+                    } else if selected == 2 {
+                        if let Some(ex) = self.selected_example() {
+                            self.category_filter = Some(ex.category);
+                            self.apply_filter();
+                            self.status_message = Some((format!("Filtered: {}", ex.category), Instant::now()));
+                        }
+                    }
                     return true;
                 }
                 _ => return true,
