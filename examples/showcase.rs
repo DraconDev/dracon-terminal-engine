@@ -91,6 +91,11 @@ struct Showcase {
     modal_preview: bool,
     show_fps: bool,
     card_start: Instant,
+    primitive_toggle: bool,
+    primitive_slider: f32,
+    primitive_checkbox: bool,
+    primitive_radio: usize,
+    primitive_button: bool,
 }
 
 impl Showcase {
@@ -124,6 +129,11 @@ impl Showcase {
             modal_preview: false,
             show_fps: true,
             card_start,
+            primitive_toggle: false,
+            primitive_slider: 0.5,
+            primitive_checkbox: true,
+            primitive_radio: 0,
+            primitive_button: false,
         }
     }
 
@@ -610,6 +620,45 @@ impl Widget for Showcase {
             };
             let feedback_color = if self.filtered.is_empty() { t.error } else { t.fg_muted };
             draw_text(&mut plane, 2, 3, &feedback_text, feedback_color, t.bg, false);
+        }
+
+        // Primitives bar
+        let prim_y = 4usize;
+        let prims = [
+            ("[1] Toggle", self.primitive_toggle, "[*]" , "[ ]"),
+            ("[2] Slider", true, "", ""),
+            ("[3] Check", self.primitive_checkbox, "[x]" , "[ ]"),
+            ("[4] Radio", true, "", ""),
+            ("[5] Button", self.primitive_button, "[B]" , "[B]"),
+        ];
+        let prim_labels = ["Toggle", "Slider", "Check", "Radio", "Button"];
+        let mut prim_x = 2usize;
+        for (i, (label, active, on_txt, off_txt)) in prims.iter().enumerate() {
+            let state_text = if i == 0 {
+                if *active { "[*] " } else { "[ ] " }
+            } else if i == 1 {
+                let pos = (self.primitive_slider * 10.0).round() as usize;
+                let filled = (0..pos).map(|_| '=').collect::<String>();
+                let empty = (pos..10).map(|_| "-").collect::<String>();
+                &format!("[{}{}]", filled, empty)
+            } else if i == 2 {
+                if *active { "[x] " } else { "[ ] " }
+            } else if i == 3 {
+                let opts = ["(1)", "(2)", "(3)"];
+                let sel = self.primitive_radio;
+                let mut s = String::new();
+                for (j, o) in opts.iter().enumerate() {
+                    s.push_str(if j == sel { "(*)" } else { "( )" });
+                }
+                &s
+            } else if i == 4 {
+                if *active { "[CLICKED]" } else { "[ Button ]" }
+            } else {
+                label
+            };
+            let fg = if i == 0 && *active || i == 2 && *active || i == 4 && *active { t.primary } else { t.fg_muted };
+            draw_text(&mut plane, prim_x, prim_y, state_text, fg, t.bg, false);
+            prim_x += state_text.len() + 3;
         }
 
         // Category sidebar
