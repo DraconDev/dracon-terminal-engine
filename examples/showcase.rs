@@ -6,7 +6,7 @@
 //! card-based layout with mini previews, and keyboard shortcuts.
 //!
 //! Controls:
-//!   arrows / hjkl — navigate cards
+//!   arrows — navigate cards
 //!   Enter — launch selected example
 //!   / — focus search bar
 //!   Tab — cycle categories

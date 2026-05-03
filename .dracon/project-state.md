@@ -1,13 +1,13 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Updated keyboard navigation documentation in the showcase example
 
 ## Context
-This change was prompted by recent dependency updates in the project, which required the lockfile to be regenerated to ensure consistent builds.
+The change removes the mention of 'hjkl' keys from the showcase example's documentation, as these keys are no longer part of the navigation controls.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Removed 'hjkl' from keyboard navigation documentation in showcase.rs
 
 ## In Progress
 - [x] No active work in progress related to this change
@@ -16,5 +16,5 @@ This change was prompted by recent dependency updates in the project, which requ
 - None
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Ensure the project builds successfully with the updated lockfile
+1. Verify the updated documentation reflects current functionality
+2. Ensure all other documentation remains accurate with current implementation
