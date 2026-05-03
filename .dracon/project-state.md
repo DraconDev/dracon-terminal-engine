@@ -1,27 +1,21 @@
 # Project State
 
 ## Current Focus
-Added debug overlay visualization in showcase example with toggle via 'D' key
+Added debug overlay toggle in showcase example via 'd' key
 
 ## Context
-To improve developer experience during UI development, this adds a visual debug overlay showing:
-- FPS counter
-- Card statistics
-- Interaction states
-- Search status
+This change enhances the showcase example by providing a visual debugging tool for developers to inspect UI state and layout information.
 
 ## Completed
-- [x] Added debug toggle via 'D' key
-- [x] Implemented overlay with centered banner
-- [x] Added performance metrics display
-- [x] Included interaction state tracking
+- [x] Added keyboard shortcut 'd' to toggle debug overlay
+- [x] Integrated debug visualization into showcase example
 
 ## In Progress
-- [x] Debug visualization system
+- [x] Debug overlay implementation and toggle functionality
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Add more debug metrics as needed
-2. Consider making debug features configurable via CLI flags
+1. Expand debug overlay features to include more UI state information
+2. Add configuration options for debug overlay appearance

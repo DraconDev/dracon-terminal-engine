@@ -995,6 +995,7 @@ impl Widget for Showcase {
                 ("/", "Focus search"),
                 ("Tab", "Cycle categories"),
                 ("t", "Cycle theme"),
+                ("d", "Debug overlay"),
                 ("q / Esc", "Quit"),
                 ("?", "Toggle this help"),
                 ("", ""),
