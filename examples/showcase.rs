@@ -94,7 +94,7 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>, card_start: Instant) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -123,8 +123,11 @@ impl Showcase {
             show_help: false,
             modal_preview: false,
             show_fps: true,
-            card_start: Instant::now(),
+            card_start,
         }
+    }
+
+    fn themes()
     }
 
     fn themes() -> Vec<(&'static str, Theme)> {
