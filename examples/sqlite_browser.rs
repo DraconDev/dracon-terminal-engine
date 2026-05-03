@@ -118,7 +118,7 @@ impl SqliteBrowser {
         }
     }
 
-    fn create_mock_db(&self) -> Vec<String> {
+    fn create_mock_db(&mut self) -> Vec<String> {
         // Create a temporary mock database
         let mock_db = format!("/tmp/dracon_mock_{}.db", std::process::id());
         let _ = Command::new("sqlite3")
