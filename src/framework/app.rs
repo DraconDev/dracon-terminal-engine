@@ -266,6 +266,15 @@ impl App {
         let cmds = widget.commands();
         self.widgets.borrow_mut().push(widget);
         self.focus_manager.register(id, focusable);
+
+        // Auto-focus first widget if nothing is focused yet
+        if self.focus_manager.focused().is_none() && focusable {
+            self.focus_manager.set_focus(id);
+            if let Some(mut w) = self.widget_mut(id) {
+                w.on_focus();
+            }
+        }
+
         self.next_widget_id += 1;
 
         for cmd in cmds {
