@@ -101,7 +101,7 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>, card_start: Instant) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -130,7 +130,7 @@ impl Showcase {
             show_help: false,
             modal_preview: false,
             show_fps: true,
-            card_start,
+            card_start: Instant::now(),
             primitive_toggle: false,
             primitive_slider: 0.5,
             primitive_checkbox: true,
@@ -1462,7 +1462,7 @@ fn main() -> std::io::Result<()> {
     let fps_counter = Arc::new(AtomicU64::new(0));
     let fps_for_tick = Arc::clone(&fps_counter);
 
-    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, Instant::now());
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter);
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));

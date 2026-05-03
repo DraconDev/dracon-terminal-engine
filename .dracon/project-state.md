@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved auto-reset functionality for primitive button interactions in the showcase example
+Simplified `Showcase` initialization by removing the `card_start` parameter.
 
 ## Context
-The showcase example needed better timing control for the primitive button's visual feedback. The previous implementation had the auto-reset logic in the wrong place, causing potential timing inconsistencies.
+The `Showcase` struct's constructor was modified to remove the `card_start` parameter, which was previously passed as an argument but is now generated internally.
 
 ## Completed
-- [x] Moved auto-reset logic from the draw phase to the mouse event handler
-- [x] Ensured the button state is properly reset after 1 second of activation
+- [x] Removed `card_start` parameter from `Showcase::new()`
+- [x] Added `Instant::now()` call inside the constructor to initialize `card_start`
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify the timing behavior in the showcase example
-2. Consider adding visual feedback for the reset action
+1. Verify no regression in showcase example behavior
+2. Check if other parts of the code rely on the previous initialization pattern
