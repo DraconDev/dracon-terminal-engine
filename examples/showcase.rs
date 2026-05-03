@@ -92,7 +92,7 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, area: Arc<Mutex<Rect>>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -106,7 +106,7 @@ impl Showcase {
             should_quit,
             pending_binary: pending,
             status_message: None,
-            area,
+            area: Rect::new(0, 0, 80, 24),
         }
     }
 
@@ -288,12 +288,8 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, t: Theme) -> P
 impl Widget for Showcase {
     fn id(&self) -> WidgetId { WidgetId::new(0) }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect {
-        *self.area.lock().unwrap()
-    }
-    fn set_area(&mut self, area: Rect) {
-        *self.area.lock().unwrap() = area;
-    }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
     fn z_index(&self) -> u16 { 0 }
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) {}
@@ -541,11 +537,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    // Shared area that the run closure can update on resize
-    let area = Arc::new(Mutex::new(Rect::new(0, 0, 80, 24)));
-    let area_for_tick = Arc::clone(&area);
-
-    let showcase = Showcase::new(should_quit, pending.clone(), Arc::clone(&area));
+    let showcase = Showcase::new(should_quit, pending.clone());
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
@@ -554,16 +546,6 @@ fn main() -> std::io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
             return;
-        }
-
-        // Update widget area on terminal resize
-        let (w, h) = ctx.compositor().size();
-        {
-            let mut rect = area_for_tick.lock().unwrap();
-            if rect.width != w || rect.height != h {
-                *rect = Rect::new(0, 0, w, h);
-                ctx.mark_all_dirty();
-            }
         }
 
         // Handle pending binary launch
