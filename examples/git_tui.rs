@@ -354,6 +354,97 @@ impl Widget for GitTui {
             _ => false,
         }
     }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let tab_h = 1u16;
+        let area = self.area;
+
+        // Tab bar click
+        if row < tab_h {
+            if self.tab_bar.handle_mouse(kind, col, row) {
+                self.view = match self.tab_bar.active() {
+                    0 => GitView::Status,
+                    1 => GitView::Log,
+                    2 => GitView::Diff,
+                    3 => GitView::Branches,
+                    _ => self.view,
+                };
+                if self.view == GitView::Diff {
+                    self.diff_content = self.read_full_diff();
+                }
+                self.dirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        // Scroll wheel for item navigation
+        match kind {
+            MouseEventKind::ScrollDown => {
+                match self.view {
+                    GitView::Status => if self.selected_file + 1 < self.files.len() { self.selected_file += 1; self.dirty = true; }
+                    GitView::Log => if self.selected_commit + 1 < self.commits.len() { self.selected_commit += 1; self.dirty = true; }
+                    GitView::Branches => if self.selected_branch + 1 < self.branches.len() { self.selected_branch += 1; self.dirty = true; }
+                    _ => {}
+                }
+                return true;
+            }
+            MouseEventKind::ScrollUp => {
+                match self.view {
+                    GitView::Status => if self.selected_file > 0 { self.selected_file -= 1; self.dirty = true; }
+                    GitView::Log => if self.selected_commit > 0 { self.selected_commit -= 1; self.dirty = true; }
+                    GitView::Branches => if self.selected_branch > 0 { self.selected_branch -= 1; self.dirty = true; }
+                    _ => {}
+                }
+                return true;
+            }
+            _ => {}
+        }
+
+        // Click on content area to select items
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            let status_h = 1u16;
+            let content_y = tab_h;
+            let content_h = area.height.saturating_sub(tab_h + status_h);
+
+            match self.view {
+                GitView::Status => {
+                    // Click on a file row
+                    let visible_count = content_h as usize;
+                    // Files start at content_y + header rows (status/untracked/modified headers)
+                    // We approximate: each file group has 1 header row, items below
+                    // For simplicity, map directly: file index = (row - content_y - 1) adjusted for headers
+                    let item_row = (row - content_y) as usize;
+                    if item_row > 0 && item_row <= self.files.len() {
+                        let idx = item_row - 1;
+                        if idx < self.files.len() {
+                            self.selected_file = idx;
+                            self.dirty = true;
+                            return true;
+                        }
+                    }
+                }
+                GitView::Log => {
+                    let item_row = (row - content_y) as usize;
+                    if item_row > 0 && item_row - 1 < self.commits.len() {
+                        self.selected_commit = item_row - 1;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                GitView::Branches => {
+                    let item_row = (row - content_y) as usize;
+                    if item_row > 0 && item_row - 1 < self.branches.len() {
+                        self.selected_branch = item_row - 1;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
 }
 
 impl GitTui {

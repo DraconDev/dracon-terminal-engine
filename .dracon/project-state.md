@@ -1,21 +1,25 @@
 # Project State
 
 ## Current Focus
-Added mouse interaction support for the Git TUI example.
+Added mouse interaction support for Git TUI tab navigation, scrolling, and item selection
 
 ## Context
-This change enables mouse interactions in the Git TUI example, building on previous work to add process selection and scrolling functionality.
+Enhanced the Git TUI example to support mouse interactions, making it more intuitive for users who prefer mouse navigation over keyboard controls
 
 ## Completed
-- [x] Added mouse event handling for Git TUI interactions
-- [x] Imported necessary mouse-related types (MouseButton, MouseEventKind)
+- [x] Added tab bar mouse click handling to switch between views
+- [x] Implemented scroll wheel navigation for file, commit, and branch lists
+- [x] Added left-click selection for files, commits, and branches
+- [x] Integrated mouse event handling with existing view system
+- [x] Added diff content loading when switching to Diff view
 
 ## In Progress
-- [x] Mouse interaction support for Git TUI
+- [x] Mouse interaction implementation for Git TUI
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Implement mouse-driven navigation in Git TUI
-2. Add visual feedback for mouse interactions
+1. Test mouse interaction across different terminal sizes
+2. Add visual feedback for mouse interactions (hover states, etc.)
+```
