@@ -365,9 +365,10 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64) {
     for (i, (label, value)) in items.iter().enumerate() {
         let y = 6 + i;
         if y > 11 { break; }
-        let bar_w = 18;
-        let fill = ((value.max(0.0).min(100.0) / 100.0) * bar_w as f64).round() as usize;
-        let color = if *value > 80.0 { t.error } else if *value > 60.0 { t.warning } else { t.success };
+        let bar_w = 14;
+        let val = value.max(0.0).min(100.0);
+        let fill = ((val / 100.0) * bar_w as f64).round() as usize;
+        let color = if val > 80.0 { t.error } else if val > 60.0 { t.warning } else { t.success };
         draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
         set_cell(plane, 6, y, '[', t.fg_muted, t.surface);
         for j in 0..bar_w {
@@ -376,6 +377,8 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64) {
             set_cell(plane, 7 + j, y, ch, fg, t.surface);
         }
         set_cell(plane, 7 + bar_w, y, ']', t.fg_muted, t.surface);
+        let pct = format!("{:>3}%", val.round() as u32);
+        draw_text(plane, 7 + bar_w + 2, y, &pct, color, t.surface, true);
     }
 }
 
