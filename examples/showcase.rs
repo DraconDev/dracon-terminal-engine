@@ -482,7 +482,10 @@ impl Widget for Showcase {
                     true
                 }
                 KeyCode::Char('t') => {
-                    self.theme_idx = (self.theme_idx + 1) % Self::themes().len();
+                    let themes = Self::themes();
+                    let current = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                    self.pending_theme = Some((current + 1) % themes.len());
+                    self.apply_filter();
                     true
                 }
                 KeyCode::Char('/') => {
