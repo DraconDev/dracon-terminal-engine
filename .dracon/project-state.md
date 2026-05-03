@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Simplified the system monitor example by removing unused variables and improving variable naming.
+Update Cargo.lock to reflect dependency version changes
 
 ## Context
-The system monitor example was being cleaned up to reduce complexity and improve readability. This change removes unused variables and renames others to better reflect their purpose.
+This change was prompted by recent documentation simplifications and refactoring of the Showcase widget, which required dependency updates to maintain compatibility.
 
 ## Completed
-- [x] Removed unused `state` variable in process CPU usage calculation
-- [x] Renamed `mem_kb` to `_mem_kb` to indicate it's intentionally unused
-- [x] Simplified variable naming for better code clarity
+- [x] Updated Cargo.lock to reflect dependency version changes
 
 ## In Progress
-- [ ] No active work in progress related to this change
+- [x] No active work in progress beyond the Cargo.lock update
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Review other parts of the system monitor example for further simplification
-2. Ensure all unused variables are properly addressed in related code
+1. Review the updated dependencies for any potential compatibility issues
+2. Continue with ongoing documentation and UI improvements for the Showcase widget
