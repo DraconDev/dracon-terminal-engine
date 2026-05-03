@@ -346,13 +346,34 @@ impl Widget for Showcase {
             }
         }
 
+        // Theme palette bar
+        let palette_y = 1usize;
+        let themes = Self::themes();
+        let square_w = 2usize;
+        let gap = 1usize;
+        let total_width = themes.len() * (square_w + gap);
+        let palette_start_x = ((area.width as usize).saturating_sub(total_width)) / 2;
+        for (i, (name, theme)) in themes.iter().enumerate() {
+            let x = palette_start_x + i * (square_w + gap);
+            let is_active = theme.name == self.theme.name;
+            let bg = if is_active { theme.primary_active } else { theme.primary };
+            let fg = theme.fg_on_accent;
+            // Draw 2-char wide colored square
+            for dx in 0..square_w {
+                if x + dx < area.width as usize {
+                    let ch = if dx == 0 && is_active { '▶' } else { ' ' };
+                    set_cell(&mut plane, x + dx, palette_y, ch, fg, bg);
+                }
+            }
+        }
+
         // Stats bar
-        let stats_y = 1usize;
+        let stats_y = 2usize;
         let stats_text = format!(
             " {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
             35,
-            5
+            themes.len()
         );
         let stats_start = 2usize;
         draw_text(&mut plane, stats_start, stats_y, &stats_text, t.fg_muted, t.bg, false);
@@ -361,7 +382,7 @@ impl Widget for Showcase {
         }
 
         // Search bar with icon
-        let search_y = 2usize;
+        let search_y = 3usize;
         let search_icon = if self.search_active { ">" } else { ":" };
         let search_prompt = if self.search_active { ">" } else { " " };
         let search_text = format!("{} {} [{}]", search_icon, search_prompt, self.search_query);
@@ -395,7 +416,7 @@ impl Widget for Showcase {
 
         // Category sidebar
         let sidebar_w = 12usize;
-        let sidebar_start_y = 5usize;
+        let sidebar_start_y = 6usize;
         let categories = ["all", "apps", "cookbook", "tools"];
         for (i, cat) in categories.iter().enumerate() {
             let cat_y = sidebar_start_y + i * 2;
