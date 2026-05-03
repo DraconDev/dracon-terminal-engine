@@ -175,8 +175,9 @@ impl SqliteBrowser {
             }
         }
 
-        let mut table = Table::new(self.results_columns.clone()).with_theme(self.theme);
-        table.rows = self.results_rows.iter().map(|r| dracon_terminal_engine::framework::widgets::TableRow { data: r.clone() }).collect();
+        let columns: Vec<Column> = self.results_columns.iter().map(|c| Column { header: c.header.clone(), width: c.width }).collect();
+        let rows: Vec<RowData> = self.results_rows.clone();
+        let mut table = Table::new(columns).with_theme(self.theme).with_rows(rows);
         table.set_visible_count(20);
         self.results_table = Some(table);
         self.dirty = true;
