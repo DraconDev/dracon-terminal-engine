@@ -289,16 +289,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             format!("{} {}", &status[..status.len().min(size.0 as usize - minimized_labels.len() as usize - 2)], minimized_labels)
         };
-        for (i, c) in status.chars().enumerate() {
+        // Taskbar rendering
+        let mut taskbar = Plane::new(999, size.0, 1);
+        taskbar.set_absolute_position(0, size.1 - 1);
+        taskbar.set_z_index(2000);
+        for (i, c) in full_status.chars().enumerate() {
             let cell = Cell {
-                        char: c,
-                        fg: dracon_terminal_engine::compositor::plane::Color::Ansi(0),
-                        bg: dracon_terminal_engine::compositor::plane::Color::Ansi(15),
-                        transparent: false,
-                        skip: false,
-                        style: Default::default(),
-                    };
-                    taskbar.put_cell(i as u16, 0, cell);
+                char: c,
+                fg: dracon_terminal_engine::compositor::plane::Color::Ansi(0),
+                bg: dracon_terminal_engine::compositor::plane::Color::Ansi(15),
+                transparent: false,
+                skip: false,
+                style: Default::default(),
+            };
+            taskbar.put_cell(i as u16, 0, cell);
         }
         compositor.add_plane(taskbar);
 
