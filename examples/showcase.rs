@@ -772,16 +772,31 @@ impl Widget for Showcase {
         let visible_themes = max_visible.min(themes.len());
         let palette_start_x = ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
         const PALETTE_BASE: usize = 200;
+        // Determine hovered palette swatch
+        let hovered_palette = self.mouse_pos
+            .filter(|(_, my)| *my as usize == palette_y)
+            .and_then(|(mx, _)| {
+                let x = mx as usize;
+                if x >= palette_start_x && x < palette_start_x + visible_themes * (square_w + gap) {
+                    let rel = x - palette_start_x;
+                    let idx = rel / (square_w + gap);
+                    if rel % (square_w + gap) < square_w { Some(idx) } else { None }
+                } else {
+                    None
+                }
+            })
+            .filter(|idx| *idx < themes.len());
         for (i, (_name, theme)) in themes.iter().enumerate() {
             if i >= visible_themes { break; }
             let x = palette_start_x + i * (square_w + gap);
             let is_active = theme.name == self.theme.name;
-            let bg = if is_active { theme.primary_active } else { theme.primary };
-            let fg = theme.fg_on_accent;
+            let is_hovered = hovered_palette == Some(i);
+            let bg = if is_hovered { theme.accent } else if is_active { theme.primary_active } else { theme.primary };
+            let fg = if is_hovered || is_active { theme.fg_on_accent } else { theme.fg_muted };
             // Draw 2-char wide colored square
             for dx in 0..square_w {
                 if x + dx < area.width as usize {
-                    let ch = if dx == 0 && is_active { '▶' } else { ' ' };
+                    let ch = if dx == 0 && is_active && !is_hovered { '▶' } else { ' ' };
                     set_cell(&mut plane, x + dx, palette_y, ch, fg, bg);
                 }
             }
