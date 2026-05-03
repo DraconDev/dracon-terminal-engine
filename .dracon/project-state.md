@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Added error handling to the Git TUI application's event loop
+Update Cargo.lock to reflect dependency version changes
 
 ## Context
-The Git TUI example was previously silently ignoring potential errors during the application's run phase. This change ensures proper error propagation and handling.
+This change was prompted by recent refactoring and cleanup efforts across the project, particularly in the Git TUI and system monitor examples. The updates ensure all dependencies are properly versioned after removing unused code and simplifying examples.
 
 ## Completed
-- [x] Added `?` operator to propagate errors from the `run` method
-- [x] Maintained the same functionality while adding proper error handling
+- [x] Updated Cargo.lock to reflect current dependency versions after refactoring and cleanup
 
 ## In Progress
-- [x] Error handling implementation for the Git TUI application
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify error handling works correctly with various Git operations
-2. Consider adding more specific error messages for Git-specific failures
+1. Verify all examples still compile and run correctly with updated dependencies
+2. Prepare for the next round of feature development or refactoring
