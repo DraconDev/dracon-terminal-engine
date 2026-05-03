@@ -256,18 +256,19 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, t: Theme) -> Plane {
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme) -> Plane {
     let card_w = 28u16;
     let card_h = 14u16;
     let mut plane = Plane::new(0, card_w, card_h);
 
     let is_selected = idx == selected_idx;
+    let is_hovered = Some(idx) == hovered_idx;
     let cat_color = category_color(t, ex.category);
 
     // Border
-    let border_fg = if is_selected { t.primary } else { t.outline };
-    let bg = if is_selected { t.surface_elevated } else { t.surface };
-    draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected);
+    let border_fg = if is_selected { t.primary } else if is_hovered { t.primary_hover } else { t.outline };
+    let bg = if is_selected { t.surface_elevated } else if is_hovered { t.surface } else { t.surface };
+    draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected || is_hovered);
 
     // Category badge (top)
     let badge = format!(" {} ", ex.category.to_uppercase());
@@ -477,7 +478,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, t);
+                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t);
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
