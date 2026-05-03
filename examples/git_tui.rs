@@ -14,7 +14,7 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{SplitPane, StatusBar, StatusSegment, TabBar, Toast, ToastKind};
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment, TabBar, Toast, ToastKind};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
