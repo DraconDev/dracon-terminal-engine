@@ -351,7 +351,7 @@ impl Widget for Showcase {
 
         // Category sidebar
         let sidebar_w = 12usize;
-        let sidebar_start_y = 9usize;
+        let sidebar_start_y = 5usize;
         let categories = ["all", "apps", "cookbook", "tools"];
         for (i, cat) in categories.iter().enumerate() {
             let cat_y = sidebar_start_y + i * 2;
@@ -383,7 +383,7 @@ impl Widget for Showcase {
 
         // Grid of cards
         let grid_start_x = sidebar_w + 2;
-        let grid_start_y = sidebar_start_y;
+        let grid_start_y = sidebar_start_y + 1;
         let card_w = 28usize;
         let card_h = 14usize;
         let cols = ((area.width as usize - grid_start_x) / (card_w + 2)).max(1);
