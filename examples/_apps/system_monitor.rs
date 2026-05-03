@@ -30,13 +30,10 @@ struct ProcessInfo {
     pid: u32,
     name: String,
     cpu_percent: f32,
-    mem_mb: f32,
-    state: String,
 }
 
 struct SystemStats {
     cpu_percent: f32,
-    cpu_count: u32,
     memory_used_mb: f32,
     memory_total_mb: f32,
     disk_read_mb: f64,
@@ -431,7 +428,7 @@ struct InputRouter {
 
 impl Widget for InputRouter {
     fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { }
+    fn set_id(&mut self, _id: WidgetId) { }
     fn area(&self) -> Rect { self.area.get() }
     fn set_area(&mut self, area: Rect) { self.area.set(area); }
     fn z_index(&self) -> u16 { 0 }

@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Simplified the system monitor example by removing unused fields and improving widget ID handling.
 
 ## Context
-This change was triggered by recent dependency updates in the project, particularly in the Showcase widget refactoring and documentation improvements.
+The system monitor example was refactored to reduce complexity by removing unused fields from data structures and improving the `InputRouter` widget's ID handling.
 
 ## Completed
-- [x] Updated Cargo.lock to synchronize dependency versions with the latest changes
+- [x] Removed unused `mem_mb` and `state` fields from `ProcessInfo`
+- [x] Removed unused `cpu_count` field from `SystemStats`
+- [x] Improved `InputRouter` widget by making the `set_id` parameter unused with `_id`
 
 ## In Progress
-- [x] No active work in progress beyond the Cargo.lock update
+- [ ] None
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved in the build system
-2. Continue with ongoing work on the Showcase widget dynamic area management
+1. Verify the system monitor still functions correctly with the removed fields
+2. Consider further simplification opportunities in the system monitor example
