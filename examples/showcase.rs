@@ -709,7 +709,7 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u
     }
 }
 
-fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let modal_w = 24usize;
     let modal_h = 8usize;
     let modal_x = 2usize;
