@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Added Unicode width support for file names in the file manager example.
+Refactored breadcrumb navigation in file manager to remove redundant path calculation
 
 ## Context
-The file manager example needed improved handling of non-ASCII characters in file names, particularly for proper rendering in the UI.
+The file manager's breadcrumb navigation was previously using a `segments()` method that was removed in a prior refactor. This change inlines the path calculation logic to maintain functionality while simplifying the code structure.
 
 ## Completed
-- [x] Added `unicode_width` dependency for accurate character width measurement
-- [x] Imported `UnicodeWidthStr` trait for file name rendering
+- [x] Removed unused `segments()` method call
+- [x] Inlined path component calculation for breadcrumbs
+- [x] Maintained existing navigation behavior when clicking breadcrumbs
 
 ## In Progress
-- [x] Implementation of Unicode-aware file name rendering in the UI
+- [ ] None (this is a completed refactoring)
 
 ## Blockers
-- None identified for this specific change
+- None (this is a completed change)
 
 ## Next Steps
-1. Implement Unicode-aware rendering in the file manager's tree view
-2. Verify proper alignment of file names with different character widths
+1. Verify breadcrumb navigation still works as expected
+2. Consider further refactoring of the path handling logic if needed

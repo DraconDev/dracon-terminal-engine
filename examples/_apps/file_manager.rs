@@ -418,23 +418,18 @@ impl Widget for FileManager {
         // Breadcrumb click detection (row 0)
         if row == 0 {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
-                use unicode_width::UnicodeWidthStr;
-                let mut x: u16 = 0;
-                let segments = self.breadcrumbs.segments(); // need this method
-                // Actually let's duplicate the logic inline
                 let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
                 let segs: Vec<String> = cwd.components()
                     .map(|c| c.as_os_str().to_string_lossy().into_owned())
                     .collect();
+                let mut x: u16 = 0;
                 for (i, seg) in segs.iter().enumerate() {
                     let seg_width = (seg.width() as u16 + 2).min(area.width.saturating_sub(x));
                     if seg_width < 3 { break; }
                     if i > 0 { x += 1; }
                     if col >= x && col < x + seg_width {
-                        // Navigate to this breadcrumb level
                         let components: Vec<_> = cwd.components().collect();
                         let target_path: PathBuf = components[..=i].iter().collect();
-                        // Rebuild tree from target path
                         self.root = FsNode::build_tree(&target_path, 0);
                         self.tree_path.clear();
                         self.selected_path = None;
