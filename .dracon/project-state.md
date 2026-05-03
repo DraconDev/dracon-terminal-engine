@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Improve widget area management in the framework by ensuring all widgets are resized to the full terminal area.
 
 ## Context
-This change was prompted by recent refactoring and cleanup efforts across multiple examples in the project. The Cargo.lock file needs to be updated to ensure all dependencies are properly versioned after removing unused imports, refactoring code, and adding new features.
+The terminal window size detection was already being used to resize the compositor and mark all widgets as dirty. This change ensures that each widget's area is explicitly set to the full terminal dimensions, which is necessary for proper rendering.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions after code changes
+- [x] Added explicit area setting for all widgets when terminal size changes
+- [x] Created a full terminal-sized `Rect` for widget area assignment
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] No active work in progress
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all examples still compile and run correctly with the updated dependencies
-2. Continue with ongoing refactoring and cleanup efforts in other examples
+1. Verify that all widgets now properly handle the full terminal area
+2. Test edge cases with different terminal sizes
