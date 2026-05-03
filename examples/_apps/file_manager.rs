@@ -240,6 +240,7 @@ impl FileManager {
         }
     }
 
+    #[allow(dead_code)]
     fn delete_selected(&mut self) {
         if let Some(ref path) = self.selected_path {
             let msg = if path.is_dir() {

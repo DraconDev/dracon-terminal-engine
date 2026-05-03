@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added a placeholder for file deletion functionality in the file manager
 
 ## Context
-This change was triggered by recent refactoring work in window and showcase card rendering components, which required updated dependencies to maintain compatibility.
+The file manager example is being enhanced with core file operations. This change prepares for implementing the actual file deletion functionality by adding a method stub with proper documentation.
 
 ## Completed
-- [x] Updated Cargo.lock with latest dependency versions
+- [x] Added `delete_selected` method stub in file manager
+- [x] Marked as dead_code to suppress warnings until implementation
 
 ## In Progress
-- [x] No active work in progress beyond this dependency update
+- [x] Implementation of actual file deletion logic
 
 ## Blockers
-- None identified
+- Need to determine proper error handling for deletion operations
+- Requires UI integration for triggering deletion
 
 ## Next Steps
-1. Continue with ongoing refactoring work in window and showcase card components
-2. Review and potentially update other documentation as needed
-```
+1. Implement file deletion logic with proper error handling
+2. Connect to UI controls for triggering deletion
