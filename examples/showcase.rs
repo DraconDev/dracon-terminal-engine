@@ -817,35 +817,41 @@ impl Widget for Showcase {
 
         // Primitives bar
         let prim_y = 4usize;
-        let prim_state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
-        let prim_state_1 = {
-            let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
-            let filled: String = (0..pos).map(|_| '=').collect();
-            let empty: String = (pos..10).map(|_| "-").collect();
-            format!("[{}{}]", filled, empty)
-        };
-        let prim_state_2 = if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" };
-        let (prim_state_3, prim_state_4) = {
-            let sel = self.primitive_radio;
-            let opts = ["(1)", "(2)", "(3)"];
-            let mut s = String::new();
-            for (j, _o) in opts.iter().enumerate() {
-                s.push_str(if j == sel { "(*)" } else { "( )" });
-            }
-            let b4 = if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" };
-            (s, b4)
-        };
-        let prim_x = 2usize;
-        draw_text(&mut plane, prim_x, prim_y, "[1]", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, prim_x + 4, prim_y, prim_state_0, t.fg, t.bg, false);
-        draw_text(&mut plane, prim_x + 18, prim_y, "[2]", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, prim_x + 22, prim_y, &prim_state_1, t.fg, t.bg, false);
-        draw_text(&mut plane, prim_x + 38, prim_y, "[3]", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, prim_x + 42, prim_y, prim_state_2, t.fg, t.bg, false);
-        draw_text(&mut plane, prim_x + 56, prim_y, "[4]", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, prim_x + 60, prim_y, &prim_state_3, t.fg, t.bg, false);
-        draw_text(&mut plane, prim_x + 74, prim_y, "[5]", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, prim_x + 78, prim_y, prim_state_4, t.fg, t.bg, false);
+        let prim_controls: [(usize, &str); 5] = [
+            (1, if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" }),
+            (2, {
+                let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
+                let filled: String = (0..pos).map(|_| '=').collect();
+                let empty: String = (pos..10).map(|_| "-").collect();
+                format!("[{}{}]", filled, empty)
+            }),
+            (3, if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" }),
+            (4, {
+                let sel = self.primitive_radio;
+                let opts = ["(1)", "(2)", "(3)"];
+                let mut s = String::new();
+                for (j, _o) in opts.iter().enumerate() {
+                    s.push_str(if j == sel { "(*)" } else { "( )" });
+                }
+                s
+            }),
+            (5, if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" }),
+        ];
+        let mut prim_x = 2usize;
+        let mut prim_hit_starts: [usize; 5] = [0; 5];
+        let mut prim_hit_ends: [usize; 5] = [0; 5];
+        for (i, (_key_num, state)) in prim_controls.iter().enumerate() {
+            let key_str = format!("[{}]", _key_num);
+            let total_w = key_str.len() + 1 + state.len();
+            prim_hit_starts[i] = prim_x;
+            prim_hit_ends[i] = prim_x + total_w;
+            draw_text(&mut plane, prim_x, prim_y, &key_str, t.fg_muted, t.bg, false);
+            prim_x += key_str.len();
+            draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
+            prim_x += 1;
+            draw_text(&mut plane, prim_x, prim_y, state, t.fg, t.bg, false);
+            prim_x += state.len() + 3;
+        }
 
         // Category sidebar
         let sidebar_w = 14usize;
