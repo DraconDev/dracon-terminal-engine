@@ -85,6 +85,7 @@ struct Showcase {
     tooltip_text: Option<String>,
     tooltip_timer: Option<Instant>,
     tooltip_pos: Option<(u16, u16)>,
+    show_help: bool,
 }
 
 impl Showcase {

@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency changes
+Added help display toggle to showcase example
 
 ## Context
-This change was triggered by recent feature additions in the showcase examples, particularly the tooltip and context menu implementations.
+This change extends the showcase example's functionality by adding a help display toggle, building on previous work that added tooltip support and interactive feedback features.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect new dependency versions
+- [x] Added `show_help` boolean field to Showcase struct to track help display state
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] Implementation of help display functionality (not yet shown in this diff)
 
 ## Blockers
-- None identified
+- Help display implementation requires UI components and logic that aren't yet added
 
 ## Next Steps
-1. Verify all showcase examples continue to work with updated dependencies
-2. Prepare for next feature implementation cycle
-```
+1. Implement help display UI components
+2. Add logic to toggle help display based on user interaction
