@@ -257,6 +257,7 @@ impl FileManager {
         }
     }
 
+    #[allow(dead_code)]
     fn create_file(&mut self, name: &str) {
         let path = self.root.path.join(name);
         if std::fs::File::create(&path).is_ok() {
