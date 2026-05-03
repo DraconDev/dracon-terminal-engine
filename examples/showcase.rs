@@ -674,7 +674,7 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: 
     }
 }
 
-fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let menus = ["File", "Edit", "View", "Help"];
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
     let menu_w = 8;
