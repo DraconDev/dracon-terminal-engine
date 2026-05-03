@@ -280,7 +280,7 @@ impl SplitResizerApp {
             for (j, c) in format!("{} {}", if i == sel { ">" } else { " " }, item)
                 .chars()
                 .enumerate()
-                .take((r.width as usize - 2).max(0))
+                .take((r.width as usize - 2))
             {
                 let idx = ((r.y + 2 + i as u16) * p.width + r.x + 1 + j as u16) as usize;
                 if idx < p.cells.len() {

@@ -437,7 +437,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             clock
         );
         let mut minimized_labels = String::new();
-        for (_idx, win) in windows.iter().enumerate() {
+        for win in windows.iter() {
             if win.minimized {
                 minimized_labels.push_str(&format!(" [{}]", &win.title.trim()));
             }
@@ -449,7 +449,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "{} {}",
                 &status[..status
                     .len()
-                    .min(size.0 as usize - minimized_labels.len() as usize - 2)],
+                    .min(size.0 as usize - minimized_labels.len() - 2)],
                 minimized_labels
             )
         };

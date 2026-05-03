@@ -243,7 +243,7 @@ impl FileManager {
         let path = self
             .selected_path
             .as_ref()
-            .or_else(|| Some(&self.root.path))
+            .or(Some(&self.root.path))
             .unwrap();
         let segments: Vec<String> = path
             .components()

@@ -534,12 +534,11 @@ impl Widget for SqliteBrowser {
                 }
                 KeyCode::Down | KeyCode::Char('j') => {
                     match self.active_panel {
-                        Panel::Tables => {
-                            if self.selected_table + 1 < self.tables.len() {
+                        Panel::Tables
+                            if self.selected_table + 1 < self.tables.len() => {
                                 self.selected_table += 1;
                                 self.dirty = true;
                             }
-                        }
                         Panel::Results => {
                             if let Some(ref mut table) = self.results_table {
                                 table.handle_key(key);
@@ -552,12 +551,11 @@ impl Widget for SqliteBrowser {
                 }
                 KeyCode::Up | KeyCode::Char('k') => {
                     match self.active_panel {
-                        Panel::Tables => {
-                            if self.selected_table > 0 {
+                        Panel::Tables
+                            if self.selected_table > 0 => {
                                 self.selected_table -= 1;
                                 self.dirty = true;
                             }
-                        }
                         Panel::Results => {
                             if let Some(ref mut table) = self.results_table {
                                 table.handle_key(key);

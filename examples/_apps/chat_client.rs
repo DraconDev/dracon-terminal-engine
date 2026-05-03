@@ -92,7 +92,7 @@ impl ChatState {
 
     fn scroll_to_bottom(&mut self) {
         let visible = (self.area.height.saturating_sub(5)).max(1) as usize;
-        self.scroll_offset = self.messages.len().saturating_sub(visible).max(0);
+        self.scroll_offset = self.messages.len().saturating_sub(visible);
     }
 
     fn unread_count(&self) -> usize {
@@ -176,7 +176,7 @@ impl ChatState {
 
         if let MouseEventKind::Down(btn) = kind {
             if btn == MouseButton::Left {
-                if col >= 1 && col <= 3 && row >= input_row && row < input_row + 1 {
+                if (1..=3).contains(&col) && row >= input_row && row < input_row + 1 {
                     self.show_emoji_modal = true;
                     return true;
                 }
@@ -575,7 +575,7 @@ fn main() -> io::Result<()> {
                     };
                 }
             }
-            for (i, c) in format!("Theme: Cyberpunk").chars().enumerate() {
+            for (i, c) in "Theme: Cyberpunk".to_string().chars().enumerate() {
                 let idx = ((sy + 3) * w + sx + 2 + i as u16) as usize;
                 if idx < mp.cells.len() {
                     mp.cells[idx].char = c;

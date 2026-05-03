@@ -101,7 +101,7 @@ impl CommandBindings {
             "[WARN] Load average: {:.2}",
             1.5 + (self.tick % 10) as f32 * 0.1
         ));
-        if self.tick % 10 == 0 {
+        if self.tick.is_multiple_of(10) {
             self.log_viewer.append_line(&format!(
                 "[ERROR] Simulated connection issue at tick {}",
                 self.tick
@@ -120,11 +120,11 @@ impl CommandBindings {
         if self.paused {
             return;
         }
-        if elapsed_secs % 2 == 0 {
+        if elapsed_secs.is_multiple_of(2) {
             self.cpu_value = 30.0 + (self.tick % 50) as f32;
             self.gauge.set_value(self.cpu_value as f64);
         }
-        if elapsed_secs % 5 == 0 {
+        if elapsed_secs.is_multiple_of(5) {
             let mut pairs = BTreeMap::new();
             pairs.insert(
                 "Memory".to_string(),
@@ -136,11 +136,11 @@ impl CommandBindings {
             );
             self.kv_grid.set_pairs(pairs);
         }
-        if elapsed_secs % 10 == 0 {
+        if elapsed_secs.is_multiple_of(10) {
             let status_text = if self.tick % 20 < 15 { "OK" } else { "WARNING" };
             self.status.set_status(status_text);
         }
-        if elapsed_secs % 3 == 0 {
+        if elapsed_secs.is_multiple_of(3) {
             self.log_viewer.clear();
             self.log_viewer
                 .append_line(&format!("[INFO] Tick {}", self.tick));

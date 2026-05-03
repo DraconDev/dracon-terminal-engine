@@ -55,21 +55,13 @@ const FIELD_SUBMIT: usize = 5;
 const FIELD_COUNT: usize = 6;
 
 /// Validation error messages.
+#[derive(Default)]
 struct ValidationErrors {
     username: Option<String>,
     email: Option<String>,
     password: Option<String>,
 }
 
-impl Default for ValidationErrors {
-    fn default() -> Self {
-        Self {
-            username: None,
-            email: None,
-            password: None,
-        }
-    }
-}
 
 /// A settings form widget composed of multiple input widgets.
 struct SettingsForm {

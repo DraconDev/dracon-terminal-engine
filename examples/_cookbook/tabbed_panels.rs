@@ -359,17 +359,17 @@ impl Widget for TabbedApp {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }
-        if self.tabbar.handle_key(key.clone()) {
+        if self.tabbar.handle_key(key) {
             return true;
         }
 
         match self.active_tab() {
             TAB_LOGS => self.logs.list.handle_key(key),
             TAB_SETTINGS => {
-                if self.settings.theme_select.handle_key(key.clone()) {
+                if self.settings.theme_select.handle_key(key) {
                     return true;
                 }
-                if self.settings.notifications.handle_key(key.clone()) {
+                if self.settings.notifications.handle_key(key) {
                     return true;
                 }
                 self.settings.volume_slider.handle_key(key)
@@ -390,11 +390,11 @@ impl Widget for TabbedApp {
                 .list
                 .handle_mouse(kind, col, row - tabbar_height - 1),
             TAB_SETTINGS => {
-                if row == tabbar_height + 2 && col >= 20 && col < 40 {
+                if row == tabbar_height + 2 && (20..40).contains(&col) {
                     self.settings
                         .theme_select
                         .handle_mouse(kind, col - 20, row - tabbar_height - 1)
-                } else if row == tabbar_height + 4 && col >= 20 && col < 45 {
+                } else if row == tabbar_height + 4 && (20..45).contains(&col) {
                     self.settings.volume_slider.handle_mouse(kind, col - 20, 0)
                 } else {
                     self.settings

@@ -312,7 +312,7 @@ impl Showcase {
             .iter()
             .enumerate()
             .filter(|(_, ex)| {
-                let matches_category = self.category_filter.map_or(true, |cat| ex.category == cat);
+                let matches_category = self.category_filter.is_none_or(|cat| ex.category == cat);
                 let matches_search = if self.search_query.is_empty() {
                     true
                 } else {
@@ -827,8 +827,8 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
         (0, 0),
     ];
     for (i, (x, y, w, h, color)) in wins.iter().enumerate() {
-        let ox = offsets[i].0 as i16;
-        let oy = offsets[i].1 as i16;
+        let ox = offsets[i].0;
+        let oy = offsets[i].1;
         let wx = (*x as i16 + ox).max(1) as usize;
         let wy = (*y as i16 + oy).max(6) as usize;
         let wx = wx.min(20);
@@ -1586,14 +1586,13 @@ impl Widget for Showcase {
                 );
                 for cy in 0..card_h {
                     for cx in 0..card_w {
-                        let src_idx = (cy * card_w + cx) as usize;
+                        let src_idx = cy * card_w + cx;
                         let dst_idx =
-                            ((y + cy as usize) * area.width as usize + x + cx as usize) as usize;
-                        if src_idx < card.cells.len() && dst_idx < plane.cells.len() {
-                            if !card.cells[src_idx].transparent {
+                            ((y + cy) * area.width as usize + x + cx);
+                        if src_idx < card.cells.len() && dst_idx < plane.cells.len()
+                            && !card.cells[src_idx].transparent {
                                 plane.cells[dst_idx] = card.cells[src_idx].clone();
                             }
-                        }
                     }
                 }
                 // Register zone for this card
@@ -2003,8 +2002,8 @@ impl Widget for Showcase {
             ];
             for (i, (key_text, desc)) in lines.iter().enumerate() {
                 let y = help_y + 3 + i;
-                if y < area.height as usize - 1 {
-                    if !key_text.is_empty() {
+                if y < area.height as usize - 1
+                    && !key_text.is_empty() {
                         draw_text(
                             &mut plane,
                             help_x + 3,
@@ -2024,7 +2023,6 @@ impl Widget for Showcase {
                             false,
                         );
                     }
-                }
             }
         }
 
@@ -2393,7 +2391,7 @@ impl Widget for Showcase {
                 if let Some(zone_id) = clicked_zone {
                     match zone_id {
                         // Theme palette swatches (PALETTE_BASE + i)
-                        id if id >= PALETTE_BASE && id < PALETTE_BASE + 20 => {
+                        id if (PALETTE_BASE..PALETTE_BASE + 20).contains(&id) => {
                             let idx = id - PALETTE_BASE;
                             self.pending_theme = Some(idx);
                             self.apply_filter();
@@ -2405,7 +2403,7 @@ impl Widget for Showcase {
                             return true;
                         }
                         // Primitives bar controls (PRIM_BASE + i)
-                        id if id >= PRIM_BASE && id < PRIM_BASE + 5 => match id - PRIM_BASE {
+                        id if (PRIM_BASE..PRIM_BASE + 5).contains(&id) => match id - PRIM_BASE {
                             0 => {
                                 self.primitive_toggle = !self.primitive_toggle;
                                 return true;
@@ -2430,7 +2428,7 @@ impl Widget for Showcase {
                             _ => {}
                         },
                         // Sidebar categories (CAT_BASE + i)
-                        id if id >= CAT_BASE && id < CAT_BASE + 4 => {
+                        id if (CAT_BASE..CAT_BASE + 4).contains(&id) => {
                             let cats: [Option<&str>; 4] =
                                 [None, Some("apps"), Some("cookbook"), Some("tools")];
                             self.category_filter = cats[id - CAT_BASE];
@@ -2466,7 +2464,7 @@ impl Widget for Showcase {
                 }
 
                 // Search bar click (no zone registered for this)
-                if y == 3 && x >= 2 && x < 30 {
+                if y == 3 && (2..30).contains(&x) {
                     self.search_active = true;
                     return true;
                 }
@@ -2490,22 +2488,16 @@ impl Widget for Showcase {
                 self.context_menu = None;
                 false
             }
-            MouseEventKind::ScrollDown => {
-                if self.selected + 1 < self.filtered.len() {
+            MouseEventKind::ScrollDown
+                if self.selected + 1 < self.filtered.len() => {
                     self.selected += 1;
                     true
-                } else {
-                    false
                 }
-            }
-            MouseEventKind::ScrollUp => {
-                if self.selected > 0 {
+            MouseEventKind::ScrollUp
+                if self.selected > 0 => {
                     self.selected -= 1;
                     true
-                } else {
-                    false
                 }
-            }
             MouseEventKind::Moved => {
                 if let Some(btn_time) = self.primitive_button_time {
                     if btn_time.elapsed() >= Duration::from_secs(1) {

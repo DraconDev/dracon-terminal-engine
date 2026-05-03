@@ -864,7 +864,7 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                         let session_id = stdout
                             .split_whitespace()
                             .filter_map(|tok| tok.parse::<u32>().ok())
-                            .last()
+                            .next_back()
                             .map(|id| id.to_string())
                             .unwrap_or_default();
                         log(&format!("New session created, ID: {}", session_id));
@@ -891,7 +891,7 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                                 "--session",
                                 &format!("--dest={}", dest),
                                 "--type=method_call",
-                                &format!("/konsole/MainWindow_1"),
+                                &"/konsole/MainWindow_1".to_string(),
                                 "org.qtproject.Qt.QWidget.raise",
                             ])
                             .spawn();

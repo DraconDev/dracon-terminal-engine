@@ -270,17 +270,13 @@ impl Widget for TreeNav {
             return false;
         }
 
-        match key.code {
-            KeyCode::Backspace => {
-                if !self.current_path.is_empty() {
-                    self.current_path.pop();
-                    self.tree.set_selected_path(self.current_path.clone());
-                    self.update_breadcrumbs();
-                    return true;
-                }
+        if key.code == KeyCode::Backspace
+            && !self.current_path.is_empty() {
+                self.current_path.pop();
+                self.tree.set_selected_path(self.current_path.clone());
+                self.update_breadcrumbs();
+                return true;
             }
-            _ => {}
-        }
 
         if self.tree.handle_key(key) {
             self.current_path = self.tree.get_selected_path().to_vec();
@@ -307,13 +303,12 @@ impl Widget for TreeNav {
         let (tree_rect, _) =
             split.split(Rect::new(0, header_height, self.area.width, content_height));
 
-        if col < tree_rect.width && row > header_height && row < header_height + tree_rect.height {
-            if self.tree.handle_mouse(kind, col, row - header_height) {
+        if col < tree_rect.width && row > header_height && row < header_height + tree_rect.height
+            && self.tree.handle_mouse(kind, col, row - header_height) {
                 self.current_path = self.tree.get_selected_path().to_vec();
                 self.update_breadcrumbs();
                 return true;
             }
-        }
 
         false
     }

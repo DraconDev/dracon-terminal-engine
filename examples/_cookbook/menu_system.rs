@@ -418,13 +418,12 @@ impl Widget for MenuApp {
         let (hdr, ftr) = (1u16, 1u16);
         let content_h = self.area.height.saturating_sub(hdr + ftr);
 
-        if self.context_menu.is_some() {
-            if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+        if self.context_menu.is_some()
+            && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
                 self.context_menu = None;
                 self.selected_idx = None;
                 return true;
             }
-        }
 
         if row == 0 {
             if let MouseEventKind::Down(MouseButton::Left) = kind {

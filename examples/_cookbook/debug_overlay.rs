@@ -148,7 +148,7 @@ impl Widget for DebugOverlayPanel {
 
         for y in 0..area.height {
             for idx in [
-                (y * plane.width + 0) as usize,
+                (y * plane.width) as usize,
                 (y * plane.width + 25) as usize,
                 (y * plane.width + area.width.saturating_sub(1)) as usize,
             ]

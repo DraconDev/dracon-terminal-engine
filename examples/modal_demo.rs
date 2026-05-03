@@ -99,14 +99,12 @@ impl<'a> Widget for HelpOverlay<'a> {
         }
         let mut plane = self.modal.render(area);
 
-        let shortcuts = vec![
-            ("?", "Toggle help"),
+        let shortcuts = [("?", "Toggle help"),
             ("q", "Quit app"),
             ("Ctrl+S", "Save (mock)"),
             ("Tab", "Cycle focus"),
             ("Esc", "Close modal"),
-            ("Enter", "Confirm"),
-        ];
+            ("Enter", "Confirm")];
 
         let start_y = 2u16;
         for (i, (key, desc)) in shortcuts.iter().enumerate() {

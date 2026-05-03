@@ -258,7 +258,7 @@ impl Widget for ThemeHeader {
 
         for (i, c) in title.chars().enumerate() {
             let x = (area.width as usize / 2 - title.len() / 2 + i) as u16;
-            let idx = 1 * area.width as usize + x as usize;
+            let idx = (area.width as usize) + x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].style = Styles::BOLD;
@@ -464,7 +464,7 @@ impl Widget for ThemePreviewPanel {
         let label = format!("[{}]", theme_name);
         for (i, c) in label.chars().enumerate() {
             let x = 1 + i as u16;
-            let idx = 1 * area.width as usize + x as usize;
+            let idx = (area.width as usize) + x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = theme.primary;
@@ -480,7 +480,7 @@ impl Widget for ThemePreviewPanel {
             let x = 2 + (i as u16 * 7);
             let content = format!("[{}]", text);
             for (j, c) in content.chars().enumerate() {
-                let idx = badge_row as usize * area.width as usize + x as usize + j as usize;
+                let idx = badge_row as usize * area.width as usize + x as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = *fg;
@@ -629,7 +629,7 @@ impl Widget for WidgetDemoPanel {
             let x = 2 + (i as u16 * 14);
             let content = format!("[{}]", text);
             for (j, c) in content.chars().enumerate() {
-                let idx = row1 as usize * area.width as usize + x as usize + j as usize;
+                let idx = row1 as usize * area.width as usize + x as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = *fg;

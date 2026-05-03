@@ -340,7 +340,7 @@ fn main() -> std::io::Result<()> {
             ctx.stop();
             return;
         }
-        if tick % 3 == 0 && !paused_clone.load(Ordering::SeqCst) {
+        if tick.is_multiple_of(3) && !paused_clone.load(Ordering::SeqCst) {
             theme_idx_clone.fetch_add(1, Ordering::SeqCst);
         }
     };
