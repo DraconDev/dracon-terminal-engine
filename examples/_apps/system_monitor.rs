@@ -576,7 +576,7 @@ fn main() -> std::io::Result<()> {
             } else {
                 (t.fg, Color::Reset)
             };
-            draw_text_plane(&mut proc_plane, 0, 1 + i, &line, fg, bg, is_selected);
+            draw_text_plane(&mut proc_plane, 0, 1 + i as u16, &line, fg, bg, is_selected);
         }
 
         ctx.add_plane(proc_plane);
