@@ -608,6 +608,58 @@ impl Widget for Showcase {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            let help_w = 50usize;
+            let help_h = 16usize;
+            let help_x = ((area.width as usize).saturating_sub(help_w)) / 2;
+            let help_y = ((area.height as usize).saturating_sub(help_h)) / 2;
+            
+            // Background
+            for cy in 0..help_h {
+                for cx in 0..help_w {
+                    if help_x + cx < area.width as usize && help_y + cy < area.height as usize {
+                        set_cell(&mut plane, help_x + cx, help_y + cy, ' ', t.fg, t.surface_elevated);
+                    }
+                }
+            }
+            
+            // Border
+            draw_rounded_border(&mut plane, Rect::new(help_x as u16, help_y as u16, help_w as u16, help_h as u16), t.primary, t.surface_elevated, true);
+            
+            // Title
+            let title = " Keyboard Shortcuts ";
+            let title_x = help_x + (help_w - title.len()) / 2;
+            draw_text(&mut plane, title_x, help_y + 1, title, t.primary, t.surface_elevated, true);
+            
+            // Content
+            let lines = [
+                ("↑↓←→", "Navigate cards"),
+                ("Enter", "Launch selected"),
+                ("Space", "Show details"),
+                ("/", "Focus search"),
+                ("Tab", "Cycle categories"),
+                ("t", "Cycle theme"),
+                ("q / Esc", "Quit"),
+                ("?", "Toggle this help"),
+                ("", ""),
+                ("Mouse", ""),
+                ("Click", "Select card"),
+                ("Double-click", "Launch example"),
+                ("Right-click", "Context menu"),
+                ("Scroll", "Navigate grid"),
+            ];
+            for (i, (key_text, desc)) in lines.iter().enumerate() {
+                let y = help_y + 3 + i;
+                if y < area.height as usize - 1 {
+                    if !key_text.is_empty() {
+                        draw_text(&mut plane, help_x + 3, y, key_text, t.primary, t.surface_elevated, false);
+                        draw_text(&mut plane, help_x + 18, y, desc, t.fg, t.surface_elevated, false);
+                    }
+                }
+            }
+        }
+
         plane
     }
 
