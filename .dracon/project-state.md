@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Added FPS display toggle functionality to the showcase example
+Added a live clock display to the showcase example
 
 ## Context
-This change enhances the showcase example by allowing users to toggle the FPS counter display on/off, improving visual customization and reducing clutter in the UI.
+The showcase example now needs visual indicators of time to better demonstrate terminal UI capabilities. The live clock provides a real-time reference point for users interacting with the demo.
 
 ## Completed
-- [x] Added FPS display toggle checkbox in the top-right corner
-- [x] Implemented click handling to toggle FPS visibility
-- [x] Added conditional rendering of FPS counter based on toggle state
+- [x] Added live clock display showing current time in HH:MM:SS format
+- [x] Positioned clock next to the title with proper spacing
+- [x] Added conditional rendering to prevent clock from overflowing the screen
 
 ## In Progress
-- [x] FPS toggle functionality is fully implemented and working
+- [x] Live clock implementation is complete
 
 ## Blockers
 - None identified for this specific change
 
 ## Next Steps
-1. Test the FPS toggle functionality across different screen sizes
-2. Consider adding keyboard shortcut support for the FPS toggle
+1. Verify clock display works across different terminal sizes
+2. Consider adding date display as an optional feature

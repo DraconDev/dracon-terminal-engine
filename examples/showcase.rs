@@ -18,6 +18,8 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+use chrono::Local;
+
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -358,6 +360,14 @@ impl Widget for Showcase {
             if px < area.width as usize {
                 set_cell(&mut plane, px, title_y, ch, t.primary, t.bg);
             }
+        }
+
+        // Live clock
+        let now = Local::now();
+        let clock_text = now.format("%H:%M:%S").to_string();
+        let clock_x = title_x + title_text.len() + 2;
+        if clock_x + clock_text.len() < area.width as usize - 10 {
+            draw_text(&mut plane, clock_x, title_y, &clock_text, t.fg_muted, t.bg, false);
         }
 
         // FPS counter (right-aligned)
