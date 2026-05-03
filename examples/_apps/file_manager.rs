@@ -268,6 +268,7 @@ impl FileManager {
         }
     }
 
+    #[allow(dead_code)]
     fn create_folder(&mut self, name: &str) {
         let path = self.root.path.join(name);
         if std::fs::create_dir(&path).is_ok() {
