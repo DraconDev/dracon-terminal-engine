@@ -83,27 +83,6 @@ impl Hud {
         self.visible = false;
     }
 
-    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
-        use crate::input::event::KeyEventKind;
-        if key.kind != KeyEventKind::Press {
-            return false;
-        }
-        false
-    }
-
-    fn handle_mouse(
-        &mut self,
-        _kind: crate::input::event::MouseEventKind,
-        _col: u16,
-        _row: u16,
-    ) -> bool {
-        false
-    }
-
-    fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
-    }
-
     /// Renders a text string at offset `(x, y)` with the given foreground and background colors.
     pub fn render_text(&self, x: u16, y: u16, text: &str, fg: Color, bg: Color) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);

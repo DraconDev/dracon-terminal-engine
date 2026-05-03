@@ -227,7 +227,7 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, anim_frame: u8, t: Theme) -> Plane {
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, t: Theme) -> Plane {
     let card_w = 28u16;
     let card_h = 14u16;
     let mut plane = Plane::new(0, card_w, card_h);
@@ -236,16 +236,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, anim_frame: u8
     let cat_color = category_color(t, ex.category);
 
     // Border
-    let border_fg = if is_selected {
-        match anim_frame {
-            0 => t.primary,
-            1 => t.primary_hover,
-            2 => t.secondary,
-            _ => t.primary,
-        }
-    } else {
-        t.outline
-    };
+    let border_fg = if is_selected { t.primary } else { t.outline };
     let bg = if is_selected { t.surface_elevated } else { t.surface };
     draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected);
 
@@ -372,7 +363,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.anim_frame, t);
+                let card = render_card(ex, grid_idx, self.selected, t);
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;

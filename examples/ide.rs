@@ -22,8 +22,7 @@ use dracon_terminal_engine::framework::widgets::{
     Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar,
     Toast, ToastKind, Tooltip, Tree, TreeNode,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
-use dracon_terminal_engine::widgets::editor::TextEditor;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -128,7 +127,7 @@ struct IdeApp {
 
 impl IdeApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
-        let mut tabs = vec![
+        let tabs = vec![
             EditorTab::new(0, "main.rs").with_content(
                 "use std::io;\n\nfn main() {\n    println!(\"Hello, Dracon!\");\n}\n"
             ),
