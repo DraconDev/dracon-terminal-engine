@@ -653,7 +653,6 @@ impl Widget for Showcase {
         let themes = Self::themes();
         let square_w = 2usize;
         let gap = 1usize;
-        let total_width = themes.len() * (square_w + gap);
         let max_visible = (area.width as usize).saturating_sub(4) / (square_w + gap);
         let visible_themes = max_visible.min(themes.len());
         let palette_start_x = ((area.width as usize).saturating_sub(visible_themes * (square_w + gap))) / 2;
