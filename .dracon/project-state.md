@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved theme palette visualization in showcase example by removing unused theme name variable.
+Added FPS counter to showcase example for performance monitoring
 
 ## Context
-This change was part of a series of improvements to the showcase example's theme palette visualization. The previous version was using the theme name in the iteration, but it wasn't being used in the visualization logic.
+To help developers visualize and debug rendering performance in the showcase example, we need a way to display frames-per-second metrics.
 
 ## Completed
-- [x] Removed unused theme name variable in theme palette visualization
-- [x] Updated Cargo.lock to reflect dependency version changes
+- [x] Added `fps` field to `Showcase` struct to track frame rate
+- [x] Initialized `fps` with default value of 0
 
 ## In Progress
-- [x] Ongoing work on theme palette visualization features
+- [x] Implementation of actual FPS calculation and display
 
 ## Blockers
-- None identified for this specific change
+- Need to implement the actual FPS measurement logic that updates this value
 
 ## Next Steps
-1. Continue refining theme palette visualization features
-2. Verify all theme-related documentation is up-to-date
+1. Implement FPS calculation logic that updates the cell value
+2. Add UI display for the FPS counter in the showcase example

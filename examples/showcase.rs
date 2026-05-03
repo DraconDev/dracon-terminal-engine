@@ -93,6 +93,7 @@ struct Showcase {
     cols: std::cell::Cell<usize>,
     last_click_time: Option<Instant>,
     last_click_idx: Option<usize>,
+    fps: std::cell::Cell<u64>,
 }
 
 impl Showcase {
@@ -115,6 +116,7 @@ impl Showcase {
             cols: std::cell::Cell::new(3),
             last_click_time: None,
             last_click_idx: None,
+            fps: std::cell::Cell::new(0),
         }
     }
 
