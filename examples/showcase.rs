@@ -624,41 +624,50 @@ impl Widget for Showcase {
 
         // Primitives bar
         let prim_y = 4usize;
-        let prims = [
-            ("[1] Toggle", self.primitive_toggle, "[*]" , "[ ]"),
-            ("[2] Slider", true, "", ""),
-            ("[3] Check", self.primitive_checkbox, "[x]" , "[ ]"),
-            ("[4] Radio", true, "", ""),
-            ("[5] Button", self.primitive_button, "[B]" , "[B]"),
+        let primitives: [(usize, &str); 5] = [
+            (0, ""),
+            (1, ""),
+            (2, ""),
+            (3, ""),
+            (4, ""),
         ];
-        let prim_labels = ["Toggle", "Slider", "Check", "Radio", "Button"];
-        let mut prim_x = 2usize;
-        for (i, (label, active, on_txt, off_txt)) in prims.iter().enumerate() {
-            let state_text = if i == 0 {
-                if *active { "[*] " } else { "[ ] " }
-            } else if i == 1 {
+        let prim_states: [&str; 5] = [
+            if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" },
+            {
                 let pos = (self.primitive_slider * 10.0).round() as usize;
-                let filled = (0..pos).map(|_| '=').collect::<String>();
-                let empty = (pos..10).map(|_| "-").collect::<String>();
-                &format!("[{}{}]", filled, empty)
-            } else if i == 2 {
-                if *active { "[x] " } else { "[ ] " }
-            } else if i == 3 {
-                let opts = ["(1)", "(2)", "(3)"];
+                let pos = pos.min(10);
+                let filled: String = (0..pos).map(|_| '=').collect();
+                let empty: String = (pos..10).map(|_| "-").collect();
+                let combined = format!("{}{}", filled, empty);
+                let combined: String = combined.chars().take(12).collect();
+                &*Box::leak(combined.into_boxed_str())
+            },
+            if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" },
+            {
                 let sel = self.primitive_radio;
+                let opts = ["(1)", "(2)", "(3)"];
                 let mut s = String::new();
-                for (j, o) in opts.iter().enumerate() {
+                for (j, _o) in opts.iter().enumerate() {
                     s.push_str(if j == sel { "(*)" } else { "( )" });
                 }
-                &s
-            } else if i == 4 {
-                if *active { "[CLICKED]" } else { "[ Button ]" }
-            } else {
-                label
+                &s[..]
+            },
+            if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" },
+        ];
+        let mut prim_x = 2usize;
+        for (i, state) in prim_states.iter().enumerate() {
+            let label = match i {
+                0 => "[1]",
+                1 => "[2]",
+                2 => "[3]",
+                3 => "[4]",
+                4 => "[5]",
+                _ => "",
             };
-            let fg = if i == 0 && *active || i == 2 && *active || i == 4 && *active { t.primary } else { t.fg_muted };
-            draw_text(&mut plane, prim_x, prim_y, state_text, fg, t.bg, false);
-            prim_x += state_text.len() + 3;
+            draw_text(&mut plane, prim_x, prim_y, label, t.fg_muted, t.bg, false);
+            prim_x += 4;
+            draw_text(&mut plane, prim_x, prim_y, state, t.fg, t.bg, false);
+            prim_x += state.len() + 3;
         }
 
         // Category sidebar
