@@ -87,6 +87,7 @@ struct Showcase {
     tooltip_pos: Option<(u16, u16)>,
     show_help: bool,
     modal_preview: bool,
+    show_fps: bool,
 }
 
 impl Showcase {

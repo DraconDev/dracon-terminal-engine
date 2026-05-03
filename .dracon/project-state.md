@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Added a visual pulse animation to selected cards in the showcase example
+Added FPS display toggle to the showcase example
 
 ## Context
-This change enhances the visual feedback for selected cards by adding a subtle pulsing effect to the border color, making the selection state more noticeable without being distracting.
+This change enables developers to visualize performance metrics by adding a toggleable FPS counter to the showcase example. This supports debugging and optimization work by providing real-time performance feedback.
 
 ## Completed
-- [x] Added time-based pulse animation to selected card borders
-- [x] Implemented smooth color transition between primary and primary_hover states
-- [x] Maintained existing hover and outline states for unselected cards
+- [x] Added `show_fps` boolean field to the Showcase struct to track FPS display state
 
 ## In Progress
-- [x] Visual feedback improvement for selected cards
+- [x] Implementation of actual FPS calculation and display logic (not yet in this commit)
 
 ## Blockers
-- None identified
+- Need to implement FPS calculation and rendering logic in the next commit
 
 ## Next Steps
-1. Test the animation across different themes to ensure visibility
-2. Consider adding configuration options for animation speed/duration
+1. Implement FPS calculation and display logic
+2. Add keyboard shortcut to toggle FPS display (likely 'F' key)
