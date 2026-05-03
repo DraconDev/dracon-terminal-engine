@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced system monitor example with improved input handling and display capabilities
+Added process selection and scrolling functionality to the system monitor example.
 
 ## Context
-The system monitor example was updated to support more comprehensive input handling and display features, particularly for mouse interactions and enhanced styling capabilities.
+This change enhances the system monitor's process display by allowing users to select individual processes and scroll through the process list.
 
 ## Completed
-- [x] Added support for mouse input events (MouseButton and MouseEventKind)
-- [x] Expanded terminal cell capabilities with Color and Styles imports
-- [x] Improved display functionality for system monitoring metrics
+- [x] Added `selected_process` field to track currently selected process
+- [x] Added `process_scroll_offset` field to support scrolling through process list
 
 ## In Progress
-- [x] Implementation of enhanced display features for system metrics
+- [x] Implementation of process selection and scrolling functionality
 
 ## Blockers
-- None identified in this change
+- None identified for this specific change
 
 ## Next Steps
-1. Test the enhanced input handling in the system monitor
-2. Verify the improved display capabilities with various system metrics
+1. Implement UI rendering for selected process details
+2. Add keyboard navigation for process selection and scrolling

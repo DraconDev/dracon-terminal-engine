@@ -79,6 +79,8 @@ struct SystemMonitor {
     last_disk_write: u64,
     last_net_rx: u64,
     last_net_tx: u64,
+    selected_process: Option<usize>,
+    process_scroll_offset: usize,
 }
 
 impl SystemMonitor {
@@ -115,6 +117,8 @@ impl SystemMonitor {
             last_disk_write: 0,
             last_net_rx: 0,
             last_net_tx: 0,
+            selected_process: None,
+            process_scroll_offset: 0,
         }
     }
 
