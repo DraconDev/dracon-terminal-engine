@@ -527,7 +527,7 @@ impl Widget for Showcase {
                     self.apply_filter();
                     true
                 }
-                KeyCode::Down | KeyCode::Char('j') => {
+                KeyCode::Down => {
                     if self.selected + 1 < self.filtered.len() {
                         self.selected += 1;
                     } else if !self.filtered.is_empty() {
@@ -535,7 +535,7 @@ impl Widget for Showcase {
                     }
                     true
                 }
-                KeyCode::Up | KeyCode::Char('k') => {
+                KeyCode::Up => {
                     if self.selected > 0 {
                         self.selected -= 1;
                     } else if !self.filtered.is_empty() {
@@ -543,14 +543,14 @@ impl Widget for Showcase {
                     }
                     true
                 }
-                KeyCode::Right | KeyCode::Char('l') => {
+                KeyCode::Right => {
                     let cols = self.cols.get().max(1);
                     if !self.filtered.is_empty() {
                         self.selected = (self.selected + cols) % self.filtered.len();
                     }
                     true
                 }
-                KeyCode::Left | KeyCode::Char('h') => {
+                KeyCode::Left => {
                     let cols = self.cols.get().max(1);
                     if !self.filtered.is_empty() {
                         self.selected = (self.selected + self.filtered.len() - cols % self.filtered.len()) % self.filtered.len();
