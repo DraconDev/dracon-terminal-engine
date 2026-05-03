@@ -144,6 +144,27 @@ Uses `ScopedZoneRegistry` for all mouse dispatch:
 - Falls back to simulated data on non-Linux
 - Uses `Rc<RefCell<SystemMonitor>>` + `InputRouter` pattern for tick-driven updates
 
+### IDE (`examples/ide.rs`)
+- Uses `CommandPalette` widget (Ctrl+P) as a command overlay with filtering
+- `Rc<RefCell<Option<String>>>` bridge pattern: callback stores command ID, app checks bridge after keyboard/mouse dispatch
+- Command palette rendered as overlay (section 11), blits non-transparent cells at absolute positions
+- Handles all palette keyboard (↑/↓/Enter/Esc/type-to-filter) and mouse events when visible
+- Commands: new-tab, open, save, close-tab, search, cut/copy/paste, cycle-theme, toggle-profiler, show-shortcuts, about
+
+## CommandPalette Widget (`src/framework/widgets/command_palette.rs`)
+
+A filterable command overlay widget:
+- `CommandItem { id, name, category }` — command definition
+- `CommandPalette::new(commands)` — create with command list
+- `.with_size(w, h)` — set overlay dimensions
+- `.with_theme(theme)` — set visual theme
+- `.on_execute(cb)` — callback when a command is selected
+- `.show()` / `.hide()` / `.is_visible()` — visibility control
+- Keyboard: ↑/↓ navigate, Enter execute, Esc dismiss, type to filter by name or category
+- Mouse: click items to execute, click outside to dismiss, scroll wheel for list scrolling
+- Uses `ScopedZoneRegistry<usize>` for mouse dispatch (click outside detection, item clicks)
+- Renders with semi-transparent backdrop
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:
