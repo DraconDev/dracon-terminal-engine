@@ -91,7 +91,6 @@ struct Showcase {
     mouse_pos: Option<(u16, u16)>,
     context_menu: Option<(usize, u16, u16)>,
     context_menu_selected: usize,
-    primitives_hovered: Option<usize>,
     tooltip_text: Option<String>,
     tooltip_timer: Option<Instant>,
     tooltip_pos: Option<(u16, u16)>,
@@ -133,7 +132,6 @@ impl Showcase {
             mouse_pos: None,
             context_menu: None,
             context_menu_selected: 0,
-            primitives_hovered: None,
             tooltip_text: None,
             tooltip_timer: None,
             tooltip_pos: None,
@@ -859,11 +857,26 @@ impl Widget for Showcase {
             let total_w = key.len() + 1 + state.len();
             prim_hit_starts[i] = prim_x;
             prim_hit_ends[i] = prim_x + total_w;
-            draw_text(&mut plane, prim_x, prim_y, key, t.fg_muted, t.bg, false);
+            prim_x += total_w + 3;
+        }
+        let hovered_idx = self.mouse_pos
+            .filter(|(_, py)| *py as usize == prim_y)
+            .and_then(|(px, _)| {
+                let mx = px as usize;
+                prim_hit_starts.iter().zip(prim_hit_ends.iter())
+                    .position(|(start, end)| mx >= *start && mx < *end)
+            });
+        prim_x = 2usize;
+        for (i, (key, state)) in prim_controls.iter().enumerate() {
+            let total_w = key.len() + 1 + state.len();
+            let hovered = hovered_idx == Some(i);
+            let key_fg = if hovered { t.primary } else { t.fg_muted };
+            let state_fg = if hovered { t.primary } else { t.fg };
+            draw_text(&mut plane, prim_x, prim_y, key, key_fg, t.bg, false);
             prim_x += key.len();
             draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
             prim_x += 1;
-            draw_text(&mut plane, prim_x, prim_y, state, t.fg, t.bg, false);
+            draw_text(&mut plane, prim_x, prim_y, state, state_fg, t.bg, false);
             prim_x += state.len() + 3;
         }
 
