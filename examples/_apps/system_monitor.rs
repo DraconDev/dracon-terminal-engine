@@ -296,12 +296,12 @@ impl SystemMonitor {
                         if rest.len() >= 3 {
                             let utime: u64 = rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
                             let stime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
-                            let state = rest.get(0).unwrap_or(&"?");
+                            let _state = rest.get(0).unwrap_or(&"?");
 
                             let cpu_usage = (utime + stime) as f32 / 100.0;
 
                             let proc_stat = format!("/proc/{}/status", pid);
-                            let mem_kb: f32 = fs::read_to_string(&proc_stat)
+                            let _mem_kb: f32 = fs::read_to_string(&proc_stat)
                                 .ok()
                                 .and_then(|c| {
                                     c.lines()
