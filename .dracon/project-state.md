@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Improve initial focus handling in the showcase example by explicitly setting focus on the main widget.
 
 ## Context
-This change was prompted by recent refactoring and feature additions in the showcase example, which required updates to the project's dependencies.
+The showcase example now needs to properly handle keyboard navigation from the start, ensuring users can immediately interact with the showcase widget without additional steps.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Added explicit focus setting on the showcase widget after adding it to the app
+- [x] Ensured keyboard navigation works immediately upon application start
 
 ## In Progress
-- [x] No active work in progress beyond the Cargo.lock update
+- [x] Testing keyboard navigation behavior with the newly set focus
 
 ## Blockers
-- None identified
+- None identified at this stage
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Continue with ongoing showcase example improvements
-```
+1. Verify consistent focus behavior across different terminal sizes
+2. Document the focus management pattern for other widget implementations
