@@ -588,7 +588,22 @@ impl Widget for Showcase {
                     let row_idx = gy / (card_h + 1);
                     let card_idx = row_idx * self.cols.get() + col_idx;
                     if card_idx < self.filtered.len() {
-                        self.selected = card_idx;
+                        let now = Instant::now();
+                        let is_double_click = self.last_click_time
+                            .zip(self.last_click_idx)
+                            .map(|(time, idx)| {
+                                idx == card_idx && now.duration_since(time).as_millis() < 300
+                            })
+                            .unwrap_or(false);
+
+                        if is_double_click {
+                            self.selected = card_idx;
+                            self.launch_selected();
+                        } else {
+                            self.selected = card_idx;
+                        }
+                        self.last_click_time = Some(now);
+                        self.last_click_idx = Some(card_idx);
                         return true;
                     }
                 }
