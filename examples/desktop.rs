@@ -315,7 +315,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // 2. Windows
         for (i, win) in windows.iter().enumerate() {
             if win.minimized { continue; }
-            let z_label = format!("[z:{}]", i + 1);
+            let _z_label = format!("[z:{}]", i + 1);
             let mut p = Plane::new(i + 1, win.width, win.height);
             p.set_absolute_position(win.x, win.y);
             p.set_z_index((i + 10) as i32);
