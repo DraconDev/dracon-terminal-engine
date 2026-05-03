@@ -356,7 +356,9 @@ impl App {
                                     Event::Resize(w, h) => {
                                         self.compositor.resize(*w, *h);
                                         self.dirty_tracker.mark_all_dirty();
+                                        let rect = Rect::new(0, 0, *w, *h);
                                         for w in self.widgets.borrow_mut().iter_mut() {
+                                            w.set_area(rect);
                                             w.mark_dirty();
                                         }
                                     }

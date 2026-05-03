@@ -1,14 +1,14 @@
 # Project State
 
 ## Current Focus
-Improve widget area management in the framework by ensuring all widgets are resized to the full terminal area.
+Ensure all widgets are resized to match the new window dimensions when the window is resized.
 
 ## Context
-The terminal window size detection was already being used to resize the compositor and mark all widgets as dirty. This change ensures that each widget's area is explicitly set to the full terminal dimensions, which is necessary for proper rendering.
+The framework needs to properly handle window resizing events to maintain consistent widget layouts. The previous implementation only marked widgets as dirty but didn't update their areas.
 
 ## Completed
-- [x] Added explicit area setting for all widgets when terminal size changes
-- [x] Created a full terminal-sized `Rect` for widget area assignment
+- [x] Added creation of a new `Rect` with the updated window dimensions
+- [x] Updated all widgets to use the new window dimensions via `set_area()`
 
 ## In Progress
 - [ ] No active work in progress
@@ -17,5 +17,5 @@ The terminal window size detection was already being used to resize the composit
 - None identified
 
 ## Next Steps
-1. Verify that all widgets now properly handle the full terminal area
-2. Test edge cases with different terminal sizes
+1. Verify the resizing behavior in all example applications
+2. Consider adding performance optimizations for large widget trees
