@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added dynamic card width parameter to showcase preview rendering functions
+Added dynamic card width parameter to scroll preview rendering function
 
 ## Context
-This change implements a feature to support dynamic card sizing across different showcase preview components, maintaining consistent layout behavior.
+This change enables dynamic sizing of showcase cards by passing the card width as a parameter, improving the showcase's responsiveness to different display sizes.
 
 ## Completed
-- [x] Added `card_w` parameter to `render_theme_preview` function
-- [x] Added `card_w` parameter to `render_widget_preview` function
-- [x] Added `card_w` parameter to `render_command_preview` function
+- [x] Added `card_w` parameter to `render_scroll_preview` function
+- [x] Updated function signature to include dynamic width parameter
 
 ## In Progress
-- [ ] Testing dynamic sizing behavior across all showcase components
+- [ ] None
 
 ## Blockers
-- Need to verify consistent rendering across all preview components
+- None
 
 ## Next Steps
-1. Test dynamic sizing behavior in showcase examples
-2. Document the new dynamic sizing API in showcase documentation
+1. Verify visual consistency across different card widths
+2. Update related showcase components to utilize the new parameter

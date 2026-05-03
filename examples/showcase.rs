@@ -469,7 +469,7 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     draw_text(plane, 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
 }
 
-fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let lines = [
         "  line 0  ▸ active",
         "  line 1",
