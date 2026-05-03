@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced showcase card rendering with dynamic sizing and improved animation handling
+Enhanced showcase card rendering with dynamic sizing and improved animation
 
 ## Context
-The showcase example was updated to support dynamic card width calculations, which improves the visual presentation of live gauge previews in the UI.
+The showcase example was updated to support dynamic card sizing while maintaining animation effects. This aligns with recent documentation enhancements for the file manager and command palette.
 
 ## Completed
-- [x] Added `card_w` parameter to `render_live_gauge_preview` to enable dynamic width calculations
-- [x] Updated gauge rendering to respect the new width parameter
+- [x] Added `card_w` parameter to `render_split_preview` to enable dynamic sizing
+- [x] Maintained existing animation behavior while adding new sizing capability
 
 ## In Progress
-- [x] Testing visual consistency across different screen sizes
+- [x] Testing integration with other showcase components
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify visual consistency across all supported platforms
-2. Document the new dynamic sizing feature in the showcase documentation
+1. Verify dynamic sizing works with all showcase components
+2. Document the new parameter in showcase examples

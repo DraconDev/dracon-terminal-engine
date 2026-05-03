@@ -390,7 +390,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u1
     }
 }
 
-fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let split_x = (4.0 + (phase * 0.5).sin() * 3.0).round() as usize;
     let split_x = split_x.min(25);
     let w = 26;
