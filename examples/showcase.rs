@@ -1029,8 +1029,10 @@ impl Widget for Showcase {
 
                     // Menu items
                     for (i, item) in menu_items.iter().enumerate() {
-                        let fg = if i == 0 { t.primary } else { t.fg };
-                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, t.surface_elevated, false);
+                        let selected = i == self.context_menu_selected;
+                        let fg = if selected { t.bg } else if i == 0 { t.primary } else { t.fg };
+                        let bg = if selected { t.primary } else { t.surface_elevated };
+                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, bg, false);
                     }
                 }
             }
