@@ -86,9 +86,6 @@ struct IdeApp {
     // File tree
     file_tree: Tree,
 
-    // Editor
-    editor_content: String,
-
     // Search
     show_search: bool,
     search_input: SearchInput,
