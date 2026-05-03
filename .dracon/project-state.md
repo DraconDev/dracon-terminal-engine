@@ -1,20 +1,24 @@
 # Project State
 
 ## Current Focus
-Refactor column count tracking in the showcase example to use a getter method.
+Refactored theme management in the showcase example to use a direct `Theme` field instead of an index.
 
 ## Context
-The showcase example was recently enhanced with column count tracking for better widget layout. This change refactors how the column count is accessed to ensure proper synchronization and avoid potential race conditions.
+The previous implementation used a `theme_idx` to select from a list of themes, which required modulo arithmetic to handle bounds. This was replaced with a direct `Theme` field to simplify theme handling and remove the need for index-based lookups.
 
 ## Completed
-- [x] Refactored column count access to use a getter method (`self.cols.get()`) instead of direct access
+- [x] Replaced `theme_idx` with direct `Theme` field in `Showcase` struct
+- [x] Updated initialization to use `Theme::nord()` as default
+- [x] Removed `current_theme()` helper method
+- [x] Updated theme rendering to use the direct `Theme` field
+- [x] Added `on_theme_change` method for theme updates
 
 ## In Progress
-- [x] No active work in progress beyond this refactor
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify the refactor doesn't introduce layout issues in the showcase example
-2. Consider additional refactoring opportunities in the widget area management
+1. Verify theme switching functionality works as expected
+2. Consider adding more theme options or theme switching UI controls

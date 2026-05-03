@@ -84,7 +84,7 @@ struct Showcase {
     category_filter: Option<&'static str>,
     search_query: String,
     search_active: bool,
-    theme_idx: usize,
+    theme: Theme,
     should_quit: Arc<AtomicBool>,
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
@@ -103,7 +103,7 @@ impl Showcase {
             category_filter: None,
             search_query: String::new(),
             search_active: false,
-            theme_idx: 0,
+            theme: Theme::nord(),
             should_quit,
             pending_binary: pending,
             status_message: None,
@@ -114,10 +114,6 @@ impl Showcase {
 
     fn themes() -> Vec<Theme> {
         vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::gruvbox_dark(), Theme::tokyo_night()]
-    }
-
-    fn current_theme(&self) -> Theme {
-        Self::themes()[self.theme_idx % Self::themes().len()]
     }
 
     fn apply_filter(&mut self) {
@@ -298,9 +294,13 @@ impl Widget for Showcase {
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool { true }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.current_theme();
+        let t = self.theme;
 
         // Background fill
         for cell in plane.cells.iter_mut() {
