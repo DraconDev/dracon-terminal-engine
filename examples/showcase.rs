@@ -940,8 +940,9 @@ impl Widget for Showcase {
                 "tools" => ("◦", " TOOLS "),
                 _ => ("•", *cat),
             };
-            draw_text(&mut plane, 1, cat_y, icon, if is_active { t.primary } else { t.fg_muted }, bg_cat, is_active);
-            draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active);
+            let icon_fg = if is_hovered { t.primary } else if is_active { t.primary } else { t.fg_muted };
+            draw_text(&mut plane, 1, cat_y, icon, icon_fg, bg_cat, is_active || is_hovered);
+            draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active || is_hovered);
             // Register zone for this category
             let mut zones = self.zones.borrow_mut();
             zones.register(CAT_BASE + i, 0, cat_y as u16, sidebar_w as u16, 1);
