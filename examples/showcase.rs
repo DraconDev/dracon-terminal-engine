@@ -502,26 +502,34 @@ impl Widget for Showcase {
                 KeyCode::Down | KeyCode::Char('j') => {
                     if self.selected + 1 < self.filtered.len() {
                         self.selected += 1;
+                    } else if !self.filtered.is_empty() {
+                        self.selected = 0;
                     }
                     true
                 }
                 KeyCode::Up | KeyCode::Char('k') => {
                     if self.selected > 0 {
                         self.selected -= 1;
+                    } else if !self.filtered.is_empty() {
+                        self.selected = self.filtered.len() - 1;
                     }
                     true
                 }
                 KeyCode::Right | KeyCode::Char('l') => {
                     let cols = self.cols.get().max(1);
-                    if self.selected + cols < self.filtered.len() {
+                    if self.filtered.is_empty() {
+                        true
+                    } else if self.selected + cols < self.filtered.len() {
                         self.selected += cols;
+                    } else {
+                        self.selected = (self.selected + cols) % self.filtered.len();
                     }
                     true
                 }
                 KeyCode::Left | KeyCode::Char('h') => {
                     let cols = self.cols.get().max(1);
-                    if self.selected >= cols {
-                        self.selected -= cols;
+                    if !self.filtered.is_empty() {
+                        self.selected = (self.selected + self.filtered.len() - cols % self.filtered.len()) % self.filtered.len();
                     }
                     true
                 }
