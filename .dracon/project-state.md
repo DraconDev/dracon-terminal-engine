@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added mouse interaction support for the Git TUI example.
 
 ## Context
-This is an automated dependency version update triggered by Cargo's version resolution process. It maintains project compatibility with updated dependencies without functional changes to the application code.
+This change enables mouse interactions in the Git TUI example, building on previous work to add process selection and scrolling functionality.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Added mouse event handling for Git TUI interactions
+- [x] Imported necessary mouse-related types (MouseButton, MouseEventKind)
 
 ## In Progress
-- [x] Dependency version synchronization
+- [x] Mouse interaction support for Git TUI
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify no breaking changes in updated dependencies
-2. Prepare for potential integration testing if new versions introduce changes
+1. Implement mouse-driven navigation in Git TUI
+2. Add visual feedback for mouse interactions
