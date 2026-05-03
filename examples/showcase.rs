@@ -258,15 +258,15 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, t: Theme) -> P
 
     // Description
     let desc_y = 4usize;
-    let desc = if ex.description.len() > 24 { &ex.description[..24] } else { ex.description };
-    draw_text(&mut plane, 2, desc_y, desc, t.fg_muted, bg, false);
+    let desc: String = ex.description.chars().take(24).collect();
+    draw_text(&mut plane, 2, desc_y, &desc, t.fg_muted, bg, false);
 
     // Preview (mini ASCII art)
     for (i, line) in ex.preview.iter().enumerate() {
         let py = 6 + i;
         if py < card_h as usize - 1 {
-            let preview_line = if line.len() > 24 { &line[..24] } else { line };
-            draw_text(&mut plane, 2, py, preview_line, t.fg_subtle, bg, false);
+            let preview_line: String = line.chars().take(24).collect();
+            draw_text(&mut plane, 2, py, &preview_line, t.fg_subtle, bg, false);
         }
     }
 
@@ -308,7 +308,7 @@ impl Widget for Showcase {
         // Title bar with decorative border
         let title_text = " Dracon Terminal Engine ";
         let title_x = ((area.width as usize).saturating_sub(title_text.len())) / 2;
-        let title_y = 1usize;
+        let title_y = 0usize;
 
         for (i, ch) in title_text.chars().enumerate() {
             let px = title_x + i;
@@ -317,14 +317,8 @@ impl Widget for Showcase {
             }
         }
 
-        // Subtle separator line
-        let sep_y = 2usize;
-        for x in 2..area.width as usize - 2 {
-            set_cell(&mut plane, x, sep_y, '─', t.outline, t.bg);
-        }
-
         // Stats bar
-        let stats_y = 3usize;
+        let stats_y = 1usize;
         let stats_text = format!(
             " {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
@@ -338,7 +332,7 @@ impl Widget for Showcase {
         }
 
         // Search bar with icon
-        let search_y = 6usize;
+        let search_y = 2usize;
         let search_icon = if self.search_active { "▶" } else { "🔍" };
         let search_prompt = if self.search_active { ">" } else { " " };
         let search_text = format!("{} {} [ {} ]", search_icon, search_prompt, self.search_query);
