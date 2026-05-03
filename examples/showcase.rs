@@ -14,7 +14,7 @@
 //!   q — quit
 
 use std::io::Read;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -93,11 +93,11 @@ struct Showcase {
     cols: std::cell::Cell<usize>,
     last_click_time: Option<Instant>,
     last_click_idx: Option<usize>,
-    fps: std::cell::Cell<u64>,
+    fps: Arc<AtomicU64>,
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, fps: Arc<AtomicU64>) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -116,7 +116,7 @@ impl Showcase {
             cols: std::cell::Cell::new(3),
             last_click_time: None,
             last_click_idx: None,
-            fps: std::cell::Cell::new(0),
+            fps,
         }
     }
 
@@ -349,7 +349,7 @@ impl Widget for Showcase {
         }
 
         // FPS counter (right-aligned)
-        let fps_val = self.fps.get();
+        let fps_val = self.fps.load(Ordering::Relaxed);
         let fps_text = format!("{} FPS", fps_val);
         let fps_x = area.width as usize - fps_text.len() - 2;
         if fps_x > title_x + title_text.len() {
@@ -720,8 +720,10 @@ fn main() -> std::io::Result<()> {
     let pending = Arc::new(Mutex::new(None));
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let fps_counter = Arc::new(AtomicU64::new(0));
+    let fps_for_tick = Arc::clone(&fps_counter);
 
-    let showcase = Showcase::new(should_quit, pending.clone());
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter);
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
@@ -731,6 +733,9 @@ fn main() -> std::io::Result<()> {
             ctx.stop();
             return;
         }
+
+        // Compute and store FPS
+        fps_for_tick.store(ctx.fps(), Ordering::Relaxed);
 
         // Handle pending binary launch
         if let Some(binary_name) = pending.lock().unwrap().take() {

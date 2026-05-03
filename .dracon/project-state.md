@@ -4,19 +4,19 @@
 Added FPS counter to showcase example for performance monitoring
 
 ## Context
-This change enhances the showcase example by adding a real-time FPS counter to help monitor and demonstrate the terminal engine's performance capabilities.
+The showcase example needed a way to monitor rendering performance. This change adds a visible FPS counter to help developers and users understand the application's rendering performance.
 
 ## Completed
-- [x] Added right-aligned FPS counter display in the title bar area
-- [x] Implemented dynamic FPS value retrieval and formatting
-- [x] Added conditional rendering to prevent overlap with title text
+- [x] Added `AtomicU64` for thread-safe FPS counter
+- [x] Implemented FPS calculation and display in the UI
+- [x] Integrated FPS counter with the main application loop
 
 ## In Progress
-- [x] FPS counter implementation and display logic
+- [x] FPS counter implementation and display
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify FPS counter accuracy across different terminal configurations
-2. Consider adding performance metrics for other showcase features
+1. Verify FPS counter accuracy across different systems
+2. Consider adding performance thresholds for warning states
