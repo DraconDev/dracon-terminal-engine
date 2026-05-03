@@ -559,7 +559,7 @@ impl Widget for Showcase {
                     let gy = y - grid_start_y;
                     let col_idx = gx / (card_w + 2);
                     let row_idx = gy / (card_h + 1);
-                    let card_idx = row_idx * self.cols + col_idx;
+                    let card_idx = row_idx * self.cols.get() + col_idx;
                     if card_idx < self.filtered.len() {
                         self.selected = card_idx;
                         return true;
