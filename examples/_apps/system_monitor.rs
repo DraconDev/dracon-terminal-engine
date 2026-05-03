@@ -431,6 +431,7 @@ impl Widget for InputRouter {
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool { true }
     fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
@@ -450,6 +451,49 @@ impl Widget for InputRouter {
             KeyCode::Char('q') => { std::process::exit(0); }
             _ => false,
         }
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let mut m = self.monitor.borrow_mut();
+        let gaiges_h = 6u16;
+        let (w, h) = (self.area.get().width, self.area.get().height);
+
+        // Process list area: left half, below gauges
+        if col < w / 2 && row >= gauges_h && row < h.saturating_sub(2) {
+            let proc_row = (row - gauges_h) as usize;
+            match kind {
+                MouseEventKind::Down(MouseButton::Left) => {
+                    let visible_count = (h.saturating_sub(gauges_h + 2)) as usize;
+                    let idx = m.process_scroll_offset + proc_row;
+                    if idx < m.stats.processes.len() {
+                        m.selected_process = if m.selected_process == Some(idx) { None } else { Some(idx) };
+                        return true;
+                    }
+                }
+                MouseEventKind::ScrollDown => {
+                    let max_scroll = m.stats.processes.len().saturating_sub(1);
+                    if m.process_scroll_offset < max_scroll {
+                        m.process_scroll_offset += 1;
+                    }
+                    return true;
+                }
+                MouseEventKind::ScrollUp => {
+                    if m.process_scroll_offset > 0 {
+                        m.process_scroll_offset -= 1;
+                    }
+                    return true;
+                }
+                _ => {}
+            }
+        }
+        // Click on right half clears selection
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            if col >= w / 2 {
+                m.selected_process = None;
+                return true;
+            }
+        }
+        false
     }
 }
 
