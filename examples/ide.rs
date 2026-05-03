@@ -281,7 +281,7 @@ fn build_sample_tree() -> Tree {
             TreeNode { label: "README.md".into(), expanded: false, children: vec![] },
         ],
     };
-    let mut tree = Tree::new(WidgetId::new(10)).with_root(vec![root]).with_theme(Theme::default());
+    let tree = Tree::new(WidgetId::new(10)).with_root(vec![root]).with_theme(Theme::default());
     tree
 }
 
