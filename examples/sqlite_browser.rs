@@ -122,7 +122,7 @@ impl SqliteBrowser {
         // Create a temporary mock database
         let mock_db = format!("/tmp/dracon_mock_{}.db", std::process::id());
         let _ = Command::new("sqlite3")
-            .args([&mock_db, "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, role TEXT);"])
+            .args([mock_db.clone(), "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, role TEXT);".to_string()])
             .output();
 
         let inserts = [
@@ -133,11 +133,12 @@ impl SqliteBrowser {
             "INSERT INTO users VALUES (5, 'Eve', 'eve@example.com', 'user');",
         ];
         for insert in &inserts {
-            let _ = Command::new("sqlite3").args([&mock_db, insert]).output();
+            let args: Vec<String> = vec![mock_db.clone(), insert.to_string()];
+            let _ = Command::new("sqlite3").args(&args).output();
         }
 
         let _ = Command::new("sqlite3")
-            .args([&mock_db, "CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, title TEXT, author TEXT, views INTEGER);"])
+            .args([mock_db.clone(), "CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, title TEXT, author TEXT, views INTEGER);".to_string()])
             .output();
 
         let post_inserts = [
@@ -146,7 +147,8 @@ impl SqliteBrowser {
             "INSERT INTO posts VALUES (3, 'TUI Design', 'Charlie', 234);",
         ];
         for insert in &post_inserts {
-            let _ = Command::new("sqlite3").args([&mock_db, insert]).output();
+            let args: Vec<String> = vec![mock_db.clone(), insert.to_string()];
+            let _ = Command::new("sqlite3").args(&args).output();
         }
 
         self.toast("Using mock database (sqlite3 not available)", ToastKind::Warning);
