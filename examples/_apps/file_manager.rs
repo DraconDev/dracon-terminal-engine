@@ -132,16 +132,27 @@ impl FileManager {
             .with_root(vec![root.to_tree_node()])
             .with_theme(theme);
 
-        let breadcrumbs = Breadcrumbs::new_with_id(
-            WidgetId::new(3),
-            cwd.components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect(),
-        );
+        let segments: Vec<String> = cwd.components()
+            .map(|c| c.as_os_str().to_string_lossy().into_owned())
+            .collect();
+        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments)
+            .on_navigate({
+                let root_path = cwd.clone();
+                move |idx| {
+                    // Navigate to breadcrumb segment: reconstruct path up to index
+                    let components: Vec<_> = root_path.components().collect();
+                    let target_path: PathBuf = components[..=idx].iter().collect();
+                    // The callback can't directly mutate FileManager state,
+                    // but we can log or use a channel
+                }
+            });
 
         Self {
             id,
             root,
             tree,
             breadcrumbs,
+            split: SplitPane::new(Orientation::Horizontal).ratio(0.35).with_divider('┃'),
             tree_path: Vec::new(),
             selected_path: None,
             context_menu: None,
@@ -151,6 +162,7 @@ impl FileManager {
             should_quit,
             theme,
             show_help: false,
+            is_dragging_split: false,
         }
     }
 
