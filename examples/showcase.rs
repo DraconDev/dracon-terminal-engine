@@ -133,6 +133,7 @@ impl Showcase {
             mouse_pos: None,
             context_menu: None,
             context_menu_selected: 0,
+            primitives_hovered: None,
             tooltip_text: None,
             tooltip_timer: None,
             tooltip_pos: None,
