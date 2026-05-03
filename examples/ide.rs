@@ -583,7 +583,7 @@ impl IdeApp {
         }
     }
 
-    fn render_editor(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab: &EditorTab, t: Theme) {
+    fn render_editor(&self, plane: &mut Plane, x: u16, y: u16, _w: u16, _h: u16, tab: &EditorTab, t: Theme) {
         let lines: Vec<&str> = tab.content.lines().collect();
         let line_num_width = lines.len().to_string().len().max(2) as u16;
 
