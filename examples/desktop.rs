@@ -228,6 +228,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // 2. Windows
         for (i, win) in windows.iter().enumerate() {
+            if win.minimized { continue; }
+            let z_label = format!("[z:{}]", i + 1);
             let mut p = Plane::new(i + 1, win.width, win.height);
             p.set_absolute_position(win.x, win.y);
             p.set_z_index((i + 10) as i32);
@@ -247,24 +249,46 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Reset;
                     }
 
-                    if header
-                        && wx > 1 && wx < win.title.len() as u16 + 2 {
-                            c.char = win.title.chars().nth((wx - 2) as usize).unwrap_or(' ');
+                    if header && wx > 1 && wx < win.title.len() as u16 + 2 {
+                        c.char = win.title.chars().nth((wx - 2) as usize).unwrap_or(' ');
+                        c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
+                        c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                    }
+                    // Z-order label on right side of title bar
+                    if header && wx > win.width.saturating_sub(z_label.len() as u16 + 1) {
+                        let label_idx = wx - (win.width - z_label.len() as u16);
+                        if let Some(ch) = z_label.chars().nth(label_idx as usize) {
+                            c.char = ch;
                             c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
-                            c.bg =
-                                dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                            c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
+                    }
                     p.put_cell(wx, wy, c);
                 }
             }
             compositor.add_plane(p);
         }
 
-        // 3. Taskbar (Bottom)
-        let mut taskbar = Plane::new(999, size.0, 1);
-        taskbar.set_absolute_position(0, size.1 - 1);
-        taskbar.set_z_index(2000);
-        let status = " [Start]  Dracon Terminal v1.0 | Press 'q' to Shutdown";
+        // 3. Taskbar (Bottom) with clock
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap();
+        let secs = now.as_secs() % 86400;
+        let hours = secs / 3600;
+        let mins = (secs % 3600) / 60;
+        let clock = format!("{:02}:{:02}", hours, mins);
+        let status = format!(" [Start]  Dracon Desktop  |  {}  | q: quit  |  Minimized:", clock);
+        let mut minimized_labels = String::new();
+        for (idx, win) in windows.iter().enumerate() {
+            if win.minimized {
+                minimized_labels.push_str(&format!(" [{}]", &win.title.trim()));
+            }
+        }
+        let full_status = if minimized_labels.is_empty() {
+            status
+        } else {
+            format!("{} {}", &status[..status.len().min(size.0 as usize - minimized_labels.len() as usize - 2)], minimized_labels)
+        };
         for (i, c) in status.chars().enumerate() {
             let cell = Cell {
                         char: c,

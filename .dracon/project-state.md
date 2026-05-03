@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Removed unused mouse event types from the desktop example
+Enhanced window management UI with z-order indicators and taskbar clock
 
 ## Context
-The desktop example was using mouse event types that weren't actually needed for the current functionality. Cleaning up unused imports improves code clarity and reduces potential confusion for future maintainers.
+This change improves the desktop example by adding visual indicators for window z-order and a functional taskbar with clock display. It follows the recent window minimization feature implementation.
 
 ## Completed
-- [x] Removed unused `MouseButton` and `MouseEventKind` imports from the desktop example
+- [x] Added z-order indicators in window title bars
+- [x] Implemented taskbar with system time display
+- [x] Added minimized window indicators in taskbar
+- [x] Improved window rendering logic for minimized states
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None (all changes are complete)
 
 ## Blockers
-- None
+- None (feature is fully implemented)
 
 ## Next Steps
-1. Review other examples for similar unused imports
-2. Consider adding a lint rule to catch unused imports automatically
+1. Test window interaction with new indicators
+2. Verify taskbar behavior with different screen sizes
