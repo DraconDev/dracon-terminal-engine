@@ -356,7 +356,7 @@ impl Widget for GitTui {
 }
 
 impl GitTui {
-    fn render_status(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+    fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
         let header = "Status";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
