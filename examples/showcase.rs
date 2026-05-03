@@ -591,6 +591,7 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64) {
     }
 }
 
+#[allow(dead_code)]
 fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let wins = [
         (2, 7, 14, 5, t.primary, "z:3"),

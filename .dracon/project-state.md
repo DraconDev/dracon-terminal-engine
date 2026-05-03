@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added a new preview function for z-index visualization in the showcase example.
 
 ## Context
-This change was prompted by recent documentation improvements and feature additions across the project, particularly in the file manager and showcase examples.
+This change prepares for a future feature that will demonstrate z-index handling in the UI, likely for showcasing window layering or depth management.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `render_zindex_preview` function with basic window rendering setup
+- [x] Marked function as `#[allow(dead_code)]` since it's not yet used
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [ ] Implementation of actual z-index visualization logic
 
 ## Blockers
-- None reported
+- No immediate blockers - this is preparatory work
 
 ## Next Steps
-1. Continue with ongoing documentation and feature development
-2. Monitor for any additional dependency updates required by other changes
+1. Implement the actual z-index visualization logic
+2. Integrate the preview into the showcase example's sidebar navigation
