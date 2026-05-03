@@ -18,8 +18,8 @@ use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, ContextAction, ContextMenu, MenuBar, MenuEntry, MenuItem,
-    Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar,
+    Breadcrumbs, CommandItem, CommandPalette, ContextAction, ContextMenu, MenuBar, MenuEntry,
+    MenuItem, Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar,
     Toast, ToastKind, Tooltip, Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
