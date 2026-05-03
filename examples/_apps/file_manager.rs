@@ -373,11 +373,9 @@ impl Widget for FileManager {
                             draw_text(&mut plane, dx, meta_y, &format!("Modified: {}", time), t.fg_muted, t.surface_elevated, false);
                             meta_y += 1;
                         }
-                        if let Ok(permissions) = meta.permissions().mode() {
-                            let perms = format_permissions(permissions);
-                            draw_text(&mut plane, dx, meta_y, &format!("Permissions: {}", perms), t.fg_muted, t.surface_elevated, false);
-                            meta_y += 1;
-                        }
+                        let perms = format_permissions(meta.permissions().mode());
+                        draw_text(&mut plane, dx, meta_y, &format!("Permissions: {}", perms), t.fg_muted, t.surface_elevated, false);
+                        meta_y += 1;
                     }
 
                     // File preview for text files
