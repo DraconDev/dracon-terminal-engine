@@ -91,6 +91,8 @@ struct Showcase {
     status_message: Option<(String, Instant)>,
     area: Rect,
     cols: std::cell::Cell<usize>,
+    last_click_time: Option<Instant>,
+    last_click_idx: Option<usize>,
 }
 
 impl Showcase {
@@ -111,6 +113,8 @@ impl Showcase {
             status_message: None,
             area: Rect::new(0, 0, 80, 24),
             cols: std::cell::Cell::new(3),
+            last_click_time: None,
+            last_click_idx: None,
         }
     }
 
@@ -467,8 +471,11 @@ impl Widget for Showcase {
             match key.code {
                 KeyCode::Esc => {
                     self.search_active = false;
-                    self.search_query.clear();
-                    self.apply_filter();
+                    true
+                }
+                KeyCode::Enter => {
+                    self.search_active = false;
+                    self.launch_selected();
                     true
                 }
                 KeyCode::Backspace => {

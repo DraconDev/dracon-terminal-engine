@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced search bar interaction in the showcase example with cursor visibility and improved visual feedback
+Added click tracking to showcase example for potential double-click detection
 
 ## Context
-The search bar in the showcase example needed better visual feedback during active input. The previous implementation showed a static icon and prompt, making it unclear when typing was active.
+To improve user interaction in the showcase example, we need to track mouse click events to potentially implement double-click detection for widget launching.
 
 ## Completed
-- [x] Changed search icons to use ">" for active state and ":" for inactive (more compact)
-- [x] Added visual cursor when search is active and query isn't empty
-- [x] Fixed search bar filling logic to account for Unicode characters
-- [x] Improved search bar appearance with consistent spacing
+- [x] Added `last_click_time` and `last_click_idx` fields to track click history
+- [x] Modified Enter key behavior to launch selected widget instead of clearing search
 
 ## In Progress
-- [x] Search bar interaction enhancements
+- [x] Click tracking implementation is complete but not yet connected to event handling
 
 ## Blockers
-- None identified for this specific change
+- Need to implement actual double-click detection logic using the tracked clicks
 
 ## Next Steps
-1. Test search bar behavior with various input lengths
-2. Verify cursor positioning works correctly with different terminal widths
+1. Implement double-click detection using the new tracking fields
+2. Add visual feedback for click events in the UI
