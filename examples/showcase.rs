@@ -448,9 +448,9 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64) {
 
 fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let wins = [
-        (1, 6, 8, 4, *t.primary),
-        (11, 7, 8, 4, *t.warning),
-        (6, 9, 10, 3, *t.info),
+        (1, 6, 8, 4, t.primary),
+        (11, 7, 8, 4, t.warning),
+        (6, 9, 10, 3, t.info),
     ];
     let offsets = [
         ((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16),
@@ -663,7 +663,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_phase);
+                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_phase.get());
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
