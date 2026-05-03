@@ -85,6 +85,7 @@ struct Showcase {
     search_query: String,
     search_active: bool,
     theme: Theme,
+    pending_theme: Option<usize>,
     should_quit: Arc<AtomicBool>,
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
