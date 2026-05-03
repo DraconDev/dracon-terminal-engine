@@ -363,7 +363,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     plane
 }
 
-fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let items = [
         ("CPU", (phase * 30.0).sin() * 40.0 + 50.0),
         ("MEM", (phase * 20.0).sin() * 30.0 + 60.0),
