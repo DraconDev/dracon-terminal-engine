@@ -515,21 +515,38 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64) {
 }
 
 fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64) {
+    // Tab bar with active/inactive tabs
+    let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
+    let mut tab_x = 1usize;
+    for (i, (label, active)) in tabs.iter().enumerate() {
+        let fg = if *active { t.fg_on_accent } else { t.fg_muted };
+        let bg = if *active { t.primary_active } else { t.surface };
+        draw_text(plane, tab_x, 5, label, fg, bg, *active);
+        tab_x += label.len() + 1;
+    }
+    // Underline for active tab
+    let active_tab_len = tabs[0].0.len();
+    for dx in 0..active_tab_len {
+        set_cell(plane, 1 + dx, 5 + 1, '▔', t.primary_active, t.surface);
+    }
+
+    // Code lines with line numbers
     let lines = [
-        "fn main() {",
-        "    let x = 42;",
-        "    println!(\"{}\", x);",
-        "}",
+        ("1", "fn main() {"),
+        ("2", "    let x = 42;"),
+        ("3", "    println!(\"{}\", x);"),
+        ("4", "}"),
     ];
-    for (i, line) in lines.iter().enumerate() {
+    for (i, (num, code)) in lines.iter().enumerate() {
         let py = 6 + i;
         if py > 10 { break; }
-        let text: String = line.chars().take(22).collect();
-        draw_text(plane, 2, py, &text, t.fg_subtle, t.surface, false);
+        draw_text(plane, 1, py, num, t.fg_muted, t.surface, false);
+        draw_text(plane, 3, py, code, t.fg, t.surface, false);
     }
+    // Blinking cursor on line 3 (the empty line after code)
     let cursor_visible = (phase * 3.0).fract() < 0.6;
     if cursor_visible {
-        set_cell(plane, 18, 8, '▌', t.primary, t.surface);
+        set_cell(plane, 4, 6, '▎', t.primary, t.surface);
     }
 }
 
