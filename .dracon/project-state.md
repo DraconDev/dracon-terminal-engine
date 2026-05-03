@@ -1,20 +1,25 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Expanded framework documentation with new built-in systems and showcase examples
 
 ## Context
-This change was triggered by recent updates to project dependencies, which required a version bump to ensure compatibility with the latest versions of the dependencies.
+The project is adding comprehensive documentation for framework features that were previously only used in examples. This makes the systems more discoverable and provides concrete usage patterns.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect the latest dependency versions
+- [x] Added documentation for Hit Zone System with scoped registry pattern
+- [x] Documented Drag-and-Drop System with full lifecycle management
+- [x] Included Animation System with keyframe-based interpolation
+- [x] Showcased framework usage in Showcase Launcher with zone-based interaction
+- [x] Documented example app patterns (file_manager, system_monitor)
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Framework documentation expansion for built-in systems
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce any breaking changes
-2. Continue with other development tasks that may require these updated dependencies
+1. Review and refine documentation for consistency
+2. Update example apps to use documented patterns
+3. Consider adding visual documentation for complex systems

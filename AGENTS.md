@@ -85,12 +85,64 @@ editor.load_config()                     // Load from .file.dte.json
 editor.save_config()                     // Save to .file.dte.json
 ```
 
-## Widget Trait Bridge
+## Framework Built-in Systems (Available for Examples)
 
-TextEditor implements **ratatui's `Widget`** trait (renders to `Buffer`).
-The App framework uses its own `Widget` trait (returns `Plane`, has `id`, `handle_key`, `handle_mouse`).
+### Hit Zone System (`src/framework/hitzone.rs`)
+- `HitZone<T>` — Rectangular zone with callbacks for click, right-click, drag (with auto double/triple click detection)
+- `HitZoneGroup<T>` — Multi-zone dispatcher to first matching zone
+- `ScopedZone<T>` — Lightweight geometry-only zone (no callbacks)
+- `ScopedZoneRegistry<T>` — Per-frame scoped registry: clear at start of render, register zones during render, dispatch in mouse handler
 
-To use TextEditor in App, wrap it in an adapter that implements the framework's Widget trait.
+**Usage pattern:**
+```rust
+// In widget struct:
+zones: RefCell<ScopedZoneRegistry<usize>>,
+
+// In render (cleared each frame):
+self.zones.borrow_mut().clear();
+// ... register zones:
+self.zones.borrow_mut().register(ZONE_ID, x, y, width, height);
+// ... query for hover:
+let hovered = self.zones.borrow().dispatch(mouse_x, mouse_y);
+
+// In handle_mouse:
+if let Some(id) = self.zones.borrow().dispatch(col, row) {
+    match id {
+        ZONE_ID => { /* handle click */ }
+        _ => {}
+    }
+}
+```
+
+### Drag-and-Drop System (`src/framework/dragdrop.rs`)
+- `DragManager<T>` — Full drag-and-drop lifecycle: `start_drag()`, `move_ghost()`, `end_drag()`, `cancel()`
+- `DragItem<T>` — Payload with data and source ID
+- `DragGhost` — Visual ghost rendered during drag at z=9000
+- `DropTarget<T>` — Rectangular target zone
+
+### Animation System (`src/framework/animation.rs`)
+- `Animation` — Keyframe-based on widget properties (position, size)
+- `AnimationManager` — Manages active animations
+- `Easing` — Interpolation functions (linear, sine, quadratic, etc.)
+
+## Showcase Launcher (`examples/showcase.rs`)
+
+Uses `ScopedZoneRegistry` for all mouse dispatch:
+- Zone IDs: 100-104 (primitives bar), 200+ (theme palette), 300-304 (sidebar categories), 400 (FPS toggle), 500+ (cards)
+- Hover detection via zone dispatch in render (primitives bar, palette swatches, sidebar categories)
+- Eliminates all duplicated position math between `render()` and `handle_mouse()`
+
+## Example App Patterns
+
+### file_manager (`examples/_apps/file_manager.rs`)
+- Uses `SplitPane` with stored mutable state + divider drag resize
+- Breadcrumb click navigation via inline position computation
+- Stores `is_dragging_split` boolean for Drag/Up tracking
+
+### system_monitor (`examples/_apps/system_monitor.rs`)
+- Real `/proc` data reading (CPU, memory, disk, network, processes)
+- Falls back to simulated data on non-Linux
+- Uses `Rc<RefCell<SystemMonitor>>` + `InputRouter` pattern for tick-driven updates
 
 ## Deferred / Out of Scope
 
