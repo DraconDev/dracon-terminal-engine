@@ -36,7 +36,6 @@ use std::time::{Duration, Instant};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct EditorTab {
-    id: usize,
     title: String,
     path: Option<PathBuf>,
     content: String,
@@ -46,9 +45,8 @@ struct EditorTab {
 }
 
 impl EditorTab {
-    fn new(id: usize, title: &str) -> Self {
+    fn new(title: &str) -> Self {
         Self {
-            id,
             title: title.to_string(),
             path: None,
             content: String::new(),
@@ -61,11 +59,6 @@ impl EditorTab {
     fn with_content(mut self, content: &str) -> Self {
         self.content = content.to_string();
         self
-    }
-
-    fn display_title(&self) -> String {
-        let mod_marker = if self.modified { "● " } else { "" };
-        format!("{}{}", mod_marker, self.title)
     }
 }
 
@@ -128,10 +121,10 @@ struct IdeApp {
 impl IdeApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let tabs = vec![
-            EditorTab::new(0, "main.rs").with_content(
+            EditorTab::new("main.rs").with_content(
                 "use std::io;\n\nfn main() {\n    println!(\"Hello, Dracon!\");\n}\n"
             ),
-            EditorTab::new(1, "lib.rs").with_content(
+            EditorTab::new("lib.rs").with_content(
                 "pub fn greet(name: &str) -> String {\n    format!(\"Hello, {}!\", name)\n}\n"
             ),
         ];
@@ -499,7 +492,7 @@ impl Widget for IdeApp {
             }
             KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 let new_id = self.tabs.len();
-                self.tabs.push(EditorTab::new(new_id, &format!("untitled-{}.rs", new_id + 1)));
+                self.tabs.push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1)));
                 self.active_tab = new_id;
                 self.sync_tab_bar();
                 true
@@ -583,7 +576,7 @@ impl IdeApp {
         }
     }
 
-    fn render_editor(&self, plane: &mut Plane, x: u16, y: u16, _w: u16, _h: u16, tab: &EditorTab, t: Theme) {
+    fn render_editor(&self, plane: &mut Plane, x: u16, y: u16, _w: u16, h: u16, tab: &EditorTab, t: Theme) {
         let lines: Vec<&str> = tab.content.lines().collect();
         let line_num_width = lines.len().to_string().len().max(2) as u16;
 
