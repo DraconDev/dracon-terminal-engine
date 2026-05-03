@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Added interactive zone tracking for UI cards in the showcase example
+Refactored mouse event handling in showcase example using zone-based dispatch system
 
 ## Context
-This change implements interactive zone tracking for UI cards in the showcase example, building on the scoped zone registry system introduced in previous commits. The zones will enable hover detection and click handling for individual cards in the UI grid.
+The showcase example was previously handling mouse clicks with hardcoded coordinate checks, which was error-prone and difficult to maintain. This change implements a zone-based system where UI elements register their clickable areas during rendering, making the interaction system more robust and maintainable.
 
 ## Completed
-- [x] Added zone registration for each card in the showcase grid
-- [x] Implemented constant base ID for card zones (500)
-- [x] Properly scoped zone registration with borrow_mut()
+- [x] Replaced hardcoded coordinate checks with zone-based dispatch system
+- [x] Added constants for zone ID ranges (PRIM_BASE, PALETTE_BASE, etc.)
+- [x] Implemented zone-based handling for theme palette, FPS toggle, primitive controls, and sidebar categories
+- [x] Maintained double-click detection for card selection
+- [x] Kept search bar click handling (no zone registered for it)
 
 ## In Progress
-- [x] Zone tracking implementation for UI cards
+- [x] Zone-based system implementation is complete
 
 ## Blockers
-- Need to implement actual hover/click handling for these zones
+- None identified
 
 ## Next Steps
-1. Implement hover detection for registered card zones
-2. Add click handlers for interactive card actions
+1. Verify all click interactions work correctly with the new system
+2. Consider adding visual feedback for interactive zones during hover
