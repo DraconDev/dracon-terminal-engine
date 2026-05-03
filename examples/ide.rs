@@ -511,6 +511,23 @@ impl Widget for IdeApp {
             self.blit(&mut plane, &prof_plane, area.width - 25, menu_h + tab_h);
         }
 
+        // 11. Command palette overlay
+        if self.command_palette.is_visible() {
+            let pal_plane = self.command_palette.render(area);
+            for y in 0..area.height {
+                for x in 0..area.width {
+                    let src_idx = (y * area.width + x) as usize;
+                    let dst_idx = (y * area.width + x) as usize;
+                    if src_idx < pal_plane.cells.len() && dst_idx < plane.cells.len() {
+                        let src_cell = &pal_plane.cells[src_idx];
+                        if !src_cell.transparent {
+                            plane.cells[dst_idx] = src_cell.clone();
+                        }
+                    }
+                }
+            }
+        }
+
         plane
     }
 
