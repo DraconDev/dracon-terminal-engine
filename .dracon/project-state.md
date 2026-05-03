@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency changes
+Added selection time tracking to the showcase example
 
 ## Context
-This change was triggered by recent feature additions and refactoring in the showcase example, particularly the implementation of modal preview, help overlay, and tooltip support. The Cargo.lock file needs to be updated to ensure all dependencies are correctly versioned and resolved.
+This change supports future features that need to track how long items remain selected in the interactive showcase
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency changes from recent feature implementations
+- [x] Added `selection_time` field to track selection duration
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Implementation of selection time tracking
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all dependencies are correctly resolved
-2. Continue with other showcase example improvements
+1. Implement logic to update and use the selection time
+2. Add UI display for selection duration
