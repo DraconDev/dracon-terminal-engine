@@ -689,6 +689,24 @@ impl Widget for Showcase {
                 }
                 false
             }
+            MouseEventKind::Down(MouseButton::Right) => {
+                let y = row as usize;
+                let x = col as usize;
+                if x >= grid_start_x && y >= grid_start_y {
+                    let gx = x - grid_start_x;
+                    let gy = y - grid_start_y;
+                    let col_idx = gx / (card_w + 2);
+                    let row_idx = gy / (card_h + 1);
+                    let card_idx = row_idx * self.cols.get() + col_idx;
+                    if card_idx < self.filtered.len() {
+                        self.selected = card_idx;
+                        self.context_menu = Some((card_idx, col, row));
+                        return true;
+                    }
+                }
+                self.context_menu = None;
+                false
+            }
             MouseEventKind::ScrollDown => {
                 if self.selected + 1 < self.filtered.len() {
                     self.selected += 1;
