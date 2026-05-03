@@ -521,6 +521,43 @@ impl Widget for Showcase {
             }
         }
 
+        // Context menu
+        if let Some((card_idx, mx, my)) = self.context_menu {
+            if let Some(&ex_idx) = self.filtered.get(card_idx) {
+                if let Some(ex) = self.examples.get(ex_idx) {
+                    let menu_x = (mx as usize).min(area.width as usize - 18);
+                    let menu_y = (my as usize).min(area.height as usize - 5);
+                    let menu_w = 16usize;
+                    let menu_h = 4usize;
+                    
+                    // Menu background
+                    for cy in 0..menu_h {
+                        for cx in 0..menu_w {
+                            set_cell(&mut plane, menu_x + cx, menu_y + cy, ' ', t.fg, t.surface_elevated);
+                        }
+                    }
+                    
+                    // Border
+                    for cx in 0..menu_w {
+                        set_cell(&mut plane, menu_x + cx, menu_y, '─', t.outline, t.surface_elevated);
+                        set_cell(&mut plane, menu_x + cx, menu_y + menu_h - 1, '─', t.outline, t.surface_elevated);
+                    }
+                    for cy in 0..menu_h {
+                        set_cell(&mut plane, menu_x, menu_y + cy, '│', t.outline, t.surface_elevated);
+                        set_cell(&mut plane, menu_x + menu_w - 1, menu_y + cy, '│', t.outline, t.surface_elevated);
+                    }
+                    set_cell(&mut plane, menu_x, menu_y, '┌', t.outline, t.surface_elevated);
+                    set_cell(&mut plane, menu_x + menu_w - 1, menu_y, '┐', t.outline, t.surface_elevated);
+                    set_cell(&mut plane, menu_x, menu_y + menu_h - 1, '└', t.outline, t.surface_elevated);
+                    set_cell(&mut plane, menu_x + menu_w - 1, menu_y + menu_h - 1, '┘', t.outline, t.surface_elevated);
+                    
+                    // Menu items
+                    draw_text(&mut plane, menu_x + 2, menu_y + 1, "Launch", t.fg, t.surface_elevated, false);
+                    draw_text(&mut plane, menu_x + 2, menu_y + 2, "Cancel", t.fg_muted, t.surface_elevated, false);
+                }
+            }
+        }
+
         plane
     }
 
