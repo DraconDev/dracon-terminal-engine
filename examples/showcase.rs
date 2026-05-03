@@ -710,7 +710,7 @@ impl Widget for Showcase {
                 format!("  {} results", self.filtered.len())
             };
             let feedback_color = if self.filtered.is_empty() { t.error } else { t.fg_muted };
-            draw_text(&mut plane, 2, 3, &feedback_text, feedback_color, t.bg, false);
+            draw_text(&mut plane, 2, 5, &feedback_text, feedback_color, t.bg, false);
         }
 
         // Primitives bar
