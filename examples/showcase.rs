@@ -364,6 +364,25 @@ impl Widget for Showcase {
             }
         }
 
+        // Search feedback: match count or no results
+        if self.search_active && !self.search_query.is_empty() {
+            let feedback = if self.filtered.is_empty() {
+                "  No results!"
+            } else {
+                let count = self.filtered.len();
+                if count == 1 { "  1 result" } else { "  x results" }
+            };
+            let feedback_text = if self.filtered.len() == 1 {
+                format!("  1 result")
+            } else if self.filtered.is_empty() {
+                "  No results!".to_string()
+            } else {
+                format!("  {} results", self.filtered.len())
+            };
+            let feedback_color = if self.filtered.is_empty() { t.error } else { t.fg_muted };
+            draw_text(&mut plane, 2, 3, &feedback_text, feedback_color, t.bg, false);
+        }
+
         // Category sidebar
         let sidebar_w = 12usize;
         let sidebar_start_y = 5usize;
