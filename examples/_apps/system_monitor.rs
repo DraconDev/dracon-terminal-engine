@@ -414,6 +414,22 @@ fn format_uptime(seconds: u64) -> String {
     }
 }
 
+fn draw_text_plane(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
+    for (i, ch) in text.chars().enumerate() {
+        let idx = (y * plane.width + x + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx] = Cell {
+                char: ch,
+                fg,
+                bg,
+                style: if bold { Styles::BOLD } else { Styles::empty() },
+                transparent: false,
+                skip: false,
+            };
+        }
+    }
+}
+
 struct InputRouter {
     monitor: Rc<RefCell<SystemMonitor>>,
     id: WidgetId,
