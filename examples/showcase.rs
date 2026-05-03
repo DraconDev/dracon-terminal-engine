@@ -1587,8 +1587,7 @@ impl Widget for Showcase {
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = cy * card_w + cx;
-                        let dst_idx =
-                            ((y + cy) * area.width as usize + x + cx);
+                        let dst_idx = (y + cy) * area.width as usize + x + cx;
                         if src_idx < card.cells.len() && dst_idx < plane.cells.len()
                             && !card.cells[src_idx].transparent {
                                 plane.cells[dst_idx] = card.cells[src_idx].clone();

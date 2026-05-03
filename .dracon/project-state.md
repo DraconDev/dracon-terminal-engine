@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Improved string handling in the SplitResizerApp widget
+Optimized card rendering in the Showcase widget by simplifying index calculation.
 
 ## Context
-The change addresses a potential buffer overflow risk in the terminal rendering logic of the SplitResizerApp widget.
+The change improves performance in the Showcase widget's card rendering by removing unnecessary parentheses in the destination index calculation.
 
 ## Completed
-- [x] Fixed potential buffer overflow by removing unnecessary usize conversion in character iteration
+- [x] Simplified the destination index calculation in card rendering
 
 ## In Progress
-- [x] No active work in progress
+- [x] No active work in progress related to this change
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify the change doesn't affect text rendering
-2. Review for any performance implications
+1. Verify performance impact with additional test cases
+2. Review for potential additional rendering optimizations
