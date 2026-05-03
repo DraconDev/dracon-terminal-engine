@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added window minimization state tracking to the desktop example
+Added window minimization and taskbar interaction support to the desktop example
 
 ## Context
-This change implements the window minimization feature that was previously requested. It provides a consistent way to track minimized state across all windows in the desktop example.
+This change implements window minimization functionality and improves taskbar interaction in the desktop example. It addresses user needs for window management and provides a more complete desktop experience.
 
 ## Completed
-- [x] Added `minimized: false` field to all window definitions
-- [x] Maintained consistent initialization pattern for all windows
+- [x] Added minimize button detection on window title bars
+- [x] Implemented taskbar click handling to restore minimized windows
+- [x] Added minimized window state tracking in hit testing
+- [x] Enhanced window interaction logic to respect minimized state
 
 ## In Progress
-- [x] Window minimization state tracking implementation
+- [x] Window minimization and taskbar interaction implementation
 
 ## Blockers
 - None identified for this specific change
 
 ## Next Steps
-1. Implement actual window minimization behavior in the rendering system
-2. Add UI controls to toggle window minimization state
+1. Test window minimization behavior with multiple windows
+2. Verify taskbar interaction works with various window configurations

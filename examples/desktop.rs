@@ -116,9 +116,39 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             let cy = y.saturating_sub(1);
 
                             if is_press && !is_drag {
-                                // Hit Test
+                                // Check for minimize button click on title bar (right side)
+                                let mut minimized_click = None;
+                                for (idx, win) in windows.iter().enumerate() {
+                                    if cy == win.y && cx >= win.x + win.width.saturating_sub(4) && cx < win.x + win.width - 1 {
+                                        minimized_click = Some(idx);
+                                        break;
+                                    }
+                                }
+                                if let Some(idx) = minimized_click {
+                                    windows[idx].minimized = !windows[idx].minimized;
+                                    dragging_window = None;
+                                    continue;
+                                }
+
+                                // Check taskbar click to restore minimized windows
+                                if cy == size.1 - 1 {
+                                    for (idx, win) in windows.iter().enumerate() {
+                                        if win.minimized {
+                                            let label_x = 2 + idx as u16 * 12;
+                                            if cx >= label_x && cx < label_x + 10 {
+                                                windows[idx].minimized = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    dragging_window = None;
+                                    continue;
+                                }
+
+                                // Hit Test for normal windows
                                 let mut focused = None;
                                 for (idx, win) in windows.iter_mut().enumerate().rev() {
+                                    if win.minimized { continue; }
                                     if cx >= win.x
                                         && cx < win.x + win.width
                                         && cy >= win.y
