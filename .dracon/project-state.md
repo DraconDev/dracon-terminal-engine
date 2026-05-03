@@ -4,18 +4,18 @@
 Added pending theme state tracking to showcase example
 
 ## Context
-This change supports future theme switching functionality by introducing a pending_theme field to track theme changes before they're applied
+This change implements a mechanism to track pending theme changes in the showcase example, allowing for smoother theme transitions by separating the selection from immediate application.
 
 ## Completed
-- [x] Added pending_theme field to Showcase struct
-- [x] Initialized as Option<usize> to track theme changes
+- [x] Added `pending_theme` field to track theme selection before application
+- [x] Implemented theme application logic that processes pending themes
 
 ## In Progress
-- [x] Theme switching implementation is now in progress
+- [x] Theme transition system is now ready for integration with UI controls
 
 ## Blockers
-- Theme application logic needs to be implemented
+- UI controls for theme selection need to be implemented to trigger the pending state
 
 ## Next Steps
-1. Implement theme switching logic using pending_theme
-2. Add UI controls for theme selection
+1. Implement UI controls to set the pending theme state
+2. Add visual feedback for pending theme changes

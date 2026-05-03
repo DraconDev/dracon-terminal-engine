@@ -105,6 +105,7 @@ impl Showcase {
             search_query: String::new(),
             search_active: false,
             theme: Theme::nord(),
+            pending_theme: None,
             should_quit,
             pending_binary: pending,
             status_message: None,
@@ -118,6 +119,9 @@ impl Showcase {
     }
 
     fn apply_filter(&mut self) {
+        if let Some(idx) = self.pending_theme.take() {
+            self.theme = Self::themes()[idx % Self::themes().len()];
+        }
         self.filtered = self.examples.iter().enumerate()
             .filter(|(_, ex)| {
                 let matches_category = self.category_filter.map_or(true, |cat| ex.category == cat);
