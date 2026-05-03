@@ -342,14 +342,22 @@ impl Widget for Showcase {
 
         // Search bar with icon
         let search_y = 2usize;
-        let search_icon = if self.search_active { "▶" } else { "🔍" };
+        let search_icon = if self.search_active { ">" } else { ":" };
         let search_prompt = if self.search_active { ">" } else { " " };
-        let search_text = format!("{} {} [ {} ]", search_icon, search_prompt, self.search_query);
+        let search_text = format!("{} {} [{}]", search_icon, search_prompt, self.search_query);
         let search_fg = if self.search_active { t.primary } else { t.fg_muted };
+        let search_text_chars = search_text.chars().count + 1;
         draw_text(&mut plane, 2, search_y, &search_text, search_fg, t.surface, false);
         // Fill rest of search bar
-        for x in search_text.len() + 2..area.width as usize - 2 {
+        for x in search_text_chars + 2..area.width as usize - 2 {
             set_cell(&mut plane, x, search_y, ' ', search_fg, t.surface);
+        }
+        // Draw cursor if active
+        if self.search_active && !self.search_query.is_empty() {
+            let cursor_x = 2 + search_text_chars - 1;
+            if cursor_x < area.width as usize - 2 {
+                set_cell(&mut plane, cursor_x, search_y, '_', t.primary, t.surface);
+            }
         }
 
         // Category sidebar
