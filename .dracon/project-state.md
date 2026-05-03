@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency changes
+Added a card phase tracking field to the showcase example.
 
 ## Context
-This update ensures the project's dependency versions are synchronized with the latest changes in the codebase, particularly after recent feature additions and documentation improvements.
+This change supports potential future animations or state management for cards in the showcase example, building on existing visual features like modal previews and FPS display.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Added `card_phase` field to `Showcase` struct for tracking card animation state
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Implementation of card phase tracking
 
 ## Blockers
-- None
+- None identified for this specific change
 
 ## Next Steps
-1. Verify that all dependencies are correctly resolved
-2. Continue with other development tasks
-```
+1. Implement animation logic using the `card_phase` field
+2. Add UI controls to manipulate card phase for demonstration purposes
