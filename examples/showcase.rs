@@ -333,7 +333,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
         "ide" => render_ide_preview(&mut plane, t, phase),
         "desktop" => render_desktop_preview(&mut plane, t, phase),
         "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, phase),
-        "git_tui" => render_zindex_preview(&mut plane, t, phase),
+        "git_tui" => render_git_tui_preview(&mut plane, t, phase),
         "file_manager" => render_file_manager_preview(&mut plane, t, phase),
         "menu_system" => render_menu_system_preview(&mut plane, t, phase),
         "modal_demo" => render_modal_demo_preview(&mut plane, t, phase),
