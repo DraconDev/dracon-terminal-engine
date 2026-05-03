@@ -1002,7 +1002,7 @@ impl Widget for Showcase {
                         format!("  Filter: {}", ex.category),
                         "  Cancel".to_string(),
                     ];
-                    let menu_item_count = menu_items.len();
+                    
 
                     // Menu background
                     for cy in 0..menu_h {
