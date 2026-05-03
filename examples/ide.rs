@@ -635,7 +635,11 @@ impl Widget for IdeApp {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         // Command palette intercepts all mouse events when visible
         if self.command_palette.is_visible() {
-            return self.command_palette.handle_mouse(kind, col, row);
+            let handled = self.command_palette.handle_mouse(kind, col, row);
+            if let Some(cmd_id) = self.cmd_bridge.borrow_mut().take() {
+                self.dispatch_palette_command(cmd_id);
+            }
+            return handled;
         }
 
         // Menu bar
