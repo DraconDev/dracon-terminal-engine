@@ -264,8 +264,16 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     let is_hovered = Some(idx) == hovered_idx;
     let cat_color = category_color(t, ex.category);
 
-    // Border
-    let border_fg = if is_selected { t.primary } else if is_hovered { t.primary_hover } else { t.outline };
+    // Border with pulse animation for selected cards
+    let now = Instant::now();
+    let pulse = (now.elapsed().as_millis() as f64 / 500.0).sin() * 0.5 + 0.5;
+    let border_fg = if is_selected {
+        if pulse > 0.5 { t.primary } else { t.primary_hover }
+    } else if is_hovered {
+        t.primary_hover
+    } else {
+        t.outline
+    };
     let bg = if is_selected { t.surface_elevated } else if is_hovered { t.surface } else { t.surface };
     draw_rounded_border(&mut plane, Rect::new(0, 0, card_w, card_h), border_fg, bg, is_selected || is_hovered);
 

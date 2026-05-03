@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Removed selection time tracking from the showcase example
+Added a visual pulse animation to selected cards in the showcase example
 
 ## Context
-The showcase example was previously tracking selection time, but this feature was removed as part of ongoing refactoring and simplification of the example code.
+This change enhances the visual feedback for selected cards by adding a subtle pulsing effect to the border color, making the selection state more noticeable without being distracting.
 
 ## Completed
-- [x] Removed `selection_time` field from `Showcase` struct
-- [x] Removed initialization of `selection_time` in `new()` method
+- [x] Added time-based pulse animation to selected card borders
+- [x] Implemented smooth color transition between primary and primary_hover states
+- [x] Maintained existing hover and outline states for unselected cards
 
 ## In Progress
-- [ ] None (this was a cleanup operation)
+- [x] Visual feedback improvement for selected cards
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify showcase example still functions correctly without selection time tracking
-2. Consider whether other tracking features should be similarly simplified
+1. Test the animation across different themes to ensure visibility
+2. Consider adding configuration options for animation speed/duration
