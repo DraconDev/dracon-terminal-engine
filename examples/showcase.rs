@@ -428,7 +428,7 @@ fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) 
     }
 }
 
-fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64) {
+fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, card_w: u16) {
     let colors = [t.primary, t.primary_hover, t.success, t.warning, t.error, t.info, t.fg, t.bg];
     let cols = 4;
     let swatch_size = 3;
@@ -447,7 +447,7 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64) {
     draw_text(plane, 2, 11, &name, t.fg_muted, t.bg, false);
 }
 
-fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let checks = ["[x] Alpha", "[ ] Beta", "[x] Gamma"];
     for (i, check) in checks.iter().enumerate() {
         let py = 6 + i;
