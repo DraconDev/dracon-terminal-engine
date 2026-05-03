@@ -633,7 +633,7 @@ impl Widget for IdeApp {
         if self.command_palette.is_visible() {
             let handled = self.command_palette.handle_mouse(kind, col, row);
             let cmd = self.cmd_bridge.borrow_mut().take();
-            if let Some(cmd_id) = cmd {
+            if let Some(ref cmd_id) = cmd {
                 self.dispatch_palette_command(cmd_id);
             }
             return handled;
