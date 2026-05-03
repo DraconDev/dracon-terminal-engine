@@ -5,7 +5,7 @@ use std::io::{self, stdout, Read, Write};
 use dracon_terminal_engine::{
     compositor::engine::Compositor,
     compositor::plane::{Cell, Plane},
-    input::event::{Event, KeyCode, KeyEvent, MouseButton, MouseEventKind},
+    input::event::{Event, KeyCode, KeyEvent},
     input::parser::Parser,
     Terminal,
 };
