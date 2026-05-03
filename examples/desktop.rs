@@ -236,30 +236,58 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             for wy in 0..win.height {
                 for wx in 0..win.width {
-                    let border = wx == 0 || wx == win.width - 1 || wy == 0 || wy == win.height - 1;
-                    let header = wy == 0;
+                    let is_top = wy == 0;
+                    let is_bottom = wy == win.height - 1;
+                    let is_left = wx == 0;
+                    let is_right = wx == win.width - 1;
+                    let is_border = is_top || is_bottom || is_left || is_right;
+                    let is_header = is_top;
+                    let is_content = !is_border;
 
                     let mut c = Cell::default();
-                    if border {
-                        c.char = if header { '=' } else { '|' };
+                    if is_border {
+                        c.char = if is_top && is_left { '╭' }
+                            else if is_top && is_right { '╮' }
+                            else if is_bottom && is_left { '╰' }
+                            else if is_bottom && is_right { '╯' }
+                            else if is_top || is_bottom { '─' }
+                            else { '│' };
                         c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                    } else if is_content && wy > 1 {
+                        // Window content area
+                        let content_y = wy - 2;
+                        let content_x = wx - 1;
+                        let content = get_window_content(win._id, content_x, content_y, win.width - 2);
+                        c.char = content.ch;
+                        c.fg = content.fg;
+                        c.bg = content.bg;
                     } else {
                         c.char = ' ';
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Reset;
                     }
 
-                    if header && wx > 1 && wx < win.title.len() as u16 + 2 {
+                    if is_header && wx > 1 && wx < win.title.len() as u16 + 2 {
                         c.char = win.title.chars().nth((wx - 2) as usize).unwrap_or(' ');
                         c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
                         c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                     }
-                    // Z-order label on right side of title bar
-                    if header && wx > win.width.saturating_sub(z_label.len() as u16 + 1) {
-                        let label_idx = wx - (win.width - z_label.len() as u16);
-                        if let Some(ch) = z_label.chars().nth(label_idx as usize) {
-                            c.char = ch;
+                    // Minimize button [_] on right side of title bar
+                    if is_header && wx >= win.width.saturating_sub(4) && wx < win.width - 1 {
+                        let btn_chars = ['[', '_', ']'];
+                        let btn_idx = (wx - (win.width - 4)) as usize;
+                        if btn_idx < 3 {
+                            c.char = btn_chars[btn_idx];
                             c.fg = dracon_terminal_engine::compositor::plane::Color::Ansi(15);
+                            c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
+                        }
+                    }
+                    // Z-order label after title
+                    if is_header && wx > win.title.len() as u16 + 2 && wx < win.width.saturating_sub(4) {
+                        let label_start = win.title.len() as u16 + 2;
+                        let label_idx = wx - label_start;
+                        if label_idx == 0 {
+                            c.char = ' ';
                             c.bg = dracon_terminal_engine::compositor::plane::Color::Ansi(win.color);
                         }
                     }

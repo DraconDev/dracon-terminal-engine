@@ -1,20 +1,25 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Enhanced window rendering with proper borders, content display, and UI controls
 
 ## Context
-This change is part of a series of refactoring and feature additions to the showcase card system, particularly around dynamic card width parameters and improved rendering.
+Improved the desktop window rendering to use proper box-drawing characters, display window content, and add interactive elements like minimize buttons and z-order labels
 
 ## Completed
-- [x] Updated Cargo.lock with dependency version changes
+- [x] Replaced simple borders with proper box-drawing characters (╭, ╮, ╯, ╰, etc.)
+- [x] Added window content display with proper padding
+- [x] Implemented minimize button ([_]) in window title bar
+- [x] Added z-order label display after window title
+- [x] Improved header content rendering with proper spacing
 
 ## In Progress
-- [x] Refactoring showcase card rendering with dynamic sizing and animation improvements
+- [x] Window rendering improvements are complete
 
 ## Blockers
-- No blockers identified
+- None identified for this specific change
 
 ## Next Steps
-1. Continue refactoring showcase card rendering functions
-2. Verify dynamic card width parameter implementation across all preview components
+1. Test window interaction with new rendering
+2. Verify content display and scrolling behavior
+3. Implement minimize button functionality
