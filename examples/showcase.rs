@@ -817,36 +817,40 @@ impl Widget for Showcase {
 
         // Primitives bar
         let prim_y = 4usize;
-        let prim_controls: [(usize, &str); 5] = [
-            (1, if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" }),
-            (2, {
-                let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
-                let filled: String = (0..pos).map(|_| '=').collect();
-                let empty: String = (pos..10).map(|_| "-").collect();
-                format!("[{}{}]", filled, empty)
-            }),
-            (3, if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" }),
-            (4, {
-                let sel = self.primitive_radio;
-                let opts = ["(1)", "(2)", "(3)"];
-                let mut s = String::new();
-                for (j, _o) in opts.iter().enumerate() {
-                    s.push_str(if j == sel { "(*)" } else { "( )" });
-                }
-                s
-            }),
-            (5, if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" }),
+        let state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
+        let state_1 = {
+            let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
+            let filled: String = (0..pos).map(|_| '=').collect();
+            let empty: String = (pos..10).map(|_| "-").collect();
+            format!("[{}{}]", filled, empty)
+        };
+        let state_2 = if self.primitive_checkbox { "[x] Check" } else { "[ ] Check" };
+        let state_3 = {
+            let sel = self.primitive_radio;
+            let opts = ["(1)", "(2)", "(3)"];
+            let mut s = String::new();
+            for (j, _o) in opts.iter().enumerate() {
+                s.push_str(if j == sel { "(*)" } else { "( )" });
+            }
+            s
+        };
+        let state_4 = if self.primitive_button { "[CLICKED!]" } else { "[ Button ]" };
+        let prim_controls: [(&str, &str); 5] = [
+            ("[1]", state_0),
+            ("[2]", &state_1),
+            ("[3]", state_2),
+            ("[4]", &state_3),
+            ("[5]", state_4),
         ];
         let mut prim_x = 2usize;
         let mut prim_hit_starts: [usize; 5] = [0; 5];
         let mut prim_hit_ends: [usize; 5] = [0; 5];
-        for (i, (_key_num, state)) in prim_controls.iter().enumerate() {
-            let key_str = format!("[{}]", _key_num);
-            let total_w = key_str.len() + 1 + state.len();
+        for (i, (key, state)) in prim_controls.iter().enumerate() {
+            let total_w = key.len() + 1 + state.len();
             prim_hit_starts[i] = prim_x;
             prim_hit_ends[i] = prim_x + total_w;
-            draw_text(&mut plane, prim_x, prim_y, &key_str, t.fg_muted, t.bg, false);
-            prim_x += key_str.len();
+            draw_text(&mut plane, prim_x, prim_y, key, t.fg_muted, t.bg, false);
+            prim_x += key.len();
             draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
             prim_x += 1;
             draw_text(&mut plane, prim_x, prim_y, state, t.fg, t.bg, false);
