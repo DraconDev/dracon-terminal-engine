@@ -110,7 +110,7 @@ impl PresetColor {
     ];
 
     /// Returns the Color representation for use in Cell rendering.
-    fn to_compositor_color(&self) -> Color {
+    fn to_compositor_color(self) -> Color {
         Color::Rgb(self.r, self.g, self.b)
     }
 

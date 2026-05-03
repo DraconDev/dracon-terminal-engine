@@ -298,8 +298,8 @@ impl Widget for Table {
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        if self.search.handle_key(key.clone()) {
-            self.filter(&self.search.query().to_string());
+        if self.search.handle_key(key) {
+            self.filter(&self.search.query());
             return true;
         }
         match key.code {
