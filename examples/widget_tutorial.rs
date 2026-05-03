@@ -431,7 +431,7 @@ impl Widget for ColorPicker {
             "←/→"
         };
         let instr_len = instruction.len().min(area.width as usize);
-        let instr_start = ((area.width as usize - instr_len) / 2);
+        let instr_start = (area.width as usize - instr_len) / 2;
 
         for (i, c) in instruction.chars().take(instr_len).enumerate() {
             let idx = instruction_row * area.width as usize + instr_start + i;
@@ -451,7 +451,7 @@ impl Widget for ColorPicker {
         // Shows "1/8" style position indicator.
         let index_row = 4usize;
         let index_text = format!("{}/{}", self.selected_index + 1, PresetColor::PRESETS.len());
-        let index_start = ((area.width as usize - index_text.len()) / 2);
+        let index_start = (area.width as usize - index_text.len()) / 2;
 
         for (i, c) in index_text
             .chars()
