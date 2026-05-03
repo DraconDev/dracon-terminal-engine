@@ -350,7 +350,7 @@ impl Widget for Showcase {
         let search_prompt = if self.search_active { ">" } else { " " };
         let search_text = format!("{} {} [{}]", search_icon, search_prompt, self.search_query);
         let search_fg = if self.search_active { t.primary } else { t.fg_muted };
-        let search_text_chars = search_text.chars().count + 1;
+        let search_text_chars = search_text.chars().count() + 1;
         draw_text(&mut plane, 2, search_y, &search_text, search_fg, t.surface, false);
         // Fill rest of search bar
         for x in search_text_chars + 2..area.width as usize - 2 {
