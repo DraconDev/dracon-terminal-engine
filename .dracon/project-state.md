@@ -4,17 +4,18 @@
 Added modal preview state to showcase example
 
 ## Context
-This change prepares the showcase example to support modal preview functionality, which will be used to demonstrate interactive UI components in a modal context.
+This change enables the showcase example to demonstrate modal dialog functionality by introducing a `modal_preview` state variable.
 
 ## Completed
-- [x] Added `modal_preview` boolean field to track modal state
+- [x] Added `modal_preview` boolean field to showcase state struct
+- [x] Initialized the new state variable to `false` in the default constructor
 
 ## In Progress
-- [x] Implementation of modal preview functionality
+- [x] Modal preview functionality implementation
 
 ## Blockers
-- Modal preview UI implementation not yet complete
+- Modal dialog UI implementation and interaction logic not yet implemented
 
 ## Next Steps
-1. Implement modal preview UI components
-2. Add keyboard shortcuts for modal preview toggle
+1. Implement modal dialog UI components
+2. Add keyboard and mouse interaction handlers for the modal preview

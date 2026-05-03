@@ -117,6 +117,7 @@ impl Showcase {
             tooltip_timer: None,
             tooltip_pos: None,
             show_help: false,
+            modal_preview: false,
         }
     }
 
