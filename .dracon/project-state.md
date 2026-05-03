@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added FPS counter to showcase example for performance monitoring
+Added hover state tracking for showcase cards to enable visual feedback
 
 ## Context
-The showcase example needed a way to monitor rendering performance. This change adds a visible FPS counter to help developers and users understand the application's rendering performance.
+This change supports visual feedback when users hover over cards in the showcase example, improving the interactive experience by providing clear visual cues for user actions.
 
 ## Completed
-- [x] Added `AtomicU64` for thread-safe FPS counter
-- [x] Implemented FPS calculation and display in the UI
-- [x] Integrated FPS counter with the main application loop
+- [x] Added `hovered_card` field to track which card is currently hovered
+- [x] Initialized the field to `None` in the struct constructor
 
 ## In Progress
-- [x] FPS counter implementation and display
+- [x] Implementation of hover visual effects (not yet shown in this diff)
 
 ## Blockers
-- None identified
+- Visual styling for hovered state needs to be implemented in the UI rendering code
 
 ## Next Steps
-1. Verify FPS counter accuracy across different systems
-2. Consider adding performance thresholds for warning states
+1. Implement visual styling for hovered cards
+2. Add hover event handling in the showcase interaction logic

@@ -94,6 +94,7 @@ struct Showcase {
     last_click_time: Option<Instant>,
     last_click_idx: Option<usize>,
     fps: Arc<AtomicU64>,
+    hovered_card: Option<usize>,
 }
 
 impl Showcase {
@@ -117,6 +118,7 @@ impl Showcase {
             last_click_time: None,
             last_click_idx: None,
             fps,
+            hovered_card: None,
         }
     }
 
