@@ -1011,12 +1011,22 @@ impl Widget for Showcase {
             draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, false);
         }
 
-        // Grid of cards
+        // Grid of cards — responsive sizing
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
-        let card_w = 28usize;
-        let card_h = 14usize;
-        self.cols.set(((area.width as usize - grid_start_x) / (card_w + 2)).max(1));
+        let available_w = area.width as usize - grid_start_x;
+        let available_h = area.height as usize - grid_start_y - 2;
+        
+        // Responsive card sizing
+        let (card_w, card_h) = if available_w >= 90 {
+            (32usize, 16usize)  // Large terminal
+        } else if available_w >= 60 {
+            (28usize, 14usize)  // Medium terminal
+        } else {
+            (24usize, 12usize)  // Small terminal
+        };
+        
+        self.cols.set((available_w / (card_w + 2)).max(1));
         let cols = self.cols.get();
 
         for (grid_idx, &ex_idx) in self.filtered.iter().enumerate() {
@@ -1030,7 +1040,7 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_start.elapsed().as_secs_f64());
+                let card = render_card(ex, grid_idx, self.selected, self.hovered_card, t, self.card_start.elapsed().as_secs_f64(), card_w as u16, card_h as u16);
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = (cy * card_w + cx) as usize;
@@ -1050,12 +1060,19 @@ impl Widget for Showcase {
             }
         }
 
-        // Scroll indicator
+        // Scroll indicator with styled container
         let total_cards = self.filtered.len();
-        let visible_cards = cols * ((area.height as usize - grid_start_y - 2) / (card_h + 1)).max(1);
+        let visible_cards = cols * (available_h / (card_h + 1)).max(1);
         if total_cards > visible_cards {
-            let scroll_text = format!("{} more", total_cards - visible_cards);
-            draw_text(&mut plane, area.width as usize - scroll_text.len() - 2, area.height as usize - 3, &scroll_text, t.fg_muted, t.bg, false);
+            let scroll_text = format!("↓ {} more", total_cards - visible_cards);
+            let sx = area.width as usize - scroll_text.len() - 4;
+            let sy = area.height as usize - 3;
+            // Draw scroll indicator background
+            for i in 0..scroll_text.len() + 4 {
+                set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
+            }
+            draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, true);
+            draw_text(&mut plane, sx + 3, sy, &scroll_text[2..], t.fg_muted, t.surface, false);
         }
 
         // Status bar
