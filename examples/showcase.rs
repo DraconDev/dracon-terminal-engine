@@ -98,6 +98,7 @@ struct Showcase {
     primitive_button: bool,
     scroll_state: dracon_terminal_engine::framework::scroll::ScrollState,
     scroll_content_offset: usize,
+    show_debug: bool,
 }
 
 impl Showcase {
@@ -142,6 +143,7 @@ impl Showcase {
                 viewport_height: 6,
             },
             scroll_content_offset: 0,
+            show_debug: false,
         }
     }
 
@@ -1062,6 +1064,37 @@ impl Widget for Showcase {
             }
         }
 
+        // Debug overlay: show dirty region highlights
+        if self.show_debug {
+            let dbg_text = " DEBUG MODE [D] ";
+            let dbg_w = dbg_text.len() + 4;
+            let dbg_x = (area.width as usize).saturating_sub(dbg_w) / 2;
+            let dbg_y = 2;
+
+            for cx in 0..dbg_w {
+                if dbg_x + cx < area.width as usize {
+                    set_cell(&mut plane, dbg_x + cx, dbg_y, ' ', t.bg, t.error);
+                }
+            }
+            for cx in 0..dbg_w {
+                if dbg_x + cx < area.width as usize {
+                    set_cell(&mut plane, dbg_x + cx, dbg_y, '─', t.error, t.error);
+                }
+            }
+            draw_text(&mut plane, dbg_x + 2, dbg_y, dbg_text, t.bg, t.error, true);
+
+            let dbg_info = format!(
+                "FPS:{:>3} | Cards:{:>2} | Selected:{:>2} | Hover:{:>2?} | Search:{:>5}",
+                self.fps.load(Ordering::Relaxed),
+                self.filtered.len(),
+                self.selected,
+                self.hovered_card,
+                if self.search_active { "active" } else { "idle" }
+            );
+            let dbg_info_y = dbg_y + 2;
+            draw_text(&mut plane, 2, dbg_info_y, &dbg_info, t.error, t.bg, false);
+        }
+
         plane
     }
 
@@ -1149,6 +1182,10 @@ impl Widget for Showcase {
                     let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
                     self.pending_theme = Some((current + 1) % themes.len());
                     self.apply_filter();
+                    true
+                }
+                KeyCode::Char('d') => {
+                    self.show_debug = !self.show_debug;
                     true
                 }
                 KeyCode::Char('/') => {

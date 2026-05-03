@@ -1,24 +1,27 @@
 # Project State
 
 ## Current Focus
-Added scroll preview visualization to showcase example with animated scrollbar and content
+Added debug overlay visualization in showcase example with toggle via 'D' key
 
 ## Context
-This implements a visual demonstration of scrollable content with an animated scrollbar thumb that moves in sync with the visible content area. It builds on previous work adding interactive UI primitives and refactoring UI rendering.
+To improve developer experience during UI development, this adds a visual debug overlay showing:
+- FPS counter
+- Card statistics
+- Interaction states
+- Search status
 
 ## Completed
-- [x] Added scroll preview visualization showing 15 lines of content
-- [x] Implemented animated scrollbar thumb that tracks visible content
-- [x] Added visual distinction for active line
-- [x] Implemented scrollbar track with proportional thumb size
-- [x] Added phase-based animation for scroll position
+- [x] Added debug toggle via 'D' key
+- [x] Implemented overlay with centered banner
+- [x] Added performance metrics display
+- [x] Included interaction state tracking
 
 ## In Progress
-- [x] Scroll preview visualization implementation
+- [x] Debug visualization system
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Add interactive scroll controls to showcase example
-2. Integrate with existing interactive UI primitives
+1. Add more debug metrics as needed
+2. Consider making debug features configurable via CLI flags
