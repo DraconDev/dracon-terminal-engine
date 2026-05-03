@@ -1,23 +1,24 @@
 # Project State
 
 ## Current Focus
-Added hover state visual feedback to showcase cards
+Updated showcase examples with more detailed visual previews and new example categories
 
 ## Context
-Improved user interaction by providing visual feedback when hovering over showcase cards, complementing the existing selection state
+The showcase examples were being updated to provide more realistic visual representations of the framework's capabilities, making it easier for users to understand what each example demonstrates.
 
 ## Completed
-- [x] Added `hovered_idx` parameter to `render_card` function
-- [x] Implemented hover state styling with distinct colors
-- [x] Updated border rendering to include hover state
-- [x] Maintained consistent visual hierarchy between states
+- [x] Updated system_monitor example with more detailed gauge visualizations
+- [x] Added new IDE example showing file tree and editor preview
+- [x] Added Git TUI example demonstrating real Git operations
+- [x] Simplified and reorganized the example list by category
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [x] Hover state implementation is complete
+- [ ] No active work in progress shown in this diff
 
 ## Blockers
-- None
+- None identified in this diff
 
 ## Next Steps
-1. Test hover interactions across different themes
-2. Consider adding subtle animations for smoother transitions
+1. Continue refining example previews for better user understanding
+2. Add more interactive features to showcase examples

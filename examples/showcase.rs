@@ -40,35 +40,20 @@ impl ExampleMeta {
     fn all() -> Vec<Self> {
         vec![
             // Apps
-            ExampleMeta { name: "system_monitor", category: "apps", description: "htop-like dashboard with live gauges", binary_name: "system_monitor", preview: &["+CPU [████----] 75%", "+MEM [████--] 60%", "+NET [--------]", "+PROC 142 running",] },
-            ExampleMeta { name: "file_manager", category: "apps", description: "Full file manager UI with Tree + Table", binary_name: "file_manager", preview: &["v src/", "  > lib.rs", "  > main.rs", "  + Cargo.toml",] },
-            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with emoji picker", binary_name: "chat_client", preview: &["[10:42] Alice: Hey!", "[10:43] Bob: Hi", "[10:44] Alice: Hi!", "> _",] },
-            ExampleMeta { name: "dashboard_builder", category: "apps", description: "All command widgets in grid layout", binary_name: "dashboard_builder", preview: &["+-----+ +-----+ +-----+", "| 75  | | 42  | | 88  |", "+-----+ +-----+ +-----+", " CPU    MEM    DISK ",] },
+            ExampleMeta { name: "system_monitor", category: "apps", description: "Live system gauges with auto-refresh", binary_name: "system_monitor", preview: &["CPU [████████░░] 80%", "MEM [██████░░░░] 60%", "DISK [████░░░░░░] 40%", "NET  [██████████] 100%",] },
+            ExampleMeta { name: "ide", category: "apps", description: "Full IDE with menus, tabs, tree, editor", binary_name: "ide", preview: &["[File][Edit][View]", "+-src/ +--------+", "| main |fn main|", "| lib  |{      |",] },
+            ExampleMeta { name: "file_manager", category: "apps", description: "File browser with Tree + Table", binary_name: "file_manager", preview: &["v home/", "  v user/", "    v src/", "      > main.rs",] },
+            ExampleMeta { name: "chat_client", category: "apps", description: "Rich chat UI with panels", binary_name: "chat_client", preview: &["[10:42] Alice: Hey!", "[10:43] Bob: Hi", "[10:44] Alice: Hi!", "> _",] },
+            ExampleMeta { name: "git_tui", category: "apps", description: "Real Git status/log/diff/branches", binary_name: "git_tui", preview: &["[Status][Log][Diff]", " M src/main.rs", " A Cargo.toml", "?? README.md",] },
             // Cookbook
-            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets in one App", binary_name: "widget_gallery", preview: &["[x] Checkbox", "(o) Radio", "[----] Slider", "Loading [####] ",] },
-            ExampleMeta { name: "tree_navigator", category: "cookbook", description: "Hierarchical navigation with Tree", binary_name: "tree_navigator", preview: &["v home/", "  v user/", "    v src/", "      > main.rs",] },
-            ExampleMeta { name: "log_monitor", category: "cookbook", description: "Real-time log viewer with filtering", binary_name: "log_monitor", preview: &["[INFO] Starting", "[WARN] High mem", "[ERR ] Timeout", "[INFO] Done",] },
-            ExampleMeta { name: "tabbed_panels", category: "cookbook", description: "Tab switching with per-tab state", binary_name: "tabbed_panels", preview: &["[Tab1][Tab2][Tab3]", "+---------------+", "| Dashboard     |", "| CPU: 45%      |",] },
-            ExampleMeta { name: "data_table", category: "cookbook", description: "Sortable table with search/filter", binary_name: "data_table", preview: &["Name     | Role   |", "---------+--------", "Alice    | Admin  |", "Bob      | User   |",] },
-            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Nested SplitPane with drag-to-resize", binary_name: "split_resizer", preview: &["+-----+-----+", "|  A  |  B  |", "+-----+-----+", "|  C  |  D  |",] },
-            ExampleMeta { name: "command_bindings", category: "cookbook", description: "5 command-bound widgets with auto-refresh", binary_name: "command_bindings", preview: &["Load: 0.45 0.32", "CPU:  [####--]", "Mem:  [######]", "Net:  [------]",] },
-            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu with shortcuts", binary_name: "menu_system", preview: &["[File][Edit][View]", "+-----------+", "| New        |", "| Open       |",] },
-            ExampleMeta { name: "debug_overlay", category: "cookbook", description: "Debug tools overlay with F12 toggle", binary_name: "debug_overlay", preview: &["FPS: 60", "Frame: 16ms", "Widgets: 12", "Events: 45",] },
+            ExampleMeta { name: "widget_gallery", category: "cookbook", description: "All interactive widgets demo", binary_name: "widget_gallery", preview: &["[x] Checkbox", "(o) Radio", "[----] Slider", "Loading [####] ",] },
+            ExampleMeta { name: "command_bindings", category: "cookbook", description: "Live CLI-bound widgets", binary_name: "command_bindings", preview: &["Load: 0.45 0.32", "CPU:  [####--]", "Mem:  [######]", "Net:  [------]",] },
+            ExampleMeta { name: "split_resizer", category: "cookbook", description: "Drag-to-resize SplitPane", binary_name: "split_resizer", preview: &["+-----+-----+", "|  A  |  B  |", "+--+--+-----+", "|  C  |  D  |",] },
+            ExampleMeta { name: "menu_system", category: "cookbook", description: "MenuBar + ContextMenu", binary_name: "menu_system", preview: &["[File][Edit][View]", "+-----------+", "| New        |", "| Open       |",] },
             // Tools
-            ExampleMeta { name: "form_demo", category: "tools", description: "Settings form with validation", binary_name: "form_demo", preview: &["Username: alice", "Email: a@b.com", "Password: ****", "[Submit]",] },
-            ExampleMeta { name: "modal_demo", category: "tools", description: "ConfirmDialog + help overlay", binary_name: "modal_demo", preview: &["+---------------+", "| Confirm?     |", "| [Yes] [No]   |", "+---------------+",] },
-            ExampleMeta { name: "theme_switcher", category: "tools", description: "Live theme cycling through all 15 themes", binary_name: "theme_switcher", preview: &["Theme: Nord", "+----------+", "| # # # #   |", "| # # # #   |",] },
-            ExampleMeta { name: "widget_tutorial", category: "tools", description: "Build a custom ColorPicker widget", binary_name: "widget_tutorial", preview: &["ColorPicker:", "+----------+", "| R G B Y   |", "| P O W B   |",] },
-            ExampleMeta { name: "text_editor_demo", category: "tools", description: "Text editor widget demo", binary_name: "text_editor_demo", preview: &["fn main() {", "  println!(", "    \"Hello\"", "  );",] },
-            ExampleMeta { name: "desktop", category: "tools", description: "Desktop environment mockup", binary_name: "desktop", preview: &["+------++------+", "| Win1 || Win2  |", "|      ||      |", "+------++------+",] },
-            ExampleMeta { name: "game_loop", category: "tools", description: "Interactive game loop demo", binary_name: "game_loop", preview: &["    @     *", "   *   @   ", "  @     *  ", "    *   @  ",] },
-            ExampleMeta { name: "input_debug", category: "tools", description: "Input event debugger", binary_name: "input_debug", preview: &["Key: Enter", "Code: 13", "Kind: Press", "Mod: Ctrl",] },
-            ExampleMeta { name: "framework_file_manager", category: "tools", description: "File browser", binary_name: "framework_file_manager", preview: &["v src/", "  > lib.rs", "  > main.rs", "  + Cargo.toml",] },
-            ExampleMeta { name: "form_widget", category: "tools", description: "Form builder with labeled fields", binary_name: "form_widget", preview: &["Name:     _____", "Email:    _____", "Password: *****", "[Submit]",] },
-            ExampleMeta { name: "table_widget", category: "tools", description: "Sortable data table", binary_name: "table_widget", preview: &["Name   | Role  |", "-------+------", "Alice  | Admin |", "Bob    | User  |",] },
-            ExampleMeta { name: "ide", category: "apps", description: "Mini IDE with all widgets", binary_name: "ide", preview: &["[File][Edit][View]", "+-src/ +--------+", "| main |fn main|", "| lib  |{      |", "+------+--------+",] },
-            ExampleMeta { name: "git_tui", category: "apps", description: "Real Git interface with status/log/diff/branches", binary_name: "git_tui", preview: &["[Status][Log][Diff]", " M src/main.rs", " A Cargo.toml", "?? README.md",] },
-            ExampleMeta { name: "sqlite_browser", category: "apps", description: "Database browser with query editor", binary_name: "sqlite_browser", preview: &["Tables  | Query   |", "users   | SELECT  |", "posts   | FROM    |", "        | users   |",] },
+            ExampleMeta { name: "theme_switcher", category: "tools", description: "Live theme cycling (15 themes)", binary_name: "theme_switcher", preview: &["Theme: Nord", "+----------+", "| # # # #   |", "| # # # #   |",] },
+            ExampleMeta { name: "modal_demo", category: "tools", description: "Modal dialogs + focus trapping", binary_name: "modal_demo", preview: &["+---------------+", "| Confirm?     |", "| [Yes] [No]   |", "+---------------+",] },
+            ExampleMeta { name: "desktop", category: "tools", description: "Draggable windows + taskbar", binary_name: "desktop", preview: &["+------++------+", "| Win1 || Win2  |", "|      ||      |", "+------++------+",] },
         ]
     }
 }
