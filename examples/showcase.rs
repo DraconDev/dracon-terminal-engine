@@ -650,7 +650,7 @@ fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) 
     }
 }
 
-fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let items = [
         (0, "home/", true, 0),
         (1, "user/", true, 1),
