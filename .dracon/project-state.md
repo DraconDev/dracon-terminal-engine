@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock and Cargo.toml to reflect dependency version changes
+Removed animation-related fields from the Showcase struct.
 
 ## Context
-This change was prompted by recent dependency updates in the project, particularly in the SQLite browser and Git TUI examples. The updates ensure all dependencies are properly versioned and compatible with the current codebase.
+The animation fields (`anim_frame` and `last_anim`) were no longer being used in the showcase example, suggesting they were either deprecated or not needed for the current implementation.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency version changes
-- [x] Updated Cargo.toml to ensure proper dependency resolution
+- [x] Removed unused animation tracking fields from the Showcase struct
+- [x] Cleaned up initialization code that set these fields
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] No active work on this file
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all examples continue to work with the updated dependencies
-2. Prepare for the next round of feature development or refactoring
+1. Verify if animation functionality is needed elsewhere in the project
+2. If not needed, consider removing related animation code entirely

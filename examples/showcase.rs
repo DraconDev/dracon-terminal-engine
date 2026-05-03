@@ -88,8 +88,6 @@ struct Showcase {
     should_quit: Arc<AtomicBool>,
     pending_binary: Arc<Mutex<Option<String>>>,
     status_message: Option<(String, Instant)>,
-    anim_frame: u8,
-    last_anim: Instant,
 }
 
 impl Showcase {
@@ -107,8 +105,6 @@ impl Showcase {
             should_quit,
             pending_binary: pending,
             status_message: None,
-            anim_frame: 0,
-            last_anim: Instant::now(),
         }
     }
 
