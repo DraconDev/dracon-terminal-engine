@@ -52,6 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             width: 20,
             height: 10,
             color: 0,
+            minimized: false,
         },
         Window {
             _id: 2,
@@ -61,6 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             width: 25,
             height: 8,
             color: 20,
+            minimized: false,
         },
         Window {
             _id: 3,
@@ -69,7 +71,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             y: 14,
             width: 20,
             height: 5,
-            color: 1, // Red
+            color: 1,
+            minimized: false,
         },
     ];
 
