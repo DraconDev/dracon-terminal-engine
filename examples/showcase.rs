@@ -123,6 +123,7 @@ impl Showcase {
             show_help: false,
             modal_preview: false,
             show_fps: true,
+            card_phase: 0.0,
         }
     }
 
