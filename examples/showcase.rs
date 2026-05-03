@@ -537,7 +537,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
             break;
         }
         let bar_w = 14;
-        let val = value.max(0.0).min(100.0);
+        let val = value.clamp(0.0, 100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
         let color = if val > 80.0 {
             t.error
@@ -1503,9 +1503,7 @@ impl Widget for Showcase {
                 "tools" => ("◦", " TOOLS "),
                 _ => ("•", *cat),
             };
-            let icon_fg = if is_hovered {
-                t.primary
-            } else if is_active {
+            let icon_fg = if is_hovered || is_active {
                 t.primary
             } else {
                 t.fg_muted
