@@ -1072,7 +1072,8 @@ impl Widget for Showcase {
                 set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
             }
             draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, true);
-            draw_text(&mut plane, sx + 3, sy, &scroll_text[2..], t.fg_muted, t.surface, false);
+            let rest: String = scroll_text.chars().skip(2).collect();
+            draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, false);
         }
 
         // Status bar
