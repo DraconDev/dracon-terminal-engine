@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactor card animation timing to use `Instant` for more accurate elapsed time tracking
+Added `Instant` timestamp to `Showcase` initialization for timing accuracy
 
 ## Context
-The previous implementation used a `Cell<f64>` to track card animation phase, which required manual updates. This change replaces it with an `Instant` timestamp, allowing the animation to calculate elapsed time directly when needed.
+This change was prompted by the refactoring of card animation timing to use `Instant` for more accurate elapsed time calculations, as seen in recent commits.
 
 ## Completed
-- [x] Replace `card_phase` with `card_start: Instant`
-- [x] Update card rendering to use `card_start.elapsed().as_secs_f64()`
-- [x] Initialize `card_start` with `Instant::now()` in the constructor
+- [x] Added `Instant::now()` as a parameter to `Showcase::new()`
+- [x] Updated showcase initialization to include timing reference
 
 ## In Progress
-- [x] Animation timing now uses system time rather than manual phase tracking
+- [x] Integration of timing system with card animations
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify animation timing accuracy across different systems
-2. Consider adding animation pause/resume functionality if needed
+1. Verify timing accuracy in card animations
+2. Ensure consistent timing across all showcase elements

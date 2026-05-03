@@ -1238,7 +1238,7 @@ fn main() -> std::io::Result<()> {
     let fps_counter = Arc::new(AtomicU64::new(0));
     let fps_for_tick = Arc::clone(&fps_counter);
 
-    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter);
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, Instant::now());
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
