@@ -299,7 +299,7 @@ impl Widget for Table {
             return false;
         }
         if self.search.handle_key(key.clone()) {
-            let q = self.search.query();
+            let q = self.search.query().to_string();
             self.filter(&q);
             return true;
         }
