@@ -185,13 +185,13 @@ impl IdeApp {
             CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
         ];
 
-        let cmd_bridge: Rc<RefCell<Option<&'static str>>> = Rc::new(RefCell::new(None));
+        let cmd_bridge: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
         let cmd_bridge_clone = cmd_bridge.clone();
         let command_palette = CommandPalette::new(palette_commands)
             .with_size(45, 18)
             .with_theme(theme)
             .on_execute(move |cmd_id| {
-                *cmd_bridge_clone.borrow_mut() = Some(cmd_id);
+                *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
             });
 
         Self {
