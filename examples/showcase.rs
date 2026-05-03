@@ -716,14 +716,6 @@ impl Widget for Showcase {
             draw_text(&mut plane, 2, 5, &feedback_text, feedback_color, t.bg, false);
         }
 
-        // Auto-reset primitive button after 1 second
-        if let Some(btn_time) = self.primitive_button_time {
-            if btn_time.elapsed() >= Duration::from_secs(1) {
-                self.primitive_button = false;
-                self.primitive_button_time = None;
-            }
-        }
-
         // Primitives bar
         let prim_y = 4usize;
         let prim_state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
@@ -1325,6 +1317,7 @@ impl Widget for Showcase {
                     }
                     if x >= 76 && x < 90 {
                         self.primitive_button = true;
+                        self.primitive_button_time = Some(Instant::now());
                         return true;
                     }
                 }
@@ -1407,6 +1400,12 @@ impl Widget for Showcase {
                 }
             }
             MouseEventKind::Moved => {
+                if let Some(btn_time) = self.primitive_button_time {
+                    if btn_time.elapsed() >= Duration::from_secs(1) {
+                        self.primitive_button = false;
+                        self.primitive_button_time = None;
+                    }
+                }
                 let y = row as usize;
                 let x = col as usize;
                 if x >= grid_start_x && y >= grid_start_y {
