@@ -386,23 +386,23 @@ impl crate::framework::widget::Widget for CommandPalette {
 
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                let zones = self.zones.borrow();
-                if let Some(cmd_idx) = zones.dispatch(col, row) {
+                let cmd_id = {
+                    let zones = self.zones.borrow();
+                    zones.dispatch(col, row)
+                };
+                if let Some(cmd_idx) = cmd_id {
                     self.selected_index = cmd_idx;
                     let filtered = self.filtered_commands();
-                    if cmd_idx < filtered.len() {
-                        let cmd = filtered[cmd_idx];
+                    let cmd_id = filtered.get(cmd_idx.min(filtered.len().saturating_sub(1))).map(|c| c.id);
+                    self.hide();
+                    if let Some(id) = cmd_id {
                         if let Some(ref mut f) = self.on_execute {
-                            f(cmd.id);
+                            f(id);
                         }
                     }
-                    drop(zones);
-                    self.hide();
                     return true;
                 }
-                drop(zones);
-
-                // Click outside the palette area hides it
+                // Click outside hides palette
                 let (w, h) = (self.width.min(self.area.get().width), self.height.min(self.area.get().height));
                 let ox = (self.area.get().width.saturating_sub(w)) / 2;
                 let oy = (self.area.get().height.saturating_sub(h)) / 3;
