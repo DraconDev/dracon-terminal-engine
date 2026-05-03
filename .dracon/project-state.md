@@ -1,20 +1,24 @@
 # Project State
 
 ## Current Focus
-Refactored unused variable in file manager detail pane rendering
+Enhanced showcase card rendering with dynamic sizing and improved animations
 
 ## Context
-The change removes an unused variable in the file manager's detail pane rendering logic, which was previously bound to `self.selected_path` but never used in the subsequent code block.
+The showcase example was refactored to support dynamic card dimensions and more organic animations across different examples. This improves visual consistency and user experience in the demo interface.
 
 ## Completed
-- [x] Removed unused `sel_path` variable in file manager detail pane rendering
+- [x] Made card dimensions configurable via parameters
+- [x] Added per-card phase offset for more organic animations
+- [x] Improved text truncation to respect card width
+- [x] Enhanced preview rendering to adapt to card dimensions
+- [x] Updated all example previews to use the new parameterized rendering
 
 ## In Progress
-- [x] No active work in progress
+- [ ] No active work in progress
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Review for any other unused variables in the file manager code
-2. Continue with ongoing file manager refactoring work
+1. Verify visual consistency across all examples
+2. Test with different terminal sizes to ensure responsiveness

@@ -286,17 +286,20 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64) -> Plane {
-    let card_w = 28u16;
-    let card_h = 14u16;
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, card_w: u16, card_h: u16) -> Plane {
     let mut plane = Plane::new(0, card_w, card_h);
+    let card_w_usize = card_w as usize;
+    let card_h_usize = card_h as usize;
 
     let is_selected = idx == selected_idx;
     let is_hovered = Some(idx) == hovered_idx;
     let cat_color = category_color(t, ex.category);
 
+    // Per-card phase offset for more organic animations
+    let card_phase = phase + (idx as f64 * 0.73);
+
     let border_fg = if is_selected {
-        let pulse = (phase * 2.0).sin() * 0.5 + 0.5;
+        let pulse = (card_phase * 2.0).sin() * 0.5 + 0.5;
         if pulse > 0.5 { t.primary } else { t.primary_hover }
     } else if is_hovered {
         t.primary_hover
@@ -311,37 +314,42 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     let badge_y = 1usize;
     for (i, ch) in badge.chars().enumerate() {
         let px = badge_x + i;
-        if px < plane.width as usize - 2 {
+        if px < card_w_usize - 2 {
             set_cell(&mut plane, px, badge_y, ch, t.fg_on_accent, cat_color);
         }
     }
 
     let name_y = 3usize;
-    let name_truncated = if ex.name.len() > 24 { &ex.name[..24] } else { ex.name };
-    draw_text(&mut plane, 2, name_y, name_truncated, t.fg, bg, true);
+    let max_name_len = (card_w_usize - 4).min(24);
+    let name_truncated: String = ex.name.chars().take(max_name_len).collect();
+    draw_text(&mut plane, 2, name_y, &name_truncated, t.fg, bg, true);
 
     let desc_y = 4usize;
-    let desc: String = ex.description.chars().take(24).collect();
+    let max_desc_len = (card_w_usize - 4).min(24);
+    let desc: String = ex.description.chars().take(max_desc_len).collect();
     draw_text(&mut plane, 2, desc_y, &desc, t.fg_muted, bg, false);
 
+    let preview_start_y = 6usize;
+    let preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
+
     match ex.name {
-        "system_monitor" => render_live_gauge_preview(&mut plane, t, phase),
-        "split_resizer" => render_split_preview(&mut plane, t, phase),
-        "command_bindings" => render_command_preview(&mut plane, t, phase),
-        "theme_switcher" => render_theme_preview(&mut plane, t, phase),
-        "widget_gallery" => render_widget_preview(&mut plane, t, phase),
-        "ide" => render_ide_preview(&mut plane, t, phase),
-        "desktop" => render_desktop_preview(&mut plane, t, phase),
-        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, phase),
-        "git_tui" => render_git_tui_preview(&mut plane, t, phase),
-        "file_manager" => render_file_manager_preview(&mut plane, t, phase),
-        "menu_system" => render_menu_system_preview(&mut plane, t, phase),
-        "modal_demo" => render_modal_demo_preview(&mut plane, t, phase),
+        "system_monitor" => render_live_gauge_preview(&mut plane, t, card_phase, card_w),
+        "split_resizer" => render_split_preview(&mut plane, t, card_phase, card_w),
+        "command_bindings" => render_command_preview(&mut plane, t, card_phase, card_w),
+        "theme_switcher" => render_theme_preview(&mut plane, t, card_phase, card_w),
+        "widget_gallery" => render_widget_preview(&mut plane, t, card_phase, card_w),
+        "ide" => render_ide_preview(&mut plane, t, card_phase, card_w),
+        "desktop" => render_desktop_preview(&mut plane, t, card_phase, card_w),
+        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, card_phase, card_w),
+        "git_tui" => render_git_tui_preview(&mut plane, t, card_phase, card_w),
+        "file_manager" => render_file_manager_preview(&mut plane, t, card_phase, card_w),
+        "menu_system" => render_menu_system_preview(&mut plane, t, card_phase, card_w),
+        "modal_demo" => render_modal_demo_preview(&mut plane, t, card_phase, card_w),
         _ => {
             for (i, line) in ex.preview.iter().enumerate() {
-                let py = 6 + i;
-                if py < card_h as usize - 1 {
-                    let preview_line: String = line.chars().take(24).collect();
+                let py = preview_start_y + i;
+                if py < card_h_usize - 1 {
+                    let preview_line: String = line.chars().take(card_w_usize - 4).collect();
                     draw_text(&mut plane, 2, py, &preview_line, t.fg_subtle, bg, false);
                 }
             }
@@ -349,7 +357,7 @@ fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: O
     }
 
     if is_selected {
-        draw_text(&mut plane, 1, card_h as usize / 2, "►", t.primary, bg, true);
+        draw_text(&mut plane, 1, card_h_usize / 2, "►", t.primary, bg, true);
     }
 
     plane
