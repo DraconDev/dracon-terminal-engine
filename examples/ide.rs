@@ -12,6 +12,7 @@
 //!   Ctrl+G      — go to line
 //!   F12         — toggle profiler overlay
 //!   t           — cycle theme
+//!   Ctrl+P      — command palette
 //!   q / Ctrl+Q  — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};

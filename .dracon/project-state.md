@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Added keyboard shortcut handling for the settings modal in the IDE example
+Added Ctrl+P keyboard shortcut documentation for the command palette in the IDE example.
 
 ## Context
-This change enables users to close the settings modal using either Escape or 'q' key presses, improving the user experience by providing consistent keyboard navigation patterns.
+This change documents the keyboard shortcut for opening the command palette, which was recently implemented in the IDE example. It maintains consistency with the existing shortcut documentation style.
 
 ## Completed
-- [x] Added keyboard shortcut handling for settings modal (Esc and 'q' keys)
-- [x] Implemented modal priority handling to prevent other UI interactions
+- [x] Added Ctrl+P shortcut documentation in the IDE example's help text
 
 ## In Progress
-- [x] Keyboard shortcut implementation for settings modal
+- [x] Documentation of keyboard shortcuts for the command palette
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify modal behavior with other keyboard shortcuts
-2. Add visual feedback when modal is open/closed
+1. Verify the shortcut works as documented in the IDE example
+2. Ensure all command palette features are properly documented
