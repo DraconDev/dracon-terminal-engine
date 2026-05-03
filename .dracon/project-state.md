@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Refactored `Showcase` widget to use thread-safe `Rect` storage for dynamic area management.
+Implement dynamic area management for the Showcase widget by adding terminal resize handling
 
 ## Context
-The `Showcase` widget needed thread-safe storage for its area property to support dynamic resizing scenarios. The previous implementation used a direct `Rect` field, which wasn't suitable for concurrent access.
+The Showcase widget needs to properly handle terminal resizing events to maintain correct layout. This was previously missing from the widget's implementation.
 
 ## Completed
-- [x] Replaced direct `Rect` field with `Arc<Mutex<Rect>>` for thread-safe access
-- [x] Updated `area()` and `set_area()` methods to properly handle the mutex
+- [x] Added thread-safe Rect storage for dynamic area management
+- [x] Implemented resize handling in the main event loop
+- [x] Updated Showcase constructor to accept area parameter
+- [x] Added dirty marking on resize events
 
 ## In Progress
-- [ ] Testing thread-safety in concurrent rendering scenarios
+- [x] Terminal resize handling implementation
 
 ## Blockers
-- Need to verify mutex performance impact in high-frequency rendering
+- None identified
 
 ## Next Steps
-1. Add integration tests for thread-safe area management
-2. Document thread-safety considerations in widget documentation
+1. Test resize behavior across different terminal sizes
+2. Verify widget layout remains stable during rapid resizing

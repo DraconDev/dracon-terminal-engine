@@ -541,7 +541,11 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let showcase = Showcase::new(should_quit, pending.clone());
+    // Shared area that the run closure can update on resize
+    let area = Arc::new(Mutex::new(Rect::new(0, 0, 80, 24)));
+    let area_for_tick = Arc::clone(&area);
+
+    let showcase = Showcase::new(should_quit, pending.clone(), Arc::clone(&area));
 
     let mut app = App::new()?.title("Dracon Showcase").fps(30).theme(Theme::nord());
     app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
@@ -550,6 +554,16 @@ fn main() -> std::io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
             return;
+        }
+
+        // Update widget area on terminal resize
+        let (w, h) = ctx.compositor().size();
+        {
+            let mut rect = area_for_tick.lock().unwrap();
+            if rect.width != w || rect.height != h {
+                *rect = Rect::new(0, 0, w, h);
+                ctx.mark_all_dirty();
+            }
         }
 
         // Handle pending binary launch
@@ -594,9 +608,7 @@ fn main() -> std::io::Result<()> {
             let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
-    }).run(|ctx| {
-        let (w, h) = ctx.compositor().size();
-        // Re-render with current size
-        let _ = (w, h);
+    }).run(|_ctx| {
+        // Render loop handled by framework
     })
 }
