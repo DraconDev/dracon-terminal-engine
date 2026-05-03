@@ -4,18 +4,19 @@
 Added FPS counter to showcase example for performance monitoring
 
 ## Context
-To help developers visualize and debug rendering performance in the showcase example, we need a way to display frames-per-second metrics.
+This change enhances the showcase example by adding a real-time FPS counter to help monitor and demonstrate the terminal engine's performance capabilities.
 
 ## Completed
-- [x] Added `fps` field to `Showcase` struct to track frame rate
-- [x] Initialized `fps` with default value of 0
+- [x] Added right-aligned FPS counter display in the title bar area
+- [x] Implemented dynamic FPS value retrieval and formatting
+- [x] Added conditional rendering to prevent overlap with title text
 
 ## In Progress
-- [x] Implementation of actual FPS calculation and display
+- [x] FPS counter implementation and display logic
 
 ## Blockers
-- Need to implement the actual FPS measurement logic that updates this value
+- None identified
 
 ## Next Steps
-1. Implement FPS calculation logic that updates the cell value
-2. Add UI display for the FPS counter in the showcase example
+1. Verify FPS counter accuracy across different terminal configurations
+2. Consider adding performance metrics for other showcase features

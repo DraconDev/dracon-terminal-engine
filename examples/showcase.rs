@@ -338,7 +338,7 @@ impl Widget for Showcase {
 
         // Title bar with decorative border
         let title_text = " Dracon Terminal Engine ";
-        let title_x = ((area.width as usize).saturating_sub(title_text.len())) / 2;
+        let title_x = 2usize;
         let title_y = 0usize;
 
         for (i, ch) in title_text.chars().enumerate() {
@@ -346,6 +346,14 @@ impl Widget for Showcase {
             if px < area.width as usize {
                 set_cell(&mut plane, px, title_y, ch, t.primary, t.bg);
             }
+        }
+
+        // FPS counter (right-aligned)
+        let fps_val = self.fps.get();
+        let fps_text = format!("{} FPS", fps_val);
+        let fps_x = area.width as usize - fps_text.len() - 2;
+        if fps_x > title_x + title_text.len() {
+            draw_text(&mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false);
         }
 
         // Theme palette bar
