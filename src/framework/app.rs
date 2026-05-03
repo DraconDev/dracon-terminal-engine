@@ -326,6 +326,14 @@ impl App {
         let mut stdin = io::stdin();
         let frame_duration = Duration::from_secs_f64(1.0 / self.fps as f64);
 
+        // One-time: sync widget areas to compositor size on first frame
+        let (w, h) = self.compositor.size();
+        let full_rect = Rect::new(0, 0, w, h);
+        for w in self.widgets.borrow_mut().iter_mut() {
+            w.set_area(full_rect);
+            w.mark_dirty();
+        }
+
         while running.load(Ordering::SeqCst) {
             let frame_start = Instant::now();
 
