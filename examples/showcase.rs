@@ -515,19 +515,19 @@ fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
         let wx = wx.min(19);
         let wy = wy.min(11);
 
-        set_cell(plane, wx, wy, '┌', *color, t.bg);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.bg); }
-        set_cell(plane, wx + w - 1, wy, '┐', *color, t.bg);
+        set_cell(plane, wx, wy, '┌', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy, '─', *color, t.surface); }
+        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
         for dy in 1..h - 1 {
-            set_cell(plane, wx, wy + dy, '│', *color, t.bg);
-            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.bg); }
-            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.bg);
+            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
+            for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface); }
+            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
         }
-        set_cell(plane, wx, wy + h - 1, '└', *color, t.bg);
-        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.bg); }
-        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.bg);
+        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface); }
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
 
-        draw_text(plane, wx + 2, wy + 1, label, *color, t.bg, true);
+        draw_text(plane, wx + 2, wy + 1, label, *color, t.surface, true);
     }
 }
 
