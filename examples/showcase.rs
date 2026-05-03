@@ -361,12 +361,19 @@ impl Widget for Showcase {
         }
 
         // FPS counter (right-aligned)
-        let fps_val = self.fps.load(Ordering::Relaxed);
-        let fps_text = format!("{} FPS", fps_val);
-        let fps_x = area.width as usize - fps_text.len() - 2;
-        if fps_x > title_x + title_text.len() {
-            draw_text(&mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false);
+        if self.show_fps {
+            let fps_val = self.fps.load(Ordering::Relaxed);
+            let fps_text = format!("{} FPS", fps_val);
+            let fps_x = area.width as usize - fps_text.len() - 2;
+            if fps_x > title_x + title_text.len() {
+                draw_text(&mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false);
+            }
         }
+        
+        // FPS toggle checkbox
+        let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
+        let toggle_x = area.width as usize - fps_toggle.len() - 2;
+        draw_text(&mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false);
 
         // Theme palette bar
         let palette_y = 1usize;
@@ -915,6 +922,16 @@ impl Widget for Showcase {
                             self.apply_filter();
                             return true;
                         }
+                    }
+                }
+
+                // FPS toggle click
+                if y == 0 {
+                    let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
+                    let toggle_x = self.area.width as usize - fps_toggle.len() - 2;
+                    if x >= toggle_x && x < toggle_x + fps_toggle.len() {
+                        self.show_fps = !self.show_fps;
+                        return true;
                     }
                 }
 
