@@ -353,7 +353,7 @@ impl Widget for Showcase {
         let gap = 1usize;
         let total_width = themes.len() * (square_w + gap);
         let palette_start_x = ((area.width as usize).saturating_sub(total_width)) / 2;
-        for (i, (name, theme)) in themes.iter().enumerate() {
+        for (i, (_name, theme)) in themes.iter().enumerate() {
             let x = palette_start_x + i * (square_w + gap);
             let is_active = theme.name == self.theme.name;
             let bg = if is_active { theme.primary_active } else { theme.primary };
