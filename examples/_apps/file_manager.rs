@@ -414,11 +414,81 @@ impl Widget for FileManager {
         let area = self.area.get();
         let ch = area.height.saturating_sub(hh + 1);
 
-        if row == 0 { return self.breadcrumbs.handle_mouse(kind, col, row); }
+        // Breadcrumb click detection (row 0)
+        if row == 0 {
+            if let MouseEventKind::Down(MouseButton::Left) = kind {
+                use unicode_width::UnicodeWidthStr;
+                let mut x: u16 = 0;
+                let segments = self.breadcrumbs.segments(); // need this method
+                // Actually let's duplicate the logic inline
+                let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+                let segs: Vec<String> = cwd.components()
+                    .map(|c| c.as_os_str().to_string_lossy().into_owned())
+                    .collect();
+                for (i, seg) in segs.iter().enumerate() {
+                    let seg_width = (seg.width() as u16 + 2).min(area.width.saturating_sub(x));
+                    if seg_width < 3 { break; }
+                    if i > 0 { x += 1; }
+                    if col >= x && col < x + seg_width {
+                        // Navigate to this breadcrumb level
+                        let components: Vec<_> = cwd.components().collect();
+                        let target_path: PathBuf = components[..=i].iter().collect();
+                        // Rebuild tree from target path
+                        self.root = FsNode::build_tree(&target_path, 0);
+                        self.tree_path.clear();
+                        self.selected_path = None;
+                        self.dirty = true;
+                        return true;
+                    }
+                    x += seg_width;
+                }
+            }
+            return true;
+        }
 
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, _) = split.split(Rect::new(0, hh, area.width, ch));
+        // Split pane drag resize
+        let divider_rect = self.split.divider_rect(Rect::new(0, hh, area.width, ch));
+        if col >= divider_rect.x && col < divider_rect.x + divider_rect.width
+            && row >= divider_rect.y && row < divider_rect.y + divider_rect.height
+        {
+            match kind {
+                MouseEventKind::Down(MouseButton::Left) => {
+                    self.is_dragging_split = true;
+                    return true;
+                }
+                MouseEventKind::Drag(_) if self.is_dragging_split => {
+                    if self.split.handle_resize(kind, col, row, Rect::new(0, hh, area.width, ch)) {
+                        self.dirty = true;
+                    }
+                    return true;
+                }
+                MouseEventKind::Up(_) if self.is_dragging_split => {
+                    self.is_dragging_split = false;
+                    self.dirty = true;
+                    return true;
+                }
+                _ => {}
+            }
+        }
+        // If dragging ends outside the divider, also reset
+        if self.is_dragging_split && matches!(kind, MouseEventKind::Up(_)) {
+            self.is_dragging_split = false;
+            self.dirty = true;
+            return true;
+        }
 
+        // Store drag state for continuous resize events
+        if self.is_dragging_split {
+            if let MouseEventKind::Drag(_) = kind {
+                if self.split.handle_resize(kind, col, row, Rect::new(0, hh, area.width, ch)) {
+                    self.dirty = true;
+                }
+                return true;
+            }
+        }
+
+        // Tree pane click
+        let (tree_rect, _) = self.split.split(Rect::new(0, hh, area.width, ch));
         if col < tree_rect.width && row >= hh && row < hh + ch {
             return self.tree.handle_mouse(kind, col, row - hh);
         }
