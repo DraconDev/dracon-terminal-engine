@@ -110,6 +110,9 @@ struct IdeApp {
     // Breadcrumbs
     breadcrumbs: Breadcrumbs,
 
+    // Command palette
+    command_palette: CommandPalette,
+
     // Animation
     anim_frame: u8,
     last_anim: Instant,
