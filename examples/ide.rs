@@ -801,18 +801,47 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 }
 
 fn is_keyword(line: &str, pos: usize) -> bool {
-    let keywords = ["fn", "let", "mut", "pub", "use", "struct", "impl", "if", "else", "return", "match", "for", "while", "loop"];
-    let before = &line[..pos.min(line.len())];
-    let after = &line[pos.min(line.len())..];
-    keywords.iter().any(|kw| before.ends_with(kw) || after.starts_with(kw))
+    let keywords = ["fn", "let", "mut", "pub", "use", "struct", "impl", "if", "else", "return", "match", "for", "while", "loop", "in", "mod", "trait", "type", "enum", "const", "static", "unsafe", "async", "await"];
+    // Find the word boundary around position
+    let before: String = line[..pos.min(line.len())].chars().rev().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+    let after: String = line[pos.min(line.len())..].chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+    let word: String = before.chars().rev().collect::<String>() + &after;
+    keywords.iter().any(|kw| word == *kw)
 }
 
-fn is_string_literal(_line: &str, _pos: usize) -> bool {
-    false // Simplified - would need proper parser
+fn is_string_literal(line: &str, pos: usize) -> bool {
+    let mut in_string = false;
+    let mut in_char = false;
+    let mut escape = false;
+    for (i, ch) in line.chars().enumerate() {
+        if i > pos { break; }
+        if escape {
+            escape = false;
+            continue;
+        }
+        if ch == '\\' {
+            escape = true;
+            continue;
+        }
+        if ch == '"' && !in_char {
+            in_string = !in_string;
+        } else if ch == '\'' && !in_string {
+            in_char = !in_char;
+        }
+    }
+    in_string || in_char
 }
 
 fn is_comment(line: &str, pos: usize) -> bool {
-    line[..pos.min(line.len())].contains("//")
+    if let Some(idx) = line.find("//") {
+        pos >= idx
+    } else {
+        false
+    }
+}
+
+fn is_number(line: &str, pos: usize) -> bool {
+    line.chars().nth(pos).map(|c| c.is_ascii_digit()).unwrap_or(false)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
