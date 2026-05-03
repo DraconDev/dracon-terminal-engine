@@ -695,6 +695,17 @@ impl Widget for Showcase {
             }
         }
 
+        // Modal preview takes priority
+        if self.modal_preview {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char(' ') => {
+                    self.modal_preview = false;
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
         // Search mode
         if self.search_active {
             match key.code {
