@@ -1257,10 +1257,11 @@ impl Widget for Showcase {
                             self.status_message = Some((format!("Copied: {}", ex.binary_name), Instant::now()));
                         }
                     } else if selected == 2 {
-                        if let Some(ex) = self.selected_example() {
-                            self.category_filter = Some(ex.category);
+                        let category = self.selected_example().map(|ex| ex.category);
+                        if let Some(cat) = category {
+                            self.category_filter = Some(cat);
                             self.apply_filter();
-                            self.status_message = Some((format!("Filtered: {}", ex.category), Instant::now()));
+                            self.status_message = Some((format!("Filtered: {}", cat), Instant::now()));
                         }
                     }
                     return true;
@@ -1543,6 +1544,7 @@ impl Widget for Showcase {
                     if card_idx < self.filtered.len() {
                         self.selected = card_idx;
                         self.context_menu = Some((card_idx, col, row));
+                        self.context_menu_selected = 0;
                         return true;
                     }
                 }
