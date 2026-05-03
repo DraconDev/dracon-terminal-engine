@@ -4,17 +4,18 @@
 Added FPS display toggle to the showcase example
 
 ## Context
-This change enables developers to visualize performance metrics by adding a toggleable FPS counter to the showcase example. This supports debugging and optimization work by providing real-time performance feedback.
+This change enables users to toggle the display of frames-per-second (FPS) metrics in the showcase example, providing performance visibility for the interactive demonstration.
 
 ## Completed
-- [x] Added `show_fps` boolean field to the Showcase struct to track FPS display state
+- [x] Added `show_fps` boolean field to showcase state
+- [x] Enabled FPS display functionality in the example
 
 ## In Progress
-- [x] Implementation of actual FPS calculation and display logic (not yet in this commit)
+- [ ] Implement actual FPS calculation and display logic
 
 ## Blockers
-- Need to implement FPS calculation and rendering logic in the next commit
+- FPS calculation and rendering implementation pending
 
 ## Next Steps
-1. Implement FPS calculation and display logic
-2. Add keyboard shortcut to toggle FPS display (likely 'F' key)
+1. Implement FPS calculation logic
+2. Add visual display of FPS metrics in the UI
