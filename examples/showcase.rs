@@ -522,12 +522,38 @@ impl Widget for Showcase {
             }
         }
 
-        // Status message (temporary)
+        // Status message (temporary) - toast style
         if let Some((ref msg, time)) = self.status_message {
             if time.elapsed() < Duration::from_secs(2) {
-                let msg_x = 2usize;
-                let msg_y = area.height as usize - 2;
-                draw_text(&mut plane, msg_x, msg_y, msg, t.warning, t.bg, true);
+                let msg_y = area.height as usize / 2;
+                let msg_x = ((area.width as usize).saturating_sub(msg.len() + 6)) / 2;
+                let msg_w = msg.len() + 6;
+                
+                // Toast background
+                for cx in 0..msg_w {
+                    if msg_x + cx < area.width as usize {
+                        set_cell(&mut plane, msg_x + cx, msg_y - 1, ' ', t.fg, t.warning);
+                        set_cell(&mut plane, msg_x + cx, msg_y, ' ', t.fg, t.warning);
+                        set_cell(&mut plane, msg_x + cx, msg_y + 1, ' ', t.fg, t.warning);
+                    }
+                }
+                
+                // Toast border
+                for cx in 0..msg_w {
+                    if msg_x + cx < area.width as usize {
+                        set_cell(&mut plane, msg_x + cx, msg_y - 1, '─', t.warning, t.warning);
+                        set_cell(&mut plane, msg_x + cx, msg_y + 1, '─', t.warning, t.warning);
+                    }
+                }
+                set_cell(&mut plane, msg_x, msg_y - 1, '┌', t.warning, t.warning);
+                set_cell(&mut plane, msg_x + msg_w - 1, msg_y - 1, '┐', t.warning, t.warning);
+                set_cell(&mut plane, msg_x, msg_y + 1, '└', t.warning, t.warning);
+                set_cell(&mut plane, msg_x + msg_w - 1, msg_y + 1, '┘', t.warning, t.warning);
+                set_cell(&mut plane, msg_x, msg_y, '│', t.warning, t.warning);
+                set_cell(&mut plane, msg_x + msg_w - 1, msg_y, '│', t.warning, t.warning);
+                
+                // Message text
+                draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, true);
             }
         }
 
