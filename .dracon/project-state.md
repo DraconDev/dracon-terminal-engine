@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency version changes
+Simplified the system monitor example by removing unused dependencies and imports.
 
 ## Context
-This change was triggered by recent dependency updates in the project, particularly in the `Showcase` widget refactoring and simplification efforts. The Cargo.lock file was updated to ensure version consistency across the project.
+The system monitor example was refactored to reduce unnecessary dependencies and imports, improving code clarity and build times.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
-- [x] Synchronized dependency versions with recent refactoring work
+- [x] Removed unused `Cell` and `Styles` imports from `dracon_terminal_engine::compositor`
+- [x] Removed unused `MouseEventKind` import from `dracon_terminal_engine::input::event`
+- [x] Removed unused `AtomicBool` and `Arc` imports from standard library
 
 ## In Progress
-- [x] Dependency version synchronization
+- [x] No active work in progress for this file
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with ongoing refactoring and feature implementation work
+1. Verify the system monitor still functions correctly with the removed dependencies
+2. Consider further refactoring opportunities in the system monitor example
