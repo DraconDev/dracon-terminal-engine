@@ -1,21 +1,26 @@
 # Project State
 
 ## Current Focus
-Improved dynamic screen resizing handling in UI examples
+Added a Git TUI example that displays repository status, commit log, diffs, and branch management
 
 ## Context
-The changes address a hardcoded screen size (80x24) in UI examples, replacing it with dynamic size detection from the compositor. This makes the examples more flexible across different terminal sizes.
+This adds a practical terminal UI for Git operations, building on the framework's widget system. It demonstrates real-world integration with Git commands and provides a complete example for the library's capabilities.
 
 ## Completed
-- [x] Updated dashboard builder to use dynamic screen dimensions
-- [x] Updated text editor demo to use dynamic screen dimensions
+- [x] Created a Git TUI with four main views (Status, Log, Diff, Branches)
+- [x] Implemented Git command integration for status, log, diff, and branch operations
+- [x] Added keyboard navigation and interaction controls
+- [x] Included visual indicators for file status, commit history, and branch states
+- [x] Added refresh functionality to update repository state
+- [x] Implemented toast notifications for user feedback
 
 ## In Progress
-- [x] No active work in progress for this change
+- [ ] No active work in progress shown in this commit
 
 ## Blockers
-- None identified
+- None identified in this commit
 
 ## Next Steps
-1. Verify all examples now properly handle different terminal sizes
-2. Consider adding size change event handling for more responsive UIs
+1. Add more Git operations (commit, push, pull)
+2. Improve diff visualization with syntax highlighting
+3. Add configuration options for the TUI
