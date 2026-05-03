@@ -17,7 +17,7 @@
 //! | Ctrl+Q | Quit application |
 //! | ESC | Close menu/modal |
 
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -181,16 +181,15 @@ impl Widget for MenuApp {
 
         if let Some(idx) = self.active_menu {
             let dp = self.render_dropdown(idx, area);
-            let base = (hdr * area.width) as usize;
+            let base_idx = (hdr * area.width) as usize;
             for (i, c) in dp.cells.iter().enumerate() {
-                let idx = base + i;
+                let idx = base_idx + i;
                 if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
             }
         }
 
         let list_rect = Rect::new(2, hdr + 1, area.width - 4, content_h.saturating_sub(2));
         let list_plane = self.list.render(list_rect);
-        let base = ((hdr + 1) * area.width + 2) as usize;
         for (i, c) in list_plane.cells.iter().enumerate() {
             let dest_x = i as u16 % list_plane.width;
             let dest_y = i as u16 / list_plane.width;
@@ -226,9 +225,9 @@ impl Widget for MenuApp {
         }
 
         let status_plane = self.status_bar.render(Rect::new(0, area.height - ftr, area.width, ftr));
-        let base = ((area.height - ftr) * area.width) as usize;
+        let status_base = ((area.height - ftr) * area.width) as usize;
         for (i, c) in status_plane.cells.iter().enumerate() {
-            let idx = base + i;
+            let idx = status_base + i;
             if !c.transparent && idx < plane.cells.len() { plane.cells[idx] = c.clone(); }
         }
         plane

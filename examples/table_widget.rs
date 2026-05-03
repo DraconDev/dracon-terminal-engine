@@ -15,6 +15,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 #[derive(Clone)]
+#[allow(dead_code)]
 struct User {
     name: String,
     role: String,

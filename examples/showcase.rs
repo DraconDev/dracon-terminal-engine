@@ -305,15 +305,51 @@ impl Widget for Showcase {
             cell.transparent = false;
         }
 
-        // Title bar
-        let title = " Dracon Terminal Engine ";
-        let title_x = (area.width as usize - title.len()) / 2;
-        draw_text(&mut plane, title_x, 0, title, t.primary, t.bg, true);
+        // Title bar with decorative border
+        let title_border_top = "╔══════════════════════════════════════════════════════════════════╗";
+        let title_border_bottom = "╚══════════════════════════════════════════════════════════════════╝";
+        let title_text = "  ██████╗ ███████╗ ██████╗ ███████╗██╗     ███████╗  ";
+        let title_x = (area.width as usize - title_border_top.len()) / 2;
+        let title_y = 1usize;
 
-        // Search bar
-        let search_y = 2usize;
-        let search_prompt = if self.search_active { "> " } else { "  " };
-        let search_text = format!("{}Search: {}_", search_prompt, self.search_query);
+        for (i, ch) in title_border_top.chars().enumerate() {
+            let px = title_x + i;
+            if px < area.width as usize {
+                set_cell(&mut plane, px, title_y, ch, t.primary, t.bg);
+            }
+        }
+        for (i, ch) in title_text.chars().enumerate() {
+            let px = title_x + 2 + i;
+            if px < area.width as usize {
+                set_cell(&mut plane, px, title_y + 1, ch, t.primary, t.bg);
+            }
+        }
+        for (i, ch) in title_border_bottom.chars().enumerate() {
+            let px = title_x + i;
+            if px < area.width as usize {
+                set_cell(&mut plane, px, title_y + 2, ch, t.primary, t.bg);
+            }
+        }
+
+        // Stats bar
+        let stats_y = 4usize;
+        let stats_text = format!(
+            " {} Examples  │  {} Widgets  │  {} Themes ",
+            self.examples.len(),
+            35,
+            5
+        );
+        let stats_start = 2usize;
+        draw_text(&mut plane, stats_start, stats_y, &stats_text, t.fg_muted, t.bg, false);
+        for x in stats_start + stats_text.len()..area.width as usize - 2 {
+            set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
+        }
+
+        // Search bar with icon
+        let search_y = 6usize;
+        let search_icon = if self.search_active { "▶" } else { "🔍" };
+        let search_prompt = if self.search_active { ">" } else { " " };
+        let search_text = format!("{} {} [ {} ]", search_icon, search_prompt, self.search_query);
         let search_fg = if self.search_active { t.primary } else { t.fg_muted };
         draw_text(&mut plane, 2, search_y, &search_text, search_fg, t.surface, false);
         // Fill rest of search bar
