@@ -454,7 +454,7 @@ impl Widget for Showcase {
         }
 
         // Category sidebar
-        let sidebar_w = 12usize;
+        let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
         let categories = ["all", "apps", "cookbook", "tools"];
         for (i, cat) in categories.iter().enumerate() {
@@ -482,7 +482,7 @@ impl Widget for Showcase {
                 self.examples.iter().filter(|e| e.category == *cat).count()
             };
             let count_str = format!("{:>2}", count);
-            draw_text(&mut plane, 11, cat_y, &count_str, t.fg_muted, bg_cat, false);
+            draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, false);
         }
 
         // Grid of cards
