@@ -184,6 +184,23 @@ impl IdeApp {
             CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
         ];
 
+        let is_dracon = false;
+        let command_palette = CommandPalette::new(palette_commands, &theme)
+            .with_size(45, 18)
+            .on_execute({
+                move |cmd_id| {
+                    match cmd_id {
+                        "new-tab" => (), // handled via callback, see below
+                        "cycle-theme" => (),
+                        "toggle-profiler" => (),
+                        "toggle-search" => (),
+                        "show-shortcuts" => (),
+                        "about" => (),
+                        _ => (),
+                    }
+                }
+            });
+
         Self {
             should_quit,
             theme,
@@ -205,6 +222,7 @@ impl IdeApp {
             profiler: Profiler::new(WidgetId::new(5)),
             show_profiler: false,
             breadcrumbs,
+            command_palette,
             anim_frame: 0,
             last_anim: Instant::now(),
         }
