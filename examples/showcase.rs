@@ -525,7 +525,7 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     }
 }
 
-fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     // Tab bar with active/inactive tabs
     let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
     let mut tab_x = 1usize;
