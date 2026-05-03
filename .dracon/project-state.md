@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Refactored the `App` struct's tick callback type to be more explicit and accessible.
 
 ## Context
-This change updates the dependency versions in the lockfile to ensure compatibility with the latest versions of dependencies used in the project. This is part of ongoing maintenance to keep the project's dependencies up-to-date.
+The change improves code organization by making the tick callback type reusable across the framework.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Made `TickCallback` a public type alias for the tick handler closure
+- [x] Simplified the `App` struct definition by removing the inline type
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Continue with other ongoing documentation and UI improvements
+1. Update any code that directly referenced the old inline type
+2. Verify no breaking changes in framework behavior
