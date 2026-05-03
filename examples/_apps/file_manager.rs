@@ -220,8 +220,7 @@ impl Widget for FileManager {
         }
 
         // Split pane
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.35);
-        let (tree_rect, _detail_rect) = split.split(Rect::new(0, hh, area.width, content_h));
+        let (tree_rect, _detail_rect) = self.split.split(Rect::new(0, hh, area.width, content_h));
 
         // Tree
         let tree_plane = self.tree.render(tree_rect);
@@ -235,12 +234,15 @@ impl Widget for FileManager {
             }
         }
 
-        // Separator
-        for y in hh..hh + content_h {
-            let idx = (y * area.width + tree_rect.width) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '│';
-                plane.cells[idx].fg = t.outline;
+        // Divider (using SplitPane's built-in render)
+        let divider = self.split.render_divider(Rect::new(0, hh, area.width, content_h));
+        for (i, c) in divider.cells.iter().enumerate() {
+            if c.transparent { continue; }
+            let row = i / divider.width as usize;
+            let col = i % divider.width as usize;
+            let idx = (hh + row as u16 + divider.y) * area.width + (divider.x + col as u16);
+            if (idx as usize) < plane.cells.len() {
+                plane.cells[idx as usize] = c.clone();
             }
         }
 
