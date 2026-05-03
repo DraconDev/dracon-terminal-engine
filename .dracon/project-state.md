@@ -4,19 +4,18 @@
 Improved debug overlay rendering in the cookbook example
 
 ## Context
-The debug overlay was rendering incorrectly due to improper index calculations when drawing the top border. The changes simplify the index calculations to ensure proper rendering of the debug overlay.
+The debug overlay in the cookbook example was updated to simplify the calculation of the close button position, making the code more maintainable and reducing potential off-by-one errors.
 
 ## Completed
-- [x] Fixed top border rendering by simplifying index calculations
-- [x] Improved horizontal ruler rendering by removing unnecessary multiplication
-- [x] Enhanced text rendering by correcting index calculations for text placement
+- [x] Simplified the index calculation for the close button in the debug overlay
+- [x] Removed unnecessary multiplication by zero in the position calculation
 
 ## In Progress
-- [x] Verification of debug overlay rendering across different terminal sizes
+- [x] No active work in progress beyond this commit
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify debug overlay rendering in various terminal configurations
-2. Consider additional debug visualization features for future iterations
+1. Review the updated debug overlay behavior in the cookbook example
+2. Consider additional improvements to the debug overlay functionality if needed

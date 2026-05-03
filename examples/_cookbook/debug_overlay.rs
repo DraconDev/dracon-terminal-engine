@@ -176,7 +176,7 @@ impl Widget for DebugOverlayPanel {
 
         let close = "[x] Close";
         for (i, c) in close.chars().enumerate() {
-            let idx = (0 * plane.width + area.width.saturating_sub(10) + i as u16) as usize;
+            let idx = (plane.width.saturating_sub(10) + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
             }
