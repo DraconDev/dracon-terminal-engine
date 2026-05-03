@@ -18,13 +18,14 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, ContextMenu, SplitPane, StatusBar, StatusSegment, Toast, ToastKind, Tree, TreeNode,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
+use unicode_width::UnicodeWidthStr;
 
 struct FsNode {
     name: String,

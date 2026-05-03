@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced file manager with interactive breadcrumb navigation and split pane resizing
+Added Unicode width support for file names in the file manager example.
 
 ## Context
-The file manager needed improved navigation and layout control. The breadcrumb system was refactored to handle direct path navigation, and the split pane now supports interactive resizing with proper mouse event handling.
+The file manager example needed improved handling of non-ASCII characters in file names, particularly for proper rendering in the UI.
 
 ## Completed
-- [x] Implemented breadcrumb click navigation that rebuilds the file tree at the selected path
-- [x] Added split pane divider with mouse drag resizing functionality
-- [x] Improved mouse event handling for continuous resize operations
-- [x] Added proper state management for drag operations
+- [x] Added `unicode_width` dependency for accurate character width measurement
+- [x] Imported `UnicodeWidthStr` trait for file name rendering
 
 ## In Progress
-- [ ] Testing edge cases for path navigation and resize behavior
+- [x] Implementation of Unicode-aware file name rendering in the UI
 
 ## Blockers
-- Need to verify cross-platform path handling for breadcrumb navigation
+- None identified for this specific change
 
 ## Next Steps
-1. Test breadcrumb navigation with complex paths
-2. Optimize performance for large directory trees
+1. Implement Unicode-aware rendering in the file manager's tree view
+2. Verify proper alignment of file names with different character widths
