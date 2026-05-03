@@ -127,9 +127,6 @@ impl Showcase {
         }
     }
 
-    fn themes()
-    }
-
     fn themes() -> Vec<(&'static str, Theme)> {
         vec![
             ("dark", Theme::dark()),
