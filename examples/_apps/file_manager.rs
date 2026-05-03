@@ -4,9 +4,9 @@
 //! Reads actual directory contents from the current working directory.
 //!
 //! Controls:
-//!   ↑/↓ or j/k    — navigate tree
+//!   ↑/↓           — navigate tree
 //!   Enter or →    — expand directory / open file
-//!   Backspace or ← — go up
+//!   Backspace or ← — go up to parent directory
 //!   c             — context menu
 //!   r             — refresh directory
 //!   ?             — help overlay
@@ -16,7 +16,8 @@ use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, ContextMenu, SplitPane, StatusBar, StatusSegment, Toast, ToastKind, Tree, TreeNode,
+    Breadcrumbs, ContextAction, ContextMenu, SplitPane, StatusBar, StatusSegment, Toast, ToastKind,
+    Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
@@ -36,16 +37,35 @@ struct FsNode {
 }
 
 impl FsNode {
-    fn icon(&self) -> &'static str {
-        if self.is_dir { "📁 " } else { "📄 " }
+    fn icon(&self, expanded: bool) -> &'static str {
+        if self.is_dir {
+            if expanded { "▾ " } else { "▸ " }
+        } else {
+            "  "
+        }
     }
 
-    fn to_tree_node(&self) -> TreeNode {
-        let label = format!("{}{}", self.icon(), self.name);
+    fn file_symbol(&self) -> &'static str {
+        if self.is_dir { return "▸"; }
+        let name_lower = self.name.to_lowercase();
+        if name_lower.ends_with(".rs") { "" }
+        else if name_lower.ends_with(".toml") { "�" }
+        else if name_lower.ends_with(".md") { "" }
+        else if name_lower.ends_with(".json") || name_lower.ends_with(".yaml") || name_lower.ends_with(".yml") { "�" }
+        else if name_lower.ends_with(".sh") || name_lower.ends_with(".bash") { "" }
+        else if name_lower.ends_with(".py") { "" }
+        else if name_lower.ends_with(".js") || name_lower.ends_with(".ts") { "" }
+        else if name_lower.ends_with(".html") || name_lower.ends_with(".css") { "" }
+        else if name_lower.ends_with(".gitignore") || name_lower.ends_with(".lock") { "﬍" }
+        else { "" }
+    }
+
+    fn to_tree_node(&self, expanded: bool) -> TreeNode {
+        let label = format!("{}{}", self.icon(expanded), self.name);
         let mut node = TreeNode::new(&label);
-        node.expanded = !self.children.is_empty();
+        node.expanded = expanded;
         for child in &self.children {
-            node.add_child(child.to_tree_node());
+            node.add_child(child.to_tree_node(expanded));
         }
         node
     }
@@ -130,15 +150,16 @@ impl FileManager {
         let root = FsNode::build_tree(&cwd, 0);
 
         let tree = Tree::new(WidgetId::new(2))
-            .with_root(vec![root.to_tree_node()])
+            .with_root(vec![root.to_tree_node(true)])
             .with_theme(theme);
 
         let segments: Vec<String> = cwd.components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
-        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments);
+        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments)
+            .with_theme(theme);
 
-        Self {
+        let mut fm = Self {
             id,
             root,
             tree,
@@ -154,14 +175,16 @@ impl FileManager {
             theme,
             show_help: false,
             is_dragging_split: false,
-        }
+        };
+        fm.update_breadcrumbs();
+        fm
     }
 
     fn refresh(&mut self) {
         let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         self.root = FsNode::build_tree(&cwd, 0);
         self.tree = Tree::new(WidgetId::new(2))
-            .with_root(vec![self.root.to_tree_node()])
+            .with_root(vec![self.root.to_tree_node(true)])
             .with_theme(self.theme);
         self.dirty = true;
         self.toast("Directory refreshed", ToastKind::Info);
@@ -182,8 +205,74 @@ impl FileManager {
         let segments: Vec<String> = path.components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
-        self.breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments);
-        self.breadcrumbs.on_theme_change(&self.theme);
+        self.breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments)
+            .with_theme(self.theme);
+    }
+
+    fn navigate_to(&mut self, path: PathBuf) {
+        if let Ok(canonical) = path.canonicalize() {
+            std::env::set_current_dir(&canonical).ok();
+            self.root = FsNode::build_tree(&canonical, 0);
+            self.tree = Tree::new(WidgetId::new(2))
+                .with_root(vec![self.root.to_tree_node(true)])
+                .with_theme(self.theme);
+            self.tree_path.clear();
+            self.selected_path = None;
+            self.update_breadcrumbs();
+            self.dirty = true;
+        }
+    }
+
+    fn go_up(&mut self) {
+        if let Some(parent) = self.root.path.parent() {
+            let parent_buf = parent.to_path_buf();
+            self.navigate_to(parent_buf);
+            self.toast("Navigated up", ToastKind::Info);
+        }
+    }
+
+    fn preview_file(&self, path: &PathBuf, max_lines: usize) -> Vec<String> {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            content.lines().take(max_lines).map(|s| s.to_string()).collect()
+        } else {
+            vec!["<binary file>".to_string()]
+        }
+    }
+
+    fn delete_selected(&mut self) {
+        if let Some(ref path) = self.selected_path {
+            let msg = if path.is_dir() {
+                format!("Deleted folder: {}", path.file_name().unwrap_or_default().to_string_lossy())
+            } else {
+                format!("Deleted file: {}", path.file_name().unwrap_or_default().to_string_lossy())
+            };
+            if std::fs::remove_dir_all(path).is_ok() || std::fs::remove_file(path).is_ok() {
+                self.refresh();
+                self.toast(&msg, ToastKind::Success);
+            } else {
+                self.toast("Failed to delete", ToastKind::Error);
+            }
+        }
+    }
+
+    fn create_file(&mut self, name: &str) {
+        let path = self.root.path.join(name);
+        if std::fs::File::create(&path).is_ok() {
+            self.refresh();
+            self.toast(&format!("Created file: {}", name), ToastKind::Success);
+        } else {
+            self.toast("Failed to create file", ToastKind::Error);
+        }
+    }
+
+    fn create_folder(&mut self, name: &str) {
+        let path = self.root.path.join(name);
+        if std::fs::create_dir(&path).is_ok() {
+            self.refresh();
+            self.toast(&format!("Created folder: {}", name), ToastKind::Success);
+        } else {
+            self.toast("Failed to create folder", ToastKind::Error);
+        }
     }
 }
 
@@ -235,7 +324,7 @@ impl Widget for FileManager {
             }
         }
 
-        // Divider (using SplitPane's built-in render)
+        // Divider
         let divider = self.split.render_divider(Rect::new(0, hh, area.width, content_h));
         for (i, c) in divider.cells.iter().enumerate() {
             if c.transparent { continue; }
@@ -248,38 +337,81 @@ impl Widget for FileManager {
         }
 
         // Detail pane
-        if let Some(ref _path) = self.selected_path {
-            if let Some(node) = self.root.find_by_path(&self.tree_path) {
-                let dx = tree_rect.width + 2;
-                let dy = hh + 1;
+        let detail_x = tree_rect.width + 2;
+        let detail_w = area.width.saturating_sub(detail_x);
+        let detail_h = content_h.saturating_sub(2);
 
-                draw_text(&mut plane, dx, dy, &node.name, t.primary, t.bg, true);
-                draw_text(&mut plane, dx, dy + 2, &format!("Type: {}", if node.is_dir { "Directory" } else { "File" }), t.fg, t.bg, false);
+        if detail_w > 0 && detail_h > 0 {
+            if let Some(ref sel_path) = self.selected_path {
+                if let Some(node) = self.root.find_by_path(&self.tree_path) {
+                    // Detail pane border
+                    render_box(&mut plane, detail_x - 1, hh, detail_w + 1, detail_h, t.outline, t.surface_elevated);
 
-                if !node.is_dir {
-                    let size_str = format_size(node.size);
-                    draw_text(&mut plane, dx, dy + 3, &format!("Size: {}", size_str), t.fg, t.bg, false);
-                }
+                    let dx = detail_x + 1;
+                    let dy = hh + 1;
 
-                if let Ok(meta) = std::fs::metadata(&node.path) {
-                    if let Ok(modified) = meta.modified() {
-                        let time = format_system_time(modified);
-                        draw_text(&mut plane, dx, dy + 4, &format!("Modified: {}", time), t.fg_muted, t.bg, false);
+                    // File icon and name
+                    let sym = node.file_symbol();
+                    draw_text(&mut plane, dx, dy, sym, t.primary, t.surface_elevated, true);
+                    draw_text(&mut plane, dx + 2, dy, &node.name, t.primary, t.surface_elevated, true);
+
+                    // Metadata
+                    let mut meta_y = dy + 2;
+                    draw_text(&mut plane, dx, meta_y, &format!("Type: {}", if node.is_dir { "Directory" } else { "File" }), t.fg, t.surface_elevated, false);
+                    meta_y += 1;
+
+                    if !node.is_dir {
+                        let size_str = format_size(node.size);
+                        draw_text(&mut plane, dx, meta_y, &format!("Size: {}", size_str), t.fg, t.surface_elevated, false);
+                        meta_y += 1;
+                    }
+
+                    if let Ok(meta) = std::fs::metadata(&node.path) {
+                        if let Ok(modified) = meta.modified() {
+                            let time = format_system_time(modified);
+                            draw_text(&mut plane, dx, meta_y, &format!("Modified: {}", time), t.fg_muted, t.surface_elevated, false);
+                            meta_y += 1;
+                        }
+                        if let Ok(permissions) = meta.permissions().mode() {
+                            let perms = format_permissions(permissions);
+                            draw_text(&mut plane, dx, meta_y, &format!("Permissions: {}", perms), t.fg_muted, t.surface_elevated, false);
+                            meta_y += 1;
+                        }
+                    }
+
+                    // File preview for text files
+                    if !node.is_dir && detail_h > 10 {
+                        let preview_y = meta_y + 2;
+                        if preview_y + 3 < hh + detail_h {
+                            draw_text(&mut plane, dx, preview_y, "Preview:", t.info, t.surface_elevated, true);
+                            let preview = self.preview_file(&node.path, (hh + detail_h - preview_y - 1) as usize);
+                            for (i, line) in preview.iter().enumerate() {
+                                let y = preview_y + 1 + i as u16;
+                                if y >= hh + detail_h { break; }
+                                let truncated: String = line.chars().take(detail_w as usize - 4).collect();
+                                draw_text(&mut plane, dx, y, &truncated, t.fg, t.surface_elevated, false);
+                            }
+                        }
                     }
                 }
+            } else {
+                // Empty state with icon
+                let cx = detail_x + detail_w / 2;
+                let cy = hh + content_h / 2;
+                let msg = "Select a file or folder";
+                let mx = cx.saturating_sub((msg.width() as u16) / 2);
+                draw_text(&mut plane, mx, cy, msg, t.fg_muted, t.bg, false);
+                let sub = "↑/↓ to navigate  •  Enter to select";
+                let sx = cx.saturating_sub((sub.width() as u16) / 2);
+                draw_text(&mut plane, sx, cy + 1, sub, t.fg_muted, t.bg, false);
             }
-        } else {
-            let dx = tree_rect.width + 2;
-            let dy = hh + content_h / 2;
-            let msg = "Select a file or folder";
-            draw_text(&mut plane, dx, dy, msg, t.fg_muted, t.bg, false);
         }
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
         let status = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new(&format!("{} items", self.root.child_count())).with_fg(t.fg_muted))
-            .add_segment(StatusSegment::new("? help | r refresh | q quit").with_fg(t.primary));
+            .add_segment(StatusSegment::new("? help | c context | r refresh | q quit").with_fg(t.primary));
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
         for (i, c) in status_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
@@ -292,37 +424,7 @@ impl Widget for FileManager {
 
         // Help overlay
         if self.show_help {
-            let help_w = 35u16.min(area.width - 4);
-            let help_h = 10u16.min(area.height - 4);
-            let help_x = (area.width - help_w) / 2;
-            let help_y = (area.height - help_h) / 2;
-
-            for y in help_y..help_y + help_h {
-                for x in help_x..help_x + help_w {
-                    let idx = (y * area.width + x) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].bg = t.surface_elevated;
-                        plane.cells[idx].fg = t.fg;
-                    }
-                }
-            }
-
-            let lines = [
-                "  File Manager Help  ",
-                "",
-                "↑/↓ j/k  Navigate",
-                "Enter    Open/Expand",
-                "Bksp     Go up",
-                "c        Context menu",
-                "r        Refresh",
-                "q        Quit",
-                "",
-                "  Press any key...  ",
-            ];
-            for (i, line) in lines.iter().enumerate() {
-                let y = help_y + 1 + i as u16;
-                draw_text(&mut plane, help_x + 2, y, line, t.primary, t.surface_elevated, i == 0 || i == lines.len() - 1);
-            }
+            render_help_overlay(&mut plane, area, t);
         }
 
         // Toast
@@ -366,31 +468,32 @@ impl Widget for FileManager {
             KeyCode::Char('?') => { self.show_help = true; self.dirty = true; true }
             KeyCode::Char('c') => {
                 self.context_menu = Some(ContextMenu::new_with_id(WidgetId::new(50), vec![
-                    ("Open", ContextAction::Open),
-                    ("Refresh", ContextAction::Copy),
-                    ("Properties", ContextAction::Edit),
+                    ("New Folder", ContextAction::Open),
+                    ("New File", ContextAction::Copy),
+                    ("Delete", ContextAction::Cut),
+                    ("Refresh", ContextAction::Edit),
                 ]));
                 self.dirty = true;
                 true
             }
             KeyCode::Enter | KeyCode::Right => {
                 let path = self.tree.get_selected_path().to_vec();
-                let node_info = self.root.find_by_path(&path).map(|n| (n.path.clone(), n.is_dir));
-                if let Some((node_path, is_dir)) = node_info {
-                    self.selected_path = Some(node_path);
-                    self.tree_path = path;
-                    self.update_breadcrumbs();
+                let node_info = self.root.find_by_path(&path).map(|n| (n.path.clone(), n.is_dir, n.name.clone()));
+                if let Some((node_path, is_dir, name)) = node_info {
                     if is_dir {
-                        // Toggle expansion
+                        self.navigate_to(node_path);
+                        self.toast(&format!("Opened: {}", name), ToastKind::Info);
+                    } else {
+                        self.selected_path = Some(node_path);
+                        self.tree_path = path;
+                        self.update_breadcrumbs();
+                        self.dirty = true;
                     }
                 }
-                self.dirty = true;
                 true
             }
             KeyCode::Backspace | KeyCode::Left => {
-                self.selected_path = None;
-                self.tree_path.clear();
-                self.dirty = true;
+                self.go_up();
                 true
             }
             _ => {
@@ -415,27 +518,25 @@ impl Widget for FileManager {
         let area = self.area.get();
         let ch = area.height.saturating_sub(hh + 1);
 
-        // Breadcrumb click detection (row 0)
+        // Breadcrumb clicks — delegate to Breadcrumbs widget
         if row == 0 {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
-                let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-                let segs: Vec<String> = cwd.components()
+                // Try to find which segment was clicked using Breadcrumbs' zone logic
+                let segs: Vec<String> = self.root.path.components()
                     .map(|c| c.as_os_str().to_string_lossy().into_owned())
                     .collect();
                 let mut x: u16 = 0;
                 for (i, seg) in segs.iter().enumerate() {
                     let seg_width = (seg.width() as u16 + 2).min(area.width.saturating_sub(x));
                     if seg_width < 3 { break; }
-                    if i > 0 { x += 1; }
+                    // Zone covers the whole segment area [x, x+seg_width)
                     if col >= x && col < x + seg_width {
-                        let components: Vec<_> = cwd.components().collect();
+                        let components: Vec<_> = self.root.path.components().collect();
                         let target_path: PathBuf = components[..=i].iter().collect();
-                        self.root = FsNode::build_tree(&target_path, 0);
-                        self.tree_path.clear();
-                        self.selected_path = None;
-                        self.dirty = true;
+                        self.navigate_to(target_path);
                         return true;
                     }
+                    if i > 0 { x += 1; } // separator
                     x += seg_width;
                 }
             }
@@ -466,14 +567,11 @@ impl Widget for FileManager {
                 _ => {}
             }
         }
-        // If dragging ends outside the divider, also reset
         if self.is_dragging_split && matches!(kind, MouseEventKind::Up(_)) {
             self.is_dragging_split = false;
             self.dirty = true;
             return true;
         }
-
-        // Store drag state for continuous resize events
         if self.is_dragging_split {
             if let MouseEventKind::Drag(_) = kind {
                 if self.split.handle_resize(kind, col, row, Rect::new(0, hh, area.width, ch)) {
@@ -508,6 +606,59 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
+fn render_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, border_color: Color, bg_color: Color) {
+    if w < 2 || h < 2 { return; }
+    for row in y..y+h {
+        for col in x..x+w {
+            let idx = (row * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
+                plane.cells[idx].bg = if is_border { bg_color } else { bg_color };
+                plane.cells[idx].fg = border_color;
+                if is_border {
+                    if row == y && col == x { plane.cells[idx].char = '╭'; }
+                    else if row == y && col == x+w-1 { plane.cells[idx].char = '╮'; }
+                    else if row == y+h-1 && col == x { plane.cells[idx].char = '╰'; }
+                    else if row == y+h-1 && col == x+w-1 { plane.cells[idx].char = '╯'; }
+                    else if row == y || row == y+h-1 { plane.cells[idx].char = '─'; }
+                    else { plane.cells[idx].char = '│'; }
+                } else {
+                    plane.cells[idx].char = ' ';
+                }
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
+
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+    let help_w = 40u16.min(area.width - 4);
+    let help_h = 12u16.min(area.height - 4);
+    let help_x = (area.width - help_w) / 2;
+    let help_y = (area.height - help_h) / 2;
+
+    render_box(plane, help_x, help_y, help_w, help_h, t.outline, t.surface_elevated);
+
+    let lines = [
+        ("  File Manager Help  ", true),
+        ("", false),
+        ("↑/↓       Navigate tree", false),
+        ("Enter     Open folder / Select file", false),
+        ("Bksp      Go to parent directory", false),
+        ("c         Context menu", false),
+        ("r         Refresh directory", false),
+        ("q         Quit", false),
+        ("", false),
+        ("  Click breadcrumbs to navigate  ", false),
+        ("  Drag divider to resize panels  ", false),
+    ];
+    for (i, (line, bold)) in lines.iter().enumerate() {
+        let y = help_y + 1 + i as u16;
+        let x = help_x + (help_w.saturating_sub(line.width() as u16)) / 2;
+        draw_text(plane, x, y, line, if *bold { t.primary } else { t.fg }, t.surface_elevated, *bold);
+    }
+}
+
 fn format_size(size: u64) -> String {
     if size < 1024 {
         format!("{} B", size)
@@ -529,9 +680,24 @@ fn format_system_time(time: std::time::SystemTime) -> String {
     format!("{}d {:02}:{:02}", day, hours, mins)
 }
 
+fn format_permissions(mode: u32) -> String {
+    let perms = [
+        if mode & 0o400 != 0 { 'r' } else { '-' },
+        if mode & 0o200 != 0 { 'w' } else { '-' },
+        if mode & 0o100 != 0 { 'x' } else { '-' },
+        if mode & 0o040 != 0 { 'r' } else { '-' },
+        if mode & 0o020 != 0 { 'w' } else { '-' },
+        if mode & 0o010 != 0 { 'x' } else { '-' },
+        if mode & 0o004 != 0 { 'r' } else { '-' },
+        if mode & 0o002 != 0 { 'w' } else { '-' },
+        if mode & 0o001 != 0 { 'x' } else { '-' },
+    ];
+    perms.iter().collect()
+}
+
 fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
-    println!("? help | r refresh | q quit");
+    println!("? help | c context | r refresh | q quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
