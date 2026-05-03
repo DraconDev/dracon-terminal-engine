@@ -631,6 +631,164 @@ impl Widget for IdeApp {
                 self.update_breadcrumbs();
                 true
             }
+            // Editor text input
+            KeyCode::Char(c) if key.modifiers.is_empty() || key.modifiers == KeyModifiers::SHIFT => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    let mut new_content = String::new();
+                    for (i, line) in lines.iter().enumerate() {
+                        if i > 0 { new_content.push('\n'); }
+                        if i == tab.cursor_line {
+                            let col = tab.cursor_col.min(line.len());
+                            new_content.push_str(&line[..col]);
+                            new_content.push(c);
+                            new_content.push_str(&line[col..]);
+                            tab.cursor_col = col + 1;
+                        } else {
+                            new_content.push_str(line);
+                        }
+                    }
+                    if lines.is_empty() {
+                        new_content.push(c);
+                        tab.cursor_col = 1;
+                    }
+                    tab.content = new_content;
+                    tab.modified = true;
+                    self.update_status();
+                }
+                true
+            }
+            KeyCode::Backspace => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    let mut new_content = String::new();
+                    for (i, line) in lines.iter().enumerate() {
+                        if i > 0 { new_content.push('\n'); }
+                        if i == tab.cursor_line {
+                            let col = tab.cursor_col.min(line.len());
+                            if col > 0 {
+                                new_content.push_str(&line[..col-1]);
+                                new_content.push_str(&line[col..]);
+                                tab.cursor_col = col - 1;
+                                tab.modified = true;
+                            } else if i > 0 {
+                                // Join with previous line
+                                continue;
+                            } else {
+                                new_content.push_str(line);
+                            }
+                        } else if i == tab.cursor_line.saturating_sub(1) && tab.cursor_col == 0 {
+                            let prev_len = line.len();
+                            new_content.push_str(line);
+                            if let Some(next_line) = lines.get(i + 1) {
+                                new_content.push_str(next_line);
+                            }
+                            tab.cursor_line = i;
+                            tab.cursor_col = prev_len;
+                            tab.modified = true;
+                            continue;
+                        } else {
+                            new_content.push_str(line);
+                        }
+                    }
+                    tab.content = new_content;
+                    self.update_status();
+                }
+                true
+            }
+            KeyCode::Enter => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    let mut new_content = String::new();
+                    for (i, line) in lines.iter().enumerate() {
+                        if i > 0 { new_content.push('\n'); }
+                        if i == tab.cursor_line {
+                            let col = tab.cursor_col.min(line.len());
+                            new_content.push_str(&line[..col]);
+                            new_content.push('\n');
+                            new_content.push_str(&line[col..]);
+                        } else {
+                            new_content.push_str(line);
+                        }
+                    }
+                    if lines.is_empty() {
+                        new_content.push('\n');
+                    }
+                    tab.content = new_content;
+                    tab.cursor_line += 1;
+                    tab.cursor_col = 0;
+                    tab.modified = true;
+                    self.update_status();
+                }
+                true
+            }
+            KeyCode::Up => {
+                if let Some(tab) = self.active_tab_mut() {
+                    if tab.cursor_line > 0 {
+                        tab.cursor_line -= 1;
+                        let lines: Vec<&str> = tab.content.lines().collect();
+                        if let Some(line) = lines.get(tab.cursor_line) {
+                            tab.cursor_col = tab.cursor_col.min(line.len());
+                        }
+                    }
+                }
+                true
+            }
+            KeyCode::Down => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    if tab.cursor_line + 1 < lines.len() {
+                        tab.cursor_line += 1;
+                        if let Some(line) = lines.get(tab.cursor_line) {
+                            tab.cursor_col = tab.cursor_col.min(line.len());
+                        }
+                    }
+                }
+                true
+            }
+            KeyCode::Left => {
+                if let Some(tab) = self.active_tab_mut() {
+                    if tab.cursor_col > 0 {
+                        tab.cursor_col -= 1;
+                    } else if tab.cursor_line > 0 {
+                        tab.cursor_line -= 1;
+                        let lines: Vec<&str> = tab.content.lines().collect();
+                        if let Some(line) = lines.get(tab.cursor_line) {
+                            tab.cursor_col = line.len();
+                        }
+                    }
+                }
+                true
+            }
+            KeyCode::Right => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    if let Some(line) = lines.get(tab.cursor_line) {
+                        if tab.cursor_col < line.len() {
+                            tab.cursor_col += 1;
+                        } else if tab.cursor_line + 1 < lines.len() {
+                            tab.cursor_line += 1;
+                            tab.cursor_col = 0;
+                        }
+                    }
+                }
+                true
+            }
+            KeyCode::Home => {
+                if let Some(tab) = self.active_tab_mut() {
+                    tab.cursor_col = 0;
+                }
+                true
+            }
+            KeyCode::End => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    if let Some(line) = lines.get(tab.cursor_line) {
+                        tab.cursor_col = line.len();
+                    }
+                }
+                true
+            }
             _ => false,
         }
     }
