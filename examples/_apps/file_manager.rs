@@ -243,8 +243,7 @@ impl FileManager {
         let path = self
             .selected_path
             .as_ref()
-            .or(Some(&self.root.path))
-            .unwrap();
+            .unwrap_or(&self.root.path);
         let segments: Vec<String> = path
             .components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
@@ -814,7 +813,7 @@ fn render_box(
             let idx = (row * plane.width + col) as usize;
             if idx < plane.cells.len() {
                 let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
-                plane.cells[idx].bg = if is_border { bg_color } else { bg_color };
+                plane.cells[idx].bg = bg_color;
                 plane.cells[idx].fg = border_color;
                 if is_border {
                     if row == y && col == x {

@@ -299,7 +299,8 @@ impl Widget for Table {
             return false;
         }
         if self.search.handle_key(key.clone()) {
-            self.filter(&self.search.query().to_string());
+            let q = self.search.query();
+            self.filter(&q);
             return true;
         }
         match key.code {
