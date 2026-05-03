@@ -92,7 +92,7 @@ struct Showcase {
 }
 
 impl Showcase {
-    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, pending: Arc<Mutex<Option<String>>>, area: Arc<Mutex<Rect>>) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         Self {
@@ -106,7 +106,7 @@ impl Showcase {
             should_quit,
             pending_binary: pending,
             status_message: None,
-            area: Rect::new(0, 0, 80, 24),
+            area,
         }
     }
 
