@@ -90,12 +90,6 @@ impl ChatState {
         self.messages.iter().filter(|m| !m.is_read).count()
     }
 
-    fn mark_read(&mut self) {
-        for msg in &mut self.messages {
-            msg.is_read = true;
-        }
-    }
-
     fn send_message(&mut self) {
         if self.input_text.trim().is_empty() { return; }
         let text = std::mem::take(&mut self.input_text);
