@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Added selection time tracking to the showcase example
+Added selection time tracking to showcase example
 
 ## Context
-This change supports future features that need to track how long items remain selected in the interactive showcase
+This change enables tracking when a selection occurs in the interactive showcase, which will be used for performance measurement and user interaction analysis.
 
 ## Completed
-- [x] Added `selection_time` field to track selection duration
+- [x] Added `selection_time` field to track when selections occur
+- [x] Initialized with `Instant::now()` to capture current timestamp
 
 ## In Progress
-- [x] Implementation of selection time tracking
+- [x] Selection time tracking implementation
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Implement logic to update and use the selection time
-2. Add UI display for selection duration
+1. Implement usage of selection time for performance metrics
+2. Add visualization of selection timing in the showcase UI
