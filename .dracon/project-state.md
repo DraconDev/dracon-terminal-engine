@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added `AppTrait` alias to framework prelude for consistent trait usage.
+Removed `AppTrait` alias from framework prelude to simplify trait usage.
 
 ## Context
-This change improves type clarity in the framework by providing a consistent alias for the `App` trait, which is already exposed in the prelude. This makes the codebase more uniform when referring to the trait versus the concrete implementation.
+The `AppTrait` alias was previously added to the framework prelude for consistent trait usage, but it's no longer needed since the `App` type already provides the same functionality.
 
 ## Completed
-- [x] Added `App as AppTrait` to framework prelude
-- [x] Maintained existing `App` and `Ctx` re-exports for backward compatibility
+- [x] Removed redundant `AppTrait` alias from framework prelude
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [ ] Verify no breaking changes in downstream code
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify no breaking changes in dependent modules
-2. Consider adding similar aliases for other key traits if needed
+1. Verify no downstream code breaks due to this change
+2. Consider if other trait aliases can be simplified similarly

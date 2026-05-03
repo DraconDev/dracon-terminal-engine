@@ -42,7 +42,7 @@ pub mod prelude {
     pub use crate::compositor::{Cell, Color, Compositor, Plane, Styles};
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
-        app::{App, Ctx, App as AppTrait},
+        app::{App, Ctx},
         command::{
             AppConfig, AreaConfig, BoundCommand, CommandRunner, LayoutConfig, LoggedLine,
             OutputParser, ParsedOutput, ParserConfig, WidgetConfig,
