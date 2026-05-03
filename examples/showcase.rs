@@ -140,7 +140,7 @@ impl Showcase {
 
     fn apply_filter(&mut self) {
         if let Some(idx) = self.pending_theme.take() {
-            self.theme = Self::themes()[idx % Self::themes().len()];
+            self.theme = Self::themes()[idx % Self::themes().len()].1;
         }
         self.filtered = self.examples.iter().enumerate()
             .filter(|(_, ex)| {
@@ -527,7 +527,7 @@ impl Widget for Showcase {
                 }
                 KeyCode::Char('t') => {
                     let themes = Self::themes();
-                    let current = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                    let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
                     self.pending_theme = Some((current + 1) % themes.len());
                     self.apply_filter();
                     true
