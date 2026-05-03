@@ -564,6 +564,48 @@ impl Widget for Showcase {
             }
         }
 
+        // Tooltip on hover
+        if let Some(ref text) = self.tooltip_text {
+            if let Some((tx, ty)) = self.tooltip_pos {
+                let tooltip_x = (tx as usize).min(area.width as usize - text.len() - 4);
+                let tooltip_y = (ty as usize).saturating_sub(2);
+                let tooltip_w = text.len() + 4;
+                let tooltip_h = 3usize;
+                
+                // Background
+                for cy in 0..tooltip_h {
+                    for cx in 0..tooltip_w {
+                        if tooltip_x + cx < area.width as usize && tooltip_y + cy < area.height as usize {
+                            set_cell(&mut plane, tooltip_x + cx, tooltip_y + cy, ' ', t.fg, t.surface_elevated);
+                        }
+                    }
+                }
+                
+                // Border
+                for cx in 0..tooltip_w {
+                    if tooltip_x + cx < area.width as usize && tooltip_y < area.height as usize {
+                        set_cell(&mut plane, tooltip_x + cx, tooltip_y, '─', t.outline, t.surface_elevated);
+                    }
+                    if tooltip_x + cx < area.width as usize && tooltip_y + tooltip_h - 1 < area.height as usize {
+                        set_cell(&mut plane, tooltip_x + cx, tooltip_y + tooltip_h - 1, '─', t.outline, t.surface_elevated);
+                    }
+                }
+                for cy in 0..tooltip_h {
+                    if tooltip_x < area.width as usize && tooltip_y + cy < area.height as usize {
+                        set_cell(&mut plane, tooltip_x, tooltip_y + cy, '│', t.outline, t.surface_elevated);
+                    }
+                    if tooltip_x + tooltip_w - 1 < area.width as usize && tooltip_y + cy < area.height as usize {
+                        set_cell(&mut plane, tooltip_x + tooltip_w - 1, tooltip_y + cy, '│', t.outline, t.surface_elevated);
+                    }
+                }
+                
+                // Text
+                if tooltip_y + 1 < area.height as usize {
+                    draw_text(&mut plane, tooltip_x + 2, tooltip_y + 1, text, t.fg, t.surface_elevated, false);
+                }
+            }
+        }
+
         plane
     }
 
