@@ -1574,34 +1574,32 @@ impl Widget for Showcase {
                         self.primitive_button_time = None;
                     }
                 }
-                let y = row as usize;
-                let x = col as usize;
-                if x >= grid_start_x && y >= grid_start_y {
-                    let gx = x - grid_start_x;
-                    let gy = y - grid_start_y;
-                    let col_idx = gx / (card_w + 2);
-                    let row_idx = gy / (card_h + 1);
-                    let card_idx = row_idx * self.cols.get() + col_idx;
-                    if card_idx < self.filtered.len() {
-                        self.hovered_card = Some(card_idx);
-                        // Start or update tooltip timer
-                        match self.tooltip_timer {
-                            None => {
-                                self.tooltip_timer = Some(Instant::now());
-                                self.tooltip_pos = Some((col, row));
-                            }
-                            Some(time) => {
-                                if time.elapsed().as_millis() >= 500 {
-                                    if let Some(&ex_idx) = self.filtered.get(card_idx) {
-                                        if let Some(ex) = self.examples.get(ex_idx) {
-                                            self.tooltip_text = Some(ex.description.to_string());
-                                            self.tooltip_pos = Some((col, row));
+                // Use zone dispatch for hover detection
+                let hovered_zone = self.zones.borrow().dispatch(col, row);
+                if let Some(zone_id) = hovered_zone {
+                    if zone_id >= CARD_BASE {
+                        let card_idx = zone_id - CARD_BASE;
+                        if card_idx < self.filtered.len() {
+                            self.hovered_card = Some(card_idx);
+                            // Start or update tooltip timer
+                            match self.tooltip_timer {
+                                None => {
+                                    self.tooltip_timer = Some(Instant::now());
+                                    self.tooltip_pos = Some((col, row));
+                                }
+                                Some(time) => {
+                                    if time.elapsed().as_millis() >= 500 {
+                                        if let Some(&ex_idx) = self.filtered.get(card_idx) {
+                                            if let Some(ex) = self.examples.get(ex_idx) {
+                                                self.tooltip_text = Some(ex.description.to_string());
+                                                self.tooltip_pos = Some((col, row));
+                                            }
                                         }
                                     }
                                 }
                             }
+                            return true;
                         }
-                        return true;
                     }
                 }
                 self.hovered_card = None;
