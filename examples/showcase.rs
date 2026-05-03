@@ -716,6 +716,14 @@ impl Widget for Showcase {
             draw_text(&mut plane, 2, 5, &feedback_text, feedback_color, t.bg, false);
         }
 
+        // Auto-reset primitive button after 1 second
+        if let Some(btn_time) = self.primitive_button_time {
+            if btn_time.elapsed() >= Duration::from_secs(1) {
+                self.primitive_button = false;
+                self.primitive_button_time = None;
+            }
+        }
+
         // Primitives bar
         let prim_y = 4usize;
         let prim_state_0 = if self.primitive_toggle { "[*] Toggle" } else { "[ ] Toggle" };
