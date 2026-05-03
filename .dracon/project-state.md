@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Renamed `render_zindex_preview` to `render_git_tui_preview` in the showcase example
+Added animated Git TUI preview with cycling diff statuses to showcase example
 
 ## Context
-This change appears to be part of a larger refactoring effort to standardize naming conventions for preview rendering functions in the showcase example. The previous name `render_zindex_preview` was likely a temporary or placeholder name that needed to be updated to better reflect the actual functionality being demonstrated.
+Enhancing the showcase example to demonstrate a realistic Git TUI interface with animated status updates
 
 ## Completed
-- [x] Renamed `render_zindex_preview` to `render_git_tui_preview` to better match the actual preview being rendered
+- [x] Added Git TUI preview function with branch header display
+- [x] Implemented animated diff status cycling through different file states
+- [x] Added visual distinction between modified (warning), added (success), and untracked (error) files
+- [x] Integrated with existing theme system for consistent styling
 
 ## In Progress
-- [ ] No ongoing work identified from this change
+- [x] Finalizing animation timing and phase transitions
 
 ## Blockers
-- None identified from this specific change
+- None identified
 
 ## Next Steps
-1. Verify that the renamed function still correctly renders the Git TUI preview
-2. Ensure the showcase example continues to function as expected with the new function name
+1. Verify animation timing feels natural in showcase context
+2. Add more Git operations (commit, push) to complete the demo

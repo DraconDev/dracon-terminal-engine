@@ -622,6 +622,25 @@ set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
     }
 }
 
+fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64) {
+    // Branch header
+    draw_text(plane, 2, 6, " main ", t.fg_on_accent, t.primary_active, true);
+    draw_text(plane, 2, 7, "Status: 3 files changed", t.fg, t.surface, false);
+
+    // Animated diff lines cycling through different statuses
+    let phases = [
+        [(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)],
+        [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)],
+        [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)],
+        [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)],
+    ];
+    let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
+    let lines = &phases[phase_idx];
+    for (i, (text, color)) in lines.iter().enumerate() {
+        draw_text(plane, 2, 9 + i, text, *color, t.surface, false);
+    }
+}
+
 fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let items = [
         (0, "home/", true, 0),
