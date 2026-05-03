@@ -359,17 +359,25 @@ impl Widget for Showcase {
 
         // Category sidebar
         let sidebar_w = 12usize;
+        let sidebar_start_y = 9usize;
         let categories = ["all", "apps", "cookbook", "tools"];
         for (i, cat) in categories.iter().enumerate() {
-            let cat_y = 4 + i * 2;
+            let cat_y = sidebar_start_y + i * 2;
             let is_active = self.category_filter.map_or(*cat == "all", |f| f == *cat);
             let (fg, bg_cat) = if is_active {
                 (t.fg_on_accent, t.primary_active)
             } else {
                 (t.fg_muted, t.bg)
             };
-            let label = format!(" {} ", cat.to_uppercase());
-            draw_text(&mut plane, 1, cat_y, &label, fg, bg_cat, is_active);
+            let (icon, label) = match *cat {
+                "all" => ("◈", " ALL "),
+                "apps" => ("▣", " APPS "),
+                "cookbook" => ("◉", " COOKBOOK "),
+                "tools" => ("◦", " TOOLS "),
+                _ => ("•", cat),
+            };
+            draw_text(&mut plane, 1, cat_y, icon, if is_active { t.primary } else { t.fg_muted }, bg_cat, is_active);
+            draw_text(&mut plane, 3, cat_y, label, fg, bg_cat, is_active);
 
             // Count badge
             let count = if *cat == "all" {
@@ -377,13 +385,13 @@ impl Widget for Showcase {
             } else {
                 self.examples.iter().filter(|e| e.category == *cat).count()
             };
-            let count_str = format!("{}", count);
-            draw_text(&mut plane, 10, cat_y, &count_str, fg, bg_cat, false);
+            let count_str = format!("{:>2}", count);
+            draw_text(&mut plane, 11, cat_y, &count_str, t.fg_muted, bg_cat, false);
         }
 
         // Grid of cards
         let grid_start_x = sidebar_w + 2;
-        let grid_start_y = 4usize;
+        let grid_start_y = sidebar_start_y;
         let card_w = 28usize;
         let card_h = 14usize;
         let cols = ((area.width as usize - grid_start_x) / (card_w + 2)).max(1);
