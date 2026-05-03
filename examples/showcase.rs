@@ -791,7 +791,7 @@ impl Widget for Showcase {
             let x = palette_start_x + i * (square_w + gap);
             let is_active = theme.name == self.theme.name;
             let is_hovered = hovered_palette == Some(i);
-            let bg = if is_hovered { theme.accent } else if is_active { theme.primary_active } else { theme.primary };
+            let bg = if is_hovered { theme.primary_hover } else if is_active { theme.primary_active } else { theme.primary };
             let fg = if is_hovered || is_active { theme.fg_on_accent } else { theme.fg_muted };
             // Draw 2-char wide colored square
             for dx in 0..square_w {
