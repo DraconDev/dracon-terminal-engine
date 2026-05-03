@@ -5,7 +5,7 @@ use std::io::{self, stdout, Read, Write};
 use dracon_terminal_engine::{
     compositor::engine::Compositor,
     compositor::plane::{Cell, Plane},
-    input::event::{Event, KeyCode, KeyEvent},
+    input::event::{Event, KeyCode, KeyEvent, MouseButton, MouseEventKind},
     input::parser::Parser,
     Terminal,
 };
@@ -18,6 +18,7 @@ struct Window {
     width: u16,
     height: u16,
     color: u8,
+    minimized: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

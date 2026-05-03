@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Minor dependency version bump in Cargo.lock
+Added window minimization state tracking to the desktop example
 
 ## Context
-This change was prompted by a routine dependency maintenance process, likely triggered by a new version of one or more dependencies in the project.
+This change supports future mouse interaction features by adding a `minimized` state to window management
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `minimized` field to `Window` struct
+- [x] Updated imports to include mouse-related types
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [ ] Implement actual window minimization functionality
 
 ## Blockers
-- None identified
+- Need to implement mouse interaction handlers for minimization
 
 ## Next Steps
-1. Verify that the updated dependencies don't introduce breaking changes
-2. Continue with other development work that may depend on these updates
+1. Implement mouse event handling for window minimization
+2. Add visual feedback for minimized windows
