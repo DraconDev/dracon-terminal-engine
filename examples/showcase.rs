@@ -566,7 +566,7 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     }
 }
 
-fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64) {
+fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, card_w: u16) {
     let wins = [
         (1, 6, 8, 4, t.primary),
         (11, 7, 8, 4, t.warning),
