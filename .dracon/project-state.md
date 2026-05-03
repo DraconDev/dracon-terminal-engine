@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Ensure all widgets are resized to match the new window dimensions when the window is resized.
+Update Cargo.lock to reflect dependency version changes
 
 ## Context
-The framework needs to properly handle window resizing events to maintain consistent widget layouts. The previous implementation only marked widgets as dirty but didn't update their areas.
+This change was prompted by recent dependency updates across multiple examples in the project. The Cargo.lock file was modified to ensure all dependencies are properly versioned and resolved.
 
 ## Completed
-- [x] Added creation of a new `Rect` with the updated window dimensions
-- [x] Updated all widgets to use the new window dimensions via `set_area()`
+- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Ensured all dependency resolutions are correct after recent updates
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] No active work in progress related to this change
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify the resizing behavior in all example applications
-2. Consider adding performance optimizations for large widget trees
+1. Verify that all examples build successfully with the updated dependencies
+2. Test the affected examples to ensure no regressions occurred
