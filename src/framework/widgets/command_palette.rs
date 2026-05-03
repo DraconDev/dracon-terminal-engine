@@ -351,14 +351,13 @@ impl crate::framework::widget::Widget for CommandPalette {
             }
             KeyCode::Enter => {
                 let filtered = self.filtered_commands();
-                if !filtered.is_empty() {
-                    let idx = self.selected_index.min(filtered.len() - 1);
-                    let cmd = filtered[idx];
+                let cmd_id = filtered.get(self.selected_index.min(filtered.len().saturating_sub(1))).map(|c| c.id);
+                self.hide();
+                if let Some(id) = cmd_id {
                     if let Some(ref mut f) = self.on_execute {
-                        f(cmd.id);
+                        f(id);
                     }
                 }
-                self.hide();
                 true
             }
             KeyCode::Backspace => {
