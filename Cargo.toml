@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.91.0"
+version = "27.92.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -140,6 +140,10 @@ path = "examples/ide.rs"
 [[example]]
 name = "git_tui"
 path = "examples/git_tui.rs"
+
+[[example]]
+name = "sqlite_browser"
+path = "examples/sqlite_browser.rs"
 
 [features]
 default = []
