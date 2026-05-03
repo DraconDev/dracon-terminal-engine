@@ -410,7 +410,7 @@ impl Widget for GitTui {
             match self.view {
                 GitView::Status => {
                     // Click on a file row
-                    let visible_count = content_h as usize;
+                    let _visible_count = content_h as usize;
                     // Files start at content_y + header rows (status/untracked/modified headers)
                     // We approximate: each file group has 1 header row, items below
                     // For simplicity, map directly: file index = (row - content_y - 1) adjusted for headers
