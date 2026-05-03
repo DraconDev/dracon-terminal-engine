@@ -4,18 +4,18 @@
 Added mouse position tracking to showcase example for interactive feedback
 
 ## Context
-This change enables more detailed interactive feedback in the showcase example by tracking the mouse position, which will be used to enhance visual effects and user interactions.
+This change enables the showcase example to track and respond to mouse position, which is necessary for implementing interactive features like hover effects and click handling.
 
 ## Completed
-- [x] Added `mouse_pos` field to `Showcase` struct to store current mouse coordinates
-- [x] Prepared infrastructure for mouse position-based interactions
+- [x] Added `mouse_pos` field to store current mouse coordinates
+- [x] Updated mouse event handler to update the stored position
 
 ## In Progress
-- [ ] Implement mouse position-based visual effects and interactions
+- [x] Mouse position tracking is now available for use in interactive features
 
 ## Blockers
-- Need to implement actual interaction logic using the tracked mouse position
+- None identified for this specific change
 
 ## Next Steps
-1. Implement visual feedback based on mouse position
-2. Add interactive elements that respond to mouse movement
+1. Implement hover effects using the tracked mouse position
+2. Add click handling based on the mouse position

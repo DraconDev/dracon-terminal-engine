@@ -105,6 +105,7 @@ impl Showcase {
             last_click_idx: None,
             fps,
             hovered_card: None,
+            mouse_pos: None,
         }
     }
 
@@ -603,6 +604,7 @@ impl Widget for Showcase {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.mouse_pos = Some((col, row));
         let sidebar_w = 12usize;
         let sidebar_start_y = 6usize;
         let grid_start_x = sidebar_w + 2;
