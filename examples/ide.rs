@@ -112,6 +112,7 @@ struct IdeApp {
 
     // Command palette
     command_palette: CommandPalette,
+    cmd_bridge: Rc<RefCell<Option<&'static str>>>,
 
     // Animation
     anim_frame: u8,
@@ -166,39 +167,30 @@ impl IdeApp {
 
         let breadcrumbs = Breadcrumbs::new(vec!["workspace".into(), "src".into(), "main.rs".into()]);
 
-        let palette_commands = vec![
+        let palette_commands: Vec<CommandItem> = vec![
             CommandItem { id: "new-tab", name: "New Tab", category: "file" },
             CommandItem { id: "open", name: "Open File", category: "file" },
             CommandItem { id: "save", name: "Save", category: "file" },
             CommandItem { id: "save-all", name: "Save All", category: "file" },
             CommandItem { id: "close-tab", name: "Close Tab", category: "file" },
-            CommandItem { id: "search", name: "Search", category: "edit" },
+            CommandItem { id: "search", name: "Search (Ctrl+F)", category: "edit" },
             CommandItem { id: "replace", name: "Find and Replace", category: "edit" },
             CommandItem { id: "cut", name: "Cut", category: "edit" },
             CommandItem { id: "copy", name: "Copy", category: "edit" },
             CommandItem { id: "paste", name: "Paste", category: "edit" },
-            CommandItem { id: "cycle-theme", name: "Cycle Theme", category: "view" },
-            CommandItem { id: "toggle-profiler", name: "Toggle Profiler", category: "view" },
+            CommandItem { id: "cycle-theme", name: "Cycle Theme (t)", category: "view" },
+            CommandItem { id: "toggle-profiler", name: "Toggle Profiler (F12)", category: "view" },
             CommandItem { id: "toggle-search", name: "Toggle Search Panel", category: "view" },
             CommandItem { id: "show-shortcuts", name: "Keyboard Shortcuts", category: "help" },
             CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
         ];
 
-        let is_dracon = false;
+        let cmd_bridge: Rc<RefCell<Option<&'static str>>> = Rc::new(RefCell::new(None));
+        let cmd_bridge_clone = cmd_bridge.clone();
         let command_palette = CommandPalette::new(palette_commands, &theme)
             .with_size(45, 18)
-            .on_execute({
-                move |cmd_id| {
-                    match cmd_id {
-                        "new-tab" => (), // handled via callback, see below
-                        "cycle-theme" => (),
-                        "toggle-profiler" => (),
-                        "toggle-search" => (),
-                        "show-shortcuts" => (),
-                        "about" => (),
-                        _ => (),
-                    }
-                }
+            .on_execute(move |cmd_id| {
+                *cmd_bridge_clone.borrow_mut() = Some(cmd_id);
             });
 
         Self {
@@ -223,6 +215,7 @@ impl IdeApp {
             show_profiler: false,
             breadcrumbs,
             command_palette,
+            cmd_bridge,
             anim_frame: 0,
             last_anim: Instant::now(),
         }

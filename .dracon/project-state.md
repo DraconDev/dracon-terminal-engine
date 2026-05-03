@@ -1,23 +1,23 @@
 # Project State
 
 ## Current Focus
-Added command palette functionality to the IDE example with basic command handling.
+Enhanced command palette with keyboard shortcut hints and command execution bridge
 
 ## Context
-This change implements the command palette UI component in the IDE example, allowing users to quickly access and execute commands through a searchable interface. It builds on recent work adding the CommandPalette widget to the framework.
+The command palette was previously functional but lacked keyboard shortcut hints in the UI and had a basic command execution handler. This change improves usability by showing shortcuts and implements a proper command execution bridge for better integration with the IDE's event system.
 
 ## Completed
-- [x] Integrated CommandPalette widget into the IDE example
-- [x] Added basic command palette items (new-tab, cycle-theme, etc.)
-- [x] Implemented placeholder command execution handlers
+- [x] Added keyboard shortcut hints to command palette items (e.g., "Search (Ctrl+F)")
+- [x] Implemented command execution bridge using Rc<RefCell<Option<&'static str>>>
+- [x] Refactored command execution handler to use the bridge pattern
+- [x] Added cmd_bridge field to IdeApp struct for command handling
 
 ## In Progress
-- [x] Command palette UI integration with IDE functionality
+- [ ] Integration with actual command handlers in the IDE
 
 ## Blockers
-- Command execution logic needs to be fully implemented for each command
-- Visual styling of the command palette needs refinement
+- Need to implement actual command handlers for each command ID
 
 ## Next Steps
-1. Implement actual command execution logic for each command type
-2. Enhance the command palette's visual appearance and behavior
+1. Implement command handlers for each command ID in the IDE
+2. Add proper error handling for unknown commands
