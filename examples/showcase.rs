@@ -90,7 +90,7 @@ struct Showcase {
     show_help: bool,
     modal_preview: bool,
     show_fps: bool,
-    card_phase: f64,
+    card_phase: std::cell::Cell<f64>,
 }
 
 impl Showcase {
