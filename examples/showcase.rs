@@ -369,8 +369,7 @@ impl Widget for Showcase {
             let feedback = if self.filtered.is_empty() {
                 "  No results!"
             } else {
-                let count = self.filtered.len();
-                if count == 1 { "  1 result" } else { "  x results" }
+                format!("  {} results", self.filtered.len())
             };
             let feedback_text = if self.filtered.len() == 1 {
                 format!("  1 result")
