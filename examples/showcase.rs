@@ -115,6 +115,7 @@ impl Showcase {
             tooltip_text: None,
             tooltip_timer: None,
             tooltip_pos: None,
+            show_help: false,
         }
     }
 
