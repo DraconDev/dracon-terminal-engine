@@ -705,6 +705,23 @@ impl Widget for Showcase {
                     false
                 }
             }
+            MouseEventKind::Moved => {
+                let y = row as usize;
+                let x = col as usize;
+                if x >= grid_start_x && y >= grid_start_y {
+                    let gx = x - grid_start_x;
+                    let gy = y - grid_start_y;
+                    let col_idx = gx / (card_w + 2);
+                    let row_idx = gy / (card_h + 1);
+                    let card_idx = row_idx * self.cols.get() + col_idx;
+                    if card_idx < self.filtered.len() {
+                        self.hovered_card = Some(card_idx);
+                        return true;
+                    }
+                }
+                self.hovered_card = None;
+                false
+            }
             _ => false,
         }
     }
