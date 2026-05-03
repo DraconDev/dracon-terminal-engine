@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "27.90.0"
+version = "27.91.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -136,6 +136,10 @@ path = "examples/table_widget.rs"
 [[example]]
 name = "ide"
 path = "examples/ide.rs"
+
+[[example]]
+name = "git_tui"
+path = "examples/git_tui.rs"
 
 [features]
 default = []
