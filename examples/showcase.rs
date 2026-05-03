@@ -444,7 +444,10 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64) {
         let fg = if i == thumb { t.primary } else { t.fg_muted };
         set_cell(plane, 3 + i, slider_y, ch, fg, t.surface);
     }
-    // Render overlapping windows with z-index labels
+    draw_text(plane, 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
+}
+
+fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let wins = [
         (2, 7, 14, 5, t.primary, "z:3"),
         (8, 6, 14, 5, t.warning, "z:2"),
