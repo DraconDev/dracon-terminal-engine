@@ -286,7 +286,7 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, _card_w: u16, card_h: u16) -> Plane {
+fn render_card(ex: &ExampleMeta, idx: usize, selected_idx: usize, hovered_idx: Option<usize>, t: Theme, phase: f64, card_w: u16, card_h: u16) -> Plane {
     let mut plane = Plane::new(0, card_w, card_h);
     let card_w_usize = card_w as usize;
     let card_h_usize = card_h as usize;
