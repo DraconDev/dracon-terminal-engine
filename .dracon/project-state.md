@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Enhanced syntax highlighting in the IDE example by adding number highlighting and reordering syntax rules
+Minor dependency version bump in Cargo.lock
 
 ## Context
-The IDE example needed improved syntax highlighting to better distinguish different code elements. The previous implementation prioritized keywords over comments, which made comments appear less prominent. This change reorders the syntax rules to prioritize comments and adds number highlighting for better visual distinction.
+This change is part of a series of refactoring and feature additions to the showcase card system, particularly around dynamic card width parameters and improved rendering.
 
 ## Completed
-- [x] Reordered syntax rules to prioritize comments over keywords
-- [x] Added number highlighting with warning color
-- [x] Maintained existing string literal and keyword highlighting
+- [x] Updated Cargo.lock with dependency version changes
 
 ## In Progress
-- [x] Syntax highlighting improvements for the IDE example
+- [x] Refactoring showcase card rendering with dynamic sizing and animation improvements
 
 ## Blockers
-- None identified
+- No blockers identified
 
 ## Next Steps
-1. Test the new syntax highlighting in various code scenarios
-2. Consider adding additional syntax elements (operators, functions) if needed
+1. Continue refactoring showcase card rendering functions
+2. Verify dynamic card width parameter implementation across all preview components
