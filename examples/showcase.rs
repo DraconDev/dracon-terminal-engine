@@ -148,6 +148,7 @@ impl Showcase {
             primitive_button: false,
             show_debug: false,
             primitive_button_time: None,
+            zones: RefCell::new(ScopedZoneRegistry::new()),
         }
     }
 
