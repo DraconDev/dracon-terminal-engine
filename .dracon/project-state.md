@@ -1,32 +1,25 @@
 # Project State
 
 ## Current Focus
-Expanded showcase examples with new UI component demos and improved documentation
+Expanded showcase examples with new UI component demos and improved demo organization
 
 ## Context
-The showcase examples were enhanced to demonstrate more UI components and provide better visual documentation of the framework's capabilities. This helps potential users understand what the library can do through concrete examples.
+The showcase examples were being expanded to demonstrate more UI components and improve the organization of the demo previews. This makes the showcase more comprehensive for potential users.
 
 ## Completed
-- [x] Added dashboard builder demo with drag-and-drop interface
-- [x] Created tabbed panels example with panel switching
-- [x] Implemented tree navigator with expandable nodes
-- [x] Added data table with sorting and selection
-- [x] Included log monitor with live filtering
-- [x] Added debug overlay for performance metrics
-- [x] Created input debug visualizer for key/mouse events
-- [x] Added text editor demo with syntax highlighting
-- [x] Implemented advanced table widget with sorting
-- [x] Added form demo with validation
-- [x] Included SQLite browser for database inspection
-- [x] Created widget tutorial with step-by-step guide
-- [x] Added game loop demo with snake game
+- [x] Added new showcase demos for dashboard builder, tabbed panels, tree navigator, data table, input debug, text editor demo, game loop, form demo, framework file manager, SQLite browser, widget tutorial, debug overlay, and table widget
+- [x] Renamed "log_viewer" to "log_monitor" for consistency
+- [x] Removed unused z-index preview code
+- [x] Updated modal demo preview with simplified styling
+- [x] Updated Cargo.lock with dependency version changes
 
 ## In Progress
-- [x] Comprehensive showcase examples with visual previews
+- [ ] No active work in progress shown in the diff
 
 ## Blockers
-- None identified
+- None identified in this commit
 
 ## Next Steps
-1. Verify all examples build and run correctly
-2. Update documentation to reference new showcase examples
+1. Verify all new showcase demos work correctly
+2. Update documentation to reflect the new showcase components
+3. Consider adding more interactive showcase examples
