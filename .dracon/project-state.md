@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Added a generic callback type for table row selection handling.
+Refactored table widget's selection callback to use a dedicated type for better type safety.
 
 ## Context
-This change follows a pattern of refactoring widget callback types to use dedicated types for better type safety and clarity, as seen in recent commits for the `Select` widget and `CommandPalette`.
+This change aligns with ongoing efforts to standardize callback types across widgets for improved type safety and maintainability.
 
 ## Completed
-- [x] Added `SelectCallback<T>` type alias for table row selection handling
-- [x] The type uses a boxed trait object for mutable callbacks
+- [x] Replaced `Box<dyn FnMut(&T)>` with `SelectCallback<T>` in the Table widget
 
 ## In Progress
-- [x] Implementation of table row selection using this callback type
+- [x] Ongoing refactoring of other widgets to use dedicated callback types
 
 ## Blockers
-- Need to verify callback behavior with the table's selection logic
+- None identified
 
 ## Next Steps
-1. Implement table row selection using the new callback type
-2. Add unit tests for the selection behavior
+1. Continue refactoring remaining widgets to use dedicated callback types
+2. Update documentation to reflect the new callback type usage

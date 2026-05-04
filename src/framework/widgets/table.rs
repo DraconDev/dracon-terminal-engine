@@ -34,7 +34,7 @@ pub struct Table<T> {
     offset: usize,
     visible_count: usize,
     theme: Theme,
-    on_select: Option<Box<dyn FnMut(&T)>>,
+    on_select: Option<SelectCallback<T>>,
     area: Cell<Rect>,
     dirty: bool,
 }
