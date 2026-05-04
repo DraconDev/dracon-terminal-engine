@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Refactored showcase example widget to optimize theme color handling.
+Added smoke test for showcase example to verify it builds and runs without crashing.
 
 ## Context
-This change continues a series of refactorings to improve the showcase example's performance and maintainability by simplifying how theme colors are passed and used in card rendering.
+The showcase example has undergone several refactoring passes to improve its theme handling and rendering. This smoke test ensures the example remains functional after these changes by verifying it can be built and executed without immediate crashes.
 
 ## Completed
-- [x] Optimized theme color handling by removing unnecessary cloning in the showcase widget
-- [x] Updated card rendering to directly use theme colors instead of cloned values
+- [x] Added integration test that builds and runs the showcase example
+- [x] Implemented timeout handling to prevent hanging in CI environments
+- [x] Marked test as ignored for CI environments due to TTY requirements
 
 ## In Progress
-- [x] Ongoing refactoring of showcase example components to use structured configurations
+- [ ] None (test is complete)
 
 ## Blockers
-- No significant blockers identified; ongoing refactoring work
+- Requires a real TTY for proper execution (marked as ignored in CI)
 
 ## Next Steps
-1. Complete refactoring of remaining showcase example components
-2. Verify performance improvements in the showcase example
+1. Verify test passes locally with a real terminal
+2. Consider adding more comprehensive showcase functionality tests
