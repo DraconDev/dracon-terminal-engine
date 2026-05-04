@@ -1,24 +1,20 @@
 # Project State
 
 ## Current Focus
-Added mouse event handling implementation for the showcase widget.
+Dependency version bump in Cargo.lock
 
 ## Context
-This change implements the mouse event dispatching logic that was previously referenced in the code structure but not fully implemented. It follows up on the recent mouse event debugging work and provides the core functionality needed for mouse interactions in the showcase example.
+This change updates the project's dependencies to their latest versions, ensuring compatibility and security updates.
 
 ## Completed
-- [x] Implemented mouse event dispatching method for the showcase widget
-- [x] Added basic mouse event handling structure with sidebar positioning logic
+- [x] Updated Cargo.lock with latest dependency versions
 
 ## In Progress
-- [ ] Complete mouse event processing logic (currently just the method signature)
-- [ ] Integration with existing mouse event logging system
+- [x] No active work in progress related to this change
 
 ## Blockers
-- Need to determine exact mouse interaction requirements for the showcase widget
-- Requires testing with actual mouse input to verify behavior
+- None
 
 ## Next Steps
-1. Implement complete mouse event processing logic
-2. Integrate with existing input debugging systems
-3. Add unit tests for mouse event handling
+1. Verify all dependencies work correctly with the new versions
+2. Update documentation if any breaking changes were introduced
