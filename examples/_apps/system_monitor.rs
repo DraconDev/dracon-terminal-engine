@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! System Monitor — htop-like dashboard with real system data.
+//! System Monitor — htop-like dashboard with real system data and sparkline history.
 //!
 //! Reads actual system metrics from /proc filesystem:
 //! - CPU usage from /proc/stat
@@ -8,457 +8,611 @@
 //! - Network from /proc/net/dev
 //! - Process list from /proc/<pid>/stat
 //!
-//! Falls back to simulated data if /proc unavailable (e.g., non-Linux).
+//! Controls:
+//!   t          — cycle theme (15 themes)
+//!   ?          — toggle help
+//!   ↑/↓        — navigate process list
+//!   q          — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Gauge, KeyValueGrid, StatusBadge, StreamingText};
+use dracon_terminal_engine::framework::widgets::{Gauge, StatusBadge};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
-use std::collections::BTreeMap;
+use std::collections::VecDeque;
 use std::fs;
 use std::rc::Rc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 const THEMES: &[&str] = &[
-    "nord",
-    "dracula",
-    "cyberpunk",
-    "gruvbox-dark",
-    "tokyo-night",
+    "nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night",
+    "catppuccin", "solarized-dark", "one-dark", "rose-pine", "kanagawa",
+    "everforest", "monokai", "solarized-light", "gruvbox-dark", "light",
 ];
+const HISTORY_SIZE: usize = 60;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HISTORY TRACKER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+struct MetricHistory {
+    values: VecDeque<f64>,
+}
+
+impl MetricHistory {
+    fn new() -> Self {
+        Self { values: VecDeque::with_capacity(HISTORY_SIZE) }
+    }
+    fn push(&mut self, v: f64) {
+        if self.values.len() >= HISTORY_SIZE { self.values.pop_front(); }
+        self.values.push_back(v);
+    }
+    fn current(&self) -> f64 { self.values.back().copied().unwrap_or(0.0) }
+    fn max(&self) -> f64 { self.values.iter().copied().fold(0.0, f64::max) }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATA STRUCTURES
+// ═══════════════════════════════════════════════════════════════════════════════
 
 struct ProcessInfo {
     pid: u32,
     name: String,
     cpu_percent: f32,
+    mem_mb: f32,
+    state: String,
 }
 
-struct SystemStats {
-    cpu_percent: f32,
+struct SystemData {
+    cpu_hist: MetricHistory,
+    mem_hist: MetricHistory,
+    disk_hist: MetricHistory,
+    net_hist: MetricHistory,
     memory_used_mb: f32,
     memory_total_mb: f32,
-    disk_read_mb: f64,
-    disk_write_mb: f64,
-    network_rx_mb: f64,
-    network_tx_mb: f64,
     uptime_seconds: u64,
     load_avg: (f32, f32, f32),
     processes: Vec<ProcessInfo>,
-}
-
-impl SystemStats {
-    fn new() -> Self {
-        Self {
-            cpu_percent: 0.0,
-            memory_used_mb: 0.0,
-            memory_total_mb: 4096.0,
-            disk_read_mb: 0.0,
-            disk_write_mb: 0.0,
-            network_rx_mb: 0.0,
-            network_tx_mb: 0.0,
-            uptime_seconds: 0,
-            load_avg: (0.0, 0.0, 0.0),
-            processes: Vec::new(),
-        }
-    }
-}
-
-struct SystemMonitor {
-    cpu_gauge: Gauge,
-    mem_gauge: Gauge,
-    disk_gauge: Gauge,
-    net_gauge: Gauge,
-    process_grid: KeyValueGrid,
-    status_badge: StatusBadge,
-    uptime_text: StreamingText,
-    stats: SystemStats,
-    theme_index: usize,
-    start_time: Instant,
     last_cpu_total: u64,
     last_cpu_idle: u64,
     last_disk_read: u64,
     last_disk_write: u64,
     last_net_rx: u64,
     last_net_tx: u64,
-    selected_process: Option<usize>,
-    process_scroll_offset: usize,
 }
 
-impl SystemMonitor {
+impl SystemData {
     fn new() -> Self {
-        let theme = Theme::nord();
         Self {
-            cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU")
-                .with_theme(theme)
-                .warn_threshold(70.0)
-                .crit_threshold(90.0),
-            mem_gauge: Gauge::with_id(WidgetId::new(2), "Memory")
-                .with_theme(theme)
-                .warn_threshold(80.0)
-                .crit_threshold(95.0),
-            disk_gauge: Gauge::with_id(WidgetId::new(3), "Disk I/O")
-                .with_theme(theme)
-                .warn_threshold(75.0)
-                .crit_threshold(90.0),
-            net_gauge: Gauge::with_id(WidgetId::new(4), "Network")
-                .with_theme(theme)
-                .warn_threshold(80.0)
-                .crit_threshold(95.0),
-            process_grid: KeyValueGrid::with_id(WidgetId::new(5)).with_theme(theme),
-            status_badge: StatusBadge::new(WidgetId::new(6)).with_theme(theme),
-            uptime_text: StreamingText::with_id(WidgetId::new(7))
-                .with_theme(theme)
-                .max_lines(1),
-            stats: SystemStats::new(),
-            theme_index: 0,
-            start_time: Instant::now(),
+            cpu_hist: MetricHistory::new(),
+            mem_hist: MetricHistory::new(),
+            disk_hist: MetricHistory::new(),
+            net_hist: MetricHistory::new(),
+            memory_used_mb: 0.0,
+            memory_total_mb: 16384.0,
+            uptime_seconds: 0,
+            load_avg: (0.0, 0.0, 0.0),
+            processes: Vec::new(),
             last_cpu_total: 0,
             last_cpu_idle: 0,
             last_disk_read: 0,
             last_disk_write: 0,
             last_net_rx: 0,
             last_net_tx: 0,
-            selected_process: None,
-            process_scroll_offset: 0,
         }
     }
 
-    fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
+    fn refresh(&mut self) {
+        self.read_cpu();
+        self.read_memory();
+        let (dr, dw) = self.read_disk();
+        let (nr, nt) = self.read_network();
+        self.disk_hist.push(dr + dw);
+        self.net_hist.push(nr + nt);
+        self.uptime_seconds = self.read_uptime();
+        self.load_avg = self.read_load_avg();
+        self.read_processes();
     }
 
-    fn get_theme(&self) -> Theme {
-        match THEMES[self.theme_index] {
-            "nord" => Theme::nord(),
-            "dracula" => Theme::dracula(),
-            "cyberpunk" => Theme::cyberpunk(),
-            "gruvbox-dark" => Theme::gruvbox_dark(),
-            "tokyo-night" => Theme::tokyo_night(),
-            _ => Theme::nord(),
-        }
-    }
-
-    fn read_cpu_stats(&mut self) -> f32 {
+    fn read_cpu(&mut self) {
+        let mut pct = 0.0;
         if let Ok(content) = fs::read_to_string("/proc/stat") {
-            let line = content.lines().next().unwrap_or_default();
-            let parts: Vec<&str> = line.split_whitespace().collect();
+            let parts: Vec<&str> = content.lines().next().unwrap_or_default().split_whitespace().collect();
             if parts.len() >= 5 {
                 let user: u64 = parts[1].parse().unwrap_or(0);
                 let nice: u64 = parts[2].parse().unwrap_or(0);
                 let system: u64 = parts[3].parse().unwrap_or(0);
                 let idle: u64 = parts[4].parse().unwrap_or(0);
                 let iowait: u64 = parts.get(5).and_then(|s| s.parse().ok()).unwrap_or(0);
-                let irq: u64 = parts.get(6).and_then(|s| s.parse().ok()).unwrap_or(0);
-                let softirq: u64 = parts.get(7).and_then(|s| s.parse().ok()).unwrap_or(0);
-
-                let total = user + nice + system + idle + iowait + irq + softirq;
-                let idle_total = idle + iowait;
-
-                let delta_total = total.saturating_sub(self.last_cpu_total);
-                let delta_idle = idle_total.saturating_sub(self.last_cpu_idle);
-
+                let total = user + nice + system + idle + iowait;
+                let dt = total.saturating_sub(self.last_cpu_total);
+                let di = (idle + iowait).saturating_sub(self.last_cpu_idle);
                 self.last_cpu_total = total;
-                self.last_cpu_idle = idle_total;
-
-                if delta_total > 0 {
-                    return ((delta_total - delta_idle) as f32 / delta_total as f32) * 100.0;
-                }
+                self.last_cpu_idle = idle + iowait;
+                if dt > 0 { pct = ((dt - di) as f64 / dt as f64) * 100.0; }
             }
         }
-        self.simulate_cpu()
+        self.cpu_hist.push(pct.clamp(0.0, 100.0));
     }
 
-    fn simulate_cpu(&mut self) -> f32 {
-        let tick = (self.start_time.elapsed().as_secs() as f32 / 2.0).round() as u32;
-        let base = 30.0 + (tick % 5) as f32 * 10.0;
-        (base + rand_float(5.0, 15.0)).clamp(5.0, 95.0)
-    }
-
-    fn read_memory_stats(&mut self) -> (f32, f32) {
+    fn read_memory(&mut self) {
         if let Ok(content) = fs::read_to_string("/proc/meminfo") {
-            let mut mem_total_kb: u64 = 0;
-            let mut mem_available_kb: u64 = 0;
-
+            let mut total_kb = 0u64;
+            let mut available_kb = 0u64;
             for line in content.lines() {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 2 {
-                    let value: u64 = parts[1].parse().unwrap_or(0);
-                    match parts[0] {
-                        "MemTotal:" => mem_total_kb = value,
-                        "MemAvailable:" => mem_available_kb = value,
+                let p: Vec<&str> = line.split_whitespace().collect();
+                if p.len() >= 2 {
+                    let v: u64 = p[1].parse().unwrap_or(0);
+                    match p[0] {
+                        "MemTotal:" => total_kb = v,
+                        "MemAvailable:" => available_kb = v,
                         _ => {}
                     }
                 }
             }
-
-            if mem_total_kb > 0 {
-                let total_mb = mem_total_kb as f32 / 1024.0;
-                let available_mb = mem_available_kb as f32 / 1024.0;
-                let used_mb = total_mb - available_mb;
-                self.stats.memory_total_mb = total_mb;
-                return (used_mb, total_mb);
+            if total_kb > 0 {
+                self.memory_total_mb = total_kb as f32 / 1024.0;
+                let used_kb = total_kb.saturating_sub(available_kb);
+                self.memory_used_mb = used_kb as f32 / 1024.0;
+                let pct = used_kb as f64 / total_kb as f64 * 100.0;
+                self.mem_hist.push(pct);
             }
         }
-        self.stats.memory_total_mb = 16384.0;
-        (8192.0 + rand_float(0.0, 500.0), self.stats.memory_total_mb)
     }
 
-    fn read_disk_stats(&mut self) -> (f64, f64) {
-        let mut read_bytes: u64 = 0;
-        let mut write_bytes: u64 = 0;
-
+    fn read_disk(&mut self) -> (f64, f64) {
+        let mut read_b = 0u64;
+        let mut write_b = 0u64;
         if let Ok(entries) = fs::read_dir("/sys/class/block") {
             for entry in entries.filter_map(|e| e.ok()) {
-                let path = entry.path();
-                if let Ok(stat) = fs::read_to_string(path.join("stat")) {
-                    let parts: Vec<&str> = stat.split_whitespace().collect();
-                    if parts.len() >= 6 {
-                        read_bytes += parts[2].parse::<u64>().unwrap_or(0);
-                        write_bytes += parts[6].parse::<u64>().unwrap_or(0);
+                if let Ok(s) = fs::read_to_string(entry.path().join("stat")) {
+                    let p: Vec<&str> = s.split_whitespace().collect();
+                    if p.len() >= 6 {
+                        read_b += p[2].parse::<u64>().unwrap_or(0) * 512;
+                        write_b += p[6].parse::<u64>().unwrap_or(0) * 512;
                     }
                 }
             }
         }
-
-        if read_bytes > 0 || write_bytes > 0 {
-            let delta_read = read_bytes.saturating_sub(self.last_disk_read) / 1024 / 1024;
-            let delta_write = write_bytes.saturating_sub(self.last_disk_write) / 1024 / 1024;
-            self.last_disk_read = read_bytes;
-            self.last_disk_write = write_bytes;
-            return (delta_read as f64, delta_write as f64);
-        }
-        (rand_float(1.0, 10.0) as f64, rand_float(0.5, 5.0) as f64)
+        let dr = if self.last_disk_read > 0 { (read_b.saturating_sub(self.last_disk_read) as f64) / 1048576.0 } else { 0.0 };
+        let dw = if self.last_disk_write > 0 { (write_b.saturating_sub(self.last_disk_write) as f64) / 1048576.0 } else { 0.0 };
+        self.last_disk_read = read_b;
+        self.last_disk_write = write_b;
+        (dr, dw)
     }
 
-    fn read_network_stats(&mut self) -> (f64, f64) {
-        let mut rx_bytes: u64 = 0;
-        let mut tx_bytes: u64 = 0;
-
+    fn read_network(&mut self) -> (f64, f64) {
+        let mut rx_b = 0u64;
+        let mut tx_b = 0u64;
         if let Ok(content) = fs::read_to_string("/proc/net/dev") {
             for line in content.lines().skip(2) {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 10 {
-                    rx_bytes += parts[1].parse::<u64>().unwrap_or(0);
-                    tx_bytes += parts[9].parse::<u64>().unwrap_or(0);
+                let p: Vec<&str> = line.split_whitespace().collect();
+                if p.len() >= 10 {
+                    rx_b += p[1].parse::<u64>().unwrap_or(0);
+                    tx_b += p[9].parse::<u64>().unwrap_or(0);
                 }
             }
         }
-
-        if rx_bytes > 0 || tx_bytes > 0 {
-            let delta_rx = (rx_bytes.saturating_sub(self.last_net_rx) as f64) / 1024.0 / 1024.0;
-            let delta_tx = (tx_bytes.saturating_sub(self.last_net_tx) as f64) / 1024.0 / 1024.0;
-            self.last_net_rx = rx_bytes;
-            self.last_net_tx = tx_bytes;
-            return (delta_rx, delta_tx);
-        }
-        (rand_float(5.0, 50.0) as f64, rand_float(1.0, 20.0) as f64)
-    }
-
-    fn read_load_avg(&self) -> (f32, f32, f32) {
-        if let Ok(content) = fs::read_to_string("/proc/loadavg") {
-            let parts: Vec<&str> = content.split_whitespace().take(3).collect();
-            if parts.len() >= 3 {
-                let a: f32 = parts[0].parse().unwrap_or(0.0);
-                let b: f32 = parts[1].parse().unwrap_or(0.0);
-                let c: f32 = parts[2].parse().unwrap_or(0.0);
-                return (a, b, c);
-            }
-        }
-        (
-            rand_float(0.1, 2.0),
-            rand_float(0.1, 1.5),
-            rand_float(0.1, 1.0),
-        )
+        let nr = if self.last_net_rx > 0 { (rx_b.saturating_sub(self.last_net_rx) as f64) / 1048576.0 } else { 0.0 };
+        let nt = if self.last_net_tx > 0 { (tx_b.saturating_sub(self.last_net_tx) as f64) / 1048576.0 } else { 0.0 };
+        self.last_net_rx = rx_b;
+        self.last_net_tx = tx_b;
+        (nr, nt)
     }
 
     fn read_uptime(&self) -> u64 {
-        if let Ok(content) = fs::read_to_string("/proc/uptime") {
-            if let Some(first) = content.split_whitespace().next() {
-                return first.parse::<f64>().unwrap_or(0.0) as u64;
-            }
-        }
-        self.start_time.elapsed().as_secs()
+        fs::read_to_string("/proc/uptime")
+            .ok()
+            .and_then(|c| c.split_whitespace().next()?.parse::<f64>().ok())
+            .unwrap_or(0.0) as u64
     }
 
-    fn read_top_processes(&mut self) {
-        self.stats.processes.clear();
+    fn read_load_avg(&self) -> (f32, f32, f32) {
+        fs::read_to_string("/proc/loadavg")
+            .ok()
+            .and_then(|c| {
+                let p: Vec<&str> = c.split_whitespace().take(3).collect();
+                if p.len() >= 3 {
+                    Some((p[0].parse().unwrap_or(0.0), p[1].parse().unwrap_or(0.0), p[2].parse().unwrap_or(0.0)))
+                } else { None }
+            })
+            .unwrap_or((0.0, 0.0, 0.0))
+    }
 
+    fn read_processes(&mut self) {
+        self.processes.clear();
         if let Ok(entries) = fs::read_dir("/proc") {
-            let mut pids: Vec<u32> = Vec::new();
             for entry in entries.filter_map(|e| e.ok()) {
-                if let Some(name) = entry.file_name().to_str() {
-                    if let Ok(pid) = name.parse::<u32>() {
-                        pids.push(pid);
-                    }
-                }
-            }
-
-            for pid in pids.into_iter().take(20) {
+                let name = entry.file_name();
+                let name_str = name.to_string_lossy();
+                let pid: u32 = match name_str.parse() { Ok(p) => p, _ => continue };
                 if let Ok(content) = fs::read_to_string(format!("/proc/{}/stat", pid)) {
-                    let paren_pos = content.find('(').unwrap_or(0);
+                    let paren = content.find('(').unwrap_or(0);
                     let end_paren = content.find(')').unwrap_or(content.len());
-
-                    if end_paren > paren_pos && paren_pos > 0 {
-                        let name = content[paren_pos + 1..end_paren].to_string();
+                    if end_paren > paren && paren > 0 {
+                        let pname = content[paren + 1..end_paren].to_string();
                         let rest: Vec<&str> = content[end_paren + 1..].split_whitespace().collect();
-
-                        if rest.len() >= 3 {
+                        if rest.len() >= 12 {
                             let utime: u64 = rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
                             let stime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
-                            let _state = rest.first().unwrap_or(&"?");
-
-                            let cpu_usage = (utime + stime) as f32 / 100.0;
-
-                            let proc_stat = format!("/proc/{}/status", pid);
-                            let _mem_kb: f32 = fs::read_to_string(&proc_stat)
+                            let state = rest.first().copied().unwrap_or("?").to_string();
+                            let mem_mb: f32 = fs::read_to_string(format!("/proc/{}/status", pid))
                                 .ok()
-                                .and_then(|c| {
-                                    c.lines()
-                                        .find(|l| l.starts_with("VmRSS:"))
-                                        .and_then(|l| l.split_whitespace().nth(1))
-                                        .and_then(|s| s.parse().ok())
-                                })
-                                .unwrap_or(0.0)
-                                / 1024.0;
-
-                            self.stats.processes.push(ProcessInfo {
-                                pid,
-                                name,
-                                cpu_percent: cpu_usage,
+                                .and_then(|c| c.lines().find(|l| l.starts_with("VmRSS:"))
+                                    .and_then(|l| l.split_whitespace().nth(1))
+                                    .and_then(|s| s.parse().ok()))
+                                .unwrap_or(0.0) / 1024.0;
+                            self.processes.push(ProcessInfo {
+                                pid, name: pname,
+                                cpu_percent: ((utime + stime) as f32 / 100.0).clamp(0.0, 100.0),
+                                mem_mb, state,
                             });
                         }
                     }
                 }
             }
         }
-
-        self.stats
-            .processes
-            .sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
-        self.stats.processes.truncate(8);
+        self.processes.sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
+        self.processes.truncate(20);
     }
-
-    fn refresh_stats(&mut self) {
-        self.stats.cpu_percent = self.read_cpu_stats();
-        let (mem_used, mem_total) = self.read_memory_stats();
-        self.stats.memory_used_mb = mem_used;
-        self.stats.memory_total_mb = mem_total;
-        let (disk_r, disk_w) = self.read_disk_stats();
-        self.stats.disk_read_mb = disk_r;
-        self.stats.disk_write_mb = disk_w;
-        let (net_rx, net_tx) = self.read_network_stats();
-        self.stats.network_rx_mb = net_rx;
-        self.stats.network_tx_mb = net_tx;
-        self.stats.uptime_seconds = self.read_uptime();
-        self.stats.load_avg = self.read_load_avg();
-
-        self.read_top_processes();
-
-        let cpu_status = if self.stats.cpu_percent >= 80.0 {
-            "HIGH CPU"
-        } else {
-            "Normal"
-        };
-        let mem_pct = (self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as u32;
-        let mem_status = if mem_pct >= 90 { "HIGH MEM" } else { "Normal" };
-        let final_status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" {
-            "WARNING"
-        } else {
-            "HEALTHY"
-        };
-        self.status_badge.set_status(final_status);
-
-        self.cpu_gauge.set_value(self.stats.cpu_percent as f64);
-        self.mem_gauge
-            .set_value((self.stats.memory_used_mb / self.stats.memory_total_mb * 100.0) as f64);
-
-        let disk_activity = (self.stats.disk_read_mb + self.stats.disk_write_mb).min(100.0);
-        self.disk_gauge.set_value(disk_activity);
-
-        let net_activity = (self.stats.network_rx_mb + self.stats.network_tx_mb).min(100.0);
-        self.net_gauge.set_value(net_activity);
-
-        self.uptime_text.clear();
-        self.uptime_text
-            .append(&format_uptime(self.stats.uptime_seconds));
-
-        self.process_grid.set_pairs(self.build_process_pairs());
-    }
-
-    fn build_process_pairs(&self) -> BTreeMap<String, String> {
-        let mut pairs = BTreeMap::new();
-        pairs.insert("Top Processes".to_string(), "CPU%".to_string());
-        for p in &self.stats.processes {
-            let name = if p.name.len() > 15 {
-                format!("{}...", &p.name[..12])
-            } else {
-                p.name.clone()
-            };
-            pairs.insert(
-                format!("{} ({})", name, p.pid),
-                format!("{:.1}%", p.cpu_percent),
-            );
-        }
-        let (la1, la5, la15) = self.stats.load_avg;
-        pairs.insert(
-            "Load Avg".to_string(),
-            format!("{:.2} {:.2} {:.2}", la1, la5, la15),
-        );
-        pairs
-    }
-}
-
-fn rand_float(min: f32, max: f32) -> f32 {
-    use std::time::SystemTime;
-    let nanos = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .subsec_nanos() as f32;
-    min + (nanos / u32::MAX as f32) * (max - min)
 }
 
 fn format_uptime(seconds: u64) -> String {
-    let days = seconds / 86400;
-    let hours = (seconds % 86400) / 3600;
-    let mins = (seconds % 3600) / 60;
-    let secs = seconds % 60;
-    if days > 0 {
-        format!("{}d {}h {}m {}s", days, hours, mins, secs)
-    } else if hours > 0 {
-        format!("{}h {}m {}s", hours, mins, secs)
-    } else if mins > 0 {
-        format!("{}m {}s", mins, secs)
-    } else {
-        format!("{}s", secs)
+    let d = seconds / 86400;
+    let h = (seconds % 86400) / 3600;
+    let m = (seconds % 3600) / 60;
+    let s = seconds % 60;
+    if d > 0 { format!("{}d {:02}h {:02}m {:02}s", d, h, m, s) }
+    else if h > 0 { format!("{:02}h {:02}m {:02}s", h, m, s) }
+    else { format!("{:02}m {:02}s", m, s) }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SYSTEM MONITOR WIDGET
+// ═══════════════════════════════════════════════════════════════════════════════
+
+struct SystemMonitor {
+    data: SystemData,
+    cpu_gauge: Gauge,
+    mem_gauge: Gauge,
+    disk_gauge: Gauge,
+    net_gauge: Gauge,
+    status_badge: StatusBadge,
+    theme_index: usize,
+    theme: Theme,
+    selected_process: Option<usize>,
+    process_scroll: usize,
+    show_help: bool,
+}
+
+impl SystemMonitor {
+    fn new() -> Self {
+        let mut data = SystemData::new();
+        data.refresh();
+        let theme = Theme::nord();
+        Self {
+            cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU %").with_theme(theme).warn_threshold(70.0).crit_threshold(90.0),
+            mem_gauge: Gauge::with_id(WidgetId::new(2), "Memory %").with_theme(theme).warn_threshold(80.0).crit_threshold(95.0),
+            disk_gauge: Gauge::with_id(WidgetId::new(3), "I/O").with_theme(theme).warn_threshold(75.0).crit_threshold(90.0),
+            net_gauge: Gauge::with_id(WidgetId::new(4), "Network").with_theme(theme).warn_threshold(80.0).crit_threshold(95.0),
+            status_badge: StatusBadge::new(WidgetId::new(5)).with_theme(theme),
+            data,
+            theme_index: 0,
+            theme,
+            selected_process: None,
+            process_scroll: 0,
+            show_help: false,
+        }
+    }
+
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % THEMES.len();
+        self.theme = match THEMES[self.theme_index] {
+            "nord" => Theme::nord(), "dracula" => Theme::dracula(),
+            "cyberpunk" => Theme::cyberpunk(), "gruvbox-dark" => Theme::gruvbox_dark(),
+            "tokyo-night" => Theme::tokyo_night(), "catppuccin" => Theme::catppuccin_mocha(),
+            "solarized-dark" => Theme::solarized_dark(), "one-dark" => Theme::one_dark(),
+            "rose-pine" => Theme::rose_pine(), "kanagawa" => Theme::kanagawa(),
+            "everforest" => Theme::everforest(), "monokai" => Theme::monokai(),
+            "solarized-light" => Theme::solarized_light(), "light" => Theme::light(),
+            _ => Theme::nord(),
+        };
+        self.cpu_gauge.on_theme_change(&self.theme);
+        self.mem_gauge.on_theme_change(&self.theme);
+        self.disk_gauge.on_theme_change(&self.theme);
+        self.net_gauge.on_theme_change(&self.theme);
+        self.status_badge.on_theme_change(&self.theme);
+    }
+
+    fn update_gauges(&mut self) {
+        let cpu = self.data.cpu_hist.current() as f64;
+        let mem = self.data.mem_hist.current() as f64;
+        self.cpu_gauge.set_value(cpu);
+        self.mem_gauge.set_value(mem);
+
+        let cpu_status = if cpu >= 80.0 { "HIGH CPU" } else if cpu >= 50.0 { "MODERATE" } else { "Normal" };
+        let mem_pct = mem;
+        let mem_status = if mem_pct >= 90.0 { "HIGH MEM" } else { "Normal" };
+        let status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" { "WARNING" } else if cpu_status == "MODERATE" { "CAUTION" } else { "HEALTHY" };
+        self.status_badge.set_status(status);
     }
 }
 
-fn draw_text_plane(
-    plane: &mut Plane,
-    x: u16,
-    y: u16,
-    text: &str,
-    fg: Color,
-    bg: Color,
-    bold: bool,
-) {
+impl Widget for SystemMonitor {
+    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    fn set_area(&mut self, _area: Rect) {}
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
+
+    fn render(&self, area: Rect) -> Plane {
+        let t = self.theme;
+        let mut plane = Plane::new(0, area.width, area.height);
+        for cell in plane.cells.iter_mut() {
+            cell.bg = t.bg; cell.fg = t.fg; cell.transparent = false;
+        }
+
+        // ── Header ──
+        let header = " System Monitor ";
+        let theme_label = format!(" {} ", THEMES[self.theme_index]);
+        let uptime = format!(" Up {}", format_uptime(self.data.uptime_seconds));
+        draw_text(&mut plane, 2, 0, header, t.primary, t.bg, true);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + uptime.len() as u16 + 3), 0,
+            &uptime, t.fg_muted, t.bg, false);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 1), 0,
+            &theme_label, t.secondary, t.bg, false);
+
+        // Separator
+        for x in 0..area.width {
+            let idx = (area.width + x as u16) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+        }
+
+        // ── Gauges Row (2x2 grid) ──
+        let gauge_h = 5u16;
+        let half_w = area.width / 2;
+        render_card_border(&mut plane, 0, 2, half_w, gauge_h, t);
+        render_card_border(&mut plane, half_w, 2, area.width - half_w, gauge_h, t);
+
+        let cg = self.cpu_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
+        blit_to(&mut plane, &cg, 2, 3);
+        let hist_w = half_w.saturating_sub(8) as u16;
+        let cpu_color = if self.data.cpu_hist.current() >= 90.0 { t.error }
+            else if self.data.cpu_hist.current() >= 70.0 { t.warning } else { t.success };
+        render_sparkline(&mut plane, 2, 2 + gauge_h - 2, hist_w.min(20), 2, &self.data.cpu_hist, cpu_color, t.surface);
+
+        let mg = self.mem_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
+        blit_to(&mut plane, &mg, half_w + 2, 3);
+        let mem_color = if self.data.mem_hist.current() >= 95.0 { t.error }
+            else if self.data.mem_hist.current() >= 80.0 { t.warning } else { t.success };
+        render_sparkline(&mut plane, half_w + 2, 2 + gauge_h - 2, hist_w.min(20), 2, &self.data.mem_hist, mem_color, t.surface);
+
+        // Status badge + load avg
+        let badge_y = 2 + gauge_h;
+        let sb = self.status_badge.render(Rect::new(0, 0, half_w - 2, 1));
+        blit_to(&mut plane, &sb, 2, badge_y);
+        let (l1, l5, l15) = self.data.load_avg;
+        let load_text = format!("Load: {:.2} {:.2} {:.2}", l1, l5, l15);
+        draw_text(&mut plane, half_w + 2, badge_y, &load_text, t.fg_muted, t.bg, false);
+
+        // ── Process List ──
+        let list_y = badge_y + 2;
+        let list_h = area.height.saturating_sub(list_y + 2);
+        render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
+
+        let header_y = list_y + 1;
+        let header_text = " PID  STATE  NAME             CPU%      MEM ";
+        draw_text(&mut plane, 2, header_y, header_text, t.fg_muted, t.surface, true);
+
+        let max_visible = (list_h as usize).saturating_sub(3);
+        for i in 0..max_visible {
+            let proc_idx = self.process_scroll + i;
+            let row_y = header_y + 1 + i as u16;
+            if row_y >= list_y + list_h - 1 { break; }
+            if let Some(proc) = self.data.processes.get(proc_idx) {
+                let is_selected = self.selected_process == Some(proc_idx);
+                let (fg, bg) = if is_selected { (t.fg_on_accent, t.primary_active) } else { (t.fg, t.surface) };
+                let name = if proc.name.len() > 14 { &proc.name[..14] } else { &proc.name };
+                let line = format!(" {:>5}  {:<3}  {:<14} {:>5.1}%  {:>5.0}MB", proc.pid, proc.state, name, proc.cpu_percent, proc.mem_mb);
+                draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
+            }
+        }
+
+        // ── Detail Panel (right side, when process selected) ──
+        if let Some(sel) = self.selected_process {
+            if let Some(proc) = self.data.processes.get(sel) {
+                let detail_x = area.width / 2;
+                let detail_w = area.width.saturating_sub(detail_x + 2);
+                let detail_y = badge_y + 1;
+                if detail_w > 10 {
+                    let mut dy = detail_y;
+                    draw_text(&mut plane, detail_x, dy, &format!(" Process: {}", proc.name), t.primary, t.bg, true);
+                    dy += 1;
+                    draw_text(&mut plane, detail_x, dy, &format!(" PID: {}", proc.pid), t.fg, t.bg, false);
+                    dy += 1;
+                    draw_text(&mut plane, detail_x, dy, &format!(" CPU: {:.1}%", proc.cpu_percent), t.fg, t.bg, false);
+                    dy += 1;
+                    draw_text(&mut plane, detail_x, dy, &format!(" MEM: {:.0} MB", proc.mem_mb), t.fg, t.bg, false);
+                    dy += 1;
+                    draw_text(&mut plane, detail_x, dy, &format!(" State: {}", proc.state), t.fg_muted, t.bg, false);
+                }
+            }
+        }
+
+        // ── Footer ──
+        let footer_y = area.height.saturating_sub(1);
+        for x in 0..area.width {
+            let idx = (footer_y * area.width + x as u16) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+        }
+        let footer = " t:theme  ?:help  ↑↓:nav  q:quit ";
+        draw_text(&mut plane, 2, footer_y, footer, t.fg_muted, t.bg, false);
+
+        if self.show_help { render_help(&mut plane, area, t); }
+        plane
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press { return false; }
+        if self.show_help { self.show_help = false; return true; }
+        match key.code {
+            KeyCode::Char('q') => std::process::exit(0),
+            KeyCode::Char('t') => { self.cycle_theme(); true }
+            KeyCode::Char('?') => { self.show_help = true; true }
+            KeyCode::Up => {
+                let n = self.selected_process.unwrap_or(0);
+                if n > 0 { self.selected_process = Some(n - 1); }
+                if self.selected_process.unwrap_or(0) < self.process_scroll { self.process_scroll = self.selected_process.unwrap_or(0); }
+                true
+            }
+            KeyCode::Down => {
+                let n = self.selected_process.unwrap_or(0);
+                if n + 1 < self.data.processes.len() { self.selected_process = Some(n + 1); }
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                // Process list area
+                if col < self.area().width / 2 && row >= 9 && row < self.area().height.saturating_sub(2) {
+                    let proc_row = (row - 9) as usize;
+                    let idx = self.process_scroll + proc_row;
+                    if idx < self.data.processes.len() {
+                        self.selected_process = Some(idx);
+                        return true;
+                    }
+                }
+                // Click right side clears
+                if col >= self.area().width / 2 { self.selected_process = None; return true; }
+            }
+            MouseEventKind::ScrollDown => {
+                let max_scroll = self.data.processes.len().saturating_sub(10);
+                if self.process_scroll < max_scroll { self.process_scroll += 1; return true; }
+            }
+            MouseEventKind::ScrollUp => {
+                if self.process_scroll > 0 { self.process_scroll -= 1; return true; }
+            }
+            _ => {}
+        }
+        false
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
     for (i, ch) in text.chars().enumerate() {
         let idx = (y * plane.width + x + i as u16) as usize;
         if idx < plane.cells.len() {
             plane.cells[idx] = Cell {
-                char: ch,
-                fg,
-                bg,
+                char: ch, fg, bg,
                 style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false,
-                skip: false,
+                transparent: false, skip: false,
             };
         }
     }
 }
+
+fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 3 || h < 2 { return; }
+    let (border, bg) = (t.outline, t.surface);
+    for row in y..y+h {
+        for col in x..x+w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            plane.cells[idx].bg = bg;
+            let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
+            if is_border {
+                plane.cells[idx].fg = border;
+                plane.cells[idx].char = if row == y && col == x { '╭' }
+                    else if row == y && col == x+w-1 { '╮' }
+                    else if row == y+h-1 && col == x { '╰' }
+                    else if row == y+h-1 && col == x+w-1 { '╯' }
+                    else if row == y || row == y+h-1 { '─' } else { '│' };
+            } else {
+                plane.cells[idx].char = ' '; plane.cells[idx].fg = t.fg;
+            }
+        }
+    }
+}
+
+fn render_sparkline(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, metric: &MetricHistory, color: Color, bg: Color) {
+    if metric.values.is_empty() || w == 0 || h == 0 { return; }
+    let max_val = metric.max().max(1.0);
+    let values: Vec<f64> = metric.values.iter().copied().collect();
+    let start = values.len().saturating_sub(w as usize);
+    let to_show = &values[start..];
+    for (i, &val) in to_show.iter().enumerate() {
+        let bar_h = ((val / max_val) * h as f64).round().clamp(0.0, h as f64) as u16;
+        let col = x + i as u16;
+        if col >= x + w { break; }
+        for row in 0..h {
+            let row_y = y + h - 1 - row;
+            let idx = (row_y * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = if row < bar_h { '█' } else { ' ' };
+                plane.cells[idx].fg = if row < bar_h { color } else { bg };
+                plane.cells[idx].bg = bg;
+            }
+        }
+    }
+}
+
+fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
+    for (i, cell) in src.cells.iter().enumerate() {
+        if cell.char == '\0' || cell.transparent { continue; }
+        let w = src.width as usize;
+        let row = i / w;
+        let col = i % w;
+        let dy = offset_y as usize + row;
+        let dx = offset_x as usize + col;
+        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
+        let idx = dy * dest.width as usize + dx;
+        if idx < dest.cells.len() { dest.cells[idx] = cell.clone(); }
+    }
+}
+
+fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
+    let hw = 46u16.min(area.width.saturating_sub(4));
+    let hh = 12u16.min(area.height.saturating_sub(4));
+    let hx = (area.width - hw) / 2;
+    let hy = (area.height - hh) / 2;
+    render_card_border(plane, hx, hy, hw, hh, t);
+    for cell in plane.cells.iter_mut() {
+        if cell.bg == t.surface { cell.bg = t.surface_elevated; }
+    }
+    let lines = [
+        (" System Monitor Help ", true),
+        ("", false),
+        ("t          Cycle theme (15 themes)", false),
+        ("?          Toggle this help", false),
+        ("↑/↓        Navigate process list", false),
+        ("Click      Select process", false),
+        ("Scroll     Scroll process list", false),
+        ("q          Quit", false),
+    ];
+    for (i, (line, bold)) in lines.iter().enumerate() {
+        let y = hy + 1 + i as u16;
+        let x = hx + (hw.saturating_sub(line.len() as u16)) / 2;
+        draw_text(plane, x, y, line, if *bold { t.primary } else { t.fg }, t.surface_elevated, *bold);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INPUT ROUTER
+// ═══════════════════════════════════════════════════════════════════════════════
 
 struct InputRouter {
     monitor: Rc<RefCell<SystemMonitor>>,
@@ -467,105 +621,28 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId {
-        self.id
-    }
+    fn id(&self) -> WidgetId { self.id }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect {
-        self.area.get()
-    }
-    fn set_area(&mut self, area: Rect) {
-        self.area.set(area);
-    }
-    fn z_index(&self) -> u16 {
-        0
-    }
-    fn needs_render(&self) -> bool {
-        false
-    }
+    fn area(&self) -> Rect { self.area.get() }
+    fn set_area(&mut self, area: Rect) { self.area.set(area); }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool {
-        true
-    }
-    fn render(&self, _area: Rect) -> Plane {
-        Plane::new(0, 0, 0)
-    }
-
-    fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press {
-            return false;
-        }
-        match key.code {
-            KeyCode::Char('t') => {
-                let mut m = self.monitor.borrow_mut();
-                m.cycle_theme();
-                let t = m.get_theme();
-                m.cpu_gauge.on_theme_change(&t);
-                m.mem_gauge.on_theme_change(&t);
-                m.disk_gauge.on_theme_change(&t);
-                m.net_gauge.on_theme_change(&t);
-                m.process_grid.on_theme_change(&t);
-                m.status_badge.on_theme_change(&t);
-                m.uptime_text.on_theme_change(&t);
-                true
-            }
-            KeyCode::Char('q') => {
-                std::process::exit(0);
-            }
-            _ => false,
-        }
-    }
-
+    fn focusable(&self) -> bool { true }
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn handle_key(&mut self, key: KeyEvent) -> bool { self.monitor.borrow_mut().handle_key(key) }
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let mut m = self.monitor.borrow_mut();
-        let gauges_h = 6u16;
-        let (w, h) = (self.area.get().width, self.area.get().height);
-
-        // Process list area: left half, below gauges
-        if col < w / 2 && row >= gauges_h && row < h.saturating_sub(2) {
-            let proc_row = (row - gauges_h) as usize;
-            match kind {
-                MouseEventKind::Down(MouseButton::Left) => {
-                    let idx = m.process_scroll_offset + proc_row;
-                    if idx < m.stats.processes.len() {
-                        m.selected_process = if m.selected_process == Some(idx) {
-                            None
-                        } else {
-                            Some(idx)
-                        };
-                        return true;
-                    }
-                }
-                MouseEventKind::ScrollDown => {
-                    let max_scroll = m.stats.processes.len().saturating_sub(1);
-                    if m.process_scroll_offset < max_scroll {
-                        m.process_scroll_offset += 1;
-                    }
-                    return true;
-                }
-                MouseEventKind::ScrollUp => {
-                    if m.process_scroll_offset > 0 {
-                        m.process_scroll_offset -= 1;
-                    }
-                    return true;
-                }
-                _ => {}
-            }
-        }
-        // Click on right half clears selection
-        if let MouseEventKind::Down(MouseButton::Left) = kind {
-            if col >= w / 2 {
-                m.selected_process = None;
-                return true;
-            }
-        }
-        false
+        self.monitor.borrow_mut().handle_mouse(kind, col, row)
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════════════════════════════
+
 fn main() -> std::io::Result<()> {
-    println!("System Monitor — Real system metrics from /proc | t: cycle theme | q: quit");
+    println!("System Monitor — Real /proc data | t:theme ?:help q:quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let monitor = Rc::new(RefCell::new(SystemMonitor::new()));
@@ -586,100 +663,10 @@ fn main() -> std::io::Result<()> {
 
     app.on_tick(move |ctx, _| {
         let mut m = mon_for_tick.borrow_mut();
-        m.refresh_stats();
-
+        m.data.refresh();
+        m.update_gauges();
         let (w, h) = ctx.compositor().size();
-
-        let gauges_h = 6u16;
-
-        let cpu_plane = m.cpu_gauge.render(Rect::new(0, 0, w / 4, gauges_h));
-        let mem_plane = m.mem_gauge.render(Rect::new(w / 4, 0, w / 4, gauges_h));
-        let disk_plane = m.disk_gauge.render(Rect::new(w / 2, 0, w / 4, gauges_h));
-        let net_plane = m.net_gauge.render(Rect::new(3 * w / 4, 0, w / 4, gauges_h));
-
-        ctx.add_plane(cpu_plane);
-        ctx.add_plane(mem_plane);
-        ctx.add_plane(disk_plane);
-        ctx.add_plane(net_plane);
-
-        // Process list (left half, below gauges) — manual rendering with selection highlight
-        let process_rect = Rect::new(0, gauges_h, w / 2, h.saturating_sub(gauges_h + 2));
-        let mut proc_plane = Plane::new(0, process_rect.width, process_rect.height);
-        let t = m.get_theme();
-        for cell in proc_plane.cells.iter_mut() {
-            cell.bg = t.bg;
-            cell.fg = t.fg;
-        }
-
-        // Header row
-        draw_text_plane(
-            &mut proc_plane,
-            0,
-            0,
-            " PID  NAME            CPU%",
-            t.fg_muted,
-            t.bg,
-            true,
-        );
-
-        // Process rows
-        let max_visible = process_rect.height as usize - 1;
-        for i in 0..max_visible {
-            let proc_idx = m.process_scroll_offset + i;
-            if proc_idx >= m.stats.processes.len() {
-                break;
-            }
-            let proc = &m.stats.processes[proc_idx];
-            let is_selected = m.selected_process == Some(proc_idx);
-            let line = format!(
-                "{:>5} {:<15} {:>5.1}%",
-                proc.pid,
-                &proc.name[..proc.name.len().min(15)],
-                proc.cpu_percent
-            );
-            let (fg, bg) = if is_selected {
-                (t.fg_on_accent, t.primary_active)
-            } else {
-                (t.fg, Color::Reset)
-            };
-            draw_text_plane(&mut proc_plane, 0, 1 + i as u16, &line, fg, bg, is_selected);
-        }
-
-        ctx.add_plane(proc_plane);
-
-        // Right panel: selected process detail or status
-        if let Some(sel_idx) = m.selected_process {
-            if let Some(proc) = m.stats.processes.get(sel_idx) {
-                let detail_rect = Rect::new(w / 2, gauges_h, w / 2, h.saturating_sub(gauges_h));
-                let mut detail_plane = Plane::new(0, detail_rect.width, detail_rect.height);
-                for cell in detail_plane.cells.iter_mut() {
-                    cell.bg = t.bg;
-                    cell.fg = t.fg;
-                }
-                let lines = [
-                    &format!(" Process: {}", proc.name),
-                    &format!(" PID: {}", proc.pid),
-                    &format!(" CPU: {:.1}%", proc.cpu_percent),
-                    "",
-                    " Scroll: ↑↓ wheel",
-                    " Click: select/deselect",
-                ];
-                for (i, line) in lines.iter().enumerate() {
-                    let fg = if i == 0 { t.primary } else { t.fg_muted };
-                    draw_text_plane(&mut detail_plane, 1, i as u16, line, fg, t.bg, i == 0);
-                }
-                ctx.add_plane(detail_plane);
-            }
-        } else {
-            // Default: status badge + uptime
-            let status_rect = Rect::new(w / 2, gauges_h, w / 2, 4);
-            let status_plane = m.status_badge.render(status_rect);
-            ctx.add_plane(status_plane);
-
-            let uptime_rect = Rect::new(w / 2, gauges_h + 4, w / 2, h.saturating_sub(gauges_h + 6));
-            let uptime_plane = m.uptime_text.render(uptime_rect);
-            ctx.add_plane(uptime_plane);
-        }
+        ctx.mark_dirty(0, 0, w, h);
     })
     .run(|_| {})
 }

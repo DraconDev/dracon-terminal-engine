@@ -1,52 +1,42 @@
 #![allow(missing_docs)]
-//! Widget Gallery — interactive showcase of all framework widgets.
+//! Widget Gallery — all interactive widgets shown simultaneously in a polished grid.
 //!
-//! Demonstrates every interactive widget in a single, runnable App.
-//! Navigate with arrow keys, activate with Enter/Space.
+//! Every widget is rendered in its own card with border, title, and live state.
+//! Click or use Enter to interact with each widget.
 //!
-//! # Widgets Shown
-//!
-//! | Widget | Interaction | State API |
-//! |--------|-------------|-----------|
-//! | Checkbox | Click/Enter to toggle | `is_checked()` |
-//! | Radio | Click/Enter to select | `is_selected()` |
-//! | Slider | Drag to change value | `value()` |
-//! | Spinner | Auto-animates | `current_frame()` |
-//! | Toggle | Click/Enter to toggle | `is_on()` |
-//! | Select | Click/Enter to expand | `selected_label()` |
-//! | SearchInput | Type to input text | `query()` |
-//! | ProgressBar | Changes with slider | `progress()` |
-//! | Button | Click/Enter to press | `on_click()` |
-//!
-//! # Run
-//!
-//! ```sh
-//! cargo run --example widget_gallery
-//! ```
+//! Controls:
+//!   ↑/↓/←/→  — navigate between widget cards
+//!   Enter    — activate focused widget
+//!   Tab      — cycle theme
+//!   q        — quit
 
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, List, Orientation, ProgressBar, Radio, SearchInput, Select, Slider, Spinner,
-    SplitPane, Toggle,
+    Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
-use std::os::fd::AsFd;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
-const WIDGET_NAMES: &[&str] = &[
-    "Checkbox",
-    "Radio",
-    "Slider",
-    "Spinner",
-    "Toggle",
-    "Select",
-    "SearchInput",
-    "ProgressBar",
-    "Button",
+const THEMES: &[&str] = &[
+    "nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night",
+    "catppuccin", "solarized-dark", "one-dark", "rose-pine",
+];
+
+// Widget slot positions in the grid (row, col)
+const WIDGET_SLOTS: &[(usize, usize, &str)] = &[
+    (0, 0, "Checkbox"),
+    (0, 1, "Radio"),
+    (0, 2, "Toggle"),
+    (0, 3, "Spinner"),
+    (1, 0, "Slider"),
+    (1, 1, "Select"),
+    (1, 2, "Search Input"),
+    (2, 0, "Progress Bar"),
+    (2, 1, "Button"),
 ];
 
 struct WidgetGallery {
@@ -62,18 +52,20 @@ struct WidgetGallery {
     progress: ProgressBar,
     button: Button,
     area: Rect,
-    dirty: bool,
-    quit_requested: Arc<AtomicBool>,
+    theme_index: usize,
+    theme: Theme,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl WidgetGallery {
     fn new(quit: Arc<AtomicBool>) -> Self {
         let id = WidgetId::new(1);
+        let theme = Theme::nord();
         Self {
             id,
             selected: 0,
             checkbox: Checkbox::new(WidgetId::new(10), "Enable Feature"),
-            radio: Radio::new(WidgetId::new(11), "Option A"),
+            radio: Radio::new(WidgetId::new(11), "Selected"),
             slider: Slider::new(WidgetId::new(12)).with_range(0.0, 100.0),
             spinner: Spinner::new(WidgetId::new(13)),
             toggle: Toggle::new(WidgetId::new(14), "Dark Mode"),
@@ -86,399 +78,303 @@ impl WidgetGallery {
             progress: ProgressBar::new(WidgetId::new(17)),
             button: Button::with_id(WidgetId::new(18), "Click Me!"),
             area: Rect::new(0, 0, 80, 24),
-            dirty: true,
-            quit_requested: quit,
+            theme_index: 0,
+            theme,
+            should_quit: quit,
         }
     }
 
-    fn nav_list(&self) -> List<String> {
-        let items: Vec<String> = WIDGET_NAMES.iter().map(|s| s.to_string()).collect();
-        let list = List::new_with_id(WidgetId::new(100), items);
-        list.with_theme(self.current_theme())
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % THEMES.len();
+        self.theme = match THEMES[self.theme_index] {
+            "nord" => Theme::nord(),
+            "dracula" => Theme::dracula(),
+            "cyberpunk" => Theme::cyberpunk(),
+            "gruvbox-dark" => Theme::gruvbox_dark(),
+            "tokyo-night" => Theme::tokyo_night(),
+            "catppuccin" => Theme::catppuccin_mocha(),
+            "solarized-dark" => Theme::solarized_dark(),
+            "one-dark" => Theme::one_dark(),
+            "rose-pine" => Theme::rose_pine(),
+            _ => Theme::nord(),
+        };
     }
 
-    fn current_theme(&self) -> Theme {
-        Theme::nord()
-    }
-
-    fn update_progress_from_slider(&mut self) {
-        let progress = self.slider.value() / 100.0;
-        self.progress.set_progress(progress);
-    }
-
-    fn render_nav(&self, area: Rect) -> Plane {
-        let mut list = self.nav_list();
-        list.set_area(area);
-        list.scroll_to(self.selected);
-        list.render(area)
-    }
-
-    fn render_content(&self, area: Rect) -> Plane {
-        let theme = self.current_theme();
-        let mut plane = Plane::new(0, area.width, area.height);
-        plane.z_index = 10;
-
-        let widget_name = WIDGET_NAMES[self.selected];
-        let title = format!("═══ {} ═══", widget_name);
-        for (i, c) in title.chars().take(area.width as usize).enumerate() {
-            let idx = i;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = Cell {
-                    char: c,
-                    fg: theme.primary,
-                    bg: theme.bg,
-                    style: Styles::empty(),
-                    transparent: false,
-                    skip: false,
-                };
-            }
-        }
-
-        let content_top = 2;
-        let _content_height = (area.height as usize).saturating_sub(content_top + 4);
-
-        match self.selected {
-            0 => {
-                let cb_area = Rect::new(area.x + 2, area.y + content_top as u16, 30, 3);
-                let cb_plane = self.checkbox.render(cb_area);
-                self.copy_plane(&mut plane, &cb_plane, 2, content_top);
-            }
-            1 => {
-                let radio_area = Rect::new(area.x + 2, area.y + content_top as u16, 30, 3);
-                let radio_plane = self.radio.render(radio_area);
-                self.copy_plane(&mut plane, &radio_plane, 2, content_top);
-            }
-            2 => {
-                let slider_area =
-                    Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
-                let slider_plane = self.slider.render(slider_area);
-                self.copy_plane(&mut plane, &slider_plane, 2, content_top);
-                let val_text = format!("Value: {:.0}", self.slider.value());
-                for (i, c) in val_text.chars().take(area.width as usize - 4).enumerate() {
-                    let idx = ((content_top + 3) as u16 * plane.width + 2 + i as u16) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx] = Cell {
-                            char: c,
-                            fg: theme.fg,
-                            bg: theme.bg,
-                            style: Styles::empty(),
-                            transparent: false,
-                            skip: false,
-                        };
-                    }
-                }
-            }
-            3 => {
-                let spinner_area = Rect::new(area.x + 2, area.y + content_top as u16, 10, 3);
-                let spinner_plane = self.spinner.render(spinner_area);
-                self.copy_plane(&mut plane, &spinner_plane, 2, content_top);
-                let frame_text = format!("Frame: '{}'", self.spinner.current_frame());
-                for (i, c) in frame_text.chars().take(20).enumerate() {
-                    let idx = ((content_top + 3) as u16 * plane.width + 2 + i as u16) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx] = Cell {
-                            char: c,
-                            fg: theme.fg,
-                            bg: theme.bg,
-                            style: Styles::empty(),
-                            transparent: false,
-                            skip: false,
-                        };
-                    }
-                }
-            }
-            4 => {
-                let toggle_area = Rect::new(area.x + 2, area.y + content_top as u16, 30, 3);
-                let toggle_plane = self.toggle.render(toggle_area);
-                self.copy_plane(&mut plane, &toggle_plane, 2, content_top);
-            }
-            5 => {
-                let select_area = Rect::new(area.x + 2, area.y + content_top as u16, 20, 5);
-                let select_plane = self.select.render(select_area);
-                self.copy_plane(&mut plane, &select_plane, 2, content_top);
-            }
-            6 => {
-                let search_area =
-                    Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
-                let search_plane = self.search.render(search_area);
-                self.copy_plane(&mut plane, &search_plane, 2, content_top);
-            }
-            7 => {
-                let pb_area = Rect::new(area.x + 2, area.y + content_top as u16, area.width - 4, 3);
-                let pb_plane = self.progress.render(pb_area);
-                self.copy_plane(&mut plane, &pb_plane, 2, content_top);
-                let pct = (self.progress.progress() * 100.0).round() as u16;
-                let pct_text = format!("{}%", pct);
-                for (i, c) in pct_text.chars().take(area.width as usize - 4).enumerate() {
-                    let idx = ((content_top + 3) as u16 * plane.width + 2 + i as u16) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx] = Cell {
-                            char: c,
-                            fg: theme.fg,
-                            bg: theme.bg,
-                            style: Styles::empty(),
-                            transparent: false,
-                            skip: false,
-                        };
-                    }
-                }
-            }
-            8 => {
-                let btn_area = Rect::new(area.x + 2, area.y + content_top as u16, 20, 3);
-                let btn_plane = self.button.render(btn_area);
-                self.copy_plane(&mut plane, &btn_plane, 2, content_top);
-            }
-            _ => {}
-        }
-
-        let status_y = (area.height as usize).saturating_sub(2);
-        let status_text = format!(
-            "State: checkbox={}, toggle={}, slider={:.0}, progress={:.0}%",
-            self.checkbox.is_checked(),
-            self.toggle.is_on(),
-            self.slider.value(),
-            self.progress.progress() * 100.0
-        );
-        for (i, c) in status_text.chars().take(area.width as usize).enumerate() {
-            let idx = (status_y as u16 * plane.width + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = Cell {
-                    char: c,
-                    fg: theme.fg_muted,
-                    bg: theme.bg,
-                    style: Styles::empty(),
-                    transparent: false,
-                    skip: false,
-                };
-            }
-        }
-
-        plane
-    }
-
-    fn copy_plane(&self, dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
-        for (i, cell) in src.cells.iter().enumerate() {
-            if cell.char == '\0' || cell.transparent {
-                continue;
-            }
-            let src_width = src.width as usize;
-            let row = i / src_width;
-            let col = i % src_width;
-            let dest_row = offset_y + row;
-            let dest_col = offset_x + col;
-            if dest_row >= dest.height as usize || dest_col >= dest.width as usize {
-                continue;
-            }
-            let dest_idx = dest_row * dest.width as usize + dest_col;
-            if dest_idx < dest.cells.len() {
-                dest.cells[dest_idx] = cell.clone();
-            }
+    fn widget_mut(&mut self, slot: usize) -> &mut dyn Widget {
+        match slot {
+            0 => &mut self.checkbox,
+            1 => &mut self.radio,
+            2 => &mut self.toggle,
+            3 => &mut self.spinner,
+            4 => &mut self.slider,
+            5 => &mut self.select,
+            6 => &mut self.search,
+            7 => &mut self.progress,
+            8 => &mut self.button,
+            _ => &mut self.checkbox,
         }
     }
 
-    fn get_widget_mut(&mut self) -> Option<&mut dyn Widget> {
-        match self.selected {
-            0 => Some(&mut self.checkbox),
-            1 => Some(&mut self.radio),
-            2 => Some(&mut self.slider),
-            3 => Some(&mut self.spinner),
-            4 => Some(&mut self.toggle),
-            5 => Some(&mut self.select),
-            6 => Some(&mut self.search),
-            7 => Some(&mut self.progress),
-            8 => Some(&mut self.button),
-            _ => None,
-        }
+    fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
+        let (row, col, _name) = WIDGET_SLOTS[slot];
+        let rows = 3u16;
+        let cols = if row == 0 { 4u16 } else if row == 1 { 3u16 } else { 2u16 };
+
+        let card_w = area.width.saturating_sub(2) / cols;
+        let card_h = area.height.saturating_sub(4) / rows;
+
+        let x = area.x + 1 + col as u16 * card_w;
+        let y = area.y + 2 + row as u16 * card_h;
+
+        Rect::new(x, y, card_w.saturating_sub(1), card_h.saturating_sub(1))
+    }
+
+    fn update_bg(&self, cell: &mut Cell) {
+        cell.bg = self.theme.bg;
+        cell.fg = self.theme.fg;
+        cell.transparent = false;
     }
 }
 
 impl Widget for WidgetGallery {
-    fn id(&self) -> WidgetId {
-        self.id
-    }
-
-    fn set_id(&mut self, id: WidgetId) {
-        self.id = id;
-    }
-
-    fn area(&self) -> Rect {
-        self.area
-    }
-
-    fn set_area(&mut self, area: Rect) {
-        self.area = area;
-        self.dirty = true;
-    }
-
-    fn needs_render(&self) -> bool {
-        self.dirty
-            || self.checkbox.needs_render()
-            || self.radio.needs_render()
-            || self.slider.needs_render()
-            || self.spinner.needs_render()
-            || self.toggle.needs_render()
-            || self.select.needs_render()
-            || self.search.needs_render()
-            || self.progress.needs_render()
-            || self.button.needs_render()
-    }
-
-    fn mark_dirty(&mut self) {
-        self.dirty = true;
-    }
-
-    fn clear_dirty(&mut self) {
-        self.dirty = false;
-        self.checkbox.clear_dirty();
-        self.radio.clear_dirty();
-        self.slider.clear_dirty();
-        self.spinner.clear_dirty();
-        self.toggle.clear_dirty();
-        self.select.clear_dirty();
-        self.search.clear_dirty();
-        self.progress.clear_dirty();
-        self.button.clear_dirty();
-    }
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { true }
 
     fn render(&self, area: Rect) -> Plane {
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
-        let (nav_rect, content_rect) = split.split(area);
-
+        let t = self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
-        plane.z_index = 0;
+        for cell in plane.cells.iter_mut() {
+            self.update_bg(cell);
+        }
 
-        let nav_plane = self.render_nav(nav_rect);
-        self.copy_plane(
-            &mut plane,
-            &nav_plane,
-            nav_rect.x as usize,
-            nav_rect.y as usize,
-        );
+        // Header
+        let title = " Widget Gallery ";
+        let theme_label = format!(" {} ", THEMES[self.theme_index]);
+        draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 1), 0,
+            &theme_label, t.secondary, t.bg, false);
 
-        let divider_plane = split.render_divider(area);
-        self.copy_plane(
-            &mut plane,
-            &divider_plane,
-            divider_plane.x as usize,
-            divider_plane.y as usize,
-        );
+        // Divider
+        for x in 0..area.width {
+            let idx = (1 * area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
 
-        let content_plane = self.render_content(content_rect);
-        self.copy_plane(
-            &mut plane,
-            &content_plane,
-            content_rect.x as usize,
-            content_rect.y as usize,
-        );
+        // Widget cards
+        for (slot, &(_row, _col, name)) in WIDGET_SLOTS.iter().enumerate() {
+            let rect = self.slot_rect(slot, area);
+            let is_selected = slot == self.selected;
+
+            render_card_border(&mut plane, rect, t, is_selected);
+
+            // Title
+            draw_text(&mut plane, rect.x + 1, rect.y + 1, name, t.primary, t.surface, true);
+
+            // Render the widget into its card
+            let widget_area = Rect::new(rect.x + 1, rect.y + 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
+            if widget_area.width >= 4 && widget_area.height >= 1 {
+                let mut w_plane = match slot {
+                    0 => self.checkbox.render(widget_area),
+                    1 => self.radio.render(widget_area),
+                    2 => self.toggle.render(widget_area),
+                    3 => self.spinner.render(widget_area),
+                    4 => self.slider.render(widget_area),
+                    5 => self.select.render(widget_area),
+                    6 => self.search.render(widget_area),
+                    7 => self.progress.render(widget_area),
+                    8 => self.button.render(widget_area),
+                    _ => Plane::new(0, 0, 0),
+                };
+                blit_to(&mut plane, &mut w_plane, widget_area.x as usize, widget_area.y as usize);
+
+                // Show widget state below
+                let state_y = widget_area.y + widget_area.height + 1;
+                if state_y < rect.y + rect.height - 1 {
+                        let state = match slot {
+                        0 => format!("checked: {}", self.checkbox.is_checked()),
+                        1 => format!("selected: {}", self.radio.is_selected()),
+                        2 => format!("on: {}", self.toggle.is_on()),
+                        3 => format!("frame: '{}'", self.spinner.current_frame()),
+                        4 => format!("value: {:.0}", self.slider.value()),
+                        5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
+                        6 => format!("query: '{}'", self.search.query()),
+                        7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
+                        8 => String::from("[Click me]"),
+                        _ => String::new(),
+                    };
+                    draw_text(&mut plane, rect.x + 1, state_y, &state, t.fg_muted, t.surface, false);
+                }
+            }
+        }
+
+        // Footer
+        let footer_y = area.height.saturating_sub(1);
+        for x in 0..area.width {
+            let idx = (footer_y * area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+        let nav_text = format!(" ↑↓←→ nav | Enter activate | Tab theme | q quit ");
+        draw_text(&mut plane, 2, footer_y, &nav_text, t.fg_muted, t.bg, false);
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        use KeyCode::{Char, Down, Enter, Esc, Up};
-        if key.kind != KeyEventKind::Press {
-            return false;
-        }
+        if key.kind != KeyEventKind::Press { return false; }
         match key.code {
-            Down => {
-                if self.selected + 1 < WIDGET_NAMES.len() {
-                    self.selected += 1;
-                    self.dirty = true;
-                }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
                 true
             }
-            Up => {
-                if self.selected > 0 {
-                    self.selected -= 1;
-                    self.dirty = true;
-                }
+            KeyCode::Char('\t') | KeyCode::Char('t') => {
+                self.cycle_theme();
                 true
             }
-            Char('q') | Esc => {
-                self.quit_requested
-                    .store(true, std::sync::atomic::Ordering::SeqCst);
+            KeyCode::Right | KeyCode::Down => {
+                self.selected = (self.selected + 1) % WIDGET_SLOTS.len();
                 true
             }
-            Enter => {
-                if let Some(widget) = self.get_widget_mut() {
-                    widget.handle_key(key)
+            KeyCode::Left | KeyCode::Up => {
+                self.selected = if self.selected == 0 {
+                    WIDGET_SLOTS.len() - 1
                 } else {
-                    false
-                }
+                    self.selected - 1
+                };
+                true
+            }
+            KeyCode::Enter | KeyCode::Char(' ') => {
+                self.widget_mut(self.selected).handle_key(key)
             }
             _ => {
-                if let Some(widget) = self.get_widget_mut() {
-                    widget.handle_key(key)
-                } else {
-                    false
-                }
+                self.widget_mut(self.selected).handle_key(key)
             }
         }
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
-        let (nav_rect, content_rect) = split.split(self.area);
-
-        if col >= nav_rect.x
-            && col < nav_rect.x + nav_rect.width
-            && row >= nav_rect.y
-            && row < nav_rect.y + nav_rect.height
-        {
-            let rel_row = (row - nav_rect.y) as usize;
-            if rel_row < WIDGET_NAMES.len() {
-                self.selected = rel_row;
-                self.dirty = true;
+        // Find which slot was clicked
+        for (slot, &(..)) in WIDGET_SLOTS.iter().enumerate() {
+            let rect = self.slot_rect(slot, self.area);
+            if col >= rect.x && col < rect.x + rect.width
+                && row >= rect.y && row < rect.y + rect.height
+            {
+                if let MouseEventKind::Down(MouseButton::Left) = kind {
+                    self.selected = slot;
+                }
+                let widget_area = Rect::new(1, 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
+                if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height {
+                    let rel_col = col - rect.x - 1;
+                    let rel_row = row - rect.y - 2;
+                    return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+                }
                 return true;
-            }
-        }
-
-        if col >= content_rect.x
-            && col < content_rect.x + content_rect.width
-            && row >= content_rect.y
-            && row < content_rect.y + content_rect.height
-        {
-            let rel_col = col - content_rect.x;
-            let rel_row = row - content_rect.y;
-            if let Some(widget) = self.get_widget_mut() {
-                let handled = widget.handle_mouse(kind, rel_col, rel_row);
-                if handled && self.selected == 2 {
-                    self.update_progress_from_slider();
-                }
-                if handled {
-                    self.dirty = true;
-                }
-                return handled;
             }
         }
         false
     }
+}
 
-    fn focusable(&self) -> bool {
-        true
-    }
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
 
-    fn z_index(&self) -> u16 {
-        10
+fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
+    for (i, ch) in text.chars().enumerate() {
+        let idx = (y * plane.width + x + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx] = Cell {
+                char: ch,
+                fg,
+                bg,
+                style: if bold { Styles::BOLD } else { Styles::empty() },
+                transparent: false,
+                skip: false,
+            };
+        }
     }
 }
 
-fn main() -> std::io::Result<()> {
-    let theme = Theme::nord();
+fn render_card_border(plane: &mut Plane, rect: Rect, t: Theme, selected: bool) {
+    let (x, y, w, h) = (rect.x, rect.y, rect.width, rect.height);
+    let border = if selected { t.primary } else { t.outline };
+    let bg = if selected { t.surface_elevated } else { t.surface };
+    if w < 3 || h < 3 { return; }
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            plane.cells[idx].bg = bg;
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            if is_border {
+                plane.cells[idx].fg = border;
+                plane.cells[idx].char = if row == y && col == x { '╭' }
+                    else if row == y && col == x + w - 1 { '╮' }
+                    else if row == y + h - 1 && col == x { '╰' }
+                    else if row == y + h - 1 && col == x + w - 1 { '╯' }
+                    else if row == y || row == y + h - 1 { '─' }
+                    else { '│' };
+            } else {
+                plane.cells[idx].char = ' ';
+                plane.cells[idx].fg = t.fg;
+            }
+        }
+    }
+}
 
-    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
-        .unwrap_or((80, 24));
+fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) {
+    // Copy src cells into dest at the given offset
+    // Only copy non-transparent, non-null cells
+    for i in 0..src.cells.len() {
+        let cell = &src.cells[i];
+        if cell.char == '\0' || cell.transparent { continue; }
+        let w = src.width as usize;
+        let row = i / w;
+        let col = i % w;
+        let dy = offset_y + row;
+        let dx = offset_x + col;
+        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
+        let idx = dy * dest.width as usize + dx;
+        if idx < dest.cells.len() {
+            dest.cells[idx] = cell.clone();
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn main() -> std::io::Result<()> {
+    println!("Widget Gallery — All widgets demo | ↑↓←→ nav | Enter interact | t theme | q quit");
+    std::thread::sleep(std::time::Duration::from_millis(300));
 
     let running = Arc::new(AtomicBool::new(true));
     let running_clone = running.clone();
 
-    let mut gallery = WidgetGallery::new(running_clone.clone());
-    gallery.set_area(Rect::new(0, 0, w, h));
+    let gallery = WidgetGallery::new(running_clone.clone());
 
-    let mut app = App::new()?.title("Widget Gallery").fps(30).theme(theme);
-    app.add_widget(Box::new(gallery), Rect::new(0, 0, w, h));
+    let mut app = App::new()?
+        .title("Widget Gallery")
+        .fps(30)
+        .theme(Theme::nord());
+
+    app.add_widget(Box::new(gallery), Rect::new(0, 0, 80, 24));
+
     app.on_tick(move |ctx, _| {
-        if !running_clone.load(std::sync::atomic::Ordering::SeqCst) {
+        if !running_clone.load(Ordering::SeqCst) {
             ctx.stop();
         }
     })
