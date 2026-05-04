@@ -149,7 +149,7 @@ pub fn render_card(config: &CardConfig) -> Plane {
         let r = (t.primary.r as f32 * hover_pulse) as u8;
         let g = (t.primary.g as f32 * hover_pulse) as u8;
         let b = (t.primary.b as f32 * hover_pulse) as u8;
-        Color::rgb(r, g, b)
+        Color::Rgb(r, g, b)
     } else {
         t.outline
     };
