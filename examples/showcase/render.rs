@@ -11,7 +11,7 @@ use crate::data::ExampleMeta;
 // RENDERING
 // ═══════════════════════════════════════════════════════════════════════════════
 
-fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, selected: bool) {
+pub fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, selected: bool) {
     let w = area.width as usize;
     let h = area.height as usize;
     if w < 2 || h < 2 {
@@ -50,7 +50,7 @@ fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, sele
     }
 }
 
-fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Color) {
+pub fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Color) {
     let idx = y * plane.width as usize + x;
     if idx < plane.cells.len() {
         plane.cells[idx] = Cell {
@@ -64,7 +64,7 @@ fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Colo
     }
 }
 
-fn draw_text(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, bold: bool) {
+pub fn draw_text(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, bold: bool) {
     for (i, ch) in text.chars().enumerate() {
         let idx = y * plane.width as usize + x + i;
         if idx < plane.cells.len() {
@@ -80,7 +80,7 @@ fn draw_text(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: C
     }
 }
 
-fn category_color(t: Theme, cat: &str) -> Color {
+pub fn category_color(t: Theme, cat: &str) -> Color {
     match cat {
         "apps" => t.warning,
         "cookbook" => t.info,
@@ -89,7 +89,7 @@ fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-fn render_card(
+pub fn render_card(
     ex: &ExampleMeta,
     idx: usize,
     selected_idx: usize,
