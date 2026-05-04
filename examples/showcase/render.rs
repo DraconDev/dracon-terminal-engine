@@ -119,6 +119,24 @@ pub fn render_card(config: &CardConfig) -> Plane {
     // Per-card phase offset for more organic animations
     let card_phase = config.phase + (config.idx as f64 * 0.73);
 
+    // Glow effect for selected cards
+    if is_selected {
+        let glow_phase = (card_phase * 1.5).sin() * 0.3 + 0.7;
+        let glow_alpha = (glow_phase * 0.3).min(0.3);
+        for y in 0..card_h_usize {
+            for x in 0..card_w_usize {
+                let cell_idx = y * card_w_usize + x;
+                if cell_idx < plane.cells.len() {
+                    let mut cell = &mut plane.cells[cell_idx];
+                    let bg_r = (cell.bg.r as f32 * (1.0 - glow_alpha) + t.primary.r as f32 * glow_alpha) as u8;
+                    let bg_g = (cell.bg.g as f32 * (1.0 - glow_alpha) + t.primary.g as f32 * glow_alpha) as u8;
+                    let bg_b = (cell.bg.b as f32 * (1.0 - glow_alpha) + t.primary.b as f32 * glow_alpha) as u8;
+                    cell.bg = Color::rgb(bg_r, bg_g, bg_b);
+                }
+            }
+        }
+    }
+
     let border_fg = if is_selected {
         let pulse = (card_phase * 2.0).sin() * 0.5 + 0.5;
         if pulse > 0.5 {
@@ -127,7 +145,11 @@ pub fn render_card(config: &CardConfig) -> Plane {
             t.primary_hover
         }
     } else if is_hovered {
-        t.primary_hover
+        let hover_pulse = (card_phase * 3.0).sin() * 0.2 + 0.8;
+        let r = (t.primary.r as f32 * hover_pulse) as u8;
+        let g = (t.primary.g as f32 * hover_pulse) as u8;
+        let b = (t.primary.b as f32 * hover_pulse) as u8;
+        Color::rgb(r, g, b)
     } else {
         t.outline
     };
