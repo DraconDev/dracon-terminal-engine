@@ -1,9 +1,11 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::cell::RefCell;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::WidgetId;
+use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use ratatui::layout::Rect;
 
 use crate::data::ExampleMeta;
