@@ -423,6 +423,18 @@ impl Widget for Showcase {
         self.cols.set((available_w / (card_w + 2)).max(1));
         let cols = self.cols.get();
 
+        // Invalidate cache if grid dimensions changed
+        let cache_valid = {
+            let cache = self.card_cache.borrow();
+            cache.len() == self.filtered.len()
+        };
+
+        if !cache_valid {
+            let mut cache = self.card_cache.borrow_mut();
+            cache.clear();
+            cache.resize(self.filtered.len(), None);
+        }
+
         for (grid_idx, &ex_idx) in self.filtered.iter().enumerate() {
             if let Some(ex) = self.examples.get(ex_idx) {
                 let col = grid_idx % cols;
@@ -439,12 +451,23 @@ impl Widget for Showcase {
                     idx: grid_idx,
                     selected_idx: self.selected,
                     hovered_idx: self.hovered_card,
-                    theme: t,
+                    theme: t.clone(),
                     phase: self.card_start.elapsed().as_secs_f64(),
                     width: card_w as u16,
                     height: card_h as u16,
                 };
-                let card = render_card(&card_config);
+
+                let card = {
+                    let mut cache = self.card_cache.borrow_mut();
+                    if let Some(Some(ref cached)) = cache.get(grid_idx) {
+                        cached.clone()
+                    } else {
+                        let rendered = render_card(&card_config);
+                        cache[*grid_idx] = Some(rendered.clone());
+                        rendered
+                    }
+                };
+
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = cy * card_w + cx;
@@ -457,7 +480,7 @@ impl Widget for Showcase {
                         }
                     }
                 }
-                // Register zone for this card
+
                 const CARD_BASE: usize = 500;
                 let mut zones = self.zones.borrow_mut();
                 zones.register(
