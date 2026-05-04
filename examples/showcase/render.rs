@@ -113,7 +113,7 @@ pub fn render_card(config: &CardConfig) -> Plane {
 
     let is_selected = config.idx == config.selected_idx;
     let is_hovered = Some(config.idx) == config.hovered_idx;
-    let cat_color = category_color(config.theme, config.config.ex.category);
+    let cat_color = category_color(config.theme, config.ex.category);
 
     // Per-card phase offset for more organic animations
     let card_phase = config.phase + (config.idx as f64 * 0.73);
