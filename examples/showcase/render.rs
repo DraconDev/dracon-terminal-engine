@@ -61,7 +61,15 @@ pub fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: 
     }
 }
 
-pub fn draw_text(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, bold: bool) {
+pub fn draw_text(
+    plane: &mut Plane,
+    x: usize,
+    y: usize,
+    text: &str,
+    fg: Color,
+    bg: Color,
+    bold: bool,
+) {
     for (i, ch) in text.chars().enumerate() {
         let idx = y * plane.width as usize + x + i;
         if idx < plane.cells.len() {

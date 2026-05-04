@@ -8,8 +8,8 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
+use crate::render::{category_color, draw_rounded_border, draw_text, render_card, set_cell};
 use crate::state::Showcase;
-use crate::render::{draw_rounded_border, draw_text, set_cell, category_color, render_card};
 
 impl Widget for Showcase {
     fn id(&self) -> WidgetId {

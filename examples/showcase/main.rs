@@ -107,7 +107,8 @@ fn main() -> std::io::Result<()> {
             let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
-    }).run(|_ctx| {
+    })
+    .run(|_ctx| {
         // Render loop handled by framework
     })
 }
