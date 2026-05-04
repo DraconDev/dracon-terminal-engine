@@ -8,6 +8,8 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
+pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
+
 pub struct List<T> {
     id: WidgetId,
     items: Vec<T>,

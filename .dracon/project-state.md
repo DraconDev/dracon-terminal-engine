@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored the `CommandPalette` widget to use a dedicated `ExecuteCallback` type for command execution.
+Added a generic callback type for list widget selection handling
 
 ## Context
-This change aligns with recent refactoring efforts to make callback types more explicit across the codebase. The `ExecuteCallback` type was introduced to standardize how command execution callbacks are handled in the `CommandPalette` widget.
+The `List` widget now needs a way to handle user selection events without tightly coupling the widget to specific application logic. This change enables more flexible interaction patterns.
 
 ## Completed
-- [x] Replaced the `Box<dyn FnMut(&str)>` closure with the `ExecuteCallback` type in the `CommandPalette` struct
+- [x] Added `SelectCallback<T>` type alias for selection handling
+- [x] Prepared the `List` struct to use the callback type
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Implementation of callback invocation in list item selection
 
 ## Blockers
-- None
+- Need to implement the actual callback invocation logic in the widget's rendering logic
 
 ## Next Steps
-1. Verify that the `ExecuteCallback` type is consistently used throughout the widget's implementation
-2. Ensure backward compatibility with existing command palette usage
+1. Implement callback invocation when list items are selected
+2. Add documentation for the new callback type usage
