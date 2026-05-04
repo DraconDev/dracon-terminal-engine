@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Optimize showcase example rendering with a card cache to reduce redundant rendering operations.
+Optimize card rendering in showcase example by improving cache handling
 
 ## Context
-The showcase example was rendering cards multiple times unnecessarily. This change improves performance by caching rendered cards.
+The showcase example was previously using a cache that could store `Option<Plane>` values, leading to potential `None` values when accessing cached cards. This change improves the cache management by ensuring the cache always contains valid `Plane` objects.
 
 ## Completed
-- [x] Refactored card cache access to use direct indexing instead of dereferencing a pointer
-- [x] Updated Cargo.lock with dependency version bump
+- [x] Replace `Option` cache lookup with direct indexing
+- [x] Initialize cache with empty `Plane` objects when needed
+- [x] Simplify cache access pattern for better performance
 
 ## In Progress
-- [x] Card cache optimization in showcase example
+- [x] Cache optimization for showcase example rendering
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify performance improvement in showcase example
-2. Consider additional caching optimizations for other showcase components
+1. Verify performance improvements in showcase example
+2. Consider additional optimizations for other showcase components
