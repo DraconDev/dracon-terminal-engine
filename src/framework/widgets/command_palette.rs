@@ -41,7 +41,7 @@ pub struct CommandPalette {
     dirty: bool,
     width: u16,
     height: u16,
-    on_execute: Option<Box<dyn FnMut(&str)>>,
+    on_execute: Option<ExecuteCallback>,
     zones: RefCell<ScopedZoneRegistry<usize>>,
 }
 
