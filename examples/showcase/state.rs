@@ -49,7 +49,6 @@ pub struct Showcase {
     pub(crate) context_menu_selected: usize,
     pub(crate) hovered_card: Option<usize>,
     pub(crate) mouse_pos: Option<(u16, u16)>,
-    pub(crate) card_cache: RefCell<Vec<Option<Plane>>>,
 }
 
 impl Showcase {

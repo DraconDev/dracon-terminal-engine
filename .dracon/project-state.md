@@ -4,15 +4,15 @@
 Optimize card rendering in showcase example by improving cache handling
 
 ## Context
-The showcase example was previously using a cache that could store `Option<Plane>` values, leading to potential `None` values when accessing cached cards. This change improves the cache management by ensuring the cache always contains valid `Plane` objects.
+The showcase example was rendering cards inefficiently by recreating them on every frame. This change improves performance by caching rendered cards and only updating when necessary.
 
 ## Completed
-- [x] Replace `Option` cache lookup with direct indexing
-- [x] Initialize cache with empty `Plane` objects when needed
-- [x] Simplify cache access pattern for better performance
+- [x] Removed redundant `Plane` creation in card cache
+- [x] Simplified cache access logic
+- [x] Improved cache initialization handling
 
 ## In Progress
-- [x] Cache optimization for showcase example rendering
+- [x] Optimized card rendering with proper cache management
 
 ## Blockers
 - None identified

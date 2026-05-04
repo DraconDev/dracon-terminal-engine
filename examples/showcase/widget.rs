@@ -459,14 +459,14 @@ impl Widget for Showcase {
 
                 let card = {
                     let mut cache = self.card_cache.borrow_mut();
-                    if grid_idx < cache.len() {
-                        cache[grid_idx].clone()
+                    while cache.len() <= grid_idx {
+                        cache.push(None);
+                    }
+                    if cache[grid_idx].is_some() {
+                        cache[grid_idx].clone().unwrap()
                     } else {
                         let rendered = render_card(&card_config);
-                        while cache.len() <= grid_idx {
-                            cache.push(Plane::new(0, card_w as u16, card_h as u16));
-                        }
-                        cache[grid_idx] = rendered.clone();
+                        cache[grid_idx] = Some(rendered.clone());
                         rendered
                     }
                 };
