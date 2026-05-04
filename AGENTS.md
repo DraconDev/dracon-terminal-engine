@@ -125,7 +125,14 @@ if let Some(id) = self.zones.borrow().dispatch(col, row) {
 - `AnimationManager` — Manages active animations
 - `Easing` — Interpolation functions (linear, sine, quadratic, etc.)
 
-## Showcase Launcher (`examples/showcase.rs`)
+## Showcase Launcher (`examples/showcase/`)
+
+Modular example launcher split across submodules:
+- `main.rs` — Entry point, app setup, binary launch
+- `data.rs` — `ExampleMeta` definitions for all examples
+- `state.rs` — `Showcase` struct, filtering, selection state
+- `render.rs` — Card rendering + all preview functions
+- `widget.rs` — `Widget` impl (render, handle_key, handle_mouse)
 
 Uses `ScopedZoneRegistry` for all mouse dispatch:
 - Zone IDs: 100-104 (primitives bar), 200+ (theme palette), 300-304 (sidebar categories), 400 (FPS toggle), 500+ (cards)
