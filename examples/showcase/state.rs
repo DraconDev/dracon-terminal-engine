@@ -149,7 +149,7 @@ impl Showcase {
             .and_then(|&idx| self.examples.get(idx))
     }
 
-    fn launch_selected(&mut self) {
+    pub fn launch_selected(&mut self) {
         if let Some(ex) = self.selected_example() {
             *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
             self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));

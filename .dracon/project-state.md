@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Made `Showcase::selected_example` public to allow external access to the currently selected example.
+Made `Showcase::launch_selected` public to allow external access to the example launching functionality.
 
 ## Context
-This change was prompted by the ongoing refactoring of the showcase state structure, which made fields public for better accessibility. Making this specific method public aligns with the broader goal of improving the showcase widget's API.
+This change follows a pattern of making internal methods public to enable better external access to showcase functionality, as seen in previous commits that exposed other methods like `selected_example`, `apply_filter`, and `themes`.
 
 ## Completed
-- [x] Made `Showcase::selected_example` public to enable external access to the selected example metadata
+- [x] Made `Showcase::launch_selected` public to allow external components to trigger example launches
 
 ## In Progress
-- [ ] None (this is a focused, complete change)
+- [x] This is a completed change, not work in progress
 
 ## Blockers
-- None (this is a straightforward API improvement)
+- None identified
 
 ## Next Steps
-1. Verify that the public method doesn't expose internal state inappropriately
-2. Update any dependent code to use the new public method
+1. Verify that the public method doesn't expose internal implementation details
+2. Update any documentation to reflect the new public API surface
