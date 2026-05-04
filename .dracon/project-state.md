@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added area tracking to system monitor for proper rendering bounds
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, likely to resolve version conflicts or ensure compatibility with recent updates to the project's dependencies.
+The system monitor now needs to track its rendering area to ensure proper display within the terminal window. This change prepares for dynamic resizing and proper layout management.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock to resolve version conflicts or ensure compatibility
+- [x] Added `area` field to `SystemMonitor` struct to track rendering dimensions
+- [x] Initialized default area (80x24) in the constructor
+- [x] Updated rendering to use the tracked area
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Area tracking implementation for dynamic resizing
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application to ensure all functionality remains intact
+1. Implement dynamic area updates when terminal is resized
+2. Add proper layout management for different screen sizes

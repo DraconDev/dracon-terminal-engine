@@ -285,6 +285,7 @@ struct SystemMonitor {
     selected_process: Option<usize>,
     process_scroll: usize,
     show_help: bool,
+    area: Rect,
 }
 
 impl SystemMonitor {
@@ -304,6 +305,7 @@ impl SystemMonitor {
             selected_process: None,
             process_scroll: 0,
             show_help: false,
+            area: Rect::new(0, 0, 80, 24),
         }
     }
 
@@ -666,6 +668,8 @@ fn main() -> std::io::Result<()> {
         m.data.refresh();
         m.update_gauges();
         let (w, h) = ctx.compositor().size();
+        let plane = m.render(Rect::new(0, 0, w, h));
+        ctx.add_plane(plane);
         ctx.mark_dirty(0, 0, w, h);
     })
     .run(|_| {})
