@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Added `chrono::Local` dependency for date/time handling in the showcase widget.
+Made `Showcase::themes()` public to allow external access to theme definitions.
 
 ## Context
-The showcase widget is being enhanced with improved rendering capabilities, and this change adds the necessary dependency for handling local time/date formatting.
+This change was made to enable other parts of the application to access the available themes for the showcase widget, which is part of the ongoing refactoring work to improve accessibility and modularity of the showcase system.
 
 ## Completed
-- [x] Added `chrono::Local` import for date/time functionality in showcase widget
+- [x] Made `Showcase::themes()` public to expose theme definitions externally
 
 ## In Progress
-- [x] Implementation of time-based rendering features in the showcase widget
+- [x] Refactoring showcase state structure and metadata access
 
 ## Blockers
 - None identified for this specific change
 
 ## Next Steps
-1. Implement time-based rendering logic using the newly added dependency
-2. Verify cross-platform compatibility of the time formatting
+1. Verify that external code can now properly access the themes
+2. Continue refactoring related showcase components to improve overall system modularity
