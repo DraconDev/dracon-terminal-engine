@@ -100,6 +100,8 @@ impl Showcase {
             primitive_button_time: None,
             zones: RefCell::new(ScopedZoneRegistry::new()),
             recently_launched: Vec::new(),
+            show_input_debug: false,
+            event_log: RefCell::new(VecDeque::with_capacity(16)),
         }
     }
 
