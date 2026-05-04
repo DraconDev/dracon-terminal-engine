@@ -1125,6 +1125,7 @@ impl Widget for Showcase {
     }
 }
 
+impl Showcase {
     fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
