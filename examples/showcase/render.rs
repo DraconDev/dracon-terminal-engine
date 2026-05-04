@@ -94,44 +94,46 @@ pub fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-pub fn render_card(
-    ex: &ExampleMeta,
-    idx: usize,
-    selected_idx: usize,
-    hovered_idx: Option<usize>,
-    t: Theme,
-    phase: f64,
-    card_w: u16,
-    card_h: u16,
-) -> Plane {
-    let mut plane = Plane::new(0, card_w, card_h);
-    let card_w_usize = card_w as usize;
-    let card_h_usize = card_h as usize;
+/// Configuration for rendering a single example card.
+pub struct CardConfig<'a> {
+    pub ex: &'a ExampleMeta,
+    pub idx: usize,
+    pub selected_idx: usize,
+    pub hovered_idx: Option<usize>,
+    pub theme: Theme,
+    pub phase: f64,
+    pub width: u16,
+    pub height: u16,
+}
 
-    let is_selected = idx == selected_idx;
-    let is_hovered = Some(idx) == hovered_idx;
-    let cat_color = category_color(t, ex.category);
+pub fn render_card(config: &CardConfig) -> Plane {
+    let mut plane = Plane::new(0, config.width, config.height);
+    let card_w_usize = config.width as usize;
+    let card_h_usize = config.height as usize;
+
+    let is_selected = config.idx == config.selected_idx;
+    let is_hovered = Some(config.idx) == config.hovered_idx;
+    let cat_color = category_color(config.theme, config.ex.category);
 
     // Per-card phase offset for more organic animations
-    let card_phase = phase + (idx as f64 * 0.73);
+    let card_phase = config.phase + (config.idx as f64 * 0.73);
 
     let border_fg = if is_selected {
         let pulse = (card_phase * 2.0).sin() * 0.5 + 0.5;
         if pulse > 0.5 {
-            t.primary
+            config.theme.primary
         } else {
-            t.primary_hover
+            config.theme.primary_hover
         }
     } else if is_hovered {
-        t.primary_hover
+        config.theme.primary_hover
     } else {
-        t.outline
+        config.theme.outline
     };
     let bg = if is_selected {
-        t.surface_elevated
+        config.theme.surface_elevated
     } else {
-        t.surface
+        config.theme.surface
     };
     draw_rounded_border(
         &mut plane,
