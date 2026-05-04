@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Made `Showcase::new` constructor public to allow external instantiation of the showcase state.
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security. The recent refactoring work required these updates to resolve version conflicts and maintain proper package integration.
+This change enables external code to create new instances of the `Showcase` struct, which was previously only constructible internally. This aligns with the ongoing refactoring efforts to improve accessibility of showcase components.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Made `Showcase::new` public to allow controlled instantiation from external code
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [ ] None (this is a single focused change)
 
 ## Blockers
-- None
+- None (this is a straightforward access modification)
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Continue with ongoing refactoring and feature development
-```
+1. Verify that external code can now properly instantiate `Showcase`
+2. Ensure no unintended side effects from making the constructor public

@@ -52,7 +52,7 @@ pub struct Showcase {
 }
 
 impl Showcase {
-    fn new(
+    pub fn new(
         should_quit: Arc<AtomicBool>,
         pending: Arc<Mutex<Option<String>>>,
         fps: Arc<AtomicU64>,
