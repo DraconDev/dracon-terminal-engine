@@ -855,6 +855,7 @@ impl Widget for Showcase {
                 ("Tab", "Cycle categories"),
                 ("t", "Cycle theme"),
                 ("d", "Debug overlay"),
+                ("i", "Input debug"),
                 ("q / Esc", "Quit"),
                 ("?", "Toggle this help"),
                 ("", ""),
