@@ -213,20 +213,20 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         let val = value.clamp(0.0, 100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
         let color = if val > 80.0 {
-            t.error
+            config.theme.error
         } else if val > 60.0 {
-            t.warning
+            config.theme.warning
         } else {
-            t.success
+            config.theme.success
         };
-        draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
-        set_cell(plane, 6, y, '[', t.fg_muted, t.surface);
+        draw_text(plane, 2, y, label, config.theme.fg_muted, config.theme.surface, false);
+        set_cell(plane, 6, y, '[', config.theme.fg_muted, config.theme.surface);
         for j in 0..bar_w {
             let ch = if j < fill { '█' } else { '░' };
-            let fg = if j < fill { color } else { t.fg_muted };
-            set_cell(plane, 7 + j, y, ch, fg, t.surface);
+            let fg = if j < fill { color } else { config.theme.fg_muted };
+            set_cell(plane, 7 + j, y, ch, fg, config.theme.surface);
         }
-        set_cell(plane, 7 + bar_w, y, ']', t.fg_muted, t.surface);
+        set_cell(plane, 7 + bar_w, y, ']', config.theme.fg_muted, config.theme.surface);
         let pct = format!("{:>3}%", val.round() as u32);
         draw_text(plane, 7 + bar_w + 2, y, &pct, color, config.theme.surface, true);
     }
