@@ -51,6 +51,8 @@ pub struct Showcase {
     pub(crate) hovered_card: Option<usize>,
     pub(crate) mouse_pos: Option<(u16, u16)>,
     pub(crate) recently_launched: Vec<String>,
+    pub(crate) show_input_debug: bool,
+    pub(crate) event_log: RefCell<VecDeque<(Instant, String)>>,
 }
 
 impl Showcase {
