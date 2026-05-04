@@ -30,8 +30,6 @@ mod data;
 mod render;
 mod state;
 mod widget;
-
-use data::ExampleMeta;
 use state::Showcase;
 
 // ═══════════════════════════════════════════════════════════════════════════════
