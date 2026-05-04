@@ -1,15 +1,14 @@
 # Project State
 
 ## Current Focus
-Simplified keyboard event handling in the showcase widget by removing modal and menu priority logic
+Removed mouse event logging from the showcase widget
 
 ## Context
-The previous implementation had complex nested if-else statements for handling different UI states (help overlay, context menu, modal preview, etc.) which made the code harder to maintain and understand. This change simplifies the keyboard event handling by removing these state priorities.
+This change removes the mouse event logging functionality that was previously added to help debug input events in the showcase example. The logging tracked mouse positions and event types, but the feature was not being actively used and was causing unnecessary complexity.
 
 ## Completed
-- [x] Removed nested if-else logic for UI state priorities in keyboard handling
-- [x] Reduced the dispatch_key function from 204 lines to 21 lines
-- [x] Simplified the keyboard event handling flow
+- [x] Removed mouse event logging code from the widget implementation
+- [x] Cleaned up related state tracking (mouse position and event log)
 
 ## In Progress
 - [ ] None
@@ -18,5 +17,5 @@ The previous implementation had complex nested if-else statements for handling d
 - None
 
 ## Next Steps
-1. Test the simplified keyboard handling to ensure all keybindings still work as expected
-2. Review the remaining keyboard event handling logic for further simplification opportunities
+1. Review if any other input debugging features need similar cleanup
+2. Consider whether to keep the input debug overlay toggle functionality
