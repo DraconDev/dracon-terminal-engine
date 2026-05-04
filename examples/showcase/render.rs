@@ -86,6 +86,7 @@ pub fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn render_card(
     ex: &ExampleMeta,
     idx: usize,
