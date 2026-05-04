@@ -1,25 +1,25 @@
 # Project State
 
 ## Current Focus
-Modularized the showcase example launcher for better maintainability and organization.
+Added callback type aliases to improve code organization and reduce Clippy warnings
 
 ## Context
-The showcase example was previously a monolithic file. This refactoring splits it into submodules to improve code organization, readability, and maintainability.
+The changes introduce standardized type aliases for callback functions across the framework, making signatures cleaner and reducing "very complex type" warnings from Clippy.
 
 ## Completed
-- [x] Split showcase launcher into modular submodules
-- [x] Added `main.rs` for entry point and app setup
-- [x] Created `data.rs` for example metadata definitions
-- [x] Implemented `state.rs` for showcase state management
-- [x] Added `render.rs` for card rendering and preview functions
-- [x] Included `widget.rs` for widget implementation
+- [x] Added `TickCallback` for framework app timing
+- [x] Added `ExecuteCallback` for command palette
+- [x] Added `SelectCallback<T>` for list and table widgets
+- [x] Added `ChangeCallback` for select widgets
+- [x] Added `SubmitCallback` for text input
+- [x] Added `SelectCallback` for tree widgets
 
 ## In Progress
-- [x] Modular showcase example launcher implementation
+- [ ] None (documentation-only change)
 
 ## Blockers
-- None identified
+- None (documentation update)
 
 ## Next Steps
-1. Verify all showcase functionality remains intact
-2. Update documentation to reflect the new modular structure
+1. Review if additional callback types are needed
+2. Ensure consistent usage across the codebase

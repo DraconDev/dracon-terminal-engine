@@ -139,6 +139,20 @@ Uses `ScopedZoneRegistry` for all mouse dispatch:
 - Hover detection via zone dispatch in render (primitives bar, palette swatches, sidebar categories)
 - Eliminates all duplicated position math between `render()` and `handle_mouse()`
 
+## Callback Type Aliases
+
+The following type aliases are used for cleaner signatures and to avoid "very complex type" clippy warnings:
+
+| Alias | Location | Type |
+|-------|----------|------|
+| `TickCallback` | `src/framework/app.rs` | `Box<dyn FnMut(&mut Ctx, u64) + 'static>` |
+| `ExecuteCallback` | `src/framework/widgets/command_palette.rs` | `Box<dyn FnMut(&str)>` |
+| `SelectCallback<T>` | `src/framework/widgets/list.rs` | `Box<dyn FnMut(&T)>` |
+| `ChangeCallback` | `src/framework/widgets/select.rs` | `Box<dyn FnMut(&str)>` |
+| `SelectCallback<T>` | `src/framework/widgets/table.rs` | `Box<dyn FnMut(&T)>` |
+| `SubmitCallback` | `src/framework/widgets/text_input_base.rs` | `Box<dyn FnMut(&str)>` |
+| `SelectCallback` | `src/framework/widgets/tree.rs` | `Box<dyn FnMut(&str)>` |
+
 ## Example App Patterns
 
 ### file_manager (`examples/_apps/file_manager.rs`)
