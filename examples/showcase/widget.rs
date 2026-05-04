@@ -10,6 +10,8 @@ use ratatui::layout::Rect;
 use crate::data::ExampleMeta;
 use crate::state::Showcase;
 use crate::render::{draw_rounded_border, draw_text, set_cell, category_color, render_card};
+
+impl Widget for Showcase {
     fn id(&self) -> WidgetId {
         WidgetId::new(0)
     }
