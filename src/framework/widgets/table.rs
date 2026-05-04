@@ -23,6 +23,8 @@ pub struct TableRow<T> {
     pub data: T,
 }
 
+pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
+
 /// A sortable, selectable table with header and row hit zones.
 pub struct Table<T> {
     id: WidgetId,
