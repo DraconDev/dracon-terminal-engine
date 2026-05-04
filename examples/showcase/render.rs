@@ -167,18 +167,18 @@ pub fn render_card(config: &CardConfig) -> Plane {
     let _preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
 
     match config.ex.name {
-        "system_monitor" => render_live_gauge_preview(&mut plane, t, card_phase, config.width),
-        "split_resizer" => render_split_preview(&mut plane, t, card_phase, config.width),
-        "command_bindings" => render_command_preview(&mut plane, t, card_phase, config.width),
-        "theme_switcher" => render_theme_preview(&mut plane, t, card_phase, config.width),
-        "widget_gallery" => render_widget_preview(&mut plane, t, card_phase, config.width),
-        "ide" => render_ide_preview(&mut plane, t, card_phase, config.width),
-        "desktop" => render_desktop_preview(&mut plane, t, card_phase, config.width),
-        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, card_phase, config.width),
-        "git_tui" => render_git_tui_preview(&mut plane, t, card_phase, config.width),
-        "file_manager" => render_file_manager_preview(&mut plane, t, card_phase, config.width),
-        "menu_system" => render_menu_system_preview(&mut plane, t, card_phase, config.width),
-        "modal_demo" => render_modal_demo_preview(&mut plane, t, card_phase, config.width),
+        "system_monitor" => render_live_gauge_preview(&mut plane, config.theme, card_phase, config.width),
+        "split_resizer" => render_split_preview(&mut plane, config.theme, card_phase, config.width),
+        "command_bindings" => render_command_preview(&mut plane, config.theme, card_phase, config.width),
+        "theme_switcher" => render_theme_preview(&mut plane, config.theme, card_phase, config.width),
+        "widget_gallery" => render_widget_preview(&mut plane, config.theme, card_phase, config.width),
+        "ide" => render_ide_preview(&mut plane, config.theme, card_phase, config.width),
+        "desktop" => render_desktop_preview(&mut plane, config.theme, card_phase, config.width),
+        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, config.theme, card_phase, config.width),
+        "git_tui" => render_git_tui_preview(&mut plane, config.theme, card_phase, config.width),
+        "file_manager" => render_file_manager_preview(&mut plane, config.theme, card_phase, config.width),
+        "menu_system" => render_menu_system_preview(&mut plane, config.theme, card_phase, config.width),
+        "modal_demo" => render_modal_demo_preview(&mut plane, config.theme, card_phase, config.width),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
                 let py = preview_start_y + i;

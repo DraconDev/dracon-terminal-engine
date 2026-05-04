@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored showcase example card rendering to use theme colors directly from the `Theme` struct.
+Refactored showcase example card rendering to pass theme configuration directly to preview functions.
 
 ## Context
-This change was part of a broader refactoring effort to improve the showcase example's rendering and state management. The previous implementation accessed theme colors through a `config` object, which was being refactored to use a more structured approach.
+This change follows a series of refactorings to improve the showcase example's rendering system. The previous implementation passed theme information indirectly through the `t` parameter, which was inconsistent with the new structured configuration approach.
 
 ## Completed
-- [x] Updated `category_color` function to directly use the `Theme` struct instead of accessing colors through `config.theme`
+- [x] Modified all showcase example preview functions to accept theme configuration directly
+- [x] Updated all function calls to pass the theme from the config object
 
 ## In Progress
-- [x] Refactoring showcase example rendering and state management
+- [x] Theme-aware rendering for showcase examples
 
 ## Blockers
-- None identified in this specific change
+- None identified for this specific change
 
 ## Next Steps
-1. Complete the refactoring of showcase example rendering and state management
-2. Verify all theme colors are correctly applied in the showcase examples
+1. Verify all showcase examples render correctly with theme support
+2. Consider adding visual regression tests for the showcase examples
