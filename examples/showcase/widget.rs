@@ -1,4 +1,15 @@
-impl Widget for Showcase {
+use std::sync::atomic::Ordering;
+use std::time::Instant;
+
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
+use ratatui::layout::Rect;
+
+use crate::data::ExampleMeta;
+use crate::state::Showcase;
+use crate::render::{draw_rounded_border, draw_text, set_cell, category_color, render_card};
     fn id(&self) -> WidgetId {
         WidgetId::new(0)
     }
