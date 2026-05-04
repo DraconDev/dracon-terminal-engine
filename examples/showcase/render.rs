@@ -228,7 +228,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         }
         set_cell(plane, 7 + bar_w, y, ']', t.fg_muted, t.surface);
         let pct = format!("{:>3}%", val.round() as u32);
-        draw_text(plane, 7 + bar_w + 2, y, &pct, color, config.theme.surface, true);
+        draw_text(plane, 7 + bar_w + 2, y, &pct, color, t.surface, true);
     }
 }
 
@@ -240,21 +240,21 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     for y in 6..12 {
         for x in 1..w {
             let bg = if x <= split_x {
-                config.theme.surface_elevated
+                t.surface_elevated
             } else {
-                config.theme.surface
+                t.surface
             };
             let fg = if x <= split_x {
-                config.theme.fg_muted
+                t.fg_muted
             } else {
-                config.theme.fg_subtle
+                t.fg_subtle
             };
             set_cell(plane, x, y, ' ', fg, bg);
         }
     }
 
     for y in 6..12 {
-        set_cell(plane, split_x, y, '│', config.theme.primary, config.theme.surface_elevated);
+        set_cell(plane, split_x, y, '│', t.primary, t.surface_elevated);
     }
 
     draw_text(plane, 2, 7, "A", config.theme.fg, config.theme.surface_elevated, false);
