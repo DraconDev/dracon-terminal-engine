@@ -1,6 +1,7 @@
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
+use chrono::Local;
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
