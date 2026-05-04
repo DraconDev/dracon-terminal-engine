@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored text input submission callback to use a dedicated type for better type safety.
+Refactored the Tree widget's selection callback to use a dedicated type for better type safety and consistency.
 
 ## Context
-This follows a pattern of recent refactoring efforts to standardize callback types across widgets, improving type safety and maintainability.
+This follows a pattern of recent refactoring efforts to standardize callback types across widgets, improving type safety and reducing boilerplate.
 
 ## Completed
-- [x] Replaced `Box<dyn FnMut(&str)>` with `SubmitCallback` type for text input submission
-- [x] Maintained all existing functionality while improving type safety
+- [x] Added a dedicated `SelectCallback` type for tree node selection
+- [x] Updated the `Tree` struct to use the new type
 
 ## In Progress
-- [ ] None
+- [x] No active work in progress for this change
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify no runtime behavior changes in text input widgets
-2. Update documentation for the new `SubmitCallback` type
+1. Update any related documentation for the Tree widget
+2. Verify this change doesn't break existing tree widget usage

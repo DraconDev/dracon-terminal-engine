@@ -36,12 +36,14 @@ impl TreeNode {
 }
 
 /// A widget that displays hierarchical data as a collapsible tree.
+type SelectCallback = Box<dyn FnMut(&str)>;
+
 pub struct Tree {
     id: WidgetId,
     root: Vec<TreeNode>,
     selected_path: Vec<usize>,
     theme: Theme,
-    on_select: Option<Box<dyn FnMut(&str)>>,
+    on_select: Option<SelectCallback>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
 }
