@@ -11,7 +11,7 @@ pub struct ExampleMeta {
 }
 
 impl ExampleMeta {
-    fn all() -> Vec<Self> {
+    pub fn all() -> Vec<Self> {
         vec![
             // Apps
             ExampleMeta {
