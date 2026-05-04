@@ -24,7 +24,9 @@ use std::io::Result;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-const ALL_THEMES: &[(&str, fn() -> Theme)] = &[
+type ThemeFactory = fn() -> Theme;
+
+const ALL_THEMES: &[(&str, ThemeFactory)] = &[
     ("Dark", Theme::dark),
     ("Light", Theme::light),
     ("Dracula", Theme::dracula),
