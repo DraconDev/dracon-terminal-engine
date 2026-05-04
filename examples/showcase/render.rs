@@ -702,7 +702,6 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
 }
 
 fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let gauge_h = 6;
     let items = [
         ("CPU", (phase * 25.0).sin() * 30.0 + 55.0),
         ("MEM", (phase * 20.0).sin() * 20.0 + 65.0),
@@ -712,7 +711,6 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u1
         let y = 6 + i;
         if y > 10 { break; }
         let val = value.clamp(0.0, 100.0) as u32;
-        let bar = format!("{:3}%", val);
         let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
         let bar_str = format!("{} [{}{}]", label, "█".repeat(filled), "░".repeat(10 - filled));
         let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
