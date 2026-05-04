@@ -3,11 +3,11 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 pub struct ExampleMeta {
-    name: &'static str,
-    category: &'static str,
-    description: &'static str,
-    binary_name: &'static str,
-    preview: &'static [&'static str],
+    pub name: &'static str,
+    pub category: &'static str,
+    pub description: &'static str,
+    pub binary_name: &'static str,
+    pub preview: &'static [&'static str],
 }
 
 impl ExampleMeta {
