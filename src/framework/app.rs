@@ -53,6 +53,9 @@ use std::time::{Duration, Instant};
 ///     .on_tick(|ctx, tick, app| { /* update every 250ms */ })
 ///     .run(|ctx, app| { /* render per frame */ });
 /// ```
+/// Tick callback type alias for cleaner signatures.
+pub(crate) type TickCallback = Box<dyn FnMut(&mut Ctx, u64) + 'static>;
+
 pub struct App {
     terminal: Terminal<io::Stdout>,
     compositor: Compositor,

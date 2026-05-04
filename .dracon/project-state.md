@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored the `App` struct's tick callback type to be more explicit and encapsulated.
+Refactored the `App` struct's tick callback type to be more explicit.
 
 ## Context
-The previous implementation exposed the `TickCallback` type directly, which could lead to accidental misuse. This change improves type safety and encapsulation by making the callback an internal field of the `App` struct.
+The previous implementation of the tick callback was implicit, making the code less clear about its purpose. This change introduces a type alias to make the callback's role more explicit in function signatures.
 
 ## Completed
-- [x] Changed `pub(crate) type TickCallback` to `on_tick: RefCell<Option<TickCallback>>` to encapsulate the callback
-- [x] Maintained the same functionality while improving type safety
+- [x] Added `TickCallback` type alias for the tick handler
+- [x] Made the callback type more explicit in the `App` struct's documentation
 
 ## In Progress
-- [ ] No active work in progress related to this change
+- [x] No active work in progress
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify no downstream effects from this refactoring
-2. Update any related documentation or tests if needed
+1. Verify the new type alias works correctly with existing tick handlers
+2. Update any related documentation or examples that reference the tick callback
