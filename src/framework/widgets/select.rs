@@ -18,7 +18,7 @@ pub struct Select {
     selected: usize,
     expanded: bool,
     theme: Theme,
-    on_change: Option<Box<dyn FnMut(&str)>>,
+    on_change: Option<ChangeCallback>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
 }

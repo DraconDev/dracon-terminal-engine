@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Refactored widget callback types to use dedicated types for better type safety and clarity.
+Refactored the `Select` widget's callback type to use a dedicated `ChangeCallback` type.
 
 ## Context
-The recent commits show a pattern of adding generic callback types to improve type safety and code organization. This change continues that effort by introducing dedicated callback types for widget interactions.
+This change aligns with recent work to standardize callback types across widgets, improving type safety and consistency in the framework.
 
 ## Completed
-- [x] Refactored `List` widget to use `SelectCallback<T>` type instead of raw `Box<dyn FnMut(&T)>`
-- [x] Added `ChangeCallback` type to `Select` widget for consistent callback handling
+- [x] Replaced `Box<dyn FnMut(&str)>` with `ChangeCallback` in the `Select` widget
+- [x] Maintained existing functionality while improving type safety
 
 ## In Progress
-- [ ] No active work in progress shown in this diff
+- [ ] No active work in progress
 
 ## Blockers
-- None identified in this diff
+- None
 
 ## Next Steps
-1. Verify the new callback types work correctly with existing widget implementations
-2. Consider applying similar pattern to other widgets that use callbacks
+1. Verify no runtime behavior changes in the `Select` widget
+2. Update other widgets using similar callback patterns
+```
