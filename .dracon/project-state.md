@@ -1,25 +1,20 @@
 # Project State
 
 ## Current Focus
-Added callback type aliases to improve code organization and reduce Clippy warnings
+Dependency version bump in Cargo.lock
 
 ## Context
-The changes introduce standardized type aliases for callback functions across the framework, making signatures cleaner and reducing "very complex type" warnings from Clippy.
+This change updates the dependency versions in the project's lock file, ensuring the project uses the latest compatible versions of its dependencies.
 
 ## Completed
-- [x] Added `TickCallback` for framework app timing
-- [x] Added `ExecuteCallback` for command palette
-- [x] Added `SelectCallback<T>` for list and table widgets
-- [x] Added `ChangeCallback` for select widgets
-- [x] Added `SubmitCallback` for text input
-- [x] Added `SelectCallback` for tree widgets
+- [x] Updated dependency versions in Cargo.lock
 
 ## In Progress
-- [ ] None (documentation-only change)
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None (documentation update)
+- None
 
 ## Next Steps
-1. Review if additional callback types are needed
-2. Ensure consistent usage across the codebase
+1. Verify that the updated dependencies do not introduce breaking changes
+2. Test the project with the new dependency versions to ensure stability
