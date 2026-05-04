@@ -87,10 +87,10 @@ pub fn draw_text(
 
 pub fn category_color(t: Theme, cat: &str) -> Color {
     match cat {
-        "apps" => config.theme.warning,
-        "cookbook" => config.theme.info,
-        "tools" => config.theme.secondary,
-        _ => config.theme.fg_muted,
+        "apps" => t.warning,
+        "cookbook" => t.info,
+        "tools" => t.secondary,
+        _ => t.fg_muted,
     }
 }
 
