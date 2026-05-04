@@ -495,7 +495,7 @@ impl Widget for SystemMonitor {
                     }
                 }
                 // Click right side clears
-                if col >= self.area().width / 2 { self.selected_process = None; return true; }
+                if col >= self.area.width / 2 { self.selected_process = None; return true; }
             }
             MouseEventKind::ScrollDown => {
                 let max_scroll = self.data.processes.len().saturating_sub(10);

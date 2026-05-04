@@ -4,17 +4,18 @@
 Improve area tracking in system monitor widget mouse event handling
 
 ## Context
-The system monitor widget was recently refactored to add proper area tracking for rendering bounds. This change modifies how mouse events are processed to use the tracked area instead of recalculating it.
+This change addresses a bug in the system monitor widget's mouse event handling where the area was incorrectly accessed. The widget now properly tracks and uses the area for rendering bounds.
 
 ## Completed
-- [x] Updated mouse event handling to use tracked area instead of recalculating it
+- [x] Fixed incorrect area access in system monitor widget mouse event handling
+- [x] Updated Cargo.lock with dependency version bump
 
 ## In Progress
-- [x] No active work in progress
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the change doesn't affect existing functionality
-2. Consider adding more comprehensive area tracking for other widget interactions
+1. Verify the system monitor widget's rendering bounds are now correct
+2. Test mouse event handling with the updated area tracking
