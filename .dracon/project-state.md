@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Simplified keyboard event handling in the showcase widget by removing modal and menu priority logic
 
 ## Context
-This change was triggered by recent updates to the showcase example's input debugging and event logging features, which required updated dependencies.
+The previous implementation had complex nested if-else statements for handling different UI states (help overlay, context menu, modal preview, etc.) which made the code harder to maintain and understand. This change simplifies the keyboard event handling by removing these state priorities.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency versions required by the showcase example's input debugging features
+- [x] Removed nested if-else logic for UI state priorities in keyboard handling
+- [x] Reduced the dispatch_key function from 204 lines to 21 lines
+- [x] Simplified the keyboard event handling flow
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify that all showcase example features are functioning correctly with the updated dependencies
-2. Prepare for any additional dependency updates that may be needed as development continues
+1. Test the simplified keyboard handling to ensure all keybindings still work as expected
+2. Review the remaining keyboard event handling logic for further simplification opportunities
