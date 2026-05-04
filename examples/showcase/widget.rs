@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 
 use chrono::Local;
 use dracon_terminal_engine::compositor::Plane;
+use crate::render::CardConfig;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
