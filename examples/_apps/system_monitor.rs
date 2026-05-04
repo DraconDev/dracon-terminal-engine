@@ -486,7 +486,7 @@ impl Widget for SystemMonitor {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 // Process list area
-                if col < self.area().width / 2 && row >= 9 && row < self.area().height.saturating_sub(2) {
+                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2) {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
                     if idx < self.data.processes.len() {
