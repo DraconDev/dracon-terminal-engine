@@ -1153,6 +1153,10 @@ impl Widget for Showcase {
                     self.show_debug = !self.show_debug;
                     true
                 }
+                KeyCode::Char('i') => {
+                    self.show_input_debug = !self.show_input_debug;
+                    true
+                }
                 KeyCode::Char('/') => {
                     self.search_active = true;
                     true

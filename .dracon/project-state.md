@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added input debugging and event logging to the showcase example.
+Added input debugging toggle for the showcase example
 
 ## Context
-This change enables better debugging of user input events in the showcase example by adding a toggle for input debugging and a log of recent events.
+This change enhances the showcase example's debugging capabilities by allowing users to toggle input debugging with the 'i' key, complementing the existing debug toggle with the 'd' key.
 
 ## Completed
-- [x] Added `show_input_debug` flag to control input debugging visibility
-- [x] Added `event_log` field to track recent input events (capacity 16)
+- [x] Added input debugging toggle via 'i' key
+- [x] Integrated with existing debug system
 
 ## In Progress
-- [x] Input debugging and event logging functionality
+- [x] Input debugging implementation
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Implement UI controls to toggle input debugging
-2. Display the event log in the showcase UI
+1. Verify input debugging works as expected
+2. Document the new debugging feature
