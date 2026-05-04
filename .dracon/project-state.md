@@ -1,25 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved snake animation rendering in showcase example with dynamic bounds checking
+Improved input debug preview rendering in the showcase example
 
 ## Context
-The previous snake rendering had hardcoded boundaries and fixed-size rendering, which could cause out-of-bounds errors. This change makes the rendering more robust by:
-1. Calculating dynamic boundaries based on snake position
-2. Using distance-based logic for snake body rendering
-3. Improving score calculation precision
+The showcase example's input debug preview was using `format!` for static strings, which creates unnecessary heap allocations. This change optimizes the code by using string literals directly.
 
 ## Completed
-- [x] Added dynamic boundary calculations for snake rendering
-- [x] Implemented distance-based snake body detection
-- [x] Fixed score calculation precision with proper floating-point operations
+- [x] Replaced `format!` calls with direct string literals in input debug preview
+- [x] Improved memory efficiency by avoiding heap allocations for static strings
 
 ## In Progress
-- [x] No active work in progress - this is a complete feature improvement
+- [x] No active work in progress for this change
 
 ## Blockers
-- None - this is a self-contained improvement
+- None identified
 
 ## Next Steps
-1. Verify the new rendering doesn't cause visual artifacts at boundaries
-2. Consider adding boundary collision detection for game mechanics
+1. Verify the showcase example continues to display input debug information correctly
+2. Consider similar optimizations in other showcase components if needed

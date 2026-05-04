@@ -754,7 +754,7 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let scroll = ((phase * 0.5).sin() * 1.5) as i16;
     for (i, line) in lines.iter().enumerate() {
         let y = 6 + i;
-        if y < 6 || y > 11 { continue; }
+        if !(6..=11).contains(&y) { continue; }
         let offset = if i == 2 { scroll } else { 0 };
         let x = (2 + offset as usize).max(1).min(20);
         let truncated: String = line.chars().skip(x.saturating_sub(2)).take(22).collect();
@@ -789,8 +789,8 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
 fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let key_y = 6;
     let keys = [
-        format!("Key: ArrowUp  0x2191"),
-        format!("Mod: Ctrl+Shift"),
+        "Key: ArrowUp  0x2191".to_string(),
+        "Mod: Ctrl+Shift".to_string(),
     ];
     for (i, key) in keys.iter().enumerate() {
         draw_text(plane, 1, key_y + i, key, t.fg_subtle, t.surface, false);
