@@ -1300,3 +1300,202 @@ impl Widget for Showcase {
         }
     }
 }
+
+impl Showcase {
+    fn dispatch_key(&mut self, key: KeyEvent) -> bool {
+        // Help overlay takes priority
+        if self.show_help {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char('?') => {
+                    self.show_help = false;
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
+        // Context menu takes priority
+        if self.context_menu.is_some() {
+            let menu_len = 4;
+            match key.code {
+                KeyCode::Esc => {
+                    self.context_menu = None;
+                    return true;
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    self.context_menu_selected = self.context_menu_selected.saturating_sub(1);
+                    return true;
+                }
+                KeyCode::Down | KeyCode::Char('j') => {
+                    self.context_menu_selected = (self.context_menu_selected + 1).min(menu_len - 1);
+                    return true;
+                }
+                KeyCode::Enter => {
+                    let selected = self.context_menu_selected;
+                    self.context_menu = None;
+                    if selected == 0 {
+                        self.launch_selected();
+                    } else if selected == 1 {
+                        if let Some(ex) = self.selected_example() {
+                            println!("{}", ex.binary_name);
+                            self.status_message =
+                                Some((format!("Copied: {}", ex.binary_name), Instant::now()));
+                        }
+                    } else if selected == 2 {
+                        let category = self.selected_example().map(|ex| ex.category);
+                        if let Some(cat) = category {
+                            self.category_filter = Some(cat);
+                            self.apply_filter();
+                            self.status_message =
+                                Some((format!("Filtered: {}", cat), Instant::now()));
+                        }
+                    }
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
+        // Modal preview takes priority
+        if self.modal_preview {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char(' ') => {
+                    self.modal_preview = false;
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
+        // Search mode
+        if self.search_active {
+            match key.code {
+                KeyCode::Esc => {
+                    self.search_active = false;
+                    true
+                }
+                KeyCode::Enter => {
+                    self.search_active = false;
+                    self.launch_selected();
+                    true
+                }
+                KeyCode::Backspace => {
+                    self.search_query.pop();
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Char(ch) => {
+                    self.search_query.push(ch);
+                    self.apply_filter();
+                    true
+                }
+                _ => false,
+            }
+        } else {
+            match key.code {
+                KeyCode::Char('q') => {
+                    self.should_quit.store(true, Ordering::SeqCst);
+                    true
+                }
+                KeyCode::Char('?') => {
+                    self.show_help = true;
+                    true
+                }
+                KeyCode::Char(' ') => {
+                    self.modal_preview = true;
+                    true
+                }
+                KeyCode::Char('t') => {
+                    let themes = Self::themes();
+                    let current = themes
+                        .iter()
+                        .position(|(_, t)| t.name == self.theme.name)
+                        .unwrap_or(0);
+                    self.pending_theme = Some((current + 1) % themes.len());
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Char('d') => {
+                    self.show_debug = !self.show_debug;
+                    true
+                }
+                KeyCode::Char('i') => {
+                    self.show_input_debug = !self.show_input_debug;
+                    true
+                }
+                KeyCode::Char('/') => {
+                    self.search_active = true;
+                    true
+                }
+                KeyCode::Tab => {
+                    let categories = [None, Some("apps"), Some("cookbook"), Some("tools")];
+                    let current = categories
+                        .iter()
+                        .position(|&c| c == self.category_filter)
+                        .unwrap_or(0);
+                    self.category_filter = categories[(current + 1) % categories.len()];
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Char('1') => {
+                    self.primitive_toggle = !self.primitive_toggle;
+                    true
+                }
+                KeyCode::Char('2') => {
+                    self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                    true
+                }
+                KeyCode::Char('3') => {
+                    self.primitive_checkbox = !self.primitive_checkbox;
+                    true
+                }
+                KeyCode::Char('4') => {
+                    self.primitive_radio = (self.primitive_radio + 1) % 3;
+                    true
+                }
+                KeyCode::Char('5') => {
+                    self.primitive_button = true;
+                    self.primitive_button_time = Some(Instant::now());
+                    true
+                }
+                KeyCode::Down => {
+                    if self.selected + 1 < self.filtered.len() {
+                        self.selected += 1;
+                    } else if !self.filtered.is_empty() {
+                        self.selected = 0;
+                    }
+                    true
+                }
+                KeyCode::Up => {
+                    if self.selected > 0 {
+                        self.selected -= 1;
+                    } else if !self.filtered.is_empty() {
+                        self.selected = self.filtered.len() - 1;
+                    }
+                    true
+                }
+                KeyCode::Right => {
+                    let cols = self.cols.get().max(1);
+                    if !self.filtered.is_empty() {
+                        self.selected = (self.selected + cols) % self.filtered.len();
+                    }
+                    true
+                }
+                KeyCode::Left => {
+                    let cols = self.cols.get().max(1);
+                    if !self.filtered.is_empty() {
+                        self.selected = (self.selected + self.filtered.len()
+                            - cols % self.filtered.len())
+                            % self.filtered.len();
+                    }
+                    true
+                }
+                KeyCode::Enter => {
+                    self.launch_selected();
+                    true
+                }
+                _ => false,
+            }
+        }
+    }
+}

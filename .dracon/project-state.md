@@ -1,21 +1,28 @@
 # Project State
 
 ## Current Focus
-Removed mouse event logging from the showcase widget
+Added comprehensive keyboard event handling for the showcase widget with modal and context menu support
 
 ## Context
-This change removes the mouse event logging functionality that was previously added to help debug input events in the showcase example. The logging tracked mouse positions and event types, but the feature was not being actively used and was causing unnecessary complexity.
+This change implements a robust keyboard interaction system for the showcase example, building on previous input debugging work. It provides a complete set of keyboard controls for navigation, filtering, and UI interactions.
 
 ## Completed
-- [x] Removed mouse event logging code from the widget implementation
-- [x] Cleaned up related state tracking (mouse position and event log)
+- [x] Added help overlay with Esc/question mark toggle
+- [x] Implemented context menu with navigation (Up/Down, Enter, Esc)
+- [x] Created modal preview mode with space/esc toggle
+- [x] Added search functionality with text input and filtering
+- [x] Implemented category filtering with Tab key navigation
+- [x] Added theme switching with 't' key
+- [x] Created primitive UI controls (toggle, slider, checkbox, radio, button)
+- [x] Added grid navigation with arrow keys and page up/down
+- [x] Implemented status message system for user feedback
 
 ## In Progress
-- [ ] None
+- [x] Comprehensive keyboard event handling system
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Review if any other input debugging features need similar cleanup
-2. Consider whether to keep the input debug overlay toggle functionality
+1. Test keyboard navigation across different screen sizes
+2. Add visual feedback for keyboard interactions
