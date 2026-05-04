@@ -108,6 +108,7 @@ pub struct CardConfig<'a> {
 
 pub fn render_card(config: &CardConfig) -> Plane {
     let mut plane = Plane::new(0, config.width, config.height);
+    let t = &config.theme;
     let card_w_usize = config.width as usize;
     let card_h_usize = config.height as usize;
 

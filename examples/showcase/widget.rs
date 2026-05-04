@@ -433,16 +433,17 @@ impl Widget for Showcase {
                     continue;
                 }
 
-                let card = render_card(
+                let card_config = CardConfig {
                     ex,
-                    grid_idx,
-                    self.selected,
-                    self.hovered_card,
-                    t,
-                    self.card_start.elapsed().as_secs_f64(),
-                    card_w as u16,
-                    card_h as u16,
-                );
+                    idx: grid_idx,
+                    selected_idx: self.selected,
+                    hovered_idx: self.hovered_card,
+                    theme: t.clone(),
+                    phase: self.card_start.elapsed().as_secs_f64(),
+                    width: card_w as u16,
+                    height: card_h as u16,
+                };
+                let card = render_card(&card_config);
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = cy * card_w + cx;
