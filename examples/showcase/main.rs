@@ -1,3 +1,40 @@
+#![allow(missing_docs)]
+//! Dracon Terminal Engine — Example Showcase Launcher
+//!
+//! Interactive grid-based launcher for all framework examples.
+//! Features: category filtering, real-time search, animated selection,
+//! card-based layout with mini previews, live data previews, keyboard shortcuts,
+//! and an interactive primitives bar demonstrating engine building blocks.
+//!
+//! Controls:
+//!   arrows  — navigate cards
+//!   Enter   — launch selected example
+//!   /       — focus search bar
+//!   Tab     — cycle categories
+//!   t       — cycle theme
+//!   d       — toggle debug overlay
+//!   ?       — toggle help
+//!   Space   — preview card (modal)
+//!   1-5     — interact with primitives bar
+//!   right-click — context menu (Launch / Copy name / Filter by category)
+//!   q       — quit
+
+use std::sync::atomic::{AtomicBool, AtomicU64};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
+
+use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::Widget;
+use ratatui::layout::Rect;
+
+mod data;
+mod render;
+mod state;
+mod widget;
+
+use data::ExampleMeta;
+use state::Showcase;
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -22,13 +59,13 @@ fn main() -> std::io::Result<()> {
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _tick| {
-        if quit_check.load(Ordering::SeqCst) {
+        if quit_check.load(std::sync::atomic::Ordering::SeqCst) {
             ctx.stop();
             return;
         }
 
         // Compute and store FPS
-        fps_for_tick.store(ctx.fps(), Ordering::Relaxed);
+        fps_for_tick.store(ctx.fps(), std::sync::atomic::Ordering::Relaxed);
 
         // Handle pending binary launch
         if let Some(binary_name) = pending.lock().unwrap().take() {
@@ -72,8 +109,7 @@ fn main() -> std::io::Result<()> {
             let _ = ctx.resume_terminal();
             ctx.mark_all_dirty();
         }
-    })
-    .run(|_ctx| {
+    }).run(|_ctx| {
         // Render loop handled by framework
     })
 }
