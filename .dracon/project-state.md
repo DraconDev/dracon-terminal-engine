@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Optimize card rendering in showcase example by improving cache handling
+Removed unused card cache from showcase example state initialization.
 
 ## Context
-The showcase example was rendering cards inefficiently by recreating them on every frame. This change improves performance by caching rendered cards and only updating when necessary.
+The card cache was previously added to optimize rendering in the showcase example, but the current implementation no longer requires it. This cleanup simplifies the state initialization while maintaining the same functionality.
 
 ## Completed
-- [x] Removed redundant `Plane` creation in card cache
-- [x] Simplified cache access logic
-- [x] Improved cache initialization handling
+- [x] Removed unused `card_cache` field from `Showcase` struct initialization
 
 ## In Progress
-- [x] Optimized card rendering with proper cache management
+- [x] None (this is a cleanup change)
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify performance improvements in showcase example
-2. Consider additional optimizations for other showcase components
+1. Verify showcase example continues to render correctly without the cache
+2. Consider if other unused state fields should be removed
