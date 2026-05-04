@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored table widget's selection callback to use a dedicated type for better type safety.
+Added a callback type for text input submission in the framework.
 
 ## Context
-This change aligns with ongoing efforts to standardize callback types across widgets for improved type safety and maintainability.
+This change follows a pattern of refactoring widget callbacks to use dedicated types, improving type safety and clarity. The `SubmitCallback` type provides a consistent way to handle text input submissions across the framework.
 
 ## Completed
-- [x] Replaced `Box<dyn FnMut(&T)>` with `SelectCallback<T>` in the Table widget
+- [x] Added `SubmitCallback` type for text input submission handling
+- [x] Documented the new callback type with a doc comment
 
 ## In Progress
-- [x] Ongoing refactoring of other widgets to use dedicated callback types
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Continue refactoring remaining widgets to use dedicated callback types
+1. Implement the callback in the `BaseInput` widget
 2. Update documentation to reflect the new callback type usage

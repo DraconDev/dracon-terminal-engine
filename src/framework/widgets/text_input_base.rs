@@ -7,6 +7,9 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
+/// Callback type for text submission.
+pub type SubmitCallback = Box<dyn FnMut(&str)>;
+
 pub struct BaseInput {
     pub id: WidgetId,
     pub text: String,
