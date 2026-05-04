@@ -1053,6 +1053,7 @@ impl IdeApp {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn render_editor(
         &self,
         plane: &mut Plane,
