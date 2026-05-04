@@ -10,6 +10,8 @@ use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A dropdown select widget for choosing from a list of options.
+type ChangeCallback = Box<dyn FnMut(&str)>;
+
 pub struct Select {
     id: WidgetId,
     options: Vec<String>,

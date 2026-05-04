@@ -17,7 +17,7 @@ pub struct List<T> {
     offset: usize,
     visible_count: usize,
     theme: Theme,
-    on_select: Option<Box<dyn FnMut(&T)>>,
+    on_select: Option<SelectCallback<T>>,
     item_height: u16,
     width: u16,
     area: std::cell::Cell<Rect>,

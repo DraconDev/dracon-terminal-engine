@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added a generic callback type for list widget selection handling
+Refactored widget callback types to use dedicated types for better type safety and clarity.
 
 ## Context
-The `List` widget now needs a way to handle user selection events without tightly coupling the widget to specific application logic. This change enables more flexible interaction patterns.
+The recent commits show a pattern of adding generic callback types to improve type safety and code organization. This change continues that effort by introducing dedicated callback types for widget interactions.
 
 ## Completed
-- [x] Added `SelectCallback<T>` type alias for selection handling
-- [x] Prepared the `List` struct to use the callback type
+- [x] Refactored `List` widget to use `SelectCallback<T>` type instead of raw `Box<dyn FnMut(&T)>`
+- [x] Added `ChangeCallback` type to `Select` widget for consistent callback handling
 
 ## In Progress
-- [x] Implementation of callback invocation in list item selection
+- [ ] No active work in progress shown in this diff
 
 ## Blockers
-- Need to implement the actual callback invocation logic in the widget's rendering logic
+- None identified in this diff
 
 ## Next Steps
-1. Implement callback invocation when list items are selected
-2. Add documentation for the new callback type usage
+1. Verify the new callback types work correctly with existing widget implementations
+2. Consider applying similar pattern to other widgets that use callbacks
