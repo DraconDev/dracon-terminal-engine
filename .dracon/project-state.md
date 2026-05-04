@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Made `Showcase::apply_filter` public to allow external access to theme filtering functionality.
+Made `Showcase::selected_example` public to allow external access to the currently selected example.
 
 ## Context
-This change was prompted by the need to expose internal state management methods for external use cases, particularly in scenarios where theme filtering needs to be triggered from outside the `Showcase` implementation.
+This change was prompted by the ongoing refactoring of the showcase state structure, which made fields public for better accessibility. Making this specific method public aligns with the broader goal of improving the showcase widget's API.
 
 ## Completed
-- [x] Made `apply_filter` method public to enable external theme filtering operations
+- [x] Made `Showcase::selected_example` public to enable external access to the selected example metadata
 
 ## In Progress
-- [ ] None
+- [ ] None (this is a focused, complete change)
 
 ## Blockers
-- None
+- None (this is a straightforward API improvement)
 
 ## Next Steps
-1. Verify that external consumers can properly utilize the newly public method
-2. Document the new public API surface for `Showcase`
+1. Verify that the public method doesn't expose internal state inappropriately
+2. Update any dependent code to use the new public method

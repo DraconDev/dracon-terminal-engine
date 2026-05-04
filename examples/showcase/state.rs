@@ -143,7 +143,7 @@ impl Showcase {
         self.selected = self.selected.min(self.filtered.len().saturating_sub(1));
     }
 
-    fn selected_example(&self) -> Option<&ExampleMeta> {
+    pub fn selected_example(&self) -> Option<&ExampleMeta> {
         self.filtered
             .get(self.selected)
             .and_then(|&idx| self.examples.get(idx))
