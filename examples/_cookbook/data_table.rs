@@ -298,7 +298,7 @@ impl Widget for Table {
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        if self.search.handle_key(key.clone()) {
+        if self.search.handle_key(key) {
             let q = self.search.query().to_string();
             self.filter(&q);
             return true;
