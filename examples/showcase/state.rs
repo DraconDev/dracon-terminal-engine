@@ -96,6 +96,7 @@ impl Showcase {
             show_debug: false,
             primitive_button_time: None,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            card_cache: RefCell::new(Vec::new()),
         }
     }
 

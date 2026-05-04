@@ -4,20 +4,18 @@
 Added a card cache to optimize rendering in the showcase example
 
 ## Context
-The showcase example was refactored to use structured card configurations, but the rendering pipeline was not optimized for repeated card rendering. This change adds a cache to store rendered cards and avoid redundant computations.
+This change was prompted by performance issues in the showcase example where card rendering was being recalculated unnecessarily. The cache will store rendered cards to avoid redundant computations.
 
 ## Completed
 - [x] Added `card_cache` field to `Showcase` struct to store rendered cards
-- [x] Implemented `RefCell` wrapper for thread-safe mutable access to the cache
+- [x] Initialized the cache as an empty `RefCell<Vec<...>>` in the default constructor
 
 ## In Progress
-- [ ] Implement cache population logic during card rendering
-- [ ] Add cache invalidation when card configurations change
+- [ ] Implement actual caching logic for card rendering
 
 ## Blockers
-- Need to determine optimal cache size and eviction policy
-- Requires integration with the existing card rendering pipeline
+- Need to determine what exactly should be cached (full rendered cards or just configurations)
 
 ## Next Steps
-1. Implement cache population during card rendering
-2. Add cache invalidation when card configurations change
+1. Implement the caching mechanism for card rendering
+2. Add performance metrics to verify the cache's effectiveness
