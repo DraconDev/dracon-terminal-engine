@@ -139,6 +139,22 @@ Uses `ScopedZoneRegistry` for all mouse dispatch:
 - Hover detection via zone dispatch in render (primitives bar, palette swatches, sidebar categories)
 - Eliminates all duplicated position math between `render()` and `handle_mouse()`
 
+**CardConfig struct** (`render.rs`): Refactored `render_card` to take a `&CardConfig` struct instead of 8 separate parameters:
+```rust
+pub struct CardConfig<'a> {
+    pub ex: &'a ExampleMeta,
+    pub idx: usize,
+    pub selected_idx: usize,
+    pub hovered_idx: Option<usize>,
+    pub theme: Theme,
+    pub phase: f64,
+    pub width: u16,
+    pub height: u16,
+}
+```
+
+**Smoke test** (`tests/showcase_smoke_test.rs`): Integration test that spawns the showcase binary and verifies it initializes without crashing (ignored by default, requires TTY).
+
 ## Callback Type Aliases
 
 The following type aliases are used for cleaner signatures and to avoid "very complex type" clippy warnings:
