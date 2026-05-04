@@ -87,10 +87,10 @@ pub fn draw_text(
 
 pub fn category_color(t: Theme, cat: &str) -> Color {
     match cat {
-        "apps" => t.warning,
-        "cookbook" => t.info,
-        "tools" => t.secondary,
-        _ => t.fg_muted,
+        "apps" => config.theme.warning,
+        "cookbook" => config.theme.info,
+        "tools" => config.theme.secondary,
+        _ => config.theme.fg_muted,
     }
 }
 
@@ -113,7 +113,7 @@ pub fn render_card(config: &CardConfig) -> Plane {
 
     let is_selected = config.idx == config.selected_idx;
     let is_hovered = Some(config.idx) == config.hovered_idx;
-    let cat_color = category_color(config.theme, config.ex.category);
+    let cat_color = category_color(config.theme, config.config.ex.category);
 
     // Per-card phase offset for more organic animations
     let card_phase = config.phase + (config.idx as f64 * 0.73);
@@ -137,61 +137,61 @@ pub fn render_card(config: &CardConfig) -> Plane {
     };
     draw_rounded_border(
         &mut plane,
-        Rect::new(0, 0, card_w, card_h),
+        Rect::new(0, 0, config.width, config.height),
         border_fg,
         bg,
         is_selected || is_hovered,
     );
 
-    let badge = format!(" {} ", ex.category.to_uppercase());
+    let badge = format!(" {} ", config.ex.category.to_uppercase());
     let badge_x = 2usize;
     let badge_y = 1usize;
     for (i, ch) in badge.chars().enumerate() {
         let px = badge_x + i;
         if px < card_w_usize - 2 {
-            set_cell(&mut plane, px, badge_y, ch, t.fg_on_accent, cat_color);
+            set_cell(&mut plane, px, badge_y, ch, config.theme.fg_on_accent, cat_color);
         }
     }
 
     let name_y = 3usize;
     let max_name_len = (card_w_usize - 4).min(24);
-    let name_truncated: String = ex.name.chars().take(max_name_len).collect();
-    draw_text(&mut plane, 2, name_y, &name_truncated, t.fg, bg, true);
+    let name_truncated: String = config.ex.name.chars().take(max_name_len).collect();
+    draw_text(&mut plane, 2, name_y, &name_truncated, config.theme.fg, bg, true);
 
     let desc_y = 4usize;
     let max_desc_len = (card_w_usize - 4).min(24);
-    let desc: String = ex.description.chars().take(max_desc_len).collect();
-    draw_text(&mut plane, 2, desc_y, &desc, t.fg_muted, bg, false);
+    let desc: String = config.ex.description.chars().take(max_desc_len).collect();
+    draw_text(&mut plane, 2, desc_y, &desc, config.theme.fg_muted, bg, false);
 
     let preview_start_y = 6usize;
     let _preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
 
-    match ex.name {
-        "system_monitor" => render_live_gauge_preview(&mut plane, t, card_phase, card_w),
-        "split_resizer" => render_split_preview(&mut plane, t, card_phase, card_w),
-        "command_bindings" => render_command_preview(&mut plane, t, card_phase, card_w),
-        "theme_switcher" => render_theme_preview(&mut plane, t, card_phase, card_w),
-        "widget_gallery" => render_widget_preview(&mut plane, t, card_phase, card_w),
-        "ide" => render_ide_preview(&mut plane, t, card_phase, card_w),
-        "desktop" => render_desktop_preview(&mut plane, t, card_phase, card_w),
-        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, card_phase, card_w),
-        "git_tui" => render_git_tui_preview(&mut plane, t, card_phase, card_w),
-        "file_manager" => render_file_manager_preview(&mut plane, t, card_phase, card_w),
-        "menu_system" => render_menu_system_preview(&mut plane, t, card_phase, card_w),
-        "modal_demo" => render_modal_demo_preview(&mut plane, t, card_phase, card_w),
+    match config.ex.name {
+        "system_monitor" => render_live_gauge_preview(&mut plane, t, card_phase, config.width),
+        "split_resizer" => render_split_preview(&mut plane, t, card_phase, config.width),
+        "command_bindings" => render_command_preview(&mut plane, t, card_phase, config.width),
+        "theme_switcher" => render_theme_preview(&mut plane, t, card_phase, config.width),
+        "widget_gallery" => render_widget_preview(&mut plane, t, card_phase, config.width),
+        "ide" => render_ide_preview(&mut plane, t, card_phase, config.width),
+        "desktop" => render_desktop_preview(&mut plane, t, card_phase, config.width),
+        "chat_client" | "log_viewer" => render_scroll_preview(&mut plane, t, card_phase, config.width),
+        "git_tui" => render_git_tui_preview(&mut plane, t, card_phase, config.width),
+        "file_manager" => render_file_manager_preview(&mut plane, t, card_phase, config.width),
+        "menu_system" => render_menu_system_preview(&mut plane, t, card_phase, config.width),
+        "modal_demo" => render_modal_demo_preview(&mut plane, t, card_phase, config.width),
         _ => {
-            for (i, line) in ex.preview.iter().enumerate() {
+            for (i, line) in config.ex.preview.iter().enumerate() {
                 let py = preview_start_y + i;
                 if py < card_h_usize - 1 {
                     let preview_line: String = line.chars().take(card_w_usize - 4).collect();
-                    draw_text(&mut plane, 2, py, &preview_line, t.fg_subtle, bg, false);
+                    draw_text(&mut plane, 2, py, &preview_line, config.theme.fg_subtle, bg, false);
                 }
             }
         }
     }
 
     if is_selected {
-        draw_text(&mut plane, 1, card_h_usize / 2, "►", t.primary, bg, true);
+        draw_text(&mut plane, 1, card_h_usize / 2, "►", config.theme.primary, bg, true);
     }
 
     plane
@@ -213,22 +213,22 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         let val = value.clamp(0.0, 100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
         let color = if val > 80.0 {
-            t.error
+            config.theme.error
         } else if val > 60.0 {
-            t.warning
+            config.theme.warning
         } else {
-            t.success
+            config.theme.success
         };
-        draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
-        set_cell(plane, 6, y, '[', t.fg_muted, t.surface);
+        draw_text(plane, 2, y, label, config.theme.fg_muted, config.theme.surface, false);
+        set_cell(plane, 6, y, '[', config.theme.fg_muted, config.theme.surface);
         for j in 0..bar_w {
             let ch = if j < fill { '█' } else { '░' };
-            let fg = if j < fill { color } else { t.fg_muted };
-            set_cell(plane, 7 + j, y, ch, fg, t.surface);
+            let fg = if j < fill { color } else { config.theme.fg_muted };
+            set_cell(plane, 7 + j, y, ch, fg, config.theme.surface);
         }
-        set_cell(plane, 7 + bar_w, y, ']', t.fg_muted, t.surface);
+        set_cell(plane, 7 + bar_w, y, ']', config.theme.fg_muted, config.theme.surface);
         let pct = format!("{:>3}%", val.round() as u32);
-        draw_text(plane, 7 + bar_w + 2, y, &pct, color, t.surface, true);
+        draw_text(plane, 7 + bar_w + 2, y, &pct, color, config.theme.surface, true);
     }
 }
 
@@ -240,27 +240,27 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     for y in 6..12 {
         for x in 1..w {
             let bg = if x <= split_x {
-                t.surface_elevated
+                config.theme.surface_elevated
             } else {
-                t.surface
+                config.theme.surface
             };
             let fg = if x <= split_x {
-                t.fg_muted
+                config.theme.fg_muted
             } else {
-                t.fg_subtle
+                config.theme.fg_subtle
             };
             set_cell(plane, x, y, ' ', fg, bg);
         }
     }
 
     for y in 6..12 {
-        set_cell(plane, split_x, y, '│', t.primary, t.surface_elevated);
+        set_cell(plane, split_x, y, '│', config.theme.primary, config.theme.surface_elevated);
     }
 
-    draw_text(plane, 2, 7, "A", t.fg, t.surface_elevated, false);
-    draw_text(plane, split_x + 2, 7, "B", t.fg, t.surface, false);
+    draw_text(plane, 2, 7, "A", config.theme.fg, config.theme.surface_elevated, false);
+    draw_text(plane, split_x + 2, 7, "B", config.theme.fg, config.theme.surface, false);
     let label = format!("{}:{}", split_x, 26 - split_x);
-    draw_text(plane, w / 2 - 3, 11, &label, t.fg_muted, t.bg, false);
+    draw_text(plane, w / 2 - 3, 11, &label, config.theme.fg_muted, config.theme.bg, false);
 }
 
 fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
@@ -288,20 +288,20 @@ fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
             break;
         }
         let truncated: String = line.chars().take(24).collect();
-        draw_text(plane, 2, py, &truncated, t.fg_subtle, t.surface, false);
+        draw_text(plane, 2, py, &truncated, config.theme.fg_subtle, config.theme.surface, false);
     }
 }
 
 fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
     let colors = [
-        t.primary,
-        t.primary_hover,
-        t.success,
-        t.warning,
-        t.error,
-        t.info,
-        t.fg,
-        t.bg,
+        config.theme.primary,
+        config.theme.primary_hover,
+        config.theme.success,
+        config.theme.warning,
+        config.theme.error,
+        config.theme.info,
+        config.theme.fg,
+        config.theme.bg,
     ];
     let cols = 4;
     let swatch_size = 3;
@@ -314,12 +314,12 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) 
             break;
         }
         for dx in 0..swatch_size {
-            set_cell(plane, x + dx, y, ' ', t.fg, *color);
-            set_cell(plane, x + dx, y + 1, ' ', t.fg, *color);
+            set_cell(plane, x + dx, y, ' ', config.theme.fg, *color);
+            set_cell(plane, x + dx, y + 1, ' ', config.theme.fg, *color);
         }
     }
-    let name = format!("  {}  ", t.name);
-    draw_text(plane, 2, 11, &name, t.fg_muted, t.bg, false);
+    let name = format!("  {}  ", config.theme.name);
+    draw_text(plane, 2, 11, &name, config.theme.fg_muted, config.theme.bg, false);
 }
 
 fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
@@ -330,14 +330,14 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
             break;
         }
         let text: String = check.chars().take(12).collect();
-        draw_text(plane, 2, py, &text, t.fg_subtle, t.surface, false);
+        draw_text(plane, 2, py, &text, config.theme.fg_subtle, config.theme.surface, false);
     }
 
     let slider_y = 10;
     let slider_w = 18;
     let thumb = ((phase * 2.0).sin() * 0.5 + 0.5 * slider_w as f64).round() as usize;
     let thumb = thumb.min(slider_w - 1);
-    draw_text(plane, 2, slider_y, "[", t.fg_muted, t.surface, false);
+    draw_text(plane, 2, slider_y, "[", config.theme.fg_muted, config.theme.surface, false);
     for i in 0..slider_w {
         let ch = if i == thumb {
             '#'
@@ -346,16 +346,16 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
         } else {
             '-'
         };
-        let fg = if i == thumb { t.primary } else { t.fg_muted };
-        set_cell(plane, 3 + i, slider_y, ch, fg, t.surface);
+        let fg = if i == thumb { config.theme.primary } else { config.theme.fg_muted };
+        set_cell(plane, 3 + i, slider_y, ch, fg, config.theme.surface);
     }
     draw_text(
         plane,
         3 + slider_w,
         slider_y,
         "]",
-        t.fg_muted,
-        t.surface,
+        config.theme.fg_muted,
+        config.theme.surface,
         false,
     );
 }
@@ -393,11 +393,11 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
             if py < 13 {
                 let text: String = line.chars().take(20).collect();
                 let fg = if line.contains("active") {
-                    t.primary
+                    config.theme.primary
                 } else {
-                    t.fg_subtle
+                    config.theme.fg_subtle
                 };
-                draw_text(plane, 2, py, &text, fg, t.surface, false);
+                draw_text(plane, 2, py, &text, fg, config.theme.surface, false);
             }
         }
     }
@@ -424,11 +424,11 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) 
             '░'
         };
         let fg = if y >= thumb_pos && y < thumb_pos + thumb_len {
-            t.primary
+            config.theme.primary
         } else {
-            t.fg_muted
+            config.theme.fg_muted
         };
-        set_cell(plane, track_x, cy, ch, fg, t.surface);
+        set_cell(plane, track_x, cy, ch, fg, config.theme.surface);
     }
 }
 
@@ -443,8 +443,8 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let mut active_tab_start = 0usize;
     let mut active_tab_len = 0usize;
     for (label, active) in &tabs {
-        let fg = if *active { t.fg_on_accent } else { t.fg_muted };
-        let bg = if *active { t.primary_active } else { t.surface };
+        let fg = if *active { config.theme.fg_on_accent } else { config.theme.fg_muted };
+        let bg = if *active { config.theme.primary_active } else { config.theme.surface };
         draw_text(plane, tab_x, 5, label, fg, bg, *active);
         if *active {
             active_tab_start = tab_x;
@@ -459,8 +459,8 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
             active_tab_start + dx,
             5 + 1,
             '▔',
-            t.primary_active,
-            t.surface,
+            config.theme.primary_active,
+            config.theme.surface,
         );
     }
 
@@ -476,21 +476,21 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
         if py > 10 {
             break;
         }
-        draw_text(plane, 1, py, num, t.fg_muted, t.surface, false);
-        draw_text(plane, 3, py, code, t.fg, t.surface, false);
+        draw_text(plane, 1, py, num, config.theme.fg_muted, config.theme.surface, false);
+        draw_text(plane, 3, py, code, config.theme.fg, config.theme.surface, false);
     }
     // Blinking cursor on line 3 (the empty line after code)
     let cursor_visible = (phase * 3.0).fract() < 0.6;
     if cursor_visible {
-        set_cell(plane, 4, 6, '▎', t.primary, t.surface);
+        set_cell(plane, 4, 6, '▎', config.theme.primary, config.theme.surface);
     }
 }
 
 fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let wins = [
-        (1, 6, 8, 4, t.primary),
-        (11, 7, 8, 4, t.warning),
-        (6, 9, 10, 3, t.info),
+        (1, 6, 8, 4, config.theme.primary),
+        (11, 7, 8, 4, config.theme.warning),
+        (6, 9, 10, 3, config.theme.info),
     ];
     let offsets = [
         ((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16),
@@ -505,32 +505,32 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
         let wx = wx.min(20);
         let wy = wy.min(11);
 
-        set_cell(plane, wx, wy, '┌', *color, t.surface);
+        set_cell(plane, wx, wy, '┌', *color, config.theme.surface);
         for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
+            set_cell(plane, wx + dx, wy, '─', *color, config.theme.surface);
         }
-        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
+        set_cell(plane, wx + w - 1, wy, '┐', *color, config.theme.surface);
         for dy in 1..h - 1 {
-            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
+            set_cell(plane, wx, wy + dy, '│', *color, config.theme.surface);
             for dx in 1..w - 1 {
-                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
+                set_cell(plane, wx + dx, wy + dy, ' ', *color, config.theme.surface);
             }
-            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
+            set_cell(plane, wx + w - 1, wy + dy, '│', *color, config.theme.surface);
         }
-        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
+        set_cell(plane, wx, wy + h - 1, '└', *color, config.theme.surface);
         for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
+            set_cell(plane, wx + dx, wy + h - 1, '─', *color, config.theme.surface);
         }
-        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, config.theme.surface);
     }
 }
 
 #[allow(dead_code)]
 fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
     let wins = [
-        (2, 7, 14, 5, t.primary, "z:3"),
-        (8, 6, 14, 5, t.warning, "z:2"),
-        (5, 8, 14, 5, t.info, "z:1"),
+        (2, 7, 14, 5, config.theme.primary, "z:3"),
+        (8, 6, 14, 5, config.theme.warning, "z:2"),
+        (5, 8, 14, 5, config.theme.info, "z:1"),
     ];
     let phase = phase * 0.3;
     for (i, (x, y, w, h, color, label)) in wins.iter().enumerate() {
@@ -541,25 +541,25 @@ fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
         let wx = wx.min(19);
         let wy = wy.min(11);
 
-        set_cell(plane, wx, wy, '┌', *color, t.surface);
+        set_cell(plane, wx, wy, '┌', *color, config.theme.surface);
         for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
+            set_cell(plane, wx + dx, wy, '─', *color, config.theme.surface);
         }
-        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
+        set_cell(plane, wx + w - 1, wy, '┐', *color, config.theme.surface);
         for dy in 1..h - 1 {
-            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
+            set_cell(plane, wx, wy + dy, '│', *color, config.theme.surface);
             for dx in 1..w - 1 {
-                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
+                set_cell(plane, wx + dx, wy + dy, ' ', *color, config.theme.surface);
             }
-            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
+            set_cell(plane, wx + w - 1, wy + dy, '│', *color, config.theme.surface);
         }
-        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
+        set_cell(plane, wx, wy + h - 1, '└', *color, config.theme.surface);
         for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
+            set_cell(plane, wx + dx, wy + h - 1, '─', *color, config.theme.surface);
         }
-        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
+        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, config.theme.surface);
 
-        draw_text(plane, wx + 2, wy + 1, label, *color, t.surface, true);
+        draw_text(plane, wx + 2, wy + 1, label, *color, config.theme.surface, true);
     }
 }
 
@@ -570,8 +570,8 @@ fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
         2,
         6,
         " main ",
-        t.fg_on_accent,
-        t.primary_active,
+        config.theme.fg_on_accent,
+        config.theme.primary_active,
         true,
     );
     draw_text(
@@ -579,38 +579,38 @@ fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16)
         2,
         7,
         "Status: 3 files changed",
-        t.fg,
-        t.surface,
+        config.theme.fg,
+        config.theme.surface,
         false,
     );
 
     // Animated diff lines cycling through different statuses
     let phases = [
         [
-            (" M src/main.rs", t.warning),
-            (" A Cargo.toml", t.success),
-            ("?? README.md", t.error),
+            (" M src/main.rs", config.theme.warning),
+            (" A Cargo.toml", config.theme.success),
+            ("?? README.md", config.theme.error),
         ],
         [
-            (" M Cargo.toml", t.warning),
-            (" D old.rs", t.error),
-            (" A new.rs", t.success),
+            (" M Cargo.toml", config.theme.warning),
+            (" D old.rs", config.theme.error),
+            (" A new.rs", config.theme.success),
         ],
         [
-            ("?? config.yml", t.error),
-            (" M lib.rs", t.warning),
-            (" A test.rs", t.success),
+            ("?? config.yml", config.theme.error),
+            (" M lib.rs", config.theme.warning),
+            (" A test.rs", config.theme.success),
         ],
         [
-            (" D removed.rs", t.error),
-            (" M updated.rs", t.warning),
-            ("?? unknown.py", t.error),
+            (" D removed.rs", config.theme.error),
+            (" M updated.rs", config.theme.warning),
+            ("?? unknown.py", config.theme.error),
         ],
     ];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
     let lines = &phases[phase_idx];
     for (i, (text, color)) in lines.iter().enumerate() {
-        draw_text(plane, 2, 9 + i, text, *color, t.surface, false);
+        draw_text(plane, 2, 9 + i, text, *color, config.theme.surface, false);
     }
 }
 
@@ -645,8 +645,8 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w:
         }
         let icon = if *is_dir { "v" } else { ">" };
         let text = format!("{}{}", icon, name);
-        let fg = if *is_dir { t.warning } else { t.fg_subtle };
-        draw_text(plane, 2, py, &text, fg, t.surface, false);
+        let fg = if *is_dir { config.theme.warning } else { config.theme.fg_subtle };
+        draw_text(plane, 2, py, &text, fg, config.theme.surface, false);
     }
 }
 
@@ -658,8 +658,8 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: 
     for (i, menu) in menus.iter().enumerate() {
         let x = 2 + i * (menu_w + 1);
         let is_highlighted = i == highlight_idx;
-        let bg = if is_highlighted { t.primary } else { t.surface };
-        let fg = if is_highlighted { t.fg_on_accent } else { t.fg };
+        let bg = if is_highlighted { config.theme.primary } else { config.theme.surface };
+        let fg = if is_highlighted { config.theme.fg_on_accent } else { config.theme.fg };
 
         for dx in 0..menu_w {
             set_cell(plane, x + dx, 6, ' ', fg, bg);
@@ -671,15 +671,15 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: 
             for dy in 1..5 {
                 for dx in 0..menu_w {
                     if dy == 4 {
-                        set_cell(plane, x + dx, 6 + dy, '─', t.primary, t.surface);
+                        set_cell(plane, x + dx, 6 + dy, '─', config.theme.primary, config.theme.surface);
                     } else {
-                        set_cell(plane, x + dx, 6 + dy, ' ', t.fg, t.surface);
+                        set_cell(plane, x + dx, 6 + dy, ' ', config.theme.fg, config.theme.surface);
                     }
                 }
             }
             let dropdown_items = ["New", "Open", "Save", "Exit"];
             for (j, item) in dropdown_items.iter().enumerate() {
-                draw_text(plane, x + 1, 7 + j, item, t.fg, t.surface, false);
+                draw_text(plane, x + 1, 7 + j, item, config.theme.fg, config.theme.surface, false);
             }
         }
     }
@@ -693,9 +693,9 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
 
     let pulse = (phase * 2.0).sin() * 0.5 + 0.5;
     let border_color = if pulse > 0.5 {
-        t.primary
+        config.theme.primary
     } else {
-        t.primary_hover
+        config.theme.primary_hover
     };
 
     set_cell(
@@ -704,7 +704,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_y,
         '┌',
         border_color,
-        t.surface_elevated,
+        config.theme.surface_elevated,
     );
     for dx in 1..modal_w - 1 {
         set_cell(
@@ -713,7 +713,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
             modal_y,
             '─',
             border_color,
-            t.surface_elevated,
+            config.theme.surface_elevated,
         );
     }
     set_cell(
@@ -722,7 +722,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_y,
         '┐',
         border_color,
-        t.surface_elevated,
+        config.theme.surface_elevated,
     );
 
     for dy in 1..modal_h - 1 {
@@ -732,7 +732,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
             modal_y + dy,
             '│',
             border_color,
-            t.surface_elevated,
+            config.theme.surface_elevated,
         );
         for dx in 1..modal_w - 1 {
             set_cell(
@@ -740,8 +740,8 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
                 modal_x + dx,
                 modal_y + dy,
                 ' ',
-                t.fg,
-                t.surface_elevated,
+                config.theme.fg,
+                config.theme.surface_elevated,
             );
         }
         set_cell(
@@ -750,7 +750,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
             modal_y + dy,
             '│',
             border_color,
-            t.surface_elevated,
+            config.theme.surface_elevated,
         );
     }
 
@@ -760,7 +760,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_y + modal_h - 1,
         '└',
         border_color,
-        t.surface_elevated,
+        config.theme.surface_elevated,
     );
     for dx in 1..modal_w - 1 {
         set_cell(
@@ -769,7 +769,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
             modal_y + modal_h - 1,
             '─',
             border_color,
-            t.surface_elevated,
+            config.theme.surface_elevated,
         );
     }
     set_cell(
@@ -778,7 +778,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_y + modal_h - 1,
         '┘',
         border_color,
-        t.surface_elevated,
+        config.theme.surface_elevated,
     );
 
     let text = " Confirm? ";
@@ -788,8 +788,8 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         text_x,
         modal_y + 2,
         text,
-        t.fg,
-        t.surface_elevated,
+        config.theme.fg,
+        config.theme.surface_elevated,
         true,
     );
 
@@ -800,8 +800,8 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_x + 4,
         modal_y + 4,
         yes_text,
-        t.primary,
-        t.surface_elevated,
+        config.theme.primary,
+        config.theme.surface_elevated,
         true,
     );
     draw_text(
@@ -809,8 +809,8 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
         modal_x + 14,
         modal_y + 4,
         no_text,
-        t.fg_muted,
-        t.surface_elevated,
+        config.theme.fg_muted,
+        config.theme.surface_elevated,
         false,
     );
 }
