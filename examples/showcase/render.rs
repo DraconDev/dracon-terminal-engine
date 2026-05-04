@@ -833,19 +833,22 @@ fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u1
     let snake_x = 12.0 + (phase * 2.0).cos() * 3.0;
     let sy = snake_y.round() as usize;
     let sx = snake_x.round() as usize;
-    for dy in 0..3 {
-        for dx in 0..4 {
-            let px = 8 + dx;
-            let py = 6 + dy;
-            if py >= 6 && py <= 10 && px >= 8 && px <= 20 {
-                let is_snake = (dx == 1 && dy == 1) || (dx == 2 && dy == 1);
-                let ch = if is_snake { '█' } else { ' ' };
-                let color = if is_snake { t.success } else { t.surface };
-                set_cell(plane, px, py, ch, color, t.surface);
-            }
+    let min_px = sx.saturating_sub(1).max(8);
+    let max_px = (sx + 1).min(20);
+    let min_py = sy.saturating_sub(1).max(6);
+    let max_py = (sy + 1).min(10);
+    for py in min_py..=max_py {
+        for px in min_px..=max_px {
+            let dx = px as i32 - snake_x as i32;
+            let dy = py as i32 - snake_y as i32;
+            let dist_sq = dx * dx + dy * dy;
+            let is_snake = dist_sq <= 2 && dist_sq > 0;
+            let ch = if is_snake { '█' } else { ' ' };
+            let color = if is_snake { t.success } else { t.surface };
+            set_cell(plane, px, py, ch, color, t.surface);
         }
     }
-    let score = (phase * 10.0).sin() as i32 * 10 + 42;
+    let score = ((phase * 10.0).sin() * 10.0) as i32 + 42;
     let score_str = format!("  Score: {:3}  ", score);
     let score_x = 12 - score_str.len() / 2;
     draw_text(plane, score_x, 11, &score_str, t.warning, t.surface, true);
