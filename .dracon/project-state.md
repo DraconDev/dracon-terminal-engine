@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Removed z-index preview functionality from the showcase example
+Refactored showcase example to mark unused variables with `_` prefix
 
 ## Context
-The showcase example was refactored to simplify theme color handling and card rendering. The z-index preview was identified as redundant with the existing dashboard preview and other component demos.
+This change is part of ongoing refactoring of the showcase example to improve code clarity and maintainability. The previous code had variables that were calculated but not used, which could confuse readers.
 
 ## Completed
-- [x] Removed `render_zindex_preview` function and its associated rendering logic
-- [x] Cleaned up the showcase example by removing unused code
+- [x] Added `_` prefix to unused variables `sy` and `sx` in `render_game_loop_preview`
 
 ## In Progress
-- [ ] None
+- [x] Refactoring of showcase example theme handling
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify showcase example still builds and runs correctly
-2. Ensure all remaining showcase components maintain their functionality
+1. Continue refactoring showcase example theme handling
+2. Verify all unused variables are properly marked
