@@ -1249,6 +1249,20 @@ impl Widget for Showcase {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.mouse_pos = Some((col, row));
+        let consumed = self.dispatch_mouse(kind, col, row);
+        if self.show_input_debug {
+            let mouse_desc = format!("{:?} at ({}, {})", kind, col, row);
+            let status = if consumed { "CONSUMED" } else { "ignored" };
+            let log_entry = format!("{} {}", mouse_desc, status);
+            self.event_log.borrow_mut().push_back((std::time::Instant::now(), log_entry));
+            while self.event_log.borrow().len() > 16 {
+                self.event_log.borrow_mut().pop_front();
+            }
+        }
+        consumed
+    }
+
+    fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
         let _grid_start_x = sidebar_w + 2;
