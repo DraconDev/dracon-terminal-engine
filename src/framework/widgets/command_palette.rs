@@ -27,6 +27,9 @@ pub struct CommandItem {
 /// Renders as a centered modal with a search input at the top and
 /// a scrollable filtered list of commands below. Supports keyboard
 /// navigation (↑/↓/Enter/Esc) and mouse clicks.
+/// Callback type for command execution.
+type ExecuteCallback = Box<dyn FnMut(&str)>;
+
 pub struct CommandPalette {
     id: WidgetId,
     commands: Vec<CommandItem>,
