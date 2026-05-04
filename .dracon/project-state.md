@@ -1,22 +1,25 @@
 # Project State
 
 ## Current Focus
-Added mouse event logging to the showcase example for debugging purposes
+Added an input debug overlay to visualize recent input events in the showcase example
 
 ## Context
-This change enhances the showcase example's debugging capabilities by logging mouse events when input debugging is enabled. This helps developers track and verify mouse interactions during development.
+This implements a visual debugging tool for input events, building on previous work that added event logging infrastructure. The overlay helps developers inspect real-time input handling behavior.
 
 ## Completed
-- [x] Added mouse event logging when `show_input_debug` is enabled
-- [x] Limited event log to 16 most recent entries for performance
-- [x] Included timestamp and event details in the log
+- [x] Added a toggleable input debug panel that displays recent input events
+- [x] Implemented color-coded event display (success, error, muted)
+- [x] Added panel with rounded border and title
+- [x] Shows events in reverse chronological order
+- [x] Automatically positions panel at bottom of screen
+- [x] Truncates long event messages to fit panel width
 
 ## In Progress
-- [x] Mouse event logging implementation
+- [x] Input debug overlay implementation
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify the logging works correctly in the showcase example
-2. Consider adding similar logging for other input events if needed
+1. Add keyboard shortcut to toggle debug overlay
+2. Expand event details when selected

@@ -1029,6 +1029,64 @@ impl Widget for Showcase {
             draw_text(&mut plane, 2, dbg_info_y, &dbg_info, t.error, t.bg, false);
         }
 
+        // Input debug overlay
+        if self.show_input_debug {
+            let log = self.event_log.borrow();
+            if !log.is_empty() {
+                let panel_w = 42usize;
+                let panel_h = (log.len() + 2).min(18);
+                let panel_x = 2usize;
+                let panel_y = (area.height as usize).saturating_sub(panel_h + 2);
+
+                // Background
+                for cy in 0..panel_h {
+                    for cx in 0..panel_w {
+                        let px = panel_x + cx;
+                        let py = panel_y + cy;
+                        if px < area.width as usize && py < area.height as usize {
+                            set_cell(&mut plane, px, py, ' ', t.fg, t.surface_elevated);
+                        }
+                    }
+                }
+
+                // Border
+                draw_rounded_border(
+                    &mut plane,
+                    Rect::new(panel_x as u16, panel_y as u16, panel_w as u16, panel_h as u16),
+                    t.warning,
+                    t.surface_elevated,
+                    true,
+                );
+
+                // Title
+                draw_text(
+                    &mut plane,
+                    panel_x + 2,
+                    panel_y + 1,
+                    " Input Debug [i] ",
+                    t.warning,
+                    t.surface_elevated,
+                    true,
+                );
+
+                // Events (newest first)
+                for (i, (_, entry)) in log.iter().rev().take(panel_h.saturating_sub(3)).enumerate() {
+                    let y = panel_y + 2 + i;
+                    if y < area.height as usize {
+                        let truncated: String = entry.chars().take(panel_w - 4).collect();
+                        let fg = if entry.contains("CONSUMED") {
+                            t.success
+                        } else if entry.contains("ignored") {
+                            t.error
+                        } else {
+                            t.fg_muted
+                        };
+                        draw_text(&mut plane, panel_x + 2, y, &truncated, fg, t.surface_elevated, false);
+                    }
+                }
+            }
+        }
+
         plane
     }
 
