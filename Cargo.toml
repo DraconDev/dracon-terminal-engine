@@ -87,7 +87,7 @@ path = "examples/_cookbook/debug_overlay.rs"
 
 [[example]]
 name = "showcase"
-path = "examples/showcase.rs"
+path = "examples/showcase/main.rs"
 
 [[example]]
 name = "desktop"
