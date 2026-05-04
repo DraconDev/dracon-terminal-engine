@@ -21,10 +21,9 @@
 
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 
 mod data;
