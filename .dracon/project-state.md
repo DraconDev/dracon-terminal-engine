@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Made `Showcase::apply_filter` public to allow external access to theme filtering functionality.
 
 ## Context
-This change updates the dependency versions in the project's lockfile, likely to incorporate recent updates from dependencies or resolve version conflicts.
+This change was prompted by the need to expose internal state management methods for external use cases, particularly in scenarios where theme filtering needs to be triggered from outside the `Showcase` implementation.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Made `apply_filter` method public to enable external theme filtering operations
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application to ensure compatibility with the new dependency versions
+1. Verify that external consumers can properly utilize the newly public method
+2. Document the new public API surface for `Showcase`

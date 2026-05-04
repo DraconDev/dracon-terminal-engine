@@ -118,7 +118,7 @@ impl Showcase {
         ]
     }
 
-    fn apply_filter(&mut self) {
+    pub fn apply_filter(&mut self) {
         if let Some(idx) = self.pending_theme.take() {
             self.theme = Self::themes()[idx % Self::themes().len()].1;
         }
