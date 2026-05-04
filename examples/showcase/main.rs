@@ -19,6 +19,7 @@
 //!   right-click — context menu (Launch / Copy name / Filter by category)
 //!   q       — quit
 
+use std::io::Read;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
