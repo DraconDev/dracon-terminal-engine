@@ -701,43 +701,6 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
     draw_text(plane, no_x, btn_y, no_text, t.fg_muted, t.surface_elevated, true);
 }
 
-fn render_zindex_preview(plane: &mut Plane, t: Theme, phase: f64) {
-    let wins = [
-        (2, 7, 14, 5, t.primary, "z:3"),
-        (8, 6, 14, 5, t.warning, "z:2"),
-        (5, 8, 14, 5, t.info, "z:1"),
-    ];
-    let phase = phase * 0.3;
-    for (i, (x, y, w, h, color, label)) in wins.iter().enumerate() {
-        let ox = ((phase * (i as f64 + 1.0) * 20.0).sin() * 1.5) as i16;
-        let oy = ((phase * (i as f64 + 1.0) * 15.0).sin() * 1.0) as i16;
-        let wx = (*x as i16 + ox).max(1) as usize;
-        let wy = (*y as i16 + oy).max(6) as usize;
-        let wx = wx.min(19);
-        let wy = wy.min(11);
-
-        set_cell(plane, wx, wy, '┌', *color, t.surface);
-        for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
-        }
-        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
-        for dy in 1..h - 1 {
-            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
-            for dx in 1..w - 1 {
-                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
-            }
-            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
-        }
-        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
-        for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
-        }
-        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
-
-        draw_text(plane, wx + 2, wy + 1, label, *color, t.surface, true);
-    }
-}
-
 fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let gauge_h = 6;
     let items = [
