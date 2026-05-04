@@ -15,7 +15,7 @@ pub struct BaseInput {
     pub text: String,
     pub cursor_pos: usize,
     pub theme: Theme,
-    pub on_submit: Option<Box<dyn FnMut(&str)>>,
+    pub on_submit: Option<SubmitCallback>,
     pub area: std::cell::Cell<Rect>,
     pub placeholder: String,
     pub mask_char: Option<char>,

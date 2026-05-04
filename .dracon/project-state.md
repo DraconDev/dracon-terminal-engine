@@ -1,14 +1,14 @@
 # Project State
 
 ## Current Focus
-Added a callback type for text input submission in the framework.
+Refactored text input submission callback to use a dedicated type for better type safety.
 
 ## Context
-This change follows a pattern of refactoring widget callbacks to use dedicated types, improving type safety and clarity. The `SubmitCallback` type provides a consistent way to handle text input submissions across the framework.
+This follows a pattern of recent refactoring efforts to standardize callback types across widgets, improving type safety and maintainability.
 
 ## Completed
-- [x] Added `SubmitCallback` type for text input submission handling
-- [x] Documented the new callback type with a doc comment
+- [x] Replaced `Box<dyn FnMut(&str)>` with `SubmitCallback` type for text input submission
+- [x] Maintained all existing functionality while improving type safety
 
 ## In Progress
 - [ ] None
@@ -17,5 +17,5 @@ This change follows a pattern of refactoring widget callbacks to use dedicated t
 - None
 
 ## Next Steps
-1. Implement the callback in the `BaseInput` widget
-2. Update documentation to reflect the new callback type usage
+1. Verify no runtime behavior changes in text input widgets
+2. Update documentation for the new `SubmitCallback` type
