@@ -891,7 +891,7 @@ pub fn spawn_terminal_at(path: &std::path::Path, new_tab: bool, command: Option<
                                 "--session",
                                 &format!("--dest={}", dest),
                                 "--type=method_call",
-                                &"/konsole/MainWindow_1".to_string(),
+                                "/konsole/MainWindow_1",
                                 "org.qtproject.Qt.QWidget.raise",
                             ])
                             .spawn();

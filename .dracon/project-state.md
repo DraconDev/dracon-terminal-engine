@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Refactored the Tree widget's selection callback to use a dedicated type for better type safety and consistency.
+Optimized terminal spawning in Konsole by simplifying string conversion
 
 ## Context
-This follows a pattern of recent refactoring efforts to standardize callback types across widgets, improving type safety and reducing boilerplate.
+The change improves code clarity in the terminal spawning utility by removing unnecessary string conversion
 
 ## Completed
-- [x] Added a dedicated `SelectCallback` type for tree node selection
-- [x] Updated the `Tree` struct to use the new type
+- [x] Removed redundant `.to_string()` call in Konsole terminal spawning arguments
 
 ## In Progress
-- [x] No active work in progress for this change
+- [x] None - this is a focused optimization
 
 ## Blockers
-- None identified
+- None - this is a small, self-contained improvement
 
 ## Next Steps
-1. Update any related documentation for the Tree widget
-2. Verify this change doesn't break existing tree widget usage
+1. Verify no runtime behavior changes occurred
+2. Check for similar string conversion optimizations in other terminal-related code
