@@ -1037,6 +1037,20 @@ impl Widget for Showcase {
             return false;
         }
 
+        // Log input event for debug
+        let key_desc = format!("{:?}", key.code);
+        let mods = format!("{:?}", key.modifiers);
+        let consumed = self.dispatch_key(key);
+        let status = if consumed { "CONSUMED" } else { "ignored" };
+        let log_entry = format!("{} {} {}", key_desc, mods, status);
+        self.event_log.borrow_mut().push_back((std::time::Instant::now(), log_entry));
+        while self.event_log.borrow().len() > 16 {
+            self.event_log.borrow_mut().pop_front();
+        }
+        consumed
+    }
+
+    fn dispatch_key(&mut self, key: KeyEvent) -> bool {
         // Help overlay takes priority
         if self.show_help {
             match key.code {
