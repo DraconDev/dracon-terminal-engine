@@ -1,3 +1,12 @@
+use chrono::Local;
+
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::WidgetId;
+use ratatui::layout::Rect;
+
+use crate::data::ExampleMeta;
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // RENDERING
 // ═══════════════════════════════════════════════════════════════════════════════

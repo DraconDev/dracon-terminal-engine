@@ -2,7 +2,7 @@
 // DATA
 // ═══════════════════════════════════════════════════════════════════════════════
 
-struct ExampleMeta {
+pub struct ExampleMeta {
     name: &'static str,
     category: &'static str,
     description: &'static str,
