@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Added area tracking to system monitor for proper rendering bounds
+Implement proper area tracking for system monitor widget rendering bounds
 
 ## Context
-The system monitor now needs to track its rendering area to ensure proper display within the terminal window. This change prepares for dynamic resizing and proper layout management.
+The system monitor widget previously had hardcoded area dimensions (80x24) and ignored set_area calls. This change enables dynamic area management for proper rendering within different container layouts.
 
 ## Completed
-- [x] Added `area` field to `SystemMonitor` struct to track rendering dimensions
-- [x] Initialized default area (80x24) in the constructor
-- [x] Updated rendering to use the tracked area
+- [x] Store widget area as instance field
+- [x] Implement proper area getter/setter methods
+- [x] Maintain existing 80x24 default area
 
 ## In Progress
-- [x] Area tracking implementation for dynamic resizing
+- [ ] Test integration with layout managers
+- [ ] Verify rendering behavior with dynamic resizing
 
 ## Blockers
-- None identified
+- Need to confirm if default area should remain 80x24 or be configurable
 
 ## Next Steps
-1. Implement dynamic area updates when terminal is resized
-2. Add proper layout management for different screen sizes
+1. Add unit tests for area tracking
+2. Verify compatibility with existing dashboard layouts

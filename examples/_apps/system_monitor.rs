@@ -345,8 +345,8 @@ impl SystemMonitor {
 impl Widget for SystemMonitor {
     fn id(&self) -> WidgetId { WidgetId::new(0) }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
-    fn set_area(&mut self, _area: Rect) {}
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
     fn z_index(&self) -> u16 { 0 }
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) {}
