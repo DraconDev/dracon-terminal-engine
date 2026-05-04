@@ -1,23 +1,26 @@
 # Project State
 
 ## Current Focus
-Added a recently launched examples tracking system to the showcase state
+Improved status message handling and recently launched examples tracking in the showcase example.
 
 ## Context
-To improve user experience by showing recently launched examples in the UI, we need to track which examples have been recently executed.
+The previous implementation of `launch_selected` had redundant calls to `selected_example()` and didn't properly handle the case where the example might not be available. This change improves efficiency and clarity by:
+1. Storing the binary name once
+2. Using proper string references in the recently launched list
+3. Providing a fallback empty string for the example name
 
 ## Completed
-- [x] Added `recently_launched` vector to store example binary names
-- [x] Implemented tracking of recently launched examples with FIFO behavior
-- [x] Limited history to 5 most recent launches
-- [x] Added cleanup of duplicate entries when re-launching the same example
+- [x] Optimized `launch_selected` by reducing redundant calls to `selected_example()`
+- [x] Improved string handling in recently launched examples tracking
+- [x] Added fallback for example name in status message
+- [x] Maintained the 5-item limit for recently launched examples
 
 ## In Progress
-- [ ] UI implementation to display the recently launched examples
+- [ ] No active work in progress
 
 ## Blockers
-- UI component needs to be implemented to visualize the recently launched examples
+- None
 
 ## Next Steps
-1. Implement UI component to display recently launched examples
-2. Add tests for the recently launched tracking logic
+1. Verify the fallback behavior works as expected when no example is selected
+2. Consider adding more detailed error handling for edge cases

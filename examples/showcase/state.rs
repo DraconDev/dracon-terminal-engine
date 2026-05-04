@@ -152,11 +152,13 @@ impl Showcase {
     }
 
     pub fn launch_selected(&mut self) {
-        if let Some(ex) = self.selected_example() {
-            *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
-            self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));
-            self.recently_launched.retain(|n| n != ex.binary_name);
-            self.recently_launched.insert(0, ex.binary_name.to_string());
+        let binary_name = self.selected_example().map(|ex| ex.binary_name.to_string());
+        if let Some(name) = binary_name {
+            *self.pending_binary.lock().unwrap() = Some(name.clone());
+            let example_name = self.selected_example().map(|ex| ex.name).unwrap_or("");
+            self.status_message = Some((format!("Launching {}...", example_name), Instant::now()));
+            self.recently_launched.retain(|n| n != &name);
+            self.recently_launched.insert(0, name);
             if self.recently_launched.len() > 5 {
                 self.recently_launched.truncate(5);
             }
