@@ -831,8 +831,8 @@ fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: 
 fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let snake_y = 7.0 + (phase * 3.0).sin() * 1.5;
     let snake_x = 12.0 + (phase * 2.0).cos() * 3.0;
-    let _sy = snake_y.round() as usize;
-    let _sx = snake_x.round() as usize;
+    let sy = snake_y.round() as usize;
+    let sx = snake_x.round() as usize;
     for dy in 0..3 {
         for dx in 0..4 {
             let px = 8 + dx;
