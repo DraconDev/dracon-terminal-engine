@@ -756,7 +756,7 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
         let y = 6 + i;
         if !(6..=11).contains(&y) { continue; }
         let offset = if i == 2 { scroll } else { 0 };
-        let x = (2 + offset as usize).max(1).min(20);
+        let x = (2 + offset as usize).clamp(1, 20);
         let truncated: String = line.chars().skip(x.saturating_sub(2)).take(22).collect();
         let prefix = if truncated.starts_with('|') { "│" } else { " " };
         draw_text(plane, 1, y, prefix, t.fg_muted, t.surface, false);
