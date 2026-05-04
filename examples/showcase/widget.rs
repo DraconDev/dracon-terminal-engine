@@ -463,7 +463,7 @@ impl Widget for Showcase {
                         cached.clone()
                     } else {
                         let rendered = render_card(&card_config);
-                        cache[*grid_idx] = Some(rendered.clone());
+                        cache[grid_idx] = Some(rendered.clone());
                         rendered
                     }
                 };
