@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added a recently launched examples tracking system to the showcase state
 
 ## Context
-This change was triggered by recent refactoring and feature additions in the showcase example, particularly the glow effect and card rendering optimizations. The Cargo.lock file was updated to reflect the latest dependency versions required by these changes.
+To improve user experience by showing recently launched examples in the UI, we need to track which examples have been recently executed.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency versions after showcase example refactoring and feature additions
+- [x] Added `recently_launched` vector to store example binary names
+- [x] Implemented tracking of recently launched examples with FIFO behavior
+- [x] Limited history to 5 most recent launches
+- [x] Added cleanup of duplicate entries when re-launching the same example
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] UI implementation to display the recently launched examples
 
 ## Blockers
-- None
+- UI component needs to be implemented to visualize the recently launched examples
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with showcase example improvements and optimizations
+1. Implement UI component to display recently launched examples
+2. Add tests for the recently launched tracking logic

@@ -49,6 +49,7 @@ pub struct Showcase {
     pub(crate) context_menu_selected: usize,
     pub(crate) hovered_card: Option<usize>,
     pub(crate) mouse_pos: Option<(u16, u16)>,
+    pub(crate) recently_launched: Vec<String>,
 }
 
 impl Showcase {
@@ -95,6 +96,7 @@ impl Showcase {
             show_debug: false,
             primitive_button_time: None,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            recently_launched: Vec::new(),
         }
     }
 
@@ -153,6 +155,11 @@ impl Showcase {
         if let Some(ex) = self.selected_example() {
             *self.pending_binary.lock().unwrap() = Some(ex.binary_name.to_string());
             self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));
+            self.recently_launched.retain(|n| n != ex.binary_name);
+            self.recently_launched.insert(0, ex.binary_name.to_string());
+            if self.recently_launched.len() > 5 {
+                self.recently_launched.truncate(5);
+            }
         }
     }
 }
