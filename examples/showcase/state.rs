@@ -1,8 +1,18 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
+
+use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::WidgetId;
+use ratatui::layout::Rect;
+
+use crate::data::ExampleMeta;
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHOWCASE STATE
 // ═══════════════════════════════════════════════════════════════════════════════
 
-struct Showcase {
+pub struct Showcase {
     examples: Vec<ExampleMeta>,
     filtered: Vec<usize>,
     selected: usize,
