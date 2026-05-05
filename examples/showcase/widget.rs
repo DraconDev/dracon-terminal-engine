@@ -210,42 +210,47 @@ impl Widget for Showcase {
 
         // Search bar with icon and better styling
         let search_y = 3usize;
-        let search_icon = if self.search_active { "󰍺" } else { "󰼈" };
-        let search_placeholder = if self.search_query.is_empty() { "type to search..." } else { &self.search_query };
-        let search_text = format!("{} {}", search_icon, search_placeholder);
-        let search_fg = if self.search_active {
-            t.fg_on_accent
-        } else {
-            t.fg_muted
-        };
-        let search_bg = if self.search_active {
-            t.primary
-        } else {
-            t.surface
-        };
-        let search_text_len = search_text.chars().count();
-        draw_text(
-            &mut plane,
-            2,
-            search_y,
-            &search_text,
-            search_fg,
-            search_bg,
-            false,
-        );
-        // Fill rest of search bar
-        for x in search_text_len + 3..area.width as usize - 2 {
-            set_cell(&mut plane, x, search_y, ' ', search_fg, search_bg);
+        let search_active_bg = t.primary;
+        let search_inactive_bg = t.surface;
+        let search_bg = if self.search_active { search_active_bg } else { search_inactive_bg };
+        
+        // Draw search bar background
+        for x in 2..area.width as usize - 2 {
+            set_cell(&mut plane, x, search_y, ' ', t.fg, search_bg);
         }
-        // Draw cursor if active
-        if self.search_active && !self.search_query.is_empty() {
-            let cursor_x = 2 + search_text_len;
-            if cursor_x < area.width as usize - 2 {
+        
+        // Search icon
+        let search_icon = if self.search_active { "󰍺" } else { "󰼈" };
+        draw_text(&mut plane, 2, search_y, search_icon, t.fg_on_accent, search_bg, false);
+        
+        // Search text or placeholder
+        let content_x = 4usize;
+        if self.search_active {
+            if self.search_query.is_empty() {
+                // Show blinking placeholder
+                let blink = std::time::Instant::now().duration_since(self.card_start).as_secs_f64();
+                let show_placeholder = (blink * 1.5).fract() < 0.85;
+                if show_placeholder {
+                    draw_text(&mut plane, content_x, search_y, "type to search...", t.fg_muted, search_bg, false);
+                }
+                // Always show cursor when active, even if empty
+                let cursor_x = content_x;
+                if (blink * 2.0).fract() < 0.7 {
+                    set_cell(&mut plane, cursor_x, search_y, '▋', t.fg_on_accent, search_bg);
+                }
+            } else {
+                // Show actual query
+                draw_text(&mut plane, content_x, search_y, &self.search_query, t.fg_on_accent, search_bg, false);
+                // Cursor at end of query
+                let cursor_x = content_x + self.search_query.len();
                 let blink = std::time::Instant::now().duration_since(self.card_start).as_secs_f64();
                 if (blink * 2.0).fract() < 0.7 {
                     set_cell(&mut plane, cursor_x, search_y, '▋', t.fg_on_accent, search_bg);
                 }
             }
+        } else {
+            // Inactive - show hint
+            draw_text(&mut plane, content_x, search_y, "press / to search", t.fg_muted, search_bg, false);
         }
 
         // Search feedback: match count or no results
