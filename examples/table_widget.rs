@@ -281,22 +281,12 @@ impl Widget for TableApp {
     fn clear_dirty(&mut self) { self.dirty = false; self.table.clear_dirty(); }
     fn focusable(&self) -> bool { true }
 
-    fn toggle_sort(&mut self, col: usize) {
-        if self.sort_column == Some(col) {
-            self.sort_ascending = !self.sort_ascending;
-        } else {
-            self.sort_column = Some(col);
-            self.sort_ascending = true;
-        }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
         self.rebuild_table();
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme;
-
-        // Background
-        for cell in plane.cells.iter_mut() {
+    fn render(&self, area: Rect) -> Plane {
             cell.bg = t.bg;
             cell.fg = t.fg;
             cell.transparent = false;

@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Added column sorting functionality to the table widget with mouse interaction support
+Refactored table widget theme handling and rendering logic
 
 ## Context
-This implements the core column sorting functionality that was previously planned but not fully implemented. The change adds the ability to toggle sorting order when clicking column headers and properly handles mouse events for column selection.
+This change was prompted by the ongoing work on column sorting functionality, which required consistent theme handling across the table widget. The previous implementation had scattered theme-related code that needed centralization.
 
 ## Completed
-- [x] Added `toggle_sort` method to handle column sorting logic
-- [x] Implemented `handle_mouse` method to process header clicks
-- [x] Integrated with existing `rebuild_table` mechanism
+- [x] Moved theme handling to a dedicated `on_theme_change` method
+- [x] Simplified the rendering logic by removing redundant theme application
+- [x] Centralized theme-related operations in one place
 
 ## In Progress
-- [x] Column sorting implementation with ascending/descending toggle
+- [x] Refactoring of the table widget's rendering pipeline
 
 ## Blockers
-- None identified in this change
+- None identified at this stage
 
 ## Next Steps
-1. Verify sorting behavior with different data types
-2. Add visual indicators for sorted columns
-3. Document the new sorting API
+1. Complete the refactoring of the table widget's mouse handling
+2. Finalize the column sorting implementation with the new theme handling
