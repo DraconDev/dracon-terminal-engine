@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Removed unused Toast widget from text editor demo
 
 ## Context
-This change updates the dependency versions in the project's lockfile. It's part of ongoing maintenance to ensure the project uses the latest compatible versions of its dependencies.
+The Toast widget was imported but not used in the text editor demo, which suggests it's either a leftover from previous development or not needed for the current implementation.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Removed unused Toast widget import
+- [x] Removed unused ToastKind import
+- [x] Updated window size handling to discard unused values
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [ ] None
 
 ## Blockers
-- None reported
+- None
 
 ## Next Steps
-1. Verify that the updated dependencies don't introduce breaking changes
-2. Continue with other ongoing development work
+1. Verify if Toast functionality is needed elsewhere in the editor
+2. Clean up any related Toast-related code if it's truly unused
