@@ -395,8 +395,12 @@ impl Widget for TabbedApp {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        // Fill with theme background
-        let theme = Theme::cyberpunk();
+        // Use current theme (cyberpunk by default)
+        let theme = match THEMES[self.theme_index] {
+            "dracula" => Theme::dracula(),
+            "nord" => Theme::nord(),
+            _ => Theme::cyberpunk(),
+        };
         for cell in plane.cells.iter_mut() {
             cell.bg = theme.bg;
             cell.fg = theme.fg;
@@ -437,13 +441,13 @@ impl Widget for TabbedApp {
         match self.active_tab() {
             TAB_DASHBOARD => render_dashboard(&mut plane, &self.dashboard, content_area),
             TAB_LOGS => render_logs(&mut plane, &self.logs, content_area),
-            TAB_SETTINGS => render_settings(&mut plane, &self.settings, content_area, theme),
+            TAB_SETTINGS => render_settings(&mut plane, &self.settings, content_area, &theme),
             TAB_STATS => render_stats(&mut plane, &self.stats, content_area),
             _ => {}
         }
 
         let hint = format!(
-            "[Left/Right] Switch tabs | Active: {}",
+            "[Left/Right] Switch tabs | Active: {} | t: theme | ?: help",
             match self.active_tab() {
                 TAB_DASHBOARD => "Dashboard",
                 TAB_LOGS => "Logs",
@@ -466,12 +470,37 @@ impl Widget for TabbedApp {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            self.render_help_overlay(&mut plane, area, &theme);
+        }
+
         plane
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
             return false;
+        }
+
+        // Dismiss help on Esc or ?
+        if self.show_help {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+            }
+            return true;
+        }
+
+        // Toggle help
+        if key.code == KeyCode::Char('?') {
+            self.show_help = true;
+            return true;
+        }
+
+        // Cycle theme
+        if key.code == KeyCode::Char('t') {
+            self.cycle_theme();
+            return true;
         }
 
         // Quit on 'q'
