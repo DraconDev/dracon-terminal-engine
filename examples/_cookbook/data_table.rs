@@ -231,7 +231,7 @@ impl Widget for Table {
                 if search_plane.cells[src_idx].transparent {
                     continue;
                 }
-                let dst_idx = ((y as u16 + inner_y) * area.width + (x as u16 + 1)) as usize;
+                let dst_idx = ((y + inner_y) * area.width + (x + 1)) as usize;
                 if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = search_plane.cells[src_idx].clone();
                 }
@@ -553,7 +553,7 @@ impl Widget for Table {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 // Check if click is in search input area
-                if row == inner_y && col >= 1 && col < 21 {
+                if row == inner_y && (1..21).contains(&col) {
                     let rel_col = col - 1;
                     return self.search.handle_mouse(kind, rel_col, 0);
                 }
