@@ -281,6 +281,60 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
 - Handles all palette keyboard (↑/↓/Enter/Esc/type-to-filter) and mouse events when visible
 - Commands: new-tab, open, save, close-tab, search, cut/copy/paste, cycle-theme, toggle-profiler, show-shortcuts, about
 
+## Focus & Hover Styling
+
+### Widgets that support hover (`hover_bg`)
+- **Tree**: `hovered_path` field; highlights hovered nodes with `hover_bg`
+- **Table**: `hovered_row` field; highlights hovered row across all columns
+- **List**: `hovered` field; highlights hovered item
+- **CommandPalette**: `hovered_index` field; highlights hovered command item
+
+### Widgets that support focus (`focus_bg`, `focus_border`)
+- **SearchInput / PasswordInput**: `BaseInput.focused` flag; uses `focus_bg` instead of `input_bg` when focused
+- **Form**: Focused field renders entire row with `focus_bg` background
+
+### Pattern for adding hover to a widget
+```rust
+// In struct:
+hovered: Option<usize>,
+
+// In render():
+let is_hovered = self.hovered == Some(idx);
+let bg = if is_selected {
+    self.theme.selection_bg
+} else if is_hovered {
+    self.theme.hover_bg
+} else {
+    self.theme.bg
+};
+
+// In handle_mouse():
+MouseEventKind::Moved => {
+    if col >= self.width || row >= self.visible_count as u16 {
+        if self.hovered.is_some() {
+            self.hovered = None;
+            self.dirty = true;
+        }
+        return false;
+    }
+    let idx = self.offset + row as usize;
+    if idx >= self.items.len() {
+        if self.hovered.is_some() {
+            self.hovered = None;
+            self.dirty = true;
+        }
+        return false;
+    }
+    if self.hovered != Some(idx) {
+        self.hovered = Some(idx);
+        self.dirty = true;
+    }
+    true
+}
+```
+
+**Key rule**: Always clear hover state when mouse moves out of widget bounds. Always set `dirty = true` when hover changes.
+
 ## CommandPalette Widget (`src/framework/widgets/command_palette.rs`)
 
 A filterable command overlay widget:
