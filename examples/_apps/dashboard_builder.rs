@@ -532,7 +532,7 @@ impl Dashboard {
 
             // Title with icon
             let title = format!("{} {}", icon, label);
-            draw_text(plane, x + 2, y + 1, title, t.primary, t.surface, true);
+            draw_text(plane, x + 2, y + 1, &title, t.primary, t.surface, true);
 
             // Current value
             let val_text = format!("{:.1}{}", metric.current(), metric.unit);
