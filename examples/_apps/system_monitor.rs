@@ -379,6 +379,21 @@ impl Widget for SystemMonitor {
         // Gauge labels with icons
         draw_text(&mut plane, 2, 2, " 󰍛 CPU", t.primary, t.surface, true);
         draw_text(&mut plane, half_w + 2, 2, " 󰘚 Memory", t.primary, t.surface, true);
+
+        let cg = self.cpu_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
+        blit_to(&mut plane, &cg, 2, 3);
+        let hist_w = half_w.saturating_sub(8);
+        let cpu_color = if self.data.cpu_hist.current() >= 90.0 { t.error }
+            else if self.data.cpu_hist.current() >= 70.0 { t.warning } else { t.success };
+        render_sparkline(&mut plane, SparklineConfig { x: 2, y: 2 + gauge_h - 2, w: hist_w.min(20), h: 2, color: cpu_color, bg: t.surface }, &self.data.cpu_hist);
+
+        let mg = self.mem_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
+        blit_to(&mut plane, &mg, half_w + 2, 3);
+        let mem_color = if self.data.mem_hist.current() >= 95.0 { t.error }
+            else if self.data.mem_hist.current() >= 80.0 { t.warning } else { t.success };
+        render_sparkline(&mut plane, SparklineConfig { x: half_w + 2, y: 2 + gauge_h - 2, w: hist_w.min(20), h: 2, color: mem_color, bg: t.surface }, &self.data.mem_hist);
+
+        let header_text = " 󰀽 Processes       PID  STATE  NAME             CPU%      MEM ";
         draw_text(&mut plane, 2, header_y, header_text, t.fg_muted, t.surface, true);
 
         let max_visible = (list_h as usize).saturating_sub(3);
