@@ -176,14 +176,14 @@ impl Widget for Table {
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
-        let (heads, widths, hh, sh) = (
+        let (heads, widths, hh, _sh) = (
             ["󰣉 Name", "󰢮 Age", "󰉋 City", "󰠨 Profession"],
             [12u16, 5, 11, 16],
             3u16,
             1u16,
         );
         let inner_y = 1u16; // content starts after top border
-        let inner_h = area.height.saturating_sub(2); // exclude top/bottom borders
+        let _inner_h = area.height.saturating_sub(2); // exclude top/bottom borders
 
         // Background
         for y in 0..area.height {
