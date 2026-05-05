@@ -723,29 +723,44 @@ impl GitTui {
         }
     }
 
-    fn render_log(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
-        let header = "Commit History";
+    fn render_log(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+        let header = " 󰊢 Commit History";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
+        if self.commits.is_empty() {
+            let msg = " 󰋖 No commits found";
+            draw_text(plane, 2, y + 2, msg, t.fg_muted, t.bg, false);
+            return;
+        }
+
+        // Draw rounded border around commit list
+        let list_y = y + 2;
+        let list_h = h.saturating_sub(3);
+        if list_h > 2 {
+            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t);
+        }
+
         for (i, commit) in self.commits.iter().enumerate() {
-            let row = y + 2 + i as u16;
+            let row = list_y + 1 + i as u16;
+            if row >= list_y + list_h - 1 { break; }
             let is_selected = self.view == GitView::Log && self.selected_commit == i;
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let bg = if is_selected { t.primary_active } else { t.bg };
+            let bg = if is_selected { t.primary_active } else { t.surface };
 
             let hash = &commit.hash;
-            let msg = if commit.message.len() > 40 {
-                &commit.message[..40]
+            let msg = if commit.message.len() > 35 {
+                &commit.message[..35]
             } else {
                 &commit.message
             };
-            let line = format!(
-                "{} │ {} │ {}",
-                hash,
-                &commit.date[..10.min(commit.date.len())],
-                msg
-            );
-            draw_text(plane, 2, row, &line, fg, bg, is_selected);
+            let date = &commit.date[..10.min(commit.date.len())];
+            
+            // Hash as colored badge
+            draw_text(plane, 4, row, &format!("{} ", hash), t.primary, bg, true);
+            // Date muted
+            draw_text(plane, 12, row, &format!("{}  ", date), t.fg_muted, bg, false);
+            // Message
+            draw_text(plane, 24, row, msg, fg, bg, is_selected);
         }
     }
 
@@ -880,6 +895,38 @@ fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: The
                 plane.cells[idx].char = ' ';
             }
             plane.cells[idx].transparent = false;
+        }
+    }
+}
+
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 3 || h < 2 { return; }
+    // Fill background
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+                let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+                plane.cells[idx].bg = if is_border { t.bg } else { t.surface };
+                plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+                if is_border {
+                    if row == y && col == x {
+                        plane.cells[idx].char = '╭';
+                    } else if row == y && col == x + w - 1 {
+                        plane.cells[idx].char = '╮';
+                    } else if row == y + h - 1 && col == x {
+                        plane.cells[idx].char = '╰';
+                    } else if row == y + h - 1 && col == x + w - 1 {
+                        plane.cells[idx].char = '╯';
+                    } else if row == y || row == y + h - 1 {
+                        plane.cells[idx].char = '─';
+                    } else {
+                        plane.cells[idx].char = '│';
+                    }
+                }
+                plane.cells[idx].transparent = false;
+            }
         }
     }
 }
