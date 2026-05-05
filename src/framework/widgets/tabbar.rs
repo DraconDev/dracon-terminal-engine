@@ -16,6 +16,7 @@ pub struct TabBar {
     theme: Theme,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered_tab: Option<usize>,
 }
 
 impl TabBar {
