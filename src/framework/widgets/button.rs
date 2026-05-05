@@ -15,6 +15,7 @@ pub struct Button {
     on_click: Option<Box<dyn FnMut()>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered: bool,
 }
 
 impl Button {
@@ -27,6 +28,7 @@ impl Button {
             on_click: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 10, 1)),
             dirty: true,
+            hovered: false,
         }
     }
 
@@ -39,6 +41,7 @@ impl Button {
             on_click: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 10, 1)),
             dirty: true,
+            hovered: false,
         }
     }
 
