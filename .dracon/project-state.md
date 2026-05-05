@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Refactored table widget rendering logic to improve layout calculations
+Added hover state tracking to table widget for interactive row highlighting
 
 ## Context
-The table widget was refactored to fix incorrect positioning calculations when rendering cells. The previous implementation used a variable `x` to track horizontal position, which could lead to misalignment in multi-column tables. The refactor introduces `row_x` to properly track horizontal position within each row.
+This change enables visual feedback when users hover over table rows, improving the interactive experience for data selection and navigation.
 
 ## Completed
-- [x] Replaced `x` with `row_x` to track horizontal position within each row
-- [x] Updated cell index calculations to use `row_x` instead of `x`
-- [x] Fixed hit zone calculations to use `row_x` for accurate positioning
+- [x] Added `hovered_row` field to track currently hovered row
+- [x] Initialized field with `None` in default constructor
 
 ## In Progress
-- [x] Refactored table widget rendering logic
+- [ ] Implement hover detection logic in render method
+- [ ] Add styling for hovered rows
 
 ## Blockers
-- No blockers identified
+- Need to implement hover detection in the widget's event handling
 
 ## Next Steps
-1. Verify rendering correctness with complex table layouts
-2. Test with different column widths and content lengths
+1. Implement hover detection in event handling
+2. Add visual styling for hovered rows

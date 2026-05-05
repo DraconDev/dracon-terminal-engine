@@ -37,6 +37,7 @@ pub struct Table<T> {
     on_select: Option<SelectCallback<T>>,
     area: Cell<Rect>,
     dirty: bool,
+    hovered_row: Option<usize>,
 }
 
 impl<T: Clone + ToString> Table<T> {
@@ -53,6 +54,7 @@ impl<T: Clone + ToString> Table<T> {
             on_select: None,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
+            hovered_row: None,
         }
     }
 
