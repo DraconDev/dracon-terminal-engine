@@ -102,6 +102,16 @@ impl<T: Clone + ToString> Table<T> {
         self
     }
 
+    /// Sets a per-column cell text formatter.
+    /// The callback receives `(&row_data, column_index)` and returns the cell text.
+    pub fn with_cell_text_fn<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&T, usize) -> String + 'static,
+    {
+        self.cell_text_fn = Some(Box::new(f));
+        self
+    }
+
     /// Returns the index of the currently selected row.
     pub fn selected_index(&self) -> usize {
         self.selected
