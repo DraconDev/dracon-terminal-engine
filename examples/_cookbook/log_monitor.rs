@@ -303,7 +303,7 @@ impl Widget for LogMonitor {
                             3 => self.filter_debug = !self.filter_debug,
                             _ => {}
                         }
-                        self.dirty = true;
+                        self.apply_filters();
                         return true;
                     }
                 }

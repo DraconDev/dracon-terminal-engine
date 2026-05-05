@@ -1,20 +1,14 @@
 # Project State
 
 ## Current Focus
-Added persistent log storage and filtering system to the LogMonitor example
+Refactored log filtering system in LogMonitor to use `apply_filters()` instead of direct `dirty` flag setting.
 
 ## Context
-The previous implementation only displayed logs in real-time without any filtering or persistence. This change adds the ability to:
-1. Store all logs in memory for later filtering
-2. Apply level-based filtering to the displayed logs
-3. Maintain the total log count while only showing filtered logs
+The LogMonitor widget was recently enhanced with persistent log storage and filtering capabilities. The previous implementation directly set the `dirty` flag when filters changed, which could lead to unnecessary redraws. This change improves performance by explicitly applying filters when needed.
 
 ## Completed
-- [x] Added `all_logs` storage to retain all logs in memory
-- [x] Implemented level-based filtering with `level_visible()` helper
-- [x] Added `apply_filters()` method to reapply filters when settings change
-- [x] Updated log display to respect filter settings
-- [x] Modified `clear()` to also clear the log storage
+- [x] Replaced direct `dirty = true` with `apply_filters()` call in filter toggle logic
+- [x] Maintained same visual behavior while improving internal efficiency
 
 ## In Progress
 - [ ] No active work in progress
@@ -23,5 +17,5 @@ The previous implementation only displayed logs in real-time without any filteri
 - None identified
 
 ## Next Steps
-1. Add UI controls to toggle log filters
-2. Implement log persistence to disk if needed
+1. Verify no visual regressions in LogMonitor behavior
+2. Consider additional performance optimizations for log processing
