@@ -62,6 +62,7 @@ impl LogMonitor {
             filter_error: true,
             filter_debug: true,
             theme: Theme::nord(),
+            all_logs: Vec::new(),
         }
     }
 
@@ -69,15 +70,47 @@ impl LogMonitor {
         let mut rng = rand::thread_rng();
         let (lvl, msg) = LOGS[rng.gen_range(0..LOGS.len())];
         let t = format_time();
-        self.log_viewer
-            .append_line(&format!("[{}] {} - {}", t, lvl, msg));
-        self.last_log = Instant::now();
+        let line = format!("[{}] {} - {}", t, lvl, msg);
+        self.all_logs.push(line.clone());
         self.total_lines += 1;
+        
+        // Only append to viewer if filter allows this level
+        if self.level_visible(lvl) {
+            self.log_viewer.append_line(&line);
+        }
+        self.last_log = Instant::now();
+        self.dirty = true;
+    }
+
+    fn level_visible(&self, lvl: &str) -> bool {
+        match lvl {
+            "INFO" => self.filter_info,
+            "WARN" => self.filter_warn,
+            "ERROR" => self.filter_error,
+            "DEBUG" => self.filter_debug,
+            _ => true,
+        }
+    }
+
+    fn apply_filters(&mut self) {
+        self.log_viewer.clear();
+        for line in &self.all_logs {
+            // Extract level from line format: [HH:MM:SS.mmm] LEVEL - msg
+            if let Some(level_start) = line.find(']') {
+                if let Some(level_end) = line.find(" -") {
+                    let level = &line[level_start + 2..level_end];
+                    if self.level_visible(level) {
+                        self.log_viewer.append_line(line);
+                    }
+                }
+            }
+        }
         self.dirty = true;
     }
 
     fn clear(&mut self) {
         self.log_viewer.clear();
+        self.all_logs.clear();
         self.total_lines = 0;
         self.dirty = true;
     }
