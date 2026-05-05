@@ -343,18 +343,16 @@ impl Widget for SqliteBrowser {
         let results_y = query_h;
         let results_h = right_rect.height.saturating_sub(query_h);
 
-        // Query section
+        // Query section with rounded border
         let query_active = matches!(self.active_panel, Panel::Query);
-        let query_bg = if query_active {
-            t.surface_elevated
-        } else {
-            t.surface
-        };
-        for y in 0..query_h {
-            for x in 0..right_rect.width {
-                let idx = (y * area.width + left_rect.width + 1 + x) as usize;
+        draw_rounded_border(&mut plane, left_rect.width + 1, 0, right_rect.width.saturating_sub(1), query_h + 1, t, query_active);
+        let query_bg = if query_active { t.surface_elevated } else { t.surface };
+        for y in 1..query_h {
+            for x in left_rect.width + 2..area.width.saturating_sub(1) {
+                let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = query_bg;
+                    plane.cells[idx].char = ' ';
                 }
             }
         }
@@ -383,18 +381,16 @@ impl Widget for SqliteBrowser {
             false,
         );
 
-        // Results section
+        // Results section with rounded border
         let results_active = matches!(self.active_panel, Panel::Results);
-        let results_bg = if results_active {
-            t.surface_elevated
-        } else {
-            t.surface
-        };
-        for y in results_y..content_h {
-            for x in 0..right_rect.width {
-                let idx = (y * area.width + left_rect.width + 1 + x) as usize;
+        draw_rounded_border(&mut plane, left_rect.width + 1, results_y, right_rect.width.saturating_sub(1), results_h, t, results_active);
+        let results_bg = if results_active { t.surface_elevated } else { t.surface };
+        for y in results_y + 1..content_h.saturating_sub(1) {
+            for x in left_rect.width + 2..area.width.saturating_sub(1) {
+                let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = results_bg;
+                    plane.cells[idx].char = ' ';
                 }
             }
         }
