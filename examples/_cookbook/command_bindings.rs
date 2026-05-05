@@ -303,7 +303,7 @@ impl Widget for CommandBindings {
         render_card(&mut p, 54, 3, 24, 8, t);
         let metrics_title = " 󰕙 System Metrics ";
         for (i, c) in metrics_title.chars().enumerate() {
-            p.cells[(3 * w + 55 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 55 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
         }
         let kv_area = Rect::new(55, 5, 22, 5);
         let kvp = self.kv_grid.render(kv_area);
