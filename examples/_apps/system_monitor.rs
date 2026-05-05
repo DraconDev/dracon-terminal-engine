@@ -589,31 +589,6 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
         }
     }
 }
-        }
-    }
-}
-
-fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
-    let SparklineConfig { x, y, w, h, color, bg } = cfg;
-    if metric.values.is_empty() || w == 0 || h == 0 { return; }
-    let max_val = metric.max().max(1.0);
-    let values: Vec<f64> = metric.values.iter().copied().collect();
-    let start = values.len().saturating_sub(w as usize);
-    let to_show = &values[start..];
-    for (i, &val) in to_show.iter().enumerate() {
-        let bar_h = ((val / max_val) * h as f64).round().clamp(0.0, h as f64) as u16;
-        let col = x + i as u16;
-        if col >= x + w { break; }
-        for row in 0..h {
-            let row_y = y + h - 1 - row;
-            let idx = (row_y * plane.width + col) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = if row < bar_h { '█' } else { ' ' };
-                plane.cells[idx].fg = if row < bar_h { color } else { bg };
-                plane.cells[idx].bg = bg;
-            }
-        }
-    }
 }
 
 fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
