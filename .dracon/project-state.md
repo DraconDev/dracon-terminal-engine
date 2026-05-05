@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Removed hardcoded row height in Table widget rendering
+Dependency version bump in Cargo.lock
 
 ## Context
-This change is part of ongoing refactoring of the Table widget to improve layout calculations. The hardcoded row height of 1 was removed to allow for more flexible row sizing.
+This change updates the project's dependency versions to ensure compatibility with the latest stable versions of the dependencies used in the project.
 
 ## Completed
-- [x] Removed hardcoded row height value from Table widget rendering logic
+- [x] Updated dependency versions in Cargo.lock to their latest stable releases
 
 ## In Progress
-- [x] Refactoring of Table widget rendering logic to improve layout calculations
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify that row heights now scale appropriately with content
-2. Complete the refactoring of Table widget rendering logic
+1. Verify that the updated dependencies do not introduce breaking changes
+2. Run tests to ensure the project remains stable with the new dependency versions
