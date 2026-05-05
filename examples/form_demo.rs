@@ -622,7 +622,7 @@ impl Widget for SettingsForm {
             self.focused_field = FIELD_PASSWORD;
             self.dirty = true;
             return self.password.handle_mouse(kind, col - input_col, 0);
-        } else if row >= 10 && row <= 13 && col >= input_col {
+        } else if (10..=13).contains(&row) && col >= input_col {
             self.focused_field = FIELD_THEME;
             self.dirty = true;
             return self.theme.handle_mouse(kind, col - input_col, row - 10);
