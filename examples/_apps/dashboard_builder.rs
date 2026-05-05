@@ -539,7 +539,7 @@ impl Dashboard {
             // Sparkline
             let spark_w = (w as usize).saturating_sub(4) as u16;
             let spark_y = y + h.saturating_sub(3);
-            render_sparkline(plane, x + 2, spark_y, spark_w, 2, metric, status_color, t.surface);
+            render_sparkline(plane, SparklineConfig { x: x + 2, y: spark_y, w: spark_w, h: 2, color: status_color, bg: t.surface }, metric);
 
             // Mini stats
             let stats = format!("avg {:.1} | max {:.1}", metric.avg(), metric.max());
