@@ -55,6 +55,7 @@ struct WidgetGallery {
     theme_index: usize,
     theme: Theme,
     should_quit: Arc<AtomicBool>,
+    show_help: bool,
 }
 
 impl WidgetGallery {

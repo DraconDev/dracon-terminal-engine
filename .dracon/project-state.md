@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added a `show_help` flag to the widget gallery for toggling help overlay visibility.
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, which is a standard part of dependency management in Rust projects. The actual dependency changes were made in previous commits, and this commit records the updated lockfile.
+This change supports the ongoing work to enhance user guidance in the widget gallery by providing a toggleable help overlay. It aligns with recent feature additions for help systems in other components.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `show_help` boolean field to `WidgetGallery` struct to track help overlay state
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] Implementation of help overlay rendering and keyboard shortcut handling
 
 ## Blockers
-- None
+- Help overlay rendering logic not yet implemented
+- Keyboard shortcut integration pending
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Continue with other development work that depends on these dependencies
-```
+1. Implement help overlay rendering logic
+2. Add keyboard shortcut handling for toggling help overlay
