@@ -623,6 +623,16 @@ impl Widget for IdeApp {
                     tab,
                     t,
                 );
+            } else {
+                // Empty state - no tabs open
+                let empty_msg = " 󰈙 No file open ";
+                let empty_y = editor_y + editor_content_h / 2;
+                let empty_x = editor_x + (editor_w.saturating_sub(2) as usize - empty_msg.len()) / 2 as u16;
+                draw_text(&mut plane, empty_x as usize, empty_y as usize, empty_msg, t.fg_muted, t.bg, false);
+                let hint_msg = "Press Ctrl+O to open a file or Ctrl+T for a new tab";
+                let hint_y = empty_y + 2;
+                let hint_x = editor_x + (editor_w.saturating_sub(2) as usize - hint_msg.len()) / 2 as u16;
+                draw_text(&mut plane, hint_x as usize, hint_y as usize, hint_msg, t.fg_subtle, t.bg, false);
             }
         }
 
