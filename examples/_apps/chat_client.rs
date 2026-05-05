@@ -264,59 +264,84 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
     for (i, msg) in chat.messages[start..end].iter().enumerate() {
         let row = header_h + 1 + i as u16;
         let base_idx = (row * area.width) as usize;
-        let bg = if !msg.is_read { t.primary_active } else { t.bg };
+        let is_me = msg.sender == "You";
+        let bg = if !msg.is_read { t.primary_active } else { t.surface };
 
-        for col in 0..area.width {
-            let idx = base_idx + col as usize;
+        // Avatar placeholder (first letter of sender)
+        let avatar = msg.sender.chars().next().unwrap_or('?');
+        let avatar_color = match msg.sender.as_str() {
+            "Alice" => t.secondary,
+            "Bob" => t.info,
+            "You" => t.success,
+            _ => t.fg_muted,
+        };
+        
+        // Draw avatar circle
+        let avatar_x = if is_me { area.width as usize - 4 } else { 1 };
+        if base_idx + avatar_x < plane.cells.len() {
+            plane.cells[base_idx + avatar_x] = Cell {
+                char: avatar,
+                fg: t.fg_on_accent,
+                bg: avatar_color,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
+        }
+
+        // Message bubble background
+        let bubble_start = if is_me { 6 } else { 4 };
+        let bubble_end = if is_me { area.width as usize - 5 } else { area.width as usize - 3 };
+        for col in bubble_start..bubble_end {
+            let idx = base_idx + col;
             if idx < plane.cells.len() {
                 plane.cells[idx].bg = bg;
-                plane.cells[idx].fg = t.fg;
             }
         }
 
+        // Sender name
         let sender_color = match msg.sender.as_str() {
             "Alice" => t.secondary,
             "Bob" => t.info,
             "You" => t.success,
             _ => t.fg_muted,
         };
-        let sender_len = msg.sender.len();
-
+        let sender_x = if is_me { bubble_end - msg.sender.len() - 1 } else { bubble_start + 1 };
         for (j, c) in msg.sender.chars().enumerate() {
-            let idx = base_idx + j;
+            let idx = base_idx + sender_x + j;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = sender_color;
                 plane.cells[idx].style = Styles::BOLD;
-            }
-        }
-        for (j, c) in "] ".chars().enumerate() {
-            let idx = base_idx + sender_len + j;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
+                plane.cells[idx].bg = bg;
             }
         }
 
-        let text_start = sender_len + 2;
-        for (j, c) in msg
-            .text
-            .chars()
-            .take((area.width as usize).saturating_sub(text_start + 10))
-            .enumerate()
-        {
-            let idx = base_idx + text_start + j;
+        // Message text
+        let text_start = if is_me { sender_x } else { bubble_start + msg.sender.len() + 3 };
+        let text_limit = if is_me { text_start.saturating_sub(2) } else { bubble_end.saturating_sub(8) };
+        let text_len = text_limit.saturating_sub(text_start);
+        for (j, c) in msg.text.chars().take(text_len).enumerate() {
+            let idx = if is_me {
+                base_idx + text_start.saturating_sub(msg.text.len().min(text_len)) + j
+            } else {
+                base_idx + text_start + j
+            };
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = if !msg.is_read { t.fg } else { t.fg_muted };
+                plane.cells[idx].bg = bg;
             }
         }
 
-        let time_x = (area.width as usize).saturating_sub(6);
+        // Timestamp
+        let time_x = if is_me { 1 } else { (area.width as usize).saturating_sub(6) };
         for (j, c) in msg.time.chars().enumerate() {
             let idx = base_idx + time_x + j;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg_subtle;
+                plane.cells[idx].bg = t.bg;
             }
         }
     }
