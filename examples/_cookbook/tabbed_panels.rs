@@ -157,13 +157,129 @@ impl TabbedApp {
             stats: StatsState::new(WidgetId::new(40)),
             area: Rect::new(0, 0, 80, 24),
             should_quit,
+            show_help: false,
+            theme_index: 0,
         }
+    }
+
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % THEMES.len();
+        let theme = match THEMES[self.theme_index] {
+            "dracula" => Theme::dracula(),
+            "nord" => Theme::nord(),
+            _ => Theme::cyberpunk(),
+        };
+        self.tabbar.on_theme_change(&theme);
+        self.dashboard.cpu.on_theme_change(&theme);
+        self.dashboard.memory.on_theme_change(&theme);
+        self.dashboard.disk.on_theme_change(&theme);
+        self.dashboard.network.on_theme_change(&theme);
+        self.logs.list.on_theme_change(&theme);
+        self.settings.theme_select.on_theme_change(&theme);
+        self.settings.notifications.on_theme_change(&theme);
+        self.settings.volume_slider.on_theme_change(&theme);
+        self.stats.grid.on_theme_change(&theme);
     }
 
     fn active_tab(&self) -> usize {
         self.tabbar.active()
     }
-}
+
+    fn render_help_overlay(&self, plane: &mut Plane, area: Rect, t: &Theme) {
+        let hw = 44u16.min(area.width.saturating_sub(4));
+        let hh = 12u16.min(area.height.saturating_sub(4));
+        let hx = (area.width - hw) / 2;
+        let hy = (area.height - hh) / 2;
+        // Fill background
+        for y in hy..hy + hh {
+            for x in hx..hx + hw {
+                let idx = (y * plane.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+        // Draw corners with rounded appearance (using box-drawing characters)
+        // Top-left corner
+        let corners = [
+            ((hy, hx), '┌'),           // top-left
+            ((hy, hx + hw - 1), '┐'),  // top-right
+            ((hy + hh - 1, hx), '└'),  // bottom-left
+            ((hy + hh - 1, hx + hw - 1), '┘'), // bottom-right
+        ];
+        for ((y, x), ch) in corners {
+            let idx = (y * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = ch;
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+        // Top and bottom borders
+        for x in (hx + 1)..(hx + hw - 1) {
+            let top_idx = (hy * plane.width + x) as usize;
+            let bot_idx = ((hy + hh - 1) * plane.width + x) as usize;
+            if top_idx < plane.cells.len() {
+                plane.cells[top_idx].char = '─';
+                plane.cells[top_idx].fg = t.outline;
+            }
+            if bot_idx < plane.cells.len() {
+                plane.cells[bot_idx].char = '─';
+                plane.cells[bot_idx].fg = t.outline;
+            }
+        }
+        // Left and right borders
+        for y in (hy + 1)..(hy + hh - 1) {
+            let left_idx = (y * plane.width + hx) as usize;
+            let right_idx = (y * plane.width + hx + hw - 1) as usize;
+            if left_idx < plane.cells.len() {
+                plane.cells[left_idx].char = '│';
+                plane.cells[left_idx].fg = t.outline;
+            }
+            if right_idx < plane.cells.len() {
+                plane.cells[right_idx].char = '│';
+                plane.cells[right_idx].fg = t.outline;
+            }
+        }
+        // Title
+        let title = "Tabbed Panels Help";
+        let tx = hx + (hw - title.len() as u16) / 2;
+        for (i, c) in title.chars().enumerate() {
+            let idx = ((hy + 1) * plane.width + tx + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+            }
+        }
+        // Shortcuts
+        let shortcuts = [
+            ("←/→", "Switch tabs"),
+            ("Click tab", "Switch tab"),
+            ("t", "Cycle theme"),
+            ("?", "Toggle help"),
+            ("q", "Quit"),
+        ];
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = hy + 3 + i as u16;
+            for (j, c) in key.chars().enumerate() {
+                let idx = (row * plane.width + hx + 2 + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].bg = t.surface_elevated;
+                }
+            }
+            for (j, c) in desc.chars().enumerate() {
+                let idx = (row * plane.width + hx + 14 + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].bg = t.surface_elevated;
+                }
+            }
+        }
+    }
 
 fn render_dashboard(plane: &mut Plane, dashboard: &DashboardState, area: Rect) {
     let half_w = area.width / 2;
