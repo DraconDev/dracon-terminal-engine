@@ -461,15 +461,15 @@ impl Widget for Table {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let (hh, sh) = (2u16, 1u16);
+        let (hh, sh, inner_y) = (3u16, 1u16, 1u16);
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                if row == hh - 1 && col >= self.area.width.saturating_sub(14) {
+                if row == inner_y && col >= self.area.width.saturating_sub(14) {
                     self.sort = self.sort.next();
                     self.sort_rows();
                     self.dirty = true;
                     true
-                } else if row >= hh && row < self.area.height - sh {
+                } else if row >= hh && row < self.area.height.saturating_sub(sh + 1) {
                     let idx = self.off + (row - hh) as usize;
                     if idx < self.rows.len() {
                         self.sel = idx;
