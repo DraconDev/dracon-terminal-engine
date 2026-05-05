@@ -1238,7 +1238,7 @@ impl IdeApp {
         }
     }
 
-    fn render_help_overlay(&self, plane: &mut Plane) {
+    fn render_help_overlay(&self, mut plane: &mut Plane) {
         let t = self.theme;
         let w = 60.min(plane.width);
         let h = 20.min(plane.height);
