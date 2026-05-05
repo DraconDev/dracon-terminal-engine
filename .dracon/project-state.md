@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Improved system monitor UI with process list header icon
+Refactored system monitor UI to use simplified gauge labels with icons
 
 ## Context
-Enhancing visual consistency in the system monitor dashboard by adding an icon to the process list header, following recent UI consistency improvements in other components.
+The previous implementation had complex gauge rendering with borders and sparklines that were visually inconsistent with other dashboard components. This change simplifies the UI by replacing the gauge borders with icon labels and consolidating the process list header.
 
 ## Completed
-- [x] Added 󰀽 icon to process list header for better visual identification
-- [x] Maintained consistent column formatting with previous header text
+- [x] Removed redundant gauge borders and sparkline rendering
+- [x] Added icon labels for CPU and Memory gauges (󰍛 and 󰘚)
+- [x] Simplified process list header with consistent styling
+- [x] Improved visual hierarchy with cleaner layout
 
 ## In Progress
-- [x] UI consistency improvements for system monitor components
+- [ ] No active work in progress
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify visual alignment with other dashboard cards
-2. Ensure icon remains visible across different terminal sizes
+1. Verify visual consistency with other dashboard components
+2. Consider adding more compact sparkline indicators if needed
