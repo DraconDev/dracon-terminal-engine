@@ -595,6 +595,16 @@ impl Widget for TableApp {
         }
     }
 
+    fn toggle_sort(&mut self, col: usize) {
+        if self.sort_column == Some(col) {
+            self.sort_ascending = !self.sort_ascending;
+        } else {
+            self.sort_column = Some(col);
+            self.sort_ascending = true;
+        }
+        self.rebuild_table();
+    }
+
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let margin = 1u16;
         let card_w = self.area.width.saturating_sub(margin * 2);
@@ -605,7 +615,25 @@ impl Widget for TableApp {
 
         // Only handle mouse within table area
         if col >= margin && col < margin + card_w && row >= table_y && row < table_y + table_h {
-            let handled = self.table.handle_mouse(kind, col - margin, row - table_y);
+            let local_col = col - margin;
+            let local_row = row - table_y;
+
+            // Header click for sorting
+            if let MouseEventKind::Down(MouseButton::Left) = kind {
+                if local_row == 0 {
+                    let mut col_x: u16 = 0;
+                    let column_widths = [18u16, 20, 14, 12, 10];
+                    for (i, w) in column_widths.iter().enumerate() {
+                        if local_col >= col_x && local_col < col_x + w {
+                            self.toggle_sort(i);
+                            return true;
+                        }
+                        col_x += w;
+                    }
+                }
+            }
+
+            let handled = self.table.handle_mouse(kind, local_col, local_row);
             if handled { self.dirty = true; }
             return handled;
         }
