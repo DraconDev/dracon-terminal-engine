@@ -1,23 +1,23 @@
 # Project State
 
 ## Current Focus
-Added empty state UI for the IDE when no tabs are open
+Improved the empty state UI for the Git TUI when not in a git repository
 
 ## Context
-Improved user experience by providing clear visual feedback when the IDE has no open files
+The previous implementation showed a single error message when not in a git repository. This change enhances the user experience by providing a more informative and visually appealing empty state with an icon, message, and hint.
 
 ## Completed
-- [x] Added centered "No file open" message with emoji icon
-- [x] Included hint text for opening files or creating new tabs
-- [x] Positioned messages in the center of the editor area
-- [x] Used appropriate color styling for different message types
+- [x] Added a visual icon (󰊢) to indicate the empty state
+- [x] Split the message into three parts: icon, main message, and hint
+- [x] Improved visual hierarchy with proper spacing between elements
+- [x] Added color differentiation (primary for icon, error for message, muted for hint)
 
 ## In Progress
-- [x] Empty state UI implementation
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Test empty state behavior with different window sizes
-2. Consider adding more visual cues for empty state
+1. Test the new empty state UI in different terminal sizes
+2. Consider adding more visual polish (e.g., subtle animation)

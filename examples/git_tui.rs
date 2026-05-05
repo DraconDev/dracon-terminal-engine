@@ -288,10 +288,16 @@ impl Widget for GitTui {
 
         // Content
         if !self.is_git_repo() {
-            let msg = "Not a git repository. Run 'git init' first.";
-            let x = (area.width as usize - msg.len()) / 2;
-            let y = content_y + content_h / 2;
-            draw_text(&mut plane, x as u16, y, msg, t.error, t.bg, true);
+            let icon = " 󰊢 ";
+            let msg = "Not a git repository";
+            let hint = "Run 'git init' in this directory to get started";
+            let icon_x = (area.width as usize - icon.len()) / 2;
+            let msg_x = (area.width as usize - msg.len()) / 2;
+            let hint_x = (area.width as usize - hint.len()) / 2;
+            let y = content_y + content_h / 2 - 1;
+            draw_text(&mut plane, icon_x as u16, y, icon, t.primary, t.bg, true);
+            draw_text(&mut plane, msg_x as u16, y + 1, msg, t.error, t.bg, true);
+            draw_text(&mut plane, hint_x as u16, y + 3, hint, t.fg_muted, t.bg, false);
         } else {
             match self.view {
                 GitView::Status => self.render_status(&mut plane, content_y, content_h, t),
