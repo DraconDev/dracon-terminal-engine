@@ -1,18 +1,17 @@
 # Project State
 
 ## Current Focus
-Improved visual styling for Git diff and branches sections in the TUI with rounded borders and icons
+Enhanced file metadata visualization in the file manager with icon badges and improved styling
 
 ## Context
-This change enhances the visual presentation of Git diff and branch information in the terminal UI by adding rounded borders, icons, and improved section organization to better differentiate content types and improve readability.
+Improving the file manager's metadata display to make it more visually distinct and informative by adding icons and colored badges for different file attributes
 
 ## Completed
-- [x] Added rounded borders to diff and branches sections
-- [x] Added icons (󰊢 for diff, 󰘦 for local branches, 󰒍 for remote branches) to section headers
-- [x] Improved section organization with proper spacing and alignment
-- [x] Enhanced visual differentiation between different types of diff lines
-- [x] Added count indicators for local and remote branches
-- [x] Improved background colors for selected items
+- [x] Added file type icons in the tree view
+- [x] Enhanced metadata display with icon badges (󰈔, 󰆼, 󰃰, 󰿆)
+- [x] Added colored badges for file type (Directory/Success, File/Info)
+- [x] Improved visual hierarchy with consistent spacing and alignment
+- [x] Added warning color for file size to make it stand out
 
 ## In Progress
 - [ ] No active work in progress
@@ -21,6 +20,5 @@ This change enhances the visual presentation of Git diff and branch information 
 - None identified
 
 ## Next Steps
-1. Verify visual consistency across different terminal sizes
-2. Test with various Git repository states to ensure all content displays correctly
-3. Consider adding similar styling improvements to other Git TUI sections
+1. Review and test the new metadata display across different file types
+2. Consider adding more metadata fields with appropriate icons
