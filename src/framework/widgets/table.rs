@@ -194,7 +194,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             for col_idx in 0..w {
                 let idx = col_idx as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].bg = self.theme.primary_active;
+                    plane.cells[idx].bg = self.theme.surface;
                     plane.cells[idx].fg = self.theme.fg;
                     plane.cells[idx].char = ' ';
                 }

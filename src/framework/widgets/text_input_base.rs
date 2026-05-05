@@ -93,6 +93,12 @@ impl BaseInput {
             self.theme.input_bg
         };
 
+        let focus_style = if self.focused {
+            Styles::UNDERLINE
+        } else {
+            Styles::empty()
+        };
+
         for (i, c) in display.chars().take(width.saturating_sub(2)).enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
@@ -109,7 +115,7 @@ impl BaseInput {
                     } else {
                         bg
                     },
-                    style: Styles::empty(),
+                    style: if is_cursor { Styles::empty() } else { focus_style },
                     transparent: false,
                     skip: false,
                 };

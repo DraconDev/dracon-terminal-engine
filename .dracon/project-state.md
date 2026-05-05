@@ -1,23 +1,23 @@
 # Project State
 
 ## Current Focus
-Added hover state tracking and visual feedback to TabBar widget
+Enhanced widget styling with scroll indicators, focus states, and improved visual feedback
 
 ## Context
-This change implements consistent hover state tracking across interactive widgets, following the pattern established in previous commits for other widgets like Select, Radio, Checkbox, and Button.
+This commit continues the series of hover state improvements by adding visual indicators for scrollable content and refining focus states across widgets. The changes ensure consistent visual feedback for interactive elements.
 
 ## Completed
-- [x] Added `hovered_tab` field to track which tab is currently hovered
-- [x] Implemented visual feedback for hovered tabs (different background and text styling)
-- [x] Added mouse movement detection to update hover state
-- [x] Maintained existing active tab styling while adding hover state
+- [x] Added scroll position indicator to List widget showing current range of visible items
+- [x] Improved Table widget styling by changing header background to surface theme
+- [x] Enhanced TextInputBase with focus state styling (underline when focused)
+- [x] Updated Cargo.lock with dependency version bumps
 
 ## In Progress
-- [x] Hover state tracking and visual feedback for TabBar widget
+- [ ] No active work in progress
 
 ## Blockers
-- None identified
+- No blockers identified
 
 ## Next Steps
-1. Verify hover state behavior matches other interactive widgets
-2. Ensure consistent styling across all interactive widgets
+1. Verify scroll indicator positioning works across different terminal sizes
+2. Test focus state styling consistency across all form widgets
