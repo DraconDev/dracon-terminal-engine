@@ -414,7 +414,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
     fn handle_mouse(
         &mut self,
         kind: crate::input::event::MouseEventKind,
-        _col: u16,
+        col: u16,
         row: u16,
     ) -> bool {
         match kind {

@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced table widget with column sorting functionality
+Refactored table widget mouse handling to properly expose column index
 
 ## Context
-The table widget needed improved usability by allowing users to sort data by clicking column headers. This change adds visual indicators for the current sort column and direction, and triggers callbacks when headers are clicked.
+This change was prompted by the ongoing work to add column sorting functionality to the table widget. The previous implementation was discarding the column index parameter in the mouse event handler.
 
 ## Completed
-- [x] Added header click callback system
-- [x] Implemented sort state tracking (column + direction)
-- [x] Added visual indicators (▲/▼) for sorted columns
-- [x] Styled sorted headers with bold text and primary color
-- [x] Maintained backward compatibility with existing table functionality
+- [x] Removed unused `_col` parameter in table mouse handler
+- [x] Exposed column index parameter for use in sorting functionality
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Implementation of column sorting based on mouse clicks
 
 ## Blockers
-- None identified
+- Need to implement the actual sorting logic after header clicks
 
 ## Next Steps
-1. Add unit tests for the new sorting functionality
-2. Document the new API methods in the widget's documentation
+1. Implement column sorting logic when headers are clicked
+2. Add visual indicators for sorted columns
