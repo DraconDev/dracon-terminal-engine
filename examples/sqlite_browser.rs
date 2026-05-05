@@ -580,6 +580,15 @@ impl Widget for SqliteBrowser {
             }
         } else {
             match key.code {
+                KeyCode::Esc => {
+                    if self.show_help {
+                        self.show_help = false;
+                        self.dirty = true;
+                        true
+                    } else {
+                        false
+                    }
+                }
                 KeyCode::Char('q') => {
                     self.should_quit.store(true, Ordering::SeqCst);
                     true

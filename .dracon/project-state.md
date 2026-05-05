@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Added a help overlay UI for the SQLite browser with keyboard shortcuts display
+Added Escape key functionality to close the help overlay in the SQLite browser.
 
 ## Context
-This implements a visual help system to make the application more discoverable by showing available keyboard shortcuts in a centered modal overlay
+This change implements a user-requested feature to allow closing the help overlay using the Escape key, maintaining consistency with standard UI patterns.
 
 ## Completed
-- [x] Added help overlay with modal window styling (box drawing characters)
-- [x] Implemented keyboard shortcuts display in a formatted table
-- [x] Added proper theming for the help content
-- [x] Included title and visual separation between key bindings and descriptions
+- [x] Added Escape key handler to toggle help overlay visibility
+- [x] Preserved existing quit behavior (Ctrl+Q) while adding new keybinding
 
 ## In Progress
-- [x] Help overlay implementation is complete
+- [x] Help overlay toggle functionality
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Add keyboard handler to toggle help overlay
-2. Test with different terminal sizes to ensure proper scaling
+1. Test Escape key behavior across different terminal environments
+2. Consider adding visual feedback when help overlay closes
