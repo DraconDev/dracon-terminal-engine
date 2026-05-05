@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Terminal cleanup sequence now disables Kitty keyboard mode instead of enabling it
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security. It follows recent UI enhancements across multiple components.
+The terminal cleanup sequence was modified to ensure proper terminal state restoration by changing the Kitty keyboard mode from enabled to disabled.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Changed `\x1b[?1007h` (enable Kitty keyboard) to `\x1b[?1007l` (disable Kitty keyboard) in terminal cleanup sequence
 
 ## In Progress
-- [x] Dependency version bump
+- [x] No active work in progress
 
 ## Blockers
-- None reported
+- None
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Test the updated dependencies in the affected UI components
+1. Verify terminal state restoration works consistently across different terminal emulators
+2. Test edge cases where terminal emulators might not support all escape sequences
