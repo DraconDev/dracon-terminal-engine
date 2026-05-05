@@ -98,6 +98,7 @@ impl FormApp {
             }
         }
     }
+}
 
 impl Widget for FormApp {
     fn id(&self) -> WidgetId {
