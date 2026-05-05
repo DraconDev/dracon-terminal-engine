@@ -425,7 +425,10 @@ impl Widget for SystemMonitor {
             if row_y >= list_y + list_h - 1 { break; }
             if let Some(proc) = self.data.processes.get(proc_idx) {
                 let is_selected = self.selected_process == Some(proc_idx);
-                let (fg, bg) = if is_selected { (t.fg_on_accent, t.primary_active) } else { (t.fg, t.surface) };
+                let is_hovered = self.hovered_process == Some(proc_idx);
+                let (fg, bg) = if is_selected { (t.fg_on_accent, t.primary_active) }
+                    else if is_hovered { (t.fg, t.hover_bg.unwrap_or(t.surface)) }
+                    else { (t.fg, t.surface) };
                 let name = if proc.name.len() > 14 { &proc.name[..14] } else { &proc.name };
                 let line = format!(" {:>5}  {:<3}  {:<14} {:>5.1}%  {:>5.0}MB", proc.pid, proc.state, name, proc.cpu_percent, proc.mem_mb);
                 draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
