@@ -432,6 +432,12 @@ impl Widget for MenuApp {
             self.active_menu = None;
             self.context_menu = None;
             true
+        } else if let KeyCode::Char('t') = key.code {
+            self.cycle_theme();
+            true
+        } else if let KeyCode::Char('?') = key.code {
+            self.show_help = true;
+            true
         } else {
             self.list.handle_key(key)
         }

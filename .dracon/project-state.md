@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added keyboard handling for the help overlay in the menu system
+Added keyboard shortcuts for theme cycling and help overlay in the menu system
 
 ## Context
-This change implements keyboard interaction for the help overlay, allowing users to close it with Esc or '?' keys. It's part of the ongoing work to enhance the menu system's usability.
+This change implements requested keyboard shortcuts to enhance user interaction with the menu system. The 't' key cycles through themes, and '?' toggles the help overlay, improving accessibility and usability.
 
 ## Completed
-- [x] Added Esc and '?' key handling to close the help overlay
-- [x] Implemented early return to prevent other key handlers from processing during help display
+- [x] Added 't' key shortcut to cycle themes
+- [x] Added '?' key shortcut to toggle help overlay
 
 ## In Progress
-- [x] Keyboard interaction for help overlay
+- [x] Keyboard shortcut implementation for menu system
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify help overlay behavior with other keyboard shortcuts
-2. Add visual feedback when help overlay is active
+1. Verify shortcuts work across all menu states
+2. Document new keyboard shortcuts in user documentation
