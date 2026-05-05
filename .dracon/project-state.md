@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactor system monitor widget rendering to improve type consistency and reduce potential overflow risks.
+Refactor mouse event handling in system monitor widget for better readability and consistency.
 
 ## Context
-The system monitor widget was refactoring its rendering logic to ensure proper type handling and prevent potential overflow issues during calculations.
+The change improves the mouse event handling in the system monitor widget by refactoring the scroll event logic to use a more concise pattern matching syntax.
 
 ## Completed
-- [x] Refactored `hist_w` calculation to remove unnecessary `as u16` conversion
-- [x] Fixed potential overflow in footer rendering by removing redundant `as u16` cast
+- [x] Refactored scroll event handling in system monitor widget to use `if` expression in pattern matching
+- [x] Simplified the scroll up/down logic while maintaining the same functionality
 
 ## In Progress
-- [x] Ongoing work to ensure all rendering calculations maintain proper type safety
+- [x] No active work in progress beyond this change
 
 ## Blockers
-- None identified in this change
+- None identified
 
 ## Next Steps
-1. Verify rendering behavior remains consistent across different terminal sizes
-2. Continue refactoring other widget components for similar improvements
+1. Verify the refactored code maintains the same behavior through testing
+2. Consider additional refactoring opportunities in the system monitor widget

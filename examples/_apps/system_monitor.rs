@@ -501,8 +501,9 @@ impl Widget for SystemMonitor {
                 let max_scroll = self.data.processes.len().saturating_sub(10);
                 if self.process_scroll < max_scroll { self.process_scroll += 1; return true; }
             }
-            MouseEventKind::ScrollUp => {
-                if self.process_scroll > 0 { self.process_scroll -= 1; return true; }
+            MouseEventKind::ScrollUp if self.process_scroll > 0 => {
+                self.process_scroll -= 1;
+                return true;
             }
             _ => {}
         }
