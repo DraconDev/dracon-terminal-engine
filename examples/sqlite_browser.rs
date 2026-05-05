@@ -313,7 +313,7 @@ impl Widget for SqliteBrowser {
             }
         }
 
-        draw_text(&mut plane, 2, 0, "Tables", t.primary, left_bg, true);
+        draw_text(&mut plane, 2, 0, " 󰓫 Tables", t.primary, left_bg, true);
         for (i, table) in self.tables.iter().enumerate() {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
@@ -369,7 +369,7 @@ impl Widget for SqliteBrowser {
             &mut plane,
             left_rect.width + 3,
             0,
-            "Query",
+            " 󰡄 Query",
             t.primary,
             query_bg,
             true,
