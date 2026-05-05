@@ -600,16 +600,6 @@ impl Widget for TableApp {
         }
     }
 
-    fn toggle_sort(&mut self, col: usize) {
-        if self.sort_column == Some(col) {
-            self.sort_ascending = !self.sort_ascending;
-        } else {
-            self.sort_column = Some(col);
-            self.sort_ascending = true;
-        }
-        self.rebuild_table();
-    }
-
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let margin = 1u16;
         let card_w = self.area.width.saturating_sub(margin * 2);
