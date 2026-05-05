@@ -444,6 +444,10 @@ impl Widget for SqliteBrowser {
                     plane.cells[idx] = c.clone();
                 }
             }
+            // Row count indicator
+            let count = self.results_rows.len();
+            let count_text = format!("{} rows", count);
+            draw_text(&mut plane, left_rect.width + 3, results_y + results_h - 1, &count_text, t.fg_muted, results_bg, false);
         } else {
             draw_text(
                 &mut plane,
