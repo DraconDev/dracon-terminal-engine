@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved help overlay integration in the IDE example by replacing the shortcut toast with a dedicated help overlay toggle.
+Added help overlay toggle to IDE example with keyboard shortcut documentation
 
 ## Context
-This change addresses the need for a more persistent and organized way to display keyboard shortcuts, replacing the temporary toast notification with a dedicated help overlay that can be toggled on/off.
+This change implements a help overlay that can be toggled with the '?' key, providing users with a quick reference to keyboard shortcuts. It follows recent work on improving the IDE example's documentation and user experience.
 
 ## Completed
-- [x] Replaced the "show-shortcuts" command toast with a help overlay toggle
-- [x] Added keyboard shortcut (?) to toggle the help overlay
-- [x] Maintained backward compatibility with the existing "show-shortcuts" command
+- [x] Added help overlay toggle with '?' key binding
+- [x] Updated documentation in the example code to include the new shortcut
+- [x] Implemented basic overlay behavior with escape key to close
 
 ## In Progress
-- [ ] Implementation of the actual help overlay content (not yet shown in this diff)
+- [x] Basic help overlay implementation is complete
 
 ## Blockers
-- The help overlay content needs to be implemented in a subsequent commit
+- No blockers identified for this change
 
 ## Next Steps
-1. Implement the help overlay content with all keyboard shortcuts
-2. Add visual styling and layout for the help overlay
+1. Expand the help overlay content with more detailed shortcut explanations
+2. Add visual styling to make the overlay more prominent

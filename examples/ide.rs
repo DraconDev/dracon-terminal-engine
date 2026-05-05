@@ -13,6 +13,7 @@
 //!   F12         — toggle profiler overlay
 //!   t           — cycle theme
 //!   Ctrl+P      — command palette
+//!   ?           — toggle help overlay
 //!   q / Ctrl+Q  — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
@@ -851,6 +852,17 @@ impl Widget for IdeApp {
                 return true;
             }
             return true;
+        }
+
+        // Help overlay
+        if self.show_help {
+            match key.code {
+                KeyCode::Esc | KeyCode::Char('?') => {
+                    self.show_help = false;
+                    return true;
+                }
+                _ => return true,
+            }
         }
 
         // Search mode
