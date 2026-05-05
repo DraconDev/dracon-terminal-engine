@@ -71,6 +71,7 @@ impl<T: Clone + ToString> Table<T> {
             on_select: None,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
+            hovered_row: None,
         }
     }
 
@@ -226,8 +227,11 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         for (i, row) in visible_rows.iter().enumerate() {
             let y = 1 + i;
             let is_selected = self.offset + i == self.selected;
+            let is_hovered = self.hovered_row == Some(self.offset + i);
             let bg = if is_selected {
                 self.theme.selection_bg
+            } else if is_hovered {
+                self.theme.hover_bg
             } else {
                 self.theme.bg
             };
