@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Removed redundant `dirty` flag update in theme cycling
+Added keyboard handling for the help overlay in the menu system
 
 ## Context
-The `dirty` flag was being set unnecessarily in the theme cycling logic, which was already triggering a redraw through other means.
+This change implements keyboard interaction for the help overlay, allowing users to close it with Esc or '?' keys. It's part of the ongoing work to enhance the menu system's usability.
 
 ## Completed
-- [x] Removed redundant `dirty = true` assignment in theme cycling handler
+- [x] Added Esc and '?' key handling to close the help overlay
+- [x] Implemented early return to prevent other key handlers from processing during help display
 
 ## In Progress
-- [x] Theme cycling functionality is complete
+- [x] Keyboard interaction for help overlay
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify no visual artifacts remain after theme changes
-2. Review other UI components for similar redundant state updates
+1. Verify help overlay behavior with other keyboard shortcuts
+2. Add visual feedback when help overlay is active

@@ -349,6 +349,13 @@ impl Widget for MenuApp {
             return false;
         }
 
+        if self.show_help {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+            }
+            return true;
+        }
+
         if self.context_menu.is_some() {
             if let KeyCode::Esc = key.code {
                 self.context_menu = None;
