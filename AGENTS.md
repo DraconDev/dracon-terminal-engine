@@ -283,6 +283,54 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
 - Handles all palette keyboard (↑/↓/Enter/Esc/type-to-filter) and mouse events when visible
 - Commands: new-tab, open, save, close-tab, search, cut/copy/paste, cycle-theme, toggle-profiler, show-shortcuts, about
 
+### Table Sorting (`src/framework/widgets/table.rs`)
+
+The `Table<T>` widget supports sortable column headers with click detection:
+
+**Builder methods:**
+- `.on_header_click(f)` — registers a callback `FnMut(usize)` invoked when a column header is clicked
+- `.with_cell_text_fn(f)` — sets a per-column cell text formatter `Fn(&T, usize) -> String`
+- `.set_sort(column, ascending)` — sets the active sort column and direction for rendering indicators
+
+**Header click detection:**
+- In `handle_mouse`, when `row == 0` (header row) and `MouseEventKind::Down(Left)`, determines which column was clicked via running x-offset accumulation
+- Fires `on_header_click(i)` with the column index
+
+**Sort indicators:**
+- When `sort_column == Some(i)` and `sort_ascending == true`, header displays `▲`
+- When `sort_column == Some(i)` and `sort_ascending == false`, header displays `▼`
+- Active sort column header text uses `theme.primary` color and `Styles::BOLD`
+
+**Example app pattern** (`examples/table_widget.rs`):
+```rust
+// App state stores sort column and direction
+sort_column: Option<usize>,
+sort_ascending: bool,
+
+// Header click in handle_mouse dispatches to toggle_sort
+if local_row == 0 {
+    let mut col_x: u16 = 0;
+    for (i, w) in column_widths.iter().enumerate() {
+        if local_col >= col_x && local_col < col_x + w {
+            self.toggle_sort(i);
+            return true;
+        }
+        col_x += w;
+    }
+}
+
+// toggle_sort implementation
+fn toggle_sort(&mut self, col: usize) {
+    if self.sort_column == Some(col) {
+        self.sort_ascending = !self.sort_ascending;
+    } else {
+        self.sort_column = Some(col);
+        self.sort_ascending = true;
+    }
+    self.rebuild_table(); // filter + sort then reconstruct Table widget
+}
+```
+
 ## Focus & Hover Styling
 
 ### Widgets that support hover (`hover_bg`)

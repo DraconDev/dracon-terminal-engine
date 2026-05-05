@@ -1,23 +1,23 @@
 # Project State
 
 ## Current Focus
-Added command palette functionality to the text editor demo with mouse event interception
+Added table sorting functionality to the `Table<T>` widget with visual indicators and click handling
 
 ## Context
-This change implements a command palette feature that intercepts all mouse events when visible, allowing users to quickly access and execute commands without navigating through menus.
+To improve data organization in tabular views, users need to sort columns by clicking headers. This enables better data exploration in widgets like the command palette and log monitor.
 
 ## Completed
-- [x] Added `CellTextFn<T>` type alias for table cell rendering
-- [x] Added `HeaderClickCallback` type alias for table header interactions
-- [x] Implemented mouse event interception in the command palette
+- [x] Added header click detection to determine which column was clicked
+- [x] Implemented sort indicators (▲/▼) for active sort columns
+- [x] Added builder methods for configuring sorting behavior
 - [x] Updated Cargo.lock with dependency version bump
 
 ## In Progress
-- [x] Command palette functionality is now fully integrated with the text editor demo
+- [x] Documentation of table sorting in AGENTS.md
 
 ## Blockers
-- None identified in this commit
+- None identified
 
 ## Next Steps
-1. Test command palette interactions with various editor components
-2. Add keyboard shortcut support for the command palette
+1. Add integration tests for table sorting behavior
+2. Implement multi-column sort support if needed
