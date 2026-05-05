@@ -92,11 +92,16 @@ pub struct Theme {
     pub disabled_fg: Color,
     pub disabled_bg: Color,
 
-    // Hover
+    /// Background color for hovered interactive items (rows, list items, nodes).
+    /// Used by `Table`, `List`, `Tree`, and `CommandPalette` widgets.
     pub hover_bg: Color,
 
-    // Focus
+    /// Background color for focused elements (e.g., input fields with keyboard focus).
+    /// Available for custom widgets that track focus state.
     pub focus_bg: Color,
+
+    /// Border color for focused widgets or sections.
+    /// Available for custom widgets that track focus state.
     pub focus_border: Color,
 
     // Scrollbar width

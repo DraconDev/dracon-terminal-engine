@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Enhanced theme system with improved hover and focus state styling for interactive widgets.
 
 ## Context
-This change was triggered by recent feature implementations that required updated dependencies. The Cargo.lock file was automatically updated during dependency resolution.
+This change builds on recent work adding hover state tracking to various widgets (CommandPalette, List, Table) and the focus state feature. It provides consistent styling properties for interactive elements across the framework.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Added `hover_bg` documentation for interactive widget hover states
+- [x] Added `focus_bg` documentation for focused elements
+- [x] Added `focus_border` property for focused widget borders
+- [x] Improved theme documentation for consistent styling across widgets
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None (this is a documentation and property addition)
 
 ## Blockers
-- None
+- None (this is a documentation and property addition)
 
 ## Next Steps
-1. Continue with ongoing feature development
-2. Monitor for any dependency conflicts
-```
+1. Update widget implementations to use the new theme properties
+2. Add visual tests for hover/focus states in affected widgets
