@@ -54,6 +54,7 @@ struct FileManagerApp {
     breadcrumbs: Breadcrumbs,
     selected: usize,
     scroll_offset: usize,
+    visible_count: usize,
     theme: Theme,
     area: Rect,
     dirty: bool,
