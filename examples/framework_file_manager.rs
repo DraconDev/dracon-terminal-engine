@@ -80,6 +80,7 @@ impl FileManagerApp {
             breadcrumbs,
             selected: 0,
             scroll_offset: 0,
+            visible_count: 10,
             theme,
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
@@ -130,10 +131,10 @@ impl Widget for FileManagerApp {
     fn area(&self) -> Rect { self.area }
     fn set_area(&mut self, area: Rect) {
         self.area = area;
-        // Pre-compute visible count here (where we have &mut self)
         let split = SplitPane::new(Orientation::Vertical).ratio(0.7);
         let (main_rect, _) = split.split(area);
-        self.list.set_visible_count((main_rect.height as usize).saturating_sub(2).max(1));
+        self.visible_count = (main_rect.height as usize).saturating_sub(2).max(1);
+        self.list.set_visible_count(self.visible_count);
         self.dirty = true;
     }
     fn z_index(&self) -> u16 { 10 }
@@ -255,12 +256,11 @@ impl Widget for FileManagerApp {
         }
 
         // Scrollbar indicator
-        let visible = self.list.visible_count();
-        if self.entries.len() > visible {
+        if self.entries.len() > self.visible_count {
             let sb_x = main_rect.width;
             let content_h = main_rect.height.saturating_sub(2);
-            let thumb_h = (visible as f32 / self.entries.len() as f32 * content_h as f32).max(1.0) as u16;
-            let thumb_y = (self.scroll_offset as f32 / self.entries.len().saturating_sub(visible).max(1) as f32
+            let thumb_h = (self.visible_count as f32 / self.entries.len() as f32 * content_h as f32).max(1.0) as u16;
+            let thumb_y = (self.scroll_offset as f32 / self.entries.len().saturating_sub(self.visible_count).max(1) as f32
                 * (content_h - thumb_h) as f32) as u16 + 2;
             for i in 0..thumb_h {
                 let y = thumb_y + i;

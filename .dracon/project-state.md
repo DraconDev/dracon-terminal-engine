@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Added visible_count field to FileManagerApp for tracking visible items in the file manager UI.
+Refactored visible item counting in the file manager UI to use a dedicated field
 
 ## Context
-This change supports improved scrollbar rendering and navigation in the file manager by tracking how many items are currently visible in the viewport.
+The file manager's scrollbar indicator was recalculating visible item counts in multiple places, leading to potential inconsistencies. This change centralizes the calculation in a single field for better maintainability.
 
 ## Completed
-- [x] Added visible_count field to FileManagerApp struct
-- [x] Enabled tracking of visible items for scrollbar calculations
+- [x] Added `visible_count` field to `FileManagerApp` to track visible items
+- [x] Moved visible count calculation to `set_area()` method
+- [x] Updated scrollbar indicator to use the centralized `visible_count` value
 
 ## In Progress
-- [x] Implementation of visible_count field
+- [x] Refactoring of visible item counting logic
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Implement scrollbar rendering logic using visible_count
-2. Add tests for visible item tracking functionality
+1. Verify scrollbar behavior remains consistent across different window sizes
+2. Consider adding unit tests for the visible count calculations
