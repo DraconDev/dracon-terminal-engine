@@ -464,12 +464,6 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                     }
                     return false;
                 }
-                            return true;
-                        }
-                        col_x += w;
-                    }
-                    return false;
-                }
                 let rel_row = row.saturating_sub(1);
                 if rel_row >= self.visible_count as u16 {
                     return false;

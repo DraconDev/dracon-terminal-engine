@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Added column sorting functionality to the table widget
+Removed unused code from table widget's column sorting logic
 
 ## Context
-This change implements column sorting in the table widget, allowing users to click column headers to sort data. It follows recent refactoring of the table widget's header handling and search functionality.
+This change was prompted by the recent refactoring of the table widget's header click handler, which simplified the column sorting functionality. The removed code was redundant and no longer needed after the refactoring.
 
 ## Completed
-- [x] Added "Click col" to sort column help text in the overlay
-- [x] Updated Cargo.lock with dependency version bump
+- [x] Removed unused code from table widget's column sorting logic
+- [x] Simplified the column sorting implementation
 
 ## In Progress
-- [x] Column sorting functionality is implemented but not yet fully integrated with the UI
+- [x] Ongoing work on column sorting functionality
 
 ## Blockers
-- Need to verify sorting behavior with large datasets
-- Requires visual confirmation of sorted column indicators
+- None identified
 
 ## Next Steps
-1. Complete UI integration for sorted column indicators
-2. Add descending sort option
-3. Test performance with large datasets
+1. Verify column sorting functionality works as expected
+2. Continue refining table widget features
