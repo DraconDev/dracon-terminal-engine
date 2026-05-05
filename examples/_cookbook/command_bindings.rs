@@ -273,10 +273,10 @@ impl Widget for CommandBindings {
         // ── Header bar ──
         let header = " 󰔟 Command Bindings ";
         for (i, c) in header.chars().enumerate().take(w - 4) {
-            p.cells[1 * w + 1 + i] = Cell { char: c, fg: t.fg_on_accent, bg: t.primary, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[w + 1 + i] = Cell { char: c, fg: t.fg_on_accent, bg: t.primary, style: Styles::BOLD, transparent: false, skip: false };
         }
         for x in (1 + header.len() + 1)..(w - 1) {
-            p.cells[1 * w + x] = Cell { char: '─', fg: t.primary, bg: t.primary, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[w + x] = Cell { char: '─', fg: t.primary, bg: t.primary, style: Styles::empty(), transparent: false, skip: false };
         }
 
         // ── Card: CPU Gauge (top-left) ──
