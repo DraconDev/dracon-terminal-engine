@@ -475,30 +475,30 @@ impl Widget for Dashboard {
         let div_rect = self.split.divider_rect(Rect::new(0, header_h, self.area.width, content_h));
 
         match kind {
-            MouseEventKind::Down(MouseButton::Left) => {
-                if col >= div_rect.x && col < div_rect.x + div_rect.width
-                    && row >= div_rect.y && row < div_rect.y + div_rect.height {
-                    return true; // Start drag
-                }
+            MouseEventKind::Down(MouseButton::Left)
+                if col >= div_rect.x
+                    && col < div_rect.x + div_rect.width
+                    && row >= div_rect.y
+                    && row < div_rect.y + div_rect.height =>
+            {
+                return true;
             }
-            MouseEventKind::Drag(_) => {
-                if self.split.handle_resize(kind, col, row, Rect::new(0, header_h, self.area.width, content_h)) {
-                    return true;
-                }
+            MouseEventKind::Drag(_)
+                if self
+                    .split
+                    .handle_resize(kind, col, row, Rect::new(0, header_h, self.area.width, content_h)) =>
+            {
+                return true;
             }
-            MouseEventKind::ScrollDown => {
-                if col > self.area.width / 2 {
-                    let visible = content_h.saturating_sub(2) as usize;
-                    let max_scroll = self.data.processes.len().saturating_sub(visible);
-                    self.data.process_scroll = (self.data.process_scroll + 1).min(max_scroll);
-                    return true;
-                }
+            MouseEventKind::ScrollDown if col > self.area.width / 2 => {
+                let visible = content_h.saturating_sub(2) as usize;
+                let max_scroll = self.data.processes.len().saturating_sub(visible);
+                self.data.process_scroll = (self.data.process_scroll + 1).min(max_scroll);
+                return true;
             }
-            MouseEventKind::ScrollUp => {
-                if col > self.area.width / 2 {
-                    self.data.process_scroll = self.data.process_scroll.saturating_sub(1);
-                    return true;
-                }
+            MouseEventKind::ScrollUp if col > self.area.width / 2 => {
+                self.data.process_scroll = self.data.process_scroll.saturating_sub(1);
+                return true;
             }
             _ => {}
         }
