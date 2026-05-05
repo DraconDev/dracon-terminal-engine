@@ -169,6 +169,13 @@ impl crate::framework::widget::Widget for Checkbox {
         _row: u16,
     ) -> bool {
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if !self.hovered {
+                    self.hovered = true;
+                    self.dirty = true;
+                }
+                false
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 self.toggle();
                 if let Some(ref mut cb) = self.on_change {

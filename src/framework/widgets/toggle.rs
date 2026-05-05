@@ -18,6 +18,7 @@ pub struct Toggle {
     on_change: Option<Box<dyn FnMut(bool)>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered: bool,
 }
 
 impl Toggle {
@@ -31,6 +32,7 @@ impl Toggle {
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
             dirty: true,
+            hovered: false,
         }
     }
 
@@ -102,10 +104,15 @@ impl crate::framework::widget::Widget for Toggle {
         let start_x = (width.saturating_sub(cell_width)) / 2;
         let start_y = height.saturating_sub(1) / 2;
 
-        let bg = if self.state {
+        let base_bg = if self.state {
             self.theme.success
         } else {
             self.theme.fg_muted
+        };
+        let bg = if self.hovered {
+            self.theme.hover_bg
+        } else {
+            base_bg
         };
 
         for (i, c) in full_text.chars().take(width).enumerate() {
@@ -150,6 +157,13 @@ impl crate::framework::widget::Widget for Toggle {
         _row: u16,
     ) -> bool {
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if !self.hovered {
+                    self.hovered = true;
+                    self.dirty = true;
+                }
+                false
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 self.toggle();
                 if let Some(ref mut cb) = self.on_change {

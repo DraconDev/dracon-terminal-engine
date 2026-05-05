@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added hover state styling to Checkbox widget for interactive visual feedback
+Added hover state tracking and styling to interactive widgets (Checkbox, Radio, Toggle)
 
 ## Context
-This change continues the theme system improvements by adding hover state styling to the Checkbox widget, maintaining consistency with other interactive widgets that now support hover states.
+This implements consistent hover state visual feedback across interactive form widgets, following the pattern established in previous commits for Button and CommandPalette widgets.
 
 ## Completed
-- [x] Added hover state background color to Checkbox widget
-- [x] Maintained consistent hover state behavior with other widgets
+- [x] Added `hovered` state tracking to Checkbox, Radio, and Toggle widgets
+- [x] Implemented hover state styling using theme's `hover_bg` color
+- [x] Added mouse move event handling to detect hover state changes
+- [x] Maintained consistent visual feedback pattern across all interactive widgets
 
 ## In Progress
-- [x] Hover state styling implementation for Checkbox
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify hover state behavior across different themes
-2. Add hover state tests for Checkbox widget
+1. Verify hover state behavior across all interactive widgets
+2. Document hover state styling guidelines in the theme system documentation

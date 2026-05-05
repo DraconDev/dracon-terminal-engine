@@ -18,6 +18,7 @@ pub struct Radio {
     on_change: Option<Box<dyn FnMut(bool)>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered: bool,
 }
 
 impl Radio {
@@ -31,6 +32,7 @@ impl Radio {
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
             dirty: true,
+            hovered: false,
         }
     }
 
@@ -113,6 +115,11 @@ impl crate::framework::widget::Widget for Radio {
         } else {
             self.theme.fg
         };
+        let bg = if self.hovered {
+            self.theme.hover_bg
+        } else {
+            self.theme.bg
+        };
 
         for (i, c) in full_text.chars().take(width).enumerate() {
             let idx = (start_y as u16 * plane.width + (start_x as u16 + i as u16)) as usize;
@@ -120,7 +127,7 @@ impl crate::framework::widget::Widget for Radio {
                 plane.cells[idx] = Cell {
                     char: c,
                     fg,
-                    bg: self.theme.bg,
+                    bg,
                     style: Styles::empty(),
                     transparent: false,
                     skip: false,
