@@ -116,7 +116,7 @@ impl WidgetGallery {
     }
 
     fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
-        let (row, col, _name) = WIDGET_SLOTS[slot];
+        let (row, col, _name, _icon) = WIDGET_SLOTS[slot];
         let rows = 3u16;
         let cols = if row == 0 { 4u16 } else if row == 1 { 3u16 } else { 2u16 };
 
