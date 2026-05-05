@@ -199,7 +199,11 @@ impl Widget for FormApp {
         true
     }
     fn render(&self, area: Rect) -> Plane {
-        self.form.borrow().render(area)
+        let mut plane = self.form.borrow().render(area);
+        if self.show_help {
+            self.render_help_overlay(&mut plane, area);
+        }
+        plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
@@ -210,6 +214,22 @@ impl Widget for FormApp {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
                 true
+            }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                true
+            }
+            KeyCode::Esc => {
+                if self.show_help {
+                    self.show_help = false;
+                    true
+                } else {
+                    false
+                }
             }
             _ => self.form.borrow_mut().handle_key(key),
         }
