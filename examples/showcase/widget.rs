@@ -582,11 +582,6 @@ impl Widget for Showcase {
         // Status message (temporary) - toast style with slide-in animation
         if let Some((ref msg, time)) = self.status_message {
             if time.elapsed() < Duration::from_secs(2) {
-                // Start toast animation if not started
-                if self.toast_anim.is_none() {
-                    self.toast_anim = Some(self.animations.start(-3.0, 0.0, Duration::from_millis(300)));
-                }
-                
                 let toast_offset = self.toast_anim
                     .and_then(|id| self.animations.value(id))
                     .unwrap_or(0.0);
@@ -641,6 +636,9 @@ impl Widget for Showcase {
 
                 // Message text
                 draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, true);
+            } else {
+                // Toast expired - clear animation
+                self.toast_anim = None;
             }
         }
 

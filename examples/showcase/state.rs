@@ -169,6 +169,8 @@ impl Showcase {
             *self.pending_binary.lock().unwrap() = Some(name.clone());
             let example_name = self.selected_example().map(|ex| ex.name).unwrap_or("");
             self.status_message = Some((format!("Launching {}...", example_name), Instant::now()));
+            // Start toast slide-in animation
+            self.toast_anim = Some(self.animations.start(-3.0, 0.0, Duration::from_millis(300)));
             self.recently_launched.retain(|n| n != &name);
             self.recently_launched.insert(0, name);
             if self.recently_launched.len() > 5 {
