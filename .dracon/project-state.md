@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced showcase UI with improved status bar styling and better keyboard hint formatting
+Added a keyboard icon to the showcase widget title for better visual identification.
 
 ## Context
-This change improves the visual presentation of the showcase UI by adding a gradient effect to the status bar and restructuring the keyboard hint display for better readability and visual hierarchy
+The change improves the visual clarity of the keyboard shortcuts section in the showcase UI by adding a distinctive icon.
 
 ## Completed
-- [x] Added gradient background to status bar with alternating colors
-- [x] Restructured keyboard hints to show keys and descriptions separately with distinct styling
-- [x] Improved visual separation between different hint groups
+- [x] Added Unicode keyboard icon (󰌍) to the widget title
+- [x] Maintained consistent spacing around the title text
 
 ## In Progress
-- [x] Status bar styling and hint formatting enhancements
+- [x] Visual styling improvements for the showcase UI
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify gradient effect works across all themes
-2. Test hint formatting with different terminal sizes
+1. Verify the icon renders correctly across different platforms
+2. Ensure the visual change aligns with the showcase's overall design theme
