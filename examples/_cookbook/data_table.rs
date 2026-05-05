@@ -360,6 +360,14 @@ impl Widget for Table {
         }
 
         let sy = area.height.saturating_sub(2);
+        // Fill status bar background
+        for x in 1..area.width.saturating_sub(1) {
+            let idx = (sy * area.width + x) as usize;
+            if idx < p.cells.len() {
+                p.cells[idx].bg = self.theme.surface;
+                p.cells[idx].transparent = false;
+            }
+        }
         let txt = if let Some(r) = self.rows.get(self.sel) {
             format!(
                 " Selected: {} | Age: {} | City: {} | {} rows ",
