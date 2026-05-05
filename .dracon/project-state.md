@@ -4,19 +4,18 @@
 Refactored theme cycling implementation in widget tutorial example
 
 ## Context
-The theme cycling functionality was previously implemented using `const` arrays, which may not be as flexible for runtime modifications. This change switches to using `Vec` for better runtime flexibility while maintaining the same theme options.
+This change was prompted by the ongoing work to improve UI examples with theme cycling functionality. The refactoring makes the theme selection more robust by using a reference to the themes array rather than a direct index.
 
 ## Completed
-- [x] Replaced `const THEMES` with `let themes: Vec<Theme>`
-- [x] Replaced `const THEME_NAMES` with `let theme_names: Vec<&str>`
-- [x] Updated Cargo.lock with dependency version changes
+- [x] Changed theme access from direct array indexing to reference-based access
+- [x] Fixed potential ownership issues in theme cycling implementation
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] Verification of theme cycling behavior across all UI examples
 
 ## Blockers
-- None identified
+- Need to ensure consistent theme behavior across all widget examples
 
 ## Next Steps
-1. Verify runtime behavior of theme cycling remains consistent
-2. Consider if additional theme options should be added
+1. Verify theme cycling works consistently in all UI examples
+2. Update documentation to reflect the new theme cycling implementation

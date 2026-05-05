@@ -636,7 +636,7 @@ fn main() -> std::io::Result<()> {
 
     // Current theme index for cycling
     let mut current_theme_idx = 0;
-    let current_theme = THEMES[current_theme_idx];
+    let current_theme = &themes[current_theme_idx];
 
     // ---- Create multiple ColorPicker instances ----
     //
