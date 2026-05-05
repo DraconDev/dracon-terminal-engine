@@ -83,6 +83,12 @@ impl UserStatus {
     }
 }
 
+impl std::fmt::Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 fn build_users() -> Vec<User> {
     vec![
         User { name: "Alice Chen".into(), role: "Engineering Lead".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "2m ago".into(), email: "alice@corp.io".into(), join_date: "2021-03-15".into() },

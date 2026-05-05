@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added `Display` implementation for `User` struct to enable string formatting
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility with recent changes in the customizable cell text rendering and hover state tracking features.
+This change enables the `User` struct to be displayed as a string, which is required for rendering user names in the table widget. The table widget needs to display user names in its cells, and this implementation provides the necessary formatting capability.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Implemented `std::fmt::Display` for `User` to display the user's name
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify that all features relying on these dependencies continue to function correctly
-2. Prepare for the next set of interactive widget enhancements
+1. Verify the display implementation works correctly with the table widget
+2. Consider adding more formatting options for the table widget if needed
