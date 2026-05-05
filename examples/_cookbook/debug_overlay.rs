@@ -33,6 +33,8 @@ use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;
 
+const THEMES: [&str; 3] = ["dark", "nord", "dracula"];
+
 struct DebugOverlayPanel {
     id: WidgetId,
     profiler: Profiler,
@@ -40,6 +42,8 @@ struct DebugOverlayPanel {
     event_logger: EventLogger,
     visible: bool,
     theme: Theme,
+    theme_index: usize,
+    show_help: bool,
 }
 
 impl DebugOverlayPanel {
@@ -51,13 +55,83 @@ impl DebugOverlayPanel {
             event_logger: EventLogger::new(WidgetId::new(170)),
             visible: false,
             theme,
+            theme_index: 0,
+            show_help: false,
         }
     }
 
     fn toggle(&mut self) {
         self.visible = !self.visible;
     }
-}
+
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % THEMES.len();
+        self.theme = match THEMES[self.theme_index] {
+            "nord" => Theme::nord(),
+            "dracula" => Theme::dracula(),
+            _ => Theme::dark(),
+        };
+        // Propagate theme to all child widgets
+        self.profiler.on_theme_change(&self.theme);
+        self.inspector.on_theme_change(&self.theme);
+        self.event_logger.on_theme_change(&self.theme);
+    }
+
+    fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
+        let w = 40.min(area.width);
+        let h = 15.min(plane.height);
+        let x = (area.width.saturating_sub(w)) / 2;
+        let y = (area.height.saturating_sub(h)) / 2;
+
+        // Draw semi-transparent backdrop
+        for ry in 0..h {
+            for rx in 0..w {
+                let idx = ((y + ry) * plane.width + x + rx) as usize;
+                if idx < plane.cells.len() {
+                    let on_border = ry == 0 || ry == h - 1 || rx == 0 || rx == w - 1;
+                    let corner = (rx == 0 && ry == 0)
+                        || (rx == w - 1 && ry == 0)
+                        || (rx == 0 && ry == h - 1)
+                        || (rx == w - 1 && ry == h - 1);
+                    plane.cells[idx] = Cell {
+                        char: if corner { '+' } else if on_border { '#' } else { ' ' },
+                        fg: self.theme.primary,
+                        bg: self.theme.surface_elevated,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
+                }
+            }
+        }
+
+        // Draw help text
+        let shortcuts = [
+            ("F12", "Toggle overlay"),
+            ("ESC", "Close overlay"),
+            ("t", "Cycle theme"),
+            ("q", "Quit"),
+        ];
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = y + 2 + i as u16;
+            let col = x + 2;
+            for (j, c) in key.chars().enumerate() {
+                let idx = (row * plane.width + col + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = self.theme.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+            for (j, c) in desc.chars().enumerate() {
+                let idx = (row * plane.width + col + 6 + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = self.theme.fg;
+                }
+            }
+        }
+    }
 
 impl Widget for DebugOverlayPanel {
     fn id(&self) -> WidgetId {
@@ -79,7 +153,7 @@ impl Widget for DebugOverlayPanel {
         200
     }
     fn needs_render(&self) -> bool {
-        self.visible
+        self.visible || self.show_help
     }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
@@ -101,6 +175,11 @@ impl Widget for DebugOverlayPanel {
                 if idx < plane.cells.len() {
                     let border = y == 0 || y == 9 || y == area.height - 1;
                     let separator = y == 9 && x == 26;
+                    let bg_color = if border {
+                            self.theme.surface_elevated
+                        } else {
+                            self.theme.bg
+                        };
                     plane.cells[idx] = Cell {
                         char: if separator {
                             '+'
@@ -112,13 +191,9 @@ impl Widget for DebugOverlayPanel {
                         fg: if border {
                             self.theme.primary
                         } else {
-                            Color::Reset
+                            self.theme.fg
                         },
-                        bg: if border {
-                            self.theme.surface_elevated
-                        } else {
-                            Color::Reset
-                        },
+                        bg: bg_color,
                         style: if border {
                             Styles::BOLD
                         } else {
@@ -232,6 +307,11 @@ impl Widget for DebugOverlayPanel {
             }
         }
 
+        // Render help overlay if active
+        if self.show_help {
+            self.render_help_overlay(&mut plane, area);
+        }
+
         plane
     }
 
@@ -239,6 +319,15 @@ impl Widget for DebugOverlayPanel {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+
+        // Handle help overlay first
+        if self.show_help {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+            }
+            return true;
+        }
+
         if let KeyCode::F(12) = key.code {
             self.toggle();
             return true;
@@ -246,6 +335,16 @@ impl Widget for DebugOverlayPanel {
         if self.visible {
             if let KeyCode::Esc = key.code {
                 self.toggle();
+                return true;
+            }
+            // Theme cycling with 't'
+            if let KeyCode::Char('t') = key.code {
+                self.cycle_theme();
+                return true;
+            }
+            // Help overlay with '?'
+            if let KeyCode::Char('?') = key.code {
+                self.show_help = true;
                 return true;
             }
         }

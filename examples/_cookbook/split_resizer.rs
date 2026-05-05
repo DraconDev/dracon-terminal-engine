@@ -140,7 +140,7 @@ impl Widget for SplitResizerApp {
                 self.dirty = true;
                 true
             }
-            KeyCode::Escape => {
+            KeyCode::Esc => {
                 if self.show_help {
                     self.show_help = false;
                     self.dirty = true;
@@ -449,13 +449,8 @@ impl SplitResizerApp {
         let x = (p.width - w) / 2;
         let y = (p.height - h) / 2;
 
-        // Box drawing with rounded corners
-        let corners = [('╭', '╮', '╰', '╯')];
-        let horizontal = '─';
-        let vertical = '│';
-
         // Top border with rounded corners
-        let mut idx = (y * p.width + x) as usize;
+        let idx = (y * p.width + x) as usize;
         if idx < p.cells.len() {
             p.cells[idx] = Cell { char: '╭', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
         }
@@ -472,18 +467,18 @@ impl SplitResizerApp {
 
         // Body rows
         for row in 1..h - 1 {
-            let idx = (y + row) as usize;
-            let left_idx = (idx * p.width + x) as usize;
+            let row_y = y + row;
+            let left_idx = (row_y * p.width + x) as usize;
             if left_idx < p.cells.len() {
                 p.cells[left_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
             }
-            let right_idx = (idx * p.width + x + w - 1) as usize;
+            let right_idx = (row_y * p.width + x + w - 1) as usize;
             if right_idx < p.cells.len() {
                 p.cells[right_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
             }
             // Fill background
             for col in 1..w - 1 {
-                let idx = (idx * p.width + x + col) as usize;
+                let idx = (row_y * p.width + x + col) as usize;
                 if idx < p.cells.len() {
                     p.cells[idx] = Cell { char: ' ', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
                 }
@@ -523,7 +518,7 @@ impl SplitResizerApp {
             if row_y >= y + h - 1 {
                 break;
             }
-            for (j, c) in line.chars().enumerate().take(w - 2) {
+            for (j, c) in line.chars().enumerate().take((w - 2) as usize) {
                 let idx = (row_y * p.width + x + 1 + j as u16) as usize;
                 if idx < p.cells.len() {
                     let style = if line.starts_with(" Keyboard") || line.starts_with(" ─") {

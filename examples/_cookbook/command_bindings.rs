@@ -8,7 +8,10 @@
 //!
 //! - `s` — trigger manual refresh of all commands
 //! - `p` — pause/resume auto-refresh
-//! - `Ctrl+C` — quit
+//! - `t` — cycle theme (Nord, Cyberpunk, Dracula, Monokai)
+//! - `?` — toggle help overlay
+//! - `q` — quit
+//! - `Esc` — close help overlay
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -333,7 +336,7 @@ impl Widget for CommandBindings {
 
         // ── Status bar ──
         let auto_str = if self.paused { "⏸ PAUSED" } else { "▶ RUNNING" };
-        let status = format!("  {}  |  tick: {}  |  s=refresh p=pause  |  q=quit", auto_str, self.tick);
+        let status = format!("  {}  |  tick: {}  |  t=theme  ?=help  q=quit", auto_str, self.tick);
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
@@ -343,6 +346,85 @@ impl Widget for CommandBindings {
         for x in 1..w - 1 {
             let idx = (h - 1) * w + x;
             p.cells[idx].bg = t.surface_elevated;
+        }
+
+        // ── Help overlay ──
+        if self.show_help {
+            let help_w = 36;
+            let help_h = 12;
+            let help_x = (w as i32 - help_w as i32) / 2;
+            let help_y = (h as i32 - help_h as i32) / 2;
+
+            // backdrop
+            for sy in 0..help_h {
+                for sx in 0..help_w {
+                    let px = help_x + sx as i32;
+                    let py = help_y + sy as i32;
+                    if px >= 0 && py >= 0 && px < w as i32 && py < h as i32 {
+                        let idx = py as usize * w + px as usize;
+                        p.cells[idx] = Cell { char: ' ', fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                    }
+                }
+            }
+
+            // rounded border
+            let hx = help_x as usize;
+            let hy = help_y as usize;
+            p.cells[hy * w + hx] = Cell { char: '╭', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[hy * w + hx + help_w - 1] = Cell { char: '╮', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[(hy + help_h - 1) * w + hx] = Cell { char: '╰', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[(hy + help_h - 1) * w + hx + help_w - 1] = Cell { char: '╯', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            for ix in 1..help_w - 1 {
+                p.cells[hy * w + hx + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[(hy + help_h - 1) * w + hx + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            }
+            for iy in 1..help_h - 1 {
+                p.cells[(hy + iy) * w + hx] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[(hy + iy) * w + hx + help_w - 1] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            }
+
+            // title
+            let title = " Command Bindings Help ";
+            for (i, c) in title.chars().enumerate() {
+                let idx = (hy + 1) * w + hx + 1 + i;
+                if idx < p.cells.len() {
+                    p.cells[idx] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+                }
+            }
+
+            // shortcuts
+            let shortcuts = [
+                ("s", "Refresh all commands"),
+                ("p", "Pause/Resume auto-refresh"),
+                ("t", "Cycle theme"),
+                ("?", "Toggle this help"),
+                ("q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let y_off = 3 + i;
+                let key_str = format!(" {} ", key);
+                for (j, c) in key_str.chars().enumerate() {
+                    let idx = (hy + y_off) * w + hx + 2 + j;
+                    if idx < p.cells.len() {
+                        p.cells[idx] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                    }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (hy + y_off) * w + hx + 2 + key_str.len() + 1 + j;
+                    if idx < p.cells.len() {
+                        p.cells[idx] = Cell { char: c, fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                    }
+                }
+            }
+
+            // hint
+            let hint = " Press ? to close ";
+            for (i, c) in hint.chars().enumerate() {
+                let idx = (hy + help_h - 2) * w + hx + (help_w as usize - hint.len()) / 2 + i;
+                if idx < p.cells.len() {
+                    p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                }
+            }
         }
 
         p
@@ -361,6 +443,27 @@ impl Widget for CommandBindings {
                 self.paused = !self.paused;
                 self.dirty = true;
                 true
+            }
+            KeyCode::Char('t') => {
+                let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::monokai()];
+                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                let next = themes[(idx + 1) % themes.len()];
+                self.on_theme_change(&next);
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Esc => {
+                if self.show_help {
+                    self.show_help = false;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
             }
             _ => false,
         }

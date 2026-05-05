@@ -124,6 +124,98 @@ impl LogMonitor {
     fn tick(&mut self) {
         self.push_log();
     }
+
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % THEMES.len();
+        self.theme = match THEMES[self.theme_index] {
+            "nord" => Theme::nord(),
+            "dracula" => Theme::dracula(),
+            "cyberpunk" => Theme::cyberpunk(),
+            _ => Theme::gruvbox_dark(),
+        };
+        self.log_viewer.on_theme_change(&self.theme);
+        self.dirty = true;
+    }
+
+    fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+        let w = 42.min(area.width as usize);
+        let h = 14.min(area.height as usize);
+        let x = (area.width as usize - w) / 2;
+        let y = (area.height as usize - h) / 2;
+
+        // Rounded box background
+        for row in 0..h {
+            for col in 0..w {
+                let idx = (y + row) * plane.width as usize + x + col;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        // Rounded corners (top row)
+        if w >= 2 && h >= 1 {
+            plane.cells[y * plane.width as usize + x].char = '╭';
+            plane.cells[y * plane.width as usize + x].fg = t.outline;
+            plane.cells[y * plane.width as usize + x + w - 1].char = '╮';
+            plane.cells[y * plane.width as usize + x + w - 1].fg = t.outline;
+        }
+        // Rounded corners (bottom row)
+        if h >= 2 {
+            let bot_y = (y + h - 1) * plane.width as usize;
+            plane.cells[bot_y + x].char = '╰';
+            plane.cells[bot_y + x].fg = t.outline;
+            plane.cells[bot_y + x + w - 1].char = '╯';
+            plane.cells[bot_y + x + w - 1].fg = t.outline;
+        }
+        // Horizontal borders
+        if h >= 1 {
+            for col in 1..w - 1 {
+                plane.cells[y * plane.width as usize + x + col].char = '─';
+                plane.cells[y * plane.width as usize + x + col].fg = t.outline;
+            }
+        }
+        if h >= 2 {
+            let bot_y = (y + h - 1) * plane.width as usize;
+            for col in 1..w - 1 {
+                plane.cells[bot_y + x + col].char = '─';
+                plane.cells[bot_y + x + col].fg = t.outline;
+            }
+        }
+        // Vertical borders
+        for row in 1..h - 1 {
+            plane.cells[(y + row) * plane.width as usize + x].char = '│';
+            plane.cells[(y + row) * plane.width as usize + x].fg = t.outline;
+            plane.cells[(y + row) * plane.width as usize + x + w - 1].char = '│';
+            plane.cells[(y + row) * plane.width as usize + x + w - 1].fg = t.outline;
+        }
+
+        let lines = [
+            "┌─ Log Monitor Help ─────────────┐",
+            "│ c      Clear all logs           │",
+            "│ r      Resume auto-scroll       │",
+            "│ t      Cycle theme              │",
+            "│ ?      Toggle this help         │",
+            "│ Click  Toggle log level filter │",
+            "│ Click  Pause/resume scroll      │",
+            "│ q      Quit application         │",
+            "└────────────────────────────────┘",
+        ];
+        let start_y = y + (h - lines.len()) / 2;
+        for (i, line) in lines.iter().enumerate() {
+            let row = start_y + i;
+            for (j, c) in line.chars().enumerate() {
+                let idx = row * plane.width as usize + x + 2 + j;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
+            }
+        }
+    }
 }
 
 fn format_time() -> String {
@@ -272,6 +364,11 @@ impl Widget for LogMonitor {
             p.cells[idx].bg = t.surface_elevated;
         }
 
+        // ── Help overlay ──
+        if self.show_help {
+            self.render_help_overlay(&mut p, area);
+        }
+
         p
     }
 
@@ -289,6 +386,24 @@ impl Widget for LogMonitor {
                 self.log_viewer.auto_scroll = true;
                 self.dirty = true;
                 true
+            }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Esc => {
+                if self.show_help {
+                    self.show_help = false;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
             }
             _ => false,
         }
