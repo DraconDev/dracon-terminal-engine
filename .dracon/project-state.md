@@ -1,21 +1,24 @@
 # Project State
 
 ## Current Focus
-Added hover state tracking to table widget for interactive row highlighting
+Added hover state tracking to list and table widgets for interactive row highlighting
 
 ## Context
-This change enables visual feedback when users hover over table rows, improving the interactive experience in the UI framework.
+This change implements visual feedback for mouse hover interactions in list and table widgets, improving user experience by providing clear visual cues for interactive elements.
 
 ## Completed
-- [x] Added `hovered_row` field to track currently hovered row
-- [x] Implemented hover state styling using theme's `hover_bg` color
+- [x] Added `hovered` field to track currently hovered item in List widget
+- [x] Implemented hover state rendering with distinct background color
+- [x] Added mouse move event handling to update hover state
+- [x] Implemented hover state tracking for Table widget rows
+- [x] Added proper state cleanup when mouse leaves widget area
 
 ## In Progress
-- [ ] None (feature is complete)
+- [ ] No active work in progress
 
 ## Blockers
-- None (hover state is fully implemented)
+- None identified
 
 ## Next Steps
-1. Verify hover behavior works with keyboard navigation
-2. Consider adding hover effects to other interactive widgets
+1. Add hover state styling customization through theme system
+2. Implement keyboard navigation that updates hover state

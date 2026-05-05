@@ -360,22 +360,49 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         _col: u16,
         row: u16,
     ) -> bool {
-        if row == 0 {
-            return false;
-        }
-
-        let rel_row = row.saturating_sub(1);
-        if rel_row >= self.visible_count as u16 {
-            return false;
-        }
-
-        let idx = self.offset + rel_row as usize;
-        if idx >= self.rows.len() {
-            return false;
-        }
-
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if row == 0 {
+                    if self.hovered_row.is_some() {
+                        self.hovered_row = None;
+                        self.dirty = true;
+                    }
+                    return false;
+                }
+                let rel_row = row.saturating_sub(1);
+                if rel_row >= self.visible_count as u16 {
+                    if self.hovered_row.is_some() {
+                        self.hovered_row = None;
+                        self.dirty = true;
+                    }
+                    return false;
+                }
+                let idx = self.offset + rel_row as usize;
+                if idx >= self.rows.len() {
+                    if self.hovered_row.is_some() {
+                        self.hovered_row = None;
+                        self.dirty = true;
+                    }
+                    return false;
+                }
+                if self.hovered_row != Some(idx) {
+                    self.hovered_row = Some(idx);
+                    self.dirty = true;
+                }
+                true
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+                if row == 0 {
+                    return false;
+                }
+                let rel_row = row.saturating_sub(1);
+                if rel_row >= self.visible_count as u16 {
+                    return false;
+                }
+                let idx = self.offset + rel_row as usize;
+                if idx >= self.rows.len() {
+                    return false;
+                }
                 self.selected = idx;
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.rows[idx].data);

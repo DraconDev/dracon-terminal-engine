@@ -22,6 +22,7 @@ pub struct List<T> {
     width: u16,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered: Option<usize>,
 }
 
 impl<T: Clone + ToString> List<T> {
@@ -39,6 +40,7 @@ impl<T: Clone + ToString> List<T> {
             width: 40,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
             dirty: true,
+            hovered: None,
         }
     }
 
@@ -56,6 +58,7 @@ impl<T: Clone + ToString> List<T> {
             width: 40,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
             dirty: true,
+            hovered: None,
         }
     }
 
@@ -185,9 +188,13 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
 
         for (i, item) in visible_items.iter().enumerate() {
             let row = i as u16;
-            let is_selected = self.offset + i == self.selected;
+            let idx = self.offset + i;
+            let is_selected = idx == self.selected;
+            let is_hovered = self.hovered == Some(idx);
             let bg = if is_selected {
                 self.theme.selection_bg
+            } else if is_hovered {
+                self.theme.hover_bg
             } else {
                 self.theme.bg
             };
@@ -300,15 +307,37 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         col: u16,
         row: u16,
     ) -> bool {
-        if col >= self.width || row >= self.visible_count as u16 {
-            return false;
-        }
-        let idx = self.offset + row as usize;
-        if idx >= self.items.len() {
-            return false;
-        }
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if col >= self.width || row >= self.visible_count as u16 {
+                    if self.hovered.is_some() {
+                        self.hovered = None;
+                        self.dirty = true;
+                    }
+                    return false;
+                }
+                let idx = self.offset + row as usize;
+                if idx >= self.items.len() {
+                    if self.hovered.is_some() {
+                        self.hovered = None;
+                        self.dirty = true;
+                    }
+                    return false;
+                }
+                if self.hovered != Some(idx) {
+                    self.hovered = Some(idx);
+                    self.dirty = true;
+                }
+                true
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+                if col >= self.width || row >= self.visible_count as u16 {
+                    return false;
+                }
+                let idx = self.offset + row as usize;
+                if idx >= self.items.len() {
+                    return false;
+                }
                 self.selected = idx;
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.items[idx]);
