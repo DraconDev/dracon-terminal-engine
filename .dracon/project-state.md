@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Enhanced IDE editor UI with language indicator and current line highlighting
 
 ## Context
-This change was triggered by recent refactoring work in the system monitor and sparkline rendering components, which required updated dependencies to resolve compatibility issues.
+Improving the visual feedback in the IDE editor by adding a language indicator and highlighting the current line for better code navigation
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency version changes
+- [x] Added language indicator (󱘫) in status bar
+- [x] Implemented current line highlighting in editor
+- [x] Refactored editor rendering to properly account for line numbers
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [x] Visual feedback improvements for code editing experience
 
 ## Blockers
-- None reported
+- None identified in this change
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with ongoing refactoring work in the system monitor and sparkline components
-```
+1. Test visual consistency across different file types
+2. Consider adding additional editor features like syntax highlighting

@@ -357,6 +357,7 @@ impl IdeApp {
                     ))
                     .with_fg(self.theme.fg_muted),
                 )
+                .add_segment(StatusSegment::new("󱘫 ").with_fg(self.theme.info))
                 .add_segment(StatusSegment::new(lang).with_fg(self.theme.info))
                 .add_segment(StatusSegment::new("UTF-8").with_fg(self.theme.fg_muted));
         }
@@ -1081,13 +1082,15 @@ impl IdeApp {
         plane: &mut Plane,
         x: u16,
         y: u16,
-        _w: u16,
+        w: u16,
         h: u16,
         tab: &EditorTab,
         t: Theme,
     ) {
         let lines: Vec<&str> = tab.content.lines().collect();
         let line_num_width = lines.len().to_string().len().max(2) as u16;
+        let content_x = x + line_num_width;
+        let editor_w = w.saturating_sub(line_num_width);
 
         for (i, line) in lines.iter().enumerate().take(h as usize) {
             let row = y + i as u16;
@@ -1112,7 +1115,6 @@ impl IdeApp {
             }
 
             // Line content with basic syntax highlighting
-            let content_x = x + line_num_width;
             for (j, ch) in line.chars().enumerate() {
                 let col = content_x + j as u16;
                 let idx = (row * plane.width + col) as usize;
@@ -1151,6 +1153,22 @@ impl IdeApp {
             if idx < plane.cells.len() {
                 plane.cells[idx].bg = t.primary_active;
                 plane.cells[idx].fg = t.fg_on_accent;
+            }
+        }
+
+        // Current line highlight
+        if cursor_row < plane.height {
+            for col in x..x + line_num_width {
+                let idx = (cursor_row * plane.width + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                }
+            }
+            for col in content_x..(content_x + editor_w.saturating_sub(line_num_width)) {
+                let idx = (cursor_row * plane.width + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                }
             }
         }
     }
