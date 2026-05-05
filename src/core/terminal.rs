@@ -92,7 +92,7 @@ impl<W: Write + AsFd> Terminal<W> {
     pub fn suspend(&mut self) -> io::Result<()> {
         let _ = write!(
             self.output,
-            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007h\x1b[?7h\x1b[?1049l"
+            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l"
         );
         let _ = self.output.flush();
         let _ = set_terminal_attr(self.output.as_fd(), &self.original_termios);

@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Terminal cleanup sequence now disables Kitty keyboard mode instead of enabling it
+Fix terminal cleanup sequence to disable Kitty keyboard mode instead of enabling it
 
 ## Context
-The terminal cleanup sequence was modified to ensure proper terminal state restoration by changing the Kitty keyboard mode from enabled to disabled.
+The terminal cleanup sequence was previously enabling Kitty keyboard mode (`?1007h`) when suspending, which could interfere with terminal behavior. This change corrects the sequence to disable it (`?1007l`) instead.
 
 ## Completed
-- [x] Changed `\x1b[?1007h` (enable Kitty keyboard) to `\x1b[?1007l` (disable Kitty keyboard) in terminal cleanup sequence
+- [x] Modified terminal suspend sequence to disable Kitty keyboard mode
+- [x] Maintained all other terminal state changes (cursor, modes, etc.)
 
 ## In Progress
-- [x] No active work in progress
+- [x] Terminal state management improvements
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify terminal state restoration works consistently across different terminal emulators
-2. Test edge cases where terminal emulators might not support all escape sequences
+1. Verify terminal behavior after suspend/resume
+2. Test with Kitty terminal emulator specifically
