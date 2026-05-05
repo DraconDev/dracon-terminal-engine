@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added keyboard shortcuts for theme cycling and help overlay in the menu system
+Added a help overlay to the menu system with keyboard shortcuts display
 
 ## Context
-This change implements requested keyboard shortcuts to enhance user interaction with the menu system. The 't' key cycles through themes, and '?' toggles the help overlay, improving accessibility and usability.
+This implements the `show_help` flag added in previous commits, providing users with a visual reference for available keyboard shortcuts in the menu system.
 
 ## Completed
-- [x] Added 't' key shortcut to cycle themes
-- [x] Added '?' key shortcut to toggle help overlay
+- [x] Added a centered help overlay with themed background
+- [x] Implemented bordered window with title
+- [x] Displayed keyboard shortcuts in a formatted grid
+- [x] Integrated with existing theme system
 
 ## In Progress
-- [x] Keyboard shortcut implementation for menu system
+- [x] Help overlay implementation
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify shortcuts work across all menu states
-2. Document new keyboard shortcuts in user documentation
+1. Add keyboard handling for help overlay (already in progress)
+2. Test with different terminal sizes to ensure proper rendering
