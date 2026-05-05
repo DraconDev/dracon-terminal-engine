@@ -94,6 +94,16 @@ impl Widget for SearchInput {
         self.base.handle_mouse(kind, col, row)
     }
 
+    fn on_focus(&mut self) {
+        self.base.focused = true;
+        self.base.dirty = true;
+    }
+
+    fn on_blur(&mut self) {
+        self.base.focused = false;
+        self.base.dirty = true;
+    }
+
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.base.theme = *theme;
     }

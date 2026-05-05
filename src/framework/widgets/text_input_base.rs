@@ -20,6 +20,7 @@ pub struct BaseInput {
     pub placeholder: String,
     pub mask_char: Option<char>,
     pub dirty: bool,
+    pub focused: bool,
 }
 
 impl BaseInput {
@@ -34,6 +35,7 @@ impl BaseInput {
             placeholder: placeholder.to_string(),
             mask_char: None,
             dirty: true,
+            focused: false,
         }
     }
 
@@ -85,6 +87,12 @@ impl BaseInput {
             self.text.clone()
         };
 
+        let bg = if self.focused {
+            self.theme.focus_bg
+        } else {
+            self.theme.input_bg
+        };
+
         for (i, c) in display.chars().take(width.saturating_sub(2)).enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
@@ -99,7 +107,7 @@ impl BaseInput {
                     bg: if is_cursor {
                         self.theme.fg
                     } else {
-                        self.theme.input_bg
+                        bg
                     },
                     style: Styles::empty(),
                     transparent: false,
