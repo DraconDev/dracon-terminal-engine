@@ -43,6 +43,7 @@ pub struct CommandPalette {
     height: u16,
     on_execute: Option<ExecuteCallback>,
     zones: RefCell<ScopedZoneRegistry<usize>>,
+    hovered_index: Option<usize>,
 }
 
 impl CommandPalette {
@@ -61,6 +62,7 @@ impl CommandPalette {
             height: 20,
             on_execute: None,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            hovered_index: None,
         }
     }
 
