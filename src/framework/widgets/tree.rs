@@ -2,8 +2,6 @@
 //!
 //! Renders a collapsible tree with expand/collapse state per node.
 
-use unicode_width::UnicodeWidthStr;
-
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
@@ -190,6 +188,7 @@ impl crate::framework::widget::Widget for Tree {
 
         let width = plane.cells.len() / plane.height as usize;
         let mut row = 0usize;
+        let hovered = &self.hovered_path;
 
         fn render_node(
             node: &TreeNode,
@@ -198,6 +197,8 @@ impl crate::framework::widget::Widget for Tree {
             theme: &Theme,
             width: usize,
             row: &mut usize,
+            current_path: &mut Vec<usize>,
+            hovered: &Option<Vec<usize>>,
         ) {
             if *row >= plane.height as usize {
                 return;
@@ -208,14 +209,16 @@ impl crate::framework::widget::Widget for Tree {
                 if node.expanded { "- " } else { "+ " },
                 node.label
             );
-            let _label_len = line.width().min(width);
+            let is_hovered = hovered.as_ref().map_or(false, |h| h == current_path);
+            let bg = if is_hovered { theme.hover_bg } else { theme.bg };
+            let fg = if is_hovered { theme.fg } else { theme.fg };
             for (i, c) in line.chars().take(width).enumerate() {
                 let idx = (*row as u16 * plane.width + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
                         char: c,
-                        fg: theme.fg,
-                        bg: theme.bg,
+                        fg,
+                        bg,
                         style: Styles::empty(),
                         transparent: false,
                         skip: false,
@@ -225,15 +228,18 @@ impl crate::framework::widget::Widget for Tree {
             *row += 1;
 
             if node.expanded {
-                for child in &node.children {
+                for (i, child) in node.children.iter().enumerate() {
+                    current_path.push(i);
                     let child_prefix = if node.expanded { "  " } else { "" };
-                    render_node(child, child_prefix, plane, theme, width, row);
+                    render_node(child, child_prefix, plane, theme, width, row, current_path, hovered);
+                    current_path.pop();
                 }
             }
         }
 
-        for node in &self.root {
-            render_node(node, "", &mut plane, &self.theme, width, &mut row);
+        for (i, node) in self.root.iter().enumerate() {
+            let mut path = vec![i];
+            render_node(node, "", &mut plane, &self.theme, width, &mut row, &mut path, hovered);
         }
 
         plane
@@ -324,6 +330,20 @@ impl crate::framework::widget::Widget for Tree {
                     }
                 }
                 true
+            }
+            crate::input::event::MouseEventKind::Moved => {
+                if let Some(path) = self.node_at_row(row) {
+                    if self.hovered_path.as_ref() != Some(&path) {
+                        self.hovered_path = Some(path);
+                        self.dirty = true;
+                        return true;
+                    }
+                } else if self.hovered_path.is_some() {
+                    self.hovered_path = None;
+                    self.dirty = true;
+                    return true;
+                }
+                false
             }
             _ => false,
         }
