@@ -43,18 +43,15 @@ const THEMES: &[&str] = &[
 
 struct MetricHistory {
     values: VecDeque<f64>,
-    #[allow(dead_code)]
-    label: String,
     unit: String,
     warn_threshold: f64,
     crit_threshold: f64,
 }
 
 impl MetricHistory {
-    fn new(label: &str, unit: &str, warn: f64, crit: f64) -> Self {
+    fn new(_label: &str, unit: &str, warn: f64, crit: f64) -> Self {
         Self {
             values: VecDeque::with_capacity(HISTORY_SIZE),
-            label: label.to_string(),
             unit: unit.to_string(),
             warn_threshold: warn,
             crit_threshold: crit,
