@@ -44,6 +44,7 @@ struct LogMonitor {
     filter_error: bool,
     filter_debug: bool,
     theme: Theme,
+    all_logs: Vec<String>,
 }
 
 impl LogMonitor {
