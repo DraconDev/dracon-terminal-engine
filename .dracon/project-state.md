@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added theme cycling functionality to the SQLite browser
+Added keyboard shortcuts for theme cycling and help toggle in the SQLite browser
 
 ## Context
-This change enables users to cycle through different visual themes in the SQLite browser application, improving customization and user experience.
+This change enhances the SQLite browser's user experience by providing quick access to theme switching and help documentation through keyboard shortcuts, aligning with recent UI improvements in other components.
 
 ## Completed
-- [x] Added theme cycling method that rotates through predefined themes
-- [x] Implemented theme propagation to all UI components (status bar, search input, results table)
-- [x] Updated dirty flag to trigger UI refresh after theme change
+- [x] Added 't' key shortcut to cycle themes
+- [x] Added '?' key shortcut to toggle help overlay
 
 ## In Progress
-- [ ] None (feature is complete)
+- [x] Keyboard shortcut integration for SQLite browser UI
 
 ## Blockers
-- None (feature is self-contained)
+- None identified for this specific change
 
 ## Next Steps
-1. Add keyboard shortcut for theme cycling
-2. Add visual indicator of current theme in status bar
+1. Verify theme cycling works across all browser components
+2. Test help overlay positioning and content accuracy

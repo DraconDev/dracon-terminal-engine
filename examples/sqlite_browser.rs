@@ -541,6 +541,15 @@ impl Widget for SqliteBrowser {
                     self.dirty = true;
                     true
                 }
+                KeyCode::Char('t') => {
+                    self.cycle_theme();
+                    true
+                }
+                KeyCode::Char('?') => {
+                    self.show_help = !self.show_help;
+                    self.dirty = true;
+                    true
+                }
                 KeyCode::Tab => {
                     self.active_panel = match self.active_panel {
                         Panel::Tables => Panel::Query,
