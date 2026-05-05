@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Removed unused column sorting toggle method from table widget
+Dependency version bump in Cargo.lock
 
 ## Context
-This change eliminates redundant code that was previously part of the column sorting functionality in the table widget. The `toggle_sort` method was no longer needed after refactoring the header click handling and mouse event processing.
+This change was triggered by recent refactoring and feature additions to the table widget, particularly the column sorting functionality. The Cargo.lock update reflects dependency version adjustments needed to support these changes.
 
 ## Completed
-- [x] Removed unused `toggle_sort` method from table widget implementation
-- [x] Cleaned up associated imports and dependencies
+- [x] Updated Cargo.lock to reflect dependency versions compatible with the latest table widget features
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] No active work in progress beyond the dependency update
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify no functionality was affected by this removal
-2. Consider further code cleanup opportunities in the table widget
+1. Verify all dependencies are properly resolved and compatible with the current codebase
+2. Continue with any remaining table widget refinements or new features
