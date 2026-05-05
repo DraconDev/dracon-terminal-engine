@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added a `show_help` flag to the menu system for toggling help overlay visibility.
 
 ## Context
-This change updates the dependency versions in the project's lockfile to ensure consistent builds across environments.
+This change supports the interactive help overlay feature recently added to the data table widget. The `show_help` field will be used to control when the help overlay is displayed in the menu system.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `show_help` boolean field to `MenuApp` struct to track help overlay state
 
 ## In Progress
-- [x] Dependency version bump
+- [x] Implementation of help overlay rendering logic in the menu system
 
 ## Blockers
-- None
+- None identified for this specific change
 
 ## Next Steps
-1. Verify build consistency across environments
-2. Prepare for any potential breaking changes from updated dependencies
+1. Implement help overlay rendering logic using the `show_help` flag
+2. Integrate keyboard shortcuts for toggling help overlay (already implemented in other features)

@@ -43,6 +43,7 @@ struct MenuApp {
     area: Rect,
     should_quit: Arc<AtomicBool>,
     theme: Theme,
+    show_help: bool,
 }
 
 impl MenuApp {
