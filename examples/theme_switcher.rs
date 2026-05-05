@@ -84,6 +84,7 @@ fn vscode_dark() -> Theme {
         scrollbar_thumb_hover: Color::Rgb(110, 110, 110),
         disabled_fg: Color::Rgb(90, 90, 90),
         disabled_bg: Color::Rgb(45, 45, 45),
+        hover_bg: Color::Rgb(55, 55, 55),
         scrollbar_width: 1,
     }
 }

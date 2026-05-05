@@ -535,6 +535,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(127, 141, 141),
             disabled_fg: Color::Rgb(147, 161, 161),
             disabled_bg: Color::Rgb(240, 238, 230),
+            hover_bg: Color::Rgb(248, 245, 238),
             scrollbar_width: 1,
         }
     }
@@ -578,6 +579,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(82, 86, 96),
             disabled_fg: Color::Rgb(124, 131, 141),
             disabled_bg: Color::Rgb(48, 52, 60),
+            hover_bg: Color::Rgb(52, 56, 68),
             scrollbar_width: 1,
         }
     }
@@ -621,6 +623,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(80, 75, 95),
             disabled_fg: Color::Rgb(100, 90, 100),
             disabled_bg: Color::Rgb(40, 38, 55),
+            hover_bg: Color::Rgb(52, 50, 68),
             scrollbar_width: 1,
         }
     }
@@ -664,6 +667,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(108, 110, 132),
             disabled_fg: Color::Rgb(100, 95, 110),
             disabled_bg: Color::Rgb(45, 47, 68),
+            hover_bg: Color::Rgb(50, 52, 78),
             scrollbar_width: 1,
         }
     }
@@ -707,6 +711,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(100, 110, 90),
             disabled_fg: Color::Rgb(100, 110, 90),
             disabled_bg: Color::Rgb(48, 53, 45),
+            hover_bg: Color::Rgb(55, 62, 52),
             scrollbar_width: 1,
         }
     }
@@ -750,6 +755,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(120, 115, 100),
             disabled_fg: Color::Rgb(130, 125, 110),
             disabled_bg: Color::Rgb(45, 46, 38),
+            hover_bg: Color::Rgb(58, 59, 48),
             scrollbar_width: 1,
         }
     }
