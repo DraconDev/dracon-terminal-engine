@@ -415,6 +415,15 @@ impl Widget for SqliteBrowser {
             true,
         );
 
+        // Separator between query and results
+        for x in 0..right_rect.width {
+            let idx = (results_y * area.width + left_rect.width + 1 + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
         if let Some(ref table) = self.results_table {
             let table_plane = table.render(Rect::new(
                 left_rect.width + 2,
