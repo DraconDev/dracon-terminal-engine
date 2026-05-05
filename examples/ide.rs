@@ -128,10 +128,10 @@ impl IdeApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let tabs = vec![
             EditorTab::new("main.rs").with_content(
-                "use std::io;\n\nfn main() {\n    println!(\"Hello, Dracon!\");\n}\n",
+                "use std::io::{self, Write};\nuse std::process;\n\nfn main() -> io::Result<()> {\n    print!(\"Enter your name: \");\n    io::stdout().flush()?;\n\n    let mut name = String::new();\n    io::stdin().read_line(&mut name)?;\n\n    let name = name.trim();\n    if name.is_empty() {\n        eprintln!(\"Error: name cannot be empty\");\n        process::exit(1);\n    }\n\n    println!(\"Hello, {}! Welcome to Dracon.\", name);\n    Ok(())\n}\n",
             ),
             EditorTab::new("lib.rs").with_content(
-                "pub fn greet(name: &str) -> String {\n    format!(\"Hello, {}!\", name)\n}\n",
+                "/// A simple greeting module\npub fn greet(name: &str) -> String {\n    format!(\"Hello, {}!\", name)\n}\n\n/// Calculate the factorial of n\npub fn factorial(n: u64) -> u64 {\n    match n {\n        0 | 1 => 1,\n        n => n * factorial(n - 1),\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_greet() {\n        assert_eq!(greet(\"World\"), \"Hello, World!\");\n    }\n\n    #[test]\n    fn test_factorial() {\n        assert_eq!(factorial(5), 120);\n    }\n}\n",
             ),
         ];
 

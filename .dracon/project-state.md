@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added a help overlay toggle flag to the IDE example
+Enhanced the IDE example with a more interactive main.rs and added factorial function with tests to lib.rs
 
 ## Context
-This change implements the foundation for a help overlay feature in the IDE example, which was previously removed. The toggle flag will enable/disable the help overlay when implemented.
+The changes improve the IDE example by making the main.rs more interactive with user input handling and error cases, while adding a factorial function with tests to demonstrate proper Rust module organization.
 
 ## Completed
-- [x] Added `show_help` boolean field to `IdeApp` struct
-- [x] Initialized the field to `false` in the struct initialization
+- [x] Updated main.rs to include interactive input handling with proper error cases
+- [x] Added factorial function with recursive implementation to lib.rs
+- [x] Added comprehensive test cases for both greet and factorial functions
+- [x] Added documentation comments to both functions
 
 ## In Progress
-- [ ] Implementation of the actual help overlay UI and functionality
+- [x] No active work in progress beyond these changes
 
 ## Blockers
-- Help overlay UI and keyboard shortcut documentation still needs to be implemented
+- None identified for this commit
 
 ## Next Steps
-1. Implement the help overlay UI component
-2. Add keyboard shortcut handling for the help overlay
+1. Verify the interactive functionality works as expected
+2. Consider adding more example functions to demonstrate different Rust concepts
