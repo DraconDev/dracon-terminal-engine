@@ -26,17 +26,17 @@ const THEMES: &[&str] = &[
     "catppuccin", "solarized-dark", "one-dark", "rose-pine",
 ];
 
-// Widget slot positions in the grid (row, col)
-const WIDGET_SLOTS: &[(usize, usize, &str)] = &[
-    (0, 0, "Checkbox"),
-    (0, 1, "Radio"),
-    (0, 2, "Toggle"),
-    (0, 3, "Spinner"),
-    (1, 0, "Slider"),
-    (1, 1, "Select"),
-    (1, 2, "Search Input"),
-    (2, 0, "Progress Bar"),
-    (2, 1, "Button"),
+// Widget slot positions in the grid (row, col, name, icon)
+const WIDGET_SLOTS: &[(usize, usize, &str, &str)] = &[
+    (0, 0, "Checkbox", "󰄵"),
+    (0, 1, "Radio", "󰑃"),
+    (0, 2, "Toggle", "󰔡"),
+    (0, 3, "Spinner", "󰝥"),
+    (1, 0, "Slider", "󰜈"),
+    (1, 1, "Select", "󰑇"),
+    (1, 2, "Search Input", "󰍉"),
+    (2, 0, "Progress Bar", "󰖎"),
+    (2, 1, "Button", "󰔂"),
 ];
 
 struct WidgetGallery {
