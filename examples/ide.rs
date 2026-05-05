@@ -444,6 +444,18 @@ fn file_icon(name: &str) -> &'static str {
         " "
     } else if name.ends_with(".md") {
         " "
+    } else if name.ends_with(".json") || name.ends_with(".yaml") || name.ends_with(".yml") {
+        " "
+    } else if name.ends_with(".js") || name.ends_with(".ts") {
+        " "
+    } else if name.ends_with(".py") {
+        " "
+    } else if name.ends_with(".sh") || name.ends_with(".bash") {
+        " "
+    } else if name.ends_with(".html") || name.ends_with(".css") {
+        " "
+    } else if name.ends_with(".gitignore") || name.ends_with(".lock") {
+        "﬍ "
     } else {
         " "
     }
