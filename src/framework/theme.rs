@@ -95,6 +95,10 @@ pub struct Theme {
     // Hover
     pub hover_bg: Color,
 
+    // Focus
+    pub focus_bg: Color,
+    pub focus_border: Color,
+
     // Scrollbar width
     pub scrollbar_width: u16,
 }
@@ -140,6 +144,8 @@ impl Theme {
             disabled_fg: Color::Rgb(80, 80, 100),
             disabled_bg: Color::Rgb(35, 35, 50),
             hover_bg: Color::Rgb(40, 40, 56),
+            focus_bg: Color::Rgb(50, 50, 70),
+            focus_border: Color::Rgb(0, 200, 120),
             scrollbar_width: 1,
         }
     }
@@ -184,6 +190,8 @@ impl Theme {
             disabled_fg: Color::Rgb(150, 150, 155),
             disabled_bg: Color::Rgb(235, 235, 240),
             hover_bg: Color::Rgb(240, 240, 245),
+            focus_bg: Color::Rgb(230, 230, 240),
+            focus_border: Color::Rgb(0, 100, 180),
             scrollbar_width: 1,
         }
     }
@@ -228,6 +236,8 @@ impl Theme {
             disabled_fg: Color::Rgb(0, 80, 50),
             disabled_bg: Color::Rgb(20, 20, 30),
             hover_bg: Color::Rgb(25, 25, 40),
+            focus_bg: Color::Rgb(35, 35, 55),
+            focus_border: Color::Rgb(255, 0, 100),
             scrollbar_width: 1,
         }
     }
@@ -272,6 +282,8 @@ impl Theme {
             disabled_fg: Color::Rgb(68, 71, 90),
             disabled_bg: Color::Rgb(50, 52, 64),
             hover_bg: Color::Rgb(58, 60, 76),
+            focus_bg: Color::Rgb(68, 70, 86),
+            focus_border: Color::Rgb(255, 121, 198),
             scrollbar_width: 1,
         }
     }
@@ -316,6 +328,8 @@ impl Theme {
             disabled_fg: Color::Rgb(119, 128, 144),
             disabled_bg: Color::Rgb(50, 55, 68),
             hover_bg: Color::Rgb(56, 62, 78),
+            focus_bg: Color::Rgb(66, 72, 88),
+            focus_border: Color::Rgb(136, 192, 208),
             scrollbar_width: 1,
         }
     }
@@ -360,6 +374,8 @@ impl Theme {
             disabled_fg: Color::Rgb(108, 112, 134),
             disabled_bg: Color::Rgb(40, 40, 58),
             hover_bg: Color::Rgb(52, 52, 72),
+            focus_bg: Color::Rgb(62, 62, 82),
+            focus_border: Color::Rgb(137, 180, 250),
             scrollbar_width: 1,
         }
     }
@@ -404,6 +420,8 @@ impl Theme {
             disabled_fg: Color::Rgb(120, 90, 60),
             disabled_bg: Color::Rgb(50, 45, 40),
             hover_bg: Color::Rgb(65, 60, 55),
+            focus_bg: Color::Rgb(75, 70, 65),
+            focus_border: Color::Rgb(214, 93, 14),
             scrollbar_width: 1,
         }
     }
@@ -448,6 +466,8 @@ impl Theme {
             disabled_fg: Color::Rgb(113, 117, 138),
             disabled_bg: Color::Rgb(40, 42, 54),
             hover_bg: Color::Rgb(42, 44, 58),
+            focus_bg: Color::Rgb(52, 54, 68),
+            focus_border: Color::Rgb(98, 130, 234),
             scrollbar_width: 1,
         }
     }
@@ -492,6 +512,8 @@ impl Theme {
             disabled_fg: Color::Rgb(88, 110, 117),
             disabled_bg: Color::Rgb(0, 55, 68),
             hover_bg: Color::Rgb(10, 55, 72),
+            focus_bg: Color::Rgb(20, 65, 82),
+            focus_border: Color::Rgb(38, 139, 210),
             scrollbar_width: 1,
         }
     }
@@ -536,6 +558,8 @@ impl Theme {
             disabled_fg: Color::Rgb(147, 161, 161),
             disabled_bg: Color::Rgb(240, 238, 230),
             hover_bg: Color::Rgb(248, 245, 238),
+            focus_bg: Color::Rgb(238, 235, 228),
+            focus_border: Color::Rgb(38, 139, 210),
             scrollbar_width: 1,
         }
     }
@@ -580,6 +604,8 @@ impl Theme {
             disabled_fg: Color::Rgb(124, 131, 141),
             disabled_bg: Color::Rgb(48, 52, 60),
             hover_bg: Color::Rgb(52, 56, 68),
+            focus_bg: Color::Rgb(62, 66, 78),
+            focus_border: Color::Rgb(97, 175, 239),
             scrollbar_width: 1,
         }
     }
@@ -624,6 +650,8 @@ impl Theme {
             disabled_fg: Color::Rgb(100, 90, 100),
             disabled_bg: Color::Rgb(40, 38, 55),
             hover_bg: Color::Rgb(52, 50, 68),
+            focus_bg: Color::Rgb(62, 60, 78),
+            focus_border: Color::Rgb(210, 160, 160),
             scrollbar_width: 1,
         }
     }
@@ -668,6 +696,8 @@ impl Theme {
             disabled_fg: Color::Rgb(100, 95, 110),
             disabled_bg: Color::Rgb(45, 47, 68),
             hover_bg: Color::Rgb(50, 52, 78),
+            focus_bg: Color::Rgb(60, 62, 88),
+            focus_border: Color::Rgb(166, 122, 102),
             scrollbar_width: 1,
         }
     }
@@ -712,6 +742,8 @@ impl Theme {
             disabled_fg: Color::Rgb(100, 110, 90),
             disabled_bg: Color::Rgb(48, 53, 45),
             hover_bg: Color::Rgb(55, 62, 52),
+            focus_bg: Color::Rgb(65, 72, 62),
+            focus_border: Color::Rgb(148, 181, 97),
             scrollbar_width: 1,
         }
     }
@@ -756,6 +788,8 @@ impl Theme {
             disabled_fg: Color::Rgb(130, 125, 110),
             disabled_bg: Color::Rgb(45, 46, 38),
             hover_bg: Color::Rgb(58, 59, 48),
+            focus_bg: Color::Rgb(68, 69, 58),
+            focus_border: Color::Rgb(166, 226, 50),
             scrollbar_width: 1,
         }
     }

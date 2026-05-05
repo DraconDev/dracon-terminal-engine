@@ -85,6 +85,8 @@ fn vscode_dark() -> Theme {
         disabled_fg: Color::Rgb(90, 90, 90),
         disabled_bg: Color::Rgb(45, 45, 45),
         hover_bg: Color::Rgb(55, 55, 55),
+        focus_bg: Color::Rgb(65, 65, 65),
+        focus_border: Color::Rgb(0, 122, 204),
         scrollbar_width: 1,
     }
 }
@@ -128,6 +130,8 @@ fn vscode_light() -> Theme {
         disabled_fg: Color::Rgb(150, 150, 150),
         disabled_bg: Color::Rgb(235, 235, 240),
         hover_bg: Color::Rgb(245, 245, 250),
+        focus_bg: Color::Rgb(235, 235, 240),
+        focus_border: Color::Rgb(0, 122, 204),
         scrollbar_width: 1,
     }
 }
@@ -171,6 +175,8 @@ fn autumn() -> Theme {
         disabled_fg: Color::Rgb(100, 90, 75),
         disabled_bg: Color::Rgb(48, 42, 38),
         hover_bg: Color::Rgb(58, 52, 46),
+        focus_bg: Color::Rgb(68, 62, 56),
+        focus_border: Color::Rgb(200, 140, 80),
         scrollbar_width: 1,
     }
 }
