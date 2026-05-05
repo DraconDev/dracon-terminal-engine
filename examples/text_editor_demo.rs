@@ -373,6 +373,12 @@ impl Widget for EditorApp {
             render_help_overlay(&mut plane, area, t);
         }
 
+        // Command palette overlay
+        if self.command_palette.is_visible() {
+            let pal_plane = self.command_palette.render(area);
+            blit(&mut plane, &pal_plane, 0, 0);
+        }
+
         plane
     }
 
@@ -433,6 +439,11 @@ impl Widget for EditorApp {
                     tab.modified = false;
                 }
                 self.sync_tab_bar();
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.open_command_palette();
                 self.dirty = true;
                 true
             }
