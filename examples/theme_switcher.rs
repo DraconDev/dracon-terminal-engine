@@ -679,7 +679,7 @@ impl Widget for WidgetDemoPanel {
 
         // Checkbox previews
         let chk_row = 3;
-        let chk_x = btn_x + btn_text.len() as u16 + 3;
+        let mut chk_x = btn_x + btn_text.len() as u16 + 3;
         let checks = [(true, theme.success), (false, theme.fg_muted), (true, theme.primary)];
         for (checked, color) in checks.iter() {
             let mark = if *checked { "󰄬" } else { "󰄱" };
