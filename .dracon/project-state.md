@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Added help toggle state to SQLite browser UI
+Updated the SQLite browser status bar with new keyboard shortcut information
 
 ## Context
-This change enables the help functionality in the SQLite browser by adding a state variable to track whether the help overlay should be displayed.
+This change enhances user visibility of available keyboard shortcuts in the SQLite browser UI, following recent work on help toggles and theme cycling in other components.
 
 ## Completed
-- [x] Added `show_help` boolean field to track help overlay visibility
+- [x] Added 't: theme' shortcut to status bar
+- [x] Added '?: help' shortcut to status bar
+- [x] Updated status bar formatting to maintain consistent styling
 
 ## In Progress
-- [x] Help toggle functionality implementation
+- [x] Status bar UI improvements
 
 ## Blockers
-- Help overlay UI implementation needs to be completed
+- None identified
 
 ## Next Steps
-1. Implement help overlay UI components
-2. Add keyboard shortcut for toggling help
+1. Verify status bar updates don't affect layout
+2. Test keyboard shortcut functionality in browser

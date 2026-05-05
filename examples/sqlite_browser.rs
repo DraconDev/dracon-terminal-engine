@@ -77,7 +77,7 @@ impl SqliteBrowser {
         let status_bar = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new("SQLite Browser").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("Tab: switch | e: edit | r: refresh | q: quit")
+                StatusSegment::new("Tab: switch | e: edit | r: refresh | t: theme | ?: help | q: quit")
                     .with_fg(theme.fg_muted),
             );
 
