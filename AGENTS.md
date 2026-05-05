@@ -235,6 +235,35 @@ fn render_help_overlay(&self, plane: &mut Plane) {
 - Dismiss: `Esc` or `?` key sets `self.show_help = false`
 - Rendered after main content as overlay
 
+### Theme Cycling
+
+Most examples support `t` key to cycle themes:
+```rust
+fn cycle_theme(&mut self) {
+    let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+    let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+    self.theme = themes[(idx + 1) % themes.len()];
+    // Update all widget themes
+    self.menu_bar.on_theme_change(&self.theme);
+    self.search_input.on_theme_change(&self.theme);
+    // ...
+}
+```
+
+### SparklineConfig Pattern
+
+For rendering sparkline charts, use `SparklineConfig` struct to avoid too-many-args warnings:
+```rust
+struct SparklineConfig {
+    x: u16, y: u16, w: u16, h: u16,
+    color: Color, bg: Color,
+}
+
+fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
+    // ...
+}
+```
+
 ### file_manager (`examples/_apps/file_manager.rs`)
 - Uses `SplitPane` with stored mutable state + divider drag resize
 - Breadcrumb click navigation via inline position computation
