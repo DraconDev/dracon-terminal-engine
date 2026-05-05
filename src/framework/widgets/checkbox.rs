@@ -18,6 +18,7 @@ pub struct Checkbox {
     on_change: Option<Box<dyn FnMut(bool)>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered: bool,
 }
 
 impl Checkbox {
@@ -31,6 +32,7 @@ impl Checkbox {
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
             dirty: true,
+            hovered: false,
         }
     }
 

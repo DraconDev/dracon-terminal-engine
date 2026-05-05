@@ -162,17 +162,30 @@ impl crate::framework::widget::Widget for Button {
         row: u16,
     ) -> bool {
         let area = self.area.get();
-        if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height
-        {
-            if let crate::input::event::MouseEventKind::Down(_) = kind {
+        let inside = col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height;
+        
+        match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if inside {
+                    if !self.hovered {
+                        self.hovered = true;
+                        self.dirty = true;
+                    }
+                } else if self.hovered {
+                    self.hovered = false;
+                    self.dirty = true;
+                }
+                false
+            }
+            crate::input::event::MouseEventKind::Down(_) if inside => {
                 if let Some(ref mut cb) = self.on_click {
                     cb();
                 }
                 self.dirty = true;
-                return true;
+                true
             }
+            _ => false,
         }
-        false
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
