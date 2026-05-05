@@ -342,9 +342,12 @@ impl crate::framework::widget::Widget for CommandPalette {
             let cmd = filtered[cmd_idx];
             let y = list_start_y + i as u16;
             let is_selected = cmd_idx == self.selected_index;
+            let is_hovered = self.hovered_index == Some(cmd_idx);
 
             let (fg, bg) = if is_selected {
                 (t.fg_on_accent, t.primary_active)
+            } else if is_hovered {
+                (t.fg, t.hover_bg)
             } else {
                 (t.fg, t.surface_elevated)
             };
@@ -454,6 +457,31 @@ impl crate::framework::widget::Widget for CommandPalette {
         }
 
         match kind {
+            MouseEventKind::Moved => {
+                let cmd_id = {
+                    let zones = self.zones.borrow();
+                    zones.dispatch(col, row)
+                };
+                if let Some(cmd_idx) = cmd_id {
+                    if self.hovered_index != Some(cmd_idx) {
+                        self.hovered_index = Some(cmd_idx);
+                        self.dirty = true;
+                    }
+                } else {
+                    let (w, h) = (
+                        self.width.min(self.area.get().width),
+                        self.height.min(self.area.get().height),
+                    );
+                    let ox = (self.area.get().width.saturating_sub(w)) / 2;
+                    let oy = (self.area.get().height.saturating_sub(h)) / 3;
+                    let inside = col >= ox && col < ox + w && row >= oy && row < oy + h;
+                    if !inside && self.hovered_index.is_some() {
+                        self.hovered_index = None;
+                        self.dirty = true;
+                    }
+                }
+                return false;
+            }
             MouseEventKind::Down(MouseButton::Left) => {
                 let cmd_id = {
                     let zones = self.zones.borrow();
