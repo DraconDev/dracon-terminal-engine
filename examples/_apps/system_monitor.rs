@@ -494,7 +494,6 @@ impl Widget for SystemMonitor {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                // Process list area
                 if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2) {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
@@ -503,8 +502,17 @@ impl Widget for SystemMonitor {
                         return true;
                     }
                 }
-                // Click right side clears
                 if col >= self.area.width / 2 { self.selected_process = None; return true; }
+            }
+            MouseEventKind::Moved => {
+                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2) {
+                    let proc_row = (row - 9) as usize;
+                    let idx = self.process_scroll + proc_row;
+                    self.hovered_process = if idx < self.data.processes.len() { Some(idx) } else { None };
+                } else {
+                    self.hovered_process = None;
+                }
+                return true;
             }
             MouseEventKind::ScrollDown => {
                 let max_scroll = self.data.processes.len().saturating_sub(10);
