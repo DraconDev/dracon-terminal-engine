@@ -4,18 +4,18 @@
 Added customizable cell text rendering to the Table widget
 
 ## Context
-The Table widget now needs to support dynamic cell content generation rather than just displaying raw data. This enables more complex UI scenarios where cell text depends on both the row data and column index.
+This change enables developers to customize how cell content is displayed in the Table widget, allowing for more flexible data presentation.
 
 ## Completed
-- [x] Added `CellTextFn<T>` type alias for custom cell text rendering
-- [x] Integrated cell text function into Table struct
+- [x] Added `cell_text_fn` field to Table struct for custom text rendering
+- [x] Initialized `cell_text_fn` as None in both Table constructors
 
 ## In Progress
-- [x] Implementation of cell rendering using the new function
+- [ ] Implement the actual text rendering logic using the provided function
 
 ## Blockers
-- Need to implement the actual rendering logic that uses this function
+- Need to implement the rendering logic that will use the `cell_text_fn` callback
 
 ## Next Steps
-1. Implement the cell rendering logic in the Table's render method
-2. Add documentation for the new cell text customization feature
+1. Implement the cell rendering logic that will call the provided function
+2. Add documentation for the new customization capability
