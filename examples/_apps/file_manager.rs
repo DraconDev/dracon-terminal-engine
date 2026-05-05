@@ -246,6 +246,7 @@ impl FileManager {
         self.theme = themes[(idx + 1) % themes.len()];
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
+        self.split.on_theme_change(&self.theme);
         self.dirty = true;
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
     }

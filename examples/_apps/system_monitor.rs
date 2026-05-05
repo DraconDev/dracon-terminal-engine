@@ -440,6 +440,26 @@ impl Widget for SystemMonitor {
                     draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
                 }
             }
+
+            // Scrollbar indicator
+            if self.data.processes.len() > max_visible {
+                let sb_x = area.width - 1;
+                let content_h = max_visible as u16;
+                let thumb_h = (max_visible as f32 / self.data.processes.len() as f32 * content_h as f32).max(1.0) as u16;
+                let thumb_y = (self.process_scroll as f32 / self.data.processes.len() as f32 * content_h as f32) as u16 + header_y + 1;
+                for i in 0..thumb_h {
+                    let y = thumb_y + i;
+                    if y < list_y + list_h - 1 {
+                        let idx = (y * area.width + sb_x) as usize;
+                        if idx < plane.cells.len() {
+                            plane.cells[idx].char = '▐';
+                            plane.cells[idx].fg = t.primary;
+                            plane.cells[idx].bg = t.surface;
+                            plane.cells[idx].transparent = false;
+                        }
+                    }
+                }
+            }
         }
 
         // ── Detail Panel (right side, when process selected) ──
@@ -633,10 +653,39 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
     let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
-    render_card_border(plane, hx, hy, hw, hh, t);
-    for cell in plane.cells.iter_mut() {
-        if cell.bg == t.surface { cell.bg = t.surface_elevated; }
+
+    // Fill background with surface_elevated
+    for y in hy..hy + hh {
+        for x in hx..hx + hw {
+            let idx = (y * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].transparent = false;
+            }
+        }
     }
+
+    // Draw rounded corners
+    let corners = [(hy, hx, '╭'), (hy, hx + hw - 1, '╮'), (hy + hh - 1, hx, '╰'), (hy + hh - 1, hx + hw - 1, '╯')];
+    for (r, c, ch) in corners {
+        let idx = (r * plane.width + c) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+    }
+    // Draw borders
+    for col in hx..hx + hw {
+        let idx = (hy * plane.width + col) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+        let idx2 = ((hy + hh - 1) * plane.width + col) as usize;
+        if idx2 < plane.cells.len() { plane.cells[idx2].char = '─'; plane.cells[idx2].fg = t.outline; }
+    }
+    for row in hy..hy + hh {
+        let idx = (row * plane.width + hx) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = '│'; plane.cells[idx].fg = t.outline; }
+        let idx2 = (row * plane.width + hx + hw - 1) as usize;
+        if idx2 < plane.cells.len() { plane.cells[idx2].char = '│'; plane.cells[idx2].fg = t.outline; }
+    }
+
     let lines = [
         (" System Monitor Help ", true),
         ("", false),

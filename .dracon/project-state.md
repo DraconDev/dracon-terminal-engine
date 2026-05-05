@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Added border rendering to the tree navigator's detail pane and ensured breadcrumbs follow theme changes
+Enhanced UI components with theme propagation and improved visual feedback
 
 ## Context
-This change improves the visual separation between the tree navigator's components by adding a border around the detail pane. It also ensures the breadcrumbs component properly updates when the theme changes, maintaining visual consistency across the UI.
+The changes propagate theme changes to more UI components and add visual feedback elements like scrollbars and help overlays to improve user experience.
 
 ## Completed
-- [x] Added border rendering around the detail pane using box-drawing characters
-- [x] Implemented theme change propagation to breadcrumbs component
-- [x] Maintained bounds checking for cell access to prevent out-of-bounds errors
+- [x] Added theme propagation to file manager's split component
+- [x] Implemented scrollbar indicator in system monitor
+- [x] Enhanced help overlay rendering with proper borders and background
+- [x] Added theme propagation to all widget gallery components
 
 ## In Progress
-- [x] Complete implementation of border rendering and theme synchronization
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify border rendering works across different terminal sizes
-2. Test theme changes with breadcrumbs to ensure visual consistency
+1. Verify theme propagation works consistently across all components
+2. Test scrollbar behavior with different content sizes
+3. Review help overlay positioning and readability

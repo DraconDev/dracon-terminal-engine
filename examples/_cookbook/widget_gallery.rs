@@ -100,6 +100,15 @@ impl WidgetGallery {
             "rose-pine" => Theme::rose_pine(),
             _ => Theme::nord(),
         };
+        self.checkbox.on_theme_change(&self.theme);
+        self.radio.on_theme_change(&self.theme);
+        self.slider.on_theme_change(&self.theme);
+        self.spinner.on_theme_change(&self.theme);
+        self.toggle.on_theme_change(&self.theme);
+        self.select.on_theme_change(&self.theme);
+        self.search.on_theme_change(&self.theme);
+        self.progress.on_theme_change(&self.theme);
+        self.button.on_theme_change(&self.theme);
     }
 
     fn widget_mut(&mut self, slot: usize) -> &mut dyn Widget {
