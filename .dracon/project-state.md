@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Removed unused header click handler and simplified table widget construction
+Added column sorting functionality to the table widget
 
 ## Context
-The previous implementation included an empty header click handler that wasn't being used, which was added during the column sorting feature development. This change removes the unused handler to clean up the codebase.
+This change implements column sorting in the table widget, allowing users to click column headers to sort data. It follows recent refactoring of the table widget's header handling and search functionality.
 
 ## Completed
-- [x] Removed unused `on_header_click` handler from table widget construction
-- [x] Simplified table widget initialization by removing redundant empty handler
+- [x] Added "Click col" to sort column help text in the overlay
+- [x] Updated Cargo.lock with dependency version bump
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Column sorting functionality is implemented but not yet fully integrated with the UI
 
 ## Blockers
-- None
+- Need to verify sorting behavior with large datasets
+- Requires visual confirmation of sorted column indicators
 
 ## Next Steps
-1. Review other unused handlers in the table widget
-2. Consider consolidating table widget construction patterns
+1. Complete UI integration for sorted column indicators
+2. Add descending sort option
+3. Test performance with large datasets

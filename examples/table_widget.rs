@@ -662,6 +662,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     let shortcuts = [
         ("↑/↓", "Navigate rows"),
         ("Enter", "Select row"),
+        ("Click col", "Sort column"),
         ("/", "Search/filter"),
         ("Esc", "Clear search"),
         ("t", "Cycle theme"),
