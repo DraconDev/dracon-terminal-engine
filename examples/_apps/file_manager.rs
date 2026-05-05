@@ -463,7 +463,6 @@ impl Widget for FileManager {
                     let mut meta_y = dy + 2;
                     let icon_col = 3;
                     let label_col = 12;
-                    let value_col = 22;
                     draw_text(&mut plane, dx + icon_col, meta_y, "Type:", t.fg_muted, t.surface_elevated, false);
                     draw_text(&mut plane, dx + label_col, meta_y, if node.is_dir { "Directory" } else { "File" }, t.fg, t.surface_elevated, false);
                     meta_y += 1;
