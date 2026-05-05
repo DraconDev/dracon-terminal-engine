@@ -1,23 +1,20 @@
 # Project State
 
 ## Current Focus
-Improved focus state styling for form widgets with consistent background handling
+Removed hardcoded row height in Table widget rendering
 
 ## Context
-This change builds on recent focus state improvements across widgets by adding proper background handling to form elements. The previous implementation used a hardcoded background color, which didn't properly reflect the focused state in the theme system.
+This change is part of ongoing refactoring of the Table widget to improve layout calculations. The hardcoded row height of 1 was removed to allow for more flexible row sizing.
 
 ## Completed
-- [x] Added focus state background color using theme's focus_bg
-- [x] Implemented full row background filling for consistent styling
-- [x] Updated all form element rendering to use the proper background color
-- [x] Maintained consistent styling for labels, inputs, and error messages
+- [x] Removed hardcoded row height value from Table widget rendering logic
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Refactoring of Table widget rendering logic to improve layout calculations
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify visual consistency with other focusable widgets
-2. Consider adding animation for focus transitions if needed
+1. Verify that row heights now scale appropriately with content
+2. Complete the refactoring of Table widget rendering logic

@@ -186,7 +186,6 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let row_height: u16 = 1;
         let mut x: u16 = 0;
 
         for (i, col) in self.columns.iter().enumerate() {
