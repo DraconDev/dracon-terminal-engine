@@ -636,9 +636,6 @@ impl Widget for Showcase {
 
                 // Message text
                 draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, true);
-            } else {
-                // Toast expired - clear animation
-                self.toast_anim = None;
             }
         }
 
