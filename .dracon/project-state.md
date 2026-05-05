@@ -1,20 +1,31 @@
 # Project State
 
 ## Current Focus
-Refactored table widget's card positioning logic to improve maintainability
+Enhanced the form demo with visual polish, icons, and theme cycling
 
 ## Context
-The table widget's layout code was being refactored to better handle terminal window resizing. This change is part of a larger effort to improve the widget's responsiveness and maintainability.
+The form demo was refactored to demonstrate more advanced UI patterns including:
+- Visual polish with rounded borders and icons
+- Theme cycling functionality
+- Help overlay and mouse support
+- Improved validation feedback
 
 ## Completed
-- [x] Renamed `card_x` to `_card_x` to indicate it's intentionally unused in the current implementation
+- [x] Added rounded border card layout with header bar
+- [x] Integrated nerd font icons for all field labels
+- [x] Implemented focus row highlighting with `focus_bg`
+- [x] Enhanced validation error display with icons and red text
+- [x] Added success toast with rounded border and icon
+- [x] Implemented theme cycling functionality (`t` key)
+- [x] Added help overlay (`?` key)
+- [x] Enabled mouse support for all form fields
 
 ## In Progress
-- [x] Refactoring of terminal window size handling in the table widget
+- [ ] Testing cross-platform compatibility of new visual elements
 
 ## Blockers
-- None identified in this change
+- None identified
 
 ## Next Steps
-1. Complete the terminal window size handling refactoring
-2. Verify the table widget's layout remains consistent across different terminal sizes
+1. Verify visual consistency across different terminal emulators
+2. Add more theme options to the theme cycling feature
