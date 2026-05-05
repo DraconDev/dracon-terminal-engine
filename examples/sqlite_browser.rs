@@ -405,21 +405,12 @@ impl Widget for SqliteBrowser {
             true,
         );
 
-        // Separator between query and results
-        for x in 0..right_rect.width {
-            let idx = (results_y * area.width + left_rect.width + 1 + x) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
-            }
-        }
-
         if let Some(ref table) = self.results_table {
             let table_plane = table.render(Rect::new(
-                left_rect.width + 2,
+                left_rect.width + 3,
                 results_y + 1,
-                right_rect.width.saturating_sub(2),
-                results_h.saturating_sub(1),
+                right_rect.width.saturating_sub(4),
+                results_h.saturating_sub(2),
             ));
             for (i, c) in table_plane.cells.iter().enumerate() {
                 if c.transparent {
@@ -427,24 +418,34 @@ impl Widget for SqliteBrowser {
                 }
                 let row = i / table_plane.width as usize;
                 let col = i % table_plane.width as usize;
-                let dst_x = left_rect.width + 2 + col as u16;
+                let dst_x = left_rect.width + 3 + col as u16;
                 let dst_y = results_y + 1 + row as u16;
                 let idx = (dst_y * area.width + dst_x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = c.clone();
                 }
             }
-            // Row count indicator
+            // Row count badge
             let count = self.results_rows.len();
-            let count_text = format!("{} rows", count);
-            draw_text(&mut plane, left_rect.width + 3, results_y + results_h - 1, &count_text, t.fg_muted, results_bg, false);
+            let count_text = format!(" {} rows ", count);
+            let count_x = area.width.saturating_sub(count_text.len() as u16 + 3);
+            draw_text(&mut plane, count_x, results_y + results_h - 2, &count_text, t.fg_on_accent, t.primary, true);
         } else {
             draw_text(
                 &mut plane,
-                left_rect.width + 3,
-                results_y + 2,
-                "No results",
+                left_rect.width + 5,
+                results_y + 3,
+                "No results to display",
                 t.fg_muted,
+                results_bg,
+                false,
+            );
+            draw_text(
+                &mut plane,
+                left_rect.width + 5,
+                results_y + 4,
+                "Run a query to see data",
+                t.fg_subtle,
                 results_bg,
                 false,
             );
