@@ -211,7 +211,7 @@ impl Widget for LogMonitor {
             let check = if *active { "✓" } else { " " };
             let label = format!("[{}] {}", check, lvl);
             for (j, c) in label.chars().enumerate() {
-                let idx = (2 * w + fx as usize + j) as usize;
+                let idx = 2 * w + fx as usize + j;
                 if idx < p.cells.len() {
                     let fg = if *active { *color } else { t.fg_muted };
                     p.cells[idx] = Cell { char: c, fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
