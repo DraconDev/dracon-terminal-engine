@@ -215,8 +215,8 @@ impl crate::framework::widget::Widget for CommandPalette {
             }
         }
 
-        // Border
-        let border_chars = ['┌', '─', '┐', '│', '│', '└', '─', '┘'];
+        // Border (rounded corners for GUI aesthetic)
+        let border_chars = ['╭', '─', '╮', '│', '│', '╰', '─', '╯'];
         for x in ox..ox + w {
             let t_idx = (oy * area.width + x) as usize;
             let b_idx = ((oy + h - 1) * area.width + x) as usize;

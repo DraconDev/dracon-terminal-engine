@@ -3,7 +3,6 @@
 use std::cell::Cell;
 
 use crate::compositor::{Plane, Styles};
-use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
@@ -241,11 +240,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 self.theme.fg
             };
 
-            let y_off = 1u16 + i as u16;
             let mut row_x: u16 = 0;
             for (j, col) in self.columns.iter().enumerate() {
                 let w = col.width.min(area.width.saturating_sub(row_x));
-                let _hit_zone = HitZone::new(self.offset + i, row_x, area.y + y_off, w, row_height);
 
                 for col_idx in 0..w {
                     let idx = y * area.width as usize + row_x as usize + col_idx as usize;
