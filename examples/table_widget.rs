@@ -287,6 +287,11 @@ impl Widget for TableApp {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        let mut plane = Plane::new(0, area.width, area.height);
+        let t = self.theme;
+
+        // Background
+        for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
             cell.fg = t.fg;
             cell.transparent = false;
