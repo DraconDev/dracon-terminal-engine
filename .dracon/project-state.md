@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added mouse interaction support to the Table widget
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security patches. It follows recent work on hover and focus state styling for interactive widgets.
+The Table widget now needs to handle mouse events for better user interaction, particularly for selecting and interacting with table cells.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `handle_mouse` method to process mouse events
+- [x] Delegated mouse event handling to the table's internal logic
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [ ] No active work in progress
 
 ## Blockers
-- None reported
+- None identified
 
 ## Next Steps
-1. Verify all dependencies work as expected
-2. Continue with ongoing hover state styling improvements
+1. Implement mouse interaction logic for table cells
+2. Add visual feedback for mouse interactions (e.g., hover states)

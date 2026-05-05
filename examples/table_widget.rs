@@ -138,6 +138,10 @@ impl Widget for TableApp {
             _ => self.table.handle_key(key),
         }
     }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.table.handle_mouse(kind, col, row)
+    }
 }
 
 fn main() -> std::io::Result<()> {
