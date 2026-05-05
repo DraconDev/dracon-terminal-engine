@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added documentation for rendering patterns and debugging techniques in the framework
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, likely to incorporate the latest compatible versions of project dependencies.
+The framework now supports two distinct rendering patterns, and developers need clear guidance on when to use each approach. The documentation also provides debugging tips for common blank-screen issues.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Added documentation for Widget Trait Auto-Render pattern
+- [x] Added documentation for InputRouter + Manual `ctx.add_plane()` pattern
+- [x] Included guidance on blank screen debugging
+- [x] Documented help overlay pattern used across examples
 
 ## In Progress
-- [x] Dependency version bump
+- [x] Documentation of rendering patterns and debugging techniques
 
 ## Blockers
-- None reported
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application with the new dependency versions
+1. Review documentation for completeness
+2. Update example apps to follow documented patterns consistently

@@ -171,6 +171,70 @@ The following type aliases are used for cleaner signatures and to avoid "very co
 
 ## Example App Patterns
 
+### Rendering Patterns
+
+There are **two ways** to render content in the framework:
+
+**Pattern 1: Widget Trait Auto-Render**
+```rust
+impl Widget for MyApp {
+    fn needs_render(&self) -> bool { self.dirty }
+    fn render(&self, area: Rect) -> Plane { /* full render */ }
+}
+```
+- App framework automatically calls `render()` when `needs_render()` returns true
+- Set `self.dirty = true` after state changes to trigger re-render
+- Used by: `file_manager`, `git_tui`, `sqlite_browser`, `widget_gallery`, `dashboard_builder`
+
+**Pattern 2: InputRouter + Manual `ctx.add_plane()`**
+```rust
+// Router widget with needs_render() -> false
+impl Widget for MyRouter {
+    fn needs_render(&self) -> bool { false }
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.app.borrow_mut().handle_key(key)
+    }
+}
+
+// App-level rendering in on_tick
+app.on_tick(move |ctx, _| {
+    let mut app = app.borrow_mut();
+    app.tick();
+    let (w, h) = ctx.compositor().size();
+    let plane = app.render(Rect::new(0, 0, w, h));
+    ctx.add_plane(plane);
+})
+```
+- Must explicitly call `ctx.add_plane()` in `on_tick` callback
+- `needs_render()` returns false — App doesn't auto-render from widget
+- Used by: `system_monitor`, `ide`, `chat_client`, `log_monitor`, `modal_demo`
+
+**Which pattern to use?**
+- Use **Pattern 1** (Widget trait) for simpler apps where App framework handles render scheduling
+- Use **Pattern 2** (InputRouter) when you need app-level control over render timing or shared state across ticks
+
+### Blank Screen Debugging
+
+If an example shows nothing:
+1. Check `needs_render()` — does it return `true` (or `false` with `ctx.add_plane()` in on_tick)?
+2. Check if widget is added to App via `app.add_widget()`
+3. Check if `on_tick` callback exists and runs
+4. Verify `dirty` flag is set after state changes (Pattern 1)
+
+### Help Overlay Pattern
+
+Many examples use a consistent help overlay (toggle with `?` key):
+```rust
+fn render_help_overlay(&self, plane: &mut Plane) {
+    let w = 50.min(plane.width);
+    let h = 15.min(plane.height);
+    // Draw centered box with shortcuts
+}
+```
+- Toggle: `?` key sets `self.show_help = true`
+- Dismiss: `Esc` or `?` key sets `self.show_help = false`
+- Rendered after main content as overlay
+
 ### file_manager (`examples/_apps/file_manager.rs`)
 - Uses `SplitPane` with stored mutable state + divider drag resize
 - Breadcrumb click navigation via inline position computation
