@@ -171,14 +171,15 @@ impl Widget for WidgetGallery {
         }
 
         // Widget cards
-        for (slot, &(_row, _col, name)) in WIDGET_SLOTS.iter().enumerate() {
+        for (slot, &(_row, _col, name, icon)) in WIDGET_SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, area);
             let is_selected = slot == self.selected;
 
             render_card_border(&mut plane, rect, t, is_selected);
 
-            // Title
-            draw_text(&mut plane, rect.x + 1, rect.y + 1, name, t.primary, t.surface, true);
+            // Title with icon
+            let title = format!("{} {}", icon, name);
+            draw_text(&mut plane, rect.x + 1, rect.y + 1, &title, t.primary, t.surface, true);
 
             // Render the widget into its card
             let widget_area = Rect::new(rect.x + 1, rect.y + 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
