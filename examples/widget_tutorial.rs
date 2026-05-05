@@ -708,7 +708,7 @@ fn main() -> std::io::Result<()> {
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
 
     // ---- Theme cycling helper ----
-    let cycle_theme_fn = || {
+    let _cycle_theme_fn = || {
         current_theme_idx = (current_theme_idx + 1) % themes.len();
         themes[current_theme_idx].clone()
     };
