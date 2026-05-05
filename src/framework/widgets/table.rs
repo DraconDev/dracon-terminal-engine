@@ -58,6 +58,9 @@ impl<T: Clone + ToString> Table<T> {
             theme: Theme::default(),
             on_select: None,
             cell_text_fn: None,
+            on_header_click: None,
+            sort_column: None,
+            sort_ascending: true,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
             hovered_row: None,
@@ -76,6 +79,9 @@ impl<T: Clone + ToString> Table<T> {
             theme: Theme::default(),
             on_select: None,
             cell_text_fn: None,
+            on_header_click: None,
+            sort_column: None,
+            sort_ascending: true,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
             hovered_row: None,
@@ -114,6 +120,22 @@ impl<T: Clone + ToString> Table<T> {
     {
         self.cell_text_fn = Some(Box::new(f));
         self
+    }
+
+    /// Registers a callback invoked when a column header is clicked.
+    pub fn on_header_click<F>(mut self, f: F) -> Self
+    where
+        F: FnMut(usize) + 'static,
+    {
+        self.on_header_click = Some(Box::new(f));
+        self
+    }
+
+    /// Sets the active sort column and direction for rendering indicators.
+    pub fn set_sort(&mut self, column: Option<usize>, ascending: bool) {
+        self.sort_column = column;
+        self.sort_ascending = ascending;
+        self.dirty = true;
     }
 
     /// Returns the index of the currently selected row.
@@ -222,14 +244,31 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 }
             }
 
-            let label_len = col.header.len().min(w as usize - 2);
+            let label = if self.sort_column == Some(i) {
+                if self.sort_ascending {
+                    format!("{} ▲", col.header)
+                } else {
+                    format!("{} ▼", col.header)
+                }
+            } else {
+                col.header.clone()
+            };
+            let label_len = label.len().min(w as usize - 2);
             let start = (w.saturating_sub(label_len as u16)) / 2;
-            for (j, ch) in col.header.chars().take(label_len).enumerate() {
+            for (j, ch) in label.chars().take(label_len).enumerate() {
                 let idx = start as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = self.theme.fg;
-                    plane.cells[idx].style = Styles::empty();
+                    plane.cells[idx].fg = if self.sort_column == Some(i) {
+                        self.theme.primary
+                    } else {
+                        self.theme.fg
+                    };
+                    plane.cells[idx].style = if self.sort_column == Some(i) {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
 
@@ -411,6 +450,18 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if row == 0 {
+                    // Header click — determine which column
+                    let mut col_x: u16 = 0;
+                    for (i, col) in self.columns.iter().enumerate() {
+                        let w = col.width.min(area.width.saturating_sub(col_x));
+                        if col >= col_x && col < col_x + w {
+                            if let Some(f) = self.on_header_click.as_mut() {
+                                f(i);
+                            }
+                            return true;
+                        }
+                        col_x += w;
+                    }
                     return false;
                 }
                 let rel_row = row.saturating_sub(1);

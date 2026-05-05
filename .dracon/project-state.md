@@ -1,21 +1,24 @@
 # Project State
 
 ## Current Focus
-Added header click handling to the table widget for column sorting functionality.
+Enhanced table widget with column sorting functionality
 
 ## Context
-The table widget needs to support user-initiated sorting by column headers. This change enables click callbacks on headers and prepares the data structure for tracking sort state.
+The table widget needed improved usability by allowing users to sort data by clicking column headers. This change adds visual indicators for the current sort column and direction, and triggers callbacks when headers are clicked.
 
 ## Completed
-- [x] Added `HeaderClickCallback` type for header click handling
-- [x] Added `sort_column` and `sort_ascending` fields to track sort state
+- [x] Added header click callback system
+- [x] Implemented sort state tracking (column + direction)
+- [x] Added visual indicators (▲/▼) for sorted columns
+- [x] Styled sorted headers with bold text and primary color
+- [x] Maintained backward compatibility with existing table functionality
 
 ## In Progress
-- [ ] Implementation of actual sorting logic when headers are clicked
+- [ ] No active work in progress
 
 ## Blockers
-- Need to implement the actual sorting behavior that will use these new fields
+- None identified
 
 ## Next Steps
-1. Implement the sorting logic that uses the new callback and state fields
-2. Add visual indicators for sorted columns (arrows, highlighting)
+1. Add unit tests for the new sorting functionality
+2. Document the new API methods in the widget's documentation
