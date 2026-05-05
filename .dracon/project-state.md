@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Refactored column sorting logic in the table widget to improve maintainability.
 
 ## Context
-This change was triggered by recent refactoring and feature additions to the table widget, particularly the column sorting functionality. The Cargo.lock update reflects dependency version adjustments needed to support these changes.
+The previous implementation had duplicate sorting toggle logic in both the `TableApp` and `Widget` implementations. This refactoring consolidates the sorting functionality to avoid code duplication and improve maintainability.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency versions compatible with the latest table widget features
+- [x] Moved `toggle_sort` method from `Widget` trait implementation to `TableApp` implementation
+- [x] Maintained all existing sorting functionality while reducing code duplication
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] No active work in progress for this change
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify all dependencies are properly resolved and compatible with the current codebase
-2. Continue with any remaining table widget refinements or new features
+1. Verify the refactored sorting still works with existing UI interactions
+2. Consider adding unit tests for the sorting functionality
