@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -283,7 +283,7 @@ impl Widget for CommandBindings {
         render_card(&mut p, 2, 3, 24, 8, t);
         let card_title = " 󰓃 CPU ";
         for (i, c) in card_title.chars().enumerate() {
-            p.cells[(3 * w + 3 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 3 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
         }
         let gauge_area = Rect::new(3, 5, 22, 5);
         let gp = self.gauge.render(gauge_area);
@@ -293,7 +293,7 @@ impl Widget for CommandBindings {
         render_card(&mut p, 28, 3, 24, 8, t);
         let status_title = " 󰀄 Connection ";
         for (i, c) in status_title.chars().enumerate() {
-            p.cells[(3 * w + 29 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 29 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
         }
         let status_area = Rect::new(29, 5, 22, 5);
         let sp = self.status.render(status_area);
