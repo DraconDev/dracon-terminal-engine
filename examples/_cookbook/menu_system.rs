@@ -96,7 +96,6 @@ impl MenuApp {
         self.theme = themes[(idx + 1) % themes.len()];
         self.status_bar.on_theme_change(&self.theme);
         self.list.on_theme_change(&self.theme);
-        self.dirty = true;
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
