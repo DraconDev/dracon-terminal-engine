@@ -244,12 +244,7 @@ impl TableApp {
             .with_theme(self.theme)
             .with_rows(self.filtered_users.clone())
             .with_cell_text_fn(cell_fn)
-            .on_select(|_user| {})
-            .on_header_click(move |col| {
-                // This closure is captured but we need to handle sort state
-                // We'll use a bridge pattern since on_header_click doesn't return state
-                let _ = col;
-            });
+            .on_select(|_user| {});
         new_table.set_visible_count((self.area.height.saturating_sub(10)) as usize);
         new_table.set_sort(sort_col, sort_asc);
         self.table = new_table;

@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Added column sorting functionality to the table widget with header click handling
+Removed unused header click handler and simplified table widget construction
 
 ## Context
-This change implements column sorting for the table widget, allowing users to click on column headers to sort data either ascending or descending. It builds on previous refactoring work to properly expose column indices and rebuild the table display.
+The previous implementation included an empty header click handler that wasn't being used, which was added during the column sorting feature development. This change removes the unused handler to clean up the codebase.
 
 ## Completed
-- [x] Added `toggle_sort` method to handle column sorting state
-- [x] Implemented header click detection in mouse handling
-- [x] Added column width calculations for proper header targeting
-- [x] Integrated sorting with the existing table rebuild mechanism
+- [x] Removed unused `on_header_click` handler from table widget construction
+- [x] Simplified table widget initialization by removing redundant empty handler
 
 ## In Progress
-- [x] Column sorting functionality is fully implemented
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify sorting works correctly with all column types
-2. Add visual indicators for sorted columns (e.g., arrows in headers)
+1. Review other unused handlers in the table widget
+2. Consider consolidating table widget construction patterns
