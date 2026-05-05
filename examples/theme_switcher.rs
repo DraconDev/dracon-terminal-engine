@@ -643,27 +643,61 @@ impl Widget for WidgetDemoPanel {
 
         let row1 = 2;
         let badges = [
-            ("OK", theme.success),
-            ("WARNING", theme.warning),
-            ("ERROR", theme.error),
-            ("OK", theme.success),
+            ("󰄬 OK", theme.success, theme.success_bg),
+            ("󰀦 WARN", theme.warning, theme.warning_bg),
+            ("󰅙 ERROR", theme.error, theme.error_bg),
+            ("󰋽 INFO", theme.info, theme.info_bg),
         ];
-        for (i, (text, fg)) in badges.iter().enumerate() {
-            let x = 2 + (i as u16 * 14);
-            let content = format!("[{}]", text);
+        let mut badge_x = 2u16;
+        for (text, fg, bg) in badges.iter() {
+            let content = format!(" {} ", text);
             for (j, c) in content.chars().enumerate() {
-                let idx = row1 as usize * area.width as usize + x as usize + j;
+                let idx = row1 as usize * area.width as usize + badge_x as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = *fg;
                     plane.cells[idx].style = Styles::BOLD;
-                    plane.cells[idx].bg = theme.bg;
+                    plane.cells[idx].bg = *bg;
                 }
+            }
+            badge_x += content.len() as u16 + 1;
+        }
+
+        // Button preview
+        let btn_row = 3;
+        let btn_text = " 󰔳 Submit ";
+        let btn_x = 2u16;
+        for (j, c) in btn_text.chars().enumerate() {
+            let idx = btn_row as usize * area.width as usize + btn_x as usize + j;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = theme.fg_on_accent;
+                plane.cells[idx].bg = theme.primary;
+                plane.cells[idx].style = Styles::BOLD;
             }
         }
 
-        let gauge_row = 4;
-        let label = "CPU: ";
+        // Checkbox previews
+        let chk_row = 3;
+        let chk_x = btn_x + btn_text.len() as u16 + 3;
+        let checks = [(true, theme.success), (false, theme.fg_muted), (true, theme.primary)];
+        for (checked, color) in checks.iter() {
+            let mark = if *checked { "󰄬" } else { "󰄱" };
+            let label = if *checked { " On " } else { " Off " };
+            let text = format!("{} {}", mark, label);
+            for (j, c) in text.chars().enumerate() {
+                let idx = chk_row as usize * area.width as usize + chk_x as usize + j;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = *color;
+                    plane.cells[idx].bg = theme.bg;
+                }
+            }
+            chk_x += text.len() as u16 + 2;
+        }
+
+        let gauge_row = 5;
+        let label = "󰍛 CPU: ";
         for (i, c) in label.chars().enumerate() {
             let idx = gauge_row as usize * area.width as usize + 2 + i;
             if idx < plane.cells.len() {
@@ -719,26 +753,12 @@ impl Widget for WidgetDemoPanel {
             }
         }
 
-        let list_row = 6;
-        let items = ["item-1", "item-2", "item-3", "selected", "item-5"];
-        let selected_idx = 3;
-        for (i, item) in items.iter().enumerate() {
-            let is_selected = i == selected_idx;
-            let bg = if is_selected {
-                theme.selection_bg
-            } else {
-                theme.bg
-            };
-            let fg = if is_selected {
-                theme.selection_fg
-            } else {
-                theme.fg
-            };
-            let style = if is_selected {
-                Styles::BOLD
-            } else {
-                Styles::empty()
-            };
+        let list_row = 7;
+        let items = [(false, "󰆍 item-1"), (false, "󰆍 item-2"), (false, "󰆍 item-3"), (true, "󰆌 selected"), (false, "󰆍 item-5")];
+        for (i, (is_selected, item)) in items.iter().enumerate() {
+            let bg = if *is_selected { theme.selection_bg } else { theme.bg };
+            let fg = if *is_selected { theme.selection_fg } else { theme.fg };
+            let style = if *is_selected { Styles::BOLD } else { Styles::empty() };
 
             for (j, c) in item.chars().enumerate() {
                 let idx = (list_row as usize + i) * area.width as usize + 2 + j;
@@ -751,18 +771,38 @@ impl Widget for WidgetDemoPanel {
             }
         }
 
-        let breadcrumb_row = 11;
-        let crumbs = ["home", "projects", "demo"];
-        let total_len: usize = crumbs.iter().map(|s| s.len()).sum::<usize>() + crumbs.len() - 1;
+        // Input preview
+        let input_row = list_row + items.len() as u16 + 1;
+        let input_label = "󰏅 Search: ";
+        for (i, c) in input_label.chars().enumerate() {
+            let idx = input_row as usize * area.width as usize + 2 + i;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = theme.fg_muted;
+                plane.cells[idx].bg = theme.bg;
+            }
+        }
+        let input_box = "Type here...";
+        for (i, c) in input_box.chars().enumerate() {
+            let idx = input_row as usize * area.width as usize + 2 + input_label.len() + i;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = theme.input_fg;
+                plane.cells[idx].bg = theme.input_bg;
+            }
+        }
+
+        let breadcrumb_row = area.height as usize - 1;
+        let crumbs = [("󰋜 home", false), ("󰉋 projects", false), ("󰆍 demo", true)];
+        let total_len: usize = crumbs.iter().map(|(s, _)| s.len()).sum::<usize>() + crumbs.len() - 1;
         let start_x = (area.width as usize / 2 - total_len / 2) as u16;
 
         let mut x = start_x;
-        for (i, crumb) in crumbs.iter().enumerate() {
-            let is_last = i == crumbs.len() - 1;
+        for (i, (crumb, is_last)) in crumbs.iter().enumerate() {
             if i > 0 {
                 let idx = breadcrumb_row as usize * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = '/';
+                    plane.cells[idx].char = '›';
                     plane.cells[idx].fg = theme.fg_muted;
                 }
                 x += 1;
@@ -772,17 +812,9 @@ impl Widget for WidgetDemoPanel {
                 let idx = breadcrumb_row as usize * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = if is_last { theme.primary } else { theme.fg };
-                    plane.cells[idx].style = if is_last {
-                        Styles::BOLD
-                    } else {
-                        Styles::empty()
-                    };
-                    plane.cells[idx].bg = if is_last {
-                        theme.primary_active
-                    } else {
-                        theme.bg
-                    };
+                    plane.cells[idx].fg = if *is_last { theme.primary } else { theme.fg };
+                    plane.cells[idx].style = if *is_last { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].bg = if *is_last { theme.primary_active } else { theme.bg };
                 }
                 x += 1;
             }
