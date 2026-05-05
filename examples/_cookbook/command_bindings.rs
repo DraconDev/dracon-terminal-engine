@@ -339,7 +339,7 @@ impl Widget for CommandBindings {
             }
         }
         for x in 1..w - 1 {
-            let idx = ((h - 1) * w + x) as usize;
+            let idx = (h - 1) * w + x;
             p.cells[idx].bg = t.surface_elevated;
         }
 
