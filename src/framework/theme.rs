@@ -92,6 +92,9 @@ pub struct Theme {
     pub disabled_fg: Color,
     pub disabled_bg: Color,
 
+    // Hover
+    pub hover_bg: Color,
+
     // Scrollbar width
     pub scrollbar_width: u16,
 }
@@ -136,6 +139,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(100, 100, 120),
             disabled_fg: Color::Rgb(80, 80, 100),
             disabled_bg: Color::Rgb(35, 35, 50),
+            hover_bg: Color::Rgb(40, 40, 56),
             scrollbar_width: 1,
         }
     }
@@ -179,6 +183,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(120, 120, 125),
             disabled_fg: Color::Rgb(150, 150, 155),
             disabled_bg: Color::Rgb(235, 235, 240),
+            hover_bg: Color::Rgb(240, 240, 245),
             scrollbar_width: 1,
         }
     }
