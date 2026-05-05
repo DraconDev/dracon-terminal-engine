@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Refactored terminal window size handling in the table widget example
+Dependency version bump in Cargo.lock
 
 ## Context
-The table widget example was previously using the terminal window size directly without proper error handling. This change improves robustness by providing a fallback size when the actual terminal size can't be determined.
+This change updates the dependency versions in the project's lock file, ensuring the project uses the latest compatible versions of its dependencies.
 
 ## Completed
-- [x] Added fallback terminal size (80x24) when window size detection fails
-- [x] Ignored the window dimensions (marked as unused with `_`) since they weren't being used
+- [x] Updated dependency versions in Cargo.lock
 
 ## In Progress
-- [ ] None - this is a complete change
+- [x] Dependency version management
 
 ## Blockers
-- None - this is a simple refactoring
+- None reported
 
 ## Next Steps
-1. Verify the fallback size works as expected in different terminal environments
-2. Consider whether the table widget should dynamically resize when the terminal changes size
+1. Verify all dependencies are compatible with the current project version
+2. Test the project with the updated dependencies to ensure no regressions
