@@ -517,6 +517,80 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         }
     }
 
+    // Scrollbar indicator for messages
+    let visible_count = (list_h as usize).saturating_sub(2).max(1);
+    if chat.messages.len() > visible_count {
+        let sb_x = area.width - 2;
+        let content_h = list_h - 2;
+        let thumb_h = (visible_count as f32 / chat.messages.len() as f32 * content_h as f32).max(1.0) as u16;
+        let thumb_y = (chat.scroll_offset as f32 / chat.messages.len().saturating_sub(visible_count).max(1) as f32 * (content_h - thumb_h) as f32) as u16 + header_h + 1;
+        for i in 0..thumb_h {
+            let y = thumb_y + i;
+            if y >= header_h + 1 && y < input_row - 1 {
+                let idx = (y * area.width + sb_x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '▐';
+                    plane.cells[idx].fg = t.primary;
+                }
+            }
+        }
+    }
+
+    // Help overlay
+    if chat.show_help {
+        let hw = 36u16.min(area.width.saturating_sub(4));
+        let hh = 12u16.min(area.height.saturating_sub(4));
+        let hx = (area.width - hw) / 2;
+        let hy = (area.height - hh) / 2;
+        for y in hy..hy + hh {
+            for x in hx..hx + hw {
+                let idx = (y * area.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        for (ch, cx, cy) in corners.iter() {
+            let idx = (cy * area.width + cx) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+        }
+        for x in hx + 1..hx + hw - 1 {
+            let top_idx = (hy * area.width + x) as usize;
+            let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
+            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
+            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+        }
+        for y in hy + 1..hy + hh - 1 {
+            let left_idx = (y * area.width + hx) as usize;
+            let right_idx = (y * area.width + hx + hw - 1) as usize;
+            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
+            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+        }
+        let title = "Chat Help";
+        let tx = hx + (hw - title.len() as u16) / 2;
+        for (i, c) in title.chars().enumerate() {
+            let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+        }
+        let shortcuts = [
+            ("↑/↓", "Scroll messages"), ("Enter", "Send message"), ("Type", "Compose"),
+            ("t", "Cycle theme"), ("?", "Toggle help"), ("q", "Quit"),
+        ];
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = hy + 3 + i as u16;
+            for (j, c) in key.chars().enumerate() {
+                let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+            }
+            for (j, c) in desc.chars().enumerate() {
+                let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+            }
+        }
+    }
+
     plane
 }
 
@@ -660,7 +734,7 @@ fn main() -> io::Result<()> {
                     };
                 }
             }
-            for (i, c) in "Theme: Cyberpunk".to_string().chars().enumerate() {
+            for (i, c) in format!("Theme: {}", chat.theme.name).chars().enumerate() {
                 let idx = ((sy + 3) * w + sx + 2 + i as u16) as usize;
                 if idx < mp.cells.len() {
                     mp.cells[idx].char = c;
