@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Refactor mouse event handling in system monitor widget for better readability and consistency.
+Dependency version bump in Cargo.lock
 
 ## Context
-The change improves the mouse event handling in the system monitor widget by refactoring the scroll event logic to use a more concise pattern matching syntax.
+This change was triggered by recent refactoring work in the system monitor widget and IDE example, which required updated dependencies. The Cargo.lock file was automatically updated during dependency resolution.
 
 ## Completed
-- [x] Refactored scroll event handling in system monitor widget to use `if` expression in pattern matching
-- [x] Simplified the scroll up/down logic while maintaining the same functionality
+- [x] Updated Cargo.lock with new dependency versions
 
 ## In Progress
-- [x] No active work in progress beyond this change
+- [x] Dependency version bump
 
 ## Blockers
-- None identified
+- None - this is an automated dependency update
 
 ## Next Steps
-1. Verify the refactored code maintains the same behavior through testing
-2. Consider additional refactoring opportunities in the system monitor widget
+1. Verify the updated dependencies work with the current codebase
+2. Continue with ongoing refactoring and feature work
