@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Enhanced data table visualization with scrollbar and help overlay improvements
+Enhanced menu system with icon integration and keyboard shortcuts display
 
 ## Context
-The changes improve the data table widget by adding visual feedback for scrolling and refining the help overlay presentation. This follows the pattern of adding consistent visual indicators across components.
+The menu system was updated to include visual icons alongside text labels and keyboard shortcuts, improving usability and visual consistency with other components.
 
 ## Completed
-- [x] Added scrollbar indicator for data tables when content overflows
-- [x] Improved help overlay styling with proper borders and title positioning
-- [x] Updated menu system labels with Nerd Font icons for better visual hierarchy
+- [x] Added visual icons to menu items (e.g., 󰝊 for New, 󰃖 for Copy)
+- [x] Updated keyboard shortcuts display for better discoverability
+- [x] Maintained consistent styling across all menu categories
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] Testing icon rendering across different themes
+- [ ] Verifying accessibility of icon-text combinations
 
 ## Blockers
-- None identified
+- No blockers identified
 
 ## Next Steps
-1. Verify scrollbar behavior with large datasets
-2. Test help overlay positioning across different terminal sizes
+1. Verify icon rendering consistency across all menu items
+2. Ensure proper alignment of icons and text in different locales
