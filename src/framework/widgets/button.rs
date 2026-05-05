@@ -98,11 +98,16 @@ impl crate::framework::widget::Widget for Button {
             &self.label
         };
         let max_width = area.width.saturating_sub(2);
+        let bg = if self.hovered {
+            self.theme.hover_bg
+        } else {
+            self.theme.bg
+        };
 
         plane.cells[0] = Cell {
             char: '[',
             fg: self.theme.fg,
-            bg: self.theme.bg,
+            bg,
             style: Styles::empty(),
             transparent: false,
             skip: false,
@@ -114,7 +119,7 @@ impl crate::framework::widget::Widget for Button {
                 plane.cells[idx] = Cell {
                     char: c,
                     fg: self.theme.fg,
-                    bg: self.theme.bg,
+                    bg,
                     style: Styles::BOLD,
                     transparent: false,
                     skip: false,
@@ -127,7 +132,7 @@ impl crate::framework::widget::Widget for Button {
             plane.cells[end_idx] = Cell {
                 char: ']',
                 fg: self.theme.fg,
-                bg: self.theme.bg,
+                bg,
                 style: Styles::empty(),
                 transparent: false,
                 skip: false,
