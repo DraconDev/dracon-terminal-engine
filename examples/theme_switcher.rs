@@ -127,6 +127,7 @@ fn vscode_light() -> Theme {
         scrollbar_thumb_hover: Color::Rgb(140, 140, 140),
         disabled_fg: Color::Rgb(150, 150, 150),
         disabled_bg: Color::Rgb(235, 235, 240),
+        hover_bg: Color::Rgb(245, 245, 250),
         scrollbar_width: 1,
     }
 }
