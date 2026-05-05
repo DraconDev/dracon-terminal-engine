@@ -840,35 +840,33 @@ impl GitTui {
 }
 
 fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 2 || h < 2 {
-        return;
-    }
+    if w < 2 || h < 2 { return; }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx < plane.cells.len() {
-                let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
-                plane.cells[idx].bg = if is_border { t.bg } else { t.surface_elevated };
-                plane.cells[idx].fg = t.outline;
-                if is_border {
-                    if row == y && col == x {
-                        plane.cells[idx].char = '┌';
-                    } else if row == y && col == x + w - 1 {
-                        plane.cells[idx].char = '┐';
-                    } else if row == y + h - 1 && col == x {
-                        plane.cells[idx].char = '└';
-                    } else if row == y + h - 1 && col == x + w - 1 {
-                        plane.cells[idx].char = '┘';
-                    } else if row == y || row == y + h - 1 {
-                        plane.cells[idx].char = '─';
-                    } else {
-                        plane.cells[idx].char = '│';
-                    }
+            if idx >= plane.cells.len() { continue; }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+            plane.cells[idx].bg = if is_border { t.bg } else { t.surface_elevated };
+            plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+            if is_border {
+                if row == y && col == x {
+                    plane.cells[idx].char = '╭';
+                } else if row == y && col == x + w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == y + h - 1 && col == x {
+                    plane.cells[idx].char = '╰';
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == y || row == y + h - 1 {
+                    plane.cells[idx].char = '─';
                 } else {
-                    plane.cells[idx].char = ' ';
+                    plane.cells[idx].char = '│';
                 }
-                plane.cells[idx].transparent = false;
+            } else {
+                plane.cells[idx].char = ' ';
             }
+            plane.cells[idx].transparent = false;
         }
     }
 }
