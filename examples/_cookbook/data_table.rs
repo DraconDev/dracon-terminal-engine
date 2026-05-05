@@ -231,7 +231,7 @@ impl Widget for Table {
                 if search_plane.cells[src_idx].transparent {
                     continue;
                 }
-                let dst_idx = ((y + inner_y as u32) * area.width as u32 + (x + 1)) as usize;
+                let dst_idx = ((y as u16 + inner_y) * area.width + (x as u16 + 1)) as usize;
                 if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = search_plane.cells[src_idx].clone();
                 }

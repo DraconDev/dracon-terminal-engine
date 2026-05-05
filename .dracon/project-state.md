@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Adjust table widget rendering to account for borders, header, and status line in visible area calculation
+Optimized array indexing in table widget rendering calculations
 
 ## Context
-The table widget's visible area calculation previously didn't account for the space taken by borders, header, and status line, leading to incorrect rendering of table content.
+The table widget rendering logic was being improved to handle proper content area calculations, including borders, headers, and scrolling. This change specifically addresses potential integer overflow issues in array indexing during rendering.
 
 ## Completed
-- [x] Updated visible area calculation to subtract 5 rows (accounting for borders, header, and status line) from total height
+- [x] Fixed potential integer overflow in table cell indexing by using consistent u16 types for coordinates
+- [x] Improved rendering calculations to handle proper content area boundaries
 
 ## In Progress
-- [x] Testing visual rendering with different table sizes to ensure proper content display
+- [ ] Verifying rendering behavior with edge cases (empty tables, very large tables)
 
 ## Blockers
-- None identified for this specific change
+- Need to verify rendering behavior with edge cases (empty tables, very large tables)
 
 ## Next Steps
-1. Verify rendering consistency across different terminal sizes
-2. Document the rendering behavior in the widget's documentation
+1. Add unit tests for edge cases in table rendering
+2. Verify visual behavior in the widget gallery demo
