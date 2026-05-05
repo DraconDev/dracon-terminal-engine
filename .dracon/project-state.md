@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added `CellTextFn` to table widget exports for custom cell text formatting.
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security. It follows several recent refactoring efforts in the UI components and documentation enhancements.
+This change enables developers to customize how table cells are rendered by exposing the `CellTextFn` type, which was previously used internally but not exposed in the public API.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `CellTextFn` to table widget exports
+- [x] Maintained existing table widget functionality
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [ ] None
 
 ## Blockers
-- None reported
+- None
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Test the application to ensure no breaking changes from the dependency updates
+1. Update documentation to explain how to use `CellTextFn` for custom cell rendering
+2. Consider adding examples in the table widget documentation
