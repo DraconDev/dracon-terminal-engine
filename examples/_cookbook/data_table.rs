@@ -415,6 +415,15 @@ impl Widget for Table {
             return true;
         }
         match key.code {
+            KeyCode::Char('t') if key.modifiers.is_empty() => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                self.dirty = true;
+                true
+            }
             KeyCode::Down => {
                 if self.sel + 1 < self.rows.len() {
                     self.sel += 1;
