@@ -54,6 +54,9 @@ pub struct Showcase {
     pub(crate) recently_launched: Vec<String>,
     pub(crate) show_input_debug: bool,
     pub(crate) event_log: RefCell<VecDeque<(Instant, String)>>,
+    pub(crate) animations: AnimationManager,
+    pub(crate) card_hover_anim: Vec<Option<usize>>, // animation id per card
+    pub(crate) toast_anim: Option<usize>,
 }
 
 impl Showcase {
