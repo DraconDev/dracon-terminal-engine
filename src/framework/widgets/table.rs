@@ -24,6 +24,7 @@ pub struct TableRow<T> {
 
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
 pub type CellTextFn<T> = Box<dyn Fn(&T, usize) -> String>;
+pub type HeaderClickCallback = Box<dyn FnMut(usize)>;
 
 /// A sortable, selectable table with header and row hit zones.
 pub struct Table<T> {
@@ -36,6 +37,9 @@ pub struct Table<T> {
     theme: Theme,
     on_select: Option<SelectCallback<T>>,
     cell_text_fn: Option<CellTextFn<T>>,
+    on_header_click: Option<HeaderClickCallback>,
+    sort_column: Option<usize>,
+    sort_ascending: bool,
     area: Cell<Rect>,
     dirty: bool,
     hovered_row: Option<usize>,

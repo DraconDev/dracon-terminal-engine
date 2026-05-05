@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added `CellTextFn` to table widget exports for custom cell text formatting.
+Added header click handling to the table widget for column sorting functionality.
 
 ## Context
-This change enables developers to customize how table cells are rendered by exposing the `CellTextFn` type, which was previously used internally but not exposed in the public API.
+The table widget needs to support user-initiated sorting by column headers. This change enables click callbacks on headers and prepares the data structure for tracking sort state.
 
 ## Completed
-- [x] Added `CellTextFn` to table widget exports
-- [x] Maintained existing table widget functionality
+- [x] Added `HeaderClickCallback` type for header click handling
+- [x] Added `sort_column` and `sort_ascending` fields to track sort state
 
 ## In Progress
-- [ ] None
+- [ ] Implementation of actual sorting logic when headers are clicked
 
 ## Blockers
-- None
+- Need to implement the actual sorting behavior that will use these new fields
 
 ## Next Steps
-1. Update documentation to explain how to use `CellTextFn` for custom cell rendering
-2. Consider adding examples in the table widget documentation
+1. Implement the sorting logic that uses the new callback and state fields
+2. Add visual indicators for sorted columns (arrows, highlighting)
