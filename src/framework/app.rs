@@ -336,10 +336,9 @@ impl App {
         let title = self.title.clone();
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
 
-        let terminal_ptr = std::rc::Rc::new(std::cell::UnsafeCell::new(self.terminal));
-        let terminal_for_panic = terminal_ptr.clone();
-        std::panic::set_hook(Box::new(move |_| {
-            let t = unsafe { &mut *terminal_for_panic.get() };
+        let terminal_ptr = &mut self.terminal as *mut Terminal<io::Stdout> as usize;
+        std::panic::set_hook(Box::new(move || {
+            let t = unsafe { &mut *(terminal_ptr as *mut Terminal<io::Stdout>) };
             let _ = write!(
                 t,
                 "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l"
@@ -349,10 +348,10 @@ impl App {
 
         let running_for_signal = running.clone();
         unsafe {
-            signal_hook::low_level:: sigaction(SIGINT, &signal_hook::Sigaction::new(move |_: i32| {
+            signal_hook::low_level::sigaction(SIGINT, &signal_hook::Sigaction::new(move |_: i32| {
                 running_for_signal.store(false, Ordering::SeqCst);
             })).ok();
-            signal_hook::low_level:: sigaction(SIGTERM, &signal_hook::Sigaction::new(move |_: i32| {
+            signal_hook::low_level::sigaction(SIGTERM, &signal_hook::Sigaction::new(move |_: i32| {
                 running_for_signal.store(false, Ordering::SeqCst);
             })).ok();
         }

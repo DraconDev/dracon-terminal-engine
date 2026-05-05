@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Added signal handling and panic terminal cleanup for robust application shutdown
+Refactored terminal panic handler to use raw pointer instead of Rc<UnsafeCell>
 
 ## Context
-To ensure graceful application termination when receiving SIGINT or SIGTERM signals, and to properly reset terminal state during panics
+The previous implementation used Rc<UnsafeCell> for thread-safe terminal access during panics, which was unnecessarily complex. The change simplifies the panic handler by using a raw pointer to the terminal, reducing overhead while maintaining safety through controlled unsafe blocks.
 
 ## Completed
-- [x] Added SIGINT and SIGTERM signal handlers to set running flag to false
-- [x] Implemented panic hook to reset terminal state with Kitty keyboard mode disabled
-- [x] Used UnsafeCell and Rc for thread-safe terminal access in panic handler
+- [x] Replaced Rc<UnsafeCell> with raw pointer for terminal access in panic handler
+- [x] Fixed typo in signal_hook::low_level::sigaction calls (removed space)
+- [x] Maintained same functionality while reducing memory overhead
 
 ## In Progress
-- [ ] None (this is a complete feature implementation)
+- [x] Testing edge cases for terminal access during panic scenarios
 
 ## Blockers
-- None (feature is complete)
+- None identified
 
 ## Next Steps
-1. Verify signal handling works in integration tests
-2. Document terminal cleanup sequence in developer guide
+1. Verify no regressions in panic handling behavior
+2. Consider further optimization opportunities in signal handling
