@@ -224,7 +224,7 @@ impl Widget for LogMonitor {
         let content_bottom = h - 2;
         for y in content_top..content_bottom {
             for x in 1..w - 1 {
-                let idx = (y * w + x) as usize;
+                let idx = y * w + x;
                 if idx < p.cells.len() {
                     p.cells[idx].bg = t.surface;
                 }
