@@ -43,6 +43,7 @@ struct ChatState {
     cursor_pos: usize,
     show_emoji_modal: bool,
     show_settings_modal: bool,
+    show_help: bool,
     emoji_modal: Modal<'static>,
     settings_modal: Modal<'static>,
     notifications_enabled: bool,
@@ -74,6 +75,7 @@ impl ChatState {
             cursor_pos: 0,
             show_emoji_modal: false,
             show_settings_modal: false,
+            show_help: false,
             emoji_modal: Modal::new("Emoji Picker")
                 .with_size(30, 10)
                 .with_buttons(vec![("Close", ModalResult::Cancel)]),
