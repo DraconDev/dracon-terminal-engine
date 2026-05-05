@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added scroll indicator visibility control to the LogViewer widget
 
 ## Context
-This change updates the dependency versions in the project's lock file, likely to incorporate the latest compatible versions of dependencies or to resolve version conflicts.
+The LogViewer widget now needs to support configurable visibility of scroll indicators to improve user awareness of scrollable content.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `show_scroll_indicator` field to LogViewer struct
+- [x] Set default value to `true` for new instances
 
 ## In Progress
-- [x] Dependency version bump in Cargo.lock
+- [ ] Implement actual rendering logic for the scroll indicator
 
 ## Blockers
-- None reported
+- Need to implement the visual representation of the scroll indicator
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application with the new dependency versions
+1. Implement the visual rendering of the scroll indicator
+2. Add configuration options to toggle visibility programmatically
