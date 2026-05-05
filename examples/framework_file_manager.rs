@@ -164,65 +164,65 @@ fn main() -> std::io::Result<()> {
 
             ctx.add_plane(info_plane);
 
-            // Help overlay with rounded corners (box-drawing)
-            if true {
-                let help_text = vec![
-                    "HELP",
-                    "",
-                    "q - Quit",
-                    "t - Cycle theme",
-                    "Arrows - Navigate",
-                    "Enter - Open",
-                    "Backspace - Go up",
-                    "c - Context menu",
-                    "Esc - Close this",
-                ];
-                let overlay_w = 30.min(w.saturating_sub(4));
-                let overlay_h = (help_text.len() as u16 + 2).min(h.saturating_sub(2));
-                let overlay_x = (w.saturating_sub(overlay_w)) / 2;
-                let overlay_y = (h.saturating_sub(overlay_h)) / 2;
+// Help overlay with rounded corners (box-drawing)
+                if true {
+                    let help_text = vec![
+                        "HELP",
+                        "",
+                        "q - Quit",
+                        "t - Cycle theme",
+                        "Arrows - Navigate",
+                        "Enter - Open",
+                        "Backspace - Go up",
+                        "c - Context menu",
+                        "Esc - Close this",
+                    ];
+                    let overlay_w = 30.min(w.saturating_sub(4));
+                    let overlay_h = (help_text.len() as u16 + 2).min(h.saturating_sub(2));
+                    let overlay_x = (w.saturating_sub(overlay_w)) / 2;
+                    let _overlay_y = (h.saturating_sub(overlay_h)) / 2;
 
-                let mut overlay = Plane::new(overlay_y, overlay_w, overlay_h);
-                // Fill background with rounded corners look (using simple box chars)
-                for row in 0..overlay_h {
-                    for col in 0..overlay_w {
-                        let idx = (row * overlay_w + col) as usize;
-                        if idx < overlay.cells.len() {
-                            // Determine if corner position
-                            let is_corner = (row == 0 && col == 0)
-                                || (row == 0 && col == overlay_w - 1)
-                                || (row == overlay_h - 1 && col == 0)
-                                || (row == overlay_h - 1 && col == overlay_w - 1);
-                            let is_border = row == 0 || row == overlay_h - 1 || col == 0 || col == overlay_w - 1;
+                    let mut overlay = Plane::new(0, overlay_w, overlay_h); // id=0, width, height
+                    // Fill background with rounded corners look (using simple box chars)
+                    for row in 0..overlay_h {
+                        for col in 0..overlay_w {
+                            let idx = (row * overlay_w + col) as usize;
+                            if idx < overlay.cells.len() {
+                                // Determine if corner position
+                                let is_corner = (row == 0 && col == 0)
+                                    || (row == 0 && col == overlay_w - 1)
+                                    || (row == overlay_h - 1 && col == 0)
+                                    || (row == overlay_h - 1 && col == overlay_w - 1);
+                                let is_border = row == 0 || row == overlay_h - 1 || col == 0 || col == overlay_w - 1;
 
-                            overlay.cells[idx].bg = t.surface;
-                            overlay.cells[idx].fg = t.fg;
-                            overlay.cells[idx].transparent = false;
+                                overlay.cells[idx].bg = t.surface;
+                                overlay.cells[idx].fg = t.fg;
+                                overlay.cells[idx].transparent = false;
 
-                            if is_corner {
-                                overlay.cells[idx].char = '+';
-                            } else if is_border {
-                                overlay.cells[idx].char = '-';
-                            } else {
-                                overlay.cells[idx].char = ' ';
+                                if is_corner {
+                                    overlay.cells[idx].char = '+';
+                                } else if is_border {
+                                    overlay.cells[idx].char = '-';
+                                } else {
+                                    overlay.cells[idx].char = ' ';
+                                }
                             }
                         }
                     }
-                }
-                // Fill help text
-                for (i, line) in help_text.iter().enumerate() {
-                    let start_x = 2;
-                    let start_y = 1 + i as u16;
-                    for (j, ch) in line.chars().enumerate() {
-                        let idx = (start_y * overlay_w + start_x + j as u16) as usize;
-                        if idx < overlay.cells.len() {
-                            overlay.cells[idx].char = ch;
-                            overlay.cells[idx].fg = if i == 0 { t.primary } else { t.fg };
-                            overlay.cells[idx].bg = t.surface;
+                    // Fill help text
+                    for (i, line) in help_text.iter().enumerate() {
+                        let start_x = 2;
+                        let start_y = 1 + i as u16;
+                        for (j, ch) in line.chars().enumerate() {
+                            let idx = (start_y * overlay_w + start_x + j as u16) as usize;
+                            if idx < overlay.cells.len() {
+                                overlay.cells[idx].char = ch;
+                                overlay.cells[idx].fg = if i == 0 { t.primary } else { t.fg };
+                                overlay.cells[idx].bg = t.surface;
+                            }
                         }
                     }
+                    ctx.add_plane(overlay);
                 }
-                ctx.add_plane(overlay);
-            }
         })
 }

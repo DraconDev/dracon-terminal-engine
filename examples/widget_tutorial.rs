@@ -625,28 +625,46 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::nord());
 
-    // ---- Create multiple ColorPicker instances ----
+    // Theme cycling support - store theme index for cycling
+    let theme_index = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let theme_cycle = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+
+    // List of themes to cycle through
+    const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark"];
+
+    // Create multiple ColorPicker instances
     //
     // We'll create a 2x2 grid of color pickers with different initial colors
     // to demonstrate that each instance maintains its own state.
 
     // Row 1: Red and Green pickers
-    let red_picker = ColorPicker::new()
+    let mut red_picker = ColorPicker::new()
         .initial_color("Red")
         .with_theme(Theme::nord());
 
-    let green_picker = ColorPicker::new()
+    let mut green_picker = ColorPicker::new()
         .initial_color("Green")
         .with_theme(Theme::nord());
 
     // Row 2: Blue and Yellow pickers
-    let blue_picker = ColorPicker::new()
+    let mut blue_picker = ColorPicker::new()
         .initial_color("Blue")
         .with_theme(Theme::nord());
 
-    let yellow_picker = ColorPicker::new()
+    let mut yellow_picker = ColorPicker::new()
         .initial_color("Yellow")
         .with_theme(Theme::nord());
+
+    // Header and footer labels for theme display
+    let mut header_label = dracon_terminal_engine::framework::widgets::Label::new(
+        "←/→ to change color | Click swatch to cycle | Tab to navigate",
+    );
+    let mut footer_label = dracon_terminal_engine::framework::widgets::Label::new(
+        "Theme: nord | Press Ctrl+C to exit",
+    );
+
+    // Store all widgets for theme propagation
+    let mut all_widgets: Vec<Box<dyn Widget>> = Vec::new();
 
     // ---- Add widgets to the app with their areas ----
     //
