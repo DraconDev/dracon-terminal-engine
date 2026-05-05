@@ -313,7 +313,7 @@ impl Widget for CommandBindings {
         render_card(&mut p, 2, 12, 38, 10, t);
         let log_title = " 󰑊 Activity Log ";
         for (i, c) in log_title.chars().enumerate() {
-            p.cells[(12 * w + 3 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[12 * w + 3 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
         }
         let log_area = Rect::new(3, 14, 36, 7);
         let lp = self.log_viewer.render(log_area);
@@ -323,7 +323,7 @@ impl Widget for CommandBindings {
         render_card(&mut p, 42, 12, 36, 10, t);
         let stream_title = " 󰅐 Live Stream ";
         for (i, c) in stream_title.chars().enumerate() {
-            p.cells[(12 * w + 43 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[12 * w + 43 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
         }
         let stream_area = Rect::new(43, 14, 34, 7);
         let streamp = self.streaming.render(stream_area);
