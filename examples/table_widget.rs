@@ -269,7 +269,7 @@ impl Widget for TableApp {
         }
 
         let margin = 1u16;
-        let card_x = margin;
+        let _card_x = margin;
         let card_w = area.width.saturating_sub(margin * 2);
         let header_h = 3u16;
         let search_h = if self.show_search { 2u16 } else { 0u16 };
