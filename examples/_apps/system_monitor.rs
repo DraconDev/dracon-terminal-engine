@@ -384,7 +384,7 @@ impl Widget for SystemMonitor {
 
         let cg = self.cpu_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
         blit_to(&mut plane, &cg, 2, 3);
-        let hist_w = half_w.saturating_sub(8) as u16;
+        let hist_w = half_w.saturating_sub(8);
         let cpu_color = if self.data.cpu_hist.current() >= 90.0 { t.error }
             else if self.data.cpu_hist.current() >= 70.0 { t.warning } else { t.success };
         render_sparkline(&mut plane, 2, 2 + gauge_h - 2, hist_w.min(20), 2, &self.data.cpu_hist, cpu_color, t.surface);
@@ -450,7 +450,7 @@ impl Widget for SystemMonitor {
         // ── Footer ──
         let footer_y = area.height.saturating_sub(1);
         for x in 0..area.width {
-            let idx = (footer_y * area.width + x as u16) as usize;
+            let idx = (footer_y * area.width + x) as usize;
             if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
         }
         let footer = " t:theme  ?:help  ↑↓:nav  q:quit ";
