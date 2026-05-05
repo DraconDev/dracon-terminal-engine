@@ -1,23 +1,20 @@
 # Project State
 
 ## Current Focus
-Add hover state tracking to tree widget for interactive UI elements
+Dependency version bump in Cargo.lock
 
 ## Context
-This change enhances the tree widget's interactivity by tracking and visually indicating hovered nodes, improving user feedback for interactive elements.
+This change updates the dependency versions in the project's lockfile to ensure compatibility with the latest versions of dependencies.
 
 ## Completed
-- [x] Added hover state tracking with `hovered_path` field
-- [x] Implemented visual feedback for hovered nodes (background/foreground color changes)
-- [x] Added mouse movement event handling to update hover state
-- [x] Removed unused `UnicodeWidthStr` import
+- [x] Updated dependency versions in Cargo.lock
 
 ## In Progress
-- [x] Hover state tracking implementation
+- [x] No active work in progress related to this change
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Test hover interactions across different node depths
-2. Consider adding hover effects for collapsed/expanded indicators
+1. Verify that the updated dependencies do not introduce breaking changes
+2. Test the application to ensure all functionality remains intact
