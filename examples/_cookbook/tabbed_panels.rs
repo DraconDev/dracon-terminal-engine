@@ -137,7 +137,11 @@ struct TabbedApp {
     stats: StatsState,
     area: Rect,
     should_quit: Arc<AtomicBool>,
+    show_help: bool,
+    theme_index: usize,
 }
+
+const THEMES: [&str; 3] = ["cyberpunk", "dracula", "nord"];
 
 impl TabbedApp {
     fn new(should_quit: Arc<AtomicBool>) -> Self {
