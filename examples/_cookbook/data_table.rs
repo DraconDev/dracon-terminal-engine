@@ -259,7 +259,11 @@ impl Widget for Table {
             }
         }
 
-        let mut x = 1u16; // offset by 1 for left border
+        let mut x = 1u16;
+        let col_sep_x: Vec<u16> = widths.iter().scan(1u16, |acc, w| {
+            *acc += w + 1;
+            Some(*acc - 1)
+        }).collect();
         for (h, w) in heads.iter().zip(widths.iter()) {
             let w = *w.min(&area.width.saturating_sub(x + 1));
             for (j, c) in h.chars().take(w as usize).enumerate() {
@@ -268,9 +272,21 @@ impl Widget for Table {
                     p.cells[idx].char = c;
                     p.cells[idx].fg = self.theme.primary;
                     p.cells[idx].style = Styles::BOLD;
+                    p.cells[idx].bg = self.theme.surface;
                 }
             }
             x += w + 1;
+        }
+        // Column separators in header row
+        for &sx in &col_sep_x {
+            if sx > 0 && sx < area.width - 1 {
+                let idx = (hh * area.width + sx) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = '│';
+                    p.cells[idx].fg = self.theme.outline;
+                    p.cells[idx].bg = self.theme.surface;
+                }
+            }
         }
 
         let data_start_y = hh + 1;
