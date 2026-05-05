@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added icons to modal dialog buttons for better visual distinction
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security. It follows recent UI enhancements and feature additions in the codebase.
+Improving UI consistency by adding visual indicators to modal dialog buttons
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added 󰔳 icon to confirm dialog button
+- [x] Added 󰋖 icon to help dialog button
 
 ## In Progress
-- [x] No active work in progress beyond dependency management
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Continue with ongoing UI and feature development
-```
+1. Verify icon visibility across different themes
+2. Consider adding similar icons to other dialog buttons

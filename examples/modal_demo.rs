@@ -187,8 +187,8 @@ impl<'a> ModalDemoApp<'a> {
 
         let help_overlay = HelpOverlay::new();
 
-        let confirm_btn = Button::new("Show Confirm Dialog");
-        let help_btn = Button::new("Show Help (?)");
+        let confirm_btn = Button::new(" 󰔳 Show Confirm Dialog");
+        let help_btn = Button::new(" 󰋖 Show Help (?)");
 
         Self {
             show_confirm: false,
