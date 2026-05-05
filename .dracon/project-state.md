@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Refactored visible item counting in the file manager UI to use a dedicated field
+Refactored scroll handling in the file manager UI to use the new `visible_count` field.
 
 ## Context
-The file manager's scrollbar indicator was recalculating visible item counts in multiple places, leading to potential inconsistencies. This change centralizes the calculation in a single field for better maintainability.
+The file manager's scroll behavior was previously handling visible item counting manually. This change leverages the newly added `visible_count` field to simplify scroll calculations and improve consistency.
 
 ## Completed
-- [x] Added `visible_count` field to `FileManagerApp` to track visible items
-- [x] Moved visible count calculation to `set_area()` method
-- [x] Updated scrollbar indicator to use the centralized `visible_count` value
+- [x] Replaced manual visible item counting with the `visible_count` field
+- [x] Simplified scroll offset calculations for up/down navigation
+- [x] Updated scroll handling for mouse wheel events
 
 ## In Progress
-- [x] Refactoring of visible item counting logic
+- [ ] Verify scroll behavior with edge cases (empty lists, single item, etc.)
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify scrollbar behavior remains consistent across different window sizes
-2. Consider adding unit tests for the visible count calculations
+1. Test scroll behavior with various list sizes
+2. Consider adding visual feedback for scroll position changes

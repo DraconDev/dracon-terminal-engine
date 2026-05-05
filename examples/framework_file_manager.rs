@@ -367,20 +367,15 @@ impl Widget for FileManagerApp {
             }
             KeyCode::Down if self.selected + 1 < self.entries.len() => {
                 self.selected += 1;
-                let visible = self.list.visible_count();
-                if self.selected >= self.scroll_offset + visible {
-                    self.scroll_offset = self.selected - visible + 1;
-                }
-                self.list.set_selected(self.selected);
+                self.list.scroll_to(self.selected);
+                self.scroll_offset = self.list.selected_index().saturating_sub(self.visible_count).max(0);
                 self.dirty = true;
                 true
             }
             KeyCode::Up if self.selected > 0 => {
                 self.selected -= 1;
-                if self.selected < self.scroll_offset {
-                    self.scroll_offset = self.selected;
-                }
-                self.list.set_selected(self.selected);
+                self.list.scroll_to(self.selected);
+                self.scroll_offset = self.list.selected_index();
                 self.dirty = true;
                 true
             }
@@ -414,8 +409,7 @@ impl Widget for FileManagerApp {
                 }
             }
             MouseEventKind::ScrollDown => {
-                let visible = self.list.visible_count();
-                self.scroll_offset = (self.scroll_offset + 1).min(self.entries.len().saturating_sub(visible));
+                self.scroll_offset = (self.scroll_offset + 1).min(self.entries.len().saturating_sub(self.visible_count));
                 self.dirty = true;
                 true
             }
