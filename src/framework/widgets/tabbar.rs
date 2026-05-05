@@ -29,6 +29,7 @@ impl TabBar {
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 3)),
             dirty: true,
+            hovered_tab: None,
         }
     }
 
@@ -41,6 +42,7 @@ impl TabBar {
             theme: Theme::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 3)),
             dirty: true,
+            hovered_tab: None,
         }
     }
 
@@ -105,19 +107,26 @@ impl crate::framework::widget::Widget for TabBar {
         for (i, tab) in self.tabs.iter().enumerate() {
             let x = (i as u16) * tab_width;
             let is_active = i == self.active;
+            let is_hovered = self.hovered_tab == Some(i);
 
             let bg = if is_active {
                 self.theme.primary_active
+            } else if is_hovered {
+                self.theme.hover_bg
             } else {
                 self.theme.bg
             };
             let fg = if is_active {
                 self.theme.primary
+            } else if is_hovered {
+                self.theme.fg
             } else {
                 self.theme.fg_muted
             };
             let style = if is_active {
                 Styles::BOLD | Styles::UNDERLINE
+            } else if is_hovered {
+                Styles::BOLD
             } else {
                 Styles::empty()
             };
@@ -187,12 +196,23 @@ impl crate::framework::widget::Widget for TabBar {
         let tab_count = self.tabs.len().max(1);
         let tab_width = (self.area.get().width / tab_count as u16).max(1);
         let idx = col / tab_width;
-        if idx >= tab_count as u16 {
-            return false;
-        }
+        let inside = idx < tab_count as u16;
 
         match kind {
-            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
+            crate::input::event::MouseEventKind::Moved => {
+                if inside {
+                    let tab_idx = idx as usize;
+                    if self.hovered_tab != Some(tab_idx) {
+                        self.hovered_tab = Some(tab_idx);
+                        self.dirty = true;
+                    }
+                } else if self.hovered_tab.is_some() {
+                    self.hovered_tab = None;
+                    self.dirty = true;
+                }
+                false
+            }
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) if inside => {
                 self.active = idx as usize;
                 self.dirty = true;
                 true
