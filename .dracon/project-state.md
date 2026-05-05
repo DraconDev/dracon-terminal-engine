@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added a `show_help` flag to the tree navigator for toggling help overlay visibility
 
 ## Context
-This change was triggered by recent feature additions in the menu system and table widget, which required updated dependencies to resolve compatibility issues or take advantage of new functionality.
+This change supports the ongoing implementation of a help overlay system in the menu system, which was recently added with keyboard shortcuts for theme cycling and help display.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency versions required by recent feature implementations
+- [x] Added `show_help` boolean field to `TreeNav` struct to track help overlay state
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Implementation of help overlay rendering and keyboard handling
 
 ## Blockers
-- None
+- Help overlay rendering logic not yet implemented
+- Keyboard handling for help overlay not yet connected
 
 ## Next Steps
-1. Verify that all recent features work correctly with the updated dependencies
-2. Consider reviewing dependency updates for potential security or performance improvements
+1. Implement help overlay rendering logic
+2. Connect keyboard handling for help overlay toggle

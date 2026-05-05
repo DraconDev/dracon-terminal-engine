@@ -81,6 +81,7 @@ struct TreeNav {
     current_path: Vec<usize>,
     theme: Theme,
     area: Rect,
+    show_help: bool,
 }
 
 impl TreeNav {
