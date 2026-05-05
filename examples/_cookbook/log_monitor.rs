@@ -98,22 +98,6 @@ fn format_time() -> String {
     format!("{:02}:{:02}:{:02}.{:03}", h, m, s, d.subsec_millis())
 }
 
-fn draw_text(p: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
-    for (i, c) in text.chars().enumerate().take(p.width as usize - x as usize) {
-        let idx = (y as usize * p.width as usize + x as usize + i) as usize;
-        if idx < p.cells.len() {
-            p.cells[idx] = Cell {
-                char: c,
-                fg,
-                bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false,
-                skip: false,
-            };
-        }
-    }
-}
-
 impl Widget for LogMonitor {
     fn id(&self) -> WidgetId {
         self.id
