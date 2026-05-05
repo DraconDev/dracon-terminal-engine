@@ -1,20 +1,24 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added context menu functionality to the file manager demo
 
 ## Context
-This change was triggered by recent refactoring work in the widget tutorial examples, particularly the theme cycling and help overlay functionality. The Cargo.lock file was updated to reflect the latest dependency versions required by these changes.
+The file manager demo was enhanced to provide more user interaction options through a right-click context menu, improving the file management experience.
 
 ## Completed
-- [x] Updated Cargo.lock to include latest dependency versions for widget tutorial examples
+- [x] Added context menu support with right-click activation
+- [x] Updated keyboard shortcuts documentation
+- [x] Refactored the file manager app structure
+- [x] Improved theme propagation to child widgets
+- [x] Enhanced layout management with split panes
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Context menu implementation and integration
 
 ## Blockers
-- None
+- None identified in this change
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with ongoing refactoring and feature development in widget tutorial examples
+1. Test context menu functionality across different file types
+2. Add additional context menu actions (copy, paste, delete)
