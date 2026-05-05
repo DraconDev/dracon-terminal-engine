@@ -535,18 +535,60 @@ fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Them
         for col in x..x+w {
             let idx = (row * plane.width + col) as usize;
             if idx >= plane.cells.len() { continue; }
-            plane.cells[idx].bg = bg;
-            let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
-            if is_border {
-                plane.cells[idx].fg = border;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x+w-1 { '╮' }
-                    else if row == y+h-1 && col == x { '╰' }
-                    else if row == y+h-1 && col == x+w-1 { '╯' }
-                    else if row == y || row == y+h-1 { '─' } else { '│' };
-            } else {
-                plane.cells[idx].char = ' '; plane.cells[idx].fg = t.fg;
+            plane.cells[idx].char = ' '; plane.cells[idx].fg = t.fg;
+        }
+    }
+
+    for col in x..x+w {
+        let idx = (y * plane.width + col) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = border; }
+        let idx2 = ((y+h-1) * plane.width + col) as usize;
+        if idx2 < plane.cells.len() { plane.cells[idx2].char = '─'; plane.cells[idx2].fg = border; }
+    }
+    for row in y..y+h {
+        let idx = (row * plane.width + x) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = '│'; plane.cells[idx].fg = border; }
+        let idx2 = (row * plane.width + x+w-1) as usize;
+        if idx2 < plane.cells.len() { plane.cells[idx2].char = '│'; plane.cells[idx2].fg = border; }
+    }
+    let corners = [(y,x,'┌'), (y,x+w-1,'┐'), (y+h-1,x,'└'), (y+h-1,x+w-1,'┘')];
+    for (r,c,ch) in corners {
+        let idx = (r * plane.width + c) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = border; }
+    }
+}
+
+struct SparklineConfig {
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+    color: Color,
+    bg: Color,
+}
+
+fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
+    let SparklineConfig { x, y, w, h, color, bg } = cfg;
+    if metric.values.is_empty() || w == 0 || h == 0 { return; }
+    let max_val = metric.max().max(1.0);
+    let values: Vec<f64> = metric.values.iter().copied().collect();
+    let start = values.len().saturating_sub(w as usize);
+    let to_show = &values[start..];
+    for (i, &val) in to_show.iter().enumerate() {
+        let bar_h = ((val / max_val) * h as f64).round().clamp(0.0, h as f64) as u16;
+        let col = x + i as u16;
+        if col >= x + w { break; }
+        for row in 0..h {
+            let row_y = y + h - 1 - row;
+            let idx = (row_y * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = if row < bar_h { '█' } else { ' ' };
+                plane.cells[idx].fg = if row < bar_h { color } else { bg };
+                plane.cells[idx].bg = bg;
             }
+        }
+    }
+}
         }
     }
 }
