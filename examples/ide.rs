@@ -341,7 +341,7 @@ impl IdeApp {
                 .unwrap_or("Plain");
             self.status_bar = StatusBar::new(WidgetId::new(4))
                 .add_segment(
-                    StatusSegment::new(if tab.modified { "Modified" } else { "Ready" }).with_fg(
+                    StatusSegment::new(if tab.modified { "● Modified" } else { "✓ Ready" }).with_fg(
                         if tab.modified {
                             self.theme.warning
                         } else {
@@ -1174,8 +1174,14 @@ impl IdeApp {
     }
 
     fn sync_tab_bar(&mut self) {
-        let labels: Vec<&str> = self.tabs.iter().map(|t| t.title.as_str()).collect();
-        self.tab_bar = TabBar::new_with_id(WidgetId::new(2), labels);
+        let labels: Vec<String> = self.tabs.iter().map(|t| {
+            if t.modified {
+                format!("{} ×", t.title)
+            } else {
+                t.title.clone()
+            }
+        }).collect();
+        self.tab_bar = TabBar::new_with_id(WidgetId::new(2), labels.iter().map(|s| s.as_str()).collect());
         self.tab_bar.set_active(self.active_tab);
         self.tab_bar.on_theme_change(&self.theme);
     }
