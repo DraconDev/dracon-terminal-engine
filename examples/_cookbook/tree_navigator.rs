@@ -161,6 +161,7 @@ impl TreeNav {
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tree.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
     }
 
     fn item_count(&self) -> usize {
@@ -433,6 +434,34 @@ impl TreeNav {
             cell.bg = self.theme.bg;
             cell.fg = self.theme.fg;
             cell.transparent = false;
+        }
+
+        // Border around detail pane
+        let (w, h) = (area.width, area.height);
+        if w > 1 && h > 1 {
+            // Corners
+            let corners = [('╭', 0, 0), ('╮', w - 1, 0), ('╰', 0, h - 1), ('╯', w - 1, h - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = self.theme.outline;
+                }
+            }
+            // Horizontal lines
+            for x in 1..w.saturating_sub(1) {
+                let top_idx = x as usize;
+                let bot_idx = ((h - 1) * area.width + x) as usize;
+                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = self.theme.outline; }
+                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = self.theme.outline; }
+            }
+            // Vertical lines
+            for y in 1..h.saturating_sub(1) {
+                let left_idx = (y * area.width) as usize;
+                let right_idx = (y * area.width + w - 1) as usize;
+                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = self.theme.outline; }
+                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = self.theme.outline; }
+            }
         }
 
         let print_line = |plane: &mut Plane, y: u16, text: &str, fg: Color| {
