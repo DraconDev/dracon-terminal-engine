@@ -179,9 +179,11 @@ impl Widget for Table {
         let (heads, widths, hh, sh) = (
             ["󰣉 Name", "󰢮 Age", "󰉋 City", "󰠨 Profession"],
             [12u16, 5, 11, 16],
-            2u16,
+            3u16,
             1u16,
         );
+        let inner_y = 1u16; // content starts after top border
+        let inner_h = area.height.saturating_sub(2); // exclude top/bottom borders
 
         // Background
         for y in 0..area.height {
