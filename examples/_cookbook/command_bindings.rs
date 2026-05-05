@@ -333,7 +333,7 @@ impl Widget for CommandBindings {
         let auto_str = if self.paused { "⏸ PAUSED" } else { "▶ RUNNING" };
         let status = format!("  {}  |  tick: {}  |  s=refresh p=pause  |  q=quit", auto_str, self.tick);
         for (i, c) in status.chars().enumerate().take(w - 2) {
-            let idx = ((h - 1) * w + 1 + i) as usize;
+            let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
                 p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
             }

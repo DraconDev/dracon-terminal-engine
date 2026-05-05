@@ -4,18 +4,18 @@
 Optimized array indexing in the command bindings example
 
 ## Context
-The change improves performance by removing unnecessary type casting in array index calculations during plane blitting operations.
+The change improves performance in the command bindings example by removing unnecessary casting operations in the array indexing logic.
 
 ## Completed
-- [x] Removed redundant `as usize` cast in destination index calculation
-- [x] Simplified index calculation while maintaining safety checks
+- [x] Removed redundant `as usize` cast in array index calculation
+- [x] Simplified index calculation for better readability and performance
 
 ## In Progress
-- [x] Performance optimization for plane blitting operations
+- [x] None - this is a completed optimization
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify no regression in visual output
-2. Check for additional performance optimizations in related code
+1. Verify no regression in command bindings behavior
+2. Consider similar optimizations in other examples if needed
