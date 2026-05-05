@@ -21,6 +21,7 @@ pub struct Select {
     on_change: Option<ChangeCallback>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    hovered_index: Option<usize>,
 }
 
 impl Select {
@@ -35,6 +36,7 @@ impl Select {
             on_change: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 1)),
             dirty: true,
+            hovered_index: None,
         }
     }
 
@@ -136,6 +138,7 @@ impl crate::framework::widget::Widget for Select {
                     break;
                 }
                 let is_selected = i == self.selected;
+                let is_hovered = self.hovered_index == Some(i);
                 let prefix = if is_selected { ">" } else { " " };
                 let line = format!("{}{}", prefix, option);
 
@@ -151,6 +154,8 @@ impl crate::framework::widget::Widget for Select {
                             },
                             bg: if is_selected {
                                 self.theme.selection_bg
+                            } else if is_hovered {
+                                self.theme.hover_bg
                             } else {
                                 self.theme.bg
                             },
@@ -206,6 +211,24 @@ impl crate::framework::widget::Widget for Select {
         row: u16,
     ) -> bool {
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if self.expanded && row > 0 {
+                    let item_idx = (row - 1) as usize;
+                    if item_idx < self.options.len() {
+                        if self.hovered_index != Some(item_idx) {
+                            self.hovered_index = Some(item_idx);
+                            self.dirty = true;
+                        }
+                    } else if self.hovered_index.is_some() {
+                        self.hovered_index = None;
+                        self.dirty = true;
+                    }
+                } else if self.hovered_index.is_some() {
+                    self.hovered_index = None;
+                    self.dirty = true;
+                }
+                false
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if row == 0 {
                     self.expanded = !self.expanded;
