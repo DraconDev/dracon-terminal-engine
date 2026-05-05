@@ -76,6 +76,9 @@ struct GitTui {
 
     dirty: bool,
     last_refresh: Instant,
+
+    // Help overlay
+    show_help: bool,
 }
 
 impl GitTui {
@@ -108,6 +111,7 @@ impl GitTui {
             toasts: Vec::new(),
             dirty: true,
             last_refresh: Instant::now(),
+            show_help: false,
         };
         app.refresh();
         app
@@ -126,6 +130,10 @@ impl GitTui {
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tab_bar.on_theme_change(&self.theme);
+        self.status_bar.on_theme_change(&self.theme);
+        for toast in &mut self.toasts {
+            toast.on_theme_change(&self.theme);
+        }
         self.dirty = true;
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
     }
@@ -335,6 +343,11 @@ impl Widget for GitTui {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            render_help_overlay(&mut plane, area, t);
+        }
+
         plane
     }
 
@@ -350,6 +363,11 @@ impl Widget for GitTui {
             }
             KeyCode::Char('t') => {
                 self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                self.dirty = true;
                 true
             }
             KeyCode::Char('r') => {
