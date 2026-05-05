@@ -2,18 +2,7 @@
 //! Command Bindings — Auto-refresh widgets via CLI commands.
 //!
 //! Demonstrates all 5 command-bound widgets with mock commands that update
-//! them on configurable intervals. Shows the core framework value proposition:
-//! any widget can be bound to a CLI command with custom parsers.
-//!
-//! ## Widgets
-//!
-//! | Widget | Mock Command | Parser | Interval |
-//! |--------|-------------|--------|----------|
-//! | Gauge (CPU) | simulated | direct | 2s |
-//! | KeyValueGrid | simulated | direct | 5s |
-//! | StatusBadge | simulated | direct | 10s |
-//! | LogViewer | simulated | direct | 3s |
-//! | StreamingText | simulated | direct | 1s |
+//! them on configurable intervals.
 //!
 //! ## Controls
 //!
@@ -28,7 +17,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use dracon_terminal_engine::compositor::{Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -160,6 +149,65 @@ impl Default for CommandBindings {
     }
 }
 
+fn blit_plane(src: &Plane, dst: &mut Plane, dst_x: u16, dst_y: u16) {
+    for y in 0..src.height {
+        for x in 0..src.width {
+            let src_idx = (y * src.width + x) as usize;
+            if src_idx >= src.cells.len() {
+                continue;
+            }
+            if src.cells[src_idx].transparent {
+                continue;
+            }
+            let dx = dst_x + x;
+            let dy = dst_y + y;
+            if dx >= dst.width || dy >= dst.height {
+                continue;
+            }
+            let dst_idx = (dy as usize * dst.width as usize + dx as usize) as usize;
+            if dst_idx < dst.cells.len() {
+                dst.cells[dst_idx] = src.cells[src_idx].clone();
+            }
+        }
+    }
+}
+
+fn render_card(p: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
+    let w = w as usize;
+    let h = h as usize;
+    let px = x as usize;
+    let py = y as usize;
+
+    if w < 2 || h < 2 {
+        return;
+    }
+
+    // corners
+    p.cells[py * p.width as usize + px] = Cell { char: '╭', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    p.cells[py * p.width as usize + px + w - 1] = Cell { char: '╮', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    p.cells[(py + h - 1) * p.width as usize + px] = Cell { char: '╰', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    p.cells[(py + h - 1) * p.width as usize + px + w - 1] = Cell { char: '╯', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+
+    // horizontal edges
+    for ix in 1..w - 1 {
+        p.cells[py * p.width as usize + px + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[(py + h - 1) * p.width as usize + px + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    }
+
+    // vertical edges
+    for iy in 1..h - 1 {
+        p.cells[(py + iy) * p.width as usize + px] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[(py + iy) * p.width as usize + px + w - 1] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    }
+
+    // fill interior
+    for iy in 1..h - 1 {
+        for ix in 1..w - 1 {
+            p.cells[(py + iy) * p.width as usize + px + ix] = Cell { char: ' ', fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+        }
+    }
+}
+
 impl Widget for CommandBindings {
     fn id(&self) -> WidgetId {
         self.id
@@ -186,126 +234,113 @@ impl Widget for CommandBindings {
     fn clear_dirty(&mut self) {
         self.dirty = false;
     }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.gauge.on_theme_change(theme);
+        self.kv_grid.on_theme_change(theme);
+        self.status.on_theme_change(theme);
+        self.log_viewer.on_theme_change(theme);
+        self.streaming.on_theme_change(theme);
+        self.dirty = true;
+    }
 
     fn render(&self, area: Rect) -> Plane {
+        let t = &self.theme;
         let mut p = Plane::new(0, area.width, area.height);
-        p.z_index = 10;
 
-        for idx in 0..p.cells.len() {
-            p.cells[idx].bg = self.theme.bg;
-            p.cells[idx].fg = self.theme.fg;
+        for c in p.cells.iter_mut() {
+            c.bg = t.bg;
+            c.fg = t.fg;
         }
 
-        let title = " Command Bindings — Auto-refresh ";
-        let title_color = Color::Rgb(0, 255, 200);
-        let title_width = title.len() as u16;
-        let title_x = (area.width.saturating_sub(title_width)) / 2;
-        for (i, c) in title.chars().enumerate() {
-            let idx = (i as u16 + title_x) as usize;
+        let w = area.width as usize;
+        let h = area.height as usize;
+
+        // ── Rounded border ──
+        p.cells[0] = Cell { char: '╭', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[w - 1] = Cell { char: '╮', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[(h - 1) * w] = Cell { char: '╰', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[(h - 1) * w + w - 1] = Cell { char: '╯', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        for x in 1..w - 1 {
+            p.cells[x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[(h - 1) * w + x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        }
+        for y in 1..h - 1 {
+            p.cells[y * w] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[y * w + w - 1] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        }
+
+        // ── Header bar ──
+        let header = " 󰔟 Command Bindings ";
+        for (i, c) in header.chars().enumerate().take(w - 4) {
+            p.cells[1 * w + 1 + i] = Cell { char: c, fg: t.fg_on_accent, bg: t.primary, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        for x in (1 + header.len() + 1)..(w - 1) {
+            p.cells[1 * w + x] = Cell { char: '─', fg: t.primary, bg: t.primary, style: Styles::empty(), transparent: false, skip: false };
+        }
+
+        // ── Card: CPU Gauge (top-left) ──
+        render_card(&mut p, 2, 3, 24, 8, t);
+        let card_title = " 󰓃 CPU ";
+        for (i, c) in card_title.chars().enumerate() {
+            p.cells[(3 * w + 3 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        let gauge_area = Rect::new(3, 5, 22, 5);
+        let gp = self.gauge.render(gauge_area);
+        blit_plane(&gp, &mut p, 3, 5);
+
+        // ── Card: Status (top-right) ──
+        render_card(&mut p, 28, 3, 24, 8, t);
+        let status_title = " 󰀄 Connection ";
+        for (i, c) in status_title.chars().enumerate() {
+            p.cells[(3 * w + 29 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        let status_area = Rect::new(29, 5, 22, 5);
+        let sp = self.status.render(status_area);
+        blit_plane(&sp, &mut p, 29, 5);
+
+        // ── Card: Metrics (middle) ──
+        render_card(&mut p, 54, 3, 24, 8, t);
+        let metrics_title = " 󰕙 System Metrics ";
+        for (i, c) in metrics_title.chars().enumerate() {
+            p.cells[(3 * w + 55 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        let kv_area = Rect::new(55, 5, 22, 5);
+        let kvp = self.kv_grid.render(kv_area);
+        blit_plane(&kvp, &mut p, 55, 5);
+
+        // ── Card: Log (bottom-left) ──
+        render_card(&mut p, 2, 12, 38, 10, t);
+        let log_title = " 󰑊 Activity Log ";
+        for (i, c) in log_title.chars().enumerate() {
+            p.cells[(12 * w + 3 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        let log_area = Rect::new(3, 14, 36, 7);
+        let lp = self.log_viewer.render(log_area);
+        blit_plane(&lp, &mut p, 3, 14);
+
+        // ── Card: Streaming (bottom-right) ──
+        render_card(&mut p, 42, 12, 36, 10, t);
+        let stream_title = " 󰅐 Live Stream ";
+        for (i, c) in stream_title.chars().enumerate() {
+            p.cells[(12 * w + 43 + i)] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        let stream_area = Rect::new(43, 14, 34, 7);
+        let streamp = self.streaming.render(stream_area);
+        blit_plane(&streamp, &mut p, 43, 14);
+
+        // ── Status bar ──
+        let auto_str = if self.paused { "⏸ PAUSED" } else { "▶ RUNNING" };
+        let status = format!("  {}  |  tick: {}  |  s=refresh p=pause  |  q=quit", auto_str, self.tick);
+        for (i, c) in status.chars().enumerate().take(w - 2) {
+            let idx = ((h - 1) * w + 1 + i) as usize;
             if idx < p.cells.len() {
-                p.cells[idx].char = c;
-                p.cells[idx].fg = title_color;
-                p.cells[idx].style = Styles::BOLD;
+                p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
             }
         }
-
-        for x in 0..area.width {
-            let idx = (area.width + x) as usize;
-            if idx < p.cells.len() {
-                p.cells[idx].char = '─';
-                p.cells[idx].fg = Color::Rgb(100, 100, 100);
-            }
-        }
-
-        // Gauge
-        let gauge_area = Rect::new(0, 2, 25, 4);
-        let gauge_plane = self.gauge.render(gauge_area);
-        for y in 0..gauge_plane.height {
-            for x in 0..gauge_plane.width {
-                let src_idx = (y * gauge_plane.width + x) as usize;
-                if gauge_plane.cells[src_idx].transparent {
-                    continue;
-                }
-                let dst_idx = ((y + 2) * area.width + x) as usize;
-                if src_idx < gauge_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = gauge_plane.cells[src_idx].clone();
-                }
-            }
-        }
-
-        // StatusBadge
-        let status_area = Rect::new(0, 6, 25, 3);
-        let status_plane = self.status.render(status_area);
-        for y in 0..status_plane.height {
-            for x in 0..status_plane.width {
-                let src_idx = (y * status_plane.width + x) as usize;
-                if status_plane.cells[src_idx].transparent {
-                    continue;
-                }
-                let dst_idx = ((y + 6) * area.width + x) as usize;
-                if src_idx < status_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = status_plane.cells[src_idx].clone();
-                }
-            }
-        }
-
-        // KeyValueGrid
-        let kv_area = Rect::new(26, 2, area.width - 26, 4);
-        let kv_plane = self.kv_grid.render(kv_area);
-        for y in 0..kv_plane.height {
-            for x in 0..kv_plane.width {
-                let src_idx = (y * kv_plane.width + x) as usize;
-                if kv_plane.cells[src_idx].transparent {
-                    continue;
-                }
-                let dst_idx = ((y + 2) * area.width + x + 26) as usize;
-                if src_idx < kv_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = kv_plane.cells[src_idx].clone();
-                }
-            }
-        }
-
-        // LogViewer
-        let log_area = Rect::new(26, 6, area.width - 26, 6);
-        let log_plane = self.log_viewer.render(log_area);
-        for y in 0..log_plane.height {
-            for x in 0..log_plane.width {
-                let src_idx = (y * log_plane.width + x) as usize;
-                if log_plane.cells[src_idx].transparent {
-                    continue;
-                }
-                let dst_idx = ((y + 6) * area.width + x + 26) as usize;
-                if src_idx < log_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = log_plane.cells[src_idx].clone();
-                }
-            }
-        }
-
-        // StreamingText
-        let stream_area = Rect::new(0, area.height - 3, area.width, 3);
-        let stream_plane = self.streaming.render(stream_area);
-        for y in 0..stream_plane.height {
-            for x in 0..stream_plane.width {
-                let src_idx = (y * stream_plane.width + x) as usize;
-                if stream_plane.cells[src_idx].transparent {
-                    continue;
-                }
-                let dst_idx = ((y + area.height - 3) * area.width + x) as usize;
-                if src_idx < stream_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = stream_plane.cells[src_idx].clone();
-                }
-            }
-        }
-
-        let status_line_y = (area.height - 1) as usize;
-        let paused_str = if self.paused { "PAUSED" } else { "ON" };
-        let status_text = format!(" Auto-refresh: {} | s=refresh p=pause ", paused_str);
-        for (i, c) in status_text.chars().enumerate() {
-            let idx = status_line_y * area.width as usize + i;
-            if idx < p.cells.len() {
-                p.cells[idx].char = c;
-                p.cells[idx].fg = Color::Rgb(100, 100, 100);
-            }
+        for x in 1..w - 1 {
+            let idx = ((h - 1) * w + x) as usize;
+            p.cells[idx].bg = t.surface_elevated;
         }
 
         p
