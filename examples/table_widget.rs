@@ -534,22 +534,22 @@ impl Widget for TableApp {
                 KeyCode::Esc => {
                     self.show_search = false;
                     self.search_query.clear();
-                    self.apply_filter();
+                    self.rebuild_table();
                     return true;
                 }
                 KeyCode::Enter => {
                     self.show_search = false;
-                    self.apply_filter();
+                    self.rebuild_table();
                     return true;
                 }
                 KeyCode::Backspace => {
                     self.search_query.pop();
-                    self.apply_filter();
+                    self.rebuild_table();
                     return true;
                 }
                 KeyCode::Char(c) => {
                     self.search_query.push(c);
-                    self.apply_filter();
+                    self.rebuild_table();
                     return true;
                 }
                 _ => {}
