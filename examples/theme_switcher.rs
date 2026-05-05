@@ -495,21 +495,22 @@ impl Widget for ThemePreviewPanel {
         }
 
         let badge_row = 3;
-        let badge_texts = ["OK", "WARN", "ERROR", "OK"];
+        let badge_texts = ["󰄬 OK", "󰀦 WARN", "󰅙 ERROR", "󰄬 OK"];
         let badge_fgs = [theme.success, theme.warning, theme.error, theme.success];
 
+        let mut badge_x = 2u16;
         for (i, (text, fg)) in badge_texts.iter().zip(badge_fgs.iter()).enumerate() {
-            let x = 2 + (i as u16 * 7);
-            let content = format!("[{}]", text);
+            let content = format!(" {} ", text);
             for (j, c) in content.chars().enumerate() {
-                let idx = badge_row as usize * area.width as usize + x as usize + j;
+                let idx = badge_row as usize * area.width as usize + badge_x as usize + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = *fg;
                     plane.cells[idx].style = Styles::BOLD;
-                    plane.cells[idx].bg = theme.bg;
+                    plane.cells[idx].bg = if i % 2 == 0 { theme.surface } else { theme.bg };
                 }
             }
+            badge_x += content.len() as u16 + 1;
         }
 
         let gauge_row = 5u16;
