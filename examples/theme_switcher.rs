@@ -456,9 +456,20 @@ impl Widget for ThemePreviewPanel {
             for x in 0..area.width {
                 let idx = y as usize * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
-                    let is_border = x == 0 || x == area.width - 1 || y == 0 || y == area.height - 1;
+                    let is_top = y == 0;
+                    let is_bottom = y == area.height - 1;
+                    let is_left = x == 0;
+                    let is_right = x == area.width - 1;
+                    let is_border = is_top || is_bottom || is_left || is_right;
+                    let ch = if !is_border { ' ' }
+                        else if is_top && is_left { '╭' }
+                        else if is_top && is_right { '╮' }
+                        else if is_bottom && is_left { '╰' }
+                        else if is_bottom && is_right { '╯' }
+                        else if is_top || is_bottom { '─' }
+                        else { '│' };
                     plane.cells[idx] = Cell {
-                        char: if is_border { '#' } else { ' ' },
+                        char: ch,
                         fg: theme.outline,
                         bg: theme.bg,
                         style: Styles::empty(),

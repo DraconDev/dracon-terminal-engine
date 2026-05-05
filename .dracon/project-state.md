@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Removed field row calculation function from the settings form implementation.
+Improved theme preview panel border rendering with Unicode box-drawing characters
 
 ## Context
-The `field_row` function was previously used to determine the vertical position of form fields in the terminal UI. This was part of an older implementation approach that's no longer needed after recent refactoring of the form rendering logic.
+The theme switcher example was updated to provide a more visually polished preview panel with proper Unicode box-drawing characters instead of simple ASCII borders.
 
 ## Completed
-- [x] Removed the `field_row` function which was handling field positioning
-- [x] Cleaned up the form implementation by removing unused code
+- [x] Replaced simple ASCII borders with Unicode box-drawing characters (╭, ╮, ╰, ╯, ─, │)
+- [x] Maintained consistent styling with theme colors
+- [x] Improved visual clarity of the preview panel
 
 ## In Progress
-- [ ] No active work in progress related to this change
+- [x] Completed the border rendering improvements
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify the form rendering still works correctly without the removed function
-2. Consider if any other legacy positioning logic needs similar cleanup
+1. Verify the visual appearance across different terminal emulators
+2. Consider adding more visual elements to the theme preview panel
