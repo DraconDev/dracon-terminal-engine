@@ -667,7 +667,7 @@ fn main() -> std::io::Result<()> {
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
         "Theme: {} | Press Ctrl+C to exit",
-        THEME_NAMES[current_theme_idx]
+        theme_names[current_theme_idx]
     ));
 
     // Propagate initial theme to all widgets
@@ -709,8 +709,8 @@ fn main() -> std::io::Result<()> {
 
     // ---- Theme cycling helper ----
     let cycle_theme_fn = || {
-        current_theme_idx = (current_theme_idx + 1) % THEMES.len();
-        THEMES[current_theme_idx]
+        current_theme_idx = (current_theme_idx + 1) % themes.len();
+        themes[current_theme_idx].clone()
     };
 
     // ---- Quit support ----
