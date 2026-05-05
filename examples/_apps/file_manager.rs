@@ -461,55 +461,30 @@ impl Widget for FileManager {
 
                     // Metadata
                     let mut meta_y = dy + 2;
-                    draw_text(
-                        &mut plane,
-                        dx,
-                        meta_y,
-                        &format!("Type: {}", if node.is_dir { "Directory" } else { "File" }),
-                        t.fg,
-                        t.surface_elevated,
-                        false,
-                    );
+                    let icon_col = 3;
+                    let label_col = 12;
+                    let value_col = 22;
+                    draw_text(&mut plane, dx + icon_col, meta_y, "Type:", t.fg_muted, t.surface_elevated, false);
+                    draw_text(&mut plane, dx + label_col, meta_y, if node.is_dir { "Directory" } else { "File" }, t.fg, t.surface_elevated, false);
                     meta_y += 1;
 
                     if !node.is_dir {
                         let size_str = format_size(node.size);
-                        draw_text(
-                            &mut plane,
-                            dx,
-                            meta_y,
-                            &format!("Size: {}", size_str),
-                            t.fg,
-                            t.surface_elevated,
-                            false,
-                        );
+                        draw_text(&mut plane, dx + icon_col, meta_y, "Size:", t.fg_muted, t.surface_elevated, false);
+                        draw_text(&mut plane, dx + label_col, meta_y, &size_str, t.fg, t.surface_elevated, false);
                         meta_y += 1;
                     }
 
                     if let Ok(meta) = std::fs::metadata(&node.path) {
                         if let Ok(modified) = meta.modified() {
                             let time = format_system_time(modified);
-                            draw_text(
-                                &mut plane,
-                                dx,
-                                meta_y,
-                                &format!("Modified: {}", time),
-                                t.fg_muted,
-                                t.surface_elevated,
-                                false,
-                            );
+                            draw_text(&mut plane, dx + icon_col, meta_y, "Changed:", t.fg_muted, t.surface_elevated, false);
+                            draw_text(&mut plane, dx + label_col, meta_y, &time, t.fg, t.surface_elevated, false);
                             meta_y += 1;
                         }
                         let perms = format_permissions(meta.permissions().mode());
-                        draw_text(
-                            &mut plane,
-                            dx,
-                            meta_y,
-                            &format!("Permissions: {}", perms),
-                            t.fg_muted,
-                            t.surface_elevated,
-                            false,
-                        );
+                        draw_text(&mut plane, dx + icon_col, meta_y, "Access:", t.fg_muted, t.surface_elevated, false);
+                        draw_text(&mut plane, dx + label_col, meta_y, &perms, t.fg_muted, t.surface_elevated, false);
                         meta_y += 1;
                     }
 

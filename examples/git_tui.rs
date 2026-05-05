@@ -599,7 +599,7 @@ impl GitTui {
 
             let mut row = sub_y;
             if !staged.is_empty() {
-                render_section_card(plane, 2, row, 40, staged.len() + 3, t);
+                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t);
                 draw_text(
                     plane,
                     3,
@@ -638,7 +638,7 @@ impl GitTui {
             }
 
             if !modified.is_empty() {
-                render_section_card(plane, 2, row, 40, modified.len() + 3, t);
+                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t);
                 draw_text(
                     plane,
                     3,
