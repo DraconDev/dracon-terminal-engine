@@ -54,15 +54,20 @@ impl Widget for Showcase {
         self.zones.borrow_mut().clear();
 
         // Title bar with decorative border
-        let title_text = " Dracon Terminal Engine ";
+        let title_text = " 󰣇 Dracon Terminal Engine ";
         let title_x = 2usize;
         let title_y = 0usize;
 
         for (i, ch) in title_text.chars().enumerate() {
             let px = title_x + i;
             if px < area.width as usize {
-                set_cell(&mut plane, px, title_y, ch, t.primary, t.bg);
+                set_cell(&mut plane, px, title_y, ch, t.fg_on_accent, t.primary);
             }
+        }
+
+        // Fill rest of title bar
+        for x in title_x + title_text.len()..area.width as usize {
+            set_cell(&mut plane, x, title_y, ' ', t.primary, t.primary);
         }
 
         // Live clock
@@ -75,8 +80,8 @@ impl Widget for Showcase {
                 clock_x,
                 title_y,
                 &clock_text,
-                t.fg_muted,
-                t.bg,
+                t.fg_on_accent,
+                t.primary,
                 false,
             );
         }
@@ -184,7 +189,7 @@ impl Widget for Showcase {
         // Stats bar
         let stats_y = 2usize;
         let stats_text = format!(
-            " {} Examples  │  {} Widgets  │  {} Themes ",
+            "  {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
             35,
             themes.len()
@@ -195,43 +200,51 @@ impl Widget for Showcase {
             stats_start,
             stats_y,
             &stats_text,
-            t.fg_muted,
+            t.fg,
             t.bg,
-            false,
+            true,
         );
         for x in stats_start + stats_text.len()..area.width as usize - 2 {
             set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
         }
 
-        // Search bar with icon
+        // Search bar with icon and better styling
         let search_y = 3usize;
-        let search_icon = if self.search_active { ">" } else { ":" };
-        let search_prompt = if self.search_active { ">" } else { " " };
-        let search_text = format!("{} {} [{}]", search_icon, search_prompt, self.search_query);
+        let search_icon = if self.search_active { "󰍺" } else { "󰼈" };
+        let search_placeholder = if self.search_query.is_empty() { "type to search..." } else { &self.search_query };
+        let search_text = format!("{} {}", search_icon, search_placeholder);
         let search_fg = if self.search_active {
-            t.primary
+            t.fg_on_accent
         } else {
             t.fg_muted
         };
-        let search_text_chars = search_text.chars().count() + 1;
+        let search_bg = if self.search_active {
+            t.primary
+        } else {
+            t.surface
+        };
+        let search_text_len = search_text.chars().count();
         draw_text(
             &mut plane,
             2,
             search_y,
             &search_text,
             search_fg,
-            t.surface,
+            search_bg,
             false,
         );
         // Fill rest of search bar
-        for x in search_text_chars + 2..area.width as usize - 2 {
-            set_cell(&mut plane, x, search_y, ' ', search_fg, t.surface);
+        for x in search_text_len + 3..area.width as usize - 2 {
+            set_cell(&mut plane, x, search_y, ' ', search_fg, search_bg);
         }
         // Draw cursor if active
         if self.search_active && !self.search_query.is_empty() {
-            let cursor_x = 2 + search_text_chars - 1;
+            let cursor_x = 2 + search_text_len;
             if cursor_x < area.width as usize - 2 {
-                set_cell(&mut plane, cursor_x, search_y, '_', t.primary, t.surface);
+                let blink = std::time::Instant::now().duration_since(self.card_start).as_secs_f64();
+                if (blink * 2.0).fract() < 0.7 {
+                    set_cell(&mut plane, cursor_x, search_y, '▋', t.fg_on_accent, search_bg);
+                }
             }
         }
 
@@ -260,51 +273,51 @@ impl Widget for Showcase {
             );
         }
 
-        // Primitives bar
+        // Primitives bar - live widget demo
         let prim_y = 4usize;
         let state_0 = if self.primitive_toggle {
-            "[*] Toggle"
+            " �checkmark Toggle"
         } else {
-            "[ ] Toggle"
+            " 󰠱 Toggle"
         };
         let state_1 = {
             let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
-            let filled: String = (0..pos).map(|_| '=').collect();
-            let empty: String = (pos..10).map(|_| "-").collect();
-            format!("[{}{}]", filled, empty)
+            let filled: String = (0..pos).map(|_| '▓').collect();
+            let empty: String = (pos..10).map(|_| '░').collect();
+            format!(" Slider [{}{}]", filled, empty)
         };
         let state_2 = if self.primitive_checkbox {
-            "[x] Check"
+            " 󰗈 Check"
         } else {
-            "[ ] Check"
+            " 󰗐 Check"
         };
         let state_3 = {
             let sel = self.primitive_radio;
-            let opts = ["(1)", "(2)", "(3)"];
+            let opts = ["①", "②", "③"];
             let mut s = String::new();
             for (j, _o) in opts.iter().enumerate() {
-                s.push_str(if j == sel { "(*)" } else { "( )" });
+                s.push_str(if j == sel { "●" } else { "○" });
             }
-            s
+            format!(" Radio {}", s)
         };
-        let state_4 = if self.primitive_button {
-            "[CLICKED!]"
+        let state_4 = if self.primitive_button || self.primitive_button_time.is_some() {
+            " 󰜎 Clicked!"
         } else {
-            "[ Button ]"
+            " 󰏦 Button"
         };
         let prim_controls: [(&str, &str); 5] = [
-            ("[1]", state_0),
-            ("[2]", &state_1),
-            ("[3]", state_2),
-            ("[4]", &state_3),
-            ("[5]", state_4),
+            ("", state_0),
+            ("", &state_1),
+            ("", state_2),
+            ("", &state_3),
+            ("", state_4),
         ];
         // Compute positions and register zones
         let mut prim_x = 2usize;
         let mut zones = self.zones.borrow_mut();
         const PRIM_BASE: usize = 100;
-        for (i, (key, state)) in prim_controls.iter().enumerate() {
-            let total_w = key.len() + 1 + state.len();
+        for (i, (_key, state)) in prim_controls.iter().enumerate() {
+            let total_w = state.len();
             zones.register(
                 PRIM_BASE + i,
                 prim_x as u16,
@@ -312,7 +325,7 @@ impl Widget for Showcase {
                 total_w as u16,
                 1,
             );
-            prim_x += total_w + 3;
+            prim_x += total_w + 4;
         }
         // Determine hover from zones
         let hovered_prim = self
@@ -323,16 +336,12 @@ impl Widget for Showcase {
         drop(zones); // release borrow before using plane
                      // Draw primitives with hover highlight
         prim_x = 2usize;
-        for (i, (key, state)) in prim_controls.iter().enumerate() {
+        for (i, (_key, state)) in prim_controls.iter().enumerate() {
             let hovered = hovered_prim == Some(i);
-            let key_fg = if hovered { t.primary } else { t.fg_muted };
             let state_fg = if hovered { t.primary } else { t.fg };
-            draw_text(&mut plane, prim_x, prim_y, key, key_fg, t.bg, false);
-            prim_x += key.len();
-            draw_text(&mut plane, prim_x, prim_y, " ", t.fg_muted, t.bg, false);
-            prim_x += 1;
-            draw_text(&mut plane, prim_x, prim_y, state, state_fg, t.bg, false);
-            prim_x += state.len() + 3;
+            let state_bg = if hovered { t.surface_elevated } else { t.surface };
+            draw_text(&mut plane, prim_x, prim_y, state, state_fg, state_bg, hovered);
+            prim_x += state.len() + 4;
         }
 
         // Category sidebar

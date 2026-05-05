@@ -101,10 +101,12 @@ fn main() -> std::io::Result<()> {
                 .current_dir(&exe_dir)
                 .status();
 
-            let mut drain_buf = [0u8; 256];
-            let _ = std::io::stdin().read(&mut drain_buf);
-
+            let _ = ctx.suspend_terminal();
             let _ = ctx.resume_terminal();
+
+            let mut drain_buf = [0u8; 512];
+            while std::io::stdin().read(&mut drain_buf).unwrap_or(0) > 0 {}
+
             ctx.mark_all_dirty();
         }
     })
