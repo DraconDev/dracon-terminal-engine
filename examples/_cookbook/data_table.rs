@@ -222,8 +222,8 @@ impl Widget for Table {
             }
         }
 
-        // Render search input (skip transparent cells to preserve parent background)
-        let search_area = Rect::new(0, 0, 20, 1);
+        // Render search input (offset by 1 for top border)
+        let search_area = Rect::new(1, inner_y, 20, 1);
         let search_plane = self.search.render(search_area);
         for y in 0..search_plane.height {
             for x in 0..search_plane.width {
@@ -231,7 +231,7 @@ impl Widget for Table {
                 if search_plane.cells[src_idx].transparent {
                     continue;
                 }
-                let dst_idx = (y * area.width + x) as usize;
+                let dst_idx = ((y + inner_y as u32) * area.width as u32 + (x + 1)) as usize;
                 if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
                     p.cells[dst_idx] = search_plane.cells[src_idx].clone();
                 }
@@ -239,17 +239,19 @@ impl Widget for Table {
         }
 
         let lbl = format!("Sort: Name{}", self.sort.sym());
-        let sx = area.width.saturating_sub(lbl.len() as u16 + 2);
+        let sx = area.width.saturating_sub(lbl.len() as u16 + 3);
         for (i, c) in lbl.chars().enumerate() {
-            let idx = (sx + i as u16) as usize;
+            let idx = (inner_y * area.width + sx + i as u16) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = c;
                 p.cells[idx].fg = self.theme.fg;
             }
         }
 
-        for x in 0..area.width {
-            let idx = (area.width + x) as usize;
+        // Separator line (y = inner_y + 1 = 2)
+        let sep_y = inner_y + 1;
+        for x in 1..area.width.saturating_sub(1) {
+            let idx = (sep_y * area.width + x) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = '─';
                 p.cells[idx].fg = self.theme.outline;
