@@ -66,16 +66,6 @@ impl Slider {
     pub fn value(&self) -> f32 {
         self.value
     }
-
-    #[allow(unused)]
-    fn value_to_position(&self) -> usize {
-        let ratio = if self.max > self.min {
-            (self.value - self.min) / (self.max - self.min)
-        } else {
-            0.5
-        };
-        (ratio * 100.0).round() as usize
-    }
 }
 
 impl crate::framework::widget::Widget for Slider {
