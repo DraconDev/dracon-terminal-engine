@@ -387,13 +387,13 @@ impl Widget for SystemMonitor {
         let hist_w = half_w.saturating_sub(8);
         let cpu_color = if self.data.cpu_hist.current() >= 90.0 { t.error }
             else if self.data.cpu_hist.current() >= 70.0 { t.warning } else { t.success };
-        render_sparkline(&mut plane, 2, 2 + gauge_h - 2, hist_w.min(20), 2, &self.data.cpu_hist, cpu_color, t.surface);
+        render_sparkline(&mut plane, SparklineConfig { x: 2, y: 2 + gauge_h - 2, w: hist_w.min(20), h: 2, color: cpu_color, bg: t.surface }, &self.data.cpu_hist);
 
         let mg = self.mem_gauge.render(Rect::new(0, 0, half_w - 4, gauge_h - 2));
         blit_to(&mut plane, &mg, half_w + 2, 3);
         let mem_color = if self.data.mem_hist.current() >= 95.0 { t.error }
             else if self.data.mem_hist.current() >= 80.0 { t.warning } else { t.success };
-        render_sparkline(&mut plane, half_w + 2, 2 + gauge_h - 2, hist_w.min(20), 2, &self.data.mem_hist, mem_color, t.surface);
+        render_sparkline(&mut plane, SparklineConfig { x: half_w + 2, y: 2 + gauge_h - 2, w: hist_w.min(20), h: 2, color: mem_color, bg: t.surface }, &self.data.mem_hist);
 
         // Status badge + load avg
         let badge_y = 2 + gauge_h;
