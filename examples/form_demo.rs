@@ -354,6 +354,14 @@ impl Widget for SettingsForm {
                 let idx = (y * area.width + margin + dx) as usize;
                 if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
             }
+            if is_focused {
+                for dx in 1..card_w.saturating_sub(1) {
+                    let top_idx = ((y - 1) * area.width + margin + dx) as usize;
+                    let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
+                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
+                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                }
+            }
             for (i, c) in Self::field_label(field).chars().enumerate() {
                 let idx = (y * area.width + label_col + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -396,6 +404,14 @@ impl Widget for SettingsForm {
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
                 if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+            }
+            if is_focused {
+                for dx in 1..card_w.saturating_sub(1) {
+                    let top_idx = ((y - 1) * area.width + margin + dx) as usize;
+                    let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
+                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
+                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                }
             }
             for (i, c) in Self::field_label(field).chars().enumerate() {
                 let idx = (y * area.width + label_col + i as u16) as usize;
