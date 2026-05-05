@@ -1,25 +1,23 @@
 # Project State
 
 ## Current Focus
-Added file type icons for JSON, YAML, JavaScript, Python, shell scripts, and HTML/CSS files in the IDE example.
+Added rounded borders to the IDE editor panel for better visual separation
 
 ## Context
-The IDE example was previously missing visual file type indicators for several common file formats. This change improves the file manager's visual clarity by adding consistent icons for these file types.
+This change improves the visual hierarchy of the IDE interface by adding distinct borders around the editor area, making it clearer where the main content begins and ends.
 
 ## Completed
-- [x] Added JSON/YAML icons ()
-- [x] Added JavaScript/TypeScript icons ()
-- [x] Added Python icons ()
-- [x] Added shell script icons ()
-- [x] Added HTML/CSS icons ()
-- [x] Added Gitignore/lockfile icons (﬍)
+- [x] Added `draw_rounded_border` function to render rounded corners using Unicode box-drawing characters
+- [x] Applied rounded borders to the editor panel
+- [x] Adjusted breadcrumb and editor content positioning to account for the new border
+- [x] Added bounds checking to prevent rendering outside the plane
 
 ## In Progress
-- [ ] None (this is a complete feature addition)
+- [ ] No active work in progress
 
 ## Blockers
-- None (this is a self-contained enhancement)
+- None
 
 ## Next Steps
-1. Verify icon consistency across all file types
-2. Consider adding more file type icons if needed
+1. Verify border rendering works across different terminal sizes
+2. Consider adding configurable border styles for different themes

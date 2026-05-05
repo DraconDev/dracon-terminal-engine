@@ -601,11 +601,14 @@ impl Widget for IdeApp {
         let editor_x = tree_w + 1;
         let editor_w = area.width.saturating_sub(editor_x);
         if editor_w > 0 && content_h > 0 {
+            // Rounded border around editor
+            draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t);
+            
             // Breadcrumbs
             let bc_plane = self
                 .breadcrumbs
-                .render(Rect::new(editor_x, content_y, editor_w, 1));
-            self.blit(&mut plane, &bc_plane, editor_x, content_y);
+                .render(Rect::new(editor_x + 1, content_y, editor_w.saturating_sub(2), 1));
+            self.blit(&mut plane, &bc_plane, editor_x + 1, content_y);
 
             // Editor content
             let editor_y = content_y + 1;
@@ -613,9 +616,9 @@ impl Widget for IdeApp {
             if let Some(tab) = self.active_tab_ref() {
                 self.render_editor(
                     &mut plane,
-                    editor_x,
+                    editor_x + 1,
                     editor_y,
-                    editor_w,
+                    editor_w.saturating_sub(2),
                     editor_content_h,
                     tab,
                     t,
@@ -1328,6 +1331,35 @@ impl IdeApp {
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = t.fg_muted;
+            }
+        }
+    }
+}
+
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 3 || h < 2 { return; }
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+            if is_border {
+                plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+                if row == y && col == x {
+                    plane.cells[idx].char = '╭';
+                } else if row == y && col == x + w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == y + h - 1 && col == x {
+                    plane.cells[idx].char = '╰';
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == y || row == y + h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+                plane.cells[idx].transparent = false;
             }
         }
     }
