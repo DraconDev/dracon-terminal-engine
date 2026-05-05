@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Added a `show_help` flag to the widget gallery for toggling help overlay visibility.
+Added help overlay toggle functionality to the widget gallery
 
 ## Context
-This change supports the ongoing work to enhance user guidance in the widget gallery by providing a toggleable help overlay. It aligns with recent feature additions for help systems in other components.
+This change implements a help overlay feature for the widget gallery, allowing users to view keyboard shortcuts and toggle the help display with '?' and Esc keys.
 
 ## Completed
-- [x] Added `show_help` boolean field to `WidgetGallery` struct to track help overlay state
+- [x] Added `show_help` flag to track help overlay state
+- [x] Implemented keyboard handling for '?' to show help and Esc to hide it
+- [x] Integrated help overlay toggle with existing keyboard handling
 
 ## In Progress
-- [x] Implementation of help overlay rendering and keyboard shortcut handling
+- [x] Help overlay display implementation (not shown in this diff)
 
 ## Blockers
-- Help overlay rendering logic not yet implemented
-- Keyboard shortcut integration pending
+- Help overlay rendering implementation pending
 
 ## Next Steps
-1. Implement help overlay rendering logic
-2. Add keyboard shortcut handling for toggling help overlay
+1. Implement help overlay rendering
+2. Add help content for widget gallery shortcuts

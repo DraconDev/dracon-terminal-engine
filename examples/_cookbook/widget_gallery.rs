@@ -82,6 +82,7 @@ impl WidgetGallery {
             theme_index: 0,
             theme,
             should_quit: quit,
+            show_help: false,
         }
     }
 
@@ -236,9 +237,21 @@ impl Widget for WidgetGallery {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
+
+        if self.show_help {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+            }
+            return true;
+        }
+
         match key.code {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = true;
                 true
             }
             KeyCode::Char('\t') | KeyCode::Char('t') => {
