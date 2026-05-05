@@ -22,11 +22,13 @@
 //!   ?           — help overlay
 //!   q           — quit
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, SearchInput, StatusBar, StatusSegment, TabBar,
+    Breadcrumbs, CommandItem, CommandPalette, SearchInput, StatusBar, StatusSegment, TabBar,
     Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -58,6 +60,8 @@ struct EditorApp {
     area: Rect,
     dirty: bool,
     should_quit: Arc<AtomicBool>,
+    command_palette: CommandPalette,
+    cmd_bridge: Rc<RefCell<Option<String>>>,
 }
 
 impl EditorApp {
