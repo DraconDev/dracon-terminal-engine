@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored sparkline rendering in system monitor with structured configuration
+Refactored system monitor card border rendering to improve visual consistency
 
 ## Context
-This change follows a series of refactoring efforts to improve code consistency and maintainability across the system monitor and dashboard builder components. The previous implementation used positional arguments for sparkline rendering, which was being replaced with a more structured configuration approach.
+The change was prompted by a need to improve the visual appearance of card borders in the system monitor. The previous implementation had an unused variable that was removed to clean up the code.
 
 ## Completed
-- [x] Refactored CPU sparkline rendering to use `SparklineConfig` struct
-- [x] Refactored memory sparkline rendering to use `SparklineConfig` struct
-- [x] Maintained all visual behavior while improving code organization
+- [x] Removed unused `_bg` variable in card border rendering
+- [x] Cleaned up the border rendering logic
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress for this change
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify visual consistency with previous implementation
-2. Update related documentation if needed
+1. Verify visual consistency across different system monitor views
+2. Consider additional visual improvements for other UI components

@@ -530,7 +530,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
     if w < 3 || h < 2 { return; }
-    let (border, bg) = (t.outline, t.surface);
+    let (border, _bg) = (t.outline, t.surface);
     for row in y..y+h {
         for col in x..x+w {
             let idx = (row * plane.width + col) as usize;
@@ -588,7 +588,6 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
             }
         }
     }
-}
 }
 
 fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
