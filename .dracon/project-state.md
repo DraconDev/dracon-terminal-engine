@@ -1,28 +1,28 @@
 # Project State
 
 ## Current Focus
-Improved visual styling for section cards in the Git TUI with rounded corners and enhanced border colors
+Improved visual styling for Git status sections in the TUI with consistent icons and layout
 
 ## Context
-The change enhances the visual consistency of section cards in the terminal UI by:
-1. Using rounded corner characters (╭, ╮, ╯, ╰) instead of sharp corners
-2. Applying primary color to corners for better visual hierarchy
-3. Maintaining consistent border styling while improving visual appeal
+The Git TUI was updated to provide a more visually consistent interface for status sections (clean, staged, modified, untracked) by:
+1. Adding Nerd Font icons for each status category
+2. Standardizing the layout of status indicators
+3. Improving visual hierarchy with proper spacing
 
 ## Completed
-- [x] Replaced sharp corners (┌, ┐, └, ┘) with rounded corners (╭, ╮, ╯, ╰)
-- [x] Changed corner text color to primary theme color
-- [x] Simplified border character logic for better readability
-- [x] Added bounds checking before cell access
-- [x] Improved visual hierarchy with distinct corner styling
+- [x] Added Nerd Font icons (󰄬, 󰄱, 󰋖) for clean, staged, modified, and untracked statuses
+- [x] Standardized status section layout with consistent icon positioning
+- [x] Improved visual hierarchy with proper spacing between elements
+- [x] Enhanced section cards with rounded corners (via render_section_card)
+- [x] Maintained selection highlighting for interactive elements
 
 ## In Progress
-- [ ] No active work in progress for this change
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify visual consistency across all section types
-2. Test with different terminal font sizes to ensure readability
-3. Consider adding optional configuration for corner styles
+1. Verify visual consistency across all status states
+2. Test with different terminal fonts to ensure icons render correctly
+3. Consider adding more Nerd Font icons for additional status types if needed

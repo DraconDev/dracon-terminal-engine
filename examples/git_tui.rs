@@ -579,7 +579,7 @@ impl GitTui {
                 plane,
                 2,
                 sub_y,
-                "✓ Working tree clean",
+                " 󰄬 Working tree clean",
                 t.success,
                 t.bg,
                 false,
@@ -604,14 +604,14 @@ impl GitTui {
                     plane,
                     3,
                     row,
-                    "✓ Staged",
+                    " 󰄬 Staged",
                     t.success,
                     t.surface_elevated,
                     true,
                 );
                 draw_text(
                     plane,
-                    13,
+                    14,
                     row,
                     &format!("({})", staged.len()),
                     t.fg_muted,
@@ -623,11 +623,12 @@ impl GitTui {
                     let is_selected = self.view == GitView::Status && self.selected_file == i;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
                     let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let icon = "󰄬";
                     draw_text(
                         plane,
                         4,
                         row,
-                        &format!("{} {}", file.status, file.path),
+                        &format!("{} {} {}", icon, file.status, file.path),
                         fg,
                         bg,
                         is_selected,
@@ -643,14 +644,14 @@ impl GitTui {
                     plane,
                     3,
                     row,
-                    "✗ Modified",
+                    " 󰄱 Modified",
                     t.warning,
                     t.surface_elevated,
                     true,
                 );
                 draw_text(
                     plane,
-                    14,
+                    15,
                     row,
                     &format!("({})", modified.len()),
                     t.fg_muted,
@@ -664,11 +665,12 @@ impl GitTui {
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
                     let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let icon = "󰄱";
                     draw_text(
                         plane,
                         4,
                         row,
-                        &format!("{} {}", file.status, file.path),
+                        &format!("{} {} {}", icon, file.status, file.path),
                         fg,
                         bg,
                         is_selected,
@@ -679,27 +681,38 @@ impl GitTui {
             }
 
             if !untracked.is_empty() {
+                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t);
                 draw_text(
                     plane,
-                    2,
+                    3,
                     row,
-                    &format!("Untracked ({}):", untracked.len()),
+                    " 󰋖 Untracked",
                     t.fg_muted,
-                    t.bg,
+                    t.surface_elevated,
                     true,
                 );
-                row += 1;
+                draw_text(
+                    plane,
+                    16,
+                    row,
+                    &format!("({})", untracked.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
                 let offset = staged.len() + modified.len();
                 for (i, file) in untracked.iter().enumerate() {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.bg };
+                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let icon = "󰋖";
                     draw_text(
                         plane,
                         4,
                         row,
-                        &format!("{} {}", file.status, file.path),
+                        &format!("{} {} {}", icon, file.status, file.path),
                         fg,
                         bg,
                         is_selected,
