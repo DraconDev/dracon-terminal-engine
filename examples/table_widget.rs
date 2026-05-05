@@ -574,7 +574,7 @@ impl Widget for TableApp {
                 self.show_search = !self.show_search;
                 if !self.show_search {
                     self.search_query.clear();
-                    self.apply_filter();
+                    self.rebuild_table();
                 }
                 self.dirty = true;
                 true
@@ -582,7 +582,7 @@ impl Widget for TableApp {
             KeyCode::Esc => {
                 if !self.search_query.is_empty() {
                     self.search_query.clear();
-                    self.apply_filter();
+                    self.rebuild_table();
                     self.dirty = true;
                 }
                 true
