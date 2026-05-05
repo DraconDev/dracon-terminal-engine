@@ -448,6 +448,17 @@ impl Widget for Showcase {
                     continue;
                 }
 
+                // Get hover animation offset
+                let hover_offset = if let Some(anim_id) = self.card_hover_anim.get(grid_idx).copied().flatten() {
+                    self.animations.value(anim_id).unwrap_or(0.0)
+                } else {
+                    0.0
+                };
+                let offset_y = (hover_offset * -0.5) as i16; // Lift up by up to 0.5 rows
+                let offset_x = (hover_offset * 0.5) as i16;  // Slight right shift
+                let draw_x = (x as i16 + offset_x).max(1) as usize;
+                let draw_y = (y as i16 + offset_y).max(1) as usize;
+
                 let card_config = CardConfig {
                     ex,
                     idx: grid_idx,
@@ -464,12 +475,16 @@ impl Widget for Showcase {
                 for cy in 0..card_h {
                     for cx in 0..card_w {
                         let src_idx = cy * card_w + cx;
-                        let dst_idx = (y + cy) * area.width as usize + x + cx;
-                        if src_idx < card.cells.len()
-                            && dst_idx < plane.cells.len()
-                            && !card.cells[src_idx].transparent
-                        {
-                            plane.cells[dst_idx] = card.cells[src_idx].clone();
+                        let dst_x = draw_x + cx;
+                        let dst_y = draw_y + cy;
+                        if dst_x < area.width as usize && dst_y < area.height as usize {
+                            let dst_idx = dst_y * area.width as usize + dst_x;
+                            if src_idx < card.cells.len()
+                                && dst_idx < plane.cells.len()
+                                && !card.cells[src_idx].transparent
+                            {
+                                plane.cells[dst_idx] = card.cells[src_idx].clone();
+                            }
                         }
                     }
                 }
