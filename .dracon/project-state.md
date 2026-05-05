@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added hover state tracking for processes in the system monitor UI
 
 ## Context
-This change updates the dependency versions in the project's lockfile, likely to incorporate the latest compatible versions of dependencies or to resolve version conflicts.
+This change enables visual feedback when users hover over processes in the system monitor, improving the interactive experience by providing clear visual cues about which process is being examined.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added `hovered_process` field to track which process is currently hovered
+- [x] Initialized `hovered_process` as `None` in the default state
 
 ## In Progress
-- [x] Dependency version synchronization
+- [ ] Implementation of visual feedback for hovered processes (UI rendering logic)
 
 ## Blockers
-- None identified in this commit
+- UI rendering logic needs to be implemented to visually distinguish hovered processes
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application with the new dependency versions
+1. Implement visual feedback for hovered processes (e.g., highlighting)
+2. Add hover event handling in the UI rendering code
