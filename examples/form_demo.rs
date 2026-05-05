@@ -516,6 +516,14 @@ impl Widget for SettingsForm {
                 plane.cells[idx].bg = row_bg;
             }
         }
+        if is_focused {
+            for dx in 1..card_w.saturating_sub(1) {
+                let top_idx = (13 * area.width + margin + dx) as usize;
+                let bot_idx = (15 * area.width + margin + dx) as usize;
+                if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
+                if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+            }
+        }
         let submit_plane = self.submit.render(Rect::new(input_col, 14, 20, 1));
         blit(&mut plane, &submit_plane, input_col, 14);
 
