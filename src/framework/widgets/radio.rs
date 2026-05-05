@@ -165,6 +165,13 @@ impl crate::framework::widget::Widget for Radio {
         _row: u16,
     ) -> bool {
         match kind {
+            crate::input::event::MouseEventKind::Moved => {
+                if !self.hovered {
+                    self.hovered = true;
+                    self.dirty = true;
+                }
+                false
+            }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if !self.selected {
                     self.selected = true;
