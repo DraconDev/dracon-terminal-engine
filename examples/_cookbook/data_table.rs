@@ -259,9 +259,9 @@ impl Widget for Table {
             }
         }
 
-        let mut x = 0u16;
+        let mut x = 1u16; // offset by 1 for left border
         for (h, w) in heads.iter().zip(widths.iter()) {
-            let w = *w.min(&area.width.saturating_sub(x));
+            let w = *w.min(&area.width.saturating_sub(x + 1));
             for (j, c) in h.chars().take(w as usize).enumerate() {
                 let idx = (hh * area.width + x + j as u16) as usize;
                 if idx < p.cells.len() {
@@ -273,8 +273,10 @@ impl Widget for Table {
             x += w + 1;
         }
 
+        let data_start_y = hh + 1;
         for (i, row) in self.rows.iter().skip(self.off).take(self.vis).enumerate() {
-            let y = hh + i as u16;
+            let y = data_start_y + i as u16;
+            if y >= area.height.saturating_sub(1) { break; }
             let sel = self.off + i == self.sel;
             let bg = if sel {
                 self.theme.selection_bg
@@ -287,7 +289,7 @@ impl Widget for Table {
                 self.theme.fg
             };
             let sty = if sel { Styles::BOLD } else { Styles::empty() };
-            for x in 0..area.width {
+            for x in 1..area.width.saturating_sub(1) {
                 let idx = (y * area.width + x) as usize;
                 if idx < p.cells.len() {
                     p.cells[idx].bg = bg;
@@ -297,9 +299,9 @@ impl Widget for Table {
             }
 
             let vals = [&row.0, &row.1.to_string(), &row.2, &row.3];
-            let mut x = 0u16;
+            let mut x = 1u16;
             for (j, (v, w)) in vals.iter().zip(widths.iter()).enumerate() {
-                let w = *w.min(&area.width.saturating_sub(x));
+                let w = *w.min(&area.width.saturating_sub(x + 1));
                 let txt = if j == 1 {
                     format!("{:>3}", v)
                 } else {
@@ -318,20 +320,21 @@ impl Widget for Table {
             }
         }
 
-        let sy = area.height - sh;
+        let sy = area.height.saturating_sub(2);
         let txt = if let Some(r) = self.rows.get(self.sel) {
             format!(
-                "Selected: {} | Age: {} | City: {} | {} rows",
+                " Selected: {} | Age: {} | City: {} | {} rows ",
                 r.0,
                 r.1,
                 r.2,
                 self.rows.len()
             )
         } else {
-            format!("No results | {} rows", self.rows.len())
+            format!(" No results | {} rows ", self.rows.len())
         };
-        for (i, c) in txt.chars().take(area.width as usize).enumerate() {
-            let idx = (sy * area.width + i as u16) as usize;
+        let txt_x = (area.width.saturating_sub(txt.len() as u16)) / 2;
+        for (i, c) in txt.chars().take(area.width.saturating_sub(2) as usize).enumerate() {
+            let idx = (sy * area.width + txt_x + i as u16) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = c;
                 p.cells[idx].fg = self.theme.primary;
