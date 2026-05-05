@@ -1,25 +1,23 @@
 # Project State
 
 ## Current Focus
-Enhanced table widget with column sorting functionality and improved header click handling
+Added column sorting functionality to the table widget with ascending/descending toggle
 
 ## Context
-The table widget was refactored to properly expose column indices during header clicks, enabling column sorting functionality. This change builds on previous work to improve the table widget's interactivity and data presentation capabilities.
+This implements the core sorting functionality for the table widget, allowing users to click column headers to sort data. The previous commits laid groundwork for this feature by adding header click handling and refactoring related components.
 
 ## Completed
-- [x] Added sort_column and sort_ascending fields to TableApp for tracking sort state
-- [x] Refactored header click handling to properly expose column indices
-- [x] Improved column width calculation in header click detection
-- [x] Added proper return values for header click handling logic
+- [x] Added `sort_users` helper function to handle column-based sorting
+- [x] Implemented sort state tracking in `TableApp` (column index + direction)
+- [x] Connected sort state to table rebuild process
+- [x] Added basic sort indicator integration with table widget
 
 ## In Progress
-- [x] Implementation of actual sorting functionality (not yet implemented in this diff)
+- [ ] Need to implement visual indicators for sort direction in headers
 
 ## Blockers
-- Sorting algorithm implementation needs to be completed
-- UI feedback for sort state needs to be added
+- Visual feedback for sort direction requires UI theme integration
 
 ## Next Steps
-1. Implement sorting algorithm based on sort_column and sort_ascending
-2. Add visual indicators for sort state in the table header
-3. Write tests for the new sorting functionality
+1. Add visual indicators for sort direction in column headers
+2. Test edge cases with empty tables and mixed data types

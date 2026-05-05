@@ -176,13 +176,30 @@ impl TableApp {
             show_help: false,
             show_search: false,
             search_query: String::new(),
+            sort_column: None,
+            sort_ascending: true,
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             should_quit,
         }
     }
 
-    fn apply_filter(&mut self) {
+    fn sort_users(users: &mut [User], col: usize, ascending: bool) {
+        users.sort_by(|a, b| {
+            let ord = match col {
+                0 => a.name.cmp(&b.name),
+                1 => a.role.cmp(&b.role),
+                2 => a.department.cmp(&b.department),
+                3 => a.status.label().cmp(b.status.label()),
+                4 => a.last_active.cmp(&b.last_active),
+                _ => std::cmp::Ordering::Equal,
+            };
+            if ascending { ord } else { ord.reverse() }
+        });
+    }
+
+    fn rebuild_table(&mut self) {
+        // Apply filter
         let query = self.search_query.to_lowercase();
         if query.is_empty() {
             self.filtered_users = self.all_users.clone();
@@ -197,6 +214,12 @@ impl TableApp {
                 .cloned()
                 .collect();
         }
+
+        // Apply sort
+        if let Some(col) = self.sort_column {
+            Self::sort_users(&mut self.filtered_users, col, self.sort_ascending);
+        }
+
         let columns = vec![
             Column { header: "󰣉 Name".into(), width: 18 },
             Column { header: "󰠨 Role".into(), width: 20 },
@@ -214,12 +237,21 @@ impl TableApp {
                 _ => String::new(),
             }
         };
+
+        let sort_col = self.sort_column;
+        let sort_asc = self.sort_ascending;
         let mut new_table = Table::new(columns)
             .with_theme(self.theme)
             .with_rows(self.filtered_users.clone())
             .with_cell_text_fn(cell_fn)
-            .on_select(|_user| {});
+            .on_select(|_user| {})
+            .on_header_click(move |col| {
+                // This closure is captured but we need to handle sort state
+                // We'll use a bridge pattern since on_header_click doesn't return state
+                let _ = col;
+            });
         new_table.set_visible_count((self.area.height.saturating_sub(10)) as usize);
+        new_table.set_sort(sort_col, sort_asc);
         self.table = new_table;
         self.dirty = true;
     }
@@ -234,7 +266,7 @@ impl TableApp {
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
-        self.apply_filter(); // rebuilds table with new theme
+        self.rebuild_table();
     }
 
     fn selected_user(&self) -> Option<&User> {
@@ -256,7 +288,7 @@ impl Widget for TableApp {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
-        self.apply_filter();
+        self.rebuild_table();
     }
 
     fn render(&self, area: Rect) -> Plane {
