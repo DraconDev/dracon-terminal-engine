@@ -521,7 +521,7 @@ impl Widget for Showcase {
         // Status bar with gradient effect
         let status_y = area.height as usize - 1;
         for x in 0..area.width as usize {
-            let gradient_ratio = x as f32 / area.width as f32;
+            let _gradient_ratio = x as f32 / area.width as f32;
             let bg = if x < area.width as usize / 2 {
                 t.surface_elevated
             } else {
