@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Enhanced data table visualization with scrollbar and help overlay improvements
 
 ## Context
-This change updates the dependency versions in the project's lock file, which is typically done automatically during dependency resolution. It's part of the ongoing work to improve the widget gallery, tree navigator, and menu system with new features like help overlays and theme cycling.
+The changes improve the data table widget by adding visual feedback for scrolling and refining the help overlay presentation. This follows the pattern of adding consistent visual indicators across components.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Added scrollbar indicator for data tables when content overflows
+- [x] Improved help overlay styling with proper borders and title positioning
+- [x] Updated menu system labels with Nerd Font icons for better visual hierarchy
 
 ## In Progress
-- [x] Adding help overlay functionality across multiple components (widget gallery, tree navigator, menu system)
-- [x] Implementing keyboard shortcuts for theme cycling and help overlays
-- [x] Refactoring keyboard handling and removing redundant code
+- [ ] No active work in progress
 
 ## Blockers
-- No blockers identified for this specific change
+- None identified
 
 ## Next Steps
-1. Continue implementing help overlay features in remaining components
-2. Finalize keyboard shortcut integration across all systems
+1. Verify scrollbar behavior with large datasets
+2. Test help overlay positioning across different terminal sizes

@@ -338,9 +338,30 @@ impl Widget for Table {
             if idx < p.cells.len() {
                 p.cells[idx].char = c;
                 p.cells[idx].fg = self.theme.primary;
+                p.cells[idx].bg = self.theme.surface;
                 p.cells[idx].transparent = false;
             }
         }
+
+        // Scrollbar indicator if content overflows
+        if self.rows.len() > self.vis {
+            let sb_x = area.width - 1;
+            let content_h = area.height.saturating_sub(3); // minus header and status
+            let thumb_h = (self.vis as f32 / self.rows.len() as f32 * content_h as f32).max(1.0) as u16;
+            let thumb_y = (self.off as f32 / self.rows.len() as f32 * content_h as f32) as u16 + 2;
+            for i in 0..thumb_h {
+                let y = thumb_y + i;
+                if y < area.height.saturating_sub(1) {
+                    let idx = (y * area.width + sb_x) as usize;
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = '▐';
+                        p.cells[idx].fg = self.theme.primary;
+                        p.cells[idx].transparent = false;
+                    }
+                }
+            }
+        }
+
         // Help overlay
         if self.show_help {
             let hw = 40u16.min(area.width.saturating_sub(4));
@@ -368,6 +389,20 @@ impl Widget for Table {
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
                 if left_idx < p.cells.len() { p.cells[left_idx].char = '│'; p.cells[left_idx].fg = self.theme.outline; }
                 if right_idx < p.cells.len() { p.cells[right_idx].char = '│'; p.cells[right_idx].fg = self.theme.outline; }
+            }
+            // Corners
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = *ch;
+                    p.cells[idx].fg = self.theme.outline;
+                }
             }
             // Title
             let title = "Data Table Help";

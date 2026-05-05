@@ -57,10 +57,10 @@ impl MenuApp {
             "videos".to_string(),
         ];
         let menu_bar = vec![
-            MenuLabel("File"),
-            MenuLabel("Edit"),
-            MenuLabel("View"),
-            MenuLabel("Help"),
+            MenuLabel("󰈔 File"),
+            MenuLabel("󰏪 Edit"),
+            MenuLabel("󰰈 View"),
+            MenuLabel("󰋽 Help"),
         ];
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
