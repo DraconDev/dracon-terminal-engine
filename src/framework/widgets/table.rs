@@ -263,6 +263,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                         };
                     }
                 }
+            }
 
             x += w;
             let _ = j;
