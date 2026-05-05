@@ -355,13 +355,50 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
     }
 
     let input_row = header_h + list_h;
-    let base_idx = (input_row * area.width) as usize;
-    for col in 0..area.width {
-        let idx = base_idx + col as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx].bg = t.input_bg;
+    // Rounded border around input
+    let input_w = area.width.saturating_sub(2);
+    if input_w > 4 {
+        let input_y = input_row;
+        for col in 1..area.width.saturating_sub(1) {
+            let idx_top = (input_y * area.width + col) as usize;
+            let idx_bottom = ((input_y + 2) * area.width + col) as usize;
+            if idx_top < plane.cells.len() {
+                plane.cells[idx_top].char = '─';
+                plane.cells[idx_top].fg = t.outline;
+            }
+            if idx_bottom < plane.cells.len() {
+                plane.cells[idx_bottom].char = '─';
+                plane.cells[idx_bottom].fg = t.outline;
+            }
+        }
+        // Corners
+        let corners = [
+            (input_y, 1, '╭'), (input_y, area.width.saturating_sub(2), '╮'),
+            (input_y + 2, 1, '╰'), (input_y + 2, area.width.saturating_sub(2), '╯'),
+        ];
+        for (r, c, ch) in corners {
+            let idx = (r * area.width + c) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = ch;
+                plane.cells[idx].fg = t.primary;
+            }
+        }
+        // Side borders
+        for row in input_y + 1..input_y + 2 {
+            let idx_left = (row * area.width + 1) as usize;
+            let idx_right = (row * area.width + area.width.saturating_sub(2)) as usize;
+            if idx_left < plane.cells.len() {
+                plane.cells[idx_left].char = '│';
+                plane.cells[idx_left].fg = t.outline;
+            }
+            if idx_right < plane.cells.len() {
+                plane.cells[idx_right].char = '│';
+                plane.cells[idx_right].fg = t.outline;
+            }
         }
     }
+
+    let base_idx = ((input_row + 1) * area.width + 3) as usize;
 
     for (i, c) in "[📎]".chars().enumerate() {
         let idx = base_idx + i;

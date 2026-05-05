@@ -1,25 +1,25 @@
 # Project State
 
 ## Current Focus
-Enhanced chat UI with message bubbles, avatars, and improved visual hierarchy
+Enhanced chat client UI with rounded input borders for better visual separation
 
 ## Context
-Improved the chat client's visual presentation to better distinguish messages, show sender identity, and create a more conversational UI experience
+Improving the chat client's visual hierarchy by adding rounded borders to the input area, making it stand out from the message list
 
 ## Completed
-- [x] Added avatar circles showing first letter of sender
-- [x] Implemented message bubbles with different positioning for user vs others
-- [x] Added color-coded sender names and timestamps
-- [x] Improved message alignment and spacing
-- [x] Enhanced visual distinction between unread and read messages
+- [x] Added rounded border characters (╭, ╮, ╰, ╯) around input area
+- [x] Implemented horizontal borders (─) above and below input
+- [x] Added vertical borders (│) on sides of input
+- [x] Adjusted input text positioning to account for new borders
 
 ## In Progress
-- [x] Visual styling improvements for chat messages
+- [ ] Testing input behavior with new borders
+- [ ] Verifying border rendering at different terminal sizes
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Add message status indicators (delivered/read)
-2. Implement message selection and actions
-3. Add typing indicators for active users
+1. Test input behavior with new borders
+2. Verify border rendering at different terminal sizes
+3. Consider adding visual feedback for input focus state
