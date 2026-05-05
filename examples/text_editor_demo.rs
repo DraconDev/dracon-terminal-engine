@@ -178,6 +178,56 @@ impl EditorApp {
         self.tab_bar.set_active(self.active_tab);
         self.tab_bar.on_theme_change(&self.theme);
     }
+
+    fn open_command_palette(&mut self) {
+        let pw = 45u16;
+        let ph = 18u16;
+        let ox = (self.area.width.saturating_sub(pw)) / 2;
+        let oy = (self.area.height.saturating_sub(ph)) / 2;
+        self.command_palette.set_area(Rect::new(ox, oy, pw, ph));
+        self.command_palette.show();
+    }
+
+    fn dispatch_palette_command(&mut self, cmd_id: &str) {
+        match cmd_id {
+            "new-tab" => {
+                let new_id = self.tabs.len();
+                self.tabs.push(Tab {
+                    title: format!("untitled-{}.rs", new_id + 1),
+                    content: "// New file\n".to_string(),
+                    cursor_line: 0,
+                    cursor_col: 0,
+                    modified: false,
+                });
+                self.active_tab = new_id;
+                self.sync_tab_bar();
+            }
+            "close-tab" => {
+                if self.tabs.len() > 1 {
+                    self.tabs.remove(self.active_tab);
+                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                    self.sync_tab_bar();
+                }
+            }
+            "save" => {
+                if let Some(tab) = self.active_tab_mut() {
+                    tab.modified = false;
+                }
+                self.sync_tab_bar();
+            }
+            "search" => {
+                self.show_search = true;
+            }
+            "cycle-theme" => {
+                self.cycle_theme();
+            }
+            "show-shortcuts" => {
+                self.show_help = true;
+            }
+            _ => {}
+        }
+        self.dirty = true;
+    }
 }
 
 fn build_file_tree(theme: Theme) -> Tree {
@@ -328,6 +378,16 @@ impl Widget for EditorApp {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
+
+        // Command palette takes priority when visible
+        if self.command_palette.is_visible() {
+            let _handled = self.command_palette.handle_key(key);
+            let cmd = self.cmd_bridge.borrow_mut().take();
+            if let Some(ref cmd_id) = cmd {
+                self.dispatch_palette_command(cmd_id);
+            }
+            return true;
+        }
 
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
