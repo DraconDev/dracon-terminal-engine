@@ -170,6 +170,7 @@ fn autumn() -> Theme {
         scrollbar_thumb_hover: Color::Rgb(120, 105, 90),
         disabled_fg: Color::Rgb(100, 90, 75),
         disabled_bg: Color::Rgb(48, 42, 38),
+        hover_bg: Color::Rgb(58, 52, 46),
         scrollbar_width: 1,
     }
 }

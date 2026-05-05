@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Added hover background color to VS Code light theme for interactive UI elements
+Added hover background color to theme system for interactive UI elements
 
 ## Context
-This change implements a hover background color for the VS Code light theme as part of a broader effort to standardize interactive UI feedback across all built-in themes.
+This change implements a consistent hover background color across all themes, improving visual feedback for interactive elements in the system monitor and other UI components.
 
 ## Completed
-- [x] Added hover background color (RGB 245, 245, 250) to VS Code light theme
+- [x] Added `hover_bg` color property to all built-in themes
+- [x] Updated system monitor to use the new `hover_bg` color for hovered process rows
+- [x] Updated Cargo.lock with dependency version bump
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Implementation of hover states across all interactive UI components
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify hover behavior across all themes
-2. Document the new hover styling in theme documentation
+1. Verify hover states work consistently across all themes
+2. Apply hover styling to additional interactive UI elements
