@@ -47,54 +47,65 @@ impl FormApp {
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
         let help_text = [
-            "─ Controls ─",
-            "",
-            "↑/↓    Navigate fields",
-            "Type    Enter value",
-            "Home    Clear field",
-            "t       Cycle theme",
-            "?       Toggle help",
-            "q       Quit",
+            "┌─ Controls ────────────────┐",
+            "│ ↑/↓    Navigate fields   │",
+            "│ Type    Enter value     │",
+            "│ Home    Clear field     │",
+            "│ t       Cycle theme     │",
+            "│ ?       Toggle help     │",
+            "│ q       Quit            │",
+            "└─────────────────────────┘",
         ];
-
         let w = 30.min(area.width.saturating_sub(4));
         let h = help_text.len() as u16 + 2;
         let x = (area.width - w) / 2;
         let y = (area.height - h) / 2;
 
-        // Draw rounded box (transparent background for proper overlay effect)
-        // Top-left corner
-        plane.put_str(x, y, "╭", self.theme.fg, self.theme.bg, Styles::empty());
-        // Top line
-        for i in 1..w - 1 {
-            plane.put_str(x + i, y, "─", self.theme.fg, self.theme.bg, Styles::empty());
-        }
-        // Top-right corner
-        plane.put_str(x + w - 1, y, "╮", self.theme.fg, self.theme.bg, Styles::empty());
-
-        // Middle rows
-        for row in 0..h - 2 {
-            plane.put_str(x, y + 1 + row, "│", self.theme.fg, self.theme.bg, Styles::empty());
-            plane.put_str(x + w - 1, y + 1 + row, "│", self.theme.fg, self.theme.bg, Styles::empty());
+        for row in 0..h {
+            for col in 0..w {
+                let idx = ((y + row) * plane.width + x + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].transparent = false;
+                }
+            }
         }
 
-        // Bottom-left corner
-        plane.put_str(x, y + h - 1, "╰", self.theme.fg, self.theme.bg, Styles::empty());
-        // Bottom line
-        for i in 1..w - 1 {
-            plane.put_str(x + i, y + h - 1, "─", self.theme.fg, self.theme.bg, Styles::empty());
+        let corners = [(y, x, '╭'), (y, x + w - 1, '╮'), (y + h - 1, x, '╰'), (y + h - 1, x + w - 1, '╯')];
+        for (cy, cx, ch) in &corners {
+            let idx = (*cy * plane.width + *cx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
-        // Bottom-right corner
-        plane.put_str(x + w - 1, y + h - 1, "╯", self.theme.fg, self.theme.bg, Styles::empty());
 
-        // Draw help text
+        for col in 1..w - 1 {
+            let top_idx = (y * plane.width + x + col) as usize;
+            let bot_idx = ((y + h - 1) * plane.width + x + col) as usize;
+            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
+            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+        }
+
+        for row in 1..h - 1 {
+            let left_idx = ((y + row) * plane.width + x) as usize;
+            let right_idx = ((y + row) * plane.width + x + w - 1) as usize;
+            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
+            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+        }
+
+        let start_y = y + (h - help_text.len() as u16) / 2;
         for (i, line) in help_text.iter().enumerate() {
-            let text_y = y + 1 + i as u16;
-            let text_x = x + 2;
-            let available = w - 4;
-            for (j, c) in line.chars().take(available as usize).enumerate() {
-                plane.put_str(text_x + j as u16, text_y, &c.to_string(), self.theme.fg, self.theme.bg, Styles::empty());
+            let row = start_y + i as u16;
+            for (j, c) in line.chars().enumerate() {
+                let idx = (row * plane.width + x + 2 + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }
