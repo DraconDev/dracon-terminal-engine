@@ -437,41 +437,53 @@ impl IdeApp {
     }
 }
 
+fn file_icon(name: &str) -> &'static str {
+    if name.ends_with(".rs") {
+        " "
+    } else if name.ends_with(".toml") {
+        " "
+    } else if name.ends_with(".md") {
+        " "
+    } else {
+        " "
+    }
+}
+
 fn build_sample_tree() -> Tree {
     let root = TreeNode {
-        label: "workspace".into(),
+        label: "󰉋 workspace".into(),
         expanded: true,
         children: vec![
             TreeNode {
-                label: "Cargo.toml".into(),
+                label: format!("{}Cargo.toml", file_icon("Cargo.toml")),
                 expanded: false,
                 children: vec![],
             },
             TreeNode {
-                label: "src".into(),
+                label: "󰉋 src".into(),
                 expanded: true,
                 children: vec![
                     TreeNode {
-                        label: "main.rs".into(),
+                        label: format!("{}main.rs", file_icon("main.rs")),
                         expanded: false,
                         children: vec![],
                     },
                     TreeNode {
-                        label: "lib.rs".into(),
+                        label: format!("{}lib.rs", file_icon("lib.rs")),
                         expanded: false,
                         children: vec![],
                     },
                     TreeNode {
-                        label: "widgets".into(),
+                        label: "󰉋 widgets".into(),
                         expanded: false,
                         children: vec![
                             TreeNode {
-                                label: "mod.rs".into(),
+                                label: format!("{}mod.rs", file_icon("mod.rs")),
                                 expanded: false,
                                 children: vec![],
                             },
                             TreeNode {
-                                label: "button.rs".into(),
+                                label: format!("{}button.rs", file_icon("button.rs")),
                                 expanded: false,
                                 children: vec![],
                             },
@@ -480,16 +492,16 @@ fn build_sample_tree() -> Tree {
                 ],
             },
             TreeNode {
-                label: "examples".into(),
+                label: "󰉋 examples".into(),
                 expanded: false,
                 children: vec![TreeNode {
-                    label: "demo.rs".into(),
+                    label: format!("{}demo.rs", file_icon("demo.rs")),
                     expanded: false,
                     children: vec![],
                 }],
             },
             TreeNode {
-                label: "README.md".into(),
+                label: format!("{}README.md", file_icon("README.md")),
                 expanded: false,
                 children: vec![],
             },
