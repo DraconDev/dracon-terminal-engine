@@ -102,6 +102,12 @@ impl LogViewer {
         self
     }
 
+    pub fn with_scroll_indicator(mut self, show: bool) -> Self {
+        self.show_scroll_indicator = show;
+        self.dirty = true;
+        self
+    }
+
     pub fn append_line(&mut self, line: &str) {
         let parsed = self.parse_line(line);
         if self.filter.is_some() && !self.matches_filter(&parsed) {

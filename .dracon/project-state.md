@@ -4,18 +4,18 @@
 Added scroll indicator visibility control to the LogViewer widget
 
 ## Context
-The LogViewer widget now needs to support configurable visibility of scroll indicators to improve user awareness of scrollable content.
+This change enables users to toggle the visibility of scroll indicators in the LogViewer widget, improving customization options for log viewing interfaces.
 
 ## Completed
-- [x] Added `show_scroll_indicator` field to LogViewer struct
-- [x] Set default value to `true` for new instances
+- [x] Added `with_scroll_indicator` method to control scroll indicator visibility
+- [x] Implemented dirty flag update when visibility changes
 
 ## In Progress
-- [ ] Implement actual rendering logic for the scroll indicator
+- [x] Scroll indicator visibility control implementation
 
 ## Blockers
-- Need to implement the visual representation of the scroll indicator
+- None identified
 
 ## Next Steps
-1. Implement the visual rendering of the scroll indicator
-2. Add configuration options to toggle visibility programmatically
+1. Test scroll indicator behavior with different log content sizes
+2. Document the new widget configuration option in API documentation
