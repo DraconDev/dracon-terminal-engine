@@ -95,6 +95,7 @@ impl SqliteBrowser {
             results_rows: Vec::new(),
             results_table: None,
             active_panel: Panel::Tables,
+            show_help: false,
             status_bar,
             toasts: Vec::new(),
             dirty: true,
