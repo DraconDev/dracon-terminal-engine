@@ -288,9 +288,15 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
 - **Table**: `hovered_row` field; highlights hovered row across all columns
 - **List**: `hovered` field; highlights hovered item
 - **CommandPalette**: `hovered_index` field; highlights hovered command item
+- **Button**: `hovered` field; button background changes to `hover_bg` on mouse hover
+- **Checkbox**: `hovered` field; background changes to `hover_bg` on hover
+- **Toggle**: `hovered` field; background changes to `hover_bg` on hover
+- **Radio**: `hovered` field; background changes to `hover_bg` on hover
+- **Select**: `hovered_index` field; dropdown option items highlight with `hover_bg`
+- **TabBar**: `hovered_tab` field; hovered tab uses `hover_bg` + bold text
 
 ### Widgets that support focus (`focus_bg`, `focus_border`)
-- **SearchInput / PasswordInput**: `BaseInput.focused` flag; uses `focus_bg` instead of `input_bg` when focused
+- **SearchInput / PasswordInput**: `BaseInput.focused` flag; uses `focus_bg` instead of `input_bg` when focused; text is underlined when focused
 - **Form**: Focused field renders entire row with `focus_bg` background
 
 ### Pattern for adding hover to a widget
