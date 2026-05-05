@@ -305,22 +305,17 @@ impl Widget for SettingsForm {
         let input_col = margin + 18;
         let input_width = card_w.saturating_sub(22);
 
-        // Helper to render a field row
-        let mut render_field = |field: usize, y: u16, has_error: bool| {
+        // Username
+        {
+            let field = FIELD_USERNAME;
+            let y = 4u16;
             let is_focused = self.focused_field == field;
             let row_bg = if is_focused { t.focus_bg } else { t.surface };
-
-            // Highlight full row
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = row_bg;
-                }
+                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
             }
-
-            // Label
-            let label = Self::field_label(field);
-            for (i, c) in label.chars().enumerate() {
+            for (i, c) in Self::field_label(field).chars().enumerate() {
                 let idx = (y * area.width + label_col + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
@@ -329,9 +324,7 @@ impl Widget for SettingsForm {
                     plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
                 }
             }
-
-            // Error icon if applicable
-            if has_error {
+            if self.errors.username.is_some() {
                 let err_x = margin + card_w - 4;
                 let idx = (y * area.width + err_x) as usize;
                 if idx < plane.cells.len() {
@@ -340,10 +333,7 @@ impl Widget for SettingsForm {
                     plane.cells[idx].bg = row_bg;
                 }
             }
-        };
-
-        // Username
-        render_field(FIELD_USERNAME, 4, self.errors.username.is_some());
+        }
         let username_plane = self.username.render(Rect::new(input_col, 4, input_width, 1));
         blit(&mut plane, &username_plane, input_col, 4);
         if let Some(ref err) = self.errors.username {
@@ -359,7 +349,34 @@ impl Widget for SettingsForm {
         }
 
         // Email
-        render_field(FIELD_EMAIL, 6, self.errors.email.is_some());
+        {
+            let field = FIELD_EMAIL;
+            let y = 6u16;
+            let is_focused = self.focused_field == field;
+            let row_bg = if is_focused { t.focus_bg } else { t.surface };
+            for dx in 1..card_w.saturating_sub(1) {
+                let idx = (y * area.width + margin + dx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+            }
+            for (i, c) in Self::field_label(field).chars().enumerate() {
+                let idx = (y * area.width + label_col + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
+                    plane.cells[idx].bg = row_bg;
+                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                }
+            }
+            if self.errors.email.is_some() {
+                let err_x = margin + card_w - 4;
+                let idx = (y * area.width + err_x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '󰅙';
+                    plane.cells[idx].fg = t.error;
+                    plane.cells[idx].bg = row_bg;
+                }
+            }
+        }
         let email_plane = self.email.render(Rect::new(input_col, 6, input_width, 1));
         blit(&mut plane, &email_plane, input_col, 6);
         if let Some(ref err) = self.errors.email {
@@ -375,7 +392,34 @@ impl Widget for SettingsForm {
         }
 
         // Password
-        render_field(FIELD_PASSWORD, 8, self.errors.password.is_some());
+        {
+            let field = FIELD_PASSWORD;
+            let y = 8u16;
+            let is_focused = self.focused_field == field;
+            let row_bg = if is_focused { t.focus_bg } else { t.surface };
+            for dx in 1..card_w.saturating_sub(1) {
+                let idx = (y * area.width + margin + dx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+            }
+            for (i, c) in Self::field_label(field).chars().enumerate() {
+                let idx = (y * area.width + label_col + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
+                    plane.cells[idx].bg = row_bg;
+                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                }
+            }
+            if self.errors.password.is_some() {
+                let err_x = margin + card_w - 4;
+                let idx = (y * area.width + err_x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '󰅙';
+                    plane.cells[idx].fg = t.error;
+                    plane.cells[idx].bg = row_bg;
+                }
+            }
+        }
         let password_plane = self.password.render(Rect::new(input_col, 8, input_width, 1));
         blit(&mut plane, &password_plane, input_col, 8);
         if let Some(ref err) = self.errors.password {
@@ -391,7 +435,25 @@ impl Widget for SettingsForm {
         }
 
         // Theme
-        render_field(FIELD_THEME, 10, false);
+        {
+            let field = FIELD_THEME;
+            let y = 10u16;
+            let is_focused = self.focused_field == field;
+            let row_bg = if is_focused { t.focus_bg } else { t.surface };
+            for dx in 1..card_w.saturating_sub(1) {
+                let idx = (y * area.width + margin + dx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+            }
+            for (i, c) in Self::field_label(field).chars().enumerate() {
+                let idx = (y * area.width + label_col + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
+                    plane.cells[idx].bg = row_bg;
+                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                }
+            }
+        }
         let theme_plane = self.theme.render(Rect::new(input_col, 10, 25, 4));
         blit(&mut plane, &theme_plane, input_col, 10);
 
