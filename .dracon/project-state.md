@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved empty state handling in system monitor process list
+Improved hover state visual feedback in system monitor process list items
 
 ## Context
-The system monitor widget now needs to handle cases where process data isn't immediately available, particularly when waiting for /proc data collection.
+This change enhances the system monitor UI by refining the visual feedback for process list items when hovered over, making the interface more intuitive and responsive.
 
 ## Completed
-- [x] Added empty state UI with loading indicator when no processes are available
-- [x] Included scroll-to-refresh hint in the empty state message
-- [x] Maintained consistent visual styling with existing process list
+- [x] Updated hover state styling to use `surface_elevated` background
+- [x] Maintained consistent formatting for process list items
+- [x] Preserved existing selection highlighting logic
 
 ## In Progress
-- [x] Empty state handling implementation
+- [x] Hover state visual feedback implementation
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify empty state appears during initial load
-2. Test with different terminal sizes to ensure proper centering
-3. Consider adding animation for the loading indicator
+1. Verify hover state behavior across different terminal environments
+2. Consider adding more visual cues for process states (e.g., running vs sleeping)
