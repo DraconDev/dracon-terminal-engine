@@ -513,13 +513,15 @@ impl Dashboard {
         let card_h = area.height / 3;
 
         let cards = [
-            (&self.data.cpu, 0, 0),
-            (&self.data.mem, 1, 0),
-            (&self.data.disk_read, 0, 1),
-            (&self.data.net_rx, 1, 1),
+            (&self.data.cpu, " CPU ", "󰍛"),
+            (&self.data.mem, " Memory ", "󰘚"),
+            (&self.data.disk_read, " Disk ", "󰋊"),
+            (&self.data.net_rx, " Network ", "󰀂"),
         ];
 
-        for (metric, cx, cy) in cards {
+        for (i, (metric, label, icon)) in cards.iter().enumerate() {
+            let cx = i as u16 % 2;
+            let cy = i as u16 / 2;
             let x = area.x + cx * card_w;
             let y = area.y + cy * card_h;
             let w = if cx == 0 { card_w } else { area.width - card_w };
@@ -528,9 +530,9 @@ impl Dashboard {
             render_card_border(plane, x, y, w, h, t.outline, t.surface);
             let status_color = metric.status_color(t);
 
-            // Title
-            let title = format!(" {} ", metric.label);
-            draw_text(plane, x + 2, y + 1, &title, t.primary, t.surface, true);
+            // Title with icon
+            let title = format!("{} {}", icon, label);
+            draw_text(plane, x + 2, y + 1, title, t.primary, t.surface, true);
 
             // Current value
             let val_text = format!("{:.1}{}", metric.current(), metric.unit);
@@ -549,7 +551,7 @@ impl Dashboard {
 
     fn render_process_panel(&self, plane: &mut Plane, area: Rect, t: Theme) {
         render_card_border(plane, area.x, area.y, area.width, area.height, t.outline, t.surface);
-        draw_text(plane, area.x + 2, area.y + 1, " Processes ", t.primary, t.surface, true);
+        draw_text(plane, area.x + 2, area.y + 1, " 󰀽 Processes ", t.primary, t.surface, true);
 
         let header_y = area.y + 2;
         let header = " PID    NAME             CPU%   MEM ";
