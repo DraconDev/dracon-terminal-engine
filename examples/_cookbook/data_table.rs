@@ -503,7 +503,7 @@ fn main() -> std::io::Result<()> {
 
     let mut t = Table::new();
     t.set_area(Rect::new(0, 0, w, h));
-    t.vis = (h as usize).saturating_sub(3).max(1);
+    t.vis = (h as usize).saturating_sub(5).max(1); // account for borders + header + status
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);

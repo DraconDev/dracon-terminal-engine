@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Improved table widget sorting behavior and rendering calculations
+Adjust table widget rendering to account for borders, header, and status line in visible area calculation
 
 ## Context
-The changes address edge cases in the table widget's sorting and rendering logic, particularly around header and footer calculations. This follows recent work on table sorting functionality and interactive help features.
+The table widget's visible area calculation previously didn't account for the space taken by borders, header, and status line, leading to incorrect rendering of table content.
 
 ## Completed
-- [x] Updated header height calculation for sorting controls
-- [x] Fixed footer calculation to prevent rendering outside bounds
-- [x] Improved row selection logic with proper bounds checking
+- [x] Updated visible area calculation to subtract 5 rows (accounting for borders, header, and status line) from total height
 
 ## In Progress
-- [x] Testing edge cases for table rendering with different data sizes
+- [x] Testing visual rendering with different table sizes to ensure proper content display
 
 ## Blockers
-- Need to verify behavior with very large datasets
+- None identified for this specific change
 
 ## Next Steps
-1. Add integration tests for table widget with sorting
-2. Document the new rendering behavior in the widget documentation
+1. Verify rendering consistency across different terminal sizes
+2. Document the rendering behavior in the widget's documentation
