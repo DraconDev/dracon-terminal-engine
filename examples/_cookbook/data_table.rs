@@ -314,8 +314,19 @@ impl Widget for Table {
                 }
             }
 
+            // Row number
+            let row_num = format!("{:>2} ", self.off + i + 1);
+            for (j, c) in row_num.chars().enumerate() {
+                let idx = (y * area.width + 1 + j as u16) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = c;
+                    p.cells[idx].fg = self.theme.fg_muted;
+                    p.cells[idx].bg = bg;
+                }
+            }
+
             let vals = [&row.0, &row.1.to_string(), &row.2, &row.3];
-            let mut x = 1u16;
+            let mut x = 5u16; // after row number
             for (j, (v, w)) in vals.iter().zip(widths.iter()).enumerate() {
                 let w = *w.min(&area.width.saturating_sub(x + 1));
                 let txt = if j == 1 {
@@ -330,9 +341,21 @@ impl Widget for Table {
                         p.cells[idx].char = c;
                         p.cells[idx].fg = fg;
                         p.cells[idx].style = sty;
+                        p.cells[idx].bg = bg;
                     }
                 }
                 x += w + 1;
+            }
+            // Column separators for data rows
+            for &sx in &col_sep_x {
+                if sx > 4 && sx < area.width - 1 {
+                    let idx = (y * area.width + sx) as usize;
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = '│';
+                        p.cells[idx].fg = self.theme.outline;
+                        p.cells[idx].bg = bg;
+                    }
+                }
             }
         }
 
