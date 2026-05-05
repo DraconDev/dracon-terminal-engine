@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added scroll indicator visibility control to the LogViewer widget
+Added scroll position indicators to LogViewer and Table widgets for better navigation feedback
 
 ## Context
-This change enables users to toggle the visibility of scroll indicators in the LogViewer widget, improving customization options for log viewing interfaces.
+These changes improve user orientation in scrollable widgets by showing the current visible range of content versus total content length
 
 ## Completed
-- [x] Added `with_scroll_indicator` method to control scroll indicator visibility
-- [x] Implemented dirty flag update when visibility changes
+- [x] Added scroll position indicator to LogViewer widget showing "start–end/total" format
+- [x] Added similar scroll indicator to Table widget
+- [x] Implemented visual styling for indicators with theme-aware colors
+- [x] Added bounds checking to prevent display issues with small widgets
 
 ## In Progress
-- [x] Scroll indicator visibility control implementation
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Test scroll indicator behavior with different log content sizes
-2. Document the new widget configuration option in API documentation
+1. Verify indicator positioning works consistently across different terminal sizes
+2. Consider adding configuration options for indicator visibility/position

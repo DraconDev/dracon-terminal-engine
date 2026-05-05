@@ -348,6 +348,45 @@ impl Widget for LogViewer {
             }
         }
 
+        // Scroll position indicator
+        if self.show_scroll_indicator && !self.lines.is_empty() && area.height > 1 {
+            let total = self.lines.len();
+            let visible = (area.height as usize).saturating_sub(1); // Reserve 1 row for indicator
+            let start_idx = if self.auto_scroll {
+                total.saturating_sub(visible.min(total))
+            } else {
+                0
+            };
+            let end_idx = (start_idx + visible).min(total);
+            
+            if total > visible {
+                let indicator = format!(" {}–{}/{} ", start_idx + 1, end_idx, total);
+                let badge_len = indicator.len();
+                let badge_x = (area.width as usize).saturating_sub(badge_len);
+                let badge_y = (area.height as usize).saturating_sub(1);
+                
+                // Draw badge background
+                for x in badge_x..(area.width as usize) {
+                    let idx = badge_y * area.width as usize + x;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = self.theme.surface_elevated;
+                        plane.cells[idx].fg = self.theme.fg_muted;
+                    }
+                }
+                
+                // Draw badge text
+                for (i, c) in indicator.chars().enumerate() {
+                    let idx = badge_y * area.width as usize + badge_x + i;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = self.theme.fg_muted;
+                        plane.cells[idx].bg = self.theme.surface_elevated;
+                        plane.cells[idx].style = Styles::empty();
+                    }
+                }
+            }
+        }
+
         plane
     }
 
