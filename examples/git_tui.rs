@@ -91,7 +91,7 @@ impl GitTui {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("1-4: views | r: refresh | q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new("1-4: views | r: refresh | ?: help | q: quit").with_fg(theme.fg_muted),
             );
 
         let mut app = Self {
@@ -985,6 +985,65 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
                 skip: false,
             };
         }
+    }
+}
+
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+    let help_lines = vec![
+        "Git TUI — Help",
+        "",
+        " 1-4     Switch views (Status/Log/Diff/Branches)",
+        " ↑/↓ or j/k  Navigate",
+        " Enter   Stage/unstage (status) or checkout (branches)",
+        " d       View diff for selected file",
+        " r       Refresh",
+        " t       Cycle theme",
+        " ?       Toggle this help",
+        " q       Quit",
+    ];
+
+    let help_w = 45u16;
+    let help_h = (help_lines.len() as u16).min(area.height - 2);
+    let help_x = (area.width.saturating_sub(help_w)) / 2;
+    let help_y = (area.height.saturating_sub(help_h)) / 2;
+
+    // Draw rounded border box
+    for row in help_y..help_y + help_h {
+        for col in help_x..help_x + help_w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            let is_border = row == help_y || row == help_y + help_h - 1 || col == help_x || col == help_x + help_w - 1;
+            let is_corner = (row == help_y || row == help_y + help_h - 1) && (col == help_x || col == help_x + help_w - 1);
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+            if is_border {
+                if row == help_y && col == help_x {
+                    plane.cells[idx].char = '╭';
+                } else if row == help_y && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == help_y + help_h - 1 && col == help_x {
+                    plane.cells[idx].char = '╰';
+                } else if row == help_y + help_h - 1 && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == help_y || row == help_y + help_h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+            } else {
+                plane.cells[idx].char = ' ';
+            }
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Draw help text
+    for (i, line) in help_lines.iter().enumerate() {
+        let row = help_y + 1 + i as u16;
+        if row >= help_y + help_h - 1 { break; }
+        let fg = if line.is_empty() || line.starts_with("Git TUI") { t.primary } else { t.fg };
+        let bold = !line.is_empty() && !line.starts_with(" ");
+        draw_text(plane, help_x + 2, row, line, fg, t.surface_elevated, bold);
     }
 }
 
