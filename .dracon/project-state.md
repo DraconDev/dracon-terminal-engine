@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Refactored table widget theme handling and rendering logic
+Added column sorting functionality to the table widget
 
 ## Context
-This change is part of ongoing work to improve the table widget's theming system and rendering pipeline. The recent focus has been on column sorting functionality, and this refactoring supports that by providing a cleaner way to handle theme application during rendering.
+This implements the core sorting logic for the table widget, allowing users to sort data by clicking column headers. The previous commits laid the groundwork by adding header click handling and refactoring related functionality.
 
 ## Completed
-- [x] Refactored theme handling in table widget rendering
-- [x] Simplified background color application in the rendering pipeline
+- [x] Added `toggle_sort` method to handle column sorting
+- [x] Implemented toggle between ascending/descending sort
+- [x] Added sort state tracking (current column and direction)
+- [x] Triggered table rebuild after sorting
 
 ## In Progress
-- [x] Ongoing work on column sorting functionality
+- [ ] Header click integration (will be added in subsequent commit)
 
 ## Blockers
-- None identified in this commit
+- Header click handler not yet connected to this sorting logic
 
 ## Next Steps
-1. Continue implementing column sorting features
-2. Verify theme consistency across all table widget components
+1. Connect header clicks to the new `toggle_sort` method
+2. Add visual indicators for sorted columns
