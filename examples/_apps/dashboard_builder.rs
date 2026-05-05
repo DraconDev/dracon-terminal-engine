@@ -622,7 +622,17 @@ fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, border:
     }
 }
 
-fn render_sparkline(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, metric: &MetricHistory, color: Color, bg: Color) {
+struct SparklineConfig {
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+    color: Color,
+    bg: Color,
+}
+
+fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
+    let SparklineConfig { x, y, w, h, color, bg } = cfg;
     if metric.values.is_empty() || w == 0 || h == 0 { return; }
     let max_val = metric.max().max(1.0);
     let values: Vec<f64> = metric.values.iter().copied().collect();
