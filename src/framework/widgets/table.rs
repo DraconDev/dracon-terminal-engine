@@ -157,8 +157,12 @@ impl<T: Clone + ToString> Table<T> {
         self.visible_count = count;
     }
 
-    fn cell_text(&self, row: &TableRow<T>, _col: usize) -> String {
-        row.data.to_string()
+    fn cell_text(&self, row: &TableRow<T>, col: usize) -> String {
+        if let Some(ref f) = self.cell_text_fn {
+            f(&row.data, col)
+        } else {
+            row.data.to_string()
+        }
     }
 }
 
