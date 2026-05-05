@@ -129,6 +129,8 @@ struct TableApp {
     show_help: bool,
     show_search: bool,
     search_query: String,
+    sort_column: Option<usize>,
+    sort_ascending: bool,
     area: Rect,
     dirty: bool,
     should_quit: Arc<AtomicBool>,

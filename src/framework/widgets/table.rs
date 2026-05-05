@@ -452,12 +452,18 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 if row == 0 {
                     // Header click — determine which column
                     let mut col_x: u16 = 0;
-                    for (i, col) in self.columns.iter().enumerate() {
-                        let w = col.width.min(area.width.saturating_sub(col_x));
+                    for (i, column) in self.columns.iter().enumerate() {
+                        let w = column.width;
                         if col >= col_x && col < col_x + w {
                             if let Some(f) = self.on_header_click.as_mut() {
                                 f(i);
                             }
+                            return true;
+                        }
+                        col_x += w;
+                    }
+                    return false;
+                }
                             return true;
                         }
                         col_x += w;
