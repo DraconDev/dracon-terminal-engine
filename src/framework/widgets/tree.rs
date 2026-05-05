@@ -56,6 +56,7 @@ impl Tree {
             id,
             root: Vec::new(),
             selected_path: Vec::new(),
+            hovered_path: None,
             theme: Theme::default(),
             on_select: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 20)),
