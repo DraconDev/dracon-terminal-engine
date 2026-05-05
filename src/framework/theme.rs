@@ -491,6 +491,7 @@ impl Theme {
             scrollbar_thumb_hover: Color::Rgb(0, 100, 120),
             disabled_fg: Color::Rgb(88, 110, 117),
             disabled_bg: Color::Rgb(0, 55, 68),
+            hover_bg: Color::Rgb(10, 55, 72),
             scrollbar_width: 1,
         }
     }
