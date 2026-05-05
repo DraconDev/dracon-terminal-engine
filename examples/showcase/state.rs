@@ -106,6 +106,9 @@ impl Showcase {
             recently_launched: Vec::new(),
             show_input_debug: false,
             event_log: RefCell::new(VecDeque::with_capacity(16)),
+            animations: AnimationManager::new(),
+            card_hover_anim: Vec::new(),
+            toast_anim: None,
         }
     }
 

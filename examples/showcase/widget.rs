@@ -1298,6 +1298,14 @@ impl Showcase {
                     if zone_id >= CARD_BASE {
                         let card_idx = zone_id - CARD_BASE;
                         if card_idx < self.filtered.len() {
+                            // Start hover animation if entering new card
+                            if self.hovered_card != Some(card_idx) {
+                                let anim_id = self.animations.start(0.0, 1.0, Duration::from_millis(200));
+                                if card_idx >= self.card_hover_anim.len() {
+                                    self.card_hover_anim.resize(card_idx + 1, None);
+                                }
+                                self.card_hover_anim[card_idx] = Some(anim_id);
+                            }
                             self.hovered_card = Some(card_idx);
                             // Start or update tooltip timer
                             match self.tooltip_timer {
@@ -1319,6 +1327,14 @@ impl Showcase {
                             }
                             return true;
                         }
+                    }
+                }
+                // Clear hover and start exit animations
+                if let Some(prev_hover) = self.hovered_card {
+                    if prev_hover < self.card_hover_anim.len() {
+                        // Start reverse animation
+                        let anim_id = self.animations.start(1.0, 0.0, Duration::from_millis(150));
+                        self.card_hover_anim[prev_hover] = Some(anim_id);
                     }
                 }
                 self.hovered_card = None;
