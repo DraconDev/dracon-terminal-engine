@@ -800,7 +800,7 @@ impl Widget for WidgetDemoPanel {
         let mut x = start_x;
         for (i, (crumb, is_last)) in crumbs.iter().enumerate() {
             if i > 0 {
-                let idx = breadcrumb_row as usize * area.width as usize + x as usize;
+                let idx = breadcrumb_row * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '›';
                     plane.cells[idx].fg = theme.fg_muted;
@@ -809,7 +809,7 @@ impl Widget for WidgetDemoPanel {
             }
 
             for c in crumb.chars() {
-                let idx = breadcrumb_row as usize * area.width as usize + x as usize;
+                let idx = breadcrumb_row * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if *is_last { theme.primary } else { theme.fg };
