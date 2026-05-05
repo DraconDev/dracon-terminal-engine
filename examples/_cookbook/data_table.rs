@@ -86,6 +86,7 @@ struct Table {
     theme: Theme,
     area: Rect,
     dirty: bool,
+    show_help: bool,
 }
 
 impl Table {
@@ -106,7 +107,22 @@ impl Table {
             theme: Theme::cyberpunk(),
             area: Rect::new(0, 0, 80, 20),
             dirty: true,
+            show_help: false,
         }
+    }
+
+    fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::nord(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.search.on_theme_change(&self.theme);
+        self.dirty = true;
     }
 
     fn filter(&mut self, q: &str) {
@@ -161,12 +177,13 @@ impl Widget for Table {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
         let (heads, widths, hh, sh) = (
-            ["Name", "Age", "City", "Profession"],
+            ["󰣉 Name", "󰢮 Age", "󰉋 City", "󰠨 Profession"],
             [12u16, 5, 11, 16],
             2u16,
             1u16,
         );
 
+        // Background
         for y in 0..area.height {
             for x in 0..area.width {
                 let idx = (y * area.width + x) as usize;
@@ -174,6 +191,32 @@ impl Widget for Table {
                     p.cells[idx].bg = self.theme.bg;
                     p.cells[idx].fg = self.theme.fg;
                 }
+            }
+        }
+
+        // Rounded border
+        let bw = area.width;
+        let bh = area.height;
+        if bw > 0 && bh > 0 {
+            let corners = [('╭', 0, 0), ('╮', bw - 1, 0), ('╰', 0, bh - 1), ('╯', bw - 1, bh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = *ch;
+                    p.cells[idx].fg = self.theme.outline;
+                }
+            }
+            for x in 1..bw.saturating_sub(1) {
+                let top_idx = x as usize;
+                let bot_idx = ((bh - 1) * area.width + x) as usize;
+                if top_idx < p.cells.len() { p.cells[top_idx].char = '─'; p.cells[top_idx].fg = self.theme.outline; }
+                if bot_idx < p.cells.len() { p.cells[bot_idx].char = '─'; p.cells[bot_idx].fg = self.theme.outline; }
+            }
+            for y in 1..bh.saturating_sub(1) {
+                let left_idx = (y * area.width) as usize;
+                let right_idx = (y * area.width + bw - 1) as usize;
+                if left_idx < p.cells.len() { p.cells[left_idx].char = '│'; p.cells[left_idx].fg = self.theme.outline; }
+                if right_idx < p.cells.len() { p.cells[right_idx].char = '│'; p.cells[right_idx].fg = self.theme.outline; }
             }
         }
 

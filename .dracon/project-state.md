@@ -1,23 +1,24 @@
 # Project State
 
 ## Current Focus
-Added table sorting functionality to the `Table<T>` widget with visual indicators and click handling
+Enhanced the data table widget with theme cycling, rounded borders, and visual improvements
 
 ## Context
-To improve data organization in tabular views, users need to sort columns by clicking headers. This enables better data exploration in widgets like the command palette and log monitor.
+The data table widget needed visual polish to better match the project's aesthetic goals and improve user experience. The changes add theme cycling functionality and a more polished visual presentation.
 
 ## Completed
-- [x] Added header click detection to determine which column was clicked
-- [x] Implemented sort indicators (▲/▼) for active sort columns
-- [x] Added builder methods for configuring sorting behavior
-- [x] Updated Cargo.lock with dependency version bump
+- [x] Added theme cycling capability with 5 built-in themes
+- [x] Implemented rounded border rendering for the table
+- [x] Added visual indicators (Nerd Font icons) to column headers
+- [x] Improved visual hierarchy with proper background rendering
+- [x] Added show_help flag to track help state
 
 ## In Progress
-- [x] Documentation of table sorting in AGENTS.md
+- [ ] None - all changes are complete
 
 ## Blockers
-- None identified
+- None - all functionality is implemented
 
 ## Next Steps
-1. Add integration tests for table sorting behavior
-2. Implement multi-column sort support if needed
+1. Add keyboard shortcut for theme cycling
+2. Implement help text display when show_help is true
