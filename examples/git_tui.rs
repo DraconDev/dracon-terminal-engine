@@ -121,6 +121,24 @@ impl GitTui {
         self.dirty = true;
     }
 
+    fn cycle_theme(&mut self) {
+        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.tab_bar.on_theme_change(&self.theme);
+        self.dirty = true;
+        self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
+    }
+
+    fn toast(&mut self, msg: &str, kind: ToastKind) {
+        let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
+            .with_kind(kind)
+            .with_duration(Duration::from_secs(2))
+            .with_theme(self.theme);
+        self.toasts.push(toast);
+        self.dirty = true;
+    }
+
     fn read_git_status(&self) -> Vec<GitFile> {
         let output = Command::new("git")
             .args(["status", "--porcelain"])
@@ -331,6 +349,10 @@ impl Widget for GitTui {
         match key.code {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
                 true
             }
             KeyCode::Char('r') => {

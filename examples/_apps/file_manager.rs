@@ -239,6 +239,16 @@ impl FileManager {
         self.dirty = true;
     }
 
+    fn cycle_theme(&mut self) {
+        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.tree.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
+        self.dirty = true;
+        self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
+    }
+
     fn update_breadcrumbs(&mut self) {
         let path = self.selected_path.as_ref().unwrap_or(&self.root.path);
         let segments: Vec<String> = path
@@ -621,6 +631,10 @@ impl Widget for FileManager {
         match key.code {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
                 true
             }
             KeyCode::Char('r') => {
