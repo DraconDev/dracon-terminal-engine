@@ -192,18 +192,6 @@ impl SettingsForm {
         }
     }
 
-    fn field_row(field: usize) -> u16 {
-        match field {
-            FIELD_USERNAME => 4,
-            FIELD_EMAIL => 6,
-            FIELD_PASSWORD => 8,
-            FIELD_THEME => 10,
-            FIELD_NOTIFICATIONS => 12,
-            FIELD_SUBMIT => 14,
-            _ => 0,
-        }
-    }
-
     fn field_label(field: usize) -> &'static str {
         match field {
             FIELD_USERNAME => "󰀄 Username",
