@@ -1,31 +1,21 @@
 # Project State
 
 ## Current Focus
-Expanded the text editor demo into a full-featured mini-IDE with tabs, file tree, and search functionality.
+Added customizable cell text rendering to the Table widget
 
 ## Context
-The original simple text editor was enhanced to demonstrate more complex UI patterns and interactions in the terminal framework.
+The Table widget now needs to support dynamic cell content generation rather than just displaying raw data. This enables more complex UI scenarios where cell text depends on both the row data and column index.
 
 ## Completed
-- [x] Added tab bar for multiple file editing
-- [x] Implemented file tree sidebar with icons
-- [x] Created search bar overlay with search functionality
-- [x] Added syntax highlighting for Rust basics
-- [x] Implemented line numbers with current line highlight
-- [x] Added status bar showing position, language, and encoding
-- [x] Created theme cycling functionality
-- [x] Added help overlay with keyboard shortcuts
-- [x] Implemented tab management (new/close/switch)
-- [x] Added mock save functionality
-- [x] Enhanced navigation controls
+- [x] Added `CellTextFn<T>` type alias for custom cell text rendering
+- [x] Integrated cell text function into Table struct
 
 ## In Progress
-- [ ] No active work in progress - all features implemented
+- [x] Implementation of cell rendering using the new function
 
 ## Blockers
-- None identified
+- Need to implement the actual rendering logic that uses this function
 
 ## Next Steps
-1. Add actual file system integration
-2. Implement proper save functionality
-3. Add more language syntax highlighting
+1. Implement the cell rendering logic in the Table's render method
+2. Add documentation for the new cell text customization feature
