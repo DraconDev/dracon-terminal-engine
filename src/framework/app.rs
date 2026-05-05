@@ -337,7 +337,7 @@ impl App {
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
 
         let terminal_ptr = &mut self.terminal as *mut Terminal<io::Stdout> as usize;
-        std::panic::set_hook(Box::new(move || {
+        std::panic::set_hook(Box::new(move |_| {
             let t = unsafe { &mut *(terminal_ptr as *mut Terminal<io::Stdout>) };
             let _ = write!(
                 t,
@@ -348,12 +348,14 @@ impl App {
 
         let running_for_signal = running.clone();
         unsafe {
-            signal_hook::low_level::sigaction(SIGINT, &signal_hook::Sigaction::new(move |_: i32| {
-                running_for_signal.store(false, Ordering::SeqCst);
-            })).ok();
-            signal_hook::low_level::sigaction(SIGTERM, &signal_hook::Sigaction::new(move |_: i32| {
-                running_for_signal.store(false, Ordering::SeqCst);
-            })).ok();
+            let running_int = running_for_signal.clone();
+            signal_hook::low_level::register(SIGINT, move || {
+                running_int.store(false, Ordering::SeqCst);
+            }).ok();
+            let running_term = running_for_signal.clone();
+            signal_hook::low_level::register(SIGTERM, move || {
+                running_term.store(false, Ordering::SeqCst);
+            }).ok();
         }
 
         let mut stdin = io::stdin();

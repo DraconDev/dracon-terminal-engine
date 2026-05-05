@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Refactored signal handling implementation in the application framework
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, likely to incorporate the latest versions of project dependencies or resolve version conflicts.
+The previous signal handling implementation used `sigaction` with closures that captured the `running` flag. This was replaced with a more straightforward approach using `signal_hook::register` which provides better control and avoids potential issues with the previous implementation.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Replaced `sigaction` with `signal_hook::register` for SIGINT and SIGTERM handling
+- [x] Simplified signal handler implementation by using cloned `running` flags
+- [x] Maintained consistent behavior for both signal types (SIGINT and SIGTERM)
 
 ## In Progress
-- [ ] None
+- [ ] Verify no regression in signal handling behavior
 
 ## Blockers
-- None
+- None identified at this time
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application with the new dependency versions
+1. Verify signal handling works correctly in integration tests
+2. Review terminal panic handler implementation for consistency
