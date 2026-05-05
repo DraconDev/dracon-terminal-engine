@@ -409,7 +409,7 @@ impl Widget for SqliteBrowser {
             &mut plane,
             left_rect.width + 3,
             results_y,
-            "Results",
+            " 󰠱 Results",
             t.primary,
             results_bg,
             true,
