@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Removed unused code from table widget's column sorting logic
+Dependency version bump in Cargo.lock
 
 ## Context
-This change was prompted by the recent refactoring of the table widget's header click handler, which simplified the column sorting functionality. The removed code was redundant and no longer needed after the refactoring.
+This change updates the dependency versions in the Cargo.lock file, likely to ensure compatibility with the latest versions of dependencies or to resolve version conflicts.
 
 ## Completed
-- [x] Removed unused code from table widget's column sorting logic
-- [x] Simplified the column sorting implementation
+- [x] Updated dependency versions in Cargo.lock
 
 ## In Progress
-- [x] Ongoing work on column sorting functionality
+- [x] No active work in progress beyond the dependency update
 
 ## Blockers
-- None identified
+- None reported
 
 ## Next Steps
-1. Verify column sorting functionality works as expected
-2. Continue refining table widget features
+1. Verify that the updated dependencies do not introduce breaking changes
+2. Test the application to ensure all functionality remains intact
