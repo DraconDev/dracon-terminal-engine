@@ -4,18 +4,19 @@
 Added hover background color to theme system for interactive UI elements
 
 ## Context
-This change enables visual feedback for hover states across the application, improving user interaction clarity. It follows recent UI enhancements that standardized visual styling across components.
+This change supports visual feedback for interactive elements by introducing a distinct hover background color, improving user experience for interactive components.
 
 ## Completed
-- [x] Added `hover_bg` field to Theme struct
-- [x] Implemented default hover colors for both dark and light themes
+- [x] Added `hover_bg` color property to Theme struct
+- [x] Set default hover background color to RGB(25, 25, 40)
 
 ## In Progress
-- [x] Hover state styling implementation
+- [ ] Testing hover behavior across different UI components
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Apply hover effects to interactive components (buttons, list items)
-2. Document hover state theming in style guide
+1. Verify hover behavior in all interactive components
+2. Document the new theme property in API documentation
+```
