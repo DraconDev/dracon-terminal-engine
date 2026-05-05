@@ -299,10 +299,6 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
 
         plane
     }
-        }
-
-        plane
-    }
 
     fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         use crate::input::event::{KeyCode, KeyEventKind};
