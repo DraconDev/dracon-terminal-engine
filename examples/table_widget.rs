@@ -288,7 +288,7 @@ impl Widget for TableApp {
                 plane.cells[idx].fg = t.fg;
             }
             // Row 1 of header
-            let idx2 = ((1) * area.width + margin + x) as usize;
+            let idx2 = (area.width + margin + x) as usize;
             if idx2 < plane.cells.len() {
                 plane.cells[idx2].bg = t.surface;
             }

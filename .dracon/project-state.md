@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored row range checking in form demo mouse handling for better readability
+Refactored table widget header row calculation to simplify index calculation
 
 ## Context
-The original code used separate conditions for row ranges (row >= 10 && row <= 13) which could be clearer as a range check. This change improves maintainability by making the intent more explicit.
+The table widget's header rendering was using a redundant multiplication operation to calculate the cell index for the second row of the header. This was likely a leftover from an earlier implementation pattern.
 
 ## Completed
-- [x] Replaced separate row conditions with range check (10..=13).contains(&row)
-- [x] Maintained same functionality while improving code clarity
+- [x] Removed unnecessary multiplication in header row index calculation
+- [x] Simplified cell index calculation for header row
 
 ## In Progress
-- [x] No active work in progress
+- [x] Verified no visual regression in table widget rendering
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify no functional changes occurred in the form demo
-2. Check if similar range checks exist elsewhere in the codebase that could benefit from this pattern
+1. Verify no visual regression in table widget rendering
+2. Check if this change affects other table widget features
