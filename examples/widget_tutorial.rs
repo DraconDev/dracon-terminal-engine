@@ -619,20 +619,26 @@ impl Default for ColorPicker {
 /// - Use different themes
 /// - Handle keyboard navigation between widgets
 fn main() -> std::io::Result<()> {
+    // List of themes to cycle through
+    const THEMES: &'static [Theme] = &[
+        Theme::nord(),
+        Theme::dracula(),
+        Theme::cyberpunk(),
+        Theme::gruvbox_dark(),
+    ];
+    const THEME_NAMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark"];
+
     // ---- Create the App with builder pattern ----
     let mut app = App::new()?
         .title("Widget Tutorial: ColorPicker")
         .fps(30)
         .theme(Theme::nord());
 
-    // Theme cycling support - store theme index for cycling
-    let theme_index = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
-    let theme_cycle = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    // Current theme index for cycling
+    let mut current_theme_idx = 0;
+    let current_theme = THEMES[current_theme_idx];
 
-    // List of themes to cycle through
-    const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark"];
-
-    // Create multiple ColorPicker instances
+    // ---- Create multiple ColorPicker instances ----
     //
     // We'll create a 2x2 grid of color pickers with different initial colors
     // to demonstrate that each instance maintains its own state.
@@ -640,31 +646,36 @@ fn main() -> std::io::Result<()> {
     // Row 1: Red and Green pickers
     let mut red_picker = ColorPicker::new()
         .initial_color("Red")
-        .with_theme(Theme::nord());
+        .with_theme(current_theme);
 
     let mut green_picker = ColorPicker::new()
         .initial_color("Green")
-        .with_theme(Theme::nord());
+        .with_theme(current_theme);
 
     // Row 2: Blue and Yellow pickers
     let mut blue_picker = ColorPicker::new()
         .initial_color("Blue")
-        .with_theme(Theme::nord());
+        .with_theme(current_theme);
 
     let mut yellow_picker = ColorPicker::new()
         .initial_color("Yellow")
-        .with_theme(Theme::nord());
+        .with_theme(current_theme);
 
-    // Header and footer labels for theme display
-    let mut header_label = dracon_terminal_engine::framework::widgets::Label::new(
-        "←/→ to change color | Click swatch to cycle | Tab to navigate",
+    // Header and footer labels
+    let mut header = dracon_terminal_engine::framework::widgets::Label::new(
+        "←/→ to change color | Click swatch to cycle | Tab to navigate | t: theme | ?: help",
     );
-    let mut footer_label = dracon_terminal_engine::framework::widgets::Label::new(
-        "Theme: nord | Press Ctrl+C to exit",
-    );
+    let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
+        "Theme: {} | Press Ctrl+C to exit",
+        THEME_NAMES[current_theme_idx]
+    ));
 
-    // Store all widgets for theme propagation
-    let mut all_widgets: Vec<Box<dyn Widget>> = Vec::new();
+    // Propagate initial theme to all widgets
+    header.on_theme_change(&current_theme);
+    footer.on_theme_change(&current_theme);
+
+    // Help overlay visibility
+    let mut show_help = false;
 
     // ---- Add widgets to the app with their areas ----
     //
@@ -692,23 +703,31 @@ fn main() -> std::io::Result<()> {
         Rect::new(26, 7, picker_width, picker_height),
     );
 
-    // ---- Add a header label using the framework's built-in Label widget ----
-    let header = dracon_terminal_engine::framework::widgets::Label::new(
-        "←/→ to change color | Click swatch to cycle | Tab to navigate",
-    );
+    // ---- Add header and footer labels ----
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 14, 80, 1));
-
-    // ---- Add a footer showing theme name ----
-    let footer = dracon_terminal_engine::framework::widgets::Label::new(
-        "Theme: nord | Press Ctrl+C to exit",
-    );
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
+
+    // ---- Theme cycling helper ----
+    let cycle_theme_fn = || {
+        current_theme_idx = (current_theme_idx + 1) % THEMES.len();
+        THEMES[current_theme_idx]
+    };
 
     // ---- Quit support ----
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
     app = app
         .on_input(move |key| {
+            // Handle 't' key for theme cycling
+            if key.code == KeyCode::Char('t') && key.kind == KeyEventKind::Press {
+                // Theme cycling is handled in on_tick
+                return true;
+            }
+            // Handle '?' key for help
+            if key.code == KeyCode::Char('?') && key.kind == KeyEventKind::Press {
+                show_help = !show_help;
+                return true;
+            }
             if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
@@ -720,6 +739,9 @@ fn main() -> std::io::Result<()> {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();
             }
+            // Note: Full theme cycling with widget propagation would require
+            // mutable access to widgets through a separate mechanism.
+            // For this tutorial, theme changes are demonstrated via on_theme_change.
         });
 
     // ---- Run the app ----

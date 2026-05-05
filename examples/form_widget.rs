@@ -241,7 +241,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::nord();
-    let app = Rc::new(RefCell::new(FormApp::new(should_quit, theme)));
+    let app = Rc::new(RefCell::new(FormApp::new(should_quit, theme.clone())));
     let app_for_input = Rc::clone(&app);
 
     let mut app_widget = App::new()?.title("Form Widget Demo").fps(30).theme(theme);
