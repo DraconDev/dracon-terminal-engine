@@ -42,6 +42,7 @@ pub struct Tree {
     id: WidgetId,
     root: Vec<TreeNode>,
     selected_path: Vec<usize>,
+    hovered_path: Option<Vec<usize>>,
     theme: Theme,
     on_select: Option<SelectCallback>,
     area: std::cell::Cell<Rect>,
