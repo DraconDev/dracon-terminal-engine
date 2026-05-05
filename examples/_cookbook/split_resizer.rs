@@ -443,6 +443,100 @@ impl SplitResizerApp {
         }
     }
 
+    fn render_help_overlay(&self, p: &mut Plane, t: &Theme) {
+        let w = 42.min(p.width);
+        let h = 12.min(p.height);
+        let x = (p.width - w) / 2;
+        let y = (p.height - h) / 2;
+
+        // Box drawing with rounded corners
+        let corners = [('╭', '╮', '╰', '╯')];
+        let horizontal = '─';
+        let vertical = '│';
+
+        // Top border with rounded corners
+        let mut idx = (y * p.width + x) as usize;
+        if idx < p.cells.len() {
+            p.cells[idx] = Cell { char: '╭', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        for i in 1..w - 1 {
+            let idx = (y * p.width + x + i) as usize;
+            if idx < p.cells.len() {
+                p.cells[idx] = Cell { char: '─', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            }
+        }
+        let idx = (y * p.width + x + w - 1) as usize;
+        if idx < p.cells.len() {
+            p.cells[idx] = Cell { char: '╮', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+        }
+
+        // Body rows
+        for row in 1..h - 1 {
+            let idx = (y + row) as usize;
+            let left_idx = (idx * p.width + x) as usize;
+            if left_idx < p.cells.len() {
+                p.cells[left_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            }
+            let right_idx = (idx * p.width + x + w - 1) as usize;
+            if right_idx < p.cells.len() {
+                p.cells[right_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            }
+            // Fill background
+            for col in 1..w - 1 {
+                let idx = (idx * p.width + x + col) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx] = Cell { char: ' ', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
+                }
+            }
+        }
+
+        // Bottom border
+        let idx = ((y + h - 1) * p.width + x) as usize;
+        if idx < p.cells.len() {
+            p.cells[idx] = Cell { char: '╰', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+        }
+        for i in 1..w - 1 {
+            let idx = ((y + h - 1) * p.width + x + i) as usize;
+            if idx < p.cells.len() {
+                p.cells[idx] = Cell { char: '─', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            }
+        }
+        let idx = ((y + h - 1) * p.width + x + w - 1) as usize;
+        if idx < p.cells.len() {
+            p.cells[idx] = Cell { char: '╯', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+        }
+
+        // Help text
+        let lines = [
+            " Keyboard Shortcuts ",
+            " ────────────────── ",
+            " ←/→   Resize A panel",
+            " ↑/↓   Resize B panel",
+            " t      Cycle theme ",
+            " r      Reset sizes  ",
+            " ? / Esc  Toggle help",
+            " q      Quit         ",
+        ];
+        let start_y = y + 1;
+        for (i, line) in lines.iter().enumerate() {
+            let row_y = start_y + i as u16;
+            if row_y >= y + h - 1 {
+                break;
+            }
+            for (j, c) in line.chars().enumerate().take(w - 2) {
+                let idx = (row_y * p.width + x + 1 + j as u16) as usize;
+                if idx < p.cells.len() {
+                    let style = if line.starts_with(" Keyboard") || line.starts_with(" ─") {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
+                    p.cells[idx] = Cell { char: c, fg: t.fg_on_accent, bg: t.surface_elevated, style, transparent: false, skip: false };
+                }
+            }
+        }
+    }
+
     fn tick(&mut self) {
         if rand::thread_rng().gen_range(0..8) == 0 {
             self.pct = rand::thread_rng().gen_range(10.0..90.0);

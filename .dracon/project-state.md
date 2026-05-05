@@ -1,23 +1,24 @@
 # Project State
 
 ## Current Focus
-Added help overlay toggle functionality to the Git TUI and widget gallery examples
+Added help overlay functionality and theme cycling to the log monitor and split resizer examples
 
 ## Context
-This change implements a consistent help overlay system across examples, allowing users to toggle keyboard shortcuts display with '?' and close with Escape
+These changes enhance the user experience by providing visual feedback and theme customization options in the example applications, following the pattern established in other UI components.
 
 ## Completed
-- [x] Added `show_help` flag to both `CommandBindings` and `SplitResizerApp` structs
-- [x] Implemented help overlay rendering in `SplitResizerApp`
-- [x] Added keyboard shortcuts for help toggle ('?') and theme cycling ('t')
-- [x] Updated Cargo.lock with dependency version bump
+- [x] Added help overlay rendering with keyboard shortcuts display in split_resizer.rs
+- [x] Implemented theme cycling functionality in log_monitor.rs
+- [x] Added theme selection options (nord, dracula, cyberpunk, gruvbox-dark)
+- [x] Created toggle mechanism for help overlay visibility
 
 ## In Progress
-- [x] Help overlay implementation across multiple examples
+- [x] Help overlay implementation and theme cycling features are now functional
 
 ## Blockers
-- None identified
+- None identified for this specific implementation
 
 ## Next Steps
-1. Verify help overlay consistency across all examples
-2. Document the new keyboard shortcuts in the examples' READMEs
+1. Verify cross-platform rendering consistency
+2. Add additional theme options if needed
+3. Document the new features in the examples section
