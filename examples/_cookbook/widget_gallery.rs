@@ -228,7 +228,7 @@ impl Widget for WidgetGallery {
             }
         }
         let nav_text = " ↑↓←→ nav | Enter activate | Tab theme | q quit ";
-        draw_text(&mut plane, 2, footer_y, &nav_text, t.fg_muted, t.bg, false);
+        draw_text(&mut plane, 2, footer_y, nav_text, t.fg_muted, t.bg, false);
 
         plane
     }
