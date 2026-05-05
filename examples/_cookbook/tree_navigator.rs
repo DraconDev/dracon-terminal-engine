@@ -19,7 +19,7 @@
 //!
 //! Mouse: Click to select, click folder to expand
 
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
