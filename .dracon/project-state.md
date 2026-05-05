@@ -1,17 +1,18 @@
 # Project State
 
 ## Current Focus
-Enhanced file metadata visualization in the file manager with icon badges and improved styling
+Improved visual styling for the SQLite browser's left panel with rounded borders and better selection indicators
 
 ## Context
-Improving the file manager's metadata display to make it more visually distinct and informative by adding icons and colored badges for different file attributes
+The SQLite browser UI was updated to provide clearer visual hierarchy and improved user feedback for table selection. This follows recent styling improvements across other TUI components.
 
 ## Completed
-- [x] Added file type icons in the tree view
-- [x] Enhanced metadata display with icon badges (󰈔, 󰆼, 󰃰, 󰿆)
-- [x] Added colored badges for file type (Directory/Success, File/Info)
-- [x] Improved visual hierarchy with consistent spacing and alignment
-- [x] Added warning color for file size to make it stand out
+- [x] Added rounded border drawing function with active/inactive states
+- [x] Replaced flat background with proper border rendering
+- [x] Improved selection indicators with visual arrow (▸) instead of text
+- [x] Added proper corner characters (╭, ╮, ╰, ╯) for rounded borders
+- [x] Enhanced visual feedback for active/inactive panels
+- [x] Added transparent background for border cells
 
 ## In Progress
 - [ ] No active work in progress
@@ -20,5 +21,5 @@ Improving the file manager's metadata display to make it more visually distinct 
 - None identified
 
 ## Next Steps
-1. Review and test the new metadata display across different file types
-2. Consider adding more metadata fields with appropriate icons
+1. Verify border rendering works across different terminal sizes
+2. Test visual feedback for table selection changes

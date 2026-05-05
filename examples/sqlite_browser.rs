@@ -299,16 +299,14 @@ impl Widget for SqliteBrowser {
 
         // Left panel: tables
         let left_active = matches!(self.active_panel, Panel::Tables);
-        let left_bg = if left_active {
-            t.surface_elevated
-        } else {
-            t.surface
-        };
-        for y in 0..left_rect.height {
-            for x in 0..left_rect.width {
+        draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t, left_active);
+        let left_bg = if left_active { t.surface_elevated } else { t.surface };
+        for y in 1..content_h.saturating_sub(1) {
+            for x in 1..left_rect.width.saturating_sub(1) {
                 let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = left_bg;
+                    plane.cells[idx].char = ' ';
                 }
             }
         }
@@ -318,12 +316,8 @@ impl Widget for SqliteBrowser {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let bg = if is_selected {
-                t.primary_active
-            } else {
-                left_bg
-            };
-            let prefix = if is_selected { "> " } else { "  " };
+            let bg = if is_selected { t.primary_active } else { left_bg };
+            let prefix = if is_selected { "▸ " } else { "  " };
             draw_text(
                 &mut plane,
                 2,
@@ -587,6 +581,36 @@ impl Widget for SqliteBrowser {
                     true
                 }
                 _ => false,
+            }
+        }
+    }
+}
+
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme, active: bool) {
+    if w < 3 || h < 2 { return; }
+    let border_color = if active { t.primary } else { t.outline };
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+            if is_border {
+                plane.cells[idx].fg = if is_corner { t.primary } else { border_color };
+                if row == y && col == x {
+                    plane.cells[idx].char = '╭';
+                } else if row == y && col == x + w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == y + h - 1 && col == x {
+                    plane.cells[idx].char = '╰';
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == y || row == y + h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+                plane.cells[idx].transparent = false;
             }
         }
     }
