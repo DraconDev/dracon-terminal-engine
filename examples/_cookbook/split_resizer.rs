@@ -25,6 +25,7 @@ struct SplitResizerApp {
     pct: f32,
     txt: String,
     theme: Theme,
+    show_help: bool,
 }
 
 impl SplitResizerApp {
@@ -39,6 +40,7 @@ impl SplitResizerApp {
             pct: 50.0,
             txt: "Ready".into(),
             theme,
+            show_help: false,
         }
     }
 }
@@ -87,6 +89,9 @@ impl Widget for SplitResizerApp {
         self.render_header(Rect::new(0, 0, area.width, h), t, &mut p);
         self.render_content(c, t, &mut p);
         self.render_status(Rect::new(0, area.height - h, area.width, h), t, &mut p);
+        if self.show_help {
+            self.render_help_overlay(&mut p, t);
+        }
         p
     }
 
@@ -101,6 +106,11 @@ impl Widget for SplitResizerApp {
             KeyCode::Char('r') => {
                 self.ra = DA;
                 self.rb = DB;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
                 self.dirty = true;
                 true
             }
@@ -122,6 +132,22 @@ impl Widget for SplitResizerApp {
                     (self.rb + if key.code == KeyCode::Up { -0.05 } else { 0.05 }).clamp(0.1, 0.9);
                 self.dirty = true;
                 true
+            }
+            KeyCode::Char('t') => {
+                let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                self.theme = themes[(idx + 1) % themes.len()];
+                self.dirty = true;
+                true
+            }
+            KeyCode::Escape => {
+                if self.show_help {
+                    self.show_help = false;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
             }
             _ => false,
         }

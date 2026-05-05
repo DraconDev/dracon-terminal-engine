@@ -38,6 +38,7 @@ struct CommandBindings {
     paused: bool,
     tick: u64,
     cpu_value: f32,
+    show_help: bool,
 }
 
 impl CommandBindings {
@@ -60,6 +61,7 @@ impl CommandBindings {
             paused: false,
             tick: 0,
             cpu_value: 50.0,
+            show_help: false,
         }
     }
 
