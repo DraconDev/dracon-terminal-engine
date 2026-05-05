@@ -128,7 +128,20 @@ impl crate::framework::widget::Widget for Form {
             } else {
                 self.theme.fg
             };
+            let bg = if is_focused {
+                self.theme.focus_bg
+            } else {
+                self.theme.bg
+            };
             let err_fg = self.theme.error;
+
+            // Fill the entire row background first
+            for x in 0..width {
+                let idx = (i as u16 * plane.width + x as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = bg;
+                }
+            }
 
             for (j, c) in label_text.chars().take(width).enumerate() {
                 let idx = (i as u16 * plane.width + j as u16) as usize;
@@ -136,7 +149,7 @@ impl crate::framework::widget::Widget for Form {
                     plane.cells[idx] = Cell {
                         char: c,
                         fg,
-                        bg: self.theme.bg,
+                        bg,
                         style: Styles::BOLD,
                         transparent: false,
                         skip: false,
@@ -155,7 +168,7 @@ impl crate::framework::widget::Widget for Form {
                     plane.cells[idx] = Cell {
                         char: c,
                         fg,
-                        bg: self.theme.bg,
+                        bg,
                         style: Styles::empty(),
                         transparent: false,
                         skip: false,
@@ -174,7 +187,7 @@ impl crate::framework::widget::Widget for Form {
                         plane.cells[idx] = Cell {
                             char: c,
                             fg: err_fg,
-                            bg: self.theme.bg,
+                            bg,
                             style: Styles::empty(),
                             transparent: false,
                             skip: false,
