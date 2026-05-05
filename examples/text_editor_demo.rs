@@ -98,6 +98,30 @@ impl EditorApp {
 
         let breadcrumbs = Breadcrumbs::new(vec!["src".into(), "main.rs".into()]);
 
+        let palette_commands: Vec<CommandItem> = vec![
+            CommandItem { id: "new-tab", name: "New Tab", category: "file" },
+            CommandItem { id: "open", name: "Open File", category: "file" },
+            CommandItem { id: "save", name: "Save", category: "file" },
+            CommandItem { id: "close-tab", name: "Close Tab", category: "file" },
+            CommandItem { id: "search", name: "Search", category: "edit" },
+            CommandItem { id: "cut", name: "Cut", category: "edit" },
+            CommandItem { id: "copy", name: "Copy", category: "edit" },
+            CommandItem { id: "paste", name: "Paste", category: "edit" },
+            CommandItem { id: "cycle-theme", name: "Cycle Theme", category: "view" },
+            CommandItem { id: "toggle-profiler", name: "Toggle Profiler", category: "view" },
+            CommandItem { id: "show-shortcuts", name: "Show Shortcuts", category: "help" },
+            CommandItem { id: "about", name: "About", category: "help" },
+        ];
+
+        let cmd_bridge: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
+        let cmd_bridge_clone = cmd_bridge.clone();
+        let command_palette = CommandPalette::new(palette_commands)
+            .with_size(45, 18)
+            .with_theme(theme)
+            .on_execute(move |cmd_id| {
+                *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
+            });
+
         Self {
             id: WidgetId::new(0),
             tabs,
@@ -113,6 +137,8 @@ impl EditorApp {
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             should_quit,
+            command_palette,
+            cmd_bridge,
         }
     }
 
