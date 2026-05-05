@@ -409,7 +409,7 @@ impl Widget for SystemMonitor {
         render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
 
         let header_y = list_y + 1;
-        let header_text = " PID  STATE  NAME             CPU%      MEM ";
+        let header_text = " 󰀽 Processes       PID  STATE  NAME             CPU%      MEM ";
         draw_text(&mut plane, 2, header_y, header_text, t.fg_muted, t.surface, true);
 
         let max_visible = (list_h as usize).saturating_sub(3);

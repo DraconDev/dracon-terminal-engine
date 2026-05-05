@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved dashboard card UI with consistent title rendering
+Improved system monitor UI with process list header icon
 
 ## Context
-This change aligns with recent UI consistency improvements in the dashboard builder example. The modification ensures proper string handling for title rendering in dashboard cards.
+Enhancing visual consistency in the system monitor dashboard by adding an icon to the process list header, following recent UI consistency improvements in other components.
 
 ## Completed
-- [x] Fixed string ownership issue in dashboard card title rendering by adding reference (`&`) to the title string
+- [x] Added 󰀽 icon to process list header for better visual identification
+- [x] Maintained consistent column formatting with previous header text
 
 ## In Progress
-- [x] No active work in progress beyond this change
+- [x] UI consistency improvements for system monitor components
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify UI consistency across all dashboard card types
-2. Review if additional string handling improvements are needed in other UI components
+1. Verify visual alignment with other dashboard cards
+2. Ensure icon remains visible across different terminal sizes
