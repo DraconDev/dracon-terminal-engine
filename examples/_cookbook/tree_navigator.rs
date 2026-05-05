@@ -277,6 +277,67 @@ impl Widget for TreeNav {
         let status_plane = status_bar.render(footer_rect);
         copy_plane(&mut plane, &status_plane, 0, footer_rect.y);
 
+        // Help overlay
+        if self.show_help {
+            let hw = 46u16.min(area.width.saturating_sub(4));
+            let hh = 12u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = self.theme.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            // Border
+            for x in hx..hx + hw {
+                let top_idx = (hy * area.width + x) as usize;
+                let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
+                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = self.theme.outline; }
+                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = self.theme.outline; }
+            }
+            for y in hy..hy + hh {
+                let left_idx = (y * area.width + hx) as usize;
+                let right_idx = (y * area.width + hx + hw - 1) as usize;
+                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = self.theme.outline; }
+                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = self.theme.outline; }
+            }
+            // Title
+            let title = "Tree Navigator Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = self.theme.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+            // Shortcuts
+            let shortcuts = [
+                ("↑/↓", "Navigate tree"),
+                ("→/Enter", "Expand folder"),
+                ("←", "Collapse folder"),
+                ("Backspace", "Go up"),
+                ("t", "Cycle theme"),
+                ("?", "Toggle help"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = self.theme.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = self.theme.fg; }
+                }
+            }
+        }
+
         plane
     }
 
@@ -285,7 +346,23 @@ impl Widget for TreeNav {
             return false;
         }
 
-        if key.code == KeyCode::Backspace && !self.current_path.is_empty() {
+        if self.show_help {
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+            }
+            return true;
+        }
+
+        match key.code {
+            KeyCode::Char('t') if key.modifiers.is_empty() => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = true;
+                true
+            }
+            KeyCode::Backspace if !self.current_path.is_empty() => {
             self.current_path.pop();
             self.tree.set_selected_path(self.current_path.clone());
             self.update_breadcrumbs();

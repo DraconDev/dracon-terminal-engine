@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Added theme cycling functionality to the tree navigator component.
+Added a help overlay to the tree navigator with keyboard shortcuts display
 
 ## Context
-This change enables users to cycle through different visual themes in the tree navigator, enhancing customization and visual appeal. It builds on recent work adding theme support and keyboard shortcuts.
+This change enhances the tree navigator component by providing an interactive help overlay that displays keyboard shortcuts, making the interface more discoverable and user-friendly.
 
 ## Completed
-- [x] Added `cycle_theme()` method to rotate through predefined themes
-- [x] Implemented theme cycling logic with wrap-around behavior
-- [x] Integrated theme changes with the tree component
+- [x] Added a help overlay with centered modal window
+- [x] Implemented keyboard shortcut display (↑/↓, →/Enter, etc.)
+- [x] Added theme cycling ('t' key) and help toggle ('?' key)
+- [x] Implemented help overlay toggle with '?' key and ESC key
+- [x] Added proper theming for help overlay elements
 
 ## In Progress
-- [x] Theme cycling functionality is fully implemented
+- [x] Help overlay implementation and keyboard handling
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify theme cycling works with all existing tree navigator features
-2. Add keyboard shortcut for theme cycling (pending recent keyboard handling work)
+1. Test help overlay behavior with various terminal sizes
+2. Consider adding more detailed help content if needed
