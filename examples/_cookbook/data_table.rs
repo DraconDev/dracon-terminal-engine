@@ -341,6 +341,67 @@ impl Widget for Table {
                 p.cells[idx].transparent = false;
             }
         }
+        // Help overlay
+        if self.show_help {
+            let hw = 40u16.min(area.width.saturating_sub(4));
+            let hh = 10u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < p.cells.len() {
+                        p.cells[idx].bg = self.theme.surface_elevated;
+                        p.cells[idx].transparent = false;
+                    }
+                }
+            }
+            // Border
+            for x in hx..hx + hw {
+                let top_idx = (hy * area.width + x) as usize;
+                let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
+                if top_idx < p.cells.len() { p.cells[top_idx].char = '─'; p.cells[top_idx].fg = self.theme.outline; }
+                if bot_idx < p.cells.len() { p.cells[bot_idx].char = '─'; p.cells[bot_idx].fg = self.theme.outline; }
+            }
+            for y in hy..hy + hh {
+                let left_idx = (y * area.width + hx) as usize;
+                let right_idx = (y * area.width + hx + hw - 1) as usize;
+                if left_idx < p.cells.len() { p.cells[left_idx].char = '│'; p.cells[left_idx].fg = self.theme.outline; }
+                if right_idx < p.cells.len() { p.cells[right_idx].char = '│'; p.cells[right_idx].fg = self.theme.outline; }
+            }
+            // Title
+            let title = "Data Table Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = c;
+                    p.cells[idx].fg = self.theme.primary;
+                    p.cells[idx].style = Styles::BOLD;
+                }
+            }
+            // Shortcuts
+            let shortcuts = [
+                ("↑/↓", "Navigate"),
+                ("Enter", "Sort column"),
+                ("Type", "Filter"),
+                ("t", "Cycle theme"),
+                ("?", "Toggle help"),
+                ("q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 12 + j as u16) as usize;
+                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.fg; }
+                }
+            }
+        }
+
         p
     }
 
