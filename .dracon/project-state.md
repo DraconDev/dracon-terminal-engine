@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved hover state visual feedback in system monitor process list items
+Added dead code annotation to unused field in MetricHistory struct
 
 ## Context
-This change enhances the system monitor UI by refining the visual feedback for process list items when hovered over, making the interface more intuitive and responsive.
+The change was prompted by a need to suppress compiler warnings about unused fields in the MetricHistory struct, which was part of the dashboard builder example.
 
 ## Completed
-- [x] Updated hover state styling to use `surface_elevated` background
-- [x] Maintained consistent formatting for process list items
-- [x] Preserved existing selection highlighting logic
+- [x] Added `#[allow(dead_code)]` attribute to the unused `label` field in MetricHistory struct
+- [x] Updated Cargo.lock with dependency version changes
 
 ## In Progress
-- [x] Hover state visual feedback implementation
+- [ ] None
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify hover state behavior across different terminal environments
-2. Consider adding more visual cues for process states (e.g., running vs sleeping)
+1. Verify the dashboard builder functionality remains unchanged
+2. Consider whether the `label` field should be removed entirely if it's truly unused

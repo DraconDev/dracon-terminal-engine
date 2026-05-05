@@ -43,6 +43,7 @@ const THEMES: &[&str] = &[
 
 struct MetricHistory {
     values: VecDeque<f64>,
+    #[allow(dead_code)]
     label: String,
     unit: String,
     warn_threshold: f64,
