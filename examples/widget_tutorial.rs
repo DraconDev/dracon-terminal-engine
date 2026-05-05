@@ -644,20 +644,20 @@ fn main() -> std::io::Result<()> {
     // to demonstrate that each instance maintains its own state.
 
     // Row 1: Red and Green pickers
-    let mut red_picker = ColorPicker::new()
+    let red_picker = ColorPicker::new()
         .initial_color("Red")
         .with_theme(current_theme);
 
-    let mut green_picker = ColorPicker::new()
+    let green_picker = ColorPicker::new()
         .initial_color("Green")
         .with_theme(current_theme);
 
     // Row 2: Blue and Yellow pickers
-    let mut blue_picker = ColorPicker::new()
+    let blue_picker = ColorPicker::new()
         .initial_color("Blue")
         .with_theme(current_theme);
 
-    let mut yellow_picker = ColorPicker::new()
+    let yellow_picker = ColorPicker::new()
         .initial_color("Yellow")
         .with_theme(current_theme);
 
