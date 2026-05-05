@@ -97,6 +97,18 @@ impl ChatState {
         self.scroll_offset = self.messages.len().saturating_sub(visible);
     }
 
+    fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::nord(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+    }
+
     fn unread_count(&self) -> usize {
         self.messages.iter().filter(|m| !m.is_read).count()
     }
@@ -121,10 +133,19 @@ impl ChatState {
             KeyCode::Esc => {
                 self.show_emoji_modal = false;
                 self.show_settings_modal = false;
+                self.show_help = false;
                 true
             }
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('t') if !self.show_emoji_modal && !self.show_settings_modal => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
                 true
             }
             KeyCode::Enter if !self.show_emoji_modal && !self.show_settings_modal => {
