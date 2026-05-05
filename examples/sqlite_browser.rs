@@ -63,6 +63,7 @@ struct SqliteBrowser {
     results_table: Option<Table<RowData>>,
 
     active_panel: Panel,
+    show_help: bool,
 
     status_bar: StatusBar,
     toasts: Vec<Toast>,

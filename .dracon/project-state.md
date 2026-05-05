@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Added scrollbar indicator and help overlay to chat client UI
+Added help toggle state to SQLite browser UI
 
 ## Context
-Enhanced the chat client's user interface to improve navigation and usability by adding visual feedback for message scrolling and a help modal with keyboard shortcuts
+This change prepares for implementing a help overlay in the SQLite browser tool, following similar UI enhancements in other components.
 
 ## Completed
-- [x] Added scrollbar indicator showing message position
-- [x] Implemented help overlay with keyboard shortcuts
-- [x] Updated theme display to show current theme name
+- [x] Added `show_help` boolean field to track help overlay state
 
 ## In Progress
-- [x] Help overlay implementation and styling
+- [x] Implementation of help overlay functionality
 
 ## Blockers
-- None identified
+- Help overlay UI design and content specification needed
 
 ## Next Steps
-1. Test scrollbar behavior with different message volumes
-2. Verify help overlay positioning on various terminal sizes
+1. Implement help overlay UI component
+2. Add keyboard shortcut for help toggle
