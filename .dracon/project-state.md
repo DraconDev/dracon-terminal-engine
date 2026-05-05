@@ -1,25 +1,22 @@
 # Project State
 
 ## Current Focus
-Added a help overlay with keyboard shortcuts to the IDE example
+Improved help overlay integration in the IDE example by replacing the shortcut toast with a dedicated help overlay toggle.
 
 ## Context
-This change implements a feature requested in the recent commit "feat(help overlay): Added help overlay toggle to IDE example". The overlay provides users with a quick reference of keyboard shortcuts, improving discoverability and usability of the IDE interface.
+This change addresses the need for a more persistent and organized way to display keyboard shortcuts, replacing the temporary toast notification with a dedicated help overlay that can be toggled on/off.
 
 ## Completed
-- [x] Added help overlay rendering with centered modal window
-- [x] Implemented keyboard shortcuts display in categorized sections
-- [x] Added visual styling with themed colors and formatting
-- [x] Included closing hint at the bottom of the overlay
-- [x] Integrated with existing show_help toggle mechanism
+- [x] Replaced the "show-shortcuts" command toast with a help overlay toggle
+- [x] Added keyboard shortcut (?) to toggle the help overlay
+- [x] Maintained backward compatibility with the existing "show-shortcuts" command
 
 ## In Progress
-- [ ] None (feature is complete)
+- [ ] Implementation of the actual help overlay content (not yet shown in this diff)
 
 ## Blockers
-- None (feature is fully implemented)
+- The help overlay content needs to be implemented in a subsequent commit
 
 ## Next Steps
-1. Verify overlay works consistently across different terminal sizes
-2. Consider adding more shortcut categories if needed
-3. Test with different themes to ensure proper color contrast
+1. Implement the help overlay content with all keyboard shortcuts
+2. Add visual styling and layout for the help overlay

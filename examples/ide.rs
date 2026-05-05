@@ -403,10 +403,7 @@ impl IdeApp {
                 self.show_profiler = !self.show_profiler;
             }
             "show-shortcuts" => {
-                self.toast(
-                    "Shortcuts: Ctrl+P palette, Ctrl+T tab, Ctrl+F search, Ctrl+S save",
-                    ToastKind::Info,
-                );
+                self.show_help = true;
             }
             "about" => {
                 self.toast(
@@ -880,6 +877,10 @@ impl Widget for IdeApp {
             }
             KeyCode::Char('t') if key.modifiers.is_empty() => {
                 self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
                 true
             }
             KeyCode::Char('o') if key.modifiers.contains(KeyModifiers::CONTROL) => {
