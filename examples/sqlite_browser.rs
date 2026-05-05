@@ -493,6 +493,61 @@ impl Widget for SqliteBrowser {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            let hw = 42u16.min(area.width.saturating_sub(4));
+            let hh = 14u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top_idx = (hy * area.width + x) as usize;
+                let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
+                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
+                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left_idx = (y * area.width + hx) as usize;
+                let right_idx = (y * area.width + hx + hw - 1) as usize;
+                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
+                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+            }
+            let title = "SQLite Browser Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+            }
+            let shortcuts = [
+                ("↑/↓/j/k", "Navigate"), ("Enter", "Select / Run query"), ("Tab", "Switch panel"),
+                ("e", "Edit query"), ("r", "Refresh"), ("t", "Cycle theme"), ("?", "Toggle help"), ("q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
+            }
+        }
+
         plane
     }
 

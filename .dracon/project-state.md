@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added keyboard shortcuts for theme cycling and help toggle in the SQLite browser
+Added a help overlay UI for the SQLite browser with keyboard shortcuts display
 
 ## Context
-This change enhances the SQLite browser's user experience by providing quick access to theme switching and help documentation through keyboard shortcuts, aligning with recent UI improvements in other components.
+This implements a visual help system to make the application more discoverable by showing available keyboard shortcuts in a centered modal overlay
 
 ## Completed
-- [x] Added 't' key shortcut to cycle themes
-- [x] Added '?' key shortcut to toggle help overlay
+- [x] Added help overlay with modal window styling (box drawing characters)
+- [x] Implemented keyboard shortcuts display in a formatted table
+- [x] Added proper theming for the help content
+- [x] Included title and visual separation between key bindings and descriptions
 
 ## In Progress
-- [x] Keyboard shortcut integration for SQLite browser UI
+- [x] Help overlay implementation is complete
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify theme cycling works across all browser components
-2. Test help overlay positioning and content accuracy
+1. Add keyboard handler to toggle help overlay
+2. Test with different terminal sizes to ensure proper scaling
