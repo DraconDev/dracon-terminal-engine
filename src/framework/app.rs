@@ -29,6 +29,7 @@ use crate::input::event::{Event, KeyEvent};
 use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
+use signal_hook::consts::signal::{SIGINT, SIGTERM};
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;

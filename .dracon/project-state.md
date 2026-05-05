@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Fix terminal cleanup sequence to disable Kitty keyboard mode instead of enabling it
+Added signal handling for SIGINT and SIGTERM in the application framework.
 
 ## Context
-The terminal cleanup sequence was previously enabling Kitty keyboard mode (`?1007h`) when suspending, which could interfere with terminal behavior. This change corrects the sequence to disable it (`?1007l`) instead.
+The change implements proper signal handling to ensure the application can gracefully handle termination signals, which is important for robust process management.
 
 ## Completed
-- [x] Modified terminal suspend sequence to disable Kitty keyboard mode
-- [x] Maintained all other terminal state changes (cursor, modes, etc.)
+- [x] Added signal_hook dependency for signal handling
+- [x] Imported SIGINT and SIGTERM constants for proper signal handling
 
 ## In Progress
-- [x] Terminal state management improvements
+- [ ] Implementation of actual signal handler logic (not yet added)
 
 ## Blockers
-- None identified
+- Signal handler implementation needs to be completed to properly handle termination signals
 
 ## Next Steps
-1. Verify terminal behavior after suspend/resume
-2. Test with Kitty terminal emulator specifically
+1. Implement signal handler logic to clean up resources on termination
+2. Test signal handling behavior with various termination scenarios
