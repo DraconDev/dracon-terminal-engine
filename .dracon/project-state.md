@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Added theme cycling functionality to file manager and Git TUI examples
+Removed toast notification functionality from Git TUI example
 
 ## Context
-Users need visual customization options to improve their experience with different themes. This change provides a consistent way to cycle through predefined themes in both the file manager and Git TUI examples.
+The toast notification system was removed as part of ongoing refactoring efforts to improve code organization and maintainability in the Git TUI example.
 
 ## Completed
-- [x] Added theme cycling functionality to both file manager and Git TUI examples
-- [x] Implemented keyboard shortcut ('t') to cycle themes
-- [x] Added visual feedback through toast notifications when theme changes
-- [x] Updated Cargo.lock with dependency changes
+- [x] Removed toast notification methods from GitTui implementation
+- [x] Updated Cargo.lock with dependency version changes
 
 ## In Progress
-- [x] Theme cycling implementation is complete
+- [x] Refactoring of notification systems across the project
 
 ## Blockers
-- No blockers identified
+- None identified
 
 ## Next Steps
-1. Verify theme cycling works consistently across all examples
-2. Consider adding more theme options or custom theme support
+1. Review other examples for similar notification systems to refactor
+2. Update documentation to reflect the removed functionality

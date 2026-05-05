@@ -226,15 +226,6 @@ impl GitTui {
             .unwrap_or_else(|| "No changes to display".to_string())
     }
 
-    fn toast(&mut self, msg: &str, kind: ToastKind) {
-        let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
-            .with_kind(kind)
-            .with_duration(Duration::from_secs(2))
-            .with_theme(self.theme);
-        self.toasts.push(toast);
-        self.dirty = true;
-    }
-
     fn is_git_repo(&self) -> bool {
         Command::new("git")
             .args(["rev-parse", "--git-dir"])
