@@ -765,46 +765,53 @@ impl GitTui {
     }
 
     fn render_diff(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
-        let header = "Diff";
+        let header = " 󰊢 Diff";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
+        let content_y = y + 2;
+        let content_h = h.saturating_sub(3);
+        if content_h > 2 {
+            draw_rounded_border(plane, 2, content_y, plane.width.saturating_sub(4), content_h, t);
+        }
+
         let lines: Vec<&str> = self.diff_content.lines().collect();
-        let visible = (h as usize).saturating_sub(3);
+        let visible = (content_h as usize).saturating_sub(2);
 
         for (i, line) in lines.iter().take(visible).enumerate() {
-            let row = y + 2 + i as u16;
-            let (fg, bold) = if line.starts_with('+') && !line.starts_with("+++") {
-                (t.success, false)
+            let row = content_y + 1 + i as u16;
+            if row >= content_y + content_h - 1 { break; }
+            let (fg, bg, bold) = if line.starts_with('+') && !line.starts_with("+++") {
+                (t.success, t.success_bg, false)
             } else if line.starts_with('-') && !line.starts_with("---") {
-                (t.error, false)
+                (t.error, t.error_bg, false)
             } else if line.starts_with("@@") {
-                (t.info, true)
+                (t.info, t.info_bg, true)
             } else if line.starts_with("diff ")
                 || line.starts_with("index ")
                 || line.starts_with("--- ")
                 || line.starts_with("+++ ")
             {
-                (t.fg_muted, true)
+                (t.fg_muted, t.bg, true)
             } else {
-                (t.fg, false)
+                (t.fg, t.surface, false)
             };
 
-            let truncated = if line.len() > plane.width as usize - 4 {
-                &line[..plane.width as usize - 4]
+            let truncated = if line.len() > plane.width as usize - 8 {
+                &line[..plane.width as usize - 8]
             } else {
                 line
             };
-            draw_text(plane, 2, row, truncated, fg, t.bg, bold);
+            draw_text(plane, 4, row, truncated, fg, bg, bold);
         }
 
         if lines.len() > visible {
             let more = format!("... {} more lines", lines.len() - visible);
-            draw_text(plane, 2, y + h - 2, &more, t.fg_muted, t.bg, false);
+            draw_text(plane, 4, content_y + content_h - 2, &more, t.fg_muted, t.bg, false);
         }
     }
 
-    fn render_branches(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
-        let header = "Branches";
+    fn render_branches(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+        let header = " 󰊢 Branches";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         let locals: Vec<_> = self.branches.iter().filter(|b| !b.remote).collect();
@@ -812,8 +819,13 @@ impl GitTui {
 
         let mut row = y + 2;
         if !locals.is_empty() {
-            draw_text(plane, 2, row, "Local:", t.secondary, t.bg, true);
-            row += 1;
+            let section_h = (locals.len() + 3) as u16;
+            if section_h > 2 && row + section_h < y + h {
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
+            }
+            draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
+            draw_text(plane, 16, row, &format!("({})", locals.len()), t.fg_muted, t.surface, false);
+            row += 2;
             for (i, branch) in locals.iter().enumerate() {
                 let is_selected = self.view == GitView::Branches && self.selected_branch == i;
                 let fg = if branch.current {
@@ -823,8 +835,8 @@ impl GitTui {
                 } else {
                     t.fg
                 };
-                let bg = if is_selected { t.primary_active } else { t.bg };
-                let marker = if branch.current { "* " } else { "  " };
+                let bg = if is_selected { t.primary_active } else { t.surface };
+                let marker = if branch.current { " 󰘦 " } else { "   " };
                 draw_text(
                     plane,
                     4,
@@ -836,12 +848,17 @@ impl GitTui {
                 );
                 row += 1;
             }
-            row += 1;
+            row += 2;
         }
 
         if !remotes.is_empty() {
-            draw_text(plane, 2, row, "Remote:", t.secondary, t.bg, true);
-            row += 1;
+            let section_h = (remotes.len() + 3) as u16;
+            if section_h > 2 && row + section_h < y + h {
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
+            }
+            draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
+            draw_text(plane, 17, row, &format!("({})", remotes.len()), t.fg_muted, t.surface, false);
+            row += 2;
             let offset = locals.len();
             for (i, branch) in remotes.iter().enumerate() {
                 let idx = offset + i;
@@ -851,12 +868,12 @@ impl GitTui {
                 } else {
                     t.fg_muted
                 };
-                let bg = if is_selected { t.primary_active } else { t.bg };
+                let bg = if is_selected { t.primary_active } else { t.surface };
                 draw_text(
                     plane,
                     4,
                     row,
-                    &format!("  {}", branch.name),
+                    &format!("  󰒍 {}", branch.name),
                     fg,
                     bg,
                     is_selected,
