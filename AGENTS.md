@@ -166,6 +166,8 @@ The following type aliases are used for cleaner signatures and to avoid "very co
 | `SelectCallback<T>` | `src/framework/widgets/list.rs` | `Box<dyn FnMut(&T)>` |
 | `ChangeCallback` | `src/framework/widgets/select.rs` | `Box<dyn FnMut(&str)>` |
 | `SelectCallback<T>` | `src/framework/widgets/table.rs` | `Box<dyn FnMut(&T)>` |
+| `CellTextFn<T>` | `src/framework/widgets/table.rs` | `Box<dyn Fn(&T, usize) -> String>` |
+| `HeaderClickCallback` | `src/framework/widgets/table.rs` | `Box<dyn FnMut(usize)>` |
 | `SubmitCallback` | `src/framework/widgets/text_input_base.rs` | `Box<dyn FnMut(&str)>` |
 | `SelectCallback` | `src/framework/widgets/tree.rs` | `Box<dyn FnMut(&str)>` |
 

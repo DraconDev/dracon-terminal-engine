@@ -540,6 +540,12 @@ impl Widget for EditorApp {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        // Command palette intercepts all mouse events when visible
+        if self.command_palette.is_visible() {
+            let _handled = self.command_palette.handle_mouse(kind, col, row);
+            return true;
+        }
+
         if let MouseEventKind::Down(MouseButton::Left) = kind {
             // Tab bar click
             if row == 0 {
