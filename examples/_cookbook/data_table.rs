@@ -392,13 +392,13 @@ impl Widget for Table {
 
         // Scrollbar indicator if content overflows
         if self.rows.len() > self.vis {
-            let sb_x = area.width - 1;
-            let content_h = area.height.saturating_sub(3); // minus header and status
+            let sb_x = area.width - 2; // inside right border
+            let content_h = area.height.saturating_sub(7); // data area height
             let thumb_h = (self.vis as f32 / self.rows.len() as f32 * content_h as f32).max(1.0) as u16;
-            let thumb_y = (self.off as f32 / self.rows.len() as f32 * content_h as f32) as u16 + 2;
+            let thumb_y = (self.off as f32 / self.rows.len().saturating_sub(self.vis).max(1) as f32 * (content_h - thumb_h) as f32) as u16 + data_start_y;
             for i in 0..thumb_h {
                 let y = thumb_y + i;
-                if y < area.height.saturating_sub(1) {
+                if y >= data_start_y && y < area.height.saturating_sub(2) {
                     let idx = (y * area.width + sb_x) as usize;
                     if idx < p.cells.len() {
                         p.cells[idx].char = '▐';
