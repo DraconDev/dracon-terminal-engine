@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added help overlay toggle to IDE example with keyboard shortcut documentation
+Removed the help overlay implementation from the IDE example.
 
 ## Context
-This change implements a help overlay that can be toggled with the '?' key, providing users with a quick reference to keyboard shortcuts. It follows recent work on improving the IDE example's documentation and user experience.
+The help overlay was previously implemented as a hardcoded feature in the IDE example, but this was moved to a separate component. The current change removes the redundant implementation to streamline the codebase.
 
 ## Completed
-- [x] Added help overlay toggle with '?' key binding
-- [x] Updated documentation in the example code to include the new shortcut
-- [x] Implemented basic overlay behavior with escape key to close
+- [x] Removed the help overlay rendering function from `ide.rs`
+- [x] Removed the help overlay toggle counter from the widget implementation
 
 ## In Progress
-- [x] Basic help overlay implementation is complete
+- [x] The help overlay is now being developed as a separate component
 
 ## Blockers
-- No blockers identified for this change
+- The help overlay component needs to be integrated back into the IDE example
 
 ## Next Steps
-1. Expand the help overlay content with more detailed shortcut explanations
-2. Add visual styling to make the overlay more prominent
+1. Complete the help overlay component development
+2. Integrate the help overlay component back into the IDE example

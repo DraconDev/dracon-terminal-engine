@@ -701,121 +701,12 @@ impl Widget for IdeApp {
             }
         }
 
-        // 11. Help overlay
+        // 12. Help overlay
         if self.show_help {
             self.render_help_overlay(&mut plane);
         }
 
         plane
-    }
-
-    fn render_help_overlay(&self, plane: &mut Plane) {
-        let t = self.theme;
-        let w = 60.min(plane.width);
-        let h = 20.min(plane.height);
-        let x = (plane.width - w) / 2;
-        let y = (plane.height - h) / 2;
-
-        for py in 0..h {
-            for px in 0..w {
-                let idx = ((y + py) * plane.width + x + px) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].fg = t.fg;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-        }
-
-        let title = "Keyboard Shortcuts";
-        for (i, ch) in title.chars().enumerate() {
-            let idx = ((y + 1) * plane.width + x + 2 + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = ch;
-                plane.cells[idx].fg = t.primary;
-                plane.cells[idx].style = Styles::BOLD;
-            }
-        }
-
-        let sep_y = y + 2;
-        for px in 0..w {
-            let idx = (sep_y * plane.width + x + px) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
-            }
-        }
-
-        let shortcuts = [
-            ("File", &[
-                ("Ctrl+O", "Open file"),
-                ("Ctrl+S", "Save file"),
-                ("Ctrl+T", "New tab"),
-                ("Ctrl+W", "Close tab"),
-            ]),
-            ("Edit", &[
-                ("Type", "Insert text"),
-                ("←↑↓→", "Move cursor"),
-                ("Home/End", "Line start/end"),
-                ("Backspace", "Delete char"),
-            ]),
-            ("View", &[
-                ("Ctrl+F", "Search"),
-                ("F12", "Profiler"),
-                ("Ctrl+P", "Palette"),
-                ("t", "Cycle theme"),
-            ]),
-            ("General", &[
-                ("?", "Toggle this help"),
-                ("q", "Quit"),
-            ]),
-        ];
-
-        let mut row = sep_y + 1;
-        for (category, items) in shortcuts {
-            let cat_col = x + 2;
-            for (i, ch) in category.chars().enumerate() {
-                let idx = (row * plane.width + cat_col + i as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = t.warning;
-                    plane.cells[idx].style = Styles::BOLD;
-                }
-            }
-
-            for (i, (key, desc)) in items.iter().enumerate() {
-                let key_col = x + 8;
-                let desc_col = x + 20;
-                let item_y = row + i as u16;
-
-                for (j, ch) in key.chars().enumerate() {
-                    let idx = (item_y * plane.width + key_col + j as u16) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = t.primary;
-                        plane.cells[idx].style = Styles::BOLD;
-                    }
-                }
-
-                for (j, ch) in desc.chars().enumerate() {
-                    let idx = (item_y * plane.width + desc_col + j as u16) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = t.fg_muted;
-                    }
-                }
-            }
-            row += 1 + items.len() as u16 + 1;
-        }
-
-        let hint = "Press ? or Esc to close";
-        for (i, ch) in hint.chars().enumerate() {
-            let idx = ((y + h - 1) * plane.width + x + 2 + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = ch;
-                plane.cells[idx].fg = t.fg_muted;
-            }
-        }
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
