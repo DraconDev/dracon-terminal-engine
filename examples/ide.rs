@@ -319,6 +319,8 @@ impl IdeApp {
         self.tab_bar.on_theme_change(&self.theme);
         self.file_tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
+        self.command_palette.on_theme_change(&self.theme);
+        self.profiler.on_theme_change(&self.theme);
         self.toasts.clear();
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
     }
@@ -1243,16 +1245,8 @@ impl IdeApp {
         let x = (plane.width - w) / 2;
         let y = (plane.height - h) / 2;
 
-        for py in 0..h {
-            for px in 0..w {
-                let idx = ((y + py) * plane.width + x + px) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].fg = t.fg;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-        }
+        // Draw rounded border and fill
+        draw_rounded_box(&mut plane, x, y, w, h, t);
 
         let title = "Keyboard Shortcuts";
         for (i, ch) in title.chars().enumerate() {
@@ -1370,6 +1364,49 @@ fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: The
                     plane.cells[idx].char = '│';
                 }
                 plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
+
+fn draw_rounded_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 3 || h < 2 { return; }
+
+    // Fill interior
+    for row in (y + 1)..(y + h - 1) {
+        for col in (x + 1)..(x + w - 1) {
+            let idx = (row * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+
+    // Draw border with rounded corners
+    for row in y..(y + h) {
+        for col in x..(x + w) {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() { continue; }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+            if is_border {
+                plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+                plane.cells[idx].transparent = false;
+                if row == y && col == x {
+                    plane.cells[idx].char = '╭';
+                } else if row == y && col == x + w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == y + h - 1 && col == x {
+                    plane.cells[idx].char = '╰';
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == y || row == y + h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
             }
         }
     }
