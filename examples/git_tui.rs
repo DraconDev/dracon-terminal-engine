@@ -570,7 +570,7 @@ impl Widget for GitTui {
 
 impl GitTui {
     fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
-        let header = "Status";
+        let header = " 󰊢 Status";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         let sub_y = y + 2;
@@ -579,7 +579,7 @@ impl GitTui {
                 plane,
                 2,
                 sub_y,
-                "Working tree clean",
+                "✓ Working tree clean",
                 t.success,
                 t.bg,
                 false,
@@ -599,20 +599,30 @@ impl GitTui {
 
             let mut row = sub_y;
             if !staged.is_empty() {
+                render_section_card(plane, 2, row, 40, staged.len() + 3, t);
                 draw_text(
                     plane,
-                    2,
+                    3,
                     row,
-                    &format!("Staged ({}):", staged.len()),
+                    "✓ Staged",
                     t.success,
-                    t.bg,
+                    t.surface_elevated,
                     true,
                 );
-                row += 1;
+                draw_text(
+                    plane,
+                    13,
+                    row,
+                    &format!("({})", staged.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
                 for (i, file) in staged.iter().enumerate() {
                     let is_selected = self.view == GitView::Status && self.selected_file == i;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.bg };
+                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
                     draw_text(
                         plane,
                         4,
@@ -624,26 +634,36 @@ impl GitTui {
                     );
                     row += 1;
                 }
-                row += 1;
+                row += 2;
             }
 
             if !modified.is_empty() {
+                render_section_card(plane, 2, row, 40, modified.len() + 3, t);
                 draw_text(
                     plane,
-                    2,
+                    3,
                     row,
-                    &format!("Modified ({}):", modified.len()),
+                    "✗ Modified",
                     t.warning,
-                    t.bg,
+                    t.surface_elevated,
                     true,
                 );
-                row += 1;
+                draw_text(
+                    plane,
+                    14,
+                    row,
+                    &format!("({})", modified.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
                 let offset = staged.len();
                 for (i, file) in modified.iter().enumerate() {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.bg };
+                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
                     draw_text(
                         plane,
                         4,
@@ -655,7 +675,7 @@ impl GitTui {
                     );
                     row += 1;
                 }
-                row += 1;
+                row += 2;
             }
 
             if !untracked.is_empty() {
@@ -814,6 +834,40 @@ impl GitTui {
                     is_selected,
                 );
                 row += 1;
+            }
+        }
+    }
+}
+
+fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 2 || h < 2 {
+        return;
+    }
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+                plane.cells[idx].bg = if is_border { t.bg } else { t.surface_elevated };
+                plane.cells[idx].fg = t.outline;
+                if is_border {
+                    if row == y && col == x {
+                        plane.cells[idx].char = '┌';
+                    } else if row == y && col == x + w - 1 {
+                        plane.cells[idx].char = '┐';
+                    } else if row == y + h - 1 && col == x {
+                        plane.cells[idx].char = '└';
+                    } else if row == y + h - 1 && col == x + w - 1 {
+                        plane.cells[idx].char = '┘';
+                    } else if row == y || row == y + h - 1 {
+                        plane.cells[idx].char = '─';
+                    } else {
+                        plane.cells[idx].char = '│';
+                    }
+                } else {
+                    plane.cells[idx].char = ' ';
+                }
+                plane.cells[idx].transparent = false;
             }
         }
     }

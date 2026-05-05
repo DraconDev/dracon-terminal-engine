@@ -1,23 +1,25 @@
 # Project State
 
 ## Current Focus
-Improved visual indicators for modified/ready states in IDE UI
+Improved visual indicators for modified/ready states in Git TUI status view
 
 ## Context
-Enhancing the IDE's status bar and tab bar to provide clearer visual feedback about document states
+The Git TUI example was enhanced to provide clearer visual feedback about file states (staged, modified, untracked) with improved UI elements and icons.
 
 ## Completed
-- [x] Updated status bar to show "● Modified" with warning color when document is modified
-- [x] Updated status bar to show "✓ Ready" with normal color when document is unmodified
-- [x] Updated tab bar to append " ×" indicator to modified tabs
-- [x] Maintained consistent visual styling across both status and tab indicators
+- [x] Added visual cards for status sections with proper borders
+- [x] Replaced plain text status indicators with icons (✓ for staged, ✗ for modified)
+- [x] Improved color contrast for selected files
+- [x] Added status counts in muted text next to section headers
+- [x] Enhanced layout spacing between sections
+- [x] Added a new `render_section_card` helper function for consistent card rendering
 
 ## In Progress
-- [x] Visual state indicators for modified/ready documents
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
 1. Verify visual consistency across different themes
-2. Consider adding more visual indicators for other document states (e.g., unsaved changes)
+2. Add similar visual improvements to other Git TUI sections
