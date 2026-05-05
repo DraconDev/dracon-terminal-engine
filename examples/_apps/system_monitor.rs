@@ -418,8 +418,14 @@ impl Widget for SystemMonitor {
         let header_text = " 󰀽 Processes       PID  STATE  NAME             CPU%      MEM ";
         draw_text(&mut plane, 2, header_y, header_text, t.fg_muted, t.surface, true);
 
-        let max_visible = (list_h as usize).saturating_sub(3);
-        for i in 0..max_visible {
+        if self.data.processes.is_empty() {
+            let cx = area.width / 2;
+            let cy = header_y + list_h / 2 - 2;
+            draw_text(&mut plane, cx.saturating_sub(10), cy, " 󰓇 Collecting process data... ", t.fg_muted, t.surface, false);
+            draw_text(&mut plane, cx.saturating_sub(14), cy + 1, " (scroll to refresh  •  wait for /proc) ", t.fg_subtle, t.surface, false);
+        } else {
+            let max_visible = (list_h as usize).saturating_sub(3);
+            for i in 0..max_visible {
             let proc_idx = self.process_scroll + i;
             let row_y = header_y + 1 + i as u16;
             if row_y >= list_y + list_h - 1 { break; }
@@ -433,6 +439,7 @@ impl Widget for SystemMonitor {
                 let line = format!(" {:>5}  {:<3}  {:<14} {:>5.1}%  {:>5.0}MB", proc.pid, proc.state, name, proc.cpu_percent, proc.mem_mb);
                 draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
             }
+        }
         }
 
         // ── Detail Panel (right side, when process selected) ──
