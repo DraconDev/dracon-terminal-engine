@@ -498,32 +498,48 @@ impl Widget for Showcase {
             draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, false);
         }
 
-        // Status bar
+        // Status bar with gradient effect
         let status_y = area.height as usize - 1;
         for x in 0..area.width as usize {
-            set_cell(&mut plane, x, status_y, ' ', t.fg, t.surface_elevated);
+            let gradient_ratio = x as f32 / area.width as f32;
+            let bg = if x < area.width as usize / 2 {
+                t.surface_elevated
+            } else {
+                t.surface
+            };
+            set_cell(&mut plane, x, status_y, ' ', t.fg, bg);
         }
 
         let hints = [
-            "↑↓←→ nav",
-            "Enter launch",
-            "/ search",
-            "Tab category",
-            "t theme",
-            "q quit",
+            ("↑↓←→", "nav"),
+            ("Enter", "launch"),
+            ("/", "search"),
+            ("Tab", "category"),
+            ("t", "theme"),
+            ("q", "quit"),
         ];
         let mut hint_x = 2usize;
-        for hint in hints.iter() {
+        for (key, desc) in hints.iter() {
             draw_text(
                 &mut plane,
                 hint_x,
                 status_y,
-                hint,
+                key,
                 t.primary,
+                t.surface_elevated,
+                true,
+            );
+            hint_x += key.len();
+            draw_text(
+                &mut plane,
+                hint_x,
+                status_y,
+                desc,
+                t.fg_muted,
                 t.surface_elevated,
                 false,
             );
-            hint_x += hint.len() + 3;
+            hint_x += desc.len() + 3;
         }
 
         // Mouse coordinates (right side)
