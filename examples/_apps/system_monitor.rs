@@ -329,8 +329,8 @@ impl SystemMonitor {
     }
 
     fn update_gauges(&mut self) {
-        let cpu = self.data.cpu_hist.current() as f64;
-        let mem = self.data.mem_hist.current() as f64;
+        let cpu = self.data.cpu_hist.current();
+        let mem = self.data.mem_hist.current();
         self.cpu_gauge.set_value(cpu);
         self.mem_gauge.set_value(mem);
 
@@ -372,7 +372,7 @@ impl Widget for SystemMonitor {
 
         // Separator
         for x in 0..area.width {
-            let idx = (area.width + x as u16) as usize;
+            let idx = (area.width + x) as usize;
             if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
         }
 

@@ -163,7 +163,7 @@ impl Widget for WidgetGallery {
 
         // Divider
         for x in 0..area.width {
-            let idx = (1 * area.width + x) as usize;
+            let idx = (area.width + x) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -226,7 +226,7 @@ impl Widget for WidgetGallery {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav_text = format!(" ↑↓←→ nav | Enter activate | Tab theme | q quit ");
+        let nav_text = " ↑↓←→ nav | Enter activate | Tab theme | q quit ";
         draw_text(&mut plane, 2, footer_y, &nav_text, t.fg_muted, t.bg, false);
 
         plane
