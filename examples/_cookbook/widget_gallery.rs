@@ -232,6 +232,50 @@ impl Widget for WidgetGallery {
         let nav_text = " ↑↓←→ nav | Enter activate | Tab theme | q quit ";
         draw_text(&mut plane, 2, footer_y, nav_text, t.fg_muted, t.bg, false);
 
+        // Help overlay
+        if self.show_help {
+            let hw = 44u16.min(area.width.saturating_sub(4));
+            let hh = 12u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            for x in hx..hx + hw {
+                let top_idx = (hy * area.width + x) as usize;
+                let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
+                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
+                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+            }
+            for y in hy..hy + hh {
+                let left_idx = (y * area.width + hx) as usize;
+                let right_idx = (y * area.width + hx + hw - 1) as usize;
+                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
+                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+            }
+            let title = "Widget Gallery Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            draw_text(&mut plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
+            let shortcuts = [
+                ("↑↓←→", "Navigate cards"),
+                ("Enter", "Activate widget"),
+                ("Tab/t", "Cycle theme"),
+                ("?", "Toggle help"),
+                ("q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                draw_text(&mut plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
+                draw_text(&mut plane, hx + 14, row, desc, t.fg, t.surface_elevated, false);
+            }
+        }
+
         plane
     }
 
