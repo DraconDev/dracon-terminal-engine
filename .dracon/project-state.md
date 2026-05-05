@@ -1,21 +1,26 @@
 # Project State
 
 ## Current Focus
-Adjusted column widths in the table widget to accommodate row numbers
+Added keyboard and mouse interaction enhancements to the table widget
 
 ## Context
-The table widget was recently enhanced with row numbers, which required adjusting column widths to maintain proper alignment and visual balance.
+This change improves user interaction with the table widget by:
+1. Allowing column sorting via Enter key
+2. Enabling search input focus via mouse click
+3. Maintaining consistent state updates
 
 ## Completed
-- [x] Updated column widths to [10, 5, 10, 14] to accommodate row numbers
+- [x] Added Enter key sorting functionality
+- [x] Implemented mouse click handling for search input
+- [x] Ensured proper state updates after interactions
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Complete implementation of table interaction features
 
 ## Blockers
-- None
+- None identified for this specific change
 
 ## Next Steps
-1. Verify visual alignment of table content with new column widths
-2. Consider additional styling adjustments if needed
-```
+1. Verify cross-platform compatibility
+2. Add visual feedback for active sorting state
+3. Document new interaction patterns in widget documentation

@@ -497,6 +497,12 @@ impl Widget for Table {
             return true;
         }
         match key.code {
+            KeyCode::Enter => {
+                self.sort = self.sort.next();
+                self.sort_rows();
+                self.dirty = true;
+                true
+            }
             KeyCode::Char('t') if key.modifiers.is_empty() => {
                 self.cycle_theme();
                 true
@@ -546,6 +552,11 @@ impl Widget for Table {
         let (hh, sh, inner_y) = (3u16, 1u16, 1u16);
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
+                // Check if click is in search input area
+                if row == inner_y && col >= 1 && col < 21 {
+                    let rel_col = col - 1;
+                    return self.search.handle_mouse(kind, rel_col, 0);
+                }
                 if row == inner_y && col >= self.area.width.saturating_sub(14) {
                     self.sort = self.sort.next();
                     self.sort_rows();
