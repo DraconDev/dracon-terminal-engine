@@ -178,7 +178,7 @@ impl Widget for Table {
         p.z_index = 10;
         let (heads, widths, hh, _sh) = (
             ["󰣉 Name", "󰢮 Age", "󰉋 City", "󰠨 Profession"],
-            [12u16, 5, 11, 16],
+            [10u16, 5, 10, 14], // adjusted for row numbers
             3u16,
             1u16,
         );

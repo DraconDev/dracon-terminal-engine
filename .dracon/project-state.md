@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved scrollbar positioning and rendering in the table widget
+Adjusted column widths in the table widget to accommodate row numbers
 
 ## Context
-The table widget's scrollbar rendering needed adjustment to better align with the data area and prevent visual overflow issues.
+The table widget was recently enhanced with row numbers, which required adjusting column widths to maintain proper alignment and visual balance.
 
 ## Completed
-- [x] Fixed scrollbar position to align with right border
-- [x] Adjusted scrollbar height calculation to account for data area
-- [x] Improved scrollbar thumb positioning to prevent rendering outside data area
-- [x] Added bounds checking for scrollbar rendering
+- [x] Updated column widths to [10, 5, 10, 14] to accommodate row numbers
 
 ## In Progress
-- [x] Scrollbar rendering improvements
+- [ ] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify scrollbar behavior with different table sizes
-2. Consider adding scrollbar theming options
+1. Verify visual alignment of table content with new column widths
+2. Consider additional styling adjustments if needed
+```
