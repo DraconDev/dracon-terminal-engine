@@ -146,7 +146,21 @@ impl TreeNav {
             current_path: Vec::new(),
             theme: Theme::default(),
             area: Rect::new(0, 0, 80, 24),
+            show_help: false,
         }
+    }
+
+    fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::nord(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.tree.on_theme_change(&self.theme);
     }
 
     fn item_count(&self) -> usize {
