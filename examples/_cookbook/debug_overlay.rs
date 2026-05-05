@@ -132,6 +132,7 @@ impl DebugOverlayPanel {
             }
         }
     }
+}
 
 impl Widget for DebugOverlayPanel {
     fn id(&self) -> WidgetId {
