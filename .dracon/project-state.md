@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added column sorting functionality to the table widget with mouse interaction support
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file, likely to ensure compatibility with the latest versions of dependencies or to resolve version conflicts.
+This implements the core column sorting functionality that was previously planned but not fully implemented. The change adds the ability to toggle sorting order when clicking column headers and properly handles mouse events for column selection.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Added `toggle_sort` method to handle column sorting logic
+- [x] Implemented `handle_mouse` method to process header clicks
+- [x] Integrated with existing `rebuild_table` mechanism
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] Column sorting implementation with ascending/descending toggle
 
 ## Blockers
-- None reported
+- None identified in this change
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the application to ensure all functionality remains intact
+1. Verify sorting behavior with different data types
+2. Add visual indicators for sorted columns
+3. Document the new sorting API
