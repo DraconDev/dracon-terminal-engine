@@ -282,6 +282,7 @@ impl IdeApp {
             context_menu: None,
             profiler: Profiler::new(WidgetId::new(5)),
             show_profiler: false,
+            show_help: false,
             breadcrumbs,
             command_palette,
             cmd_bridge,

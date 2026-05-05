@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Added a comprehensive help overlay with keyboard shortcut documentation to the IDE example
+Added a help overlay toggle flag to the IDE example
 
 ## Context
-This implements a visual help system that displays keyboard shortcuts in a centered overlay, improving user discoverability of available commands in the IDE example application.
+This change implements the foundation for a help overlay feature in the IDE example, which was previously removed. The toggle flag will enable/disable the help overlay when implemented.
 
 ## Completed
-- [x] Added `render_help_overlay` method to display a centered overlay with keyboard shortcuts
-- [x] Implemented themed styling for the overlay with proper background and text colors
-- [x] Organized shortcuts into logical categories (File, Edit, View, General)
-- [x] Added visual separators and proper spacing between elements
-- [x] Included a closing hint message at the bottom of the overlay
+- [x] Added `show_help` boolean field to `IdeApp` struct
+- [x] Initialized the field to `false` in the struct initialization
 
 ## In Progress
-- [x] Help overlay implementation is complete
+- [ ] Implementation of the actual help overlay UI and functionality
 
 ## Blockers
-- None identified
+- Help overlay UI and keyboard shortcut documentation still needs to be implemented
 
 ## Next Steps
-1. Add keyboard binding to toggle the help overlay
-2. Ensure proper integration with existing IDE functionality
+1. Implement the help overlay UI component
+2. Add keyboard shortcut handling for the help overlay
