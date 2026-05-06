@@ -254,31 +254,6 @@ impl Widget for FileManagerApp {
                 print_info(&mut plane, &size_str, t.warning, &mut info_y);
             }
         }
-            }
-            info_y += 1;
-        };
-
-        print_info(&mut plane, "INFORMATION", t.primary);
-        info_y += 1;
-        print_info(&mut plane, &format!("Items: {}", self.entries.len()), t.fg_muted);
-        if let Some(entry) = self.entries.get(self.selected) {
-            info_y += 1;
-            print_info(&mut plane, &format!("Name: {}", entry.name), t.fg_on_accent);
-            if entry.is_dir {
-                print_info(&mut plane, "Type: Directory", t.info);
-            } else {
-                let size_str = if entry.size < 1024 {
-                    format!("Size: {} B", entry.size)
-                } else if entry.size < 1024 * 1024 {
-                    format!("Size: {} KB", entry.size / 1024)
-                } else if entry.size < 1024 * 1024 * 1024 {
-                    format!("Size: {} MB", entry.size / 1024 / 1024)
-                } else {
-                    format!("Size: {} GB", entry.size / 1024 / 1024 / 1024)
-                };
-                print_info(&mut plane, &size_str, t.warning);
-            }
-        }
 
         // Scrollbar indicator
         if self.entries.len() > self.visible_count {

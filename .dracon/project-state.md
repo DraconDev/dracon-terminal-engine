@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced file manager UI with detailed file information display and improved selection handling
+Removed detailed file information display from the file manager UI
 
 ## Context
-The file manager UI was improved to provide more detailed information about selected files and directories, and to better handle selection scrolling.
+This change removes the file information panel that was previously showing file metadata (name, type, size) when a file was selected. The panel was part of the enhanced UI features added in recent commits.
 
 ## Completed
-- [x] Added detailed file information display in the sidebar
-- [x] Improved file size formatting (B, KB, MB, GB)
-- [x] Updated selection handling to use `scroll_to` instead of `set_selected`
-- [x] Enhanced visual distinction between file types (directories vs files)
+- [x] Removed file information display section from the file manager UI
+- [x] Cleaned up related code structure
 
 ## In Progress
-- [x] Implementation of the new information display system
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Test the new information display with various file types
-2. Verify scroll behavior with large directory listings
+1. Determine if the file information display should be reimplemented in a different way
+2. Review if other UI elements need similar adjustments
