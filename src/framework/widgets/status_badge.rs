@@ -82,6 +82,7 @@ impl StatusBadge {
 
     fn render_badge(&self, text: &str, fg: Color, bg: Color, width: u16) -> Plane {
         let mut plane = Plane::new(0, width, 1);
+        plane.fill_bg(bg);
 
         let content = format!("[{}]", text);
         let max = plane.width.min(content.len() as u16);
