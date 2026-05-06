@@ -1,22 +1,20 @@
 # Project State
 
 ## Current Focus
-Expanded widget test coverage with new widget components and related imports
+Removed redundant `Column` imports from widget tests to reduce test file noise.
 
 ## Context
-The test suite for terminal widgets was being expanded to include more comprehensive coverage of widget interactions and behaviors. This change adds new widget types to the test file and imports necessary dependencies for their testing.
+The `Column` type is already imported in other test functions, making the redundant imports unnecessary. This cleanup maintains functionality while improving test file readability.
 
 ## Completed
-- [x] Added new widget types to test coverage: Form, List, LogViewer, Select, SplitPane, TabBar, Table
-- [x] Added related imports for widget testing: Orientation (for SplitPane), Column (for Table)
-- [x] Maintained existing widget test coverage while expanding to new components
+- [x] Removed duplicate `Column` imports from `test_table_render()` and `test_table_clear_dirty()`
 
 ## In Progress
-- [x] Comprehensive test suite expansion for terminal widgets
+- [x] No active work in progress
 
 ## Blockers
-- None identified in this change
+- None
 
 ## Next Steps
-1. Implement tests for the newly added widget components
-2. Verify all widget interactions work as expected in the test environment
+1. Review other test files for similar redundant imports
+2. Consider standardizing import organization across all test files

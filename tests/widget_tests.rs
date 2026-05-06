@@ -855,7 +855,6 @@ fn test_table_with_theme() {
 
 #[test]
 fn test_table_render() {
-    use dracon_terminal_engine::framework::widgets::table::Column;
     let cols = vec![
         Column {
             header: "Name".to_string(),
@@ -875,7 +874,6 @@ fn test_table_render() {
 
 #[test]
 fn test_table_clear_dirty() {
-    use dracon_terminal_engine::framework::widgets::table::Column;
     let cols = vec![Column {
         header: "Name".to_string(),
         width: 20,
