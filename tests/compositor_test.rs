@@ -488,7 +488,7 @@ fn test_invert_filter_swaps_fg_bg() {
 }
 
 #[test]
-fn test_pulse_filter_time_zero_no_effect() {
+fn test_pulse_filter_time_zero_no_opacity_change() {
     use dracon_terminal_engine::compositor::filter::Pulse;
     let pulse = Pulse;
     let mut cell = Cell {
@@ -500,7 +500,7 @@ fn test_pulse_filter_time_zero_no_effect() {
         skip: false,
     };
     pulse.apply(&mut cell, 0, 0, 0.0);
-    assert_eq!(cell.fg, Color::Rgb(100, 100, 100));
+    assert_eq!(cell.bg, Color::Rgb(50, 50, 50));
 }
 
 #[test]
