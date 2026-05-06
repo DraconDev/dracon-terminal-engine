@@ -1,22 +1,25 @@
 # Project State
 
 ## Current Focus
-Removed theme cycling shortcut from widget tutorial example
+Standardized help overlay implementation across all examples with consistent theme propagation requirements
 
 ## Context
-The widget tutorial was demonstrating theme cycling functionality, but this was moved to a separate feature. The tutorial now focuses on basic widget usage without theme cycling.
+To ensure all examples have consistent user interface patterns and maintainable theming, we're implementing a standardized help overlay pattern that all examples must follow.
 
 ## Completed
-- [x] Removed theme cycling code from widget tutorial
-- [x] Made theme index read-only in tutorial
-- [x] Simplified tutorial to focus on basic widget usage
+- [x] Added mandatory help overlay implementation with `?` toggle and `Esc` dismissal
+- [x] Created standardized help overlay rendering pattern with rounded borders, two-column layout, and proper theme coloring
+- [x] Added comprehensive theme propagation checklist for all widget types
+- [x] Included status bar hint updates for theme and help shortcuts
+- [x] Documented common implementation pitfalls and widget-specific requirements
 
 ## In Progress
-- [ ] None
+- [ ] Implementing help overlays in remaining examples
 
 ## Blockers
-- None
+- Need to verify all examples properly implement the new pattern
 
 ## Next Steps
-1. Update tutorial documentation to reflect changes
-2. Consider adding a separate tutorial for theme cycling
+1. Implement help overlays in remaining examples
+2. Add visual regression tests for help overlay rendering
+3. Document any additional widget-specific theming requirements

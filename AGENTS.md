@@ -225,32 +225,198 @@ If an example shows nothing:
 
 ### Help Overlay Pattern
 
-Many examples use a consistent help overlay (toggle with `?` key):
+All examples MUST implement a help overlay (toggle with `?` key, dismiss with `Esc` or `?`):
+
 ```rust
-fn render_help_overlay(&self, plane: &mut Plane) {
-    let w = 50.min(plane.width);
-    let h = 15.min(plane.height);
-    // Draw centered box with shortcuts
+// In struct:
+show_help: bool,
+
+// In handle_key:
+KeyCode::Char('?') => {
+    self.show_help = !self.show_help;
+    self.dirty = true;
+    true
+}
+KeyCode::Esc => {
+    if self.show_help {
+        self.show_help = false;
+        self.dirty = true;
+        true
+    } else { false }
+}
+
+// In render (drawn last, after main content):
+if self.show_help {
+    let t = &self.theme;
+    let hw = 40u16.min(area.width.saturating_sub(4));
+    let hh = 12u16.min(area.height.saturating_sub(4));
+    let hx = (area.width - hw) / 2;
+    let hy = (area.height - hh) / 2;
+    
+    // Background fill
+    for y in hy..hy + hh {
+        for x in hx..hx + hw {
+            let idx = (y * area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+    
+    // Rounded border
+    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+    for (ch, cx, cy) in corners.iter() {
+        let idx = (cy * area.width + cx) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+    }
+    for x in hx + 1..hx + hw - 1 {
+        let top = (hy * area.width + x) as usize;
+        let bot = ((hy + hh - 1) * area.width + x) as usize;
+        if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+        if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+    }
+    for y in hy + 1..hy + hh - 1 {
+        let left = (y * area.width + hx) as usize;
+        let right = (y * area.width + hx + hw - 1) as usize;
+        if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+        if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+    }
+    
+    // Title (centered, primary color, bold)
+    let title = "Example Help";
+    let tx = hx + (hw - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+        }
+    }
+    
+    // Shortcuts (two columns: keys + descriptions)
+    let shortcuts = [
+        ("↑/↓", "Navigate"),
+        ("Enter", "Select"),
+        ("t", "Cycle theme"),
+        ("?", "Toggle help"),
+        ("q", "Quit"),
+    ];
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = hy + 3 + i as u16;
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * area.width + hx + 2 + j as u16) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * area.width + hx + 14 + j as u16) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+        }
+    }
 }
 ```
-- Toggle: `?` key sets `self.show_help = true`
-- Dismiss: `Esc` or `?` key sets `self.show_help = false`
-- Rendered after main content as overlay
 
-### Theme Cycling
+**Required elements:**
+- `show_help: bool` field in struct
+- `?` key toggles, `Esc` dismisses
+- Rounded corners (╭╮╰╯) with `theme.outline`
+- Background: `theme.surface_elevated`
+- Title centered with `theme.primary` + `Styles::BOLD`
+- Two-column layout: keys (`theme.primary`) + descriptions (`theme.fg`)
 
-Most examples support `t` key to cycle themes:
+### Theme Propagation Checklist
+
+When adding theme cycling to an example, verify ALL child widgets receive the new theme:
+
 ```rust
 fn cycle_theme(&mut self) {
     let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
     let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
     self.theme = themes[(idx + 1) % themes.len()];
-    // Update all widget themes
-    self.menu_bar.on_theme_change(&self.theme);
+    
+    // Propagate to EVERY child widget:
+    self.list.on_theme_change(&self.theme);
     self.search_input.on_theme_change(&self.theme);
-    // ...
+    self.status_bar.on_theme_change(&self.theme);
+    self.table.on_theme_change(&self.theme);
+    self.menu_bar.on_theme_change(&self.theme);
+    // ... any other widgets
 }
 ```
+
+**Common widgets that need propagation:**
+- `List<T>`
+- `Table<T>`
+- `SearchInput` / `PasswordInput`
+- `StatusBar`
+- `MenuBar`
+- `Breadcrumbs`
+- `Tree`
+- `CommandPalette`
+- `Form`
+- `TabBar`
+- `SplitPane` (for divider colors)
+- `Toast` (recreated with `.with_theme()`)
+- Custom sub-widgets
+
+**Status bar hint** must include `t: theme | ?: help`:
+```rust
+StatusSegment::new("Tab: switch | t: theme | ?: help | q: quit")
+```
+
+### Common Pitfalls
+
+1. **`render(&self)` not `render(&mut self)`** — The `Widget` trait requires `fn render(&self, area: Rect) -> Plane`. All mutations must happen in `handle_key`, `handle_mouse`, `set_area`, or `on_theme_change`.
+
+2. **Theme constructors are NOT const** — Cannot use `const THEMES: [Theme; 3] = [Theme::nord(), ...]`. Use runtime arrays:
+   ```rust
+   let themes = vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+   ```
+
+3. **`Plane` has no `transparent` field** — Set `cell.transparent` on individual cells:
+   ```rust
+   for cell in plane.cells.iter_mut() {
+       cell.transparent = false;
+   }
+   ```
+
+4. **`put_str` takes 3 arguments, not 6** — Signature is `fn put_str(&mut self, x: u16, y: u16, text: &str)`. For styled text, manipulate `plane.cells[idx]` directly.
+
+5. **`impl` blocks must be properly closed** — Every `impl MyStruct {` needs a matching `}`. Duplicate `impl` blocks cause "unclosed delimiter" errors that are hard to trace.
+
+6. **Widget-based vs closure-based apps** — Widget-based (Pattern 1) supports theme cycling via `app.set_theme()`. Closure-based (Pattern 2) cannot easily cycle themes because `on_input` only receives `KeyEvent`, not `&mut App`.
+
+### Scrollbar Indicator Pattern
+
+For scrollable content, render a proportional scrollbar thumb:
+
+```rust
+if content_len > visible_count {
+    let sb_x = area.width - 2; // inside right border
+    let content_h = area.height.saturating_sub(header_and_footer);
+    let thumb_h = (visible_count as f32 / content_len as f32 * content_h as f32).max(1.0) as u16;
+    let thumb_y = (scroll_offset as f32 / (content_len - visible_count).max(1) as f32
+        * (content_h - thumb_h) as f32) as u16 + content_start_y;
+    for i in 0..thumb_h {
+        let y = thumb_y + i;
+        if y >= content_start_y && y < content_end_y {
+            let idx = (y * area.width + sb_x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '▐';
+                plane.cells[idx].fg = theme.primary;
+            }
+        }
+    }
+}
+```
+
+**Key values:**
+- Thumb character: `'▐'`
+- Color: `theme.primary`
+- Position: `area.width - 2` (inside border, not on it)
+- Proportional height: `(visible / total) * content_height`
+- Proportional position: `(offset / (total - visible)) * (content_height - thumb_height)`
 
 ### SparklineConfig Pattern
 
