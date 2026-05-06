@@ -128,6 +128,7 @@ impl crate::framework::widget::Widget for Toast {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 90;
+        plane.fill_bg(self.theme.bg);
 
         let prefix = match self.kind {
             ToastKind::Info => "[i]",
