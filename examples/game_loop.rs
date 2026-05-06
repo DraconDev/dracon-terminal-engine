@@ -18,6 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (mut w, mut h) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())?;
     let mut compositor = Compositor::new(w, h);
+    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(16, 16, 24));
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
