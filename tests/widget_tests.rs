@@ -630,7 +630,7 @@ fn test_select_selected_index() {
 
 #[test]
 fn test_select_clear_dirty() {
-    let let mut select = Select::new(WidgetId::default_id());
+    let mut select = Select::new(WidgetId::default_id());
     assert!(select.needs_render());
     select.clear_dirty();
     assert!(!select.needs_render());
