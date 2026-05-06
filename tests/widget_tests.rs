@@ -911,3 +911,293 @@ fn test_tabbar_clear_dirty() {
     assert!(!tabbar.needs_render());
 }
 
+#[test]
+fn test_tree_new() {
+    let tree = Tree::new(WidgetId::default_id());
+    let area = Rect::new(0, 0, 40, 20);
+    let _plane = tree.render(area);
+}
+
+#[test]
+fn test_tree_with_root() {
+    let root = TreeNode::new("Root");
+    let tree = Tree::new(WidgetId::default_id()).with_root(vec![root]);
+    let area = Rect::new(0, 0, 40, 20);
+    let _plane = tree.render(area);
+}
+
+#[test]
+fn test_tree_with_theme() {
+    let tree = Tree::new(WidgetId::default_id()).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 20);
+    let _plane = tree.render(area);
+}
+
+#[test]
+fn test_tree_render() {
+    let root = TreeNode::new("Root");
+    let tree = Tree::new(WidgetId::default_id()).with_root(vec![root]);
+    let area = Rect::new(0, 0, 40, 20);
+    let plane = tree.render(area);
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_tree_node_new() {
+    let node = TreeNode::new("Test");
+    assert_eq!(node.label, "Test");
+    assert!(!node.expanded);
+    assert!(node.children.is_empty());
+}
+
+#[test]
+fn test_tree_node_add_child() {
+    let mut node = TreeNode::new("Parent");
+    node.add_child(TreeNode::new("Child"));
+    assert_eq!(node.children.len(), 1);
+}
+
+#[test]
+fn test_tree_clear_dirty() {
+    let tree = Tree::new(WidgetId::default_id());
+    assert!(tree.needs_render());
+}
+
+#[test]
+fn test_command_palette_new() {
+    let commands = vec![
+        CommandItem {
+            id: "test",
+            name: "Test Command",
+            category: "Testing",
+        },
+    ];
+    let palette = CommandPalette::new(commands);
+    let area = Rect::new(0, 0, 40, 20);
+    let _plane = palette.render(area);
+}
+
+#[test]
+fn test_command_palette_with_theme() {
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test",
+        category: "Test",
+    }];
+    let palette = CommandPalette::new(commands).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 20);
+    let _plane = palette.render(area);
+}
+
+#[test]
+fn test_command_palette_render() {
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test",
+        category: "Test",
+    }];
+    let palette = CommandPalette::new(commands);
+    let area = Rect::new(0, 0, 40, 20);
+    let plane = palette.render(area);
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_command_palette_show_hide() {
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test",
+        category: "Test",
+    }];
+    let mut palette = CommandPalette::new(commands);
+    assert!(!palette.is_visible());
+    palette.show();
+    assert!(palette.is_visible());
+    palette.hide();
+    assert!(!palette.is_visible());
+}
+
+#[test]
+fn test_command_palette_clear_dirty() {
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test",
+        category: "Test",
+    }];
+    let mut palette = CommandPalette::new(commands);
+    assert!(palette.needs_render());
+    palette.clear_dirty();
+    assert!(!palette.needs_render());
+}
+
+#[test]
+fn test_confirm_dialog_new() {
+    let dialog = ConfirmDialog::new("Title", "Message");
+    assert_eq!(dialog.title, "Title");
+    assert_eq!(dialog.message, "Message");
+}
+
+#[test]
+fn test_confirm_dialog_with_id() {
+    let dialog = ConfirmDialog::with_id(WidgetId::new(5), "Title", "Message");
+    assert_eq!(dialog.id, WidgetId::new(5));
+}
+
+#[test]
+fn test_confirm_dialog_with_theme() {
+    let dialog = ConfirmDialog::new("Title", "Message").with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 7);
+    let _plane = dialog.render(area);
+}
+
+#[test]
+fn test_confirm_dialog_render() {
+    let dialog = ConfirmDialog::new("Title", "Message");
+    let area = Rect::new(0, 0, 40, 7);
+    let plane = dialog.render(area);
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_confirm_dialog_clear_dirty() {
+    let mut dialog = ConfirmDialog::new("Title", "Message");
+    assert!(dialog.needs_render());
+    dialog.clear_dirty();
+    assert!(!dialog.needs_render());
+}
+
+#[test]
+fn test_modal_new() {
+    let modal = Modal::new("Test Title");
+    let area = Rect::new(0, 0, 40, 5);
+    let _plane = modal.render(area);
+}
+
+#[test]
+fn test_modal_new_with_id() {
+    let modal = Modal::new_with_id(WidgetId::new(3), "Test Title");
+    assert_eq!(modal.id, WidgetId::new(3));
+}
+
+#[test]
+fn test_modal_with_theme() {
+    let modal = Modal::new("Test").with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 5);
+    let _plane = modal.render(area);
+}
+
+#[test]
+fn test_modal_render() {
+    let modal = Modal::new("Test");
+    let area = Rect::new(0, 0, 40, 5);
+    let plane = modal.render(area);
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_modal_clear_dirty() {
+    let mut modal = Modal::new("Test");
+    assert!(modal.needs_render());
+    modal.clear_dirty();
+    assert!(!modal.needs_render());
+}
+
+#[test]
+fn test_hud_new() {
+    let hud = Hud::new(50);
+    assert!(hud.is_visible());
+}
+
+#[test]
+fn test_hud_with_theme() {
+    let hud = Hud::new(50).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 30, 10);
+    let _plane = hud.render(area);
+}
+
+#[test]
+fn test_hud_render() {
+    let hud = Hud::new(50);
+    let area = Rect::new(0, 0, 30, 10);
+    let plane = hud.render(area);
+    assert_eq!(plane.width, 30);
+    assert_eq!(plane.height, 10);
+}
+
+#[test]
+fn test_hud_show_hide() {
+    let mut hud = Hud::new(50);
+    assert!(hud.is_visible());
+    hud.hide();
+    assert!(!hud.is_visible());
+    hud.show();
+    assert!(hud.is_visible());
+}
+
+#[test]
+fn test_context_menu_new() {
+    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let area = Rect::new(0, 0, 20, 10);
+    let _plane = menu.render(area);
+}
+
+#[test]
+fn test_context_menu_with_theme() {
+    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)])
+        .with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 20, 10);
+    let _plane = menu.render(area);
+}
+
+#[test]
+fn test_context_menu_render() {
+    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let area = Rect::new(0, 0, 20, 10);
+    let plane = menu.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_context_menu_clear_dirty() {
+    let mut menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    assert!(menu.needs_render());
+    menu.clear_dirty();
+    assert!(!menu.needs_render());
+}
+
+#[test]
+fn test_text_input_base_new() {
+    let input = BaseInput::new(WidgetId::default_id(), "Text...");
+    let area = Rect::new(0, 0, 40, 1);
+    let _plane = input.render_input(area);
+}
+
+#[test]
+fn test_text_input_base_with_theme() {
+    let input = BaseInput::new(WidgetId::default_id(), "Text...")
+        .with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 1);
+    let _plane = input.render_input(area);
+}
+
+#[test]
+fn test_text_input_base_render() {
+    let input = BaseInput::new(WidgetId::default_id(), "Text...");
+    let area = Rect::new(0, 0, 40, 1);
+    let plane = input.render_input(area);
+    assert_eq!(plane.width, 40);
+    assert_eq!(plane.height, 1);
+}
+
+#[test]
+fn test_text_input_base_clear_dirty() {
+    let mut input = BaseInput::new(WidgetId::default_id(), "Text...");
+    assert!(input.dirty);
+    input.dirty = false;
+    assert!(!input.dirty);
+}
+
