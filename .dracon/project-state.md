@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Adjust test coordinates for table row selection in event handler tests
+Adjust test coordinates for modal widget mouse click handling in event handler tests
 
 ## Context
-The test for table row selection was updated to ensure correct row selection behavior when handling mouse down events at specific coordinates.
+This change refines test coverage for the Modal widget by updating test coordinates to ensure accurate click detection within the widget's area.
 
 ## Completed
-- [x] Updated test coordinates in `event_handler_test.rs` to verify correct row selection behavior
-- [x] Modified test assertions to match the expected selection indices
+- [x] Updated test coordinates for modal mouse click handling to verify correct button detection
 
 ## In Progress
-- [x] No active work in progress beyond the test adjustment
+- [x] No active work in progress beyond this commit
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify test coverage for other table interaction scenarios
-2. Consider expanding test cases for edge cases in row selection
+1. Review test results to ensure modal click handling behaves as expected
+2. Continue expanding test coverage for other widget interactions

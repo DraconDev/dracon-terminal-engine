@@ -642,8 +642,8 @@ fn test_modal_handle_mouse_click_button() {
     let mut modal = Modal::new("Test?");
     modal.set_area(Rect::new(0, 0, 40, 10));
 
-    let cx = 20;
-    let cy = 8;
+    let cx = 11;
+    let cy = 5;
     let result = modal.handle_mouse(MouseEventKind::Down(MouseButton::Left), cx, cy);
     assert!(result);
 }
