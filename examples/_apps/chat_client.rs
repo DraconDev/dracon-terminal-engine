@@ -690,6 +690,7 @@ fn main() -> io::Result<()> {
         let mut chat = chat_for_render.borrow_mut();
         let (w, h) = ctx.compositor().size();
         chat.area = Rect::new(0, 0, w, h);
+        chat.theme = *ctx.theme();
         ctx.add_plane(render_chat(&chat, Rect::new(0, 0, w, h)));
 
         if chat.show_emoji_modal {
