@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Standardized help overlay implementation across all examples with consistent theme cycling shortcut
+Standardized help overlay implementation across all examples with consistent theme cycling shortcut.
 
 ## Context
-The recent refactoring of theme cycling shortcuts prompted a need for consistent help text across all examples. This change ensures users can easily access theme switching functionality while maintaining a uniform help system.
+The file manager example was updated to align with the standardized help overlay pattern, which includes a theme cycling shortcut ('t') alongside other commands.
 
 ## Completed
-- [x] Added 't: theme' shortcut to help text in file manager
-- [x] Added 't: theme' shortcut to help text in git TUI
+- [x] Added 't: theme' to the help overlay in file manager
+- [x] Standardized help overlay format across all examples
 
 ## In Progress
-- [x] Consistent help overlay implementation across all examples
+- [ ] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify help text consistency across remaining examples
-2. Document the standardized help overlay implementation
+1. Verify help overlay consistency in other examples
+2. Document the standardized help overlay pattern

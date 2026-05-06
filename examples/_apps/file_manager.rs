@@ -926,7 +926,7 @@ fn format_permissions(mode: u32) -> String {
 
 fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
-    println!("? help | c context | r refresh | q quit");
+    println!("t: theme | ?: help | c: context | r: refresh | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
