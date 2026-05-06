@@ -634,8 +634,8 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::nord());
 
-    // Current theme index for cycling
-    let mut current_theme_idx = 0;
+    // Current theme index (read-only for this tutorial)
+    let current_theme_idx = 0;
     let current_theme = themes[current_theme_idx].clone();
 
     // ---- Create multiple ColorPicker instances ----
@@ -707,23 +707,11 @@ fn main() -> std::io::Result<()> {
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 14, 80, 1));
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
 
-    // ---- Theme cycling helper ----
-    let _cycle_theme_fn = || {
-        current_theme_idx = (current_theme_idx + 1) % themes.len();
-        themes[current_theme_idx].clone()
-    };
-
     // ---- Quit support ----
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
     app = app
         .on_input(move |key| {
-            // Handle 't' key for theme cycling
-            if key.code == KeyCode::Char('t') && key.kind == KeyEventKind::Press {
-                // Theme cycling is handled in on_tick
-                return true;
-            }
-            // Handle '?' key for help
             if key.code == KeyCode::Char('?') && key.kind == KeyEventKind::Press {
                 show_help = !show_help;
                 return true;
@@ -739,9 +727,6 @@ fn main() -> std::io::Result<()> {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();
             }
-            // Note: Full theme cycling with widget propagation would require
-            // mutable access to widgets through a separate mechanism.
-            // For this tutorial, theme changes are demonstrated via on_theme_change.
         });
 
     // ---- Run the app ----

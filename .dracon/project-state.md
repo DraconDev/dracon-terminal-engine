@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Removed theme cycling shortcut from the widget tutorial's header label
+Removed theme cycling shortcut from widget tutorial example
 
 ## Context
-The widget tutorial's header label was previously showing a theme cycling shortcut ('t: theme') that wasn't actually implemented in the tutorial. This was causing confusion for users who saw the hint but couldn't use the feature.
+The widget tutorial was demonstrating theme cycling functionality, but this was moved to a separate feature. The tutorial now focuses on basic widget usage without theme cycling.
 
 ## Completed
-- [x] Removed the 't: theme' shortcut hint from the header label
+- [x] Removed theme cycling code from widget tutorial
+- [x] Made theme index read-only in tutorial
+- [x] Simplified tutorial to focus on basic widget usage
 
 ## In Progress
-- [x] None - this was a direct removal of outdated documentation
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify the tutorial still functions correctly without the removed hint
-2. Consider adding proper theme cycling implementation to the tutorial if needed
+1. Update tutorial documentation to reflect changes
+2. Consider adding a separate tutorial for theme cycling
