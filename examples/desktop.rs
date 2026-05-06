@@ -142,6 +142,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let size = (80, 24); // Assume standard or get from ioctl/crossterm if added
     let mut compositor = Compositor::new(size.0, size.1);
+    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(16, 16, 24));
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
