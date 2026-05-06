@@ -243,7 +243,7 @@ mod tests {
     // ===== Comprehensive Interpolation Tests =====
 
     #[test]
-    fn test_easing_linear_at Quarter_half_three_quarter() {
+    fn test_easing_linear_at_quarter_half_three_quarter() {
         let linear = Easing::Linear;
         assert_eq!(Easing::apply_easing(&linear, 0.0), 0.0);
         assert_eq!(Easing::apply_easing(&linear, 0.25), 0.25);
