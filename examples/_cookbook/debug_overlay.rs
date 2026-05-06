@@ -305,6 +305,18 @@ impl Widget for DebugOverlayPanel {
             }
         }
 
+        // Status bar
+        let status_y = plane.height.saturating_sub(1);
+        let hint = "F12: toggle | t: theme | ?: help | q: quit";
+        for (i, c) in hint.chars().take(plane.width as usize.saturating_sub(2)).enumerate() {
+            let idx = (status_y * plane.width + 2 + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.fg_muted;
+                plane.cells[idx].bg = self.theme.surface;
+            }
+        }
+
         // Render help overlay if active
         if self.show_help {
             self.render_help_overlay(&mut plane, area);

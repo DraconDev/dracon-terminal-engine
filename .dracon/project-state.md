@@ -4,20 +4,19 @@
 Added standardized status bars to form and table widgets with keyboard shortcut hints
 
 ## Context
-This implements consistent UI feedback for both form and table widgets, following the pattern established in previous help overlay implementations. The status bars provide immediate visual feedback about available keyboard commands.
+This change implements a consistent status bar display across table and debug overlay widgets, showing keyboard shortcuts and contextual information. It follows the recent pattern of standardizing UI elements across the cookbook examples.
 
 ## Completed
-- [x] Added status bar to form widget showing navigation and action shortcuts
-- [x] Added status bar to table widget showing navigation, selection, and user count
-- [x] Implemented consistent styling using theme colors for both status bars
-- [x] Positioned status bars at bottom of widget area with proper bounds checking
+- [x] Added status bar to table widget showing filter status, row count, and navigation hints
+- [x] Added status bar to debug overlay showing toggle and navigation shortcuts
+- [x] Implemented consistent styling using theme colors for status bars
 
 ## In Progress
-- [x] Status bar implementation for both widget types
+- [x] Standardized status bar implementation across widgets
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify status bar content is complete for all widget types
-2. Ensure status bar doesn't interfere with widget content at small terminal sizes
+1. Verify status bar behavior across different terminal sizes
+2. Consider adding more contextual information to status bars as needed
