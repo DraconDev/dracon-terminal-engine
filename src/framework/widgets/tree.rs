@@ -190,6 +190,7 @@ impl crate::framework::widget::Widget for Tree {
         let mut row = 0usize;
         let hovered = &self.hovered_path;
 
+        #[allow(clippy::too_many_arguments)]
         fn render_node(
             node: &TreeNode,
             prefix: &str,
