@@ -162,6 +162,7 @@ impl Widget for StreamingText {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
 
         if self.lines.is_empty() {
             let msg = "(waiting for input...)";
