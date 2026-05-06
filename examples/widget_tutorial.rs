@@ -38,6 +38,8 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
