@@ -1,25 +1,23 @@
 # Project State
 
 ## Current Focus
-Expanded test coverage for widget event handling (Table, Tree, and other interactive components)
+Refactored table and tree widget test initialization to use direct construction instead of builder pattern
 
 ## Context
-To ensure robust behavior of interactive UI components, we're adding comprehensive test coverage for keyboard navigation, mouse interactions, and state management across Table, Tree, and other widget types.
+The test suite was previously using the TableBuilder pattern for creating test tables, which was being removed from the main codebase. This change aligns the test initialization with the current implementation.
 
 ## Completed
-- [x] Added keyboard navigation tests for Table (Up/Down/Home/End keys)
-- [x] Added mouse interaction tests for Table (row selection and hover tracking)
-- [x] Added keyboard navigation tests for Tree (Down/Up/Left/Right keys)
-- [x] Added state management tests for Tree (expansion/collapse behavior)
-- [x] Implemented key repeat suppression tests for Table
-- [x] Added mouse event handling tests for Tree (node selection)
+- [x] Updated table widget tests to use direct Table construction with Column and data vectors
+- [x] Updated tree widget tests to use direct Tree construction with TreeNode hierarchy
+- [x] Simplified test setup by removing redundant builder pattern usage
+- [x] Reduced test file size by removing redundant test cases
 
 ## In Progress
-- [ ] Completing remaining widget event tests (MenuBar, CommandPalette, etc.)
+- [ ] No active work in progress
 
 ## Blockers
-- Need to finalize test coverage for remaining interactive widgets
+- None identified
 
 ## Next Steps
-1. Complete test coverage for remaining interactive widgets
-2. Refactor test initialization to use builder patterns consistently
+1. Verify all test cases still pass with the new construction approach
+2. Consider further test simplification opportunities

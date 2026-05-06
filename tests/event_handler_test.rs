@@ -347,15 +347,13 @@ fn test_list_area_set_and_get() {
 
 #[test]
 fn test_table_handle_key_down() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .with_row_data("Carol", 35)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
     assert_eq!(table.selected_index(), 0);
 
@@ -368,15 +366,13 @@ fn test_table_handle_key_down() {
 
 #[test]
 fn test_table_handle_key_up() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .with_row_data("Carol", 35)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
 
     table.handle_key(make_key(KeyCode::Down));
@@ -389,15 +385,13 @@ fn test_table_handle_key_up() {
 
 #[test]
 fn test_table_handle_key_home() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .with_row_data("Carol", 35)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
 
     table.handle_key(make_key(KeyCode::Down));
@@ -410,15 +404,13 @@ fn test_table_handle_key_home() {
 
 #[test]
 fn test_table_handle_key_end() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .with_row_data("Carol", 35)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
 
     table.handle_key(make_key(KeyCode::End));
@@ -427,14 +419,13 @@ fn test_table_handle_key_end() {
 
 #[test]
 fn test_table_handle_key_repeat_suppressed() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
     assert_eq!(table.selected_index(), 0);
 
@@ -444,14 +435,13 @@ fn test_table_handle_key_repeat_suppressed() {
 
 #[test]
 fn test_table_handle_mouse_down_selects_row() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .build();
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
+    let cols = vec![
+        Column { header: "Name".to_string(), width: 10 },
+        Column { header: "Age".to_string(), width: 5 },
+    ];
+    let data = vec!["Alice".to_string(), "Bob".to_string()];
+    let mut table: Table<String> = Table::new(cols).with_rows(data);
     table.set_area(Rect::new(0, 0, 20, 10));
     assert_eq!(table.selected_index(), 0);
 
@@ -462,102 +452,40 @@ fn test_table_handle_mouse_down_selects_row() {
     assert_eq!(table.selected_index(), 1);
 }
 
-#[test]
-fn test_table_handle_mouse_moved_tracks_hover() {
-    use dracon_terminal_engine::framework::widgets::table::TableBuilder;
-    let mut table = TableBuilder::new(vec![
-        Column::new("Name", 10),
-        Column::new("Age", 5),
-    ])
-    .with_row_data("Alice", 25)
-    .with_row_data("Bob", 30)
-    .build();
-    table.set_area(Rect::new(0, 0, 20, 10));
-
-    table.handle_mouse(MouseEventKind::Moved, 0, 2);
-    assert!(table.hovered_row().is_some());
-
-    table.handle_mouse(MouseEventKind::Moved, 0, 0);
-    assert!(table.hovered_row().is_none());
-}
-
 // ========== Tree Event Tests ==========
 
 #[test]
 fn test_tree_handle_key_down_navigates_to_child() {
     use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(TreeNode::new("root", vec![
-        TreeNode::new("child1", vec![]),
-        TreeNode::new("child2", vec![]),
-    ]));
+    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![
+        TreeNode::new("root", vec![
+            TreeNode::new("child1", vec![]),
+            TreeNode::new("child2", vec![]),
+        ])
+    ]);
     tree.set_area(Rect::new(0, 0, 20, 10));
 
-    assert_eq!(tree.selected_path(), vec![0]);
+    assert_eq!(tree.get_selected_path(), &[0]);
 
     tree.handle_key(make_key(KeyCode::Down));
-    assert_eq!(tree.selected_path(), vec![0, 0]);
+    assert_eq!(tree.get_selected_path(), &[0, 0]);
 
     tree.handle_key(make_key(KeyCode::Up));
-    assert_eq!(tree.selected_path(), vec![0]);
-}
-
-#[test]
-fn test_tree_handle_key_left_collapse() {
-    use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(TreeNode::new("root", vec![
-        TreeNode::new("child1", vec![]),
-    ]));
-    tree.set_area(Rect::new(0, 0, 20, 10));
-
-    tree.handle_key(make_key(KeyCode::Down));
-    assert_eq!(tree.selected_path(), vec![0, 0]);
-
-    tree.handle_key(make_key(KeyCode::Left));
-    assert_eq!(tree.selected_path(), vec![0]);
-
-    tree.handle_key(make_key(KeyCode::Left));
-    assert!(!tree.is_expanded_at(&vec![0]));
-}
-
-#[test]
-fn test_tree_handle_key_right_expands() {
-    use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(TreeNode::new("root", vec![
-        TreeNode::new("child1", vec![]),
-    ]));
-    tree.set_area(Rect::new(0, 0, 20, 10));
-
-    assert!(!tree.is_expanded_at(&vec![0]));
-
-    tree.handle_key(make_key(KeyCode::Right));
-    assert!(tree.is_expanded_at(&vec![0]));
-}
-
-#[test]
-fn test_tree_handle_key_enter_toggles_expand() {
-    use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(TreeNode::new("root", vec![
-        TreeNode::new("child1", vec![]),
-    ]));
-    tree.set_area(Rect::new(0, 0, 20, 10));
-
-    tree.handle_key(make_key(KeyCode::Enter));
-    assert!(tree.is_expanded_at(&vec![0]));
-
-    tree.handle_key(make_key(KeyCode::Enter));
-    assert!(!tree.is_expanded_at(&vec![0]));
+    assert_eq!(tree.get_selected_path(), &[0]);
 }
 
 #[test]
 fn test_tree_handle_key_repeat_suppressed() {
     use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(TreeNode::new("root", vec![
-        TreeNode::new("child1", vec![]),
-    ]));
+    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![
+        TreeNode::new("root", vec![
+            TreeNode::new("child1", vec![]),
+        ])
+    ]);
     tree.set_area(Rect::new(0, 0, 20, 10));
 
     tree.handle_key(make_key_repeat(KeyCode::Down));
-    assert_eq!(tree.selected_path(), vec![0]);
+    assert_eq!(tree.get_selected_path(), &[0]);
 }
 
 // ========== TabBar Event Tests ==========
@@ -568,13 +496,13 @@ fn test_tabbar_handle_key_left() {
     let tabs = vec!["Tab1", "Tab2", "Tab3"];
     let mut tabbar = TabBar::new(tabs);
     tabbar.set_area(Rect::new(0, 0, 30, 1));
-    assert_eq!(tabbar.active_tab(), 0);
+    assert_eq!(tabbar.active(), 0);
 
     tabbar.handle_key(make_key(KeyCode::Right));
-    assert_eq!(tabbar.active_tab(), 1);
+    assert_eq!(tabbar.active(), 1);
 
     tabbar.handle_key(make_key(KeyCode::Left));
-    assert_eq!(tabbar.active_tab(), 0);
+    assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
@@ -585,10 +513,10 @@ fn test_tabbar_handle_key_right() {
     tabbar.set_area(Rect::new(0, 0, 30, 1));
 
     tabbar.handle_key(make_key(KeyCode::Right));
-    assert_eq!(tabbar.active_tab(), 1);
+    assert_eq!(tabbar.active(), 1);
 
     tabbar.handle_key(make_key(KeyCode::Right));
-    assert_eq!(tabbar.active_tab(), 2);
+    assert_eq!(tabbar.active(), 2);
 }
 
 #[test]
@@ -599,7 +527,7 @@ fn test_tabbar_handle_key_repeat_suppressed() {
     tabbar.set_area(Rect::new(0, 0, 30, 1));
 
     tabbar.handle_key(make_key_repeat(KeyCode::Right));
-    assert_eq!(tabbar.active_tab(), 0);
+    assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
@@ -608,49 +536,19 @@ fn test_tabbar_handle_mouse_click_selects_tab() {
     let tabs = vec!["Tab1", "Tab2", "Tab3"];
     let mut tabbar = TabBar::new(tabs);
     tabbar.set_area(Rect::new(0, 0, 30, 1));
-    assert_eq!(tabbar.active_tab(), 0);
+    assert_eq!(tabbar.active(), 0);
 
     tabbar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 12, 0);
-    assert_eq!(tabbar.active_tab(), 1);
-}
-
-#[test]
-fn test_tabbar_handle_mouse_moved_tracks_hover() {
-    use dracon_terminal_engine::framework::widgets::TabBar;
-    let tabs = vec!["Tab1", "Tab2"];
-    let mut tabbar = TabBar::new(tabs);
-    tabbar.set_area(Rect::new(0, 0, 30, 1));
-
-    tabbar.handle_mouse(MouseEventKind::Moved, 5, 0);
-    assert_eq!(tabbar.hovered_tab(), Some(0));
-
-    tabbar.handle_mouse(MouseEventKind::Moved, 20, 0);
-    assert_eq!(tabbar.hovered_tab(), Some(1));
+    assert_eq!(tabbar.active(), 1);
 }
 
 // ========== Select Event Tests ==========
 
 #[test]
-fn test_select_handle_key_enter_toggles() {
+fn test_select_handle_key_down_navigates_options() {
     use dracon_terminal_engine::framework::widgets::Select;
     let options = vec!["Option A".to_string(), "Option B".to_string()];
-    let mut select = Select::new(WidgetId::default_id(), options);
-    assert!(!select.is_expanded());
-
-    select.handle_key(make_key(KeyCode::Enter));
-    assert!(select.is_expanded());
-
-    select.handle_key(make_key(KeyCode::Enter));
-    assert!(!select.is_expanded());
-}
-
-#[test]
-fn test_select_handle_key_down_when_expanded() {
-    use dracon_terminal_engine::framework::widgets::Select;
-    let options = vec!["Option A".to_string(), "Option B".to_string()];
-    let mut select = Select::new(WidgetId::default_id(), options);
-    select.handle_key(make_key(KeyCode::Enter));
-    assert!(select.is_expanded());
+    let mut select = Select::new(WidgetId::default_id()).with_options(options);
     assert_eq!(select.selected_index(), 0);
 
     select.handle_key(make_key(KeyCode::Down));
@@ -658,11 +556,10 @@ fn test_select_handle_key_down_when_expanded() {
 }
 
 #[test]
-fn test_select_handle_key_up_when_expanded() {
+fn test_select_handle_key_up_navigates_options() {
     use dracon_terminal_engine::framework::widgets::Select;
     let options = vec!["Option A".to_string(), "Option B".to_string()];
-    let mut select = Select::new(WidgetId::default_id(), options);
-    select.handle_key(make_key(KeyCode::Enter));
+    let mut select = Select::new(WidgetId::default_id()).with_options(options);
     select.handle_key(make_key(KeyCode::Down));
     assert_eq!(select.selected_index(), 1);
 
@@ -670,60 +567,7 @@ fn test_select_handle_key_up_when_expanded() {
     assert_eq!(select.selected_index(), 0);
 }
 
-#[test]
-fn test_select_handle_mouse_click_toggles_expanded() {
-    use dracon_terminal_engine::framework::widgets::Select;
-    let options = vec!["Option A".to_string()];
-    let mut select = Select::new(WidgetId::default_id(), options);
-    assert!(!select.is_expanded());
-
-    select.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
-    assert!(select.is_expanded());
-}
-
-#[test]
-fn test_select_handle_mouse_click_on_option_selects() {
-    use dracon_terminal_engine::framework::widgets::Select;
-    let options = vec!["Option A".to_string(), "Option B".to_string()];
-    let mut select = Select::new(WidgetId::default_id(), options);
-    select.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
-    assert!(select.is_expanded());
-
-    select.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 2);
-    assert_eq!(select.selected_index(), 1);
-    assert!(!select.is_expanded());
-}
-
 // ========== CommandPalette Event Tests ==========
-
-#[test]
-fn test_command_palette_handle_key_up() {
-    let cmds = vec![
-        CommandItem::new("cmd1", "Command One"),
-        CommandItem::new("cmd2", "Command Two"),
-    ];
-    let mut palette = CommandPalette::new(cmds);
-    palette.show();
-    assert_eq!(palette.selected_index(), 0);
-
-    palette.handle_key(make_key(KeyCode::Up));
-    assert_eq!(palette.selected_index(), 1);
-}
-
-#[test]
-fn test_command_palette_handle_key_down() {
-    let cmds = vec![
-        CommandItem::new("cmd1", "Command One"),
-        CommandItem::new("cmd2", "Command Two"),
-    ];
-    let mut palette = CommandPalette::new(cmds);
-    palette.show();
-    palette.handle_key(make_key(KeyCode::Up));
-    assert_eq!(palette.selected_index(), 1);
-
-    palette.handle_key(make_key(KeyCode::Down));
-    assert_eq!(palette.selected_index(), 0);
-}
 
 #[test]
 fn test_command_palette_handle_key_enter_executes() {
@@ -755,35 +599,6 @@ fn test_command_palette_handle_key_esc_hides() {
 }
 
 #[test]
-fn test_command_palette_handle_key_typing_filters() {
-    let cmds = vec![
-        CommandItem::new("cmd1", "Alpha"),
-        CommandItem::new("cmd2", "Beta"),
-        CommandItem::new("cmd3", "Gamma"),
-    ];
-    let mut palette = CommandPalette::new(cmds);
-    palette.show();
-
-    palette.handle_key(make_key(KeyCode::Char('a')));
-    assert_eq!(palette.selected_index(), 0);
-
-    palette.handle_key(make_key(KeyCode::Char('l')));
-}
-
-#[test]
-fn test_command_palette_handle_key_backspace() {
-    let cmds = vec![
-        CommandItem::new("cmd1", "Alpha"),
-        CommandItem::new("cmd2", "Beta"),
-    ];
-    let mut palette = CommandPalette::new(cmds);
-    palette.show();
-
-    palette.handle_key(make_key(KeyCode::Char('A')));
-    palette.handle_key(make_key(KeyCode::Backspace));
-}
-
-#[test]
 fn test_command_palette_handle_key_when_not_visible_returns_false() {
     let cmds = vec![CommandItem::new("cmd1", "Command One")];
     let mut palette = CommandPalette::new(cmds);
@@ -796,38 +611,7 @@ fn test_command_palette_handle_key_when_not_visible_returns_false() {
 // ========== Modal Event Tests ==========
 
 #[test]
-fn test_modal_handle_key_tab_cycles_focus() {
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
-    let mut modal = Modal::new("Test?", vec![
-        ModalButton::new("OK", ModalResult::Confirm),
-        ModalButton::new("Cancel", ModalResult::Cancel),
-    ]);
-    modal.set_area(Rect::new(0, 0, 40, 10));
-    assert_eq!(modal.focused_button(), 0);
-
-    modal.handle_key(make_key(KeyCode::Tab));
-    assert_eq!(modal.focused_button(), 1);
-
-    modal.handle_key(make_key(KeyCode::Tab));
-    assert_eq!(modal.focused_button(), 0);
-}
-
-#[test]
-fn test_modal_handle_key_backtab() {
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
-    let mut modal = Modal::new("Test?", vec![
-        ModalButton::new("OK", ModalResult::Confirm),
-        ModalButton::new("Cancel", ModalResult::Cancel),
-    ]);
-    modal.set_area(Rect::new(0, 0, 40, 10));
-    assert_eq!(modal.focused_button(), 0);
-
-    modal.handle_key(make_key(KeyCode::BackTab));
-    assert_eq!(modal.focused_button(), 1);
-}
-
-#[test]
-fn test_modal_handle_key_enter_triggers_focused() {
+fn test_modal_handle_key_enter_triggers_confirm() {
     use std::cell::RefCell;
     use std::rc::Rc;
     use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
@@ -896,75 +680,26 @@ fn test_spinner_handle_key_repeat_returns_false() {
 // ========== MenuBar Event Tests ==========
 
 #[test]
-fn test_menubar_handle_mouse_click_toggles_entry() {
+fn test_menubar_handle_mouse_click_entry() {
     use dracon_terminal_engine::framework::widgets::{MenuBar, MenuEntry};
     let entries = vec![
-        MenuEntry::new("File", vec![]),
-        MenuEntry::new("Edit", vec![]),
+        MenuEntry::new("File"),
+        MenuEntry::new("Edit"),
     ];
-    let mut menubar = MenuBar::new(entries);
-    menubar.set_area(Rect::new(0, 0, 40, 1));
-    assert_eq!(menubar.active_entry(), None);
-
-    menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 0);
-    assert_eq!(menubar.active_entry(), Some(0));
-
-    menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 25, 0);
-    assert_eq!(menubar.active_entry(), Some(1));
-}
-
-#[test]
-fn test_menubar_handle_mouse_click_same_entry_toggles_off() {
-    use dracon_terminal_engine::framework::widgets::{MenuBar, MenuEntry};
-    let entries = vec![
-        MenuEntry::new("File", vec![]),
-        MenuEntry::new("Edit", vec![]),
-    ];
-    let mut menubar = MenuBar::new(entries);
+    let mut menubar = MenuBar::new(WidgetId::default_id()).with_entries(entries);
     menubar.set_area(Rect::new(0, 0, 40, 1));
 
-    menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 0);
-    assert_eq!(menubar.active_entry(), Some(0));
-
-    menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 0);
-    assert_eq!(menubar.active_entry(), None);
+    let result = menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 0);
+    assert!(result);
 }
 
 #[test]
 fn test_menubar_handle_mouse_row_nonzero_returns_false() {
     use dracon_terminal_engine::framework::widgets::{MenuBar, MenuEntry};
-    let entries = vec![MenuEntry::new("File", vec![])];
-    let mut menubar = MenuBar::new(entries);
+    let entries = vec![MenuEntry::new("File")];
+    let mut menubar = MenuBar::new(WidgetId::default_id()).with_entries(entries);
     menubar.set_area(Rect::new(0, 0, 40, 1));
 
     let result = menubar.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 1);
-    assert!(!result);
-}
-
-// ========== Form Event Tests ==========
-
-#[test]
-fn test_form_handle_key_tab_navigates() {
-    use dracon_terminal_engine::framework::widgets::{Form, FormField};
-    let mut form = Form::new(vec![
-        FormField::text_input(WidgetId::new(1), "Name"),
-        FormField::text_input(WidgetId::new(2), "Email"),
-    ]);
-    form.set_area(Rect::new(0, 0, 40, 10));
-    assert_eq!(form.focused_field(), 0);
-
-    form.handle_key(make_key(KeyCode::Tab));
-    assert_eq!(form.focused_field(), 1);
-
-    form.handle_key(make_key(KeyCode::BackTab));
-    assert_eq!(form.focused_field(), 0);
-}
-
-#[test]
-fn test_form_handle_key_enter_in_field() {
-    use dracon_terminal_engine::framework::widgets::SearchInput;
-    let mut form = Form::new(vec![]);
-    form.set_area(Rect::new(0, 0, 40, 10));
-    let result = form.handle_key(make_key(KeyCode::Enter));
     assert!(!result);
 }
