@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added system information retrieval for hostname and CPU core count in the system monitor example.
+Added hostname and CPU core count retrieval to system monitoring
 
 ## Context
-The system monitor example now needs to display basic system information like hostname and CPU core count to provide more context about the monitored system.
+Enhanced system monitoring capabilities by including fundamental system information that's useful for diagnostics and resource management
 
 ## Completed
-- [x] Added `read_hostname()` method to read system hostname from `/proc/sys/kernel/hostname`
-- [x] Added `read_cpu_cores()` method to count CPU cores from `/proc/cpuinfo`
+- [x] Added hostname retrieval to SystemData struct
+- [x] Added CPU core count tracking to SystemData struct
 
 ## In Progress
-- [ ] Integration of these methods into the UI display
+- [x] System information retrieval implementation
 
 ## Blockers
-- UI components need to be updated to display the new system information
+- None identified for this specific change
 
 ## Next Steps
-1. Update the UI to show hostname and CPU core count
-2. Add unit tests for the new methods
+1. Implement display of hostname and CPU core count in the UI
+2. Add unit tests for the new system information retrieval functions

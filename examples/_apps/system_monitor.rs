@@ -75,6 +75,8 @@ struct SystemData {
     uptime_seconds: u64,
     load_avg: (f32, f32, f32),
     processes: Vec<ProcessInfo>,
+    hostname: String,
+    cpu_cores: usize,
     last_cpu_total: u64,
     last_cpu_idle: u64,
     last_disk_read: u64,
