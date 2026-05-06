@@ -574,21 +574,21 @@ fn test_status_badge_clear_dirty() {
 
 #[test]
 fn test_status_bar_new() {
-    let bar = StatusBar::new();
+    let bar = StatusBar::new(WidgetId::default_id());
     let area = Rect::new(0, 0, 80, 1);
     let _plane = bar.render(area);
 }
 
 #[test]
 fn test_status_bar_with_theme() {
-    let bar = StatusBar::new().with_theme(Theme::cyberpunk());
+    let bar = StatusBar::new(WidgetId::default_id()).with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 80, 1);
     let _plane = bar.render(area);
 }
 
 #[test]
 fn test_status_bar_render() {
-    let bar = StatusBar::new();
+    let bar = StatusBar::new(WidgetId::default_id());
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);
     assert_eq!(plane.width, 80);
@@ -597,7 +597,7 @@ fn test_status_bar_render() {
 
 #[test]
 fn test_status_bar_add_segment() {
-    let mut bar = StatusBar::new();
+    let mut bar = StatusBar::new(WidgetId::default_id());
     bar.add_segment(StatusSegment::new("Test segment"));
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);

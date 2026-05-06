@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Added `StatusSegment` widget to widget test coverage
+Added `WidgetId` parameter to `StatusBar::new()` for consistent widget identification
 
 ## Context
-This change expands test coverage for the terminal UI framework by including the newly added `StatusSegment` widget in the widget test suite. It follows recent work on status bar components and maintains consistency with other widget tests.
+This change aligns the `StatusBar` widget with other UI components that require explicit widget IDs for proper rendering and event handling.
 
 ## Completed
-- [x] Added `StatusSegment` to widget test imports
-- [x] Removed `StatusBar` from widget test imports (as it's being replaced by `StatusSegment`)
+- [x] Updated all `StatusBar` test cases to include `WidgetId::default_id()` parameter
+- [x] Maintained existing test functionality while adding the new parameter
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress beyond the current changes
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify all widget tests pass with the new imports
-2. Consider adding specific test cases for `StatusSegment` behavior
+1. Verify the new `WidgetId` parameter doesn't affect existing functionality
+2. Consider whether this pattern should be applied to other widget constructors
