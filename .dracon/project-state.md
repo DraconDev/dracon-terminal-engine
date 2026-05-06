@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added a help overlay with keyboard shortcuts to the desktop example
 
 ## Context
-This change updates the project's dependency versions to ensure compatibility and security. It follows a series of recent documentation improvements and feature additions related to help overlays and theme support in the project's examples.
+The desktop example needed better user guidance. The previous version only had a quit command ('q'), which could be confusing for new users.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock to resolve potential compatibility issues
+- [x] Added help overlay triggered by '?' key
+- [x] Implemented a formatted help display with ASCII borders
+- [x] Added all available keyboard shortcuts to the help
+- [x] Included a pause-after-display feature to prevent accidental dismissal
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [x] Help overlay implementation and testing
 
 ## Blockers
-- None reported for this specific change
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies don't introduce breaking changes
-2. Continue with ongoing documentation and feature development
+1. Test help overlay across different terminal sizes
+2. Consider adding visual indicators for active shortcuts
