@@ -4,21 +4,20 @@
 Standardized help overlay implementation and improved UI rendering across examples
 
 ## Context
-This commit continues the work on standardizing help overlay implementations and improving UI rendering across various examples. The changes focus on simplifying conditional logic and improving the tree widget's hover detection.
+This commit continues the effort to standardize help overlay behavior and improve UI consistency across all examples. The changes address redundant code patterns in help text rendering and key handling.
 
 ## Completed
-- [x] Standardized help overlay implementation across examples with consistent pattern matching
-- [x] Improved tree widget hover detection with `is_some_and` for cleaner code
-- [x] Fixed scrollbar rendering in chat client
-- [x] Simplified conditional logic in file manager and other examples
-- [x] Improved rounded box drawing in IDE example
+- [x] Standardized help overlay implementation across all examples
+- [x] Improved UI rendering for help text in command bindings and split resizer
+- [x] Fixed potential out-of-bounds access in help text rendering
+- [x] Optimized widget positioning calculations in system monitor
 
 ## In Progress
-- [x] Ongoing work to standardize UI components and improve code consistency
+- [ ] No active work in progress
 
 ## Blockers
-- No significant blockers identified
+- None identified
 
 ## Next Steps
-1. Continue standardizing UI components across remaining examples
-2. Review and refine the standardized help overlay implementation
+1. Review and test standardized help behavior across all examples
+2. Address any remaining inconsistencies in help text formatting

@@ -636,7 +636,7 @@ fn main() -> std::io::Result<()> {
 
     // Current theme index (read-only for this tutorial)
     let current_theme_idx = 0;
-    let current_theme = themes[current_theme_idx].clone();
+    let current_theme = themes[current_theme_idx];
 
     // ---- Create multiple ColorPicker instances ----
     //

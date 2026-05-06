@@ -420,7 +420,7 @@ impl Widget for CommandBindings {
             // hint
             let hint = " Press ? to close ";
             for (i, c) in hint.chars().enumerate() {
-                let idx = (hy + help_h - 2) * w + hx + (help_w as usize - hint.len()) / 2 + i;
+                let idx = (hy + help_h - 2) * w + hx + (help_w - hint.len()) / 2 + i;
                 if idx < p.cells.len() {
                     p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
                 }
@@ -456,15 +456,12 @@ impl Widget for CommandBindings {
                 self.dirty = true;
                 true
             }
-            KeyCode::Esc => {
-                if self.show_help {
+            KeyCode::Esc
+                if self.show_help => {
                     self.show_help = false;
                     self.dirty = true;
                     true
-                } else {
-                    false
                 }
-            }
             _ => false,
         }
     }

@@ -435,7 +435,7 @@ impl Widget for SystemMonitor {
         ];
         
         for (i, (label, val, _)) in gauges.iter().enumerate() {
-            let gx = (i as u16 * qw) as u16;
+            let gx = (i as u16 * qw);
             let gcolor = if *val >= 90.0 { t.error } else if *val >= 70.0 { t.warning } else { t.success };
             
             // Card border
@@ -474,7 +474,7 @@ impl Widget for SystemMonitor {
         ];
         
         for (i, hist, color) in sparklines.iter() {
-            let sx = (*i as u16 * qw) + 2;
+            let sx = (*i * qw) + 2;
             render_sparkline(&mut plane, SparklineConfig { x: sx, y: spark_y, w: spark_w, h: spark_h, color: *color, bg: t.bg }, hist);
         }
 
@@ -528,7 +528,7 @@ impl Widget for SystemMonitor {
                     * (content_h - thumb_h) as f32) as u16 + header_y + 1;
                 for i in 0..thumb_h {
                     let y = thumb_y + i;
-                    if y >= header_y + 1 && y < list_y + list_h - 1 {
+                    if y > header_y && y < list_y + list_h - 1 {
                         let idx = (y * area.width + sb_x) as usize;
                         if idx < plane.cells.len() {
                             plane.cells[idx].char = '▐';
