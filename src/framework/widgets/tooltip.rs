@@ -77,6 +77,7 @@ impl crate::framework::widget::Widget for Tooltip {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 100;
+        plane.fill_bg(self.theme.fg);
 
         let lines: Vec<&str> = self.text.lines().collect();
         let max_len = lines.iter().map(|l| l.len()).max().unwrap_or(0);
