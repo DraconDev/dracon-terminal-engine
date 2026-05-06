@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (mut w, mut h) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())?;
     let mut compositor = Compositor::new(w, h);
     let mut parser = Parser::new();
-    let stdin = io::stdin();
+    let mut stdin = io::stdin();
 
     let mut x_pos = 10.0;
     let mut last_tick = Instant::now();
