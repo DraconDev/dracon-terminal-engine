@@ -163,22 +163,40 @@ impl TabbedApp {
     }
 
     fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
-        let theme = match THEMES[self.theme_index] {
-            "dracula" => Theme::dracula(),
-            "nord" => Theme::nord(),
-            _ => Theme::cyberpunk(),
-        };
-        self.tabbar.on_theme_change(&theme);
-        self.dashboard.cpu.on_theme_change(&theme);
-        self.dashboard.memory.on_theme_change(&theme);
-        self.dashboard.disk.on_theme_change(&theme);
-        self.dashboard.network.on_theme_change(&theme);
-        self.logs.list.on_theme_change(&theme);
-        self.settings.theme_select.on_theme_change(&theme);
-        self.settings.notifications.on_theme_change(&theme);
-        self.settings.volume_slider.on_theme_change(&theme);
-        self.stats.grid.on_theme_change(&theme);
+        let themes = [
+            Theme::dark(),
+            Theme::light(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::nord(),
+            Theme::catppuccin_mocha(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+            Theme::solarized_dark(),
+            Theme::solarized_light(),
+            Theme::one_dark(),
+            Theme::rose_pine(),
+            Theme::kanagawa(),
+            Theme::everforest(),
+            Theme::monokai(),
+            Theme::warm(),
+            Theme::cool(),
+            Theme::forest(),
+            Theme::sunset(),
+            Theme::mono(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.tabbar.on_theme_change(&self.theme);
+        self.dashboard.cpu.on_theme_change(&self.theme);
+        self.dashboard.memory.on_theme_change(&self.theme);
+        self.dashboard.disk.on_theme_change(&self.theme);
+        self.dashboard.network.on_theme_change(&self.theme);
+        self.logs.list.on_theme_change(&self.theme);
+        self.settings.theme_select.on_theme_change(&self.theme);
+        self.settings.notifications.on_theme_change(&self.theme);
+        self.settings.volume_slider.on_theme_change(&self.theme);
+        self.stats.grid.on_theme_change(&self.theme);
     }
 
     fn active_tab(&self) -> usize {

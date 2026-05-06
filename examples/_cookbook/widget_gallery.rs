@@ -86,20 +86,31 @@ impl WidgetGallery {
         }
     }
 
-    fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
-        self.theme = match THEMES[self.theme_index] {
-            "nord" => Theme::nord(),
-            "dracula" => Theme::dracula(),
-            "cyberpunk" => Theme::cyberpunk(),
-            "gruvbox-dark" => Theme::gruvbox_dark(),
-            "tokyo-night" => Theme::tokyo_night(),
-            "catppuccin" => Theme::catppuccin_mocha(),
-            "solarized-dark" => Theme::solarized_dark(),
-            "one-dark" => Theme::one_dark(),
-            "rose-pine" => Theme::rose_pine(),
-            _ => Theme::nord(),
-        };
+fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::dark(),
+            Theme::light(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::nord(),
+            Theme::catppuccin_mocha(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+            Theme::solarized_dark(),
+            Theme::solarized_light(),
+            Theme::one_dark(),
+            Theme::rose_pine(),
+            Theme::kanagawa(),
+            Theme::everforest(),
+            Theme::monokai(),
+            Theme::warm(),
+            Theme::cool(),
+            Theme::forest(),
+            Theme::sunset(),
+            Theme::mono(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.checkbox.on_theme_change(&self.theme);
         self.radio.on_theme_change(&self.theme);
         self.slider.on_theme_change(&self.theme);
@@ -109,6 +120,7 @@ impl WidgetGallery {
         self.search.on_theme_change(&self.theme);
         self.progress.on_theme_change(&self.theme);
         self.button.on_theme_change(&self.theme);
+        self.dirty = true;
     }
 
     fn widget_mut(&mut self, slot: usize) -> &mut dyn Widget {
