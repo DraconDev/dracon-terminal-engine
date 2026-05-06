@@ -572,3 +572,113 @@ fn test_cyberpunk_is_dark_kind() {
         dracon_terminal_engine::framework::theme::ThemeKind::Dark
     );
 }
+
+// === warm theme ===
+
+#[test]
+fn test_theme_warm_name() {
+    assert_theme_name(&Theme::warm(), "warm");
+}
+
+#[test]
+fn test_theme_warm_bg() {
+    assert_eq!(Theme::warm().bg, Color::Rgb(28, 26, 24));
+}
+
+#[test]
+fn test_theme_warm_primary() {
+    assert_rgb(&Theme::warm(), "primary", 224, 164, 90);
+}
+
+#[test]
+fn test_theme_warm_secondary() {
+    assert_rgb(&Theme::warm(), "secondary", 94, 199, 178);
+}
+
+// === cool theme ===
+
+#[test]
+fn test_theme_cool_name() {
+    assert_theme_name(&Theme::cool(), "cool");
+}
+
+#[test]
+fn test_theme_cool_bg() {
+    assert_eq!(Theme::cool().bg, Color::Rgb(24, 26, 32));
+}
+
+#[test]
+fn test_theme_cool_primary() {
+    assert_rgb(&Theme::cool(), "primary", 160, 118, 255);
+}
+
+#[test]
+fn test_theme_cool_secondary() {
+    assert_rgb(&Theme::cool(), "secondary", 116, 184, 255);
+}
+
+// === forest theme ===
+
+#[test]
+fn test_theme_forest_name() {
+    assert_theme_name(&Theme::forest(), "forest");
+}
+
+#[test]
+fn test_theme_forest_bg() {
+    assert_eq!(Theme::forest().bg, Color::Rgb(24, 30, 26));
+}
+
+#[test]
+fn test_theme_forest_primary() {
+    assert_rgb(&Theme::forest(), "primary", 126, 196, 102);
+}
+
+#[test]
+fn test_theme_forest_secondary() {
+    assert_rgb(&Theme::forest(), "secondary", 86, 168, 142);
+}
+
+// === sunset theme ===
+
+#[test]
+fn test_theme_sunset_name() {
+    assert_theme_name(&Theme::sunset(), "sunset");
+}
+
+#[test]
+fn test_theme_sunset_bg() {
+    assert_eq!(Theme::sunset().bg, Color::Rgb(32, 24, 26));
+}
+
+#[test]
+fn test_theme_sunset_primary() {
+    assert_rgb(&Theme::sunset(), "primary", 236, 146, 98);
+}
+
+#[test]
+fn test_theme_sunset_secondary() {
+    assert_rgb(&Theme::sunset(), "secondary", 236, 99, 141);
+}
+
+// === mono theme ===
+
+#[test]
+fn test_theme_mono_name() {
+    assert_theme_name(&Theme::mono(), "mono");
+}
+
+#[test]
+fn test_theme_mono_bg() {
+    assert_eq!(Theme::mono().bg, Color::Rgb(26, 28, 32));
+}
+
+#[test]
+fn test_theme_mono_primary() {
+    assert_rgb(&Theme::mono(), "primary", 210, 214, 224);
+}
+
+#[test]
+fn test_theme_mono_secondary() {
+    assert_rgb(&Theme::mono(), "secondary", 162, 172, 188);
+}
