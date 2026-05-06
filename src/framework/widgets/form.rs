@@ -108,6 +108,7 @@ impl crate::framework::widget::Widget for Form {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
+        plane.fill_bg(self.theme.bg);
 
         let width = plane.cells.len() / plane.height as usize;
 
