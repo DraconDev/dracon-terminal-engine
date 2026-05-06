@@ -111,6 +111,7 @@ impl crate::framework::widget::Widget for EventLogger {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 170;
+        plane.fill_bg(self.theme.bg);
 
         let width = plane.cells.len() / plane.height as usize;
 
