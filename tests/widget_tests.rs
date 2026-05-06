@@ -588,3 +588,340 @@ fn test_status_bar_add_segment() {
     let plane = bar.render(area);
     assert!(plane.width > 0);
 }
+
+#[test]
+fn test_select_new() {
+    let select = Select::new(WidgetId::default_id());
+    let area = Rect::new(0, 0, 20, 1);
+    let _plane = select.render(area);
+}
+
+#[test]
+fn test_select_with_options() {
+    let options = vec!["Option A".to_string(), "Option B".to_string()];
+    let select = Select::new(WidgetId::default_id()).with_options(options);
+    let area = Rect::new(0, 0, 20, 1);
+    let _plane = select.render(area);
+}
+
+#[test]
+fn test_select_with_theme() {
+    let select = Select::new(WidgetId::default_id()).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 20, 1);
+    let _plane = select.render(area);
+}
+
+#[test]
+fn test_select_render() {
+    let options = vec!["A".to_string(), "B".to_string()];
+    let select = Select::new(WidgetId::default_id()).with_options(options);
+    let area = Rect::new(0, 0, 20, 1);
+    let plane = select.render(area);
+    assert_eq!(plane.width, 20);
+    assert_eq!(plane.height, 1);
+}
+
+#[test]
+fn test_select_selected_index() {
+    let options = vec!["A".to_string(), "B".to_string()];
+    let select = Select::new(WidgetId::default_id()).with_options(options);
+    assert_eq!(select.selected_index(), 0);
+}
+
+#[test]
+fn test_select_clear_dirty() {
+    let let mut select = Select::new(WidgetId::default_id());
+    assert!(select.needs_render());
+    select.clear_dirty();
+    assert!(!select.needs_render());
+}
+
+#[test]
+fn test_form_new() {
+    let form = Form::new(WidgetId::default_id());
+    let area = Rect::new(0, 0, 40, 10);
+    let _plane = form.render(area);
+}
+
+#[test]
+fn test_form_add_field() {
+    let form = Form::new(WidgetId::default_id()).add_field("Name");
+    let area = Rect::new(0, 0, 40, 10);
+    let plane = form.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_form_with_theme() {
+    let form = Form::new(WidgetId::default_id()).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 10);
+    let _plane = form.render(area);
+}
+
+#[test]
+fn test_form_render() {
+    let form = Form::new(WidgetId::default_id()).add_field("Name");
+    let area = Rect::new(0, 0, 40, 10);
+    let plane = form.render(area);
+    assert_eq!(plane.width, 40);
+    assert_eq!(plane.height, 10);
+}
+
+#[test]
+fn test_form_set_field_value() {
+    let mut form = Form::new(WidgetId::default_id()).add_field("Name");
+    form.set_field_value(0, "Alice");
+    assert_eq!(form.fields[0].value, "Alice");
+}
+
+#[test]
+fn test_form_set_field_error() {
+    let mut form = Form::new(WidgetId::default_id()).add_field("Email");
+    form.set_field_error(0, "Invalid email");
+    assert_eq!(form.fields[0].error, Some("Invalid email".to_string()));
+}
+
+#[test]
+fn test_form_clear_dirty() {
+    let mut form = Form::new(WidgetId::default_id());
+    assert!(form.needs_render());
+    form.clear_dirty();
+    assert!(!form.needs_render());
+}
+
+#[test]
+fn test_log_viewer_new() {
+    let viewer = LogViewer::new();
+    let area = Rect::new(0, 0, 80, 20);
+    let _plane = viewer.render(area);
+}
+
+#[test]
+fn test_log_viewer_with_id() {
+    let viewer = LogViewer::with_id(WidgetId::new(5));
+    assert_eq!(viewer.id, WidgetId::new(5));
+}
+
+#[test]
+fn test_log_viewer_with_theme() {
+    let viewer = LogViewer::new().with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 80, 20);
+    let _plane = viewer.render(area);
+}
+
+#[test]
+fn test_log_viewer_render() {
+    let viewer = LogViewer::new();
+    let area = Rect::new(0, 0, 80, 20);
+    let plane = viewer.render(area);
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 20);
+}
+
+#[test]
+fn test_log_viewer_max_lines() {
+    let viewer = LogViewer::new().max_lines(100);
+    assert_eq!(viewer.max_lines, 100);
+}
+
+#[test]
+fn test_log_viewer_clear_dirty() {
+    let mut viewer = LogViewer::new();
+    assert!(viewer.needs_render());
+    viewer.clear_dirty();
+    assert!(!viewer.needs_render());
+}
+
+#[test]
+fn test_split_pane_new() {
+    let split = SplitPane::new(Orientation::Horizontal);
+    let area = Rect::new(0, 0, 80, 24);
+    let _plane = split.render(area);
+}
+
+#[test]
+fn test_split_pane_new_with_id() {
+    let split = SplitPane::new_with_id(WidgetId::new(3), Orientation::Vertical);
+    assert_eq!(split.id, WidgetId::new(3));
+}
+
+#[test]
+fn test_split_pane_with_theme() {
+    let split = SplitPane::new(Orientation::Horizontal).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 80, 24);
+    let _plane = split.render(area);
+}
+
+#[test]
+fn test_split_pane_render() {
+    let split = SplitPane::new(Orientation::Horizontal);
+    let area = Rect::new(0, 0, 80, 24);
+    let plane = split.render(area);
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_split_pane_ratio() {
+    let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
+    assert_eq!(split.get_ratio(), 0.3);
+}
+
+#[test]
+fn test_split_pane_split_horizontal() {
+    let split = SplitPane::new(Orientation::Horizontal);
+    let area = Rect::new(0, 0, 80, 24);
+    let (left, right) = split.split(area);
+    assert!(left.width > 0);
+    assert!(right.width > 0);
+    assert_eq!(left.width + right.width, 80);
+}
+
+#[test]
+fn test_split_pane_split_vertical() {
+    let split = SplitPane::new(Orientation::Vertical);
+    let area = Rect::new(0, 0, 80, 24);
+    let (top, bottom) = split.split(area);
+    assert!(top.height > 0);
+    assert!(bottom.height > 0);
+    assert_eq!(top.height + bottom.height, 24);
+}
+
+#[test]
+fn test_split_pane_clear_dirty() {
+    let mut split = SplitPane::new(Orientation::Horizontal);
+    assert!(split.needs_render());
+    split.clear_dirty();
+    assert!(!split.needs_render());
+}
+
+#[test]
+fn test_list_new() {
+    let items = vec!["a", "b", "c"];
+    let list = List::new(items);
+    assert_eq!(list.len(), 3);
+}
+
+#[test]
+fn test_list_render() {
+    let items = vec!["Item 1", "Item 2", "Item 3"];
+    let list = List::new(items);
+    let area = Rect::new(0, 0, 40, 10);
+    let plane = list.render(area);
+    assert_eq!(plane.width, 40);
+    assert_eq!(plane.height, 10);
+}
+
+#[test]
+fn test_list_with_theme() {
+    let items = vec!["a", "b"];
+    let list = List::new(items).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 20, 5);
+    let plane = list.render(area);
+    assert_eq!(plane.width, 20);
+}
+
+#[test]
+fn test_list_selected_index() {
+    let items = vec!["a", "b", "c"];
+    let list = List::new(items);
+    assert_eq!(list.selected_index(), 0);
+}
+
+#[test]
+fn test_list_clear_dirty() {
+    let items = vec!["a", "b"];
+    let mut list = List::new(items);
+    assert!(list.needs_render());
+    list.clear_dirty();
+    assert!(!list.needs_render());
+}
+
+#[test]
+fn test_table_new() {
+    let table: Table<String> = Table::new(vec![]);
+    assert_eq!(table.len(), 0);
+}
+
+#[test]
+fn test_table_with_theme() {
+    let table: Table<String> = Table::new(vec![]).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 80, 20);
+    let _plane = table.render(area);
+}
+
+#[test]
+fn test_table_render() {
+    use dracon_terminal_engine::framework::widgets::table::Column;
+    let cols = vec![
+        Column {
+            header: "Name".to_string(),
+            width: 20,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 10,
+        },
+    ];
+    let table: Table<String> = Table::new(cols);
+    let area = Rect::new(0, 0, 80, 20);
+    let plane = table.render(area);
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_table_clear_dirty() {
+    use dracon_terminal_engine::framework::widgets::table::Column;
+    let cols = vec![Column {
+        header: "Name".to_string(),
+        width: 20,
+    }];
+    let mut table: Table<String> = Table::new(cols);
+    assert!(table.needs_render());
+    table.clear_dirty();
+    assert!(!table.needs_render());
+}
+
+#[test]
+fn test_tabbar_new() {
+    let tabs = vec!["Tab A", "Tab B", "Tab C"];
+    let tabbar = TabBar::new(tabs.clone());
+    assert_eq!(tabbar.active(), 0);
+}
+
+#[test]
+fn test_tabbar_with_theme() {
+    let tabs = vec!["Tab A", "Tab B"];
+    let tabbar = TabBar::new(tabs).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 80, 3);
+    let _plane = tabbar.render(area);
+}
+
+#[test]
+fn test_tabbar_render() {
+    let tabs = vec!["Tab A", "Tab B"];
+    let tabbar = TabBar::new(tabs);
+    let area = Rect::new(0, 0, 80, 3);
+    let plane = tabbar.render(area);
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 3);
+}
+
+#[test]
+fn test_tabbar_set_active() {
+    let tabs = vec!["Tab A", "Tab B", "Tab C"];
+    let mut tabbar = TabBar::new(tabs);
+    tabbar.set_active(2);
+    assert_eq!(tabbar.active(), 2);
+}
+
+#[test]
+fn test_tabbar_clear_dirty() {
+    let tabs = vec!["Tab A", "Tab B"];
+    let mut tabbar = TabBar::new(tabs);
+    assert!(tabbar.needs_render());
+    tabbar.clear_dirty();
+    assert!(!tabbar.needs_render());
+}
+
