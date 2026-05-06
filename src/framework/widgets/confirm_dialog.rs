@@ -200,6 +200,7 @@ impl Widget for ConfirmDialog {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
 
         let border_fg = if self.danger {
             self.theme.error
