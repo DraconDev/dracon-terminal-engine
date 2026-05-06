@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Added documentation for raw terminal examples demonstrating low-level engine internals.
+Added documentation for shared state patterns in agent-based applications
 
 ## Context
-The project includes several examples that intentionally use raw terminal/compositor APIs to showcase engine internals. This documentation clarifies their purpose and implementation details.
+The project needs clear guidance on how to manage shared state between input handlers and render loops in agent-based applications, particularly when using the InputRouter pattern.
 
 ## Completed
-- [x] Added section documenting raw terminal examples (`desktop.rs`, `game_loop.rs`, `input_debug.rs`)
-- [x] Included code snippet showing help overlay implementation using direct terminal writes
-- [x] Explained that these examples bypass the framework for demonstration purposes
+- [x] Added Bridge Pattern documentation for shared state management
+- [x] Documented Rc<RefCell> usage for non-atomic shared state
+- [x] Added Arc<AtomicBool> example for atomic shared state
+- [x] Included practical code examples for help overlay toggling
 
 ## In Progress
-- [ ] None
+- [ ] None (documentation complete)
 
 ## Blockers
-- None
+- None (documentation is self-contained)
 
 ## Next Steps
-1. Review and expand documentation for other low-level examples if needed
-2. Consider adding more examples demonstrating different engine internals
+1. Review for consistency with other documentation patterns
+2. Add examples for more complex shared state scenarios

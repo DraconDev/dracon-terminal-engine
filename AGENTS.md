@@ -215,6 +215,41 @@ app.on_tick(move |ctx, _| {
 - Use **Pattern 1** (Widget trait) for simpler apps where App framework handles render scheduling
 - Use **Pattern 2** (InputRouter) when you need app-level control over render timing or shared state across ticks
 
+### Bridge Pattern for Shared State (Pattern 2)
+
+Pattern 2 apps (using `on_input`/`on_tick` closures) cannot access app state directly from `on_input` callbacks. Use `Rc<RefCell<T>>` to share state between closures:
+
+```rust
+// Shared state via Rc<RefCell>
+let show_help = Rc::new(RefCell::new(false));
+let show_help_input = Rc::clone(&show_help);
+let show_help_render = Rc::clone(&show_help);
+
+// In on_input closure:
+.on_input(move |key| {
+    if key.code == KeyCode::Char('?') && key.kind == KeyEventKind::Press {
+        let mut h = show_help_input.borrow_mut();
+        *h = !*h;
+        return true;
+    }
+    // ...
+})
+
+// In on_tick or run closure:
+app.run(move |ctx| {
+    if *show_help_render.borrow() {
+        // render help overlay via ctx.add_plane()
+    }
+})
+```
+
+For atomic shared state (e.g., toggling between `on_input` and `on_tick`):
+```rust
+let show_help = Arc::new(AtomicBool::new(false));
+let show_help_input = Arc::clone(&show_help);
+let show_help_render = Arc::clone(&show_help);
+```
+
 ### Blank Screen Debugging
 
 If an example shows nothing:
