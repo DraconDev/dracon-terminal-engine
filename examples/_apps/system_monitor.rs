@@ -97,6 +97,8 @@ impl SystemData {
             uptime_seconds: 0,
             load_avg: (0.0, 0.0, 0.0),
             processes: Vec::new(),
+            hostname: "localhost".to_string(),
+            cpu_cores: 1,
             last_cpu_total: 0,
             last_cpu_idle: 0,
             last_disk_read: 0,
@@ -115,6 +117,8 @@ impl SystemData {
         self.net_hist.push(nr + nt);
         self.uptime_seconds = self.read_uptime();
         self.load_avg = self.read_load_avg();
+        self.hostname = self.read_hostname();
+        self.cpu_cores = self.read_cpu_cores();
         self.read_processes();
     }
 
