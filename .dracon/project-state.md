@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Standardized help text formatting in the command bindings example
+Standardized help text formatting in the split resizer example
 
 ## Context
-This change continues the effort to standardize help text formatting across all examples, ensuring consistency in user interface elements.
+This follows a series of recent commits standardizing help text formatting across various examples. The split resizer example was updated to match the consistent format established in other examples.
 
 ## Completed
-- [x] Updated the status bar help text in command_bindings.rs to use consistent formatting (e.g., "t: theme" instead of "t=theme")
+- [x] Updated help text in split resizer example to match standardized format
+- [x] Added theme cycling shortcut ('t') to help text
+- [x] Added help shortcut ('?') to help text
+- [x] Improved visual consistency with other examples
 
 ## In Progress
-- [x] No active work in progress for this specific change
+- [ ] None (this was a focused formatting update)
 
 ## Blockers
-- None identified for this specific change
+- None (this was a straightforward formatting update)
 
 ## Next Steps
-1. Verify the standardized formatting appears correctly in the command bindings example
-2. Continue applying standardized formatting to other examples as part of the broader effort
+1. Review other examples for remaining help text inconsistencies
+2. Consider adding help overlay standardization to the split resizer example
