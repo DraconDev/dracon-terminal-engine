@@ -455,7 +455,7 @@ fn test_table_handle_mouse_down_selects_row() {
 // ========== Tree Event Tests ==========
 
 #[test]
-fn test_tree_handle_key_down_navigates_to_child() {
+fn test_tree_handle_key_right_expands_and_navigates() {
     let mut child1 = TreeNode::new("child1");
     let mut child2 = TreeNode::new("child2");
     let mut root = TreeNode::new("root");
@@ -467,7 +467,7 @@ fn test_tree_handle_key_down_navigates_to_child() {
     tree.set_selected_path(vec![0]);
     assert_eq!(tree.get_selected_path(), &[0]);
 
-    tree.handle_key(make_key(KeyCode::Down));
+    tree.handle_key(make_key(KeyCode::Right));
     assert_eq!(tree.get_selected_path(), &[0, 0]);
 
     tree.handle_key(make_key(KeyCode::Up));
