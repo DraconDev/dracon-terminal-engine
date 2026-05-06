@@ -1,23 +1,22 @@
 # Project State
 
 ## Current Focus
-Added help overlay visibility control to the theme switcher example
+Refactored help overlay visibility control in the theme switcher example
 
 ## Context
-This change implements the help overlay functionality that was previously added as a feature. It connects the help overlay widget to the application's state management system, allowing it to be shown/hidden based on user interaction.
+The theme switcher example needed a more robust way to control help overlay visibility. The previous boolean flag was replaced with an atomic boolean for thread-safe access, which is important for UI components that might be accessed from multiple threads.
 
 ## Completed
-- [x] Added `show_help` atomic boolean to track help overlay state
-- [x] Integrated help overlay widget into the application
-- [x] Implemented tick handler to update help overlay visibility
-- [x] Connected help overlay to the application's dirty state system
+- [x] Replaced simple boolean visibility flag with thread-safe `Arc<AtomicBool>`
+- [x] Updated `needs_render` to check the atomic boolean with `SeqCst` ordering
+- [x] Maintained all existing functionality while improving thread safety
 
 ## In Progress
-- [x] Help overlay visibility control is now fully functional
+- [ ] None - this change is complete
 
 ## Blockers
-- None identified for this specific change
+- None - this is a straightforward refactoring
 
 ## Next Steps
-1. Verify help overlay appears/disappears correctly when triggered
-2. Test keyboard shortcut integration with the help overlay
+1. Verify the help overlay still works correctly with the new visibility control
+2. Ensure the keyboard shortcuts for toggling help still function properly

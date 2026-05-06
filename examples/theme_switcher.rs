@@ -846,15 +846,15 @@ impl Widget for WidgetDemoPanel {
 // Help Overlay widget
 struct HelpOverlay {
     id: WidgetId,
-    visible: bool,
+    show_help: Arc<AtomicBool>,
     area: std::cell::Cell<Rect>,
 }
 
 impl HelpOverlay {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, show_help: Arc<AtomicBool>) -> Self {
         Self {
             id,
-            visible: false,
+            show_help,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
@@ -866,7 +866,7 @@ impl Widget for HelpOverlay {
     fn area(&self) -> Rect { self.area.get() }
     fn set_area(&mut self, area: Rect) { self.area.set(area); }
     fn z_index(&self) -> u16 { 200 }
-    fn needs_render(&self) -> bool { self.visible }
+    fn needs_render(&self) -> bool { self.show_help.load(Ordering::SeqCst) }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool { false }
