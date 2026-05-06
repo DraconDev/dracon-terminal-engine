@@ -544,12 +544,13 @@ fn test_tabbar_handle_mouse_click_selects_tab() {
 // ========== Select Event Tests ==========
 
 #[test]
-fn test_select_handle_key_down_navigates_options() {
+fn test_select_handle_key_enter_toggles_expanded() {
     use dracon_terminal_engine::framework::widgets::Select;
     let options = vec!["Option A".to_string(), "Option B".to_string()];
     let mut select = Select::new(WidgetId::default_id()).with_options(options);
     assert_eq!(select.selected_index(), 0);
 
+    select.handle_key(make_key(KeyCode::Enter));
     select.handle_key(make_key(KeyCode::Down));
     assert_eq!(select.selected_index(), 1);
 }
@@ -559,6 +560,7 @@ fn test_select_handle_key_up_navigates_options() {
     use dracon_terminal_engine::framework::widgets::Select;
     let options = vec!["Option A".to_string(), "Option B".to_string()];
     let mut select = Select::new(WidgetId::default_id()).with_options(options);
+    select.handle_key(make_key(KeyCode::Enter));
     select.handle_key(make_key(KeyCode::Down));
     assert_eq!(select.selected_index(), 1);
 
