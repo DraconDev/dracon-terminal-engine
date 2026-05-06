@@ -221,7 +221,7 @@ impl Widget for FileManagerApp {
         let info_x = main_rect.width + 2;
         let info_w = side_rect.width.saturating_sub(3);
 
-        let mut print_info = |plane: &mut Plane, text: &str, fg: Color, y: &mut u16| {
+        let print_info = |plane: &mut Plane, text: &str, fg: Color, y: &mut u16| {
             for (i, c) in text.chars().take(info_w as usize).enumerate() {
                 let idx = (*y * area.width + info_x + i as u16) as usize;
                 if idx < plane.cells.len() {

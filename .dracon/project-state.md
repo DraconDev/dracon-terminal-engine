@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Refactored the file information display helper in the file manager UI.
 
 ## Context
-This change updates the dependency versions in the project's lockfile. It's part of ongoing maintenance to ensure the project uses the latest compatible versions of dependencies.
+This change was part of ongoing UI improvements for the file manager. The helper function for printing file information was modified to remove unnecessary mutability, making the code cleaner and more predictable.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Removed unnecessary `mut` from the `print_info` closure parameter
+- [x] Simplified the helper function signature while maintaining functionality
 
 ## In Progress
-- [x] Dependency version management
+- [x] Refactoring of file information display components
 
 ## Blockers
-- None reported
+- None identified
 
 ## Next Steps
-1. Verify that the new dependency versions don't introduce breaking changes
-2. Test the application with the updated dependencies
+1. Verify the refactored code maintains the same visual output
+2. Continue UI improvements for the file manager
