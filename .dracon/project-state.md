@@ -1,22 +1,22 @@
 # Project State
 
 ## Current Focus
-Enhance CI checks and standardize status bar rendering across examples
+Added documentation for raw terminal examples demonstrating low-level engine internals.
 
 ## Context
-The changes improve code quality and consistency in status bar rendering across different examples. The CI workflow now enforces stricter clippy warnings, and the status bar rendering has been standardized to prevent potential overflow issues.
+The project includes several examples that intentionally use raw terminal/compositor APIs to showcase engine internals. This documentation clarifies their purpose and implementation details.
 
 ## Completed
-- [x] Added stricter clippy checks in CI to enforce warning-free builds
-- [x] Standardized status bar rendering across examples to prevent potential overflow issues
-- [x] Fixed potential integer overflow in status bar character rendering
+- [x] Added section documenting raw terminal examples (`desktop.rs`, `game_loop.rs`, `input_debug.rs`)
+- [x] Included code snippet showing help overlay implementation using direct terminal writes
+- [x] Explained that these examples bypass the framework for demonstration purposes
 
 ## In Progress
-- [x] No active work in progress
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the standardized status bar rendering works across all examples
-2. Consider adding more examples to the standardized pattern
+1. Review and expand documentation for other low-level examples if needed
+2. Consider adding more examples demonstrating different engine internals

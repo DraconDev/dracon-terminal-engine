@@ -571,6 +571,26 @@ A filterable command overlay widget:
 - Uses `ScopedZoneRegistry<usize>` for mouse dispatch (click outside detection, item clicks)
 - Renders with semi-transparent backdrop
 
+## Raw Terminal Examples (Low-Level Demos)
+
+Some examples (`desktop.rs`, `game_loop.rs`, `input_debug.rs`) deliberately use raw terminal/compositor APIs instead of the framework. These are intentionally low-level to demonstrate engine internals. They still implement help overlays via simple `write!` calls:
+
+```rust
+// In the main loop, after polling input:
+if let Some(Event::Key(KeyEvent { code: KeyCode::Char('?'), .. })) = parser.advance(byte) {
+    show_help = !show_help;
+}
+// During render:
+if show_help {
+    write!(term, "\x1b[2J\x1b[H")?;
+    write!(term, "╭────────────────────────────────────────────╮\r\n")?;
+    write!(term, "│  q          — Quit                         │\r\n")?;
+    write!(term, "│  ?          — Toggle this help              │\r\n")?;
+    write!(term, "╰────────────────────────────────────────────╯\r\n")?;
+    term.flush()?;
+}
+```
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:
