@@ -456,15 +456,15 @@ fn test_table_handle_mouse_down_selects_row() {
 
 #[test]
 fn test_tree_handle_key_down_navigates_to_child() {
-    use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![
-        TreeNode::new("root", vec![
-            TreeNode::new("child1", vec![]),
-            TreeNode::new("child2", vec![]),
-        ])
-    ]);
+    let mut child1 = TreeNode::new("child1");
+    let mut child2 = TreeNode::new("child2");
+    let mut root = TreeNode::new("root");
+    root.add_child(child1);
+    root.add_child(child2);
+    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![root]);
     tree.set_area(Rect::new(0, 0, 20, 10));
 
+    tree.set_selected_path(vec![0]);
     assert_eq!(tree.get_selected_path(), &[0]);
 
     tree.handle_key(make_key(KeyCode::Down));
@@ -476,12 +476,13 @@ fn test_tree_handle_key_down_navigates_to_child() {
 
 #[test]
 fn test_tree_handle_key_repeat_suppressed() {
-    let mut child = TreeNode::new("child1");
+    let child = TreeNode::new("child1");
     let mut root = TreeNode::new("root");
     root.add_child(child);
     let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![root]);
     tree.set_area(Rect::new(0, 0, 20, 10));
 
+    tree.set_selected_path(vec![0]);
     tree.handle_key(make_key_repeat(KeyCode::Down));
     assert_eq!(tree.get_selected_path(), &[0]);
 }
@@ -572,8 +573,8 @@ fn test_command_palette_handle_key_enter_executes() {
     use std::cell::RefCell;
     use std::rc::Rc;
     let cmds = vec![
-        CommandItem::new("cmd1", "Command One"),
-        CommandItem::new("cmd2", "Command Two"),
+        CommandItem { id: "cmd1", name: "Command One", category: "test" },
+        CommandItem { id: "cmd2", name: "Command Two", category: "test" },
     ];
     let mut palette = CommandPalette::new(cmds);
     let executed = Rc::new(RefCell::new(None));
@@ -587,7 +588,7 @@ fn test_command_palette_handle_key_enter_executes() {
 
 #[test]
 fn test_command_palette_handle_key_esc_hides() {
-    let cmds = vec![CommandItem::new("cmd1", "Command One")];
+    let cmds = vec![CommandItem { id: "cmd1", name: "Command One", category: "test" }];
     let mut palette = CommandPalette::new(cmds);
     palette.show();
     assert!(palette.is_visible());
@@ -598,7 +599,7 @@ fn test_command_palette_handle_key_esc_hides() {
 
 #[test]
 fn test_command_palette_handle_key_when_not_visible_returns_false() {
-    let cmds = vec![CommandItem::new("cmd1", "Command One")];
+    let cmds = vec![CommandItem { id: "cmd1", name: "Command One", category: "test" }];
     let mut palette = CommandPalette::new(cmds);
     assert!(!palette.is_visible());
 
