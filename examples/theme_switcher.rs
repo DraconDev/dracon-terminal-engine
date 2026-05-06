@@ -963,7 +963,7 @@ fn main() -> Result<()> {
 
     let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
 
-    let header = ThemeHeader::new(WidgetId::new(1), should_quit, show_help);
+    let header = ThemeHeader::new(WidgetId::new(1), should_quit, show_help.clone());
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 0, 80, 3));
 
     let tracking = TrackingWidget::new(WidgetId::new(2));
