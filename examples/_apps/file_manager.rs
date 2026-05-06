@@ -562,7 +562,7 @@ impl Widget for FileManager {
                     .with_fg(t.fg_muted),
             )
             .add_segment(
-                StatusSegment::new("? help | c context | r refresh | q quit").with_fg(t.primary),
+                StatusSegment::new("t: theme | ?: help | c: context | r: refresh | q: quit").with_fg(t.primary),
             );
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
         for (i, c) in status_plane.cells.iter().enumerate() {

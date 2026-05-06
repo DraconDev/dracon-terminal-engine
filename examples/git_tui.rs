@@ -91,7 +91,7 @@ impl GitTui {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("1-4: views | r: refresh | ?: help | q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new("1-4: views | t: theme | r: refresh | ?: help | q: quit").with_fg(theme.fg_muted),
             );
 
         let mut app = Self {

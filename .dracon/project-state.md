@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Standardized help overlay implementation across all examples with consistent theme cycling shortcut
 
 ## Context
-This change was triggered by recent feature implementations and refactoring in the file manager UI, which required updated dependencies. The Cargo.lock file was modified to reflect the latest dependency versions.
+The recent refactoring of theme cycling shortcuts prompted a need for consistent help text across all examples. This change ensures users can easily access theme switching functionality while maintaining a uniform help system.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect current dependency versions
+- [x] Added 't: theme' shortcut to help text in file manager
+- [x] Added 't: theme' shortcut to help text in git TUI
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Consistent help overlay implementation across all examples
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with ongoing UI improvements and feature development
+1. Verify help text consistency across remaining examples
+2. Document the standardized help overlay implementation
