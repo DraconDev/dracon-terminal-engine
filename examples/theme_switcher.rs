@@ -289,6 +289,19 @@ impl Widget for ThemeHeader {
         if let KeyCode::Char('q') = key.code {
             self.should_quit.store(true, Ordering::SeqCst);
             true
+        } else if let KeyCode::Char('?') = key.code {
+            let new_val = !self.show_help.load(Ordering::SeqCst);
+            self.show_help.store(new_val, Ordering::SeqCst);
+            self.dirty = true;
+            true
+        } else if let KeyCode::Esc = key.code {
+            if self.show_help.load(Ordering::SeqCst) {
+                self.show_help.store(false, Ordering::SeqCst);
+                self.dirty = true;
+                true
+            } else {
+                false
+            }
         } else if let KeyCode::Char('t') = key.code {
             cycle_theme();
             self.dirty = true;

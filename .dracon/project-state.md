@@ -1,24 +1,22 @@
 # Project State
 
 ## Current Focus
-Added a standardized help overlay widget to the theme switcher example
+Added keyboard shortcuts for help overlay in the theme switcher example
 
 ## Context
-The theme switcher example needed a consistent help display mechanism to show keyboard shortcuts and usage instructions. This follows the pattern established in other examples for better user experience.
+The theme switcher example now needs consistent help overlay behavior across all examples. This change implements keyboard shortcuts to toggle the help overlay, improving user experience.
 
 ## Completed
-- [x] Implemented HelpOverlay widget with modal-style display
-- [x] Added keyboard shortcut reference in the help overlay
-- [x] Integrated with existing theme system for consistent styling
-- [x] Added proper z-indexing to ensure overlay appears above other content
-- [x] Implemented responsive sizing that adapts to terminal dimensions
+- [x] Added '?' key to toggle help overlay visibility
+- [x] Added Esc key to close help overlay when visible
+- [x] Maintained existing 'q' key for quit functionality
 
 ## In Progress
-- [x] Help overlay implementation is complete
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify help overlay works across different terminal sizes
-2. Consider adding more detailed help content for other examples
+1. Verify help overlay behavior across all examples
+2. Document the new keyboard shortcuts in the example's help text
