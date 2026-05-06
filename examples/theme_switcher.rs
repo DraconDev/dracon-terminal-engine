@@ -196,15 +196,17 @@ struct ThemeHeader {
     area: std::cell::Cell<Rect>,
     dirty: bool,
     should_quit: Arc<AtomicBool>,
+    show_help: Arc<AtomicBool>,
 }
 
 impl ThemeHeader {
-    fn new(id: WidgetId, should_quit: Arc<AtomicBool>) -> Self {
+    fn new(id: WidgetId, should_quit: Arc<AtomicBool>, show_help: Arc<AtomicBool>) -> Self {
         Self {
             id,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 3)),
             dirty: true,
             should_quit,
+            show_help,
         }
     }
 }
@@ -825,6 +827,118 @@ impl Widget for WidgetDemoPanel {
 
     fn on_theme_change(&mut self, _theme: &Theme) {
         self.dirty = true;
+    }
+}
+
+// Help Overlay widget
+struct HelpOverlay {
+    id: WidgetId,
+    visible: bool,
+    area: std::cell::Cell<Rect>,
+}
+
+impl HelpOverlay {
+    fn new(id: WidgetId) -> Self {
+        Self {
+            id,
+            visible: false,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+        }
+    }
+}
+
+impl Widget for HelpOverlay {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area.get() }
+    fn set_area(&mut self, area: Rect) { self.area.set(area); }
+    fn z_index(&self) -> u16 { 200 }
+    fn needs_render(&self) -> bool { self.visible }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { false }
+
+    fn render(&self, area: Rect) -> Plane {
+        let mut plane = Plane::new(0, area.width, area.height);
+        plane.z_index = 200;
+        let t = get_current_theme();
+
+        // Dim background
+        for cell in plane.cells.iter_mut() {
+            cell.bg = t.bg;
+            cell.fg = t.fg;
+            cell.transparent = false;
+        }
+
+        // Centered help box
+        let hw = 44u16.min(area.width.saturating_sub(4));
+        let hh = 14u16.min(area.height.saturating_sub(4));
+        let hx = (area.width - hw) / 2;
+        let hy = (area.height - hh) / 2;
+
+        // Background fill
+        for y in hy..hy + hh {
+            for x in hx..hx + hw {
+                let idx = (y * area.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        // Rounded border
+        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        for (ch, cx, cy) in corners.iter() {
+            let idx = (cy * area.width + cx) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+        }
+        for x in hx + 1..hx + hw - 1 {
+            let top = (hy * area.width + x) as usize;
+            let bot = ((hy + hh - 1) * area.width + x) as usize;
+            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+        }
+        for y in hy + 1..hy + hh - 1 {
+            let left = (y * area.width + hx) as usize;
+            let right = (y * area.width + hx + hw - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+        }
+
+        // Title
+        let title = "Theme Switcher Help";
+        let tx = hx + (hw - title.len() as u16) / 2;
+        for (i, c) in title.chars().enumerate() {
+            let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].style = Styles::BOLD;
+            }
+        }
+
+        // Shortcuts
+        let shortcuts = [
+            ("t", "Cycle theme"),
+            ("↑/↓", "Navigate (if applicable)"),
+            ("?", "Toggle help"),
+            ("Esc", "Dismiss help"),
+            ("q", "Quit"),
+        ];
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = hy + 3 + i as u16;
+            for (j, c) in key.chars().enumerate() {
+                let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+            }
+            for (j, c) in desc.chars().enumerate() {
+                let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+            }
+        }
+
+        plane
     }
 }
 

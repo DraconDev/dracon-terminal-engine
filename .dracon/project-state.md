@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Added theme cycling functionality to the modal demo app
+Added a standardized help overlay widget to the theme switcher example
 
 ## Context
-This change enables users to cycle through different themes in the modal demo application, enhancing visual customization options.
+The theme switcher example needed a consistent help display mechanism to show keyboard shortcuts and usage instructions. This follows the pattern established in other examples for better user experience.
 
 ## Completed
-- [x] Added keyboard shortcut ('t') to cycle themes
-- [x] Updated toast widget to use the current theme
-- [x] Integrated theme cycling with existing theme support
+- [x] Implemented HelpOverlay widget with modal-style display
+- [x] Added keyboard shortcut reference in the help overlay
+- [x] Integrated with existing theme system for consistent styling
+- [x] Added proper z-indexing to ensure overlay appears above other content
+- [x] Implemented responsive sizing that adapts to terminal dimensions
 
 ## In Progress
-- [x] Theme cycling implementation
+- [x] Help overlay implementation is complete
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Test theme cycling across different modal states
-2. Document the new theme cycling feature in the demo app
+1. Verify help overlay works across different terminal sizes
+2. Consider adding more detailed help content for other examples
