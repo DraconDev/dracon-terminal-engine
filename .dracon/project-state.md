@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved theme display in the widget gallery by showing the theme name instead of an index.
+Removed theme index tracking from widget gallery to simplify theme management.
 
 ## Context
-The widget gallery previously displayed themes using an index (THEMES[self.theme_index]), which was less informative. This change makes the UI more user-friendly by showing the actual theme name.
+The widget gallery was previously tracking a theme index, which was redundant since the theme object itself was already being stored. This change simplifies the component by removing unnecessary state.
 
 ## Completed
-- [x] Replaced theme index display with theme name display in the widget gallery header
-- [x] Removed unnecessary dirty flag update in theme cycle function
+- [x] Removed redundant `theme_index` field from `WidgetGallery` struct
+- [x] Removed initialization of `theme_index` in widget gallery constructor
 
 ## In Progress
-- [x] Theme display improvements in the widget gallery
+- [x] Theme management is now handled solely through the `theme` field
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify theme name display works consistently across all themes
-2. Consider adding theme preview functionality in the widget gallery
+1. Verify theme switching functionality remains consistent
+2. Consider if other examples should follow similar simplification patterns
