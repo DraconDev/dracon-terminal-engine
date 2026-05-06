@@ -39,18 +39,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
                 for &byte in &buf[..n] {
-                    if let Some(event) = parser.advance(byte) {
-                        if let Event::Key(KeyEvent { code, .. }) = event {
-                            match code {
-                                KeyCode::Char('q') => {
-                                    write!(term, "\x1b[?25h")?;
-                                    return Ok(());
-                                }
-                                KeyCode::Char('?') => {
-                                    show_help = !show_help;
-                                }
-                                _ => {}
+                    if let Some(Event::Key(KeyEvent { code: KeyCode::Char(c), .. })) = parser.advance(byte) {
+                        match c {
+                            'q' => {
+                                write!(term, "\x1b[?25h")?;
+                                return Ok(());
                             }
+                            '?' => {
+                                show_help = !show_help;
+                            }
+                            _ => {}
                         }
                     }
                 }
