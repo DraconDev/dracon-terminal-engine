@@ -1164,3 +1164,186 @@ fn test_context_menu_clear_dirty() {
     assert!(!menu.needs_render());
 }
 
+#[test]
+fn test_toast_new() {
+    let toast = Toast::new(WidgetId::new(1), "Hello");
+    assert_eq!(toast.message(), "Hello");
+}
+
+#[test]
+fn test_toast_with_kind() {
+    let toast = Toast::new(WidgetId::new(1), "Error").with_kind(ToastKind::Error);
+    let area = Rect::new(0, 0, 40, 1);
+    let _plane = toast.render(area);
+}
+
+#[test]
+fn test_toast_with_theme() {
+    let toast = Toast::new(WidgetId::new(1), "Test").with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 40, 1);
+    let _plane = toast.render(area);
+}
+
+#[test]
+fn test_toast_render() {
+    let toast = Toast::new(WidgetId::new(1), "Hello");
+    let area = Rect::new(0, 0, 40, 1);
+    let plane = toast.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_toast_not_expired_immediately() {
+    let toast = Toast::new(WidgetId::new(1), "Hello");
+    assert!(!toast.is_expired());
+}
+
+#[test]
+fn test_tooltip_new() {
+    let tooltip = Tooltip::new(WidgetId::new(1), "Hint");
+    assert_eq!(tooltip.text(), "Hint");
+}
+
+#[test]
+fn test_tooltip_with_theme() {
+    let tooltip = Tooltip::new(WidgetId::new(1), "Hint").with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 30, 3);
+    let _plane = tooltip.render(area);
+}
+
+#[test]
+fn test_tooltip_render() {
+    let tooltip = Tooltip::new(WidgetId::new(1), "Hint");
+    let area = Rect::new(0, 0, 30, 3);
+    let plane = tooltip.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_tooltip_z_index() {
+    let tooltip = Tooltip::new(WidgetId::new(1), "Hint");
+    assert_eq!(tooltip.z_index(), 100);
+}
+
+#[test]
+fn test_menu_bar_new() {
+    let menu_bar = MenuBar::new(WidgetId::new(1));
+    let area = Rect::new(0, 0, 80, 1);
+    let _plane = menu_bar.render(area);
+}
+
+#[test]
+fn test_menu_bar_with_theme() {
+    let menu_bar = MenuBar::new(WidgetId::new(1)).with_theme(Theme::cyberpunk());
+    let area = Rect::new(0, 0, 80, 1);
+    let _plane = menu_bar.render(area);
+}
+
+#[test]
+fn test_menu_bar_render() {
+    let menu_bar = MenuBar::new(WidgetId::new(1));
+    let area = Rect::new(0, 0, 80, 1);
+    let plane = menu_bar.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_menu_bar_add_entry() {
+    let mut menu_bar = MenuBar::new(WidgetId::new(1));
+    let entry = MenuEntry::new("File").add_item(MenuItem::new("Open"));
+    menu_bar.add_entry(entry);
+    let area = Rect::new(0, 0, 80, 1);
+    let plane = menu_bar.render(area);
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_menu_bar_clear_dirty() {
+    let mut menu_bar = MenuBar::new(WidgetId::new(1));
+    assert!(menu_bar.needs_render());
+    menu_bar.clear_dirty();
+    assert!(!menu_bar.needs_render());
+}
+
+#[test]
+fn test_menu_item_new() {
+    let item = MenuItem::new("Open");
+    assert!(item.enabled);
+}
+
+#[test]
+fn test_menu_item_with_enabled() {
+    let item = MenuItem::new("Open").with_enabled(false);
+    assert!(!item.enabled);
+}
+
+#[test]
+fn test_all_themes_have_unique_names() {
+    let themes = vec![
+        Theme::dark(),
+        Theme::light(),
+        Theme::cyberpunk(),
+        Theme::dracula(),
+        Theme::nord(),
+        Theme::catppuccin_mocha(),
+        Theme::gruvbox_dark(),
+        Theme::tokyo_night(),
+        Theme::solarized_dark(),
+        Theme::solarized_light(),
+        Theme::one_dark(),
+        Theme::rose_pine(),
+        Theme::kanagawa(),
+        Theme::everforest(),
+        Theme::monokai(),
+        Theme::warm(),
+        Theme::cool(),
+        Theme::forest(),
+        Theme::sunset(),
+        Theme::mono(),
+    ];
+    let mut names: Vec<&str> = themes.iter().map(|t| t.name).collect();
+    names.sort();
+    names.dedup();
+    assert_eq!(names.len(), 20, "Expected 20 unique theme names");
+}
+
+#[test]
+fn test_all_themes_are_dark_or_light() {
+    let themes = vec![
+        Theme::dark(),
+        Theme::light(),
+        Theme::cyberpunk(),
+        Theme::dracula(),
+        Theme::nord(),
+        Theme::catppuccin_mocha(),
+        Theme::gruvbox_dark(),
+        Theme::tokyo_night(),
+        Theme::solarized_dark(),
+        Theme::solarized_light(),
+        Theme::one_dark(),
+        Theme::rose_pine(),
+        Theme::kanagawa(),
+        Theme::everforest(),
+        Theme::monokai(),
+        Theme::warm(),
+        Theme::cool(),
+        Theme::forest(),
+        Theme::sunset(),
+        Theme::mono(),
+    ];
+    for theme in themes {
+        assert!(
+            theme.kind == dracon_terminal_engine::framework::theme::ThemeKind::Dark
+                || theme.kind == dracon_terminal_engine::framework::theme::ThemeKind::Light,
+            "Theme '{}' must be Dark or Light",
+            theme.name
+        );
+    }
+}
+
+#[test]
+fn test_theme_dark_is_default() {
+    let default = Theme::default();
+    assert_eq!(default.name, "dark");
+}
+
