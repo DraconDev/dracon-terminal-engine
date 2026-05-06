@@ -165,6 +165,7 @@ struct ModalDemoApp<'a> {
     help_btn: Button,
     area: Rect,
     should_quit: Arc<AtomicBool>,
+    theme: Theme,
 }
 
 impl<'a> ModalDemoApp<'a> {
