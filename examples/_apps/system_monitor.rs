@@ -435,7 +435,7 @@ impl Widget for SystemMonitor {
         ];
         
         for (i, (label, val, _)) in gauges.iter().enumerate() {
-            let gx = (i as u16 * qw);
+            let gx = i as u16 * qw;
             let gcolor = if *val >= 90.0 { t.error } else if *val >= 70.0 { t.warning } else { t.success };
             
             // Card border
