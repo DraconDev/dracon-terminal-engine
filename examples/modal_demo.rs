@@ -451,6 +451,22 @@ fn main() -> io::Result<()> {
             ctx.add_plane(toast.render(toast_area));
             demo.show_save_toast = false;
         }
+
+        // Status bar
+        let mut status_plane = Plane::new(0, w, 1);
+        status_plane.set_absolute_position(0, h.saturating_sub(1));
+        status_plane.set_z_index(1000);
+        let t = demo.theme;
+        let hint = "t: theme | ?: help | Enter: confirm | q: quit";
+        for (i, c) in hint.chars().take(w as usize).enumerate() {
+            if i < status_plane.cells.len() {
+                status_plane.cells[i].char = c;
+                status_plane.cells[i].fg = t.fg_muted;
+                status_plane.cells[i].bg = t.surface;
+                status_plane.cells[i].transparent = false;
+            }
+        }
+        ctx.add_plane(status_plane);
     })?;
 
     eprintln!("\nModal demo exited cleanly");
