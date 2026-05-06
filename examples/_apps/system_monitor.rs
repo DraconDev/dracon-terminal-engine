@@ -333,13 +333,19 @@ impl SystemMonitor {
     fn update_gauges(&mut self) {
         let cpu = self.data.cpu_hist.current();
         let mem = self.data.mem_hist.current();
+        let disk = self.data.disk_hist.current();
+        let net = self.data.net_hist.current();
         self.cpu_gauge.set_value(cpu);
         self.mem_gauge.set_value(mem);
+        self.disk_gauge.set_value(disk);
+        self.net_gauge.set_value(net);
 
         let cpu_status = if cpu >= 80.0 { "HIGH CPU" } else if cpu >= 50.0 { "MODERATE" } else { "Normal" };
-        let mem_pct = mem;
-        let mem_status = if mem_pct >= 90.0 { "HIGH MEM" } else { "Normal" };
-        let status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" { "WARNING" } else if cpu_status == "MODERATE" { "CAUTION" } else { "HEALTHY" };
+        let mem_status = if mem >= 90.0 { "HIGH MEM" } else { "Normal" };
+        let disk_status = if disk >= 75.0 { "HIGH I/O" } else { "Normal" };
+        let net_status = if net >= 80.0 { "HIGH NET" } else { "Normal" };
+        let status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" || disk_status == "HIGH I/O" || net_status == "HIGH NET" { "WARNING" }
+            else if cpu_status == "MODERATE" { "CAUTION" } else { "HEALTHY" };
         self.status_badge.set_status(status);
     }
 }

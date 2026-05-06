@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Enhanced system monitoring with disk and network utilization tracking
 
 ## Context
-This change updates the dependency versions in the Cargo.lock file to ensure the project uses the latest compatible versions of its dependencies. This is a routine maintenance task to keep the project's dependencies up-to-date.
+The system monitor was previously only tracking CPU and memory usage. This change adds disk I/O and network throughput monitoring to provide a more comprehensive system health overview.
 
 ## Completed
-- [x] Updated dependency versions in Cargo.lock
+- [x] Added disk utilization gauge and status check
+- [x] Added network throughput gauge and status check
+- [x] Expanded system health status to include disk and network thresholds
+- [x] Updated status badge logic to consider all four metrics
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Implementation of enhanced monitoring features
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Test the project with the new dependency versions to ensure stability
+1. Verify threshold values for disk and network metrics
+2. Add visualization for historical trends of all metrics
