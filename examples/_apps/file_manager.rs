@@ -396,6 +396,19 @@ impl Widget for FileManager {
         // Split pane
         let (tree_rect, _detail_rect) = self.split.split(Rect::new(0, hh, area.width, content_h));
 
+        // Fill tree area with surface background first
+        for row in hh..hh + tree_rect.height {
+            for col in 0..tree_rect.width {
+                let idx = (row * area.width + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].transparent = false;
+                    plane.cells[idx].char = ' ';
+                }
+            }
+        }
+
         // Tree
         let tree_plane = self.tree.render(tree_rect);
         for (i, c) in tree_plane.cells.iter().enumerate() {
