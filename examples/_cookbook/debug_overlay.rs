@@ -33,8 +33,6 @@ use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;
 
-const THEMES: [&str; 3] = ["dark", "nord", "dracula"];
-
 struct DebugOverlayPanel {
     id: WidgetId,
     profiler: Profiler,
@@ -42,7 +40,6 @@ struct DebugOverlayPanel {
     event_logger: EventLogger,
     visible: bool,
     theme: Theme,
-    theme_index: usize,
     show_help: bool,
 }
 
@@ -55,7 +52,6 @@ impl DebugOverlayPanel {
             event_logger: EventLogger::new(WidgetId::new(170)),
             visible: false,
             theme,
-            theme_index: 0,
             show_help: false,
         }
     }
@@ -65,12 +61,30 @@ impl DebugOverlayPanel {
     }
 
     fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
-        self.theme = match THEMES[self.theme_index] {
-            "nord" => Theme::nord(),
-            "dracula" => Theme::dracula(),
-            _ => Theme::dark(),
-        };
+        let themes = [
+            Theme::dark(),
+            Theme::light(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::nord(),
+            Theme::catppuccin_mocha(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+            Theme::solarized_dark(),
+            Theme::solarized_light(),
+            Theme::one_dark(),
+            Theme::rose_pine(),
+            Theme::kanagawa(),
+            Theme::everforest(),
+            Theme::monokai(),
+            Theme::warm(),
+            Theme::cool(),
+            Theme::forest(),
+            Theme::sunset(),
+            Theme::mono(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         // Propagate theme to all child widgets
         self.profiler.on_theme_change(&self.theme);
         self.inspector.on_theme_change(&self.theme);

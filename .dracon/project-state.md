@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Expanded theme rotation system across example applications with 19 available themes.
+Expanded theme rotation system across example applications with 19 available themes
 
 ## Context
-This change enhances the theme customization capabilities by adding more color schemes to both the form widget and IDE examples, providing users with greater visual customization options.
+This change standardizes theme rotation across the cookbook examples by consolidating theme cycling logic and adding more theme options.
 
 ## Completed
-- [x] Added 19 new themes to the theme rotation system in both form widget and IDE examples
-- [x] Updated theme cycling logic to include all available themes
-- [x] Maintained consistent theme change handling across both examples
+- [x] Added 19 theme options (dark, light, cyberpunk, dracula, nord, catppuccin_mocha, gruvbox_dark, tokyo_night, solarized_dark, solarized_light, one_dark, rose_pine, kanagawa, everforest, monokai, warm, cool, forest, sunset, mono) to both data_table and debug_overlay examples
+- [x] Refactored theme cycling to use consistent logic in both examples
+- [x] Removed hardcoded theme array from debug_overlay
+- [x] Added theme propagation to child widgets when cycling
 
 ## In Progress
-- [ ] None (all changes are complete)
+- [x] Theme rotation implementation across all cookbook examples
 
 ## Blockers
-- None (all theme additions are implemented)
+- None identified
 
 ## Next Steps
-1. Verify theme consistency across all example applications
-2. Consider adding theme persistence for user preferences
+1. Verify theme propagation works correctly in all child widgets
+2. Document the expanded theme system in the cookbook examples
