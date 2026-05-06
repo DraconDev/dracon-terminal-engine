@@ -112,7 +112,6 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
 
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
-        plane.fill_bg(self.theme.bg);
 
         let mut buf = Buffer::empty(area);
         (&self.editor).render(area, &mut buf);
