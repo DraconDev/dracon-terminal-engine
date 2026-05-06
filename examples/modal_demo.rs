@@ -255,6 +255,10 @@ impl<'a> ModalDemoApp<'a> {
                 self.should_quit.store(true, Ordering::SeqCst);
                 true
             }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
+                true
+            }
             KeyCode::Char('?') => {
                 self.help_visible = true;
                 true
@@ -441,7 +445,7 @@ fn main() -> io::Result<()> {
             let toast = Toast::new(WidgetId::new(200), &demo.toast_message)
                 .with_kind(ToastKind::Success)
                 .with_duration(Duration::from_secs(2))
-                .with_theme(Theme::dark());
+                .with_theme(demo.theme);
 
             let toast_area = Rect::new((w.saturating_sub(40)) / 2, h.saturating_sub(3), 40, 1);
             ctx.add_plane(toast.render(toast_area));
