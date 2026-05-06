@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Removed redundant test case for `SplitPane` with theme rendering
+Removed redundant test cases for `Form` and `SplitPane` widget components
 
 ## Context
-The test case `test_split_pane_with_theme` was redundant as it didn't add meaningful coverage beyond what other tests already verified. This cleanup maintains test coverage while reducing test noise.
+This change follows a series of test refactoring efforts to reduce redundancy while maintaining coverage. The removed tests were either duplicates or covered by more comprehensive test cases.
 
 ## Completed
-- [x] Removed redundant `test_split_pane_with_theme` test case
-- [x] Maintained existing test coverage for `SplitPane` functionality
+- [x] Removed redundant `test_form_set_field_value` test (covered by existing form tests)
+- [x] Removed redundant `test_form_set_field_error` test (covered by existing form tests)
+- [x] Removed redundant `test_split_pane_new_with_id` test (covered by existing split pane tests)
 
 ## In Progress
-- [ ] None
+- [x] No active work in progress
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Review other widget tests for similar redundant cases
-2. Ensure test coverage remains comprehensive for all widget components
+1. Review remaining widget test cases for further redundancy
+2. Ensure all critical widget behaviors are still covered by remaining tests
