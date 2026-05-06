@@ -197,6 +197,7 @@ impl Widget for KeyValueGrid {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
 
         let alt_bg = self.theme.surface;
         let key_fg = self.theme.fg;
