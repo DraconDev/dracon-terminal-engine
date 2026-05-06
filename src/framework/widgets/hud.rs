@@ -201,13 +201,19 @@ impl crate::framework::widget::Widget for Hud {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index as i32;
 
-        if !self.visible {
+        if self.visible {
+            plane.fill_bg(self.theme.bg);
+        } else {
             for cell in &mut plane.cells {
                 cell.transparent = true;
             }
         }
 
         plane
+    }
+
+    fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
+        self.theme = *theme;
     }
 
     fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
