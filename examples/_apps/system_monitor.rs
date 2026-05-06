@@ -574,12 +574,15 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
     if w < 3 || h < 2 { return; }
-    let (border, _bg) = (t.outline, t.surface);
+    let (border, bg) = (t.outline, t.surface);
     for row in y..y+h {
         for col in x..x+w {
             let idx = (row * plane.width + col) as usize;
             if idx >= plane.cells.len() { continue; }
-            plane.cells[idx].char = ' '; plane.cells[idx].fg = t.fg;
+            let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
+            plane.cells[idx].bg = bg;
+            plane.cells[idx].fg = if is_border { border } else { t.fg };
+            plane.cells[idx].char = ' ';
         }
     }
 
