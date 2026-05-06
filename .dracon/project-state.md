@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Standardized debug overlay background color to use theme background instead of terminal reset
+feat(scroll): make scroll container background transparent
 
 ## Context
-This change aligns the debug overlay's background color with the application theme, ensuring consistency across different UI components.
+This change aligns scroll containers with the theme's background by making them transparent, improving visual consistency across the UI.
 
 ## Completed
-- [x] Changed debug overlay background from `Color::Reset` to `self.theme.bg`
+- [x] changed scroll container background from opaque to transparent
 
 ## In Progress
-- [x] No active work in progress
+- [x] none
 
 ## Blockers
-- None
+- none
 
 ## Next Steps
-1. Verify visual consistency across different themes
-2. Ensure no unintended side effects with transparent background rendering
+1. verify visual consistency across all themes
+2. test scroll performance with transparent backgrounds
+```

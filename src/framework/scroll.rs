@@ -222,7 +222,7 @@ impl ScrollContainer {
                     },
                     bg: Color::Reset,
                     style: Styles::empty(),
-                    transparent: false,
+                    transparent: true,
                     skip: false,
                 };
             }
