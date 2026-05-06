@@ -122,6 +122,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
+        plane.fill_bg(self.theme.bg);
 
         let mut x: u16 = 0;
 
