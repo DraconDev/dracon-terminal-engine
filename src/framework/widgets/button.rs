@@ -91,6 +91,7 @@ impl crate::framework::widget::Widget for Button {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
+        plane.fill_bg(self.theme.bg);
 
         let display = if self.label.is_empty() {
             "Button"
