@@ -476,12 +476,10 @@ fn test_tree_handle_key_down_navigates_to_child() {
 
 #[test]
 fn test_tree_handle_key_repeat_suppressed() {
-    use dracon_terminal_engine::framework::widgets::TreeNode;
-    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![
-        TreeNode::new("root", vec![
-            TreeNode::new("child1", vec![]),
-        ])
-    ]);
+    let mut child = TreeNode::new("child1");
+    let mut root = TreeNode::new("root");
+    root.add_child(child);
+    let mut tree = Tree::new(WidgetId::default_id()).with_root(vec![root]);
     tree.set_area(Rect::new(0, 0, 20, 10));
 
     tree.handle_key(make_key_repeat(KeyCode::Down));
