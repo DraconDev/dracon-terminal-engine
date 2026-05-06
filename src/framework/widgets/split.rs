@@ -151,7 +151,6 @@ impl SplitPane {
         for cell in &mut plane.cells {
             cell.char = self.divider_char;
             cell.fg = self.divider_color;
-            cell.bg = Color::Reset;
             cell.style = Styles::empty();
             cell.transparent = false;
             cell.skip = false;
