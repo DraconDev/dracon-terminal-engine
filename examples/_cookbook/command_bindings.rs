@@ -336,7 +336,7 @@ impl Widget for CommandBindings {
 
         // ── Status bar ──
         let auto_str = if self.paused { "⏸ PAUSED" } else { "▶ RUNNING" };
-        let status = format!("  {}  |  tick: {}  |  t=theme  ?=help  q=quit", auto_str, self.tick);
+        let status = format!("  {}  |  tick: {}  |  t: theme | ?: help | q: quit", auto_str, self.tick);
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
