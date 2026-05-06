@@ -715,7 +715,8 @@ fn main() -> std::io::Result<()> {
     app = app
         .on_input(move |key| {
             if key.code == KeyCode::Char('?') && key.kind == KeyEventKind::Press {
-                show_help = !show_help;
+                let mut h = show_help_input.borrow_mut();
+                *h = !*h;
                 return true;
             }
             if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
@@ -740,8 +741,92 @@ fn main() -> std::io::Result<()> {
     // - Responds to window resize
     //
     // The closure is called each frame (render callback).
-    // We don't use it because widgets self-manage via the render loop.
-    app.run(|_ctx| {})
+    // We render the help overlay here when visible.
+    let current_theme_for_help = current_theme;
+    app.run(move |ctx| {
+        if *show_help_render.borrow() {
+            let (w, h) = ctx.compositor().size();
+            let mut plane = Plane::new(0, w, h);
+            plane.z_index = 200;
+            let t = current_theme_for_help;
+
+            // Dim background
+            for cell in plane.cells.iter_mut() {
+                cell.bg = t.bg;
+                cell.transparent = false;
+            }
+
+            // Centered help box
+            let hw = 46u16.min(w.saturating_sub(4));
+            let hh = 12u16.min(h.saturating_sub(4));
+            let hx = (w - hw) / 2;
+            let hy = (h - hh) / 2;
+
+            // Background fill
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * w + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+
+            // Rounded border
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * w + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * w + x) as usize;
+                let bot = ((hy + hh - 1) * w + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * w + hx) as usize;
+                let right = (y * w + hx + hw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+
+            // Title
+            let title = "Widget Tutorial Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * w + tx + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+
+            // Shortcuts
+            let shortcuts = [
+                ("←/→", "Change color"),
+                ("Enter/Click", "Cycle color"),
+                ("Tab", "Navigate widgets"),
+                ("?", "Toggle help"),
+                ("q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * w + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * w + hx + 18 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
+            }
+
+            ctx.add_plane(plane);
+        }
+    })
 }
 
 // ============================================================================

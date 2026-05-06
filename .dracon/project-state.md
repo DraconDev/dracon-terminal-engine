@@ -1,22 +1,25 @@
 # Project State
 
 ## Current Focus
-Refactored help overlay visibility control in the theme switcher example to use shared state.
+Added a standardized help overlay with keyboard shortcuts to the widget tutorial
 
 ## Context
-The help overlay visibility was previously managed with a simple boolean flag, which limited its use across different closures. This change introduces shared state using `Rc<RefCell<bool>>` to allow the help overlay to be controlled from multiple places in the code.
+The widget tutorial needed a consistent help system that shows keyboard shortcuts and can be toggled with '?'
 
 ## Completed
-- [x] Refactored help overlay visibility to use shared state with `Rc<RefCell<bool>>`
-- [x] Updated footer text to include new keyboard shortcuts (t: theme, q: quit)
-- [x] Ensured proper ownership of the shared state across closures
+- [x] Added help overlay that appears when '?' is pressed
+- [x] Implemented dimmed background and centered help box
+- [x] Added rounded border with proper corner characters
+- [x] Included all keyboard shortcuts in the help overlay
+- [x] Made help overlay responsive to window size changes
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the shared state works correctly across all closures
-2. Consider adding more keyboard shortcuts for the help overlay
+1. Add more detailed help content for each widget type
+2. Improve help overlay styling for different themes
+```
