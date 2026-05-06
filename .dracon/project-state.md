@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored compositor test to improve clarity in pulse filter behavior
+Expanded compositor testing with comprehensive plane and cell behavior verification
 
 ## Context
-The change modifies the `Glitch` filter test to better demonstrate its deterministic behavior at the same time, replacing the previous probabilistic assertion with explicit equality checks.
+The compositor test was enhanced to verify hit testing behavior across multiple planes with different positions and opacities, ensuring correct z-order and visibility handling.
 
 ## Completed
-- [x] Renamed test function to clarify it's testing deterministic behavior
-- [x] Changed test logic to explicitly verify cell equality at same time
-- [x] Updated Cargo.lock to reflect dependency changes
+- [x] Added comprehensive hit test assertions for multiple planes at different positions
+- [x] Updated Cargo.lock to reflect consistent background color implementation
 
 ## In Progress
-- [x] No active work in progress beyond the described changes
+- [x] Comprehensive compositor testing with expanded plane and cell behavior verification
 
 ## Blockers
-- None identified in this commit
+- None identified
 
 ## Next Steps
-1. Verify test behavior matches expected deterministic output
-2. Consider additional test cases for edge cases in glitch filter behavior
+1. Review test coverage for edge cases in compositor behavior
+2. Consider additional test scenarios for complex compositing scenarios
