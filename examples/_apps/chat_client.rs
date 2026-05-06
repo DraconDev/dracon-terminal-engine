@@ -669,8 +669,7 @@ fn main() -> io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let mut app = App::new()?.title("Chat Client").fps(30);
-    let theme = *app.theme();
-    let chat = Rc::new(RefCell::new(ChatState::new(should_quit, theme)));
+    let chat = Rc::new(RefCell::new(ChatState::new(should_quit, Theme::default())));
     let chat_for_render = Rc::clone(&chat);
     let chat_for_input = Rc::clone(&chat);
 
