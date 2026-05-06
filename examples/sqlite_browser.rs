@@ -668,6 +668,47 @@ impl Widget for SqliteBrowser {
             }
         }
     }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if self.editing_query {
+            return self.search_input.handle_mouse(kind, col, row);
+        }
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let content_h = self.area.height.saturating_sub(1);
+                let split = SplitPane::new(Orientation::Horizontal).ratio(0.25);
+                let (left_rect, _) = split.split(Rect::new(0, 0, self.area.width, content_h));
+                if col < left_rect.width && row < content_h {
+                    let idx = row as usize;
+                    if idx < self.tables.len() {
+                        self.selected_table = idx;
+                        self.active_panel = Panel::Tables;
+                        self.dirty = true;
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
+            MouseEventKind::ScrollDown => {
+                if self.active_panel == Panel::Tables && self.selected_table + 1 < self.tables.len() {
+                    self.selected_table += 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            MouseEventKind::ScrollUp => {
+                if self.active_panel == Panel::Tables && self.selected_table > 0 {
+                    self.selected_table -= 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            _ => false,
+        }
+    }
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme, active: bool) {
