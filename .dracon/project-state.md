@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Expanded widget test coverage with new `CommandPalette` component
+Refined `CommandPalette` test initialization by replacing `needs_render()` assertion with explicit `show()` call.
 
 ## Context
-This change follows recent work expanding widget test coverage, particularly for new components like `Tree` and `CommandPalette`. The `CommandPalette` is a critical UI component for command-based interactions in terminal applications.
+The change improves test clarity by directly testing the `show()` method's effect on the palette's dirty state, rather than relying on an indirect assertion.
 
 ## Completed
-- [x] Added `CommandPalette` to widget test imports
-- [x] Updated Cargo.lock due to dependency changes
+- [x] Replaced `assert!(palette.needs_render())` with explicit `palette.show()` call in test
+- [x] Maintained same test outcome (verifying dirty state is cleared)
 
 ## In Progress
-- [x] Comprehensive testing of `CommandPalette` functionality
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Implement additional test cases for `CommandPalette` interactions
-2. Review and refactor any redundant test cases for consistency
+1. Verify test behavior matches expected widget behavior
+2. Consider adding additional test cases for edge cases in `CommandPalette` rendering

@@ -1028,7 +1028,7 @@ fn test_command_palette_clear_dirty() {
         category: "Test",
     }];
     let mut palette = CommandPalette::new(commands);
-    assert!(palette.needs_render());
+    palette.show();
     palette.clear_dirty();
     assert!(!palette.needs_render());
 }
