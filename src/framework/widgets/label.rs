@@ -101,6 +101,7 @@ impl crate::framework::widget::Widget for Label {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 0;
+        plane.fill_bg(self.theme.bg);
 
         for (i, c) in self.text.chars().take(area.width as usize).enumerate() {
             let idx = i;
