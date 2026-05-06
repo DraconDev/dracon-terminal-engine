@@ -614,39 +614,31 @@ fn test_command_palette_handle_key_when_not_visible_returns_false() {
 fn test_modal_handle_key_enter_triggers_confirm() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
-    let mut modal = Modal::new("Test?", vec![
-        ModalButton::new("OK", ModalResult::Confirm),
-    ]);
+    use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
+    let mut modal = Modal::new("Test?");
     modal.set_area(Rect::new(0, 0, 40, 10));
     let confirmed = Rc::new(RefCell::new(false));
     let confirmed_clone = confirmed.clone();
     modal = modal.on_confirm(move || *confirmed_clone.borrow_mut() = true);
 
     modal.handle_key(make_key(KeyCode::Enter));
-    assert!(modal.result().is_some());
+    assert!(modal.get_result().is_some());
 }
 
 #[test]
 fn test_modal_handle_key_esc_triggers_cancel() {
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
-    let mut modal = Modal::new("Test?", vec![
-        ModalButton::new("OK", ModalResult::Confirm),
-        ModalButton::new("Cancel", ModalResult::Cancel),
-    ]);
+    use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
+    let mut modal = Modal::new("Test?");
     modal.set_area(Rect::new(0, 0, 40, 10));
 
     modal.handle_key(make_key(KeyCode::Esc));
-    assert_eq!(modal.result(), Some(ModalResult::Cancel));
+    assert_eq!(modal.get_result(), Some(ModalResult::Cancel));
 }
 
 #[test]
 fn test_modal_handle_mouse_click_button() {
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalButton, ModalResult};
-    let mut modal = Modal::new("Test?", vec![
-        ModalButton::new("OK", ModalResult::Confirm),
-        ModalButton::new("Cancel", ModalResult::Cancel),
-    ]);
+    use dracon_terminal_engine::framework::widgets::Modal;
+    let mut modal = Modal::new("Test?");
     modal.set_area(Rect::new(0, 0, 40, 10));
 
     let cx = 20;
@@ -660,7 +652,7 @@ fn test_modal_handle_mouse_click_button() {
 #[test]
 fn test_spinner_handle_key_returns_false() {
     use dracon_terminal_engine::framework::widgets::Spinner;
-    let mut spinner = Spinner::new();
+    let mut spinner = Spinner::new(WidgetId::default_id());
     spinner.set_area(Rect::new(0, 0, 10, 1));
 
     let result = spinner.handle_key(make_key(KeyCode::Enter));
@@ -670,7 +662,7 @@ fn test_spinner_handle_key_returns_false() {
 #[test]
 fn test_spinner_handle_key_repeat_returns_false() {
     use dracon_terminal_engine::framework::widgets::Spinner;
-    let mut spinner = Spinner::new();
+    let mut spinner = Spinner::new(WidgetId::default_id());
     spinner.set_area(Rect::new(0, 0, 10, 1));
 
     let result = spinner.handle_key(make_key_repeat(KeyCode::Enter));
