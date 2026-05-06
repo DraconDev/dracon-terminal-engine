@@ -415,12 +415,7 @@ impl Widget for TabbedApp {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        // Use current theme (cyberpunk by default)
-        let theme = match THEMES[self.theme_index] {
-            "dracula" => Theme::dracula(),
-            "nord" => Theme::nord(),
-            _ => Theme::cyberpunk(),
-        };
+        let theme = self.theme;
         for cell in plane.cells.iter_mut() {
             cell.bg = theme.bg;
             cell.fg = theme.fg;

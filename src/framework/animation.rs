@@ -204,7 +204,7 @@ mod tests {
     fn test_animation_easing_values() {
         let ease_in = Easing::EaseIn;
         let ease_out = Easing::EaseOut;
-        let ease_in_out = Easing::EaseInOut;
+        let _ease_in_out = Easing::EaseInOut;
         let linear = Easing::Linear;
 
         assert_eq!(Easing::apply_easing(&linear, 0.0), 0.0);
