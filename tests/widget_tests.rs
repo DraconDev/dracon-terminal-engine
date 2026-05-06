@@ -8,9 +8,12 @@ mod common;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, Button, Checkbox, Gauge, Label, ProgressBar, Radio, Slider, Spinner,
-    StatusBadge, StatusBar, StatusSegment, Toggle,
+    Breadcrumbs, Button, Checkbox, Form, Gauge, Label, List, LogViewer, ProgressBar, Radio,
+    Select, Slider, Spinner, SplitPane, StatusBadge, StatusBar, StatusSegment, TabBar,
+    Table, Toggle,
 };
+use dracon_terminal_engine::framework::widgets::split::Orientation;
+use dracon_terminal_engine::framework::widgets::table::Column;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use std::cell::Cell;
 use std::rc::Rc;
