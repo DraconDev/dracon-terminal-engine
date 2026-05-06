@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Removed detailed file information display from the file manager UI
+Refactored mouse event handling in file manager to ignore column position
 
 ## Context
-This change removes the file information panel that was previously showing file metadata (name, type, size) when a file was selected. The panel was part of the enhanced UI features added in recent commits.
+The file manager's mouse handling was being updated to focus on row position rather than both row and column, as column position wasn't being used in the logic.
 
 ## Completed
-- [x] Removed file information display section from the file manager UI
-- [x] Cleaned up related code structure
+- [x] Removed unused column parameter from mouse event handler
+- [x] Simplified mouse handling logic to only consider row position
 
 ## In Progress
-- [ ] None
+- [x] Mouse event handling refactoring
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Determine if the file information display should be reimplemented in a different way
-2. Review if other UI elements need similar adjustments
+1. Verify mouse interactions still work correctly with the simplified logic
+2. Consider if any other mouse handling optimizations are needed

@@ -391,7 +391,7 @@ impl Widget for FileManagerApp {
         }
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 if row >= 2 && row < self.area.height.saturating_sub(2) {
