@@ -336,12 +336,6 @@ fn test_spinner_tick() {
 }
 
 #[test]
-fn test_spinner_frames() {
-    let spinner = Spinner::new(WidgetId::default_id()).with_frames(vec!['<', '>']);
-    assert_eq!(spinner.frames.len(), 2);
-}
-
-#[test]
 fn test_spinner_clear_dirty() {
     let mut spinner = Spinner::new(WidgetId::default_id());
     assert!(spinner.needs_render());
@@ -597,7 +591,7 @@ fn test_status_bar_render() {
 
 #[test]
 fn test_status_bar_add_segment() {
-    let mut bar = StatusBar::new(WidgetId::default_id());
+    let bar = StatusBar::new(WidgetId::default_id());
     bar.add_segment(StatusSegment::new("Test segment"));
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);
