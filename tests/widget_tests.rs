@@ -591,8 +591,8 @@ fn test_status_bar_render() {
 
 #[test]
 fn test_status_bar_add_segment() {
-    let bar = StatusBar::new(WidgetId::default_id());
-    bar.add_segment(StatusSegment::new("Test segment"));
+    let bar = StatusBar::new(WidgetId::default_id())
+        .add_segment(StatusSegment::new("Test segment"));
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);
     assert!(plane.width > 0);
