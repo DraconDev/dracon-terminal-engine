@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Added help overlay functionality to the input debugger example
 
 ## Context
-This change updates the dependency versions in the project's lockfile to ensure compatibility with the latest versions of dependencies.
+The input debugger tool needed better user guidance. The previous version only showed a basic quit instruction, which wasn't sufficient for users to understand all available interactions.
 
 ## Completed
-- [x] Updated Cargo.lock with new dependency versions
+- [x] Added '?' key to toggle help overlay
+- [x] Created standardized help display with keyboard shortcuts
+- [x] Implemented help overlay with ASCII art borders
+- [x] Updated quit instruction to include help key
 
 ## In Progress
-- [x] No active work in progress beyond the dependency update
+- [ ] None (feature is complete)
 
 ## Blockers
-- None identified
+- None (help overlay is fully functional)
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Continue with other development tasks that may depend on these updated dependencies
-```
+1. Consider adding more detailed event explanations
+2. Explore adding visual indicators for key presses

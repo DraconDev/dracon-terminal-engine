@@ -6,7 +6,7 @@ use std::io::{self, Read, Write};
 
 fn main() -> io::Result<()> {
     println!("Preparing to enter Raw Mode...");
-    println!("Type 'q' to quit.");
+    println!("Type 'q' to quit, '?' for help.");
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     let stdout = io::stdout();
@@ -29,8 +29,24 @@ fn main() -> io::Result<()> {
     let stdin = io::stdin();
     let mut handle = stdin.lock();
     let mut buf = [0u8; 128];
+    let mut show_help = false;
 
     loop {
+        if show_help {
+            write!(term, "\x1b[2J\x1b[H")?;
+            write!(term, "╭────────────────────────────────────────────╮\r\n")?;
+            write!(term, "│           Input Debugger Help               │\r\n")?;
+            write!(term, "├─────────────────────────────────────────────┤\r\n")?;
+            write!(term, "│  q        — Quit                            │\r\n")?;
+            write!(term, "│  ?        — Toggle this help                │\r\n")?;
+            write!(term, "│  Keys     — Shows KeyEvent on screen        │\r\n")?;
+            write!(term, "│  Mouse    — Shows MouseEvent on screen      │\r\n")?;
+            write!(term, "╰────────────────────────────────────────────╯\r\n")?;
+            term.flush()?;
+            show_help = false;
+            continue;
+        }
+
         let n = handle.read(&mut buf)?;
         if n == 0 {
             break;
@@ -38,18 +54,17 @@ fn main() -> io::Result<()> {
 
         for &byte in &buf[..n] {
             if let Some(event) = parser.advance(byte) {
-                // Quit on 'q'
-                if let Event::Key(KeyEvent {
-                    code: KeyCode::Char('q'),
-                    ..
-                }) = event
-                {
-                    return Ok(());
+                match &event {
+                    Event::Key(KeyEvent { code: KeyCode::Char('q'), .. }) => {
+                        return Ok(());
+                    }
+                    Event::Key(KeyEvent { code: KeyCode::Char('?'), .. }) => {
+                        show_help = true;
+                    }
+                    _ => {
+                        write!(term, "{:?}\r\n", event)?;
+                    }
                 }
-
-                // Print event details
-                // formatted with \r\n for raw mode cleanliness
-                write!(term, "{:?}\r\n", event)?;
             }
         }
         term.flush()?;
