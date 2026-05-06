@@ -102,6 +102,7 @@ impl crate::framework::widget::Widget for Slider {
         self.last_area_width.set(area.width);
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
+        plane.fill_bg(self.theme.bg);
 
         let width = plane.cells.len() / plane.height as usize;
         let height = plane.height as usize;
