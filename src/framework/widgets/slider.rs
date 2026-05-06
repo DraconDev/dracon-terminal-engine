@@ -134,7 +134,7 @@ impl crate::framework::widget::Widget for Slider {
         let left_bracket = Cell {
             char: '[',
             fg: self.theme.fg,
-            bg: Color::Reset,
+            bg: self.theme.bg,
             style: Styles::empty(),
             transparent: false,
             skip: false,
@@ -142,7 +142,7 @@ impl crate::framework::widget::Widget for Slider {
         let right_bracket = Cell {
             char: ']',
             fg: self.theme.fg,
-            bg: Color::Reset,
+            bg: self.theme.bg,
             style: Styles::empty(),
             transparent: false,
             skip: false,

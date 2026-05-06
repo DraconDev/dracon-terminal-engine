@@ -103,7 +103,7 @@ impl crate::framework::widget::Widget for ProgressBar {
         let left_bracket = Cell {
             char: '[',
             fg: self.theme.fg,
-            bg: Color::Reset,
+            bg: self.theme.bg,
             style: Styles::empty(),
             transparent: false,
             skip: false,
@@ -111,7 +111,7 @@ impl crate::framework::widget::Widget for ProgressBar {
         let right_bracket = Cell {
             char: ']',
             fg: self.theme.fg,
-            bg: Color::Reset,
+            bg: self.theme.bg,
             style: Styles::empty(),
             transparent: false,
             skip: false,
