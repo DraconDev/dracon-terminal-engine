@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Added background color filling to Label widget rendering
+Added consistent background color filling to widget rendering for Checkbox, Radio, and Toggle components.
 
 ## Context
-This change aligns with recent work on background color support for other widgets (Button, Plane compositor) to maintain visual consistency across the framework.
+This follows a pattern of adding background color support to UI widgets, maintaining visual consistency across the framework. The change leverages the recently added `fill_bg` functionality in the Plane compositor.
 
 ## Completed
-- [x] Added background color filling to Label widget rendering using theme's background color
+- [x] Added background color filling to Checkbox widget rendering
+- [x] Added background color filling to Radio widget rendering
+- [x] Added background color filling to Toggle widget rendering
 
 ## In Progress
-- [x] Background color support for other widgets is ongoing
+- [x] Consistent background color implementation across form control widgets
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify visual consistency with other widgets using background colors
-2. Consider adding background color as a configurable property for all text-based widgets
+1. Verify visual consistency with other form control widgets
+2. Consider adding background color support to remaining form widgets (e.g., TextInput)
