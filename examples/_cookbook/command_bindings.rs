@@ -445,9 +445,30 @@ impl Widget for CommandBindings {
                 true
             }
             KeyCode::Char('t') => {
-                let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::monokai()];
+                let themes = [
+                    Theme::dark(),
+                    Theme::light(),
+                    Theme::cyberpunk(),
+                    Theme::dracula(),
+                    Theme::nord(),
+                    Theme::catppuccin_mocha(),
+                    Theme::gruvbox_dark(),
+                    Theme::tokyo_night(),
+                    Theme::solarized_dark(),
+                    Theme::solarized_light(),
+                    Theme::one_dark(),
+                    Theme::rose_pine(),
+                    Theme::kanagawa(),
+                    Theme::everforest(),
+                    Theme::monokai(),
+                    Theme::warm(),
+                    Theme::cool(),
+                    Theme::forest(),
+                    Theme::sunset(),
+                    Theme::mono(),
+                ];
                 let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-                let next = themes[(idx + 1) % themes.len()];
+                let next = themes[(idx + 1) % themes.len()].clone();
                 self.on_theme_change(&next);
                 true
             }
