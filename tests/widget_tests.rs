@@ -1248,10 +1248,9 @@ fn test_menu_bar_render() {
 }
 
 #[test]
-fn test_menu_bar_add_entry() {
-    let mut menu_bar = MenuBar::new(WidgetId::new(1));
+fn test_menu_bar_with_entries() {
     let entry = MenuEntry::new("File").add_item(MenuItem::new("Open"));
-    menu_bar.add_entry(entry);
+    let menu_bar = MenuBar::new(WidgetId::new(1)).with_entries(vec![entry]);
     let area = Rect::new(0, 0, 80, 1);
     let plane = menu_bar.render(area);
     assert!(plane.width > 0);
