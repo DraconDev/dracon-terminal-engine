@@ -146,6 +146,7 @@ impl SplitPane {
         let mut plane = Plane::new(0, rect.width, rect.height);
         plane.x = rect.x;
         plane.y = rect.y;
+        plane.fill_bg(self.divider_color);
 
         for cell in &mut plane.cells {
             cell.char = self.divider_char;
