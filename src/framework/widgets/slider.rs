@@ -2,7 +2,7 @@
 //!
 //! A horizontal track with a draggable thumb indicator.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
