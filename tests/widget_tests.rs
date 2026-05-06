@@ -8,9 +8,10 @@ mod common;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, Button, Checkbox, Form, Gauge, Label, List, LogViewer, ProgressBar, Radio,
-    Select, Slider, Spinner, SplitPane, StatusBadge, StatusBar, StatusSegment, TabBar,
-    Table, Toggle,
+    BaseInput, Breadcrumbs, Button, Checkbox, CommandItem, CommandPalette, ConfirmDialog,
+    ContextAction, ContextMenu, Form, Gauge, Hud, Label, List, LogViewer, Modal, ProgressBar,
+    Radio, Select, Slider, Spinner, SplitPane, StatusBadge, StatusBar, StatusSegment, TabBar,
+    Table, Toggle, Tree, TreeNode,
 };
 use dracon_terminal_engine::framework::widgets::split::Orientation;
 use dracon_terminal_engine::framework::widgets::table::Column;
