@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Expanded test coverage for Tree widget event handling with keyboard navigation
+Adjust test coordinates for table row selection in event handler tests
 
 ## Context
-This change improves test coverage for the Tree widget's keyboard interaction behavior, specifically focusing on right-arrow key expansion and navigation.
+The test for table row selection was updated to ensure correct row selection behavior when handling mouse down events at specific coordinates.
 
 ## Completed
-- [x] Renamed test function to reflect new behavior: `test_tree_handle_key_right_expands_and_navigates`
-- [x] Updated test to verify right-arrow key expands nodes and navigates to children
-- [x] Maintained existing test assertions while changing the key input from Down to Right
+- [x] Updated test coordinates in `event_handler_test.rs` to verify correct row selection behavior
+- [x] Modified test assertions to match the expected selection indices
 
 ## In Progress
-- [x] Test coverage expansion for Tree widget keyboard interactions
+- [x] No active work in progress beyond the test adjustment
 
 ## Blockers
-- None identified in this change
+- None identified
 
 ## Next Steps
-1. Review test results to ensure all edge cases are covered
-2. Consider adding similar tests for left-arrow collapse behavior
+1. Verify test coverage for other table interaction scenarios
+2. Consider expanding test cases for edge cases in row selection

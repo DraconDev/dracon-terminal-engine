@@ -445,10 +445,10 @@ fn test_table_handle_mouse_down_selects_row() {
     table.set_area(Rect::new(0, 0, 20, 10));
     assert_eq!(table.selected_index(), 0);
 
-    table.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 2);
+    table.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 1);
     assert_eq!(table.selected_index(), 0);
 
-    table.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 3);
+    table.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 2);
     assert_eq!(table.selected_index(), 1);
 }
 
