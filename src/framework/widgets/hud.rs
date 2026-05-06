@@ -87,6 +87,7 @@ impl Hud {
     pub fn render_text(&self, x: u16, y: u16, text: &str, fg: Color, bg: Color) -> Plane {
         let mut plane = Plane::new(0, self.width, self.height);
         plane.z_index = self.z_index as i32;
+        plane.fill_bg(bg);
 
         let text_len = text
             .width()

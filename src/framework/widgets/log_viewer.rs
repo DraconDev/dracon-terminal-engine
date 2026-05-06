@@ -247,6 +247,7 @@ impl Widget for LogViewer {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
 
         if self.lines.is_empty() {
             let msg = "(no log output)";
