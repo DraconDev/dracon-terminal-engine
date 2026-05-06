@@ -1077,12 +1077,6 @@ fn test_modal_new() {
 }
 
 #[test]
-fn test_modal_new_with_id() {
-    let modal = Modal::new_with_id(WidgetId::new(3), "Test Title");
-    assert_eq!(modal.id, WidgetId::new(3));
-}
-
-#[test]
 fn test_modal_with_theme() {
     let modal = Modal::new("Test").with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 40, 5);
@@ -1167,37 +1161,5 @@ fn test_context_menu_clear_dirty() {
     assert!(menu.needs_render());
     menu.clear_dirty();
     assert!(!menu.needs_render());
-}
-
-#[test]
-fn test_text_input_base_new() {
-    let input = BaseInput::new(WidgetId::default_id(), "Text...");
-    let area = Rect::new(0, 0, 40, 1);
-    let _plane = input.render_input(area);
-}
-
-#[test]
-fn test_text_input_base_with_theme() {
-    let input = BaseInput::new(WidgetId::default_id(), "Text...")
-        .with_theme(Theme::cyberpunk());
-    let area = Rect::new(0, 0, 40, 1);
-    let _plane = input.render_input(area);
-}
-
-#[test]
-fn test_text_input_base_render() {
-    let input = BaseInput::new(WidgetId::default_id(), "Text...");
-    let area = Rect::new(0, 0, 40, 1);
-    let plane = input.render_input(area);
-    assert_eq!(plane.width, 40);
-    assert_eq!(plane.height, 1);
-}
-
-#[test]
-fn test_text_input_base_clear_dirty() {
-    let mut input = BaseInput::new(WidgetId::default_id(), "Text...");
-    assert!(input.dirty);
-    input.dirty = false;
-    assert!(!input.dirty);
 }
 

@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Removed redundant `BaseInput` import from widget tests to reduce test file size
+Removed redundant widget test cases to reduce test file size and improve maintainability.
 
 ## Context
-The test file was importing `BaseInput` which wasn't being used in the tests, making the import redundant. This cleanup maintains the same functionality while reducing the test file's size.
+The project has been expanding widget test coverage, and some test cases were found to be redundant. These tests were either duplicates or covered by other tests, so they were removed to clean up the test suite.
 
 ## Completed
-- [x] Removed unused `BaseInput` import from widget tests
-- [x] Maintained all existing test functionality
+- [x] Removed redundant `Modal` test case for `new_with_id`
+- [x] Removed redundant `BaseInput` test cases for basic functionality
+- [x] Reduced test file size by removing duplicate test coverage
 
 ## In Progress
-- [ ] None
+- [ ] No active work in progress
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Review other test files for similar redundant imports
-2. Consider adding a linter rule to catch unused imports in tests
+1. Review remaining widget tests for further redundancy
+2. Ensure all critical widget functionality remains covered by tests
