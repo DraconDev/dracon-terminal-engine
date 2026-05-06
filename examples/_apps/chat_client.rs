@@ -668,13 +668,11 @@ fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let theme = Theme::cyberpunk();
+    let mut app = App::new()?.title("Chat Client").fps(30);
+    let theme = *app.theme();
     let chat = Rc::new(RefCell::new(ChatState::new(should_quit, theme)));
     let chat_for_render = Rc::clone(&chat);
     let chat_for_input = Rc::clone(&chat);
-
-    let mut app = App::new()?.title("Chat Client").fps(30);
-    app.set_theme(Theme::cyberpunk());
 
     let router = ChatInputRouter {
         target: chat_for_input,
