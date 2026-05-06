@@ -119,9 +119,6 @@ fn test_compositor_add_plane() {
 #[test]
 fn test_compositor_empty_planes_not_rendered() {
     let comp = Compositor::new(80, 24);
-    // With no planes added, there's nothing to render.
-    // The app framework must skip render() when planes are empty
-    // to prevent a black screen flash.
     assert!(comp.planes.is_empty());
 }
 
@@ -134,4 +131,110 @@ fn test_compositor_plane_ordering() {
     comp.add_plane(low);
     let ids: Vec<_> = comp.planes.iter().map(|p| p.id).collect();
     assert_eq!(ids, [2, 1]);
+}
+
+#[test]
+fn test_compositor_set_clear_color() {
+    let mut comp = Compositor::new(80, 24);
+    comp.set_clear_color(Color::Rgb(30, 30, 30));
+    assert_eq!(comp.size(), (80, 24));
+}
+
+#[test]
+fn test_compositor_resize() {
+    let mut comp = Compositor::new(80, 24);
+    comp.resize(120, 40);
+    assert_eq!(comp.size(), (120, 40));
+}
+
+#[test]
+fn test_compositor_hit_test_empty() {
+    let comp = Compositor::new(80, 24);
+    assert!(comp.hit_test(10, 10).is_none());
+}
+
+#[test]
+fn test_compositor_hit_test_with_plane() {
+    let mut comp = Compositor::new(80, 24);
+    let mut plane = Plane::new(1, 10, 10);
+    plane.set_absolute_position(5, 5);
+    plane.cells[0].transparent = false;
+    comp.add_plane(plane);
+    assert!(comp.hit_test(5, 5).is_some());
+}
+
+#[test]
+fn test_compositor_hit_test_outside() {
+    let mut comp = Compositor::new(80, 24);
+    let mut plane = Plane::new(1, 10, 10);
+    plane.set_absolute_position(5, 5);
+    plane.cells[0].transparent = false;
+    comp.add_plane(plane);
+    assert!(comp.hit_test(20, 20).is_none());
+}
+
+#[test]
+fn test_compositor_hit_test_transparent_cell() {
+    let mut comp = Compositor::new(80, 24);
+    let plane = Plane::new(1, 10, 10);
+    comp.add_plane(plane);
+    assert!(comp.hit_test(0, 0).is_none());
+}
+
+#[test]
+fn test_compositor_draw_text() {
+    let mut comp = Compositor::new(80, 24);
+    comp.draw_text("Hello", 10, 5, Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), Styles::BOLD);
+    assert!(!comp.planes.is_empty());
+}
+
+#[test]
+fn test_compositor_draw_rect() {
+    let mut comp = Compositor::new(80, 24);
+    comp.draw_rect(5, 5, 10, 5, '#', Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), Styles::empty());
+    assert!(!comp.planes.is_empty());
+}
+
+#[test]
+fn test_compositor_tick() {
+    let mut comp = Compositor::new(80, 24);
+    comp.tick(0.016);
+}
+
+#[test]
+fn test_plane_visible() {
+    let mut plane = Plane::new(0, 10, 10);
+    assert!(plane.visible);
+    plane.visible = false;
+    assert!(!plane.visible);
+}
+
+#[test]
+fn test_plane_opacity() {
+    let mut plane = Plane::new(0, 10, 10);
+    assert_eq!(plane.opacity, 1.0);
+    plane.opacity = 0.5;
+    assert_eq!(plane.opacity, 0.5);
+}
+
+#[test]
+fn test_plane_filter() {
+    use dracon_terminal_engine::compositor::filter::Dim;
+    let mut plane = Plane::new(0, 10, 10);
+    assert!(plane.filter.is_none());
+    plane.filter = Some(Box::new(Dim::default()));
+    assert!(plane.filter.is_some());
+}
+
+#[test]
+fn test_compositor_plane_z_ordering() {
+    let mut comp = Compositor::new(80, 24);
+    let plane1 = Plane::new(1, 10, 10);
+    let plane2 = Plane::new(2, 10, 10);
+    let plane3 = Plane::new(0, 10, 10);
+    comp.add_plane(plane1);
+    comp.add_plane(plane2);
+    comp.add_plane(plane3);
+    let z_indices: Vec<_> = comp.planes.iter().map(|p| p.z_index).collect();
+    assert!(z_indices.windows(2).all(|w| w[0] <= w[1]));
 }
