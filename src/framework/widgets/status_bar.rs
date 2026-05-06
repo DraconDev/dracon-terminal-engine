@@ -114,6 +114,7 @@ impl crate::framework::widget::Widget for StatusBar {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 50;
+        plane.fill_bg(self.theme.bg);
 
         let width = plane.cells.len() / plane.height as usize;
         let _height = plane.height as usize;
