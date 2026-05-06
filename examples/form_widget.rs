@@ -42,7 +42,7 @@ impl FormApp {
     fn cycle_theme(&mut self) {
         let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.theme = themes[(idx + 1) % themes.len()];
         self.form.borrow_mut().on_theme_change(&self.theme);
     }
 
@@ -176,7 +176,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::nord();
-    let app = Rc::new(RefCell::new(FormApp::new(should_quit, theme.clone())));
+    let app = Rc::new(RefCell::new(FormApp::new(should_quit, theme)));
     let app_for_input = Rc::clone(&app);
 
     let mut app_widget = App::new()?.title("Form Widget Demo").fps(30).theme(theme);

@@ -1246,7 +1246,7 @@ impl IdeApp {
         let y = (plane.height - h) / 2;
 
         // Draw rounded border and fill
-        draw_rounded_box(&mut plane, x, y, w, h, t);
+        draw_rounded_box(plane, x, y, w, h, t);
 
         let title = "Keyboard Shortcuts";
         for (i, ch) in title.chars().enumerate() {

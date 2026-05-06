@@ -209,7 +209,7 @@ impl crate::framework::widget::Widget for Tree {
                 if node.expanded { "- " } else { "+ " },
                 node.label
             );
-            let is_hovered = hovered.as_ref().map_or(false, |h| h == current_path);
+            let is_hovered = hovered.as_ref().is_some_and(|h| h == current_path);
             let bg = if is_hovered { theme.hover_bg } else { theme.bg };
             let fg = if is_hovered { theme.fg } else { theme.fg };
             for (i, c) in line.chars().take(width).enumerate() {

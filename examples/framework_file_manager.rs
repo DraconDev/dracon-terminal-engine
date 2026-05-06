@@ -348,10 +348,8 @@ impl Widget for FileManagerApp {
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
-            KeyCode::Esc => {
-                if self.show_help { self.show_help = false; self.dirty = true; true }
-                else { false }
-            }
+            KeyCode::Esc
+                if self.show_help => { self.show_help = false; self.dirty = true; true }
             KeyCode::Char('t') if key.modifiers.is_empty() => {
                 self.cycle_theme();
                 true
@@ -368,7 +366,7 @@ impl Widget for FileManagerApp {
             KeyCode::Down if self.selected + 1 < self.entries.len() => {
                 self.selected += 1;
                 self.list.scroll_to(self.selected);
-                self.scroll_offset = self.list.selected_index().saturating_sub(self.visible_count).max(0);
+                self.scroll_offset = self.list.selected_index().saturating_sub(self.visible_count);
                 self.dirty = true;
                 true
             }
@@ -393,8 +391,8 @@ impl Widget for FileManagerApp {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
         match kind {
-            MouseEventKind::Down(MouseButton::Left) => {
-                if row >= 2 && row < self.area.height.saturating_sub(2) {
+            MouseEventKind::Down(MouseButton::Left)
+                if row >= 2 && row < self.area.height.saturating_sub(2) => {
                     let idx = self.scroll_offset + (row as usize - 2);
                     if idx < self.entries.len() {
                         self.selected = idx;
@@ -404,10 +402,7 @@ impl Widget for FileManagerApp {
                     } else {
                         false
                     }
-                } else {
-                    false
                 }
-            }
             MouseEventKind::ScrollDown => {
                 self.scroll_offset = (self.scroll_offset + 1).min(self.entries.len().saturating_sub(self.visible_count));
                 self.dirty = true;
@@ -423,7 +418,7 @@ impl Widget for FileManagerApp {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = theme.clone();
+        self.theme = *theme;
         self.list.on_theme_change(theme);
         self.dirty = true;
     }

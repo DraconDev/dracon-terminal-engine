@@ -202,13 +202,12 @@ impl EditorApp {
                 self.active_tab = new_id;
                 self.sync_tab_bar();
             }
-            "close-tab" => {
-                if self.tabs.len() > 1 {
+            "close-tab"
+                if self.tabs.len() > 1 => {
                     self.tabs.remove(self.active_tab);
                     self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
                     self.sync_tab_bar();
                 }
-            }
             "save" => {
                 if let Some(tab) = self.active_tab_mut() {
                     tab.modified = false;

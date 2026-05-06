@@ -526,7 +526,7 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         let thumb_y = (chat.scroll_offset as f32 / chat.messages.len().saturating_sub(visible_count).max(1) as f32 * (content_h - thumb_h) as f32) as u16 + header_h + 1;
         for i in 0..thumb_h {
             let y = thumb_y + i;
-            if y >= header_h + 1 && y < input_row - 1 {
+            if y > header_h && y < input_row - 1 {
                 let idx = (y * area.width + sb_x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '▐';

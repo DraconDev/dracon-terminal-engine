@@ -396,15 +396,12 @@ impl Widget for LogMonitor {
                 self.dirty = true;
                 true
             }
-            KeyCode::Esc => {
-                if self.show_help {
+            KeyCode::Esc
+                if self.show_help => {
                     self.show_help = false;
                     self.dirty = true;
                     true
-                } else {
-                    false
                 }
-            }
             _ => false,
         }
     }
