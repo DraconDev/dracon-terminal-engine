@@ -135,7 +135,7 @@ impl Hud {
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = self.theme.fg_muted;
-                plane.cells[idx].bg = Color::Reset;
+                plane.cells[idx].bg = self.theme.bg;
             }
         }
 
