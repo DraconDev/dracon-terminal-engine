@@ -388,7 +388,7 @@ impl Widget for SystemMonitor {
             cell.bg = t.bg; cell.fg = t.fg; cell.transparent = false;
         }
 
-        let w = area.width as usize;
+        let _w = area.width as usize;
 
         // ── Header Row ──
         let hostname = &self.data.hostname;
