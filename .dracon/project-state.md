@@ -1,13 +1,14 @@
 # Project State
 
 ## Current Focus
-Simplified tree widget rendering by removing redundant hover state color logic
+Refactored debug overlay border rendering logic for cleaner corner detection.
 
 ## Context
-The tree widget was unnecessarily duplicating the foreground color logic for both hovered and non-hovered states, which was redundant since the same color was being applied in both cases.
+The debug overlay panel was rendering borders with redundant corner checks. This change simplifies the logic while maintaining the same visual output.
 
 ## Completed
-- [x] Removed redundant foreground color assignment in tree widget rendering
+- [x] Simplified corner detection logic from 4 separate conditions to a single combined condition
+- [x] Maintained identical visual output while reducing code complexity
 
 ## In Progress
 - [x] No active work in progress
@@ -16,5 +17,5 @@ The tree widget was unnecessarily duplicating the foreground color logic for bot
 - None
 
 ## Next Steps
-1. Verify no visual regression in tree widget rendering
-2. Consider if other widget components could benefit from similar optimizations
+1. Verify no visual regressions in debug overlay rendering
+2. Consider additional border style optimizations if needed

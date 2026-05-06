@@ -89,10 +89,7 @@ impl DebugOverlayPanel {
                 let idx = ((y + ry) * plane.width + x + rx) as usize;
                 if idx < plane.cells.len() {
                     let on_border = ry == 0 || ry == h - 1 || rx == 0 || rx == w - 1;
-                    let corner = (rx == 0 && ry == 0)
-                        || (rx == w - 1 && ry == 0)
-                        || (rx == 0 && ry == h - 1)
-                        || (rx == w - 1 && ry == h - 1);
+                    let corner = (rx == 0 || rx == w - 1) && (ry == 0 || ry == h - 1);
                     plane.cells[idx] = Cell {
                         char: if corner { '+' } else if on_border { '#' } else { ' ' },
                         fg: self.theme.primary,
