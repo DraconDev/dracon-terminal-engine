@@ -211,7 +211,7 @@ impl crate::framework::widget::Widget for Tree {
             );
             let is_hovered = hovered.as_ref().is_some_and(|h| h == current_path);
             let bg = if is_hovered { theme.hover_bg } else { theme.bg };
-            let fg = if is_hovered { theme.fg } else { theme.fg };
+            let fg = theme.fg;
             for (i, c) in line.chars().take(width).enumerate() {
                 let idx = (*row as u16 * plane.width + i as u16) as usize;
                 if idx < plane.cells.len() {
