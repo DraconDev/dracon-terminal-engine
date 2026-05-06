@@ -327,12 +327,11 @@ fn test_spinner_render() {
 }
 
 #[test]
-fn test_spinner_tick() {
+fn test_spinner_clear_dirty() {
     let mut spinner = Spinner::new(WidgetId::default_id());
-    let initial = spinner.current_frame();
-    spinner.tick();
-    let next = spinner.current_frame();
-    assert!(initial != next || spinner.frames.len() == 1);
+    assert!(spinner.needs_render());
+    spinner.clear_dirty();
+    assert!(!spinner.needs_render());
 }
 
 #[test]
