@@ -11,7 +11,7 @@ use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, Button, Checkbox, Gauge, Label, ProgressBar, Radio, Slider, Spinner,
     StatusBadge, StatusBar, StatusSegment, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use std::cell::Cell;
 use std::rc::Rc;
 use ratatui::layout::Rect;
