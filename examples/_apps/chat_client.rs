@@ -104,6 +104,19 @@ impl ChatState {
             Theme::dracula(),
             Theme::gruvbox_dark(),
             Theme::tokyo_night(),
+            Theme::solarized_dark(),
+            Theme::solarized_light(),
+            Theme::monokai(),
+            Theme::one_dark(),
+            Theme::material(),
+            Theme::oceanic(),
+            Theme::palenight(),
+            Theme::light(),
+            Theme::warm(),
+            Theme::cool(),
+            Theme::forest(),
+            Theme::sunset(),
+            Theme::mono(),
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
