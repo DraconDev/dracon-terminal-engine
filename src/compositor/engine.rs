@@ -21,7 +21,7 @@ impl Compositor {
             width,
             height,
             last_frame: vec![Cell::default(); (width as u32 * height as u32) as usize],
-            clear_color: Color::Rgb(0, 0, 0),
+            clear_color: Color::Rgb(16, 16, 24),
         }
     }
 
