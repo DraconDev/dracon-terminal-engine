@@ -4,17 +4,17 @@
 Refactored HUD widget to use theme-aware background rendering instead of explicit color reset.
 
 ## Context
-This change aligns with the ongoing effort to standardize background color handling across widgets by using theme-defined values rather than hardcoded colors.
+This change aligns with ongoing work to standardize background rendering across widgets by using theme colors consistently. Previous commits addressed similar refactoring in other widgets (SplitPane, TabBar, List, etc.).
 
 ## Completed
-- [x] Replaced explicit `Color::Reset` with `self.theme.bg` in HUD widget rendering
+- [x] Replaced hardcoded `Color::Reset` with theme-aware background color (`self.theme.bg`) in HUD widget rendering
 
 ## In Progress
-- [x] Theme-aware background rendering implementation
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify consistent background rendering across all widgets
-2. Update documentation to reflect theme-aware rendering approach
+1. Verify visual consistency across all widgets using theme colors
+2. Address any remaining widgets that may still use explicit background colors

@@ -155,7 +155,7 @@ impl Hud {
                 } else {
                     self.theme.outline
                 };
-                plane.cells[idx].bg = Color::Reset;
+                plane.cells[idx].bg = self.theme.bg;
             }
         }
 
