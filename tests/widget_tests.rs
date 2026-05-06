@@ -335,14 +335,6 @@ fn test_spinner_clear_dirty() {
 }
 
 #[test]
-fn test_spinner_clear_dirty() {
-    let mut spinner = Spinner::new(WidgetId::default_id());
-    assert!(spinner.needs_render());
-    spinner.clear_dirty();
-    assert!(!spinner.needs_render());
-}
-
-#[test]
 fn test_progress_bar_new() {
     let pb = ProgressBar::new(WidgetId::default_id());
     assert_eq!(pb.progress(), 0.0);
