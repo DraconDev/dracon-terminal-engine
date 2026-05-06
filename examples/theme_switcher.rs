@@ -981,7 +981,7 @@ fn main() -> Result<()> {
     let demo = WidgetDemoPanel::new(WidgetId::new(6));
     let _demo_id = app.add_widget(Box::new(demo), Rect::new(0, 17, 80, 12));
 
-    let help_overlay = HelpOverlay::new(WidgetId::new(7), help_check);
+    let help_overlay = HelpOverlay::new(WidgetId::new(7), Arc::clone(&show_help));
     let _help_id = app.add_widget(Box::new(help_overlay), Rect::new(0, 0, 80, 24));
 
     let _ = app
