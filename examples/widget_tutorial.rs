@@ -666,7 +666,7 @@ fn main() -> std::io::Result<()> {
         "←/→ to change color | Click swatch to cycle | Tab to navigate | ?: help",
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
-        "Theme: {} | Press Ctrl+C to exit",
+        "Theme: {} | t: theme | ?: help | q: quit",
         theme_names[current_theme_idx]
     ));
 
@@ -674,8 +674,10 @@ fn main() -> std::io::Result<()> {
     header.on_theme_change(&current_theme);
     footer.on_theme_change(&current_theme);
 
-    // Help overlay visibility
-    let mut show_help = false;
+    // Help overlay visibility (shared between closures)
+    let show_help = Rc::new(RefCell::new(false));
+    let show_help_input = Rc::clone(&show_help);
+    let show_help_render = Rc::clone(&show_help);
 
     // ---- Add widgets to the app with their areas ----
     //

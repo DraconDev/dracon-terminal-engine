@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Cloning the `show_help` closure to ensure proper ownership in the theme switcher example.
+Refactored help overlay visibility control in the theme switcher example to use shared state.
 
 ## Context
-The change was needed to fix potential ownership issues when passing the `show_help` closure to the `ThemeHeader` widget. The original code might have been trying to move ownership of the closure, which could lead to compilation errors.
+The help overlay visibility was previously managed with a simple boolean flag, which limited its use across different closures. This change introduces shared state using `Rc<RefCell<bool>>` to allow the help overlay to be controlled from multiple places in the code.
 
 ## Completed
-- [x] Cloned the `show_help` closure to ensure proper ownership in the theme switcher example
+- [x] Refactored help overlay visibility to use shared state with `Rc<RefCell<bool>>`
+- [x] Updated footer text to include new keyboard shortcuts (t: theme, q: quit)
+- [x] Ensured proper ownership of the shared state across closures
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] No active work in progress
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify that the cloned closure behaves as expected in the theme switcher UI
-2. Ensure no other ownership issues exist in the theme switcher example
+1. Verify the shared state works correctly across all closures
+2. Consider adding more keyboard shortcuts for the help overlay
