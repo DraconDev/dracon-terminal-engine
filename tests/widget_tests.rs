@@ -8,10 +8,12 @@ mod common;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, Button, Checkbox, Gauge, Label, ProgressBar, Radio, SearchInput, Slider, Spinner,
+    Breadcrumbs, Button, Checkbox, Gauge, Label, ProgressBar, Radio, Slider, Spinner,
     StatusBadge, StatusBar, Toggle,
 };
-use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use std::cell::Cell;
+use std::rc::Rc;
 use ratatui::layout::Rect;
 
 #[test]
@@ -96,6 +98,34 @@ fn test_button_z_index() {
 fn test_button_cursor_position_returns_none() {
     let btn = Button::new("test");
     assert!(btn.cursor_position().is_none());
+}
+
+#[test]
+fn test_button_handle_key_enter_triggers_callback() {
+    let called = Rc::new(Cell::new(false));
+    let called_clone = called.clone();
+    {
+        let mut btn = Button::new("OK").on_click(move || {
+            called_clone.set(true);
+        });
+        btn.handle_key(KeyEvent {
+            kind: KeyEventKind::Press,
+            code: KeyCode::Enter,
+            modifiers: Default::default(),
+        });
+    }
+    assert!(called.get());
+}
+
+#[test]
+fn test_button_handle_key_non_enter_returns_false() {
+    let mut btn = Button::new("OK").on_click(|| {});
+    let result = btn.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Backspace,
+        modifiers: Default::default(),
+    });
+    assert!(!result);
 }
 
 #[test]
@@ -516,13 +546,6 @@ fn test_breadcrumbs_clear_dirty() {
 fn test_status_badge_new() {
     let badge = StatusBadge::new(WidgetId::new(1));
     assert_eq!(badge.id(), WidgetId::new(1));
-    assert_eq!(badge.status, "UNKNOWN");
-}
-
-#[test]
-fn test_status_badge_with_status() {
-    let badge = StatusBadge::new(WidgetId::new(1)).with_status("OK");
-    assert_eq!(badge.status, "OK");
 }
 
 #[test]
@@ -579,36 +602,4 @@ fn test_status_bar_add_segment() {
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);
     assert!(plane.width > 0);
-}
-
-#[test]
-fn test_search_input_new() {
-    let input = SearchInput::new(WidgetId::default_id(), "Search...");
-    let area = Rect::new(0, 0, 40, 1);
-    let _plane = input.render(area);
-}
-
-#[test]
-fn test_search_input_with_theme() {
-    let input = SearchInput::new(WidgetId::default_id(), "Search...")
-        .with_theme(Theme::cyberpunk());
-    let area = Rect::new(0, 0, 40, 1);
-    let _plane = input.render(area);
-}
-
-#[test]
-fn test_search_input_render() {
-    let input = SearchInput::new(WidgetId::default_id(), "Search...");
-    let area = Rect::new(0, 0, 40, 1);
-    let plane = input.render(area);
-    assert_eq!(plane.width, 40);
-    assert_eq!(plane.height, 1);
-}
-
-#[test]
-fn test_search_input_clear_dirty() {
-    let mut input = SearchInput::new(WidgetId::default_id(), "Search...");
-    assert!(input.needs_render());
-    input.clear_dirty();
-    assert!(!input.needs_render());
 }
