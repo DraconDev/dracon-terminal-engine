@@ -101,6 +101,7 @@ impl crate::framework::widget::Widget for TabBar {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
         let tab_count = self.tabs.len().max(1);
         let tab_width = (area.width / tab_count as u16).max(1);
 
