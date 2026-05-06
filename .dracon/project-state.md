@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Refactored the file information display helper in the file manager UI.
+Removed theme cycling shortcut from the widget tutorial's header label
 
 ## Context
-This change was part of ongoing UI improvements for the file manager. The helper function for printing file information was modified to remove unnecessary mutability, making the code cleaner and more predictable.
+The widget tutorial's header label was previously showing a theme cycling shortcut ('t: theme') that wasn't actually implemented in the tutorial. This was causing confusion for users who saw the hint but couldn't use the feature.
 
 ## Completed
-- [x] Removed unnecessary `mut` from the `print_info` closure parameter
-- [x] Simplified the helper function signature while maintaining functionality
+- [x] Removed the 't: theme' shortcut hint from the header label
 
 ## In Progress
-- [x] Refactoring of file information display components
+- [x] None - this was a direct removal of outdated documentation
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify the refactored code maintains the same visual output
-2. Continue UI improvements for the file manager
+1. Verify the tutorial still functions correctly without the removed hint
+2. Consider adding proper theme cycling implementation to the tutorial if needed

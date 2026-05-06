@@ -663,7 +663,7 @@ fn main() -> std::io::Result<()> {
 
     // Header and footer labels
     let mut header = dracon_terminal_engine::framework::widgets::Label::new(
-        "←/→ to change color | Click swatch to cycle | Tab to navigate | t: theme | ?: help",
+        "←/→ to change color | Click swatch to cycle | Tab to navigate | ?: help",
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
         "Theme: {} | Press Ctrl+C to exit",
