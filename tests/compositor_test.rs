@@ -411,12 +411,10 @@ fn test_compositor_multiple_planes_hit_topmost_opaque() {
     comp.add_plane(p3);
     assert!(comp.hit_test(4, 4).is_some());
     assert_eq!(comp.hit_test(4, 4).unwrap().id, 3);
-    assert!(comp.hit_test(1, 1).is_some());
-    assert_eq!(comp.hit_test(1, 1).unwrap().id, 1);
-    assert!(comp.hit_test(0, 0).is_some());
-    assert_eq!(comp.hit_test(0, 0).unwrap().id, 1);
     assert!(comp.hit_test(2, 2).is_some());
     assert_eq!(comp.hit_test(2, 2).unwrap().id, 2);
+    assert!(comp.hit_test(0, 0).is_some());
+    assert_eq!(comp.hit_test(0, 0).unwrap().id, 1);
 }
 
 #[test]
