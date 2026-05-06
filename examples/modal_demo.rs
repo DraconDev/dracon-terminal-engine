@@ -100,6 +100,7 @@ impl<'a> Widget for HelpOverlay<'a> {
         let mut plane = self.modal.render(area);
 
         let shortcuts = [
+            ("t", "Cycle theme"),
             ("?", "Toggle help"),
             ("q", "Quit app"),
             ("Ctrl+S", "Save (mock)"),
@@ -203,7 +204,14 @@ impl<'a> ModalDemoApp<'a> {
             help_btn,
             area: Rect::new(0, 0, 80, 24),
             should_quit,
+            theme: Theme::dark(),
         }
+    }
+
+    fn cycle_theme(&mut self) {
+        let themes = [Theme::dark(), Theme::nord(), Theme::dracula(), Theme::cyberpunk()];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
