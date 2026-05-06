@@ -76,6 +76,7 @@ impl BaseInput {
     pub fn render_input(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
+        plane.fill_bg(self.theme.input_bg);
 
         let width = plane.cells.len() / plane.height as usize;
 
