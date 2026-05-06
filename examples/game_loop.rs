@@ -19,10 +19,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (mut w, mut h) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())?;
     let mut compositor = Compositor::new(w, h);
     let mut parser = Parser::new();
-    let mut stdin = io::stdin();
+    let stdin = io::stdin();
 
     let mut x_pos = 10.0;
     let mut last_tick = Instant::now();
+    let mut show_help = false;
 
     // FPS Counter
     let mut frames = 0;
@@ -38,13 +39,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
                 for &byte in &buf[..n] {
-                    if let Some(Event::Key(KeyEvent {
-                        code: KeyCode::Char('q'),
-                        ..
-                    })) = parser.advance(byte)
-                    {
-                        write!(term, "\x1b[?25h")?;
-                        return Ok(());
+                    if let Some(event) = parser.advance(byte) {
+                        if let Event::Key(KeyEvent { code, .. }) = event {
+                            match code {
+                                KeyCode::Char('q') => {
+                                    write!(term, "\x1b[?25h")?;
+                                    return Ok(());
+                                }
+                                KeyCode::Char('?') => {
+                                    show_help = !show_help;
+                                }
+                                _ => {}
+                            }
+                        }
                     }
                 }
             }
@@ -75,10 +82,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // 4. Render
             compositor.planes.clear();
             let mut p = Plane::new(1, w, h);
-            let msg = format!("FPS: {} | Res: {}x{} | X: {:.1}", fps, w, h, x_pos);
-            p.put_str(0, 0, &msg);
 
-            p.put_str(x_pos as u16, h / 2, "🚀 IO Writer");
+            if show_help {
+                let help_text = "╭───────────────────────────────────────────────────╮
+│              Game Loop Help                    │
+├───────────────────────────────────────────────┤
+│  q    — Quit                                  │
+│  ?    — Toggle this help                      │
+│  →    — Watch the rocket fly                  │
+│  FPS  — Measures render performance           │
+╰───────────────────────────────────────────────╯";
+                for (i, line) in help_text.lines().enumerate() {
+                    p.put_str(2, 2 + i as u16, line);
+                }
+            } else {
+                let msg = format!("FPS: {} | Res: {}x{} | X: {:.1} | ?: help", fps, w, h, x_pos);
+                p.put_str(0, 0, &msg);
+                p.put_str(x_pos as u16, h / 2, "🚀 IO Writer");
+            }
 
             compositor.add_plane(p);
             compositor.render(term.inner())?;
