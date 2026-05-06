@@ -955,6 +955,54 @@ impl Widget for HelpOverlay {
     }
 }
 
+// Status Bar widget
+struct StatusBarWidget {
+    id: WidgetId,
+    area: std::cell::Cell<Rect>,
+}
+
+impl StatusBarWidget {
+    fn new(id: WidgetId) -> Self {
+        Self {
+            id,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
+        }
+    }
+}
+
+impl Widget for StatusBarWidget {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area.get() }
+    fn set_area(&mut self, area: Rect) { self.area.set(area); }
+    fn z_index(&self) -> u16 { 5 }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool { false }
+
+    fn render(&self, area: Rect) -> Plane {
+        let mut plane = Plane::new(0, area.width, area.height);
+        plane.z_index = 5;
+        let t = get_current_theme();
+        let hint = "t: theme | ?: help | q: quit";
+        for (i, c) in hint.chars().take(area.width as usize).enumerate() {
+            let idx = i as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg_muted;
+                plane.cells[idx].bg = t.bg;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        plane
+    }
+
+    fn on_theme_change(&mut self, _theme: &Theme) {
+        // Re-render on theme change
+    }
+}
+
 fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
