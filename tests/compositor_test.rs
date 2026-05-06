@@ -1,3 +1,4 @@
+use dracon_terminal_engine::compositor::filter::{Dim, Filter, Invert};
 use dracon_terminal_engine::compositor::{Cell, Color, Compositor, Plane, Styles};
 
 #[test]
@@ -237,4 +238,419 @@ fn test_compositor_plane_z_ordering() {
     comp.add_plane(plane3);
     let z_indices: Vec<_> = comp.planes.iter().map(|p| p.z_index).collect();
     assert!(z_indices.windows(2).all(|w| w[0] <= w[1]));
+}
+
+// ===== Comprehensive Compositor Tests =====
+
+#[test]
+fn test_plane_put_cell_sets_opaque() {
+    let mut plane = Plane::new(0, 10, 10);
+    let cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::BOLD,
+        transparent: false,
+        skip: false,
+    };
+    plane.put_cell(5, 5, cell);
+    assert!(!plane.cells[5 * 10 + 5].transparent);
+}
+
+#[test]
+fn test_plane_put_cell_out_of_bounds_ignored() {
+    let mut plane = Plane::new(0, 10, 10);
+    let cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    plane.put_cell(100, 100, cell);
+    assert_eq!(plane.cells.iter().filter(|c| c.char == 'X').count(), 0);
+}
+
+#[test]
+fn test_plane_put_char_wide_character_marks_next_as_skip() {
+    let mut plane = Plane::new(0, 10, 10);
+    plane.put_char(0, 0, '一');
+    let idx = 0 * 10 + 0;
+    let next_idx = idx + 1;
+    assert!(plane.cells[idx].char == '一');
+    assert!(plane.cells[next_idx].skip);
+}
+
+#[test]
+fn test_plane_fill_bg() {
+    let mut plane = Plane::new(0, 10, 10);
+    plane.fill_bg(Color::Rgb(30, 30, 30));
+    for cell in &plane.cells {
+        assert_eq!(cell.bg, Color::Rgb(30, 30, 30));
+        assert!(!cell.transparent);
+    }
+}
+
+#[test]
+fn test_plane_fill_bg_preserves_existing_content() {
+    let mut plane = Plane::new(0, 3, 3);
+    plane.put_char(1, 1, 'X');
+    let fg_before = plane.cells[1 * 3 + 1].fg;
+    plane.fill_bg(Color::Rgb(50, 50, 50));
+    assert_eq!(plane.cells[1 * 3 + 1].char, 'X');
+    assert_eq!(plane.cells[1 * 3 + 1].fg, fg_before);
+}
+
+#[test]
+fn test_cell_eq_same_content_equal() {
+    let cell1 = Cell {
+        char: 'A',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::BOLD,
+        transparent: false,
+        skip: false,
+    };
+    let cell2 = Cell {
+        char: 'A',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::BOLD,
+        transparent: false,
+        skip: false,
+    };
+    assert_eq!(cell1, cell2);
+}
+
+#[test]
+fn test_cell_eq_different_fg_not_equal() {
+    let cell1 = Cell {
+        char: 'A',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    let cell2 = Cell {
+        char: 'A',
+        fg: Color::Rgb(0, 255, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    assert_ne!(cell1, cell2);
+}
+
+#[test]
+fn test_hit_test_with_visible_false_plane() {
+    let mut comp = Compositor::new(80, 24);
+    let mut plane = Plane::new(1, 10, 10);
+    plane.set_absolute_position(5, 5);
+    plane.cells[0].transparent = false;
+    plane.visible = false;
+    comp.add_plane(plane);
+    assert!(comp.hit_test(5, 5).is_none());
+}
+
+#[test]
+fn test_hit_test_returns_topmost() {
+    let mut comp = Compositor::new(80, 24);
+    let mut lower = Plane::new(1, 10, 10);
+    lower.set_absolute_position(0, 0);
+    lower.cells[0].transparent = false;
+    lower.z_index = 0;
+    let mut upper = Plane::new(2, 10, 10);
+    upper.set_absolute_position(0, 0);
+    upper.cells[0].transparent = false;
+    upper.z_index = 1;
+    comp.add_plane(lower);
+    comp.add_plane(upper);
+    let hit = comp.hit_test(0, 0);
+    assert!(hit.is_some());
+    assert_eq!(hit.unwrap().id, 2);
+}
+
+#[test]
+fn test_hit_test_transparent_upper_shows_lower() {
+    let mut comp = Compositor::new(80, 24);
+    let mut lower = Plane::new(1, 10, 10);
+    lower.set_absolute_position(0, 0);
+    lower.cells[0].transparent = false;
+    lower.z_index = 0;
+    let mut upper = Plane::new(2, 10, 10);
+    upper.set_absolute_position(0, 0);
+    upper.cells[0].transparent = true;
+    upper.z_index = 1;
+    comp.add_plane(upper);
+    comp.add_plane(lower);
+    let hit = comp.hit_test(0, 0);
+    assert!(hit.is_some());
+    assert_eq!(hit.unwrap().id, 1);
+}
+
+#[test]
+fn test_compositor_multiple_planes_hit_topmost_opaque() {
+    let mut comp = Compositor::new(80, 24);
+    let mut p1 = Plane::new(1, 5, 5);
+    p1.set_absolute_position(0, 0);
+    p1.cells[0].transparent = false;
+    p1.z_index = 0;
+    let mut p2 = Plane::new(2, 5, 5);
+    p2.set_absolute_position(2, 2);
+    p2.cells[0].transparent = false;
+    p2.z_index = 1;
+    let mut p3 = Plane::new(3, 5, 5);
+    p3.set_absolute_position(4, 4);
+    p3.cells[0].transparent = false;
+    p3.z_index = 2;
+    comp.add_plane(p1);
+    comp.add_plane(p2);
+    comp.add_plane(p3);
+    assert!(comp.hit_test(6, 6).is_some());
+    assert_eq!(comp.hit_test(6, 6).unwrap().id, 3);
+    assert!(comp.hit_test(1, 1).is_some());
+    assert_eq!(comp.hit_test(1, 1).unwrap().id, 1);
+}
+
+#[test]
+fn test_compositor_plane_sort_preserves_insertion_order_same_z() {
+    let mut comp = Compositor::new(80, 24);
+    let p1 = Plane::new(1, 10, 10);
+    let p2 = Plane::new(2, 10, 10);
+    let p3 = Plane::new(3, 10, 10);
+    comp.add_plane(p1);
+    comp.add_plane(p2);
+    comp.add_plane(p3);
+    let z_indices: Vec<_> = comp.planes.iter().map(|p| p.z_index).collect();
+    assert!(z_indices.windows(2).all(|w| w[0] <= w[1]));
+}
+
+#[test]
+fn test_compositor_resize_clears_planes() {
+    let mut comp = Compositor::new(80, 24);
+    let plane = Plane::new(1, 80, 24);
+    comp.add_plane(plane);
+    comp.resize(120, 40);
+    assert_eq!(comp.size(), (120, 40));
+}
+
+#[test]
+fn test_dim_filter_actually_modifies_cell() {
+    let dim = Dim { factor: 0.5 };
+    let mut cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 150, 200),
+        bg: Color::Rgb(50, 75, 100),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    dim.apply(&mut cell, 0, 0, 0.0);
+    assert_eq!(cell.fg, Color::Rgb(50, 75, 100));
+    assert_eq!(cell.bg, Color::Rgb(25, 37, 50));
+}
+
+#[test]
+fn test_dim_filter_resets_dont_change() {
+    let dim = Dim { factor: 0.5 };
+    let mut cell = Cell {
+        char: 'X',
+        fg: Color::Reset,
+        bg: Color::Reset,
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    let orig_fg = cell.fg;
+    let orig_bg = cell.bg;
+    dim.apply(&mut cell, 0, 0, 0.0);
+    assert_eq!(cell.fg, orig_fg);
+    assert_eq!(cell.bg, orig_bg);
+}
+
+#[test]
+fn test_invert_filter_swaps_fg_bg() {
+    let invert = Invert;
+    let mut cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 150, 200),
+        bg: Color::Rgb(50, 75, 100),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    invert.apply(&mut cell, 0, 0, 0.0);
+    assert_eq!(cell.fg, Color::Rgb(50, 75, 100));
+    assert_eq!(cell.bg, Color::Rgb(100, 150, 200));
+}
+
+#[test]
+fn test_pulse_filter_time_zero_no_effect() {
+    use dracon_terminal_engine::compositor::filter::Pulse;
+    let pulse = Pulse;
+    let mut cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    pulse.apply(&mut cell, 0, 0, 0.0);
+    assert_eq!(cell.fg, Color::Rgb(100, 100, 100));
+}
+
+#[test]
+fn test_scanline_filter_even_rows_dimmed() {
+    use dracon_terminal_engine::compositor::filter::Scanline;
+    let scanline = Scanline;
+    let mut even_cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    scanline.apply(&mut even_cell, 0, 0, 0.0);
+    assert_eq!(even_cell.fg, Color::Rgb(80, 80, 80));
+    assert_eq!(even_cell.bg, Color::Rgb(40, 40, 40));
+    let mut odd_cell = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    scanline.apply(&mut odd_cell, 0, 1, 0.0);
+    assert_eq!(odd_cell.fg, Color::Rgb(100, 100, 100));
+    assert_eq!(odd_cell.bg, Color::Rgb(50, 50, 50));
+}
+
+#[test]
+fn test_glitch_filter_deterministic_at_same_time() {
+    use dracon_terminal_engine::compositor::filter::Glitch;
+    let glitch = Glitch;
+    let mut cell1 = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    let mut cell2 = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    glitch.apply(&mut cell1, 5, 5, 42.0);
+    glitch.apply(&mut cell2, 5, 5, 42.0);
+    assert_eq!(cell1.char, cell2.char);
+    assert_eq!(cell1.fg, cell2.fg);
+}
+
+#[test]
+fn test_glitch_filter_different_at_different_times() {
+    use dracon_terminal_engine::compositor::filter::Glitch;
+    let glitch = Glitch;
+    let mut cell1 = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    let mut cell2 = Cell {
+        char: 'X',
+        fg: Color::Rgb(100, 100, 100),
+        bg: Color::Rgb(50, 50, 50),
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    glitch.apply(&mut cell1, 5, 5, 10.0);
+    glitch.apply(&mut cell2, 5, 5, 20.0);
+    let same_result = cell1.char == cell2.char && cell1.fg == cell2.fg;
+    assert!(!same_result);
+}
+
+#[test]
+fn test_plane_with_dim_filter() {
+    let mut plane = Plane::new(0, 10, 10);
+    plane.filter = Some(Box::new(Dim { factor: 0.3 }));
+    assert!(plane.filter.is_some());
+}
+
+#[test]
+fn test_plane_fill_and_put_char() {
+    let mut plane = Plane::new(0, 10, 10);
+    plane.fill_bg(Color::Rgb(20, 20, 20));
+    plane.put_char(5, 5, 'A');
+    let idx = 5 * 10 + 5;
+    assert_eq!(plane.cells[idx].char, 'A');
+    assert_eq!(plane.cells[idx].bg, Color::Rgb(20, 20, 20));
+    assert!(!plane.cells[idx].transparent);
+}
+
+#[test]
+fn test_compositor_hit_test_edge_of_plane() {
+    let mut comp = Compositor::new(80, 24);
+    let mut plane = Plane::new(1, 10, 10);
+    plane.set_absolute_position(5, 5);
+    plane.cells[(9 * 10 + 9) as usize].transparent = false;
+    comp.add_plane(plane);
+    assert!(comp.hit_test(14, 14).is_some());
+    assert!(comp.hit_test(15, 15).is_none());
+}
+
+#[test]
+fn test_compositor_plane_all_cells_transparent_returns_none() {
+    let mut comp = Compositor::new(80, 24);
+    let plane = Plane::new(1, 10, 10);
+    comp.add_plane(plane);
+    for x in 0..10 {
+        for y in 0..10 {
+            assert!(comp.hit_test(x, y).is_none());
+        }
+    }
+}
+
+#[test]
+fn test_compositor_mixed_opaque_transparent_in_plane() {
+    let mut comp = Compositor::new(80, 24);
+    let mut plane = Plane::new(1, 5, 5);
+    plane.set_absolute_position(0, 0);
+    plane.cells[0].transparent = false;
+    plane.cells[1].transparent = true;
+    plane.cells[2].transparent = false;
+    comp.add_plane(plane);
+    assert!(comp.hit_test(0, 0).is_some());
+    assert!(comp.hit_test(1, 0).is_none());
+    assert!(comp.hit_test(2, 0).is_some());
+}
+
+#[test]
+fn test_plane_clear_resets_to_transparent() {
+    let mut plane = Plane::new(0, 10, 10);
+    plane.put_cell(5, 5, Cell {
+        char: 'X',
+        fg: Color::Rgb(255, 0, 0),
+        bg: Color::Rgb(0, 0, 0),
+        style: Styles::BOLD,
+        transparent: false,
+        skip: false,
+    });
+    plane.clear();
+    let cell = &plane.cells[5 * 10 + 5];
+    assert_eq!(cell.char, ' ');
+    assert!(cell.transparent);
 }
