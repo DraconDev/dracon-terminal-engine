@@ -31,6 +31,7 @@ impl TextEditorAdapter {
             editor,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
+            theme: crate::framework::theme::Theme::default(),
         }
     }
 
