@@ -204,6 +204,7 @@ impl Widget for Gauge {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.theme.bg);
 
         let label_text = format!("{}: {:.1}%", self.label, self.percentage());
         for (i, c) in label_text.chars().take(area.width as usize).enumerate() {
