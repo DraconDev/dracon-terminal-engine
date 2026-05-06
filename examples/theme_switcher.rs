@@ -1032,6 +1032,9 @@ fn main() -> Result<()> {
     let help_overlay = HelpOverlay::new(WidgetId::new(7), Arc::clone(&show_help));
     let _help_id = app.add_widget(Box::new(help_overlay), Rect::new(0, 0, 80, 24));
 
+    let status_bar = StatusBarWidget::new(WidgetId::new(8));
+    let _status_id = app.add_widget(Box::new(status_bar), Rect::new(0, 23, 80, 1));
+
     let _ = app
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {

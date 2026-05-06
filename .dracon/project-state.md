@@ -4,20 +4,19 @@
 Added a standardized status bar widget to the theme switcher example
 
 ## Context
-This implements a consistent status bar component across examples, showing keyboard shortcuts and theme information. It follows the standardized pattern seen in other examples (form and table widgets).
+This change aligns with the recent effort to standardize status bars across examples, improving consistency in the UI and user experience.
 
 ## Completed
-- [x] Created `StatusBarWidget` struct with basic widget implementation
-- [x] Implemented rendering of keyboard shortcut hints
-- [x] Added theme-aware rendering with proper z-indexing
-- [x] Included theme change handling
+- [x] Added a `StatusBarWidget` to the theme switcher example
+- [x] Positioned the status bar at the bottom of the screen (row 23)
+- [x] Integrated with the existing widget system using `WidgetId::new(8)`
 
 ## In Progress
-- [x] Status bar implementation for theme switcher example
+- [x] Status bar implementation is complete for this example
 
 ## Blockers
-- None identified
+- None identified for this specific change
 
 ## Next Steps
-1. Verify status bar appears correctly in theme switcher example
-2. Ensure consistent styling across all examples with status bars
+1. Verify status bar rendering in the theme switcher example
+2. Apply similar status bar standardization to other examples as part of ongoing work
