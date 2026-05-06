@@ -1,20 +1,25 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency changes from recent widget test expansions
+Expanded test coverage for widget event handling (Table, Tree, and other interactive components)
 
 ## Context
-This change was triggered by recent expansions in widget test coverage, particularly for new UI components like MenuBar, CommandPalette, and Tree. The Cargo.lock file needs to be updated to ensure all dependencies are correctly resolved for these new test scenarios.
+To ensure robust behavior of interactive UI components, we're adding comprehensive test coverage for keyboard navigation, mouse interactions, and state management across Table, Tree, and other widget types.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency changes from recent widget test expansions
+- [x] Added keyboard navigation tests for Table (Up/Down/Home/End keys)
+- [x] Added mouse interaction tests for Table (row selection and hover tracking)
+- [x] Added keyboard navigation tests for Tree (Down/Up/Left/Right keys)
+- [x] Added state management tests for Tree (expansion/collapse behavior)
+- [x] Implemented key repeat suppression tests for Table
+- [x] Added mouse event handling tests for Tree (node selection)
 
 ## In Progress
-- [x] No active work in progress beyond the Cargo.lock update
+- [ ] Completing remaining widget event tests (MenuBar, CommandPalette, etc.)
 
 ## Blockers
-- None identified for this specific change
+- Need to finalize test coverage for remaining interactive widgets
 
 ## Next Steps
-1. Verify that all dependencies are correctly resolved with the updated Cargo.lock
-2. Continue with ongoing work on widget test coverage and UI component development
+1. Complete test coverage for remaining interactive widgets
+2. Refactor test initialization to use builder patterns consistently
