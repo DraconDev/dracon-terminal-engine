@@ -342,11 +342,12 @@ mod tests {
     #[test]
     fn test_manager_preserves_active_after_cleanup() {
         let mut manager = AnimationManager::new();
-        let _short = manager.start(0.0, 100.0, Duration::from_millis(5));
+        let short_id = manager.start(0.0, 100.0, Duration::from_millis(5));
         let long_id = manager.start(0.0, 100.0, Duration::from_secs(10));
         std::thread::sleep(Duration::from_millis(20));
         manager.cleanup();
         assert_eq!(manager.len(), 1);
+        assert!(manager.value(short_id).is_none());
         assert!(manager.value(long_id).is_some());
         assert!(!manager.is_done(long_id));
     }
