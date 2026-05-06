@@ -138,7 +138,7 @@ struct TabbedApp {
     area: Rect,
     should_quit: Arc<AtomicBool>,
     show_help: bool,
-    theme_index: usize,
+    theme: Theme,
 }
 
 const THEMES: [&str; 3] = ["cyberpunk", "dracula", "nord"];
@@ -149,6 +149,7 @@ impl TabbedApp {
             WidgetId::new(1),
             vec!["Dashboard", "Logs", "Settings", "Stats"],
         );
+        let theme = Theme::nord();
         Self {
             tabbar,
             dashboard: DashboardState::new(WidgetId::new(10)),
@@ -158,7 +159,7 @@ impl TabbedApp {
             area: Rect::new(0, 0, 80, 24),
             should_quit,
             show_help: false,
-            theme_index: 0,
+            theme,
         }
     }
 
