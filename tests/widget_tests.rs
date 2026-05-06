@@ -9,7 +9,7 @@ use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, Button, Checkbox, Gauge, Label, ProgressBar, Radio, Slider, Spinner,
-    StatusBadge, StatusBar, Toggle,
+    StatusBadge, StatusBar, StatusSegment, Toggle,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use std::cell::Cell;
