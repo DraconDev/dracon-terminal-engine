@@ -220,6 +220,14 @@ impl Plane {
         }
     }
 
+    /// Fills the background color of all cells.
+    pub fn fill_bg(&mut self, bg: Color) {
+        for cell in &mut self.cells {
+            cell.bg = bg;
+            cell.transparent = false;
+        }
+    }
+
     /// Resets all cells to their default state.
     pub fn clear(&mut self) {
         for cell in &mut self.cells {
