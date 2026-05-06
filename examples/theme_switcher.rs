@@ -987,8 +987,7 @@ impl Widget for StatusBarWidget {
         let t = get_current_theme();
         let hint = "t: theme | ?: help | q: quit";
         for (i, c) in hint.chars().take(area.width as usize).enumerate() {
-            let idx = i as usize;
-            if idx < plane.cells.len() {
+            if i < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg_muted;
                 plane.cells[idx].bg = t.bg;
