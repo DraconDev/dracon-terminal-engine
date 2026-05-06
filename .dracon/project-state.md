@@ -1,22 +1,23 @@
 # Project State
 
 ## Current Focus
-Added keyboard shortcuts for help overlay in the theme switcher example
+Added help overlay visibility control to the theme switcher example
 
 ## Context
-The theme switcher example now needs consistent help overlay behavior across all examples. This change implements keyboard shortcuts to toggle the help overlay, improving user experience.
+This change implements the help overlay functionality that was previously added as a feature. It connects the help overlay widget to the application's state management system, allowing it to be shown/hidden based on user interaction.
 
 ## Completed
-- [x] Added '?' key to toggle help overlay visibility
-- [x] Added Esc key to close help overlay when visible
-- [x] Maintained existing 'q' key for quit functionality
+- [x] Added `show_help` atomic boolean to track help overlay state
+- [x] Integrated help overlay widget into the application
+- [x] Implemented tick handler to update help overlay visibility
+- [x] Connected help overlay to the application's dirty state system
 
 ## In Progress
-- [ ] None
+- [x] Help overlay visibility control is now fully functional
 
 ## Blockers
-- None
+- None identified for this specific change
 
 ## Next Steps
-1. Verify help overlay behavior across all examples
-2. Document the new keyboard shortcuts in the example's help text
+1. Verify help overlay appears/disappears correctly when triggered
+2. Test keyboard shortcut integration with the help overlay

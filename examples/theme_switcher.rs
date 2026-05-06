@@ -958,10 +958,12 @@ impl Widget for HelpOverlay {
 fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let show_help = Arc::new(AtomicBool::new(false));
+    let help_check = Arc::clone(&show_help);
 
     let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
 
-    let header = ThemeHeader::new(WidgetId::new(1), should_quit);
+    let header = ThemeHeader::new(WidgetId::new(1), should_quit, show_help);
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 0, 80, 3));
 
     let tracking = TrackingWidget::new(WidgetId::new(2));
@@ -979,10 +981,17 @@ fn main() -> Result<()> {
     let demo = WidgetDemoPanel::new(WidgetId::new(6));
     let _demo_id = app.add_widget(Box::new(demo), Rect::new(0, 17, 80, 12));
 
+    let help_overlay = HelpOverlay::new(WidgetId::new(7));
+    let _help_id = app.add_widget(Box::new(help_overlay), Rect::new(0, 0, 80, 24));
+
     let _ = app
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();
+            }
+            // Update help overlay visibility
+            if help_check.load(Ordering::SeqCst) {
+                ctx.mark_all_dirty();
             }
         })
         .run(|_ctx| {});
