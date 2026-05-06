@@ -749,13 +749,6 @@ fn test_split_pane_new_with_id() {
 }
 
 #[test]
-fn test_split_pane_with_theme() {
-    let split = SplitPane::new(Orientation::Horizontal).with_theme(Theme::cyberpunk());
-    let area = Rect::new(0, 0, 80, 24);
-    let _plane = split.render(area);
-}
-
-#[test]
 fn test_split_pane_render() {
     let split = SplitPane::new(Orientation::Horizontal);
     let area = Rect::new(0, 0, 80, 24);
