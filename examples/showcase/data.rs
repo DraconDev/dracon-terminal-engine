@@ -198,7 +198,7 @@ impl ExampleMeta {
             ExampleMeta {
                 name: "theme_switcher",
                 category: "tools",
-                description: "Live theme cycling (15 themes)",
+                description: "Live theme cycling (20 themes)",
                 binary_name: "theme_switcher",
                 preview: &[
                     "Theme: Nord",
