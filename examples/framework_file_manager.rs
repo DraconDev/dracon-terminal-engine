@@ -221,14 +221,39 @@ impl Widget for FileManagerApp {
         let info_x = main_rect.width + 2;
         let info_w = side_rect.width.saturating_sub(3);
 
-        let print_info = |plane: &mut Plane, text: &str, fg: Color| {
+        let mut print_info = |plane: &mut Plane, text: &str, fg: Color, y: &mut u16| {
             for (i, c) in text.chars().take(info_w as usize).enumerate() {
-                let idx = (info_y * area.width + info_x + i as u16) as usize;
+                let idx = (*y * area.width + info_x + i as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = fg;
                     plane.cells[idx].bg = t.surface;
                 }
+            }
+            *y += 1;
+        };
+
+        print_info(&mut plane, "INFORMATION", t.primary, &mut info_y);
+        info_y += 1;
+        print_info(&mut plane, &format!("Items: {}", self.entries.len()), t.fg_muted, &mut info_y);
+        if let Some(entry) = self.entries.get(self.selected) {
+            info_y += 1;
+            print_info(&mut plane, &format!("Name: {}", entry.name), t.fg_on_accent, &mut info_y);
+            if entry.is_dir {
+                print_info(&mut plane, "Type: Directory", t.info, &mut info_y);
+            } else {
+                let size_str = if entry.size < 1024 {
+                    format!("Size: {} B", entry.size)
+                } else if entry.size < 1024 * 1024 {
+                    format!("Size: {} KB", entry.size / 1024)
+                } else if entry.size < 1024 * 1024 * 1024 {
+                    format!("Size: {} MB", entry.size / 1024 / 1024)
+                } else {
+                    format!("Size: {} GB", entry.size / 1024 / 1024 / 1024)
+                };
+                print_info(&mut plane, &size_str, t.warning, &mut info_y);
+            }
+        }
             }
             info_y += 1;
         };
@@ -398,7 +423,7 @@ impl Widget for FileManagerApp {
                     let idx = self.scroll_offset + (row as usize - 2);
                     if idx < self.entries.len() {
                         self.selected = idx;
-                        self.list.set_selected(self.selected);
+                        self.list.scroll_to(self.selected);
                         self.dirty = true;
                         true
                     } else {

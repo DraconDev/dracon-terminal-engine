@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Dependency version bump in Cargo.lock
+Enhanced file manager UI with detailed file information display and improved selection handling
 
 ## Context
-This change was triggered by recent feature implementations across multiple components (file manager, SQLite browser, chat client) that required updated dependencies.
+The file manager UI was improved to provide more detailed information about selected files and directories, and to better handle selection scrolling.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency changes from recent feature implementations
+- [x] Added detailed file information display in the sidebar
+- [x] Improved file size formatting (B, KB, MB, GB)
+- [x] Updated selection handling to use `scroll_to` instead of `set_selected`
+- [x] Enhanced visual distinction between file types (directories vs files)
 
 ## In Progress
-- [x] Dependency management synchronization
+- [x] Implementation of the new information display system
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify all dependencies are properly resolved
-2. Prepare for next feature implementation cycle
-```
+1. Test the new information display with various file types
+2. Verify scroll behavior with large directory listings
