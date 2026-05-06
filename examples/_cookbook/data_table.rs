@@ -394,7 +394,7 @@ impl Widget for Table {
         let status_y = area.height.saturating_sub(1);
         let count_str = format!("{} rows", self.rows.len());
         let hint = format!("Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | q: quit | {}", self.search.query(), count_str);
-        for (i, c) in hint.chars().take(area.width as usize.saturating_sub(2)).enumerate() {
+        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
             let idx = (status_y * area.width + 2 + i as u16) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = c;

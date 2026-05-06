@@ -514,7 +514,7 @@ impl Widget for TableApp {
         // === STATUS BAR ===
         let status_y = area.height.saturating_sub(1);
         let hint = format!("t: theme | ?: help | ↑↓: nav | Enter: select | q: quit | {} users", self.filtered_users.len());
-        for (i, c) in hint.chars().take(area.width as usize.saturating_sub(2)).enumerate() {
+        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
