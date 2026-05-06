@@ -20,6 +20,7 @@ pub struct TextEditorAdapter {
     editor: TextEditor,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    theme: crate::framework::theme::Theme,
 }
 
 impl TextEditorAdapter {
