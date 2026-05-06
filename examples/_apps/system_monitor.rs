@@ -257,6 +257,20 @@ impl SystemData {
         self.processes.sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
         self.processes.truncate(20);
     }
+
+    fn read_hostname(&self) -> String {
+        fs::read_to_string("/proc/sys/kernel/hostname")
+            .ok()
+            .map(|s| s.trim().to_string())
+            .unwrap_or_else(|| "localhost".to_string())
+    }
+
+    fn read_cpu_cores(&self) -> usize {
+        fs::read_to_string("/proc/cpuinfo")
+            .ok()
+            .map(|c| c.lines().filter(|l| l.starts_with("processor")).count())
+            .unwrap_or(1)
+    }
 }
 
 fn format_uptime(seconds: u64) -> String {

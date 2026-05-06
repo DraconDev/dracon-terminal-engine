@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced system monitoring with disk and network utilization tracking
+Added system information retrieval for hostname and CPU core count in the system monitor example.
 
 ## Context
-The system monitor was previously only tracking CPU and memory usage. This change adds disk I/O and network throughput monitoring to provide a more comprehensive system health overview.
+The system monitor example now needs to display basic system information like hostname and CPU core count to provide more context about the monitored system.
 
 ## Completed
-- [x] Added disk utilization gauge and status check
-- [x] Added network throughput gauge and status check
-- [x] Expanded system health status to include disk and network thresholds
-- [x] Updated status badge logic to consider all four metrics
+- [x] Added `read_hostname()` method to read system hostname from `/proc/sys/kernel/hostname`
+- [x] Added `read_cpu_cores()` method to count CPU cores from `/proc/cpuinfo`
 
 ## In Progress
-- [x] Implementation of enhanced monitoring features
+- [ ] Integration of these methods into the UI display
 
 ## Blockers
-- None identified
+- UI components need to be updated to display the new system information
 
 ## Next Steps
-1. Verify threshold values for disk and network metrics
-2. Add visualization for historical trends of all metrics
+1. Update the UI to show hostname and CPU core count
+2. Add unit tests for the new methods
