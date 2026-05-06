@@ -352,7 +352,7 @@ impl Widget for LogMonitor {
         let s = self.last_log.elapsed().as_secs();
         let last_str = if s < 1 { "now" } else { &format!("{}s ago", s) };
         let auto_str = if self.auto_scroll { "auto" } else { "paused" };
-        let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  c=clear r=resume  |  q=quit", last_str, self.total_lines, auto_str);
+        let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  t: theme | ?: help | c: clear | r: resume | q: quit", last_str, self.total_lines, auto_str);
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {

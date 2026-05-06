@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Standardized footer help text formatting across dashboard builder example
+Standardized help text formatting in log monitor UI
 
 ## Context
-This change aligns with recent work standardizing help displays across examples by improving readability and consistency in the dashboard builder's footer text.
+Part of the ongoing effort to standardize help text across all examples. This commit updates the log monitor's status bar to match the new standardized format.
 
 ## Completed
-- [x] Reformatted footer help text to use pipe-separated format for better visual scanning
-- [x] Maintained all existing functionality while improving visual clarity
+- [x] Updated log monitor status bar to include standardized help text format
+- [x] Added theme cycling shortcut ('t') to the help text
+- [x] Improved help text readability with consistent formatting
 
 ## In Progress
-- [x] No active work in progress beyond this change
+- [ ] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify consistency with other examples' help displays
-2. Consider adding color coding to help items for better visual distinction
+1. Verify standardized help text appears consistently across all examples
+2. Review for any additional UI elements needing help text standardization
+```
