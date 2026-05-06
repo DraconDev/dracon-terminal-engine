@@ -120,7 +120,6 @@ fn cycle_theme(&mut self) {
         self.search.on_theme_change(&self.theme);
         self.progress.on_theme_change(&self.theme);
         self.button.on_theme_change(&self.theme);
-        self.dirty = true;
     }
 
     fn widget_mut(&mut self, slot: usize) -> &mut dyn Widget {
@@ -179,7 +178,7 @@ impl Widget for WidgetGallery {
 
         // Header
         let title = " Widget Gallery ";
-        let theme_label = format!(" {} ", THEMES[self.theme_index]);
+        let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 1), 0,
             &theme_label, t.secondary, t.bg, false);
