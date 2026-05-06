@@ -129,6 +129,11 @@ impl Showcase {
             ("kanagawa", Theme::kanagawa()),
             ("everforest", Theme::everforest()),
             ("monokai", Theme::monokai()),
+            ("warm", Theme::warm()),
+            ("cool", Theme::cool()),
+            ("forest", Theme::forest()),
+            ("sunset", Theme::sunset()),
+            ("mono", Theme::mono()),
         ]
     }
 

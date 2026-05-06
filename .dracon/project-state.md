@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect dependency changes from recent widget test refactoring
+Added five new theme options to the showcase example.
 
 ## Context
-This change was triggered by the recent refactoring of widget tests, which involved removing redundant imports and test cases. The Cargo.lock update ensures the project's dependencies remain consistent with the current codebase.
+The project recently expanded the built-in theme palette from 15 to 20 options, and this commit adds the corresponding showcase examples for the new themes.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect dependency changes from widget test refactoring
+- [x] Added showcase examples for five new themes: warm, cool, forest, sunset, and mono
 
 ## In Progress
-- [ ] None
+- [x] Theme showcase examples for all available themes
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all dependencies are properly resolved
-2. Continue with ongoing widget test improvements
+1. Verify all new themes render correctly in the showcase
+2. Update documentation to reflect the expanded theme options
