@@ -1,24 +1,23 @@
 # Project State
 
 ## Current Focus
-Added comprehensive keyboard navigation tests for SplitPane widget
+Added comprehensive mouse interaction tests for the ConfirmDialog widget
 
 ## Context
-This implements test coverage for keyboard navigation functionality added in the "feat(keyboard navigation): Added keyboard navigation support for SplitPane widget" commit
+This change implements mouse interaction support for the ConfirmDialog widget, which was previously only keyboard-driven. This improves usability by allowing users to interact with dialogs using mouse clicks.
 
 ## Completed
-- [x] Added tests for horizontal split pane ratio adjustment with left/right keys
-- [x] Added tests for vertical split pane ratio adjustment with up/down keys
-- [x] Added tests for ratio clamping at minimum (0.1) and maximum (0.9) values
-- [x] Added tests for ignoring unsupported key events
-- [x] Added tests for ignoring key repeat events
+- [x] Added mouse click tests for ConfirmDialog buttons (confirm/cancel)
+- [x] Added tests for edge cases (wrong row, right-click, outside buttons)
+- [x] Updated SplitPane test imports to include KeyEvent types
 
 ## In Progress
-- [x] Comprehensive test coverage for SplitPane keyboard navigation
+- [x] Mouse interaction implementation for ConfirmDialog
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify all tests pass in CI
-2. Consider adding integration tests for SplitPane keyboard interaction
+1. Implement mouse interaction for other widgets
+2. Add visual feedback for mouse interactions
+```

@@ -4,7 +4,7 @@ use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{Orientation, SplitPane};
-use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 #[test]

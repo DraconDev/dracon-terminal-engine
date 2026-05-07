@@ -109,3 +109,79 @@ fn test_confirm_dialog_with_theme() {
     let dlg = ConfirmDialog::new("t", "m").with_theme(theme);
     assert_eq!(dlg.theme.name, "cyberpunk");
 }
+
+#[test]
+fn test_confirm_dialog_mouse_click_confirm() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
+
+    assert_eq!(dlg.confirmed(), None);
+
+    // Click on the Confirm button row (height - 2 = 5), somewhere in the middle where confirm button is
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 5);
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+}
+
+#[test]
+fn test_confirm_dialog_mouse_click_cancel() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
+
+    assert_eq!(dlg.confirmed(), None);
+
+    // Click on the Cancel button (should be to the right of Confirm)
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 25, 5);
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+}
+
+#[test]
+fn test_confirm_dialog_mouse_click_outside_buttons() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
+
+    assert_eq!(dlg.confirmed(), None);
+
+    // Click on the button row but way off to the side
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 38, 5);
+    assert!(!consumed);
+    assert_eq!(dlg.confirmed(), None);
+}
+
+#[test]
+fn test_confirm_dialog_mouse_wrong_row() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
+
+    // Click on the title row, not the button row
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 1);
+    assert!(!consumed);
+    assert_eq!(dlg.confirmed(), None);
+}
+
+#[test]
+fn test_confirm_dialog_mouse_right_click_ignored() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
+
+    // Right click on confirm button should be ignored
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Right), 10, 5);
+    assert!(!consumed);
+    assert_eq!(dlg.confirmed(), None);
+}
