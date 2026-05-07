@@ -219,9 +219,9 @@ fn test_splitpane_handle_key_left_decreases_ratio() {
 fn test_splitpane_handle_key_right_increases_ratio() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
-        kind: crate::input::event::KeyEventKind::Press,
-        code: crate::input::event::KeyCode::Right,
+    let result = pane.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Right,
         modifiers: Default::default(),
     });
 
@@ -233,9 +233,9 @@ fn test_splitpane_handle_key_right_increases_ratio() {
 fn test_splitpane_handle_key_up_decreases_ratio() {
     let mut pane = SplitPane::new(Orientation::Vertical).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
-        kind: crate::input::event::KeyEventKind::Press,
-        code: crate::input::event::KeyCode::Up,
+    let result = pane.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Up,
         modifiers: Default::default(),
     });
 
@@ -247,7 +247,7 @@ fn test_splitpane_handle_key_up_decreases_ratio() {
 fn test_splitpane_handle_key_down_increases_ratio() {
     let mut pane = SplitPane::new(Orientation::Vertical).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
+    let result = pane.handle_key(KeyEvent {
         kind: crate::input::event::KeyEventKind::Press,
         code: crate::input::event::KeyCode::Down,
         modifiers: Default::default(),
@@ -286,8 +286,8 @@ fn test_splitpane_handle_key_clamping_at_max() {
 
     // Should clamp to 0.9, not exceed
     pane.handle_key(crate::input::event::KeyEvent {
-        kind: crate::input::event::KeyEventKind::Press,
-        code: crate::input::event::KeyCode::Right,
+        kind: KeyEventKind::Press,
+        code: KeyCode::Right,
         modifiers: Default::default(),
     });
 
@@ -295,8 +295,8 @@ fn test_splitpane_handle_key_clamping_at_max() {
 
     // Should stay at 0.9
     pane.handle_key(crate::input::event::KeyEvent {
-        kind: crate::input::event::KeyEventKind::Press,
-        code: crate::input::event::KeyCode::Right,
+        kind: KeyEventKind::Press,
+        code: KeyCode::Right,
         modifiers: Default::default(),
     });
 
@@ -307,7 +307,7 @@ fn test_splitpane_handle_key_clamping_at_max() {
 fn test_splitpane_handle_key_ignores_unsupported_keys() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
+    let result = pane.handle_key(KeyEvent {
         kind: crate::input::event::KeyEventKind::Press,
         code: crate::input::event::KeyCode::Char('x'),
         modifiers: Default::default(),
@@ -321,7 +321,7 @@ fn test_splitpane_handle_key_ignores_unsupported_keys() {
 fn test_splitpane_handle_key_ignores_repeat_events() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
+    let result = pane.handle_key(KeyEvent {
         kind: crate::input::event::KeyEventKind::Repeat,
         code: crate::input::event::KeyCode::Left,
         modifiers: Default::default(),
