@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored test suite to use `widgets` module instead of `command` for `LogLine` type.
+Refactored streaming text test to use `LoggedLine` instead of `LogLine` for consistency with command module.
 
 ## Context
-The test suite was using the wrong module path for `LogLine`, which could cause test failures if the module structure changes. This change ensures consistency with the rest of the codebase.
+The test was updated to maintain consistency with the command module's logging system, which now uses `LoggedLine` with severity levels (like "info") instead of the widget module's `LogLine`.
 
 ## Completed
-- [x] Updated `LogLine` type reference from `command` to `widgets` module
-- [x] Maintained identical test behavior while fixing the module path
+- [x] Updated streaming text test to use `LoggedLine::new()` with severity level
+- [x] Maintained same test functionality but with updated type
 
 ## In Progress
-- [x] No active work in progress beyond this change
+- [ ] No active work in progress
 
 ## Blockers
-- None identified for this specific change
+- None identified
 
 ## Next Steps
-1. Verify all related tests pass after this change
-2. Check for any other instances of `LogLine` usage that may need similar updates
+1. Verify all related tests still pass with the new type
+2. Consider if other tests need similar updates to maintain consistency
