@@ -180,7 +180,7 @@ mod tests {
         let anim = Animation::new(10.0, 20.0, Duration::from_secs(1));
         std::thread::sleep(Duration::from_millis(5));
         let val = anim.value();
-        assert!(val >= 10.0 && val <= 20.0);
+        assert!((10.0..=20.0).contains(&val));
     }
 
     #[test]
@@ -291,7 +291,7 @@ mod tests {
         let anim = Animation::new(-100.0, 100.0, Duration::from_secs(1));
         std::thread::sleep(Duration::from_millis(10));
         let val = anim.value();
-        assert!(val >= -100.0 && val <= 100.0);
+        assert!((-100.0..=100.0).contains(&val));
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
         let anim = Animation::new(100.0, 0.0, Duration::from_secs(1));
         std::thread::sleep(Duration::from_millis(10));
         let val = anim.value();
-        assert!(val >= 0.0 && val <= 100.0);
+        assert!((0.0..=100.0).contains(&val));
         assert!(anim.value() < 100.0);
     }
 

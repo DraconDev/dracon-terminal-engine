@@ -53,7 +53,7 @@ fn test_table_sort_survives_theme_change() {
     table.on_theme_change(&theme);
 
     let plane = table.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn test_table_clear_sort() {
     table.set_sort(None, true);
 
     let plane = table.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -98,7 +98,7 @@ fn test_table_row_selection_after_sort() {
     table.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 2);
 
     let plane = table.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -113,7 +113,7 @@ fn test_table_multiple_theme_changes() {
     for theme in &themes {
         table.on_theme_change(theme);
         let plane = table.render(Rect::new(0, 0, 40, 10));
-        assert!(plane.cells.len() > 0);
+        assert!(!plane.cells.is_empty());
     }
 }
 
@@ -130,7 +130,7 @@ fn test_table_empty_rows_sort() {
     table.set_sort(Some(0), true);
 
     let plane = table.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -147,5 +147,5 @@ fn test_table_single_row_sort() {
     table.set_sort(Some(0), true);
 
     let plane = table.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }

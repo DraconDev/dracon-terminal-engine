@@ -56,14 +56,14 @@ fn test_chat_list_scrollable() {
 fn test_chat_system_message() {
     let label = Label::new("*** User joined the channel ***");
     let plane = label.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
 fn test_chat_empty_message() {
     let label = Label::new("");
     let plane = label.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn test_chat_unicode_messages() {
     ];
     let list = List::new_with_id(WidgetId::new(1), messages);
     let plane = list.render(Rect::new(0, 0, 80, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

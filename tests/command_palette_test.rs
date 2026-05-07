@@ -1,7 +1,7 @@
 //! CommandPalette tests — filtering, navigation, execution.
 
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{CommandItem, CommandPalette};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
@@ -86,7 +86,7 @@ fn test_palette_filter_by_name() {
     palette.handle_key(key_press(KeyCode::Char('n')));
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -101,7 +101,7 @@ fn test_palette_filter_by_category() {
     palette.handle_key(key_press(KeyCode::Char('t')));
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -114,7 +114,7 @@ fn test_palette_navigation_up_down() {
     palette.handle_key(key_press(KeyCode::Up));
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn test_palette_backspace_clears_filter() {
     palette.handle_key(key_press(KeyCode::Backspace));
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -175,7 +175,7 @@ fn test_palette_empty_filter_shows_all() {
     palette.show();
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -190,7 +190,7 @@ fn test_palette_no_match_filter() {
     palette.handle_key(key_press(KeyCode::Char('z')));
 
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -200,7 +200,7 @@ fn test_palette_theme_change() {
 
     palette.on_theme_change(&Theme::cyberpunk());
     let plane = palette.render(Rect::new(0, 0, 40, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

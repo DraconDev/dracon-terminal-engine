@@ -55,8 +55,8 @@ fn test_button_focus_indicator() {
     let plane_blurred = btn.render(Rect::new(0, 0, 15, 3));
 
     // Both should render without issue
-    assert!(plane_focused.cells.len() > 0);
-    assert!(plane_blurred.cells.len() > 0);
+    assert!(!plane_focused.cells.is_empty());
+    assert!(!plane_blurred.cells.is_empty());
 }
 
 #[test]

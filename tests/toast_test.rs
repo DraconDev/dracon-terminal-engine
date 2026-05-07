@@ -59,7 +59,7 @@ fn test_toast_info_colors() {
         .with_kind(ToastKind::Info)
         .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn test_toast_success_colors() {
         .with_kind(ToastKind::Success)
         .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn test_toast_warning_colors() {
         .with_kind(ToastKind::Warning)
         .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn test_toast_error_colors() {
         .with_kind(ToastKind::Error)
         .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn test_toast_theme_change() {
     let mut toast = Toast::new(WidgetId::new(1), "Test");
     toast.on_theme_change(&Theme::cyberpunk());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

@@ -41,7 +41,7 @@ fn test_status_bar_theme_change() {
 
     bar.on_theme_change(&Theme::cyberpunk());
     let plane = bar.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn test_status_bar_long_segments() {
 fn test_status_bar_empty() {
     let bar = StatusBar::new(WidgetId::new(1));
     let plane = bar.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

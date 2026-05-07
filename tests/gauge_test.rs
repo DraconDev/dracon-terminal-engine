@@ -93,7 +93,7 @@ fn test_gauge_render_with_value() {
     let mut gauge = Gauge::new("Memory").max(100.0).with_theme(Theme::nord());
     gauge.set_value(42.0);
     let plane = gauge.render(Rect::new(0, 0, 30, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -101,7 +101,7 @@ fn test_gauge_theme_change() {
     let mut gauge = Gauge::new("Disk");
     gauge.on_theme_change(&Theme::cyberpunk());
     let plane = gauge.render(Rect::new(0, 0, 30, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

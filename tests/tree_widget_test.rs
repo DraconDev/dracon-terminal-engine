@@ -117,7 +117,7 @@ fn test_tree_mouse_hover() {
     let mut tree = make_tree();
     tree.set_area(Rect::new(0, 0, 40, 10));
 
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+    use dracon_terminal_engine::input::event::MouseEventKind;
     let result = tree.handle_mouse(MouseEventKind::Moved, 5, 0);
     assert!(result);
 }

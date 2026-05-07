@@ -1,7 +1,7 @@
 //! Modal dialog tests — focus trap, button navigation, callbacks.
 
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
@@ -153,5 +153,5 @@ fn test_modal_theme_change() {
 
     let plane = modal.render(Rect::new(0, 0, 80, 24));
     // Modal background should use theme
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }

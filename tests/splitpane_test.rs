@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{Orientation, SplitPane};
 use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
@@ -94,7 +94,7 @@ fn test_splitpane_theme_change() {
     pane.on_theme_change(&theme);
 
     let plane = pane.render(Rect::new(0, 0, 80, 24));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

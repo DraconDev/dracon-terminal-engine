@@ -316,7 +316,7 @@ fn test_plane_put_cell_out_of_bounds_ignored() {
 fn test_plane_put_char_wide_character_marks_next_as_skip() {
     let mut plane = Plane::new(0, 10, 10);
     plane.put_char(0, 0, '一');
-    let idx = 0 * 10 + 0;
+    let idx = 0;
     let next_idx = idx + 1;
     assert!(plane.cells[idx].char == '一');
     assert!(plane.cells[next_idx].skip);
@@ -336,10 +336,10 @@ fn test_plane_fill_bg() {
 fn test_plane_fill_bg_preserves_existing_content() {
     let mut plane = Plane::new(0, 3, 3);
     plane.put_char(1, 1, 'X');
-    let fg_before = plane.cells[1 * 3 + 1].fg;
+    let fg_before = plane.cells[3 + 1].fg;
     plane.fill_bg(Color::Rgb(50, 50, 50));
-    assert_eq!(plane.cells[1 * 3 + 1].char, 'X');
-    assert_eq!(plane.cells[1 * 3 + 1].fg, fg_before);
+    assert_eq!(plane.cells[3 + 1].char, 'X');
+    assert_eq!(plane.cells[3 + 1].fg, fg_before);
 }
 
 #[test]

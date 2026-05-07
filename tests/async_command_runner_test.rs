@@ -11,7 +11,7 @@
 //! - OutputParser integration
 
 use dracon_terminal_engine::framework::command::{
-    BoundCommand, CommandRunner, OutputParser, ParsedOutput,
+    CommandRunner, OutputParser, ParsedOutput,
 };
 use std::time::{Duration, Instant};
 
@@ -436,10 +436,7 @@ mod async_tests {
         };
         let output = runner.run_and_parse(&parser);
 
-        match output {
-            ParsedOutput::Scalar(s) => assert!(s.contains("42") || s.contains("value")),
-            _ => {}
-        }
+        if let ParsedOutput::Scalar(s) = output { assert!(s.contains("42") || s.contains("value")) }
     }
 
     #[test]
@@ -455,10 +452,7 @@ mod async_tests {
         };
         let output = runner.run_and_parse(&parser);
 
-        match output {
-            ParsedOutput::Lines(lines) => assert!(lines.len() >= 2 || lines.len() >= 1),
-            _ => {}
-        }
+        if let ParsedOutput::Lines(lines) = output { assert!(lines.len() >= 2 || !lines.is_empty()) }
     }
 
     #[test]

@@ -55,7 +55,7 @@ fn test_profiler_render_with_metrics() {
     let mut profiler = Profiler::new(WidgetId::new(1)).with_theme(Theme::nord());
     profiler.record("render", Duration::from_millis(16), 1);
     let plane = profiler.render(Rect::new(0, 0, 60, 15));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -72,14 +72,14 @@ fn test_profiler_theme_change() {
     let mut profiler = Profiler::new(WidgetId::new(1));
     profiler.on_theme_change(&Theme::cyberpunk());
     let plane = profiler.render(Rect::new(0, 0, 60, 15));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
 fn test_profiler_empty_metrics() {
     let profiler = Profiler::new(WidgetId::new(1));
     let plane = profiler.render(Rect::new(0, 0, 60, 15));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -104,5 +104,5 @@ fn test_profiler_large_number_of_metrics() {
         );
     }
     let plane = profiler.render(Rect::new(0, 0, 60, 15));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }

@@ -85,7 +85,7 @@ fn test_easing_boundary_values() {
     for easing in easings {
         let anim_start = Animation::new(0.0, 100.0, Duration::from_secs(1)).with_easing(easing);
         let start_val = anim_start.value();
-        assert!(start_val >= 0.0 && start_val <= 100.0);
+        assert!((0.0..=100.0).contains(&start_val));
     }
 }
 

@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::Breadcrumbs;
 use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
@@ -37,7 +37,7 @@ fn test_breadcrumbs_empty() {
 fn test_breadcrumbs_single_segment() {
     let crumbs = Breadcrumbs::new(vec!["root".to_string()]);
     let plane = crumbs.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn test_breadcrumbs_theme_change() {
     let mut crumbs = Breadcrumbs::new(vec!["a".to_string(), "b".to_string()]);
     crumbs.on_theme_change(&Theme::cyberpunk());
     let plane = crumbs.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -104,7 +104,7 @@ fn test_breadcrumbs_long_path_truncated() {
 fn test_breadcrumbs_from_path_empty() {
     let crumbs = Breadcrumbs::from_path(Path::new("/"));
     let plane = crumbs.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

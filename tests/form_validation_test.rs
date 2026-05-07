@@ -22,7 +22,7 @@ fn test_form_field_error_display() {
     // Set error on first field
     form.set_field_error(0, "Username is required");
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -35,7 +35,7 @@ fn test_form_field_error_cleared() {
     form.set_field_value(0, "valid_user");
 
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn test_form_field_value_persists() {
 
     // First field should still have "tes"
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -82,7 +82,7 @@ fn test_form_empty_field_validation() {
     let plane = form.render(Rect::new(0, 0, 40, 10));
 
     // Error should be visible
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_form_out_of_bounds_field_error() {
     form.set_field_error(99, "Error");
     // Should not panic
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn test_form_out_of_bounds_field_value() {
     form.set_field_value(99, "Value");
     // Should not panic
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -145,7 +145,7 @@ fn test_form_multiple_errors() {
     form.set_field_error(2, "Password too short");
 
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

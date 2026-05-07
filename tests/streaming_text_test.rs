@@ -111,7 +111,7 @@ fn test_streaming_text_theme_change() {
     st.append("Test");
     st.on_theme_change(&Theme::cyberpunk());
     let plane = st.render(Rect::new(0, 0, 80, 10));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

@@ -1,4 +1,3 @@
-use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::Slider;
@@ -6,7 +5,7 @@ use ratatui::layout::Rect;
 
 #[test]
 fn test_slider_render_zero_area() {
-    let mut slider = Slider::new(WidgetId::new(1));
+    let slider = Slider::new(WidgetId::new(1));
     let plane = slider.render(Rect::new(0, 0, 0, 0));
     assert_eq!(plane.width, 1);
     assert_eq!(plane.height, 1);
@@ -14,7 +13,7 @@ fn test_slider_render_zero_area() {
 
 #[test]
 fn test_slider_render_zero_width() {
-    let mut slider = Slider::new(WidgetId::new(1));
+    let slider = Slider::new(WidgetId::new(1));
     let plane = slider.render(Rect::new(0, 0, 0, 1));
     assert_eq!(plane.width, 1);
     assert_eq!(plane.height, 1);
@@ -22,7 +21,7 @@ fn test_slider_render_zero_width() {
 
 #[test]
 fn test_slider_render_zero_height() {
-    let mut slider = Slider::new(WidgetId::new(1));
+    let slider = Slider::new(WidgetId::new(1));
     let plane = slider.render(Rect::new(0, 0, 1, 0));
     assert_eq!(plane.width, 1);
     assert_eq!(plane.height, 1);
@@ -30,7 +29,7 @@ fn test_slider_render_zero_height() {
 
 #[test]
 fn test_slider_render_normal() {
-    let mut slider = Slider::new(WidgetId::new(1));
+    let slider = Slider::new(WidgetId::new(1));
     let plane = slider.render(Rect::new(0, 0, 20, 1));
     assert_eq!(plane.width, 20);
     assert_eq!(plane.height, 1);
@@ -39,7 +38,7 @@ fn test_slider_render_normal() {
 
 #[test]
 fn test_slider_max_equals_min() {
-    let mut slider = Slider::new(WidgetId::new(1)).with_range(5.0, 5.0);
+    let slider = Slider::new(WidgetId::new(1)).with_range(5.0, 5.0);
     let plane = slider.render(Rect::new(0, 0, 20, 1));
     assert_eq!(plane.width, 20);
     assert_eq!(plane.height, 1);

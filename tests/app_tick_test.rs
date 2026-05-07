@@ -153,7 +153,7 @@ impl OutputTrackingWidget {
     fn new(
         id: usize,
         command_output_received: Rc<Cell<bool>>,
-        last_output: Rc<RefCell<Option<String>>>,
+        _last_output: Rc<RefCell<Option<String>>>,
     ) -> Self {
         Self {
             id: WidgetId::new(id),

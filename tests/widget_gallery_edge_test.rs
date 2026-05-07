@@ -1,5 +1,3 @@
-use dracon_terminal_engine::compositor::Color;
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
@@ -8,8 +6,6 @@ use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
 };
 use ratatui::layout::Rect;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 
 // Minimal reproduction of WidgetGallery's handle_mouse to test edge cases
 struct WidgetGalleryMock {
@@ -96,7 +92,7 @@ impl WidgetGalleryMock {
 
     fn handle_mouse_at_edge(
         &mut self,
-        kind: MouseEventKind,
+        _kind: MouseEventKind,
         col: u16,
         row: u16,
         area: Rect,
@@ -117,7 +113,7 @@ impl WidgetGalleryMock {
                 // This is the fixed code - includes col check
                 if row >= rect.y + 2
                     && row < rect.y + 2 + widget_area.height
-                    && col >= rect.x + 1
+                    && col > rect.x
                     && col < rect.x + 1 + widget_area.width
                 {
                     let _rel_col = col - rect.x - 1;

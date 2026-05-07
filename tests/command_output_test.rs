@@ -901,7 +901,7 @@ mod end_to_end_command_pipeline {
     use super::*;
 
     fn count_rendered_content(
-        rect: ratatui::layout::Rect,
+        _rect: ratatui::layout::Rect,
         plane: &dracon_terminal_engine::compositor::Plane,
     ) -> usize {
         plane

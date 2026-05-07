@@ -3,7 +3,7 @@
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Label, List, Table};
+use dracon_terminal_engine::framework::widgets::{Label, List};
 use dracon_terminal_engine::utils::highlight_code;
 use ratatui::layout::Rect;
 
@@ -87,7 +87,7 @@ fn test_list_render_with_highlighted_items() {
     let mut list = List::new_with_id(WidgetId::new(1), items);
     list.on_theme_change(&Theme::nord());
     let plane = list.render(Rect::new(0, 0, 30, 5));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

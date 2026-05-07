@@ -18,7 +18,7 @@ fn test_widget_inspector_new() {
 fn test_widget_inspector_empty_hierarchy() {
     let inspector = WidgetInspector::new(WidgetId::new(1));
     let plane = inspector.render(Rect::new(0, 0, 60, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -31,7 +31,7 @@ fn test_widget_inspector_with_hierarchy() {
     ];
     inspector.set_hierarchy(nodes);
     let plane = inspector.render(Rect::new(0, 0, 60, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -42,7 +42,7 @@ fn test_widget_inspector_nested_nodes() {
         .push(WidgetNode::new(WidgetId::new(2), "Child"));
     inspector.set_hierarchy(vec![root]);
     let plane = inspector.render(Rect::new(0, 0, 60, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -50,7 +50,7 @@ fn test_widget_inspector_theme_change() {
     let mut inspector = WidgetInspector::new(WidgetId::new(1));
     inspector.on_theme_change(&Theme::cyberpunk());
     let plane = inspector.render(Rect::new(0, 0, 60, 20));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn test_debug_overlay_theme_change() {
     let mut overlay = DebugOverlay::new(WidgetId::new(1));
     overlay.on_theme_change(&Theme::cyberpunk());
     let plane = overlay.render(Rect::new(0, 0, 80, 24));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]

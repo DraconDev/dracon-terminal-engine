@@ -494,8 +494,8 @@ fn test_table_handle_mouse_down_selects_row() {
 
 #[test]
 fn test_tree_handle_key_right_expands_and_navigates() {
-    let mut child1 = TreeNode::new("child1");
-    let mut child2 = TreeNode::new("child2");
+    let child1 = TreeNode::new("child1");
+    let child2 = TreeNode::new("child2");
     let mut root = TreeNode::new("root");
     root.add_child(child1);
     root.add_child(child2);
@@ -667,7 +667,7 @@ fn test_command_palette_handle_key_when_not_visible_returns_false() {
 
 #[test]
 fn test_modal_handle_key_enter_triggers_confirm() {
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
+    use dracon_terminal_engine::framework::widgets::Modal;
     use std::cell::RefCell;
     use std::rc::Rc;
     let mut modal = Modal::new("Test?");

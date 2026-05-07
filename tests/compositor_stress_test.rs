@@ -139,7 +139,7 @@ fn test_compositor_z_index_ordering() {
     for i in (0..10).rev() {
         let mut plane = Plane::new(i, 10, 10);
         plane.z_index = i as i32;
-        plane.cells[0].char = ('0' as u8 + i as u8) as char;
+        plane.cells[0].char = (b'0' + i as u8) as char;
         plane.cells[0].transparent = false;
         compositor.add_plane(plane);
     }

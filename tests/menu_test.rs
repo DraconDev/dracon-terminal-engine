@@ -53,7 +53,7 @@ fn test_menu_bar_theme_change() {
     let mut menu = make_menu_bar();
     menu.on_theme_change(&Theme::cyberpunk());
     let plane = menu.render(Rect::new(0, 0, 80, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -82,7 +82,7 @@ fn test_context_menu_with_theme() {
     let items = vec![("Cut", ContextAction::Open), ("Copy", ContextAction::Open)];
     let menu = ContextMenu::new(items).with_theme(Theme::nord());
     let plane = menu.render(Rect::new(0, 0, 20, 3));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -99,7 +99,7 @@ fn test_context_menu_navigation_down() {
     menu.handle_key(key_press(KeyCode::Down));
 
     let plane = menu.render(Rect::new(0, 0, 20, 5));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
 
 #[test]
@@ -140,5 +140,5 @@ fn test_context_menu_mouse_click() {
 fn test_context_menu_empty() {
     let menu = ContextMenu::new(vec![]);
     let plane = menu.render(Rect::new(0, 0, 20, 1));
-    assert!(plane.cells.len() > 0);
+    assert!(!plane.cells.is_empty());
 }
