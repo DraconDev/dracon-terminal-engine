@@ -1,23 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved SplitPane widget with better divider rendering and resizing constraints
+Add drag state tracking to SplitPane widget
 
 ## Context
-The SplitPane widget was enhanced to provide more robust divider rendering and better handling of resizing constraints, particularly for minimum size requirements.
+The SplitPane widget needs to track when users are actively dragging the divider to enable proper visual feedback and interaction handling.
 
 ## Completed
-- [x] Added `dragging` state to track resize operations
-- [x] Improved divider rendering with explicit character placement
-- [x] Enhanced size calculation to properly enforce minimum size constraints
-- [x] Fixed potential out-of-bounds access in divider rendering
+- [x] Added `dragging` field to SplitPane struct to track drag state
+- [x] Initialized `dragging` as false in all constructors
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] Implement actual drag handling logic (not yet in this commit)
 
 ## Blockers
-- None identified
+- Need to implement the actual drag interaction logic that will use this state
 
 ## Next Steps
-1. Verify the new divider rendering works in all edge cases
-2. Test the resizing behavior with various minimum size values
+1. Implement drag interaction logic using the new `dragging` state
+2. Add visual feedback for active dragging state

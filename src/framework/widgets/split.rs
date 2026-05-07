@@ -40,6 +40,7 @@ impl SplitPane {
             min_size: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
+            dragging: false,
         }
     }
 
@@ -54,6 +55,7 @@ impl SplitPane {
             min_size: 10,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
+            dragging: false,
         }
     }
 
@@ -74,6 +76,7 @@ impl SplitPane {
             min_size: 10,
             area: std::cell::Cell::new(rect),
             dirty: true,
+            dragging: false,
         }
     }
 
