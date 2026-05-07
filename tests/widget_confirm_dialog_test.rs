@@ -120,8 +120,11 @@ fn test_confirm_dialog_mouse_click_confirm() {
 
     assert_eq!(dlg.confirmed(), None);
 
-    // Click on the Confirm button row (height - 2 = 5), somewhere in the middle where confirm button is
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 5);
+    // Click on the Confirm button row (height - 2 = 5)
+    // In a 40-wide area with default labels "Confirm" and "Cancel":
+    // total_btn_len = 7 + 6 + 5 = 18, start_col = (40 - 18) / 2 = 11
+    // Confirm button occupies cols 11..20
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 15, 5);
     assert!(consumed);
     assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
 }
@@ -136,7 +139,8 @@ fn test_confirm_dialog_mouse_click_cancel() {
 
     assert_eq!(dlg.confirmed(), None);
 
-    // Click on the Cancel button (should be to the right of Confirm)
+    // Cancel button starts at: start_col (11) + "[Confirm]".len() (9) + 3 = 23
+    // Cancel button occupies cols 23..31
     let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 25, 5);
     assert!(consumed);
     assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
@@ -152,8 +156,8 @@ fn test_confirm_dialog_mouse_click_outside_buttons() {
 
     assert_eq!(dlg.confirmed(), None);
 
-    // Click on the button row but way off to the side
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 38, 5);
+    // Click between the buttons or outside them
+    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 21, 5);
     assert!(!consumed);
     assert_eq!(dlg.confirmed(), None);
 }

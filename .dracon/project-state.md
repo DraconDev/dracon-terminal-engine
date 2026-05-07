@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Refactored SplitPane keyboard navigation tests by simplifying KeyEvent construction
+Improved mouse interaction testing for ConfirmDialog widget by adding precise button positioning assertions
 
 ## Context
-The test suite for SplitPane keyboard navigation was previously using fully qualified paths for KeyEvent construction, which made the tests more verbose. This refactoring simplifies the test code by using direct imports.
+The previous mouse interaction tests for ConfirmDialog used arbitrary coordinates. This change adds precise calculations for button positions based on dialog width and button labels, ensuring more reliable test coverage.
 
 ## Completed
-- [x] Simplified KeyEvent construction in SplitPane tests by removing redundant module paths
-- [x] Maintained all test functionality while reducing code duplication
+- [x] Updated test_confirm_dialog_mouse_click_confirm() with precise button positioning logic
+- [x] Added comments explaining the button positioning calculations
+- [x] Updated test_confirm_dialog_mouse_click_cancel() with precise button positioning
+- [x] Modified test_confirm_dialog_mouse_click_outside_buttons() to test between buttons
 
 ## In Progress
-- [x] No active work in progress
+- [x] Comprehensive mouse interaction testing for ConfirmDialog widget
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Review test coverage for other keyboard navigation components
-2. Consider similar refactoring for mouse interaction tests
+1. Review test coverage for edge cases (very narrow dialogs, different label lengths)
+2. Consider adding visual regression testing for the ConfirmDialog
