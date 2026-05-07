@@ -105,7 +105,7 @@ fn test_compositor_single_cell_plane() {
 fn test_compositor_resize() {
     let mut compositor = Compositor::new(80, 24);
     let mut plane = Plane::new(0, 80, 24);
-    plane.fill_bg(Color::Red);
+    plane.fill_bg(Color::Ansi(1));
     compositor.add_plane(plane);
     
     compositor.resize(40, 12);
@@ -119,7 +119,7 @@ fn test_compositor_plane_position_offset() {
     let mut plane = Plane::new(0, 10, 10);
     plane.x = 5;
     plane.y = 5;
-    plane.fill_bg(Color::Green);
+    plane.fill_bg(Color::Ansi(2));
     compositor.add_plane(plane);
     
     // Hit inside the positioned plane
@@ -138,7 +138,7 @@ fn test_compositor_z_index_ordering() {
     // Add planes in reverse z-order
     for i in (0..10).rev() {
         let mut plane = Plane::new(i, 10, 10);
-        plane.z_index = i as u16;
+        plane.z_index = i as i32;
         plane.cells[0].char = ('0' as u8 + i as u8) as char;
         plane.cells[0].transparent = false;
         compositor.add_plane(plane);
