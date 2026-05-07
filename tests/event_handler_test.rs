@@ -195,6 +195,64 @@ fn test_slider_handle_key_left_right() {
     assert_eq!(slider.value(), 50.0);
 }
 
+#[test]
+fn test_slider_handle_key_up_down() {
+    let mut slider = Slider::new(WidgetId::default_id()).with_range(0.0, 100.0);
+    assert_eq!(slider.value(), 50.0);
+
+    let result = slider.handle_key(make_key(KeyCode::Up));
+    assert!(result);
+    assert_eq!(slider.value(), 55.0); // 5% step = 5.0
+
+    let result = slider.handle_key(make_key(KeyCode::Down));
+    assert!(result);
+    assert_eq!(slider.value(), 50.0);
+}
+
+#[test]
+fn test_slider_handle_key_home_end() {
+    let mut slider = Slider::new(WidgetId::default_id()).with_range(0.0, 100.0);
+    slider.set_value(42.0);
+
+    let result = slider.handle_key(make_key(KeyCode::Home));
+    assert!(result);
+    assert_eq!(slider.value(), 0.0);
+
+    slider.set_value(42.0);
+
+    let result = slider.handle_key(make_key(KeyCode::End));
+    assert!(result);
+    assert_eq!(slider.value(), 100.0);
+}
+
+#[test]
+fn test_slider_handle_key_clamping_at_bounds() {
+    let mut slider = Slider::new(WidgetId::default_id()).with_range(0.0, 100.0);
+    slider.set_value(2.0);
+
+    // Should clamp to min, not go negative
+    let result = slider.handle_key(make_key(KeyCode::Left));
+    assert!(result);
+    assert_eq!(slider.value(), 0.0);
+
+    slider.set_value(98.0);
+
+    // Should clamp to max, not exceed 100
+    let result = slider.handle_key(make_key(KeyCode::Right));
+    assert!(result);
+    assert_eq!(slider.value(), 100.0);
+}
+
+#[test]
+fn test_slider_handle_key_ignores_unsupported_keys() {
+    let mut slider = Slider::new(WidgetId::default_id()).with_range(0.0, 100.0);
+    let initial = slider.value();
+
+    let result = slider.handle_key(make_key(KeyCode::Char('x')));
+    assert!(!result);
+    assert_eq!(slider.value(), initial);
+}
+
 // ========== Checkbox Event Tests ==========
 
 #[test]
