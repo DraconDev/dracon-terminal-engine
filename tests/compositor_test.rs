@@ -2,6 +2,30 @@ use dracon_terminal_engine::compositor::filter::{Dim, Filter, Invert};
 use dracon_terminal_engine::compositor::{Cell, Color, Compositor, Plane, Styles};
 
 #[test]
+fn test_plane_new_zero_dimensions_clamped_to_one() {
+    let plane = Plane::new(0, 0, 0);
+    assert_eq!(plane.width, 1);
+    assert_eq!(plane.height, 1);
+    assert_eq!(plane.cells.len(), 1);
+}
+
+#[test]
+fn test_plane_new_zero_width_clamped() {
+    let plane = Plane::new(0, 0, 10);
+    assert_eq!(plane.width, 1);
+    assert_eq!(plane.height, 10);
+    assert_eq!(plane.cells.len(), 10);
+}
+
+#[test]
+fn test_plane_new_zero_height_clamped() {
+    let plane = Plane::new(0, 10, 0);
+    assert_eq!(plane.width, 10);
+    assert_eq!(plane.height, 1);
+    assert_eq!(plane.cells.len(), 10);
+}
+
+#[test]
 fn test_plane_new() {
     let plane = Plane::new(0, 80, 24);
     assert_eq!(plane.width, 80);
