@@ -40,8 +40,13 @@ const THEMES: &[&str] = &[
     "everforest",
     "monokai",
     "solarized-light",
-    "gruvbox-dark",
     "light",
+    "dark",
+    "warm",
+    "cool",
+    "forest",
+    "sunset",
+    "mono",
 ];
 const HISTORY_SIZE: usize = 60;
 
