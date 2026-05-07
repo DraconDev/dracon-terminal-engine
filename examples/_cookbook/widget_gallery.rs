@@ -190,6 +190,7 @@ impl Widget for WidgetGallery {
         }
 
         // Widget cards
+        self.zones.borrow_mut().clear();
         for (slot, &(_row, _col, name, icon)) in WIDGET_SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, area);
             let is_selected = slot == self.selected;
@@ -203,6 +204,9 @@ impl Widget for WidgetGallery {
             // Render the widget into its card
             let widget_area = Rect::new(rect.x + 1, rect.y + 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
             if widget_area.width >= 4 && widget_area.height >= 1 {
+                // Register hit zone for this widget's interactive area
+                self.zones.borrow_mut().register(slot, widget_area.x, widget_area.y, widget_area.width, widget_area.height);
+                
                 let mut w_plane = match slot {
                     0 => self.checkbox.render(widget_area),
                     1 => self.radio.render(widget_area),
