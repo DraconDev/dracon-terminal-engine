@@ -115,8 +115,7 @@ impl SplitPane {
                     // Cannot satisfy both min_size constraints; split evenly
                     area.width / 2
                 } else {
-                    ((area.width as f32 * self.ratio).round() as u16)
-                        .clamp(self.min_size, max_w1)
+                    ((area.width as f32 * self.ratio).round() as u16).clamp(self.min_size, max_w1)
                 };
                 let w2 = area.width.saturating_sub(w1);
                 (
@@ -130,8 +129,7 @@ impl SplitPane {
                     // Cannot satisfy both min_size constraints; split evenly
                     area.height / 2
                 } else {
-                    ((area.height as f32 * self.ratio).round() as u16)
-                        .clamp(self.min_size, max_h1)
+                    ((area.height as f32 * self.ratio).round() as u16).clamp(self.min_size, max_h1)
                 };
                 let h2 = area.height.saturating_sub(h1);
                 (
@@ -199,7 +197,8 @@ impl SplitPane {
                     false
                 }
             }
-            crate::input::event::MouseEventKind::Drag(_) | crate::input::event::MouseEventKind::Moved => {
+            crate::input::event::MouseEventKind::Drag(_)
+            | crate::input::event::MouseEventKind::Moved => {
                 if !self.dragging {
                     return false;
                 }
@@ -220,15 +219,13 @@ impl SplitPane {
                 self.dirty = true;
                 true
             }
-            crate::input::event::MouseEventKind::Up(_) => {
-                match self.dragging {
-                    true => {
-                        self.dragging = false;
-                        true
-                    }
-                    false => false,
+            crate::input::event::MouseEventKind::Up(_) => match self.dragging {
+                true => {
+                    self.dragging = false;
+                    true
                 }
-            }
+                false => false,
+            },
             _ => false,
         }
     }

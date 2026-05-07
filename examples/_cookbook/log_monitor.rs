@@ -75,7 +75,7 @@ impl LogMonitor {
         let line = format!("[{}] {} - {}", t, lvl, msg);
         self.all_logs.push(line.clone());
         self.total_lines += 1;
-        
+
         // Only append to viewer if filter allows this level
         if self.level_visible(lvl) {
             self.log_viewer.append_line(&line);
@@ -121,7 +121,7 @@ impl LogMonitor {
         self.push_log();
     }
 
-fn cycle_theme(&mut self) {
+    fn cycle_theme(&mut self) {
         let themes = [
             Theme::dark(),
             Theme::light(),
@@ -144,7 +144,10 @@ fn cycle_theme(&mut self) {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.dirty = true;
     }
@@ -286,26 +289,96 @@ impl Widget for LogMonitor {
         let h = area.height as usize;
 
         // ── Rounded border ──
-        p.cells[0] = Cell { char: '╭', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[w - 1] = Cell { char: '╮', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(h - 1) * w] = Cell { char: '╰', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(h - 1) * w + w - 1] = Cell { char: '╯', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[0] = Cell {
+            char: '╭',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[w - 1] = Cell {
+            char: '╮',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(h - 1) * w] = Cell {
+            char: '╰',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(h - 1) * w + w - 1] = Cell {
+            char: '╯',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
         for x in 1..w - 1 {
-            p.cells[x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[(h - 1) * w + x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[x] = Cell {
+                char: '─',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[(h - 1) * w + x] = Cell {
+                char: '─',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
         for y in 1..h - 1 {
-            p.cells[y * w] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[y * w + w - 1] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[y * w] = Cell {
+                char: '│',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[y * w + w - 1] = Cell {
+                char: '│',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
 
         // ── Header bar with icon and title ──
         let header = " 󰑊 Log Monitor ";
         for (i, c) in header.chars().enumerate().take(w - 4) {
-            p.cells[1 + i] = Cell { char: c, fg: t.fg_on_accent, bg: t.primary, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[1 + i] = Cell {
+                char: c,
+                fg: t.fg_on_accent,
+                bg: t.primary,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         for x in (1 + header.len())..w - 1 {
-            p.cells[1 + x] = Cell { char: '─', fg: t.primary, bg: t.primary, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[1 + x] = Cell {
+                char: '─',
+                fg: t.primary,
+                bg: t.primary,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
 
         // ── Filter toggles ──
@@ -324,7 +397,14 @@ impl Widget for LogMonitor {
                 let idx = 2 * w + fx as usize + j;
                 if idx < p.cells.len() {
                     let fg = if *active { *color } else { t.fg_muted };
-                    p.cells[idx] = Cell { char: c, fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: c,
+                        fg,
+                        bg: t.surface,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }
@@ -342,7 +422,12 @@ impl Widget for LogMonitor {
         }
 
         // ── Log viewer ──
-        let la = Rect::new(1, content_top as u16, (w - 2) as u16, (content_bottom - content_top) as u16);
+        let la = Rect::new(
+            1,
+            content_top as u16,
+            (w - 2) as u16,
+            (content_bottom - content_top) as u16,
+        );
         let lp = self.log_viewer.render(la);
         for (i, c) in lp.cells.iter().enumerate() {
             if c.transparent {
@@ -368,7 +453,14 @@ impl Widget for LogMonitor {
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
-                p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[idx] = Cell {
+                    char: c,
+                    fg: t.fg_muted,
+                    bg: t.surface_elevated,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
         for x in 1..w - 1 {
@@ -408,12 +500,11 @@ impl Widget for LogMonitor {
                 self.dirty = true;
                 true
             }
-            KeyCode::Esc
-                if self.show_help => {
-                    self.show_help = false;
-                    self.dirty = true;
-                    true
-                }
+            KeyCode::Esc if self.show_help => {
+                self.show_help = false;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }

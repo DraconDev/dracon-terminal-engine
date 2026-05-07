@@ -48,7 +48,7 @@ fn test_gauge_fill_color_normal() {
         .warn_threshold(70.0)
         .crit_threshold(90.0)
         .with_theme(Theme::nord());
-    
+
     // Below warning threshold
     let color = gauge.fill_color();
     assert!(color != Color::Reset);
@@ -61,7 +61,7 @@ fn test_gauge_fill_color_warning() {
         .warn_threshold(70.0)
         .crit_threshold(90.0)
         .with_theme(Theme::nord());
-    
+
     gauge.set_value(75.0);
     let color = gauge.fill_color();
     assert!(color != Color::Reset);
@@ -74,7 +74,7 @@ fn test_gauge_fill_color_critical() {
         .warn_threshold(70.0)
         .crit_threshold(90.0)
         .with_theme(Theme::nord());
-    
+
     gauge.set_value(95.0);
     let color = gauge.fill_color();
     assert!(color != Color::Reset);
@@ -119,7 +119,7 @@ fn test_gauge_custom_thresholds() {
         .max(1000.0)
         .warn_threshold(500.0)
         .crit_threshold(800.0);
-    
+
     gauge.set_value(600.0);
     assert_eq!(gauge.percentage(), 60.0);
 }

@@ -18,10 +18,10 @@ fn test_toast_new() {
 fn test_toast_with_kind() {
     let toast = Toast::new(WidgetId::new(1), "Success!").with_kind(ToastKind::Success);
     assert_eq!(toast.message(), "Success!");
-    
+
     let toast = Toast::new(WidgetId::new(1), "Warning!").with_kind(ToastKind::Warning);
     assert_eq!(toast.message(), "Warning!");
-    
+
     let toast = Toast::new(WidgetId::new(1), "Error!").with_kind(ToastKind::Error);
     assert_eq!(toast.message(), "Error!");
 }
@@ -55,28 +55,36 @@ fn test_toast_render() {
 
 #[test]
 fn test_toast_info_colors() {
-    let toast = Toast::new(WidgetId::new(1), "Info").with_kind(ToastKind::Info).with_theme(Theme::nord());
+    let toast = Toast::new(WidgetId::new(1), "Info")
+        .with_kind(ToastKind::Info)
+        .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
     assert!(plane.cells.len() > 0);
 }
 
 #[test]
 fn test_toast_success_colors() {
-    let toast = Toast::new(WidgetId::new(1), "Success").with_kind(ToastKind::Success).with_theme(Theme::nord());
+    let toast = Toast::new(WidgetId::new(1), "Success")
+        .with_kind(ToastKind::Success)
+        .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
     assert!(plane.cells.len() > 0);
 }
 
 #[test]
 fn test_toast_warning_colors() {
-    let toast = Toast::new(WidgetId::new(1), "Warning").with_kind(ToastKind::Warning).with_theme(Theme::nord());
+    let toast = Toast::new(WidgetId::new(1), "Warning")
+        .with_kind(ToastKind::Warning)
+        .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
     assert!(plane.cells.len() > 0);
 }
 
 #[test]
 fn test_toast_error_colors() {
-    let toast = Toast::new(WidgetId::new(1), "Error").with_kind(ToastKind::Error).with_theme(Theme::nord());
+    let toast = Toast::new(WidgetId::new(1), "Error")
+        .with_kind(ToastKind::Error)
+        .with_theme(Theme::nord());
     let plane = toast.render(Rect::new(0, 0, 40, 3));
     assert!(plane.cells.len() > 0);
 }

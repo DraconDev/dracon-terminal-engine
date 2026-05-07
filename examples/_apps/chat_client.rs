@@ -119,7 +119,10 @@ impl ChatState {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
     }
 
@@ -302,7 +305,11 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         let row = header_h + 1 + i as u16;
         let base_idx = (row * area.width) as usize;
         let is_me = msg.sender == "You";
-        let bg = if !msg.is_read { t.primary_active } else { t.surface };
+        let bg = if !msg.is_read {
+            t.primary_active
+        } else {
+            t.surface
+        };
 
         // Avatar placeholder (first letter of sender)
         let avatar = msg.sender.chars().next().unwrap_or('?');
@@ -312,7 +319,7 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
             "You" => t.success,
             _ => t.fg_muted,
         };
-        
+
         // Draw avatar circle
         let avatar_x = if is_me { area.width as usize - 4 } else { 1 };
         if base_idx + avatar_x < plane.cells.len() {
@@ -328,7 +335,11 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
 
         // Message bubble background
         let bubble_start = if is_me { 6 } else { 4 };
-        let bubble_end = if is_me { area.width as usize - 5 } else { area.width as usize - 3 };
+        let bubble_end = if is_me {
+            area.width as usize - 5
+        } else {
+            area.width as usize - 3
+        };
         for col in bubble_start..bubble_end {
             let idx = base_idx + col;
             if idx < plane.cells.len() {
@@ -343,7 +354,11 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
             "You" => t.success,
             _ => t.fg_muted,
         };
-        let sender_x = if is_me { bubble_end - msg.sender.len() - 1 } else { bubble_start + 1 };
+        let sender_x = if is_me {
+            bubble_end - msg.sender.len() - 1
+        } else {
+            bubble_start + 1
+        };
         for (j, c) in msg.sender.chars().enumerate() {
             let idx = base_idx + sender_x + j;
             if idx < plane.cells.len() {
@@ -355,8 +370,16 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         }
 
         // Message text
-        let text_start = if is_me { sender_x } else { bubble_start + msg.sender.len() + 3 };
-        let text_limit = if is_me { text_start.saturating_sub(2) } else { bubble_end.saturating_sub(8) };
+        let text_start = if is_me {
+            sender_x
+        } else {
+            bubble_start + msg.sender.len() + 3
+        };
+        let text_limit = if is_me {
+            text_start.saturating_sub(2)
+        } else {
+            bubble_end.saturating_sub(8)
+        };
         let text_len = text_limit.saturating_sub(text_start);
         for (j, c) in msg.text.chars().take(text_len).enumerate() {
             let idx = if is_me {
@@ -372,7 +395,11 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         }
 
         // Timestamp
-        let time_x = if is_me { 1 } else { (area.width as usize).saturating_sub(6) };
+        let time_x = if is_me {
+            1
+        } else {
+            (area.width as usize).saturating_sub(6)
+        };
         for (j, c) in msg.time.chars().enumerate() {
             let idx = base_idx + time_x + j;
             if idx < plane.cells.len() {
@@ -410,8 +437,10 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         }
         // Corners
         let corners = [
-            (input_y, 1, '╭'), (input_y, area.width.saturating_sub(2), '╮'),
-            (input_y + 2, 1, '╰'), (input_y + 2, area.width.saturating_sub(2), '╯'),
+            (input_y, 1, '╭'),
+            (input_y, area.width.saturating_sub(2), '╮'),
+            (input_y + 2, 1, '╰'),
+            (input_y + 2, area.width.saturating_sub(2), '╯'),
         ];
         for (r, c, ch) in corners {
             let idx = (r * area.width + c) as usize;
@@ -536,8 +565,13 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
     if chat.messages.len() > visible_count {
         let sb_x = area.width - 2;
         let content_h = list_h - 2;
-        let thumb_h = (visible_count as f32 / chat.messages.len() as f32 * content_h as f32).max(1.0) as u16;
-        let thumb_y = (chat.scroll_offset as f32 / chat.messages.len().saturating_sub(visible_count).max(1) as f32 * (content_h - thumb_h) as f32) as u16 + header_h + 1;
+        let thumb_h =
+            (visible_count as f32 / chat.messages.len() as f32 * content_h as f32).max(1.0) as u16;
+        let thumb_y = (chat.scroll_offset as f32
+            / chat.messages.len().saturating_sub(visible_count).max(1) as f32
+            * (content_h - thumb_h) as f32) as u16
+            + header_h
+            + 1;
         for i in 0..thumb_h {
             let y = thumb_y + i;
             if y > header_h && y < input_row - 1 {
@@ -565,42 +599,76 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
                 }
             }
         }
-        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
         for (ch, cx, cy) in corners.iter() {
             let idx = (cy * area.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
         for x in hx + 1..hx + hw - 1 {
             let top_idx = (hy * area.width + x) as usize;
             let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
-            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
-            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+            if top_idx < plane.cells.len() {
+                plane.cells[top_idx].char = '─';
+                plane.cells[top_idx].fg = t.outline;
+            }
+            if bot_idx < plane.cells.len() {
+                plane.cells[bot_idx].char = '─';
+                plane.cells[bot_idx].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left_idx = (y * area.width + hx) as usize;
             let right_idx = (y * area.width + hx + hw - 1) as usize;
-            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
-            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+            if left_idx < plane.cells.len() {
+                plane.cells[left_idx].char = '│';
+                plane.cells[left_idx].fg = t.outline;
+            }
+            if right_idx < plane.cells.len() {
+                plane.cells[right_idx].char = '│';
+                plane.cells[right_idx].fg = t.outline;
+            }
         }
         let title = "Chat Help";
         let tx = hx + (hw - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].style = Styles::BOLD;
+            }
         }
         let shortcuts = [
-            ("↑/↓", "Scroll messages"), ("Enter", "Send message"), ("Type", "Compose"),
-            ("t", "Cycle theme"), ("?", "Toggle help"), ("q", "Quit"),
+            ("↑/↓", "Scroll messages"),
+            ("Enter", "Send message"),
+            ("Type", "Compose"),
+            ("t", "Cycle theme"),
+            ("?", "Toggle help"),
+            ("q", "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }

@@ -11,17 +11,17 @@
 //!   q        — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
-use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 // Widget slot positions in the grid (row, col, name, icon)
 const WIDGET_SLOTS: &[(usize, usize, &str, &str)] = &[
@@ -83,7 +83,7 @@ impl WidgetGallery {
         }
     }
 
-fn cycle_theme(&mut self) {
+    fn cycle_theme(&mut self) {
         let themes = [
             Theme::dark(),
             Theme::light(),
@@ -106,7 +106,10 @@ fn cycle_theme(&mut self) {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.checkbox.on_theme_change(&self.theme);
         self.radio.on_theme_change(&self.theme);
@@ -137,7 +140,13 @@ fn cycle_theme(&mut self) {
     fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
         let (row, col, _name, _icon) = WIDGET_SLOTS[slot];
         let rows = 3u16;
-        let cols = if row == 0 { 4u16 } else if row == 1 { 3u16 } else { 2u16 };
+        let cols = if row == 0 {
+            4u16
+        } else if row == 1 {
+            3u16
+        } else {
+            2u16
+        };
 
         let card_w = area.width.saturating_sub(2) / cols;
         let card_h = area.height.saturating_sub(4) / rows;
@@ -156,15 +165,29 @@ fn cycle_theme(&mut self) {
 }
 
 impl Widget for WidgetGallery {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
@@ -177,8 +200,15 @@ impl Widget for WidgetGallery {
         let title = " Widget Gallery ";
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 1), 0,
-            &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 1),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -199,14 +229,33 @@ impl Widget for WidgetGallery {
 
             // Title with icon
             let title = format!("{} {}", icon, name);
-            draw_text(&mut plane, rect.x + 1, rect.y + 1, &title, t.primary, t.surface, true);
+            draw_text(
+                &mut plane,
+                rect.x + 1,
+                rect.y + 1,
+                &title,
+                t.primary,
+                t.surface,
+                true,
+            );
 
             // Render the widget into its card
-            let widget_area = Rect::new(rect.x + 1, rect.y + 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
+            let widget_area = Rect::new(
+                rect.x + 1,
+                rect.y + 2,
+                rect.width.saturating_sub(2),
+                rect.height.saturating_sub(3),
+            );
             if widget_area.width >= 4 && widget_area.height >= 1 {
                 // Register hit zone for this widget's interactive area
-                self.zones.borrow_mut().register(slot, widget_area.x, widget_area.y, widget_area.width, widget_area.height);
-                
+                self.zones.borrow_mut().register(
+                    slot,
+                    widget_area.x,
+                    widget_area.y,
+                    widget_area.width,
+                    widget_area.height,
+                );
+
                 let mut w_plane = match slot {
                     0 => self.checkbox.render(widget_area),
                     1 => self.radio.render(widget_area),
@@ -219,24 +268,40 @@ impl Widget for WidgetGallery {
                     8 => self.button.render(widget_area),
                     _ => Plane::new(0, 0, 0),
                 };
-                blit_to(&mut plane, &mut w_plane, widget_area.x as usize, widget_area.y as usize);
+                blit_to(
+                    &mut plane,
+                    &mut w_plane,
+                    widget_area.x as usize,
+                    widget_area.y as usize,
+                );
 
                 // Show widget state below
                 let state_y = widget_area.y + widget_area.height + 1;
                 if state_y < rect.y + rect.height - 1 {
-                        let state = match slot {
+                    let state = match slot {
                         0 => format!("checked: {}", self.checkbox.is_checked()),
                         1 => format!("selected: {}", self.radio.is_selected()),
                         2 => format!("on: {}", self.toggle.is_on()),
                         3 => format!("frame: '{}'", self.spinner.current_frame()),
                         4 => format!("value: {:.0}", self.slider.value()),
-                        5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
+                        5 => format!(
+                            "selected: {}",
+                            self.select.selected_label().unwrap_or("none")
+                        ),
                         6 => format!("query: '{}'", self.search.query()),
                         7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
                         8 => String::from("[Click me]"),
                         _ => String::new(),
                     };
-                    draw_text(&mut plane, rect.x + 1, state_y, &state, t.fg_muted, t.surface, false);
+                    draw_text(
+                        &mut plane,
+                        rect.x + 1,
+                        state_y,
+                        &state,
+                        t.fg_muted,
+                        t.surface,
+                        false,
+                    );
                 }
             }
         }
@@ -271,18 +336,38 @@ impl Widget for WidgetGallery {
             for x in hx..hx + hw {
                 let top_idx = (hy * area.width + x) as usize;
                 let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].char = '─';
+                    plane.cells[top_idx].fg = t.outline;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].char = '─';
+                    plane.cells[bot_idx].fg = t.outline;
+                }
             }
             for y in hy..hy + hh {
                 let left_idx = (y * area.width + hx) as usize;
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
-                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
-                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+                if left_idx < plane.cells.len() {
+                    plane.cells[left_idx].char = '│';
+                    plane.cells[left_idx].fg = t.outline;
+                }
+                if right_idx < plane.cells.len() {
+                    plane.cells[right_idx].char = '│';
+                    plane.cells[right_idx].fg = t.outline;
+                }
             }
             let title = "Widget Gallery Help";
             let tx = hx + (hw - title.len() as u16) / 2;
-            draw_text(&mut plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
+            draw_text(
+                &mut plane,
+                tx,
+                hy + 1,
+                title,
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
             let shortcuts = [
                 ("↑↓←→", "Navigate cards"),
                 ("Enter", "Activate widget"),
@@ -292,8 +377,24 @@ impl Widget for WidgetGallery {
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
-                draw_text(&mut plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
-                draw_text(&mut plane, hx + 14, row, desc, t.fg, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    hx + 2,
+                    row,
+                    key,
+                    t.primary,
+                    t.surface_elevated,
+                    false,
+                );
+                draw_text(
+                    &mut plane,
+                    hx + 14,
+                    row,
+                    desc,
+                    t.fg,
+                    t.surface_elevated,
+                    false,
+                );
             }
         }
 
@@ -301,7 +402,9 @@ impl Widget for WidgetGallery {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
@@ -335,12 +438,8 @@ impl Widget for WidgetGallery {
                 };
                 true
             }
-            KeyCode::Enter | KeyCode::Char(' ') => {
-                self.widget_mut(self.selected).handle_key(key)
-            }
-            _ => {
-                self.widget_mut(self.selected).handle_key(key)
-            }
+            KeyCode::Enter | KeyCode::Char(' ') => self.widget_mut(self.selected).handle_key(key),
+            _ => self.widget_mut(self.selected).handle_key(key),
         }
     }
 
@@ -356,12 +455,14 @@ impl Widget for WidgetGallery {
             let rel_row = row - rect.y - 2;
             return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
         }
-        
+
         // Check if click is in any card (for selection, not widget interaction)
         for (slot, &(..)) in WIDGET_SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, self.area);
-            if col >= rect.x && col < rect.x + rect.width
-                && row >= rect.y && row < rect.y + rect.height
+            if col >= rect.x
+                && col < rect.x + rect.width
+                && row >= rect.y
+                && row < rect.y + rect.height
             {
                 if let MouseEventKind::Down(MouseButton::Left) = kind {
                     self.selected = slot;
@@ -396,22 +497,37 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 fn render_card_border(plane: &mut Plane, rect: Rect, t: Theme, selected: bool) {
     let (x, y, w, h) = (rect.x, rect.y, rect.width, rect.height);
     let border = if selected { t.primary } else { t.outline };
-    let bg = if selected { t.surface_elevated } else { t.surface };
-    if w < 3 || h < 3 { return; }
+    let bg = if selected {
+        t.surface_elevated
+    } else {
+        t.surface
+    };
+    if w < 3 || h < 3 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             plane.cells[idx].bg = bg;
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             if is_border {
                 plane.cells[idx].fg = border;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x + w - 1 { '╮' }
-                    else if row == y + h - 1 && col == x { '╰' }
-                    else if row == y + h - 1 && col == x + w - 1 { '╯' }
-                    else if row == y || row == y + h - 1 { '─' }
-                    else { '│' };
+                plane.cells[idx].char = if row == y && col == x {
+                    '╭'
+                } else if row == y && col == x + w - 1 {
+                    '╮'
+                } else if row == y + h - 1 && col == x {
+                    '╰'
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    '╯'
+                } else if row == y || row == y + h - 1 {
+                    '─'
+                } else {
+                    '│'
+                };
             } else {
                 plane.cells[idx].char = ' ';
                 plane.cells[idx].fg = t.fg;
@@ -425,13 +541,17 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
     // Only copy non-transparent, non-null cells
     for i in 0..src.cells.len() {
         let cell = &src.cells[i];
-        if cell.char == '\0' || cell.transparent { continue; }
+        if cell.char == '\0' || cell.transparent {
+            continue;
+        }
         let w = src.width as usize;
         let row = i / w;
         let col = i % w;
         let dy = offset_y + row;
         let dx = offset_x + col;
-        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
+        if dy >= dest.height as usize || dx >= dest.width as usize {
+            continue;
+        }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
             dest.cells[idx] = cell.clone();

@@ -233,7 +233,16 @@ impl crate::framework::widget::Widget for Tree {
                 for (i, child) in node.children.iter().enumerate() {
                     current_path.push(i);
                     let child_prefix = if node.expanded { "  " } else { "" };
-                    render_node(child, child_prefix, plane, theme, width, row, current_path, hovered);
+                    render_node(
+                        child,
+                        child_prefix,
+                        plane,
+                        theme,
+                        width,
+                        row,
+                        current_path,
+                        hovered,
+                    );
                     current_path.pop();
                 }
             }
@@ -241,7 +250,16 @@ impl crate::framework::widget::Widget for Tree {
 
         for (i, node) in self.root.iter().enumerate() {
             let mut path = vec![i];
-            render_node(node, "", &mut plane, &self.theme, width, &mut row, &mut path, hovered);
+            render_node(
+                node,
+                "",
+                &mut plane,
+                &self.theme,
+                width,
+                &mut row,
+                &mut path,
+                hovered,
+            );
         }
 
         plane

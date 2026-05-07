@@ -19,10 +19,7 @@ fn test_showcase_smoke() {
         .status()
         .expect("failed to run cargo build for showcase");
 
-    assert!(
-        build_status.success(),
-        "cargo build for showcase failed"
-    );
+    assert!(build_status.success(), "cargo build for showcase failed");
 
     let mut child = Command::new("cargo")
         .args(["run", "--example", "showcase"])

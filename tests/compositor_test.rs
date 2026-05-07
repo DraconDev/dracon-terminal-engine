@@ -209,14 +209,30 @@ fn test_compositor_hit_test_transparent_cell() {
 #[test]
 fn test_compositor_draw_text() {
     let mut comp = Compositor::new(80, 24);
-    comp.draw_text("Hello", 10, 5, Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), Styles::BOLD);
+    comp.draw_text(
+        "Hello",
+        10,
+        5,
+        Color::Rgb(255, 255, 255),
+        Color::Rgb(0, 0, 0),
+        Styles::BOLD,
+    );
     assert!(!comp.planes.is_empty());
 }
 
 #[test]
 fn test_compositor_draw_rect() {
     let mut comp = Compositor::new(80, 24);
-    comp.draw_rect(5, 5, 10, 5, '#', Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), Styles::empty());
+    comp.draw_rect(
+        5,
+        5,
+        10,
+        5,
+        '#',
+        Color::Rgb(255, 255, 255),
+        Color::Rgb(0, 0, 0),
+        Styles::empty(),
+    );
     assert!(!comp.planes.is_empty());
 }
 
@@ -667,14 +683,18 @@ fn test_compositor_mixed_opaque_transparent_in_plane() {
 #[test]
 fn test_plane_clear_resets_to_transparent() {
     let mut plane = Plane::new(0, 10, 10);
-    plane.put_cell(5, 5, Cell {
-        char: 'X',
-        fg: Color::Rgb(255, 0, 0),
-        bg: Color::Rgb(0, 0, 0),
-        style: Styles::BOLD,
-        transparent: false,
-        skip: false,
-    });
+    plane.put_cell(
+        5,
+        5,
+        Cell {
+            char: 'X',
+            fg: Color::Rgb(255, 0, 0),
+            bg: Color::Rgb(0, 0, 0),
+            style: Styles::BOLD,
+            transparent: false,
+            skip: false,
+        },
+    );
     plane.clear();
     let cell = &plane.cells[5 * 10 + 5];
     assert_eq!(cell.char, ' ');

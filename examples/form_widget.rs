@@ -62,7 +62,10 @@ impl FormApp {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.form.borrow_mut().on_theme_change(&self.theme);
     }
@@ -95,7 +98,12 @@ impl FormApp {
             }
         }
 
-        let corners = [(y, x, '╭'), (y, x + w - 1, '╮'), (y + h - 1, x, '╰'), (y + h - 1, x + w - 1, '╯')];
+        let corners = [
+            (y, x, '╭'),
+            (y, x + w - 1, '╮'),
+            (y + h - 1, x, '╰'),
+            (y + h - 1, x + w - 1, '╯'),
+        ];
         for (cy, cx, ch) in &corners {
             let idx = (*cy * plane.width + *cx) as usize;
             if idx < plane.cells.len() {
@@ -107,15 +115,27 @@ impl FormApp {
         for col in 1..w - 1 {
             let top_idx = (y * plane.width + x + col) as usize;
             let bot_idx = ((y + h - 1) * plane.width + x + col) as usize;
-            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
-            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+            if top_idx < plane.cells.len() {
+                plane.cells[top_idx].char = '─';
+                plane.cells[top_idx].fg = t.outline;
+            }
+            if bot_idx < plane.cells.len() {
+                plane.cells[bot_idx].char = '─';
+                plane.cells[bot_idx].fg = t.outline;
+            }
         }
 
         for row in 1..h - 1 {
             let left_idx = ((y + row) * plane.width + x) as usize;
             let right_idx = ((y + row) * plane.width + x + w - 1) as usize;
-            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
-            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+            if left_idx < plane.cells.len() {
+                plane.cells[left_idx].char = '│';
+                plane.cells[left_idx].fg = t.outline;
+            }
+            if right_idx < plane.cells.len() {
+                plane.cells[right_idx].char = '│';
+                plane.cells[right_idx].fg = t.outline;
+            }
         }
 
         let start_y = y + (h - help_text.len() as u16) / 2;
@@ -160,7 +180,11 @@ impl Widget for FormApp {
         // Status bar at bottom
         let status_y = area.height.saturating_sub(1);
         let hint = "Tab: next | t: theme | ?: help | q: quit";
-        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
+        for (i, c) in hint
+            .chars()
+            .take((area.width as usize).saturating_sub(2))
+            .enumerate()
+        {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;

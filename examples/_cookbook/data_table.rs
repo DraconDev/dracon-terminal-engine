@@ -134,7 +134,10 @@ impl Table {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.search.on_theme_change(&self.theme);
         self.dirty = true;
@@ -215,7 +218,12 @@ impl Widget for Table {
         let bw = area.width;
         let bh = area.height;
         if bw > 0 && bh > 0 {
-            let corners = [('╭', 0, 0), ('╮', bw - 1, 0), ('╰', 0, bh - 1), ('╯', bw - 1, bh - 1)];
+            let corners = [
+                ('╭', 0, 0),
+                ('╮', bw - 1, 0),
+                ('╰', 0, bh - 1),
+                ('╯', bw - 1, bh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < p.cells.len() {
@@ -226,14 +234,26 @@ impl Widget for Table {
             for x in 1..bw.saturating_sub(1) {
                 let top_idx = x as usize;
                 let bot_idx = ((bh - 1) * area.width + x) as usize;
-                if top_idx < p.cells.len() { p.cells[top_idx].char = '─'; p.cells[top_idx].fg = self.theme.outline; }
-                if bot_idx < p.cells.len() { p.cells[bot_idx].char = '─'; p.cells[bot_idx].fg = self.theme.outline; }
+                if top_idx < p.cells.len() {
+                    p.cells[top_idx].char = '─';
+                    p.cells[top_idx].fg = self.theme.outline;
+                }
+                if bot_idx < p.cells.len() {
+                    p.cells[bot_idx].char = '─';
+                    p.cells[bot_idx].fg = self.theme.outline;
+                }
             }
             for y in 1..bh.saturating_sub(1) {
                 let left_idx = (y * area.width) as usize;
                 let right_idx = (y * area.width + bw - 1) as usize;
-                if left_idx < p.cells.len() { p.cells[left_idx].char = '│'; p.cells[left_idx].fg = self.theme.outline; }
-                if right_idx < p.cells.len() { p.cells[right_idx].char = '│'; p.cells[right_idx].fg = self.theme.outline; }
+                if left_idx < p.cells.len() {
+                    p.cells[left_idx].char = '│';
+                    p.cells[left_idx].fg = self.theme.outline;
+                }
+                if right_idx < p.cells.len() {
+                    p.cells[right_idx].char = '│';
+                    p.cells[right_idx].fg = self.theme.outline;
+                }
             }
         }
 
@@ -275,10 +295,13 @@ impl Widget for Table {
         }
 
         let mut x = 1u16;
-        let col_sep_x: Vec<u16> = widths.iter().scan(1u16, |acc, w| {
-            *acc += w + 1;
-            Some(*acc - 1)
-        }).collect();
+        let col_sep_x: Vec<u16> = widths
+            .iter()
+            .scan(1u16, |acc, w| {
+                *acc += w + 1;
+                Some(*acc - 1)
+            })
+            .collect();
         for (h, w) in heads.iter().zip(widths.iter()) {
             let w = *w.min(&area.width.saturating_sub(x + 1));
             for (j, c) in h.chars().take(w as usize).enumerate() {
@@ -307,7 +330,9 @@ impl Widget for Table {
         let data_start_y = hh + 1;
         for (i, row) in self.rows.iter().skip(self.off).take(self.vis).enumerate() {
             let y = data_start_y + i as u16;
-            if y >= area.height.saturating_sub(1) { break; }
+            if y >= area.height.saturating_sub(1) {
+                break;
+            }
             let sel = self.off + i == self.sel;
             let bg = if sel {
                 self.theme.selection_bg
@@ -395,7 +420,11 @@ impl Widget for Table {
             format!(" No results | {} rows ", self.rows.len())
         };
         let txt_x = (area.width.saturating_sub(txt.len() as u16)) / 2;
-        for (i, c) in txt.chars().take(area.width.saturating_sub(2) as usize).enumerate() {
+        for (i, c) in txt
+            .chars()
+            .take(area.width.saturating_sub(2) as usize)
+            .enumerate()
+        {
             let idx = (sy * area.width + txt_x + i as u16) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = c;
@@ -408,8 +437,16 @@ impl Widget for Table {
         // Status bar
         let status_y = area.height.saturating_sub(1);
         let count_str = format!("{} rows", self.rows.len());
-        let hint = format!("Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | q: quit | {}", self.search.query(), count_str);
-        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
+        let hint = format!(
+            "Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | q: quit | {}",
+            self.search.query(),
+            count_str
+        );
+        for (i, c) in hint
+            .chars()
+            .take((area.width as usize).saturating_sub(2))
+            .enumerate()
+        {
             let idx = (status_y * area.width + 2 + i as u16) as usize;
             if idx < p.cells.len() {
                 p.cells[idx].char = c;
@@ -422,8 +459,11 @@ impl Widget for Table {
         if self.rows.len() > self.vis {
             let sb_x = area.width - 2; // inside right border
             let content_h = area.height.saturating_sub(7); // data area height
-            let thumb_h = (self.vis as f32 / self.rows.len() as f32 * content_h as f32).max(1.0) as u16;
-            let thumb_y = (self.off as f32 / self.rows.len().saturating_sub(self.vis).max(1) as f32 * (content_h - thumb_h) as f32) as u16 + data_start_y;
+            let thumb_h =
+                (self.vis as f32 / self.rows.len() as f32 * content_h as f32).max(1.0) as u16;
+            let thumb_y = (self.off as f32 / self.rows.len().saturating_sub(self.vis).max(1) as f32
+                * (content_h - thumb_h) as f32) as u16
+                + data_start_y;
             for i in 0..thumb_h {
                 let y = thumb_y + i;
                 if y >= data_start_y && y < area.height.saturating_sub(2) {
@@ -456,14 +496,26 @@ impl Widget for Table {
             for x in hx..hx + hw {
                 let top_idx = (hy * area.width + x) as usize;
                 let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
-                if top_idx < p.cells.len() { p.cells[top_idx].char = '─'; p.cells[top_idx].fg = self.theme.outline; }
-                if bot_idx < p.cells.len() { p.cells[bot_idx].char = '─'; p.cells[bot_idx].fg = self.theme.outline; }
+                if top_idx < p.cells.len() {
+                    p.cells[top_idx].char = '─';
+                    p.cells[top_idx].fg = self.theme.outline;
+                }
+                if bot_idx < p.cells.len() {
+                    p.cells[bot_idx].char = '─';
+                    p.cells[bot_idx].fg = self.theme.outline;
+                }
             }
             for y in hy..hy + hh {
                 let left_idx = (y * area.width + hx) as usize;
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
-                if left_idx < p.cells.len() { p.cells[left_idx].char = '│'; p.cells[left_idx].fg = self.theme.outline; }
-                if right_idx < p.cells.len() { p.cells[right_idx].char = '│'; p.cells[right_idx].fg = self.theme.outline; }
+                if left_idx < p.cells.len() {
+                    p.cells[left_idx].char = '│';
+                    p.cells[left_idx].fg = self.theme.outline;
+                }
+                if right_idx < p.cells.len() {
+                    p.cells[right_idx].char = '│';
+                    p.cells[right_idx].fg = self.theme.outline;
+                }
             }
             // Corners
             let corners = [
@@ -503,11 +555,17 @@ impl Widget for Table {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.primary; }
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = c;
+                        p.cells[idx].fg = self.theme.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 12 + j as u16) as usize;
-                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = self.theme.fg; }
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = c;
+                        p.cells[idx].fg = self.theme.fg;
+                    }
                 }
             }
         }

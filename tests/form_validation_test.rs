@@ -18,7 +18,7 @@ fn make_form() -> Form {
 fn test_form_field_error_display() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Set error on first field
     form.set_field_error(0, "Username is required");
     let plane = form.render(Rect::new(0, 0, 40, 10));
@@ -29,11 +29,11 @@ fn test_form_field_error_display() {
 fn test_form_field_error_cleared() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Set and clear error
     form.set_field_error(0, "Error");
     form.set_field_value(0, "valid_user");
-    
+
     let plane = form.render(Rect::new(0, 0, 40, 10));
     assert!(plane.cells.len() > 0);
 }
@@ -42,7 +42,7 @@ fn test_form_field_error_cleared() {
 fn test_form_field_value_persists() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Type into first field
     form.handle_key(KeyEvent {
         code: KeyCode::Char('t'),
@@ -59,14 +59,14 @@ fn test_form_field_value_persists() {
         modifiers: KeyModifiers::empty(),
         kind: KeyEventKind::Press,
     });
-    
+
     // Move to next field
     form.handle_key(KeyEvent {
         code: KeyCode::Down,
         modifiers: KeyModifiers::empty(),
         kind: KeyEventKind::Press,
     });
-    
+
     // First field should still have "tes"
     let plane = form.render(Rect::new(0, 0, 40, 10));
     assert!(plane.cells.len() > 0);
@@ -76,11 +76,11 @@ fn test_form_field_value_persists() {
 fn test_form_empty_field_validation() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Leave field empty and set error
     form.set_field_error(0, "Required field");
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    
+
     // Error should be visible
     assert!(plane.cells.len() > 0);
 }
@@ -89,19 +89,19 @@ fn test_form_empty_field_validation() {
 fn test_form_field_focus_indicator() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // First field focused by default
     let plane1 = form.render(Rect::new(0, 0, 40, 10));
-    
+
     // Move to second field
     form.handle_key(KeyEvent {
         code: KeyCode::Down,
         modifiers: KeyModifiers::empty(),
         kind: KeyEventKind::Press,
     });
-    
+
     let plane2 = form.render(Rect::new(0, 0, 40, 10));
-    
+
     // Should be different due to focus change
     assert_ne!(plane1.cells, plane2.cells);
 }
@@ -139,11 +139,11 @@ fn test_form_out_of_bounds_field_value() {
 fn test_form_multiple_errors() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     form.set_field_error(0, "Username required");
     form.set_field_error(1, "Invalid email");
     form.set_field_error(2, "Password too short");
-    
+
     let plane = form.render(Rect::new(0, 0, 40, 10));
     assert!(plane.cells.len() > 0);
 }
@@ -153,7 +153,7 @@ fn test_form_error_theme_colors() {
     let mut form = make_form().with_theme(Theme::nord());
     form.set_field_error(0, "Error message");
     let plane = form.render(Rect::new(0, 0, 40, 10));
-    
+
     // Error should use theme error color
     let has_error_color = plane.cells.iter().any(|c| c.fg != Color::Reset);
     assert!(has_error_color);

@@ -34,8 +34,16 @@ fn test_profiler_record_multiple() {
 #[test]
 fn test_profiler_set_metrics() {
     let metrics = vec![
-        Metric { name: "A".to_string(), value: Duration::from_millis(10), call_count: 1 },
-        Metric { name: "B".to_string(), value: Duration::from_millis(20), call_count: 2 },
+        Metric {
+            name: "A".to_string(),
+            value: Duration::from_millis(10),
+            call_count: 1,
+        },
+        Metric {
+            name: "B".to_string(),
+            value: Duration::from_millis(20),
+            call_count: 2,
+        },
     ];
     let mut profiler = Profiler::new(WidgetId::new(1));
     profiler.set_metrics(metrics);
@@ -78,7 +86,7 @@ fn test_profiler_empty_metrics() {
 fn test_profiler_metric_values() {
     let mut profiler = Profiler::new(WidgetId::new(1));
     profiler.record("test", Duration::from_millis(100), 5);
-    
+
     let metric = &profiler.metrics()[0];
     assert_eq!(metric.name, "test");
     assert_eq!(metric.value, Duration::from_millis(100));
@@ -89,7 +97,11 @@ fn test_profiler_metric_values() {
 fn test_profiler_large_number_of_metrics() {
     let mut profiler = Profiler::new(WidgetId::new(1));
     for i in 0..50 {
-        profiler.record(&format!("metric{}", i), Duration::from_micros(i as u64 * 100), i as u64);
+        profiler.record(
+            &format!("metric{}", i),
+            Duration::from_micros(i as u64 * 100),
+            i as u64,
+        );
     }
     let plane = profiler.render(Rect::new(0, 0, 60, 15));
     assert!(plane.cells.len() > 0);

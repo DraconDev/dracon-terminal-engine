@@ -22,18 +22,18 @@
 //!   ?           — help overlay
 //!   q           — quit
 
-use std::cell::RefCell;
-use std::rc::Rc;
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, CommandItem, CommandPalette, SearchInput, StatusBar, StatusSegment, TabBar,
-    Tree, TreeNode,
+    Breadcrumbs, CommandItem, CommandPalette, SearchInput, StatusBar, StatusSegment, TabBar, Tree,
+    TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 use std::os::fd::AsFd;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -99,18 +99,66 @@ impl EditorApp {
         let breadcrumbs = Breadcrumbs::new(vec!["src".into(), "main.rs".into()]);
 
         let palette_commands: Vec<CommandItem> = vec![
-            CommandItem { id: "new-tab", name: "New Tab", category: "file" },
-            CommandItem { id: "open", name: "Open File", category: "file" },
-            CommandItem { id: "save", name: "Save", category: "file" },
-            CommandItem { id: "close-tab", name: "Close Tab", category: "file" },
-            CommandItem { id: "search", name: "Search", category: "edit" },
-            CommandItem { id: "cut", name: "Cut", category: "edit" },
-            CommandItem { id: "copy", name: "Copy", category: "edit" },
-            CommandItem { id: "paste", name: "Paste", category: "edit" },
-            CommandItem { id: "cycle-theme", name: "Cycle Theme", category: "view" },
-            CommandItem { id: "toggle-profiler", name: "Toggle Profiler", category: "view" },
-            CommandItem { id: "show-shortcuts", name: "Show Shortcuts", category: "help" },
-            CommandItem { id: "about", name: "About", category: "help" },
+            CommandItem {
+                id: "new-tab",
+                name: "New Tab",
+                category: "file",
+            },
+            CommandItem {
+                id: "open",
+                name: "Open File",
+                category: "file",
+            },
+            CommandItem {
+                id: "save",
+                name: "Save",
+                category: "file",
+            },
+            CommandItem {
+                id: "close-tab",
+                name: "Close Tab",
+                category: "file",
+            },
+            CommandItem {
+                id: "search",
+                name: "Search",
+                category: "edit",
+            },
+            CommandItem {
+                id: "cut",
+                name: "Cut",
+                category: "edit",
+            },
+            CommandItem {
+                id: "copy",
+                name: "Copy",
+                category: "edit",
+            },
+            CommandItem {
+                id: "paste",
+                name: "Paste",
+                category: "edit",
+            },
+            CommandItem {
+                id: "cycle-theme",
+                name: "Cycle Theme",
+                category: "view",
+            },
+            CommandItem {
+                id: "toggle-profiler",
+                name: "Toggle Profiler",
+                category: "view",
+            },
+            CommandItem {
+                id: "show-shortcuts",
+                name: "Show Shortcuts",
+                category: "help",
+            },
+            CommandItem {
+                id: "about",
+                name: "About",
+                category: "help",
+            },
         ];
 
         let cmd_bridge: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
@@ -173,19 +221,26 @@ impl EditorApp {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.dirty = true;
     }
 
     fn sync_tab_bar(&mut self) {
-        let labels: Vec<String> = self.tabs.iter().map(|t| {
-            if t.modified {
-                format!("{} ×", t.title)
-            } else {
-                t.title.clone()
-            }
-        }).collect();
+        let labels: Vec<String> = self
+            .tabs
+            .iter()
+            .map(|t| {
+                if t.modified {
+                    format!("{} ×", t.title)
+                } else {
+                    t.title.clone()
+                }
+            })
+            .collect();
         self.tab_bar = TabBar::new_with_id(
             WidgetId::new(10),
             labels.iter().map(|s| s.as_str()).collect(),
@@ -217,12 +272,11 @@ impl EditorApp {
                 self.active_tab = new_id;
                 self.sync_tab_bar();
             }
-            "close-tab"
-                if self.tabs.len() > 1 => {
-                    self.tabs.remove(self.active_tab);
-                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
-                    self.sync_tab_bar();
-                }
+            "close-tab" if self.tabs.len() > 1 => {
+                self.tabs.remove(self.active_tab);
+                self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                self.sync_tab_bar();
+            }
             "save" => {
                 if let Some(tab) = self.active_tab_mut() {
                     tab.modified = false;
@@ -258,18 +312,32 @@ fn build_file_tree(theme: Theme) -> Tree {
                 label: "󰉋 src".into(),
                 expanded: true,
                 children: vec![
-                    TreeNode { label: format!("{}main.rs", file_icon("main.rs")), expanded: false, children: vec![] },
-                    TreeNode { label: format!("{}lib.rs", file_icon("lib.rs")), expanded: false, children: vec![] },
+                    TreeNode {
+                        label: format!("{}main.rs", file_icon("main.rs")),
+                        expanded: false,
+                        children: vec![],
+                    },
+                    TreeNode {
+                        label: format!("{}lib.rs", file_icon("lib.rs")),
+                        expanded: false,
+                        children: vec![],
+                    },
                 ],
             },
             TreeNode {
                 label: "󰉋 examples".into(),
                 expanded: false,
-                children: vec![
-                    TreeNode { label: format!("{}demo.rs", file_icon("demo.rs")), expanded: false, children: vec![] },
-                ],
+                children: vec![TreeNode {
+                    label: format!("{}demo.rs", file_icon("demo.rs")),
+                    expanded: false,
+                    children: vec![],
+                }],
             },
-            TreeNode { label: format!("{}README.md", file_icon("README.md")), expanded: false, children: vec![] },
+            TreeNode {
+                label: format!("{}README.md", file_icon("README.md")),
+                expanded: false,
+                children: vec![],
+            },
         ],
     };
     Tree::new(WidgetId::new(11))
@@ -278,24 +346,49 @@ fn build_file_tree(theme: Theme) -> Tree {
 }
 
 fn file_icon(name: &str) -> &'static str {
-    if name.ends_with(".rs") { " " }
-    else if name.ends_with(".toml") { " " }
-    else if name.ends_with(".md") { " " }
-    else if name.ends_with(".json") { " " }
-    else if name.ends_with(".js") || name.ends_with(".ts") { " " }
-    else if name.ends_with(".py") { " " }
-    else { " " }
+    if name.ends_with(".rs") {
+        " "
+    } else if name.ends_with(".toml") {
+        " "
+    } else if name.ends_with(".md") {
+        " "
+    } else if name.ends_with(".json") {
+        " "
+    } else if name.ends_with(".js") || name.ends_with(".ts") {
+        " "
+    } else if name.ends_with(".py") {
+        " "
+    } else {
+        " "
+    }
 }
 
 impl Widget for EditorApp {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
         self.file_tree.on_theme_change(theme);
@@ -350,14 +443,24 @@ impl Widget for EditorApp {
             draw_rounded_border(&mut plane, editor_x, editor_y, editor_w, content_h, t);
 
             // Breadcrumbs inside editor
-            let bc_plane = self.breadcrumbs.render(Rect::new(editor_x + 1, editor_y, editor_w - 2, 1));
+            let bc_plane =
+                self.breadcrumbs
+                    .render(Rect::new(editor_x + 1, editor_y, editor_w - 2, 1));
             blit(&mut plane, &bc_plane, editor_x + 1, editor_y);
 
             // Editor content
             let text_y = editor_y + 1;
             let text_h = content_h.saturating_sub(2);
             if let Some(tab) = self.active_tab() {
-                render_editor_content(&mut plane, editor_x + 1, text_y, editor_w - 2, text_h, tab, t);
+                render_editor_content(
+                    &mut plane,
+                    editor_x + 1,
+                    text_y,
+                    editor_w - 2,
+                    text_h,
+                    tab,
+                    t,
+                );
             }
         }
 
@@ -372,14 +475,24 @@ impl Widget for EditorApp {
                     }
                 }
             }
-            draw_text(&mut plane, 2, search_y, "Find:", t.primary, t.surface_elevated, true);
+            draw_text(
+                &mut plane,
+                2,
+                search_y,
+                "Find:",
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
             let search_plane = self.search.render(Rect::new(8, search_y, 30, 1));
             blit(&mut plane, &search_plane, 8, search_y);
         }
 
         // Status bar
         let status_y = area.height - status_h;
-        let status_plane = self.status_bar.render(Rect::new(0, status_y, area.width, status_h));
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, status_y, area.width, status_h));
         blit(&mut plane, &status_plane, 0, status_y);
 
         // Help overlay
@@ -397,7 +510,9 @@ impl Widget for EditorApp {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         // Command palette takes priority when visible
         if self.command_palette.is_visible() {
@@ -492,7 +607,9 @@ impl Widget for EditorApp {
             }
             KeyCode::Up => {
                 if let Some(tab) = self.active_tab_mut() {
-                    if tab.cursor_line > 0 { tab.cursor_line -= 1; }
+                    if tab.cursor_line > 0 {
+                        tab.cursor_line -= 1;
+                    }
                 }
                 self.dirty = true;
                 true
@@ -509,7 +626,9 @@ impl Widget for EditorApp {
             }
             KeyCode::Left => {
                 if let Some(tab) = self.active_tab_mut() {
-                    if tab.cursor_col > 0 { tab.cursor_col -= 1; }
+                    if tab.cursor_col > 0 {
+                        tab.cursor_col -= 1;
+                    }
                 }
                 self.dirty = true;
                 true
@@ -531,7 +650,9 @@ impl Widget for EditorApp {
                     let lines: Vec<&str> = tab.content.lines().collect();
                     let mut new_content = String::new();
                     for (i, line) in lines.iter().enumerate() {
-                        if i > 0 { new_content.push('\n'); }
+                        if i > 0 {
+                            new_content.push('\n');
+                        }
                         if i == tab.cursor_line {
                             let col = tab.cursor_col.min(line.len());
                             new_content.push_str(&line[..col]);
@@ -585,7 +706,9 @@ fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab:
 
     for (i, line) in lines.iter().enumerate().take(h as usize) {
         let row = y + i as u16;
-        if row >= plane.height { break; }
+        if row >= plane.height {
+            break;
+        }
 
         // Line number
         let num = format!("{:>width$} ", i + 1, width = line_num_width as usize);
@@ -595,7 +718,11 @@ fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab:
                 plane.cells[idx] = Cell {
                     char: ch,
                     fg: t.fg_muted,
-                    bg: if i == tab.cursor_line { t.surface_elevated } else { t.bg },
+                    bg: if i == tab.cursor_line {
+                        t.surface_elevated
+                    } else {
+                        t.bg
+                    },
                     style: Styles::empty(),
                     transparent: false,
                     skip: false,
@@ -604,17 +731,27 @@ fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab:
         }
 
         // Line content with basic syntax highlighting
-        for (j, ch) in line.chars().enumerate().take((w - line_num_width - 1) as usize) {
+        for (j, ch) in line
+            .chars()
+            .enumerate()
+            .take((w - line_num_width - 1) as usize)
+        {
             let col = content_x + j as u16;
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() || col >= plane.width { break; }
+            if idx >= plane.cells.len() || col >= plane.width {
+                break;
+            }
 
             let (fg, style) = syntax_color(line, j, t);
 
             plane.cells[idx] = Cell {
                 char: ch,
                 fg,
-                bg: if i == tab.cursor_line { t.surface_elevated } else { t.bg },
+                bg: if i == tab.cursor_line {
+                    t.surface_elevated
+                } else {
+                    t.bg
+                },
                 style,
                 transparent: false,
                 skip: false,
@@ -635,12 +772,20 @@ fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab:
 }
 
 fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
-    let keywords = ["fn", "let", "mut", "pub", "use", "if", "else", "for", "while", "match", "impl", "struct", "enum", "trait", "type", "return", "self", "true", "false", "const", "static", "async", "await"];
-    let types = ["String", "Vec", "Option", "Result", "i32", "u32", "f64", "bool", "char", "usize"];
+    let keywords = [
+        "fn", "let", "mut", "pub", "use", "if", "else", "for", "while", "match", "impl", "struct",
+        "enum", "trait", "type", "return", "self", "true", "false", "const", "static", "async",
+        "await",
+    ];
+    let types = [
+        "String", "Vec", "Option", "Result", "i32", "u32", "f64", "bool", "char", "usize",
+    ];
 
     // Check if we're in a comment
     if let Some(pos) = line.find("//") {
-        if col >= pos { return (t.fg_muted, Styles::empty()); }
+        if col >= pos {
+            return (t.fg_muted, Styles::empty());
+        }
     }
 
     // Check if we're in a string literal
@@ -649,7 +794,9 @@ fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
     for (i, c) in line.chars().enumerate() {
         if c == '"' {
             if in_string {
-                if col >= string_start && col <= i { return (t.success, Styles::empty()); }
+                if col >= string_start && col <= i {
+                    return (t.success, Styles::empty());
+                }
                 in_string = false;
             } else {
                 in_string = true;
@@ -657,7 +804,9 @@ fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
             }
         }
     }
-    if in_string && col >= string_start { return (t.success, Styles::empty()); }
+    if in_string && col >= string_start {
+        return (t.success, Styles::empty());
+    }
 
     // Check for keywords and types
     for word in keywords {
@@ -707,7 +856,15 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     // Title
     let title = "Keyboard Shortcuts";
     let title_x = x + (w - title.len() as u16) / 2;
-    draw_text(plane, title_x, y + 1, title, t.primary, t.surface_elevated, true);
+    draw_text(
+        plane,
+        title_x,
+        y + 1,
+        title,
+        t.primary,
+        t.surface_elevated,
+        true,
+    );
 
     let shortcuts = [
         ("Ctrl+T", "New tab"),
@@ -727,24 +884,43 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     }
 
     let hint = "Press ? or Esc to close";
-    draw_text(plane, x + 3, y + h - 1, hint, t.fg_muted, t.surface_elevated, false);
+    draw_text(
+        plane,
+        x + 3,
+        y + h - 1,
+        hint,
+        t.fg_muted,
+        t.surface_elevated,
+        false,
+    );
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             if is_border {
                 plane.cells[idx].fg = t.outline;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x + w - 1 { '╮' }
-                    else if row == y + h - 1 && col == x { '╰' }
-                    else if row == y + h - 1 && col == x + w - 1 { '╯' }
-                    else if row == y || row == y + h - 1 { '─' }
-                    else { '│' };
+                plane.cells[idx].char = if row == y && col == x {
+                    '╭'
+                } else if row == y && col == x + w - 1 {
+                    '╮'
+                } else if row == y + h - 1 && col == x {
+                    '╰'
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    '╯'
+                } else if row == y || row == y + h - 1 {
+                    '─'
+                } else {
+                    '│'
+                };
                 plane.cells[idx].transparent = false;
             }
         }
@@ -769,7 +945,9 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 fn blit(dst: &mut Plane, src: &Plane, dx: u16, dy: u16) {
     for (i, cell) in src.cells.iter().enumerate() {
-        if cell.transparent { continue; }
+        if cell.transparent {
+            continue;
+        }
         let x = (i % src.width as usize) as u16 + dx;
         let y = (i / src.width as usize) as u16 + dy;
         let idx = (y * dst.width + x) as usize;
@@ -793,7 +971,10 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::nord())
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press && key.modifiers.is_empty() {
+            if key.code == KeyCode::Char('q')
+                && key.kind == KeyEventKind::Press
+                && key.modifiers.is_empty()
+            {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {

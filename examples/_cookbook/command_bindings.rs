@@ -188,27 +188,90 @@ fn render_card(p: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     }
 
     // corners
-    p.cells[py * p.width as usize + px] = Cell { char: '╭', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-    p.cells[py * p.width as usize + px + w - 1] = Cell { char: '╮', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-    p.cells[(py + h - 1) * p.width as usize + px] = Cell { char: '╰', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-    p.cells[(py + h - 1) * p.width as usize + px + w - 1] = Cell { char: '╯', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+    p.cells[py * p.width as usize + px] = Cell {
+        char: '╭',
+        fg: t.outline,
+        bg: t.surface,
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    p.cells[py * p.width as usize + px + w - 1] = Cell {
+        char: '╮',
+        fg: t.outline,
+        bg: t.surface,
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    p.cells[(py + h - 1) * p.width as usize + px] = Cell {
+        char: '╰',
+        fg: t.outline,
+        bg: t.surface,
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
+    p.cells[(py + h - 1) * p.width as usize + px + w - 1] = Cell {
+        char: '╯',
+        fg: t.outline,
+        bg: t.surface,
+        style: Styles::empty(),
+        transparent: false,
+        skip: false,
+    };
 
     // horizontal edges
     for ix in 1..w - 1 {
-        p.cells[py * p.width as usize + px + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(py + h - 1) * p.width as usize + px + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[py * p.width as usize + px + ix] = Cell {
+            char: '─',
+            fg: t.outline,
+            bg: t.surface,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(py + h - 1) * p.width as usize + px + ix] = Cell {
+            char: '─',
+            fg: t.outline,
+            bg: t.surface,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
     }
 
     // vertical edges
     for iy in 1..h - 1 {
-        p.cells[(py + iy) * p.width as usize + px] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(py + iy) * p.width as usize + px + w - 1] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[(py + iy) * p.width as usize + px] = Cell {
+            char: '│',
+            fg: t.outline,
+            bg: t.surface,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(py + iy) * p.width as usize + px + w - 1] = Cell {
+            char: '│',
+            fg: t.outline,
+            bg: t.surface,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
     }
 
     // fill interior
     for iy in 1..h - 1 {
         for ix in 1..w - 1 {
-            p.cells[(py + iy) * p.width as usize + px + ix] = Cell { char: ' ', fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[(py + iy) * p.width as usize + px + ix] = Cell {
+                char: ' ',
+                fg: t.fg,
+                bg: t.surface,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
     }
 }
@@ -262,33 +325,110 @@ impl Widget for CommandBindings {
         let h = area.height as usize;
 
         // ── Rounded border ──
-        p.cells[0] = Cell { char: '╭', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[w - 1] = Cell { char: '╮', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(h - 1) * w] = Cell { char: '╰', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-        p.cells[(h - 1) * w + w - 1] = Cell { char: '╯', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+        p.cells[0] = Cell {
+            char: '╭',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[w - 1] = Cell {
+            char: '╮',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(h - 1) * w] = Cell {
+            char: '╰',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        p.cells[(h - 1) * w + w - 1] = Cell {
+            char: '╯',
+            fg: t.outline,
+            bg: t.bg,
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
         for x in 1..w - 1 {
-            p.cells[x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[(h - 1) * w + x] = Cell { char: '─', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[x] = Cell {
+                char: '─',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[(h - 1) * w + x] = Cell {
+                char: '─',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
         for y in 1..h - 1 {
-            p.cells[y * w] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[y * w + w - 1] = Cell { char: '│', fg: t.outline, bg: t.bg, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[y * w] = Cell {
+                char: '│',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[y * w + w - 1] = Cell {
+                char: '│',
+                fg: t.outline,
+                bg: t.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
 
         // ── Header bar ──
         let header = " 󰔟 Command Bindings ";
         for (i, c) in header.chars().enumerate().take(w - 4) {
-            p.cells[w + 1 + i] = Cell { char: c, fg: t.fg_on_accent, bg: t.primary, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[w + 1 + i] = Cell {
+                char: c,
+                fg: t.fg_on_accent,
+                bg: t.primary,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         for x in (1 + header.len() + 1)..(w - 1) {
-            p.cells[w + x] = Cell { char: '─', fg: t.primary, bg: t.primary, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[w + x] = Cell {
+                char: '─',
+                fg: t.primary,
+                bg: t.primary,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
         }
 
         // ── Card: CPU Gauge (top-left) ──
         render_card(&mut p, 2, 3, 24, 8, t);
         let card_title = " 󰓃 CPU ";
         for (i, c) in card_title.chars().enumerate() {
-            p.cells[3 * w + 3 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 3 + i] = Cell {
+                char: c,
+                fg: t.primary,
+                bg: t.surface,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         let gauge_area = Rect::new(3, 5, 22, 5);
         let gp = self.gauge.render(gauge_area);
@@ -298,7 +438,14 @@ impl Widget for CommandBindings {
         render_card(&mut p, 28, 3, 24, 8, t);
         let status_title = " 󰀄 Connection ";
         for (i, c) in status_title.chars().enumerate() {
-            p.cells[3 * w + 29 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 29 + i] = Cell {
+                char: c,
+                fg: t.primary,
+                bg: t.surface,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         let status_area = Rect::new(29, 5, 22, 5);
         let sp = self.status.render(status_area);
@@ -308,7 +455,14 @@ impl Widget for CommandBindings {
         render_card(&mut p, 54, 3, 24, 8, t);
         let metrics_title = " 󰕙 System Metrics ";
         for (i, c) in metrics_title.chars().enumerate() {
-            p.cells[3 * w + 55 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[3 * w + 55 + i] = Cell {
+                char: c,
+                fg: t.primary,
+                bg: t.surface,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         let kv_area = Rect::new(55, 5, 22, 5);
         let kvp = self.kv_grid.render(kv_area);
@@ -318,7 +472,14 @@ impl Widget for CommandBindings {
         render_card(&mut p, 2, 12, 38, 10, t);
         let log_title = " 󰑊 Activity Log ";
         for (i, c) in log_title.chars().enumerate() {
-            p.cells[12 * w + 3 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[12 * w + 3 + i] = Cell {
+                char: c,
+                fg: t.primary,
+                bg: t.surface,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         let log_area = Rect::new(3, 14, 36, 7);
         let lp = self.log_viewer.render(log_area);
@@ -328,19 +489,40 @@ impl Widget for CommandBindings {
         render_card(&mut p, 42, 12, 36, 10, t);
         let stream_title = " 󰅐 Live Stream ";
         for (i, c) in stream_title.chars().enumerate() {
-            p.cells[12 * w + 43 + i] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[12 * w + 43 + i] = Cell {
+                char: c,
+                fg: t.primary,
+                bg: t.surface,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         let stream_area = Rect::new(43, 14, 34, 7);
         let streamp = self.streaming.render(stream_area);
         blit_plane(&streamp, &mut p, 43, 14);
 
         // ── Status bar ──
-        let auto_str = if self.paused { "⏸ PAUSED" } else { "▶ RUNNING" };
-        let status = format!("  {}  |  tick: {}  |  t: theme | ?: help | q: quit", auto_str, self.tick);
+        let auto_str = if self.paused {
+            "⏸ PAUSED"
+        } else {
+            "▶ RUNNING"
+        };
+        let status = format!(
+            "  {}  |  tick: {}  |  t: theme | ?: help | q: quit",
+            auto_str, self.tick
+        );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
-                p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[idx] = Cell {
+                    char: c,
+                    fg: t.fg_muted,
+                    bg: t.surface_elevated,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
         for x in 1..w - 1 {
@@ -362,7 +544,14 @@ impl Widget for CommandBindings {
                     let py = help_y + sy as i32;
                     if px >= 0 && py >= 0 && px < w as i32 && py < h as i32 {
                         let idx = py as usize * w + px as usize;
-                        p.cells[idx] = Cell { char: ' ', fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                        p.cells[idx] = Cell {
+                            char: ' ',
+                            fg: t.fg,
+                            bg: t.surface,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                     }
                 }
             }
@@ -370,17 +559,73 @@ impl Widget for CommandBindings {
             // rounded border
             let hx = help_x as usize;
             let hy = help_y as usize;
-            p.cells[hy * w + hx] = Cell { char: '╭', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[hy * w + hx + help_w - 1] = Cell { char: '╮', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[(hy + help_h - 1) * w + hx] = Cell { char: '╰', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-            p.cells[(hy + help_h - 1) * w + hx + help_w - 1] = Cell { char: '╯', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+            p.cells[hy * w + hx] = Cell {
+                char: '╭',
+                fg: t.outline,
+                bg: t.surface,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[hy * w + hx + help_w - 1] = Cell {
+                char: '╮',
+                fg: t.outline,
+                bg: t.surface,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[(hy + help_h - 1) * w + hx] = Cell {
+                char: '╰',
+                fg: t.outline,
+                bg: t.surface,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
+            p.cells[(hy + help_h - 1) * w + hx + help_w - 1] = Cell {
+                char: '╯',
+                fg: t.outline,
+                bg: t.surface,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            };
             for ix in 1..help_w - 1 {
-                p.cells[hy * w + hx + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-                p.cells[(hy + help_h - 1) * w + hx + ix] = Cell { char: '─', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[hy * w + hx + ix] = Cell {
+                    char: '─',
+                    fg: t.outline,
+                    bg: t.surface,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
+                p.cells[(hy + help_h - 1) * w + hx + ix] = Cell {
+                    char: '─',
+                    fg: t.outline,
+                    bg: t.surface,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
             for iy in 1..help_h - 1 {
-                p.cells[(hy + iy) * w + hx] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
-                p.cells[(hy + iy) * w + hx + help_w - 1] = Cell { char: '│', fg: t.outline, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                p.cells[(hy + iy) * w + hx] = Cell {
+                    char: '│',
+                    fg: t.outline,
+                    bg: t.surface,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
+                p.cells[(hy + iy) * w + hx + help_w - 1] = Cell {
+                    char: '│',
+                    fg: t.outline,
+                    bg: t.surface,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
             }
 
             // title
@@ -388,7 +633,14 @@ impl Widget for CommandBindings {
             for (i, c) in title.chars().enumerate() {
                 let idx = (hy + 1) * w + hx + 1 + i;
                 if idx < p.cells.len() {
-                    p.cells[idx] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::BOLD, transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: c,
+                        fg: t.primary,
+                        bg: t.surface,
+                        style: Styles::BOLD,
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
 
@@ -406,13 +658,27 @@ impl Widget for CommandBindings {
                 for (j, c) in key_str.chars().enumerate() {
                     let idx = (hy + y_off) * w + hx + 2 + j;
                     if idx < p.cells.len() {
-                        p.cells[idx] = Cell { char: c, fg: t.primary, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                        p.cells[idx] = Cell {
+                            char: c,
+                            fg: t.primary,
+                            bg: t.surface,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                     }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (hy + y_off) * w + hx + 2 + key_str.len() + 1 + j;
                     if idx < p.cells.len() {
-                        p.cells[idx] = Cell { char: c, fg: t.fg, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                        p.cells[idx] = Cell {
+                            char: c,
+                            fg: t.fg,
+                            bg: t.surface,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
                     }
                 }
             }
@@ -422,7 +688,14 @@ impl Widget for CommandBindings {
             for (i, c) in hint.chars().enumerate() {
                 let idx = (hy + help_h - 2) * w + hx + (help_w - hint.len()) / 2 + i;
                 if idx < p.cells.len() {
-                    p.cells[idx] = Cell { char: c, fg: t.fg_muted, bg: t.surface, style: Styles::empty(), transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: c,
+                        fg: t.fg_muted,
+                        bg: t.surface,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }
@@ -467,7 +740,10 @@ impl Widget for CommandBindings {
                     Theme::sunset(),
                     Theme::mono(),
                 ];
-                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                let idx = themes
+                    .iter()
+                    .position(|t| t.name == self.theme.name)
+                    .unwrap_or(0);
                 let next = themes[(idx + 1) % themes.len()];
                 self.on_theme_change(&next);
                 true
@@ -477,12 +753,11 @@ impl Widget for CommandBindings {
                 self.dirty = true;
                 true
             }
-            KeyCode::Esc
-                if self.show_help => {
-                    self.show_help = false;
-                    self.dirty = true;
-                    true
-                }
+            KeyCode::Esc if self.show_help => {
+                self.show_help = false;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }

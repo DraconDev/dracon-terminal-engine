@@ -7,18 +7,18 @@ mod common;
 
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widgets::split::Orientation;
+use dracon_terminal_engine::framework::widgets::table::Column;
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, Button, Checkbox, CommandItem, CommandPalette, ConfirmDialog, ContextAction,
     ContextMenu, Form, Gauge, Hud, Label, List, LogViewer, MenuBar, MenuEntry, MenuItem, Modal,
     ProgressBar, Radio, Select, Slider, Spinner, SplitPane, StatusBadge, StatusBar, StatusSegment,
     TabBar, Table, Toast, ToastKind, Toggle, Tooltip, Tree, TreeNode,
 };
-use dracon_terminal_engine::framework::widgets::split::Orientation;
-use dracon_terminal_engine::framework::widgets::table::Column;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use ratatui::layout::Rect;
 use std::cell::Cell;
 use std::rc::Rc;
-use ratatui::layout::Rect;
 
 #[test]
 fn test_button_new() {
@@ -586,8 +586,8 @@ fn test_status_bar_render() {
 
 #[test]
 fn test_status_bar_add_segment() {
-    let bar = StatusBar::new(WidgetId::default_id())
-        .add_segment(StatusSegment::new("Test segment"));
+    let bar =
+        StatusBar::new(WidgetId::default_id()).add_segment(StatusSegment::new("Test segment"));
     let area = Rect::new(0, 0, 80, 1);
     let plane = bar.render(area);
     assert!(plane.width > 0);
@@ -967,13 +967,11 @@ fn test_tree_clear_dirty() {
 
 #[test]
 fn test_command_palette_new() {
-    let commands = vec![
-        CommandItem {
-            id: "test",
-            name: "Test Command",
-            category: "Testing",
-        },
-    ];
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test Command",
+        category: "Testing",
+    }];
     let palette = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 40, 20);
     let _plane = palette.render(area);
@@ -1142,8 +1140,7 @@ fn test_context_menu_new() {
 
 #[test]
 fn test_context_menu_with_theme() {
-    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)])
-        .with_theme(Theme::cyberpunk());
+    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]).with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 20, 10);
     let _plane = menu.render(area);
 }
@@ -1345,4 +1342,3 @@ fn test_theme_dark_is_default() {
     let default = Theme::default();
     assert_eq!(default.name, "dark");
 }
-

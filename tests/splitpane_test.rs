@@ -23,7 +23,7 @@ fn test_splitpane_new_vertical() {
 fn test_splitpane_ratio_clamping() {
     let pane = SplitPane::new(Orientation::Horizontal).ratio(0.05);
     assert_eq!(pane.get_ratio(), 0.1); // Clamped to min
-    
+
     let pane = SplitPane::new(Orientation::Horizontal).ratio(0.95);
     assert_eq!(pane.get_ratio(), 0.9); // Clamped to max
 }
@@ -32,7 +32,7 @@ fn test_splitpane_ratio_clamping() {
 fn test_splitpane_horizontal_split() {
     let pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
     let (left, right) = pane.split(Rect::new(0, 0, 80, 24));
-    
+
     assert_eq!(left.x, 0);
     assert_eq!(left.y, 0);
     assert_eq!(left.height, 24);
@@ -46,7 +46,7 @@ fn test_splitpane_horizontal_split() {
 fn test_splitpane_vertical_split() {
     let pane = SplitPane::new(Orientation::Vertical).ratio(0.5);
     let (top, bottom) = pane.split(Rect::new(0, 0, 80, 24));
-    
+
     assert_eq!(top.x, 0);
     assert_eq!(top.y, 0);
     assert_eq!(top.width, 80);
@@ -62,7 +62,7 @@ fn test_splitpane_min_size_respected() {
         .ratio(0.5)
         .with_min_size(20);
     let (left, right) = pane.split(Rect::new(0, 0, 80, 24));
-    
+
     assert!(left.width >= 20);
     assert!(right.width >= 20);
 }
@@ -92,7 +92,7 @@ fn test_splitpane_theme_change() {
     let mut pane = SplitPane::new(Orientation::Horizontal);
     let theme = Theme::cyberpunk();
     pane.on_theme_change(&theme);
-    
+
     let plane = pane.render(Rect::new(0, 0, 80, 24));
     assert!(plane.cells.len() > 0);
 }
@@ -101,7 +101,7 @@ fn test_splitpane_theme_change() {
 fn test_splitpane_handle_resize_drag() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
     pane.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Drag on the divider (around x=40)
     let result = pane.handle_resize(
         MouseEventKind::Down(MouseButton::Left),
@@ -116,7 +116,7 @@ fn test_splitpane_handle_resize_drag() {
 fn test_splitpane_handle_resize_drag_horizontal() {
     let mut pane = SplitPane::new(Orientation::Vertical).ratio(0.5);
     pane.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Drag on the divider (around y=12)
     let result = pane.handle_resize(
         MouseEventKind::Down(MouseButton::Left),
@@ -131,7 +131,7 @@ fn test_splitpane_handle_resize_drag_horizontal() {
 fn test_splitpane_handle_resize_outside_divider() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
     pane.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Click far from divider
     let result = pane.handle_resize(
         MouseEventKind::Down(MouseButton::Left),
@@ -146,7 +146,7 @@ fn test_splitpane_handle_resize_outside_divider() {
 fn test_splitpane_drag_changes_ratio() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
     pane.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Start drag at divider
     pane.handle_resize(
         MouseEventKind::Down(MouseButton::Left),
@@ -154,15 +154,10 @@ fn test_splitpane_drag_changes_ratio() {
         10,
         Rect::new(0, 0, 80, 24),
     );
-    
+
     // Drag to new position
-    pane.handle_resize(
-        MouseEventKind::Moved,
-        60,
-        10,
-        Rect::new(0, 0, 80, 24),
-    );
-    
+    pane.handle_resize(MouseEventKind::Moved, 60, 10, Rect::new(0, 0, 80, 24));
+
     // Ratio should have changed
     let ratio = pane.get_ratio();
     assert!(ratio > 0.5);
@@ -172,14 +167,14 @@ fn test_splitpane_drag_changes_ratio() {
 fn test_splitpane_drag_release() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
     pane.set_area(Rect::new(0, 0, 80, 24));
-    
+
     pane.handle_resize(
         MouseEventKind::Down(MouseButton::Left),
         40,
         10,
         Rect::new(0, 0, 80, 24),
     );
-    
+
     let result = pane.handle_resize(
         MouseEventKind::Up(MouseButton::Left),
         60,
@@ -200,7 +195,7 @@ fn test_splitpane_with_divider_char() {
 fn test_splitpane_no_black_background() {
     let pane = SplitPane::new(Orientation::Horizontal);
     let plane = pane.render(Rect::new(0, 0, 80, 24));
-    
+
     for cell in &plane.cells {
         assert_ne!(cell.bg, Color::Reset);
     }

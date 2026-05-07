@@ -18,7 +18,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (mut w, mut h) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())?;
     let mut compositor = Compositor::new(w, h);
-    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(16, 16, 24));
+    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(
+        16, 16, 24,
+    ));
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
@@ -40,7 +42,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
                 for &byte in &buf[..n] {
-                    if let Some(Event::Key(KeyEvent { code: KeyCode::Char(c), .. })) = parser.advance(byte) {
+                    if let Some(Event::Key(KeyEvent {
+                        code: KeyCode::Char(c),
+                        ..
+                    })) = parser.advance(byte)
+                    {
                         match c {
                             'q' => {
                                 write!(term, "\x1b[?25h")?;
@@ -95,7 +101,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     p.put_str(2, 2 + i as u16, line);
                 }
             } else {
-                let msg = format!("FPS: {} | Res: {}x{} | X: {:.1} | ?: help", fps, w, h, x_pos);
+                let msg = format!(
+                    "FPS: {} | Res: {}x{} | X: {:.1} | ?: help",
+                    fps, w, h, x_pos
+                );
                 p.put_str(0, 0, &msg);
                 p.put_str(x_pos as u16, h / 2, "🚀 IO Writer");
             }

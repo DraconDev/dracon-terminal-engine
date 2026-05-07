@@ -173,7 +173,10 @@ impl TreeNav {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
@@ -312,14 +315,26 @@ impl Widget for TreeNav {
             for x in hx..hx + hw {
                 let top_idx = (hy * area.width + x) as usize;
                 let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = self.theme.outline; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = self.theme.outline; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].char = '─';
+                    plane.cells[top_idx].fg = self.theme.outline;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].char = '─';
+                    plane.cells[bot_idx].fg = self.theme.outline;
+                }
             }
             for y in hy..hy + hh {
                 let left_idx = (y * area.width + hx) as usize;
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
-                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = self.theme.outline; }
-                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = self.theme.outline; }
+                if left_idx < plane.cells.len() {
+                    plane.cells[left_idx].char = '│';
+                    plane.cells[left_idx].fg = self.theme.outline;
+                }
+                if right_idx < plane.cells.len() {
+                    plane.cells[right_idx].char = '│';
+                    plane.cells[right_idx].fg = self.theme.outline;
+                }
             }
             // Title
             let title = "Tree Navigator Help";
@@ -345,11 +360,17 @@ impl Widget for TreeNav {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = self.theme.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = self.theme.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = self.theme.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = self.theme.fg;
+                    }
                 }
             }
         }
@@ -455,7 +476,12 @@ impl TreeNav {
         let (w, h) = (area.width, area.height);
         if w > 1 && h > 1 {
             // Corners
-            let corners = [('╭', 0, 0), ('╮', w - 1, 0), ('╰', 0, h - 1), ('╯', w - 1, h - 1)];
+            let corners = [
+                ('╭', 0, 0),
+                ('╮', w - 1, 0),
+                ('╰', 0, h - 1),
+                ('╯', w - 1, h - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < plane.cells.len() {
@@ -467,15 +493,27 @@ impl TreeNav {
             for x in 1..w.saturating_sub(1) {
                 let top_idx = x as usize;
                 let bot_idx = ((h - 1) * area.width + x) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = self.theme.outline; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = self.theme.outline; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].char = '─';
+                    plane.cells[top_idx].fg = self.theme.outline;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].char = '─';
+                    plane.cells[bot_idx].fg = self.theme.outline;
+                }
             }
             // Vertical lines
             for y in 1..h.saturating_sub(1) {
                 let left_idx = (y * area.width) as usize;
                 let right_idx = (y * area.width + w - 1) as usize;
-                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = self.theme.outline; }
-                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = self.theme.outline; }
+                if left_idx < plane.cells.len() {
+                    plane.cells[left_idx].char = '│';
+                    plane.cells[left_idx].fg = self.theme.outline;
+                }
+                if right_idx < plane.cells.len() {
+                    plane.cells[right_idx].char = '│';
+                    plane.cells[right_idx].fg = self.theme.outline;
+                }
             }
         }
 

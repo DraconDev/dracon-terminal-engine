@@ -20,8 +20,8 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{SplitPane};
 use dracon_terminal_engine::framework::widgets::split::Orientation;
+use dracon_terminal_engine::framework::widgets::SplitPane;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::collections::VecDeque;
@@ -32,9 +32,20 @@ use std::time::{Duration, Instant};
 
 const HISTORY_SIZE: usize = 60;
 const THEMES: &[&str] = &[
-    "nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night",
-    "catppuccin", "solarized-dark", "one-dark", "rose-pine", "kanagawa",
-    "everforest", "monokai", "solarized-light", "light",
+    "nord",
+    "dracula",
+    "cyberpunk",
+    "gruvbox-dark",
+    "tokyo-night",
+    "catppuccin",
+    "solarized-dark",
+    "one-dark",
+    "rose-pine",
+    "kanagawa",
+    "everforest",
+    "monokai",
+    "solarized-light",
+    "light",
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -288,23 +299,28 @@ impl SystemData {
                             let end_paren = content.find(')').unwrap_or(content.len());
                             if end_paren > paren && paren > 0 {
                                 let pname = content[paren + 1..end_paren].to_string();
-                                let rest: Vec<&str> = content[end_paren + 1..].split_whitespace().collect();
+                                let rest: Vec<&str> =
+                                    content[end_paren + 1..].split_whitespace().collect();
                                 if rest.len() >= 12 {
-                                    let utime: u64 = rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
-                                    let stime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
-                                    let mem_kb: f32 = fs::read_to_string(format!("/proc/{}/status", pid))
-                                        .ok()
-                                        .and_then(|c| {
-                                            c.lines()
-                                                .find(|l| l.starts_with("VmRSS:"))
-                                                .and_then(|l| l.split_whitespace().nth(1))
-                                                .and_then(|s| s.parse().ok())
-                                        })
-                                        .unwrap_or(0.0);
+                                    let utime: u64 =
+                                        rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
+                                    let stime: u64 =
+                                        rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
+                                    let mem_kb: f32 =
+                                        fs::read_to_string(format!("/proc/{}/status", pid))
+                                            .ok()
+                                            .and_then(|c| {
+                                                c.lines()
+                                                    .find(|l| l.starts_with("VmRSS:"))
+                                                    .and_then(|l| l.split_whitespace().nth(1))
+                                                    .and_then(|s| s.parse().ok())
+                                            })
+                                            .unwrap_or(0.0);
                                     self.processes.push(ProcessInfo {
                                         pid,
                                         name: pname,
-                                        cpu_percent: ((utime + stime) as f32 / 100.0).clamp(0.0, 100.0),
+                                        cpu_percent: ((utime + stime) as f32 / 100.0)
+                                            .clamp(0.0, 100.0),
                                         mem_mb: mem_kb / 1024.0,
                                     });
                                 }
@@ -314,7 +330,8 @@ impl SystemData {
                 }
             }
         }
-        self.processes.sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
+        self.processes
+            .sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
         self.processes.truncate(20);
     }
 }
@@ -375,15 +392,27 @@ impl Dashboard {
 }
 
 impl Widget for Dashboard {
-    fn id(&self) -> WidgetId { WidgetId::new(1) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(1)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
@@ -401,15 +430,30 @@ impl Widget for Dashboard {
         // Header
         let title = " System Dashboard ";
         let theme_label = format!(" {} ", THEMES[self.theme_index]);
-        let status = if self.paused { " ⏸ PAUSED " } else { " ● LIVE " };
+        let status = if self.paused {
+            " ⏸ PAUSED "
+        } else {
+            " ● LIVE "
+        };
         draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
-        let sx = area.width.saturating_sub(status.len() as u16 + theme_label.len() as u16 + 4);
+        let sx = area
+            .width
+            .saturating_sub(status.len() as u16 + theme_label.len() as u16 + 4);
         draw_text(&mut plane, sx, 0, &theme_label, t.secondary, t.bg, false);
-        draw_text(&mut plane, area.width.saturating_sub(status.len() as u16 + 1), 0, status,
-            if self.paused { t.warning } else { t.success }, t.bg, true);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(status.len() as u16 + 1),
+            0,
+            status,
+            if self.paused { t.warning } else { t.success },
+            t.bg,
+            true,
+        );
 
         // Content split: left = metrics, right = processes
-        let (left_rect, right_rect) = self.split.split(Rect::new(0, header_h, area.width, content_h));
+        let (left_rect, right_rect) = self
+            .split
+            .split(Rect::new(0, header_h, area.width, content_h));
 
         // Left panel: metric cards
         self.render_metrics_card(&mut plane, left_rect, t);
@@ -418,13 +462,23 @@ impl Widget for Dashboard {
         self.render_process_panel(&mut plane, right_rect, t);
 
         // Divider
-        let div = self.split.render_divider(Rect::new(0, header_h, area.width, content_h));
+        let div = self
+            .split
+            .render_divider(Rect::new(0, header_h, area.width, content_h));
         blit_plane(&mut plane, &div, div.x as usize, div.y as usize);
 
         // Footer
         let footer_y = area.height.saturating_sub(1);
         let footer_text = " t: theme | ?: help | p: pause | r: refresh | ↑↓: nav | q: quit ";
-        draw_text(&mut plane, 2, footer_y, footer_text, t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            2,
+            footer_y,
+            footer_text,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Help overlay
         if self.show_help {
@@ -435,15 +489,36 @@ impl Widget for Dashboard {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
-        if self.show_help { self.show_help = false; return true; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        if self.show_help {
+            self.show_help = false;
+            return true;
+        }
 
         match key.code {
-            KeyCode::Char('q') => { self.should_quit.store(true, Ordering::SeqCst); true }
-            KeyCode::Char('t') => { self.cycle_theme(); true }
-            KeyCode::Char('p') => { self.paused = !self.paused; true }
-            KeyCode::Char('r') => { self.data.refresh(); self.last_update = Instant::now(); true }
-            KeyCode::Char('?') => { self.show_help = true; true }
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('p') => {
+                self.paused = !self.paused;
+                true
+            }
+            KeyCode::Char('r') => {
+                self.data.refresh();
+                self.last_update = Instant::now();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = true;
+                true
+            }
             KeyCode::Up => {
                 if self.data.selected_process > 0 {
                     self.data.selected_process -= 1;
@@ -459,7 +534,8 @@ impl Widget for Dashboard {
                 }
                 let visible = self.area.height.saturating_sub(4) as usize;
                 if self.data.selected_process >= self.data.process_scroll + visible {
-                    self.data.process_scroll = self.data.selected_process.saturating_sub(visible - 1);
+                    self.data.process_scroll =
+                        self.data.selected_process.saturating_sub(visible - 1);
                 }
                 true
             }
@@ -470,7 +546,9 @@ impl Widget for Dashboard {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let header_h = 1u16;
         let content_h = self.area.height.saturating_sub(2);
-        let div_rect = self.split.divider_rect(Rect::new(0, header_h, self.area.width, content_h));
+        let div_rect = self
+            .split
+            .divider_rect(Rect::new(0, header_h, self.area.width, content_h));
 
         match kind {
             MouseEventKind::Down(MouseButton::Left)
@@ -482,9 +560,12 @@ impl Widget for Dashboard {
                 return true;
             }
             MouseEventKind::Drag(_)
-                if self
-                    .split
-                    .handle_resize(kind, col, row, Rect::new(0, header_h, self.area.width, content_h)) =>
+                if self.split.handle_resize(
+                    kind,
+                    col,
+                    row,
+                    Rect::new(0, header_h, self.area.width, content_h),
+                ) =>
             {
                 return true;
             }
@@ -523,7 +604,11 @@ impl Dashboard {
             let x = area.x + cx * card_w;
             let y = area.y + cy * card_h;
             let w = if cx == 0 { card_w } else { area.width - card_w };
-            let h = if cy == 0 { card_h } else { area.height - card_h * 2 };
+            let h = if cy == 0 {
+                card_h
+            } else {
+                area.height - card_h * 2
+            };
 
             render_card_border(plane, x, y, w, h, t.outline, t.surface);
             let status_color = metric.status_color(t);
@@ -534,12 +619,31 @@ impl Dashboard {
 
             // Current value
             let val_text = format!("{:.1}{}", metric.current(), metric.unit);
-            draw_text(plane, x + 2, y + 2, &val_text, status_color, t.surface, true);
+            draw_text(
+                plane,
+                x + 2,
+                y + 2,
+                &val_text,
+                status_color,
+                t.surface,
+                true,
+            );
 
             // Sparkline
             let spark_w = (w as usize).saturating_sub(4) as u16;
             let spark_y = y + h.saturating_sub(3);
-            render_sparkline(plane, SparklineConfig { x: x + 2, y: spark_y, w: spark_w, h: 2, color: status_color, bg: t.surface }, metric);
+            render_sparkline(
+                plane,
+                SparklineConfig {
+                    x: x + 2,
+                    y: spark_y,
+                    w: spark_w,
+                    h: 2,
+                    color: status_color,
+                    bg: t.surface,
+                },
+                metric,
+            );
 
             // Mini stats
             let stats = format!("avg {:.1} | max {:.1}", metric.avg(), metric.max());
@@ -548,12 +652,36 @@ impl Dashboard {
     }
 
     fn render_process_panel(&self, plane: &mut Plane, area: Rect, t: Theme) {
-        render_card_border(plane, area.x, area.y, area.width, area.height, t.outline, t.surface);
-        draw_text(plane, area.x + 2, area.y + 1, " 󰀽 Processes ", t.primary, t.surface, true);
+        render_card_border(
+            plane,
+            area.x,
+            area.y,
+            area.width,
+            area.height,
+            t.outline,
+            t.surface,
+        );
+        draw_text(
+            plane,
+            area.x + 2,
+            area.y + 1,
+            " 󰀽 Processes ",
+            t.primary,
+            t.surface,
+            true,
+        );
 
         let header_y = area.y + 2;
         let header = " PID    NAME             CPU%   MEM ";
-        draw_text(plane, area.x + 2, header_y, header, t.fg_muted, t.surface, true);
+        draw_text(
+            plane,
+            area.x + 2,
+            header_y,
+            header,
+            t.fg_muted,
+            t.surface,
+            true,
+        );
 
         let list_y = header_y + 1;
         let visible = (area.height.saturating_sub(list_y - area.y + 1)) as usize;
@@ -561,7 +689,9 @@ impl Dashboard {
         for i in 0..visible {
             let proc_idx = self.data.process_scroll + i;
             let row_y = list_y + i as u16;
-            if row_y >= area.y + area.height - 1 { break; }
+            if row_y >= area.y + area.height - 1 {
+                break;
+            }
 
             if let Some(proc) = self.data.processes.get(proc_idx) {
                 let is_selected = self.data.selected_process == proc_idx;
@@ -571,8 +701,15 @@ impl Dashboard {
                     (t.fg, t.surface)
                 };
 
-                let name = if proc.name.len() > 14 { &proc.name[..14] } else { &proc.name };
-                let line = format!(" {:>5} {:<14} {:>5.1}% {:>5.1}", proc.pid, name, proc.cpu_percent, proc.mem_mb);
+                let name = if proc.name.len() > 14 {
+                    &proc.name[..14]
+                } else {
+                    &proc.name
+                };
+                let line = format!(
+                    " {:>5} {:<14} {:>5.1}% {:>5.1}",
+                    proc.pid, name, proc.cpu_percent, proc.mem_mb
+                );
                 draw_text(plane, area.x + 2, row_y, &line, fg, bg, is_selected);
             }
         }
@@ -600,21 +737,32 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 }
 
 fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, border: Color, bg: Color) {
-    if w < 3 || h < 3 { return; }
-    for row in y..y+h {
-        for col in x..x+w {
+    if w < 3 || h < 3 {
+        return;
+    }
+    for row in y..y + h {
+        for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             plane.cells[idx].bg = bg;
-            let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             if is_border {
                 plane.cells[idx].fg = border;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x+w-1 { '╮' }
-                    else if row == y+h-1 && col == x { '╰' }
-                    else if row == y+h-1 && col == x+w-1 { '╯' }
-                    else if row == y || row == y+h-1 { '─' }
-                    else { '│' };
+                plane.cells[idx].char = if row == y && col == x {
+                    '╭'
+                } else if row == y && col == x + w - 1 {
+                    '╮'
+                } else if row == y + h - 1 && col == x {
+                    '╰'
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    '╯'
+                } else if row == y || row == y + h - 1 {
+                    '─'
+                } else {
+                    '│'
+                };
             } else {
                 plane.cells[idx].char = ' ';
             }
@@ -632,8 +780,17 @@ struct SparklineConfig {
 }
 
 fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
-    let SparklineConfig { x, y, w, h, color, bg } = cfg;
-    if metric.values.is_empty() || w == 0 || h == 0 { return; }
+    let SparklineConfig {
+        x,
+        y,
+        w,
+        h,
+        color,
+        bg,
+    } = cfg;
+    if metric.values.is_empty() || w == 0 || h == 0 {
+        return;
+    }
     let max_val = metric.max().max(1.0);
     let values: Vec<f64> = metric.values.iter().copied().collect();
     let start = values.len().saturating_sub(w as usize);
@@ -642,7 +799,9 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
     for (i, &val) in to_show.iter().enumerate() {
         let bar_h = ((val / max_val) * h as f64).round() as u16;
         let col = x + i as u16;
-        if col >= x + w { break; }
+        if col >= x + w {
+            break;
+        }
 
         for row in 0..h {
             let row_y = y + h - 1 - row;
@@ -659,13 +818,17 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
 
 fn blit_plane(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
     for (i, cell) in src.cells.iter().enumerate() {
-        if cell.char == '\0' || cell.transparent { continue; }
+        if cell.char == '\0' || cell.transparent {
+            continue;
+        }
         let src_w = src.width as usize;
         let row = i / src_w;
         let col = i % src_w;
         let dy = offset_y + row;
         let dx = offset_x + col;
-        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
+        if dy >= dest.height as usize || dx >= dest.width as usize {
+            continue;
+        }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
             dest.cells[idx] = cell.clone();
@@ -695,7 +858,15 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
     for (i, (line, bold)) in lines.iter().enumerate() {
         let y = hy + 1 + i as u16;
         let x = hx + (hw.saturating_sub(line.len() as u16)) / 2;
-        draw_text(plane, x, y, line, if *bold { t.primary } else { t.fg }, t.surface_elevated, *bold);
+        draw_text(
+            plane,
+            x,
+            y,
+            line,
+            if *bold { t.primary } else { t.fg },
+            t.surface_elevated,
+            *bold,
+        );
     }
 }
 

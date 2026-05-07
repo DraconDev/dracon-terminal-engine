@@ -184,7 +184,10 @@ impl TabbedApp {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tabbar.on_theme_change(&self.theme);
         self.dashboard.cpu.on_theme_change(&self.theme);
@@ -220,9 +223,9 @@ impl TabbedApp {
         // Draw corners with rounded appearance (using box-drawing characters)
         // Top-left corner
         let corners = [
-            ((hy, hx), '┌'),           // top-left
-            ((hy, hx + hw - 1), '┐'),  // top-right
-            ((hy + hh - 1, hx), '└'),  // bottom-left
+            ((hy, hx), '┌'),                   // top-left
+            ((hy, hx + hw - 1), '┐'),          // top-right
+            ((hy + hh - 1, hx), '└'),          // bottom-left
             ((hy + hh - 1, hx + hw - 1), '┘'), // bottom-right
         ];
         for ((y, x), ch) in corners {
@@ -547,10 +550,11 @@ impl Widget for TabbedApp {
         }
 
         match self.active_tab() {
-            TAB_LOGS
-                if row > tabbar_height => {
-                    self.logs.list.handle_mouse(kind, col, row - tabbar_height - 1)
-                }
+            TAB_LOGS if row > tabbar_height => {
+                self.logs
+                    .list
+                    .handle_mouse(kind, col, row - tabbar_height - 1)
+            }
             TAB_SETTINGS => {
                 if row == tabbar_height + 2 && (20..40).contains(&col) {
                     self.settings

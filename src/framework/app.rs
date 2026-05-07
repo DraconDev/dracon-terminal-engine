@@ -351,11 +351,13 @@ impl App {
             let running_int = running_for_signal.clone();
             signal_hook::low_level::register(SIGINT, move || {
                 running_int.store(false, Ordering::SeqCst);
-            }).ok();
+            })
+            .ok();
             let running_term = running_for_signal.clone();
             signal_hook::low_level::register(SIGTERM, move || {
                 running_term.store(false, Ordering::SeqCst);
-            }).ok();
+            })
+            .ok();
         }
 
         let mut stdin = io::stdin();

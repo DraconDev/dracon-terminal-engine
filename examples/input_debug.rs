@@ -55,10 +55,16 @@ fn main() -> io::Result<()> {
         for &byte in &buf[..n] {
             if let Some(event) = parser.advance(byte) {
                 match &event {
-                    Event::Key(KeyEvent { code: KeyCode::Char('q'), .. }) => {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Char('q'),
+                        ..
+                    }) => {
                         return Ok(());
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Char('?'), .. }) => {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Char('?'),
+                        ..
+                    }) => {
                         show_help = true;
                     }
                     _ => {

@@ -2,7 +2,9 @@
 
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::split::Orientation;
-use dracon_terminal_engine::framework::widgets::{CommandItem, CommandPalette, List, SearchInput, Slider, Tree, TreeNode};
+use dracon_terminal_engine::framework::widgets::{
+    CommandItem, CommandPalette, List, SearchInput, Slider, Tree, TreeNode,
+};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -349,8 +351,14 @@ fn test_list_area_set_and_get() {
 fn test_table_handle_key_down() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -368,8 +376,14 @@ fn test_table_handle_key_down() {
 fn test_table_handle_key_up() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -387,8 +401,14 @@ fn test_table_handle_key_up() {
 fn test_table_handle_key_home() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -406,8 +426,14 @@ fn test_table_handle_key_home() {
 fn test_table_handle_key_end() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string(), "Carol".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -421,8 +447,14 @@ fn test_table_handle_key_end() {
 fn test_table_handle_key_repeat_suppressed() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -437,8 +469,14 @@ fn test_table_handle_key_repeat_suppressed() {
 fn test_table_handle_mouse_down_selects_row() {
     use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     let cols = vec![
-        Column { header: "Name".to_string(), width: 10 },
-        Column { header: "Age".to_string(), width: 5 },
+        Column {
+            header: "Name".to_string(),
+            width: 10,
+        },
+        Column {
+            header: "Age".to_string(),
+            width: 5,
+        },
     ];
     let data = vec!["Alice".to_string(), "Bob".to_string()];
     let mut table: Table<String> = Table::new(cols).with_rows(data);
@@ -575,8 +613,16 @@ fn test_command_palette_handle_key_enter_executes() {
     use std::cell::RefCell;
     use std::rc::Rc;
     let cmds = vec![
-        CommandItem { id: "cmd1", name: "Command One", category: "test" },
-        CommandItem { id: "cmd2", name: "Command Two", category: "test" },
+        CommandItem {
+            id: "cmd1",
+            name: "Command One",
+            category: "test",
+        },
+        CommandItem {
+            id: "cmd2",
+            name: "Command Two",
+            category: "test",
+        },
     ];
     let mut palette = CommandPalette::new(cmds);
     let executed = Rc::new(RefCell::new(None));
@@ -590,7 +636,11 @@ fn test_command_palette_handle_key_enter_executes() {
 
 #[test]
 fn test_command_palette_handle_key_esc_hides() {
-    let cmds = vec![CommandItem { id: "cmd1", name: "Command One", category: "test" }];
+    let cmds = vec![CommandItem {
+        id: "cmd1",
+        name: "Command One",
+        category: "test",
+    }];
     let mut palette = CommandPalette::new(cmds);
     palette.show();
     assert!(palette.is_visible());
@@ -601,7 +651,11 @@ fn test_command_palette_handle_key_esc_hides() {
 
 #[test]
 fn test_command_palette_handle_key_when_not_visible_returns_false() {
-    let cmds = vec![CommandItem { id: "cmd1", name: "Command One", category: "test" }];
+    let cmds = vec![CommandItem {
+        id: "cmd1",
+        name: "Command One",
+        category: "test",
+    }];
     let mut palette = CommandPalette::new(cmds);
     assert!(!palette.is_visible());
 
@@ -613,9 +667,9 @@ fn test_command_palette_handle_key_when_not_visible_returns_false() {
 
 #[test]
 fn test_modal_handle_key_enter_triggers_confirm() {
+    use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
     use std::cell::RefCell;
     use std::rc::Rc;
-    use dracon_terminal_engine::framework::widgets::{Modal, ModalResult};
     let mut modal = Modal::new("Test?");
     modal.set_area(Rect::new(0, 0, 40, 10));
     let confirmed = Rc::new(RefCell::new(false));
@@ -675,10 +729,7 @@ fn test_spinner_handle_key_repeat_returns_false() {
 #[test]
 fn test_menubar_handle_mouse_click_entry() {
     use dracon_terminal_engine::framework::widgets::{MenuBar, MenuEntry};
-    let entries = vec![
-        MenuEntry::new("File"),
-        MenuEntry::new("Edit"),
-    ];
+    let entries = vec![MenuEntry::new("File"), MenuEntry::new("Edit")];
     let mut menubar = MenuBar::new(WidgetId::default_id()).with_entries(entries);
     menubar.set_area(Rect::new(0, 0, 40, 1));
 

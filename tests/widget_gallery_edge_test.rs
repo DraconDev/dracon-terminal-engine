@@ -4,10 +4,12 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 // Minimal reproduction of WidgetGallery's handle_mouse to test edge cases
 struct WidgetGalleryMock {
@@ -44,14 +46,20 @@ impl WidgetGalleryMock {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
             KeyCode::Right | KeyCode::Down => {
                 self.selected = (self.selected + 1) % 9;
                 true
             }
             KeyCode::Left | KeyCode::Up => {
-                self.selected = if self.selected == 0 { 8 } else { self.selected - 1 };
+                self.selected = if self.selected == 0 {
+                    8
+                } else {
+                    self.selected - 1
+                };
                 true
             }
             KeyCode::Enter | KeyCode::Char(' ') => {
@@ -67,7 +75,13 @@ impl WidgetGalleryMock {
 
     fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
         let rows = 3u16;
-        let cols = if slot < 4 { 4u16 } else if slot < 7 { 3u16 } else { 2u16 };
+        let cols = if slot < 4 {
+            4u16
+        } else if slot < 7 {
+            3u16
+        } else {
+            2u16
+        };
         let row = (slot / cols as usize) as u16;
         let col = (slot % cols as usize) as u16;
 
@@ -80,20 +94,31 @@ impl WidgetGalleryMock {
         Rect::new(x, y, card_w.saturating_sub(1), card_h.saturating_sub(1))
     }
 
-    fn handle_mouse_at_edge(&mut self, kind: MouseEventKind, col: u16, row: u16, area: Rect) -> bool {
+    fn handle_mouse_at_edge(
+        &mut self,
+        kind: MouseEventKind,
+        col: u16,
+        row: u16,
+        area: Rect,
+    ) -> bool {
         for slot in 0..9usize {
             let rect = self.slot_rect(slot, area);
-            if col >= rect.x && col < rect.x + rect.width
-                && row >= rect.y && row < rect.y + rect.height
+            if col >= rect.x
+                && col < rect.x + rect.width
+                && row >= rect.y
+                && row < rect.y + rect.height
             {
                 let widget_area = Rect::new(
-                    1, 2,
+                    1,
+                    2,
                     rect.width.saturating_sub(2),
-                    rect.height.saturating_sub(3)
+                    rect.height.saturating_sub(3),
                 );
                 // This is the fixed code - includes col check
-                if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height
-                    && col >= rect.x + 1 && col < rect.x + 1 + widget_area.width
+                if row >= rect.y + 2
+                    && row < rect.y + 2 + widget_area.height
+                    && col >= rect.x + 1
+                    && col < rect.x + 1 + widget_area.width
                 {
                     let _rel_col = col - rect.x - 1;
                     let _rel_row = row - rect.y - 2;
@@ -115,9 +140,9 @@ fn test_widget_gallery_mouse_at_left_edge_no_panic() {
     let rect = gallery.slot_rect(0, area);
     let result = gallery.handle_mouse_at_edge(
         MouseEventKind::Down(MouseButton::Left),
-        rect.x,        // Left edge - this used to panic
-        rect.y + 3,    // Inside widget area vertically
-        area
+        rect.x,     // Left edge - this used to panic
+        rect.y + 3, // Inside widget area vertically
+        area,
     );
     assert!(result);
 }
@@ -131,9 +156,9 @@ fn test_widget_gallery_mouse_at_top_edge_no_panic() {
     let rect = gallery.slot_rect(0, area);
     let result = gallery.handle_mouse_at_edge(
         MouseEventKind::Down(MouseButton::Left),
-        rect.x + 2,    // Inside widget area horizontally
-        rect.y + 1,    // Just above widget area - this used to panic
-        area
+        rect.x + 2, // Inside widget area horizontally
+        rect.y + 1, // Just above widget area - this used to panic
+        area,
     );
     assert!(result); // Should be in card but outside widget area
 }
@@ -146,9 +171,9 @@ fn test_widget_gallery_mouse_inside_widget_area() {
     let rect = gallery.slot_rect(0, area);
     let result = gallery.handle_mouse_at_edge(
         MouseEventKind::Down(MouseButton::Left),
-        rect.x + 2,    // Inside widget area
-        rect.y + 3,    // Inside widget area
-        area
+        rect.x + 2, // Inside widget area
+        rect.y + 3, // Inside widget area
+        area,
     );
     assert!(result);
 }
@@ -160,9 +185,9 @@ fn test_widget_gallery_mouse_outside_all_cards() {
 
     let result = gallery.handle_mouse_at_edge(
         MouseEventKind::Down(MouseButton::Left),
-        0,    // Top-left corner - outside all cards
+        0, // Top-left corner - outside all cards
         0,
-        area
+        area,
     );
     assert!(!result);
 }
@@ -192,7 +217,7 @@ fn test_widget_gallery_mouse_small_terminal() {
         MouseEventKind::Down(MouseButton::Left),
         rect.x,
         rect.y,
-        area
+        area,
     );
     // Just verify it doesn't panic - result may vary with tiny dimensions
 }
@@ -205,8 +230,12 @@ fn test_widget_gallery_mouse_small_terminal() {
 fn test_widget_gallery_key_right_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
-    
-    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Right,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 1);
 }
@@ -215,8 +244,12 @@ fn test_widget_gallery_key_right_navigates() {
 fn test_widget_gallery_key_left_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 5;
-    
-    let key = KeyEvent { code: KeyCode::Left, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Left,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 4);
 }
@@ -225,8 +258,12 @@ fn test_widget_gallery_key_left_navigates() {
 fn test_widget_gallery_key_left_wraps() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
-    
-    let key = KeyEvent { code: KeyCode::Left, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Left,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 8); // Wraps to last slot
 }
@@ -235,8 +272,12 @@ fn test_widget_gallery_key_left_wraps() {
 fn test_widget_gallery_key_right_wraps() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 8;
-    
-    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Right,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 0); // Wraps to first slot
 }
@@ -245,8 +286,12 @@ fn test_widget_gallery_key_right_wraps() {
 fn test_widget_gallery_key_enter_toggles_checkbox() {
     let mut gallery = WidgetGalleryMock::new();
     assert!(!gallery.checkbox.is_checked());
-    
-    let key = KeyEvent { code: KeyCode::Enter, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Enter,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert!(gallery.checkbox.is_checked());
 }
@@ -255,8 +300,12 @@ fn test_widget_gallery_key_enter_toggles_checkbox() {
 fn test_widget_gallery_key_release_ignored() {
     let mut gallery = WidgetGalleryMock::new();
     let original = gallery.selected;
-    
-    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Release };
+
+    let key = KeyEvent {
+        code: KeyCode::Right,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Release,
+    };
     assert!(!gallery.handle_key(key));
     assert_eq!(gallery.selected, original);
 }
@@ -265,8 +314,12 @@ fn test_widget_gallery_key_release_ignored() {
 fn test_widget_gallery_key_down_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
-    
-    let key = KeyEvent { code: KeyCode::Down, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Down,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 1);
 }
@@ -275,8 +328,12 @@ fn test_widget_gallery_key_down_navigates() {
 fn test_widget_gallery_key_up_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 3;
-    
-    let key = KeyEvent { code: KeyCode::Up, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
+
+    let key = KeyEvent {
+        code: KeyCode::Up,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 2);
 }

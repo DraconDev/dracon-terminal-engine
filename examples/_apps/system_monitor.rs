@@ -27,9 +27,21 @@ use std::rc::Rc;
 use std::time::Duration;
 
 const THEMES: &[&str] = &[
-    "nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night",
-    "catppuccin", "solarized-dark", "one-dark", "rose-pine", "kanagawa",
-    "everforest", "monokai", "solarized-light", "gruvbox-dark", "light",
+    "nord",
+    "dracula",
+    "cyberpunk",
+    "gruvbox-dark",
+    "tokyo-night",
+    "catppuccin",
+    "solarized-dark",
+    "one-dark",
+    "rose-pine",
+    "kanagawa",
+    "everforest",
+    "monokai",
+    "solarized-light",
+    "gruvbox-dark",
+    "light",
 ];
 const HISTORY_SIZE: usize = 60;
 
@@ -43,14 +55,22 @@ struct MetricHistory {
 
 impl MetricHistory {
     fn new() -> Self {
-        Self { values: VecDeque::with_capacity(HISTORY_SIZE) }
+        Self {
+            values: VecDeque::with_capacity(HISTORY_SIZE),
+        }
     }
     fn push(&mut self, v: f64) {
-        if self.values.len() >= HISTORY_SIZE { self.values.pop_front(); }
+        if self.values.len() >= HISTORY_SIZE {
+            self.values.pop_front();
+        }
         self.values.push_back(v);
     }
-    fn current(&self) -> f64 { self.values.back().copied().unwrap_or(0.0) }
-    fn max(&self) -> f64 { self.values.iter().copied().fold(0.0, f64::max) }
+    fn current(&self) -> f64 {
+        self.values.back().copied().unwrap_or(0.0)
+    }
+    fn max(&self) -> f64 {
+        self.values.iter().copied().fold(0.0, f64::max)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -125,7 +145,12 @@ impl SystemData {
     fn read_cpu(&mut self) {
         let mut pct = 0.0;
         if let Ok(content) = fs::read_to_string("/proc/stat") {
-            let parts: Vec<&str> = content.lines().next().unwrap_or_default().split_whitespace().collect();
+            let parts: Vec<&str> = content
+                .lines()
+                .next()
+                .unwrap_or_default()
+                .split_whitespace()
+                .collect();
             if parts.len() >= 5 {
                 let user: u64 = parts[1].parse().unwrap_or(0);
                 let nice: u64 = parts[2].parse().unwrap_or(0);
@@ -137,7 +162,9 @@ impl SystemData {
                 let di = (idle + iowait).saturating_sub(self.last_cpu_idle);
                 self.last_cpu_total = total;
                 self.last_cpu_idle = idle + iowait;
-                if dt > 0 { pct = ((dt - di) as f64 / dt as f64) * 100.0; }
+                if dt > 0 {
+                    pct = ((dt - di) as f64 / dt as f64) * 100.0;
+                }
             }
         }
         self.cpu_hist.push(pct.clamp(0.0, 100.0));
@@ -182,8 +209,16 @@ impl SystemData {
                 }
             }
         }
-        let dr = if self.last_disk_read > 0 { (read_b.saturating_sub(self.last_disk_read) as f64) / 1048576.0 } else { 0.0 };
-        let dw = if self.last_disk_write > 0 { (write_b.saturating_sub(self.last_disk_write) as f64) / 1048576.0 } else { 0.0 };
+        let dr = if self.last_disk_read > 0 {
+            (read_b.saturating_sub(self.last_disk_read) as f64) / 1048576.0
+        } else {
+            0.0
+        };
+        let dw = if self.last_disk_write > 0 {
+            (write_b.saturating_sub(self.last_disk_write) as f64) / 1048576.0
+        } else {
+            0.0
+        };
         self.last_disk_read = read_b;
         self.last_disk_write = write_b;
         (dr, dw)
@@ -201,8 +236,16 @@ impl SystemData {
                 }
             }
         }
-        let nr = if self.last_net_rx > 0 { (rx_b.saturating_sub(self.last_net_rx) as f64) / 1048576.0 } else { 0.0 };
-        let nt = if self.last_net_tx > 0 { (tx_b.saturating_sub(self.last_net_tx) as f64) / 1048576.0 } else { 0.0 };
+        let nr = if self.last_net_rx > 0 {
+            (rx_b.saturating_sub(self.last_net_rx) as f64) / 1048576.0
+        } else {
+            0.0
+        };
+        let nt = if self.last_net_tx > 0 {
+            (tx_b.saturating_sub(self.last_net_tx) as f64) / 1048576.0
+        } else {
+            0.0
+        };
         self.last_net_rx = rx_b;
         self.last_net_tx = tx_b;
         (nr, nt)
@@ -221,8 +264,14 @@ impl SystemData {
             .and_then(|c| {
                 let p: Vec<&str> = c.split_whitespace().take(3).collect();
                 if p.len() >= 3 {
-                    Some((p[0].parse().unwrap_or(0.0), p[1].parse().unwrap_or(0.0), p[2].parse().unwrap_or(0.0)))
-                } else { None }
+                    Some((
+                        p[0].parse().unwrap_or(0.0),
+                        p[1].parse().unwrap_or(0.0),
+                        p[2].parse().unwrap_or(0.0),
+                    ))
+                } else {
+                    None
+                }
             })
             .unwrap_or((0.0, 0.0, 0.0))
     }
@@ -233,7 +282,10 @@ impl SystemData {
             for entry in entries.filter_map(|e| e.ok()) {
                 let name = entry.file_name();
                 let name_str = name.to_string_lossy();
-                let pid: u32 = match name_str.parse() { Ok(p) => p, _ => continue };
+                let pid: u32 = match name_str.parse() {
+                    Ok(p) => p,
+                    _ => continue,
+                };
                 if let Ok(content) = fs::read_to_string(format!("/proc/{}/stat", pid)) {
                     let paren = content.find('(').unwrap_or(0);
                     let end_paren = content.find(')').unwrap_or(content.len());
@@ -246,21 +298,28 @@ impl SystemData {
                             let state = rest.first().copied().unwrap_or("?").to_string();
                             let mem_mb: f32 = fs::read_to_string(format!("/proc/{}/status", pid))
                                 .ok()
-                                .and_then(|c| c.lines().find(|l| l.starts_with("VmRSS:"))
-                                    .and_then(|l| l.split_whitespace().nth(1))
-                                    .and_then(|s| s.parse().ok()))
-                                .unwrap_or(0.0) / 1024.0;
+                                .and_then(|c| {
+                                    c.lines()
+                                        .find(|l| l.starts_with("VmRSS:"))
+                                        .and_then(|l| l.split_whitespace().nth(1))
+                                        .and_then(|s| s.parse().ok())
+                                })
+                                .unwrap_or(0.0)
+                                / 1024.0;
                             self.processes.push(ProcessInfo {
-                                pid, name: pname,
+                                pid,
+                                name: pname,
                                 cpu_percent: ((utime + stime) as f32 / 100.0).clamp(0.0, 100.0),
-                                mem_mb, state,
+                                mem_mb,
+                                state,
                             });
                         }
                     }
                 }
             }
         }
-        self.processes.sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
+        self.processes
+            .sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
         self.processes.truncate(20);
     }
 
@@ -284,9 +343,13 @@ fn format_uptime(seconds: u64) -> String {
     let h = (seconds % 86400) / 3600;
     let m = (seconds % 3600) / 60;
     let s = seconds % 60;
-    if d > 0 { format!("{}d {:02}h {:02}m {:02}s", d, h, m, s) }
-    else if h > 0 { format!("{:02}h {:02}m {:02}s", h, m, s) }
-    else { format!("{:02}m {:02}s", m, s) }
+    if d > 0 {
+        format!("{}d {:02}h {:02}m {:02}s", d, h, m, s)
+    } else if h > 0 {
+        format!("{:02}h {:02}m {:02}s", h, m, s)
+    } else {
+        format!("{:02}m {:02}s", m, s)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -315,10 +378,22 @@ impl SystemMonitor {
         data.refresh();
         let theme = Theme::nord();
         Self {
-            cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU %").with_theme(theme).warn_threshold(70.0).crit_threshold(90.0),
-            mem_gauge: Gauge::with_id(WidgetId::new(2), "Memory %").with_theme(theme).warn_threshold(80.0).crit_threshold(95.0),
-            disk_gauge: Gauge::with_id(WidgetId::new(3), "I/O").with_theme(theme).warn_threshold(75.0).crit_threshold(90.0),
-            net_gauge: Gauge::with_id(WidgetId::new(4), "Network").with_theme(theme).warn_threshold(80.0).crit_threshold(95.0),
+            cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU %")
+                .with_theme(theme)
+                .warn_threshold(70.0)
+                .crit_threshold(90.0),
+            mem_gauge: Gauge::with_id(WidgetId::new(2), "Memory %")
+                .with_theme(theme)
+                .warn_threshold(80.0)
+                .crit_threshold(95.0),
+            disk_gauge: Gauge::with_id(WidgetId::new(3), "I/O")
+                .with_theme(theme)
+                .warn_threshold(75.0)
+                .crit_threshold(90.0),
+            net_gauge: Gauge::with_id(WidgetId::new(4), "Network")
+                .with_theme(theme)
+                .warn_threshold(80.0)
+                .crit_threshold(95.0),
             status_badge: StatusBadge::new(WidgetId::new(5)).with_theme(theme),
             data,
             theme_index: 0,
@@ -334,13 +409,20 @@ impl SystemMonitor {
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % THEMES.len();
         self.theme = match THEMES[self.theme_index] {
-            "nord" => Theme::nord(), "dracula" => Theme::dracula(),
-            "cyberpunk" => Theme::cyberpunk(), "gruvbox-dark" => Theme::gruvbox_dark(),
-            "tokyo-night" => Theme::tokyo_night(), "catppuccin" => Theme::catppuccin_mocha(),
-            "solarized-dark" => Theme::solarized_dark(), "one-dark" => Theme::one_dark(),
-            "rose-pine" => Theme::rose_pine(), "kanagawa" => Theme::kanagawa(),
-            "everforest" => Theme::everforest(), "monokai" => Theme::monokai(),
-            "solarized-light" => Theme::solarized_light(), "light" => Theme::light(),
+            "nord" => Theme::nord(),
+            "dracula" => Theme::dracula(),
+            "cyberpunk" => Theme::cyberpunk(),
+            "gruvbox-dark" => Theme::gruvbox_dark(),
+            "tokyo-night" => Theme::tokyo_night(),
+            "catppuccin" => Theme::catppuccin_mocha(),
+            "solarized-dark" => Theme::solarized_dark(),
+            "one-dark" => Theme::one_dark(),
+            "rose-pine" => Theme::rose_pine(),
+            "kanagawa" => Theme::kanagawa(),
+            "everforest" => Theme::everforest(),
+            "monokai" => Theme::monokai(),
+            "solarized-light" => Theme::solarized_light(),
+            "light" => Theme::light(),
             _ => Theme::nord(),
         };
         self.cpu_gauge.on_theme_change(&self.theme);
@@ -360,32 +442,61 @@ impl SystemMonitor {
         self.disk_gauge.set_value(disk);
         self.net_gauge.set_value(net);
 
-        let cpu_status = if cpu >= 80.0 { "HIGH CPU" } else if cpu >= 50.0 { "MODERATE" } else { "Normal" };
+        let cpu_status = if cpu >= 80.0 {
+            "HIGH CPU"
+        } else if cpu >= 50.0 {
+            "MODERATE"
+        } else {
+            "Normal"
+        };
         let mem_status = if mem >= 90.0 { "HIGH MEM" } else { "Normal" };
         let disk_status = if disk >= 75.0 { "HIGH I/O" } else { "Normal" };
         let net_status = if net >= 80.0 { "HIGH NET" } else { "Normal" };
-        let status = if cpu_status == "HIGH CPU" || mem_status == "HIGH MEM" || disk_status == "HIGH I/O" || net_status == "HIGH NET" { "WARNING" }
-            else if cpu_status == "MODERATE" { "CAUTION" } else { "HEALTHY" };
+        let status = if cpu_status == "HIGH CPU"
+            || mem_status == "HIGH MEM"
+            || disk_status == "HIGH I/O"
+            || net_status == "HIGH NET"
+        {
+            "WARNING"
+        } else if cpu_status == "MODERATE" {
+            "CAUTION"
+        } else {
+            "HEALTHY"
+        };
         self.status_badge.set_status(status);
     }
 }
 
 impl Widget for SystemMonitor {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
-            cell.bg = t.bg; cell.fg = t.fg; cell.transparent = false;
+            cell.bg = t.bg;
+            cell.fg = t.fg;
+            cell.transparent = false;
         }
 
         let _w = area.width as usize;
@@ -396,19 +507,30 @@ impl Widget for SystemMonitor {
         let uptime = format_uptime(self.data.uptime_seconds);
         let (l1, l5, l15) = self.data.load_avg;
         let theme_label = format!(" {} ", THEMES[self.theme_index]);
-        
+
         // Left: hostname + cores
         let left_info = format!(" 󰣇 {} | {} cores | {} ", hostname, cores, uptime);
         draw_text(&mut plane, 2, 0, &left_info, t.primary, t.bg, true);
-        
+
         // Right: theme label
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 1), 0,
-            &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 1),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // ── System Info Bar (row 1) ──
         let mem_total = self.data.memory_total_mb;
         let mem_used = self.data.memory_used_mb;
-        let mem_pct = if mem_total > 0.0 { (mem_used / mem_total * 100.0) as u16 } else { 0 };
+        let mem_pct = if mem_total > 0.0 {
+            (mem_used / mem_total * 100.0) as u16
+        } else {
+            0
+        };
         let info_text = format!(" 󰍛 Load: {:.2} {:.2} {:.2} | 󰘚 Memory: {:.0}/{:.0} MB ({}%) | 󰋊 Disk I/O: {:.1} MB/s | 󰀂 Network: {:.1} MB/s ",
             l1, l5, l15, mem_used, mem_total, mem_pct,
             self.data.disk_hist.current(), self.data.net_hist.current());
@@ -418,14 +540,17 @@ impl Widget for SystemMonitor {
         // Separator
         for x in 0..area.width {
             let idx = (2 * area.width + x) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
         }
 
         // ── 4 Mini Gauges Row ──
         let gauge_y = 3u16;
         let gauge_h = 4u16;
         let qw = area.width / 4;
-        
+
         // Gauge labels and values
         let gauges = [
             ("󰍛 CPU", self.data.cpu_hist.current(), t),
@@ -433,21 +558,43 @@ impl Widget for SystemMonitor {
             ("󰋊 Disk I/O", self.data.disk_hist.current(), t),
             ("󰀂 Network", self.data.net_hist.current(), t),
         ];
-        
+
         for (i, (label, val, _)) in gauges.iter().enumerate() {
             let gx = i as u16 * qw;
-            let gcolor = if *val >= 90.0 { t.error } else if *val >= 70.0 { t.warning } else { t.success };
-            
+            let gcolor = if *val >= 90.0 {
+                t.error
+            } else if *val >= 70.0 {
+                t.warning
+            } else {
+                t.success
+            };
+
             // Card border
             render_card_border(&mut plane, gx, gauge_y, qw, gauge_h, t);
-            
+
             // Label
-            draw_text(&mut plane, gx + 2, gauge_y, label, t.primary, t.surface, true);
-            
+            draw_text(
+                &mut plane,
+                gx + 2,
+                gauge_y,
+                label,
+                t.primary,
+                t.surface,
+                true,
+            );
+
             // Value
             let val_text = format!("{:.1}%", val);
-            draw_text(&mut plane, gx + 2, gauge_y + 1, &val_text, gcolor, t.surface, true);
-            
+            draw_text(
+                &mut plane,
+                gx + 2,
+                gauge_y + 1,
+                &val_text,
+                gcolor,
+                t.surface,
+                true,
+            );
+
             // Mini bar
             let bar_w = qw.saturating_sub(4);
             let filled = ((*val / 100.0) * bar_w as f64).round() as u16;
@@ -465,27 +612,46 @@ impl Widget for SystemMonitor {
         let spark_y = gauge_y + gauge_h + 1;
         let spark_h = 2u16;
         let spark_w = qw.saturating_sub(4);
-        
+
         let sparklines = [
             (0u16, &self.data.cpu_hist, t.success),
             (1, &self.data.mem_hist, t.info),
             (2, &self.data.disk_hist, t.warning),
             (3, &self.data.net_hist, t.secondary),
         ];
-        
+
         for (i, hist, color) in sparklines.iter() {
             let sx = (*i * qw) + 2;
-            render_sparkline(&mut plane, SparklineConfig { x: sx, y: spark_y, w: spark_w, h: spark_h, color: *color, bg: t.bg }, hist);
+            render_sparkline(
+                &mut plane,
+                SparklineConfig {
+                    x: sx,
+                    y: spark_y,
+                    w: spark_w,
+                    h: spark_h,
+                    color: *color,
+                    bg: t.bg,
+                },
+                hist,
+            );
         }
 
         // ── Status Badge ──
         let badge_y = spark_y + spark_h + 1;
         let sb = self.status_badge.render(Rect::new(0, 0, 16, 1));
         blit_to(&mut plane, &sb, 2, badge_y);
-        
+
         // Process count
         let proc_count = format!("{} processes", self.data.processes.len());
-        draw_text(&mut plane, 20, badge_y, &proc_count, t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            20,
+            badge_y,
+            &proc_count,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // ── Process List ──
         let list_y = badge_y + 2;
@@ -494,27 +660,55 @@ impl Widget for SystemMonitor {
 
         let header_y = list_y + 1;
         let header_text = " 󰀽 PID      NAME             CPU%    MEM     STATE  ";
-        draw_text(&mut plane, 2, header_y, header_text, t.fg_muted, t.surface, true);
+        draw_text(
+            &mut plane,
+            2,
+            header_y,
+            header_text,
+            t.fg_muted,
+            t.surface,
+            true,
+        );
 
         if self.data.processes.is_empty() {
             let cx = area.width / 2;
             let cy = header_y + list_h / 2 - 2;
-            draw_text(&mut plane, cx.saturating_sub(10), cy, " 󰓇 Collecting process data... ", t.fg_muted, t.surface, false);
+            draw_text(
+                &mut plane,
+                cx.saturating_sub(10),
+                cy,
+                " 󰓇 Collecting process data... ",
+                t.fg_muted,
+                t.surface,
+                false,
+            );
         } else {
             let max_visible = (list_h as usize).saturating_sub(3);
             for i in 0..max_visible {
                 let proc_idx = self.process_scroll + i;
                 let row_y = header_y + 1 + i as u16;
-                if row_y >= list_y + list_h - 1 { break; }
+                if row_y >= list_y + list_h - 1 {
+                    break;
+                }
                 if let Some(proc) = self.data.processes.get(proc_idx) {
                     let is_selected = self.selected_process == Some(proc_idx);
                     let is_hovered = self.hovered_process == Some(proc_idx);
-                    let (fg, bg) = if is_selected { (t.fg_on_accent, t.primary_active) }
-                        else if is_hovered { (t.fg, t.hover_bg) }
-                        else { (t.fg, t.surface) };
-                    let name = if proc.name.len() > 16 { &proc.name[..16] } else { &proc.name };
-                    let line = format!(" {:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
-                        proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state);
+                    let (fg, bg) = if is_selected {
+                        (t.fg_on_accent, t.primary_active)
+                    } else if is_hovered {
+                        (t.fg, t.hover_bg)
+                    } else {
+                        (t.fg, t.surface)
+                    };
+                    let name = if proc.name.len() > 16 {
+                        &proc.name[..16]
+                    } else {
+                        &proc.name
+                    };
+                    let line = format!(
+                        " {:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
+                        proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
+                    );
                     draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
                 }
             }
@@ -523,9 +717,14 @@ impl Widget for SystemMonitor {
             if self.data.processes.len() > max_visible {
                 let sb_x = area.width - 2;
                 let content_h = max_visible as u16;
-                let thumb_h = (max_visible as f32 / self.data.processes.len() as f32 * content_h as f32).max(1.0) as u16;
-                let thumb_y = (self.process_scroll as f32 / self.data.processes.len().saturating_sub(max_visible).max(1) as f32
-                    * (content_h - thumb_h) as f32) as u16 + header_y + 1;
+                let thumb_h = (max_visible as f32 / self.data.processes.len() as f32
+                    * content_h as f32)
+                    .max(1.0) as u16;
+                let thumb_y = (self.process_scroll as f32
+                    / self.data.processes.len().saturating_sub(max_visible).max(1) as f32
+                    * (content_h - thumb_h) as f32) as u16
+                    + header_y
+                    + 1;
                 for i in 0..thumb_h {
                     let y = thumb_y + i;
                     if y > header_y && y < list_y + list_h - 1 {
@@ -549,24 +748,43 @@ impl Widget for SystemMonitor {
                 let detail_y = list_y + 1;
                 if detail_w > 10 && detail_y + 6 < list_y + list_h {
                     let mut dy = detail_y;
-                    draw_text(&mut plane, detail_x, dy, &format!(" Process: {}", proc.name), t.primary, t.surface, true);
+                    draw_text(
+                        &mut plane,
+                        detail_x,
+                        dy,
+                        &format!(" Process: {}", proc.name),
+                        t.primary,
+                        t.surface,
+                        true,
+                    );
                     dy += 1;
-                    draw_text(&mut plane, detail_x, dy, &format!(" PID: {}", proc.pid), t.fg, t.surface, false);
+                    draw_text(
+                        &mut plane,
+                        detail_x,
+                        dy,
+                        &format!(" PID: {}", proc.pid),
+                        t.fg,
+                        t.surface,
+                        false,
+                    );
                     dy += 1;
                     // Mini CPU gauge
-                    let cpu_bar = ((proc.cpu_percent / 100.0).min(1.0) * (detail_w - 10) as f32) as u16;
+                    let cpu_bar =
+                        ((proc.cpu_percent / 100.0).min(1.0) * (detail_w - 10) as f32) as u16;
                     draw_text(&mut plane, detail_x, dy, " CPU: ", t.fg, t.surface, false);
                     for bx in 0..(detail_w - 10) {
                         let idx = (dy * area.width + detail_x + 6 + bx) as usize;
                         if idx < plane.cells.len() {
                             plane.cells[idx].char = if bx < cpu_bar { '█' } else { '░' };
-                            plane.cells[idx].fg = if bx < cpu_bar { t.warning } else { t.fg_subtle };
+                            plane.cells[idx].fg =
+                                if bx < cpu_bar { t.warning } else { t.fg_subtle };
                             plane.cells[idx].bg = t.surface;
                         }
                     }
                     dy += 1;
                     // Mini MEM gauge
-                    let mem_bar = ((proc.mem_mb / self.data.memory_total_mb).min(1.0) * (detail_w - 10) as f32) as u16;
+                    let mem_bar = ((proc.mem_mb / self.data.memory_total_mb).min(1.0)
+                        * (detail_w - 10) as f32) as u16;
                     draw_text(&mut plane, detail_x, dy, " MEM: ", t.fg, t.surface, false);
                     for bx in 0..(detail_w - 10) {
                         let idx = (dy * area.width + detail_x + 6 + bx) as usize;
@@ -577,7 +795,15 @@ impl Widget for SystemMonitor {
                         }
                     }
                     dy += 1;
-                    draw_text(&mut plane, detail_x, dy, &format!(" State: {}", proc.state), t.fg_muted, t.surface, false);
+                    draw_text(
+                        &mut plane,
+                        detail_x,
+                        dy,
+                        &format!(" State: {}", proc.state),
+                        t.fg_muted,
+                        t.surface,
+                        false,
+                    );
                 }
             }
         }
@@ -586,31 +812,53 @@ impl Widget for SystemMonitor {
         let footer_y = area.height.saturating_sub(1);
         for x in 0..area.width {
             let idx = (footer_y * area.width + x) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
         }
         let footer = " t: theme | ?: help | ↑/↓: nav | Click: select | Scroll: browse | q: quit ";
         draw_text(&mut plane, 2, footer_y, footer, t.fg_muted, t.bg, false);
 
-        if self.show_help { render_help(&mut plane, area, t); }
+        if self.show_help {
+            render_help(&mut plane, area, t);
+        }
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
-        if self.show_help { self.show_help = false; return true; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        if self.show_help {
+            self.show_help = false;
+            return true;
+        }
         match key.code {
             KeyCode::Char('q') => std::process::exit(0),
-            KeyCode::Char('t') => { self.cycle_theme(); true }
-            KeyCode::Char('?') => { self.show_help = true; true }
+            KeyCode::Char('t') => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Char('?') => {
+                self.show_help = true;
+                true
+            }
             KeyCode::Up => {
                 let n = self.selected_process.unwrap_or(0);
-                if n > 0 { self.selected_process = Some(n - 1); }
-                if self.selected_process.unwrap_or(0) < self.process_scroll { self.process_scroll = self.selected_process.unwrap_or(0); }
+                if n > 0 {
+                    self.selected_process = Some(n - 1);
+                }
+                if self.selected_process.unwrap_or(0) < self.process_scroll {
+                    self.process_scroll = self.selected_process.unwrap_or(0);
+                }
                 true
             }
             KeyCode::Down => {
                 let n = self.selected_process.unwrap_or(0);
-                if n + 1 < self.data.processes.len() { self.selected_process = Some(n + 1); }
+                if n + 1 < self.data.processes.len() {
+                    self.selected_process = Some(n + 1);
+                }
                 true
             }
             _ => false,
@@ -620,7 +868,8 @@ impl Widget for SystemMonitor {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2) {
+                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2)
+                {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
                     if idx < self.data.processes.len() {
@@ -628,13 +877,21 @@ impl Widget for SystemMonitor {
                         return true;
                     }
                 }
-                if col >= self.area.width / 2 { self.selected_process = None; return true; }
+                if col >= self.area.width / 2 {
+                    self.selected_process = None;
+                    return true;
+                }
             }
             MouseEventKind::Moved => {
-                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2) {
+                if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2)
+                {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
-                    self.hovered_process = if idx < self.data.processes.len() { Some(idx) } else { None };
+                    self.hovered_process = if idx < self.data.processes.len() {
+                        Some(idx)
+                    } else {
+                        None
+                    };
                 } else {
                     self.hovered_process = None;
                 }
@@ -642,7 +899,10 @@ impl Widget for SystemMonitor {
             }
             MouseEventKind::ScrollDown => {
                 let max_scroll = self.data.processes.len().saturating_sub(10);
-                if self.process_scroll < max_scroll { self.process_scroll += 1; return true; }
+                if self.process_scroll < max_scroll {
+                    self.process_scroll += 1;
+                    return true;
+                }
             }
             MouseEventKind::ScrollUp if self.process_scroll > 0 => {
                 self.process_scroll -= 1;
@@ -663,44 +923,71 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
         let idx = (y * plane.width + x + i as u16) as usize;
         if idx < plane.cells.len() {
             plane.cells[idx] = Cell {
-                char: ch, fg, bg,
+                char: ch,
+                fg,
+                bg,
                 style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false, skip: false,
+                transparent: false,
+                skip: false,
             };
         }
     }
 }
 
 fn render_card_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     let (border, bg) = (t.outline, t.surface);
-    for row in y..y+h {
-        for col in x..x+w {
+    for row in y..y + h {
+        for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
-            let is_border = row == y || row == y+h-1 || col == x || col == x+w-1;
+            if idx >= plane.cells.len() {
+                continue;
+            }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             plane.cells[idx].bg = bg;
             plane.cells[idx].fg = if is_border { border } else { t.fg };
             plane.cells[idx].char = ' ';
         }
     }
 
-    for col in x..x+w {
+    for col in x..x + w {
         let idx = (y * plane.width + col) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = border; }
-        let idx2 = ((y+h-1) * plane.width + col) as usize;
-        if idx2 < plane.cells.len() { plane.cells[idx2].char = '─'; plane.cells[idx2].fg = border; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '─';
+            plane.cells[idx].fg = border;
+        }
+        let idx2 = ((y + h - 1) * plane.width + col) as usize;
+        if idx2 < plane.cells.len() {
+            plane.cells[idx2].char = '─';
+            plane.cells[idx2].fg = border;
+        }
     }
-    for row in y..y+h {
+    for row in y..y + h {
         let idx = (row * plane.width + x) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = '│'; plane.cells[idx].fg = border; }
-        let idx2 = (row * plane.width + x+w-1) as usize;
-        if idx2 < plane.cells.len() { plane.cells[idx2].char = '│'; plane.cells[idx2].fg = border; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '│';
+            plane.cells[idx].fg = border;
+        }
+        let idx2 = (row * plane.width + x + w - 1) as usize;
+        if idx2 < plane.cells.len() {
+            plane.cells[idx2].char = '│';
+            plane.cells[idx2].fg = border;
+        }
     }
-    let corners = [(y,x,'┌'), (y,x+w-1,'┐'), (y+h-1,x,'└'), (y+h-1,x+w-1,'┘')];
-    for (r,c,ch) in corners {
+    let corners = [
+        (y, x, '┌'),
+        (y, x + w - 1, '┐'),
+        (y + h - 1, x, '└'),
+        (y + h - 1, x + w - 1, '┘'),
+    ];
+    for (r, c, ch) in corners {
         let idx = (r * plane.width + c) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = border; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = ch;
+            plane.cells[idx].fg = border;
+        }
     }
 }
 
@@ -714,8 +1001,17 @@ struct SparklineConfig {
 }
 
 fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHistory) {
-    let SparklineConfig { x, y, w, h, color, bg } = cfg;
-    if metric.values.is_empty() || w == 0 || h == 0 { return; }
+    let SparklineConfig {
+        x,
+        y,
+        w,
+        h,
+        color,
+        bg,
+    } = cfg;
+    if metric.values.is_empty() || w == 0 || h == 0 {
+        return;
+    }
     let max_val = metric.max().max(1.0);
     let values: Vec<f64> = metric.values.iter().copied().collect();
     let start = values.len().saturating_sub(w as usize);
@@ -723,7 +1019,9 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
     for (i, &val) in to_show.iter().enumerate() {
         let bar_h = ((val / max_val) * h as f64).round().clamp(0.0, h as f64) as u16;
         let col = x + i as u16;
-        if col >= x + w { break; }
+        if col >= x + w {
+            break;
+        }
         for row in 0..h {
             let row_y = y + h - 1 - row;
             let idx = (row_y * plane.width + col) as usize;
@@ -738,15 +1036,21 @@ fn render_sparkline(plane: &mut Plane, cfg: SparklineConfig, metric: &MetricHist
 
 fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
     for (i, cell) in src.cells.iter().enumerate() {
-        if cell.char == '\0' || cell.transparent { continue; }
+        if cell.char == '\0' || cell.transparent {
+            continue;
+        }
         let w = src.width as usize;
         let row = i / w;
         let col = i % w;
         let dy = offset_y as usize + row;
         let dx = offset_x as usize + col;
-        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
+        if dy >= dest.height as usize || dx >= dest.width as usize {
+            continue;
+        }
         let idx = dy * dest.width as usize + dx;
-        if idx < dest.cells.len() { dest.cells[idx] = cell.clone(); }
+        if idx < dest.cells.len() {
+            dest.cells[idx] = cell.clone();
+        }
     }
 }
 
@@ -769,23 +1073,43 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
     }
 
     // Draw rounded corners
-    let corners = [(hy, hx, '╭'), (hy, hx + hw - 1, '╮'), (hy + hh - 1, hx, '╰'), (hy + hh - 1, hx + hw - 1, '╯')];
+    let corners = [
+        (hy, hx, '╭'),
+        (hy, hx + hw - 1, '╮'),
+        (hy + hh - 1, hx, '╰'),
+        (hy + hh - 1, hx + hw - 1, '╯'),
+    ];
     for (r, c, ch) in corners {
         let idx = (r * plane.width + c) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = ch;
+            plane.cells[idx].fg = t.outline;
+        }
     }
     // Draw borders
     for col in hx..hx + hw {
         let idx = (hy * plane.width + col) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '─';
+            plane.cells[idx].fg = t.outline;
+        }
         let idx2 = ((hy + hh - 1) * plane.width + col) as usize;
-        if idx2 < plane.cells.len() { plane.cells[idx2].char = '─'; plane.cells[idx2].fg = t.outline; }
+        if idx2 < plane.cells.len() {
+            plane.cells[idx2].char = '─';
+            plane.cells[idx2].fg = t.outline;
+        }
     }
     for row in hy..hy + hh {
         let idx = (row * plane.width + hx) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = '│'; plane.cells[idx].fg = t.outline; }
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '│';
+            plane.cells[idx].fg = t.outline;
+        }
         let idx2 = (row * plane.width + hx + hw - 1) as usize;
-        if idx2 < plane.cells.len() { plane.cells[idx2].char = '│'; plane.cells[idx2].fg = t.outline; }
+        if idx2 < plane.cells.len() {
+            plane.cells[idx2].char = '│';
+            plane.cells[idx2].fg = t.outline;
+        }
     }
 
     let lines = [
@@ -801,7 +1125,15 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
     for (i, (line, bold)) in lines.iter().enumerate() {
         let y = hy + 1 + i as u16;
         let x = hx + (hw.saturating_sub(line.len() as u16)) / 2;
-        draw_text(plane, x, y, line, if *bold { t.primary } else { t.fg }, t.surface_elevated, *bold);
+        draw_text(
+            plane,
+            x,
+            y,
+            line,
+            if *bold { t.primary } else { t.fg },
+            t.surface_elevated,
+            *bold,
+        );
     }
 }
 
@@ -816,17 +1148,33 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
-    fn handle_key(&mut self, key: KeyEvent) -> bool { self.monitor.borrow_mut().handle_key(key) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.monitor.borrow_mut().handle_key(key)
+    }
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.monitor.borrow_mut().handle_mouse(kind, col, row)
     }

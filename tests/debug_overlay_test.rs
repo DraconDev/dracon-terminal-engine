@@ -38,7 +38,8 @@ fn test_widget_inspector_with_hierarchy() {
 fn test_widget_inspector_nested_nodes() {
     let mut inspector = WidgetInspector::new(WidgetId::new(1));
     let mut root = WidgetNode::new(WidgetId::new(1), "Root");
-    root.children.push(WidgetNode::new(WidgetId::new(2), "Child"));
+    root.children
+        .push(WidgetNode::new(WidgetId::new(2), "Child"));
     inspector.set_hierarchy(vec![root]);
     let plane = inspector.render(Rect::new(0, 0, 60, 20));
     assert!(plane.cells.len() > 0);
@@ -96,6 +97,7 @@ fn test_widget_node_new() {
 #[test]
 fn test_widget_node_with_children() {
     let mut node = WidgetNode::new(WidgetId::new(1), "Root");
-    node.children.push(WidgetNode::new(WidgetId::new(2), "Child"));
+    node.children
+        .push(WidgetNode::new(WidgetId::new(2), "Child"));
     assert_eq!(node.children.len(), 1);
 }

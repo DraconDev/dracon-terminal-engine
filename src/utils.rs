@@ -1129,10 +1129,7 @@ pub fn get_clipboard_text() -> Option<String> {
         .ok()
         .or_else(|| {
             // Fallback to in-memory store (for headless / test environments)
-            get_clipboard_store()
-                .lock()
-                .ok()
-                .map(|store| store.clone())
+            get_clipboard_store().lock().ok().map(|store| store.clone())
         })
 }
 

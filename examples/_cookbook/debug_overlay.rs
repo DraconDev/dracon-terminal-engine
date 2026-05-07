@@ -83,7 +83,10 @@ impl DebugOverlayPanel {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         // Propagate theme to all child widgets
         self.profiler.on_theme_change(&self.theme);
@@ -105,7 +108,13 @@ impl DebugOverlayPanel {
                     let on_border = ry == 0 || ry == h - 1 || rx == 0 || rx == w - 1;
                     let corner = (rx == 0 || rx == w - 1) && (ry == 0 || ry == h - 1);
                     plane.cells[idx] = Cell {
-                        char: if corner { '+' } else if on_border { '#' } else { ' ' },
+                        char: if corner {
+                            '+'
+                        } else if on_border {
+                            '#'
+                        } else {
+                            ' '
+                        },
                         fg: self.theme.primary,
                         bg: self.theme.surface_elevated,
                         style: Styles::empty(),
@@ -188,10 +197,10 @@ impl Widget for DebugOverlayPanel {
                     let border = y == 0 || y == 9 || y == area.height - 1;
                     let separator = y == 9 && x == 26;
                     let bg_color = if border {
-                            self.theme.surface_elevated
-                        } else {
-                            self.theme.bg
-                        };
+                        self.theme.surface_elevated
+                    } else {
+                        self.theme.bg
+                    };
                     plane.cells[idx] = Cell {
                         char: if separator {
                             '+'
@@ -322,7 +331,11 @@ impl Widget for DebugOverlayPanel {
         // Status bar
         let status_y = plane.height.saturating_sub(1);
         let hint = "F12: toggle | t: theme | ?: help | q: quit";
-        for (i, c) in hint.chars().take((plane.width as usize).saturating_sub(2)).enumerate() {
+        for (i, c) in hint
+            .chars()
+            .take((plane.width as usize).saturating_sub(2))
+            .enumerate()
+        {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;

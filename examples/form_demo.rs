@@ -67,14 +67,13 @@ struct SettingsForm {
 
 impl SettingsForm {
     fn new(id: WidgetId, theme: Theme) -> Self {
-        let theme_select = Select::new(WidgetId::new(id.0 + 3))
-            .with_options(vec![
-                "Dark".to_string(),
-                "Light".to_string(),
-                "Cyberpunk".to_string(),
-                "Nord".to_string(),
-                "Dracula".to_string(),
-            ]);
+        let theme_select = Select::new(WidgetId::new(id.0 + 3)).with_options(vec![
+            "Dark".to_string(),
+            "Light".to_string(),
+            "Cyberpunk".to_string(),
+            "Nord".to_string(),
+            "Dracula".to_string(),
+        ]);
 
         Self {
             id,
@@ -119,7 +118,10 @@ impl SettingsForm {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.form_theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.form_theme.name)
+            .unwrap_or(0);
         self.form_theme = themes[(idx + 1) % themes.len()];
         self.dirty = true;
     }
@@ -151,7 +153,8 @@ impl SettingsForm {
             FIELD_PASSWORD => {
                 let pwd = self.password.password();
                 if pwd.len() < 8 {
-                    self.errors.password = Some("Password must be at least 8 characters".to_string());
+                    self.errors.password =
+                        Some("Password must be at least 8 characters".to_string());
                     false
                 } else {
                     self.errors.password = None;
@@ -221,12 +224,25 @@ impl SettingsForm {
 }
 
 impl Widget for SettingsForm {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn focusable(&self) -> bool { true }
-    fn z_index(&self) -> u16 { 10 }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn z_index(&self) -> u16 {
+        10
+    }
 
     fn needs_render(&self) -> bool {
         self.dirty
@@ -238,7 +254,9 @@ impl Widget for SettingsForm {
             || self.submit.needs_render()
     }
 
-    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
 
     fn clear_dirty(&mut self) {
         self.dirty = false;
@@ -316,14 +334,20 @@ impl Widget for SettingsForm {
             let row_bg = if is_focused { t.focus_bg } else { t.surface };
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = row_bg;
+                }
             }
             if is_focused {
                 for dx in 1..card_w.saturating_sub(1) {
                     let top_idx = ((y - 1) * area.width + margin + dx) as usize;
                     let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
-                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                    if top_idx < plane.cells.len() {
+                        plane.cells[top_idx].bg = t.focus_border;
+                    }
+                    if bot_idx < plane.cells.len() {
+                        plane.cells[bot_idx].bg = t.focus_border;
+                    }
                 }
             }
             for (i, c) in Self::field_label(field).chars().enumerate() {
@@ -332,7 +356,11 @@ impl Widget for SettingsForm {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
                     plane.cells[idx].bg = row_bg;
-                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
             if self.errors.username.is_some() {
@@ -345,7 +373,9 @@ impl Widget for SettingsForm {
                 }
             }
         }
-        let username_plane = self.username.render(Rect::new(input_col, 4, input_width, 1));
+        let username_plane = self
+            .username
+            .render(Rect::new(input_col, 4, input_width, 1));
         blit(&mut plane, &username_plane, input_col, 4);
         if let Some(ref err) = self.errors.username {
             let err_text = format!("  󰅙 {}", err);
@@ -367,14 +397,20 @@ impl Widget for SettingsForm {
             let row_bg = if is_focused { t.focus_bg } else { t.surface };
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = row_bg;
+                }
             }
             if is_focused {
                 for dx in 1..card_w.saturating_sub(1) {
                     let top_idx = ((y - 1) * area.width + margin + dx) as usize;
                     let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
-                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                    if top_idx < plane.cells.len() {
+                        plane.cells[top_idx].bg = t.focus_border;
+                    }
+                    if bot_idx < plane.cells.len() {
+                        plane.cells[bot_idx].bg = t.focus_border;
+                    }
                 }
             }
             for (i, c) in Self::field_label(field).chars().enumerate() {
@@ -383,7 +419,11 @@ impl Widget for SettingsForm {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
                     plane.cells[idx].bg = row_bg;
-                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
             if self.errors.email.is_some() {
@@ -418,14 +458,20 @@ impl Widget for SettingsForm {
             let row_bg = if is_focused { t.focus_bg } else { t.surface };
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = row_bg;
+                }
             }
             if is_focused {
                 for dx in 1..card_w.saturating_sub(1) {
                     let top_idx = ((y - 1) * area.width + margin + dx) as usize;
                     let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
-                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                    if top_idx < plane.cells.len() {
+                        plane.cells[top_idx].bg = t.focus_border;
+                    }
+                    if bot_idx < plane.cells.len() {
+                        plane.cells[bot_idx].bg = t.focus_border;
+                    }
                 }
             }
             for (i, c) in Self::field_label(field).chars().enumerate() {
@@ -434,7 +480,11 @@ impl Widget for SettingsForm {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
                     plane.cells[idx].bg = row_bg;
-                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
             if self.errors.password.is_some() {
@@ -447,7 +497,9 @@ impl Widget for SettingsForm {
                 }
             }
         }
-        let password_plane = self.password.render(Rect::new(input_col, 8, input_width, 1));
+        let password_plane = self
+            .password
+            .render(Rect::new(input_col, 8, input_width, 1));
         blit(&mut plane, &password_plane, input_col, 8);
         if let Some(ref err) = self.errors.password {
             let err_text = format!("  󰅙 {}", err);
@@ -469,14 +521,20 @@ impl Widget for SettingsForm {
             let row_bg = if is_focused { t.focus_bg } else { t.surface };
             for dx in 1..card_w.saturating_sub(1) {
                 let idx = (y * area.width + margin + dx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].bg = row_bg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = row_bg;
+                }
             }
             if is_focused {
                 for dx in 1..card_w.saturating_sub(1) {
                     let top_idx = ((y - 1) * area.width + margin + dx) as usize;
                     let bot_idx = ((y + 1) * area.width + margin + dx) as usize;
-                    if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                    if top_idx < plane.cells.len() {
+                        plane.cells[top_idx].bg = t.focus_border;
+                    }
+                    if bot_idx < plane.cells.len() {
+                        plane.cells[bot_idx].bg = t.focus_border;
+                    }
                 }
             }
             for (i, c) in Self::field_label(field).chars().enumerate() {
@@ -485,7 +543,11 @@ impl Widget for SettingsForm {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
                     plane.cells[idx].bg = row_bg;
-                    plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
         }
@@ -506,8 +568,12 @@ impl Widget for SettingsForm {
             for dx in 1..card_w.saturating_sub(1) {
                 let top_idx = (11 * area.width + margin + dx) as usize;
                 let bot_idx = (13 * area.width + margin + dx) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].bg = t.focus_border;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].bg = t.focus_border;
+                }
             }
         }
         for (i, c) in notif_label.chars().enumerate() {
@@ -516,7 +582,11 @@ impl Widget for SettingsForm {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = if is_focused { t.primary } else { t.fg };
                 plane.cells[idx].bg = row_bg;
-                plane.cells[idx].style = if is_focused { Styles::BOLD } else { Styles::empty() };
+                plane.cells[idx].style = if is_focused {
+                    Styles::BOLD
+                } else {
+                    Styles::empty()
+                };
             }
         }
         let toggle_plane = self.notifications.render(Rect::new(input_col, 12, 30, 1));
@@ -535,8 +605,12 @@ impl Widget for SettingsForm {
             for dx in 1..card_w.saturating_sub(1) {
                 let top_idx = (13 * area.width + margin + dx) as usize;
                 let bot_idx = (15 * area.width + margin + dx) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].bg = t.focus_border; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].bg = t.focus_border; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].bg = t.focus_border;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].bg = t.focus_border;
+                }
             }
         }
         let submit_plane = self.submit.render(Rect::new(input_col, 14, 20, 1));
@@ -596,7 +670,9 @@ impl Widget for SettingsForm {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
@@ -702,7 +778,9 @@ impl Widget for SettingsForm {
         false
     }
 
-    fn on_focus(&mut self) { self.dirty = true; }
+    fn on_focus(&mut self) {
+        self.dirty = true;
+    }
     fn on_blur(&mut self) {
         self.validate_field(self.focused_field);
         self.dirty = true;
@@ -737,7 +815,15 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
 
     let title = "Form Help";
     let title_x = x + (w - title.len() as u16) / 2;
-    draw_text(plane, title_x, y + 1, title, t.primary, t.surface_elevated, true);
+    draw_text(
+        plane,
+        title_x,
+        y + 1,
+        title,
+        t.primary,
+        t.surface_elevated,
+        true,
+    );
 
     let shortcuts = [
         ("Tab / Shift+Tab", "Cycle focus"),
@@ -755,24 +841,43 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     }
 
     let hint = "Press ? or Esc to close";
-    draw_text(plane, x + 3, y + h - 1, hint, t.fg_muted, t.surface_elevated, false);
+    draw_text(
+        plane,
+        x + 3,
+        y + h - 1,
+        hint,
+        t.fg_muted,
+        t.surface_elevated,
+        false,
+    );
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             if is_border {
                 plane.cells[idx].fg = t.outline;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x + w - 1 { '╮' }
-                    else if row == y + h - 1 && col == x { '╰' }
-                    else if row == y + h - 1 && col == x + w - 1 { '╯' }
-                    else if row == y || row == y + h - 1 { '─' }
-                    else { '│' };
+                plane.cells[idx].char = if row == y && col == x {
+                    '╭'
+                } else if row == y && col == x + w - 1 {
+                    '╮'
+                } else if row == y + h - 1 && col == x {
+                    '╰'
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    '╯'
+                } else if row == y || row == y + h - 1 {
+                    '─'
+                } else {
+                    '│'
+                };
                 plane.cells[idx].transparent = false;
             }
         }
@@ -797,7 +902,9 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 fn blit(dst: &mut Plane, src: &Plane, dx: u16, dy: u16) {
     for (i, cell) in src.cells.iter().enumerate() {
-        if cell.transparent { continue; }
+        if cell.transparent {
+            continue;
+        }
         let x = (i % src.width as usize) as u16 + dx;
         let y = (i / src.width as usize) as u16 + dy;
         let idx = (y * dst.width + x) as usize;
@@ -822,7 +929,10 @@ fn main() -> std::io::Result<()> {
         .theme(Theme::dracula());
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
     app.on_input(move |key| {
-        if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press && key.modifiers.is_empty() {
+        if key.code == KeyCode::Char('q')
+            && key.kind == KeyEventKind::Press
+            && key.modifiers.is_empty()
+        {
             should_quit.store(true, Ordering::SeqCst);
             true
         } else {

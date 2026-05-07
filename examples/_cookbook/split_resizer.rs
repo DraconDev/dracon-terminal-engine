@@ -156,17 +156,19 @@ impl Widget for SplitResizerApp {
                     Theme::sunset(),
                     Theme::mono(),
                 ];
-                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                let idx = themes
+                    .iter()
+                    .position(|t| t.name == self.theme.name)
+                    .unwrap_or(0);
                 self.theme = themes[(idx + 1) % themes.len()];
                 self.dirty = true;
                 true
             }
-            KeyCode::Esc
-                if self.show_help => {
-                    self.show_help = false;
-                    self.dirty = true;
-                    true
-                }
+            KeyCode::Esc if self.show_help => {
+                self.show_help = false;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
@@ -445,7 +447,10 @@ impl SplitResizerApp {
         let sa = format!("A:{}%", (self.ra * 100.0).round() as i32);
         let sb = format!("B:{}%", ((1.0 - self.ra) * 100.0).round() as i32);
         let sb1 = format!("B1:{}%", (self.rb * 100.0).round() as i32);
-        let txt = format!("{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | t: theme | ?: help | q: quit", sa, sb, sb1);
+        let txt = format!(
+            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | t: theme | ?: help | q: quit",
+            sa, sb, sb1
+        );
         for (i, c) in txt.chars().enumerate().take(r.width as usize) {
             let idx = (r.y * p.width + i as u16) as usize;
             if idx < p.cells.len() {
@@ -470,17 +475,38 @@ impl SplitResizerApp {
         // Top border with rounded corners
         let idx = (y * p.width + x) as usize;
         if idx < p.cells.len() {
-            p.cells[idx] = Cell { char: '╭', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell {
+                char: '╭',
+                fg: t.fg_on_accent,
+                bg: t.surface_elevated,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         for i in 1..w - 1 {
             let idx = (y * p.width + x + i) as usize;
             if idx < p.cells.len() {
-                p.cells[idx] = Cell { char: '─', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+                p.cells[idx] = Cell {
+                    char: '─',
+                    fg: t.fg_on_accent,
+                    bg: t.surface_elevated,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
         let idx = (y * p.width + x + w - 1) as usize;
         if idx < p.cells.len() {
-            p.cells[idx] = Cell { char: '╮', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell {
+                char: '╮',
+                fg: t.fg_on_accent,
+                bg: t.surface_elevated,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
 
         // Body rows
@@ -488,17 +514,38 @@ impl SplitResizerApp {
             let row_y = y + row;
             let left_idx = (row_y * p.width + x) as usize;
             if left_idx < p.cells.len() {
-                p.cells[left_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+                p.cells[left_idx] = Cell {
+                    char: '│',
+                    fg: t.fg_on_accent,
+                    bg: t.surface_elevated,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
+                };
             }
             let right_idx = (row_y * p.width + x + w - 1) as usize;
             if right_idx < p.cells.len() {
-                p.cells[right_idx] = Cell { char: '│', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+                p.cells[right_idx] = Cell {
+                    char: '│',
+                    fg: t.fg_on_accent,
+                    bg: t.surface_elevated,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
+                };
             }
             // Fill background
             for col in 1..w - 1 {
                 let idx = (row_y * p.width + x + col) as usize;
                 if idx < p.cells.len() {
-                    p.cells[idx] = Cell { char: ' ', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::empty(), transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: ' ',
+                        fg: t.fg_on_accent,
+                        bg: t.surface_elevated,
+                        style: Styles::empty(),
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }
@@ -506,17 +553,38 @@ impl SplitResizerApp {
         // Bottom border
         let idx = ((y + h - 1) * p.width + x) as usize;
         if idx < p.cells.len() {
-            p.cells[idx] = Cell { char: '╰', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell {
+                char: '╰',
+                fg: t.fg_on_accent,
+                bg: t.surface_elevated,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
         for i in 1..w - 1 {
             let idx = ((y + h - 1) * p.width + x + i) as usize;
             if idx < p.cells.len() {
-                p.cells[idx] = Cell { char: '─', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+                p.cells[idx] = Cell {
+                    char: '─',
+                    fg: t.fg_on_accent,
+                    bg: t.surface_elevated,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
         let idx = ((y + h - 1) * p.width + x + w - 1) as usize;
         if idx < p.cells.len() {
-            p.cells[idx] = Cell { char: '╯', fg: t.fg_on_accent, bg: t.surface_elevated, style: Styles::BOLD, transparent: false, skip: false };
+            p.cells[idx] = Cell {
+                char: '╯',
+                fg: t.fg_on_accent,
+                bg: t.surface_elevated,
+                style: Styles::BOLD,
+                transparent: false,
+                skip: false,
+            };
         }
 
         // Help text
@@ -544,7 +612,14 @@ impl SplitResizerApp {
                     } else {
                         Styles::empty()
                     };
-                    p.cells[idx] = Cell { char: c, fg: t.fg_on_accent, bg: t.surface_elevated, style, transparent: false, skip: false };
+                    p.cells[idx] = Cell {
+                        char: c,
+                        fg: t.fg_on_accent,
+                        bg: t.surface_elevated,
+                        style,
+                        transparent: false,
+                        skip: false,
+                    };
                 }
             }
         }

@@ -776,22 +776,42 @@ fn main() -> std::io::Result<()> {
             }
 
             // Rounded border
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * w + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * w + x) as usize;
                 let bot = ((hy + hh - 1) * w + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * w + hx) as usize;
                 let right = (y * w + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
 
             // Title
@@ -818,11 +838,17 @@ fn main() -> std::io::Result<()> {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * w + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * w + hx + 18 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
 

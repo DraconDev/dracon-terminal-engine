@@ -263,7 +263,10 @@ impl FileManager {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
@@ -499,31 +502,95 @@ impl Widget for FileManager {
                     let mut meta_y = dy + 2;
                     let icon_col = 3;
                     let label_col = 14;
-                    
+
                     // Type badge
-                    draw_text(&mut plane, dx + icon_col, meta_y, "󰈔 Type:", t.fg_muted, t.surface_elevated, false);
+                    draw_text(
+                        &mut plane,
+                        dx + icon_col,
+                        meta_y,
+                        "󰈔 Type:",
+                        t.fg_muted,
+                        t.surface_elevated,
+                        false,
+                    );
                     let type_text = if node.is_dir { " Directory " } else { " File " };
                     let type_color = if node.is_dir { t.info } else { t.success };
-                    draw_text(&mut plane, dx + label_col, meta_y, type_text, type_color, t.surface_elevated, true);
+                    draw_text(
+                        &mut plane,
+                        dx + label_col,
+                        meta_y,
+                        type_text,
+                        type_color,
+                        t.surface_elevated,
+                        true,
+                    );
                     meta_y += 1;
 
                     if !node.is_dir {
                         let size_str = format_size(node.size);
-                        draw_text(&mut plane, dx + icon_col, meta_y, "󰆼 Size:", t.fg_muted, t.surface_elevated, false);
-                        draw_text(&mut plane, dx + label_col, meta_y, &format!(" {} ", size_str), t.warning, t.surface_elevated, true);
+                        draw_text(
+                            &mut plane,
+                            dx + icon_col,
+                            meta_y,
+                            "󰆼 Size:",
+                            t.fg_muted,
+                            t.surface_elevated,
+                            false,
+                        );
+                        draw_text(
+                            &mut plane,
+                            dx + label_col,
+                            meta_y,
+                            &format!(" {} ", size_str),
+                            t.warning,
+                            t.surface_elevated,
+                            true,
+                        );
                         meta_y += 1;
                     }
 
                     if let Ok(meta) = std::fs::metadata(&node.path) {
                         if let Ok(modified) = meta.modified() {
                             let time = format_system_time(modified);
-                            draw_text(&mut plane, dx + icon_col, meta_y, "󰃰 Changed:", t.fg_muted, t.surface_elevated, false);
-                            draw_text(&mut plane, dx + label_col, meta_y, &time, t.fg, t.surface_elevated, false);
+                            draw_text(
+                                &mut plane,
+                                dx + icon_col,
+                                meta_y,
+                                "󰃰 Changed:",
+                                t.fg_muted,
+                                t.surface_elevated,
+                                false,
+                            );
+                            draw_text(
+                                &mut plane,
+                                dx + label_col,
+                                meta_y,
+                                &time,
+                                t.fg,
+                                t.surface_elevated,
+                                false,
+                            );
                             meta_y += 1;
                         }
                         let perms = format_permissions(meta.permissions().mode());
-                        draw_text(&mut plane, dx + icon_col, meta_y, "󰿆 Access:", t.fg_muted, t.surface_elevated, false);
-                        draw_text(&mut plane, dx + label_col, meta_y, &perms, t.fg_muted, t.surface_elevated, false);
+                        draw_text(
+                            &mut plane,
+                            dx + icon_col,
+                            meta_y,
+                            "󰿆 Access:",
+                            t.fg_muted,
+                            t.surface_elevated,
+                            false,
+                        );
+                        draw_text(
+                            &mut plane,
+                            dx + label_col,
+                            meta_y,
+                            &perms,
+                            t.fg_muted,
+                            t.surface_elevated,
+                            false,
+                        );
                         meta_y += 1;
                     }
 
@@ -583,7 +650,8 @@ impl Widget for FileManager {
                     .with_fg(t.fg_muted),
             )
             .add_segment(
-                StatusSegment::new("t: theme | ?: help | c: context | r: refresh | q: quit").with_fg(t.primary),
+                StatusSegment::new("t: theme | ?: help | c: context | r: refresh | q: quit")
+                    .with_fg(t.primary),
             );
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
         for (i, c) in status_plane.cells.iter().enumerate() {

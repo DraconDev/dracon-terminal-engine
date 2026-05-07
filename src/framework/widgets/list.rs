@@ -240,20 +240,25 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         let total = self.items.len();
         let visible = visible_items.len();
         if total > visible && area.height > 1 {
-            let indicator = format!(" {}–{}/{} ", self.offset + 1, (self.offset + visible).min(total), total);
+            let indicator = format!(
+                " {}–{}/{} ",
+                self.offset + 1,
+                (self.offset + visible).min(total),
+                total
+            );
             let badge_len = indicator.len();
             let badge_x = (area.width as usize).saturating_sub(badge_len);
             let badge_y = (area.height as usize).saturating_sub(1);
             let bg = self.theme.surface_elevated;
             let fg = self.theme.fg_muted;
-            
+
             for x in badge_x..(area.width as usize) {
                 let idx = badge_y * area.width as usize + x;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = bg;
                 }
             }
-            
+
             for (i, c) in indicator.chars().enumerate() {
                 let idx = badge_y * area.width as usize + badge_x + i;
                 if idx < plane.cells.len() {

@@ -1,10 +1,10 @@
 //! StreamingText widget tests — append, clear, auto-scroll, word-wrap.
 
 use dracon_terminal_engine::compositor::Color;
+use dracon_terminal_engine::framework::command::ParsedOutput;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::StreamingText;
-use dracon_terminal_engine::framework::command::ParsedOutput;
 use ratatui::layout::Rect;
 
 #[test]

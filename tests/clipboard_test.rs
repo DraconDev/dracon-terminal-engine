@@ -12,7 +12,9 @@ use std::sync::Mutex;
 static CLIPBOARD_LOCK: Mutex<()> = Mutex::new(());
 
 fn lock_clipboard() -> std::sync::MutexGuard<'static, ()> {
-    CLIPBOARD_LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+    CLIPBOARD_LOCK
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 #[test]
@@ -61,21 +63,21 @@ fn test_editor_copy_selection() {
     let editor = TextEditor::with_content("Hello World");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Select text
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('a'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     // Copy
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('c'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     let clipboard = get_clipboard_text();
     assert!(clipboard.is_some());
     assert!(!clipboard.unwrap().is_empty());
@@ -88,21 +90,21 @@ fn test_editor_cut_selection() {
     let editor = TextEditor::with_content("Hello World");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Select all
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('a'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     // Cut
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('x'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     let clipboard = get_clipboard_text();
     assert!(clipboard.is_some());
     assert!(!clipboard.unwrap().is_empty());
@@ -113,18 +115,18 @@ fn test_editor_paste() {
     let _guard = lock_clipboard();
     clear_clipboard_text();
     set_clipboard_text("Pasted text");
-    
+
     let editor = TextEditor::new();
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
-    
+
     // Paste
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('v'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     // Content should have been pasted
     let content = adapter.editor().get_content();
     assert!(!content.is_empty());
@@ -136,10 +138,10 @@ fn test_clipboard_persists_between_operations() {
     clear_clipboard_text();
     set_clipboard_text("First");
     let first = get_clipboard_text();
-    
+
     set_clipboard_text("Second");
     let second = get_clipboard_text();
-    
+
     assert_eq!(first, Some("First".to_string()));
     assert_eq!(second, Some("Second".to_string()));
 }
@@ -169,17 +171,17 @@ fn test_editor_paste_multiline() {
     let _guard = lock_clipboard();
     clear_clipboard_text();
     set_clipboard_text("Line 1\nLine 2\nLine 3");
-    
+
     let editor = TextEditor::new();
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
-    
+
     adapter.handle_key(KeyEvent {
         code: KeyCode::Char('v'),
         modifiers: KeyModifiers::CONTROL,
         kind: KeyEventKind::Press,
     });
-    
+
     let content = adapter.editor().get_content();
     assert!(content.contains("Line 1"));
     assert!(content.contains("Line 2"));

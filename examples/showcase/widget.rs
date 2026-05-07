@@ -1,9 +1,9 @@
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
+use crate::render::CardConfig;
 use chrono::Local;
 use dracon_terminal_engine::compositor::Plane;
-use crate::render::CardConfig;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -212,45 +212,99 @@ impl Widget for Showcase {
         let search_y = 3usize;
         let search_active_bg = t.primary;
         let search_inactive_bg = t.surface;
-        let search_bg = if self.search_active { search_active_bg } else { search_inactive_bg };
-        
+        let search_bg = if self.search_active {
+            search_active_bg
+        } else {
+            search_inactive_bg
+        };
+
         // Draw search bar background
         for x in 2..area.width as usize - 2 {
             set_cell(&mut plane, x, search_y, ' ', t.fg, search_bg);
         }
-        
+
         // Search icon
         let search_icon = if self.search_active { "󰍺" } else { "󰼈" };
-        draw_text(&mut plane, 2, search_y, search_icon, t.fg_on_accent, search_bg, false);
-        
+        draw_text(
+            &mut plane,
+            2,
+            search_y,
+            search_icon,
+            t.fg_on_accent,
+            search_bg,
+            false,
+        );
+
         // Search text or placeholder
         let content_x = 4usize;
         if self.search_active {
             if self.search_query.is_empty() {
                 // Show blinking placeholder
-                let blink = std::time::Instant::now().duration_since(self.card_start).as_secs_f64();
+                let blink = std::time::Instant::now()
+                    .duration_since(self.card_start)
+                    .as_secs_f64();
                 let show_placeholder = (blink * 1.5).fract() < 0.85;
                 if show_placeholder {
-                    draw_text(&mut plane, content_x, search_y, "type to search...", t.fg_muted, search_bg, false);
+                    draw_text(
+                        &mut plane,
+                        content_x,
+                        search_y,
+                        "type to search...",
+                        t.fg_muted,
+                        search_bg,
+                        false,
+                    );
                 }
                 // Always show cursor when active, even if empty
                 let cursor_x = content_x;
                 if (blink * 2.0).fract() < 0.7 {
-                    set_cell(&mut plane, cursor_x, search_y, '▋', t.fg_on_accent, search_bg);
+                    set_cell(
+                        &mut plane,
+                        cursor_x,
+                        search_y,
+                        '▋',
+                        t.fg_on_accent,
+                        search_bg,
+                    );
                 }
             } else {
                 // Show actual query
-                draw_text(&mut plane, content_x, search_y, &self.search_query, t.fg_on_accent, search_bg, false);
+                draw_text(
+                    &mut plane,
+                    content_x,
+                    search_y,
+                    &self.search_query,
+                    t.fg_on_accent,
+                    search_bg,
+                    false,
+                );
                 // Cursor at end of query
                 let cursor_x = content_x + self.search_query.len();
-                let blink = std::time::Instant::now().duration_since(self.card_start).as_secs_f64();
+                let blink = std::time::Instant::now()
+                    .duration_since(self.card_start)
+                    .as_secs_f64();
                 if (blink * 2.0).fract() < 0.7 {
-                    set_cell(&mut plane, cursor_x, search_y, '▋', t.fg_on_accent, search_bg);
+                    set_cell(
+                        &mut plane,
+                        cursor_x,
+                        search_y,
+                        '▋',
+                        t.fg_on_accent,
+                        search_bg,
+                    );
                 }
             }
         } else {
             // Inactive - show hint
-            draw_text(&mut plane, content_x, search_y, "press / to search", t.fg_muted, search_bg, false);
+            draw_text(
+                &mut plane,
+                content_x,
+                search_y,
+                "press / to search",
+                t.fg_muted,
+                search_bg,
+                false,
+            );
         }
 
         // Search feedback: match count or no results
@@ -344,8 +398,14 @@ impl Widget for Showcase {
         for (i, (_key, state)) in prim_controls.iter().enumerate() {
             let hovered = hovered_prim == Some(i);
             let state_fg = if hovered { t.primary } else { t.fg };
-            let state_bg = if hovered { t.surface_elevated } else { t.surface };
-            draw_text(&mut plane, prim_x, prim_y, state, state_fg, state_bg, hovered);
+            let state_bg = if hovered {
+                t.surface_elevated
+            } else {
+                t.surface
+            };
+            draw_text(
+                &mut plane, prim_x, prim_y, state, state_fg, state_bg, hovered,
+            );
             prim_x += state.len() + 4;
         }
 
@@ -449,13 +509,14 @@ impl Widget for Showcase {
                 }
 
                 // Get hover animation offset
-                let hover_offset = if let Some(anim_id) = self.card_hover_anim.get(grid_idx).copied().flatten() {
-                    self.animations.value(anim_id).unwrap_or(0.0)
-                } else {
-                    0.0
-                };
+                let hover_offset =
+                    if let Some(anim_id) = self.card_hover_anim.get(grid_idx).copied().flatten() {
+                        self.animations.value(anim_id).unwrap_or(0.0)
+                    } else {
+                        0.0
+                    };
                 let offset_y = (hover_offset * -0.5) as i16; // Lift up by up to 0.5 rows
-                let offset_x = (hover_offset * 0.5) as i16;  // Slight right shift
+                let offset_x = (hover_offset * 0.5) as i16; // Slight right shift
                 let draw_x = (x as i16 + offset_x).max(1) as usize;
                 let draw_y = (y as i16 + offset_y).max(1) as usize;
 
@@ -582,10 +643,11 @@ impl Widget for Showcase {
         // Status message (temporary) - toast style with slide-in animation
         if let Some((ref msg, time)) = self.status_message {
             if time.elapsed() < Duration::from_secs(2) {
-                let toast_offset = self.toast_anim
+                let toast_offset = self
+                    .toast_anim
                     .and_then(|id| self.animations.value(id))
                     .unwrap_or(0.0);
-                
+
                 let msg_y = (area.height as i16 / 2 + toast_offset as i16).max(1) as usize;
                 let msg_x = ((area.width as usize).saturating_sub(msg.len() + 6)) / 2;
                 let msg_w = msg.len() + 6;
@@ -1102,7 +1164,12 @@ impl Widget for Showcase {
                 // Border
                 draw_rounded_border(
                     &mut plane,
-                    Rect::new(panel_x as u16, panel_y as u16, panel_w as u16, panel_h as u16),
+                    Rect::new(
+                        panel_x as u16,
+                        panel_y as u16,
+                        panel_w as u16,
+                        panel_h as u16,
+                    ),
                     t.warning,
                     t.surface_elevated,
                     true,
@@ -1120,7 +1187,8 @@ impl Widget for Showcase {
                 );
 
                 // Events (newest first)
-                for (i, (_, entry)) in log.iter().rev().take(panel_h.saturating_sub(3)).enumerate() {
+                for (i, (_, entry)) in log.iter().rev().take(panel_h.saturating_sub(3)).enumerate()
+                {
                     let y = panel_y + 2 + i;
                     if y < area.height as usize {
                         let truncated: String = entry.chars().take(panel_w - 4).collect();
@@ -1131,7 +1199,15 @@ impl Widget for Showcase {
                         } else {
                             t.fg_muted
                         };
-                        draw_text(&mut plane, panel_x + 2, y, &truncated, fg, t.surface_elevated, false);
+                        draw_text(
+                            &mut plane,
+                            panel_x + 2,
+                            y,
+                            &truncated,
+                            fg,
+                            t.surface_elevated,
+                            false,
+                        );
                     }
                 }
             }
@@ -1151,7 +1227,9 @@ impl Widget for Showcase {
         let consumed = self.dispatch_key(key);
         let status = if consumed { "CONSUMED" } else { "ignored" };
         let log_entry = format!("{} {} {}", key_desc, mods, status);
-        self.event_log.borrow_mut().push_back((std::time::Instant::now(), log_entry));
+        self.event_log
+            .borrow_mut()
+            .push_back((std::time::Instant::now(), log_entry));
         while self.event_log.borrow().len() > 16 {
             self.event_log.borrow_mut().pop_front();
         }
@@ -1165,7 +1243,9 @@ impl Widget for Showcase {
             let mouse_desc = format!("{:?} at ({}, {})", kind, col, row);
             let status = if consumed { "CONSUMED" } else { "ignored" };
             let log_entry = format!("{} {}", mouse_desc, status);
-            self.event_log.borrow_mut().push_back((std::time::Instant::now(), log_entry));
+            self.event_log
+                .borrow_mut()
+                .push_back((std::time::Instant::now(), log_entry));
             while self.event_log.borrow().len() > 16 {
                 self.event_log.borrow_mut().pop_front();
             }
@@ -1319,7 +1399,8 @@ impl Showcase {
                         if card_idx < self.filtered.len() {
                             // Start hover animation if entering new card
                             if self.hovered_card != Some(card_idx) {
-                                let anim_id = self.animations.start(0.0, 1.0, Duration::from_millis(200));
+                                let anim_id =
+                                    self.animations.start(0.0, 1.0, Duration::from_millis(200));
                                 if card_idx >= self.card_hover_anim.len() {
                                     self.card_hover_anim.resize(card_idx + 1, None);
                                 }

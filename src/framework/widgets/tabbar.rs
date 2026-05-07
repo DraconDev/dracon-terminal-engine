@@ -213,7 +213,9 @@ impl crate::framework::widget::Widget for TabBar {
                 }
                 false
             }
-            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) if inside => {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left)
+                if inside =>
+            {
                 self.active = idx as usize;
                 self.dirty = true;
                 true

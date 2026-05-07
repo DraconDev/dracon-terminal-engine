@@ -111,12 +111,12 @@ impl BaseInput {
                     } else {
                         self.theme.fg
                     },
-                    bg: if is_cursor {
-                        self.theme.fg
+                    bg: if is_cursor { self.theme.fg } else { bg },
+                    style: if is_cursor {
+                        Styles::empty()
                     } else {
-                        bg
+                        focus_style
                     },
-                    style: if is_cursor { Styles::empty() } else { focus_style },
                     transparent: false,
                     skip: false,
                 };

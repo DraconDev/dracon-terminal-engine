@@ -10,7 +10,11 @@ use std::path::Path;
 
 #[test]
 fn test_breadcrumbs_new() {
-    let crumbs = Breadcrumbs::new(vec!["home".to_string(), "user".to_string(), "projects".to_string()]);
+    let crumbs = Breadcrumbs::new(vec![
+        "home".to_string(),
+        "user".to_string(),
+        "projects".to_string(),
+    ]);
     let plane = crumbs.render(Rect::new(0, 0, 80, 1));
     assert_eq!(plane.height, 1);
 }
@@ -46,7 +50,8 @@ fn test_breadcrumbs_theme_change() {
 
 #[test]
 fn test_breadcrumbs_no_black_background() {
-    let crumbs = Breadcrumbs::new(vec!["home".to_string(), "user".to_string()]).with_theme(Theme::nord());
+    let crumbs =
+        Breadcrumbs::new(vec!["home".to_string(), "user".to_string()]).with_theme(Theme::nord());
     let plane = crumbs.render(Rect::new(0, 0, 80, 1));
     for cell in &plane.cells {
         assert_ne!(cell.bg, Color::Reset);
@@ -60,16 +65,17 @@ use std::rc::Rc;
 fn test_breadcrumbs_mouse_click_navigates() {
     let clicked = Rc::new(RefCell::new(None));
     let clicked_clone = Rc::clone(&clicked);
-    
+
     let mut crumbs = Breadcrumbs::new(vec![
         "home".to_string(),
         "user".to_string(),
         "projects".to_string(),
-    ]).on_navigate(move |idx| {
+    ])
+    .on_navigate(move |idx| {
         *clicked_clone.borrow_mut() = Some(idx);
     });
     crumbs.set_area(Rect::new(0, 0, 80, 1));
-    
+
     // Click on first segment
     let result = crumbs.handle_mouse(MouseEventKind::Down(MouseButton::Left), 2, 0);
     assert!(result);
@@ -80,7 +86,7 @@ fn test_breadcrumbs_mouse_click_navigates() {
 fn test_breadcrumbs_mouse_click_outside() {
     let mut crumbs = Breadcrumbs::new(vec!["home".to_string()]);
     crumbs.set_area(Rect::new(0, 0, 80, 1));
-    
+
     // Click outside segment area
     let result = crumbs.handle_mouse(MouseEventKind::Down(MouseButton::Left), 100, 0);
     assert!(!result);

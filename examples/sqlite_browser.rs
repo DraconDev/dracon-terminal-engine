@@ -77,8 +77,10 @@ impl SqliteBrowser {
         let status_bar = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new("SQLite Browser").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("Tab: switch | e: edit | r: refresh | t: theme | ?: help | q: quit")
-                    .with_fg(theme.fg_muted),
+                StatusSegment::new(
+                    "Tab: switch | e: edit | r: refresh | t: theme | ?: help | q: quit",
+                )
+                .with_fg(theme.fg_muted),
             );
 
         let mut app = Self {
@@ -136,7 +138,10 @@ impl SqliteBrowser {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.status_bar.on_theme_change(&self.theme);
         self.search_input.on_theme_change(&self.theme);
@@ -335,7 +340,11 @@ impl Widget for SqliteBrowser {
         // Left panel: tables
         let left_active = matches!(self.active_panel, Panel::Tables);
         draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t, left_active);
-        let left_bg = if left_active { t.surface_elevated } else { t.surface };
+        let left_bg = if left_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in 1..content_h.saturating_sub(1) {
             for x in 1..left_rect.width.saturating_sub(1) {
                 let idx = (y * area.width + x) as usize;
@@ -351,7 +360,11 @@ impl Widget for SqliteBrowser {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let bg = if is_selected { t.primary_active } else { left_bg };
+            let bg = if is_selected {
+                t.primary_active
+            } else {
+                left_bg
+            };
             let prefix = if is_selected { "▸ " } else { "  " };
             draw_text(
                 &mut plane,
@@ -380,8 +393,20 @@ impl Widget for SqliteBrowser {
 
         // Query section with rounded border
         let query_active = matches!(self.active_panel, Panel::Query);
-        draw_rounded_border(&mut plane, left_rect.width + 1, 0, right_rect.width.saturating_sub(1), query_h + 1, t, query_active);
-        let query_bg = if query_active { t.surface_elevated } else { t.surface };
+        draw_rounded_border(
+            &mut plane,
+            left_rect.width + 1,
+            0,
+            right_rect.width.saturating_sub(1),
+            query_h + 1,
+            t,
+            query_active,
+        );
+        let query_bg = if query_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in 1..query_h {
             for x in left_rect.width + 2..area.width.saturating_sub(1) {
                 let idx = (y * area.width + x) as usize;
@@ -418,8 +443,20 @@ impl Widget for SqliteBrowser {
 
         // Results section with rounded border
         let results_active = matches!(self.active_panel, Panel::Results);
-        draw_rounded_border(&mut plane, left_rect.width + 1, results_y, right_rect.width.saturating_sub(1), results_h, t, results_active);
-        let results_bg = if results_active { t.surface_elevated } else { t.surface };
+        draw_rounded_border(
+            &mut plane,
+            left_rect.width + 1,
+            results_y,
+            right_rect.width.saturating_sub(1),
+            results_h,
+            t,
+            results_active,
+        );
+        let results_bg = if results_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for y in results_y + 1..content_h.saturating_sub(1) {
             for x in left_rect.width + 2..area.width.saturating_sub(1) {
                 let idx = (y * area.width + x) as usize;
@@ -464,7 +501,15 @@ impl Widget for SqliteBrowser {
             let count = self.results_rows.len();
             let count_text = format!(" {} rows ", count);
             let count_x = area.width.saturating_sub(count_text.len() as u16 + 3);
-            draw_text(&mut plane, count_x, results_y + results_h - 2, &count_text, t.fg_on_accent, t.primary, true);
+            draw_text(
+                &mut plane,
+                count_x,
+                results_y + results_h - 2,
+                &count_text,
+                t.fg_on_accent,
+                t.primary,
+                true,
+            );
         } else {
             draw_text(
                 &mut plane,
@@ -529,42 +574,78 @@ impl Widget for SqliteBrowser {
                     }
                 }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top_idx = (hy * area.width + x) as usize;
                 let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].char = '─';
+                    plane.cells[top_idx].fg = t.outline;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].char = '─';
+                    plane.cells[bot_idx].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left_idx = (y * area.width + hx) as usize;
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
-                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
-                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+                if left_idx < plane.cells.len() {
+                    plane.cells[left_idx].char = '│';
+                    plane.cells[left_idx].fg = t.outline;
+                }
+                if right_idx < plane.cells.len() {
+                    plane.cells[right_idx].char = '│';
+                    plane.cells[right_idx].fg = t.outline;
+                }
             }
             let title = "SQLite Browser Help";
             let tx = hx + (hw - title.len() as u16) / 2;
             for (i, c) in title.chars().enumerate() {
                 let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
             }
             let shortcuts = [
-                ("↑/↓/j/k", "Navigate"), ("Enter", "Select / Run query"), ("Tab", "Switch panel"),
-                ("e", "Edit query"), ("r", "Refresh"), ("t", "Cycle theme"), ("?", "Toggle help"), ("q", "Quit"),
+                ("↑/↓/j/k", "Navigate"),
+                ("Enter", "Select / Run query"),
+                ("Tab", "Switch panel"),
+                ("e", "Edit query"),
+                ("r", "Refresh"),
+                ("t", "Cycle theme"),
+                ("?", "Toggle help"),
+                ("q", "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -601,12 +682,11 @@ impl Widget for SqliteBrowser {
             }
         } else {
             match key.code {
-                KeyCode::Esc
-                    if self.show_help => {
-                        self.show_help = false;
-                        self.dirty = true;
-                        true
-                    }
+                KeyCode::Esc if self.show_help => {
+                    self.show_help = false;
+                    self.dirty = true;
+                    true
+                }
                 KeyCode::Char('q') => {
                     self.should_quit.store(true, Ordering::SeqCst);
                     true
@@ -711,7 +791,8 @@ impl Widget for SqliteBrowser {
                 }
             }
             MouseEventKind::ScrollDown => {
-                if self.active_panel == Panel::Tables && self.selected_table + 1 < self.tables.len() {
+                if self.active_panel == Panel::Tables && self.selected_table + 1 < self.tables.len()
+                {
                     self.selected_table += 1;
                     self.dirty = true;
                 }
@@ -730,12 +811,16 @@ impl Widget for SqliteBrowser {
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme, active: bool) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     let border_color = if active { t.primary } else { t.outline };
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
             if is_border {

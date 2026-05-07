@@ -476,13 +476,21 @@ impl Widget for ThemePreviewPanel {
                     let is_left = x == 0;
                     let is_right = x == area.width - 1;
                     let is_border = is_top || is_bottom || is_left || is_right;
-                    let ch = if !is_border { ' ' }
-                        else if is_top && is_left { '╭' }
-                        else if is_top && is_right { '╮' }
-                        else if is_bottom && is_left { '╰' }
-                        else if is_bottom && is_right { '╯' }
-                        else if is_top || is_bottom { '─' }
-                        else { '│' };
+                    let ch = if !is_border {
+                        ' '
+                    } else if is_top && is_left {
+                        '╭'
+                    } else if is_top && is_right {
+                        '╮'
+                    } else if is_bottom && is_left {
+                        '╰'
+                    } else if is_bottom && is_right {
+                        '╯'
+                    } else if is_top || is_bottom {
+                        '─'
+                    } else {
+                        '│'
+                    };
                     plane.cells[idx] = Cell {
                         char: ch,
                         fg: theme.outline,
@@ -695,7 +703,11 @@ impl Widget for WidgetDemoPanel {
         // Checkbox previews
         let chk_row = 3;
         let mut chk_x = btn_x + btn_text.len() as u16 + 3;
-        let checks = [(true, theme.success), (false, theme.fg_muted), (true, theme.primary)];
+        let checks = [
+            (true, theme.success),
+            (false, theme.fg_muted),
+            (true, theme.primary),
+        ];
         for (checked, color) in checks.iter() {
             let mark = if *checked { "󰄬" } else { "󰄱" };
             let label = if *checked { " On " } else { " Off " };
@@ -769,11 +781,29 @@ impl Widget for WidgetDemoPanel {
         }
 
         let list_row = 7;
-        let items = [(false, "󰆍 item-1"), (false, "󰆍 item-2"), (false, "󰆍 item-3"), (true, "󰆌 selected"), (false, "󰆍 item-5")];
+        let items = [
+            (false, "󰆍 item-1"),
+            (false, "󰆍 item-2"),
+            (false, "󰆍 item-3"),
+            (true, "󰆌 selected"),
+            (false, "󰆍 item-5"),
+        ];
         for (i, (is_selected, item)) in items.iter().enumerate() {
-            let bg = if *is_selected { theme.selection_bg } else { theme.bg };
-            let fg = if *is_selected { theme.selection_fg } else { theme.fg };
-            let style = if *is_selected { Styles::BOLD } else { Styles::empty() };
+            let bg = if *is_selected {
+                theme.selection_bg
+            } else {
+                theme.bg
+            };
+            let fg = if *is_selected {
+                theme.selection_fg
+            } else {
+                theme.fg
+            };
+            let style = if *is_selected {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
 
             for (j, c) in item.chars().enumerate() {
                 let idx = (list_row as usize + i) * area.width as usize + 2 + j;
@@ -809,7 +839,8 @@ impl Widget for WidgetDemoPanel {
 
         let breadcrumb_row = area.height as usize - 1;
         let crumbs = [("󰋜 home", false), ("󰉋 projects", false), ("󰆍 demo", true)];
-        let total_len: usize = crumbs.iter().map(|(s, _)| s.len()).sum::<usize>() + crumbs.len() - 1;
+        let total_len: usize =
+            crumbs.iter().map(|(s, _)| s.len()).sum::<usize>() + crumbs.len() - 1;
         let start_x = (area.width as usize / 2 - total_len / 2) as u16;
 
         let mut x = start_x;
@@ -828,8 +859,16 @@ impl Widget for WidgetDemoPanel {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if *is_last { theme.primary } else { theme.fg };
-                    plane.cells[idx].style = if *is_last { Styles::BOLD } else { Styles::empty() };
-                    plane.cells[idx].bg = if *is_last { theme.primary_active } else { theme.bg };
+                    plane.cells[idx].style = if *is_last {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
+                    plane.cells[idx].bg = if *is_last {
+                        theme.primary_active
+                    } else {
+                        theme.bg
+                    };
                 }
                 x += 1;
             }
@@ -861,15 +900,29 @@ impl HelpOverlay {
 }
 
 impl Widget for HelpOverlay {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn z_index(&self) -> u16 { 200 }
-    fn needs_render(&self) -> bool { self.show_help.load(Ordering::SeqCst) }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        200
+    }
+    fn needs_render(&self) -> bool {
+        self.show_help.load(Ordering::SeqCst)
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { false }
+    fn focusable(&self) -> bool {
+        false
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -901,22 +954,42 @@ impl Widget for HelpOverlay {
         }
 
         // Rounded border
-        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
         for (ch, cx, cy) in corners.iter() {
             let idx = (cy * area.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
         for x in hx + 1..hx + hw - 1 {
             let top = (hy * area.width + x) as usize;
             let bot = ((hy + hh - 1) * area.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left = (y * area.width + hx) as usize;
             let right = (y * area.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Title
@@ -943,11 +1016,17 @@ impl Widget for HelpOverlay {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
 
@@ -971,15 +1050,29 @@ impl StatusBarWidget {
 }
 
 impl Widget for StatusBarWidget {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn z_index(&self) -> u16 { 5 }
-    fn needs_render(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        5
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { false }
+    fn focusable(&self) -> bool {
+        false
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);

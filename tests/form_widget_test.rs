@@ -41,7 +41,7 @@ fn test_form_add_field_chaining() {
 fn test_form_down_navigation() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     assert!(form.handle_key(key_press(KeyCode::Down)));
     assert!(form.handle_key(key_press(KeyCode::Down)));
     // At last field, should still return true but not advance
@@ -52,11 +52,11 @@ fn test_form_down_navigation() {
 fn test_form_up_navigation() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Move to last field
     form.handle_key(key_press(KeyCode::Down));
     form.handle_key(key_press(KeyCode::Down));
-    
+
     // Now move back up
     assert!(form.handle_key(key_press(KeyCode::Up)));
     assert!(form.handle_key(key_press(KeyCode::Up)));
@@ -68,11 +68,11 @@ fn test_form_up_navigation() {
 fn test_form_char_input() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     assert!(form.handle_key(key_press(KeyCode::Char('a'))));
     assert!(form.handle_key(key_press(KeyCode::Char('b'))));
     assert!(form.handle_key(key_press(KeyCode::Char('c'))));
-    
+
     // Field should have "abc"
     // We can't directly verify without exposing field value
     // But we can verify dirty flag is set
@@ -83,7 +83,7 @@ fn test_form_char_input() {
 fn test_form_backspace() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Type then backspace
     form.handle_key(key_press(KeyCode::Char('a')));
     form.handle_key(key_press(KeyCode::Char('b')));
@@ -94,7 +94,7 @@ fn test_form_backspace() {
 fn test_form_backspace_empty_field() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     // Backspace on empty field should not panic
     assert!(form.handle_key(key_press(KeyCode::Backspace)));
 }
@@ -103,7 +103,7 @@ fn test_form_backspace_empty_field() {
 fn test_form_home_clears_field() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     form.handle_key(key_press(KeyCode::Char('a')));
     form.handle_key(key_press(KeyCode::Char('b')));
     assert!(form.handle_key(key_press(KeyCode::Home)));
@@ -113,7 +113,7 @@ fn test_form_home_clears_field() {
 fn test_form_mouse_selects_field() {
     let mut form = make_form();
     form.set_area(Rect::new(0, 0, 40, 10));
-    
+
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
     let result = form.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 1);
     assert!(result);
@@ -124,7 +124,7 @@ fn test_form_set_field_value() {
     let mut form = make_form();
     form.set_field_value(0, "testuser");
     form.set_field_value(1, "test@example.com");
-    
+
     assert!(form.needs_render());
 }
 
@@ -138,7 +138,7 @@ fn test_form_set_field_error() {
 #[test]
 fn test_form_release_key_ignored() {
     let mut form = make_form();
-    
+
     let release = KeyEvent {
         code: KeyCode::Down,
         modifiers: KeyModifiers::empty(),
@@ -152,7 +152,7 @@ fn test_form_on_theme_change() {
     let mut form = make_form();
     let theme = Theme::cyberpunk();
     form.on_theme_change(&theme);
-    
+
     let plane = form.render(Rect::new(0, 0, 40, 10));
     // Form should render without panic after theme change
     assert_eq!(plane.width, 40);

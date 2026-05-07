@@ -129,7 +129,11 @@ pub fn render_card(config: &CardConfig) -> Plane {
     } else if is_hovered {
         let hover_pulse = (card_phase * 3.0).sin() * 0.15 + 0.85;
         let pulse_high = hover_pulse > 0.92;
-        if pulse_high { t.primary } else { t.primary_hover }
+        if pulse_high {
+            t.primary
+        } else {
+            t.primary_hover
+        }
     } else {
         t.outline
     };
@@ -170,30 +174,64 @@ pub fn render_card(config: &CardConfig) -> Plane {
     let _preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
 
     match config.ex.name {
-        "system_monitor" => render_live_gauge_preview(&mut plane, config.theme, card_phase, config.width),
+        "system_monitor" => {
+            render_live_gauge_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "split_resizer" => render_split_preview(&mut plane, config.theme, card_phase, config.width),
-        "command_bindings" => render_command_preview(&mut plane, config.theme, card_phase, config.width),
-        "theme_switcher" => render_theme_preview(&mut plane, config.theme, card_phase, config.width),
-        "widget_gallery" => render_widget_preview(&mut plane, config.theme, card_phase, config.width),
+        "command_bindings" => {
+            render_command_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "theme_switcher" => {
+            render_theme_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "widget_gallery" => {
+            render_widget_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "ide" => render_ide_preview(&mut plane, config.theme, card_phase, config.width),
         "desktop" => render_desktop_preview(&mut plane, config.theme, card_phase, config.width),
-        "chat_client" | "log_monitor" => render_scroll_preview(&mut plane, config.theme, card_phase, config.width),
+        "chat_client" | "log_monitor" => {
+            render_scroll_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "git_tui" => render_git_tui_preview(&mut plane, config.theme, card_phase, config.width),
-        "file_manager" => render_file_manager_preview(&mut plane, config.theme, card_phase, config.width),
-        "menu_system" => render_menu_system_preview(&mut plane, config.theme, card_phase, config.width),
-        "modal_demo" => render_modal_demo_preview(&mut plane, config.theme, card_phase, config.width),
-        "dashboard_builder" => render_dashboard_preview(&mut plane, config.theme, card_phase, config.width),
-        "tabbed_panels" => render_tabbed_preview(&mut plane, config.theme, card_phase, config.width),
+        "file_manager" => {
+            render_file_manager_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "menu_system" => {
+            render_menu_system_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "modal_demo" => {
+            render_modal_demo_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "dashboard_builder" => {
+            render_dashboard_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "tabbed_panels" => {
+            render_tabbed_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "tree_navigator" => render_tree_preview(&mut plane, config.theme, card_phase, config.width),
         "data_table" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
-        "input_debug" => render_input_debug_preview(&mut plane, config.theme, card_phase, config.width),
-        "text_editor_demo" => render_text_editor_preview(&mut plane, config.theme, card_phase, config.width),
+        "input_debug" => {
+            render_input_debug_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "text_editor_demo" => {
+            render_text_editor_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "game_loop" => render_game_loop_preview(&mut plane, config.theme, card_phase, config.width),
-        "form_demo" | "form_widget" => render_form_preview(&mut plane, config.theme, card_phase, config.width),
-        "framework_file_manager" => render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width),
-        "sqlite_browser" => render_file_manager_preview(&mut plane, config.theme, card_phase, config.width),
-        "widget_tutorial" => render_widget_preview(&mut plane, config.theme, card_phase, config.width),
-        "debug_overlay" => render_command_preview(&mut plane, config.theme, card_phase, config.width),
+        "form_demo" | "form_widget" => {
+            render_form_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "framework_file_manager" => {
+            render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "sqlite_browser" => {
+            render_file_manager_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "widget_tutorial" => {
+            render_widget_preview(&mut plane, config.theme, card_phase, config.width)
+        }
+        "debug_overlay" => {
+            render_command_preview(&mut plane, config.theme, card_phase, config.width)
+        }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
@@ -670,27 +708,98 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
     let modal_h = 7;
     let border_color = t.warning;
 
-    set_cell(plane, modal_x, modal_y, '┌', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x,
+        modal_y,
+        '┌',
+        border_color,
+        t.surface_elevated,
+    );
     for dx in 1..modal_w - 1 {
-        set_cell(plane, modal_x + dx, modal_y, '─', border_color, t.surface_elevated);
+        set_cell(
+            plane,
+            modal_x + dx,
+            modal_y,
+            '─',
+            border_color,
+            t.surface_elevated,
+        );
     }
-    set_cell(plane, modal_x + modal_w - 1, modal_y, '┐', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x + modal_w - 1,
+        modal_y,
+        '┐',
+        border_color,
+        t.surface_elevated,
+    );
     for dy in 1..modal_h - 1 {
-        set_cell(plane, modal_x, modal_y + dy, '│', border_color, t.surface_elevated);
+        set_cell(
+            plane,
+            modal_x,
+            modal_y + dy,
+            '│',
+            border_color,
+            t.surface_elevated,
+        );
         for dx in 1..modal_w - 1 {
-            set_cell(plane, modal_x + dx, modal_y + dy, ' ', border_color, t.surface_elevated);
+            set_cell(
+                plane,
+                modal_x + dx,
+                modal_y + dy,
+                ' ',
+                border_color,
+                t.surface_elevated,
+            );
         }
-        set_cell(plane, modal_x + modal_w - 1, modal_y + dy, '│', border_color, t.surface_elevated);
+        set_cell(
+            plane,
+            modal_x + modal_w - 1,
+            modal_y + dy,
+            '│',
+            border_color,
+            t.surface_elevated,
+        );
     }
-    set_cell(plane, modal_x, modal_y + modal_h - 1, '└', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x,
+        modal_y + modal_h - 1,
+        '└',
+        border_color,
+        t.surface_elevated,
+    );
     for dx in 1..modal_w - 1 {
-        set_cell(plane, modal_x + dx, modal_y + modal_h - 1, '─', border_color, t.surface_elevated);
+        set_cell(
+            plane,
+            modal_x + dx,
+            modal_y + modal_h - 1,
+            '─',
+            border_color,
+            t.surface_elevated,
+        );
     }
-    set_cell(plane, modal_x + modal_w - 1, modal_y + modal_h - 1, '┘', border_color, t.surface_elevated);
+    set_cell(
+        plane,
+        modal_x + modal_w - 1,
+        modal_y + modal_h - 1,
+        '┘',
+        border_color,
+        t.surface_elevated,
+    );
 
     let text = " Confirm? ";
     let text_x = modal_x + (modal_w - text.len()) / 2;
-    draw_text(plane, text_x, modal_y + 2, text, t.fg, t.surface_elevated, true);
+    draw_text(
+        plane,
+        text_x,
+        modal_y + 2,
+        text,
+        t.fg,
+        t.surface_elevated,
+        true,
+    );
 
     let yes_text = "[ Yes ]";
     let no_text = "[ No  ]";
@@ -699,8 +808,24 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u
     let no_x = modal_x + 10;
     let pulse = (phase * 3.0).sin() * 0.5 + 0.5;
     let yes_fg = if pulse > 0.5 { t.success } else { t.fg_muted };
-    draw_text(plane, yes_x, btn_y, yes_text, yes_fg, t.surface_elevated, true);
-    draw_text(plane, no_x, btn_y, no_text, t.fg_muted, t.surface_elevated, true);
+    draw_text(
+        plane,
+        yes_x,
+        btn_y,
+        yes_text,
+        yes_fg,
+        t.surface_elevated,
+        true,
+    );
+    draw_text(
+        plane,
+        no_x,
+        btn_y,
+        no_text,
+        t.fg_muted,
+        t.surface_elevated,
+        true,
+    );
 }
 
 fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
@@ -711,11 +836,24 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u1
     ];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = 6 + i;
-        if y > 10 { break; }
+        if y > 10 {
+            break;
+        }
         let val = value.clamp(0.0, 100.0) as u32;
         let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
-        let bar_str = format!("{} [{}{}]", label, "█".repeat(filled), "░".repeat(10 - filled));
-        let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
+        let bar_str = format!(
+            "{} [{}{}]",
+            label,
+            "█".repeat(filled),
+            "░".repeat(10 - filled)
+        );
+        let color = if val > 80 {
+            t.error
+        } else if val > 50 {
+            t.warning
+        } else {
+            t.success
+        };
         draw_text(plane, 1, y, &bar_str, color, t.surface, false);
     }
 }
@@ -726,7 +864,11 @@ fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16)
     for (i, tab) in tabs.iter().enumerate() {
         let is_active = i == 0;
         let fg = if is_active { t.primary } else { t.fg_muted };
-        let bg = if is_active { t.surface_elevated } else { t.surface };
+        let bg = if is_active {
+            t.surface_elevated
+        } else {
+            t.surface
+        };
         for (j, ch) in tab.chars().enumerate() {
             set_cell(plane, x + j, 5, ch, fg, bg);
         }
@@ -756,11 +898,17 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let scroll = ((phase * 0.5).sin() * 1.5) as i16;
     for (i, line) in lines.iter().enumerate() {
         let y = 6 + i;
-        if !(6..=11).contains(&y) { continue; }
+        if !(6..=11).contains(&y) {
+            continue;
+        }
         let offset = if i == 2 { scroll } else { 0 };
         let x = (2i16 + offset).clamp(1, 20) as usize;
         let truncated: String = line.chars().skip(x.saturating_sub(2)).take(22).collect();
-        let prefix = if truncated.starts_with('|') { "│" } else { " " };
+        let prefix = if truncated.starts_with('|') {
+            "│"
+        } else {
+            " "
+        };
         draw_text(plane, 1, y, prefix, t.fg_muted, t.surface, false);
         draw_text(plane, 2, y, &truncated, t.fg_subtle, t.surface, false);
     }
@@ -801,16 +949,24 @@ fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: 
     let my = (phase * 20.0).sin() as i16 + 10;
     let mouse_str = format!("Mouse: {:3}, {:2} [L-down]", mx, my);
     draw_text(plane, 1, 8, &mouse_str, t.primary, t.surface, false);
-    let wheel = if (phase * 2.0).sin() > 0.0 { "+1" } else { "-1" };
-    draw_text(plane, 1, 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, false);
+    let wheel = if (phase * 2.0).sin() > 0.0 {
+        "+1"
+    } else {
+        "-1"
+    };
+    draw_text(
+        plane,
+        1,
+        9,
+        &format!("Wheel: {}", wheel),
+        t.fg_muted,
+        t.surface,
+        false,
+    );
 }
 
 fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let lines = [
-        "1 | fn main() {",
-        "2 |   println!();",
-        "3 | }",
-    ];
+    let lines = ["1 | fn main() {", "2 |   println!();", "3 | }"];
     for (i, line) in lines.iter().enumerate() {
         let y = 5 + i;
         let is_cursor = i == 1;
@@ -857,10 +1013,7 @@ fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u1
 }
 
 fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
-    let fields = [
-        ("Name:", "[___________]"),
-        ("Email:", "[__________]"),
-    ];
+    let fields = [("Name:", "[___________]"), ("Email:", "[__________]")];
     for (i, (label, field)) in fields.iter().enumerate() {
         let y = 5 + i * 2;
         draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
@@ -888,7 +1041,11 @@ fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w:
     ];
     for (i, (name, size)) in rows.iter().enumerate() {
         let y = 7 + i;
-        let fg = if name.ends_with('/') { t.primary } else { t.fg_subtle };
+        let fg = if name.ends_with('/') {
+            t.primary
+        } else {
+            t.fg_subtle
+        };
         draw_text(plane, 2, y, name, fg, t.surface, false);
         draw_text(plane, 14, y, size, t.fg_muted, t.surface, false);
     }

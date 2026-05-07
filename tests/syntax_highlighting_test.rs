@@ -75,7 +75,7 @@ fn test_label_render_with_highlighted_text() {
     let mut label = Label::new("Hello World");
     label.on_theme_change(&Theme::nord());
     let plane = label.render(Rect::new(0, 0, 20, 1));
-    
+
     // Should have visible text
     let has_chars = plane.cells.iter().any(|c| c.char != ' ' && c.char != '\0');
     assert!(has_chars);
@@ -83,10 +83,7 @@ fn test_label_render_with_highlighted_text() {
 
 #[test]
 fn test_list_render_with_highlighted_items() {
-    let items = vec![
-        "fn main() {}".to_string(),
-        "let x = 42;".to_string(),
-    ];
+    let items = vec!["fn main() {}".to_string(), "let x = 42;".to_string()];
     let mut list = List::new_with_id(WidgetId::new(1), items);
     list.on_theme_change(&Theme::nord());
     let plane = list.render(Rect::new(0, 0, 30, 5));

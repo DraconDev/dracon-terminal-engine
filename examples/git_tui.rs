@@ -91,7 +91,8 @@ impl GitTui {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("1-4: views | t: theme | r: refresh | ?: help | q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new("1-4: views | t: theme | r: refresh | ?: help | q: quit")
+                    .with_fg(theme.fg_muted),
             );
 
         let mut app = Self {
@@ -148,7 +149,10 @@ impl GitTui {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.tab_bar.on_theme_change(&self.theme);
         self.status_bar.on_theme_change(&self.theme);
@@ -326,7 +330,15 @@ impl Widget for GitTui {
             let y = content_y + content_h / 2 - 1;
             draw_text(&mut plane, icon_x as u16, y, icon, t.primary, t.bg, true);
             draw_text(&mut plane, msg_x as u16, y + 1, msg, t.error, t.bg, true);
-            draw_text(&mut plane, hint_x as u16, y + 3, hint, t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                hint_x as u16,
+                y + 3,
+                hint,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         } else {
             match self.view {
                 GitView::Status => self.render_status(&mut plane, content_y, content_h, t),
@@ -667,7 +679,11 @@ impl GitTui {
                 for (i, file) in staged.iter().enumerate() {
                     let is_selected = self.view == GitView::Status && self.selected_file == i;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let bg = if is_selected {
+                        t.primary_active
+                    } else {
+                        t.surface_elevated
+                    };
                     let icon = "󰄬";
                     draw_text(
                         plane,
@@ -709,7 +725,11 @@ impl GitTui {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let bg = if is_selected {
+                        t.primary_active
+                    } else {
+                        t.surface_elevated
+                    };
                     let icon = "󰄱";
                     draw_text(
                         plane,
@@ -751,7 +771,11 @@ impl GitTui {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
                     let fg = if is_selected { t.fg_on_accent } else { t.fg };
-                    let bg = if is_selected { t.primary_active } else { t.surface_elevated };
+                    let bg = if is_selected {
+                        t.primary_active
+                    } else {
+                        t.surface_elevated
+                    };
                     let icon = "󰋖";
                     draw_text(
                         plane,
@@ -787,10 +811,16 @@ impl GitTui {
 
         for (i, commit) in self.commits.iter().enumerate() {
             let row = list_y + 1 + i as u16;
-            if row >= list_y + list_h - 1 { break; }
+            if row >= list_y + list_h - 1 {
+                break;
+            }
             let is_selected = self.view == GitView::Log && self.selected_commit == i;
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let bg = if is_selected { t.primary_active } else { t.surface };
+            let bg = if is_selected {
+                t.primary_active
+            } else {
+                t.surface
+            };
 
             let hash = &commit.hash;
             let msg = if commit.message.len() > 35 {
@@ -799,11 +829,19 @@ impl GitTui {
                 &commit.message
             };
             let date = &commit.date[..10.min(commit.date.len())];
-            
+
             // Hash as colored badge
             draw_text(plane, 4, row, &format!("{} ", hash), t.primary, bg, true);
             // Date muted
-            draw_text(plane, 12, row, &format!("{}  ", date), t.fg_muted, bg, false);
+            draw_text(
+                plane,
+                12,
+                row,
+                &format!("{}  ", date),
+                t.fg_muted,
+                bg,
+                false,
+            );
             // Message
             draw_text(plane, 24, row, msg, fg, bg, is_selected);
         }
@@ -816,7 +854,14 @@ impl GitTui {
         let content_y = y + 2;
         let content_h = h.saturating_sub(3);
         if content_h > 2 {
-            draw_rounded_border(plane, 2, content_y, plane.width.saturating_sub(4), content_h, t);
+            draw_rounded_border(
+                plane,
+                2,
+                content_y,
+                plane.width.saturating_sub(4),
+                content_h,
+                t,
+            );
         }
 
         let lines: Vec<&str> = self.diff_content.lines().collect();
@@ -824,7 +869,9 @@ impl GitTui {
 
         for (i, line) in lines.iter().take(visible).enumerate() {
             let row = content_y + 1 + i as u16;
-            if row >= content_y + content_h - 1 { break; }
+            if row >= content_y + content_h - 1 {
+                break;
+            }
             let (fg, bg, bold) = if line.starts_with('+') && !line.starts_with("+++") {
                 (t.success, t.success_bg, false)
             } else if line.starts_with('-') && !line.starts_with("---") {
@@ -851,7 +898,15 @@ impl GitTui {
 
         if lines.len() > visible {
             let more = format!("... {} more lines", lines.len() - visible);
-            draw_text(plane, 4, content_y + content_h - 2, &more, t.fg_muted, t.bg, false);
+            draw_text(
+                plane,
+                4,
+                content_y + content_h - 2,
+                &more,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
     }
 
@@ -869,7 +924,15 @@ impl GitTui {
                 draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
             draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
-            draw_text(plane, 16, row, &format!("({})", locals.len()), t.fg_muted, t.surface, false);
+            draw_text(
+                plane,
+                16,
+                row,
+                &format!("({})", locals.len()),
+                t.fg_muted,
+                t.surface,
+                false,
+            );
             row += 2;
             for (i, branch) in locals.iter().enumerate() {
                 let is_selected = self.view == GitView::Branches && self.selected_branch == i;
@@ -880,7 +943,11 @@ impl GitTui {
                 } else {
                     t.fg
                 };
-                let bg = if is_selected { t.primary_active } else { t.surface };
+                let bg = if is_selected {
+                    t.primary_active
+                } else {
+                    t.surface
+                };
                 let marker = if branch.current { " 󰘦 " } else { "   " };
                 draw_text(
                     plane,
@@ -902,7 +969,15 @@ impl GitTui {
                 draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
             draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
-            draw_text(plane, 17, row, &format!("({})", remotes.len()), t.fg_muted, t.surface, false);
+            draw_text(
+                plane,
+                17,
+                row,
+                &format!("({})", remotes.len()),
+                t.fg_muted,
+                t.surface,
+                false,
+            );
             row += 2;
             let offset = locals.len();
             for (i, branch) in remotes.iter().enumerate() {
@@ -913,7 +988,11 @@ impl GitTui {
                 } else {
                     t.fg_muted
                 };
-                let bg = if is_selected { t.primary_active } else { t.surface };
+                let bg = if is_selected {
+                    t.primary_active
+                } else {
+                    t.surface
+                };
                 draw_text(
                     plane,
                     4,
@@ -930,11 +1009,15 @@ impl GitTui {
 }
 
 fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 2 || h < 2 { return; }
+    if w < 2 || h < 2 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
             plane.cells[idx].bg = if is_border { t.bg } else { t.surface_elevated };
@@ -962,7 +1045,9 @@ fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: The
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     // Fill background
     for row in y..y + h {
         for col in x..x + w {
@@ -1032,9 +1117,15 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     for row in help_y..help_y + help_h {
         for col in help_x..help_x + help_w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
-            let is_border = row == help_y || row == help_y + help_h - 1 || col == help_x || col == help_x + help_w - 1;
-            let is_corner = (row == help_y || row == help_y + help_h - 1) && (col == help_x || col == help_x + help_w - 1);
+            if idx >= plane.cells.len() {
+                continue;
+            }
+            let is_border = row == help_y
+                || row == help_y + help_h - 1
+                || col == help_x
+                || col == help_x + help_w - 1;
+            let is_corner = (row == help_y || row == help_y + help_h - 1)
+                && (col == help_x || col == help_x + help_w - 1);
             plane.cells[idx].bg = t.surface_elevated;
             plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
             if is_border {
@@ -1061,8 +1152,14 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     // Draw help text
     for (i, line) in help_lines.iter().enumerate() {
         let row = help_y + 1 + i as u16;
-        if row >= help_y + help_h - 1 { break; }
-        let fg = if line.is_empty() || line.starts_with("Git TUI") { t.primary } else { t.fg };
+        if row >= help_y + help_h - 1 {
+            break;
+        }
+        let fg = if line.is_empty() || line.starts_with("Git TUI") {
+            t.primary
+        } else {
+            t.fg
+        };
         let bold = !line.is_empty() && !line.starts_with(" ");
         draw_text(plane, help_x + 2, row, line, fg, t.surface_elevated, bold);
     }

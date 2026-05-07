@@ -142,7 +142,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let size = (80, 24); // Assume standard or get from ioctl/crossterm if added
     let mut compositor = Compositor::new(size.0, size.1);
-    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(16, 16, 24));
+    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(
+        16, 16, 24,
+    ));
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
@@ -198,22 +200,55 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for &byte in &buf[..n] {
                 if let Some(event) = parser.advance(byte) {
                     match event {
-                        Event::Key(KeyEvent { code: KeyCode::Char('q'), .. }) => {
+                        Event::Key(KeyEvent {
+                            code: KeyCode::Char('q'),
+                            ..
+                        }) => {
                             write!(term, "\x1b[?1049l\x1b[?25h")?;
                             return Ok(());
                         }
-                        Event::Key(KeyEvent { code: KeyCode::Char('?'), .. }) => {
+                        Event::Key(KeyEvent {
+                            code: KeyCode::Char('?'),
+                            ..
+                        }) => {
                             // Toggle help display - show help text in terminal
                             write!(term, "\x1b[2J\x1b[H")?;
-                            write!(term, "╭────────────────────────────────────────────────────╮\r\n")?;
-                            write!(term, "│             Dracon Desktop Help                   │\r\n")?;
-                            write!(term, "├────────────────────────────────────────────────────┤\r\n")?;
-                            write!(term, "│  q          — Quit                                 │\r\n")?;
-                            write!(term, "│  ?          — Toggle this help                     │\r\n")?;
-                            write!(term, "│  Click      — Select/minimize windows              │\r\n")?;
-                            write!(term, "│  Drag       — Move windows                          │\r\n")?;
-                            write!(term, "│  Taskbar    — Shows minimized window labels        │\r\n")?;
-                            write!(term, "╰────────────────────────────────────────────────────╯\r\n")?;
+                            write!(
+                                term,
+                                "╭────────────────────────────────────────────────────╮\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│             Dracon Desktop Help                   │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "├────────────────────────────────────────────────────┤\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│  q          — Quit                                 │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│  ?          — Toggle this help                     │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│  Click      — Select/minimize windows              │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│  Drag       — Move windows                          │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "│  Taskbar    — Shows minimized window labels        │\r\n"
+                            )?;
+                            write!(
+                                term,
+                                "╰────────────────────────────────────────────────────╯\r\n"
+                            )?;
                             write!(term, "\r\nPress any key to continue...\r\n")?;
                             term.flush()?;
                             // Wait for a keypress to dismiss

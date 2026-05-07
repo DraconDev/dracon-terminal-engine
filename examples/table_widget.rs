@@ -91,32 +91,240 @@ impl std::fmt::Display for User {
 
 fn build_users() -> Vec<User> {
     vec![
-        User { name: "Alice Chen".into(), role: "Engineering Lead".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "2m ago".into(), email: "alice@corp.io".into(), join_date: "2021-03-15".into() },
-        User { name: "Bob Martinez".into(), role: "Senior Dev".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "now".into(), email: "bob@corp.io".into(), join_date: "2020-07-22".into() },
-        User { name: "Carol White".into(), role: "Product Manager".into(), department: "Product".into(), status: UserStatus::Busy, last_active: "1h ago".into(), email: "carol@corp.io".into(), join_date: "2019-11-08".into() },
-        User { name: "David Kim".into(), role: "Designer".into(), department: "Design".into(), status: UserStatus::Away, last_active: "30m ago".into(), email: "david@corp.io".into(), join_date: "2022-01-10".into() },
-        User { name: "Eve Johnson".into(), role: "DevOps Engineer".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "5m ago".into(), email: "eve@corp.io".into(), join_date: "2021-09-01".into() },
-        User { name: "Frank Liu".into(), role: "QA Lead".into(), department: "Engineering".into(), status: UserStatus::Offline, last_active: "3h ago".into(), email: "frank@corp.io".into(), join_date: "2020-04-18".into() },
-        User { name: "Grace Park".into(), role: "Data Scientist".into(), department: "Data".into(), status: UserStatus::Active, last_active: "15m ago".into(), email: "grace@corp.io".into(), join_date: "2022-06-30".into() },
-        User { name: "Henry Wilson".into(), role: "Sales Director".into(), department: "Sales".into(), status: UserStatus::OnLeave, last_active: "2d ago".into(), email: "henry@corp.io".into(), join_date: "2018-02-14".into() },
-        User { name: "Ivy Thompson".into(), role: "Marketing Lead".into(), department: "Marketing".into(), status: UserStatus::Active, last_active: "1h ago".into(), email: "ivy@corp.io".into(), join_date: "2021-12-05".into() },
-        User { name: "Jack Brown".into(), role: "Backend Dev".into(), department: "Engineering".into(), status: UserStatus::Busy, last_active: "now".into(), email: "jack@corp.io".into(), join_date: "2023-01-20".into() },
-        User { name: "Karen Davis".into(), role: "HR Manager".into(), department: "HR".into(), status: UserStatus::Active, last_active: "45m ago".into(), email: "karen@corp.io".into(), join_date: "2019-08-12".into() },
-        User { name: "Leo Garcia".into(), role: "Frontend Dev".into(), department: "Engineering".into(), status: UserStatus::Away, last_active: "2h ago".into(), email: "leo@corp.io".into(), join_date: "2022-03-08".into() },
-        User { name: "Mia Rodriguez".into(), role: "UX Researcher".into(), department: "Design".into(), status: UserStatus::Active, last_active: "10m ago".into(), email: "mia@corp.io".into(), join_date: "2023-04-15".into() },
-        User { name: "Noah Taylor".into(), role: "Security Engineer".into(), department: "Engineering".into(), status: UserStatus::Offline, last_active: "5h ago".into(), email: "noah@corp.io".into(), join_date: "2020-10-01".into() },
-        User { name: "Olivia Lee".into(), role: "Finance Analyst".into(), department: "Finance".into(), status: UserStatus::Active, last_active: "20m ago".into(), email: "olivia@corp.io".into(), join_date: "2021-05-22".into() },
-        User { name: "Paul Walker".into(), role: "Support Lead".into(), department: "Support".into(), status: UserStatus::Busy, last_active: "now".into(), email: "paul@corp.io".into(), join_date: "2022-08-01".into() },
-        User { name: "Quinn Adams".into(), role: "Mobile Dev".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "1h ago".into(), email: "quinn@corp.io".into(), join_date: "2023-02-28".into() },
-        User { name: "Rachel Scott".into(), role: "Content Strategist".into(), department: "Marketing".into(), status: UserStatus::OnLeave, last_active: "1w ago".into(), email: "rachel@corp.io".into(), join_date: "2020-01-15".into() },
-        User { name: "Sam Clark".into(), role: "Platform Engineer".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "3m ago".into(), email: "sam@corp.io".into(), join_date: "2021-07-10".into() },
-        User { name: "Tina Hall".into(), role: "Accountant".into(), department: "Finance".into(), status: UserStatus::Away, last_active: "4h ago".into(), email: "tina@corp.io".into(), join_date: "2019-04-20".into() },
-        User { name: "Uma Patel".into(), role: "ML Engineer".into(), department: "Data".into(), status: UserStatus::Active, last_active: "8m ago".into(), email: "uma@corp.io".into(), join_date: "2022-11-11".into() },
-        User { name: "Victor King".into(), role: "Recruiter".into(), department: "HR".into(), status: UserStatus::Offline, last_active: "6h ago".into(), email: "victor@corp.io".into(), join_date: "2023-03-05".into() },
-        User { name: "Wendy Young".into(), role: "Tech Writer".into(), department: "Engineering".into(), status: UserStatus::Active, last_active: "25m ago".into(), email: "wendy@corp.io".into(), join_date: "2022-05-18".into() },
-        User { name: "Xavier Lopez".into(), role: "SRE".into(), department: "Engineering".into(), status: UserStatus::Busy, last_active: "now".into(), email: "xavier@corp.io".into(), join_date: "2021-01-30".into() },
-        User { name: "Yara Nguyen".into(), role: "Product Designer".into(), department: "Design".into(), status: UserStatus::Active, last_active: "12m ago".into(), email: "yara@corp.io".into(), join_date: "2023-06-01".into() },
-        User { name: "Zack Wright".into(), role: "Intern".into(), department: "Engineering".into(), status: UserStatus::Away, last_active: "1h ago".into(), email: "zack@corp.io".into(), join_date: "2024-01-15".into() },
+        User {
+            name: "Alice Chen".into(),
+            role: "Engineering Lead".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "2m ago".into(),
+            email: "alice@corp.io".into(),
+            join_date: "2021-03-15".into(),
+        },
+        User {
+            name: "Bob Martinez".into(),
+            role: "Senior Dev".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "now".into(),
+            email: "bob@corp.io".into(),
+            join_date: "2020-07-22".into(),
+        },
+        User {
+            name: "Carol White".into(),
+            role: "Product Manager".into(),
+            department: "Product".into(),
+            status: UserStatus::Busy,
+            last_active: "1h ago".into(),
+            email: "carol@corp.io".into(),
+            join_date: "2019-11-08".into(),
+        },
+        User {
+            name: "David Kim".into(),
+            role: "Designer".into(),
+            department: "Design".into(),
+            status: UserStatus::Away,
+            last_active: "30m ago".into(),
+            email: "david@corp.io".into(),
+            join_date: "2022-01-10".into(),
+        },
+        User {
+            name: "Eve Johnson".into(),
+            role: "DevOps Engineer".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "5m ago".into(),
+            email: "eve@corp.io".into(),
+            join_date: "2021-09-01".into(),
+        },
+        User {
+            name: "Frank Liu".into(),
+            role: "QA Lead".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Offline,
+            last_active: "3h ago".into(),
+            email: "frank@corp.io".into(),
+            join_date: "2020-04-18".into(),
+        },
+        User {
+            name: "Grace Park".into(),
+            role: "Data Scientist".into(),
+            department: "Data".into(),
+            status: UserStatus::Active,
+            last_active: "15m ago".into(),
+            email: "grace@corp.io".into(),
+            join_date: "2022-06-30".into(),
+        },
+        User {
+            name: "Henry Wilson".into(),
+            role: "Sales Director".into(),
+            department: "Sales".into(),
+            status: UserStatus::OnLeave,
+            last_active: "2d ago".into(),
+            email: "henry@corp.io".into(),
+            join_date: "2018-02-14".into(),
+        },
+        User {
+            name: "Ivy Thompson".into(),
+            role: "Marketing Lead".into(),
+            department: "Marketing".into(),
+            status: UserStatus::Active,
+            last_active: "1h ago".into(),
+            email: "ivy@corp.io".into(),
+            join_date: "2021-12-05".into(),
+        },
+        User {
+            name: "Jack Brown".into(),
+            role: "Backend Dev".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Busy,
+            last_active: "now".into(),
+            email: "jack@corp.io".into(),
+            join_date: "2023-01-20".into(),
+        },
+        User {
+            name: "Karen Davis".into(),
+            role: "HR Manager".into(),
+            department: "HR".into(),
+            status: UserStatus::Active,
+            last_active: "45m ago".into(),
+            email: "karen@corp.io".into(),
+            join_date: "2019-08-12".into(),
+        },
+        User {
+            name: "Leo Garcia".into(),
+            role: "Frontend Dev".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Away,
+            last_active: "2h ago".into(),
+            email: "leo@corp.io".into(),
+            join_date: "2022-03-08".into(),
+        },
+        User {
+            name: "Mia Rodriguez".into(),
+            role: "UX Researcher".into(),
+            department: "Design".into(),
+            status: UserStatus::Active,
+            last_active: "10m ago".into(),
+            email: "mia@corp.io".into(),
+            join_date: "2023-04-15".into(),
+        },
+        User {
+            name: "Noah Taylor".into(),
+            role: "Security Engineer".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Offline,
+            last_active: "5h ago".into(),
+            email: "noah@corp.io".into(),
+            join_date: "2020-10-01".into(),
+        },
+        User {
+            name: "Olivia Lee".into(),
+            role: "Finance Analyst".into(),
+            department: "Finance".into(),
+            status: UserStatus::Active,
+            last_active: "20m ago".into(),
+            email: "olivia@corp.io".into(),
+            join_date: "2021-05-22".into(),
+        },
+        User {
+            name: "Paul Walker".into(),
+            role: "Support Lead".into(),
+            department: "Support".into(),
+            status: UserStatus::Busy,
+            last_active: "now".into(),
+            email: "paul@corp.io".into(),
+            join_date: "2022-08-01".into(),
+        },
+        User {
+            name: "Quinn Adams".into(),
+            role: "Mobile Dev".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "1h ago".into(),
+            email: "quinn@corp.io".into(),
+            join_date: "2023-02-28".into(),
+        },
+        User {
+            name: "Rachel Scott".into(),
+            role: "Content Strategist".into(),
+            department: "Marketing".into(),
+            status: UserStatus::OnLeave,
+            last_active: "1w ago".into(),
+            email: "rachel@corp.io".into(),
+            join_date: "2020-01-15".into(),
+        },
+        User {
+            name: "Sam Clark".into(),
+            role: "Platform Engineer".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "3m ago".into(),
+            email: "sam@corp.io".into(),
+            join_date: "2021-07-10".into(),
+        },
+        User {
+            name: "Tina Hall".into(),
+            role: "Accountant".into(),
+            department: "Finance".into(),
+            status: UserStatus::Away,
+            last_active: "4h ago".into(),
+            email: "tina@corp.io".into(),
+            join_date: "2019-04-20".into(),
+        },
+        User {
+            name: "Uma Patel".into(),
+            role: "ML Engineer".into(),
+            department: "Data".into(),
+            status: UserStatus::Active,
+            last_active: "8m ago".into(),
+            email: "uma@corp.io".into(),
+            join_date: "2022-11-11".into(),
+        },
+        User {
+            name: "Victor King".into(),
+            role: "Recruiter".into(),
+            department: "HR".into(),
+            status: UserStatus::Offline,
+            last_active: "6h ago".into(),
+            email: "victor@corp.io".into(),
+            join_date: "2023-03-05".into(),
+        },
+        User {
+            name: "Wendy Young".into(),
+            role: "Tech Writer".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Active,
+            last_active: "25m ago".into(),
+            email: "wendy@corp.io".into(),
+            join_date: "2022-05-18".into(),
+        },
+        User {
+            name: "Xavier Lopez".into(),
+            role: "SRE".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Busy,
+            last_active: "now".into(),
+            email: "xavier@corp.io".into(),
+            join_date: "2021-01-30".into(),
+        },
+        User {
+            name: "Yara Nguyen".into(),
+            role: "Product Designer".into(),
+            department: "Design".into(),
+            status: UserStatus::Active,
+            last_active: "12m ago".into(),
+            email: "yara@corp.io".into(),
+            join_date: "2023-06-01".into(),
+        },
+        User {
+            name: "Zack Wright".into(),
+            role: "Intern".into(),
+            department: "Engineering".into(),
+            status: UserStatus::Away,
+            last_active: "1h ago".into(),
+            email: "zack@corp.io".into(),
+            join_date: "2024-01-15".into(),
+        },
     ]
 }
 
@@ -142,11 +350,26 @@ impl TableApp {
         let filtered_users = all_users.clone();
 
         let columns = vec![
-            Column { header: "󰣉 Name".into(), width: 18 },
-            Column { header: "󰠨 Role".into(), width: 20 },
-            Column { header: "󰉋 Dept".into(), width: 14 },
-            Column { header: "󰄬 Status".into(), width: 12 },
-            Column { header: "󰃰 Active".into(), width: 10 },
+            Column {
+                header: "󰣉 Name".into(),
+                width: 18,
+            },
+            Column {
+                header: "󰠨 Role".into(),
+                width: 20,
+            },
+            Column {
+                header: "󰉋 Dept".into(),
+                width: 14,
+            },
+            Column {
+                header: "󰄬 Status".into(),
+                width: 12,
+            },
+            Column {
+                header: "󰃰 Active".into(),
+                width: 10,
+            },
         ];
 
         let cell_fn = move |user: &User, col: usize| -> String {
@@ -194,7 +417,11 @@ impl TableApp {
                 4 => a.last_active.cmp(&b.last_active),
                 _ => std::cmp::Ordering::Equal,
             };
-            if ascending { ord } else { ord.reverse() }
+            if ascending {
+                ord
+            } else {
+                ord.reverse()
+            }
         });
     }
 
@@ -204,7 +431,8 @@ impl TableApp {
         if query.is_empty() {
             self.filtered_users = self.all_users.clone();
         } else {
-            self.filtered_users = self.all_users
+            self.filtered_users = self
+                .all_users
                 .iter()
                 .filter(|u| {
                     u.name.to_lowercase().contains(&query)
@@ -221,11 +449,26 @@ impl TableApp {
         }
 
         let columns = vec![
-            Column { header: "󰣉 Name".into(), width: 18 },
-            Column { header: "󰠨 Role".into(), width: 20 },
-            Column { header: "󰉋 Dept".into(), width: 14 },
-            Column { header: "󰄬 Status".into(), width: 12 },
-            Column { header: "󰃰 Active".into(), width: 10 },
+            Column {
+                header: "󰣉 Name".into(),
+                width: 18,
+            },
+            Column {
+                header: "󰠨 Role".into(),
+                width: 20,
+            },
+            Column {
+                header: "󰉋 Dept".into(),
+                width: 14,
+            },
+            Column {
+                header: "󰄬 Status".into(),
+                width: 12,
+            },
+            Column {
+                header: "󰃰 Active".into(),
+                width: 10,
+            },
         ];
         let cell_fn = move |user: &User, col: usize| -> String {
             match col {
@@ -274,7 +517,10 @@ impl TableApp {
             Theme::sunset(),
             Theme::mono(),
         ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.rebuild_table();
     }
@@ -296,15 +542,35 @@ impl TableApp {
 }
 
 impl Widget for TableApp {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { self.dirty || self.table.needs_render() }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; self.table.clear_dirty(); }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty || self.table.needs_render()
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+        self.table.clear_dirty();
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
@@ -328,7 +594,9 @@ impl Widget for TableApp {
         let header_h = 3u16;
         let search_h = if self.show_search { 2u16 } else { 0u16 };
         let detail_h = 6u16;
-        let table_h = area.height.saturating_sub(header_h + search_h + detail_h + margin + 1);
+        let table_h = area
+            .height
+            .saturating_sub(header_h + search_h + detail_h + margin + 1);
 
         // === HEADER BAR ===
         let title = " 󰓫 User Directory ";
@@ -528,8 +796,15 @@ impl Widget for TableApp {
 
         // === STATUS BAR ===
         let status_y = area.height.saturating_sub(1);
-        let hint = format!("t: theme | ?: help | ↑↓: nav | Enter: select | q: quit | {} users", self.filtered_users.len());
-        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
+        let hint = format!(
+            "t: theme | ?: help | ↑↓: nav | Enter: select | q: quit | {} users",
+            self.filtered_users.len()
+        );
+        for (i, c) in hint
+            .chars()
+            .take((area.width as usize).saturating_sub(2))
+            .enumerate()
+        {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
@@ -539,7 +814,14 @@ impl Widget for TableApp {
         }
 
         // === CARD BORDER ===
-        draw_rounded_border(&mut plane, margin, 0, card_w, area.height.saturating_sub(1), t);
+        draw_rounded_border(
+            &mut plane,
+            margin,
+            0,
+            card_w,
+            area.height.saturating_sub(1),
+            t,
+        );
 
         // === HELP OVERLAY ===
         if self.show_help {
@@ -550,7 +832,9 @@ impl Widget for TableApp {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
@@ -621,7 +905,9 @@ impl Widget for TableApp {
             }
             _ => {
                 let handled = self.table.handle_key(key);
-                if handled { self.dirty = true; }
+                if handled {
+                    self.dirty = true;
+                }
                 handled
             }
         }
@@ -656,7 +942,9 @@ impl Widget for TableApp {
             }
 
             let handled = self.table.handle_mouse(kind, local_col, local_row);
-            if handled { self.dirty = true; }
+            if handled {
+                self.dirty = true;
+            }
             return handled;
         }
         false
@@ -684,7 +972,15 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
 
     let title = "User Directory Help";
     let title_x = x + (w - title.len() as u16) / 2;
-    draw_text(plane, title_x, y + 1, title, t.primary, t.surface_elevated, true);
+    draw_text(
+        plane,
+        title_x,
+        y + 1,
+        title,
+        t.primary,
+        t.surface_elevated,
+        true,
+    );
 
     let shortcuts = [
         ("↑/↓", "Navigate rows"),
@@ -704,24 +1000,43 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     }
 
     let hint = "Press ? or Esc to close";
-    draw_text(plane, x + 3, y + h - 1, hint, t.fg_muted, t.surface_elevated, false);
+    draw_text(
+        plane,
+        x + 3,
+        y + h - 1,
+        hint,
+        t.fg_muted,
+        t.surface_elevated,
+        false,
+    );
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             if is_border {
                 plane.cells[idx].fg = t.outline;
-                plane.cells[idx].char = if row == y && col == x { '╭' }
-                    else if row == y && col == x + w - 1 { '╮' }
-                    else if row == y + h - 1 && col == x { '╰' }
-                    else if row == y + h - 1 && col == x + w - 1 { '╯' }
-                    else if row == y || row == y + h - 1 { '─' }
-                    else { '│' };
+                plane.cells[idx].char = if row == y && col == x {
+                    '╭'
+                } else if row == y && col == x + w - 1 {
+                    '╮'
+                } else if row == y + h - 1 && col == x {
+                    '╰'
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    '╯'
+                } else if row == y || row == y + h - 1 {
+                    '─'
+                } else {
+                    '│'
+                };
                 plane.cells[idx].transparent = false;
             }
         }
@@ -746,7 +1061,9 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 fn blit(dst: &mut Plane, src: &Plane, dx: u16, dy: u16) {
     for (i, cell) in src.cells.iter().enumerate() {
-        if cell.transparent { continue; }
+        if cell.transparent {
+            continue;
+        }
         let x = (i % src.width as usize) as u16 + dx;
         let y = (i / src.width as usize) as u16 + dy;
         let idx = (y * dst.width + x) as usize;
@@ -770,7 +1087,10 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::nord())
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press && key.modifiers.is_empty() {
+            if key.code == KeyCode::Char('q')
+                && key.kind == KeyEventKind::Press
+                && key.modifiers.is_empty()
+            {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {

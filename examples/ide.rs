@@ -358,13 +358,16 @@ impl IdeApp {
                 .unwrap_or("Plain");
             self.status_bar = StatusBar::new(WidgetId::new(4))
                 .add_segment(
-                    StatusSegment::new(if tab.modified { "● Modified" } else { "✓ Ready" }).with_fg(
-                        if tab.modified {
-                            self.theme.warning
-                        } else {
-                            self.theme.success
-                        },
-                    ),
+                    StatusSegment::new(if tab.modified {
+                        "● Modified"
+                    } else {
+                        "✓ Ready"
+                    })
+                    .with_fg(if tab.modified {
+                        self.theme.warning
+                    } else {
+                        self.theme.success
+                    }),
                 )
                 .add_segment(
                     StatusSegment::new(&format!(
@@ -620,11 +623,14 @@ impl Widget for IdeApp {
         if editor_w > 0 && content_h > 0 {
             // Rounded border around editor
             draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t);
-            
+
             // Breadcrumbs
-            let bc_plane = self
-                .breadcrumbs
-                .render(Rect::new(editor_x + 1, content_y, editor_w.saturating_sub(2), 1));
+            let bc_plane = self.breadcrumbs.render(Rect::new(
+                editor_x + 1,
+                content_y,
+                editor_w.saturating_sub(2),
+                1,
+            ));
             self.blit(&mut plane, &bc_plane, editor_x + 1, content_y);
 
             // Editor content
@@ -644,12 +650,24 @@ impl Widget for IdeApp {
                 // Empty state - no tabs open
                 let empty_msg = " 󰈙 No file open ";
                 let empty_y = editor_y + editor_content_h / 2;
-                let empty_x = editor_x + 1 + (editor_w.saturating_sub(2) - empty_msg.len() as u16) / 2;
-                draw_text(&mut plane, empty_x, empty_y, empty_msg, t.fg_muted, t.bg, false);
+                let empty_x =
+                    editor_x + 1 + (editor_w.saturating_sub(2) - empty_msg.len() as u16) / 2;
+                draw_text(
+                    &mut plane, empty_x, empty_y, empty_msg, t.fg_muted, t.bg, false,
+                );
                 let hint_msg = "Press Ctrl+O to open a file or Ctrl+T for a new tab";
                 let hint_y = empty_y + 2;
-                let hint_x = editor_x + 1 + (editor_w.saturating_sub(2) - hint_msg.len() as u16) / 2;
-                draw_text(&mut plane, hint_x, hint_y, hint_msg, t.fg_subtle, t.bg, false);
+                let hint_x =
+                    editor_x + 1 + (editor_w.saturating_sub(2) - hint_msg.len() as u16) / 2;
+                draw_text(
+                    &mut plane,
+                    hint_x,
+                    hint_y,
+                    hint_msg,
+                    t.fg_subtle,
+                    t.bg,
+                    false,
+                );
             }
         }
 
@@ -1228,14 +1246,21 @@ impl IdeApp {
     }
 
     fn sync_tab_bar(&mut self) {
-        let labels: Vec<String> = self.tabs.iter().map(|t| {
-            if t.modified {
-                format!("{} ×", t.title)
-            } else {
-                t.title.clone()
-            }
-        }).collect();
-        self.tab_bar = TabBar::new_with_id(WidgetId::new(2), labels.iter().map(|s| s.as_str()).collect());
+        let labels: Vec<String> = self
+            .tabs
+            .iter()
+            .map(|t| {
+                if t.modified {
+                    format!("{} ×", t.title)
+                } else {
+                    t.title.clone()
+                }
+            })
+            .collect();
+        self.tab_bar = TabBar::new_with_id(
+            WidgetId::new(2),
+            labels.iter().map(|s| s.as_str()).collect(),
+        );
         self.tab_bar.set_active(self.active_tab);
         self.tab_bar.on_theme_change(&self.theme);
     }
@@ -1283,28 +1308,34 @@ impl IdeApp {
         }
 
         let shortcuts: [(&str, &[(&str, &str)]); 4] = [
-            ("File", &[
-                ("Ctrl+O", "Open file"),
-                ("Ctrl+S", "Save file"),
-                ("Ctrl+T", "New tab"),
-                ("Ctrl+W", "Close tab"),
-            ]),
-            ("Edit", &[
-                ("Type", "Insert text"),
-                ("←↑↓→", "Move cursor"),
-                ("Home/End", "Line start/end"),
-                ("Backspace", "Delete char"),
-            ]),
-            ("View", &[
-                ("Ctrl+F", "Search"),
-                ("F12", "Profiler"),
-                ("Ctrl+P", "Palette"),
-                ("t", "Cycle theme"),
-            ]),
-            ("General", &[
-                ("?", "Toggle this help"),
-                ("q", "Quit"),
-            ]),
+            (
+                "File",
+                &[
+                    ("Ctrl+O", "Open file"),
+                    ("Ctrl+S", "Save file"),
+                    ("Ctrl+T", "New tab"),
+                    ("Ctrl+W", "Close tab"),
+                ],
+            ),
+            (
+                "Edit",
+                &[
+                    ("Type", "Insert text"),
+                    ("←↑↓→", "Move cursor"),
+                    ("Home/End", "Line start/end"),
+                    ("Backspace", "Delete char"),
+                ],
+            ),
+            (
+                "View",
+                &[
+                    ("Ctrl+F", "Search"),
+                    ("F12", "Profiler"),
+                    ("Ctrl+P", "Palette"),
+                    ("t", "Cycle theme"),
+                ],
+            ),
+            ("General", &[("?", "Toggle this help"), ("q", "Quit")]),
         ];
 
         let mut row = sep_y + 1;
@@ -1356,11 +1387,15 @@ impl IdeApp {
 }
 
 fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
     for row in y..y + h {
         for col in x..x + w {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
             if is_border {
@@ -1385,7 +1420,9 @@ fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: The
 }
 
 fn draw_rounded_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
-    if w < 3 || h < 2 { return; }
+    if w < 3 || h < 2 {
+        return;
+    }
 
     // Fill interior
     for row in (y + 1)..(y + h - 1) {
@@ -1403,7 +1440,9 @@ fn draw_rounded_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme)
     for row in y..(y + h) {
         for col in x..(x + w) {
             let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
+            if idx >= plane.cells.len() {
+                continue;
+            }
             let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
             let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
             if is_border {
