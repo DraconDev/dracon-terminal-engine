@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Updated framework version to v28.519.0 and documentation to reflect the change.
 
 ## Context
-This change updates the dependency lockfile to ensure consistent background color implementation across the project. It follows recent work on keyboard navigation, focus tracking, and comprehensive interaction tests for UI components.
+The project is transitioning to a new major version of the terminal framework, which includes significant improvements and new features. This update ensures all documentation remains accurate with the current framework version.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Updated framework version in README from v27 to v28.519.0
+- [x] Updated dependency version in Cargo.toml to match framework v28.519.0
+- [x] Updated project version in README from v27.24.0 to v28.519.0
 
 ## In Progress
-- [x] No active work in progress beyond the Cargo.lock update
+- [ ] No active work in progress related to this change
 
 ## Blockers
-- None identified for this specific change
+- None identified for this documentation update
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce regressions in UI rendering
-2. Continue with ongoing work on keyboard navigation and interaction tests for other components
+1. Verify all dependent components are compatible with framework v28.519.0
+2. Update CHANGELOG.md to document the framework version upgrade

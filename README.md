@@ -40,7 +40,7 @@ App::new().unwrap()
     });
 ```
 
-## Framework (v27)
+## Framework (v28)
 
 The `framework` module provides the complete application runtime:
 
@@ -149,7 +149,7 @@ Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v27.0.5" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v28.519.0" }
 ```
 
 ## Quick Start (Framework)
@@ -248,7 +248,7 @@ cargo test --test scroll_test          # Scroll behavior tests
 
 ## Version
 
-**v27.24.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v28.519.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
