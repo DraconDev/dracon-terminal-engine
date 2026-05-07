@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Added keyboard navigation support for SplitPane widget
 
 ## Context
-This change ensures dependency versions are synchronized with the framework's consistent background color implementation, maintaining visual theme consistency across components.
+To improve accessibility and user experience, the SplitPane widget now responds to arrow key presses for resizing the split ratio.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Implemented key handling for Left/Right (horizontal) and Up/Down (vertical) keys
+- [x] Added 5% ratio adjustment per key press with clamping between 0.1-0.9
+- [x] Set dirty flag to trigger redraw when ratio changes
 
 ## In Progress
-- [x] No active work in progress beyond this Cargo.lock update
+- [x] Keyboard navigation implementation for SplitPane
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify visual consistency across all widgets
-2. Prepare for next feature implementation
-```
+1. Add visual feedback for keyboard interactions
+2. Consider adding configuration for key press step size

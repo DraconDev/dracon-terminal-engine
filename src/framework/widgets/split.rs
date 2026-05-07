@@ -313,6 +313,29 @@ impl crate::framework::widget::Widget for SplitPane {
         }
     }
 
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::{KeyCode, KeyEventKind};
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+
+        let step = 0.05; // 5% per keypress
+
+        match key.code {
+            KeyCode::Left | KeyCode::Up => {
+                self.ratio = (self.ratio - step).clamp(0.1, 0.9);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Right | KeyCode::Down => {
+                self.ratio = (self.ratio + step).clamp(0.1, 0.9);
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
+    }
+
     fn on_theme_change(&mut self, theme: &Theme) {
         self.divider_color = theme.outline;
     }
