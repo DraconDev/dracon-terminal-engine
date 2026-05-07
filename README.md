@@ -66,12 +66,13 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 
-### 35 Framework Widgets
+### 37 Framework Widgets
 | Widget | What |
 |---|---|
 | [`Breadcrumbs`] | Hierarchical path display with clickable segments |
 | [`Button`] | Clickable button with press state and callbacks |
 | [`Checkbox`] | Two-state toggle with check mark |
+| [`CommandPalette`] | Filterable command overlay with search |
 | [`ConfirmDialog`] | Modal yes/no dialog with optional danger styling |
 | [`ContextMenu`] | Right-click popup menu with nested submenus |
 | [`DebugOverlay`] | FPS, widget count, and debug info overlay |
@@ -99,6 +100,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`StreamingText`] | Live-updating text with word-wrap |
 | [`TabBar`] | Tab navigation bar |
 | [`Table`] | Multi-column table with sorting |
+| [`TextEditorAdapter`] | Adapter for integrating TextEditor widget |
 | [`Toast`] | Temporary notification toast messages |
 | [`Toggle`] | Two-state on/off toggle switch |
 | [`Tooltip`] | Hover tooltip overlay |

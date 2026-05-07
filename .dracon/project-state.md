@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Updated the list of built-in themes in the documentation to include new color schemes.
+Updated the list of framework widgets in the documentation to reflect new additions.
 
 ## Context
-The project recently added several new color themes (warm, cool, forest, sunset, mono) that were not previously documented in the README.
+The project is expanding its widget library, and the documentation needs to stay current to reflect these additions. This change ensures users and contributors have accurate information about available components.
 
 ## Completed
-- [x] Added 5 new theme names to the built-in themes list in README.md
-- [x] Maintained consistent formatting with the existing theme entries
+- [x] Added two new widgets to the framework list: `CommandPalette` and `TextEditorAdapter`
+- [x] Updated the widget count from 35 to 37 to reflect the additions
 
 ## In Progress
-- [x] Documentation update only (no code changes)
+- [x] Documentation update for new widgets
 
 ## Blockers
-- None (documentation update is complete)
+- None identified for this specific documentation update
 
 ## Next Steps
-1. Verify the new themes are properly implemented in the codebase
-2. Consider adding visual examples of the new themes if requested
+1. Verify the new widgets are properly documented with usage examples
+2. Review the widget list for completeness and accuracy
