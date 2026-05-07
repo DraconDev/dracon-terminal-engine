@@ -110,7 +110,8 @@ fn test_render_area_0x0_does_not_panic() {
     adapter.set_area(rect(0, 0, 0, 0));
 
     let plane = adapter.render(rect(0, 0, 0, 0));
-    assert_eq!(plane.cells.len(), 0);
+    // Plane::new clamps zero dimensions to 1x1
+    assert_eq!(plane.cells.len(), 1);
 }
 
 #[test]
