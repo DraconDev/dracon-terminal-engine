@@ -6,6 +6,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Button, Checkbox, Label, List, Toggle};
 use ratatui::layout::Rect;
 
+#[allow(dead_code)]
 /// Verify theme has sufficient contrast between fg and bg colors.
 fn has_sufficient_contrast(fg: Color, bg: Color) -> bool {
     // Simple check: they should not be the same

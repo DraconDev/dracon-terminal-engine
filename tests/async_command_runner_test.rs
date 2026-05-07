@@ -425,7 +425,7 @@ mod async_tests {
     fn test_sync_command_timeout_not_available() {
         let runner = CommandRunner::new("echo test");
         let (_, _, _) = runner.run_sync();
-        assert!(true, "sync commands work normally without async feature");
+        // sync commands work normally without async feature
     }
 
     #[test]

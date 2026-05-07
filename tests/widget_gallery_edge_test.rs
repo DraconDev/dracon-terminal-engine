@@ -1,4 +1,4 @@
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
@@ -18,6 +18,7 @@ struct WidgetGalleryMock {
     search: SearchInput,
     progress: ProgressBar,
     button: Button,
+    #[allow(dead_code)]
     selected: usize,
 }
 

@@ -700,7 +700,7 @@ fn test_command_runner_run_and_parse_json() {
             assert!(s.contains("OK") || s.contains("status"), "got: {}", s);
         }
         ParsedOutput::None => {
-            assert!(true, "parser returned None - key may not be at top level");
+            // parser returned None - key may not be at top level
         }
         other => panic!("expected Scalar or None, got {:?}", other),
     }

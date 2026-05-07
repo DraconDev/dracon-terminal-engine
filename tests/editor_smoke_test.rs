@@ -38,42 +38,38 @@ fn test_text_editor_demo_smoke() {
     thread::sleep(Duration::from_millis(500));
 
     let mut attempts = 0;
-    let mut final_status = None;
 
     while attempts < 30 {
         match child.try_wait() {
             Ok(Some(status)) => {
-                final_status = Some(status);
-                break;
+                let code = status.code();
+                if code == Some(0) || code == Some(1) {
+                    let _ = child.wait();
+                    return;
+                }
+                let mut stderr_buf = Vec::new();
+                if let Some(mut stderr) = child.stderr.take() {
+                    stderr.read_to_end(&mut stderr_buf).ok();
+                }
+                let stderr_msg = String::from_utf8_lossy(&stderr_buf);
+                let _ = child.wait();
+                panic!(
+                    "text_editor_demo exited unexpectedly with {:?}\nstderr: {}",
+                    code, stderr_msg
+                );
             }
             Ok(None) => {
                 thread::sleep(Duration::from_millis(100));
                 attempts += 1;
             }
-            Err(e) => panic!("error waiting for text_editor_demo: {}", e),
+            Err(e) => {
+                let _ = child.wait();
+                panic!("error waiting for text_editor_demo: {}", e);
+            }
         }
     }
 
-    let status = match final_status {
-        Some(s) => s,
-        None => {
-            child.kill().ok();
-            panic!("text_editor_demo did not exit within 3 seconds");
-        }
-    };
-
-    let code = status.code();
-    if code == Some(0) || code == Some(1) {
-        let _ = child.wait();
-        return;
-    }
-    let mut stderr_buf = Vec::new();
-    if let Some(mut stderr) = child.stderr.take() {
-        stderr.read_to_end(&mut stderr_buf).ok();
-    }
-    let stderr_msg = String::from_utf8_lossy(&stderr_buf);
-    panic!(
-        "text_editor_demo exited unexpectedly with {:?}\nstderr: {}",
-        code, stderr_msg
-    );
+    child.kill().ok();
+    let _ = child.wait();
+    panic!("text_editor_demo did not exit within 3 seconds");
 }

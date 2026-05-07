@@ -325,6 +325,7 @@ mod log_viewer_command_output {
 mod streaming_text_command_output {
     use super::*;
 
+    #[allow(dead_code)]
     fn streaming_text_content_len(st: &StreamingText) -> usize {
         st.content().len()
     }
