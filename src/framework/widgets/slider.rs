@@ -202,6 +202,52 @@ impl crate::framework::widget::Widget for Slider {
         }
     }
 
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::{KeyCode, KeyEventKind};
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+
+        let range = self.max - self.min;
+        let step = range / 20.0; // 5% of range per keypress
+
+        match key.code {
+            KeyCode::Left | KeyCode::Down => {
+                self.value = (self.value - step).max(self.min);
+                if let Some(ref mut cb) = self.on_change {
+                    cb(self.value);
+                }
+                self.dirty = true;
+                true
+            }
+            KeyCode::Right | KeyCode::Up => {
+                self.value = (self.value + step).min(self.max);
+                if let Some(ref mut cb) = self.on_change {
+                    cb(self.value);
+                }
+                self.dirty = true;
+                true
+            }
+            KeyCode::Home => {
+                self.value = self.min;
+                if let Some(ref mut cb) = self.on_change {
+                    cb(self.value);
+                }
+                self.dirty = true;
+                true
+            }
+            KeyCode::End => {
+                self.value = self.max;
+                if let Some(ref mut cb) = self.on_change {
+                    cb(self.value);
+                }
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
+    }
+
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
     }
