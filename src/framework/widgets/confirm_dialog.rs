@@ -351,6 +351,46 @@ impl Widget for ConfirmDialog {
         plane
     }
 
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        _row: u16,
+    ) -> bool {
+        use crate::input::event::{MouseButton, MouseEventKind};
+
+        let area = self.area.get();
+        let btn_row = area.height.saturating_sub(2);
+        if _row != btn_row {
+            return false;
+        }
+
+        let total_btn_len = self.confirm_label.len() + self.cancel_label.len() + 5;
+        let start_col = (area.width.saturating_sub(total_btn_len as u16)) / 2;
+        let confirm_str = format!("[{}]", self.confirm_label);
+        let cancel_str = format!("[{}]", self.cancel_label);
+        let cancel_start = start_col as usize + confirm_str.len() + 3;
+
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let confirm_end = start_col + confirm_str.len() as u16;
+                if col >= start_col && col < confirm_end {
+                    self.result = Some(ConfirmResult::Confirmed);
+                    self.dirty = true;
+                    return true;
+                }
+                let cancel_end = cancel_start as u16 + cancel_str.len() as u16;
+                if col >= cancel_start as u16 && col < cancel_end {
+                    self.result = Some(ConfirmResult::Cancelled);
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            _ => false,
+        }
+    }
+
     fn commands(&self) -> Vec<BoundCommand> {
         self.bound_command.iter().cloned().collect()
     }
