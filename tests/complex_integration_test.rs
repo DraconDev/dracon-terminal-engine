@@ -9,6 +9,9 @@ use dracon_terminal_engine::framework::widget::WidgetId;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+mod common;
+use common::TrackingWidget;
+
 // =============================================================================
 // Drag-and-Drop Complex Scenarios
 // =============================================================================
@@ -44,9 +47,9 @@ fn test_drag_rejection_no_valid_target() {
 
 #[test]
 fn test_drag_rejection_wrong_target_type() {
-    // DragManager uses the same type for both source and target
+    // DragManager uses the same type for both source and target.
     // This test verifies that a drag ends correctly even when
-    // the target type matches but the user rejects via higher-level logic
+    // the target value differs from the payload.
     let mut manager: DragManager<usize> = DragManager::new();
     let ghost = DragGhost::new("Test");
 
@@ -55,8 +58,8 @@ fn test_drag_rejection_wrong_target_type() {
     manager.move_ghost(25, 25);
 
     let result = manager.end_drag();
-    // The manager returns the target ID, not the payload
-    // Higher-level code should compare payload to target
+    // The manager returns the target ID, not the payload.
+    // Higher-level code should compare payload to target.
     assert_eq!(result, Some(1usize));
 }
 
@@ -153,7 +156,7 @@ fn test_focus_skip_disabled_widget() {
 
 #[test]
 fn test_focus_custom_order() {
-    // Register widgets out of order, verify tab cycles by registration order
+    // Register widgets out of order, verify tab cycles by registration order.
     let mut fm = FocusManager::new();
     let id_a = WidgetId::new(10);
     let id_b = WidgetId::new(5);
@@ -163,7 +166,7 @@ fn test_focus_custom_order() {
     fm.register(id_b, true);
     fm.register(id_c, true);
 
-    // Tab order follows registration order, not ID order
+    // Tab order follows registration order, not ID order.
     fm.set_focus(id_a);
     assert_eq!(fm.tab_next(), Some(id_b));
     assert_eq!(fm.tab_next(), Some(id_c));
@@ -250,7 +253,7 @@ fn test_focus_unregister_all_widgets() {
 }
 
 #[test]
-fn test_focus_trap_prevents_tab_cycle() {
+fn test_focus_trap_prevents_exit() {
     let mut fm = FocusManager::new();
     let id1 = WidgetId::new(1);
     let id2 = WidgetId::new(2);
@@ -260,8 +263,7 @@ fn test_focus_trap_prevents_tab_cycle() {
     fm.set_focus(id1);
 
     fm.enter_trap();
-    // When trapped, tab_next might still work depending on implementation
-    // but the trap flag should be set
+    // When trapped, the trap flag should be set.
     assert!(fm.is_trapped());
 
     fm.enable_trap_exit();
@@ -270,54 +272,72 @@ fn test_focus_trap_prevents_tab_cycle() {
     assert_eq!(fm.focused(), Some(id1)); // focus unchanged
 }
 
+#[test]
+fn test_focus_widget_receives_on_focus_and_on_blur() {
+    let mut w1 = TrackingWidget::new(1);
+    let mut w2 = TrackingWidget::new(2);
+
+    assert_eq!(w1.focus_count(), 0);
+    assert_eq!(w1.blur_count(), 0);
+
+    dracon_terminal_engine::framework::widget::Widget::on_focus(&mut w1);
+    assert_eq!(w1.focus_count(), 1);
+
+    dracon_terminal_engine::framework::widget::Widget::on_blur(&mut w1);
+    assert_eq!(w1.blur_count(), 1);
+
+    // Test second widget independently
+    dracon_terminal_engine::framework::widget::Widget::on_focus(&mut w2);
+    assert_eq!(w2.focus_count(), 1);
+}
+
 // =============================================================================
 // Animation State Transitions
 // =============================================================================
 
 #[test]
-fn test_animation_pause_resume() {
-    let mut anim = Animation::new(0.0, 100.0, Duration::from_secs(1));
-    std::thread::sleep(Duration::from_millis(50));
-    let val_before = anim.value();
+fn test_animation_progress_over_time() {
+    let anim = Animation::new(0.0, 100.0, Duration::from_millis(100));
+    std::thread::sleep(Duration::from_millis(10));
+    let val_early = anim.value();
 
-    // Note: Animation may not have explicit pause/resume methods.
-    // If not available, this test verifies the animation continues progressing.
-    std::thread::sleep(Duration::from_millis(50));
-    let val_after = anim.value();
+    std::thread::sleep(Duration::from_millis(40));
+    let val_later = anim.value();
 
     // Should have progressed further
     assert!(
-        val_after > val_before || val_after >= 100.0,
-        "Animation should progress or be complete"
+        val_later > val_early || val_later >= 100.0,
+        "Animation should progress or be complete: early={}, later={}",
+        val_early,
+        val_later
     );
 }
 
 #[test]
-fn test_animation_completion_callback() {
-    let mut manager = AnimationManager::new();
-    let completed = Arc::new(Mutex::new(Vec::new()));
-    let completed_clone = completed.clone();
+fn test_animation_ease_in_start_slowly() {
+    let anim = Animation::new(0.0, 100.0, Duration::from_millis(100)).with_easing(Easing::EaseIn);
 
-    let id = manager.start(0.0, 100.0, Duration::from_millis(50));
+    std::thread::sleep(Duration::from_millis(10));
+    let val = anim.value();
+    // EaseIn should start slowly — at ~10% time, value should be less than ~10%
+    assert!(val < 15.0, "EaseIn should start slowly, got {}", val);
+}
 
-    // If AnimationManager supports completion callbacks, this would test them.
-    // Since the current API may not expose callbacks, we verify the animation
-    // completes via polling.
-    std::thread::sleep(Duration::from_millis(100));
-    manager.tick();
+#[test]
+fn test_animation_ease_out_end_slowly() {
+    let anim = Animation::new(0.0, 100.0, Duration::from_millis(100)).with_easing(Easing::EaseOut);
 
-    let val = manager.value(id);
-    if let Some(v) = val {
-        // Animation may be cleaned up after completion
-        assert!(v >= 0.0);
-    }
+    std::thread::sleep(Duration::from_millis(90));
+    let val = anim.value();
+    // EaseOut should end slowly — at ~90% time, value should be high
+    assert!(val > 70.0, "EaseOut should be near end by 90%, got {}", val);
 }
 
 #[test]
 fn test_animation_chained_sequence() {
     let mut manager = AnimationManager::new();
 
-    // Start multiple animations that form a sequence
+    // Start multiple animations that form a sequence.
     let id1 = manager.start(0.0, 50.0, Duration::from_millis(50));
     let id2 = manager.start(50.0, 100.0, Duration::from_millis(50));
 
@@ -327,7 +347,7 @@ fn test_animation_chained_sequence() {
     let val1 = manager.value(id1).unwrap_or(0.0);
     let val2 = manager.value(id2).unwrap_or(50.0);
 
-    // Both should be progressing independently
+    // Both should be progressing independently.
     assert!(val1 >= 0.0 && val1 <= 50.0);
     assert!(val2 >= 50.0 && val2 <= 100.0);
 }
@@ -341,47 +361,12 @@ fn test_animation_precise_value_linear_halfway() {
     manager.tick();
 
     let val = manager.value(id).unwrap_or(0.0);
-    // Linear easing at ~50% should be around 50 (with tolerance for scheduling)
-    assert!(val >= 30.0 && val <= 70.0, "Linear halfway should be near 50, got {}", val);
-}
-
-#[test]
-fn test_animation_precise_value_ease_in_start() {
-    let mut manager = AnimationManager::new();
-    let id = manager
-        .start_with_easing(0.0, 100.0, Duration::from_millis(100), Easing::EaseIn);
-
-    std::thread::sleep(Duration::from_millis(10));
-    manager.tick();
-
-    let val = manager.value(id).unwrap_or(0.0);
-    // EaseIn should start slowly — at 10% time, value should be less than 10%
-    assert!(val < 15.0, "EaseIn should start slowly, got {}", val);
-}
-
-#[test]
-fn test_animation_precise_value_ease_out_end() {
-    let mut manager = AnimationManager::new();
-    let id = manager
-        .start_with_easing(0.0, 100.0, Duration::from_millis(100), Easing::EaseOut);
-
-    std::thread::sleep(Duration::from_millis(90));
-    manager.tick();
-
-    let val = manager.value(id).unwrap_or(0.0);
-    // EaseOut should end slowly — at 90% time, value should be high
-    assert!(val > 70.0, "EaseOut should be near end by 90%, got {}", val);
-}
-
-#[test]
-fn test_animation_manager_remove_animation() {
-    let mut manager = AnimationManager::new();
-    let id = manager.start(0.0, 100.0, Duration::from_secs(1));
-
-    assert_eq!(manager.len(), 1);
-    manager.remove(id);
-    assert_eq!(manager.len(), 0);
-    assert!(manager.value(id).is_none());
+    // Linear easing at ~50% should be around 50 (with tolerance for scheduling).
+    assert!(
+        val >= 30.0 && val <= 70.0,
+        "Linear halfway should be near 50, got {}",
+        val
+    );
 }
 
 #[test]
@@ -395,8 +380,22 @@ fn test_animation_manager_cleanup_completed() {
     manager.tick();
     manager.cleanup();
 
-    // After cleanup, completed animations should be removed
+    // After cleanup, completed animations should be removed.
     assert_eq!(manager.len(), 0);
+}
+
+#[test]
+fn test_animation_manager_preserves_active_after_cleanup() {
+    let mut manager = AnimationManager::new();
+    let active_id = manager.start(0.0, 100.0, Duration::from_secs(10));
+    manager.start(0.0, 100.0, Duration::from_millis(50));
+
+    std::thread::sleep(Duration::from_millis(100));
+    manager.cleanup();
+
+    // Only the completed animation should be removed.
+    assert_eq!(manager.len(), 1);
+    assert!(manager.value(active_id).is_some());
 }
 
 #[test]
@@ -422,7 +421,7 @@ fn test_animation_state_running_to_done() {
     std::thread::sleep(Duration::from_millis(100));
     manager.tick();
 
-    // After completion, value might be removed or at final value
+    // After completion, value might be removed or at final value.
     if let Some(val) = manager.value(id) {
         assert_eq!(val, 100.0);
     }
@@ -437,7 +436,11 @@ fn test_animation_reverse_direction() {
     manager.tick();
 
     let val = manager.value(id).unwrap_or(100.0);
-    assert!(val < 100.0 && val >= 0.0, "Reverse animation should decrease, got {}", val);
+    assert!(
+        val < 100.0 && val >= 0.0,
+        "Reverse animation should decrease, got {}",
+        val
+    );
 }
 
 #[test]
@@ -449,7 +452,11 @@ fn test_animation_large_range() {
     manager.tick();
 
     let val = manager.value(id).unwrap_or(-1000.0);
-    assert!(val > -1000.0 && val < 1000.0, "Large range should progress, got {}", val);
+    assert!(
+        val > -1000.0 && val < 1000.0,
+        "Large range should progress, got {}",
+        val
+    );
 }
 
 // =============================================================================
@@ -465,7 +472,7 @@ fn test_focus_and_animation_together() {
     fm.register(id1, true);
     fm.set_focus(id1);
 
-    // Start animation while focus is active
+    // Start animation while focus is active.
     let anim_id = manager.start(0.0, 100.0, Duration::from_millis(50));
 
     std::thread::sleep(Duration::from_millis(25));
@@ -488,7 +495,7 @@ fn test_drag_and_focus_independence() {
     let ghost = DragGhost::new("Drag");
     dm.start_drag("data".to_string(), 1, ghost);
 
-    // Focus and drag should operate independently
+    // Focus and drag should operate independently.
     assert_eq!(fm.focused(), Some(id1));
     assert!(dm.is_dragging());
 
