@@ -1477,6 +1477,13 @@ impl TextEditor {
             self.invalidate_from(*row);
         }
 
+        // Advance main cursor after insertion
+        if let Some(&(row, col)) = all_cursors.first() {
+            if row == self.cursor_row && col == self.cursor_col {
+                self.cursor_col += c.len_utf8();
+            }
+        }
+
         if let Some(&(last_row, _)) = all_cursors.last() {
             self.cursor_row = last_row;
         }
