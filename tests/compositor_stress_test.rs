@@ -10,7 +10,7 @@ fn test_compositor_many_overlapping_planes() {
     for i in 0..100 {
         let x = (i % 20) as u16;
         let y = (i % 10) as u16;
-        let mut plane = Plane::new(i as u16, 10, 5);
+        let mut plane = Plane::new(i, 10, 5);
         plane.x = x;
         plane.y = y;
         

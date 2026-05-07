@@ -12,7 +12,7 @@ fn benchmark_render_100_buttons() {
     let start = Instant::now();
     
     for i in 0..100 {
-        let mut btn = Button::with_id(WidgetId::new(i as u16), "Test");
+        let mut btn = Button::with_id(WidgetId::new(i), "Test");
         btn.on_theme_change(&Theme::nord());
         let _ = btn.render(Rect::new(0, 0, 20, 3));
     }
@@ -27,7 +27,7 @@ fn benchmark_render_100_checkboxes() {
     let start = Instant::now();
     
     for i in 0..100 {
-        let mut cb = Checkbox::new(WidgetId::new(i as u16), "Option");
+        let mut cb = Checkbox::new(WidgetId::new(i), "Option");
         cb.on_theme_change(&Theme::nord());
         let _ = cb.render(Rect::new(0, 0, 20, 1));
     }
@@ -50,7 +50,8 @@ fn benchmark_compositor_50_planes() {
     }
     
     let start = Instant::now();
-    let _ = compositor.render();
+    let mut output = Vec::new();
+    let _ = compositor.render(&mut output);
     let elapsed = start.elapsed();
     
     println!("Compositor with 50 planes: {:?}", elapsed);
@@ -70,7 +71,8 @@ fn benchmark_compositor_200_planes() {
     }
     
     let start = Instant::now();
-    let _ = compositor.render();
+    let mut output = Vec::new();
+    let _ = compositor.render(&mut output);
     let elapsed = start.elapsed();
     
     println!("Compositor with 200 planes: {:?}", elapsed);
@@ -126,7 +128,8 @@ fn benchmark_large_terminal_200x100() {
     compositor.add_plane(plane);
     
     let start = Instant::now();
-    let _ = compositor.render();
+    let mut output = Vec::new();
+    let _ = compositor.render(&mut output);
     let elapsed = start.elapsed();
     
     println!("200x100 terminal render: {:?}", elapsed);

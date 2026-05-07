@@ -129,7 +129,7 @@ fn test_drag_manager_target_edge_boundary() {
     
     manager.register_target(1, 10, 10, 20, 20);
     
-    manager.start_drag("data".to_string(), 1, ghost);
+    manager.start_drag(42usize, 1, ghost);
     manager.move_ghost(10, 10); // Top-left edge
     
     assert_eq!(manager.end_drag(), Some(1));
