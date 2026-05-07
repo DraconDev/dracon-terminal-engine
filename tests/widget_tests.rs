@@ -5,6 +5,7 @@
 
 mod common;
 
+use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::split::Orientation;
