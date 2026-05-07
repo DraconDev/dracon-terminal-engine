@@ -46,6 +46,12 @@ const THEMES: &[&str] = &[
     "monokai",
     "solarized-light",
     "light",
+    "dark",
+    "warm",
+    "cool",
+    "forest",
+    "sunset",
+    "mono",
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
