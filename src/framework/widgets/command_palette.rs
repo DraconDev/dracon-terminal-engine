@@ -328,7 +328,7 @@ impl crate::framework::widget::Widget for CommandPalette {
         let filtered = self.filtered_commands();
         let list_start_y = sep_y + 1;
         let max_visible = (h as usize).saturating_sub(4).min(filtered.len());
-        let scroll_offset = if self.selected_index >= max_visible {
+        let scroll_offset = if self.selected_index >= max_visible && max_visible > 0 {
             self.selected_index.saturating_sub(max_visible - 1)
         } else {
             0
