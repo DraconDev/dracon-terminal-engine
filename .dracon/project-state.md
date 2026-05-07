@@ -1,25 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced compositor stress testing with improved hit testing and plane management
+Updated compositor stress test to use ANSI color codes instead of named colors.
 
 ## Context
-The compositor stress test suite was expanded to better validate the terminal engine's handling of overlapping planes, extreme z-index scenarios, and large areas. This update focuses on more robust hit testing and plane management.
+The change was made to align with the consistent background color implementation across the project, as seen in recent Cargo.lock updates. ANSI color codes provide more flexibility and consistency in color handling.
 
 ## Completed
-- [x] Added comprehensive hit testing for transparent and opaque planes
-- [x] Improved plane position offset validation
-- [x] Enhanced z-index ordering verification
-- [x] Added tests for empty compositor state
-- [x] Refined large area plane handling
-- [x] Added resize functionality validation
+- [x] Replaced named colors (Red, Blue) with ANSI color codes (1, 4) in compositor stress test
+- [x] Maintained all other cell properties (style, transparency, skip flags)
 
 ## In Progress
-- [ ] Further validation of edge cases in hit testing
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Add performance benchmarks for compositor operations
-2. Expand test coverage for complex plane interactions
+1. Verify test behavior remains consistent with ANSI color codes
+2. Ensure all other tests using named colors are updated similarly

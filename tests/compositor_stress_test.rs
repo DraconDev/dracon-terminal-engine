@@ -89,8 +89,8 @@ fn test_compositor_single_cell_plane() {
     let mut plane = Plane::new(0, 1, 1);
     plane.cells[0] = Cell {
         char: 'X',
-        fg: Color::Red,
-        bg: Color::Blue,
+        fg: Color::Ansi(1),
+        bg: Color::Ansi(4),
         style: Styles::BOLD,
         transparent: false,
         skip: false,
