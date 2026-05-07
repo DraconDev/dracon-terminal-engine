@@ -142,7 +142,7 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "27.0.5"
+dracon-terminal-engine = "28.519.0"
 ```
 
 Or from git:
