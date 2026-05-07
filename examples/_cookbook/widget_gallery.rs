@@ -21,13 +21,8 @@ use ratatui::layout::Rect;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-const THEMES: &[&str] = &[
-    "nord", "dracula", "cyberpunk", "gruvbox-dark", "tokyo-night",
-    "catppuccin", "solarized-dark", "one-dark", "rose-pine",
-];
-
-// Widget slot positions in the grid (row, col, name, icon)
-const WIDGET_SLOTS: &[(usize, usize, &str, &str)] = &[
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
     (0, 0, "Checkbox", "󰄵"),
     (0, 1, "Radio", "󰑃"),
     (0, 2, "Toggle", "󰔡"),
