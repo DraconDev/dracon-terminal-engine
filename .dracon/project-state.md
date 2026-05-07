@@ -1,34 +1,22 @@
 # Project State
 
 ## Current Focus
-Improved code formatting and readability across multiple example applications and core widgets
+Documented color handling exceptions for StatusBar and standalone widgets.
 
 ## Context
-The changes focus on enhancing code readability and maintainability by:
-1. Standardizing formatting of conditional expressions and variable assignments
-2. Improving alignment of related code blocks
-3. Making logical structures more visually distinct
-4. Applying consistent formatting patterns across different components
+The recent theme system refactoring required clarifying color handling exceptions to prevent unintended theme inheritance.
 
 ## Completed
-- [x] Standardized formatting of conditional expressions in chat client rendering
-- [x] Improved alignment of variable assignments in system monitor
-- [x] Applied consistent formatting to widget gallery examples
-- [x] Enhanced readability of table widget implementations
-- [x] Standardized formatting of menu system examples
-- [x] Improved code organization in text editor demo
-- [x] Applied consistent formatting to framework file manager
-- [x] Enhanced readability of form widget examples
-- [x] Standardized formatting of command bindings examples
-- [x] Improved code organization in widget tutorial
+- [x] Added documentation for StatusBar's intentional use of `Color::Reset`
+- [x] Documented hardcoded color choices in standalone widgets (editor/hotkey/input)
+- [x] Updated Cargo.lock to reflect consistent background color implementation
 
 ## In Progress
-- [ ] No active work in progress - all changes are completed formatting improvements
+- [x] Documenting additional widget-specific color exceptions if needed
 
 ## Blockers
-- None - these were purely formatting improvements with no functional changes
+- None identified
 
 ## Next Steps
-1. Review and test affected examples to ensure no functional changes occurred
-2. Consider additional formatting improvements for remaining files
-3. Evaluate if these changes should be applied to core widget implementations
+1. Review other widgets for similar color handling exceptions
+2. Update related documentation if additional exceptions are found

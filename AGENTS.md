@@ -439,6 +439,10 @@ fn render(&self, area: Rect) -> Plane {
 
 **Where to apply:** Every widget's `render()` method. Check existing widgets for the pattern.
 
+**Exception — StatusBar:** `StatusBar` intentionally uses `Color::Reset` for its default `fg` and `bg` fields to inherit terminal defaults. This allows StatusBar to blend with the terminal background when not explicitly themed. Document this exception if adding StatusBar tests or modifications.
+
+**Exception — Standalone Editor/Hotkey/Input widgets** (`src/widgets/`): These widgets use hardcoded `Color::Black` for cursor and highlight contrast (e.g., cursor: blue bg + black fg, bracket matching: yellow bg + black fg). These are intentional contrast choices for specific UI features, not theme-aware. They live in `src/widgets/` rather than `src/framework/widgets/` and are not part of the framework theme system.
+
 ### u16 Arithmetic Safety in Mouse Handlers
 
 **Always bounds-check before subtracting from `u16` mouse coordinates.** `u16` underflow panics in debug mode and wraps in release — both are bugs.
