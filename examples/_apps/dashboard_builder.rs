@@ -6,7 +6,7 @@
 //! - Sparkline history graphs for each metric
 //! - Color-coded status indicators
 //! - Draggable panel resize
-//! - Theme cycling (15 themes)
+//! - Theme cycling (20 themes)
 //! - Pause/resume updates
 //! - Process table with selection
 //!
@@ -392,6 +392,12 @@ impl Dashboard {
             "monokai" => Theme::monokai(),
             "solarized-light" => Theme::solarized_light(),
             "light" => Theme::light(),
+            "dark" => Theme::dark(),
+            "warm" => Theme::warm(),
+            "cool" => Theme::cool(),
+            "forest" => Theme::forest(),
+            "sunset" => Theme::sunset(),
+            "mono" => Theme::mono(),
             _ => Theme::nord(),
         };
     }
