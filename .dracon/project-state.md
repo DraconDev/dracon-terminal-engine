@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Updated the list of framework widgets in the documentation to reflect new additions.
+docs(readme): update widget count in documentation to reflect new built-in widgets
 
 ## Context
-The project is expanding its widget library, and the documentation needs to stay current to reflect these additions. This change ensures users and contributors have accurate information about available components.
+The README.md was updated to reflect the addition of 2 new built-in widgets to the framework, increasing the total count from 35 to 37.
 
 ## Completed
-- [x] Added two new widgets to the framework list: `CommandPalette` and `TextEditorAdapter`
-- [x] Updated the widget count from 35 to 37 to reflect the additions
+- [x] Updated widget count in README.md to accurately reflect the framework's capabilities
 
 ## In Progress
 - [x] Documentation update for new widgets
 
 ## Blockers
-- None identified for this specific documentation update
+- None identified
 
 ## Next Steps
-1. Verify the new widgets are properly documented with usage examples
-2. Review the widget list for completeness and accuracy
+1. Verify the widget count matches the actual implementation
+2. Consider adding documentation for the new widgets if they have unique features
