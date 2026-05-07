@@ -345,7 +345,18 @@ impl Widget for WidgetGallery {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        // Find which slot was clicked
+        // Check if click is in a widget zone using ScopedZoneRegistry
+        if let Some(slot) = self.zones.borrow().dispatch(col, row) {
+            if let MouseEventKind::Down(MouseButton::Left) = kind {
+                self.selected = slot;
+            }
+            let rect = self.slot_rect(slot, self.area);
+            let rel_col = col - rect.x - 1;
+            let rel_row = row - rect.y - 2;
+            return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+        }
+        
+        // Check if click is in any card (for selection, not widget interaction)
         for (slot, &(..)) in WIDGET_SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, self.area);
             if col >= rect.x && col < rect.x + rect.width
@@ -353,14 +364,6 @@ impl Widget for WidgetGallery {
             {
                 if let MouseEventKind::Down(MouseButton::Left) = kind {
                     self.selected = slot;
-                }
-                let widget_area = Rect::new(1, 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
-                if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height
-                    && col >= rect.x + 1 && col < rect.x + 1 + widget_area.width
-                {
-                    let rel_col = col - rect.x - 1;
-                    let rel_row = row - rect.y - 2;
-                    return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
                 }
                 return true;
             }
