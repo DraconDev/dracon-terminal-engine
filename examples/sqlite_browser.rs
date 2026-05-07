@@ -137,7 +137,7 @@ impl SqliteBrowser {
             Theme::mono(),
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.theme = themes[(idx + 1) % themes.len()];
         self.status_bar.on_theme_change(&self.theme);
         self.search_input.on_theme_change(&self.theme);
         if let Some(ref mut table) = self.results_table {

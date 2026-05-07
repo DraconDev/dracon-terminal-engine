@@ -185,7 +185,7 @@ impl TabbedApp {
             Theme::mono(),
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.theme = themes[(idx + 1) % themes.len()];
         self.tabbar.on_theme_change(&self.theme);
         self.dashboard.cpu.on_theme_change(&self.theme);
         self.dashboard.memory.on_theme_change(&self.theme);
@@ -547,13 +547,10 @@ impl Widget for TabbedApp {
         }
 
         match self.active_tab() {
-            TAB_LOGS => {
-                if row >= tabbar_height + 1 {
+            TAB_LOGS
+                if row > tabbar_height => {
                     self.logs.list.handle_mouse(kind, col, row - tabbar_height - 1)
-                } else {
-                    false
                 }
-            }
             TAB_SETTINGS => {
                 if row == tabbar_height + 2 && (20..40).contains(&col) {
                     self.settings
@@ -561,7 +558,7 @@ impl Widget for TabbedApp {
                         .handle_mouse(kind, col - 20, row - tabbar_height - 1)
                 } else if row == tabbar_height + 4 && (20..45).contains(&col) {
                     self.settings.volume_slider.handle_mouse(kind, col - 20, 0)
-                } else if row >= tabbar_height + 1 {
+                } else if row > tabbar_height {
                     self.settings
                         .notifications
                         .handle_mouse(kind, col, row - tabbar_height - 1)

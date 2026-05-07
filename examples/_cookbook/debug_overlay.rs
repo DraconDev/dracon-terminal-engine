@@ -84,7 +84,7 @@ impl DebugOverlayPanel {
             Theme::mono(),
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.theme = themes[(idx + 1) % themes.len()];
         // Propagate theme to all child widgets
         self.profiler.on_theme_change(&self.theme);
         self.inspector.on_theme_change(&self.theme);

@@ -120,7 +120,7 @@ impl SettingsForm {
             Theme::mono(),
         ];
         let idx = themes.iter().position(|t| t.name == self.form_theme.name).unwrap_or(0);
-        self.form_theme = themes[(idx + 1) % themes.len()].clone();
+        self.form_theme = themes[(idx + 1) % themes.len()];
         self.dirty = true;
     }
 

@@ -468,7 +468,7 @@ impl Widget for CommandBindings {
                     Theme::mono(),
                 ];
                 let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-                let next = themes[(idx + 1) % themes.len()].clone();
+                let next = themes[(idx + 1) % themes.len()];
                 self.on_theme_change(&next);
                 true
             }
