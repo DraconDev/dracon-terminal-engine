@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Added keyboard shortcut help to the text editor's status bar
 
 ## Context
-This change was prompted by the recent theme system updates that required consistent background color handling across the application. The Cargo.lock file was updated to ensure all dependencies are properly aligned with the new theme implementation.
+The text editor demo needed clearer user guidance about available keyboard commands without requiring the user to remember them.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Added "t: theme | ?: help | q: quit" help segment to status bar
+- [x] Maintained consistent styling with other status bar segments
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [x] Keyboard shortcut help display implementation
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify that all theme-related components are properly using the updated background color implementation
-2. Ensure no dependency conflicts exist after this update
+1. Verify help text is visible and readable
+2. Consider adding more shortcuts as they're implemented

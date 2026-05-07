@@ -94,7 +94,10 @@ impl EditorApp {
         let status = StatusBar::new(WidgetId::new(30))
             .add_segment(StatusSegment::new("󰄛 Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("Ln 1, Col 1").with_fg(theme.fg_muted))
-            .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted));
+            .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
+            .add_segment(
+                StatusSegment::new("t: theme | ?: help | q: quit").with_fg(theme.fg_muted),
+            );
 
         let breadcrumbs = Breadcrumbs::new(vec!["src".into(), "main.rs".into()]);
 
