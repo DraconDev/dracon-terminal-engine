@@ -167,7 +167,10 @@ impl IdeApp {
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
             .add_segment(StatusSegment::new("Ln 1, Col 1").with_fg(theme.fg_muted))
             .add_segment(StatusSegment::new("Rust").with_fg(theme.info))
-            .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted));
+            .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
+            .add_segment(
+                StatusSegment::new("t: theme | ?: help | q: quit").with_fg(theme.fg_muted),
+            );
 
         let breadcrumbs =
             Breadcrumbs::new(vec!["workspace".into(), "src".into(), "main.rs".into()]);

@@ -1,14 +1,14 @@
 # Project State
 
 ## Current Focus
-Added keyboard shortcut help to the text editor's status bar
+Added keyboard shortcut help to the IDE's status bar
 
 ## Context
-The text editor demo needed clearer user guidance about available keyboard commands without requiring the user to remember them.
+This change improves user discoverability by displaying available keyboard shortcuts in the status bar, following the recent feature work on keyboard shortcuts.
 
 ## Completed
-- [x] Added "t: theme | ?: help | q: quit" help segment to status bar
-- [x] Maintained consistent styling with other status bar segments
+- [x] Added new status bar segment showing "t: theme | ?: help | q: quit" shortcuts
+- [x] Maintained consistent styling with muted foreground color
 
 ## In Progress
 - [x] Keyboard shortcut help display implementation
@@ -17,5 +17,5 @@ The text editor demo needed clearer user guidance about available keyboard comma
 - None identified
 
 ## Next Steps
-1. Verify help text is visible and readable
-2. Consider adding more shortcuts as they're implemented
+1. Verify shortcuts work across all IDE components
+2. Consider adding more shortcuts to the display as they're implemented
