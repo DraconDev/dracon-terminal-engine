@@ -103,7 +103,7 @@ impl Plane {
             y: 0,
             width,
             height,
-            cells: vec![Cell::default(); (width as usize * height as usize)],
+            cells: vec![Cell::default(); width as usize * height as usize],
             visible: true,
             opacity: 1.0,
             filter: None,
