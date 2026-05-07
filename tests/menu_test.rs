@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{ContextMenu, ContextMenuAction, MenuBar, MenuEntry, MenuItem};
+use dracon_terminal_engine::framework::widgets::{ContextMenu, ContextAction, MenuBar, MenuEntry, MenuItem};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -60,9 +60,9 @@ fn test_menu_bar_no_black_background() {
 #[test]
 fn test_context_menu_new() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
-        ("Copy", ContextMenuAction::Custom(2)),
-        ("Paste", ContextMenuAction::Custom(3)),
+        ("Cut", ContextAction::Custom(1)),
+        ("Copy", ContextAction::Custom(2)),
+        ("Paste", ContextAction::Custom(3)),
     ];
     let menu = ContextMenu::new(items);
     let plane = menu.render(Rect::new(0, 0, 20, 5));
@@ -72,8 +72,8 @@ fn test_context_menu_new() {
 #[test]
 fn test_context_menu_with_theme() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
-        ("Copy", ContextMenuAction::Custom(2)),
+        ("Cut", ContextAction::Custom(1)),
+        ("Copy", ContextAction::Custom(2)),
     ];
     let menu = ContextMenu::new(items).with_theme(Theme::nord());
     let plane = menu.render(Rect::new(0, 0, 20, 3));
@@ -83,9 +83,9 @@ fn test_context_menu_with_theme() {
 #[test]
 fn test_context_menu_navigation_down() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
-        ("Copy", ContextMenuAction::Custom(2)),
-        ("Paste", ContextMenuAction::Custom(3)),
+        ("Cut", ContextAction::Custom(1)),
+        ("Copy", ContextAction::Custom(2)),
+        ("Paste", ContextAction::Custom(3)),
     ];
     let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 5));
@@ -100,8 +100,8 @@ fn test_context_menu_navigation_down() {
 #[test]
 fn test_context_menu_enter_selects() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
-        ("Copy", ContextMenuAction::Custom(2)),
+        ("Cut", ContextAction::Custom(1)),
+        ("Copy", ContextAction::Custom(2)),
     ];
     let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 3));
@@ -113,7 +113,7 @@ fn test_context_menu_enter_selects() {
 #[test]
 fn test_context_menu_esc_closes() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
+        ("Cut", ContextAction::Custom(1)),
     ];
     let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 2));
@@ -125,9 +125,9 @@ fn test_context_menu_esc_closes() {
 #[test]
 fn test_context_menu_mouse_click() {
     let items = vec![
-        ("Cut", ContextMenuAction::Custom(1)),
-        ("Copy", ContextMenuAction::Custom(2)),
-        ("Paste", ContextMenuAction::Custom(3)),
+        ("Cut", ContextAction::Custom(1)),
+        ("Copy", ContextAction::Custom(2)),
+        ("Paste", ContextAction::Custom(3)),
     ];
     let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 5));

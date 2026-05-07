@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved test reliability for breadcrumb navigation and command palette execution
+Refactored context menu action types in test suite to improve consistency with core framework changes.
 
 ## Context
-These changes address test reliability issues in UI components by:
-1. Refactoring breadcrumb navigation tests to use proper reference counting
-2. Simplifying command palette test setup with builder pattern
+The test suite was updated to align with recent framework changes where `ContextMenuAction` was renamed to `ContextAction` for consistency with other widget systems. This ensures the test suite remains maintainable and matches the core implementation.
 
 ## Completed
-- [x] Fixed breadcrumb navigation test by using `Rc<RefCell>` for shared mutable state
-- [x] Simplified command palette test by moving `on_execute` callback into builder chain
-- [x] Added assertion to verify breadcrumb click handler was called
+- [x] Updated all test cases to use `ContextAction` instead of `ContextMenuAction`
+- [x] Maintained identical test logic while only changing the action type
 
 ## In Progress
-- [x] Comprehensive test suite improvements for UI components
+- [ ] No active work in progress
 
 ## Blockers
-- None identified in this commit
+- None
 
 ## Next Steps
-1. Verify test coverage for other UI components
-2. Review test performance impact of these changes
+1. Verify all tests pass with the new action type
+2. Consider updating other test files that might use similar action types
