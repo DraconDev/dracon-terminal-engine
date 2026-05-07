@@ -1,21 +1,26 @@
 # Project State
 
 ## Current Focus
-Add drag state tracking to SplitPane widget
+Enhanced SplitPane widget with improved drag interaction handling
 
 ## Context
-The SplitPane widget needs to track when users are actively dragging the divider to enable proper visual feedback and interaction handling.
+The SplitPane widget needed better handling of mouse interactions for resizing panes. The previous implementation only handled drag events, but now we need to properly track the drag state and handle mouse down/up events to ensure smooth resizing behavior.
 
 ## Completed
-- [x] Added `dragging` field to SplitPane struct to track drag state
-- [x] Initialized `dragging` as false in all constructors
+- [x] Added drag state tracking with `dragging` boolean flag
+- [x] Implemented mouse down event handling to initiate drag
+- [x] Added mouse up event handling to end drag
+- [x] Added bounds checking for divider area
+- [x] Added dirty flag to trigger UI updates
+- [x] Added zero-division protection for ratio calculations
 
 ## In Progress
-- [ ] Implement actual drag handling logic (not yet in this commit)
+- [x] Complete implementation of all mouse interaction states
 
 ## Blockers
-- Need to implement the actual drag interaction logic that will use this state
+- None identified
 
 ## Next Steps
-1. Implement drag interaction logic using the new `dragging` state
-2. Add visual feedback for active dragging state
+1. Verify drag behavior with visual tests
+2. Add accessibility features for keyboard navigation
+3. Optimize performance for rapid drag operations

@@ -176,18 +176,47 @@ impl SplitPane {
         area: Rect,
     ) -> bool {
         match kind {
-            crate::input::event::MouseEventKind::Drag(_) => {
+            crate::input::event::MouseEventKind::Down(_) => {
+                let divider = self.divider_rect(area);
+                if col >= divider.x
+                    && col < divider.x + divider.width
+                    && row >= divider.y
+                    && row < divider.y + divider.height
+                {
+                    self.dragging = true;
+                    true
+                } else {
+                    false
+                }
+            }
+            crate::input::event::MouseEventKind::Drag(_) | crate::input::event::MouseEventKind::Moved => {
+                if !self.dragging {
+                    return false;
+                }
                 match self.orientation {
                     Orientation::Horizontal => {
                         let total_w = area.width as f32;
-                        self.ratio = (col as f32 / total_w).clamp(0.1, 0.9);
+                        if total_w > 0.0 {
+                            self.ratio = (col as f32 / total_w).clamp(0.1, 0.9);
+                        }
                     }
                     Orientation::Vertical => {
                         let total_h = area.height as f32;
-                        self.ratio = (row as f32 / total_h).clamp(0.1, 0.9);
+                        if total_h > 0.0 {
+                            self.ratio = (row as f32 / total_h).clamp(0.1, 0.9);
+                        }
                     }
                 }
+                self.dirty = true;
                 true
+            }
+            crate::input::event::MouseEventKind::Up(_) => {
+                if self.dragging {
+                    self.dragging = false;
+                    true
+                } else {
+                    false
+                }
             }
             _ => false,
         }
