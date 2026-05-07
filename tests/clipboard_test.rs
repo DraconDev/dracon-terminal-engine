@@ -182,6 +182,7 @@ fn test_editor_paste_multiline() {
     });
     
     let content = adapter.editor().get_content();
+    eprintln!("DEBUG content: {:?}", content);
     assert!(content.contains("Line 1"));
     assert!(content.contains("Line 2"));
     assert!(content.contains("Line 3"));
