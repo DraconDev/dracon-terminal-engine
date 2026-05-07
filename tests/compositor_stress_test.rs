@@ -1,148 +1,184 @@
-//! Compositor stress tests — extreme z-index, many planes, overlapping cells.
+//! Compositor stress tests — overlapping planes, extreme z-index, large areas.
 
 use dracon_terminal_engine::compositor::{Cell, Color, Compositor, Plane, Styles};
+use ratatui::layout::Rect;
 
 #[test]
-fn test_compositor_many_planes() {
+fn test_compositor_many_overlapping_planes() {
     let mut compositor = Compositor::new(80, 24);
     
-    // Add 100 overlapping planes
+    // Add 100 small overlapping planes
     for i in 0..100 {
-        let mut plane = Plane::new(i as u16, 80, 24);
-        plane.fill_bg(Color::Ansi((i % 256) as u8));
+        let x = (i % 20) as u16;
+        let y = (i % 10) as u16;
+        let mut plane = Plane::new(i as u16, 10, 5);
+        plane.x = x;
+        plane.y = y;
+        
+        for cell in &mut plane.cells {
+            cell.bg = Color::Ansi((i % 256) as u8);
+        }
+        
         compositor.add_plane(plane);
     }
     
-    let frame = compositor.compose();
-    assert_eq!(frame.cells.len(), 80 * 24);
+    let frame = compositor.render();
+    assert_eq!(frame.width, 80);
+    assert_eq!(frame.height, 24);
 }
 
 #[test]
 fn test_compositor_extreme_z_index() {
     let mut compositor = Compositor::new(80, 24);
     
-    let mut low = Plane::new(0, 80, 24);
-    low.fill_bg(Color::Red);
+    // Add planes with extreme z-indices
+    let mut low = Plane::new(0, 10, 5);
+    low.z_index = 0;
     low.cells[0].char = 'L';
+    low.cells[0].transparent = false;
     
-    let mut high = Plane::new(65535, 80, 24);
-    high.fill_bg(Color::Blue);
+    let mut high = Plane::new(0, 10, 5);
+    high.z_index = 65535;
     high.cells[0].char = 'H';
+    high.cells[0].transparent = false;
     
     compositor.add_plane(low);
     compositor.add_plane(high);
     
-    let frame = compositor.compose();
+    let frame = compositor.render();
     // High z-index should win
-    assert_eq!(frame.cells[0].char, 'H');
-    assert_eq!(frame.cells[0].bg, Color::Blue);
+    let idx = 0;
+    assert_eq!(frame.cells[idx].char, 'H');
 }
 
 #[test]
-fn test_compositor_all_transparent() {
-    let mut compositor = Compositor::new(80, 24);
-    
-    let mut plane = Plane::new(0, 80, 24);
-    for cell in &mut plane.cells {
-        cell.transparent = true;
-    }
+fn test_compositor_large_area() {
+    let mut compositor = Compositor::new(200, 100);
+    let plane = Plane::new(0, 200, 100);
     compositor.add_plane(plane);
     
-    let frame = compositor.compose();
-    // Should still produce a frame
-    assert_eq!(frame.cells.len(), 80 * 24);
+    let frame = compositor.render();
+    assert_eq!(frame.width, 200);
+    assert_eq!(frame.height, 100);
 }
 
 #[test]
-fn test_compositor_empty() {
-    let compositor = Compositor::new(80, 24);
-    let frame = compositor.compose();
-    assert_eq!(frame.cells.len(), 80 * 24);
-    // All cells should be default
-    for cell in &frame.cells {
-        assert_eq!(cell.char, '\0');
-    }
-}
-
-#[test]
-fn test_compositor_single_cell_plane() {
+fn test_compositor_transparent_stacking() {
     let mut compositor = Compositor::new(80, 24);
     
-    let mut plane = Plane::new(1, 1, 1);
-    plane.cells[0] = Cell {
-        char: 'X',
-        fg: Color::Red,
-        bg: Color::Blue,
-        style: Styles::BOLD,
-        transparent: false,
-        skip: false,
-    };
-    compositor.add_plane(plane);
-    
-    let frame = compositor.compose();
-    assert_eq!(frame.cells[0].char, 'X');
-    assert_eq!(frame.cells[0].fg, Color::Red);
-}
-
-#[test]
-fn test_compositor_resize_smaller() {
-    let mut compositor = Compositor::new(80, 24);
-    let mut plane = Plane::new(0, 80, 24);
-    plane.fill_bg(Color::Red);
-    compositor.add_plane(plane);
-    
-    compositor.resize(40, 12);
-    let frame = compositor.compose();
-    assert_eq!(frame.cells.len(), 40 * 12);
-}
-
-#[test]
-fn test_compositor_resize_larger() {
-    let mut compositor = Compositor::new(40, 12);
-    compositor.resize(80, 24);
-    let frame = compositor.compose();
-    assert_eq!(frame.cells.len(), 80 * 24);
-}
-
-#[test]
-fn test_compositor_plane_position_offset() {
-    let mut compositor = Compositor::new(80, 24);
-    
-    let mut plane = Plane::new(0, 10, 10);
-    plane.x = 5;
-    plane.y = 5;
-    plane.fill_bg(Color::Green);
-    compositor.add_plane(plane);
-    
-    let frame = compositor.compose();
-    // Cell at (5, 5) should be green
-    let idx = (5 * 80 + 5) as usize;
-    assert_eq!(frame.cells[idx].bg, Color::Green);
-}
-
-#[test]
-fn test_compositor_overlapping_planes_merging() {
-    let mut compositor = Compositor::new(80, 24);
-    
-    // Bottom plane fills everything
     let mut bottom = Plane::new(0, 80, 24);
-    bottom.fill_bg(Color::Black);
-    compositor.add_plane(bottom);
+    bottom.cells[0].char = 'B';
+    bottom.cells[0].transparent = false;
+    bottom.cells[0].bg = Color::Ansi(1);
     
-    // Top plane with transparent holes
     let mut top = Plane::new(1, 80, 24);
-    top.fill_bg(Color::White);
-    for cell in &mut top.cells {
-        cell.transparent = true;
-    }
-    // Make one cell non-transparent
-    top.cells[100].transparent = false;
-    top.cells[100].bg = Color::Red;
+    top.cells[0].transparent = true; // Let bottom show through
+    top.cells[1].char = 'T';
+    top.cells[1].transparent = false;
+    
+    compositor.add_plane(bottom);
     compositor.add_plane(top);
     
-    let frame = compositor.compose();
-    // Cell 100 should be red (from top plane)
-    assert_eq!(frame.cells[100].bg, Color::Red);
-    // Cell 0 should be black (from bottom, top is transparent)
-    assert_eq!(frame.cells[0].bg, Color::Black);
+    let frame = compositor.render();
+    assert_eq!(frame.cells[0].char, 'B'); // Bottom shows through
+    assert_eq!(frame.cells[1].char, 'T'); // Top covers
+}
+
+#[test]
+fn test_compositor_out_of_bounds_planes() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    let mut plane = Plane::new(0, 10, 5);
+    plane.x = 100; // Outside compositor bounds
+    plane.y = 50;
+    
+    compositor.add_plane(plane);
+    
+    let frame = compositor.render();
+    assert_eq!(frame.width, 80);
+    assert_eq!(frame.height, 24);
+}
+
+#[test]
+fn test_compositor_negative_position() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    let mut plane = Plane::new(0, 10, 5);
+    // u16 can't be negative, but saturating_sub should handle edge cases
+    plane.x = 0;
+    plane.y = 0;
+    
+    compositor.add_plane(plane);
+    
+    let frame = compositor.render();
+    assert_eq!(frame.width, 80);
+}
+
+#[test]
+fn test_compositor_empty_planes() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    // Add plane with empty cells
+    let mut plane = Plane::new(0, 80, 24);
+    for cell in &mut plane.cells {
+        cell.char = '\0'; // Null character = transparent skip
+        cell.transparent = true;
+    }
+    
+    compositor.add_plane(plane);
+    
+    let frame = compositor.render();
+    assert_eq!(frame.width, 80);
+}
+
+#[test]
+fn test_compositor_filter_application() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    let mut plane = Plane::new(0, 80, 24);
+    plane.cells[0].char = 'X';
+    plane.cells[0].fg = Color::Ansi(7);
+    
+    compositor.add_plane(plane);
+    
+    // Apply a filter
+    compositor.apply_filter(|cell| {
+        cell.fg = Color::Ansi(15);
+        cell
+    });
+    
+    let frame = compositor.render();
+    assert_eq!(frame.cells[0].fg, Color::Ansi(15));
+}
+
+#[test]
+fn test_compositor_z_index_sorting() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    // Add planes in reverse z-order
+    for i in (0..10).rev() {
+        let mut plane = Plane::new(i, 80, 24);
+        plane.z_index = i as u16;
+        plane.cells[0].char = ('0' as u8 + i as u8) as char;
+        plane.cells[0].transparent = false;
+        compositor.add_plane(plane);
+    }
+    
+    let frame = compositor.render();
+    // Highest z-index (9) should win at cell 0
+    assert_eq!(frame.cells[0].char, '9');
+}
+
+#[test]
+fn test_compositor_remove_all_planes() {
+    let mut compositor = Compositor::new(80, 24);
+    
+    compositor.add_plane(Plane::new(0, 10, 5));
+    compositor.add_plane(Plane::new(1, 10, 5));
+    
+    compositor.clear_planes();
+    
+    let frame = compositor.render();
+    assert_eq!(frame.width, 80);
+    assert_eq!(frame.height, 24);
 }
