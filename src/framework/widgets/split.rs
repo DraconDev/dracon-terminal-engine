@@ -221,11 +221,12 @@ impl SplitPane {
                 true
             }
             crate::input::event::MouseEventKind::Up(_) => {
-                if self.dragging {
-                    self.dragging = false;
-                    true
-                } else {
-                    false
+                match self.dragging {
+                    true => {
+                        self.dragging = false;
+                        true
+                    }
+                    false => false,
                 }
             }
             _ => false,
