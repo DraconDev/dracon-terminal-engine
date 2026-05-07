@@ -65,7 +65,7 @@ impl MenuApp {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
             .add_segment(
-                StatusSegment::new("Ctrl+N|O|S: New|Open|Save | Ctrl+Q: Quit")
+                StatusSegment::new("Ctrl+N|O|S: New|Open|Save | t: theme | ?: help | Ctrl+Q: Quit")
                     .with_fg(theme.fg_muted),
             );
         Self {
