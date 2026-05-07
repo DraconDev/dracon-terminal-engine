@@ -129,19 +129,37 @@ fn test_list_no_black_background() {
 #[test]
 fn test_table_no_black_background() {
     for theme in all_themes() {
-        let items = vec![
-            ("Alice".to_string(), 30),
-            ("Bob".to_string(), 25),
+        let columns = vec![
+            Column { header: "Name".to_string(), width: 20 },
+            Column { header: "Age".to_string(), width: 10 },
         ];
-        let mut table = Table::new(
-            WidgetId::new(1),
-            vec!["Name".to_string(), "Age".to_string()],
-            items,
-        );
+        let mut table = Table::new_with_id(WidgetId::new(1), columns);
         table.on_theme_change(&theme);
         let plane = table.render(Rect::new(0, 0, 40, 4));
         assert_no_black_background(&plane, "Table");
     }
+}
+
+#[test]
+fn test_all_20_themes_no_panic() {
+    // Sanity check: rendering every widget with every theme doesn't panic
+    let themes = all_themes();
+    assert_eq!(themes.len(), 20, "Expected 20 themes");
+    
+    for theme in &themes {
+        let mut cb = Checkbox::new(WidgetId::new(1), "Test");
+        cb.on_theme_change(theme);
+        let _ = cb.render(Rect::new(0, 0, 20, 1));
+        
+        let mut btn = Button::with_id(WidgetId::new(1), "Click");
+        btn.on_theme_change(theme);
+        let _ = btn.render(Rect::new(0, 0, 15, 1));
+        
+        let mut list = List::new_with_id(WidgetId::new(1), vec!["a".to_string()]);
+        list.on_theme_change(theme);
+        let _ = list.render(Rect::new(0, 0, 20, 3));
+    }
+}
 }
 
 #[test]
