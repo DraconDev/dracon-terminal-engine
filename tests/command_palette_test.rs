@@ -104,8 +104,7 @@ fn test_palette_enter_executes() {
     let executed = Rc::new(RefCell::new(None));
     let executed_clone = Rc::clone(&executed);
     
-    let mut palette = make_palette();
-    palette.on_execute(move |id| {
+    let mut palette = make_palette().on_execute(move |id| {
         *executed_clone.borrow_mut() = Some(id.to_string());
     });
     palette.show();

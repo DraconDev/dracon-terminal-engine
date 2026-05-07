@@ -53,23 +53,27 @@ fn test_breadcrumbs_no_black_background() {
     }
 }
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 #[test]
 fn test_breadcrumbs_mouse_click_navigates() {
-    let clicked = std::cell::Cell::new(None);
-    let clicked_ref = &clicked;
+    let clicked = Rc::new(RefCell::new(None));
+    let clicked_clone = Rc::clone(&clicked);
     
     let mut crumbs = Breadcrumbs::new(vec![
         "home".to_string(),
         "user".to_string(),
         "projects".to_string(),
     ]).on_navigate(move |idx| {
-        clicked_ref.set(Some(idx));
+        *clicked_clone.borrow_mut() = Some(idx);
     });
     crumbs.set_area(Rect::new(0, 0, 80, 1));
     
     // Click on first segment
     let result = crumbs.handle_mouse(MouseEventKind::Down(MouseButton::Left), 2, 0);
     assert!(result);
+    assert!(clicked.borrow().is_some());
 }
 
 #[test]
