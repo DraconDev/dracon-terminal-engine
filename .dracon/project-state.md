@@ -4,17 +4,17 @@
 Simplified widget creation in theme validation tests by removing explicit `WidgetId` parameter.
 
 ## Context
-The change removes the need for explicit `WidgetId` when creating widgets in theme validation tests, making the test code cleaner and more maintainable.
+The change removes redundant `WidgetId` parameter from `List::new()` in theme validation tests, aligning with recent widget creation simplifications.
 
 ## Completed
-- [x] Removed explicit `WidgetId` parameter from `List` widget creation in theme validation tests
+- [x] Removed `WidgetId` parameter from `List::new()` call in theme validation tests
 
 ## In Progress
 - [x] No active work in progress
 
 ## Blockers
-- None
+- None identified
 
 ## Next Steps
-1. Verify test coverage remains complete after this change
-2. Consider similar simplifications for other widget types in tests
+1. Verify test suite still passes with this change
+2. Check if other widget constructors need similar simplification

@@ -217,7 +217,7 @@ fn test_all_20_themes_no_panic() {
         btn.on_theme_change(theme);
         let _ = btn.render(Rect::new(0, 0, 15, 1));
         
-        let mut list = List::new(WidgetId::new(1), vec!["a".to_string()]);
+        let mut list = List::new(vec!["a".to_string()]);
         list.on_theme_change(theme);
         let _ = list.render(Rect::new(0, 0, 20, 3));
     }
