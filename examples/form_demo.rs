@@ -618,7 +618,7 @@ impl Widget for SettingsForm {
 
         // === STATUS BAR ===
         let status_y = card_h.saturating_sub(1);
-        let hint = "[Tab] next  [Shift+Tab] prev  [Enter] submit  [Esc] clear";
+        let hint = "Tab: next | Shift+Tab: prev | Enter: submit | Esc: clear | t: theme | ?: help | q: quit";
         for (i, c) in hint.chars().take(card_w as usize - 2).enumerate() {
             let idx = (status_y * area.width + margin + 1 + i as u16) as usize;
             if idx < plane.cells.len() {

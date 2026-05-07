@@ -284,7 +284,7 @@ impl Widget for TreeNav {
 
         // Status bar at bottom
         let status_text = format!(
-            "{} items | Total: {} | arrows: navigate, Enter: expand, Backspace: up",
+            "{} items | Total: {} | ↑↓: nav | Enter: expand | Backspace: up | t: theme | ?: help | q: quit",
             self.item_count(),
             self.fs.total_items()
         );
