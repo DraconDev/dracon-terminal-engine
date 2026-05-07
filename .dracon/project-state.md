@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved keyboard navigation and help text consistency across demo applications
+Updated chat client UI with improved status bar help text
 
 ## Context
-The changes standardize keyboard navigation hints and help text across different demo applications to provide a more consistent user experience.
+The chat client's status bar was updated to provide clearer keyboard shortcut information to users
 
 ## Completed
-- [x] Updated keyboard navigation hints in TreeNavigator with more detailed controls
-- [x] Standardized help text format in WidgetGallery with consistent key mappings
-- [x] Enhanced status bar in SettingsForm with comprehensive keyboard shortcuts
+- [x] Updated status bar text from "Press Enter to send" to "t: theme | ?: help | q: quit"
+- [x] Cargo.lock updated to reflect dependency changes
 
 ## In Progress
-- [x] Consistent help text implementation across demo applications
+- [x] UI text consistency improvements
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify consistency across all demo applications
-2. Consider adding a help overlay system for unified documentation
+1. Verify status bar text is visible and readable
+2. Test keyboard shortcut functionality

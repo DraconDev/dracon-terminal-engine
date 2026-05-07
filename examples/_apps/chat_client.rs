@@ -551,7 +551,7 @@ fn render_chat(chat: &ChatState, area: Rect) -> Plane {
         }
     }
 
-    for (i, c) in "Press Enter to send".chars().enumerate() {
+    for (i, c) in "t: theme | ?: help | q: quit".chars().enumerate() {
         let idx = status_base + 30 + i;
         if idx < plane.cells.len() {
             plane.cells[idx].char = c;
