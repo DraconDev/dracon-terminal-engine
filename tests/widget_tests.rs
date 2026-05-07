@@ -1203,12 +1203,12 @@ fn test_hud_with_size() {
 #[test]
 fn test_hud_render_text() {
     let hud = Hud::new(10);
-    let plane = hud.render_text(0, 0, "HUD", Color::White, Color::Black);
+    let plane = hud.render_text(0, 0, "HUD", Color::Ansi(15), Color::Ansi(0));
     assert_eq!(plane.width, 30); // default width
     assert_eq!(plane.height, 10); // default height
     assert_eq!(plane.cells[0].char, 'H');
-    assert_eq!(plane.cells[0].fg, Color::White);
-    assert_eq!(plane.cells[0].bg, Color::Black);
+    assert_eq!(plane.cells[0].fg, Color::Ansi(15));
+    assert_eq!(plane.cells[0].bg, Color::Ansi(0));
 }
 
 #[test]
