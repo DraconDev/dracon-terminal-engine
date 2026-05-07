@@ -160,7 +160,6 @@ fn test_all_20_themes_no_panic() {
         let _ = list.render(Rect::new(0, 0, 20, 3));
     }
 }
-}
 
 #[test]
 fn test_select_no_black_background() {
