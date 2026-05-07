@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Refactored and focused hit zone system tests to edge cases in ScopedZoneRegistry
 
 ## Context
-This change updates the dependency lockfile to ensure consistent background color handling across the project, likely in preparation for a feature or bug fix related to UI theming.
+The hit zone test suite was previously comprehensive but overly broad. This change narrows focus to critical edge cases in the ScopedZoneRegistry implementation, which handles nested hit zones and scope management.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Removed 403 lines of general hit zone tests
+- [x] Kept only 98 lines of focused ScopedZoneRegistry edge case tests
+- [x] Updated module documentation to reflect new test scope
 
 ## In Progress
-- [x] Dependency resolution for consistent background color implementation
+- [ ] No active work in progress
 
 ## Blockers
-- None reported
+- None identified
 
 ## Next Steps
-1. Verify that the background color implementation works as expected
-2. Ensure all related UI components properly reflect the updated background color
+1. Implement additional edge case tests for ScopedZoneRegistry
+2. Add integration tests for nested hit zone scenarios
