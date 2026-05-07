@@ -39,6 +39,29 @@ impl WidgetGalleryMock {
             search: SearchInput::new(WidgetId::new(16)),
             progress: ProgressBar::new(WidgetId::new(17)),
             button: Button::with_id(WidgetId::new(18), "Click Me!"),
+            selected: 0,
+        }
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press { return false; }
+        match key.code {
+            KeyCode::Right | KeyCode::Down => {
+                self.selected = (self.selected + 1) % 9;
+                true
+            }
+            KeyCode::Left | KeyCode::Up => {
+                self.selected = if self.selected == 0 { 8 } else { self.selected - 1 };
+                true
+            }
+            KeyCode::Enter | KeyCode::Char(' ') => {
+                // Toggle checkbox for slot 0
+                if self.selected == 0 {
+                    self.checkbox.toggle();
+                }
+                true
+            }
+            _ => false,
         }
     }
 
