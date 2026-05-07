@@ -290,7 +290,7 @@ fn test_adapter_typing_scenario() {
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 40, 10));
 
-    // Type first character — cursor_col stays at 0 after insert (known editor bug)
+    // Type first character — cursor advances to position 1
     let key = KeyEvent {
         kind: KeyEventKind::Press,
         code: KeyCode::Char('x'),
@@ -298,9 +298,9 @@ fn test_adapter_typing_scenario() {
     };
     adapter.handle_key(key);
     assert_eq!(adapter.editor().lines[0], "x");
-    assert_eq!(adapter.editor().cursor_col, 0); // cursor does NOT advance (known bug)
+    assert_eq!(adapter.editor().cursor_col, 1);
 
-    // Type second character — also inserts at position 0 (overwrites 'x' which shifts right)
+    // Type second character — cursor advances to position 2
     let key2 = KeyEvent {
         kind: KeyEventKind::Press,
         code: KeyCode::Char('y'),
@@ -308,6 +308,7 @@ fn test_adapter_typing_scenario() {
     };
     adapter.handle_key(key2);
 
-    // Result: 'y' at position 0, 'x' shifted to position 1
-    assert_eq!(adapter.editor().lines[0], "yx");
+    // Result: "xy" with cursor at position 2
+    assert_eq!(adapter.editor().lines[0], "xy");
+    assert_eq!(adapter.editor().cursor_col, 2);
 }

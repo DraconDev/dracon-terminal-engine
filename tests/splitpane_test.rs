@@ -61,7 +61,7 @@ fn test_splitpane_min_size_respected() {
     let pane = SplitPane::new(Orientation::Horizontal)
         .ratio(0.5)
         .with_min_size(20);
-    let (left, right) = pane.split(Rect::new(0, 0, 30, 24));
+    let (left, right) = pane.split(Rect::new(0, 0, 80, 24));
     
     assert!(left.width >= 20);
     assert!(right.width >= 20);

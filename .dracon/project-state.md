@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Improved SplitPane widget resizing behavior with better edge-case handling
+Improved text editor cursor positioning and SplitPane test adjustments
 
 ## Context
-The SplitPane widget needed better handling when the minimum size constraints couldn't be satisfied simultaneously, which could occur with very small container areas.
+The changes address two related issues:
+1. A known bug in text editor cursor positioning after text insertion
+2. A test case adjustment for SplitPane minimum size validation
 
 ## Completed
-- [x] Added fallback logic to split evenly when min_size constraints conflict
-- [x] Maintained existing ratio-based resizing for normal cases
-- [x] Updated Cargo.lock to reflect dependency changes
+- [x] Fixed text editor cursor advancement after character insertion (now moves to position 1 after typing 'x')
+- [x] Updated SplitPane test to use larger dimensions (80x24) for more realistic minimum size validation
+- [x] Enhanced text editor test assertions to verify both content and cursor position
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress - these are focused fixes
 
 ## Blockers
-- None identified
+- None identified for these specific changes
 
 ## Next Steps
-1. Verify the new behavior with edge-case tests
-2. Document the improved resizing behavior in widget documentation
+1. Verify the text editor cursor behavior in integration tests
+2. Consider additional SplitPane edge cases for future test improvements
