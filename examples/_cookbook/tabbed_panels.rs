@@ -547,10 +547,13 @@ impl Widget for TabbedApp {
         }
 
         match self.active_tab() {
-            TAB_LOGS => self
-                .logs
-                .list
-                .handle_mouse(kind, col, row - tabbar_height - 1),
+            TAB_LOGS => {
+                if row >= tabbar_height + 1 {
+                    self.logs.list.handle_mouse(kind, col, row - tabbar_height - 1)
+                } else {
+                    false
+                }
+            }
             TAB_SETTINGS => {
                 if row == tabbar_height + 2 && (20..40).contains(&col) {
                     self.settings
