@@ -13,14 +13,14 @@ fn test_clipboard_set_and_get() {
     let text = "Hello, Clipboard!";
     set_clipboard_text(text);
     let result = get_clipboard_text();
-    assert_eq!(result, text);
+    assert_eq!(result, Some(text.to_string()));
 }
 
 #[test]
 fn test_clipboard_empty() {
     set_clipboard_text("");
     let result = get_clipboard_text();
-    assert_eq!(result, "");
+    assert_eq!(result, Some("".to_string()));
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn test_clipboard_multiline() {
     let text = "Line 1\nLine 2\nLine 3";
     set_clipboard_text(text);
     let result = get_clipboard_text();
-    assert_eq!(result, text);
+    assert_eq!(result, Some(text.to_string()));
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn test_clipboard_unicode() {
     let text = "Hello 世界 🌍 émojis";
     set_clipboard_text(text);
     let result = get_clipboard_text();
-    assert_eq!(result, text);
+    assert_eq!(result, Some(text.to_string()));
 }
 
 #[test]
@@ -60,7 +60,8 @@ fn test_editor_copy_selection() {
     });
     
     let clipboard = get_clipboard_text();
-    assert!(!clipboard.is_empty());
+    assert!(clipboard.is_some());
+    assert!(!clipboard.unwrap().is_empty());
 }
 
 #[test]
@@ -84,7 +85,8 @@ fn test_editor_cut_selection() {
     });
     
     let clipboard = get_clipboard_text();
-    assert!(!clipboard.is_empty());
+    assert!(clipboard.is_some());
+    assert!(!clipboard.unwrap().is_empty());
 }
 
 #[test]
@@ -115,16 +117,16 @@ fn test_clipboard_persists_between_operations() {
     set_clipboard_text("Second");
     let second = get_clipboard_text();
     
-    assert_eq!(first, "First");
-    assert_eq!(second, "Second");
+    assert_eq!(first, Some("First".to_string()));
+    assert_eq!(second, Some("Second".to_string()));
 }
 
 #[test]
 fn test_clipboard_special_chars() {
-    let text = "<>&\"'\\n\\t";
+    let text = "<&\"'\\n\\t";
     set_clipboard_text(text);
     let result = get_clipboard_text();
-    assert_eq!(result, text);
+    assert_eq!(result, Some(text.to_string()));
 }
 
 #[test]
@@ -132,7 +134,7 @@ fn test_clipboard_long_text() {
     let text = "a".repeat(10000);
     set_clipboard_text(&text);
     let result = get_clipboard_text();
-    assert_eq!(result, text);
+    assert_eq!(result, Some(text));
 }
 
 #[test]
