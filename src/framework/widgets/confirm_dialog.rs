@@ -436,6 +436,17 @@ impl Widget for ConfirmDialog {
         self.bound_command.iter().cloned().collect()
     }
 
+    fn on_focus(&mut self) {
+        self.focused = true;
+        self.confirm_focused = true;
+        self.dirty = true;
+    }
+
+    fn on_blur(&mut self) {
+        self.focused = false;
+        self.dirty = true;
+    }
+
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
     }
