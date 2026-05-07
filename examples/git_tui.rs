@@ -603,7 +603,7 @@ impl Widget for GitTui {
                     }
                 }
                 GitView::Log => {
-                    let item_row = (row - content_y) as usize;
+                    let item_row = row.saturating_sub(content_y) as usize;
                     if item_row > 0 && item_row - 1 < self.commits.len() {
                         self.selected_commit = item_row - 1;
                         self.dirty = true;

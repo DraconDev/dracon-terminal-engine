@@ -4,18 +4,18 @@
 Improved bounds checking in GitTui file selection logic
 
 ## Context
-The change addresses potential integer underflow in file selection calculations when `row` is less than `content_y`. This prevents incorrect negative indices when calculating file positions in the UI.
+The change addresses potential integer overflow in commit selection calculation by replacing direct subtraction with saturating arithmetic.
 
 ## Completed
-- [x] Replaced subtraction with `saturating_sub` to prevent negative indices
-- [x] Maintained same functionality for valid cases
+- [x] Replaced `row - content_y` with `row.saturating_sub(content_y)` to prevent underflow
+- [x] Maintained same functionality while adding safety
 
 ## In Progress
-- [x] Testing edge cases where `row` is less than `content_y`
+- [x] Verification of edge cases in commit selection
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify no visual regression in file selection UI
-2. Add unit tests for edge cases
+1. Verify no regression in commit selection behavior
+2. Consider similar safety improvements in other widget interactions
