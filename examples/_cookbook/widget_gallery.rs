@@ -311,7 +311,7 @@ impl Widget for WidgetGallery {
                 self.show_help = true;
                 true
             }
-            KeyCode::Char('\t') | KeyCode::Char('t') => {
+            KeyCode::Tab | KeyCode::Char('t') => {
                 self.cycle_theme();
                 true
             }
