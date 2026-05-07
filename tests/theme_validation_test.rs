@@ -5,7 +5,7 @@ use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, Label, List, ProgressBar, Radio, SearchInput, Select, Slider, Spinner,
+    Button, Checkbox, Column, Label, List, ProgressBar, Radio, SearchInput, Select, Slider, Spinner,
     Table, Toggle,
 };
 use ratatui::layout::Rect;
