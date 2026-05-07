@@ -44,7 +44,6 @@ struct LogMonitor {
     filter_error: bool,
     filter_debug: bool,
     theme: Theme,
-    theme_index: usize,
     all_logs: Vec<String>,
     show_help: bool,
 }
@@ -64,7 +63,6 @@ impl LogMonitor {
             filter_error: true,
             filter_debug: true,
             theme: Theme::nord(),
-            theme_index: 0,
             all_logs: Vec::new(),
             show_help: false,
         }
