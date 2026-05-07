@@ -4,19 +4,19 @@
 Added in-memory clipboard fallback for headless/test environments
 
 ## Context
-This change addresses the need for clipboard functionality in environments where system clipboard access isn't available (like headless testing or CI pipelines). The existing clipboard tests were failing due to missing fallback behavior.
+The application previously relied solely on external clipboard tools (wl-copy, xclip, etc.), which fail in headless environments. This change adds a fallback mechanism to store clipboard data in memory for testing and headless scenarios.
 
 ## Completed
-- [x] Added static `CLIPBOARD` OnceLock for thread-safe in-memory clipboard storage
-- [x] Implemented `get_clipboard_store()` helper function for consistent access
-- [x] Prepared infrastructure for clipboard integration in text editor functionality
+- [x] Added in-memory storage for clipboard text
+- [x] Updated clipboard set/get functions to use fallback when external tools fail
+- [x] Updated documentation to reflect the new fallback mechanism
 
 ## In Progress
-- [ ] Implementation of actual clipboard operations (copy/paste) using the new store
+- [x] Comprehensive clipboard integration tests
 
 ## Blockers
-- Need to implement the actual clipboard operations that will use this storage
+- None identified
 
 ## Next Steps
-1. Implement clipboard operations (copy/paste) using the new storage
-2. Update clipboard tests to verify the new functionality
+1. Verify fallback behavior in CI/CD pipelines
+2. Document the new fallback mechanism in user guides

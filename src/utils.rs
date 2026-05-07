@@ -1064,7 +1064,7 @@ pub fn check_file_suitability(path: &std::path::Path, max_bytes: u64) -> (bool, 
     (false, false, 0)
 }
 
-/// Sets clipboard text via OSC 52, wl-copy, xclip, or pbcopy (in that order).
+/// Sets clipboard text via OSC 52, wl-copy, xclip, pbcopy, or in-memory fallback.
 pub fn set_clipboard_text(text: &str) {
     // 1. Try OSC 52 (Internal via stdout)
     {
@@ -1075,7 +1075,7 @@ pub fn set_clipboard_text(text: &str) {
     }
 
     // 2. Try Local Tools (for desktop environments)
-    let _ = std::process::Command::new("wl-copy")
+    let tool_result = std::process::Command::new("wl-copy")
         .arg(text)
         .spawn()
         .or_else(|_| {
@@ -1104,9 +1104,16 @@ pub fn set_clipboard_text(text: &str) {
                     child
                 })
         });
+
+    // 3. Fallback to in-memory store (for headless / test environments)
+    if tool_result.is_err() {
+        if let Ok(mut store) = get_clipboard_store().lock() {
+            *store = text.to_string();
+        }
+    }
 }
 
-/// Gets clipboard text via wl-paste, xclip, or pbpaste.
+/// Gets clipboard text via wl-paste, xclip, pbpaste, or in-memory fallback.
 pub fn get_clipboard_text() -> Option<String> {
     std::process::Command::new("wl-paste")
         .output()
@@ -1120,6 +1127,14 @@ pub fn get_clipboard_text() -> Option<String> {
         .or_else(|_| std::process::Command::new("pbpaste").output())
         .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
         .ok()
+        .or_else(|| {
+            // Fallback to in-memory store (for headless / test environments)
+            get_clipboard_store()
+                .lock()
+                .ok()
+                .map(|store| store.clone())
+                .filter(|s| !s.is_empty())
+        })
 }
 
 /// Gets the primary X11/Wayland selection text (for middle-click paste).
