@@ -1,20 +1,24 @@
 # Project State
 
 ## Current Focus
-Added focus tracking for ConfirmDialog buttons to improve keyboard navigation.
+Added keyboard navigation support for the ConfirmDialog widget
 
 ## Context
-This change enables proper keyboard navigation between the Confirm and Cancel buttons in the ConfirmDialog widget, improving accessibility and user experience.
+This change implements keyboard navigation for the ConfirmDialog widget, allowing users to interact with the dialog using Tab, arrow keys, Enter, and Escape. This improves accessibility and usability for keyboard-only users.
 
 ## Completed
 - [x] Added `confirm_focused` field to track which button has focus
+- [x] Implemented Tab key to switch between buttons
+- [x] Implemented arrow keys to switch between buttons
+- [x] Implemented Enter/Space to confirm/cancel based on focus
+- [x] Implemented Escape to cancel the dialog
 
 ## In Progress
-- [x] Implementation of focus management logic (not yet shown in this diff)
+- [x] Keyboard navigation support for ConfirmDialog
 
 ## Blockers
-- Implementation of focus management logic needs to be completed
+- None identified
 
 ## Next Steps
-1. Implement focus management logic for keyboard navigation
-2. Add tests for the new focus behavior
+1. Add visual indicators for focused buttons
+2. Write integration tests for keyboard navigation

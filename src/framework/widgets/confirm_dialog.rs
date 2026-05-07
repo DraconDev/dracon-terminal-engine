@@ -57,6 +57,7 @@ impl ConfirmDialog {
             danger: false,
             theme: Theme::default(),
             focused: false,
+            confirm_focused: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 7)),
             dirty: true,
             bound_command: None,
@@ -74,6 +75,7 @@ impl ConfirmDialog {
             danger: false,
             theme: Theme::default(),
             focused: false,
+            confirm_focused: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 7)),
             dirty: true,
             bound_command: None,
@@ -350,6 +352,42 @@ impl Widget for ConfirmDialog {
         }
 
         plane
+    }
+
+    fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
+        use crate::input::event::{KeyCode, KeyEventKind};
+
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+
+        match key.code {
+            KeyCode::Tab => {
+                self.confirm_focused = !self.confirm_focused;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Left | KeyCode::Right => {
+                self.confirm_focused = !self.confirm_focused;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Enter | KeyCode::Char(' ') => {
+                if self.confirm_focused {
+                    self.result = Some(ConfirmResult::Confirmed);
+                } else {
+                    self.result = Some(ConfirmResult::Cancelled);
+                }
+                self.dirty = true;
+                true
+            }
+            KeyCode::Esc => {
+                self.result = Some(ConfirmResult::Cancelled);
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
     }
 
     fn handle_mouse(
