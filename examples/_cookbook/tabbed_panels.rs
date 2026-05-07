@@ -561,10 +561,12 @@ impl Widget for TabbedApp {
                         .handle_mouse(kind, col - 20, row - tabbar_height - 1)
                 } else if row == tabbar_height + 4 && (20..45).contains(&col) {
                     self.settings.volume_slider.handle_mouse(kind, col - 20, 0)
-                } else {
+                } else if row >= tabbar_height + 1 {
                     self.settings
                         .notifications
                         .handle_mouse(kind, col, row - tabbar_height - 1)
+                } else {
+                    false
                 }
             }
             _ => false,
