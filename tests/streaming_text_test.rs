@@ -72,8 +72,8 @@ fn test_streaming_text_append_output_scalar() {
 fn test_streaming_text_append_output_lines() {
     let mut st = StreamingText::new();
     let log_lines = vec![
-        dracon_terminal_engine::framework::command::LogLine { text: "Line 1".to_string() },
-        dracon_terminal_engine::framework::command::LogLine { text: "Line 2".to_string() },
+        dracon_terminal_engine::framework::widgets::LogLine { text: "Line 1".to_string() },
+        dracon_terminal_engine::framework::widgets::LogLine { text: "Line 2".to_string() },
     ];
     st.append_output(ParsedOutput::Lines(log_lines));
     assert_eq!(st.lines.len(), 2);
