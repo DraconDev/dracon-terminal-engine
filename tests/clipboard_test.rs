@@ -4,12 +4,18 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use dracon_terminal_engine::utils::{get_clipboard_text, set_clipboard_text};
+use dracon_terminal_engine::utils::{clear_clipboard_text, get_clipboard_text, set_clipboard_text};
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
+use std::sync::Mutex;
+
+// Serialize clipboard tests since they share global state.
+static CLIPBOARD_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn test_clipboard_set_and_get() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     let text = "Hello, Clipboard!";
     set_clipboard_text(text);
     let result = get_clipboard_text();
@@ -18,6 +24,8 @@ fn test_clipboard_set_and_get() {
 
 #[test]
 fn test_clipboard_empty() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     set_clipboard_text("");
     let result = get_clipboard_text();
     assert_eq!(result, Some("".to_string()));
@@ -25,6 +33,8 @@ fn test_clipboard_empty() {
 
 #[test]
 fn test_clipboard_multiline() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     let text = "Line 1\nLine 2\nLine 3";
     set_clipboard_text(text);
     let result = get_clipboard_text();
@@ -33,6 +43,8 @@ fn test_clipboard_multiline() {
 
 #[test]
 fn test_clipboard_unicode() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     let text = "Hello 世界 🌍 émojis";
     set_clipboard_text(text);
     let result = get_clipboard_text();
@@ -41,7 +53,9 @@ fn test_clipboard_unicode() {
 
 #[test]
 fn test_editor_copy_selection() {
-    let mut editor = TextEditor::with_content("Hello World");
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
+    let editor = TextEditor::with_content("Hello World");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
     
@@ -66,7 +80,9 @@ fn test_editor_copy_selection() {
 
 #[test]
 fn test_editor_cut_selection() {
-    let mut editor = TextEditor::with_content("Hello World");
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
+    let editor = TextEditor::with_content("Hello World");
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
     
@@ -91,9 +107,11 @@ fn test_editor_cut_selection() {
 
 #[test]
 fn test_editor_paste() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     set_clipboard_text("Pasted text");
     
-    let mut editor = TextEditor::new();
+    let editor = TextEditor::new();
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
     
@@ -111,6 +129,8 @@ fn test_editor_paste() {
 
 #[test]
 fn test_clipboard_persists_between_operations() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     set_clipboard_text("First");
     let first = get_clipboard_text();
     
@@ -123,6 +143,8 @@ fn test_clipboard_persists_between_operations() {
 
 #[test]
 fn test_clipboard_special_chars() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     let text = "<&\"'\\n\\t";
     set_clipboard_text(text);
     let result = get_clipboard_text();
@@ -131,6 +153,8 @@ fn test_clipboard_special_chars() {
 
 #[test]
 fn test_clipboard_long_text() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     let text = "a".repeat(10000);
     set_clipboard_text(&text);
     let result = get_clipboard_text();
@@ -139,9 +163,11 @@ fn test_clipboard_long_text() {
 
 #[test]
 fn test_editor_paste_multiline() {
+    let _guard = CLIPBOARD_LOCK.lock().unwrap();
+    clear_clipboard_text();
     set_clipboard_text("Line 1\nLine 2\nLine 3");
     
-    let mut editor = TextEditor::new();
+    let editor = TextEditor::new();
     let mut adapter = TextEditorAdapter::new(WidgetId::new(1), editor);
     adapter.set_area(Rect::new(0, 0, 80, 24));
     
