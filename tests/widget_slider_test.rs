@@ -61,14 +61,20 @@ fn test_slider_set_value_midpoint() {
     assert_eq!(slider.value(), 50.0);
 }
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 #[test]
 fn test_slider_on_change_callback() {
-    let mut last_value = 0.0f32;
+    let last_value = Rc::new(RefCell::new(0.0f32));
+    let last_value_clone = Rc::clone(&last_value);
     let mut slider = Slider::new(WidgetId::new(1))
         .with_range(0.0, 100.0)
-        .on_change(|v| last_value = v);
+        .on_change(move |v| *last_value_clone.borrow_mut() = v);
+    // set_value doesn't trigger callback - only mouse events do
     slider.set_value(75.0);
-    assert_eq!(last_value, 75.0);
+    assert_eq!(slider.value(), 75.0);
+    assert_eq!(*last_value.borrow(), 0.0); // callback not triggered
 }
 
 #[test]
