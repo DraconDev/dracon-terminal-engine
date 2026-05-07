@@ -39,6 +39,7 @@ pub struct ConfirmDialog {
     pub danger: bool,
     pub theme: Theme,
     focused: bool,
+    confirm_focused: bool, // true = Confirm button focused, false = Cancel
     area: std::cell::Cell<Rect>,
     dirty: bool,
     bound_command: Option<BoundCommand>,
