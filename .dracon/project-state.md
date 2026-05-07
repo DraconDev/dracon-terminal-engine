@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Updated theme count in documentation and examples to reflect the addition of 5 new themes.
 
 ## Context
-This change was prompted by recent work on widget testing frameworks that require consistent ANSI color handling across components. The background color implementation needed to be standardized to ensure visual consistency in test outputs.
+The project recently added 5 new built-in themes to the framework, but the documentation and examples were not updated to reflect this change. This commit ensures all references to the theme count are consistent.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color dependencies
+- [x] Updated theme count from 15 to 20 in README.md
+- [x] Updated all examples that reference the theme count
 
 ## In Progress
-- [x] Ongoing work on widget testing framework color handling
+- [x] No active work in progress for this change
 
 ## Blockers
-- None identified at this time
+- None
 
 ## Next Steps
-1. Verify test outputs show consistent background colors
-2. Complete remaining widget testing framework implementation
-```
+1. Verify all examples and documentation now correctly reference 20 themes
+2. Consider adding a changelog entry for this documentation update

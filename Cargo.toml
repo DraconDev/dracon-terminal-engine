@@ -1,11 +1,11 @@
 [package]
 name = "dracon-terminal-engine"
-version = "28.501.22"
+version = "28.501.23"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
 readme = "README.md"
-description = "A terminal application framework for Rust — App, widgets, compositor, themes, and 15 built-in themes"
+description = "A terminal application framework for Rust — App, widgets, compositor, themes, and 20 built-in themes"
 repository = "https://github.com/DraconDev/dracon-terminal-engine"
 homepage = "https://github.com/DraconDev/dracon-terminal-engine"
 documentation = "https://docs.rs/dracon-terminal-engine"

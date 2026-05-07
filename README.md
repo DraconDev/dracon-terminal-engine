@@ -18,7 +18,7 @@
 
 ## What It Is
 
-`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 35 built-in widgets, 15 themes, dirty rendering, and focus management.
+`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 35 built-in widgets, 20 themes, dirty rendering, and focus management.
 
 **Command-driven architecture** — every widget binds a CLI command, AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`.
 
@@ -111,9 +111,9 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`DirtyRegionTracker`] | Efficient partial screen updates |
 | [`AnimationManager`] | Tweening animations with easing curves |
 | [`Layout`] | Constraint-based layout engine (percentage, fixed, min, max, ratio) |
-| [`Theme`] | 15 built-in themes |
+| [`Theme`] | 20 built-in themes |
 
-### 15 Built-in Themes
+### 20 Built-in Themes
 `dark` · `light` · `cyberpunk` · `dracula` · `nord` · `catppuccin_mocha` · `gruvbox_dark` · `tokyo_night` · `solarized_dark` · `solarized_light` · `one_dark` · `rose_pine` · `kanagawa` · `everforest` · `monokai`
 
 ---
@@ -207,7 +207,7 @@ cargo run --example dashboard_builder  # All 5 command widgets in grid layout wi
 
 ```bash
 cargo run --example form_demo          # Settings form with validation and Tab-cycling
-cargo run --example theme_switcher     # Live theme cycling through all 15 themes
+cargo run --example theme_switcher     # Live theme cycling through all 20 themes
 cargo run --example modal_demo         # ConfirmDialog + help overlay with keyboard shortcuts
 cargo run --example widget_tutorial    # Build a custom ColorPicker widget from scratch
 cargo run --example framework_demo     # App + List + Breadcrumbs + SplitPane + Hud
