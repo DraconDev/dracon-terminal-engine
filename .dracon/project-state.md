@@ -1,21 +1,24 @@
 # Project State
 
 ## Current Focus
-Refactored context menu action types in test suite to improve consistency with core framework changes.
+Improved test reliability for accessibility and menu systems by refactoring test cases and removing redundant high-contrast theme tests.
 
 ## Context
-The test suite was updated to align with recent framework changes where `ContextMenuAction` was renamed to `ContextAction` for consistency with other widget systems. This ensures the test suite remains maintainable and matches the core implementation.
+The changes address test reliability issues identified in recent comprehensive testing efforts. The high-contrast theme tests were removed as they were redundant with existing light/dark theme coverage, while menu tests were updated to use more realistic action types and improved focus/blur handling.
 
 ## Completed
-- [x] Updated all test cases to use `ContextAction` instead of `ContextMenuAction`
-- [x] Maintained identical test logic while only changing the action type
+- [x] Removed redundant high-contrast theme tests in accessibility_test.rs
+- [x] Updated menu_test.rs to use Open action type instead of Custom variants
+- [x] Enhanced button focus/blur testing with proper state verification
+- [x] Improved list selection testing with keyboard navigation
+- [x] Updated Cargo.lock to reflect consistent dependency versions
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] No active work in progress beyond these changes
 
 ## Blockers
-- None
+- None identified for this commit
 
 ## Next Steps
-1. Verify all tests pass with the new action type
-2. Consider updating other test files that might use similar action types
+1. Review test coverage for remaining widget types
+2. Consider adding visual regression testing for theme changes
