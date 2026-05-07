@@ -339,6 +339,58 @@ fn test_spinner_clear_dirty() {
 }
 
 #[test]
+fn test_spinner_tick_advances_frame() {
+    use std::time::Duration;
+    use std::thread::sleep;
+
+    let mut spinner = Spinner::new(WidgetId::default_id());
+    assert_eq!(spinner.current_frame(), '|');
+
+    sleep(Duration::from_millis(150));
+    spinner.tick();
+    assert_eq!(spinner.current_frame(), '/');
+
+    sleep(Duration::from_millis(150));
+    spinner.tick();
+    assert_eq!(spinner.current_frame(), '-');
+}
+
+#[test]
+fn test_spinner_tick_no_advance_before_100ms() {
+    let mut spinner = Spinner::new(WidgetId::default_id());
+    assert_eq!(spinner.current_frame(), '|');
+    spinner.tick(); // < 100ms since creation, should not advance
+    assert_eq!(spinner.current_frame(), '|');
+}
+
+#[test]
+fn test_spinner_with_frames() {
+    let spinner = Spinner::new(WidgetId::default_id()).with_frames(vec!['◐', '◓', '◑', '◒']);
+    assert_eq!(spinner.current_frame(), '◐');
+
+    let spinner = Spinner::new(WidgetId::default_id()).with_frames(vec![]);
+    assert_eq!(spinner.current_frame(), '|'); // empty falls back to default
+}
+
+#[test]
+fn test_spinner_tick_cycles() {
+    use std::time::Duration;
+    use std::thread::sleep;
+
+    let mut spinner = Spinner::new(WidgetId::default_id());
+    // 4 default frames: | / - \
+    sleep(Duration::from_millis(150));
+    spinner.tick(); // -> /
+    sleep(Duration::from_millis(150));
+    spinner.tick(); // -> -
+    sleep(Duration::from_millis(150));
+    spinner.tick(); // -> \
+    sleep(Duration::from_millis(150));
+    spinner.tick(); // -> | (wraps)
+    assert_eq!(spinner.current_frame(), '|');
+}
+
+#[test]
 fn test_progress_bar_new() {
     let pb = ProgressBar::new(WidgetId::default_id());
     assert_eq!(pb.progress(), 0.0);
