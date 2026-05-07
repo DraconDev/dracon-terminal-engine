@@ -1184,6 +1184,45 @@ fn test_hud_show_hide() {
 }
 
 #[test]
+fn test_hud_new_with_id() {
+    let hud = Hud::new_with_id(WidgetId::new(42), 100);
+    assert!(hud.is_visible());
+    assert_eq!(hud.position(), (0, 0));
+}
+
+#[test]
+fn test_hud_with_size() {
+    let hud = Hud::new_with_id(WidgetId::new(1), 10).with_size(50, 20);
+    let area = Rect::new(0, 0, 50, 20);
+    let plane = hud.render(area);
+    assert_eq!(plane.width, 50);
+    assert_eq!(plane.height, 20);
+}
+
+#[test]
+fn test_hud_render_text() {
+    let hud = Hud::new(10);
+    let plane = hud.render_text(0, 0, "HUD", Color::White, Color::Black);
+    assert_eq!(plane.width, 30); // default width
+    assert_eq!(plane.height, 10); // default height
+    assert_eq!(plane.cells[0].char, 'H');
+    assert_eq!(plane.cells[0].fg, Color::White);
+    assert_eq!(plane.cells[0].bg, Color::Black);
+}
+
+#[test]
+fn test_hud_render_gauge() {
+    let hud = Hud::new(10).with_theme(Theme::cyberpunk());
+    let plane = hud.render_gauge(0, 0, "CPU:", 50.0, 100.0, 20);
+    assert_eq!(plane.width, 30);
+    assert_eq!(plane.height, 10);
+    assert_eq!(plane.cells[0].char, 'C');
+    assert_eq!(plane.cells[1].char, 'P');
+    assert_eq!(plane.cells[2].char, 'U');
+    assert_eq!(plane.cells[3].char, ':');
+}
+
+#[test]
 fn test_context_menu_new() {
     let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
     let area = Rect::new(0, 0, 20, 10);
