@@ -1133,7 +1133,6 @@ pub fn get_clipboard_text() -> Option<String> {
                 .lock()
                 .ok()
                 .map(|store| store.clone())
-                .filter(|s| !s.is_empty())
         })
 }
 
