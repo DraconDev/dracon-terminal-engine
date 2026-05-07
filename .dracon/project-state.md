@@ -1,26 +1,22 @@
 # Project State
 
 ## Current Focus
-Enhanced SplitPane widget with improved drag interaction handling
+Improved SplitPane widget resizing behavior with better edge-case handling
 
 ## Context
-The SplitPane widget needed better handling of mouse interactions for resizing panes. The previous implementation only handled drag events, but now we need to properly track the drag state and handle mouse down/up events to ensure smooth resizing behavior.
+The SplitPane widget needed better handling when the minimum size constraints couldn't be satisfied simultaneously, which could occur with very small container areas.
 
 ## Completed
-- [x] Added drag state tracking with `dragging` boolean flag
-- [x] Implemented mouse down event handling to initiate drag
-- [x] Added mouse up event handling to end drag
-- [x] Added bounds checking for divider area
-- [x] Added dirty flag to trigger UI updates
-- [x] Added zero-division protection for ratio calculations
+- [x] Added fallback logic to split evenly when min_size constraints conflict
+- [x] Maintained existing ratio-based resizing for normal cases
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [x] Complete implementation of all mouse interaction states
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify drag behavior with visual tests
-2. Add accessibility features for keyboard navigation
-3. Optimize performance for rapid drag operations
+1. Verify the new behavior with edge-case tests
+2. Document the improved resizing behavior in widget documentation

@@ -111,8 +111,13 @@ impl SplitPane {
         match self.orientation {
             Orientation::Horizontal => {
                 let max_w1 = area.width.saturating_sub(self.min_size);
-                let w1 = ((area.width as f32 * self.ratio).round() as u16)
-                    .clamp(self.min_size, max_w1);
+                let w1 = if self.min_size > max_w1 {
+                    // Cannot satisfy both min_size constraints; split evenly
+                    area.width / 2
+                } else {
+                    ((area.width as f32 * self.ratio).round() as u16)
+                        .clamp(self.min_size, max_w1)
+                };
                 let w2 = area.width.saturating_sub(w1);
                 (
                     Rect::new(area.x, area.y, w1, area.height),
@@ -121,8 +126,13 @@ impl SplitPane {
             }
             Orientation::Vertical => {
                 let max_h1 = area.height.saturating_sub(self.min_size);
-                let h1 = ((area.height as f32 * self.ratio).round() as u16)
-                    .clamp(self.min_size, max_h1);
+                let h1 = if self.min_size > max_h1 {
+                    // Cannot satisfy both min_size constraints; split evenly
+                    area.height / 2
+                } else {
+                    ((area.height as f32 * self.ratio).round() as u16)
+                        .clamp(self.min_size, max_h1)
+                };
                 let h2 = area.height.saturating_sub(h1);
                 (
                     Rect::new(area.x, area.y, area.width, h1),
