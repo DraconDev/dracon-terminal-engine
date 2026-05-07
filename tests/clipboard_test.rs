@@ -1,9 +1,8 @@
 //! Clipboard integration tests — cut/copy/paste across widgets.
 
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::TextEditorAdapter;
-use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use dracon_terminal_engine::utils::{clear_clipboard_text, get_clipboard_text, set_clipboard_text};
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
