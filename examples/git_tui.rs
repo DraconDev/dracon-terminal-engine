@@ -592,7 +592,7 @@ impl Widget for GitTui {
                     // Files start at content_y + header rows (status/untracked/modified headers)
                     // We approximate: each file group has 1 header row, items below
                     // For simplicity, map directly: file index = (row - content_y - 1) adjusted for headers
-                    let item_row = (row - content_y) as usize;
+                    let item_row = row.saturating_sub(content_y) as usize;
                     if item_row > 0 && item_row <= self.files.len() {
                         let idx = item_row - 1;
                         if idx < self.files.len() {

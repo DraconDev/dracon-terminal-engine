@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Improved bounds checking in GitTui file selection logic
 
 ## Context
-This change is part of a series of updates to maintain dependency consistency across the project, particularly in relation to visual styling and widget behavior.
+The change addresses potential integer underflow in file selection calculations when `row` is less than `content_y`. This prevents incorrect negative indices when calculating file positions in the UI.
 
 ## Completed
-- [x] Updated Cargo.lock to ensure consistent dependency versions for background color implementation
+- [x] Replaced subtraction with `saturating_sub` to prevent negative indices
+- [x] Maintained same functionality for valid cases
 
 ## In Progress
-- [x] Ongoing work on visual styling consistency across widgets
+- [x] Testing edge cases where `row` is less than `content_y`
 
 ## Blockers
-- No blockers identified for this specific Cargo.lock update
+- None identified
 
 ## Next Steps
-1. Continue implementing visual styling consistency across other widgets
-2. Verify that all widget implementations reflect the updated background color behavior
+1. Verify no visual regression in file selection UI
+2. Add unit tests for edge cases
