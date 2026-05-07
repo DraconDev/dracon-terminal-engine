@@ -1,21 +1,28 @@
 # Project State
 
 ## Current Focus
-Refined form widget theme change validation test to focus on critical first cell
+Refactored table sorting test suite to improve clarity and maintainability
 
 ## Context
-The previous test was overly broad by checking all cells for theme background consistency. This was unnecessary since form widgets only need to fill the first row with the theme background.
+The table sorting test suite was being refactored to:
+1. Remove redundant test setup code
+2. Standardize naming conventions
+3. Simplify test assertions
+4. Improve test organization
 
 ## Completed
-- [x] Reduced test scope to verify only the first cell's background color
-- [x] Simplified assertion logic to focus on critical validation point
+- [x] Renamed `set_sort_column` to `set_sort` for consistency
+- [x] Simplified test data structure by removing tuple-based items
+- [x] Removed redundant theme validation assertions
+- [x] Standardized test naming (e.g., "items" → "rows")
+- [x] Reduced test complexity by removing unnecessary intermediate steps
 
 ## In Progress
-- [x] Test refinement for form widget theme handling
+- [ ] No active work in progress
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify test coverage for edge cases in form widget rendering
-2. Consider adding tests for multi-row form behavior if needed
+1. Review refactored tests for completeness
+2. Update related documentation if needed
