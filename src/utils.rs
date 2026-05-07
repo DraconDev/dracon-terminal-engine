@@ -436,6 +436,13 @@ use syntect::util::LinesWithEndings;
 static SYNTAX_SET: OnceLock<SyntaxSet> = OnceLock::new();
 static THEME_SET: OnceLock<ThemeSet> = OnceLock::new();
 
+// In-memory clipboard fallback for headless/test environments.
+static CLIPBOARD: OnceLock<std::sync::Mutex<String>> = OnceLock::new();
+
+fn get_clipboard_store() -> &'static std::sync::Mutex<String> {
+    CLIPBOARD.get_or_init(|| std::sync::Mutex::new(String::new()))
+}
+
 /// Highlights code content using syntect and returns styled ratatui Lines.
 /// Supports syntax highlighting for 50+ languages with cyberpunk color tweaks.
 pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {

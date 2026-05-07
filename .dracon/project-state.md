@@ -1,21 +1,22 @@
 # Project State
 
 ## Current Focus
-Added public access to profiler metrics and updated tests to use the new accessor method.
+Added in-memory clipboard fallback for headless/test environments
 
 ## Context
-The profiler widget needed a way to expose its collected metrics to other parts of the application. The previous implementation exposed the metrics field directly, which could lead to unintended modifications. The change provides a controlled way to access the metrics while maintaining encapsulation.
+This change addresses the need for clipboard functionality in environments where system clipboard access isn't available (like headless testing or CI pipelines). The existing clipboard tests were failing due to missing fallback behavior.
 
 ## Completed
-- [x] Added `metrics()` method to Profiler to provide read-only access to metrics
-- [x] Updated all test assertions to use the new `metrics()` method instead of direct field access
+- [x] Added static `CLIPBOARD` OnceLock for thread-safe in-memory clipboard storage
+- [x] Implemented `get_clipboard_store()` helper function for consistent access
+- [x] Prepared infrastructure for clipboard integration in text editor functionality
 
 ## In Progress
-- [x] No active work in progress beyond the completed changes
+- [ ] Implementation of actual clipboard operations (copy/paste) using the new store
 
 ## Blockers
-- None identified for this change
+- Need to implement the actual clipboard operations that will use this storage
 
 ## Next Steps
-1. Verify the new accessor method doesn't introduce performance regressions
-2. Consider adding additional metric filtering capabilities if needed
+1. Implement clipboard operations (copy/paste) using the new storage
+2. Update clipboard tests to verify the new functionality
