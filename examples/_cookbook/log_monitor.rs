@@ -236,7 +236,7 @@ impl LogMonitor {
 fn format_time() -> String {
     let d = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap();
+        .unwrap_or_default();
     let (h, m, s) = (
         d.as_secs() / 3600 % 24,
         d.as_secs() / 60 % 60,

@@ -68,7 +68,7 @@ fn main() -> std::io::Result<()> {
         // Handle pending binary launch
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
-                Ok(p) => p.parent().unwrap().to_path_buf(),
+                Ok(p) => p.parent().map(|parent| parent.to_path_buf()).unwrap_or_default(),
                 Err(_) => return,
             };
             let binary_path = exe_dir.join(&binary_name);

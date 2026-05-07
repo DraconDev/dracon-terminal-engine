@@ -478,7 +478,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // 3. Taskbar (Bottom) with clock
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap();
+            .unwrap_or_default();
         let secs = now.as_secs() % 86400;
         let hours = secs / 3600;
         let mins = (secs % 3600) / 60;

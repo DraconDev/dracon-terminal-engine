@@ -324,7 +324,11 @@ impl SystemData {
             }
         }
         self.processes
-            .sort_by(|a, b| b.cpu_percent.partial_cmp(&a.cpu_percent).unwrap());
+            .sort_by(|a, b| {
+                b.cpu_percent
+                    .partial_cmp(&a.cpu_percent)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
         self.processes.truncate(20);
     }
 
