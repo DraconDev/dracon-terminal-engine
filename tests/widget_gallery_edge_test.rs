@@ -4,7 +4,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -206,7 +206,7 @@ fn test_widget_gallery_key_right_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
     
-    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 1);
 }
@@ -216,7 +216,7 @@ fn test_widget_gallery_key_left_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 5;
     
-    let key = KeyEvent::new(KeyCode::Left, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Left, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 4);
 }
@@ -226,7 +226,7 @@ fn test_widget_gallery_key_left_wraps() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
     
-    let key = KeyEvent::new(KeyCode::Left, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Left, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 8); // Wraps to last slot
 }
@@ -236,7 +236,7 @@ fn test_widget_gallery_key_right_wraps() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 8;
     
-    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 0); // Wraps to first slot
 }
@@ -246,7 +246,7 @@ fn test_widget_gallery_key_enter_toggles_checkbox() {
     let mut gallery = WidgetGalleryMock::new();
     assert!(!gallery.checkbox.is_checked());
     
-    let key = KeyEvent::new(KeyCode::Enter, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Enter, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert!(gallery.checkbox.is_checked());
 }
@@ -256,7 +256,7 @@ fn test_widget_gallery_key_release_ignored() {
     let mut gallery = WidgetGalleryMock::new();
     let original = gallery.selected;
     
-    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Release);
+    let key = KeyEvent { code: KeyCode::Right, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Release };
     assert!(!gallery.handle_key(key));
     assert_eq!(gallery.selected, original);
 }
@@ -266,7 +266,7 @@ fn test_widget_gallery_key_down_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     assert_eq!(gallery.selected, 0);
     
-    let key = KeyEvent::new(KeyCode::Down, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Down, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 1);
 }
@@ -276,7 +276,7 @@ fn test_widget_gallery_key_up_navigates() {
     let mut gallery = WidgetGalleryMock::new();
     gallery.selected = 3;
     
-    let key = KeyEvent::new(KeyCode::Up, KeyEventKind::Press);
+    let key = KeyEvent { code: KeyCode::Up, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press };
     assert!(gallery.handle_key(key));
     assert_eq!(gallery.selected, 2);
 }
