@@ -182,12 +182,16 @@ fn test_slider_handle_mouse_out_of_bounds_returns_false() {
 }
 
 #[test]
-fn test_slider_handle_key_not_implemented() {
+fn test_slider_handle_key_left_right() {
     let mut slider = Slider::new(WidgetId::default_id()).with_range(0.0, 100.0);
     assert_eq!(slider.value(), 50.0);
 
     let result = slider.handle_key(make_key(KeyCode::Left));
-    assert!(!result);
+    assert!(result);
+    assert_eq!(slider.value(), 45.0); // 5% step = 5.0
+
+    let result = slider.handle_key(make_key(KeyCode::Right));
+    assert!(result);
     assert_eq!(slider.value(), 50.0);
 }
 
