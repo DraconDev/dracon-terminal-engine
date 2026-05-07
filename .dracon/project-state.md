@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved bounds checking in GitTui file selection logic
+Improved bounds checking in GitTui branch selection logic
 
 ## Context
-The change addresses potential integer overflow in commit selection calculation by replacing direct subtraction with saturating arithmetic.
+The previous implementation could potentially underflow when calculating branch selection indices, leading to incorrect behavior when navigating branch lists.
 
 ## Completed
-- [x] Replaced `row - content_y` with `row.saturating_sub(content_y)` to prevent underflow
+- [x] Replaced direct subtraction with `saturating_sub` to prevent underflow
 - [x] Maintained same functionality while adding safety
 
 ## In Progress
-- [x] Verification of edge cases in commit selection
+- [ ] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify no regression in commit selection behavior
-2. Consider similar safety improvements in other widget interactions
+1. Verify no regression in branch selection behavior
+2. Consider adding more comprehensive bounds checking for other similar operations
