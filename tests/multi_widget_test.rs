@@ -484,16 +484,18 @@ struct LifecycleTracker {
     blurred: Rc<Cell<bool>>,
 }
 
+type LifecycleTrackerInit = (
+    LifecycleTracker,
+    Rc<Cell<bool>>,
+    Rc<Cell<bool>>,
+    Rc<Cell<bool>>,
+    Rc<Cell<bool>>,
+);
+
 impl LifecycleTracker {
     fn new(
         id: usize,
-    ) -> (
-        Self,
-        Rc<Cell<bool>>,
-        Rc<Cell<bool>>,
-        Rc<Cell<bool>>,
-        Rc<Cell<bool>>,
-    ) {
+    ) -> LifecycleTrackerInit {
         let mounted = Rc::new(Cell::new(false));
         let unmounted = Rc::new(Cell::new(false));
         let focused = Rc::new(Cell::new(false));
