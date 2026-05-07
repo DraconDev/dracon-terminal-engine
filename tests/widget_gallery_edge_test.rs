@@ -4,7 +4,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
 };
-use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -20,6 +20,7 @@ struct WidgetGalleryMock {
     search: SearchInput,
     progress: ProgressBar,
     button: Button,
+    selected: usize,
 }
 
 impl WidgetGalleryMock {
