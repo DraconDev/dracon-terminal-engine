@@ -149,3 +149,7 @@ path = "examples/sqlite_browser.rs"
 [features]
 default = []
 async = ["tokio"]
+
+[[bench]]
+name = "framework_benchmarks"
+harness = false
