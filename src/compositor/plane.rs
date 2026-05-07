@@ -92,7 +92,10 @@ pub struct Plane {
 
 impl Plane {
     /// Creates a new plane with the given id and dimensions.
+    /// Minimum dimensions are 1×1 to prevent division-by-zero in downstream code.
     pub fn new(id: usize, width: u16, height: u16) -> Self {
+        let width = width.max(1);
+        let height = height.max(1);
         Self {
             id,
             z_index: 0,
@@ -100,7 +103,7 @@ impl Plane {
             y: 0,
             width,
             height,
-            cells: vec![Cell::default(); (width * height) as usize],
+            cells: vec![Cell::default(); (width as usize * height as usize)],
             visible: true,
             opacity: 1.0,
             filter: None,

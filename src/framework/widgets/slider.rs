@@ -108,8 +108,12 @@ impl crate::framework::widget::Widget for Slider {
         let height = plane.height as usize;
 
         let track_width = width.saturating_sub(4);
-        let thumb_pos =
-            ((self.value - self.min) / (self.max - self.min) * track_width as f32).round() as usize;
+        let range = self.max - self.min;
+        let thumb_pos = if range == 0.0 {
+            0usize
+        } else {
+            ((self.value - self.min) / range * track_width as f32).round() as usize
+        };
         let thumb_pos = thumb_pos.min(track_width);
 
         let fill_char = '-';
