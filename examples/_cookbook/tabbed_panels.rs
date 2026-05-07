@@ -141,8 +141,6 @@ struct TabbedApp {
     theme: Theme,
 }
 
-const THEMES: [&str; 3] = ["cyberpunk", "dracula", "nord"];
-
 impl TabbedApp {
     fn new(should_quit: Arc<AtomicBool>) -> Self {
         let tabbar = TabBar::new_with_id(
