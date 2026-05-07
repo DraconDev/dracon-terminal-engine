@@ -114,7 +114,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`Theme`] | 20 built-in themes |
 
 ### 20 Built-in Themes
-`dark` · `light` · `cyberpunk` · `dracula` · `nord` · `catppuccin_mocha` · `gruvbox_dark` · `tokyo_night` · `solarized_dark` · `solarized_light` · `one_dark` · `rose_pine` · `kanagawa` · `everforest` · `monokai`
+`dark` · `light` · `cyberpunk` · `dracula` · `nord` · `catppuccin_mocha` · `gruvbox_dark` · `tokyo_night` · `solarized_dark` · `solarized_light` · `one_dark` · `rose_pine` · `kanagawa` · `everforest` · `monokai` · `warm` · `cool` · `forest` · `sunset` · `mono`
 
 ---
 
