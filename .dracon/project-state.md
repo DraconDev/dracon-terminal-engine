@@ -1,22 +1,24 @@
 # Project State
 
 ## Current Focus
-Improved text editor cursor positioning after text insertion
+Enhanced context menu functionality with visibility control and selection tracking
 
 ## Context
-The change addresses an issue where the cursor position wasn't being updated correctly after inserting text in the editor widget. This affects user experience during typing operations.
+The context menu widget needed improvements to better manage its visibility state and track user selections, which are essential for proper UI interaction handling.
 
 ## Completed
-- [x] Added cursor position adjustment after text insertion
-- [x] Removed debug logging from clipboard test
-- [x] Updated Cargo.lock for dependency consistency
+- [x] Added visibility state tracking with `visible` field
+- [x] Implemented `show()` and `hide()` methods to control menu visibility
+- [x] Added `is_visible()` method to check menu state
+- [x] Included selection tracking with `selected` field
+- [x] Initialized default values for new fields in constructors
 
 ## In Progress
-- [x] Cursor position handling during multi-cursor operations
+- [x] Basic visibility and selection management implemented
 
 ## Blockers
-- None identified in this change
+- No blockers identified for this implementation
 
 ## Next Steps
-1. Verify cursor behavior with multi-line insertions
-2. Test edge cases with special characters and Unicode text
+1. Implement keyboard navigation for menu items
+2. Add event handling for menu item selection

@@ -4,6 +4,7 @@ use crate::compositor::Plane;
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use crate::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
 /// An action type for context menu items.
@@ -37,6 +38,8 @@ pub struct ContextMenu {
     anchor_y: u16,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    selected: usize,
+    visible: bool,
 }
 
 impl ContextMenu {
@@ -51,6 +54,8 @@ impl ContextMenu {
             anchor_y: 0,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
             dirty: true,
+            selected: 0,
+            visible: true,
         }
     }
 
@@ -65,6 +70,8 @@ impl ContextMenu {
             anchor_y: 0,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 10)),
             dirty: true,
+            selected: 0,
+            visible: true,
         }
     }
 
@@ -87,6 +94,23 @@ impl ContextMenu {
         self.anchor_y = y;
         self.dirty = true;
         self
+    }
+
+    /// Returns whether the menu is currently visible.
+    pub fn is_visible(&self) -> bool {
+        self.visible
+    }
+
+    /// Shows the menu.
+    pub fn show(&mut self) {
+        self.visible = true;
+        self.dirty = true;
+    }
+
+    /// Hides the menu.
+    pub fn hide(&mut self) {
+        self.visible = false;
+        self.dirty = true;
     }
 }
 
