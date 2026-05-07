@@ -346,7 +346,8 @@ impl Widget for WidgetGallery {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         // Check if click is in a widget zone using ScopedZoneRegistry
-        if let Some(slot) = self.zones.borrow().dispatch(col, row) {
+        let zone_slot = self.zones.borrow().dispatch(col, row);
+        if let Some(slot) = zone_slot {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
                 self.selected = slot;
             }
