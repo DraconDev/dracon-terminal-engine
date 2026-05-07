@@ -186,6 +186,44 @@ fn test_event_logger_clear() {
 }
 
 #[test]
+fn test_event_logger_multiple_logs() {
+    let mut logger = EventLogger::new(WidgetId::new(12));
+    logger.log("12:00", "Event 1");
+    logger.log("12:01", "Event 2");
+    logger.log("12:02", "Event 3");
+    let plane = logger.render(dummy_area());
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_event_logger_max_events() {
+    let mut logger = EventLogger::new(WidgetId::new(12)).with_max_events(2);
+    logger.log("12:00", "Event 1");
+    logger.log("12:01", "Event 2");
+    logger.log("12:02", "Event 3");
+    let plane = logger.render(dummy_area());
+    assert!(plane.width > 0);
+    // With max_events=2, only last 2 should be kept
+    let has_event3 = plane.cells.iter().any(|c| c.char == '3');
+    assert!(
+        has_event3,
+        "rendered plane should contain latest event"
+    );
+}
+
+#[test]
+fn test_event_logger_content_in_render() {
+    let mut logger = EventLogger::new(WidgetId::new(12));
+    logger.log("12:00", "Test");
+    let plane = logger.render(dummy_area());
+    let has_content = plane.cells.iter().any(|c| c.char == 'T');
+    assert!(
+        has_content,
+        "rendered plane should contain event text"
+    );
+}
+
+#[test]
 fn test_profiler_render() {
     let mut profiler = Profiler::new(WidgetId::new(13));
     profiler.record("render", std::time::Duration::from_millis(16), 1);
