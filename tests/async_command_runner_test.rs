@@ -11,8 +11,10 @@
 //! - OutputParser integration
 
 use dracon_terminal_engine::framework::command::{
-    CommandRunner, OutputParser, ParsedOutput,
+    OutputParser, ParsedOutput,
 };
+#[cfg(not(feature = "async"))]
+use dracon_terminal_engine::framework::command::CommandRunner;
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "async")]
@@ -67,7 +69,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_captures_stdout() {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", "echo -e 'test output line\\nsecond line'"]);
+        cmd.args(["-c", "echo -e 'test output line\\nsecond line'"]);
         let output = cmd.output().await.unwrap();
 
         assert!(
@@ -80,7 +82,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_captures_stderr() {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", "echo error message >&2"]);
+        cmd.args(["-c", "echo error message >&2"]);
         let output = cmd.output().await.unwrap();
 
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -94,7 +96,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_separate_stdout_stderr() {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", "echo stdout content; echo stderr content >&2"]);
+        cmd.args(["-c", "echo stdout content; echo stderr content >&2"]);
         let output = cmd.output().await.unwrap();
 
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -181,7 +183,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_with_args() {
         let mut cmd = Command::new("printf");
-        cmd.args(&["%s %d", "value", "42"]);
+        cmd.args(["%s %d", "value", "42"]);
         let output = cmd.output().await.unwrap();
 
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -243,7 +245,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_output_parser_integration() {
         let mut cmd = Command::new("printf");
-        cmd.args(&["%s", r#"{"value":42.5}"#]);
+        cmd.args(["%s", r#"{"value":42.5}"#]);
 
         let output = cmd.output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -253,16 +255,13 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        match parsed {
-            ParsedOutput::Scalar(s) => assert!(s.contains("42") || s.contains("42.5")),
-            _ => {}
-        }
+        if let ParsedOutput::Scalar(s) = parsed { assert!(s.contains("42") || s.contains("42.5")) }
     }
 
     #[tokio::test]
     async fn test_async_command_output_parser_json_array() {
         let mut cmd = Command::new("printf");
-        cmd.args(&["%s", r#"[{"name":"a"},{"name":"b"}]"#]);
+        cmd.args(["%s", r#"[{"name":"a"},{"name":"b"}]"#]);
 
         let output = cmd.output().await.unwrap();
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -272,16 +271,13 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        match parsed {
-            ParsedOutput::List(items) => assert!(items.len() >= 1),
-            _ => {}
-        }
+        if let ParsedOutput::List(items) = parsed { assert!(!items.is_empty()) }
     }
 
     #[tokio::test]
     async fn test_async_command_output_parser_severity_line() {
         let mut cmd = Command::new("sh");
-        cmd.args(&[
+        cmd.args([
             "-c",
             "printf 'INFO: starting\\nERROR: failed\\nWARN: slow\\n'",
         ]);
@@ -299,16 +295,13 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        match parsed {
-            ParsedOutput::Lines(lines) => assert!(lines.len() >= 2 || lines.len() >= 1),
-            _ => {}
-        }
+        if let ParsedOutput::Lines(lines) = parsed { assert!(lines.len() >= 2 || !lines.is_empty()) }
     }
 
     #[tokio::test]
     async fn test_async_command_with_environment_variables() {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", "echo $TEST_VAR"]);
+        cmd.args(["-c", "echo $TEST_VAR"]);
         cmd.env("TEST_VAR", "test_value_123");
         let output = cmd.output().await.unwrap();
 
@@ -357,7 +350,7 @@ mod async_tests {
     #[tokio::test]
     async fn test_async_command_long_output() {
         let mut cmd = Command::new("printf");
-        cmd.args(&["%s", "x".repeat(1000).as_str()]);
+        cmd.args(["%s", "x".repeat(1000).as_str()]);
         let output = cmd.output().await.unwrap();
 
         assert!(
