@@ -63,6 +63,11 @@ impl Profiler {
         });
         self.dirty = true;
     }
+
+    /// Returns the current metrics.
+    pub fn metrics(&self) -> &[Metric] {
+        &self.metrics
+    }
 }
 
 impl crate::framework::widget::Widget for Profiler {

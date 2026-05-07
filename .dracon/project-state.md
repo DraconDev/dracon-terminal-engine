@@ -1,21 +1,21 @@
 # Project State
 
 ## Current Focus
-Refactored streaming text test to use `LoggedLine` instead of `LogLine` for consistency with command module.
+Added public access to profiler metrics and updated tests to use the new accessor method.
 
 ## Context
-The test was updated to maintain consistency with the command module's logging system, which now uses `LoggedLine` with severity levels (like "info") instead of the widget module's `LogLine`.
+The profiler widget needed a way to expose its collected metrics to other parts of the application. The previous implementation exposed the metrics field directly, which could lead to unintended modifications. The change provides a controlled way to access the metrics while maintaining encapsulation.
 
 ## Completed
-- [x] Updated streaming text test to use `LoggedLine::new()` with severity level
-- [x] Maintained same test functionality but with updated type
+- [x] Added `metrics()` method to Profiler to provide read-only access to metrics
+- [x] Updated all test assertions to use the new `metrics()` method instead of direct field access
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress beyond the completed changes
 
 ## Blockers
-- None identified
+- None identified for this change
 
 ## Next Steps
-1. Verify all related tests still pass with the new type
-2. Consider if other tests need similar updates to maintain consistency
+1. Verify the new accessor method doesn't introduce performance regressions
+2. Consider adding additional metric filtering capabilities if needed
