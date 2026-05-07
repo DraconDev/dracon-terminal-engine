@@ -116,7 +116,7 @@ fn test_drag_manager_multiple_targets() {
     manager.register_target(1, 0, 0, 50, 50);
     manager.register_target(2, 100, 100, 50, 50);
     
-    manager.start_drag("data".to_string(), 1, ghost);
+    manager.start_drag(42usize, 1, ghost);
     manager.move_ghost(25, 25); // Inside target 1
     
     assert_eq!(manager.end_drag(), Some(1));
