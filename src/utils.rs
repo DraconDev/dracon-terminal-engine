@@ -1137,6 +1137,13 @@ pub fn get_clipboard_text() -> Option<String> {
         })
 }
 
+/// Clears the in-memory clipboard fallback (useful for tests).
+pub fn clear_clipboard_text() {
+    if let Ok(mut store) = get_clipboard_store().lock() {
+        store.clear();
+    }
+}
+
 /// Gets the primary X11/Wayland selection text (for middle-click paste).
 pub fn get_primary_selection_text() -> Option<String> {
     std::process::Command::new("wl-paste")

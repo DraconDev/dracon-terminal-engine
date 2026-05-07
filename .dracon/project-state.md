@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Added in-memory clipboard fallback for headless/test environments
+Added a function to clear the in-memory clipboard fallback for testing purposes.
 
 ## Context
-The application previously relied solely on external clipboard tools (wl-copy, xclip, etc.), which fail in headless environments. This change adds a fallback mechanism to store clipboard data in memory for testing and headless scenarios.
+This change supports test environments where we need to reset clipboard state between tests. The in-memory clipboard fallback was previously added to handle headless environments.
 
 ## Completed
-- [x] Added in-memory storage for clipboard text
-- [x] Updated clipboard set/get functions to use fallback when external tools fail
-- [x] Updated documentation to reflect the new fallback mechanism
+- [x] Added `clear_clipboard_text()` function to reset in-memory clipboard state
+- [x] Implemented thread-safe access to clipboard store for clearing
 
 ## In Progress
-- [x] Comprehensive clipboard integration tests
+- [ ] None (this is a focused utility addition)
 
 ## Blockers
-- None identified
+- None (this is a standalone utility function)
 
 ## Next Steps
-1. Verify fallback behavior in CI/CD pipelines
-2. Document the new fallback mechanism in user guides
+1. Update test suites to use this new clearing function
+2. Document the clipboard utilities in the public API
