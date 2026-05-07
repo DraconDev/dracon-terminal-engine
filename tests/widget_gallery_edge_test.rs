@@ -8,6 +8,7 @@ use dracon_terminal_engine::input::event::{
 use ratatui::layout::Rect;
 
 // Minimal reproduction of WidgetGallery's handle_mouse to test edge cases
+#[allow(dead_code)]
 struct WidgetGalleryMock {
     checkbox: Checkbox,
     radio: Radio,
@@ -18,7 +19,6 @@ struct WidgetGalleryMock {
     search: SearchInput,
     progress: ProgressBar,
     button: Button,
-    #[allow(dead_code)]
     selected: usize,
 }
 
