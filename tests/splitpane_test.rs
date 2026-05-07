@@ -205,9 +205,9 @@ fn test_splitpane_no_black_background() {
 fn test_splitpane_handle_key_left_decreases_ratio() {
     let mut pane = SplitPane::new(Orientation::Horizontal).ratio(0.5);
 
-    let result = pane.handle_key(crate::input::event::KeyEvent {
-        kind: crate::input::event::KeyEventKind::Press,
-        code: crate::input::event::KeyCode::Left,
+    let result = pane.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Left,
         modifiers: Default::default(),
     });
 
