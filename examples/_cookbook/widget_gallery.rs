@@ -79,6 +79,7 @@ impl WidgetGallery {
             theme,
             should_quit: quit,
             show_help: false,
+            zones: RefCell::new(ScopedZoneRegistry::new()),
         }
     }
 
