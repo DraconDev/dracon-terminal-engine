@@ -3,13 +3,14 @@
 //! Run with: `cargo bench`
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use dracon_terminal_engine::compositor::Plane;
+use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::animation::{Animation, AnimationManager, Easing};
 use dracon_terminal_engine::framework::focus::FocusManager;
-use dracon_terminal_engine::framework::hitzone::{HitZone, HitZoneGroup};
+use dracon_terminal_engine::framework::hitzone::{HitZone, HitZoneGroup, ScopedZoneRegistry};
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::{List, Table};
+use dracon_terminal_engine::framework::widgets::{Column, List, Table};
+use ratatui::layout::Rect;
 use std::time::Duration;
 
 // =============================================================================
@@ -27,20 +28,29 @@ fn bench_plane_creation(c: &mut Criterion) {
 }
 
 fn bench_plane_fill_bg(c: &mut Criterion) {
+    let theme = Theme::nord();
     c.bench_function("plane_fill_bg_80x24", |b| {
         let mut plane = Plane::new(0, 80, 24);
-        let theme = Theme::nord();
+        b.iter(|| plane.fill_bg(black_box(theme.bg)))
+    });
+
+    c.bench_function("plane_fill_bg_200x60", |b| {
+        let mut plane = Plane::new(0, 200, 60);
         b.iter(|| plane.fill_bg(black_box(theme.bg)))
     });
 }
 
 fn bench_plane_put_str(c: &mut Criterion) {
-    c.bench_function("plane_put_str_80x24", |b| {
+    c.bench_function("plane_put_str_short", |b| {
         let mut plane = Plane::new(0, 80, 24);
-        let text = "Hello, world! This is a test string for benchmarking.";
-        b.iter(|| {
-            plane.put_str(black_box(0), black_box(0), black_box(text));
-        })
+        let text = "Hello, world!";
+        b.iter(|| plane.put_str(black_box(0), black_box(0), black_box(text)))
+    });
+
+    c.bench_function("plane_put_str_long", |b| {
+        let mut plane = Plane::new(0, 80, 24);
+        let text = "Hello, world! This is a test string for benchmarking plane operations.";
+        b.iter(|| plane.put_str(black_box(0), black_box(0), black_box(text)))
     });
 }
 
@@ -49,30 +59,41 @@ fn bench_plane_put_str(c: &mut Criterion) {
 // =============================================================================
 
 fn bench_list_render(c: &mut Criterion) {
-    let items: Vec<String> = (0..100).map(|i| format!("Item {}", i)).collect();
-
+    let items_100: Vec<String> = (0..100).map(|i| format!("Item {}", i)).collect();
     c.bench_function("list_render_100_items", |b| {
-        let list = List::new(items.clone());
-        let area = ratatui::layout::Rect::new(0, 0, 40, 20);
+        let list = List::new(items_100.clone());
+        let area = Rect::new(0, 0, 40, 20);
         b.iter(|| list.render(black_box(area)))
     });
 
     let items_1k: Vec<String> = (0..1000).map(|i| format!("Item {}", i)).collect();
     c.bench_function("list_render_1000_items", |b| {
         let list = List::new(items_1k.clone());
-        let area = ratatui::layout::Rect::new(0, 0, 40, 20);
+        let area = Rect::new(0, 0, 40, 20);
         b.iter(|| list.render(black_box(area)))
     });
 }
 
 fn bench_table_render(c: &mut Criterion) {
-    let rows: Vec<Vec<String>> = (0..100)
-        .map(|i| vec![format!("{}", i), format!("Name {}", i), format!("Value {}", i)])
-        .collect();
+    let columns = vec![
+        Column { header: "ID".into(), width: 10 },
+        Column { header: "Name".into(), width: 20 },
+        Column { header: "Value".into(), width: 15 },
+    ];
 
+    let rows_100: Vec<String> = (0..100).map(|i| format!("{}", i)).collect();
     c.bench_function("table_render_100_rows", |b| {
-        let table = Table::new(rows.clone(), vec![10, 20, 15]);
-        let area = ratatui::layout::Rect::new(0, 0, 50, 20);
+        let table = Table::new(columns.clone())
+            .with_rows(rows_100.clone());
+        let area = Rect::new(0, 0, 50, 20);
+        b.iter(|| table.render(black_box(area)))
+    });
+
+    let rows_1k: Vec<String> = (0..1000).map(|i| format!("{}", i)).collect();
+    c.bench_function("table_render_1000_rows", |b| {
+        let table = Table::new(columns.clone())
+            .with_rows(rows_1k.clone());
+        let area = Rect::new(0, 0, 50, 20);
         b.iter(|| table.render(black_box(area)))
     });
 }
@@ -149,20 +170,54 @@ fn bench_animation_value(c: &mut Criterion) {
 // =============================================================================
 
 fn bench_hitzone_dispatch(c: &mut Criterion) {
-    c.bench_function("hitzone_dispatch_10_zones", |b| {
+    c.bench_function("hitzone_group_dispatch_10", |b| {
         let mut group = HitZoneGroup::new();
         for i in 0..10 {
-            group.add(HitZone::new(i, i as u16 * 10, 0, 8, 1));
+            group.add_row(i, i as u16, 8, |_| {});
         }
-        b.iter(|| group.dispatch(black_box(45), black_box(0)))
+        b.iter(|| group.dispatch_mouse(
+            dracon_terminal_engine::input::event::MouseEventKind::Down(
+                dracon_terminal_engine::input::event::MouseButton::Left
+            ),
+            black_box(45),
+            black_box(0),
+            dracon_terminal_engine::input::event::KeyModifiers::empty(),
+        ))
     });
 
-    c.bench_function("hitzone_dispatch_100_zones", |b| {
+    c.bench_function("hitzone_group_dispatch_100", |b| {
         let mut group = HitZoneGroup::new();
         for i in 0..100 {
-            group.add(HitZone::new(i, i as u16 * 2, 0, 1, 1));
+            group.add_row(i, i as u16, 1, |_| {});
         }
-        b.iter(|| group.dispatch(black_box(50), black_box(0)))
+        b.iter(|| group.dispatch_mouse(
+            dracon_terminal_engine::input::event::MouseEventKind::Down(
+                dracon_terminal_engine::input::event::MouseButton::Left
+            ),
+            black_box(50),
+            black_box(0),
+            dracon_terminal_engine::input::event::KeyModifiers::empty(),
+        ))
+    });
+}
+
+fn bench_scoped_zone_registry(c: &mut Criterion) {
+    c.bench_function("scoped_zone_dispatch_100", |b| {
+        let mut registry = ScopedZoneRegistry::new();
+        for i in 0..100 {
+            registry.register(i, i as u16 * 2, 0, 1, 1);
+        }
+        b.iter(|| registry.dispatch(black_box(50), black_box(0)))
+    });
+
+    c.bench_function("scoped_zone_clear_and_register_100", |b| {
+        let mut registry = ScopedZoneRegistry::new();
+        b.iter(|| {
+            registry.clear();
+            for i in 0..100 {
+                registry.register(i, i as u16 * 2, 0, 1, 1);
+            }
+        })
     });
 }
 
@@ -174,6 +229,30 @@ fn bench_theme_creation(c: &mut Criterion) {
     c.bench_function("theme_nord", |b| b.iter(|| Theme::nord()));
     c.bench_function("theme_cyberpunk", |b| b.iter(|| Theme::cyberpunk()));
     c.bench_function("theme_dracula", |b| b.iter(|| Theme::dracula()));
+    c.bench_function("theme_all_20", |b| {
+        b.iter(|| {
+            let _ = Theme::nord();
+            let _ = Theme::cyberpunk();
+            let _ = Theme::dracula();
+            let _ = Theme::dark();
+            let _ = Theme::light();
+            let _ = Theme::catppuccin_mocha();
+            let _ = Theme::gruvbox_dark();
+            let _ = Theme::tokyo_night();
+            let _ = Theme::solarized_dark();
+            let _ = Theme::solarized_light();
+            let _ = Theme::one_dark();
+            let _ = Theme::rose_pine();
+            let _ = Theme::kanagawa();
+            let _ = Theme::everforest();
+            let _ = Theme::monokai();
+            let _ = Theme::warm();
+            let _ = Theme::cool();
+            let _ = Theme::forest();
+            let _ = Theme::sunset();
+            let _ = Theme::mono();
+        })
+    });
 }
 
 // =============================================================================
@@ -189,7 +268,7 @@ criterion_group!(
 criterion_group!(widgets, bench_list_render, bench_table_render);
 criterion_group!(focus, bench_focus_navigation);
 criterion_group!(animation, bench_animation_tick, bench_animation_value);
-criterion_group!(hitzone, bench_hitzone_dispatch);
+criterion_group!(hitzone, bench_hitzone_dispatch, bench_scoped_zone_registry);
 criterion_group!(theme, bench_theme_creation);
 
 criterion_main!(compositor, widgets, focus, animation, hitzone, theme);
