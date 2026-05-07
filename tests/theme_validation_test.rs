@@ -119,7 +119,7 @@ fn test_progress_bar_no_black_background() {
 fn test_list_no_black_background() {
     for theme in all_themes() {
         let items = vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string()];
-        let mut list = List::new(WidgetId::new(1), items);
+        let mut list = List::new(items);
         list.on_theme_change(&theme);
         let plane = list.render(Rect::new(0, 0, 20, 5));
         assert_no_black_background(&plane, "List");

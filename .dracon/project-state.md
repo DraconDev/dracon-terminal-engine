@@ -1,20 +1,21 @@
 # Project State
 
 ## Current Focus
-Removed redundant theme validation test for widget rendering sanity checks
+Simplified widget creation in theme validation tests by removing redundant `WidgetId` parameter.
 
 ## Context
-The comprehensive theme validation tests were previously checking widget rendering with all themes, but this specific test was redundant as it didn't add meaningful validation beyond what other tests already covered.
+This change follows the recent refactoring of theme validation tests to focus on core functionality rather than implementation details. The `WidgetId` parameter was found to be unnecessary for the test cases.
 
 ## Completed
-- [x] Removed `test_all_20_themes_no_panic` test which was redundant with other theme validation tests
+- [x] Removed redundant `WidgetId` parameter from `List` widget creation in theme validation tests
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [x] Ongoing work to maintain comprehensive theme validation coverage
+- [x] Ongoing work to simplify other widget creation patterns in theme validation tests
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Continue refining theme validation tests to ensure complete coverage
-2. Verify that remaining tests maintain sufficient validation of widget rendering across themes
+1. Review and apply similar simplifications to other widget types in theme validation tests
+2. Verify test coverage remains complete after these changes
