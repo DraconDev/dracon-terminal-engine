@@ -352,7 +352,9 @@ impl Widget for WidgetGallery {
                     self.selected = slot;
                 }
                 let widget_area = Rect::new(1, 2, rect.width.saturating_sub(2), rect.height.saturating_sub(3));
-                if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height {
+                if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height
+                    && col >= rect.x + 1 && col < rect.x + 1 + widget_area.width
+                {
                     let rel_col = col - rect.x - 1;
                     let rel_row = row - rect.y - 2;
                     return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
