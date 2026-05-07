@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Improved SplitPane widget with better divider rendering and resizing constraints
 
 ## Context
-This change was prompted by the need to ensure dependency versions are locked to maintain consistent behavior across development environments, particularly for the background color implementation which requires specific dependency versions.
+The SplitPane widget was enhanced to provide more robust divider rendering and better handling of resizing constraints, particularly for minimum size requirements.
 
 ## Completed
-- [x] Updated Cargo.lock to pin dependency versions for consistent background color rendering
+- [x] Added `dragging` state to track resize operations
+- [x] Improved divider rendering with explicit character placement
+- [x] Enhanced size calculation to properly enforce minimum size constraints
+- [x] Fixed potential out-of-bounds access in divider rendering
 
 ## In Progress
-- [x] Dependency version verification and testing
+- [ ] No active work in progress
 
 ## Blockers
-- None identified at this stage
+- None identified
 
 ## Next Steps
-1. Verify background color consistency across environments
-2. Continue with clipboard test improvements and related features
+1. Verify the new divider rendering works in all edge cases
+2. Test the resizing behavior with various minimum size values

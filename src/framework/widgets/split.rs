@@ -25,6 +25,7 @@ pub struct SplitPane {
     min_size: u16,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    dragging: bool,
 }
 
 impl SplitPane {
@@ -106,18 +107,20 @@ impl SplitPane {
     pub fn split(&self, area: Rect) -> (Rect, Rect) {
         match self.orientation {
             Orientation::Horizontal => {
-                let w1 = ((area.width as f32 * self.ratio).round() as u16).max(self.min_size);
-                let w2 = area.width.saturating_sub(w1).max(self.min_size);
-                let w1 = area.width.saturating_sub(w2);
+                let max_w1 = area.width.saturating_sub(self.min_size);
+                let w1 = ((area.width as f32 * self.ratio).round() as u16)
+                    .clamp(self.min_size, max_w1);
+                let w2 = area.width.saturating_sub(w1);
                 (
                     Rect::new(area.x, area.y, w1, area.height),
                     Rect::new(area.x + w1, area.y, w2, area.height),
                 )
             }
             Orientation::Vertical => {
-                let h1 = ((area.height as f32 * self.ratio).round() as u16).max(self.min_size);
-                let h2 = area.height.saturating_sub(h1).max(self.min_size);
-                let h1 = area.height.saturating_sub(h2);
+                let max_h1 = area.height.saturating_sub(self.min_size);
+                let h1 = ((area.height as f32 * self.ratio).round() as u16)
+                    .clamp(self.min_size, max_h1);
+                let h2 = area.height.saturating_sub(h1);
                 (
                     Rect::new(area.x, area.y, area.width, h1),
                     Rect::new(area.x, area.y + h1, area.width, h2),
@@ -223,8 +226,20 @@ impl crate::framework::widget::Widget for SplitPane {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let mut plane = self.render_divider(area);
-        plane.z_index = 5;
+        let mut plane = Plane::new(0, area.width, area.height);
+        plane.fill_bg(self.divider_color);
+
+        let divider = self.divider_rect(area);
+        for row in divider.y..divider.y + divider.height {
+            for col in divider.x..divider.x + divider.width {
+                let idx = (row * area.width + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = self.divider_char;
+                    plane.cells[idx].fg = self.divider_color;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
         plane
     }
 
