@@ -133,7 +133,7 @@ fn test_table_no_black_background() {
             Column { header: "Name".to_string(), width: 20 },
             Column { header: "Age".to_string(), width: 10 },
         ];
-        let mut table = Table::new_with_id(WidgetId::new(1), columns);
+        let mut table: Table<String> = Table::new_with_id(WidgetId::new(1), columns);
         table.on_theme_change(&theme);
         let plane = table.render(Rect::new(0, 0, 40, 4));
         assert_no_black_background(&plane, "Table");
