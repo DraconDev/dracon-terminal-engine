@@ -81,7 +81,7 @@ fn test_splitpane_from_rect_tall() {
 
 #[test]
 fn test_splitpane_render() {
-    let pane = SplitPane::new(Orientation::Horizontal).with_theme(Theme::nord());
+    let pane = SplitPane::new(Orientation::Horizontal);
     let plane = pane.render(Rect::new(0, 0, 80, 24));
     assert_eq!(plane.width, 80);
     assert_eq!(plane.height, 24);
@@ -198,7 +198,7 @@ fn test_splitpane_with_divider_char() {
 
 #[test]
 fn test_splitpane_no_black_background() {
-    let pane = SplitPane::new(Orientation::Horizontal).with_theme(Theme::nord());
+    let pane = SplitPane::new(Orientation::Horizontal);
     let plane = pane.render(Rect::new(0, 0, 80, 24));
     
     for cell in &plane.cells {

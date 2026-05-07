@@ -96,20 +96,23 @@ fn test_palette_esc_hides() {
     assert!(!palette.is_visible());
 }
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 #[test]
 fn test_palette_enter_executes() {
-    let executed = std::cell::Cell::new(None);
-    let executed_ref = &executed;
+    let executed = Rc::new(RefCell::new(None));
+    let executed_clone = Rc::clone(&executed);
     
     let mut palette = make_palette();
     palette.on_execute(move |id| {
-        executed_ref.set(Some(id.to_string()));
+        *executed_clone.borrow_mut() = Some(id.to_string());
     });
     palette.show();
     
     palette.handle_key(key_press(KeyCode::Enter));
     
-    assert!(executed.get().is_some());
+    assert!(executed.borrow().is_some());
 }
 
 #[test]
