@@ -1,21 +1,20 @@
 # Project State
 
 ## Current Focus
-Added explicit type annotation for `Table` in theme validation tests to ensure proper generic type handling.
+Simplified widget creation in theme validation tests by removing explicit `WidgetId` parameter.
 
 ## Context
-The change was prompted by a need to clarify the generic type parameter for the `Table` widget in the theme validation tests. This ensures consistent behavior across different widget types and prevents potential type inference issues.
+The change removes the need for explicit `WidgetId` when creating widgets in theme validation tests, making the test code cleaner and more maintainable.
 
 ## Completed
-- [x] Added explicit `Table<String>` type annotation in theme validation tests
-- [x] Maintained existing test functionality while improving type safety
+- [x] Removed explicit `WidgetId` parameter from `List` widget creation in theme validation tests
 
 ## In Progress
-- [ ] No active work in progress
+- [x] No active work in progress
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify test coverage for other widget types
-2. Review related theme validation tests for similar type annotations
+1. Verify test coverage remains complete after this change
+2. Consider similar simplifications for other widget types in tests
