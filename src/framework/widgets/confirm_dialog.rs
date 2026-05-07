@@ -316,15 +316,22 @@ impl Widget for ConfirmDialog {
         for (i, c) in confirm_str.chars().enumerate().take(area.width as usize) {
             let idx = btn_row * area.width as usize + start_col as usize + i;
             if idx < plane.cells.len() {
+                let is_focused = self.focused && self.confirm_focused;
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if self.danger && self.focused {
+                    fg: if is_focused {
+                        self.theme.bg
+                    } else if self.danger && self.focused {
                         self.theme.error
                     } else {
                         btn_fg
                     },
-                    bg: self.theme.bg,
-                    style: if self.danger {
+                    bg: if is_focused {
+                        self.theme.primary
+                    } else {
+                        self.theme.bg
+                    },
+                    style: if self.danger || is_focused {
                         Styles::BOLD
                     } else {
                         Styles::empty()
@@ -340,11 +347,24 @@ impl Widget for ConfirmDialog {
         for (i, c) in cancel_str.chars().enumerate().take(area.width as usize) {
             let idx = btn_row * area.width as usize + cancel_start + i;
             if idx < plane.cells.len() {
+                let is_focused = self.focused && !self.confirm_focused;
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: btn_fg,
-                    bg: self.theme.bg,
-                    style: Styles::empty(),
+                    fg: if is_focused {
+                        self.theme.bg
+                    } else {
+                        btn_fg
+                    },
+                    bg: if is_focused {
+                        self.theme.primary
+                    } else {
+                        self.theme.bg
+                    },
+                    style: if is_focused {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    },
                     transparent: false,
                     skip: false,
                 };
