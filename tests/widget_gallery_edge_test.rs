@@ -196,3 +196,87 @@ fn test_widget_gallery_mouse_small_terminal() {
     );
     // Just verify it doesn't panic - result may vary with tiny dimensions
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KEYBOARD NAVIGATION TESTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_widget_gallery_key_right_navigates() {
+    let mut gallery = WidgetGalleryMock::new();
+    assert_eq!(gallery.selected, 0);
+    
+    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 1);
+}
+
+#[test]
+fn test_widget_gallery_key_left_navigates() {
+    let mut gallery = WidgetGalleryMock::new();
+    gallery.selected = 5;
+    
+    let key = KeyEvent::new(KeyCode::Left, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 4);
+}
+
+#[test]
+fn test_widget_gallery_key_left_wraps() {
+    let mut gallery = WidgetGalleryMock::new();
+    assert_eq!(gallery.selected, 0);
+    
+    let key = KeyEvent::new(KeyCode::Left, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 8); // Wraps to last slot
+}
+
+#[test]
+fn test_widget_gallery_key_right_wraps() {
+    let mut gallery = WidgetGalleryMock::new();
+    gallery.selected = 8;
+    
+    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 0); // Wraps to first slot
+}
+
+#[test]
+fn test_widget_gallery_key_enter_toggles_checkbox() {
+    let mut gallery = WidgetGalleryMock::new();
+    assert!(!gallery.checkbox.is_checked());
+    
+    let key = KeyEvent::new(KeyCode::Enter, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert!(gallery.checkbox.is_checked());
+}
+
+#[test]
+fn test_widget_gallery_key_release_ignored() {
+    let mut gallery = WidgetGalleryMock::new();
+    let original = gallery.selected;
+    
+    let key = KeyEvent::new(KeyCode::Right, KeyEventKind::Release);
+    assert!(!gallery.handle_key(key));
+    assert_eq!(gallery.selected, original);
+}
+
+#[test]
+fn test_widget_gallery_key_down_navigates() {
+    let mut gallery = WidgetGalleryMock::new();
+    assert_eq!(gallery.selected, 0);
+    
+    let key = KeyEvent::new(KeyCode::Down, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 1);
+}
+
+#[test]
+fn test_widget_gallery_key_up_navigates() {
+    let mut gallery = WidgetGalleryMock::new();
+    gallery.selected = 3;
+    
+    let key = KeyEvent::new(KeyCode::Up, KeyEventKind::Press);
+    assert!(gallery.handle_key(key));
+    assert_eq!(gallery.selected, 2);
+}
