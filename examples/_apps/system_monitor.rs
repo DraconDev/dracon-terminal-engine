@@ -428,6 +428,12 @@ impl SystemMonitor {
             "monokai" => Theme::monokai(),
             "solarized-light" => Theme::solarized_light(),
             "light" => Theme::light(),
+            "dark" => Theme::dark(),
+            "warm" => Theme::warm(),
+            "cool" => Theme::cool(),
+            "forest" => Theme::forest(),
+            "sunset" => Theme::sunset(),
+            "mono" => Theme::mono(),
             _ => Theme::nord(),
         };
         self.cpu_gauge.on_theme_change(&self.theme);
