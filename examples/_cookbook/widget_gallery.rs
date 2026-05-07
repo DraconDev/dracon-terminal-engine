@@ -52,6 +52,7 @@ struct WidgetGallery {
     theme: Theme,
     should_quit: Arc<AtomicBool>,
     show_help: bool,
+    zones: RefCell<ScopedZoneRegistry<usize>>,
 }
 
 impl WidgetGallery {
