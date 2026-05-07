@@ -3,12 +3,12 @@
 //! Run with: `cargo bench`
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::animation::{Animation, AnimationManager, Easing};
 use dracon_terminal_engine::framework::focus::FocusManager;
-use dracon_terminal_engine::framework::hitzone::{HitZone, HitZoneGroup, ScopedZoneRegistry};
+use dracon_terminal_engine::framework::hitzone::{HitZoneGroup, ScopedZoneRegistry};
 use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::framework::widget::WidgetId;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Column, List, Table};
 use ratatui::layout::Rect;
 use std::time::Duration;
@@ -75,26 +75,35 @@ fn bench_list_render(c: &mut Criterion) {
 }
 
 fn bench_table_render(c: &mut Criterion) {
-    let columns = vec![
-        Column { header: "ID".into(), width: 10 },
-        Column { header: "Name".into(), width: 20 },
-        Column { header: "Value".into(), width: 15 },
-    ];
-
     let rows_100: Vec<String> = (0..100).map(|i| format!("{}", i)).collect();
+    let area = Rect::new(0, 0, 50, 20);
     c.bench_function("table_render_100_rows", |b| {
-        let table = Table::new(columns.clone())
-            .with_rows(rows_100.clone());
-        let area = Rect::new(0, 0, 50, 20);
-        b.iter(|| table.render(black_box(area)))
+        b.iter_with_setup(
+            || {
+                Table::new(vec![
+                    Column { header: "ID".into(), width: 10 },
+                    Column { header: "Name".into(), width: 20 },
+                    Column { header: "Value".into(), width: 15 },
+                ])
+                .with_rows(rows_100.clone())
+            },
+            |table| table.render(black_box(area)),
+        )
     });
 
     let rows_1k: Vec<String> = (0..1000).map(|i| format!("{}", i)).collect();
     c.bench_function("table_render_1000_rows", |b| {
-        let table = Table::new(columns.clone())
-            .with_rows(rows_1k.clone());
-        let area = Rect::new(0, 0, 50, 20);
-        b.iter(|| table.render(black_box(area)))
+        b.iter_with_setup(
+            || {
+                Table::new(vec![
+                    Column { header: "ID".into(), width: 10 },
+                    Column { header: "Name".into(), width: 20 },
+                    Column { header: "Value".into(), width: 15 },
+                ])
+                .with_rows(rows_1k.clone())
+            },
+            |table| table.render(black_box(area)),
+        )
     });
 }
 
@@ -175,14 +184,16 @@ fn bench_hitzone_dispatch(c: &mut Criterion) {
         for i in 0..10 {
             group.add_row(i, i as u16, 8, |_| {});
         }
-        b.iter(|| group.dispatch_mouse(
-            dracon_terminal_engine::input::event::MouseEventKind::Down(
-                dracon_terminal_engine::input::event::MouseButton::Left
-            ),
-            black_box(45),
-            black_box(0),
-            dracon_terminal_engine::input::event::KeyModifiers::empty(),
-        ))
+        b.iter(|| {
+            group.dispatch_mouse(
+                dracon_terminal_engine::input::event::MouseEventKind::Down(
+                    dracon_terminal_engine::input::event::MouseButton::Left,
+                ),
+                black_box(45),
+                black_box(0),
+                dracon_terminal_engine::input::event::KeyModifiers::empty(),
+            )
+        })
     });
 
     c.bench_function("hitzone_group_dispatch_100", |b| {
@@ -190,14 +201,16 @@ fn bench_hitzone_dispatch(c: &mut Criterion) {
         for i in 0..100 {
             group.add_row(i, i as u16, 1, |_| {});
         }
-        b.iter(|| group.dispatch_mouse(
-            dracon_terminal_engine::input::event::MouseEventKind::Down(
-                dracon_terminal_engine::input::event::MouseButton::Left
-            ),
-            black_box(50),
-            black_box(0),
-            dracon_terminal_engine::input::event::KeyModifiers::empty(),
-        ))
+        b.iter(|| {
+            group.dispatch_mouse(
+                dracon_terminal_engine::input::event::MouseEventKind::Down(
+                    dracon_terminal_engine::input::event::MouseButton::Left,
+                ),
+                black_box(50),
+                black_box(0),
+                dracon_terminal_engine::input::event::KeyModifiers::empty(),
+            )
+        })
     });
 }
 
