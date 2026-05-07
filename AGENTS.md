@@ -422,6 +422,74 @@ StatusSegment::new("Tab: switch | t: theme | ?: help | q: quit")
 
 6. **Widget-based vs closure-based apps** — Widget-based (Pattern 1) supports theme cycling via `app.set_theme()`. Closure-based (Pattern 2) cannot easily cycle themes because `on_input` only receives `KeyEvent`, not `&mut App`.
 
+### Widget Background Pattern
+
+All widgets MUST fill their plane background with `self.theme.bg` to avoid black (`Color::Reset`) holes:
+
+```rust
+fn render(&self, area: Rect) -> Plane {
+    let mut plane = Plane::new(0, area.width, area.height);
+    plane.fill_bg(self.theme.bg);  // Fills all cells with theme.bg
+    // ... render content on top
+    plane
+}
+```
+
+**Why:** `Plane::new()` creates cells with `Cell::default()`, which has `bg: Color::Reset`. `Color::Reset` renders as the terminal's default background (usually black), causing visual glitches when widgets overlap or when the theme is not the terminal default.
+
+**Where to apply:** Every widget's `render()` method. Check existing widgets for the pattern.
+
+### u16 Arithmetic Safety in Mouse Handlers
+
+**Always bounds-check before subtracting from `u16` mouse coordinates.** `u16` underflow panics in debug mode and wraps in release — both are bugs.
+
+**Wrong (panics when `col == rect.x`):**
+```rust
+let rel_col = col - rect.x - 1;  // PANIC if col == rect.x
+let rel_row = row - rect.y - 2;  // PANIC if row < rect.y + 2
+```
+
+**Right (explicit bounds check):**
+```rust
+if row >= rect.y + 2 && row < rect.y + 2 + widget_area.height
+    && col >= rect.x + 1 && col < rect.x + 1 + widget_area.width
+{
+    let rel_col = col - rect.x - 1;
+    let rel_row = row - rect.y - 2;
+    return self.widget.handle_mouse(kind, rel_col, rel_row);
+}
+```
+
+**Alternative (saturating_sub for simple cases):**
+```rust
+let rel_col = col.saturating_sub(rect.x + 1);
+let rel_row = row.saturating_sub(rect.y + 2);
+// Then check if rel_col < widget_width && rel_row < widget_height
+```
+
+**Rule:** If you write `a - b` where `a` is a mouse coordinate (`col` or `row`), ensure `a >= b` first.
+
+### Pattern 2 Theme Sync
+
+Closure-based (Pattern 2) apps cannot access `App` state from `on_input`. To sync the framework theme each frame:
+
+```rust
+app.on_tick(move |ctx, _| {
+    let theme = ctx.app_theme();  // Get current framework theme
+    let mut app = app.borrow_mut();
+    app.theme = theme.clone();     // Sync to app state
+    app.tab_bar.on_theme_change(&theme);
+    app.list.on_theme_change(&theme);
+    // ... sync all child widgets
+})
+```
+
+**Key points:**
+- `ctx.app_theme()` returns the current framework theme
+- Must sync every tick because theme can change via `app.set_theme()` or global cycling
+- All child widgets need `on_theme_change()` calls
+- Store theme in app state so `render()` can use it
+
 ### Scrollbar Indicator Pattern
 
 For scrollable content, render a proportional scrollbar thumb:
