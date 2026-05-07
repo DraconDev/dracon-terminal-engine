@@ -414,12 +414,14 @@ impl Widget for ConfirmDialog {
             MouseEventKind::Down(MouseButton::Left) => {
                 let confirm_end = start_col + confirm_str.len() as u16;
                 if col >= start_col && col < confirm_end {
+                    self.confirm_focused = true;
                     self.result = Some(ConfirmResult::Confirmed);
                     self.dirty = true;
                     return true;
                 }
                 let cancel_end = cancel_start as u16 + cancel_str.len() as u16;
                 if col >= cancel_start as u16 && col < cancel_end {
+                    self.confirm_focused = false;
                     self.result = Some(ConfirmResult::Cancelled);
                     self.dirty = true;
                     return true;
