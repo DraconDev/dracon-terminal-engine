@@ -189,3 +189,149 @@ fn test_confirm_dialog_mouse_right_click_ignored() {
     assert!(!consumed);
     assert_eq!(dlg.confirmed(), None);
 }
+
+#[test]
+fn test_confirm_dialog_handle_key_enter_confirms() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    assert_eq!(dlg.confirmed(), None);
+
+    // Enter with confirm_focused=true (default) should confirm
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Enter,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+}
+
+#[test]
+fn test_confirm_dialog_handle_key_esc_cancels() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    assert_eq!(dlg.confirmed(), None);
+
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Esc,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+}
+
+#[test]
+fn test_confirm_dialog_handle_key_tab_toggles_focus() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+
+    // Tab should toggle to Cancel
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Tab,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+
+    // Now Enter should cancel
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Enter,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+}
+
+#[test]
+fn test_confirm_dialog_handle_key_left_right_toggles_focus() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+
+    // Left arrow should toggle focus
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Left,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+
+    // Right arrow should toggle back
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Right,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+}
+
+#[test]
+fn test_confirm_dialog_handle_key_space_activates() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+
+    // Space should activate the focused button (Confirm by default)
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Char(' '),
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+}
+
+#[test]
+fn test_confirm_dialog_handle_key_ignores_repeat() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+    assert_eq!(dlg.confirmed(), None);
+
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Repeat,
+        code: KeyCode::Enter,
+        modifiers: Default::default(),
+    });
+    assert!(!consumed);
+    assert_eq!(dlg.confirmed(), None);
+}
+
+#[test]
+fn test_confirm_dialog_on_focus_resets_button() {
+    use dracon_terminal_engine::framework::widget::Widget;
+    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+
+    let mut dlg = ConfirmDialog::new("Title", "Message");
+
+    // Tab to Cancel
+    dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Tab,
+        modifiers: Default::default(),
+    });
+
+    // Blur and re-focus should reset to Confirm
+    dlg.on_blur();
+    dlg.on_focus();
+
+    // Enter should confirm again
+    let consumed = dlg.handle_key(KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Enter,
+        modifiers: Default::default(),
+    });
+    assert!(consumed);
+    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+}
