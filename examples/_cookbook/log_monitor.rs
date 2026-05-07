@@ -31,8 +31,6 @@ const LOGS: &[(&str, &str)] = &[
     ("DEBUG", "GC completed in 150ms"),
 ];
 
-const THEMES: &[&str] = &["nord", "dracula", "cyberpunk", "gruvbox-dark"];
-
 struct LogMonitor {
     id: WidgetId,
     log_viewer: LogViewer,
