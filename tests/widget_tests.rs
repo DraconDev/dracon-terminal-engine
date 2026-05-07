@@ -341,8 +341,8 @@ fn test_spinner_clear_dirty() {
 
 #[test]
 fn test_spinner_tick_advances_frame() {
-    use std::time::Duration;
     use std::thread::sleep;
+    use std::time::Duration;
 
     let mut spinner = Spinner::new(WidgetId::default_id());
     assert_eq!(spinner.current_frame(), '|');
@@ -375,8 +375,8 @@ fn test_spinner_with_frames() {
 
 #[test]
 fn test_spinner_tick_cycles() {
-    use std::time::Duration;
     use std::thread::sleep;
+    use std::time::Duration;
 
     let mut spinner = Spinner::new(WidgetId::default_id());
     // 4 default frames: | / - \

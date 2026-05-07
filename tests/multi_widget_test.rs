@@ -493,9 +493,7 @@ type LifecycleTrackerInit = (
 );
 
 impl LifecycleTracker {
-    fn new(
-        id: usize,
-    ) -> LifecycleTrackerInit {
+    fn new(id: usize) -> LifecycleTrackerInit {
         let mounted = Rc::new(Cell::new(false));
         let unmounted = Rc::new(Cell::new(false));
         let focused = Rc::new(Cell::new(false));

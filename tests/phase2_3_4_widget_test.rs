@@ -205,10 +205,7 @@ fn test_event_logger_max_events() {
     assert!(plane.width > 0);
     // With max_events=2, only last 2 should be kept
     let has_event3 = plane.cells.iter().any(|c| c.char == '3');
-    assert!(
-        has_event3,
-        "rendered plane should contain latest event"
-    );
+    assert!(has_event3, "rendered plane should contain latest event");
 }
 
 #[test]
@@ -217,10 +214,7 @@ fn test_event_logger_content_in_render() {
     logger.log("12:00", "Test");
     let plane = logger.render(dummy_area());
     let has_content = plane.cells.iter().any(|c| c.char == 'T');
-    assert!(
-        has_content,
-        "rendered plane should contain event text"
-    );
+    assert!(has_content, "rendered plane should contain event text");
 }
 
 #[test]

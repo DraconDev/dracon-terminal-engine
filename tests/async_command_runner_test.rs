@@ -10,11 +10,9 @@
 //! - Error handling
 //! - OutputParser integration
 
-use dracon_terminal_engine::framework::command::{
-    OutputParser, ParsedOutput,
-};
 #[cfg(not(feature = "async"))]
 use dracon_terminal_engine::framework::command::CommandRunner;
+use dracon_terminal_engine::framework::command::{OutputParser, ParsedOutput};
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "async")]
@@ -255,7 +253,9 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        if let ParsedOutput::Scalar(s) = parsed { assert!(s.contains("42") || s.contains("42.5")) }
+        if let ParsedOutput::Scalar(s) = parsed {
+            assert!(s.contains("42") || s.contains("42.5"))
+        }
     }
 
     #[tokio::test]
@@ -271,7 +271,9 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        if let ParsedOutput::List(items) = parsed { assert!(!items.is_empty()) }
+        if let ParsedOutput::List(items) = parsed {
+            assert!(!items.is_empty())
+        }
     }
 
     #[tokio::test]
@@ -295,7 +297,9 @@ mod async_tests {
         };
         let parsed = parser.parse(&stdout, "", 0);
 
-        if let ParsedOutput::Lines(lines) = parsed { assert!(lines.len() >= 2 || !lines.is_empty()) }
+        if let ParsedOutput::Lines(lines) = parsed {
+            assert!(lines.len() >= 2 || !lines.is_empty())
+        }
     }
 
     #[tokio::test]
@@ -429,7 +433,9 @@ mod async_tests {
         };
         let output = runner.run_and_parse(&parser);
 
-        if let ParsedOutput::Scalar(s) = output { assert!(s.contains("42") || s.contains("value")) }
+        if let ParsedOutput::Scalar(s) = output {
+            assert!(s.contains("42") || s.contains("value"))
+        }
     }
 
     #[test]
@@ -445,7 +451,9 @@ mod async_tests {
         };
         let output = runner.run_and_parse(&parser);
 
-        if let ParsedOutput::Lines(lines) = output { assert!(lines.len() >= 2 || !lines.is_empty()) }
+        if let ParsedOutput::Lines(lines) = output {
+            assert!(lines.len() >= 2 || !lines.is_empty())
+        }
     }
 
     #[test]
