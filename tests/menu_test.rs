@@ -66,7 +66,7 @@ fn test_context_menu_new() {
     ];
     let menu = ContextMenu::new(items);
     let plane = menu.render(Rect::new(0, 0, 20, 5));
-    assert_eq!(plane.height, 5);
+    assert_eq!(plane.height, 3); // height matches item count
 }
 
 #[test]

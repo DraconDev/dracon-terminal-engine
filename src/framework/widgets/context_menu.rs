@@ -149,7 +149,7 @@ impl crate::framework::widget::Widget for ContextMenu {
     }
 
     fn render(&self, screen: Rect) -> Plane {
-        let height = self.items.len() as u16;
+        let height = self.items.len().max(1) as u16;
         let mut x = self.anchor_x;
         let mut y = self.anchor_y;
 
@@ -174,9 +174,18 @@ impl crate::framework::widget::Widget for ContextMenu {
             let row = i as u16;
             let _zone = HitZone::new(i, x, y + row, self.width, 1);
 
-            let idx = (row * self.width) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = ' ';
+            let is_selected = i == self.selected;
+            let bg = if is_selected {
+                self.theme.selection_bg
+            } else {
+                self.theme.bg
+            };
+
+            for c in 0..self.width {
+                let idx = (row * self.width + c) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = bg;
+                }
             }
 
             for (j, ch) in label.chars().enumerate() {
@@ -213,6 +222,41 @@ impl crate::framework::widget::Widget for ContextMenu {
         }
 
         plane
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        if self.items.is_empty() {
+            return false;
+        }
+        match key.code {
+            KeyCode::Up => {
+                if self.selected > 0 {
+                    self.selected -= 1;
+                } else {
+                    self.selected = self.items.len() - 1;
+                }
+                self.dirty = true;
+                true
+            }
+            KeyCode::Down => {
+                self.selected = (self.selected + 1) % self.items.len();
+                self.dirty = true;
+                true
+            }
+            KeyCode::Enter => {
+                self.dirty = true;
+                true
+            }
+            KeyCode::Esc => {
+                self.visible = false;
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
     }
 
     fn handle_mouse(
