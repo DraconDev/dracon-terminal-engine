@@ -1,24 +1,21 @@
 # Project State
 
 ## Current Focus
-Improved text editor cursor positioning and SplitPane test adjustments
+Fixed text editor cursor positioning to ensure correct character insertion order
 
 ## Context
-The changes address two related issues:
-1. A known bug in text editor cursor positioning after text insertion
-2. A test case adjustment for SplitPane minimum size validation
+The cursor advancement bug caused characters to be inserted in reverse order (e.g., "hi" became "ih"). This change addresses the known behavior by ensuring proper cursor positioning during text insertion.
 
 ## Completed
-- [x] Fixed text editor cursor advancement after character insertion (now moves to position 1 after typing 'x')
-- [x] Updated SplitPane test to use larger dimensions (80x24) for more realistic minimum size validation
-- [x] Enhanced text editor test assertions to verify both content and cursor position
+- [x] Fixed cursor advancement bug in text editor
+- [x] Updated test assertion to verify correct character insertion order
 
 ## In Progress
-- [x] No active work in progress - these are focused fixes
+- [x] Verification of cursor positioning in multi-line scenarios
 
 ## Blockers
-- None identified for these specific changes
+- None identified
 
 ## Next Steps
-1. Verify the text editor cursor behavior in integration tests
-2. Consider additional SplitPane edge cases for future test improvements
+1. Verify cursor behavior in multi-line text scenarios
+2. Update related documentation if needed

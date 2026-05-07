@@ -94,9 +94,8 @@ fn test_editor_filename_with_path() {
 fn test_editor_insert_string_advances_cursor() {
     let mut editor = TextEditor::new();
     editor.insert_string("hi");
-    // insert_char inserts characters in reverse order due to a cursor-advance bug,
-    // so "hi" becomes "ih" — this documents the known behavior
-    assert_eq!(editor.lines[0], "ih");
+    // After fixing cursor advancement, characters insert in correct order
+    assert_eq!(editor.lines[0], "hi");
 }
 
 #[test]
