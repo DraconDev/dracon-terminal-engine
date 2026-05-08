@@ -296,10 +296,22 @@ impl SystemData {
                 };
                 if let Ok(content) = fs::read_to_string(format!("/proc/{}/stat", pid)) {
                     let paren = content.find('(').unwrap_or(0);
-                    let end_paren = content.find(')').unwrap_or(content.len());
-                    if end_paren > paren && paren > 0 {
+                    if paren > 0 {
+                        let after_paren = &content[paren + 1..];
+                        // Find ") " where the char after is a valid process state
+                        let mut end_paren = None;
+                        for (i, window) in after_paren.as_bytes().windows(3).enumerate() {
+                            if window[0] == b')' && window[1] == b' ' {
+                                let state_char = window[2] as char;
+                                if "RSDZTWtXxPKIW".contains(state_char) {
+                                    end_paren = Some(paren + 1 + i);
+                                    break;
+                                }
+                            }
+                        }
+                        let end_paren = end_paren.unwrap_or(content.len());
                         let pname = content[paren + 1..end_paren].to_string();
-                        let rest: Vec<&str> = content[end_paren + 1..].split_whitespace().collect();
+                        let rest: Vec<&str> = content[end_paren + 2..].split_whitespace().collect();
                         if rest.len() >= 12 {
                             let ppid: u32 = rest.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
                             let utime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
@@ -334,7 +346,6 @@ impl SystemData {
                     .partial_cmp(&a.cpu_percent)
                     .unwrap_or(std::cmp::Ordering::Equal)
             });
-        self.processes.truncate(20);
     }
 
     fn read_hostname(&self) -> String {
