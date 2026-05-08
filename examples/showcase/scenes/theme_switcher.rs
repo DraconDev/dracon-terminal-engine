@@ -136,7 +136,7 @@ impl Scene for ThemeSwitcherScene {
 
         // Theme grid (4 columns)
         let cols: u16 = 4;
-        let rows = (THEMES.len() as u16 + cols - 1) / cols;
+        let _rows = (THEMES.len() as u16 + cols - 1) / cols;
         let swatch_w = (area.width.saturating_sub(2)) / cols;
         let swatch_h = 3u16;
         let start_y = 2u16;
