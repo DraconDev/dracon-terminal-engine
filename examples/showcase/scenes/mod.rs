@@ -1,3 +1,4 @@
+pub mod form_demo;
 pub mod theme_switcher;
 pub mod widget_gallery;
 
