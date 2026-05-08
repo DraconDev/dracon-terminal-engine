@@ -1,3 +1,4 @@
+pub mod theme_switcher;
 pub mod widget_gallery;
 
 /// Which action a scene wants the router to take.
