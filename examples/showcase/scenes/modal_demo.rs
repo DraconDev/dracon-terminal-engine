@@ -6,8 +6,8 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Button, ConfirmDialog, ConfirmResult, Label, Modal, Toast, ToastKind};
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::{ConfirmDialog, Modal};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -190,8 +190,8 @@ impl Scene for ModalDemoScene {
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
-                draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
-                draw_text(plane, hx + 16, row, desc, t.fg, t.surface_elevated, false);
+                draw_text(&mut plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
+                draw_text(&mut plane, hx + 16, row, desc, t.fg, t.surface_elevated, false);
             }
         }
 
