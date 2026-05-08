@@ -380,7 +380,6 @@ fn format_uptime(seconds: u64) -> String {
 /// A node in the process tree view.
 struct TreeNode {
     proc_idx: usize,
-    depth: usize,
     /// Pre-computed tree connector prefix (e.g. "│  ├─ ", "   └─ ")
     prefix: String,
 }
@@ -433,7 +432,6 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<TreeNode> {
 
         result.push(TreeNode {
             proc_idx: idx,
-            depth,
             prefix,
         });
 
