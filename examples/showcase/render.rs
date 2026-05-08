@@ -102,14 +102,13 @@ pub fn render_features_bar(
     y: usize,
     phase: f64,
 ) -> usize {
-    let t = &theme;
     let features = [
-        ("37", "Widgets", &t.info),
-        ("20", "Themes", &t.secondary),
-        ("🎨", "Animations", &t.warning),
-        ("🖱️", "Drag & Drop", &t.success),
-        ("⌨️", "Keyboard", &t.primary),
-        ("🖼️", "Sixel", &t.info),
+        ("37", "Widgets", theme.info),
+        ("20", "Themes", theme.secondary),
+        ("🎨", "Animations", theme.warning),
+        ("🖱️", "Drag & Drop", theme.success),
+        ("⌨️", "Keyboard", theme.primary),
+        ("🖼️", "Sixel", theme.info),
     ];
 
     let mut x = 2usize;
@@ -121,18 +120,18 @@ pub fn render_features_bar(
         // Separator
         if i > 0 {
             let sep = " │ ";
-            draw_text(plane, x, y, sep, t.outline, t.bg, false);
+            draw_text(plane, x, y, sep, theme.outline, theme.bg, false);
             x += sep.len();
         }
 
         // Icon with pulse effect
-        let icon_fg = if is_pulse_high { **color } else { t.fg_muted };
-        draw_text(plane, x, y, icon, icon_fg, t.bg, is_pulse_high);
+        let icon_fg = if is_pulse_high { *color } else { theme.fg_muted };
+        draw_text(plane, x, y, icon, icon_fg, theme.bg, is_pulse_high);
         x += icon.chars().count();
 
         // Label
-        let label_fg = if is_pulse_high { t.fg } else { t.fg_muted };
-        draw_text(plane, x, y, label, label_fg, t.bg, false);
+        let label_fg = if is_pulse_high { theme.fg } else { theme.fg_muted };
+        draw_text(plane, x, y, label, label_fg, theme.bg, false);
         x += label.len();
     }
 
