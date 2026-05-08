@@ -328,7 +328,7 @@ impl Widget for Showcase {
             draw_text(
                 &mut plane,
                 2,
-                5,
+                6,
                 &feedback_text,
                 feedback_color,
                 t.bg,
@@ -337,7 +337,7 @@ impl Widget for Showcase {
         }
 
         // Primitives bar - live widget demo
-        let prim_y = 4usize;
+        let prim_y = 5usize;
         let state_0 = if self.primitive_toggle {
             " �checkmark Toggle"
         } else {
