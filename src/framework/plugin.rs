@@ -115,6 +115,7 @@ mod tests {
     use super::*;
     use crate::compositor::{Cell, Color};
     use crate::framework::widget::Widget;
+    use ratatui::layout::Rect;
 
     struct TestWidget {
         id: WidgetId,
