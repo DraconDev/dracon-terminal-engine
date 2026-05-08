@@ -102,14 +102,14 @@ pub fn render_features_bar(
     y: usize,
     phase: f64,
 ) -> usize {
-    let t = theme;
+    let t = &theme;
     let features = [
-        ("37", "Widgets", t.info),
-        ("20", "Themes", t.secondary),
-        ("🎨", "Animations", t.warning),
-        ("🖱️", "Drag & Drop", t.success),
-        ("⌨️", "Keyboard", t.primary),
-        ("🖼️", "Sixel", t.info),
+        ("37", "Widgets", &t.info),
+        ("20", "Themes", &t.secondary),
+        ("🎨", "Animations", &t.warning),
+        ("🖱️", "Drag & Drop", &t.success),
+        ("⌨️", "Keyboard", &t.primary),
+        ("🖼️", "Sixel", &t.info),
     ];
 
     let mut x = 2usize;
@@ -126,7 +126,7 @@ pub fn render_features_bar(
         }
 
         // Icon with pulse effect
-        let icon_fg = if is_pulse_high { color } else { t.fg_muted };
+        let icon_fg = if is_pulse_high { **color } else { t.fg_muted };
         draw_text(plane, x, y, icon, icon_fg, t.bg, is_pulse_high);
         x += icon.chars().count();
 
