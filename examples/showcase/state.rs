@@ -75,6 +75,7 @@ impl Showcase {
         scene_router.register("widget_gallery", Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(Theme::nord())));
         scene_router.register("theme_switcher", Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(Theme::nord())));
         scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(Theme::nord())));
+        scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
 
         Self {
             examples,
@@ -180,7 +181,7 @@ impl Showcase {
     }
 
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo")
+        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator")
     }
 
     pub fn launch_selected(&mut self) {

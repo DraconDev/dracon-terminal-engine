@@ -1,5 +1,6 @@
 pub mod form_demo;
 pub mod theme_switcher;
+pub mod tree_navigator;
 pub mod widget_gallery;
 
 /// Which action a scene wants the router to take.
