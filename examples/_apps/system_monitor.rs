@@ -772,37 +772,55 @@ impl Widget for SystemMonitor {
             );
         } else {
             let max_visible = (list_h as usize).saturating_sub(3);
+            let tree_view = if self.tree_mode {
+                build_process_tree(&self.data.processes)
+            } else {
+                (0..self.data.processes.len()).map(|i| (i, 0)).collect()
+            };
+            let total_items = tree_view.len();
             for i in 0..max_visible {
-                let proc_idx = self.process_scroll + i;
+                let view_idx = self.process_scroll + i;
                 let row_y = header_y + 1 + i as u16;
                 if row_y >= list_y + list_h - 1 {
                     break;
                 }
-                if let Some(proc) = self.data.processes.get(proc_idx) {
-                    let is_selected = self.selected_process == Some(proc_idx);
-                    let is_hovered = self.hovered_process == Some(proc_idx);
-                    let (fg, bg) = if is_selected {
-                        (t.fg_on_accent, t.primary_active)
-                    } else if is_hovered {
-                        (t.fg, t.hover_bg)
-                    } else {
-                        (t.fg, t.surface)
-                    };
-                    let name = if proc.name.len() > 16 {
-                        &proc.name[..16]
-                    } else {
-                        &proc.name
-                    };
-                    let line = format!(
-                        " {:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
-                        proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
-                    );
-                    draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
+                if let Some(&(proc_idx, depth)) = tree_view.get(view_idx) {
+                    if let Some(proc) = self.data.processes.get(proc_idx) {
+                        let is_selected = self.selected_process == Some(proc_idx);
+                        let is_hovered = self.hovered_process == Some(proc_idx);
+                        let (fg, bg) = if is_selected {
+                            (t.fg_on_accent, t.primary_active)
+                        } else if is_hovered {
+                            (t.fg, t.hover_bg)
+                        } else {
+                            (t.fg, t.surface)
+                        };
+                        let indent = if self.tree_mode {
+                            "  ".repeat(depth)
+                        } else {
+                            String::new()
+                        };
+                        let prefix = if self.tree_mode && depth > 0 {
+                            "└─ "
+                        } else {
+                            ""
+                        };
+                        let name = if proc.name.len() > 16 {
+                            &proc.name[..16]
+                        } else {
+                            &proc.name
+                        };
+                        let line = format!(
+                            " {}{}{:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
+                            indent, prefix, proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
+                        );
+                        draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
+                    }
                 }
             }
 
             // Scrollbar indicator
-            if self.data.processes.len() > max_visible {
+            if total_items > max_visible {
                 let sb_x = area.width - 2;
                 let content_h = max_visible as u16;
                 let thumb_h = (max_visible as f32 / self.data.processes.len() as f32
