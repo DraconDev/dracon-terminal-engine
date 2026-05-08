@@ -89,10 +89,8 @@ struct ProcessInfo {
     ppid: Option<u32>,
     name: String,
     cpu_percent: f32,
-    mem_kb: u64,
-    user: String,
-    status: char,
-    command: String,
+    mem_mb: f32,
+    state: String,
 }
 
 struct SystemData {
