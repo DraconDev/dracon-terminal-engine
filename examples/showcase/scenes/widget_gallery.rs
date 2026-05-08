@@ -234,10 +234,6 @@ impl Scene for WidgetGalleryScene {
         }
 
         match key.code {
-            KeyCode::Char('b') | KeyCode::Char('B') | KeyCode::Esc => {
-                *self.action.borrow_mut() = SceneAction::Pop;
-                true
-            }
             KeyCode::Char('?') => { self.show_help = true; true }
             KeyCode::Tab | KeyCode::Char('t') => { self.cycle_theme(); true }
             KeyCode::Right | KeyCode::Down => {
