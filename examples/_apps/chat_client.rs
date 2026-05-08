@@ -64,7 +64,6 @@ struct ChatState {
 const ZONE_EMOJI_BTN: usize = 1;
 const ZONE_SEND_BTN: usize = 2;
 const ZONE_SETTINGS_BTN: usize = 3;
-const ZONE_INPUT: usize = 4;
 
 impl ChatState {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
