@@ -77,7 +77,7 @@ impl Showcase {
         scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(Theme::nord())));
         scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
         scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(Theme::nord())));
-        scene_router.set_default_transition(SceneTransition::Fade);
+        scene_router.with_default_transition(SceneTransition::Fade);
 
         Self {
             examples,
