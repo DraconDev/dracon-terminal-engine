@@ -366,6 +366,66 @@ fn format_uptime(seconds: u64) -> String {
     }
 }
 
+/// Build a flat list of (process_index, depth) for tree view rendering.
+fn build_process_tree(processes: &[ProcessInfo]) -> Vec<(usize, usize)> {
+    // Build parent -> children mapping
+    let mut children: std::collections::HashMap<u32, Vec<usize>> = std::collections::HashMap::new();
+    for (idx, proc) in processes.iter().enumerate() {
+        let parent = proc.ppid.unwrap_or(0);
+        children.entry(parent).or_default().push(idx);
+    }
+
+    // Find root processes (ppid = 0 or 1, or parent not in our list)
+    let mut roots: Vec<usize> = Vec::new();
+    for (idx, proc) in processes.iter().enumerate() {
+        let ppid = proc.ppid.unwrap_or(0);
+        if ppid == 0 || ppid == 1 || !processes.iter().any(|p| p.pid == ppid) {
+            roots.push(idx);
+        }
+    }
+    // Sort roots by PID for consistency
+    roots.sort_by_key(|&idx| processes[idx].pid);
+
+    // Depth-first traversal
+    let mut result = Vec::new();
+    fn dfs(
+        idx: usize,
+        depth: usize,
+        processes: &[ProcessInfo],
+        children: &std::collections::HashMap<u32, Vec<usize>>,
+        result: &mut Vec<(usize, usize)>,
+        visited: &mut std::collections::HashSet<u32>,
+    ) {
+        let pid = processes[idx].pid;
+        if !visited.insert(pid) {
+            return; // Avoid cycles
+        }
+        result.push((idx, depth));
+        if let Some(child_indices) = children.get(&pid) {
+            let mut sorted_children = child_indices.clone();
+            sorted_children.sort_by_key(|&ci| processes[ci].pid);
+            for &child_idx in &sorted_children {
+                dfs(child_idx, depth + 1, processes, children, result, visited);
+            }
+        }
+    }
+
+    let mut visited = std::collections::HashSet::new();
+    for &root in &roots {
+        dfs(root, 0, processes, &children, &mut result, &mut visited);
+    }
+
+    // Add any orphaned processes not visited
+    for idx in 0..processes.len() {
+        let pid = processes[idx].pid;
+        if !visited.contains(&pid) {
+            result.push((idx, 0));
+        }
+    }
+
+    result
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // SYSTEM MONITOR WIDGET
 // ═══════════════════════════════════════════════════════════════════════════════
