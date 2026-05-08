@@ -34,6 +34,7 @@ use ratatui::layout::Rect;
 
 mod data;
 mod render;
+mod scenes;
 mod state;
 mod widget;
 use state::Showcase;

@@ -7,9 +7,11 @@ use std::time::{Duration, Instant};
 use dracon_terminal_engine::framework::animation::AnimationManager;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::scene_router::SceneRouter;
 use ratatui::layout::Rect;
 
 use crate::data::ExampleMeta;
+use crate::scenes::widget_gallery::WidgetGalleryScene;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHOWCASE STATE
