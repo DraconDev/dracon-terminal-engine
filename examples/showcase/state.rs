@@ -71,13 +71,13 @@ impl Showcase {
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
-        let mut scene_router = SceneRouter::new();
+        let mut scene_router = SceneRouter::new()
+            .with_default_transition(SceneTransition::Fade);
         scene_router.register("widget_gallery", Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(Theme::nord())));
         scene_router.register("theme_switcher", Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(Theme::nord())));
         scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(Theme::nord())));
         scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
         scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(Theme::nord())));
-        scene_router.with_default_transition(SceneTransition::Fade);
 
         Self {
             examples,
