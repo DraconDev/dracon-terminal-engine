@@ -11,7 +11,10 @@ use dracon_terminal_engine::framework::widgets::{Button, Checkbox, Gauge, Status
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
-const THEMES: &[(&str, fn() -> Theme)] = &[
+/// Type alias for theme factory entries.
+type ThemeEntry = (&'static str, fn() -> Theme);
+
+const THEMES: &[ThemeEntry] = &[
     ("Dark", Theme::dark),
     ("Light", Theme::light),
     ("Dracula", Theme::dracula),
