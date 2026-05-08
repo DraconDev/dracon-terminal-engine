@@ -73,7 +73,8 @@ impl Showcase {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         let mut scene_router = SceneRouter::new();
-        scene_router.register("widget_gallery", Box::new(WidgetGalleryScene::new(Theme::nord())));
+        scene_router.register("widget_gallery", Box::new(scenes::widget_gallery::WidgetGalleryScene::new(Theme::nord())));
+        scene_router.register("theme_switcher", Box::new(scenes::theme_switcher::ThemeSwitcherScene::new(Theme::nord())));
 
         Self {
             examples,
