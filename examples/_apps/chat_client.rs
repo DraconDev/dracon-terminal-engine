@@ -13,7 +13,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -915,7 +915,7 @@ fn main() -> io::Result<()> {
         let area = Rect::new(0, 0, w, h);
 
         // Sync theme from framework
-        let framework_theme = ctx.app_theme();
+        let framework_theme = ctx.theme();
         if framework_theme.name != chat.theme.name {
             chat.theme = *framework_theme;
             chat.dirty = true;
