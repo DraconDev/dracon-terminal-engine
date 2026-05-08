@@ -561,16 +561,6 @@ impl ChatState {
             }
         }
 
-        // Input area bottom divider
-        let divider_row = input_row + 1;
-        for col in 0..area.width {
-            let idx = (divider_row * area.width + col) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
-            }
-        }
-
         // ── Status Bar ────────────────────────────────────────────────────────
         let status_base = ((area.height - status_h) * area.width) as usize;
 
