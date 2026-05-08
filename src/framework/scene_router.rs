@@ -169,6 +169,7 @@ impl SceneRouter {
             transition: RefCell::new(None),
             default_transition: SceneTransition::Fade,
             default_duration_ms: 200.0,
+            last_render: RefCell::new(None),
         }
     }
 
