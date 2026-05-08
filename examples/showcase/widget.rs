@@ -40,11 +40,30 @@ impl Widget for Showcase {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        // If a scene is active, delegate to it
-        if self.scene_router.current().is_some() {
-            let mut router = self.scene_router.clone();
-            router.tick_transition(33.0);
-            return router.render(area);
+        // If a scene is active, delegate to it with title bar
+        if let Some(scene_name) = self.scene_router.current() {
+            let mut plane = self.scene_router.render(area);
+            // Draw scene title bar at top
+            let title = format!("  {} ", scene_name);
+            let t = self.theme;
+            for (i, c) in title.chars().enumerate() {
+                if i < area.width as usize {
+                    let idx = i;
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+            // Fill rest of title bar
+            for x in title.len()..area.width as usize {
+                let idx = x;
+                plane.cells[idx].char = ' ';
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].fg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+            return plane;
         }
 
         let mut plane = Plane::new(0, area.width, area.height);
