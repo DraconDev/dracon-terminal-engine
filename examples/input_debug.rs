@@ -59,6 +59,8 @@ impl InputDebugger {
                     MouseEventKind::Moved => "Moved".to_string(),
                     MouseEventKind::ScrollDown => "ScrollDown".to_string(),
                     MouseEventKind::ScrollUp => "ScrollUp".to_string(),
+                    MouseEventKind::ScrollLeft => "ScrollLeft".to_string(),
+                    MouseEventKind::ScrollRight => "ScrollRight".to_string(),
                 };
                 format!("MOUSE {} at {}, {}", btn, mouse.column, mouse.row)
             }
@@ -88,13 +90,14 @@ impl InputDebugger {
         self.event_count += 1;
     }
 
-    fn render(&self, term: &mut Terminal<io::StdoutLock<'_>>) -> io::Result<()> {
+    fn render(&self) -> String {
         if self.show_help {
-            return self.render_help(term);
+            return self.render_help();
         }
 
         let (w, h) = (80usize, 24usize);
-        write!(term, "\x1b[2J\x1b[H")?;
+        let mut out = String::new();
+        out.push_str("\x1b[2J\x1b[H");
 
         // Header bar
         let elapsed = self.start_time.elapsed().as_secs();
@@ -102,11 +105,11 @@ impl InputDebugger {
             " 󰌌 Input Debugger │ {} events │ {}s │ q:quit ?:help c:clear ",
             self.event_count, elapsed
         );
-        write!(term, "\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w)?;
+        out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w));
 
         // Column headers
-        write!(term, "\x1b[1m{: <24} │ {: <48}\x1b[0m\r\n", "RAW BYTES", "EVENT")?;
-        write!(term, "{:-<80}\r\n", "")?;
+        out.push_str(&format!("\x1b[1m{: <24} │ {: <48}\x1b[0m\r\n", "RAW BYTES", "EVENT"));
+        out.push_str(&format!("{:-<80}\r\n", ""));
 
         // History entries
         let visible_rows = h - 6;
@@ -132,9 +135,12 @@ impl InputDebugger {
                     "\x1b[37m" // White
                 };
                 let raw = self.format_raw_bytes(bytes);
-                write!(term, "\x1b[90m{: <24}\x1b[0m │ {}{: <48}\x1b[0m\r\n", raw, color, event)?;
+                out.push_str(&format!(
+                    "\x1b[90m{: <24}\x1b[0m │ {}{: <48}\x1b[0m\r\n",
+                    raw, color, event
+                ));
             } else {
-                write!(term, "\r\n")?;
+                out.push_str("\r\n");
             }
         }
 
@@ -145,29 +151,30 @@ impl InputDebugger {
             format!("[{}]", total)
         };
         let status = format!(" ↑/↓ scroll {} │ Press keys/mouse to see events ", scroll_info);
-        write!(term, "\x1b[7m{: <width$}\x1b[0m", status, width = w)?;
+        out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m", status, width = w));
 
-        term.flush()
+        out
     }
 
-    fn render_help(&self, term: &mut Terminal<io::StdoutLock<'_>>) -> io::Result<()> {
-        write!(term, "\x1b[2J\x1b[H")?;
-        write!(term, "╭────────────────────────────────────────────────────────────╮\r\n")?;
-        write!(term, "│                Input Debugger Help                         │\r\n")?;
-        write!(term, "├────────────────────────────────────────────────────────────┤\r\n")?;
-        write!(term, "│  \x1b[1mq\x1b[0m        — Quit                                         │\r\n")?;
-        write!(term, "│  \x1b[1m?\x1b[0m        — Toggle this help                            │\r\n")?;
-        write!(term, "│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n")?;
-        write!(term, "│  \x1b[1m↑/↓\x1b[0m      — Scroll history                              │\r\n")?;
-        write!(term, "├────────────────────────────────────────────────────────────┤\r\n")?;
-        write!(term, "│  Events are color-coded:                                   │\r\n")?;
-        write!(term, "│    \x1b[36mKEY\x1b[0m      — Keyboard input                               │\r\n")?;
-        write!(term, "│    \x1b[33mMOUSE\x1b[0m    — Mouse clicks, drags, scroll                   │\r\n")?;
-        write!(term, "│    \x1b[35mFOCUS\x1b[0m    — Window focus in/out                         │\r\n")?;
-        write!(term, "│    \x1b[32mPASTE\x1b[0m    — Bracketed paste                             │\r\n")?;
-        write!(term, "│    \x1b[37mRESIZE\x1b[0m   — Terminal resize                              │\r\n")?;
-        write!(term, "╰────────────────────────────────────────────────────────────╯\r\n")?;
-        term.flush()
+    fn render_help(&self) -> String {
+        let mut out = String::new();
+        out.push_str("\x1b[2J\x1b[H");
+        out.push_str("╭────────────────────────────────────────────────────────────╮\r\n");
+        out.push_str("│                Input Debugger Help                         │\r\n");
+        out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
+        out.push_str("│  \x1b[1mq\x1b[0m        — Quit                                         │\r\n");
+        out.push_str("│  \x1b[1m?\x1b[0m        — Toggle this help                            │\r\n");
+        out.push_str("│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n");
+        out.push_str("│  \x1b[1m↑/↓\x1b[0m      — Scroll history                              │\r\n");
+        out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
+        out.push_str("│  Events are color-coded:                                   │\r\n");
+        out.push_str("│    \x1b[36mKEY\x1b[0m      — Keyboard input                               │\r\n");
+        out.push_str("│    \x1b[33mMOUSE\x1b[0m    — Mouse clicks, drags, scroll                   │\r\n");
+        out.push_str("│    \x1b[35mFOCUS\x1b[0m    — Window focus in/out                         │\r\n");
+        out.push_str("│    \x1b[32mPASTE\x1b[0m    — Bracketed paste                             │\r\n");
+        out.push_str("│    \x1b[37mRESIZE\x1b[0m   — Terminal resize                              │\r\n");
+        out.push_str("╰────────────────────────────────────────────────────────────╯\r\n");
+        out
     }
 }
 
@@ -189,7 +196,8 @@ fn main() -> io::Result<()> {
     let mut debugger = InputDebugger::new();
 
     // Initial render
-    debugger.render(&mut term)?;
+    write!(term, "{}", debugger.render())?;
+    term.flush()?;
 
     loop {
         let n = handle.read(&mut buf)?;
@@ -226,12 +234,14 @@ fn main() -> io::Result<()> {
                             debugger.scroll_offset += 1;
                         }
                     }
+                    Event::Unsupported(_) => {}
                     _ => {
                         debugger.add_event(raw_bytes, &event);
                     }
                 }
 
-                debugger.render(&mut term)?;
+                write!(term, "{}", debugger.render())?;
+                term.flush()?;
             }
         }
     }

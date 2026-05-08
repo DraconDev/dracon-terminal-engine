@@ -1,24 +1,15 @@
 # Project State
 
 ## Current Focus
-Added a comprehensive input debugger tool for terminal event inspection
+Enhanced mouse event handling in the input debugger with support for horizontal scrolling
 
 ## Context
-To improve terminal input handling and debugging capabilities, this commit adds a dedicated input debugger that:
-- Captures and displays raw terminal input bytes alongside parsed events
-- Provides color-coded event visualization
-- Includes navigation controls and help system
-- Tracks event history with scrollable display
+The input debugger tool needed to properly handle horizontal mouse scrolling events which were previously unsupported. This change ensures all mouse events are properly captured and displayed.
 
 ## Completed
-- [x] Created InputDebugger struct with history tracking and display state
-- [x] Implemented event formatting with color coding
-- [x] Added terminal input mode configuration (SGR mouse, focus reporting, paste mode)
-- [x] Built interactive UI with header, event display, and status bar
-- [x] Added help overlay with keyboard shortcuts and event type explanations
-- [x] Implemented scroll navigation through event history
-- [x] Added clear history functionality
-- [x] Included performance metrics (event count, elapsed time)
+- [x] Added support for horizontal mouse scrolling events (ScrollLeft/ScrollRight)
+- [x] Refactored rendering logic to build output strings instead of writing directly to terminal
+- [x] Updated the help text to include horizontal scrolling in the key bindings section
 
 ## In Progress
 - [ ] No active work in progress
@@ -27,6 +18,5 @@ To improve terminal input handling and debugging capabilities, this commit adds 
 - None identified
 
 ## Next Steps
-1. Add unit tests for input parsing and display logic
-2. Consider adding event filtering capabilities
-3. Explore adding timestamp display for events
+1. Verify all mouse events are properly captured and displayed
+2. Test horizontal scrolling behavior in different terminal environments
