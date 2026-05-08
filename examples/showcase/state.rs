@@ -72,6 +72,9 @@ impl Showcase {
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
+        let mut scene_router = SceneRouter::new();
+        scene_router.register("widget_gallery", WidgetGalleryScene::new());
+
         Self {
             examples,
             filtered,
@@ -115,6 +118,7 @@ impl Showcase {
             card_hover_anim: Vec::new(),
             toast_anim: None,
             returned_from,
+            scene_router,
         }
     }
 
