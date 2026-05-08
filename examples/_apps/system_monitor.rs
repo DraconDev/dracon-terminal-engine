@@ -24,6 +24,8 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fs;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 const THEMES: &[&str] = &[
@@ -379,10 +381,11 @@ struct SystemMonitor {
     process_scroll: usize,
     show_help: bool,
     area: Rect,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl SystemMonitor {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         let mut data = SystemData::new();
         data.refresh();
         let theme = Theme::nord();
@@ -412,6 +415,7 @@ impl SystemMonitor {
             process_scroll: 0,
             show_help: false,
             area: Rect::new(0, 0, 80, 24),
+            should_quit,
         }
     }
 
@@ -850,7 +854,10 @@ impl Widget for SystemMonitor {
             return true;
         }
         match key.code {
-            KeyCode::Char('q') => std::process::exit(0),
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
             KeyCode::Char('t') => {
                 self.cycle_theme();
                 true
@@ -1203,7 +1210,10 @@ fn main() -> std::io::Result<()> {
     println!("System Monitor — Real /proc data | t:theme ?:help q:quit");
     std::thread::sleep(Duration::from_millis(300));
 
-    let monitor = Rc::new(RefCell::new(SystemMonitor::new()));
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit)));
     let mon_for_tick = Rc::clone(&monitor);
     let mon_for_input = Rc::clone(&monitor);
 
@@ -1220,6 +1230,10 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
         let mut m = mon_for_tick.borrow_mut();
         m.data.refresh();
         m.update_gauges();

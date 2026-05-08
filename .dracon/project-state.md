@@ -1,20 +1,22 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Implement graceful shutdown for the system monitor app
 
 ## Context
-This change was prompted by recent work on visual feedback and navigation improvements in the showcase examples. The consistent background color implementation required dependency updates to ensure proper rendering.
+The system monitor app previously used `std::process::exit(0)` for quitting, which is abrupt. This change implements a more controlled shutdown process using an atomic flag to signal the main loop to exit cleanly.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Added `Arc<AtomicBool>` for thread-safe quit signaling
+- [x] Modified quit handler to set the atomic flag instead of exiting immediately
+- [x] Added main loop check for the quit flag to properly terminate the application
 
 ## In Progress
-- [x] No active work in progress beyond this Cargo.lock update
+- [ ] No active work in progress
 
 ## Blockers
-- None identified for this specific change
+- None
 
 ## Next Steps
-1. Verify that the updated dependencies do not introduce breaking changes
-2. Continue with ongoing work on visual feedback and navigation features
+1. Verify graceful shutdown works in all scenarios
+2. Consider adding shutdown animations or cleanup tasks if needed
