@@ -33,6 +33,7 @@ use crate::framework::theme::Theme;
 use crate::input::event::{KeyEvent, MouseEventKind};
 use ratatui::layout::Rect;
 use std::any::Any;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -131,17 +132,23 @@ pub enum NavigationEvent {
 ///
 /// The router maintains a registry of all available scenes and a navigation
 /// stack. Only the top scene on the stack is active.
+///
+/// # Interior Mutability
+///
+/// SceneRouter uses interior mutability for `transition` and `dirty` fields
+/// so that `render(&self)` can advance transitions without requiring `&mut self`.
+/// This allows the router to be used from Widget::render which takes `&self`.
 pub struct SceneRouter {
     /// Registry of all available scenes by ID.
     scenes: HashMap<String, Box<dyn Scene>>,
     /// Navigation stack. Top is current scene.
     stack: Vec<String>,
     /// Whether the current scene needs rendering.
-    dirty: bool,
+    dirty: Cell<bool>,
     /// Theme reference for propagation.
     theme: Option<Theme>,
     /// Active transition (if any).
-    transition: Option<TransitionState>,
+    transition: RefCell<Option<TransitionState>>,
     /// Default transition for all navigation.
     default_transition: SceneTransition,
     /// Default transition duration in milliseconds.
@@ -154,9 +161,9 @@ impl SceneRouter {
         Self {
             scenes: HashMap::new(),
             stack: Vec::new(),
-            dirty: false,
+            dirty: Cell::new(false),
             theme: None,
-            transition: None,
+            transition: RefCell::new(None),
             default_transition: SceneTransition::Fade,
             default_duration_ms: 200.0,
         }
@@ -204,7 +211,7 @@ impl SceneRouter {
         // Start transition if we have a current scene
         if let Some(current_id) = self.stack.last().cloned() {
             if transition != SceneTransition::None {
-                self.transition = Some(TransitionState {
+                *self.transition.borrow_mut() = Some(TransitionState {
                     from_scene: current_id,
                     to_scene: id.to_string(),
                     progress: 0.0,
@@ -232,7 +239,7 @@ impl SceneRouter {
             }
         }
 
-        self.dirty = true;
+        self.dirty.set(true);
     }
 
     /// Pushes a scene onto the navigation stack with the default transition.
@@ -266,7 +273,7 @@ impl SceneRouter {
             }
         }
 
-        self.dirty = true;
+        self.dirty.set(true);
         true
     }
 
@@ -297,7 +304,7 @@ impl SceneRouter {
             }
         }
 
-        self.dirty = true;
+        self.dirty.set(true);
     }
 
     /// Navigates to a scene without pushing to the stack.
@@ -325,7 +332,7 @@ impl SceneRouter {
             }
         }
 
-        self.dirty = true;
+        self.dirty.set(true);
     }
 
     /// Navigates to a deep-linked path like "settings/profile".
@@ -384,17 +391,28 @@ impl SceneRouter {
         self.scenes.get_mut(id).map(|s| s.as_mut())
     }
 
-    /// Delegates render to the current scene.
+    // ── Rendering ───────────────────────────────────────────────────────────
+
+    /// Advances any active transition and delegates render to the current scene.
+    ///
+    /// Transitions are automatically ticked inside render using a default
+    /// delta time of 33ms (assumes 30fps). For precise timing, call
+    /// `tick_transition()` manually before `render()`.
     pub fn render(&self, area: Rect) -> Plane {
-        // If we have an active transition, blend both scenes
-        if let Some(ref trans) = self.transition {
-            let from_plane = self.scenes.get(&trans.from_scene)
-                .map(|s| s.render(area))
-                .unwrap_or_else(|| Plane::new(0, area.width, area.height));
-            let to_plane = self.scenes.get(&trans.to_scene)
-                .map(|s| s.render(area))
-                .unwrap_or_else(|| Plane::new(0, area.width, area.height));
-            return Self::blend_planes(from_plane, to_plane, trans.progress, trans.transition);
+        // Advance transition if active (uses default 33ms per frame)
+        let transition_active = self.tick_transition_internal(33.0);
+
+        if transition_active {
+            let trans = self.transition.borrow();
+            if let Some(ref trans) = *trans {
+                let from_plane = self.scenes.get(&trans.from_scene)
+                    .map(|s| s.render(area))
+                    .unwrap_or_else(|| Plane::new(0, area.width, area.height));
+                let to_plane = self.scenes.get(&trans.to_scene)
+                    .map(|s| s.render(area))
+                    .unwrap_or_else(|| Plane::new(0, area.width, area.height));
+                return Self::blend_planes(from_plane, to_plane, trans.progress, trans.transition);
+            }
         }
 
         if let Some(id) = self.stack.last() {
@@ -406,16 +424,25 @@ impl SceneRouter {
     }
 
     /// Advances any active transition by the given delta time in milliseconds.
-    /// Call this every frame from your app's on_tick handler.
+    ///
+    /// For apps with access to actual frame delta time, call this manually
+    /// before `render()` for precise transition timing.
     pub fn tick_transition(&mut self, dt_ms: f32) -> bool {
-        if let Some(ref mut trans) = self.transition {
+        self.tick_transition_internal(dt_ms)
+    }
+
+    fn tick_transition_internal(&self, dt_ms: f32) -> bool {
+        let mut trans_opt = self.transition.borrow_mut();
+        if let Some(ref mut trans) = *trans_opt {
             trans.elapsed_ms += dt_ms;
             trans.progress = (trans.elapsed_ms / trans.duration_ms).min(1.0);
 
             if trans.progress >= 1.0 {
-                self.transition = None;
+                *trans_opt = None;
+                self.dirty.set(true);
+                return false;
             }
-            self.dirty = true;
+            self.dirty.set(true);
             return true;
         }
         false
@@ -423,7 +450,7 @@ impl SceneRouter {
 
     /// Returns true if a transition is currently active.
     pub fn is_transitioning(&self) -> bool {
-        self.transition.is_some()
+        self.transition.borrow().is_some()
     }
 
     fn blend_planes(from: Plane, to: Plane, progress: f32, transition: SceneTransition) -> Plane {
@@ -433,14 +460,11 @@ impl SceneRouter {
 
         match transition {
             SceneTransition::Fade => {
+                // Dithered crossfade: cells gradually switch from -> to
+                let threshold = (progress * 10.0) as u8;
                 for i in 0..from.cells.len().min(to.cells.len()) {
-                    let from_cell = &from.cells[i];
-                    let to_cell = &to.cells[i];
-                    let use_to = progress > 0.5;
-                    result.cells[i] = if use_to { to_cell.clone() } else { from_cell.clone() };
-                    if progress > 0.3 && progress < 0.7 {
-                        result.cells[i].bg = if use_to { to_cell.bg } else { from_cell.bg };
-                    }
+                    let use_to = (i % 10) < threshold as usize || progress >= 1.0;
+                    result.cells[i] = if use_to { to.cells[i].clone() } else { from.cells[i].clone() };
                 }
             }
             SceneTransition::SlideLeft => {
@@ -497,6 +521,8 @@ impl SceneRouter {
         result
     }
 
+    // ── Input Delegation ────────────────────────────────────────────────────
+
     /// Delegates keyboard input to the current scene.
     pub fn handle_key(&mut self, key: KeyEvent) -> bool {
         if let Some(id) = self.stack.last().cloned() {
@@ -523,12 +549,12 @@ impl SceneRouter {
         for scene in self.scenes.values_mut() {
             scene.on_theme_change(theme);
         }
-        self.dirty = true;
+        self.dirty.set(true);
     }
 
     /// Returns true if the current scene needs rendering.
     pub fn needs_render(&self) -> bool {
-        if self.dirty {
+        if self.dirty.get() {
             return true;
         }
         if let Some(id) = self.stack.last() {
@@ -541,12 +567,12 @@ impl SceneRouter {
 
     /// Marks the router as dirty.
     pub fn mark_dirty(&mut self) {
-        self.dirty = true;
+        self.dirty.set(true);
     }
 
     /// Clears the dirty flag.
     pub fn clear_dirty(&mut self) {
-        self.dirty = false;
+        self.dirty.set(false);
     }
 }
 
