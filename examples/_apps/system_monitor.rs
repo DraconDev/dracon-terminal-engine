@@ -301,8 +301,9 @@ impl SystemData {
                         let pname = content[paren + 1..end_paren].to_string();
                         let rest: Vec<&str> = content[end_paren + 1..].split_whitespace().collect();
                         if rest.len() >= 12 {
-                            let utime: u64 = rest.get(10).and_then(|s| s.parse().ok()).unwrap_or(0);
-                            let stime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
+                            let ppid: u32 = rest.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
+                            let utime: u64 = rest.get(11).and_then(|s| s.parse().ok()).unwrap_or(0);
+                            let stime: u64 = rest.get(12).and_then(|s| s.parse().ok()).unwrap_or(0);
                             let state = rest.first().copied().unwrap_or("?").to_string();
                             let mem_mb: f32 = fs::read_to_string(format!("/proc/{}/status", pid))
                                 .ok()
@@ -316,6 +317,7 @@ impl SystemData {
                                 / 1024.0;
                             self.processes.push(ProcessInfo {
                                 pid,
+                                ppid: if ppid > 0 { Some(ppid) } else { None },
                                 name: pname,
                                 cpu_percent: ((utime + stime) as f32 / 100.0).clamp(0.0, 100.0),
                                 mem_mb,
