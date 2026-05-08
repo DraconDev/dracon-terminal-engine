@@ -258,7 +258,7 @@ impl Scene for WidgetGalleryScene {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
                 self.selected = slot;
             }
-            let rect = self.slot_rect(slot, self.area());
+            let rect = self.slot_rect(slot, self.area.get());
             let rel_col = col.saturating_sub(rect.x + 1);
             let rel_row = row.saturating_sub(rect.y + 2);
             return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
