@@ -51,7 +51,7 @@ impl Post {
 
 fn fetch_posts() -> Result<Vec<Post>, String> {
     let output = Command::new("curl")
-        .args(&["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+        .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
         .output()
         .map_err(|e| format!("Failed to run curl: {}", e))?;
 

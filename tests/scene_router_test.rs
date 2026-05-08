@@ -3,7 +3,7 @@
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent};
 use ratatui::layout::Rect;
 
 // ═══════════════════════════════════════════════════════════════════════════════
