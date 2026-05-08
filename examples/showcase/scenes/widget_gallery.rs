@@ -281,16 +281,6 @@ impl Scene for WidgetGalleryScene {
     fn clear_dirty(&mut self) {}
 }
 
-impl WidgetGalleryScene {
-    /// Consume the pending action (called by the showcase each frame).
-    pub fn take_action(&self) -> SceneAction {
-        self.action.borrow().clone()
-    }
-
-    /// Override the area getter for mouse calculations.
-    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // RENDERING HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
