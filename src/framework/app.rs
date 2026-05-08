@@ -715,7 +715,11 @@ impl<'a> Ctx<'a> {
 
     /// Re-enter raw mode + alternate screen after suspend_terminal().
     pub fn resume_terminal(&mut self) -> io::Result<()> {
-        self.terminal.resume()
+        self.terminal.resume()?;
+        // Force full redraw — terminal was externally cleared
+        self.compositor.invalidate_last_frame();
+        self.dirty_tracker.mark_all_dirty();
+        Ok(())
     }
 
     /// Sets the focused widget by ID.
