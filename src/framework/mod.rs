@@ -26,15 +26,17 @@ pub mod app;
 pub mod command;
 pub mod dirty_regions;
 pub mod dragdrop;
+pub mod event_bus;
 pub mod event_dispatcher;
 pub mod focus;
 pub mod hitzone;
 pub mod layout;
+pub mod plugin;
 pub mod scroll;
-pub mod sixel;
-/// The theme module.
+pub mod scene_router;
 pub mod theme;
 pub mod widget;
+pub mod widget_container;
 pub mod widgets;
 
 /// The prelude module.
@@ -50,10 +52,13 @@ pub mod prelude {
         },
         dirty_regions::{DirtyRegion, DirtyRegionTracker},
         dragdrop::{DragGhost, DragManager, DragPhase},
+        event_bus::{EventBus, Reactive, SubscriptionId},
         focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         layout::{Constraint, Layout},
+        plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
+        scene_router::{NavigationEvent, Scene, SceneRouter},
         theme::Theme,
         widgets::*,
     };

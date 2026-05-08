@@ -1,7 +1,7 @@
 //! Color themes for terminal UI.
 //!
-//! Provides [`crate::framework::theme::Theme`] with 20 built-in themes: `dark`, `light`, `cyberpunk`,
-//! `dracula`, `nord`, `catppuccin_mocha`, `gruvbox_dark`, `tokyo_night`,
+//! Provides [`crate::framework::theme::Theme`] with 21 built-in themes: `dark`, `light`, `high_contrast`,
+//! `cyberpunk`, `dracula`, `nord`, `catppuccin_mocha`, `gruvbox_dark`, `tokyo_night`,
 //! `solarized_dark`, `solarized_light`, `one_dark`, `rose_pine`, `kanagawa`,
 //! `everforest`, `monokai`, `warm`, `cool`, `forest`, `sunset`, `mono`.
 //!
@@ -198,6 +198,55 @@ impl Theme {
             focus_bg: Color::Rgb(230, 230, 240),
             focus_border: Color::Rgb(0, 100, 180),
             scrollbar_width: 1,
+        }
+    }
+
+    /// Creates a high-contrast theme optimized for accessibility.
+    ///
+    /// Uses pure black and white with vivid, distinguishable colors.
+    /// Ideal for users with low vision or color blindness.
+    pub fn high_contrast() -> Self {
+        Self {
+            name: "high_contrast",
+            kind: ThemeKind::Dark,
+            bg: Color::Rgb(0, 0, 0),
+            surface: Color::Rgb(20, 20, 20),
+            surface_elevated: Color::Rgb(40, 40, 40),
+            fg: Color::Rgb(255, 255, 255),
+            fg_muted: Color::Rgb(200, 200, 200),
+            fg_subtle: Color::Rgb(160, 160, 160),
+            fg_on_accent: Color::Rgb(0, 0, 0),
+            primary: Color::Rgb(0, 160, 255),
+            primary_hover: Color::Rgb(50, 180, 255),
+            primary_active: Color::Rgb(0, 130, 220),
+            secondary: Color::Rgb(255, 200, 0),
+            secondary_hover: Color::Rgb(255, 220, 50),
+            secondary_active: Color::Rgb(220, 180, 0),
+            outline: Color::Rgb(255, 255, 255),
+            outline_variant: Color::Rgb(180, 180, 180),
+            divider: Color::Rgb(120, 120, 120),
+            error: Color::Rgb(255, 50, 50),
+            error_bg: Color::Rgb(60, 0, 0),
+            success: Color::Rgb(50, 255, 50),
+            success_bg: Color::Rgb(0, 40, 0),
+            warning: Color::Rgb(255, 255, 0),
+            warning_bg: Color::Rgb(60, 60, 0),
+            info: Color::Rgb(0, 200, 255),
+            info_bg: Color::Rgb(0, 30, 60),
+            selection_bg: Color::Rgb(0, 100, 200),
+            selection_fg: Color::Rgb(255, 255, 255),
+            input_bg: Color::Rgb(0, 0, 0),
+            input_fg: Color::Rgb(255, 255, 255),
+            input_border: Color::Rgb(255, 255, 255),
+            scrollbar_track: Color::Rgb(60, 60, 60),
+            scrollbar_thumb: Color::Rgb(255, 255, 255),
+            scrollbar_thumb_hover: Color::Rgb(0, 200, 255),
+            disabled_fg: Color::Rgb(120, 120, 120),
+            disabled_bg: Color::Rgb(40, 40, 40),
+            hover_bg: Color::Rgb(60, 60, 60),
+            focus_bg: Color::Rgb(0, 60, 120),
+            focus_border: Color::Rgb(0, 200, 255),
+            scrollbar_width: 2,
         }
     }
 

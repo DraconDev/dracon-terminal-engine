@@ -91,8 +91,7 @@ impl FileManagerApp {
     fn refresh(&mut self) {
         let path = PathBuf::from(self.crumbs.join("/"));
         self.entries = read_dir(&path);
-        self.list = List::new(self.entries.clone());
-        self.list.on_theme_change(&self.theme);
+        self.list.set_items(self.entries.clone());
         self.selected = 0;
         self.scroll_offset = 0;
         self.dirty = true;

@@ -108,6 +108,12 @@ mod tests {
             self.id
         }
 
+        fn area(&self) -> Rect {
+            Rect::new(0, 0, 1, 1)
+        }
+
+        fn set_area(&mut self, _area: Rect) {}
+
         fn render(&self, _area: Rect) -> Plane {
             Plane::new(0, 1, 1)
         }

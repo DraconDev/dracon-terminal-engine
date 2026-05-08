@@ -22,7 +22,9 @@ use crate::compositor::{Compositor, Plane};
 use crate::framework::animation::AnimationManager;
 use crate::framework::command::{AppConfig, BoundCommand, CommandRunner};
 use crate::framework::dirty_regions::DirtyRegionTracker;
+use crate::framework::event_bus::EventBus;
 use crate::framework::focus::FocusManager;
+use crate::framework::scene_router::SceneRouter;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use crate::input::event::{Event, KeyEvent};
@@ -79,6 +81,8 @@ pub struct App {
     next_widget_id: usize,
     commands: RefCell<Vec<BoundCommand>>,
     command_tracking: RefCell<HashMap<WidgetId, (Instant, BoundCommand)>>,
+    event_bus: EventBus,
+    scene_router: crate::framework::scene_router::SceneRouter,
 }
 
 impl App {
@@ -113,6 +117,8 @@ impl App {
             next_widget_id: 0,
             commands: RefCell::new(Vec::new()),
             command_tracking: RefCell::new(HashMap::new()),
+            event_bus: EventBus::new(),
+            scene_router: SceneRouter::new(),
         })
     }
 
@@ -155,6 +161,8 @@ impl App {
             next_widget_id: 0,
             commands: RefCell::new(config.commands),
             command_tracking: RefCell::new(HashMap::new()),
+            event_bus: EventBus::new(),
+            scene_router: SceneRouter::new(),
         };
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
@@ -555,7 +563,7 @@ impl App {
                     tick_fn(
                         &mut Ctx {
                             compositor: &mut self.compositor,
-                            theme: &self.theme,
+                            theme: &mut self.theme,
                             frame_count: frame_count.load(Ordering::SeqCst),
                             last_frame: &self.last_frame_time,
                             terminal: &mut self.terminal,
@@ -564,6 +572,8 @@ impl App {
                             dirty_tracker: &mut self.dirty_tracker,
                             commands: &self.commands,
                             running: &self.running,
+                            event_bus: &self.event_bus,
+                            scene_router: &mut self.scene_router,
                         },
                         self.tick_count,
                     );
@@ -600,7 +610,7 @@ impl App {
 
             f(&mut Ctx {
                 compositor: &mut self.compositor,
-                theme: &self.theme,
+                theme: &mut self.theme,
                 frame_count: frame_count.load(Ordering::SeqCst),
                 last_frame: &self.last_frame_time,
                 terminal: &mut self.terminal,
@@ -609,6 +619,8 @@ impl App {
                 dirty_tracker: &mut self.dirty_tracker,
                 commands: &self.commands,
                 running: &self.running,
+                event_bus: &self.event_bus,
+                scene_router: &mut self.scene_router,
             });
 
             // Only render when there are planes to composite.
@@ -662,7 +674,7 @@ impl Default for App {
 /// ```
 pub struct Ctx<'a> {
     pub(crate) compositor: &'a mut Compositor,
-    pub(crate) theme: &'a Theme,
+    pub(crate) theme: &'a mut Theme,
     pub(crate) frame_count: u64,
     pub(crate) last_frame: &'a Instant,
     pub(crate) terminal: &'a mut crate::Terminal<io::Stdout>,
@@ -671,6 +683,8 @@ pub struct Ctx<'a> {
     pub(crate) dirty_tracker: &'a mut DirtyRegionTracker,
     pub(crate) commands: &'a RefCell<Vec<BoundCommand>>,
     pub(crate) running: &'a AtomicBool,
+    pub(crate) event_bus: &'a EventBus,
+    pub(crate) scene_router: &'a mut SceneRouter,
 }
 
 impl<'a> Ctx<'a> {
@@ -769,6 +783,12 @@ impl<'a> Ctx<'a> {
         self.theme
     }
 
+    /// Sets the current theme. Use this in Pattern 2 apps (on_tick/on_input closures)
+    /// to change the framework theme so all child widgets receive the new theme.
+    pub fn set_theme(&mut self, theme: Theme) {
+        *self.theme = theme;
+    }
+
     /// Splits the screen horizontally into two panes and passes them to the closure.
     ///
     /// The closure receives two `SplitPane` instances covering the left and right halves.
@@ -809,6 +829,53 @@ impl<'a> Ctx<'a> {
         let mut left = crate::framework::widgets::split::SplitPane::from_rect(r1);
         let mut right = crate::framework::widgets::split::SplitPane::from_rect(r2);
         f(&mut left, &mut right);
+    }
+
+    // ── Event Bus ───────────────────────────────────────────────────────────
+
+    /// Publishes an event to the app's event bus.
+    pub fn publish<E: std::any::Any + Clone>(&self, event: E) {
+        self.event_bus.publish(event);
+    }
+
+    /// Subscribes to events of type `E` on the app's event bus.
+    pub fn subscribe<E: std::any::Any + Clone, F>(&self, callback: F) -> crate::framework::event_bus::SubscriptionId
+    where
+        F: Fn(&E) + 'static,
+    {
+        self.event_bus.subscribe(callback)
+    }
+
+    /// Returns a reference to the event bus.
+    pub fn event_bus(&self) -> &EventBus {
+        self.event_bus
+    }
+
+    // ── Scene Router ────────────────────────────────────────────────────────
+
+    /// Returns a mutable reference to the scene router.
+    pub fn scene_router(&mut self) -> &mut SceneRouter {
+        self.scene_router
+    }
+
+    /// Pushes a scene onto the navigation stack.
+    pub fn push_scene(&mut self, id: &str) {
+        self.scene_router.push(id);
+    }
+
+    /// Pops the current scene from the navigation stack.
+    pub fn pop_scene(&mut self) -> bool {
+        self.scene_router.pop()
+    }
+
+    /// Replaces the current scene.
+    pub fn replace_scene(&mut self, id: &str) {
+        self.scene_router.replace(id);
+    }
+
+    /// Navigates to a scene, clearing the stack.
+    pub fn go_to_scene(&mut self, id: &str) {
+        self.scene_router.go(id);
     }
 
     /// Lays out child rectangles using the given constraints within the screen area.
@@ -1033,13 +1100,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1048,6 +1115,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let cmds = ctx.available_commands();
@@ -1061,13 +1130,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1076,6 +1145,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let plane = Plane::new(0, 20, 10);
@@ -1089,13 +1160,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = std::time::Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1104,6 +1175,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         ctx.mark_dirty(0, 0, 80, 24);
@@ -1115,13 +1188,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = std::time::Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1130,6 +1203,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let id = WidgetId(42);
@@ -1143,13 +1218,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = std::time::Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1158,6 +1233,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         assert!(ctx.theme().name == "default" || ctx.theme().name == "dark");
@@ -1170,13 +1247,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1185,6 +1262,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         ctx.mark_all_dirty();
@@ -1198,13 +1277,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1213,6 +1292,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         ctx.clear();
@@ -1225,13 +1306,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1240,6 +1321,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let (w, h) = ctx.compositor().size();
@@ -1253,13 +1336,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = std::time::Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 100,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1268,6 +1351,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let _fps = ctx.fps();
@@ -1279,13 +1364,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1294,6 +1379,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         ctx.split_h(|left, right| {
@@ -1310,13 +1397,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let mut ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1325,6 +1412,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         ctx.split_v(|_top, _bottom| {});
@@ -1336,13 +1425,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1351,6 +1440,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         use crate::framework::layout::Constraint;
@@ -1364,13 +1455,13 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(Vec::new());
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1379,6 +1470,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let (stdout, _stderr, code) = ctx.run_command("echo test_run_command");
@@ -1392,7 +1485,7 @@ mod tests {
         let mut focus_manager = FocusManager::new();
         let mut dirty_tracker = DirtyRegionTracker::new();
         let mut animations = AnimationManager::new();
-        let theme = Theme::default();
+        let mut theme = Theme::default();
         let last_frame = Instant::now();
         let commands = RefCell::new(vec![
             BoundCommand::new("test cmd 1"),
@@ -1401,7 +1494,7 @@ mod tests {
 
         let ctx = Ctx {
             compositor: &mut compositor,
-            theme: &theme,
+            theme: &mut theme,
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
@@ -1410,6 +1503,8 @@ mod tests {
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
+            event_bus: &EventBus::new(),
+            scene_router: &mut SceneRouter::new(),
         };
 
         let cmds = ctx.available_commands();

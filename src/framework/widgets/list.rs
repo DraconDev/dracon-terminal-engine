@@ -106,6 +106,42 @@ impl<T: Clone + ToString> List<T> {
         self.items.is_empty()
     }
 
+    /// Replaces all items while preserving selection and scroll when possible.
+    ///
+    /// If the previous selection is still valid for the new item count, it is kept.
+    /// Otherwise, selection is clamped to the last item.
+    pub fn set_items(&mut self, items: Vec<T>) {
+        let old_selected = self.selected;
+        self.items = items;
+        if self.items.is_empty() {
+            self.selected = 0;
+        } else if old_selected >= self.items.len() {
+            self.selected = self.items.len() - 1;
+        }
+        // Clamp offset to ensure selected item remains visible
+        if self.selected >= self.offset + self.visible_count {
+            self.offset = self.selected.saturating_sub(self.visible_count - 1);
+        }
+        self.dirty = true;
+    }
+
+    /// Appends a single item to the end of the list.
+    pub fn push_item(&mut self, item: T) {
+        self.items.push(item);
+        self.dirty = true;
+    }
+
+    /// Removes the item at the given index and adjusts selection.
+    pub fn remove_item(&mut self, index: usize) {
+        if index < self.items.len() {
+            self.items.remove(index);
+            if !self.items.is_empty() && self.selected >= self.items.len() {
+                self.selected = self.items.len() - 1;
+            }
+            self.dirty = true;
+        }
+    }
+
     /// Returns `(start, end)` indices of the currently visible items.
     pub fn viewport(&self) -> (usize, usize) {
         let start = self.offset;

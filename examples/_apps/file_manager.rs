@@ -2,12 +2,16 @@
 //! File Manager — real filesystem browser with Tree, SplitPane, and Breadcrumbs.
 //!
 //! Reads actual directory contents from the current working directory.
+//! Supports create, delete, and rename operations.
 //!
 //! Controls:
 //!   ↑/↓           — navigate tree
 //!   Enter or →    — expand directory / open file
 //!   Backspace or ← — go up to parent directory
-//!   c             — context menu
+//!   n             — new file
+//!   f             — new folder
+//!   d             — delete selected
+//!   m             — rename selected
 //!   r             — refresh directory
 //!   ?             — help overlay
 //!   q             — quit
@@ -28,6 +32,19 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use unicode_width::UnicodeWidthStr;
+
+enum PromptKind {
+    DeleteConfirm,
+    NewFile,
+    NewFolder,
+    Rename,
+}
+
+struct FileManagerPrompt {
+    kind: PromptKind,
+    buffer: String,
+    message: String,
+}
 
 struct FsNode {
     name: String,
@@ -174,6 +191,7 @@ struct FileManager {
     selected_path: Option<PathBuf>,
     context_menu: Option<ContextMenu>,
     toast: Option<Toast>,
+    prompt: Option<FileManagerPrompt>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     should_quit: Arc<AtomicBool>,
@@ -209,6 +227,7 @@ impl FileManager {
             selected_path: None,
             context_menu: None,
             toast: None,
+            prompt: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
             should_quit,
@@ -319,7 +338,19 @@ impl FileManager {
         }
     }
 
-    #[allow(dead_code)]
+    fn rename_selected(&mut self, new_name: &str) {
+        if let Some(ref path) = self.selected_path {
+            let parent_buf = path.parent().map(|p| p.to_path_buf()).unwrap_or_else(|| PathBuf::from("."));
+            let new_path = parent_buf.join(new_name);
+            if std::fs::rename(path, &new_path).is_ok() {
+                self.refresh();
+                self.toast(&format!("Renamed to: {}", new_name), ToastKind::Success);
+            } else {
+                self.toast("Failed to rename", ToastKind::Error);
+            }
+        }
+    }
+
     fn delete_selected(&mut self) {
         if let Some(ref path) = self.selected_path {
             let msg = if path.is_dir() {
@@ -342,7 +373,6 @@ impl FileManager {
         }
     }
 
-    #[allow(dead_code)]
     fn create_file(&mut self, name: &str) {
         let path = self.root.path.join(name);
         if std::fs::File::create(&path).is_ok() {
@@ -353,7 +383,6 @@ impl FileManager {
         }
     }
 
-    #[allow(dead_code)]
     fn create_folder(&mut self, name: &str) {
         let path = self.root.path.join(name);
         if std::fs::create_dir(&path).is_ok() {
@@ -650,7 +679,7 @@ impl Widget for FileManager {
                     .with_fg(t.fg_muted),
             )
             .add_segment(
-                StatusSegment::new("t: theme | ?: help | c: context | r: refresh | q: quit")
+                StatusSegment::new("n: new file | f: new folder | m: rename | d: delete | r: refresh | ?: help | q: quit")
                     .with_fg(t.primary),
             );
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
@@ -688,6 +717,54 @@ impl Widget for FileManager {
             }
         }
 
+        // Prompt overlay
+        if let Some(ref prompt) = self.prompt {
+            let t = self.theme;
+            let pw = 50u16.min(area.width.saturating_sub(4));
+            let ph = 3u16;
+            let px = (area.width - pw) / 2;
+            let py = (area.height - ph) / 2;
+            for y in py..py + ph {
+                for x in px..px + pw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            // Border
+            let corners = [('╭', px, py), ('╮', px + pw - 1, py), ('╰', px, py + ph - 1), ('╯', px + pw - 1, py + ph - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in px + 1..px + pw - 1 {
+                let top = (py * area.width + x) as usize;
+                let bot = ((py + ph - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in py + 1..py + ph - 1 {
+                let left = (y * area.width + px) as usize;
+                let right = (y * area.width + px + pw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+            // Message + input
+            let msg = format!("{} {}", prompt.message, prompt.buffer);
+            for (i, c) in msg.chars().enumerate() {
+                let mx = px + 2 + i as u16;
+                if mx < px + pw - 1 {
+                    let idx = ((py + 1) * area.width + mx) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
+                }
+            }
+        }
+
         plane
     }
 
@@ -710,6 +787,58 @@ impl Widget for FileManager {
             return true;
         }
 
+        // Handle active prompt
+        if let Some(ref mut prompt) = self.prompt {
+            match key.code {
+                KeyCode::Enter => {
+                    let input = prompt.buffer.trim().to_string();
+                    match prompt.kind {
+                        PromptKind::DeleteConfirm => {
+                            if input.eq_ignore_ascii_case("y") {
+                                self.delete_selected();
+                            }
+                        }
+                        PromptKind::NewFile => {
+                            if !input.is_empty() {
+                                self.create_file(&input);
+                            }
+                        }
+                        PromptKind::NewFolder => {
+                            if !input.is_empty() {
+                                self.create_folder(&input);
+                            }
+                        }
+                        PromptKind::Rename => {
+                            if !input.is_empty() {
+                                self.rename_selected(&input);
+                            }
+                        }
+                    }
+                    self.prompt = None;
+                    self.dirty = true;
+                    return true;
+                }
+                KeyCode::Esc => {
+                    self.prompt = None;
+                    self.dirty = true;
+                    return true;
+                }
+                KeyCode::Backspace => {
+                    prompt.buffer.pop();
+                    self.dirty = true;
+                    return true;
+                }
+                KeyCode::Char(c) => {
+                    if prompt.buffer.len() < 40 {
+                        prompt.buffer.push(c);
+                        self.dirty = true;
+                    }
+                    return true;
+                }
+                _ => return true,
+            }
+        }
+
         match key.code {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
@@ -721,6 +850,50 @@ impl Widget for FileManager {
             }
             KeyCode::Char('r') => {
                 self.refresh();
+                true
+            }
+            KeyCode::Char('d') => {
+                if self.selected_path.is_some() {
+                    self.prompt = Some(FileManagerPrompt {
+                        kind: PromptKind::DeleteConfirm,
+                        buffer: String::new(),
+                        message: "Delete selected? (y/n): ".to_string(),
+                    });
+                    self.dirty = true;
+                } else {
+                    self.toast("No file selected", ToastKind::Warning);
+                }
+                true
+            }
+            KeyCode::Char('n') => {
+                self.prompt = Some(FileManagerPrompt {
+                    kind: PromptKind::NewFile,
+                    buffer: String::new(),
+                    message: "New file name: ".to_string(),
+                });
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('f') => {
+                self.prompt = Some(FileManagerPrompt {
+                    kind: PromptKind::NewFolder,
+                    buffer: String::new(),
+                    message: "New folder name: ".to_string(),
+                });
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('m') => {
+                if self.selected_path.is_some() {
+                    self.prompt = Some(FileManagerPrompt {
+                        kind: PromptKind::Rename,
+                        buffer: String::new(),
+                        message: "Rename to: ".to_string(),
+                    });
+                    self.dirty = true;
+                } else {
+                    self.toast("No file selected", ToastKind::Warning);
+                }
                 true
             }
             KeyCode::Char('?') => {
@@ -933,7 +1106,7 @@ fn render_box(
 
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     let help_w = 40u16.min(area.width - 4);
-    let help_h = 12u16.min(area.height - 4);
+    let help_h = 14u16.min(area.height - 4);
     let help_x = (area.width - help_w) / 2;
     let help_y = (area.height - help_h) / 2;
 
@@ -953,12 +1126,12 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("↑/↓       Navigate tree", false),
         ("Enter     Open folder / Select file", false),
         ("Bksp      Go to parent directory", false),
-        ("c         Context menu", false),
+        ("n         New file", false),
+        ("f         New folder", false),
+        ("d         Delete selected", false),
+        ("m         Rename selected", false),
         ("r         Refresh directory", false),
         ("q         Quit", false),
-        ("", false),
-        ("  Click breadcrumbs to navigate  ", false),
-        ("  Drag divider to resize panels  ", false),
     ];
     for (i, (line, bold)) in lines.iter().enumerate() {
         let y = help_y + 1 + i as u16;
@@ -1015,7 +1188,7 @@ fn format_permissions(mode: u32) -> String {
 
 fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
-    println!("t: theme | ?: help | c: context | r: refresh | q: quit");
+    println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | ?: help | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())

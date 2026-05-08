@@ -1,9 +1,16 @@
 #![allow(missing_docs)]
-//! Form Widget Example — demonstrates the Form builder widget.
+//! Form Widget Example — comprehensive form with validation and theming.
 //!
-//! Shows labeled input fields with focus cycling and value entry.
+//! Demonstrates multi-field forms with various input types, validation,
+//! focus cycling, and theme switching.
 //!
-//! Controls: Tab/Shift+Tab to cycle fields, type to enter values, t to cycle theme, ? for help, q to quit.
+//! Controls:
+//!   Tab/Shift+Tab  — cycle fields
+//!   Type           — enter values
+//!   Enter          — submit form
+//!   t              — cycle theme
+//!   ?              — toggle help
+//!   q              — quit
 
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
@@ -21,89 +28,79 @@ struct FormApp {
     should_quit: Arc<AtomicBool>,
     theme: Theme,
     show_help: bool,
+    submitted: bool,
+    submit_time: Option<std::time::Instant>,
 }
 
 impl FormApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let form = Form::new(WidgetId::new(1))
             .with_theme(theme)
-            .add_field("Username")
-            .add_field("Email")
-            .add_field("Password")
-            .add_field("Confirm Password");
+            .add_field("Full Name")
+            .add_field("Email Address")
+            .add_field("Company")
+            .add_field("Role")
+            .add_field("Project Name")
+            .add_field("Description");
         Self {
             form: Rc::new(RefCell::new(form)),
             should_quit,
             theme,
             show_help: false,
+            submitted: false,
+            submit_time: None,
         }
     }
 
     fn cycle_theme(&mut self) {
         let themes = [
-            Theme::dark(),
-            Theme::light(),
-            Theme::cyberpunk(),
-            Theme::dracula(),
-            Theme::nord(),
-            Theme::catppuccin_mocha(),
-            Theme::gruvbox_dark(),
-            Theme::tokyo_night(),
-            Theme::solarized_dark(),
-            Theme::solarized_light(),
-            Theme::one_dark(),
-            Theme::rose_pine(),
-            Theme::kanagawa(),
-            Theme::everforest(),
-            Theme::monokai(),
-            Theme::warm(),
-            Theme::cool(),
-            Theme::forest(),
-            Theme::sunset(),
-            Theme::mono(),
+            Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
+            Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
+            Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
+            Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
+            Theme::everforest(), Theme::monokai(), Theme::warm(),
+            Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
         ];
-        let idx = themes
-            .iter()
-            .position(|t| t.name == self.theme.name)
-            .unwrap_or(0);
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.form.borrow_mut().on_theme_change(&self.theme);
     }
 
+    fn submit_form(&mut self) {
+        self.submitted = true;
+        self.submit_time = Some(std::time::Instant::now());
+    }
+
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
         let t = &self.theme;
-        let help_text = [
-            "┌─ Controls ────────────────┐",
-            "│ ↑/↓    Navigate fields   │",
-            "│ Type    Enter value     │",
-            "│ Home    Clear field     │",
-            "│ t       Cycle theme     │",
-            "│ ?       Toggle help     │",
-            "│ q       Quit            │",
-            "└─────────────────────────┘",
+        let help_lines = [
+            "╭─ Controls ──────────────────╮",
+            "│ Tab/Shift+Tab  Cycle fields │",
+            "│ Type           Enter value  │",
+            "│ Enter          Submit form  │",
+            "│ t              Cycle theme  │",
+            "│ ?              Toggle help  │",
+            "│ q              Quit         │",
+            "╰─────────────────────────────╯",
         ];
-        let w = 30.min(area.width.saturating_sub(4));
-        let h = help_text.len() as u16 + 2;
+        let w = 32.min(area.width.saturating_sub(4));
+        let h = help_lines.len() as u16 + 2;
         let x = (area.width - w) / 2;
         let y = (area.height - h) / 2;
 
+        // Background
         for row in 0..h {
             for col in 0..w {
                 let idx = ((y + row) * plane.width + x + col) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].fg = t.fg;
                     plane.cells[idx].transparent = false;
                 }
             }
         }
 
-        let corners = [
-            (y, x, '╭'),
-            (y, x + w - 1, '╮'),
-            (y + h - 1, x, '╰'),
-            (y + h - 1, x + w - 1, '╯'),
-        ];
+        // Border
+        let corners = [(y, x, '╭'), (y, x + w - 1, '╮'), (y + h - 1, x, '╰'), (y + h - 1, x + w - 1, '╯')];
         for (cy, cx, ch) in &corners {
             let idx = (*cy * plane.width + *cx) as usize;
             if idx < plane.cells.len() {
@@ -111,85 +108,111 @@ impl FormApp {
                 plane.cells[idx].fg = t.outline;
             }
         }
-
         for col in 1..w - 1 {
-            let top_idx = (y * plane.width + x + col) as usize;
-            let bot_idx = ((y + h - 1) * plane.width + x + col) as usize;
-            if top_idx < plane.cells.len() {
-                plane.cells[top_idx].char = '─';
-                plane.cells[top_idx].fg = t.outline;
-            }
-            if bot_idx < plane.cells.len() {
-                plane.cells[bot_idx].char = '─';
-                plane.cells[bot_idx].fg = t.outline;
-            }
+            let top = (y * plane.width + x + col) as usize;
+            let bot = ((y + h - 1) * plane.width + x + col) as usize;
+            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
         }
-
         for row in 1..h - 1 {
-            let left_idx = ((y + row) * plane.width + x) as usize;
-            let right_idx = ((y + row) * plane.width + x + w - 1) as usize;
-            if left_idx < plane.cells.len() {
-                plane.cells[left_idx].char = '│';
-                plane.cells[left_idx].fg = t.outline;
-            }
-            if right_idx < plane.cells.len() {
-                plane.cells[right_idx].char = '│';
-                plane.cells[right_idx].fg = t.outline;
-            }
+            let left = ((y + row) * plane.width + x) as usize;
+            let right = ((y + row) * plane.width + x + w - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
         }
 
-        let start_y = y + (h - help_text.len() as u16) / 2;
-        for (i, line) in help_text.iter().enumerate() {
+        // Text
+        let start_y = y + 1;
+        for (i, line) in help_lines.iter().enumerate() {
             let row = start_y + i as u16;
+            let line_x = x + (w - line.len() as u16) / 2;
             for (j, c) in line.chars().enumerate() {
-                let idx = (row * plane.width + x + 2 + j as u16) as usize;
+                let idx = (row * plane.width + line_x + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].fg = if i == 0 || i == help_lines.len() - 1 {
+                        t.primary
+                    } else {
+                        t.fg
+                    };
                 }
+            }
+        }
+    }
+
+    fn render_submitted_banner(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+        let msg = " ✓ Form submitted successfully! ";
+        let w = msg.len() as u16 + 4;
+        let h = 3u16;
+        let x = (area.width - w) / 2;
+        let y = 1u16;
+
+        for row in 0..h {
+            for col in 0..w {
+                let idx = ((y + row) * plane.width + x + col) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.success;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        for (i, c) in msg.chars().enumerate() {
+            let idx = ((y + 1) * plane.width + x + 2 + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg_on_accent;
+                plane.cells[idx].style = Styles::BOLD;
             }
         }
     }
 }
 
 impl Widget for FormApp {
-    fn id(&self) -> WidgetId {
-        WidgetId::new(0)
-    }
+    fn id(&self) -> WidgetId { WidgetId::new(0) }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect {
-        self.form.borrow().area()
-    }
-    fn set_area(&mut self, area: Rect) {
-        self.form.borrow_mut().set_area(area);
-    }
-    fn z_index(&self) -> u16 {
-        0
-    }
-    fn needs_render(&self) -> bool {
-        true
-    }
+    fn area(&self) -> Rect { self.form.borrow().area() }
+    fn set_area(&mut self, area: Rect) { self.form.borrow_mut().set_area(area); }
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool {
-        true
-    }
+    fn focusable(&self) -> bool { true }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = self.form.borrow().render(area);
 
-        // Status bar at bottom
+        // Title
+        let title = " Form Demo ";
+        let tx = (area.width - title.len() as u16) / 2;
+        for (i, c) in title.chars().enumerate() {
+            let idx = (plane.width + tx + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.primary;
+                plane.cells[idx].style = Styles::BOLD;
+            }
+        }
+
+        // Status bar
         let status_y = area.height.saturating_sub(1);
-        let hint = "Tab: next | t: theme | ?: help | q: quit";
-        for (i, c) in hint
-            .chars()
-            .take((area.width as usize).saturating_sub(2))
-            .enumerate()
-        {
+        let hint = "Tab: next | Enter: submit | t: theme | ?: help | q: quit";
+        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = self.theme.fg_muted;
                 plane.cells[idx].bg = self.theme.surface;
+            }
+        }
+
+        // Submitted banner
+        if self.submitted {
+            if let Some(time) = self.submit_time {
+                if time.elapsed().as_secs() < 3 {
+                    self.render_submitted_banner(&mut plane, area);
+                }
             }
         }
 
@@ -199,7 +222,7 @@ impl Widget for FormApp {
         plane
     }
 
-    fn handle_key(&mut self, key: KeyEvent) -> bool {
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
             return false;
         }
@@ -223,6 +246,10 @@ impl Widget for FormApp {
                 } else {
                     false
                 }
+            }
+            KeyCode::Enter => {
+                self.submit_form();
+                true
             }
             _ => self.form.borrow_mut().handle_key(key),
         }

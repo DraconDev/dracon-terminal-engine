@@ -40,7 +40,7 @@ App::new().unwrap()
     });
 ```
 
-## Framework (v28)
+## Framework (v29)
 
 The `framework` module provides the complete application runtime:
 
@@ -115,8 +115,38 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`Layout`] | Constraint-based layout engine (percentage, fixed, min, max, ratio) |
 | [`Theme`] | 20 built-in themes |
 
-### 20 Built-in Themes
-`dark` · `light` · `cyberpunk` · `dracula` · `nord` · `catppuccin_mocha` · `gruvbox_dark` · `tokyo_night` · `solarized_dark` · `solarized_light` · `one_dark` · `rose_pine` · `kanagawa` · `everforest` · `monokai` · `warm` · `cool` · `forest` · `sunset` · `mono`
+### App Architecture (New in v29)
+
+**EventBus** — Decoupled publish/subscribe for widget communication:
+
+```rust
+// Publish an event from anywhere
+ctx.publish("task-completed", &task_id);
+
+// Subscribe in another widget
+let sub = ctx.event_bus().subscribe("task-completed", |task_id: &i64| {
+    println!("Task {} done!", task_id);
+});
+```
+
+**SceneRouter** — Multi-screen navigation with lifecycle hooks:
+
+```rust
+// Define scenes
+router.push("home", Box::new(HomeScreen::new()));
+router.push("settings", Box::new(SettingsScreen::new()));
+
+// Navigate
+router.go("settings");     // Switch to settings
+router.back();             // Go back
+```
+
+**Reactive<T>** — Observable values that auto-publish changes:
+
+```rust
+let counter = Reactive::new(0, "counter-changed");
+counter.set(5);  // Automatically publishes "counter-changed" event
+```
 
 ---
 
@@ -142,14 +172,14 @@ The framework is built on these primitives — available directly when needed:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = "28.519.0"
+dracon-terminal-engine = "29.10.0"
 ```
 
 Or from git:
 
 ```toml
 [dependencies]
-dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v28.519.0" }
+dracon-terminal-engine = { git = "https://github.com/DraconDev/dracon-terminal-engine", tag = "v29.10.0" }
 ```
 
 ## Quick Start (Framework)
@@ -200,9 +230,10 @@ cargo run --example debug_overlay      # Debug tools: DebugOverlay + Profiler + 
 
 ```bash
 cargo run --example system_monitor     # htop-like dashboard: CPU/Memory/Disk/Network gauges + KeyValueGrid + StreamingText
-cargo run --example file_manager       # Full file manager: Tree + Table + Breadcrumbs + SplitPane + ContextMenu
+cargo run --example file_manager       # Real file manager: browse, create, delete, rename files and folders
 cargo run --example chat_client        # Rich chat UI: List + TextInput + Toast + Modal + emoji picker
 cargo run --example dashboard_builder  # All 5 command widgets in grid layout with auto-refresh
+cargo run --example todo_app           # Real todo app with SQLite persistence and scene navigation
 ```
 
 ### Other Framework Examples
@@ -219,6 +250,10 @@ cargo run --example framework_widgets  # Instantiate all 35 widgets and print de
 cargo run --example command_dashboard  # Command-driven dashboard with Gauge + KeyValueGrid + StatusBadge
 cargo run --example from_toml          # TOML-driven app configuration
 cargo run --example text_editor_demo  # Standalone TextEditor with theme switching
+cargo run --example event_bus_demo    # EventBus publish/subscribe demonstration
+cargo run --example scene_router_demo  # Multi-screen navigation with SceneRouter
+cargo run --example tutorial_app      # "Building Your First App" step-by-step tutorial
+cargo run --example todo_app          # Real todo app with SQLite persistence
 ```
 
 ### Engine Examples — Raw Compositor Usage
@@ -248,7 +283,7 @@ cargo test --test scroll_test          # Scroll behavior tests
 
 ## Version
 
-**v28.519.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v29.10.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
