@@ -11,7 +11,6 @@ use dracon_terminal_engine::framework::scene_router::SceneRouter;
 use ratatui::layout::Rect;
 
 use crate::data::ExampleMeta;
-use crate::scenes::widget_gallery::WidgetGalleryScene;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHOWCASE STATE
