@@ -1,21 +1,23 @@
 # Project State
 
 ## Current Focus
-Added navigation history tracking to showcase example
+Added navigation history tracking and visual feedback when returning from example programs
 
 ## Context
-This change implements tracking for navigation history in the showcase example, allowing the application to remember where users came from during navigation.
+The showcase example now tracks which example programs were launched and provides visual feedback when returning to the showcase from an example, helping users understand their navigation history.
 
 ## Completed
-- [x] Added `returned_from` field to track navigation history with timestamp
-- [x] Integrated tracking into showcase state initialization
+- [x] Added tracking of launched example programs with timestamps
+- [x] Implemented visual toast notification showing which example was returned from
+- [x] Added 3-second display duration for the return notification
+- [x] Styled notification with proper borders and background
 
 ## In Progress
-- [x] Navigation history tracking implementation
+- [x] Navigation history tracking and visual feedback implementation
 
 ## Blockers
 - None identified
 
 ## Next Steps
-1. Verify tracking works correctly across different navigation scenarios
-2. Add UI elements to display navigation history if needed
+1. Test the return notification across different terminal sizes
+2. Consider adding more detailed navigation history features

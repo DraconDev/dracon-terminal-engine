@@ -47,8 +47,12 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     let fps_counter = Arc::new(AtomicU64::new(0));
     let fps_for_tick = Arc::clone(&fps_counter);
+    let returned_from = Arc::new(Mutex::new(None));
+    let returned_for_tick = Arc::clone(&returned_from);
+    let last_launched: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+    let last_launched_for_tick = Arc::clone(&last_launched);
 
-    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter);
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, returned_from);
 
     let mut app = App::new()?
         .title("Dracon Showcase")
@@ -72,6 +76,9 @@ fn main() -> std::io::Result<()> {
                 Err(_) => return,
             };
             let binary_path = exe_dir.join(&binary_name);
+
+            // Remember what we launched for the return message
+            *last_launched_for_tick.lock().unwrap() = Some(binary_name.clone());
 
             let _ = ctx.suspend_terminal();
 
@@ -106,6 +113,11 @@ fn main() -> std::io::Result<()> {
 
             let mut drain_buf = [0u8; 512];
             while std::io::stdin().read(&mut drain_buf).unwrap_or(0) > 0 {}
+
+            // Set the "returned from" message
+            if let Some(name) = last_launched_for_tick.lock().unwrap().take() {
+                *returned_for_tick.lock().unwrap() = Some((name, std::time::Instant::now()));
+            }
 
             ctx.mark_all_dirty();
         }

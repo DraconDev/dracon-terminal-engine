@@ -701,6 +701,37 @@ impl Widget for Showcase {
             }
         }
 
+        // Returned-from toast (shown when coming back from an example)
+        if let Ok(guard) = self.returned_from.lock() {
+            if let Some((ref name, time)) = *guard {
+                if time.elapsed() < Duration::from_secs(3) {
+                    let msg = format!("Returned from {} — Press ? for help", name);
+                    let msg_y = (area.height as usize).saturating_sub(3);
+                    let msg_x = ((area.width as usize).saturating_sub(msg.len() + 4)) / 2;
+                    let msg_w = msg.len() + 4;
+
+                    // Toast background
+                    for cx in 0..msg_w {
+                        if msg_x + cx < area.width as usize {
+                            set_cell(&mut plane, msg_x + cx, msg_y, ' ', t.fg, t.success);
+                        }
+                    }
+
+                    // Toast border
+                    for cx in 0..msg_w {
+                        if msg_x + cx < area.width as usize {
+                            set_cell(&mut plane, msg_x + cx, msg_y, '─', t.success, t.success);
+                        }
+                    }
+                    set_cell(&mut plane, msg_x, msg_y, '┌', t.success, t.success);
+                    set_cell(&mut plane, msg_x + msg_w - 1, msg_y, '┐', t.success, t.success);
+
+                    // Message text
+                    draw_text(&mut plane, msg_x + 2, msg_y, &msg, t.bg, t.success, true);
+                }
+            }
+        }
+
         // Context menu
         if let Some((card_idx, mx, my)) = self.context_menu {
             if let Some(&ex_idx) = self.filtered.get(card_idx) {
