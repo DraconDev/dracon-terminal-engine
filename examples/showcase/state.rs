@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 use dracon_terminal_engine::framework::animation::AnimationManager;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::scene_router::SceneRouter;
+use dracon_terminal_engine::framework::scene_router::{SceneRouter, SceneTransition};
 use ratatui::layout::Rect;
 
 use crate::data::ExampleMeta;
@@ -77,6 +77,7 @@ impl Showcase {
         scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(Theme::nord())));
         scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
         scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(Theme::nord())));
+        scene_router.set_default_transition(SceneTransition::Fade);
 
         Self {
             examples,
