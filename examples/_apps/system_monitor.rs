@@ -823,11 +823,11 @@ impl Widget for SystemMonitor {
             if total_items > max_visible {
                 let sb_x = area.width - 2;
                 let content_h = max_visible as u16;
-                let thumb_h = (max_visible as f32 / self.data.processes.len() as f32
+                let thumb_h = (max_visible as f32 / total_items as f32
                     * content_h as f32)
                     .max(1.0) as u16;
                 let thumb_y = (self.process_scroll as f32
-                    / self.data.processes.len().saturating_sub(max_visible).max(1) as f32
+                    / total_items.saturating_sub(max_visible).max(1) as f32
                     * (content_h - thumb_h) as f32) as u16
                     + header_y
                     + 1;
