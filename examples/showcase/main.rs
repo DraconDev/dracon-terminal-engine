@@ -118,11 +118,14 @@ fn main() -> std::io::Result<()> {
             // Non-blocking drain of any stray input bytes left by the child.
             // In raw mode, blocking read() would hang forever if the buffer is empty.
             let mut drain_buf = [0u8; 512];
+            let mut stdin = std::io::stdin();
+            let raw_fd = stdin.as_raw_fd();
             for _ in 0..10 {
-                let fd = std::io::stdin().as_fd();
+                // SAFETY: poll_input only reads the fd, no mutation
+                let fd = unsafe { std::os::fd::BorrowedFd::borrow_raw(raw_fd) };
                 match poll_input(fd, 50) {
                     Ok(true) => {
-                        let n = std::io::stdin().read(&mut drain_buf).unwrap_or(0);
+                        let n = stdin.read(&mut drain_buf).unwrap_or(0);
                         if n == 0 {
                             break;
                         }
