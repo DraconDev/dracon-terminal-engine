@@ -40,6 +40,11 @@ impl Widget for Showcase {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        // If a scene is active, delegate to it
+        if self.scene_router.current().is_some() {
+            return self.scene_router.render(area);
+        }
+
         let mut plane = Plane::new(0, area.width, area.height);
         let t = self.theme;
 
