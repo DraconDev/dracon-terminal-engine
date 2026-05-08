@@ -23,10 +23,12 @@
 //! A "Returned from [example]" toast will appear when you come back.
 
 use std::io::Read;
+use std::os::fd::AsRawFd;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+use dracon_terminal_engine::backend::tty::poll_input;
 use dracon_terminal_engine::framework::prelude::*;
 use ratatui::layout::Rect;
 
@@ -113,8 +115,21 @@ fn main() -> std::io::Result<()> {
 
             let _ = ctx.resume_terminal();
 
+            // Non-blocking drain of any stray input bytes left by the child.
+            // In raw mode, blocking read() would hang forever if the buffer is empty.
             let mut drain_buf = [0u8; 512];
-            while std::io::stdin().read(&mut drain_buf).unwrap_or(0) > 0 {}
+            for _ in 0..10 {
+                let fd = std::io::stdin().as_fd();
+                match poll_input(fd, 50) {
+                    Ok(true) => {
+                        let n = std::io::stdin().read(&mut drain_buf).unwrap_or(0);
+                        if n == 0 {
+                            break;
+                        }
+                    }
+                    _ => break,
+                }
+            }
 
             // Set the "returned from" message
             if let Some(name) = last_launched_for_tick.lock().unwrap().take() {

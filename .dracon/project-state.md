@@ -1,20 +1,23 @@
 # Project State
 
 ## Current Focus
-Removed terminal suspension in showcase example to prevent unnecessary terminal state changes.
+Improved terminal input handling during showcase example transitions
 
 ## Context
-The showcase example was unnecessarily suspending and resuming the terminal, which could cause flickering or unexpected behavior. This change simplifies the example by removing the redundant terminal suspension.
+The showcase example previously had a blocking input drain that could hang indefinitely when returning from child processes. This change addresses the issue by implementing non-blocking input polling.
 
 ## Completed
-- [x] Removed redundant terminal suspension in showcase example
+- [x] Replaced blocking input drain with non-blocking polling
+- [x] Added 50ms timeout for input polling
+- [x] Limited polling attempts to prevent infinite loops
+- [x] Added proper cleanup for empty input buffers
 
 ## In Progress
-- [x] No active work in progress related to this change
+- [ ] None
 
 ## Blockers
 - None
 
 ## Next Steps
-1. Verify showcase example behavior remains consistent without terminal suspension
-2. Ensure no visual artifacts appear in other examples due to this change
+1. Verify no regressions in showcase navigation
+2. Test with various terminal types and input scenarios
