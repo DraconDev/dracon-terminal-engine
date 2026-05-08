@@ -227,6 +227,10 @@ impl Scene for ThemeSwitcherScene {
         }
     }
 
+    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+        false
+    }
+
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
         self.checkbox.on_theme_change(theme);
