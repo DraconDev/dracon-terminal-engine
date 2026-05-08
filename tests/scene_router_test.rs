@@ -1,7 +1,6 @@
 //! Scene Router tests
 
 use dracon_terminal_engine::compositor::Plane;
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::input::event::KeyEvent;
 use ratatui::layout::Rect;
