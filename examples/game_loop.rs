@@ -1,4 +1,5 @@
 #![allow(missing_docs)]
+#![allow(clippy::manual_is_multiple_of)]
 //! Game Loop — 60fps animation demo with particles and mouse interaction.
 //!
 //! A visual showcase of the compositor's animation capabilities.
