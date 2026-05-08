@@ -418,6 +418,7 @@ impl SystemMonitor {
             hovered_process: None,
             process_scroll: 0,
             show_help: false,
+            tree_mode: false,
             area: Rect::new(0, 0, 80, 24),
             should_quit,
         }
