@@ -42,7 +42,7 @@ impl Widget for Showcase {
     fn render(&self, area: Rect) -> Plane {
         // If a scene is active, delegate to it with title bar
         if let Some(scene_name) = self.scene_router.current() {
-            let plane = self.scene_router.render(area);
+            let mut plane = self.scene_router.render(area);
             let t = self.theme;
             // Draw scene title bar at top
             let title = format!(" {} ", scene_name);
