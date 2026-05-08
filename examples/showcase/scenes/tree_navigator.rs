@@ -26,6 +26,12 @@ impl MockFs {
         }
         node
     }
+
+    fn total_items(&self) -> usize {
+        1 + self.children.as_ref()
+            .map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>())
+            .unwrap_or(0)
+    }
 }
 
 pub struct TreeNavigatorScene {
