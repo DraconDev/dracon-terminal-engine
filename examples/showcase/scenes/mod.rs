@@ -1,4 +1,5 @@
 pub mod form_demo;
+pub mod modal_demo;
 pub mod theme_switcher;
 pub mod tree_navigator;
 pub mod widget_gallery;
