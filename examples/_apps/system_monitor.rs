@@ -824,7 +824,13 @@ impl Widget for SystemMonitor {
             let tree_view = if self.tree_mode {
                 build_process_tree(&self.data.processes)
             } else {
-                (0..self.data.processes.len()).map(|i| (i, 0)).collect()
+                (0..self.data.processes.len())
+                    .map(|i| TreeNode {
+                        proc_idx: i,
+                        depth: 0,
+                        prefix: String::new(),
+                    })
+                    .collect()
             };
             let total_items = tree_view.len();
             for i in 0..max_visible {
@@ -833,10 +839,10 @@ impl Widget for SystemMonitor {
                 if row_y >= list_y + list_h - 1 {
                     break;
                 }
-                if let Some(&(proc_idx, depth)) = tree_view.get(view_idx) {
-                    if let Some(proc) = self.data.processes.get(proc_idx) {
-                        let is_selected = self.selected_process == Some(proc_idx);
-                        let is_hovered = self.hovered_process == Some(proc_idx);
+                if let Some(node) = tree_view.get(view_idx) {
+                    if let Some(proc) = self.data.processes.get(node.proc_idx) {
+                        let is_selected = self.selected_process == Some(view_idx);
+                        let is_hovered = self.hovered_process == Some(view_idx);
                         let (fg, bg) = if is_selected {
                             (t.fg_on_accent, t.primary_active)
                         } else if is_hovered {
@@ -844,24 +850,14 @@ impl Widget for SystemMonitor {
                         } else {
                             (t.fg, t.surface)
                         };
-                        let indent = if self.tree_mode {
-                            "  ".repeat(depth)
-                        } else {
-                            String::new()
-                        };
-                        let prefix = if self.tree_mode && depth > 0 {
-                            "└─ "
-                        } else {
-                            ""
-                        };
                         let name = if proc.name.len() > 16 {
                             &proc.name[..16]
                         } else {
                             &proc.name
                         };
                         let line = format!(
-                            " {}{}{:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
-                            indent, prefix, proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
+                            " {}{:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
+                            node.prefix, proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
                         );
                         draw_text(&mut plane, 2, row_y, &line, fg, bg, is_selected);
                     }
@@ -896,8 +892,20 @@ impl Widget for SystemMonitor {
         }
 
         // ── Detail Panel (right side, when process selected) ──
-        if let Some(sel) = self.selected_process {
-            if let Some(proc) = self.data.processes.get(sel) {
+        let tree_view_for_detail = if self.tree_mode {
+            build_process_tree(&self.data.processes)
+        } else {
+            (0..self.data.processes.len())
+                .map(|i| TreeNode {
+                    proc_idx: i,
+                    depth: 0,
+                    prefix: String::new(),
+                })
+                .collect::<Vec<_>>()
+        };
+        if let Some(sel_view) = self.selected_process {
+            if let Some(node) = tree_view_for_detail.get(sel_view) {
+                if let Some(proc) = self.data.processes.get(node.proc_idx) {
                 let detail_x = area.width / 2;
                 let detail_w = area.width.saturating_sub(detail_x + 2);
                 let detail_y = list_y + 1;
