@@ -1056,13 +1056,18 @@ impl Widget for SystemMonitor {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let view_count = if self.tree_mode {
+            build_process_tree(&self.data.processes).len()
+        } else {
+            self.data.processes.len()
+        };
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 if col < self.area.width / 2 && row >= 9 && row < self.area.height.saturating_sub(2)
                 {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
-                    if idx < self.data.processes.len() {
+                    if idx < view_count {
                         self.selected_process = Some(idx);
                         return true;
                     }
@@ -1077,7 +1082,7 @@ impl Widget for SystemMonitor {
                 {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
-                    self.hovered_process = if idx < self.data.processes.len() {
+                    self.hovered_process = if idx < view_count {
                         Some(idx)
                     } else {
                         None
@@ -1088,7 +1093,7 @@ impl Widget for SystemMonitor {
                 return true;
             }
             MouseEventKind::ScrollDown => {
-                let max_scroll = self.data.processes.len().saturating_sub(10);
+                let max_scroll = view_count.saturating_sub(10);
                 if self.process_scroll < max_scroll {
                     self.process_scroll += 1;
                     return true;
@@ -1306,6 +1311,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
         (" System Monitor Help ", true),
         ("", false),
         ("t          Cycle theme (15 themes)", false),
+        ("p          Toggle tree view", false),
         ("?          Toggle this help", false),
         ("↑/↓        Navigate process list", false),
         ("Click      Select process", false),
