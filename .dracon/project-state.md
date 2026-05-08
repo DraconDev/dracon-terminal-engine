@@ -1,21 +1,24 @@
 # Project State
 
 ## Current Focus
-Added graceful shutdown capability to the split resizer example
+Implement graceful shutdown for the split resizer example by replacing direct process exit with atomic flag-based termination
 
 ## Context
-To support system-wide graceful shutdown functionality, the split resizer example now accepts a shared atomic boolean flag for shutdown coordination
+The previous implementation used `std::process::exit(0)` which was abrupt. This change introduces a more controlled shutdown sequence using an atomic boolean flag to signal the application to terminate gracefully.
 
 ## Completed
-- [x] Added `Arc<AtomicBool>` parameter to track shutdown requests
-- [x] Integrated shutdown flag into app initialization
+- [x] Replaced direct process exit with atomic boolean flag
+- [x] Added proper shutdown sequence in the tick handler
+- [x] Updated main function to initialize the shutdown flag
+- [x] Maintained all existing functionality while adding graceful termination
 
 ## In Progress
-- [x] Implementation of actual shutdown handling (not shown in this diff)
+- [x] Implementation of graceful shutdown mechanism
 
 ## Blockers
-- Need to implement shutdown handler that responds to the flag
+- None identified
 
 ## Next Steps
-1. Implement shutdown handler that checks the atomic flag
-2. Add proper cleanup logic when shutdown is requested
+1. Verify graceful shutdown works across all platforms
+2. Add visual feedback during shutdown process
+3. Document graceful shutdown pattern for other examples

@@ -105,7 +105,8 @@ impl Widget for SplitResizerApp {
         }
         match key.code {
             KeyCode::Char('q') => {
-                std::process::exit(0);
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
             }
             KeyCode::Char('r') => {
                 self.ra = DA;
@@ -688,8 +689,11 @@ fn main() -> Result<()> {
     println!("Split Resizer — drag dividers | ←/→:A | ↑/↓:B | r:reset | q:quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let theme = Theme::cyberpunk();
-    let app = SplitResizerApp::new(WidgetId::new(1), theme);
+    let app = SplitResizerApp::new(WidgetId::new(1), theme, should_quit);
     let app_for_tick = Rc::new(RefCell::new(app));
     let app_for_render = Rc::clone(&app_for_tick);
 
@@ -708,6 +712,10 @@ fn main() -> Result<()> {
 
     app_ctx
         .on_tick(move |ctx, tick| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+                return;
+            }
             if tick % 2 == 0 {
                 app_for_tick.borrow_mut().tick();
             }
