@@ -259,8 +259,6 @@ impl ChatState {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let area = self.area.get();
-
         // Modal click dismissal
         if self.show_emoji_modal || self.show_settings_modal {
             if let MouseEventKind::Down(_) = kind {
@@ -272,26 +270,25 @@ impl ChatState {
             return false;
         }
 
-        // Dispatch via zones
+        // Dispatch via zones — collect result first, then act
         if let MouseEventKind::Down(MouseButton::Left) = kind {
-            if let Some(zone) = self.zones.borrow().dispatch(col, row) {
-                match zone {
-                    ZONE_EMOJI_BTN => {
-                        self.show_emoji_modal = true;
-                        self.dirty = true;
-                        return true;
-                    }
-                    ZONE_SEND_BTN => {
-                        self.send_message();
-                        return true;
-                    }
-                    ZONE_SETTINGS_BTN => {
-                        self.show_settings_modal = true;
-                        self.dirty = true;
-                        return true;
-                    }
-                    _ => {}
+            let zone = self.zones.borrow().dispatch(col, row);
+            match zone {
+                Some(ZONE_EMOJI_BTN) => {
+                    self.show_emoji_modal = true;
+                    self.dirty = true;
+                    return true;
                 }
+                Some(ZONE_SEND_BTN) => {
+                    self.send_message();
+                    return true;
+                }
+                Some(ZONE_SETTINGS_BTN) => {
+                    self.show_settings_modal = true;
+                    self.dirty = true;
+                    return true;
+                }
+                _ => {}
             }
         }
 
