@@ -204,7 +204,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             code: KeyCode::Char('q'),
                             ..
                         }) => {
-                            write!(term, "\x1b[?1049l\x1b[?25h")?;
+                            write!(
+                                term,
+                                "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
+                            )?;
+                            term.flush()?;
                             return Ok(());
                         }
                         Event::Key(KeyEvent {
