@@ -743,7 +743,11 @@ impl Widget for SystemMonitor {
         render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
 
         let header_y = list_y + 1;
-        let header_text = " 󰀽 PID      NAME             CPU%    MEM     STATE  ";
+        let header_text = if self.tree_mode {
+            " 󰀽 PID      NAME             CPU%    MEM     STATE  "
+        } else {
+            " 󰀽 PID      NAME             CPU%    MEM     STATE  "
+        };
         draw_text(
             &mut plane,
             2,
