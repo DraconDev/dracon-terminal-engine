@@ -31,7 +31,7 @@ impl ModalDemoScene {
             show_toast: false,
             toast_message: String::new(),
             help_modal: Modal::new("Keyboard Shortcuts").with_size(42, 12),
-            confirm_dialog: ConfirmDialog::new(WidgetId::new(20)),
+            confirm_dialog: ConfirmDialog::new("Confirm", "Delete item?"),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
