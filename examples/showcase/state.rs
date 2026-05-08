@@ -178,13 +178,24 @@ impl Showcase {
             .and_then(|&idx| self.examples.get(idx))
     }
 
+    pub fn is_embedded(&self, name: &str) -> bool {
+        matches!(name, "widget_gallery")
+    }
+
     pub fn launch_selected(&mut self) {
-        let binary_name = self.selected_example().map(|ex| ex.binary_name.to_string());
-        if let Some(name) = binary_name {
+        let example = self.selected_example().cloned();
+        if let Some(ex) = example {
+            if self.is_embedded(ex.name) {
+                // Launch embedded scene
+                self.scene_router.push(ex.name);
+                self.scene_router.on_theme_change(&self.theme);
+                return;
+            }
+
+            // Launch external binary
+            let name = ex.binary_name.to_string();
             *self.pending_binary.lock().unwrap() = Some(name.clone());
-            let example_name = self.selected_example().map(|ex| ex.name).unwrap_or("");
-            self.status_message = Some((format!("Launching {}...", example_name), Instant::now()));
-            // Start toast slide-in animation
+            self.status_message = Some((format!("Launching {}...", ex.name), Instant::now()));
             self.toast_anim = Some(self.animations.start(-3.0, 0.0, Duration::from_millis(300)));
             self.recently_launched.retain(|n| n != &name);
             self.recently_launched.insert(0, name);
