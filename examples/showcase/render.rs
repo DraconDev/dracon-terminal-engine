@@ -204,6 +204,18 @@ pub fn render_card(config: &CardConfig) -> Plane {
         }
     }
 
+    // Embedded badge
+    if config.ex.name == "widget_gallery" {
+        let embed_badge = " ⚡ ";
+        let embed_x = badge_x + badge.len() + 1;
+        for (i, ch) in embed_badge.chars().enumerate() {
+            let px = embed_x + i;
+            if px < card_w_usize - 2 {
+                set_cell(&mut plane, px, badge_y, ch, t.bg, t.success);
+            }
+        }
+    }
+
     let name_y = 3usize;
     let max_name_len = (card_w_usize - 4).min(24);
     let name_truncated: String = config.ex.name.chars().take(max_name_len).collect();
