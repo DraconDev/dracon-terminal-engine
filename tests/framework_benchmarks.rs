@@ -90,6 +90,9 @@ impl Scene for BenchScene {
         self.render_count.set(self.render_count.get() + 1);
         Plane::new(0, 80, 24)
     }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
 }
 
 #[test]
