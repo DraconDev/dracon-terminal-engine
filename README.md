@@ -117,7 +117,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 
 ### App Architecture (New in v29)
 
-**v29.10.98** — See [CHANGELOG](CHANGELOG.md) for full history.
+**v29.11.0** — See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## License
 
