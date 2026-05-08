@@ -19,7 +19,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -510,7 +510,6 @@ fn main() -> io::Result<()> {
     app.on_tick(move |ctx, _| {
         let mut state = state_for_tick.borrow_mut();
         let (w, h) = ctx.compositor().size();
-        let area = Rect::new(0, 0, w, h);
 
         if state.dirty {
             let mut plane = Plane::new(0, w, h);
