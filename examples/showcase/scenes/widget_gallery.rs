@@ -73,7 +73,7 @@ impl WidgetGalleryScene {
         }
     }
 
-    fn widget_mut(&mut self, slot: usize) -> &mut dyn crate::framework::widget::Widget {
+    fn widget_mut(&mut self, slot: usize) -> &mut dyn dracon_terminal_engine::framework::widget::Widget {
         match slot {
             0 => &mut self.checkbox,
             1 => &mut self.radio,
