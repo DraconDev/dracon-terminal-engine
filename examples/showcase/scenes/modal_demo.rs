@@ -6,11 +6,11 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{ConfirmDialog, Modal};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
+#[allow(dead_code)]
 pub struct ModalDemoScene {
     theme: Theme,
     show_help: bool,
@@ -236,7 +236,7 @@ impl Scene for ModalDemoScene {
 
             // Yes button
             let yes_x = dx + 4;
-            let yes_w = 6u16;
+            let _yes_w = 6u16;
             for (i, c) in "  Yes  ".chars().enumerate() {
                 let idx = ((dy + 5) * area.width + yes_x + i as u16) as usize;
                 if idx < plane.cells.len() {
