@@ -377,8 +377,16 @@ fn format_uptime(seconds: u64) -> String {
     }
 }
 
-/// Build a flat list of (process_index, depth) for tree view rendering.
-fn build_process_tree(processes: &[ProcessInfo]) -> Vec<(usize, usize)> {
+/// A node in the process tree view.
+struct TreeNode {
+    proc_idx: usize,
+    depth: usize,
+    /// Pre-computed tree connector prefix (e.g. "│  ├─ ", "   └─ ")
+    prefix: String,
+}
+
+/// Build a flat list of tree nodes for tree view rendering.
+fn build_process_tree(processes: &[ProcessInfo]) -> Vec<TreeNode> {
     // Build parent -> children mapping
     let mut children: std::collections::HashMap<u32, Vec<usize>> = std::collections::HashMap::new();
     for (idx, proc) in processes.iter().enumerate() {
@@ -397,39 +405,73 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<(usize, usize)> {
     // Sort roots by PID for consistency
     roots.sort_by_key(|&idx| processes[idx].pid);
 
-    // Depth-first traversal
+    // Depth-first traversal with proper tree connectors
     let mut result = Vec::new();
     fn dfs(
         idx: usize,
         depth: usize,
+        is_last: bool,
+        ancestor_last: &[bool],
         processes: &[ProcessInfo],
         children: &std::collections::HashMap<u32, Vec<usize>>,
-        result: &mut Vec<(usize, usize)>,
+        result: &mut Vec<TreeNode>,
         visited: &mut std::collections::HashSet<u32>,
     ) {
         let pid = processes[idx].pid;
         if !visited.insert(pid) {
             return; // Avoid cycles
         }
-        result.push((idx, depth));
+
+        // Build prefix from ancestor last-child status
+        let mut prefix = String::new();
+        for &last in ancestor_last {
+            prefix.push_str(if last { "   " } else { "│  " });
+        }
+        if depth > 0 {
+            prefix.push_str(if is_last { "└─ " } else { "├─ " });
+        }
+
+        result.push(TreeNode {
+            proc_idx: idx,
+            depth,
+            prefix,
+        });
+
         if let Some(child_indices) = children.get(&pid) {
             let mut sorted_children = child_indices.clone();
             sorted_children.sort_by_key(|&ci| processes[ci].pid);
-            for &child_idx in &sorted_children {
-                dfs(child_idx, depth + 1, processes, children, result, visited);
+            for (i, &child_idx) in sorted_children.iter().enumerate() {
+                let child_is_last = i == sorted_children.len() - 1;
+                let mut new_ancestors = ancestor_last.to_vec();
+                new_ancestors.push(is_last);
+                dfs(
+                    child_idx,
+                    depth + 1,
+                    child_is_last,
+                    &new_ancestors,
+                    processes,
+                    children,
+                    result,
+                    visited,
+                );
             }
         }
     }
 
     let mut visited = std::collections::HashSet::new();
-    for &root in &roots {
-        dfs(root, 0, processes, &children, &mut result, &mut visited);
+    for (i, &root) in roots.iter().enumerate() {
+        let is_last = i == roots.len() - 1;
+        dfs(root, 0, is_last, &[], processes, &children, &mut result, &mut visited);
     }
 
     // Add any orphaned processes not visited
     for (idx, proc) in processes.iter().enumerate() {
         if !visited.contains(&proc.pid) {
-            result.push((idx, 0));
+            result.push(TreeNode {
+                proc_idx: idx,
+                depth: 0,
+                prefix: String::new(),
+            });
         }
     }
 
