@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Implement graceful shutdown for the system monitor app
+Added graceful shutdown capability to the split resizer example
 
 ## Context
-The system monitor app previously used `std::process::exit(0)` for quitting, which is abrupt. This change implements a more controlled shutdown process using an atomic flag to signal the main loop to exit cleanly.
+To support system-wide graceful shutdown functionality, the split resizer example now accepts a shared atomic boolean flag for shutdown coordination
 
 ## Completed
-- [x] Added `Arc<AtomicBool>` for thread-safe quit signaling
-- [x] Modified quit handler to set the atomic flag instead of exiting immediately
-- [x] Added main loop check for the quit flag to properly terminate the application
+- [x] Added `Arc<AtomicBool>` parameter to track shutdown requests
+- [x] Integrated shutdown flag into app initialization
 
 ## In Progress
-- [ ] No active work in progress
+- [x] Implementation of actual shutdown handling (not shown in this diff)
 
 ## Blockers
-- None
+- Need to implement shutdown handler that responds to the flag
 
 ## Next Steps
-1. Verify graceful shutdown works in all scenarios
-2. Consider adding shutdown animations or cleanup tasks if needed
+1. Implement shutdown handler that checks the atomic flag
+2. Add proper cleanup logic when shutdown is requested

@@ -11,6 +11,8 @@ use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::io::Result;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 const DA: f32 = 0.30;
 const DB: f32 = 0.50;
@@ -26,10 +28,11 @@ struct SplitResizerApp {
     txt: String,
     theme: Theme,
     show_help: bool,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl SplitResizerApp {
-    fn new(id: WidgetId, theme: Theme) -> Self {
+    fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id,
             ra: DA,
@@ -41,6 +44,7 @@ impl SplitResizerApp {
             txt: "Ready".into(),
             theme,
             show_help: false,
+            should_quit,
         }
     }
 }
