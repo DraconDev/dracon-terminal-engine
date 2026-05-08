@@ -200,7 +200,7 @@ impl Scene for TaskListScreen {
         }
 
         // Status bar
-        let status = "↑↓: nav | Enter: detail | n: new | ?: help | q: quit";
+        let status = "↑↓: nav | Enter: detail | n: new | t: theme | ?: help | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -311,7 +311,7 @@ impl Scene for TaskDetailScreen {
         }
 
         // Status
-        let status = "e: edit | c: toggle | d: delete | Backspace: back";
+        let status = "e: edit | c: toggle | d: delete | Backspace: back | t: theme | ?: help | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -448,7 +448,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Status
-        let status = "Tab: switch field | Enter: save | Backspace: cancel";
+        let status = "Tab: switch field | Enter: save | Backspace: cancel | t: theme | ?: help | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
