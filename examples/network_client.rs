@@ -363,7 +363,7 @@ fn main() -> std::io::Result<()> {
 
     let app = NetworkApp::new(should_quit);
     let app_for_widget = Rc::new(RefCell::new(app));
-    let app_for_tick = Rc::clone(&app_for_widget);
+    let _app_for_tick = Rc::clone(&app_for_widget);
 
     // Initial fetch
     app_for_widget.borrow_mut().refresh();
