@@ -399,12 +399,24 @@ impl SceneRouter {
 
     /// Advances any active transition and delegates render to the current scene.
     ///
-    /// Transitions are automatically ticked inside render using a default
-    /// delta time of 33ms (assumes 30fps). For precise timing, call
-    /// `tick_transition()` manually before `render()`.
+    /// Transition timing is automatically calculated using actual wall-clock delta
+    /// time between frames. For apps with different frame rates, transitions will
+    /// take the same real-world duration regardless of frame rate.
     pub fn render(&self, area: Rect) -> Plane {
-        // Advance transition if active (uses default 33ms per frame)
-        let transition_active = self.tick_transition_internal(33.0);
+        // Calculate actual delta time since last render
+        let dt_ms = {
+            let now = Instant::now();
+            let mut last = self.last_render.borrow_mut();
+            let dt = last.map(|t| {
+                let elapsed = now.duration_since(t);
+                elapsed.as_secs_f32() * 1000.0
+            }).unwrap_or(16.0); // Default 16ms on first frame
+            *last = Some(now);
+            dt
+        };
+
+        // Advance transition if active
+        let transition_active = self.tick_transition_internal(dt_ms);
 
         if transition_active {
             let trans = self.transition.borrow();
