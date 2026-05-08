@@ -54,7 +54,6 @@ impl ThemeSwitcherScene {
             checkbox: Checkbox::new(WidgetId::new(10), "Preview"),
             button: Button::with_id(WidgetId::new(11), "Action"),
             gauge: Gauge::with_id(WidgetId::new(12), "Load")
-                .with_value(65.0)
                 .warn_threshold(70.0)
                 .crit_threshold(90.0),
             badge: StatusBadge::new(WidgetId::new(13)).with_status("OK"),
