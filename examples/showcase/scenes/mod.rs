@@ -2,6 +2,7 @@ pub mod widget_gallery;
 
 /// Which action a scene wants the router to take.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum SceneAction {
     /// Stay on this scene (normal operation).
     None,
