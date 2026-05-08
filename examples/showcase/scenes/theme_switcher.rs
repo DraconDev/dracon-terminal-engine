@@ -164,7 +164,7 @@ impl Scene for ThemeSwitcherScene {
 
             let theme = factory();
             let selected = i == self.theme_index;
-            self.render_swatch(&mut plane, x, y, swatch_w, swatch_h, &theme, selected);
+            self.render_swatch(&mut plane, SwatchConfig { x, y, w: swatch_w, h: swatch_h, theme: &theme, selected });
 
             if selected {
                 // Draw indicator arrow
