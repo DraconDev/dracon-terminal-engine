@@ -679,7 +679,7 @@ impl Widget for FileManager {
                     .with_fg(t.fg_muted),
             )
             .add_segment(
-                StatusSegment::new("n: new file | f: new folder | m: rename | d: delete | r: refresh | ?: help | q: quit")
+                StatusSegment::new("n: new | f: folder | m: rename | d: delete | r: refresh | t: theme | ?: help | q: quit")
                     .with_fg(t.primary),
             );
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
