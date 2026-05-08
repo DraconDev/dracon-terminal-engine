@@ -37,6 +37,16 @@ const THEMES: &[ThemeEntry] = &[
     ("High Contrast", Theme::high_contrast),
 ];
 
+/// Configuration for rendering a single theme swatch.
+struct SwatchConfig<'a> {
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+    theme: &'a Theme,
+    selected: bool,
+}
+
 pub struct ThemeSwitcherScene {
     theme_index: usize,
     theme: Theme,
@@ -77,7 +87,8 @@ impl ThemeSwitcherScene {
         self.badge.on_theme_change(&self.theme);
     }
 
-    fn render_swatch(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, theme: &Theme, selected: bool) {
+    fn render_swatch(&self, plane: &mut Plane, cfg: SwatchConfig) {
+        let SwatchConfig { x, y, w, h, theme, selected } = cfg;
         let border = if selected { self.theme.primary } else { self.theme.outline };
         for row in y..y + h {
             for col in x..x + w {
