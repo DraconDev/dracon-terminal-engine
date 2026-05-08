@@ -79,6 +79,13 @@ impl BenchScene {
 
 impl Scene for BenchScene {
     fn scene_id(&self) -> &str { self.id }
+    fn on_enter(&mut self) {}
+    fn on_exit(&mut self) {}
+    fn on_pause(&mut self) {}
+    fn on_resume(&mut self) {}
+    fn handle_key(&mut self, _key: dracon_terminal_engine::input::event::KeyEvent) -> bool { false }
+    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool { false }
+    fn update(&mut self, _ctx: &mut dracon_terminal_engine::framework::app::Ctx, _dt: f64) {}
     fn render(&self, _area: Rect) -> Plane {
         self.render_count.set(self.render_count.get() + 1);
         Plane::new(0, 80, 24)
@@ -92,7 +99,7 @@ fn bench_scene_router_push_pop() {
 
     let start = Instant::now();
     for i in 0..iterations {
-        router.register(format!("scene_{}", i % 10), BenchScene::new("bench"));
+        router.register(&format!("scene_{}", i % 10), Box::new(BenchScene::new("bench")));
         router.push(&format!("scene_{}", i % 10));
     }
     for _ in 0..iterations {
@@ -108,7 +115,7 @@ fn bench_scene_router_push_pop() {
 #[test]
 fn bench_scene_router_render() {
     let mut router = SceneRouter::new();
-    router.register("main", BenchScene::new("main"));
+    router.register("main", Box::new(BenchScene::new("main")));
     router.push("main");
     let iterations = 10_000;
 
@@ -127,7 +134,7 @@ fn bench_scene_router_render() {
 fn bench_scene_router_deep_navigation() {
     let mut router = SceneRouter::new();
     for i in 0..100 {
-        router.register(format!("scene_{}", i), BenchScene::new("bench"));
+        router.register(&format!("scene_{}", i), Box::new(BenchScene::new("bench")));
     }
 
     let start = Instant::now();
