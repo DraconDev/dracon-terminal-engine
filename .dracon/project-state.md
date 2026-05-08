@@ -1,22 +1,21 @@
 # Project State
 
 ## Current Focus
-Enhanced mouse event handling in the input debugger with support for horizontal scrolling
+Added support for unsupported terminal events in the input debugger.
 
 ## Context
-The input debugger tool needed to properly handle horizontal mouse scrolling events which were previously unsupported. This change ensures all mouse events are properly captured and displayed.
+The input debugger was enhanced to handle all possible terminal events, including those marked as unsupported. This ensures comprehensive event logging and debugging capabilities.
 
 ## Completed
-- [x] Added support for horizontal mouse scrolling events (ScrollLeft/ScrollRight)
-- [x] Refactored rendering logic to build output strings instead of writing directly to terminal
-- [x] Updated the help text to include horizontal scrolling in the key bindings section
+- [x] Added handling for `Event::Unsupported` in the input debugger
+- [x] Updated Cargo.lock to reflect dependency changes
 
 ## In Progress
-- [ ] No active work in progress
+- [ ] None
 
 ## Blockers
-- None identified
+- None
 
 ## Next Steps
-1. Verify all mouse events are properly captured and displayed
-2. Test horizontal scrolling behavior in different terminal environments
+1. Verify the new event handling works as expected in terminal environments
+2. Consider expanding the debugger to include more detailed unsupported event information if needed

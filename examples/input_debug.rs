@@ -68,6 +68,7 @@ impl InputDebugger {
             Event::FocusLost => "FOCUS Lost".to_string(),
             Event::Paste(text) => format!("PASTE {} chars", text.len()),
             Event::Resize(w, h) => format!("RESIZE {}x{}", w, h),
+            Event::Unsupported(_) => "UNSUPPORTED".to_string(),
         }
     }
 
