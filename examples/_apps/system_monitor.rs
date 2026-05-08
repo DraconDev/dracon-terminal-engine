@@ -86,10 +86,13 @@ impl MetricHistory {
 
 struct ProcessInfo {
     pid: u32,
+    ppid: Option<u32>,
     name: String,
     cpu_percent: f32,
-    mem_mb: f32,
-    state: String,
+    mem_kb: u64,
+    user: String,
+    status: char,
+    command: String,
 }
 
 struct SystemData {
