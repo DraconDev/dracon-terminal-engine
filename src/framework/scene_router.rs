@@ -35,6 +35,7 @@ use ratatui::layout::Rect;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
+use std::time::Instant;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SCENE TRAIT
@@ -153,6 +154,8 @@ pub struct SceneRouter {
     default_transition: SceneTransition,
     /// Default transition duration in milliseconds.
     default_duration_ms: f32,
+    /// Last render timestamp for delta time calculation.
+    last_render: RefCell<Option<Instant>>,
 }
 
 impl SceneRouter {
