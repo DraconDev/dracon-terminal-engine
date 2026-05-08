@@ -15,8 +15,6 @@
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
