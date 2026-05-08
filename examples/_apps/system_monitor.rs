@@ -981,6 +981,7 @@ impl Widget for SystemMonitor {
                 }
             }
         }
+        }
 
         // ── Footer ──
         let footer_y = area.height.saturating_sub(1);
