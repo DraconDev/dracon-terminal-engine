@@ -112,7 +112,7 @@ impl PluginRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compositor::{Cell, Color};
+    use crate::compositor::{Cell, Color, Plane};
     use crate::framework::widget::Widget;
     use ratatui::layout::Rect;
 
