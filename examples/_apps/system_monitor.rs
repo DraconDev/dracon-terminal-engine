@@ -416,9 +416,8 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<(usize, usize)> {
     }
 
     // Add any orphaned processes not visited
-    for idx in 0..processes.len() {
-        let pid = processes[idx].pid;
-        if !visited.contains(&pid) {
+    for (idx, proc) in processes.iter().enumerate() {
+        if !visited.contains(&proc.pid) {
             result.push((idx, 0));
         }
     }
@@ -743,11 +742,8 @@ impl Widget for SystemMonitor {
         render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
 
         let header_y = list_y + 1;
-        let header_text = if self.tree_mode {
-            " 󰀽 PID      NAME             CPU%    MEM     STATE  "
-        } else {
-            " 󰀽 PID      NAME             CPU%    MEM     STATE  "
-        };
+        let header_text =
+            " 󰀽 PID      NAME             CPU%    MEM     STATE  ";
         draw_text(
             &mut plane,
             2,
