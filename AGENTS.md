@@ -698,6 +698,73 @@ if show_help {
 }
 ```
 
+## Embedded Showcase Scenes
+
+The showcase launcher (`examples/showcase/`) supports **embedded scenes** — examples that run in-process via `SceneRouter` instead of as external processes. This provides instant launch, seamless theme propagation, and smooth transitions.
+
+### Benefits of Embedded Scenes
+- **Instant launch** — no process spawn, no terminal state save/restore
+- **Theme sharing** — showcase theme propagates to embedded scenes on `t` key
+- **Smooth transitions** — fade/slide animations between showcase and scenes
+- **Shared state** — scenes can share data via the app's `Arc` primitives
+
+### Embedded Scene Architecture
+
+```rust
+// examples/showcase/scenes/mod.rs
+pub mod widget_gallery;
+pub mod theme_switcher;
+pub mod form_demo;
+pub mod tree_navigator;
+pub mod modal_demo;
+
+/// Actions a scene can request from the router
+#[derive(Clone, Debug, PartialEq)]
+pub enum SceneAction {
+    None,
+    Pop,      // Return to previous scene
+    Push(String), // Push a new scene
+    Quit,
+}
+
+// Register scenes in state.rs:
+let mut scene_router = SceneRouter::new()
+    .with_default_transition(SceneTransition::Fade);
+scene_router.register("widget_gallery", Box::new(WidgetGalleryScene::new(theme)));
+```
+
+### Scene Trait Implementation
+
+```rust
+use dracon_terminal_engine::framework::scene_router::Scene;
+
+pub struct MyScene {
+    theme: Theme,
+    // ... scene-specific state
+}
+
+impl Scene for MyScene {
+    fn on_enter(&mut self) { /* called when scene becomes active */ }
+    fn on_exit(&mut self) { /* called when scene becomes inactive */ }
+    fn on_pause(&mut self) { /* called when another scene is pushed on top */ }
+    fn on_resume(&mut self) { /* called when scene returns to top */ }
+    fn render(&self, area: Rect) -> Plane { /* draw the scene */ }
+    fn handle_key(&mut self, key: KeyEvent) -> bool { /* handle input */ }
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool { true }
+    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; }
+}
+```
+
+### Scene Title Bar
+
+When rendering an embedded scene, the showcase draws a title bar at the top showing the scene name. The scene's render output is drawn below the title bar (y=1 onwards).
+
+### Navigation
+
+- `B` or `Esc` — pops the current scene, returns to showcase
+- Theme changes (`t` key) propagate to active scenes via `on_theme_change`
+- Embedded scenes work alongside external binary launches — both patterns coexist
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:
