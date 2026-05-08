@@ -239,9 +239,9 @@ fn bench_scoped_zone_registry(c: &mut Criterion) {
 // =============================================================================
 
 fn bench_theme_creation(c: &mut Criterion) {
-    c.bench_function("theme_nord", |b| b.iter(|| Theme::nord()));
-    c.bench_function("theme_cyberpunk", |b| b.iter(|| Theme::cyberpunk()));
-    c.bench_function("theme_dracula", |b| b.iter(|| Theme::dracula()));
+    c.bench_function("theme_nord", |b| b.iter(Theme::nord));
+    c.bench_function("theme_cyberpunk", |b| b.iter(Theme::cyberpunk));
+    c.bench_function("theme_dracula", |b| b.iter(Theme::dracula));
     c.bench_function("theme_all_20", |b| {
         b.iter(|| {
             let _ = Theme::nord();

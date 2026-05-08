@@ -348,8 +348,8 @@ fn test_animation_chained_sequence() {
     let val2 = manager.value(id2).unwrap_or(50.0);
 
     // Both should be progressing independently.
-    assert!(val1 >= 0.0 && val1 <= 50.0);
-    assert!(val2 >= 50.0 && val2 <= 100.0);
+    assert!((0.0..=50.0).contains(&val1));
+    assert!((50.0..=100.0).contains(&val2));
 }
 
 #[test]
@@ -363,7 +363,7 @@ fn test_animation_precise_value_linear_halfway() {
     let val = manager.value(id).unwrap_or(0.0);
     // Linear easing at ~50% should be around 50 (with tolerance for scheduling).
     assert!(
-        val >= 30.0 && val <= 70.0,
+        (30.0..=70.0).contains(&val),
         "Linear halfway should be near 50, got {}",
         val
     );
@@ -437,7 +437,7 @@ fn test_animation_reverse_direction() {
 
     let val = manager.value(id).unwrap_or(100.0);
     assert!(
-        val < 100.0 && val >= 0.0,
+        (0.0..100.0).contains(&val),
         "Reverse animation should decrease, got {}",
         val
     );
