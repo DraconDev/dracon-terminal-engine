@@ -210,7 +210,8 @@ impl Widget for Showcase {
 
         // Features highlight bar
         let features_y = 3usize;
-        crate::render::render_features_bar(&mut plane, t, features_y, self.phase);
+        let phase = self.card_start.elapsed().as_secs_f64();
+        crate::render::render_features_bar(&mut plane, t, features_y, phase);
 
         // Search bar with icon and better styling
         let search_y = 4usize;
