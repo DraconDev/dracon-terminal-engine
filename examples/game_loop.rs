@@ -67,7 +67,7 @@ impl GameState {
                 y: rand::random::<f32>() * h as f32,
                 brightness: 0.3 + rand::random::<f32>() * 0.7,
                 twinkle_speed: 2.0 + rand::random::<f32>() * 4.0,
-                phase: rand::random::<f32>() * 6.28,
+                phase: rand::random::<f32>() * std::f32::consts::TAU,
             });
         }
         Self {
@@ -92,7 +92,7 @@ impl GameState {
         ];
         let chars = ['●', '◆', '★', '•', '·'];
         for i in 0..count {
-            let angle = (i as f32 / count as f32) * 6.28 + rand::random::<f32>() * 0.5;
+            let angle = (i as f32 / count as f32) * std::f32::consts::TAU + rand::random::<f32>() * 0.5;
             let speed = 20.0 + rand::random::<f32>() * 40.0;
             self.particles.push(Particle {
                 x,
