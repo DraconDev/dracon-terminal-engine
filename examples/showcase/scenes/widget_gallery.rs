@@ -15,8 +15,6 @@ use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, Mous
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 
-use super::SceneAction;
-
 // ── Widget slot positions in the grid (row, col, name, icon) ────────────────
 
 const SLOTS: &[(usize, usize, &str, &str)] = &[
