@@ -913,13 +913,6 @@ fn main() -> io::Result<()> {
         let (w, h) = ctx.compositor().size();
         let area = Rect::new(0, 0, w, h);
 
-        // Sync theme from framework
-        let framework_theme = ctx.theme();
-        if framework_theme.name != chat.theme.name {
-            chat.theme = *framework_theme;
-            chat.dirty = true;
-        }
-
         // Update area if resized
         if chat.area.get() != area {
             chat.area.set(area);
