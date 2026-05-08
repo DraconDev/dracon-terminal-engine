@@ -765,6 +765,77 @@ When rendering an embedded scene, the showcase draws a title bar at the top show
 - Theme changes (`t` key) propagate to active scenes via `on_theme_change`
 - Embedded scenes work alongside external binary launches — both patterns coexist
 
+## Process Tree View Pattern (`system_monitor.rs`)
+
+The `system_monitor` example implements a process tree view. Key patterns:
+
+### TreeNode Struct with Pre-computed Connectors
+
+```rust
+struct TreeNode {
+    idx: usize,              // Index into flat processes array
+    depth: usize,            // Nesting depth (0 = root)
+    prefix: String,          // Tree connector prefix ("├─ ", "└─ ", "│  ")
+    ancestor_last: Vec<bool>, // Per-level sibling tracking for connector rendering
+}
+```
+
+Built via DFS with cycle detection (HashSet<u32> of visited PIDs). Connector prefixes computed during DFS traversal using `ancestor_last` tracking:
+- Last child at a level gets `└─ `, others get `├─ `
+- Continuation bars (`│  `) for ancestors above non-last children
+
+### View-Index Architecture
+
+**CRITICAL**: When rendering a derived view (like a tree), navigation and mouse hit-testing must use **view indices** (display row), not flat array indices:
+
+```rust
+// WRONG — broken when view order != array order:
+self.selected_process = Some(clicked_idx_into_processes);
+
+// RIGHT — use view index, convert back for data access:
+self.selected_process = Some(clicked_view_row);
+// Detail panel: let proc = &self.data.processes[self.tree_view[self.selected_process.unwrap()].idx];
+```
+
+Key fields:
+- `selected_process: Option<usize>` — view index (display row)
+- `hovered_process: Option<usize>` — view index
+- `tree_view: Vec<TreeNode>` — DFS-ordered nodes
+- `visible_process_rows()` — returns `tree_view.len()` in tree mode, `processes.len()` in flat mode
+
+### /proc/pid/stat Parsing Safety
+
+Command names in `/proc/pid/stat` can contain `)` characters. Use state-char validation:
+
+```rust
+fn find_stat_end(content: &str) -> Option<usize> {
+    // Find ") " followed by a valid single-character state
+    let valid_states = ['R', 'S', 'D', 'Z', 'T', 'W', 't', 'X', 'x', 'K', 'P', 'I'];
+    for (i, _) in content.match_indices(") ") {
+        if let Some(next) = content[i + 2..].chars().next() {
+            if valid_states.contains(&next) {
+                return Some(i);
+            }
+        }
+    }
+    None
+}
+```
+
+### Tree Connector Rendering
+
+```rust
+fn render_tree_connectors(plane: &mut Plane, x: u16, y: u16, prefix: &str, theme: &Theme) {
+    for (ci, c) in prefix.chars().enumerate() {
+        let idx = (y as usize * area.width as usize + (x + ci as u16) as usize) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = theme.dim;
+        }
+    }
+}
+```
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:
