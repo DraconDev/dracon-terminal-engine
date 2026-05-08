@@ -49,7 +49,6 @@ pub struct WidgetGalleryScene {
     theme: Theme,
     show_help: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
-    action: RefCell<SceneAction>,
 }
 
 impl WidgetGalleryScene {
@@ -69,7 +68,6 @@ impl WidgetGalleryScene {
             theme,
             show_help: false,
             zones: RefCell::new(ScopedZoneRegistry::new()),
-            action: RefCell::new(SceneAction::None),
         }
     }
 
