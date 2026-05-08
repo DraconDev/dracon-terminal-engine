@@ -4,7 +4,7 @@ use dracon_terminal_engine::framework::event_bus::EventBus;
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::compositor::Plane;
 use ratatui::layout::Rect;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EventBus Throughput Benchmarks
@@ -85,7 +85,6 @@ impl Scene for BenchScene {
     fn on_resume(&mut self) {}
     fn handle_key(&mut self, _key: dracon_terminal_engine::input::event::KeyEvent) -> bool { false }
     fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool { false }
-    fn update(&mut self, _ctx: &mut dracon_terminal_engine::framework::app::Ctx, _dt: f64) {}
     fn render(&self, _area: Rect) -> Plane {
         self.render_count.set(self.render_count.get() + 1);
         Plane::new(0, 80, 24)
