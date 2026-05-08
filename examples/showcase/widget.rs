@@ -1632,6 +1632,9 @@ impl Showcase {
                         .unwrap_or(0);
                     self.pending_theme = Some((current + 1) % themes.len());
                     self.apply_filter();
+                    if self.scene_router.current().is_some() {
+                        self.scene_router.on_theme_change(&self.theme);
+                    }
                     true
                 }
                 KeyCode::Char('d') => {
