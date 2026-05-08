@@ -878,6 +878,12 @@ impl Widget for SystemMonitor {
                 self.cycle_theme();
                 true
             }
+            KeyCode::Char('p') => {
+                self.tree_mode = !self.tree_mode;
+                self.process_scroll = 0;
+                self.selected_process = None;
+                true
+            }
             KeyCode::Char('?') => {
                 self.show_help = true;
                 true
