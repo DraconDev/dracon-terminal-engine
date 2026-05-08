@@ -179,7 +179,7 @@ impl Showcase {
     }
 
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery")
+        matches!(name, "widget_gallery" | "theme_switcher")
     }
 
     pub fn launch_selected(&mut self) {
