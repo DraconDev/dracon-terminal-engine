@@ -467,7 +467,6 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<TreeNode> {
         if !visited.contains(&proc.pid) {
             result.push(TreeNode {
                 proc_idx: idx,
-                depth: 0,
                 prefix: String::new(),
             });
         }
