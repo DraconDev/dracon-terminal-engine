@@ -268,7 +268,7 @@ fn main() -> std::io::Result<()> {
     let mut app_widget = App::new()?.title("Form Widget Demo").fps(30).theme(theme);
 
     app_widget.add_widget(
-        Box::new(FormApp::new(quit_check, theme)),
+        Box::new(FormApp::new(quit_check.clone(), theme)),
         Rect::new(0, 0, 80, 24),
     );
 
