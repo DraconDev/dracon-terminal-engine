@@ -191,7 +191,7 @@ impl Widget for Showcase {
         let stats_text = format!(
             "  {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
-            35,
+            37,
             themes.len()
         );
         let stats_start = 2usize;
@@ -208,8 +208,12 @@ impl Widget for Showcase {
             set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
         }
 
+        // Features highlight bar
+        let features_y = 3usize;
+        crate::render::render_features_bar(&mut plane, t, features_y, self.phase);
+
         // Search bar with icon and better styling
-        let search_y = 3usize;
+        let search_y = 4usize;
         let search_active_bg = t.primary;
         let search_inactive_bg = t.surface;
         let search_bg = if self.search_active {

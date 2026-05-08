@@ -94,6 +94,51 @@ pub fn category_color(t: Theme, cat: &str) -> Color {
     }
 }
 
+/// Render a features highlight bar showing framework capabilities.
+/// Returns the width consumed.
+pub fn render_features_bar(
+    plane: &mut Plane,
+    theme: Theme,
+    y: usize,
+    phase: f64,
+) -> usize {
+    let t = theme;
+    let features = [
+        ("37", "Widgets", t.info),
+        ("20", "Themes", t.secondary),
+        ("🎨", "Animations", t.warning),
+        ("🖱️", "Drag & Drop", t.success),
+        ("⌨️", "Keyboard", t.primary),
+        ("🖼️", "Sixel", t.info),
+    ];
+
+    let mut x = 2usize;
+    for (i, (icon, label, color)) in features.iter().enumerate() {
+        let item_phase = phase + i as f64 * 1.2;
+        let pulse = (item_phase * 2.5).sin() * 0.3 + 0.7;
+        let is_pulse_high = pulse > 0.85;
+
+        // Separator
+        if i > 0 {
+            let sep = " │ ";
+            draw_text(plane, x, y, sep, t.outline, t.bg, false);
+            x += sep.len();
+        }
+
+        // Icon with pulse effect
+        let icon_fg = if is_pulse_high { color } else { t.fg_muted };
+        draw_text(plane, x, y, icon, icon_fg, t.bg, is_pulse_high);
+        x += icon.chars().count();
+
+        // Label
+        let label_fg = if is_pulse_high { t.fg } else { t.fg_muted };
+        draw_text(plane, x, y, label, label_fg, t.bg, false);
+        x += label.len();
+    }
+
+    x + 2
+}
+
 /// Configuration for rendering a single example card.
 pub struct CardConfig<'a> {
     pub ex: &'a ExampleMeta,
