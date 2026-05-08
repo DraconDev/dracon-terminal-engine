@@ -2,6 +2,7 @@
 // DATA
 // ═══════════════════════════════════════════════════════════════════════════════
 
+#[derive(Clone)]
 pub struct ExampleMeta {
     pub(crate) name: &'static str,
     pub(crate) category: &'static str,
