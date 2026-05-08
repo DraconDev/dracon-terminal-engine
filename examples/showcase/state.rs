@@ -73,7 +73,7 @@ impl Showcase {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         let mut scene_router = SceneRouter::new();
-        scene_router.register("widget_gallery", WidgetGalleryScene::new());
+        scene_router.register("widget_gallery", Box::new(WidgetGalleryScene::new(Theme::nord())));
 
         Self {
             examples,
