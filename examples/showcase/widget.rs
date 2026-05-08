@@ -1498,6 +1498,19 @@ impl Showcase {
 
 impl Showcase {
     fn dispatch_key(&mut self, key: KeyEvent) -> bool {
+        // If a scene is active, delegate to it
+        if self.scene_router.current().is_some() {
+            match key.code {
+                KeyCode::Char('b') | KeyCode::Esc => {
+                    self.scene_router.pop();
+                    return true;
+                }
+                _ => {
+                    return self.scene_router.handle_key(key);
+                }
+            }
+        }
+
         // Help overlay takes priority
         if self.show_help {
             match key.code {
