@@ -60,6 +60,7 @@ pub struct Showcase {
     pub(crate) card_hover_anim: Vec<Option<usize>>, // animation id per card
     pub(crate) toast_anim: Option<usize>,
     pub(crate) returned_from: Arc<Mutex<Option<(String, Instant)>>>,
+    pub(crate) scene_router: SceneRouter,
 }
 
 impl Showcase {
