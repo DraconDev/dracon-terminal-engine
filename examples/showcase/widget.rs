@@ -1333,7 +1333,19 @@ impl Showcase {
                                 return true;
                             }
                             1 => {
-                                self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                                // Slider: click position determines direction
+                                // Slider zone starts at prim_x=2, format: " Slider [▓▓▓░░░░░░░]"
+                                // Thumb position is at ~2 + 9 + 1 + thumb_pos
+                                let slider_zone_x = 2usize;
+                                let slider_label_w = 9usize; // " Slider ["
+                                let track_w = 10usize;
+                                let thumb_pos = (self.primitive_slider * track_w as f32).round() as usize;
+                                let thumb_x = slider_zone_x + slider_label_w + thumb_pos;
+                                if (col as usize) < thumb_x {
+                                    self.primitive_slider = (self.primitive_slider - 0.1).max(0.0);
+                                } else {
+                                    self.primitive_slider = (self.primitive_slider + 0.1).min(1.0);
+                                }
                                 return true;
                             }
                             2 => {
