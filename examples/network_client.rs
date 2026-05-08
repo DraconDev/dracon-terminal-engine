@@ -139,7 +139,7 @@ impl NetworkApp {
         let title = "🌐 Network Client — JSONPlaceholder API";
         let tx = (area.width as usize).saturating_sub(title.len()) / 2;
         for (i, c) in title.chars().enumerate() {
-            let idx = (tx + i) as usize;
+            let idx = tx + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.primary;
