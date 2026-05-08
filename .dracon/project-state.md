@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Added tracking for navigation history in the showcase example
 
 ## Context
-This change was prompted by the need to ensure consistent styling across the application, particularly for the background color implementation in the ConfirmDialog widget.
+This change enables tracking the previous page visited in the showcase application, which will be used to implement "return to previous page" functionality.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Added `returned_from` field to track navigation history with timestamp
 
 ## In Progress
-- [x] Comprehensive keyboard interaction tests for the ConfirmDialog widget
+- [x] Implementation of navigation history tracking
 
 ## Blockers
-- None identified at this time
+- None identified
 
 ## Next Steps
-1. Verify that the background color implementation is consistent across all relevant components
-2. Continue with the comprehensive keyboard interaction tests for the ConfirmDialog widget
+1. Implement logic to populate and use the navigation history
+2. Add UI elements to display and interact with the navigation history
