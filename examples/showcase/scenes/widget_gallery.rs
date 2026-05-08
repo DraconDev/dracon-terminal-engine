@@ -67,6 +67,7 @@ impl WidgetGalleryScene {
             theme,
             show_help: false,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            area: Rect::new(0, 0, 80, 24),
         }
     }
 
