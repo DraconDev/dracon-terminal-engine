@@ -824,7 +824,6 @@ impl Widget for SystemMonitor {
                 (0..self.data.processes.len())
                     .map(|i| TreeNode {
                         proc_idx: i,
-                        depth: 0,
                         prefix: String::new(),
                     })
                     .collect()
@@ -895,7 +894,6 @@ impl Widget for SystemMonitor {
             (0..self.data.processes.len())
                 .map(|i| TreeNode {
                     proc_idx: i,
-                    depth: 0,
                     prefix: String::new(),
                 })
                 .collect::<Vec<_>>()
