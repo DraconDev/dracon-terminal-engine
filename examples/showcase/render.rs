@@ -148,6 +148,7 @@ pub struct CardConfig<'a> {
     pub phase: f64,
     pub width: u16,
     pub height: u16,
+    pub is_embedded: bool,
 }
 
 pub fn render_card(config: &CardConfig) -> Plane {
@@ -205,7 +206,7 @@ pub fn render_card(config: &CardConfig) -> Plane {
     }
 
     // Embedded badge
-    if config.ex.name == "widget_gallery" {
+    if config.is_embedded {
         let embed_badge = " ⚡ ";
         let embed_x = badge_x + badge.len() + 1;
         for (i, ch) in embed_badge.chars().enumerate() {
