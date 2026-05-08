@@ -66,7 +66,7 @@ impl FormDemoScene {
         if self.email.query().is_empty() || !self.email.query().contains('@') {
             return Some("Valid email required".into());
         }
-        if self.password.query().len() < 6 {
+        if self.password.password().len() < 6 {
             return Some("Password must be 6+ chars".into());
         }
         None
