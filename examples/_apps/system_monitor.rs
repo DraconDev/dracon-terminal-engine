@@ -1049,12 +1049,6 @@ impl Widget for SystemMonitor {
                 if n < max_scroll {
                     self.selected_process = Some(n + 1);
                 }
-                // Auto-scroll if selection goes below visible area
-                let list_h = self.area.height.saturating_sub(list_y().saturating_add(2));
-                let max_visible = (list_h as usize).saturating_sub(3);
-                if self.selected_process.unwrap_or(0) >= self.process_scroll + max_visible {
-                    self.process_scroll = self.selected_process.unwrap_or(0).saturating_sub(max_visible.saturating_sub(1));
-                }
                 true
             }
             _ => false,
