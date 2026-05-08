@@ -147,6 +147,10 @@ path = "examples/git_tui.rs"
 name = "sqlite_browser"
 path = "examples/sqlite_browser.rs"
 
+[[example]]
+name = "plugin_demo"
+path = "examples/plugin_demo.rs"
+
 [features]
 default = []
 async = ["tokio"]
