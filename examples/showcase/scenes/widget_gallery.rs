@@ -126,10 +126,6 @@ impl WidgetGalleryScene {
 impl Scene for WidgetGalleryScene {
     fn scene_id(&self) -> &str { "widget_gallery" }
 
-    fn on_enter(&mut self) {
-        self.action = RefCell::new(SceneAction::None);
-    }
-
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
