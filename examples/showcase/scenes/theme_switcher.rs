@@ -141,7 +141,7 @@ impl Scene for ThemeSwitcherScene {
         let swatch_h = 3u16;
         let start_y = 2u16;
 
-        for (i, (name, factory)) in THEMES.iter().enumerate() {
+        for (i, (_name, factory)) in THEMES.iter().enumerate() {
             let col = i as u16 % cols;
             let row = i as u16 / cols;
             let x = 1 + col * swatch_w;
