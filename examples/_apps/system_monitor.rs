@@ -534,6 +534,13 @@ impl SystemMonitor {
         }
     }
 
+    /// How many process rows fit in the visible area.
+    fn visible_process_rows(&self) -> usize {
+        // Layout: header(3) + gauges(4) + sparklines(2) + badge(1) + spacing(3) + footer(1) = 14
+        // Process list area starts at y=13, subtract border + header (3 rows) = area.height - 16
+        self.area.height.saturating_sub(16).max(1) as usize
+    }
+
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % THEMES.len();
         self.theme = match THEMES[self.theme_index] {
@@ -1045,6 +1052,11 @@ impl Widget for SystemMonitor {
                 let n = self.selected_process.unwrap_or(0);
                 if n < max_scroll {
                     self.selected_process = Some(n + 1);
+                }
+                // Auto-scroll if selection goes below visible area
+                let max_visible = self.visible_process_rows();
+                if self.selected_process.unwrap_or(0) >= self.process_scroll + max_visible {
+                    self.process_scroll = self.selected_process.unwrap_or(0) + 1 - max_visible;
                 }
                 true
             }
