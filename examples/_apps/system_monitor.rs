@@ -383,6 +383,7 @@ struct SystemMonitor {
     hovered_process: Option<usize>,
     process_scroll: usize,
     show_help: bool,
+    tree_mode: bool,
     area: Rect,
     should_quit: Arc<AtomicBool>,
 }
