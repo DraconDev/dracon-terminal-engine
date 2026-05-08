@@ -406,6 +406,7 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<TreeNode> {
 
     // Depth-first traversal with proper tree connectors
     let mut result = Vec::new();
+    #[allow(clippy::too_many_arguments)]
     fn dfs(
         idx: usize,
         depth: usize,
