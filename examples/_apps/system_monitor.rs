@@ -790,6 +790,17 @@ impl Widget for SystemMonitor {
                         false,
                     );
                     dy += 1;
+                    let ppid_str = proc.ppid.map(|p| p.to_string()).unwrap_or_else(|| "None".to_string());
+                    draw_text(
+                        &mut plane,
+                        detail_x,
+                        dy,
+                        &format!(" PPID: {}", ppid_str),
+                        t.fg,
+                        t.surface,
+                        false,
+                    );
+                    dy += 1;
                     // Mini CPU gauge
                     let cpu_bar =
                         ((proc.cpu_percent / 100.0).min(1.0) * (detail_w - 10) as f32) as u16;
