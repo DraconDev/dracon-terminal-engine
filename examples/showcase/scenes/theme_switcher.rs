@@ -91,7 +91,7 @@ impl ThemeSwitcherScene {
                         (_, true, _, true) => '╯',
                         _ => '─',
                     };
-                } else if row == y + 1 && col >= x + 1 && col < x + w - 1 {
+                } else if row == y + 1 && col > x && col < x + w - 1 {
                     let name = theme.name;
                     let name_x = x + 1 + (w.saturating_sub(2).saturating_sub(name.len() as u16)) / 2;
                     if col >= name_x && (col - name_x) < name.len() as u16 {
@@ -136,7 +136,7 @@ impl Scene for ThemeSwitcherScene {
 
         // Theme grid (4 columns)
         let cols: u16 = 4;
-        let _rows = (THEMES.len() as u16 + cols - 1) / cols;
+        let _rows = (THEMES.len() as u16).div_ceil(cols);
         let swatch_w = (area.width.saturating_sub(2)) / cols;
         let swatch_h = 3u16;
         let start_y = 2u16;
