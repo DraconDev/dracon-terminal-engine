@@ -65,6 +65,7 @@ impl Showcase {
         should_quit: Arc<AtomicBool>,
         pending: Arc<Mutex<Option<String>>>,
         fps: Arc<AtomicU64>,
+        returned_from: Arc<Mutex<Option<(String, Instant)>>>,
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
@@ -110,6 +111,7 @@ impl Showcase {
             animations: AnimationManager::new(),
             card_hover_anim: Vec::new(),
             toast_anim: None,
+            returned_from,
         }
     }
 
