@@ -30,7 +30,6 @@
 //! }
 //! ```
 
-use crate::compositor::Plane;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use std::collections::HashMap;
