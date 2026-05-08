@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [29.10.98] - 2026-05-08
+
+### Added
+
+#### Architecture (Major)
+- **Event Bus** (`src/framework/event_bus.rs`) — Decoupled publish/subscribe messaging with `Reactive<T>` helper for observable values
+- **Scene Router** (`src/framework/scene_router.rs`) — Multi-screen navigation with push/pop/replace, transitions (fade, slide), lifecycle hooks (on_enter, on_exit, on_pause, on_resume), and deep linking
+- **Plugin Registry** (`src/framework/plugin.rs`) — Dynamic widget loading via `WidgetFactory` trait
+
+#### New Examples
+- `event_bus_demo.rs` — Demonstrates event bus with counter + event log
+- `scene_router_demo.rs` — Multi-screen app with transitions
+- `tutorial_app.rs` — Progressive "Building Your First App" tutorial
+- `todo_app.rs` — Real SQLite-backed todo app with CRUD operations
+- `network_client.rs` — HTTP API consumer with async requests
+
+#### Showcase Launcher
+- Embedded SceneRouter scenes for instant launch (no external process spawn)
+- 5 examples converted: widget_gallery, theme_switcher, form_demo, tree_navigator, modal_demo
+- Seamless B/Esc back navigation from scenes
+- Theme sync between showcase and embedded scenes
+- Fade transitions between showcase grid and scenes
+- "⚡ Embedded" badges on scene cards
+- Scene title bar rendering
+- `is_embedded()` detection in showcase state
+
+#### Framework Improvements
+- `Ctx::set_theme()` — Pattern 2 apps can now cycle themes via context
+- `Compositor::invalidate_last_frame()` — Fixes black screen after returning from external examples
+- `SceneRouter` interior mutability — `render(&self)` auto-ticks transitions
+- Dithered crossfade transitions between scenes
+
+### Fixed
+
+#### Terminal State Corruption
+- `form_widget.rs` — Added missing `on_tick` handler so `q` actually exits
+- `input_debug.rs` — Full terminal cleanup on exit (disable mouse, focus events, bracketed paste, kitty keyboard)
+- `game_loop.rs` — Disables mouse modes before exit
+- `desktop.rs` — Disables mouse modes before exit
+- `system_monitor.rs` — Replaced `process::exit(0)` with `ctx.stop()` bridge pattern
+- `split_resizer.rs` — Replaced `process::exit(0)` with `ctx.stop()` bridge pattern
+
+#### Showcase Bugs
+- Slider in primitives bar now increments/decrements based on click position
+- Black screen / transparent holes after returning from examples fixed via `invalidate_last_frame()`
+
+#### Style Compliance
+- `chat_client.rs` — Complete rewrite: moved rendering to `on_tick`, added `ScopedZoneRegistry`, modal input capture, dirty flag, removed manual z_index
+- `form_widget.rs` — Fixed quit handler with `on_tick` bridge
+- 4 examples fixed status bar hints to include `t: theme | ?: help`
+
+### Tests
+- **1,732 tests** across 68 test files (all passing)
+- New: `event_bus_test.rs` (10 tests)
+- New: `scene_router_test.rs` (11 tests)
+- All 33 examples compile with zero warnings
+
 ## [27.0.5] - 2026-05-01
 
 ### Fixed
