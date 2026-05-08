@@ -31,6 +31,12 @@ impl Compositor {
         self.clear_color = color;
     }
 
+    /// Clears the last frame buffer, forcing a full redraw on next render.
+    /// Call this after externally clearing the terminal (e.g., resume from suspend).
+    pub fn invalidate_last_frame(&mut self) {
+        self.last_frame = vec![Cell::default(); (self.width as u32 * self.height as u32) as usize];
+    }
+
     /// Advances the compositor state by one frame.
     pub fn tick(&mut self, _delta: f32) {}
 
