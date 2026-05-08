@@ -1297,6 +1297,11 @@ impl Widget for Showcase {
 
 impl Showcase {
     fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        // If a scene is active, delegate to it
+        if self.scene_router.current().is_some() {
+            return self.scene_router.handle_mouse(kind, col, row);
+        }
+
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
         let _grid_start_x = sidebar_w + 2;
