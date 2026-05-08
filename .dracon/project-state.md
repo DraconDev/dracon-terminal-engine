@@ -1,20 +1,20 @@
 # Project State
 
 ## Current Focus
-Update Cargo.lock to reflect consistent background color implementation
+Removed terminal suspension in showcase example to prevent unnecessary terminal state changes.
 
 ## Context
-This change updates the dependency lockfile to ensure consistent background color behavior across the project, likely in response to recent UI improvements or theming changes.
+The showcase example was unnecessarily suspending and resuming the terminal, which could cause flickering or unexpected behavior. This change simplifies the example by removing the redundant terminal suspension.
 
 ## Completed
-- [x] Updated Cargo.lock to reflect consistent background color implementation
+- [x] Removed redundant terminal suspension in showcase example
 
 ## In Progress
 - [x] No active work in progress related to this change
 
 ## Blockers
-- None reported
+- None
 
 ## Next Steps
-1. Verify that the background color consistency is properly reflected in the UI
-2. Ensure no breaking changes were introduced in the dependency updates
+1. Verify showcase example behavior remains consistent without terminal suspension
+2. Ensure no visual artifacts appear in other examples due to this change

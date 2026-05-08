@@ -111,7 +111,6 @@ fn main() -> std::io::Result<()> {
                 .current_dir(&exe_dir)
                 .status();
 
-            let _ = ctx.suspend_terminal();
             let _ = ctx.resume_terminal();
 
             let mut drain_buf = [0u8; 512];
