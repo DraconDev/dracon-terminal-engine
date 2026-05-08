@@ -53,9 +53,13 @@ impl ThemeSwitcherScene {
             show_help: false,
             checkbox: Checkbox::new(WidgetId::new(10), "Preview"),
             button: Button::with_id(WidgetId::new(11), "Action"),
-            gauge: Gauge::with_id(WidgetId::new(12), "Load")
-                .warn_threshold(70.0)
-                .crit_threshold(90.0),
+            gauge: {
+                let mut g = Gauge::with_id(WidgetId::new(12), "Load")
+                    .warn_threshold(70.0)
+                    .crit_threshold(90.0);
+                g.set_value(65.0);
+                g
+            },
             badge: StatusBadge::new(WidgetId::new(13)).with_status("OK"),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
