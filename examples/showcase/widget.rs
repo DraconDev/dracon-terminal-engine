@@ -539,6 +539,7 @@ impl Widget for Showcase {
                     phase: self.card_start.elapsed().as_secs_f64(),
                     width: card_w as u16,
                     height: card_h as u16,
+                    is_embedded: self.is_embedded(ex.name),
                 };
 
                 let card = render_card(&card_config);
