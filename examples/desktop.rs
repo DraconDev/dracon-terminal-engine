@@ -1,6 +1,8 @@
 #![allow(missing_docs)]
 use rand::Rng;
 use std::io::{self, stdout, Read, Write};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 use dracon_terminal_engine::{
     backend::tty::get_window_size,
@@ -10,6 +12,7 @@ use dracon_terminal_engine::{
     input::parser::Parser,
     Terminal,
 };
+use signal_hook::consts::signal::SIGINT;
 use std::os::fd::AsFd;
 
 struct Window {
@@ -188,12 +191,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     ];
 
+    // Signal handler for clean quit on Ctrl+C
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let sig_flag = Arc::clone(&should_quit);
+    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
+        .ok();
+
     // Interaction State
     let mut dragging_window: Option<usize> = None;
     let mut drag_offset: (u16, u16) = (0, 0);
 
     // Loop
     loop {
+        if should_quit.load(Ordering::SeqCst) {
+            write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h")?;
+            term.flush()?;
+            return Ok(());
+        }
         // Input Handling
         let mut buf = [0u8; 128];
         // Note: This is blocking. Animation runs only on input/mouse move.
