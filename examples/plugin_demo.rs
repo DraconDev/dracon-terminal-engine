@@ -270,7 +270,22 @@ impl Widget for CounterWidget {
             _ => false,
         }
     }
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if kind != MouseEventKind::Down(MouseButton::Left) {
+            return false;
+        }
+        if row == 1 && col >= 9 && col <= 13 {
+            self.count = 0;
+            return true;
+        }
+        if row == 2 && col >= 1 && col <= 4 {
+            self.count -= 1;
+            return true;
+        }
+        if row == 2 && col >= 10 && col <= 13 {
+            self.count += 1;
+            return true;
+        }
         false
     }
     fn on_theme_change(&mut self, theme: &Theme) {

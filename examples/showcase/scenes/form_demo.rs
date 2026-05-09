@@ -39,6 +39,7 @@ impl FormDemoScene {
         Self {
             theme,
             show_help: false,
+            dirty: true,
             focused_field: 0,
             username: SearchInput::new(WidgetId::new(10)),
             email: SearchInput::new(WidgetId::new(11)),
