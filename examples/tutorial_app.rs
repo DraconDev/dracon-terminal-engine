@@ -200,7 +200,7 @@ impl Scene for TaskListScreen {
         }
 
         // Status bar
-        let status = "↑↓: nav | Enter: detail | n: new | t: theme | ?: help | q: quit";
+        let status = "↑↓: nav | Enter: detail | n: new | t: theme | ?: help | Esc: dismiss | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -452,7 +452,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Status
-        let status = "Tab: switch field | Type: edit | t: theme | ?: help | q: quit";
+        let status = "Tab: switch field | Type: edit | t: theme | ?: help | Esc: dismiss | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -619,7 +619,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Tutorial: Building Your First Dracon App | ?: help | q: quit");
+    println!("Tutorial: Building Your First Dracon App | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

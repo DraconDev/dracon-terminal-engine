@@ -361,7 +361,7 @@ impl Widget for InputRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Event Bus Demo | ↑/↓: counter | l: log | c: clear | t: theme | ?: help | q: quit");
+    println!("Event Bus Demo | ↑/↓: counter | l: log | c: clear | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

@@ -467,7 +467,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Scene Router Demo | Multi-screen navigation | ?: help | q: quit");
+    println!("Scene Router Demo | Multi-screen navigation | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));
