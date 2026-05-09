@@ -286,27 +286,31 @@ impl Scene for ModalDemoScene {
                     self.show_confirm = false;
                     self.show_toast = true;
                     self.toast_message = "Confirmed!".to_string();
+                    self.dirty = true;
                     true
                 }
                 KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N') => {
                     self.show_confirm = false;
+                    self.dirty = true;
                     true
                 }
                 _ => true,
             }
         } else if self.show_toast {
             self.show_toast = false;
+            self.dirty = true;
             true
         } else if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
                 self.show_help = false;
+                self.dirty = true;
             }
             true
         } else {
             match key.code {
-                KeyCode::Char('?') => { self.show_help = true; true }
-                KeyCode::Char('c') | KeyCode::Char('C') if key.modifiers.is_empty() => { self.show_confirm = true; true }
-                KeyCode::Char('t') => { self.cycle_theme(); true }
+                KeyCode::Char('?') => { self.show_help = true; self.dirty = true; true }
+                KeyCode::Char('c') | KeyCode::Char('C') if key.modifiers.is_empty() => { self.show_confirm = true; self.dirty = true; true }
+                KeyCode::Char('t') => { self.cycle_theme(); self.dirty = true; true }
                 _ => false,
             }
         }
