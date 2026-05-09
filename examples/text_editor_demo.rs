@@ -695,19 +695,7 @@ impl Widget for EditorApp {
                 self.dirty = true;
                 true
             }
-                        let prev_lines: Vec<&str> = new_content.lines().collect();
-                        if let Some(prev) = prev_lines.get(tab.cursor_line) {
-                            tab.cursor_col = prev.len();
-                        }
-                    }
-                    tab.content = new_content;
-                    tab.modified = true;
-                }
-                self.sync_tab_bar();
-                self.dirty = true;
-                true
-            }
-                if let Some(tab) = self.active_tab_mut() {
+            KeyCode::Char(c) => {
                     let lines: Vec<&str> = tab.content.lines().collect();
                     let mut new_content = String::new();
                     for (i, line) in lines.iter().enumerate() {
