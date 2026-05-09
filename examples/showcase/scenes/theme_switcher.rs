@@ -65,6 +65,7 @@ impl ThemeSwitcherScene {
             theme_index: 0,
             theme,
             show_help: false,
+            dirty: true,
             checkbox: Checkbox::new(WidgetId::new(10), "Preview"),
             button: Button::with_id(WidgetId::new(11), "Action"),
             gauge: {
