@@ -699,6 +699,8 @@ fn main() -> std::io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let show_help = Rc::new(RefCell::new(false));
+    let show_help_for_tick = Rc::clone(&show_help);
 
     let theme = Rc::new(RefCell::new(Theme::nord()));
 
@@ -724,9 +726,10 @@ fn main() -> std::io::Result<()> {
     let router = Rc::new(RefCell::new(router));
     let router_for_input = Rc::clone(&router);
     let _state_for_tick = Rc::clone(&state);
-    let _theme_for_tick = Rc::clone(&theme);
+    let theme_for_tick = Rc::clone(&theme);
+    let show_help_for_input = Rc::clone(&show_help);
 
-    let app_router = TodoRouter::new(router_for_input, state, theme, should_quit);
+    let app_router = TodoRouter::new(router_for_input, state, theme, should_quit, show_help_for_input);
 
     let mut app = App::new()?
         .title("Todo App")
