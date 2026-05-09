@@ -77,6 +77,7 @@ impl Widget for SplitResizerApp {
     }
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
+        self.dirty = true;
     }
 
     fn render(&self, area: Rect) -> Plane {
