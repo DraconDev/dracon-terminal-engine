@@ -514,15 +514,7 @@ impl App {
                                     && k.modifiers
                                         .contains(crate::input::event::KeyModifiers::CONTROL)
                                 {
-                                    let dominated = self
-                                        .focus_manager
-                                        .focused()
-                                        .and_then(|id| self.widget_mut(id))
-                                        .map(|mut w| w.handle_key(*k))
-                                        .unwrap_or(false);
-                                    if !dominated {
-                                        running.store(false, Ordering::SeqCst);
-                                    }
+                                    running.store(false, Ordering::SeqCst);
                                 } else if let Some(focused) = self.focus_manager.focused() {
                                     if let Some(mut widget) = self.widget_mut(focused) {
                                         let _ = widget.handle_key(*k);
