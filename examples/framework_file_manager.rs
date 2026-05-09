@@ -513,6 +513,10 @@ impl Widget for FileManagerApp {
                 self.enter_dir();
                 true
             }
+            KeyCode::Left => {
+                self.go_up();
+                true
+            }
             _ => false,
         }
     }
