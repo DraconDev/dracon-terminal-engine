@@ -836,6 +836,81 @@ fn render_tree_connectors(plane: &mut Plane, x: u16, y: u16, prefix: &str, theme
 }
 ```
 
+## Keybinding Conventions
+
+### Standard Keybindings (All Examples Must Implement)
+
+| Key | Action | Modifier Guard Required |
+|-----|--------|------------------------|
+| `q` | Quit | No (pass through to app) |
+| `?` | Toggle help overlay | Yes (`key.modifiers.is_empty()`) |
+| `Esc` | Dismiss help / go back | No |
+| `t` | Cycle theme | Yes (`key.modifiers.is_empty()`) |
+| `Tab` | Navigate fields | No |
+
+### Modifier Guards
+
+**Always check `key.modifiers.is_empty()` on `Char` handlers** to prevent Ctrl+X from triggering single-char actions:
+
+```rust
+// WRONG — Ctrl+P triggers pause
+KeyCode::Char('p') => {
+    self.paused = !self.paused;
+    true
+}
+
+// RIGHT — Ctrl+P ignored
+KeyCode::Char('p') if key.modifiers.is_empty() => {
+    self.paused = !self.paused;
+    true
+}
+```
+
+This applies to ALL single-character handlers: `t`, `?`, `q` (if not handled by app), `n`, `d`, `p`, `s`, etc.
+
+### Backspace Semantics
+
+**Backspace is for delete only, never navigation.** Use `Esc` or arrow keys for going back/up:
+
+```rust
+// WRONG — Backspace as navigation
+KeyCode::Backspace => {
+    self.go_up();
+    true
+}
+
+// RIGHT — Left arrow for navigation
+KeyCode::Left => {
+    self.go_up();
+    true
+}
+
+// RIGHT — Backspace for delete
+KeyCode::Backspace if !self.input.is_empty() => {
+    self.input.pop();
+    true
+}
+```
+
+### Help Overlay Standard
+
+All help overlays MUST:
+1. Toggle with `?` key
+2. Dismiss with `Esc` or `?`
+3. Mention `Esc: dismiss` in status bar / footer
+4. Use rounded corners (`╭╮╰╯`) with `theme.outline`
+5. Use `theme.surface_elevated` for background
+6. Show title centered with `theme.primary` + `Styles::BOLD`
+7. Use two-column layout: keys (`theme.primary`) + descriptions (`theme.fg`)
+
+### Status Bar / Footer Text
+
+All status bars MUST include:
+- `t: theme` (if theme cycling is supported)
+- `?: help` (if help overlay exists)
+- `Esc: dismiss` or `Esc: back` (if applicable)
+- `q: quit` (or equivalent quit shortcut)
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:
