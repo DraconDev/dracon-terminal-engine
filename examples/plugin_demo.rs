@@ -428,7 +428,33 @@ impl Widget for InputRouter {
             _ => state.counter.handle_key(key),
         }
     }
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let mut state = self.state.borrow_mut();
+
+        let clock_area = state.clock.area();
+        if col >= clock_area.x && col < clock_area.x + clock_area.width
+            && row >= clock_area.y && row < clock_area.y + clock_area.height
+        {
+            let rel_col = col - clock_area.x;
+            let rel_row = row - clock_area.y;
+            if state.clock.handle_mouse(kind, rel_col, rel_row) {
+                state.dirty = true;
+                return true;
+            }
+        }
+
+        let counter_area = state.counter.area();
+        if col >= counter_area.x && col < counter_area.x + counter_area.width
+            && row >= counter_area.y && row < counter_area.y + counter_area.height
+        {
+            let rel_col = col - counter_area.x;
+            let rel_row = row - counter_area.y;
+            if state.counter.handle_mouse(kind, rel_col, rel_row) {
+                state.dirty = true;
+                return true;
+            }
+        }
+
         false
     }
 }
@@ -439,7 +465,7 @@ impl Widget for InputRouter {
 
 fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 36u16.min(area.width.saturating_sub(4));
-    let hh = 10u16.min(area.height.saturating_sub(4));
+    let hh = 13u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
 
@@ -509,6 +535,9 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
     let shortcuts = [
         ("+/-", "Adjust counter"),
         ("←/→", "Adjust counter"),
+        ("Click", "Toggle clock format"),
+        ("Click +/-", "Adjust counter"),
+        ("Click [R]", "Reset counter"),
         ("t", "Cycle theme"),
         ("?", "Toggle help"),
         ("Esc", "Dismiss help"),

@@ -233,12 +233,13 @@ impl Scene for ThemeSwitcherScene {
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }
         match key.code {
-            KeyCode::Char('?') => { self.show_help = true; true }
-            KeyCode::Char('t') | KeyCode::Char('T') => { self.cycle_theme(); true }
+            KeyCode::Char('?') => { self.show_help = true; self.dirty = true; true }
+            KeyCode::Char('t') | KeyCode::Char('T') => { self.cycle_theme(); self.dirty = true; true }
             _ => false,
         }
     }
