@@ -80,6 +80,7 @@ impl FormApp {
             "│ Enter          Submit form  │",
             "│ t              Cycle theme  │",
             "│ ?              Toggle help  │",
+            "│ Esc            Dismiss help │",
             "│ q              Quit         │",
             "╰─────────────────────────────╯",
         ];

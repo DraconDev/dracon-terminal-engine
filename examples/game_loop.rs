@@ -349,6 +349,7 @@ fn render_help(p: &mut Plane, w: u16, h: u16) {
         "├────────────────────────────────────────────────────┤",
         "│  q       — Quit                                    │",
         "│  ?       — Toggle this help                        │",
+        "│  Esc     — Dismiss help                            │",
         "│  Space   — Toggle turbo mode                       │",
         "│  Click   — Spawn particle burst                    │",
         "├────────────────────────────────────────────────────┤",

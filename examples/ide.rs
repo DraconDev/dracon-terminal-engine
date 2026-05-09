@@ -1341,7 +1341,7 @@ impl IdeApp {
                     ("t", "Cycle theme"),
                 ],
             ),
-            ("General", &[("?", "Toggle this help"), ("q", "Quit")]),
+            ("General", &[("?", "Toggle this help"), ("Esc", "Dismiss help"), ("q", "Quit")]),
         ];
 
         let mut row = sep_y + 1;
