@@ -199,11 +199,25 @@ fn main() -> io::Result<()> {
     let mut buf = [0u8; 128];
     let mut debugger = InputDebugger::new();
 
+    // Signal handler for clean quit on Ctrl+C
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let sig_flag = Arc::clone(&should_quit);
+    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
+        .ok();
+
     // Initial render
     write!(term, "{}", debugger.render())?;
     term.flush()?;
 
     loop {
+        if should_quit.load(Ordering::SeqCst) {
+            let _ = write!(
+                term,
+                "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1004l\x1b[?1006l\x1b[?1007l\x1b[?2004l\x1b[?7h\x1b[?1049l"
+            );
+            let _ = term.flush();
+            return Ok(());
+        }
         let n = handle.read(&mut buf)?;
         if n == 0 {
             break;
