@@ -653,7 +653,47 @@ impl Widget for EditorApp {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char(c) => {
+            KeyCode::Backspace => {
+                if let Some(tab) = self.active_tab_mut() {
+                    let lines: Vec<&str> = tab.content.lines().collect();
+                    let mut new_content = String::new();
+                    for (i, line) in lines.iter().enumerate() {
+                        if i > 0 {
+                            new_content.push('\n');
+                        }
+                        if i == tab.cursor_line {
+                            let col = tab.cursor_col.min(line.len());
+                            if col > 0 {
+                                new_content.push_str(&line[..col - 1]);
+                                new_content.push_str(&line[col..]);
+                                tab.cursor_col = col - 1;
+                            } else if i > 0 {
+                                // At start of line: join with previous line
+                                continue;
+                            } else {
+                                new_content.push_str(line);
+                            }
+                        } else if i == tab.cursor_line.saturating_sub(1) && tab.cursor_line > 0 && tab.cursor_col == 0 {
+                            new_content.push_str(line);
+                        } else {
+                            new_content.push_str(line);
+                        }
+                    }
+                    // Handle joining lines when at col 0
+                    if tab.cursor_line > 0 && tab.cursor_col == 0 {
+                        tab.cursor_line -= 1;
+                        let prev_lines: Vec<&str> = new_content.lines().collect();
+                        if let Some(prev) = prev_lines.get(tab.cursor_line) {
+                            tab.cursor_col = prev.len();
+                        }
+                    }
+                    tab.content = new_content;
+                    tab.modified = true;
+                }
+                self.sync_tab_bar();
+                self.dirty = true;
+                true
+            }
                 if let Some(tab) = self.active_tab_mut() {
                     let lines: Vec<&str> = tab.content.lines().collect();
                     let mut new_content = String::new();
