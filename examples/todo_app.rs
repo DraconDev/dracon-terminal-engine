@@ -576,12 +576,12 @@ impl Scene for AddTaskScreen {
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 // Title input field area: y=2..=4
-                if row >= 2 && row <= 4 {
+                if (2..=4).contains(&row) {
                     self.editing_field = 0;
                     self.dirty = true;
                     true
                 // Desc input field area: y=5..=7
-                } else if row >= 5 && row <= 7 {
+                } else if (5..=7).contains(&row) {
                     self.editing_field = 1;
                     self.dirty = true;
                     true
