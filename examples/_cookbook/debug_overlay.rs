@@ -367,27 +367,29 @@ impl Widget for DebugOverlayPanel {
             return true;
         }
 
-        if let KeyCode::F(12) = key.code {
-            self.toggle();
-            return true;
-        }
-        if self.visible {
-            if let KeyCode::Esc = key.code {
+        match key.code {
+            KeyCode::F(12) => {
                 self.toggle();
-                return true;
+                true
             }
-            // Theme cycling with 't'
-            if let KeyCode::Char('t') = key.code {
+            KeyCode::Char('q') => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
+            KeyCode::Esc if self.visible => {
+                self.toggle();
+                true
+            }
+            KeyCode::Char('t') => {
                 self.cycle_theme();
-                return true;
+                true
             }
-            // Help overlay with '?'
-            if let KeyCode::Char('?') = key.code {
+            KeyCode::Char('?') => {
                 self.show_help = true;
-                return true;
+                true
             }
+            _ => false,
         }
-        false
     }
 
     fn handle_mouse(&mut self, _kind: MouseEventKind, col: u16, row: u16) -> bool {
