@@ -523,8 +523,24 @@ impl Scene for TaskEditScreen {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
+        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                if (3..=5).contains(&row) {
+                    self.editing_field = 0;
+                    self.dirty = true;
+                    true
+                } else if (6..=8).contains(&row) {
+                    self.editing_field = 1;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
