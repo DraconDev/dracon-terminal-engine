@@ -34,6 +34,7 @@ struct ClockWidget {
     id: WidgetId,
     area: std::cell::Cell<Rect>,
     theme: Theme,
+    use_24h: bool,
 }
 
 impl ClockWidget {
@@ -42,6 +43,7 @@ impl ClockWidget {
             id,
             area: std::cell::Cell::new(Rect::new(0, 0, 20, 3)),
             theme,
+            use_24h: true,
         }
     }
 }

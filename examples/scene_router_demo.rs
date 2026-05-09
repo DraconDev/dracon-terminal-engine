@@ -525,6 +525,19 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
             }
         }
     }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let handled = self.router.borrow_mut().handle_mouse(kind, col, row);
+        if handled {
+            let current = self.router.borrow().current().map(|s| s.to_string());
+            if let Some(ref id) = current {
+                if id == "profile" {
+                    self.router.borrow_mut().pop();
+                }
+            }
+        }
+        handled
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
