@@ -390,6 +390,14 @@ impl Widget for GitTui {
         }
 
         match key.code {
+            KeyCode::Esc => {
+                if self.show_help {
+                    self.show_help = false;
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
                 true

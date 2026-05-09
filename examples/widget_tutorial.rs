@@ -721,6 +721,14 @@ fn main() -> std::io::Result<()> {
                 *h = !*h;
                 return true;
             }
+            if key.code == KeyCode::Esc && key.kind == KeyEventKind::Press {
+                let mut h = show_help_input.borrow_mut();
+                if *h {
+                    *h = false;
+                    return true;
+                }
+                return false;
+            }
             if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
