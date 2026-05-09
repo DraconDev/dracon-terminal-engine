@@ -797,7 +797,7 @@ impl Widget for TableApp {
         // === STATUS BAR ===
         let status_y = area.height.saturating_sub(1);
         let hint = format!(
-            "t: theme | ?: help | ↑↓: nav | Enter: select | q: quit | {} users",
+            "t: theme | ?: help | Esc: dismiss | ↑↓: nav | Enter: select | q: quit | {} users",
             self.filtered_users.len()
         );
         for (i, c) in hint

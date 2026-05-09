@@ -592,7 +592,7 @@ impl ChatState {
         }
 
         // Right segment: hints
-        let hint = "t: theme | ?: help | q: quit";
+        let hint = "t: theme | ?: help | Esc: dismiss | q: quit";
         let hint_x = (area.width as usize).saturating_sub(hint.len() + 2);
         for (i, c) in hint.chars().enumerate() {
             let idx = status_base + hint_x + i;

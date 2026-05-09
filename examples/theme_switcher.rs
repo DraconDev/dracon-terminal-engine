@@ -1078,7 +1078,7 @@ impl Widget for StatusBarWidget {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 5;
         let t = get_current_theme();
-        let hint = "t: theme | ?: help | q: quit";
+        let hint = "t: theme | ?: help | Esc: dismiss | q: quit";
         for (i, c) in hint.chars().take(area.width as usize).enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;
