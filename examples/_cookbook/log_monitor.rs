@@ -482,7 +482,7 @@ impl Widget for LogMonitor {
             return false;
         }
         match key.code {
-            KeyCode::Char('c') => {
+            KeyCode::Char('c') if key.modifiers.is_empty() => {
                 self.clear();
                 true
             }

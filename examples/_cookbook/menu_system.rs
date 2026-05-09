@@ -521,10 +521,6 @@ impl Widget for MenuApp {
                     self.should_quit.store(true, Ordering::SeqCst);
                     true
                 }
-                KeyCode::Char('c') => {
-                    self.toast("Copied to clipboard", ToastKind::Info);
-                    true
-                }
                 KeyCode::Char('v') => {
                     self.toast("Pasted from clipboard", ToastKind::Info);
                     true
