@@ -320,6 +320,19 @@ impl Widget for SqliteBrowser {
         true
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.status_bar.on_theme_change(theme);
+        self.search_input.on_theme_change(theme);
+        for table in &mut self.results_table {
+            table.on_theme_change(theme);
+        }
+        for toast in &mut self.toasts {
+            toast.on_theme_change(theme);
+        }
+        self.dirty = true;
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
         let mut plane = Plane::new(0, area.width, area.height);

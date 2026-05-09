@@ -226,6 +226,9 @@ fn main() -> io::Result<()> {
                     Event::Key(KeyEvent { code: KeyCode::Char('?'), .. }) => {
                         debugger.show_help = !debugger.show_help;
                     }
+                    Event::Key(KeyEvent { code: KeyCode::Esc, .. }) => {
+                        debugger.show_help = false;
+                    }
                     Event::Key(KeyEvent { code: KeyCode::Char('c'), .. }) => {
                         debugger.history.clear();
                         debugger.scroll_offset = 0;

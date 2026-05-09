@@ -176,6 +176,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         Some(Event::Key(KeyEvent { code: KeyCode::Char('?'), .. })) => {
                             show_help = !show_help;
                         }
+                        Some(Event::Key(KeyEvent { code: KeyCode::Esc, .. })) => {
+                            show_help = false;
+                        }
                         Some(Event::Key(KeyEvent { code: KeyCode::Char(' '), .. })) => {
                             state.turbo = !state.turbo;
                         }
