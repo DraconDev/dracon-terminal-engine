@@ -7,7 +7,7 @@
 //! Controls:
 //!   ↑/↓           — navigate tree
 //!   Enter or →    — expand directory / open file
-//!   Backspace or ← — go up to parent directory
+//!   Esc or ←   — go up to parent directory
 //!   n             — new file
 //!   f             — new folder
 //!   d             — delete selected
