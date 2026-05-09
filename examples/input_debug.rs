@@ -10,7 +10,7 @@
 //!   ↑/↓      — scroll history
 
 use dracon_terminal_engine::core::terminal::Terminal;
-use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, MouseEventKind};
+use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseEventKind};
 use dracon_terminal_engine::input::parser::Parser;
 use signal_hook::consts::signal::SIGINT;
 use std::collections::VecDeque;
