@@ -569,13 +569,14 @@ impl TodoRouter {
         state: Rc<RefCell<AppState>>,
         theme: Rc<RefCell<Theme>>,
         should_quit: Arc<AtomicBool>,
+        show_help: Rc<RefCell<bool>>,
     ) -> Self {
         Self {
             router,
             state,
             theme,
             should_quit,
-            show_help: false,
+            show_help,
             show_delete_confirm: false,
             delete_target: None,
             id: WidgetId::new(100),
@@ -623,9 +624,9 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
         if key.kind != KeyEventKind::Press { return false; }
 
         // Handle overlays first
-        if self.show_help {
+        if *self.show_help.borrow() {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
-                self.show_help = false;
+                *self.show_help.borrow_mut() = false;
                 return true;
             }
             return false;
