@@ -344,7 +344,7 @@ impl Scene for TaskListScreen {
                 true
             }
             KeyCode::Down => {
-                let task_count = self.task_list.items().len();
+                let task_count = self.task_list.len();
                 if self.selected + 1 < task_count {
                     self.selected += 1;
                     self.dirty = true;
