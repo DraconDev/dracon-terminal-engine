@@ -517,7 +517,7 @@ struct AppRouter {
     state: Rc<RefCell<AppState>>,
     theme: Rc<RefCell<Theme>>,
     should_quit: Arc<AtomicBool>,
-    show_help: bool,
+    show_help: Rc<RefCell<bool>>,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
 }
@@ -528,13 +528,14 @@ impl AppRouter {
         state: Rc<RefCell<AppState>>,
         theme: Rc<RefCell<Theme>>,
         should_quit: Arc<AtomicBool>,
+        show_help: Rc<RefCell<bool>>,
     ) -> Self {
         Self {
             router,
             state,
             theme,
             should_quit,
-            show_help: false,
+            show_help,
             id: WidgetId::new(100),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
