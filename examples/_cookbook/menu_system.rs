@@ -425,7 +425,7 @@ impl Widget for MenuApp {
                 ("Ctrl+N", "New file"),
                 ("Ctrl+O", "Open"),
                 ("Ctrl+S", "Save"),
-                ("Ctrl+Q", "Quit"),
+                ("q / Ctrl+Q", "Quit"),
                 ("t", "Cycle theme"),
                 ("?", "Toggle help"),
             ];
