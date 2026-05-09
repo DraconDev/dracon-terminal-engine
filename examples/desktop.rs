@@ -8,7 +8,7 @@ use dracon_terminal_engine::{
     backend::tty::get_window_size,
     compositor::engine::Compositor,
     compositor::plane::{Cell, Plane},
-    input::event::{Event, KeyCode, KeyEvent},
+    input::event::{Event, KeyCode, KeyEvent, KeyModifiers},
     input::parser::Parser,
     Terminal,
 };
