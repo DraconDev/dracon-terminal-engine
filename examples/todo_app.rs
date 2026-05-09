@@ -673,6 +673,10 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
                 self.router.borrow_mut().pop();
                 true
             }
+            KeyCode::Enter => {
+                self.router.borrow_mut().push("detail");
+                true
+            }
             KeyCode::Char('n') => {
                 self.router.borrow_mut().push("add_task");
                 true
