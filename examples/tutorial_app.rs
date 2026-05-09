@@ -226,7 +226,7 @@ impl Scene for TaskListScreen {
                 true
             }
             KeyCode::Down => {
-                self.selected += 1;
+                self.selected = self.selected.saturating_add(1);
                 self.dirty = true;
                 true
             }
