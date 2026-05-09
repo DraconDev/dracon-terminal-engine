@@ -1537,9 +1537,15 @@ impl Showcase {
     fn dispatch_key(&mut self, key: KeyEvent) -> bool {
         // If a scene is active, delegate to it
         if self.scene_router.current().is_some() {
-            // Only 'b' triggers back navigation - Esc passes through to scenes
             if let KeyCode::Char('b') | KeyCode::Char('B') = key.code {
                 self.scene_router.pop();
+                return true;
+            }
+            // Esc: let scene handle first (help dismiss), if not consumed, pop back
+            if let KeyCode::Esc = key.code {
+                if !self.scene_router.handle_key(key) {
+                    self.scene_router.pop();
+                }
                 return true;
             }
             return self.scene_router.handle_key(key);
