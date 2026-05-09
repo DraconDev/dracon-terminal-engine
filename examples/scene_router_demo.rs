@@ -171,8 +171,37 @@ impl Scene for HomeScreen {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let first_item_y = 3u16;
+                let last_item_y = first_item_y + self.items.len() as u16 - 1;
+                if row >= first_item_y && row <= last_item_y {
+                    let idx = (row - first_item_y) as usize;
+                    if idx < self.items.len() {
+                        self.selected = idx;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                false
+            }
+            MouseEventKind::ScrollDown => {
+                if self.selected < self.items.len().saturating_sub(1) {
+                    self.selected += 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            MouseEventKind::ScrollUp => {
+                if self.selected > 0 {
+                    self.selected -= 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
@@ -192,11 +221,12 @@ impl Scene for HomeScreen {
 struct SettingsScreen {
     theme: Theme,
     dirty: bool,
+    option_enabled: bool,
 }
 
 impl SettingsScreen {
     fn new(theme: Theme) -> Self {
-        Self { theme, dirty: true }
+        Self { theme, dirty: true, option_enabled: false }
     }
 }
 
