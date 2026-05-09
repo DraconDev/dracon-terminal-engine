@@ -259,7 +259,27 @@ impl Scene for FormDemoScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if self.show_help {
+            return true;
+        }
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            let start_y = 2u16;
+            let field_h = 2u16;
+            if row >= start_y && row < start_y + FIELD_COUNT as u16 * field_h {
+                let idx = (row - start_y) / field_h;
+                if idx < FIELD_COUNT as u16 {
+                    let field_id = idx as usize;
+                    if field_id == FIELD_SUBMIT {
+                        self.submit();
+                    } else {
+                        self.focused_field = field_id;
+                    }
+                    self.dirty = true;
+                    return true;
+                }
+            }
+        }
         false
     }
 
@@ -271,11 +291,12 @@ impl Scene for FormDemoScene {
         self.theme_select.on_theme_change(theme);
         self.notifications.on_theme_change(theme);
         self.submit.on_theme_change(theme);
+        self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
 fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
