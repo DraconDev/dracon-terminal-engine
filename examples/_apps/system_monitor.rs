@@ -1038,7 +1038,7 @@ impl Widget for SystemMonitor {
                 true
             }
             KeyCode::Char('?') => {
-                self.show_help = true;
+                self.show_help = !self.show_help;
                 true
             }
             KeyCode::Up => {
