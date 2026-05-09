@@ -774,8 +774,10 @@ impl Widget for FileManager {
         }
 
         if self.show_help {
-            self.show_help = false;
-            self.dirty = true;
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+                self.dirty = true;
+            }
             return true;
         }
 
@@ -897,7 +899,7 @@ impl Widget for FileManager {
                 true
             }
             KeyCode::Char('?') => {
-                self.show_help = true;
+                self.show_help = !self.show_help;
                 self.dirty = true;
                 true
             }
