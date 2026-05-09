@@ -13,7 +13,7 @@
 //! Controls:
 //!   ↑/↓       — navigate menu
 //!   Enter     — select / go forward
-//!   Backspace — go back
+//!   Esc — go back
 //!   t         — cycle theme (global)
 //!   ?         — toggle help
 //!   q         — quit
@@ -239,7 +239,7 @@ impl Scene for SettingsScreen {
         }
 
         // Instructions
-        let instructions = "Press 't' to cycle theme | Backspace to go back";
+        let instructions = "Press 't' to cycle theme | Esc to go back";
         let iy = 5;
         for (i, c) in instructions.chars().enumerate() {
             let idx = (iy * area.width + 2 + i as u16) as usize;
