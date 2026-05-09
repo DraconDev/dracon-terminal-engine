@@ -567,9 +567,9 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
             return false;
         }
 
-        if self.show_help {
+        if *self.show_help.borrow() {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
-                self.show_help = false;
+                *self.show_help.borrow_mut() = false;
                 return true;
             }
             return false;
@@ -581,7 +581,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
                 true
             }
             KeyCode::Char('?') => {
-                self.show_help = true;
+                *self.show_help.borrow_mut() = true;
                 true
             }
             KeyCode::Char('t') => {
@@ -616,9 +616,11 @@ fn main() -> std::io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let show_help = Rc::new(RefCell::new(false));
+    let show_help_for_tick = Rc::clone(&show_help);
 
     let theme = Rc::new(RefCell::new(Theme::nord()));
-    let _theme_for_tick = Rc::clone(&theme);
+    let theme_for_tick = Rc::clone(&theme);
 
     let state = Rc::new(RefCell::new(AppState::new()));
 
@@ -631,8 +633,9 @@ fn main() -> std::io::Result<()> {
 
     let router = Rc::new(RefCell::new(router));
     let router_for_input = Rc::clone(&router);
+    let show_help_for_input = Rc::clone(&show_help);
 
-    let app_router = AppRouter::new(router_for_input, state, theme, should_quit);
+    let app_router = AppRouter::new(router_for_input, state, theme, should_quit, show_help_for_input);
 
     let mut app = App::new()?
         .title("Task Manager Tutorial")
