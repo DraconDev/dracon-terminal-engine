@@ -901,7 +901,7 @@ impl Widget for FileManager {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('c') => {
+            KeyCode::Char('c') if key.modifiers.is_empty() => {
                 self.context_menu = Some(ContextMenu::new_with_id(
                     WidgetId::new(50),
                     vec![
