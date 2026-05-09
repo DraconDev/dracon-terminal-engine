@@ -191,6 +191,11 @@ impl Widget for Table {
         self.dirty = false;
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.search.on_theme_change(theme);
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
