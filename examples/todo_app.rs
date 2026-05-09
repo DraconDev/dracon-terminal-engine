@@ -358,8 +358,40 @@ impl Scene for TaskListScreen {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let list_start_y = 2u16;
+                let list_h = self.task_list.len();
+                if row >= list_start_y && (row - list_start_y) as usize < list_h {
+                    let new_selected = (row - list_start_y) as usize;
+                    if new_selected != self.selected {
+                        self.selected = new_selected;
+                        self.dirty = true;
+                    }
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEventKind::ScrollUp => {
+                if self.selected > 0 {
+                    self.selected -= 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            MouseEventKind::ScrollDown => {
+                let task_count = self.task_list.len();
+                if self.selected + 1 < task_count {
+                    self.selected += 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
