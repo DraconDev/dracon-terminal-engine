@@ -205,7 +205,8 @@ impl Scene for FormDemoScene {
         }
 
         match key.code {
-            KeyCode::Char('?') => { self.show_help = true; true }
+            KeyCode::Char('?') => { self.show_help = !self.show_help; true }
+            KeyCode::Char('t') => { self.cycle_theme(); true }
             KeyCode::Tab => { self.cycle_focus(true); true }
             KeyCode::BackTab => { self.cycle_focus(false); true }
             KeyCode::Enter => {
