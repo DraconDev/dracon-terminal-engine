@@ -359,7 +359,7 @@ impl Widget for FileManagerApp {
         // Status bar
         let status_y = area.height.saturating_sub(2);
         let status_text = format!(
-            " {} items | {} selected | t: theme | ?: help | q: quit ",
+            " {} items | {} selected | t: theme | ?: help | Esc: dismiss | q: quit ",
             self.entries.len(),
             self.selected + 1
         );

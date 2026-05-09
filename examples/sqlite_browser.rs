@@ -78,7 +78,7 @@ impl SqliteBrowser {
             .add_segment(StatusSegment::new("SQLite Browser").with_fg(theme.primary))
             .add_segment(
                 StatusSegment::new(
-                    "Tab: switch | e: edit | r: refresh | t: theme | ?: help | q: quit",
+                    "Tab: switch | e: edit | r: refresh | t: theme | ?: help | Esc: dismiss | q: quit",
                 )
                 .with_fg(theme.fg_muted),
             );
