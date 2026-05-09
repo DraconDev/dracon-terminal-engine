@@ -355,6 +355,10 @@ impl Widget for InputRouter {
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.app.borrow_mut().handle_key(key)
     }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.app.borrow_mut().theme = *theme;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
