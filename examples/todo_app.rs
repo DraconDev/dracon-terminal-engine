@@ -571,8 +571,31 @@ impl Scene for AddTaskScreen {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
+        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                // Title input field area: y=2..=4
+                if row >= 2 && row <= 4 {
+                    self.editing_field = 0;
+                    self.dirty = true;
+                    true
+                // Desc input field area: y=5..=7
+                } else if row >= 5 && row <= 7 {
+                    self.editing_field = 1;
+                    self.dirty = true;
+                    true
+                // Priority area: y=9
+                } else if row == 9 {
+                    self.editing_field = 2;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
