@@ -8,7 +8,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Button, PasswordInput, SearchInput, Select, Toggle};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 const FIELD_USERNAME: usize = 0;
@@ -22,6 +22,7 @@ const FIELD_COUNT: usize = 6;
 pub struct FormDemoScene {
     theme: Theme,
     show_help: bool,
+    dirty: bool,
     focused_field: usize,
     username: SearchInput,
     email: SearchInput,
