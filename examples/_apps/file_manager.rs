@@ -933,7 +933,7 @@ impl Widget for FileManager {
                 }
                 true
             }
-            KeyCode::Backspace | KeyCode::Left => {
+            KeyCode::Esc | KeyCode::Backspace | KeyCode::Left => {
                 self.go_up();
                 true
             }
@@ -1125,7 +1125,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("", false),
         ("↑/↓       Navigate tree", false),
         ("Enter     Open folder / Select file", false),
-        ("Bksp      Go to parent directory", false),
+        ("Esc       Go to parent directory", false),
         ("n         New file", false),
         ("f         New folder", false),
         ("d         Delete selected", false),
