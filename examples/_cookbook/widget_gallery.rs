@@ -188,6 +188,18 @@ impl Widget for WidgetGallery {
     fn focusable(&self) -> bool {
         true
     }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.checkbox.on_theme_change(theme);
+        self.radio.on_theme_change(theme);
+        self.slider.on_theme_change(theme);
+        self.spinner.on_theme_change(theme);
+        self.toggle.on_theme_change(theme);
+        self.select.on_theme_change(theme);
+        self.search.on_theme_change(theme);
+        self.progress.on_theme_change(theme);
+        self.button.on_theme_change(theme);
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = self.theme;
