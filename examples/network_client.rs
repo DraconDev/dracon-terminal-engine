@@ -360,7 +360,7 @@ impl NetworkApp {
         }
 
         // Footer hint
-        let hint = "Press Enter or Backspace to return";
+        let hint = "Press Enter or Esc to return";
         let hy = area.height as usize - 1;
         let hx = (area.width as usize).saturating_sub(hint.len()) / 2;
         for (i, c) in hint.chars().enumerate() {
