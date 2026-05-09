@@ -37,6 +37,7 @@ impl Widget for Showcase {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
+        self.scene_router.on_theme_change(theme);
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -1654,9 +1655,7 @@ impl Showcase {
                         .unwrap_or(0);
                     self.pending_theme = Some((current + 1) % themes.len());
                     self.apply_filter();
-                    if self.scene_router.current().is_some() {
-                        self.scene_router.on_theme_change(&self.theme);
-                    }
+                    self.scene_router.on_theme_change(&self.theme);
                     true
                 }
                 KeyCode::Char('d') => {
