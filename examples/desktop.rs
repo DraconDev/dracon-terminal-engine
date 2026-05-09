@@ -10,7 +10,6 @@ use dracon_terminal_engine::{
     input::parser::Parser,
     Terminal,
 };
-use std::io::{stdin, stdout, Read, Write};
 use std::os::fd::AsFd;
 
 struct Window {
