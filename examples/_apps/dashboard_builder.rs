@@ -510,7 +510,10 @@ impl Widget for Dashboard {
             return false;
         }
         if self.show_help {
-            self.show_help = false;
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+                return true;
+            }
             return true;
         }
 
@@ -533,7 +536,7 @@ impl Widget for Dashboard {
                 true
             }
             KeyCode::Char('?') => {
-                self.show_help = true;
+                self.show_help = !self.show_help;
                 true
             }
             KeyCode::Up => {
