@@ -103,7 +103,6 @@ impl<'a> Widget for HelpOverlay<'a> {
             ("t", "Cycle theme"),
             ("?", "Toggle help"),
             ("q", "Quit app"),
-            ("Ctrl+S", "Save (mock)"),
             ("Tab", "Cycle focus"),
             ("Esc", "Close modal"),
             ("Enter", "Confirm"),

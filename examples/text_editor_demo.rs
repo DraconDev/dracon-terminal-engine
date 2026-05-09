@@ -882,6 +882,8 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("Tab", "Next tab"),
         ("↑↓←→", "Navigate"),
         ("t", "Cycle theme"),
+        ("?", "Toggle help"),
+        ("Esc", "Dismiss help / search"),
         ("q", "Quit"),
     ];
 
