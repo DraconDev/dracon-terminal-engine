@@ -238,8 +238,32 @@ impl Scene for TaskListScreen {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
+        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                if row >= 2 && row < 10 {
+                    self.selected = (row - 2) as usize;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEventKind::ScrollUp => {
+                if self.selected > 0 {
+                    self.selected -= 1;
+                    self.dirty = true;
+                }
+                true
+            }
+            MouseEventKind::ScrollDown => {
+                self.selected += 1;
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
@@ -332,8 +356,9 @@ impl Scene for TaskDetailScreen {
         false
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+        matches!(kind, MouseEventKind::Down(MouseButton::Left))
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
