@@ -856,12 +856,34 @@ impl Widget for FileManager {
             return true;
         }
 
-        if self.context_menu.is_some() {
-            if key.code == KeyCode::Esc {
-                self.context_menu = None;
-                self.dirty = true;
+        if let Some(ref mut cm) = self.context_menu {
+            match key.code {
+                KeyCode::Esc => {
+                    self.context_menu = None;
+                    self.dirty = true;
+                    return true;
+                }
+                KeyCode::Up | KeyCode::Down | KeyCode::Enter => {
+                    let handled = cm.handle_key(key);
+                    if key.code == KeyCode::Enter {
+                        if let Some(action) = cm.action_at(cm.selected_index()) {
+                            let action = action.clone();
+                            self.execute_context_action(&action);
+                        } else {
+                            self.context_menu = None;
+                            self.dirty = true;
+                        }
+                    } else {
+                        self.dirty = true;
+                    }
+                    return handled;
+                }
+                _ => {
+                    self.context_menu = None;
+                    self.dirty = true;
+                    return true;
+                }
             }
-            return true;
         }
 
         // Handle active prompt
