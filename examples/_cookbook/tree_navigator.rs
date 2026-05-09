@@ -353,6 +353,7 @@ impl Widget for TreeNav {
                 ("←", "Go up / Collapse"),
                 ("t", "Cycle theme"),
                 ("?", "Toggle help"),
+                ("Esc", "Dismiss help"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;

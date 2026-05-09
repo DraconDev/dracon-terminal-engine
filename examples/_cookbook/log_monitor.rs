@@ -215,6 +215,7 @@ impl LogMonitor {
             "│ r      Resume auto-scroll       │",
             "│ t      Cycle theme              │",
             "│ ?      Toggle this help         │",
+            "│ Esc    Dismiss help             │",
             "│ Click  Toggle log level filter │",
             "│ Click  Pause/resume scroll      │",
             "│ q      Quit application         │",

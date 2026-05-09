@@ -278,6 +278,7 @@ impl TabbedApp {
             ("Click tab", "Switch tab"),
             ("t", "Cycle theme"),
             ("?", "Toggle help"),
+            ("Esc", "Dismiss help"),
             ("q", "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
