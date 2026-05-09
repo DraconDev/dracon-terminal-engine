@@ -3,12 +3,15 @@ use rand::Rng;
 use std::io::{self, stdout, Read, Write};
 
 use dracon_terminal_engine::{
+    backend::tty::get_window_size,
     compositor::engine::Compositor,
     compositor::plane::{Cell, Plane},
     input::event::{Event, KeyCode, KeyEvent},
     input::parser::Parser,
     Terminal,
 };
+use std::io::{stdin, stdout, Read, Write};
+use std::os::fd::AsFd;
 
 struct Window {
     _id: usize,
