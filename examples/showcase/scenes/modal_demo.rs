@@ -315,6 +315,8 @@ impl Scene for ModalDemoScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
+        self.help_modal.on_theme_change(theme);
+        self.confirm_dialog.on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool { true }
@@ -334,6 +336,8 @@ impl ModalDemoScene {
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
+        self.help_modal.on_theme_change(&self.theme);
+        self.confirm_dialog.on_theme_change(&self.theme);
     }
 }
 
