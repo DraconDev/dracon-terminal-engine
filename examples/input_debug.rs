@@ -168,6 +168,7 @@ impl InputDebugger {
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
         out.push_str("│  \x1b[1mq\x1b[0m        — Quit                                         │\r\n");
         out.push_str("│  \x1b[1m?\x1b[0m        — Toggle this help                            │\r\n");
+        out.push_str("│  \x1b[1mEsc\x1b[0m      — Dismiss help                               │\r\n");
         out.push_str("│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n");
         out.push_str("│  \x1b[1m↑/↓\x1b[0m      — Scroll history                              │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
