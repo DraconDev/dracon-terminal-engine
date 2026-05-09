@@ -708,16 +708,16 @@ impl Widget for CommandBindings {
             return false;
         }
         match key.code {
-            KeyCode::Char('s') => {
+            KeyCode::Char('s') if key.modifiers.is_empty() => {
                 self.refresh_all();
                 true
             }
-            KeyCode::Char('p') => {
+            KeyCode::Char('p') if key.modifiers.is_empty() => {
                 self.paused = !self.paused;
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('t') => {
+            KeyCode::Char('t') if key.modifiers.is_empty() => {
                 let themes = [
                     Theme::dark(),
                     Theme::light(),
