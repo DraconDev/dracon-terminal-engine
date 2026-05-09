@@ -696,6 +696,7 @@ impl Widget for EditorApp {
                 true
             }
             KeyCode::Char(c) => {
+                if let Some(tab) = self.active_tab_mut() {
                     let lines: Vec<&str> = tab.content.lines().collect();
                     let mut new_content = String::new();
                     for (i, line) in lines.iter().enumerate() {
