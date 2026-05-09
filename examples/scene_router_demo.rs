@@ -268,9 +268,30 @@ impl Scene for SettingsScreen {
             }
         }
 
+        // Toggle option
+        let toggle_label = "Toggle Option";
+        let toggle_y = 6;
+        for (i, c) in toggle_label.chars().enumerate() {
+            let idx = (toggle_y * area.width + 2 + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+            }
+        }
+        let toggle_status = if self.option_enabled { " [ON] " } else { " [OFF]" };
+        let status_x = 2 + toggle_label.len() as u16 + 1;
+        for (i, c) in toggle_status.chars().enumerate() {
+            let idx = (toggle_y * area.width + status_x + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = if self.option_enabled { t.success } else { t.error };
+                plane.cells[idx].style = Styles::BOLD;
+            }
+        }
+
         // Instructions
         let instructions = "Press 't' to cycle theme | Esc to go back";
-        let iy = 5;
+        let iy = 8;
         for (i, c) in instructions.chars().enumerate() {
             let idx = (iy * area.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -286,8 +307,19 @@ impl Scene for SettingsScreen {
         false
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                let toggle_y = 6u16;
+                if row == toggle_y {
+                    self.option_enabled = !self.option_enabled;
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
