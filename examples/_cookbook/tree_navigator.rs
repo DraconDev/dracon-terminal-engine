@@ -399,12 +399,6 @@ impl Widget for TreeNav {
                 self.show_help = true;
                 true
             }
-            KeyCode::Backspace if !self.current_path.is_empty() => {
-                self.current_path.pop();
-                self.tree.set_selected_path(self.current_path.clone());
-                self.update_breadcrumbs();
-                true
-            }
             _ => {
                 if self.tree.handle_key(key) {
                     self.current_path = self.tree.get_selected_path().to_vec();

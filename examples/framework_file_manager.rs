@@ -513,10 +513,6 @@ impl Widget for FileManagerApp {
                 self.enter_dir();
                 true
             }
-            KeyCode::Backspace => {
-                self.go_up();
-                true
-            }
             _ => false,
         }
     }
