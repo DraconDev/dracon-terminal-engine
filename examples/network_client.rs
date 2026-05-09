@@ -453,7 +453,9 @@ impl Widget for NetworkWidget {
     }
     fn render(&self, area: Rect) -> Plane {
         let app = self.app.borrow();
-        if app.view_detail {
+        if app.show_help {
+            app.render_help(area)
+        } else if app.view_detail {
             app.render_detail(area)
         } else {
             app.render_list(area)
