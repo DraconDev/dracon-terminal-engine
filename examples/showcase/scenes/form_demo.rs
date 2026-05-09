@@ -79,6 +79,19 @@ impl FormDemoScene {
             self.toast = Some("Settings saved!".into());
         }
     }
+
+    fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::nord(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+        ];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.on_theme_change(&self.theme);
+    }
 }
 
 impl Scene for FormDemoScene {
