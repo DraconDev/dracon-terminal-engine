@@ -230,6 +230,9 @@ impl Scene for TaskListScreen {
                 self.dirty = true;
                 true
             }
+            KeyCode::Enter => {
+                true // Handled at router level
+            }
             _ => false,
         }
     }
@@ -311,7 +314,7 @@ impl Scene for TaskDetailScreen {
         }
 
         // Status
-        let status = "e: edit | c: toggle | d: delete | Backspace: back | t: theme | ?: help | q: quit";
+        let status = "Esc: back | t: theme | ?: help | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -448,7 +451,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Status
-        let status = "Tab: switch field | Enter: save | Backspace: cancel | t: theme | ?: help | q: quit";
+        let status = "Tab: switch field | Type: edit | t: theme | ?: help | q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -594,6 +597,10 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
                 self.router.borrow_mut().pop();
                 true
             }
+            KeyCode::Enter => {
+                self.router.borrow_mut().push("task_detail");
+                true
+            }
             KeyCode::Char('n') => {
                 self.router.borrow_mut().push("task_edit");
                 true
@@ -668,7 +675,7 @@ fn main() -> std::io::Result<()> {
 
                 let shortcuts = [
                     ("↑/↓", "Navigate"),
-                    ("Enter", "Select / save"),
+                    ("Enter", "Select / view detail"),
                     ("n", "New task"),
                     ("Esc", "Go back"),
                     ("t", "Cycle theme"),
