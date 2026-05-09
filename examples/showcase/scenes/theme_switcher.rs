@@ -322,7 +322,6 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
 
     let shortcuts = [
         ("t", "Cycle theme"),
-        ("↑↓←→", "Navigate"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
