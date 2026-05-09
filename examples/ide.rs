@@ -104,6 +104,7 @@ struct IdeApp {
 
     // Context menu
     context_menu: Option<ContextMenu>,
+    context_menu_pos: Option<(u16, u16)>,
 
     // Profiler overlay
     profiler: Profiler,
@@ -283,6 +284,7 @@ impl IdeApp {
             tooltip: None,
             tooltip_timer: None,
             context_menu: None,
+            context_menu_pos: None,
             profiler: Profiler::new(WidgetId::new(5)),
             show_profiler: false,
             show_help: false,
