@@ -71,54 +71,62 @@ impl EventBusApp {
         self.dirty = true;
     }
 
-    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) {
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
-            return;
+            return false;
         }
 
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
                 self.show_help = false;
                 self.dirty = true;
+                return true;
             }
-            return;
+            return true;
         }
 
         match key.code {
             KeyCode::Char('q') => {
                 self.should_quit.store(true, Ordering::SeqCst);
+                true
             }
             KeyCode::Char('t') => {
                 self.cycle_theme();
+                true
             }
             KeyCode::Char('?') => {
                 self.show_help = true;
                 self.dirty = true;
+                true
             }
             KeyCode::Up | KeyCode::Char('+') | KeyCode::Char('=') => {
                 self.counter_value += 1;
                 self.last_event = Some(format!("CounterChanged({})", self.counter_value));
                 self.messages.push(format!("Counter: {}", self.counter_value));
                 self.dirty = true;
+                true
             }
             KeyCode::Down | KeyCode::Char('-') => {
                 self.counter_value -= 1;
                 self.last_event = Some(format!("CounterChanged({})", self.counter_value));
                 self.messages.push(format!("Counter: {}", self.counter_value));
                 self.dirty = true;
+                true
             }
             KeyCode::Char('l') => {
                 self.messages.push("Manual log entry".into());
                 self.last_event = Some("MessageLogged".into());
                 self.dirty = true;
+                true
             }
             KeyCode::Char('c') => {
                 self.messages.clear();
                 self.messages.push("Log cleared".into());
                 self.last_event = Some("LogCleared".into());
                 self.dirty = true;
+                true
             }
-            _ => {}
+            _ => false,
         }
     }
 
@@ -344,8 +352,7 @@ impl Widget for InputRouter {
     fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        self.app.borrow_mut().handle_key(key);
-        true
+        self.app.borrow_mut().handle_key(key)
     }
 }
 
