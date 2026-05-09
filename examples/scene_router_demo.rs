@@ -127,7 +127,7 @@ impl Scene for HomeScreen {
                 let idx = (y * area.width + 4 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = if is_selected { t.primary } else { t.fg };
+                    plane.cells[idx].fg = if is_selected { t.selection_fg } else { t.fg };
                     plane.cells[idx].bg = if is_selected { t.selection_bg } else { t.bg };
                     plane.cells[idx].style = if is_selected { Styles::BOLD } else { Styles::empty() };
                 }

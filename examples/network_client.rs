@@ -195,7 +195,7 @@ impl NetworkApp {
             let line = format!("{}{}. {}", prefix, post.id, &post.title[..post.title.len().min(40)]);
 
             let bg = if is_selected { t.selection_bg } else { t.bg };
-            let fg = if is_selected { t.primary } else { t.fg };
+            let fg = if is_selected { t.selection_fg } else { t.fg };
 
             for (j, c) in line.chars().enumerate() {
                 let idx = y * area.width as usize + j;
