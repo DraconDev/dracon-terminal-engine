@@ -560,7 +560,7 @@ fn main() -> io::Result<()> {
 
             // Status bar
             let status_base = ((h - 1) * w) as usize;
-            let hint = "t: theme | ?: help | q: quit";
+            let hint = "t: theme | ?: help | Esc: dismiss | q: quit";
             let hint_x = (w as usize).saturating_sub(hint.len() + 2);
             for (i, c) in hint.chars().enumerate() {
                 let idx = status_base + hint_x + i;

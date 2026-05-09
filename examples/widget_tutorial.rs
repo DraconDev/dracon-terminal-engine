@@ -668,7 +668,7 @@ fn main() -> std::io::Result<()> {
         "←/→ to change color | Click swatch to cycle | Tab to navigate | ?: help | Esc: dismiss",
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
-        "Theme: {} | ?: help | q: quit",
+        "Theme: {} | ?: help | Esc: dismiss | q: quit",
         theme_names[current_theme_idx]
     ));
 

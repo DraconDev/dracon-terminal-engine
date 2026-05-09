@@ -135,7 +135,7 @@ impl Scene for HomeScreen {
         }
 
         // Hint
-        let hint = "Enter: select | t: theme | ?: help | q: quit";
+        let hint = "Enter: select | t: theme | ?: help | Esc: dismiss | q: quit";
         let hy = area.height - 1;
         for (i, c) in hint.chars().enumerate() {
             let idx = (hy * area.width + i as u16) as usize;

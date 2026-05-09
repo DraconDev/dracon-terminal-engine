@@ -477,7 +477,7 @@ impl Widget for TabbedApp {
         }
 
         let hint = format!(
-            "[Left/Right] Switch tabs | Active: {} | t: theme | ?: help",
+            "[Left/Right] Switch tabs | Active: {} | t: theme | ?: help | Esc: dismiss | q: quit",
             match self.active_tab() {
                 TAB_DASHBOARD => "Dashboard",
                 TAB_LOGS => "Logs",

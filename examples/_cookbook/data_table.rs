@@ -443,7 +443,7 @@ impl Widget for Table {
         let status_y = area.height.saturating_sub(1);
         let count_str = format!("{} rows", self.rows.len());
         let hint = format!(
-            "Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | q: quit | {}",
+            "Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | Esc: dismiss | q: quit | {}",
             self.search.query(),
             count_str
         );
