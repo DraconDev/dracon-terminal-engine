@@ -582,6 +582,12 @@ impl Widget for Table {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        // Esc dismisses help overlay
+        if self.show_help && key.code == KeyCode::Esc {
+            self.show_help = false;
+            self.dirty = true;
+            return true;
+        }
         if self.search.handle_key(key) {
             let q = self.search.query().to_string();
             self.filter(&q);
