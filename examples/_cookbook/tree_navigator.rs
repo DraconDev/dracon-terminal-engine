@@ -350,8 +350,7 @@ impl Widget for TreeNav {
             let shortcuts = [
                 ("↑/↓", "Navigate tree"),
                 ("→/Enter", "Expand folder"),
-                ("←", "Collapse folder"),
-                ("Backspace", "Go up"),
+                ("←", "Go up / Collapse"),
                 ("t", "Cycle theme"),
                 ("?", "Toggle help"),
             ];
