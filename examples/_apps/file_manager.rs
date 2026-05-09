@@ -1046,6 +1046,38 @@ impl Widget for FileManager {
             return true;
         }
 
+        // Context menu interactions
+        if let Some(ref mut cm) = self.context_menu {
+            let ax = cm.anchor_x();
+            let ay = cm.anchor_y();
+            let w = cm.width();
+            let h = cm.item_count() as u16;
+            let on_menu = col >= ax && col < ax + w && row >= ay && row < ay + h;
+
+            match kind {
+                MouseEventKind::Down(MouseButton::Left) => {
+                    if on_menu {
+                        let idx = (row - ay) as usize;
+                        if let Some(action) = cm.action_at(idx) {
+                            let action = action.clone();
+                            self.execute_context_action(&action);
+                        }
+                        return true;
+                    } else {
+                        self.context_menu = None;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                MouseEventKind::Down(MouseButton::Right) => {
+                    self.context_menu = Some(self.make_context_menu(col, row));
+                    self.dirty = true;
+                    return true;
+                }
+                _ => {}
+            }
+        }
+
         let hh = 1u16;
         let area = self.area.get();
         let ch = area.height.saturating_sub(hh + 1);
@@ -1126,6 +1158,13 @@ impl Widget for FileManager {
                 }
                 return true;
             }
+        }
+
+        // Right-click to open context menu anywhere
+        if let MouseEventKind::Down(MouseButton::Right) = kind {
+            self.context_menu = Some(self.make_context_menu(col, row));
+            self.dirty = true;
+            return true;
         }
 
         // Tree pane click
