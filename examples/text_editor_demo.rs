@@ -656,32 +656,45 @@ impl Widget for EditorApp {
             KeyCode::Backspace => {
                 if let Some(tab) = self.active_tab_mut() {
                     let lines: Vec<&str> = tab.content.lines().collect();
-                    let mut new_content = String::new();
-                    for (i, line) in lines.iter().enumerate() {
-                        if i > 0 {
-                            new_content.push('\n');
-                        }
-                        if i == tab.cursor_line {
-                            let col = tab.cursor_col.min(line.len());
-                            if col > 0 {
-                                new_content.push_str(&line[..col - 1]);
-                                new_content.push_str(&line[col..]);
-                                tab.cursor_col = col - 1;
-                            } else if i > 0 {
-                                // At start of line: join with previous line
-                                continue;
+                    if tab.cursor_col > 0 {
+                        // Delete character before cursor on current line
+                        let mut new_content = String::new();
+                        for (i, line) in lines.iter().enumerate() {
+                            if i > 0 { new_content.push('\n'); }
+                            if i == tab.cursor_line {
+                                new_content.push_str(&line[..tab.cursor_col - 1]);
+                                new_content.push_str(&line[tab.cursor_col..]);
                             } else {
                                 new_content.push_str(line);
                             }
-                        } else if i == tab.cursor_line.saturating_sub(1) && tab.cursor_line > 0 && tab.cursor_col == 0 {
-                            new_content.push_str(line);
-                        } else {
-                            new_content.push_str(line);
                         }
-                    }
-                    // Handle joining lines when at col 0
-                    if tab.cursor_line > 0 && tab.cursor_col == 0 {
+                        tab.content = new_content;
+                        tab.cursor_col -= 1;
+                        tab.modified = true;
+                    } else if tab.cursor_line > 0 {
+                        // At start of line: join with previous line
+                        let prev_line_len = lines[tab.cursor_line - 1].len();
+                        let mut new_content = String::new();
+                        for (i, line) in lines.iter().enumerate() {
+                            if i == tab.cursor_line { continue; }
+                            if i > 0 && i != tab.cursor_line { new_content.push('\n'); }
+                            if i == tab.cursor_line - 1 {
+                                new_content.push_str(line);
+                                new_content.push_str(lines[tab.cursor_line]);
+                            } else {
+                                new_content.push_str(line);
+                            }
+                        }
+                        tab.content = new_content;
                         tab.cursor_line -= 1;
+                        tab.cursor_col = prev_line_len;
+                        tab.modified = true;
+                    }
+                }
+                self.sync_tab_bar();
+                self.dirty = true;
+                true
+            }
                         let prev_lines: Vec<&str> = new_content.lines().collect();
                         if let Some(prev) = prev_lines.get(tab.cursor_line) {
                             tab.cursor_col = prev.len();
