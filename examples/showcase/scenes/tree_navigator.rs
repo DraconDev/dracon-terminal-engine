@@ -160,7 +160,7 @@ impl Scene for TreeNavigatorScene {
             }
         }
         let count = self.fs.total_items();
-        let status_text = format!("{} items total | ↑↓ nav | Enter: expand | B: back | t: theme | ?: help", count);
+        let status_text = format!("{} items total | ↑↓ nav | Enter: expand | B/Esc: back | t: theme | ?: help | q: quit", count);
         draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.bg, false);
 
         if self.show_help {
