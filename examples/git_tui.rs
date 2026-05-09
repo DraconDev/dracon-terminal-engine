@@ -686,9 +686,9 @@ impl GitTui {
                 row += 2;
                 for (i, file) in staged.iter().enumerate() {
                     let is_selected = self.view == GitView::Status && self.selected_file == i;
-                    let fg = if is_selected { t.fg_on_accent } else { t.fg };
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
                     let bg = if is_selected {
-                        t.primary_active
+                        t.selection_bg
                     } else {
                         t.surface_elevated
                     };
@@ -732,9 +732,9 @@ impl GitTui {
                 for (i, file) in modified.iter().enumerate() {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
-                    let fg = if is_selected { t.fg_on_accent } else { t.fg };
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
                     let bg = if is_selected {
-                        t.primary_active
+                        t.selection_bg
                     } else {
                         t.surface_elevated
                     };
@@ -778,9 +778,9 @@ impl GitTui {
                 for (i, file) in untracked.iter().enumerate() {
                     let idx = offset + i;
                     let is_selected = self.view == GitView::Status && self.selected_file == idx;
-                    let fg = if is_selected { t.fg_on_accent } else { t.fg };
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
                     let bg = if is_selected {
-                        t.primary_active
+                        t.selection_bg
                     } else {
                         t.surface_elevated
                     };
@@ -823,9 +823,9 @@ impl GitTui {
                 break;
             }
             let is_selected = self.view == GitView::Log && self.selected_commit == i;
-            let fg = if is_selected { t.fg_on_accent } else { t.fg };
+            let fg = if is_selected { t.selection_fg } else { t.fg };
             let bg = if is_selected {
-                t.primary_active
+                t.selection_bg
             } else {
                 t.surface
             };
@@ -947,12 +947,12 @@ impl GitTui {
                 let fg = if branch.current {
                     t.success
                 } else if is_selected {
-                    t.fg_on_accent
+                    t.selection_fg
                 } else {
                     t.fg
                 };
                 let bg = if is_selected {
-                    t.primary_active
+                    t.selection_bg
                 } else {
                     t.surface
                 };
@@ -992,12 +992,12 @@ impl GitTui {
                 let idx = offset + i;
                 let is_selected = self.view == GitView::Branches && self.selected_branch == idx;
                 let fg = if is_selected {
-                    t.fg_on_accent
+                    t.selection_fg
                 } else {
                     t.fg_muted
                 };
                 let bg = if is_selected {
-                    t.primary_active
+                    t.selection_bg
                 } else {
                     t.surface
                 };

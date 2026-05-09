@@ -848,7 +848,7 @@ impl Widget for SystemMonitor {
                         let is_selected = self.selected_process == Some(view_idx);
                         let is_hovered = self.hovered_process == Some(view_idx);
                         let (fg, bg) = if is_selected {
-                            (t.fg_on_accent, t.primary_active)
+                            (t.selection_fg, t.selection_bg)
                         } else if is_hovered {
                             (t.fg, t.hover_bg)
                         } else {

@@ -372,9 +372,9 @@ impl Widget for SqliteBrowser {
         for (i, table) in self.tables.iter().enumerate() {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
-            let fg = if is_selected { t.fg_on_accent } else { t.fg };
+            let fg = if is_selected { t.selection_fg } else { t.fg };
             let bg = if is_selected {
-                t.primary_active
+                t.selection_bg
             } else {
                 left_bg
             };
@@ -519,7 +519,7 @@ impl Widget for SqliteBrowser {
                 count_x,
                 results_y + results_h - 2,
                 &count_text,
-                t.fg_on_accent,
+                t.selection_fg,
                 t.primary,
                 true,
             );

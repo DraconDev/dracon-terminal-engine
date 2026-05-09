@@ -716,7 +716,7 @@ impl Dashboard {
             if let Some(proc) = self.data.processes.get(proc_idx) {
                 let is_selected = self.data.selected_process == proc_idx;
                 let (fg, bg) = if is_selected {
-                    (t.fg_on_accent, t.primary_active)
+                    (t.selection_fg, t.selection_bg)
                 } else {
                     (t.fg, t.surface)
                 };
