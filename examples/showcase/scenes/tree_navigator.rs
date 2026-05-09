@@ -309,6 +309,7 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("↑/↓", "Navigate tree"),
         ("Enter/→", "Expand folder"),
         ("←", "Collapse folder"),
+        ("t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
