@@ -778,17 +778,6 @@ impl<'a> Ctx<'a> {
         }
     }
 
-    /// Returns a reference to the current theme.
-    pub fn theme(&self) -> &Theme {
-        self.theme
-    }
-
-    /// Sets the current theme. Use this in Pattern 2 apps (on_tick/on_input closures)
-    /// to change the framework theme so all child widgets receive the new theme.
-    pub fn set_theme(&mut self, theme: Theme) {
-        *self.theme = theme;
-    }
-
     /// Splits the screen horizontally into two panes and passes them to the closure.
     ///
     /// The closure receives two `SplitPane` instances covering the left and right halves.
