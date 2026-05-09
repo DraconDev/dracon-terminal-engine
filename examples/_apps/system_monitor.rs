@@ -1009,7 +1009,10 @@ impl Widget for SystemMonitor {
             return false;
         }
         if self.show_help {
-            self.show_help = false;
+            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+                self.show_help = false;
+                return true;
+            }
             return true;
         }
         // Compute view size for navigation bounds
