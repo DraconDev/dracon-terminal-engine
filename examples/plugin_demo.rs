@@ -112,7 +112,13 @@ impl Widget for ClockWidget {
         let hours = (secs / 3600) % 24;
         let mins = (secs / 60) % 60;
         let s = secs % 60;
-        let time_str = format!("{:02}:{:02}:{:02}", hours, mins, s);
+        let time_str = if self.use_24h {
+            format!("{:02}:{:02}:{:02}", hours, mins, s)
+        } else {
+            let h12 = if hours % 12 == 0 { 12 } else { hours % 12 };
+            let ampm = if hours >= 12 { "PM" } else { "AM" };
+            format!("{:>2}:{:02}:{:02} {}", h12, mins, s, ampm)
+        };
 
         for (i, c) in time_str.chars().enumerate() {
             plane.cells[42 + i].char = c;
