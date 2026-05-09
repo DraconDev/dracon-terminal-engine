@@ -421,14 +421,7 @@ impl App {
                                                 crate::input::event::KeyModifiers::CONTROL,
                                             )
                                         {
-                                            let focused = self.focus_manager.focused();
-                                            let dominated = focused
-                                                .and_then(|id| self.widget_mut(id))
-                                                .map(|mut w| w.handle_key(*k))
-                                                .unwrap_or(false);
-                                            if !dominated {
-                                                running.store(false, Ordering::SeqCst);
-                                            }
+                                            running.store(false, Ordering::SeqCst);
                                         } else if k.code == crate::input::event::KeyCode::Tab {
                                             let old = self.focus_manager.focused();
                                             if k.modifiers
