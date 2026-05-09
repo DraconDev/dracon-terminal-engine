@@ -427,6 +427,11 @@ fn main() -> io::Result<()> {
         let (w, h) = ctx.compositor().size();
         demo.area = Rect::new(0, 0, w, h);
 
+        // Background fill
+        let mut bg = Plane::new(0, w, h);
+        bg.fill_bg(demo.theme.bg);
+        ctx.add_plane(bg);
+
         let label_area = Rect::new(
             2,
             2,
