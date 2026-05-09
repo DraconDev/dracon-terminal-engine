@@ -112,6 +112,36 @@ impl ContextMenu {
         self.visible = false;
         self.dirty = true;
     }
+
+    /// Returns the currently selected item index.
+    pub fn selected_index(&self) -> usize {
+        self.selected
+    }
+
+    /// Returns the action at the given index, if any.
+    pub fn action_at(&self, index: usize) -> Option<&ContextAction> {
+        self.items.get(index).map(|(_, a)| a)
+    }
+
+    /// Returns the anchor x coordinate.
+    pub fn anchor_x(&self) -> u16 {
+        self.anchor_x
+    }
+
+    /// Returns the anchor y coordinate.
+    pub fn anchor_y(&self) -> u16 {
+        self.anchor_y
+    }
+
+    /// Returns the number of items in the menu.
+    pub fn item_count(&self) -> usize {
+        self.items.len()
+    }
+
+    /// Returns the menu width.
+    pub fn width(&self) -> u16 {
+        self.width
+    }
 }
 
 impl crate::framework::widget::Widget for ContextMenu {

@@ -290,6 +290,9 @@ impl FileManager {
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
         self.split.on_theme_change(&self.theme);
+        if let Some(ref mut cm) = self.context_menu {
+            cm.on_theme_change(&self.theme);
+        }
         self.dirty = true;
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
     }
@@ -391,6 +394,57 @@ impl FileManager {
         } else {
             self.toast("Failed to create folder", ToastKind::Error);
         }
+    }
+
+    fn context_menu_items() -> Vec<(&'static str, ContextAction)> {
+        vec![
+            ("New Folder", ContextAction::Open),
+            ("New File", ContextAction::Copy),
+            ("Delete", ContextAction::Cut),
+            ("Refresh", ContextAction::Edit),
+        ]
+    }
+
+    fn make_context_menu(&self, anchor_x: u16, anchor_y: u16) -> ContextMenu {
+        ContextMenu::new_with_id(WidgetId::new(50), Self::context_menu_items())
+            .with_anchor(anchor_x, anchor_y)
+            .with_theme(self.theme)
+    }
+
+    fn execute_context_action(&mut self, action: &ContextAction) {
+        match action {
+            ContextAction::Open => {
+                self.prompt = Some(FileManagerPrompt {
+                    kind: PromptKind::NewFolder,
+                    buffer: String::new(),
+                    message: "New folder name: ".to_string(),
+                });
+            }
+            ContextAction::Copy => {
+                self.prompt = Some(FileManagerPrompt {
+                    kind: PromptKind::NewFile,
+                    buffer: String::new(),
+                    message: "New file name: ".to_string(),
+                });
+            }
+            ContextAction::Cut => {
+                if self.selected_path.is_some() {
+                    self.prompt = Some(FileManagerPrompt {
+                        kind: PromptKind::DeleteConfirm,
+                        buffer: String::new(),
+                        message: "Delete selected? (y/n): ".to_string(),
+                    });
+                } else {
+                    self.toast("No file selected", ToastKind::Warning);
+                }
+            }
+            ContextAction::Edit => {
+                self.refresh();
+            }
+            _ => {}
+        }
+        self.context_menu = None;
+        self.dirty = true;
     }
 }
 
