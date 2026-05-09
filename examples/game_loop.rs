@@ -325,7 +325,7 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32) {
 
     // HUD
     let hud = format!(
-        " FPS: {} | Particles: {} | Clicks: {} | Turbo: {} | ?:help ",
+        " FPS: {} | Particles: {} | Clicks: {} | Turbo: {} | ?:help | q:quit ",
         fps,
         state.particles.len(),
         state.click_count,
