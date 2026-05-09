@@ -246,6 +246,16 @@ fn main() -> io::Result<()> {
                     Event::Key(KeyEvent { code: KeyCode::Esc, .. }) => {
                         debugger.show_help = false;
                     }
+                    Event::Key(KeyEvent { code: KeyCode::Char('c'), modifiers, .. })
+                        if modifiers.contains(KeyModifiers::CONTROL) =>
+                    {
+                        let _ = write!(
+                            term,
+                            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1004l\x1b[?1006l\x1b[?1007l\x1b[?2004l\x1b[?7h\x1b[?1049l"
+                        );
+                        let _ = term.flush();
+                        return Ok(());
+                    }
                     Event::Key(KeyEvent { code: KeyCode::Char('c'), .. }) => {
                         debugger.history.clear();
                         debugger.scroll_offset = 0;
