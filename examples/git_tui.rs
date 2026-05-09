@@ -1103,21 +1103,19 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 }
 
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
-    let help_lines = vec![
-        "Git TUI — Help",
-        "",
-        " 1-4     Switch views (Status/Log/Diff/Branches)",
-        " ↑/↓ or j/k  Navigate",
-        " Enter   Stage/unstage (status) or checkout (branches)",
-        " d       View diff for selected file",
-        " r       Refresh",
-        " t       Cycle theme",
-        " ?       Toggle this help",
-        " q       Quit",
+    let shortcuts = [
+        ("1-4", "Switch views (Status/Log/Diff/Branches)"),
+        ("↑/↓ or j/k", "Navigate"),
+        ("Enter", "Stage/unstage or checkout"),
+        ("d", "View diff for selected file"),
+        ("r", "Refresh"),
+        ("t", "Cycle theme"),
+        ("?", "Toggle this help"),
+        ("q", "Quit"),
     ];
 
-    let help_w = 45u16;
-    let help_h = (help_lines.len() as u16).min(area.height - 2);
+    let help_w = 48u16;
+    let help_h = (shortcuts.len() as u16 + 3).min(area.height - 2);
     let help_x = (area.width.saturating_sub(help_w)) / 2;
     let help_y = (area.height.saturating_sub(help_h)) / 2;
 
@@ -1157,19 +1155,44 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         }
     }
 
-    // Draw help text
-    for (i, line) in help_lines.iter().enumerate() {
-        let row = help_y + 1 + i as u16;
+    // Title
+    let title = "Git TUI — Help";
+    let tx = help_x + (help_w - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((help_y + 1) * plane.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Two-column layout: keys (theme.primary) + descriptions (theme.fg)
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = help_y + 3 + i as u16;
         if row >= help_y + help_h - 1 {
             break;
         }
-        let fg = if line.is_empty() || line.starts_with("Git TUI") {
-            t.primary
-        } else {
-            t.fg
-        };
-        let bold = !line.is_empty() && !line.starts_with(" ");
-        draw_text(plane, help_x + 2, row, line, fg, t.surface_elevated, bold);
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 2 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 16 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
     }
 }
 
