@@ -244,6 +244,14 @@ impl Widget for CounterWidget {
             plane.cells[(32 + x + i as u16) as usize].bg = t.surface;
         }
 
+        // +/- controls
+        plane.cells[32].char = '-';
+        plane.cells[32].fg = t.primary;
+        plane.cells[32].style = Styles::BOLD;
+        plane.cells[42].char = '+';
+        plane.cells[42].fg = t.primary;
+        plane.cells[42].style = Styles::BOLD;
+
         plane
     }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
