@@ -183,6 +183,12 @@ impl Widget for DebugOverlayPanel {
     fn focusable(&self) -> bool {
         true
     }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.profiler.on_theme_change(theme);
+        self.inspector.on_theme_change(theme);
+        self.event_logger.on_theme_change(theme);
+    }
 
     fn render(&self, area: Rect) -> Plane {
         if !self.visible {

@@ -191,7 +191,7 @@ impl Scene for FormDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Tab: next | Shift+Tab: prev | Enter: submit | B: back | ?: help ";
+        let nav = " Tab: next | Shift+Tab: prev | Enter: submit | t: theme | B: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
