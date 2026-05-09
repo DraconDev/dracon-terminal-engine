@@ -115,7 +115,7 @@ impl Widget for ClockWidget {
         let time_str = if self.use_24h {
             format!("{:02}:{:02}:{:02}", hours, mins, s)
         } else {
-            let h12 = if hours % 12 == 0 { 12 } else { hours % 12 };
+            let h12 = if hours.is_multiple_of(12) { 12 } else { hours % 12 };
             let ampm = if hours >= 12 { "PM" } else { "AM" };
             format!("{:>2}:{:02}:{:02} {}", h12, mins, s, ampm)
         };
@@ -274,15 +274,15 @@ impl Widget for CounterWidget {
         if kind != MouseEventKind::Down(MouseButton::Left) {
             return false;
         }
-        if row == 1 && col >= 9 && col <= 13 {
+        if row == 1 && (9..=13).contains(&col) {
             self.count = 0;
             return true;
         }
-        if row == 2 && col >= 1 && col <= 4 {
+        if row == 2 && (1..=4).contains(&col) {
             self.count -= 1;
             return true;
         }
-        if row == 2 && col >= 10 && col <= 13 {
+        if row == 2 && (10..=13).contains(&col) {
             self.count += 1;
             return true;
         }
