@@ -41,10 +41,11 @@ struct DebugOverlayPanel {
     visible: bool,
     theme: Theme,
     show_help: bool,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl DebugOverlayPanel {
-    fn new(id: WidgetId, theme: Theme) -> Self {
+    fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id,
             profiler: Profiler::new(WidgetId::new(160)),
@@ -53,6 +54,7 @@ impl DebugOverlayPanel {
             visible: false,
             theme,
             show_help: false,
+            should_quit,
         }
     }
 
@@ -179,7 +181,7 @@ impl Widget for DebugOverlayPanel {
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool {
-        self.visible
+        true
     }
 
     fn render(&self, area: Rect) -> Plane {
