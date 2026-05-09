@@ -1539,7 +1539,7 @@ impl Showcase {
         if self.scene_router.current().is_some() {
             // q always quits from any scene
             if let KeyCode::Char('q') = key.code {
-                self.should_quit = true;
+                self.should_quit.store(true, Ordering::SeqCst);
                 return true;
             }
             if let KeyCode::Char('b') | KeyCode::Char('B') = key.code {
