@@ -344,9 +344,15 @@ impl Scene for TaskListScreen {
                 true
             }
             KeyCode::Down => {
-                self.selected += 1;
-                self.dirty = true;
+                let task_count = self.task_list.items().len();
+                if self.selected + 1 < task_count {
+                    self.selected += 1;
+                    self.dirty = true;
+                }
                 true
+            }
+            KeyCode::Enter => {
+                true // Handled at router level
             }
             _ => false,
         }
@@ -481,7 +487,7 @@ impl Scene for AddTaskScreen {
         }
 
         // Hint
-        let hint = "Tab: next field | ←/→: priority | Enter: save | Backspace: back";
+        let hint = "Tab: next field | ←/→: priority | Type: edit | Esc: back";
         let hy = area.height - 1;
         plane.put_str(0, hy, hint);
 
@@ -698,7 +704,7 @@ fn main() -> std::io::Result<()> {
         .unwrap_or_else(|_| "/tmp/dracon_todo.db".to_string());
 
     println!("Todo App — Tasks saved to {}", db_path);
-    println!("Controls: ↑↓ nav | n new | Enter detail | Space toggle | d delete | t theme | ? help | q quit");
+    println!("Controls: ↑↓ nav | n new | Enter detail | t theme | ? help | q quit");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
     let should_quit = Arc::new(AtomicBool::new(false));

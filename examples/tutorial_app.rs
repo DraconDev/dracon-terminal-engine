@@ -231,7 +231,8 @@ impl Scene for TaskListScreen {
                 true
             }
             KeyCode::Enter => {
-                true // Handled at router level
+                // Handled at router level — focus next scene (detail)
+                true
             }
             _ => false,
         }
