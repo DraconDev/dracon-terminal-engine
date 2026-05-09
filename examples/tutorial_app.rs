@@ -590,7 +590,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
                 self.router.borrow_mut().on_theme_change(&theme);
                 true
             }
-            KeyCode::Backspace => {
+            KeyCode::Esc => {
                 self.router.borrow_mut().pop();
                 true
             }

@@ -412,7 +412,7 @@ impl NetworkApp {
                 self.view_detail = !self.view_detail;
                 true
             }
-            KeyCode::Backspace if self.view_detail => {
+            KeyCode::Esc if self.view_detail => {
                 self.view_detail = false;
                 true
             }

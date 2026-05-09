@@ -236,7 +236,7 @@ impl Scene for WidgetGalleryScene {
 
         match key.code {
             KeyCode::Char('?') => { self.show_help = true; true }
-            KeyCode::Tab | KeyCode::Char('t') => { self.cycle_theme(); true }
+            KeyCode::Char('t') => { self.cycle_theme(); true }
             KeyCode::Right | KeyCode::Down => {
                 self.selected = (self.selected + 1) % SLOTS.len();
                 true
