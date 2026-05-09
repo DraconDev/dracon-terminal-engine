@@ -303,7 +303,7 @@ impl Scene for ModalDemoScene {
         } else {
             match key.code {
                 KeyCode::Char('?') => { self.show_help = true; true }
-                KeyCode::Char('c') | KeyCode::Char('C') => { self.show_confirm = true; true }
+                KeyCode::Char('c') | KeyCode::Char('C') if key.modifiers.is_empty() => { self.show_confirm = true; true }
                 KeyCode::Char('t') => { self.cycle_theme(); true }
                 _ => false,
             }
