@@ -180,8 +180,19 @@ impl Widget for FormApp {
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool { true }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.form.borrow_mut().on_theme_change(theme);
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = self.form.borrow().render(area);
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+            if cell.bg == Color::Reset {
+                cell.bg = self.theme.bg;
+            }
+        }
 
         // Title
         let title = " Form Demo ";
