@@ -225,6 +225,15 @@ impl Widget for CounterWidget {
             plane.cells[16 + i].style = Styles::BOLD;
         }
 
+        // Reset indicator
+        plane.cells[25].char = '[';
+        plane.cells[25].fg = t.warning;
+        plane.cells[26].char = 'R';
+        plane.cells[26].fg = t.warning;
+        plane.cells[26].style = Styles::BOLD;
+        plane.cells[27].char = ']';
+        plane.cells[27].fg = t.warning;
+
         // Count value
         let count_str = format!("{}", self.count);
         let x = 7 - count_str.len() as u16 / 2;
