@@ -15,6 +15,8 @@
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
@@ -262,6 +264,7 @@ struct PluginDemoState {
     show_help: bool,
     theme: Theme,
     dirty: bool,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl PluginDemoState {
