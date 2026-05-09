@@ -509,7 +509,7 @@ impl Widget for CommandBindings {
             "▶ RUNNING"
         };
         let status = format!(
-            "  {}  |  tick: {}  |  t: theme | ?: help | q: quit",
+            "  {}  |  tick: {}  |  t: theme | ?: help | Esc: dismiss | q: quit",
             auto_str, self.tick
         );
         for (i, c) in status.chars().enumerate().take(w - 2) {

@@ -995,7 +995,7 @@ impl Widget for SystemMonitor {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let footer = " t: theme | p: tree | ?: help | ↑/↓: nav | Click: select | q: quit ";
+        let footer = " t: theme | p: tree | ?: help | Esc: dismiss | ↑/↓: nav | Click: select | q: quit ";
         draw_text(&mut plane, 2, footer_y, footer, t.fg_muted, t.bg, false);
 
         if self.show_help {
