@@ -23,7 +23,7 @@ use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 // ═══════════════════════════════════════════════════════════════════════════════
