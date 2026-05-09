@@ -871,6 +871,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("r          Force refresh", false),
         ("↑/↓        Navigate process list", false),
         ("?          Toggle this help", false),
+        ("Esc        Dismiss help", false),
         ("q          Quit", false),
         ("", false),
         (" Mouse: scroll process list  ", false),

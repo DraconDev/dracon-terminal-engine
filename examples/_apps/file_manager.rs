@@ -1133,6 +1133,8 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("d         Delete selected", false),
         ("m         Rename selected", false),
         ("r         Refresh directory", false),
+        ("?         Toggle help", false),
+        ("Esc       Dismiss help", false),
         ("q         Quit", false),
     ];
     for (i, (line, bold)) in lines.iter().enumerate() {

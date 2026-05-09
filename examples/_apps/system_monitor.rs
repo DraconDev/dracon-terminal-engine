@@ -1325,6 +1325,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("t          Cycle theme (15 themes)", false),
         ("p          Toggle tree view", false),
         ("?          Toggle this help", false),
+        ("Esc        Dismiss help", false),
         ("↑/↓        Navigate process list", false),
         ("Click      Select process", false),
         ("Scroll     Scroll process list", false),
