@@ -412,6 +412,20 @@ impl Widget for TabbedApp {
 
     fn clear_dirty(&mut self) {}
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.tabbar.on_theme_change(&self.theme);
+        self.dashboard.cpu.on_theme_change(&self.theme);
+        self.dashboard.memory.on_theme_change(&self.theme);
+        self.dashboard.disk.on_theme_change(&self.theme);
+        self.dashboard.network.on_theme_change(&self.theme);
+        self.logs.list.on_theme_change(&self.theme);
+        self.settings.theme_select.on_theme_change(&self.theme);
+        self.settings.notifications.on_theme_change(&self.theme);
+        self.settings.volume_slider.on_theme_change(&self.theme);
+        self.stats.grid.on_theme_change(&self.theme);
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;

@@ -275,6 +275,14 @@ impl Widget for MenuApp {
     }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.list.on_theme_change(theme);
+        self.status_bar.on_theme_change(theme);
+        for toast in &mut self.toasts {
+            toast.on_theme_change(theme);
+        }
+    }
     fn focusable(&self) -> bool {
         true
     }
