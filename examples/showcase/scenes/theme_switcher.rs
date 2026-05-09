@@ -51,6 +51,7 @@ pub struct ThemeSwitcherScene {
     theme_index: usize,
     theme: Theme,
     show_help: bool,
+    dirty: bool,
     checkbox: Checkbox,
     button: Button,
     gauge: Gauge,
