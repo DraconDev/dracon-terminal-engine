@@ -209,6 +209,7 @@ impl Scene for FormDemoScene {
         if self.show_help {
             if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }
@@ -216,23 +217,26 @@ impl Scene for FormDemoScene {
         // If toast is showing, any key dismisses it
         if self.toast.is_some() {
             self.toast = None;
+            self.dirty = true;
             return true;
         }
 
         match key.code {
-            KeyCode::Char('?') => { self.show_help = !self.show_help; true }
-            KeyCode::Char('t') => { self.cycle_theme(); true }
-            KeyCode::Tab => { self.cycle_focus(true); true }
-            KeyCode::BackTab => { self.cycle_focus(false); true }
+            KeyCode::Char('?') => { self.show_help = !self.show_help; self.dirty = true; true }
+            KeyCode::Char('t') => { self.cycle_theme(); self.dirty = true; true }
+            KeyCode::Tab => { self.cycle_focus(true); self.dirty = true; true }
+            KeyCode::BackTab => { self.cycle_focus(false); self.dirty = true; true }
             KeyCode::Enter => {
                 if self.focused_field == FIELD_SUBMIT {
                     self.submit();
                 }
+                self.dirty = true;
                 true
             }
             KeyCode::Esc => {
                 if self.toast.is_some() {
                     self.toast = None;
+                    self.dirty = true;
                     true
                 } else {
                     false // Let parent (showcase) handle Esc → pop back
@@ -240,7 +244,7 @@ impl Scene for FormDemoScene {
             }
             _ => {
                 // Delegate to focused field
-                match self.focused_field {
+                let handled = match self.focused_field {
                     FIELD_USERNAME => self.username.handle_key(key),
                     FIELD_EMAIL => self.email.handle_key(key),
                     FIELD_PASSWORD => self.password.handle_key(key),
@@ -248,7 +252,9 @@ impl Scene for FormDemoScene {
                     FIELD_NOTIFICATIONS => self.notifications.handle_key(key),
                     FIELD_SUBMIT => self.submit.handle_key(key),
                     _ => false,
-                }
+                };
+                if handled { self.dirty = true; }
+                handled
             }
         }
     }
