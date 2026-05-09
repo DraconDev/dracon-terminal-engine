@@ -505,13 +505,116 @@ fn main() -> std::io::Result<()> {
             }
 
             let mut router = router.borrow_mut();
-            let _theme = *theme_for_tick.borrow();
+            let theme = *theme_for_tick.borrow();
 
             if router.needs_render() {
                 let (w, h) = ctx.compositor().size();
                 let plane = router.render(Rect::new(0, 0, w, h));
                 ctx.add_plane(plane);
                 router.clear_dirty();
+            }
+
+            // Render help overlay on top of everything
+            if *show_help_for_tick.borrow() {
+                let (w, h) = ctx.compositor().size();
+                let mut help_plane = dracon_terminal_engine::compositor::Plane::new(0, w, h);
+                help_plane.z_index = 200;
+
+                let shortcuts = [
+                    ("↑/↓", "Navigate menu"),
+                    ("Enter", "Select / go forward"),
+                    ("Backspace", "Go back"),
+                    ("t", "Cycle theme"),
+                    ("?", "Toggle this help"),
+                    ("q", "Quit"),
+                ];
+
+                let hw = 40u16.min(w.saturating_sub(4));
+                let hh = (shortcuts.len() as u16 + 4).min(h.saturating_sub(4));
+                let hx = (w - hw) / 2;
+                let hy = (h - hh) / 2;
+
+                for y in hy..hy + hh {
+                    for x in hx..hx + hw {
+                        let idx = (y * w + x) as usize;
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].bg = theme.surface_elevated;
+                            help_plane.cells[idx].transparent = false;
+                        }
+                    }
+                }
+
+                let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+                for (ch, cx, cy) in corners.iter() {
+                    let idx = (cy * w + cx) as usize;
+                    if idx < help_plane.cells.len() {
+                        help_plane.cells[idx].char = *ch;
+                        help_plane.cells[idx].fg = theme.outline;
+                        help_plane.cells[idx].transparent = false;
+                    }
+                }
+                for x in hx + 1..hx + hw - 1 {
+                    let top = (hy * w + x) as usize;
+                    let bot = ((hy + hh - 1) * w + x) as usize;
+                    if top < help_plane.cells.len() {
+                        help_plane.cells[top].char = '─';
+                        help_plane.cells[top].fg = theme.outline;
+                        help_plane.cells[top].transparent = false;
+                    }
+                    if bot < help_plane.cells.len() {
+                        help_plane.cells[bot].char = '─';
+                        help_plane.cells[bot].fg = theme.outline;
+                        help_plane.cells[bot].transparent = false;
+                    }
+                }
+                for y in hy + 1..hy + hh - 1 {
+                    let left = (y * w + hx) as usize;
+                    let right = (y * w + hx + hw - 1) as usize;
+                    if left < help_plane.cells.len() {
+                        help_plane.cells[left].char = '│';
+                        help_plane.cells[left].fg = theme.outline;
+                        help_plane.cells[left].transparent = false;
+                    }
+                    if right < help_plane.cells.len() {
+                        help_plane.cells[right].char = '│';
+                        help_plane.cells[right].fg = theme.outline;
+                        help_plane.cells[right].transparent = false;
+                    }
+                }
+
+                let title = "Scene Router Demo — Help";
+                let tx = hx + (hw - title.len() as u16) / 2;
+                for (i, c) in title.chars().enumerate() {
+                    let idx = ((hy + 1) * w + tx + i as u16) as usize;
+                    if idx < help_plane.cells.len() {
+                        help_plane.cells[idx].char = c;
+                        help_plane.cells[idx].fg = theme.primary;
+                        help_plane.cells[idx].style = dracon_terminal_engine::compositor::Styles::BOLD;
+                        help_plane.cells[idx].transparent = false;
+                    }
+                }
+
+                for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                    let row = hy + 3 + i as u16;
+                    for (j, c) in key.chars().enumerate() {
+                        let idx = (row * w + hx + 2 + j as u16) as usize;
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].char = c;
+                            help_plane.cells[idx].fg = theme.primary;
+                            help_plane.cells[idx].transparent = false;
+                        }
+                    }
+                    for (j, c) in desc.chars().enumerate() {
+                        let idx = (row * w + hx + 14 + j as u16) as usize;
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].char = c;
+                            help_plane.cells[idx].fg = theme.fg;
+                            help_plane.cells[idx].transparent = false;
+                        }
+                    }
+                }
+
+                ctx.add_plane(help_plane);
             }
         })
         .run(|_| {});

@@ -556,7 +556,7 @@ struct TodoRouter {
     state: Rc<RefCell<AppState>>,
     theme: Rc<RefCell<Theme>>,
     should_quit: Arc<AtomicBool>,
-    show_help: bool,
+    show_help: Rc<RefCell<bool>>,
     show_delete_confirm: bool,
     delete_target: Option<i64>,
     id: WidgetId,
