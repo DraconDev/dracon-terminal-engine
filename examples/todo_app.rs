@@ -660,7 +660,7 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
                 true
             }
             KeyCode::Char('?') => {
-                self.show_help = true;
+                *self.show_help.borrow_mut() = true;
                 true
             }
             KeyCode::Char('t') => {
