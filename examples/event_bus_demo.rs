@@ -119,7 +119,7 @@ impl EventBusApp {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('c') => {
+            KeyCode::Char('c') if key.modifiers.is_empty() => {
                 self.messages.clear();
                 self.messages.push("Log cleared".into());
                 self.last_event = Some("LogCleared".into());
