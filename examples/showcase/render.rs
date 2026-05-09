@@ -984,7 +984,7 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     for (i, (name, age, city)) in rows.iter().enumerate() {
         let y = 7 + i;
         let is_selected = highlight_row && i == 1;
-        let fg = if is_selected { t.primary } else { t.fg_subtle };
+        let fg = if is_selected { t.selection_fg } else { t.fg_subtle };
         let prefix = if is_selected { ">" } else { " " };
         draw_text(plane, 1, y, prefix, t.primary, t.surface, true);
         draw_text(plane, 2, y, name, fg, t.surface, false);
