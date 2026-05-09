@@ -324,7 +324,7 @@ impl Widget for SqliteBrowser {
         self.theme = *theme;
         self.status_bar.on_theme_change(theme);
         self.search_input.on_theme_change(theme);
-        for table in &mut self.results_table {
+        if let Some(table) = &mut self.results_table {
             table.on_theme_change(theme);
         }
         for toast in &mut self.toasts {
