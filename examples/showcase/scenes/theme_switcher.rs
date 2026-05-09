@@ -244,7 +244,36 @@ impl Scene for ThemeSwitcherScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if self.show_help {
+            return true;
+        }
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            let area = self.area.get();
+            let cols: u16 = 4;
+            let swatch_w = (area.width.saturating_sub(2)) / cols;
+            let swatch_h = 3u16;
+            let start_y = 2u16;
+            for (i, (_name, factory)) in THEMES.iter().enumerate() {
+                let col_idx = i as u16 % cols;
+                let row_idx = i as u16 / cols;
+                let x = 1 + col_idx * swatch_w;
+                let y = start_y + row_idx * swatch_h;
+                if y + swatch_h >= area.height.saturating_sub(8) {
+                    break;
+                }
+                if col >= x && col < x + swatch_w && row >= y && row < y + swatch_h {
+                    self.theme_index = i;
+                    self.theme = factory();
+                    self.checkbox.on_theme_change(&self.theme);
+                    self.button.on_theme_change(&self.theme);
+                    self.gauge.on_theme_change(&self.theme);
+                    self.badge.on_theme_change(&self.theme);
+                    self.dirty = true;
+                    return true;
+                }
+            }
+        }
         false
     }
 
@@ -254,11 +283,12 @@ impl Scene for ThemeSwitcherScene {
         self.button.on_theme_change(theme);
         self.gauge.on_theme_change(theme);
         self.badge.on_theme_change(theme);
+        self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
 fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
