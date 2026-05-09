@@ -215,8 +215,12 @@ impl Scene for FormDemoScene {
                 true
             }
             KeyCode::Esc => {
-                self.toast = None;
-                true
+                if self.toast.is_some() {
+                    self.toast = None;
+                    true
+                } else {
+                    false // Let parent (showcase) handle Esc → pop back
+                }
             }
             _ => {
                 // Delegate to focused field

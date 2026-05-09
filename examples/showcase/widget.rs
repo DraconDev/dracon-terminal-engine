@@ -1537,6 +1537,11 @@ impl Showcase {
     fn dispatch_key(&mut self, key: KeyEvent) -> bool {
         // If a scene is active, delegate to it
         if self.scene_router.current().is_some() {
+            // q always quits from any scene
+            if let KeyCode::Char('q') = key.code {
+                self.should_quit = true;
+                return true;
+            }
             if let KeyCode::Char('b') | KeyCode::Char('B') = key.code {
                 self.scene_router.pop();
                 return true;
