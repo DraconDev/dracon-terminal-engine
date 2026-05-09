@@ -89,8 +89,8 @@ impl FormDemoScene {
             Theme::tokyo_night(),
         ];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
-        self.on_theme_change(&self.theme);
+        let next = themes[(idx + 1) % themes.len()];
+        self.on_theme_change(&next);
     }
 }
 
