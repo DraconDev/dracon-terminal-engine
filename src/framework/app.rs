@@ -752,6 +752,17 @@ impl<'a> Ctx<'a> {
         self.compositor
     }
 
+    /// Returns a reference to the current theme.
+    pub fn theme(&self) -> &Theme {
+        self.theme
+    }
+
+    /// Sets the current theme. Use this in Pattern 2 apps (on_tick closures)
+    /// to change the framework theme so all child widgets receive the new theme.
+    pub fn set_theme(&mut self, theme: Theme) {
+        *self.theme = theme;
+    }
+
     /// Clears the entire terminal.
     pub fn clear(&mut self) {
         self.compositor.force_clear();
