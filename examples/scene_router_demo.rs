@@ -22,7 +22,7 @@ use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
