@@ -822,6 +822,7 @@ impl Widget for IdeApp {
         if self.context_menu.is_some() {
             if key.code == KeyCode::Esc {
                 self.context_menu = None;
+                self.context_menu_pos = None;
                 return true;
             }
             return true;
@@ -1096,6 +1097,60 @@ impl Widget for IdeApp {
             return handled;
         }
 
+        // Context menu intercepts when visible
+        if let Some(ref mut cm) = self.context_menu {
+            if kind == MouseEventKind::Down(MouseButton::Left) {
+                if cm.handle_mouse(kind, col, row) {
+                    if let Some((_, anchor_y)) = self.context_menu_pos {
+                        let idx = (row - anchor_y) as usize;
+                        match idx {
+                            0 => {
+                                let new_id = self.tabs.len();
+                                self.tabs.push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1)));
+                                self.active_tab = new_id;
+                                self.sync_tab_bar();
+                                self.update_breadcrumbs();
+                                self.update_status();
+                            }
+                            1 => {
+                                if self.tabs.len() > 1 {
+                                    self.tabs.remove(self.active_tab);
+                                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                                    self.sync_tab_bar();
+                                    self.update_breadcrumbs();
+                                    self.update_status();
+                                }
+                            }
+                            2 => {
+                                if let Some(tab) = self.active_tab_mut() {
+                                    tab.modified = false;
+                                }
+                                self.update_status();
+                                self.toast("File saved", ToastKind::Success);
+                            }
+                            3 => self.toast("Cut (mock)", ToastKind::Info),
+                            4 => self.toast("Copy (mock)", ToastKind::Info),
+                            5 => self.toast("Paste (mock)", ToastKind::Info),
+                            _ => {}
+                        }
+                    }
+                    self.context_menu = None;
+                    self.context_menu_pos = None;
+                    return true;
+                } else {
+                    self.context_menu = None;
+                    self.context_menu_pos = None;
+                    return true;
+                }
+            }
+            if kind == MouseEventKind::Down(MouseButton::Right) {
+                self.context_menu = None;
+                self.context_menu_pos = None;
+            } else {
+                return true;
+            }
+        }
+
         // Menu bar
         if row == 0 {
             return self.menu_bar.handle_mouse(kind, col, row);
@@ -1108,15 +1163,22 @@ impl Widget for IdeApp {
 
         // Context menu on right-click
         if kind == MouseEventKind::Down(MouseButton::Right) {
-            self.context_menu = Some(ContextMenu::new_with_id(
-                WidgetId::new(50),
-                vec![
-                    ("Cut", ContextAction::Cut),
-                    ("Copy", ContextAction::Copy),
-                    ("Paste", ContextAction::Paste),
-                    ("Go to Definition", ContextAction::Open),
-                ],
-            ));
+            self.context_menu = Some(
+                ContextMenu::new_with_id(
+                    WidgetId::new(50),
+                    vec![
+                        ("New Tab", ContextAction::Open),
+                        ("Close Tab", ContextAction::Delete),
+                        ("Save", ContextAction::Edit),
+                        ("Cut", ContextAction::Cut),
+                        ("Copy", ContextAction::Copy),
+                        ("Paste", ContextAction::Paste),
+                    ],
+                )
+                .with_anchor(col, row)
+                .with_theme(self.theme),
+            );
+            self.context_menu_pos = Some((col, row));
             return true;
         }
 
