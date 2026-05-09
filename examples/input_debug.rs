@@ -106,7 +106,7 @@ impl InputDebugger {
         // Header bar
         let elapsed = self.start_time.elapsed().as_secs();
         let header = format!(
-            " 󰌌 Input Debugger │ {} events │ {}s │ q:quit ?:help c:clear ",
+            " 󰌌 Input Debugger │ {} events │ {}s │ q:quit ?:help Esc:dismiss c:clear ",
             self.event_count, elapsed
         );
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w));

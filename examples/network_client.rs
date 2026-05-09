@@ -172,7 +172,7 @@ impl NetworkApp {
         }
 
         // Status hint
-        let hint = "↑↓:nav | Enter:detail | r:refresh | t:theme | ?:help | q:quit";
+        let hint = "↑↓:nav | Enter:detail | r:refresh | t:theme | ?:help | Esc:dismiss | q:quit";
         let hint_x = area.width as usize - hint.len() - 2;
         for (i, c) in hint.chars().enumerate() {
             let idx = (area.width as usize) + hint_x + i;
