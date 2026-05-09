@@ -149,7 +149,7 @@ impl EventBusApp {
         self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), t);
 
         // Status bar
-        let status = "↑/↓: counter | l: log | c: clear | t: theme | ?: help | q: quit";
+        let status = "↑/↓: counter | l: log | c: clear | t: theme | ?: help | Esc: dismiss | q: quit";
         let sx = (area.width as usize - status.len().min(area.width as usize)) / 2;
         let sy = area.height - 1;
         for (i, c) in status.chars().take(area.width as usize).enumerate() {

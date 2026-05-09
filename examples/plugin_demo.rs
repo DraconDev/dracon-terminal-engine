@@ -494,7 +494,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
 
 fn main() -> io::Result<()> {
     println!("Plugin Demo — Clock and Counter widgets loaded via PluginRegistry");
-    println!("+/- or ←/→ to adjust counter | t: theme | ?: help | q: quit");
+    println!("+/- or ←/→ to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

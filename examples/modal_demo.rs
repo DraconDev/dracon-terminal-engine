@@ -484,7 +484,7 @@ fn main() -> io::Result<()> {
         status_plane.set_absolute_position(0, h.saturating_sub(1));
         status_plane.set_z_index(1000);
         let t = demo.theme;
-        let hint = "t: theme | ?: help | Enter: confirm | q: quit";
+        let hint = "t: theme | ?: help | Esc: dismiss | Enter: confirm | q: quit";
         for (i, c) in hint.chars().take(w as usize).enumerate() {
             if i < status_plane.cells.len() {
                 status_plane.cells[i].char = c;
