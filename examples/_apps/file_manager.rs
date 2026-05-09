@@ -819,6 +819,27 @@ impl Widget for FileManager {
             }
         }
 
+        // Context menu overlay (rendered last, on top of everything)
+        if let Some(ref cm) = self.context_menu {
+            let cm_plane = cm.render(area);
+            let base_x = cm_plane.x;
+            let base_y = cm_plane.y;
+            for (i, c) in cm_plane.cells.iter().enumerate() {
+                if !c.transparent {
+                    let local_x = (i % cm_plane.width as usize) as u16;
+                    let local_y = (i / cm_plane.width as usize) as u16;
+                    let x = base_x + local_x;
+                    let y = base_y + local_y;
+                    if x < area.width && y < area.height {
+                        let idx = (y * area.width + x) as usize;
+                        if idx < plane.cells.len() {
+                            plane.cells[idx] = c.clone();
+                        }
+                    }
+                }
+            }
+        }
+
         plane
     }
 
