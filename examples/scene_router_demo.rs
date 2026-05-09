@@ -523,7 +523,7 @@ fn main() -> std::io::Result<()> {
                 let shortcuts = [
                     ("↑/↓", "Navigate menu"),
                     ("Enter", "Select / go forward"),
-                    ("Backspace", "Go back"),
+                    ("Esc", "Go back"),
                     ("t", "Cycle theme"),
                     ("?", "Toggle this help"),
                     ("q", "Quit"),
