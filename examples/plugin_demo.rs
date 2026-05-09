@@ -268,7 +268,7 @@ struct PluginDemoState {
 }
 
 impl PluginDemoState {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         let mut registry = PluginRegistry::new();
 
         // Register custom widgets
@@ -290,6 +290,7 @@ impl PluginDemoState {
             show_help: false,
             theme: Theme::nord(),
             dirty: true,
+            should_quit,
         }
     }
 
@@ -368,7 +369,8 @@ impl Widget for InputRouter {
 
         match key.code {
             KeyCode::Char('q') => {
-                std::process::exit(0);
+                state.should_quit.store(true, Ordering::SeqCst);
+                true
             }
             KeyCode::Char('t') => {
                 state.cycle_theme();
