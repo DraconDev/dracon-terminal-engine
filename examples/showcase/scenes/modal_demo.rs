@@ -316,7 +316,67 @@ impl Scene for ModalDemoScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let area = self.area.get();
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            if self.show_confirm {
+                let dw = 30u16;
+                let dh = 8u16;
+                let dx = (area.width - dw) / 2;
+                let dy = (area.height - dh) / 2;
+                // Click outside dialog -> dismiss
+                if col < dx || col >= dx + dw || row < dy || row >= dy + dh {
+                    self.show_confirm = false;
+                    self.dirty = true;
+                    return true;
+                }
+                // Yes button
+                let yes_x = dx + 4;
+                if row == dy + 5 && col >= yes_x && col < yes_x + 7 {
+                    self.show_confirm = false;
+                    self.show_toast = true;
+                    self.toast_message = "Confirmed!".to_string();
+                    self.dirty = true;
+                    return true;
+                }
+                // No button
+                let no_x = dx + dw.saturating_sub(10);
+                if row == dy + 5 && col >= no_x && col < no_x + 7 {
+                    self.show_confirm = false;
+                    self.dirty = true;
+                    return true;
+                }
+                return true;
+            }
+            if self.show_help {
+                let hw = 42u16.min(area.width.saturating_sub(4));
+                let hh = 12u16.min(area.height.saturating_sub(4));
+                let hx = (area.width - hw) / 2;
+                let hy = (area.height - hh) / 2;
+                if col < hx || col >= hx + hw || row < hy || row >= hy + hh {
+                    self.show_help = false;
+                    self.dirty = true;
+                    return true;
+                }
+                return true;
+            }
+            // Main content triggers
+            let content_y = 2u16;
+            let card_x = 1u16;
+            let card_w = area.width.saturating_sub(2);
+            let help_line_y = content_y + 8; // "Press '?' to toggle help overlay."
+            let confirm_line_y = content_y + 9; // "Press 'c' to show confirm dialog."
+            if row == help_line_y && col >= card_x + 2 && col < card_x + card_w - 2 {
+                self.show_help = true;
+                self.dirty = true;
+                return true;
+            }
+            if row == confirm_line_y && col >= card_x + 2 && col < card_x + card_w - 2 {
+                self.show_confirm = true;
+                self.dirty = true;
+                return true;
+            }
+        }
         false
     }
 
@@ -324,11 +384,12 @@ impl Scene for ModalDemoScene {
         self.theme = *theme;
         self.help_modal.on_theme_change(theme);
         self.confirm_dialog.on_theme_change(theme);
+        self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
 impl ModalDemoScene {
