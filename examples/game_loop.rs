@@ -16,8 +16,11 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, MouseButton, MouseEventKind};
 use dracon_terminal_engine::input::parser::Parser;
+use signal_hook::consts::signal::SIGINT;
 use std::io::{self, Read, Write};
 use std::os::fd::AsFd;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 struct Particle {
@@ -153,12 +156,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut last_tick = Instant::now();
     let mut show_help = false;
 
+    // Signal handler for clean quit on Ctrl+C
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let sig_flag = Arc::clone(&should_quit);
+    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
+        .ok();
+
     let mut frames = 0;
     let mut fps = 0;
     let mut fps_timer = Instant::now();
     let target_fps = 60.0;
 
     loop {
+        if should_quit.load(Ordering::SeqCst) {
+            write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
+            term.flush()?;
+            return Ok(());
+        }
         // Poll Input
         if poll_input(term.as_fd(), 0)? {
             let mut buf = [0u8; 128];
