@@ -1001,15 +1001,7 @@ impl Widget for FileManager {
                 true
             }
             KeyCode::Char('c') if key.modifiers.is_empty() => {
-                self.context_menu = Some(ContextMenu::new_with_id(
-                    WidgetId::new(50),
-                    vec![
-                        ("New Folder", ContextAction::Open),
-                        ("New File", ContextAction::Copy),
-                        ("Delete", ContextAction::Cut),
-                        ("Refresh", ContextAction::Edit),
-                    ],
-                ));
+                self.context_menu = Some(self.make_context_menu(2, 2));
                 self.dirty = true;
                 true
             }
