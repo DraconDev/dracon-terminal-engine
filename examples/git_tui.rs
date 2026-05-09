@@ -1110,6 +1110,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("d", "View diff for selected file"),
         ("r", "Refresh"),
         ("t", "Cycle theme"),
+        ("Esc", "Dismiss help"),
         ("?", "Toggle this help"),
         ("q", "Quit"),
     ];
