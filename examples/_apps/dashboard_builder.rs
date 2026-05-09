@@ -404,6 +404,7 @@ impl Dashboard {
             "mono" => Theme::mono(),
             _ => Theme::nord(),
         };
+        self.split.on_theme_change(&self.theme);
     }
 }
 

@@ -123,6 +123,12 @@ impl SettingsForm {
             .position(|t| t.name == self.form_theme.name)
             .unwrap_or(0);
         self.form_theme = themes[(idx + 1) % themes.len()];
+        self.username.on_theme_change(&self.form_theme);
+        self.email.on_theme_change(&self.form_theme);
+        self.password.on_theme_change(&self.form_theme);
+        self.theme.on_theme_change(&self.form_theme);
+        self.notifications.on_theme_change(&self.form_theme);
+        self.submit.on_theme_change(&self.form_theme);
         self.dirty = true;
     }
 

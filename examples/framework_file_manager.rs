@@ -144,6 +144,7 @@ impl FileManagerApp {
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.list.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
         self.dirty = true;
     }
 }

@@ -229,6 +229,11 @@ impl EditorApp {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
+        self.tab_bar.on_theme_change(&self.theme);
+        self.file_tree.on_theme_change(&self.theme);
+        self.search.on_theme_change(&self.theme);
+        self.status_bar.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
         self.dirty = true;
     }
 

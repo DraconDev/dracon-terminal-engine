@@ -131,6 +131,8 @@ impl ChatState {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
+        self.emoji_modal.on_theme_change(&self.theme);
+        self.settings_modal.on_theme_change(&self.theme);
         self.dirty = true;
     }
 

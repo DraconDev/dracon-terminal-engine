@@ -236,6 +236,10 @@ impl<'a> ModalDemoApp<'a> {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
+        self.label.on_theme_change(&self.theme);
+        self.confirm_dialog.on_theme_change(&self.theme);
+        self.confirm_btn.on_theme_change(&self.theme);
+        self.help_btn.on_theme_change(&self.theme);
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
