@@ -522,6 +522,7 @@ impl TableApp {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
+        self.table.on_theme_change(&self.theme);
         self.rebuild_table();
     }
 
