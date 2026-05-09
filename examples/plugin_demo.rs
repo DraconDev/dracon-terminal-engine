@@ -467,6 +467,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
         ("←/→", "Adjust counter"),
         ("t", "Cycle theme"),
         ("?", "Toggle help"),
+        ("Esc", "Dismiss help"),
         ("q", "Quit"),
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {

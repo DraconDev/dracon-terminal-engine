@@ -224,6 +224,7 @@ impl NetworkApp {
             ("r", "Refresh data"),
             ("t", "Cycle theme"),
             ("?", "Toggle this help"),
+            ("Esc", "Dismiss help"),
             ("q", "Quit"),
         ];
 
