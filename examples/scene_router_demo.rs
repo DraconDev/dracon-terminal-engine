@@ -407,10 +407,7 @@ impl Scene for ProfileScreen {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        match kind {
-            MouseEventKind::Down(MouseButton::Left) => true,
-            _ => false,
-        }
+        matches!(kind, MouseEventKind::Down(MouseButton::Left))
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
