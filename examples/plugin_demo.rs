@@ -131,7 +131,11 @@ impl Widget for ClockWidget {
     fn handle_key(&mut self, _key: KeyEvent) -> bool {
         false
     }
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        if kind == MouseEventKind::Down(MouseButton::Left) {
+            self.use_24h = !self.use_24h;
+            return true;
+        }
         false
     }
     fn on_theme_change(&mut self, theme: &Theme) {
