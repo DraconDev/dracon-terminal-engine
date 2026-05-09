@@ -647,7 +647,8 @@ fn main() -> std::io::Result<()> {
 
     let mut app = App::new()?
         .title("Task Manager Tutorial")
-        .fps(30);
+        .fps(30)
+        .theme(Theme::nord());
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 

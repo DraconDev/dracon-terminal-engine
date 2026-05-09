@@ -377,7 +377,8 @@ fn main() -> std::io::Result<()> {
 
     let mut app_ctx = App::new()?
         .title("Event Bus Demo")
-        .fps(30);
+        .fps(30)
+        .theme(Theme::nord());
 
     let router = InputRouter {
         app: app_for_router,
