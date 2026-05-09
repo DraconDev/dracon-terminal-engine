@@ -935,7 +935,7 @@ impl Widget for FileManager {
                 }
                 true
             }
-            KeyCode::Esc | KeyCode::Backspace | KeyCode::Left => {
+            KeyCode::Esc | KeyCode::Left => {
                 self.go_up();
                 true
             }
