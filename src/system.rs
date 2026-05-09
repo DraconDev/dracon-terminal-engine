@@ -137,6 +137,7 @@ impl SystemMonitor {
 
             final_processes.push(ProcessInfo {
                 pid: pid.as_u32(),
+                ppid: process.parent().map(|p| p.as_u32()),
                 name: process.name().to_string_lossy().to_string(),
                 cpu: process.cpu_usage(),
                 mem: process.memory() as f32 / 1024.0 / 1024.0, // MB
