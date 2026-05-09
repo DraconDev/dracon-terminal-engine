@@ -364,7 +364,7 @@ impl Scene for TaskListScreen {
             MouseEventKind::Down(MouseButton::Left) => {
                 let list_start_y = 2u16;
                 let list_h = self.task_list.len();
-                if row >= list_start_y && (row - list_start_y) as usize < list_h {
+                if row >= list_start_y && ((row - list_start_y) as usize) < list_h {
                     let new_selected = (row - list_start_y) as usize;
                     if new_selected != self.selected {
                         self.selected = new_selected;
