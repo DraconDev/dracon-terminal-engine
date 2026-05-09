@@ -143,7 +143,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // CRITICAL: Flush to ensure terminal receives commands
     term.flush()?;
 
-    let size = (80, 24); // Assume standard or get from ioctl/crossterm if added
+    let size = get_window_size(stdout().as_fd()).unwrap_or((80, 24));
     let mut compositor = Compositor::new(size.0, size.1);
     compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(
         16, 16, 24,
