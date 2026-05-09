@@ -146,7 +146,7 @@ impl BaseInput {
                 }
                 true
             }
-            KeyCode::Char(ch) => {
+            KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == crate::input::event::KeyModifiers::SHIFT => {
                 self.text.push(ch);
                 if self.cursor_pos < self.text.len() {
                     self.cursor_pos = self.text.len();
