@@ -24,6 +24,8 @@ pub struct DiskInfo {
 pub struct ProcessInfo {
     /// Process ID.
     pub pid: u32,
+    /// Parent Process ID (if available).
+    pub ppid: Option<u32>,
     /// Process name.
     pub name: String,
     /// CPU usage percentage.
