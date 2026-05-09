@@ -338,7 +338,7 @@ impl Widget for DebugOverlayPanel {
 
         // Status bar
         let status_y = plane.height.saturating_sub(1);
-        let hint = "F12: toggle | t: theme | ?: help | q: quit";
+        let hint = "F12: toggle | t: theme | ?: help | Esc: dismiss | q: quit";
         for (i, c) in hint
             .chars()
             .take((plane.width as usize).saturating_sub(2))

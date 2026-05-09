@@ -486,7 +486,7 @@ impl Widget for Dashboard {
 
         // Footer
         let footer_y = area.height.saturating_sub(1);
-        let footer_text = " t: theme | ?: help | p: pause | r: refresh | ↑↓: nav | q: quit ";
+        let footer_text = " t: theme | ?: help | Esc: dismiss | p: pause | r: refresh | ↑↓: nav | q: quit ";
         draw_text(
             &mut plane,
             2,

@@ -454,7 +454,7 @@ impl SplitResizerApp {
         let sb = format!("B:{}%", ((1.0 - self.ra) * 100.0).round() as i32);
         let sb1 = format!("B1:{}%", (self.rb * 100.0).round() as i32);
         let txt = format!(
-            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | t: theme | ?: help | q: quit",
+            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | t: theme | ?: help | Esc: dismiss | q: quit",
             sa, sb, sb1
         );
         for (i, c) in txt.chars().enumerate().take(r.width as usize) {

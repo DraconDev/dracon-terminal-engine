@@ -327,7 +327,7 @@ impl Widget for WidgetGallery {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav_text = " ↑↓←→ nav | Enter activate | Tab: theme | ?: help | q quit ";
+        let nav_text = " ↑↓←→ nav | Enter activate | Tab: theme | ?: help | Esc: dismiss | q quit ";
         draw_text(&mut plane, 2, footer_y, nav_text, t.fg_muted, t.bg, false);
 
         // Help overlay

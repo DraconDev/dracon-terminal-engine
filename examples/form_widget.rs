@@ -209,7 +209,7 @@ impl Widget for FormApp {
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
-        let hint = "Tab: next | Enter: submit | t: theme | ?: help | q: quit";
+        let hint = "Tab: next | Enter: submit | t: theme | ?: help | Esc: dismiss | q: quit";
         for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
