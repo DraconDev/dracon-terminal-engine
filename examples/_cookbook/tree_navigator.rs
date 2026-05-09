@@ -14,8 +14,7 @@
 //! |-----|--------|
 //! | Up/Down | Move selection in tree |
 //! | Right/Enter | Expand folder / enter child |
-//! | Left | Collapse folder / go to parent |
-//! | Backspace | Go up one level |
+//! | Left        | Collapse folder / go to parent |
 //!
 //! Mouse: Click to select, click folder to expand
 
@@ -284,7 +283,7 @@ impl Widget for TreeNav {
 
         // Status bar at bottom
         let status_text = format!(
-            "{} items | Total: {} | ↑↓: nav | Enter: expand | Backspace: up | t: theme | ?: help | q: quit",
+            "{} items | Total: {} | ↑↓: nav | Enter: expand | Left: up | t: theme | ?: help | q: quit",
             self.item_count(),
             self.fs.total_items()
         );

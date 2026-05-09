@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 //! File manager demo — shows List + Breadcrumbs + SplitPane.
 //!
-//! Keyboard: arrows navigate, Enter opens, Backspace goes up, t=cycle theme, ?=help.
+//! Keyboard: arrows navigate, Enter opens, Left goes up, t=cycle theme, ?=help.
 //! Mouse: click to select, scroll to browse.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
@@ -442,7 +442,7 @@ impl Widget for FileManagerApp {
             let shortcuts = [
                 ("↑/↓", "Navigate"),
                 ("Enter", "Open directory"),
-                ("Backspace", "Go up"),
+                ("Left", "Go up"),
                 ("t", "Cycle theme"),
                 ("?", "Toggle help"),
                 ("q", "Quit"),

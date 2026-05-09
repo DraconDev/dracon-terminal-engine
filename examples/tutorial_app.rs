@@ -24,7 +24,7 @@
 //!   d           — delete task
 //!   e           — edit task
 //!   c           — toggle complete
-//!   Backspace   — go back
+//!   Backspace   — delete character (in edit mode)
 //!   t           — cycle theme
 //!   ?           — toggle help
 //!   q           — quit
