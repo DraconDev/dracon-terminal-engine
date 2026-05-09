@@ -684,7 +684,7 @@ impl Widget for CommandBindings {
             }
 
             // hint
-            let hint = " Press ? to close ";
+            let hint = " Press ? or Esc to close ";
             for (i, c) in hint.chars().enumerate() {
                 let idx = (hy + help_h - 2) * w + hx + (help_w - hint.len()) / 2 + i;
                 if idx < p.cells.len() {
