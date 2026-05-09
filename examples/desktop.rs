@@ -228,6 +228,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             return Ok(());
                         }
                         Event::Key(KeyEvent {
+                            code: KeyCode::Char('c'),
+                            ref modifiers,
+                            ..
+                        }) if modifiers.contains(KeyModifiers::CONTROL) => {
+                            write!(
+                                term,
+                                "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
+                            )?;
+                            term.flush()?;
+                            return Ok(());
+                        }
+                        Event::Key(KeyEvent {
                             code: KeyCode::Char('?'),
                             ..
                         }) => {
