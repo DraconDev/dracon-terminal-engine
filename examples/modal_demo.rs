@@ -399,7 +399,7 @@ fn main() -> io::Result<()> {
     let demo_for_render = Rc::clone(&demo);
     let demo_for_input = Rc::clone(&demo);
 
-    let mut app = App::new()?.title("Modal Demo").fps(30);
+    let mut app = App::new()?.title("Modal Demo").fps(30).theme(Theme::dark());
 
     let theme = Theme::dark();
     app.set_theme(theme);

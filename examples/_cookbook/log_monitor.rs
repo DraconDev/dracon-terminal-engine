@@ -607,7 +607,7 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200);
+    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(Theme::nord());
 
     let router = InputRouter {
         target: mon_for_input,

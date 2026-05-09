@@ -1101,7 +1101,7 @@ fn main() -> Result<()> {
     let show_help = Arc::new(AtomicBool::new(false));
     let help_check = Arc::clone(&show_help);
 
-    let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
+    let mut app = App::new()?.title("Theme Switcher Demo").fps(30).theme(Theme::nord());
 
     let header = ThemeHeader::new(WidgetId::new(1), should_quit, show_help.clone());
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 0, 80, 3));
