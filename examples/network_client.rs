@@ -412,12 +412,12 @@ impl NetworkApp {
                 self.view_detail = !self.view_detail;
                 true
             }
-            KeyCode::Esc if self.view_detail => {
-                self.view_detail = false;
-                true
-            }
             KeyCode::Esc if self.show_help => {
                 self.show_help = false;
+                true
+            }
+            KeyCode::Esc if self.view_detail => {
+                self.view_detail = false;
                 true
             }
             _ => false,
