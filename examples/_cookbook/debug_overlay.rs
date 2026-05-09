@@ -406,27 +406,17 @@ fn main() -> io::Result<()> {
         .unwrap_or((80, 24));
 
     let theme = Theme::dark();
-    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme);
-    debug_panel.set_area(Rect::new(0, 0, w, h));
-
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme, should_quit);
+    // panel.set_area is called by add_widget which sets area from Rect
+
     let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(theme);
     app.add_widget(Box::new(debug_panel), Rect::new(0, 0, w, h));
-    app = app
-        .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        });
-    app.run(|_ctx| {})
+    app.run(move |ctx| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
 }
