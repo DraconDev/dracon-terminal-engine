@@ -535,6 +535,9 @@ impl Widget for MenuApp {
                 }
                 _ => false,
             }
+        } else if let KeyCode::Char('q') = key.code {
+            self.should_quit.store(true, Ordering::SeqCst);
+            true
         } else if let KeyCode::Esc = key.code {
             self.active_menu = None;
             self.context_menu = None;

@@ -497,7 +497,10 @@ fn main() -> io::Result<()> {
     println!("+/- or ←/→ to adjust counter | t: theme | ?: help | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
-    let state = Rc::new(RefCell::new(PluginDemoState::new()));
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit)));
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 
@@ -511,6 +514,10 @@ fn main() -> io::Result<()> {
     app.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
         let mut state = state_for_tick.borrow_mut();
         let (w, h) = ctx.compositor().size();
 
