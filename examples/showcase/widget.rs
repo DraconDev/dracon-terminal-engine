@@ -1612,13 +1612,11 @@ impl Showcase {
 
         // Modal preview takes priority
         if self.modal_preview {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char(' ') => {
-                    self.modal_preview = false;
-                    return true;
-                }
-                _ => return true,
+            if self.keybindings.matches(actions::BACK, &key) || key.code == KeyCode::Char(' ') {
+                self.modal_preview = false;
+                return true;
             }
+            return true;
         }
 
         // Search mode
