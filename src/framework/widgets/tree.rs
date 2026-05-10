@@ -42,9 +42,9 @@ pub struct Tree {
     selected_path: Vec<usize>,
     hovered_path: Option<Vec<usize>>,
     theme: Theme,
-    on_select: Option<SelectCallback>,
-    area: std::cell::Cell<Rect>,
     dirty: bool,
+    scroll_offset: usize,
+    visible_count: u16,
 }
 
 impl Tree {
