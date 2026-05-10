@@ -207,7 +207,6 @@ impl crate::framework::widget::Widget for Tree {
         plane.fill_bg(self.theme.bg);
 
         let width = plane.cells.len() / plane.height as usize;
-        let mut row = 0usize;
         let hovered = &self.hovered_path;
         let skip = self.scroll_offset;
         let max_rows = self.visible_count as usize;
