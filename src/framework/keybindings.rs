@@ -286,15 +286,8 @@ static RESOLVED_CONFIG: OnceLock<KeybindingConfig> = OnceLock::new();
 /// 3. Project-local `./dracon.toml`
 ///
 /// The result is cached after the first call to avoid re-parsing TOML.
-/// Call `resolve_keybindings_clear_cache()` to force a reload.
 pub fn resolve_keybindings() -> KeybindingConfig {
     RESOLVED_CONFIG.get_or_init(do_resolve_keybindings).clone()
-}
-
-/// Clear the keybinding config cache. Next call to `resolve_keybindings()` will re-parse.
-pub fn resolve_keybindings_clear_cache() {
-    // OnceLock doesn't support clearing; this is a no-op.
-    // The cache is process-lifetime. Restart the app to reload.
 }
 
 fn do_resolve_keybindings() -> KeybindingConfig {
