@@ -448,8 +448,12 @@ impl Widget for Table {
         let status_y = area.height.saturating_sub(1);
         let count_str = format!("{} rows", self.rows.len());
         let hint = format!(
-            "Filter: [{}] | ↑↓: nav | Enter: sort | t: theme | ?: help | Esc: dismiss | q: quit | {}",
+            "Filter: [{}] | ↑↓: nav | Enter: sort | {}: theme | {}: help | {}: dismiss | {}: quit | {}",
             self.search.query(),
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
             count_str
         );
         for (i, c) in hint
@@ -557,10 +561,10 @@ impl Widget for Table {
                 ("↑/↓", "Navigate"),
                 ("Enter", "Sort column"),
                 ("Type", "Filter"),
-                ("t", "Cycle theme"),
-                ("?", "Toggle help"),
-                ("Esc", "Dismiss help"),
-                ("q", "Quit"),
+                (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle help"),
+                (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+                (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
@@ -589,7 +593,7 @@ impl Widget for Table {
             return false;
         }
         // Esc dismisses help overlay
-        if self.show_help && key.code == KeyCode::Esc {
+        if self.show_help && self.keybindings.matches(actions::BACK, &key) {
             self.show_help = false;
             self.dirty = true;
             return true;
@@ -599,19 +603,19 @@ impl Widget for Table {
             self.filter(&q);
             return true;
         }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
         match key.code {
             KeyCode::Enter => {
                 self.sort = self.sort.next();
                 self.sort_rows();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
                 self.dirty = true;
                 true
             }

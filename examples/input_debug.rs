@@ -235,7 +235,7 @@ fn main() -> io::Result<()> {
                 let raw_bytes = std::mem::take(&mut debugger.raw_buffer);
 
                 match &event {
-                    Event::Key(KeyEvent { code: KeyCode::Char('q'), .. }) => {
+                    Event::Key(key_event) if keybindings.matches(actions::QUIT, key_event) => {
                         // Disable all input modes before exit
                         let _ = write!(
                             term,
@@ -244,10 +244,10 @@ fn main() -> io::Result<()> {
                         let _ = term.flush();
                         return Ok(());
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Char('?'), .. }) => {
+                    Event::Key(key_event) if keybindings.matches(actions::HELP, key_event) => {
                         debugger.show_help = !debugger.show_help;
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Esc, .. }) => {
+                    Event::Key(key_event) if keybindings.matches(actions::DISMISS, key_event) => {
                         debugger.show_help = false;
                     }
                     Event::Key(KeyEvent { code: KeyCode::Char('c'), modifiers, .. })

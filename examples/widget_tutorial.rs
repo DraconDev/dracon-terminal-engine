@@ -643,7 +643,7 @@ fn main() -> std::io::Result<()> {
 
     let kb_config = resolve_keybindings();
     let keybindings = KeybindingSet::from_config(&kb_config);
-    let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+    let _kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
     let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
     let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
     let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
