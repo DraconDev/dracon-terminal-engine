@@ -360,6 +360,7 @@ struct Dashboard {
     should_quit: Arc<AtomicBool>,
     show_help: bool,
     last_update: Instant,
+    keybindings: KeybindingSet,
 }
 
 impl Dashboard {

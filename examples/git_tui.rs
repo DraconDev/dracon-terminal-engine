@@ -1216,7 +1216,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
 
 fn main() -> std::io::Result<()> {
     println!("Git TUI — Real Git interface");
-    println!("1-4: views | r: refresh | q: quit");
+    println!("1-4: views | r: refresh | keys configurable");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
