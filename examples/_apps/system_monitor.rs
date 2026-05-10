@@ -1013,7 +1013,7 @@ impl Widget for SystemMonitor {
         }
         let kb = &self.keybindings;
         if self.show_help {
-            if kb.matches(key, actions::DISMISS) || kb.matches(key, actions::HELP) {
+            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
                 self.show_help = false;
                 return true;
             }
@@ -1027,21 +1027,21 @@ impl Widget for SystemMonitor {
         };
         let max_scroll = view_count.saturating_sub(1);
 
-        if kb.matches(key, actions::QUIT) {
+        if kb.matches(actions::QUIT, &key) {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }
-        if kb.matches(key, actions::THEME) {
+        if kb.matches(actions::THEME, &key) {
             self.cycle_theme();
             return true;
         }
-        if kb.matches(key, actions::TREE_MODE) {
+        if kb.matches(actions::TREE_MODE, &key) {
             self.tree_mode = !self.tree_mode;
             self.process_scroll = 0;
             self.selected_process = None;
             return true;
         }
-        if kb.matches(key, actions::HELP) {
+        if kb.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
             return true;
         }
