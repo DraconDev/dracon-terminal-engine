@@ -336,7 +336,7 @@ impl Scene for TaskDetailScreen {
         }
 
         // Status
-        let status = "Esc: back | t: theme | ?: help | q: quit";
+        let status = "Esc: back | t: theme | F1: help | Ctrl+Q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -474,7 +474,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Status
-        let status = "Tab: switch field | Type: edit | t: theme | ?: help | Esc: dismiss | q: quit";
+        let status = "Tab: switch field | Type: edit | t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;

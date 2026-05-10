@@ -63,6 +63,8 @@ struct EditorApp {
     should_quit: Arc<AtomicBool>,
     command_palette: CommandPalette,
     cmd_bridge: Rc<RefCell<Option<String>>>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl EditorApp {

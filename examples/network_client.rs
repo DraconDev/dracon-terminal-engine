@@ -87,6 +87,8 @@ struct NetworkApp {
     theme: Theme,
     show_help: bool,
     should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl NetworkApp {
