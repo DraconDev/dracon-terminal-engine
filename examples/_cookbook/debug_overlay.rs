@@ -344,10 +344,10 @@ impl Widget for DebugOverlayPanel {
         // Status bar
         let status_y = plane.height.saturating_sub(1);
         let hint = format!("F12: toggle | {}: theme | {}: help | {}: dismiss | {}: quit",
-            self.kb_config.get(actions::THEME).unwrap_or("t"),
-            self.kb_config.get(actions::HELP).unwrap_or("?"),
-            self.kb_config.get(actions::BACK).unwrap_or("esc"),
-            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+            self.keybindings.display(actions::THEME).unwrap_or("t"),
+            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::BACK).unwrap_or("esc"),
+            self.keybindings.display(actions::QUIT).unwrap_or("q"),
         );
         for (i, c) in hint
             .chars()

@@ -327,12 +327,18 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
     }
 
     // HUD
+    let help_key = kb.display(actions::HELP).unwrap_or("f1");
+    let back_key = kb.display(actions::BACK).unwrap_or("esc");
+    let quit_key = kb.display(actions::QUIT).unwrap_or("q");
     let hud = format!(
-        " FPS: {} | Particles: {} | Clicks: {} | Turbo: {} | ?:help | Esc:dismiss | q:quit ",
+        " FPS: {} | Particles: {} | Clicks: {} | Turbo: {} | {}:help | {}:dismiss | {}:quit ",
         fps,
         state.particles.len(),
         state.click_count,
-        if state.turbo { "ON" } else { "off" }
+        if state.turbo { "ON" } else { "off" },
+        help_key,
+        back_key,
+        quit_key,
     );
     p.put_str(0, 0, &hud);
     // HUD background
@@ -345,7 +351,7 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
     }
 }
 
-fn render_help(p: &mut Plane, w: u16, h: u16) {
+fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let help_lines = [
         "╭────────────────────────────────────────────────────╮",
         "│              Game Loop Help                        │",
