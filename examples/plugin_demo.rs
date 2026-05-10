@@ -337,6 +337,7 @@ impl PluginDemoState {
             theme: Theme::nord(),
             dirty: true,
             should_quit,
+            keybindings,
         }
     }
 

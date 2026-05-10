@@ -12,6 +12,7 @@
 //!   q            — quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -46,6 +47,8 @@ struct EventBusApp {
     should_quit: Arc<AtomicBool>,
     dirty: bool,
     last_event: Option<String>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl EventBusApp {

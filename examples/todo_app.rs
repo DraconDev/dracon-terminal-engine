@@ -644,6 +644,7 @@ impl TodoRouter {
             delete_target: None,
             id: WidgetId::new(100),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

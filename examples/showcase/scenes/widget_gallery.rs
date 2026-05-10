@@ -231,15 +231,22 @@ impl Scene for WidgetGalleryScene {
         if key.kind != KeyEventKind::Press { return false; }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
             }
             return true;
         }
 
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+
         match key.code {
-            KeyCode::Char('?') => { self.show_help = true; true }
-            KeyCode::Char('t') => { self.cycle_theme(); true }
             KeyCode::Right | KeyCode::Down => {
                 self.selected = (self.selected + 1) % SLOTS.len();
                 true

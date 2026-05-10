@@ -18,6 +18,7 @@
 //! | ESC | Close menu/modal |
 
 use dracon_terminal_engine::compositor::Plane;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -44,6 +45,8 @@ struct MenuApp {
     should_quit: Arc<AtomicBool>,
     theme: Theme,
     show_help: bool,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl MenuApp {
