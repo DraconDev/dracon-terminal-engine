@@ -241,14 +241,10 @@ impl Scene for TaskListScreen {
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
         use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
         match kind {
-            MouseEventKind::Down(MouseButton::Left) => {
-                if row >= 2 && row < 10 {
-                    self.selected = (row - 2) as usize;
-                    self.dirty = true;
-                    true
-                } else {
-                    false
-                }
+            MouseEventKind::Down(MouseButton::Left) if (2..10).contains(&row) => {
+                self.selected = (row - 2) as usize;
+                self.dirty = true;
+                true
             }
             MouseEventKind::ScrollUp => {
                 if self.selected > 0 {
