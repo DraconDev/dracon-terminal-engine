@@ -1019,6 +1019,7 @@ impl Widget for Showcase {
             let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
             let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+            let kb_quit_back = format!("{} / {}", kb_quit, kb_back);
             let lines = [
                 ("↑↓←→", "Navigate cards"),
                 ("Enter", "Launch selected"),
@@ -1028,7 +1029,7 @@ impl Widget for Showcase {
                 (kb_theme, "Cycle theme"),
                 ("d", "Debug overlay"),
                 ("i", "Input debug"),
-                (&format!("{} / {}", kb_quit, kb_back), "Quit"),
+                (kb_quit_back.as_str(), "Quit"),
                 (kb_help, "Toggle this help"),
                 ("", ""),
                 ("Mouse", ""),
