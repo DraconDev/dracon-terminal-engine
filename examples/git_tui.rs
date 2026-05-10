@@ -396,7 +396,7 @@ impl Widget for GitTui {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t);
+            self.render_help_overlay(&mut plane, area, t);
         }
 
         plane
@@ -1125,17 +1125,17 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+fn render_help_overlay(&self, plane: &mut Plane, area: Rect, t: Theme) {
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
         ("↑/↓ or j/k", "Navigate"),
-        ("Enter", "Stage/unstage or checkout"),
+        (self.keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
         ("d", "View diff for selected file"),
         ("r", "Refresh"),
-        ("[theme]", "Cycle theme"),
-        ("[back]", "Dismiss help / go back"),
-        ("[help]", "Toggle this help"),
-        ("[quit]", "Quit"),
+        (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+        (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
+        (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+        (self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
     ];
 
     let help_w = 48u16;
