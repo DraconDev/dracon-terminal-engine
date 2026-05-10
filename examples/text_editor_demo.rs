@@ -548,7 +548,9 @@ impl Widget for EditorApp {
         }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -557,7 +559,7 @@ impl Widget for EditorApp {
         }
 
         if self.show_search {
-            if key.code == KeyCode::Esc {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.show_search = false;
                 self.dirty = true;
                 return true;
@@ -567,20 +569,21 @@ impl Widget for EditorApp {
             return handled;
         }
 
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = true;
+            self.dirty = true;
+            return true;
+        }
+
         match key.code {
-            KeyCode::Char('q') if key.modifiers.is_empty() => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = true;
-                self.dirty = true;
-                true
-            }
             KeyCode::Char('f') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.show_search = !self.show_search;
                 self.dirty = true;
