@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use crate::render::CardConfig;
 use chrono::Local;
 use dracon_terminal_engine::compositor::Plane;
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::actions;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -1621,16 +1621,16 @@ impl Showcase {
 
         // Search mode
         if self.search_active {
+            if self.keybindings.matches(actions::BACK, &key) {
+                self.search_active = false;
+                return true;
+            }
+            if self.keybindings.matches(actions::SUBMIT, &key) {
+                self.search_active = false;
+                self.launch_selected();
+                return true;
+            }
             match key.code {
-                KeyCode::Esc => {
-                    self.search_active = false;
-                    true
-                }
-                KeyCode::Enter => {
-                    self.search_active = false;
-                    self.launch_selected();
-                    true
-                }
                 KeyCode::Backspace => {
                     self.search_query.pop();
                     self.apply_filter();
@@ -1644,28 +1644,28 @@ impl Showcase {
                 _ => false,
             }
         } else {
+            if self.keybindings.matches(actions::QUIT, &key) {
+                self.should_quit.store(true, Ordering::SeqCst);
+                return true;
+            }
+            if self.keybindings.matches(actions::HELP, &key) {
+                self.show_help = true;
+                return true;
+            }
+            if self.keybindings.matches(actions::THEME, &key) {
+                let themes = Self::themes();
+                let current = themes
+                    .iter()
+                    .position(|(_, t)| t.name == self.theme.name)
+                    .unwrap_or(0);
+                self.pending_theme = Some((current + 1) % themes.len());
+                self.apply_filter();
+                self.scene_router.on_theme_change(&self.theme);
+                return true;
+            }
             match key.code {
-                KeyCode::Char('q') => {
-                    self.should_quit.store(true, Ordering::SeqCst);
-                    true
-                }
-                KeyCode::Char('?') => {
-                    self.show_help = true;
-                    true
-                }
                 KeyCode::Char(' ') => {
                     self.modal_preview = true;
-                    true
-                }
-                KeyCode::Char('t') => {
-                    let themes = Self::themes();
-                    let current = themes
-                        .iter()
-                        .position(|(_, t)| t.name == self.theme.name)
-                        .unwrap_or(0);
-                    self.pending_theme = Some((current + 1) % themes.len());
-                    self.apply_filter();
-                    self.scene_router.on_theme_change(&self.theme);
                     true
                 }
                 KeyCode::Char('d') => {
