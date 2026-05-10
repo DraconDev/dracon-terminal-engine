@@ -1353,6 +1353,7 @@ impl Showcase {
                             self.apply_filter();
                             let cur_theme = self.theme;
                             self.scene_router.on_theme_change(&cur_theme);
+                            *self.pending_app_theme.lock().unwrap() = Some(cur_theme);
                             return true;
                         }
                         // FPS toggle
