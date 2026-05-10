@@ -395,7 +395,7 @@ impl Widget for MenuApp {
                 }
             }
             // Border
-            for x in hx..hx + hw {
+            for x in hx + 1..hx + hw - 1 {
                 let top_idx = (hy * area.width + x) as usize;
                 let bot_idx = ((hy + hh - 1) * area.width + x) as usize;
                 if top_idx < plane.cells.len() {
@@ -407,7 +407,7 @@ impl Widget for MenuApp {
                     plane.cells[bot_idx].fg = self.theme.outline;
                 }
             }
-            for y in hy..hy + hh {
+            for y in hy + 1..hy + hh - 1 {
                 let left_idx = (y * area.width + hx) as usize;
                 let right_idx = (y * area.width + hx + hw - 1) as usize;
                 if left_idx < plane.cells.len() {
@@ -418,6 +418,12 @@ impl Widget for MenuApp {
                     plane.cells[right_idx].char = '│';
                     plane.cells[right_idx].fg = self.theme.outline;
                 }
+            }
+            // Rounded corners
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = self.theme.outline; }
             }
             // Title
             let title = "Menu System Help";
