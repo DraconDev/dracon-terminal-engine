@@ -128,6 +128,7 @@ impl Showcase {
             returned_from,
             scene_router,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            pending_app_theme,
         }
     }
 
