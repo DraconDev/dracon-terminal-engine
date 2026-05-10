@@ -231,7 +231,7 @@ impl crate::framework::widget::Widget for Tree {
             let bg = if is_hovered { theme.hover_bg } else { theme.bg };
             let fg = theme.fg;
 
-            let skip_counter = *row + 1 <= skip;
+            let skip_counter = *row < skip;
             if !skip_counter {
                 let line = format!(
                     "{}{}{}",
