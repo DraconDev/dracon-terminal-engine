@@ -207,6 +207,8 @@ fn main() -> io::Result<()> {
     unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
         .ok();
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     // Initial render
     write!(term, "{}", debugger.render())?;
     term.flush()?;

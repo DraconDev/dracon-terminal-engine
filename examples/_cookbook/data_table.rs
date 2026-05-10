@@ -18,6 +18,7 @@
 //! **Behavior:** Type to filter • Click Sort to cycle none→asc→desc • Up/Down navigate.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::SearchInput;
@@ -87,6 +88,8 @@ struct Table {
     area: Rect,
     dirty: bool,
     show_help: bool,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl Table {
@@ -108,6 +111,8 @@ impl Table {
             area: Rect::new(0, 0, 80, 20),
             dirty: true,
             show_help: false,
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 
