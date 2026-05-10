@@ -139,10 +139,27 @@ impl Scene for FormDemoScene {
         let start_y = 2u16;
         let field_h = 2u16;
 
-        for (i, (label, field_id)) in labels.iter().enumerate() {
-            let y = start_y + i as u16 * field_h;
-            let is_focused = self.focused_field == *field_id;
-            let row_bg = if is_focused { t.focus_bg } else { t.surface };
+        // Build position map: field_id -> visual row index
+        let mut field_to_row = [0usize; FIELD_COUNT];
+        for (row_idx, &field_id) in self.field_order.iter().enumerate() {
+            field_to_row[field_id] = row_idx;
+        }
+
+        for (row_idx, &field_id) in self.field_order.iter().enumerate() {
+            let y = start_y + row_idx as u16 * field_h;
+            let is_focused = self.focused_field == field_id;
+            let is_dragged = self.dragging == Some(row_idx);
+            let is_hover_target = self.drag_hover == Some(row_idx) && self.dragging.is_some();
+
+            let row_bg = if is_dragged {
+                t.selection_bg
+            } else if is_hover_target {
+                t.primary_hover
+            } else if is_focused {
+                t.focus_bg
+            } else {
+                t.surface
+            };
 
             // Row background
             for row in y..y + field_h {
@@ -154,6 +171,13 @@ impl Scene for FormDemoScene {
                 }
             }
 
+            // Drag handle indicator on left
+            if !is_dragged {
+                let handle = if is_hover_target { "▶" } else { "≡" };
+                draw_text(&mut plane, 0, y, handle, t.fg_muted, row_bg, false);
+            }
+
+            let label = labels[field_id].0;
             if !label.is_empty() {
                 draw_text(&mut plane, 2, y, label, t.primary, row_bg, false);
             }
@@ -163,7 +187,7 @@ impl Scene for FormDemoScene {
             let widget_area = Rect::new(widget_x, y, widget_w, 1);
 
             if widget_area.width > 0 {
-                let mut w_plane = match *field_id {
+                let mut w_plane = match field_id {
                     FIELD_USERNAME => self.username.render(widget_area),
                     FIELD_EMAIL => self.email.render(widget_area),
                     FIELD_PASSWORD => self.password.render(widget_area),
