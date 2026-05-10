@@ -45,6 +45,8 @@ impl FormApp {
             .add_field("Role")
             .add_field("Project Name")
             .add_field("Description");
+        let kb_config = resolve_keybindings();
+        let keybindings = KeybindingSet::from_config(&kb_config);
         Self {
             form: Rc::new(RefCell::new(form)),
             should_quit,
@@ -52,6 +54,8 @@ impl FormApp {
             show_help: false,
             submitted: false,
             submit_time: None,
+            keybindings,
+            kb_config,
         }
     }
 
