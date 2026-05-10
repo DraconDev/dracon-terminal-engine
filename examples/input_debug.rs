@@ -292,7 +292,7 @@ fn main() -> io::Result<()> {
                     }
                 }
 
-                write!(term, "{}", debugger.render())?;
+                write!(term, "{}", debugger.render(&keybindings))?;
                 term.flush()?;
             }
         }
