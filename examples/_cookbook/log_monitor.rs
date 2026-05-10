@@ -623,8 +623,23 @@ fn main() -> Result<()> {
 
     app_ctx
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if key.kind != KeyEventKind::Press {
+                return false;
+            }
+            let mut mon = mon_for_input_closure.borrow_mut();
+            if kb_input.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
+                true
+            } else if kb_input.matches(actions::THEME, &key) {
+                mon.cycle_theme();
+                true
+            } else if kb_input.matches(actions::HELP, &key) {
+                mon.show_help = !mon.show_help;
+                mon.dirty = true;
+                true
+            } else if mon.show_help && kb_input.matches(actions::BACK, &key) {
+                mon.show_help = false;
+                mon.dirty = true;
                 true
             } else {
                 false
