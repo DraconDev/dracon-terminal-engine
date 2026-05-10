@@ -384,6 +384,29 @@ fn main() -> std::io::Result<()> {
     app_ctx.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
 
     let _ = app_ctx
+        .on_input(move |key| {
+            if key.kind != KeyEventKind::Press {
+                return false;
+            }
+            let mut app = app_for_input.borrow_mut();
+            if kb_input.matches(actions::QUIT, &key) {
+                app.should_quit.store(true, Ordering::SeqCst);
+                true
+            } else if kb_input.matches(actions::THEME, &key) {
+                app.cycle_theme();
+                true
+            } else if kb_input.matches(actions::HELP, &key) {
+                app.show_help = !app.show_help;
+                app.dirty = true;
+                true
+            } else if app.show_help && kb_input.matches(actions::BACK, &key) {
+                app.show_help = false;
+                app.dirty = true;
+                true
+            } else {
+                false
+            }
+        })
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();

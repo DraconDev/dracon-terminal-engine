@@ -430,6 +430,7 @@ struct AppRouter {
     theme: Rc<RefCell<Theme>>,
     should_quit: Arc<AtomicBool>,
     show_help: Rc<RefCell<bool>>,
+    keybindings: KeybindingSet,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
 }
