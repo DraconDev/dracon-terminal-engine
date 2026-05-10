@@ -1,0 +1,1222 @@
+#![allow(missing_docs)]
+//! Git TUI — Real Git interface with status, log, diff, and branch management.
+//!
+//! A practical Git TUI that reads actual git repository data.
+//!
+//! Controls:
+//!   1/2/3/4      — switch views (Status/Log/Diff/Branches)
+//!   ↑/↓ or j/k   — navigate
+//!   Enter        — stage/unstage (status) or checkout (branches)
+//!   d            — view diff for selected file
+//!   r            — refresh
+//!   Configurable — theme, help, back, quit (see keybindings)
+
+use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widgets::{
+    StatusBar, StatusSegment, TabBar, Toast, ToastKind,
+};
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
+use ratatui::layout::Rect;
+use std::os::fd::AsFd;
+use std::process::Command;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+
+#[derive(Clone, Copy, PartialEq)]
+enum GitView {
+    Status,
+    Log,
+    Diff,
+    Branches,
+}
+
+struct GitFile {
+    status: char,
+    path: String,
+}
+
+#[allow(dead_code)]
+struct GitCommit {
+    hash: String,
+    author: String,
+    date: String,
+    message: String,
+}
+
+struct GitBranch {
+    name: String,
+    current: bool,
+    remote: bool,
+}
+
+struct GitTui {
+    should_quit: Arc<AtomicBool>,
+    theme: Theme,
+    area: Rect,
+
+    view: GitView,
+    tab_bar: TabBar,
+
+    files: Vec<GitFile>,
+    selected_file: usize,
+
+    commits: Vec<GitCommit>,
+    selected_commit: usize,
+
+    branches: Vec<GitBranch>,
+    selected_branch: usize,
+
+    diff_content: String,
+
+    status_bar: StatusBar,
+    toasts: Vec<Toast>,
+
+    dirty: bool,
+    last_refresh: Instant,
+
+    // Help overlay
+    show_help: bool,
+    keybindings: KeybindingSet,
+}
+
+impl GitTui {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
+        let tabs = vec!["Status", "Log", "Diff", "Branches"];
+        let mut tab_bar = TabBar::new_with_id(WidgetId::new(1), tabs);
+        tab_bar.set_active(0);
+        tab_bar.on_theme_change(&theme);
+
+        let mut config = resolve_keybindings();
+        if config.get(actions::THEME).is_none() {
+            config.bindings.insert(actions::THEME.to_string(), "t".to_string());
+        }
+        if config.get(actions::REFRESH).is_none() {
+            config.bindings.insert(actions::REFRESH.to_string(), "r".to_string());
+        }
+        let keybindings = KeybindingSet::from_config(&config);
+
+        let hint = keybindings.format_hint(&[
+            ("1-4", "views"),
+            ("d", "diff"),
+            ("r", "refresh"),
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::BACK, "back"),
+            (actions::QUIT, "quit"),
+        ]);
+        let status_bar = StatusBar::new(WidgetId::new(2))
+            .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
+            .add_segment(StatusSegment::new(&hint).with_fg(theme.fg_muted));
+
+        let mut app = Self {
+            should_quit,
+            theme,
+            area: Rect::new(0, 0, 80, 24),
+            view: GitView::Status,
+            tab_bar,
+            files: Vec::new(),
+            selected_file: 0,
+            commits: Vec::new(),
+            selected_commit: 0,
+            branches: Vec::new(),
+            selected_branch: 0,
+            diff_content: String::new(),
+            status_bar,
+            toasts: Vec::new(),
+            dirty: true,
+            last_refresh: Instant::now(),
+            show_help: false,
+            keybindings,
+        };
+        app.refresh();
+        app
+    }
+
+    fn refresh(&mut self) {
+        self.files = self.read_git_status();
+        self.commits = self.read_git_log();
+        self.branches = self.read_branches();
+        self.last_refresh = Instant::now();
+        self.dirty = true;
+    }
+
+    fn cycle_theme(&mut self) {
+        let themes = [
+            Theme::dark(),
+            Theme::light(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::nord(),
+            Theme::catppuccin_mocha(),
+            Theme::gruvbox_dark(),
+            Theme::tokyo_night(),
+            Theme::solarized_dark(),
+            Theme::solarized_light(),
+            Theme::one_dark(),
+            Theme::rose_pine(),
+            Theme::kanagawa(),
+            Theme::everforest(),
+            Theme::monokai(),
+            Theme::warm(),
+            Theme::cool(),
+            Theme::forest(),
+            Theme::sunset(),
+            Theme::mono(),
+        ];
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.tab_bar.on_theme_change(&self.theme);
+        self.status_bar.on_theme_change(&self.theme);
+        for toast in &mut self.toasts {
+            toast.on_theme_change(&self.theme);
+        }
+        self.dirty = true;
+        self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
+    }
+
+    fn toast(&mut self, msg: &str, kind: ToastKind) {
+        let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
+            .with_kind(kind)
+            .with_duration(Duration::from_secs(2))
+            .with_theme(self.theme);
+        self.toasts.push(toast);
+        self.dirty = true;
+    }
+
+    fn read_git_status(&self) -> Vec<GitFile> {
+        let output = Command::new("git")
+            .args(["status", "--porcelain"])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+
+        output
+            .lines()
+            .filter(|l| l.len() >= 3)
+            .map(|l| GitFile {
+                status: l.chars().next().unwrap_or('?'),
+                path: l[3..].to_string(),
+            })
+            .collect()
+    }
+
+    fn read_git_log(&self) -> Vec<GitCommit> {
+        let output = Command::new("git")
+            .args(["log", "--oneline", "-20", "--format=%h|%an|%ar|%s"])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+
+        output
+            .lines()
+            .filter(|l| !l.is_empty())
+            .map(|l| {
+                let parts: Vec<&str> = l.splitn(4, '|').collect();
+                GitCommit {
+                    hash: parts.first().unwrap_or(&"").to_string(),
+                    author: parts.get(1).unwrap_or(&"").to_string(),
+                    date: parts.get(2).unwrap_or(&"").to_string(),
+                    message: parts.get(3).unwrap_or(&"").to_string(),
+                }
+            })
+            .collect()
+    }
+
+    fn read_branches(&self) -> Vec<GitBranch> {
+        let output = Command::new("git")
+            .args(["branch", "-a"])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+
+        output
+            .lines()
+            .filter(|l| !l.is_empty())
+            .map(|l| {
+                let current = l.starts_with("* ");
+                let name = if current {
+                    l[2..].to_string()
+                } else {
+                    l.trim().to_string()
+                };
+                let remote = name.starts_with("remotes/");
+                GitBranch {
+                    name,
+                    current,
+                    remote,
+                }
+            })
+            .collect()
+    }
+
+    fn read_diff(&self, path: &str) -> String {
+        Command::new("git")
+            .args(["diff", "--color=never", "HEAD", "--", path])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_else(|| "No diff available".to_string())
+    }
+
+    fn read_full_diff(&self) -> String {
+        Command::new("git")
+            .args(["diff", "--color=never", "HEAD"])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_else(|| "No changes to display".to_string())
+    }
+
+    fn is_git_repo(&self) -> bool {
+        Command::new("git")
+            .args(["rev-parse", "--git-dir"])
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+    }
+}
+
+impl Widget for GitTui {
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
+
+    fn render(&self, area: Rect) -> Plane {
+        let t = self.theme;
+        let mut plane = Plane::new(0, area.width, area.height);
+
+        for cell in plane.cells.iter_mut() {
+            cell.bg = t.bg;
+            cell.fg = t.fg;
+            cell.transparent = false;
+        }
+
+        let tab_h = 1u16;
+        let status_h = 1u16;
+        let content_y = tab_h;
+        let content_h = area.height.saturating_sub(tab_h + status_h);
+
+        // Tab bar
+        let tab_plane = self.tab_bar.render(Rect::new(0, 0, area.width, tab_h));
+        for (i, c) in tab_plane.cells.iter().enumerate() {
+            if !c.transparent && i < plane.cells.len() {
+                plane.cells[i] = c.clone();
+            }
+        }
+
+        // Content
+        if !self.is_git_repo() {
+            let icon = " 󰊢 ";
+            let msg = "Not a git repository";
+            let hint = "Run 'git init' in this directory to get started";
+            let icon_x = (area.width as usize - icon.len()) / 2;
+            let msg_x = (area.width as usize - msg.len()) / 2;
+            let hint_x = (area.width as usize - hint.len()) / 2;
+            let y = content_y + content_h / 2 - 1;
+            draw_text(&mut plane, icon_x as u16, y, icon, t.primary, t.bg, true);
+            draw_text(&mut plane, msg_x as u16, y + 1, msg, t.error, t.bg, true);
+            draw_text(
+                &mut plane,
+                hint_x as u16,
+                y + 3,
+                hint,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
+        } else {
+            match self.view {
+                GitView::Status => self.render_status(&mut plane, content_y, content_h, t),
+                GitView::Log => self.render_log(&mut plane, content_y, content_h, t),
+                GitView::Diff => self.render_diff(&mut plane, content_y, content_h, t),
+                GitView::Branches => self.render_branches(&mut plane, content_y, content_h, t),
+            }
+        }
+
+        // Status bar
+        let status_y = area.height.saturating_sub(1);
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, status_y, area.width, status_h));
+        for (i, c) in status_plane.cells.iter().enumerate() {
+            if !c.transparent && i < plane.cells.len() {
+                let base = (status_y * area.width) as usize;
+                if base + i < plane.cells.len() {
+                    plane.cells[base + i] = c.clone();
+                }
+            }
+        }
+
+        // Toasts
+        for (i, toast) in self.toasts.iter().enumerate() {
+            let toast_y = status_y.saturating_sub(2 + i as u16);
+            let toast_plane = toast.render(Rect::new(2, toast_y, area.width.saturating_sub(4), 1));
+            for (j, c) in toast_plane.cells.iter().enumerate() {
+                if !c.transparent && j < plane.cells.len() {
+                    let base = (toast_y * area.width + 2) as usize;
+                    if base + j < plane.cells.len() {
+                        plane.cells[base + j] = c.clone();
+                    }
+                }
+            }
+        }
+
+        // Help overlay
+        if self.show_help {
+            self.render_help_overlay(&mut plane, area, t, &self.keybindings);
+        }
+
+        plane
+    }
+
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+
+        if self.keybindings.matches(actions::BACK, &key) {
+            if self.show_help {
+                self.show_help = false;
+                self.dirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+
+        if self.keybindings.matches(actions::REFRESH, &key) {
+            self.refresh();
+            self.toast("Refreshed", ToastKind::Info);
+            return true;
+        }
+
+        match key.code {
+            KeyCode::Char('1') => {
+                self.view = GitView::Status;
+                self.tab_bar.set_active(0);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('2') => {
+                self.view = GitView::Log;
+                self.tab_bar.set_active(1);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('3') => {
+                self.view = GitView::Diff;
+                self.tab_bar.set_active(2);
+                self.diff_content = self.read_full_diff();
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('4') => {
+                self.view = GitView::Branches;
+                self.tab_bar.set_active(3);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('d') => {
+                if self.view == GitView::Status {
+                    if let Some(file) = self.files.get(self.selected_file) {
+                        self.diff_content = self.read_diff(&file.path);
+                        self.view = GitView::Diff;
+                        self.tab_bar.set_active(2);
+                        self.dirty = true;
+                    }
+                }
+                true
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                match self.view {
+                    GitView::Status if self.selected_file + 1 < self.files.len() => {
+                        self.selected_file += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit + 1 < self.commits.len() => {
+                        self.selected_commit += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch + 1 < self.branches.len() => {
+                        self.selected_branch += 1;
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
+                true
+            }
+            KeyCode::Up | KeyCode::Char('k') => {
+                match self.view {
+                    GitView::Status if self.selected_file > 0 => {
+                        self.selected_file -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit > 0 => {
+                        self.selected_commit -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch > 0 => {
+                        self.selected_branch -= 1;
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
+                true
+            }
+            KeyCode::Enter => {
+                if self.view == GitView::Branches {
+                    if let Some(branch) = self.branches.get(self.selected_branch) {
+                        if !branch.current {
+                            let output = Command::new("git")
+                                .args(["checkout", &branch.name])
+                                .output();
+                            match output {
+                                Ok(o) if o.status.success() => {
+                                    self.toast(
+                                        &format!("Switched to {}", branch.name),
+                                        ToastKind::Success,
+                                    );
+                                    self.refresh();
+                                }
+                                _ => self.toast("Checkout failed", ToastKind::Error),
+                            }
+                        }
+                    }
+                } else if self.view == GitView::Status {
+                    if let Some(file) = self.files.get(self.selected_file) {
+                        let action = match file.status {
+                            ' ' | 'M' | 'A' => "reset",
+                            _ => "add",
+                        };
+                        let _ = Command::new("git").args([action, &file.path]).output();
+                        self.refresh();
+                    }
+                }
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let tab_h = 1u16;
+        let area = self.area;
+
+        // Tab bar click
+        if row < tab_h {
+            if self.tab_bar.handle_mouse(kind, col, row) {
+                self.view = match self.tab_bar.active() {
+                    0 => GitView::Status,
+                    1 => GitView::Log,
+                    2 => GitView::Diff,
+                    3 => GitView::Branches,
+                    _ => self.view,
+                };
+                if self.view == GitView::Diff {
+                    self.diff_content = self.read_full_diff();
+                }
+                self.dirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        // Scroll wheel for item navigation
+        match kind {
+            MouseEventKind::ScrollDown => {
+                match self.view {
+                    GitView::Status if self.selected_file + 1 < self.files.len() => {
+                        self.selected_file += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit + 1 < self.commits.len() => {
+                        self.selected_commit += 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch + 1 < self.branches.len() => {
+                        self.selected_branch += 1;
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
+                return true;
+            }
+            MouseEventKind::ScrollUp => {
+                match self.view {
+                    GitView::Status if self.selected_file > 0 => {
+                        self.selected_file -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Log if self.selected_commit > 0 => {
+                        self.selected_commit -= 1;
+                        self.dirty = true;
+                    }
+                    GitView::Branches if self.selected_branch > 0 => {
+                        self.selected_branch -= 1;
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
+                return true;
+            }
+            _ => {}
+        }
+
+        // Click on content area to select items
+        if let MouseEventKind::Down(MouseButton::Left) = kind {
+            let status_h = 1u16;
+            let content_y = tab_h;
+            let content_h = area.height.saturating_sub(tab_h + status_h);
+
+            match self.view {
+                GitView::Status => {
+                    // Click on a file row
+                    let _visible_count = content_h as usize;
+                    // Files start at content_y + header rows (status/untracked/modified headers)
+                    // We approximate: each file group has 1 header row, items below
+                    // For simplicity, map directly: file index = (row - content_y - 1) adjusted for headers
+                    let item_row = row.saturating_sub(content_y) as usize;
+                    if item_row > 0 && item_row <= self.files.len() {
+                        let idx = item_row - 1;
+                        if idx < self.files.len() {
+                            self.selected_file = idx;
+                            self.dirty = true;
+                            return true;
+                        }
+                    }
+                }
+                GitView::Log => {
+                    let item_row = row.saturating_sub(content_y) as usize;
+                    if item_row > 0 && item_row - 1 < self.commits.len() {
+                        self.selected_commit = item_row - 1;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                GitView::Branches => {
+                    let item_row = row.saturating_sub(content_y) as usize;
+                    if item_row > 0 && item_row - 1 < self.branches.len() {
+                        self.selected_branch = item_row - 1;
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
+}
+
+impl GitTui {
+    fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
+        let header = " 󰊢 Status";
+        draw_text(plane, 2, y, header, t.primary, t.bg, true);
+
+        let sub_y = y + 2;
+        if self.files.is_empty() {
+            draw_text(
+                plane,
+                2,
+                sub_y,
+                " 󰄬 Working tree clean",
+                t.success,
+                t.bg,
+                false,
+            );
+        } else {
+            let staged: Vec<_> = self
+                .files
+                .iter()
+                .filter(|f| f.status == 'A' || f.status == 'M')
+                .collect();
+            let modified: Vec<_> = self
+                .files
+                .iter()
+                .filter(|f| f.status == 'M' || f.status == ' ')
+                .collect();
+            let untracked: Vec<_> = self.files.iter().filter(|f| f.status == '?').collect();
+
+            let mut row = sub_y;
+            if !staged.is_empty() {
+                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t);
+                draw_text(
+                    plane,
+                    3,
+                    row,
+                    " 󰄬 Staged",
+                    t.success,
+                    t.surface_elevated,
+                    true,
+                );
+                draw_text(
+                    plane,
+                    14,
+                    row,
+                    &format!("({})", staged.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
+                for (i, file) in staged.iter().enumerate() {
+                    let is_selected = self.view == GitView::Status && self.selected_file == i;
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
+                    let bg = if is_selected {
+                        t.selection_bg
+                    } else {
+                        t.surface_elevated
+                    };
+                    let icon = "󰄬";
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {} {}", icon, file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
+                    row += 1;
+                }
+                row += 2;
+            }
+
+            if !modified.is_empty() {
+                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t);
+                draw_text(
+                    plane,
+                    3,
+                    row,
+                    " 󰄱 Modified",
+                    t.warning,
+                    t.surface_elevated,
+                    true,
+                );
+                draw_text(
+                    plane,
+                    15,
+                    row,
+                    &format!("({})", modified.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
+                let offset = staged.len();
+                for (i, file) in modified.iter().enumerate() {
+                    let idx = offset + i;
+                    let is_selected = self.view == GitView::Status && self.selected_file == idx;
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
+                    let bg = if is_selected {
+                        t.selection_bg
+                    } else {
+                        t.surface_elevated
+                    };
+                    let icon = "󰄱";
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {} {}", icon, file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
+                    row += 1;
+                }
+                row += 2;
+            }
+
+            if !untracked.is_empty() {
+                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t);
+                draw_text(
+                    plane,
+                    3,
+                    row,
+                    " 󰋖 Untracked",
+                    t.fg_muted,
+                    t.surface_elevated,
+                    true,
+                );
+                draw_text(
+                    plane,
+                    16,
+                    row,
+                    &format!("({})", untracked.len()),
+                    t.fg_muted,
+                    t.surface_elevated,
+                    false,
+                );
+                row += 2;
+                let offset = staged.len() + modified.len();
+                for (i, file) in untracked.iter().enumerate() {
+                    let idx = offset + i;
+                    let is_selected = self.view == GitView::Status && self.selected_file == idx;
+                    let fg = if is_selected { t.selection_fg } else { t.fg };
+                    let bg = if is_selected {
+                        t.selection_bg
+                    } else {
+                        t.surface_elevated
+                    };
+                    let icon = "󰋖";
+                    draw_text(
+                        plane,
+                        4,
+                        row,
+                        &format!("{} {} {}", icon, file.status, file.path),
+                        fg,
+                        bg,
+                        is_selected,
+                    );
+                    row += 1;
+                }
+            }
+        }
+    }
+
+    fn render_log(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+        let header = " 󰊢 Commit History";
+        draw_text(plane, 2, y, header, t.primary, t.bg, true);
+
+        if self.commits.is_empty() {
+            let msg = " 󰋖 No commits found";
+            draw_text(plane, 2, y + 2, msg, t.fg_muted, t.bg, false);
+            return;
+        }
+
+        // Draw rounded border around commit list
+        let list_y = y + 2;
+        let list_h = h.saturating_sub(3);
+        if list_h > 2 {
+            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t);
+        }
+
+        for (i, commit) in self.commits.iter().enumerate() {
+            let row = list_y + 1 + i as u16;
+            if row >= list_y + list_h - 1 {
+                break;
+            }
+            let is_selected = self.view == GitView::Log && self.selected_commit == i;
+            let fg = if is_selected { t.selection_fg } else { t.fg };
+            let bg = if is_selected {
+                t.selection_bg
+            } else {
+                t.surface
+            };
+
+            let hash = &commit.hash;
+            let msg = if commit.message.len() > 35 {
+                &commit.message[..35]
+            } else {
+                &commit.message
+            };
+            let date = &commit.date[..10.min(commit.date.len())];
+
+            // Hash as colored badge
+            draw_text(plane, 4, row, &format!("{} ", hash), t.primary, bg, true);
+            // Date muted
+            draw_text(
+                plane,
+                12,
+                row,
+                &format!("{}  ", date),
+                t.fg_muted,
+                bg,
+                false,
+            );
+            // Message
+            draw_text(plane, 24, row, msg, fg, bg, is_selected);
+        }
+    }
+
+    fn render_diff(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+        let header = " 󰊢 Diff";
+        draw_text(plane, 2, y, header, t.primary, t.bg, true);
+
+        let content_y = y + 2;
+        let content_h = h.saturating_sub(3);
+        if content_h > 2 {
+            draw_rounded_border(
+                plane,
+                2,
+                content_y,
+                plane.width.saturating_sub(4),
+                content_h,
+                t,
+            );
+        }
+
+        let lines: Vec<&str> = self.diff_content.lines().collect();
+        let visible = (content_h as usize).saturating_sub(2);
+
+        for (i, line) in lines.iter().take(visible).enumerate() {
+            let row = content_y + 1 + i as u16;
+            if row >= content_y + content_h - 1 {
+                break;
+            }
+            let (fg, bg, bold) = if line.starts_with('+') && !line.starts_with("+++") {
+                (t.success, t.success_bg, false)
+            } else if line.starts_with('-') && !line.starts_with("---") {
+                (t.error, t.error_bg, false)
+            } else if line.starts_with("@@") {
+                (t.info, t.info_bg, true)
+            } else if line.starts_with("diff ")
+                || line.starts_with("index ")
+                || line.starts_with("--- ")
+                || line.starts_with("+++ ")
+            {
+                (t.fg_muted, t.bg, true)
+            } else {
+                (t.fg, t.surface, false)
+            };
+
+            let truncated = if line.len() > plane.width as usize - 8 {
+                &line[..plane.width as usize - 8]
+            } else {
+                line
+            };
+            draw_text(plane, 4, row, truncated, fg, bg, bold);
+        }
+
+        if lines.len() > visible {
+            let more = format!("... {} more lines", lines.len() - visible);
+            draw_text(
+                plane,
+                4,
+                content_y + content_h - 2,
+                &more,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
+        }
+    }
+
+    fn render_branches(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+        let header = " 󰊢 Branches";
+        draw_text(plane, 2, y, header, t.primary, t.bg, true);
+
+        let locals: Vec<_> = self.branches.iter().filter(|b| !b.remote).collect();
+        let remotes: Vec<_> = self.branches.iter().filter(|b| b.remote).collect();
+
+        let mut row = y + 2;
+        if !locals.is_empty() {
+            let section_h = (locals.len() + 3) as u16;
+            if section_h > 2 && row + section_h < y + h {
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
+            }
+            draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
+            draw_text(
+                plane,
+                16,
+                row,
+                &format!("({})", locals.len()),
+                t.fg_muted,
+                t.surface,
+                false,
+            );
+            row += 2;
+            for (i, branch) in locals.iter().enumerate() {
+                let is_selected = self.view == GitView::Branches && self.selected_branch == i;
+                let fg = if branch.current {
+                    t.success
+                } else if is_selected {
+                    t.selection_fg
+                } else {
+                    t.fg
+                };
+                let bg = if is_selected {
+                    t.selection_bg
+                } else {
+                    t.surface
+                };
+                let marker = if branch.current { " 󰘦 " } else { "   " };
+                draw_text(
+                    plane,
+                    4,
+                    row,
+                    &format!("{}{}", marker, branch.name),
+                    fg,
+                    bg,
+                    branch.current || is_selected,
+                );
+                row += 1;
+            }
+            row += 2;
+        }
+
+        if !remotes.is_empty() {
+            let section_h = (remotes.len() + 3) as u16;
+            if section_h > 2 && row + section_h < y + h {
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
+            }
+            draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
+            draw_text(
+                plane,
+                17,
+                row,
+                &format!("({})", remotes.len()),
+                t.fg_muted,
+                t.surface,
+                false,
+            );
+            row += 2;
+            let offset = locals.len();
+            for (i, branch) in remotes.iter().enumerate() {
+                let idx = offset + i;
+                let is_selected = self.view == GitView::Branches && self.selected_branch == idx;
+                let fg = if is_selected {
+                    t.selection_fg
+                } else {
+                    t.fg_muted
+                };
+                let bg = if is_selected {
+                    t.selection_bg
+                } else {
+                    t.surface
+                };
+                draw_text(
+                    plane,
+                    4,
+                    row,
+                    &format!("  󰒍 {}", branch.name),
+                    fg,
+                    bg,
+                    is_selected,
+                );
+                row += 1;
+            }
+        }
+    }
+}
+
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &KeybindingSet) {
+    let shortcuts = [
+        ("1-4", "Switch views (Status/Log/Diff/Branches)"),
+        ("↑/↓ or j/k", "Navigate"),
+        (keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
+        ("d", "View diff for selected file"),
+        ("r", "Refresh"),
+        (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+        (keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
+        (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+        (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+    ];
+
+    let help_w = 48u16;
+    let help_h = (shortcuts.len() as u16 + 3).min(area.height - 2);
+    let help_x = (area.width.saturating_sub(help_w)) / 2;
+    let help_y = (area.height.saturating_sub(help_h)) / 2;
+
+    // Draw rounded border box
+    for row in help_y..help_y + help_h {
+        for col in help_x..help_x + help_w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() {
+                continue;
+            }
+            let is_border = row == help_y
+                || row == help_y + help_h - 1
+                || col == help_x
+                || col == help_x + help_w - 1;
+            let is_corner = (row == help_y || row == help_y + help_h - 1)
+                && (col == help_x || col == help_x + help_w - 1);
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+            if is_border {
+                if row == help_y && col == help_x {
+                    plane.cells[idx].char = '╭';
+                } else if row == help_y && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == help_y + help_h - 1 && col == help_x {
+                    plane.cells[idx].char = '╰';
+                } else if row == help_y + help_h - 1 && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == help_y || row == help_y + help_h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+            } else {
+                plane.cells[idx].char = ' ';
+            }
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Title
+    let title = "Git TUI — Help";
+    let tx = help_x + (help_w - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((help_y + 1) * plane.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Two-column layout: keys (theme.primary) + descriptions (theme.fg)
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = help_y + 3 + i as u16;
+        if row >= help_y + help_h - 1 {
+            break;
+        }
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 2 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 16 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
+
+fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 2 || h < 2 {
+        return;
+    }
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() {
+                continue;
+            }
+            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+            let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+            plane.cells[idx].bg = if is_border { t.bg } else { t.surface_elevated };
+            plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+            if is_border {
+                if row == y && col == x {
+                    plane.cells[idx].char = '╭';
+                } else if row == y && col == x + w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == y + h - 1 && col == x {
+                    plane.cells[idx].char = '╰';
+                } else if row == y + h - 1 && col == x + w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == y || row == y + h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+            } else {
+                plane.cells[idx].char = ' ';
+            }
+            plane.cells[idx].transparent = false;
+        }
+    }
+}
+
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+    if w < 3 || h < 2 {
+        return;
+    }
+    // Fill background
+    for row in y..y + h {
+        for col in x..x + w {
+            let idx = (row * plane.width + col) as usize;
+            if idx < plane.cells.len() {
+                let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
+                let is_corner = (row == y || row == y + h - 1) && (col == x || col == x + w - 1);
+                plane.cells[idx].bg = if is_border { t.bg } else { t.surface };
+                plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+                if is_border {
+                    if row == y && col == x {
+                        plane.cells[idx].char = '╭';
+                    } else if row == y && col == x + w - 1 {
+                        plane.cells[idx].char = '╮';
+                    } else if row == y + h - 1 && col == x {
+                        plane.cells[idx].char = '╰';
+                    } else if row == y + h - 1 && col == x + w - 1 {
+                        plane.cells[idx].char = '╯';
+                    } else if row == y || row == y + h - 1 {
+                        plane.cells[idx].char = '─';
+                    } else {
+                        plane.cells[idx].char = '│';
+                    }
+                }
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
+
+fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
+    for (i, ch) in text.chars().enumerate() {
+        let idx = (y * plane.width + x + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx] = Cell {
+                char: ch,
+                fg,
+                bg,
+                style: if bold { Styles::BOLD } else { Styles::empty() },
+                transparent: false,
+                skip: false,
+            };
+        }
+    }
+}
+
