@@ -273,6 +273,7 @@ impl TabbedApp {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.primary;
                 plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].style = Styles::BOLD;
             }
         }
         // Shortcuts
