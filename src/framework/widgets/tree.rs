@@ -134,6 +134,20 @@ impl Tree {
         traverse(&self.root, row, &mut current_row, &mut Vec::new())
     }
 
+    fn count_visible_nodes(&self) -> usize {
+        fn count(nodes: &[TreeNode]) -> usize {
+            let mut total = 0;
+            for node in nodes.iter() {
+                total += 1;
+                if node.expanded {
+                    total += count(&node.children);
+                }
+            }
+            total
+        }
+        count(&self.root)
+    }
+
     fn toggle_expand_at(&mut self, path: &[usize]) {
         if path.is_empty() {
             return;
@@ -374,6 +388,24 @@ impl crate::framework::widget::Widget for Tree {
                     }
                 } else if self.hovered_path.is_some() {
                     self.hovered_path = None;
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            crate::input::event::MouseEventKind::ScrollDown => {
+                let total = self.count_visible_nodes();
+                let max_offset = total.saturating_sub(self.visible_count as usize);
+                if self.scroll_offset < max_offset {
+                    self.scroll_offset += 1;
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            crate::input::event::MouseEventKind::ScrollUp => {
+                if self.scroll_offset > 0 {
+                    self.scroll_offset -= 1;
                     self.dirty = true;
                     return true;
                 }
