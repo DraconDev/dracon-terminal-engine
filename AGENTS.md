@@ -422,6 +422,22 @@ StatusSegment::new("Tab: switch | t: theme | ?: help | q: quit")
 
 6. **Widget-based vs closure-based apps** — Widget-based (Pattern 1) supports theme cycling via `app.set_theme()`. Closure-based (Pattern 2) cannot easily cycle themes because `on_input` only receives `KeyEvent`, not `&mut App`.
 
+### Theme Inheritance for Examples
+
+All examples MUST use `Theme::from_env_or(default)` instead of hardcoded theme constructors so the theme can be inherited from a parent (showcase launcher, script, etc.) via the `DTRON_THEME` env var:
+
+```rust
+// WRONG — hardcoded theme, ignores parent
+.theme(Theme::nord())
+
+// RIGHT — uses DTRON_THEME if set, falls back to default
+.theme(Theme::from_env_or(Theme::nord()))
+```
+
+**Why:** The showcase launcher sets `DTRON_THEME` before spawning external binary examples. Without `from_env_or`, launched examples always start with their hardcoded theme regardless of what the user selected.
+
+**`Theme::from_env_or(default)`:** Reads `DTRON_THEME` env var, does case-insensitive lookup against all 20+ built-in theme names. Falls back to `default` if env var is unset, empty, or names an unknown theme.
+
 ### Widget Background Pattern
 
 All widgets MUST fill their plane background with `self.theme.bg` to avoid black (`Color::Reset`) holes:
