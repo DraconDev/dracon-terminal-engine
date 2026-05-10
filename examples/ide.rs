@@ -788,6 +788,12 @@ impl Widget for IdeApp {
             self.render_help_overlay(&mut plane);
         }
 
+        // 13. Context menu
+        if let Some(ref cm) = self.context_menu {
+            let menu_plane = cm.render(area);
+            self.blit(&mut plane, &menu_plane, menu_plane.x, menu_plane.y);
+        }
+
         plane
     }
 
