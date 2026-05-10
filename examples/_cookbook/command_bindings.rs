@@ -68,6 +68,8 @@ impl CommandBindings {
             tick: 0,
             cpu_value: 50.0,
             show_help: false,
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 
