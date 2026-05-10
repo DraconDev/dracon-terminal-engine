@@ -805,7 +805,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Todo App")
         .fps(30)
-        .theme(Theme::nord());
+        .theme(Theme::from_env_or(Theme::nord()));
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 

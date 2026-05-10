@@ -1423,7 +1423,7 @@ fn main() -> std::io::Result<()> {
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
-        .theme(Theme::nord());
+        .theme(Theme::from_env_or(Theme::nord()));
 
     let router = InputRouter {
         monitor: mon_for_input,
