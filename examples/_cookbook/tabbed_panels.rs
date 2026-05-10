@@ -226,10 +226,10 @@ impl TabbedApp {
         // Draw corners with rounded appearance (using box-drawing characters)
         // Top-left corner
         let corners = [
-            ((hy, hx), '┌'),                   // top-left
-            ((hy, hx + hw - 1), '┐'),          // top-right
-            ((hy + hh - 1, hx), '└'),          // bottom-left
-            ((hy + hh - 1, hx + hw - 1), '┘'), // bottom-right
+            ((hy, hx), '╭'),                   // top-left
+            ((hy, hx + hw - 1), '╮'),          // top-right
+            ((hy + hh - 1, hx), '╰'),          // bottom-left
+            ((hy + hh - 1, hx + hw - 1), '╯'), // bottom-right
         ];
         for ((y, x), ch) in corners {
             let idx = (y * plane.width + x) as usize;
