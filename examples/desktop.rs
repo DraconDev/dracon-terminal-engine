@@ -219,10 +219,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for &byte in &buf[..n] {
                 if let Some(event) = parser.advance(byte) {
                     match event {
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('q'),
-                            ..
-                        }) => {
+                        Event::Key(ref key_event) if keybindings.matches(actions::QUIT, key_event) => {
                             write!(
                                 term,
                                 "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
@@ -242,10 +239,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             term.flush()?;
                             return Ok(());
                         }
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('?'),
-                            ..
-                        }) => {
+                        Event::Key(ref key_event) if keybindings.matches(actions::HELP, key_event) => {
                             // Toggle help display - show help text in terminal
                             write!(term, "\x1b[2J\x1b[H")?;
                             write!(

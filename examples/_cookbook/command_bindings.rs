@@ -21,6 +21,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -42,6 +43,8 @@ struct CommandBindings {
     tick: u64,
     cpu_value: f32,
     show_help: bool,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl CommandBindings {
