@@ -587,27 +587,19 @@ fn main() -> std::io::Result<()> {
         .unwrap_or((80, 24));
 
     let theme = Theme::cyberpunk();
-    let mut app = FileManagerApp::new(theme);
-    app.set_area(Rect::new(0, 0, w, h));
-
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let mut app = FileManagerApp::new(theme, should_quit);
+    app.set_area(Rect::new(0, 0, w, h));
+
     let mut app_widget = App::new()?.title("File Manager").fps(30).theme(theme);
     app_widget.add_widget(Box::new(app), Rect::new(0, 0, w, h));
-    app_widget = app_widget
-        .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
+    app_widget
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();
             }
-        });
-    app_widget.run(|_ctx| {})
+        })
+        .run(|_ctx| {})
 }

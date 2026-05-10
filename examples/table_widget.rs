@@ -1092,7 +1092,7 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::nord())
         .on_input(move |key| {
-            if kb_input.matches(actions::QUIT, key)
+            if kb_input.matches(actions::QUIT, &key)
                 && key.kind == KeyEventKind::Press
             {
                 should_quit.store(true, Ordering::SeqCst);
