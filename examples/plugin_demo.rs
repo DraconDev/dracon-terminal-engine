@@ -314,7 +314,7 @@ struct PluginDemoState {
 }
 
 impl PluginDemoState {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
         let mut registry = PluginRegistry::new();
 
         // Register custom widgets
