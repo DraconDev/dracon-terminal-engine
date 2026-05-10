@@ -549,7 +549,7 @@ impl App {
 
             if self.last_tick_time.elapsed() >= self.tick_interval {
                 if let Some(ref mut tick_fn) = *self.on_tick.borrow_mut() {
-                    let prev_theme_name = self.theme.name.as_str();
+                    let prev_theme_name = self.theme.name;
                     tick_fn(
                         &mut Ctx {
                             compositor: &mut self.compositor,
