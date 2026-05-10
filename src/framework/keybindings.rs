@@ -100,7 +100,9 @@ impl KeybindingConfig {
         bindings.insert(actions::DELETE.to_string(), "ctrl+d".to_string());
         bindings.insert(actions::EDIT.to_string(), "ctrl+e".to_string());
         // Search
-        bindings.insert(actions::SEARCH.to_string(), "ctrl+f".to_string());
+        bindings.insert(actions::THEME.to_string(), "t".to_string());
+        bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
+        bindings.insert(actions::DISMISS.to_string(), "esc".to_string());
         Self { bindings }
     }
 

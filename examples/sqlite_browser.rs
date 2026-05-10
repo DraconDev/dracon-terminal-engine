@@ -15,6 +15,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, KeybindingConfig, actions};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Column, SearchInput, SplitPane, StatusBar, StatusSegment, Table, Toast, ToastKind,
@@ -68,6 +69,8 @@ struct SqliteBrowser {
     status_bar: StatusBar,
     toasts: Vec<Toast>,
     dirty: bool,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl SqliteBrowser {
