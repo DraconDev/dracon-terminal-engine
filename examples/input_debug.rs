@@ -164,15 +164,23 @@ impl InputDebugger {
         out
     }
 
-    fn render_help(&self) -> String {
+    fn render_help(&self, kb: &KeybindingSet) -> String {
+        let quit_key = kb.display(actions::QUIT).unwrap_or("q");
+        let help_key = kb.display(actions::HELP).unwrap_or("f1");
+        let back_key = kb.display(actions::BACK).unwrap_or("esc");
+        let key_w = 10usize;
+        let pad = |s: &str| -> String {
+            let vis = s.len();
+            if vis >= key_w { s.to_string() } else { format!("{}{}", s, " ".repeat(key_w - vis)) }
+        };
         let mut out = String::new();
         out.push_str("\x1b[2J\x1b[H");
         out.push_str("╭────────────────────────────────────────────────────────────╮\r\n");
         out.push_str("│                Input Debugger Help                         │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
-        out.push_str("│  \x1b[1mq\x1b[0m        — Quit                                         │\r\n");
-        out.push_str("│  \x1b[1m?\x1b[0m        — Toggle this help                            │\r\n");
-        out.push_str("│  \x1b[1mEsc\x1b[0m      — Dismiss help                               │\r\n");
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Quit                                         │\r\n", pad(quit_key)));
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Toggle this help                            │\r\n", pad(help_key)));
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Dismiss help                               │\r\n", pad(back_key)));
         out.push_str("│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n");
         out.push_str("│  \x1b[1m↑/↓\x1b[0m      — Scroll history                              │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");

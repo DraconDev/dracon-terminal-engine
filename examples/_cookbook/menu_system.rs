@@ -67,10 +67,10 @@ impl MenuApp {
         ];
         let kb_config = resolve_keybindings();
         let keybindings = KeybindingSet::from_config(&kb_config);
-        let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
-        let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
-        let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
-        let kb_quit = kb_config.get(actions::QUIT).unwrap_or("Ctrl+Q");
+        let kb_theme = keybindings.display(actions::THEME).unwrap_or("t");
+        let kb_help = keybindings.display(actions::HELP).unwrap_or("?");
+        let kb_back = keybindings.display(actions::BACK).unwrap_or("Esc");
+        let kb_quit = keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
             .add_segment(
@@ -434,10 +434,10 @@ impl Widget for MenuApp {
                 }
             }
             // Shortcuts
-            let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
-            let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
-            let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
-            let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("Ctrl+Q");
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
+            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
             let shortcuts = [
                 ("↑/↓", "Navigate list"),
                 ("Ctrl+N", "New file"),

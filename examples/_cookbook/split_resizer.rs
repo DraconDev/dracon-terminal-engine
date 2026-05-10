@@ -457,8 +457,12 @@ impl SplitResizerApp {
         let sb = format!("B:{}%", ((1.0 - self.ra) * 100.0).round() as i32);
         let sb1 = format!("B1:{}%", (self.rb * 100.0).round() as i32);
         let txt = format!(
-            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | t: theme | ?: help | Esc: dismiss | q: quit",
-            sa, sb, sb1
+            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | {}: theme | {}: help | {}: dismiss | {}: quit",
+            sa, sb, sb1,
+            self.keybindings.display(actions::THEME).unwrap_or("t"),
+            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::BACK).unwrap_or("Esc"),
+            self.keybindings.display(actions::QUIT).unwrap_or("q"),
         );
         for (i, c) in txt.chars().enumerate().take(r.width as usize) {
             let idx = (r.y * p.width + i as u16) as usize;
@@ -597,15 +601,19 @@ impl SplitResizerApp {
         }
 
         // Help text
-        let lines = [
+        let theme_key = self.keybindings.display(actions::THEME).unwrap_or("t");
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+        let quit_key = self.keybindings.display(actions::QUIT).unwrap_or("q");
+        let lines = vec![
             " Keyboard Shortcuts ",
             " ────────────────── ",
             " ←/→   Resize A panel",
             " ↑/↓   Resize B panel",
-            " t      Cycle theme ",
+            &format!(" {}      Cycle theme ", theme_key),
             " r      Reset sizes  ",
-            " ? / Esc  Toggle help",
-            " q      Quit         ",
+            &format!(" {} / {}  Toggle help", help_key, back_key),
+            &format!(" {}      Quit         ", quit_key),
         ];
         let start_y = y + 1;
         for (i, line) in lines.iter().enumerate() {
