@@ -61,6 +61,15 @@ pub mod actions {
     pub const DISMISS: &str = "dismiss";
     pub const TREE_MODE: &str = "tree_mode";
     pub const PAUSE: &str = "pause";
+    // Navigation
+    pub const UP: &str = "up";
+    pub const DOWN: &str = "down";
+    pub const LEFT: &str = "left";
+    pub const RIGHT: &str = "right";
+    pub const PAGE_UP: &str = "page_up";
+    pub const PAGE_DOWN: &str = "page_down";
+    pub const HOME: &str = "home";
+    pub const END: &str = "end";
 }
 
 /// A mapping from action names to keybinding strings.
