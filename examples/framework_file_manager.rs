@@ -60,6 +60,8 @@ struct FileManagerApp {
     area: Rect,
     dirty: bool,
     show_help: bool,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl FileManagerApp {
@@ -73,6 +75,8 @@ impl FileManagerApp {
         let entries = read_dir(&path);
         let list = List::new(entries.clone());
         let breadcrumbs = Breadcrumbs::new(crumbs.clone());
+        let kb_config = resolve_keybindings();
+        let keybindings = KeybindingSet::from_config(&kb_config);
         Self {
             id: WidgetId::new(0),
             entries,
@@ -86,6 +90,8 @@ impl FileManagerApp {
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             show_help: false,
+            keybindings,
+            kb_config,
         }
     }
 
