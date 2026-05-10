@@ -14,6 +14,30 @@ use ratatui::layout::Rect;
 use crate::data::ExampleMeta;
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum SortField {
+    Name,
+    Category,
+    RunCount,
+}
+
+impl SortField {
+    pub fn all() -> [SortField; 3] {
+        [SortField::Name, SortField::Category, SortField::RunCount]
+    }
+    pub fn label(&self) -> &'static str {
+        match self {
+            SortField::Name => "name",
+            SortField::Category => "cat",
+            SortField::RunCount => "runs",
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // SHOWCASE STATE
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -63,6 +87,10 @@ pub struct Showcase {
     pub(crate) scene_router: SceneRouter,
     pub(crate) keybindings: KeybindingSet,
     pub(crate) pending_app_theme: Arc<Mutex<Option<Theme>>>,
+    pub(crate) run_counts: Vec<u32>,
+    pub(crate) sort_field: SortField,
+    pub(crate) sort_ascending: bool,
+    pub(crate) search_query_lower: String,
 }
 
 impl Showcase {
