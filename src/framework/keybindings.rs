@@ -57,6 +57,8 @@ pub mod actions {
     pub const REFRESH: &str = "refresh";
     pub const SEARCH: &str = "search";
     pub const CANCEL: &str = "cancel";
+    pub const DISMISS: &str = "dismiss";
+    pub const TREE_MODE: &str = "tree_mode";
 }
 
 /// A mapping from action names to keybinding strings.
