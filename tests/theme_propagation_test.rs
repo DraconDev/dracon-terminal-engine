@@ -340,3 +340,60 @@ fn test_all_themes_produce_different_divider_colors() {
         }
     }
 }
+
+// === current_theme() mechanism ===
+
+/// A widget that manages its own theme state and reports it via current_theme().
+struct ThemeAwareWidget {
+    id: WidgetId,
+    theme: Theme,
+    area: std::cell::Cell<ratatui::layout::Rect>,
+}
+
+impl ThemeAwareWidget {
+    fn new(id: usize, theme: Theme) -> Self {
+        Self {
+            id: WidgetId::new(id),
+            theme,
+            area: std::cell::Cell::new(ratatui::layout::Rect::new(0, 0, 80, 24)),
+        }
+    }
+
+    fn cycle_theme(&mut self) {
+        self.theme = Theme::cyberpunk();
+    }
+}
+
+impl Widget for ThemeAwareWidget {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> ratatui::layout::Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: ratatui::layout::Rect) {
+        self.area.set(area);
+    }
+    fn render(&self, _area: ratatui::layout::Rect) -> Plane {
+        Plane::new(0, 80, 24)
+    }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme)
+    }
+}
+
+#[test]
+fn test_widget_current_theme_default_is_none() {
+    let widget = NoopWidget;
+    assert_eq!(widget.current_theme(), None, "default current_theme should return None");
+}
+
+#[test]
+fn test_widget_current_theme_returns_managed_theme() {
+    let widget = ThemeAwareWidget::new(1, Theme::nord());
+    assert_eq!(
+        widget.current_theme().map(|t| t.name),
+        Some("nord".to_string()),
+        "current_theme should return the widget's managed theme"
+    );
+}
