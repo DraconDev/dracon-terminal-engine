@@ -387,19 +387,19 @@ mod tests {
         let config = KeybindingConfig::defaults();
         let set = KeybindingSet::from_config(&config);
 
-        let quit_evt = KeyEvent {
-            kind: KeyEventKind::Press,
-            code: KeyCode::Char('q'),
-            modifiers: KeyModifiers::empty(),
-        };
-        assert!(set.matches("quit", &quit_evt));
-
         let ctrl_q = KeyEvent {
             kind: KeyEventKind::Press,
             code: KeyCode::Char('q'),
             modifiers: KeyModifiers::CONTROL,
         };
-        assert!(!set.matches("quit", &ctrl_q));
+        assert!(set.matches("quit", &ctrl_q));
+
+        let plain_q = KeyEvent {
+            kind: KeyEventKind::Press,
+            code: KeyCode::Char('q'),
+            modifiers: KeyModifiers::empty(),
+        };
+        assert!(!set.matches("quit", &plain_q));
     }
 
     #[test]
