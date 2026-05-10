@@ -1023,6 +1023,8 @@ The showcase launcher is the **single source of truth** for theme cycling:
 - `t`/`T` cycles the global theme and propagates to all scenes via `scene_router.on_theme_change()`
 - Individual scenes must NOT implement their own `cycle_theme()` — they receive theme changes via `on_theme_change()`
 - All scenes must check `actions::BACK` **before** delegating to widgets to ensure `Esc` always works to go back
+- Individual scenes must NOT implement their own `cycle_theme()` — they receive theme changes via `on_theme_change()`
+- All scenes must check `actions::BACK` **before** delegating to widgets to ensure `Esc` always works to go back
 
 ## Deferred / Out of Scope
 
