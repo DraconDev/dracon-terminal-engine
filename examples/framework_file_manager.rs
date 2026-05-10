@@ -458,7 +458,6 @@ impl Widget for FileManagerApp {
             }
             let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
             let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
-            let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
             let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
             let shortcuts = [
                 ("↑/↓", "Navigate"),
