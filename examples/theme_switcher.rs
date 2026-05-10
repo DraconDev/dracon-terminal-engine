@@ -1041,13 +1041,15 @@ impl Widget for HelpOverlay {
 struct StatusBarWidget {
     id: WidgetId,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl StatusBarWidget {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, keybindings: KeybindingSet) -> Self {
         Self {
             id,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
+            keybindings,
         }
     }
 }
