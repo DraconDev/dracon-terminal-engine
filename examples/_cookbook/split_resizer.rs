@@ -695,6 +695,9 @@ impl Widget for InputRouter {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.target.borrow_mut().on_theme_change(theme);
+    }
 }
 
 fn main() -> Result<()> {
@@ -706,7 +709,7 @@ fn main() -> Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let theme = Theme::cyberpunk();
+    let theme = Theme::from_env_or(Theme::cyberpunk());
     let app = SplitResizerApp::new(WidgetId::new(1), theme, should_quit, keybindings);
     let app_for_tick = Rc::new(RefCell::new(app));
     let app_for_render = Rc::clone(&app_for_tick);
