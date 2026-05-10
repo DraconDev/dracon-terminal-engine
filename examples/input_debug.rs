@@ -221,7 +221,7 @@ fn main() -> io::Result<()> {
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
     // Initial render
-    write!(term, "{}", debugger.render())?;
+    write!(term, "{}", debugger.render(&keybindings))?;
     term.flush()?;
 
     loop {
