@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 
 use dracon_terminal_engine::framework::animation::AnimationManager;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::{SceneRouter, SceneTransition};
 use ratatui::layout::Rect;
