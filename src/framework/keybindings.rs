@@ -30,6 +30,7 @@
 use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::OnceLock;
 
 // ═══════════════════════════════════════════════════════════════
 // KEYBINDING CONFIG
