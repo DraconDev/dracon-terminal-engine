@@ -191,7 +191,8 @@ impl<'a> ModalDemoApp<'a> {
             .cancel_label("Cancel")
             .danger(true);
 
-        let help_overlay = HelpOverlay::new();
+        let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+        let help_overlay = HelpOverlay::new(keybindings.clone());
 
         let confirm_btn = Button::new(" 󰔳 Show Confirm Dialog");
         let help_btn = Button::new(" 󰋖 Show Help (?)");
@@ -209,7 +210,7 @@ impl<'a> ModalDemoApp<'a> {
             area: Rect::new(0, 0, 80, 24),
             should_quit,
             theme: Theme::dark(),
-            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            keybindings,
         }
     }
 

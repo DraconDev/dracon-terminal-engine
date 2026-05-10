@@ -463,7 +463,7 @@ impl Widget for InputRouter {
 // HELP OVERLAY
 // ═══════════════════════════════════════════════════════════════════════════════
 
-fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
+fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let hw = 36u16.min(area.width.saturating_sub(4));
     let hh = 13u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
@@ -538,10 +538,10 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
         ("Click", "Toggle clock format"),
         ("Click +/-", "Adjust counter"),
         ("Click [R]", "Reset counter"),
-        ("t", "Cycle theme"),
-        ("?", "Toggle help"),
-        ("Esc", "Dismiss help"),
-        ("q", "Quit"),
+        (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+        (kb.display(actions::HELP).unwrap_or("?"), "Toggle help"),
+        (kb.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+        (kb.display(actions::QUIT).unwrap_or("q"), "Quit"),
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
         let row = hy + 3 + i as u16;
