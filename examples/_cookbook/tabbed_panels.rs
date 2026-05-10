@@ -283,10 +283,10 @@ impl TabbedApp {
         let shortcuts = [
             ("←/→", "Switch tabs"),
             ("Click tab", "Switch tab"),
-            (&kb_theme, "Cycle theme"),
-            (&kb_help, "Toggle help"),
-            (&kb_back, "Dismiss help"),
-            (&kb_quit, "Quit"),
+            (kb_theme, "Cycle theme"),
+            (kb_help, "Toggle help"),
+            (kb_back, "Dismiss help"),
+            (kb_quit, "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
