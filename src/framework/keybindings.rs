@@ -218,7 +218,7 @@ impl KeybindingSet {
                         existing_action, action, binding_str
                     );
                 }
-                seen.insert(event.clone(), action.clone());
+                seen.insert(event, action.clone());
                 bindings.insert(action.clone(), event);
             } else {
                 eprintln!(
