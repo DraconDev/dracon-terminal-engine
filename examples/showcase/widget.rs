@@ -1564,6 +1564,7 @@ impl Showcase {
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
                 self.scene_router.on_theme_change(&self.theme);
+                *self.pending_app_theme.lock().unwrap() = Some(self.theme);
                 return true;
             }
             if self.keybindings.matches(actions::BACK, &key) {
