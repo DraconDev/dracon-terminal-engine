@@ -514,8 +514,12 @@ impl Widget for CommandBindings {
             "▶ RUNNING"
         };
         let status = format!(
-            "  {}  |  tick: {}  |  t: theme | ?: help | Esc: dismiss | q: quit",
-            auto_str, self.tick
+            "  {}  |  tick: {}  |  {}: theme | {}: help | {}: dismiss | {}: quit",
+            auto_str, self.tick,
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
         );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
