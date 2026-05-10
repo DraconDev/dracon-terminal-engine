@@ -19,6 +19,7 @@
 //! Mouse: Click to select, click folder to expand
 
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -81,6 +82,7 @@ struct TreeNav {
     theme: Theme,
     area: Rect,
     show_help: bool,
+    keybindings: KeybindingSet,
 }
 
 impl TreeNav {
@@ -146,6 +148,7 @@ impl TreeNav {
             theme: Theme::default(),
             area: Rect::new(0, 0, 80, 24),
             show_help: false,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

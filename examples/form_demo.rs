@@ -25,6 +25,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, PasswordInput, SearchInput, Select, Toggle,
 };
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
@@ -63,10 +64,11 @@ struct SettingsForm {
     show_help: bool,
     area: Rect,
     dirty: bool,
+    keybindings: KeybindingSet,
 }
 
 impl SettingsForm {
-    fn new(id: WidgetId, theme: Theme) -> Self {
+    fn new(id: WidgetId, theme: Theme, keybindings: KeybindingSet) -> Self {
         let theme_select = Select::new(WidgetId::new(id.0 + 3)).with_options(vec![
             "Dark".to_string(),
             "Light".to_string(),
