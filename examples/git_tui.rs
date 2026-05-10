@@ -102,7 +102,7 @@ impl GitTui {
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
             .add_segment(
-                StatusSegment::new("1-4: views | t: theme | r: refresh | ?: help | Esc: dismiss | q: quit")
+                StatusSegment::new("1-4: views | d: diff | r: refresh | theme | help | back | quit")
                     .with_fg(theme.fg_muted),
             );
 
@@ -401,33 +401,38 @@ impl Widget for GitTui {
             return false;
         }
 
-        match key.code {
-            KeyCode::Esc => {
-                if self.show_help {
-                    self.show_help = false;
-                    self.dirty = true;
-                    return true;
-                }
-                false
-            }
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
+        if self.keybindings.matches(actions::BACK, &key) {
+            if self.show_help {
+                self.show_help = false;
                 self.dirty = true;
-                true
+                return true;
             }
-            KeyCode::Char('r') => {
-                self.refresh();
-                self.toast("Refreshed", ToastKind::Info);
-                true
-            }
+            return false;
+        }
+
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+
+        if self.keybindings.matches(actions::REFRESH, &key) {
+            self.refresh();
+            self.toast("Refreshed", ToastKind::Info);
+            return true;
+        }
+
+        match key.code {
             KeyCode::Char('1') => {
                 self.view = GitView::Status;
                 self.tab_bar.set_active(0);

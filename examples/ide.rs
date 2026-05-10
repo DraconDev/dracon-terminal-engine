@@ -11,10 +11,10 @@
 //!   Ctrl+W      — close tab
 //!   Ctrl+G      — go to line
 //!   F12         — toggle profiler overlay
-//!   t           — cycle theme
 //!   Ctrl+P      — command palette
-//!   ?           — toggle help overlay
-//!   q / Ctrl+Q  — quit
+//!   F1          — toggle help overlay
+//!   t           — cycle theme
+//!   Ctrl+Q      — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -1420,7 +1420,7 @@ impl IdeApp {
                     ("t", "Cycle theme"),
                 ],
             ),
-            ("General", &[("?", "Toggle this help"), ("Esc", "Dismiss help"), ("q", "Quit")]),
+            ("General", &[("F1", "Toggle this help"), ("Esc", "Dismiss help"), ("Ctrl+Q", "Quit")]),
         ];
 
         let mut row = sep_y + 1;
@@ -1633,7 +1633,7 @@ fn is_number(line: &str, pos: usize) -> bool {
 
 fn main() -> std::io::Result<()> {
     println!("Dracon IDE — Flagship Example");
-    println!("Ctrl+O open | Ctrl+S save | Ctrl+F search | F12 profiler | t theme | q quit");
+    println!("Ctrl+O open | Ctrl+S save | Ctrl+F search | F12 profiler | t theme | Ctrl+Q quit");
     std::thread::sleep(Duration::from_millis(500));
 
     let should_quit = Arc::new(AtomicBool::new(false));
