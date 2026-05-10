@@ -74,6 +74,11 @@ fn main() -> std::io::Result<()> {
             return;
         }
 
+        // Sync pending theme from showcase widget to App framework
+        if let Some(theme) = pending_app_theme_tick.lock().unwrap().take() {
+            ctx.set_theme(theme);
+        }
+
         // Compute and store FPS
         fps_for_tick.store(ctx.fps(), std::sync::atomic::Ordering::Relaxed);
 
