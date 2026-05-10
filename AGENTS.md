@@ -260,7 +260,7 @@ If an example shows nothing:
 
 ### Help Overlay Pattern
 
-All examples MUST implement a help overlay (toggle with `?` key, dismiss with `Esc` or `?`):
+All examples MUST implement a help overlay (toggle with `F1` or `?`, dismiss with `Esc` or the same key):
 
 ```rust
 // In struct:
