@@ -416,10 +416,10 @@ mod tests {
     fn test_config_merge() {
         let mut base = KeybindingConfig::defaults();
         let mut override_config = KeybindingConfig::default();
-        override_config.bindings.insert("quit".to_string(), "ctrl+q".to_string());
+        override_config.bindings.insert("quit".to_string(), "ctrl+x".to_string());
 
-        assert_eq!(base.get("quit"), Some("q"));
-        base.merge(override_config);
         assert_eq!(base.get("quit"), Some("ctrl+q"));
+        base.merge(override_config);
+        assert_eq!(base.get("quit"), Some("ctrl+x"));
     }
 }
