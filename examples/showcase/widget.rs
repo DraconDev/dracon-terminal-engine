@@ -1561,13 +1561,11 @@ impl Showcase {
 
         // Help overlay takes priority
         if self.show_help {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('?') => {
-                    self.show_help = false;
-                    return true;
-                }
-                _ => return true,
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+                self.show_help = false;
+                return true;
             }
+            return true;
         }
 
         // Context menu takes priority
