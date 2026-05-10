@@ -6,31 +6,32 @@
 #   2. User global: ~/.config/dracon/dracon.toml
 #   3. Project-local: ./dracon.toml (this file)
 #
-# To customize for your user: copy this to ~/.config/dracon/dracon.toml
-# and change only the bindings you want to override.
+# Philosophy: modifier keys for actions, never single letters.
+# Single letters conflict with text input in forms, editors, etc.
 
 [keybindings]
-# Core navigation
-quit = "q"
-help = "?"
-theme = "t"
-back = "esc"
-submit = "enter"
-tab_next = "tab"
-tab_prev = "shift+tab"
-cancel = "esc"
+# Core (always safe — no text input conflict)
+quit = "ctrl+q"          # Emergency quit — not single-key to avoid accidents
+help = "f1"              # F1 is universal help; ? conflicts with text input
+cancel = "esc"           # Dismiss overlays, cancel operations
+back = "esc"             # Go back / close modal
+submit = "enter"         # Confirm / submit form
+tab_next = "tab"         # Navigate to next field
+tab_prev = "shift+tab"   # Navigate to previous field
 
-# Content editing
-new_item = "n"
-edit = "e"
-delete = "d"
-refresh = "r"
-search = "/"
-
-# IDE / Tab actions
+# Tabs (browser/IDE standard)
 new_tab = "ctrl+t"
 close_tab = "ctrl+w"
-save = "ctrl+s"
 
-# Mouse is always enabled alongside keyboard
-# Drag handles are shown on reorderable lists
+# File operations (universal standard)
+save = "ctrl+s"
+new_item = "ctrl+n"
+delete = "ctrl+d"        # Always shows confirmation dialog
+edit = "ctrl+e"
+
+# Search
+search = "ctrl+f"        # Not / (conflicts with text input)
+
+# Theme cycling is NOT a hotkey — use UI (Select widget in settings)
+# Refresh is NOT a hotkey — automatic or button
+# View mode toggles are NOT hotkeys — Toggle widget
