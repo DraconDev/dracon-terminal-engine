@@ -214,18 +214,18 @@ fn test_app_set_theme_calls_on_theme_change_on_all_widgets() {
 
     assert_eq!(
         count1.get(),
-        1,
-        "widget 1 should have received 1 theme change"
+        2,
+        "widget 1 should have received 2 theme changes (1 from add_widget + 1 from set_theme)"
     );
     assert_eq!(
         count2.get(),
-        1,
-        "widget 2 should have received 1 theme change"
+        2,
+        "widget 2 should have received 2 theme changes (1 from add_widget + 1 from set_theme)"
     );
     assert_eq!(
         count3.get(),
-        1,
-        "widget 3 should have received 1 theme change"
+        2,
+        "widget 3 should have received 2 theme changes (1 from add_widget + 1 from set_theme)"
     );
 }
 
@@ -241,8 +241,8 @@ fn test_app_set_theme_multiple_times_accumulates() {
 
     assert_eq!(
         count.get(),
-        3,
-        "widget should have received 3 theme change calls"
+        4,
+        "widget should have received 4 theme change calls (1 from add_widget + 3 from set_theme)"
     );
 }
 
