@@ -42,6 +42,7 @@ pub struct TreeNavigatorScene {
     theme: Theme,
     show_help: bool,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl TreeNavigatorScene {
@@ -79,6 +80,7 @@ impl TreeNavigatorScene {
             theme,
             show_help: false,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

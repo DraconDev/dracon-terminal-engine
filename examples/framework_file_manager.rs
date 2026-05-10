@@ -448,13 +448,17 @@ impl Widget for FileManagerApp {
                     plane.cells[idx].style = Styles::BOLD;
                 }
             }
+            let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+            let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+            let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
+            let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
             let shortcuts = [
                 ("↑/↓", "Navigate"),
                 ("Enter", "Open directory"),
                 ("Left", "Go up"),
-                ("t", "Cycle theme"),
-                ("?", "Toggle help"),
-                ("q", "Quit"),
+                (kb_theme, "Cycle theme"),
+                (kb_help, "Toggle help"),
+                (kb_quit, "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
@@ -491,7 +495,8 @@ impl Widget for FileManagerApp {
             return false;
         }
         if self.keybindings.matches(actions::QUIT, &key) {
-            return false; // bubble to app on_input for quit
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
         if self.keybindings.matches(actions::THEME, &key) {
             self.cycle_theme();

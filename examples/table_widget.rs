@@ -839,9 +839,10 @@ impl Widget for TableApp {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        let kb = &self.keybindings;
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -876,45 +877,42 @@ impl Widget for TableApp {
             }
         }
 
-        match key.code {
-            KeyCode::Char('q') if key.modifiers.is_empty() => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = true;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('/') => {
-                self.show_search = !self.show_search;
-                if !self.show_search {
-                    self.search_query.clear();
-                    self.rebuild_table();
-                }
-                self.dirty = true;
-                true
-            }
-            KeyCode::Esc => {
-                if !self.search_query.is_empty() {
-                    self.search_query.clear();
-                    self.rebuild_table();
-                    self.dirty = true;
-                }
-                true
-            }
-            _ => {
-                let handled = self.table.handle_key(key);
-                if handled {
-                    self.dirty = true;
-                }
-                handled
-            }
+        if kb.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if kb.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if kb.matches(actions::HELP, &key) {
+            self.show_help = true;
+            self.dirty = true;
+            return true;
+        }
+        if key.code == KeyCode::Char('/') && key.modifiers.is_empty() {
+            self.show_search = !self.show_search;
+            if !self.show_search {
+                self.search_query.clear();
+                self.rebuild_table();
+            }
+            self.dirty = true;
+            return true;
+        }
+        if kb.matches(actions::BACK, &key) {
+            if !self.search_query.is_empty() {
+                self.search_query.clear();
+                self.rebuild_table();
+                self.dirty = true;
+            }
+            return true;
+        }
+
+        let handled = self.table.handle_key(key);
+        if handled {
+            self.dirty = true;
+        }
+        handled
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {

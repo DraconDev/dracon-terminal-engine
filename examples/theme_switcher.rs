@@ -17,6 +17,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::app::App;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::theme::{Theme, ThemeKind};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
@@ -197,6 +198,7 @@ struct ThemeHeader {
     dirty: bool,
     should_quit: Arc<AtomicBool>,
     show_help: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
 }
 
 impl ThemeHeader {
@@ -207,6 +209,7 @@ impl ThemeHeader {
             dirty: true,
             should_quit,
             show_help,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 }
