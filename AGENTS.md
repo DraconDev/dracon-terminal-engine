@@ -395,9 +395,10 @@ fn cycle_theme(&mut self) {
 - `Toast` (recreated with `.with_theme()`)
 - Custom sub-widgets
 
-**Status bar hint** must include `t: theme | ?: help`:
+**Status bar hint** must reference keybinding actions:
+
 ```rust
-StatusSegment::new("Tab: switch | t: theme | ?: help | q: quit")
+StatusSegment::new("Tab: switch | Ctrl+T: theme | F1: help | Ctrl+Q: quit")
 ```
 
 ### Common Pitfalls
