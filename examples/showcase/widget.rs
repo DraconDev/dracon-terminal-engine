@@ -1691,6 +1691,18 @@ impl Showcase {
                     self.apply_filter();
                     true
                 }
+                KeyCode::Char('s') if !self.search_active => {
+                    let fields = SortField::all();
+                    let cur = fields.iter().position(|f| *f == self.sort_field).unwrap_or(0);
+                    self.sort_field = fields[(cur + 1) % fields.len()];
+                    self.apply_filter();
+                    true
+                }
+                KeyCode::Char('S') => {
+                    self.sort_ascending = !self.sort_ascending;
+                    self.apply_filter();
+                    true
+                }
                 KeyCode::Char('1') => {
                     self.primitive_toggle = !self.primitive_toggle;
                     true
