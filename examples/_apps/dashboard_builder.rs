@@ -364,7 +364,7 @@ struct Dashboard {
 }
 
 impl Dashboard {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
         let mut data = SystemData::new();
         data.refresh();
         Self {
@@ -377,6 +377,7 @@ impl Dashboard {
             should_quit,
             show_help: false,
             last_update: Instant::now(),
+            keybindings,
         }
     }
 

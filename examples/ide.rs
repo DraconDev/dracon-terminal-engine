@@ -295,7 +295,6 @@ impl IdeApp {
             breadcrumbs,
             command_palette,
             cmd_bridge,
-            show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             anim_frame: 0,
             last_anim: Instant::now(),

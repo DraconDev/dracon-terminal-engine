@@ -646,16 +646,20 @@ impl Widget for SqliteBrowser {
                     plane.cells[idx].style = Styles::BOLD;
                 }
             }
-            let kb = |action: &str| self.kb_config.get(action).unwrap_or(action);
+            let kb_edit = self.kb_config.get(actions::EDIT).unwrap_or("e");
+            let kb_refresh = self.kb_config.get(actions::REFRESH).unwrap_or("r");
+            let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+            let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+            let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
             let shortcuts = [
                 ("↑/↓/j/k", "Navigate"),
                 ("Enter", "Select / Run query"),
                 ("Tab", "Switch panel"),
-                (kb(actions::EDIT), "Edit query"),
-                (kb(actions::REFRESH), "Refresh"),
-                (kb(actions::THEME), "Cycle theme"),
-                (kb(actions::HELP), "Toggle help"),
-                (kb(actions::QUIT), "Quit"),
+                (kb_edit, "Edit query"),
+                (kb_refresh, "Refresh"),
+                (kb_theme, "Cycle theme"),
+                (kb_help, "Toggle help"),
+                (kb_quit, "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
