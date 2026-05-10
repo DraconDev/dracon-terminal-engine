@@ -679,6 +679,10 @@ fn main() -> std::io::Result<()> {
                 return;
             }
 
+            // Sync theme from App framework to TabbedApp
+            let app_theme = ctx.theme();
+            app_for_tick.borrow_mut().on_theme_change(app_theme);
+
             let mut app = app_for_tick.borrow_mut();
             let cpu = 45.0 + (tick as f64 % 20.0);
             let memory = 60.0 + (tick as f64 % 15.0);
