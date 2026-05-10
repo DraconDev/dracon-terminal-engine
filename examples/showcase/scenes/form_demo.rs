@@ -357,9 +357,6 @@ impl Scene for FormDemoScene {
                 self.dirty = true;
                 true
             }
-                    false
-                }
-            }
             _ => false,
         }
     }
