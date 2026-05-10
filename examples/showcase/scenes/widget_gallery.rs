@@ -220,6 +220,9 @@ impl Scene for WidgetGalleryScene {
             self.show_help = true;
             return true;
         }
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false;
+        }
         match key.code {
             KeyCode::Right | KeyCode::Down => {
                 self.selected = (self.selected + 1) % SLOTS.len();
