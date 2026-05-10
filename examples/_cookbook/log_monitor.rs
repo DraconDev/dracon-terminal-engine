@@ -456,7 +456,14 @@ impl Widget for LogMonitor {
         let s = self.last_log.elapsed().as_secs();
         let last_str = if s < 1 { "now" } else { &format!("{}s ago", s) };
         let auto_str = if self.auto_scroll { "auto" } else { "paused" };
-        let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  t: theme | ?: help | Esc: dismiss | c: clear | r: resume | q: quit", last_str, self.total_lines, auto_str);
+        let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  {}: theme | {}: help | {}: dismiss | {}: clear | {}: resume | {}: quit", last_str, self.total_lines, auto_str,
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::NEW_ITEM).unwrap_or("c"),
+            self.kb_config.get(actions::REFRESH).unwrap_or("r"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+        );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
             if idx < p.cells.len() {
@@ -591,9 +598,16 @@ fn main() -> Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+    let kb_input = keybindings.clone();
+
     let mon = Rc::new(RefCell::new(LogMonitor::new()));
+    mon.borrow_mut().keybindings = keybindings;
+    mon.borrow_mut().kb_config = kb_config;
     let mon_for_tick = Rc::clone(&mon);
-    let mon_for_input = Rc::clone(&mon);
+    let mon_for_input_router = Rc::clone(&mon);
+    let mon_for_input_closure = Rc::clone(&mon);
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
