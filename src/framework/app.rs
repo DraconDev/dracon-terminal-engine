@@ -200,6 +200,9 @@ impl App {
     pub fn theme(mut self, theme: Theme) -> Self {
         self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
+        for widget in self.widgets.borrow_mut().iter_mut() {
+            widget.on_theme_change(&self.theme);
+        }
         self
     }
 
