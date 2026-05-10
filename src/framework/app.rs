@@ -449,8 +449,16 @@ impl App {
                                                 }
                                             }
                                         } else if let Some(focused) = self.focus_manager.focused() {
-                                            if let Some(mut widget) = self.widget_mut(focused) {
+                                            let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
                                                 let _ = widget.handle_key(*k);
+                                                widget.current_theme()
+                                            } else {
+                                                None
+                                            };
+                                            if let Some(theme) = new_theme {
+                                                if theme.name != self.theme.name {
+                                                    self.set_theme(theme);
+                                                }
                                             }
                                         }
                                     }
