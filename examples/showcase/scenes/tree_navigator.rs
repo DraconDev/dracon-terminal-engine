@@ -84,20 +84,6 @@ impl TreeNavigatorScene {
         }
     }
 
-    fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
-            Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
-            Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
-            Theme::everforest(), Theme::monokai(), Theme::warm(),
-            Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
-        ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
-        self.tree.on_theme_change(&self.theme);
-        self.breadcrumbs.on_theme_change(&self.theme);
-    }
 }
 
 impl Scene for TreeNavigatorScene {
@@ -163,7 +149,7 @@ impl Scene for TreeNavigatorScene {
             }
         }
         let count = self.fs.total_items();
-        let status_text = format!("{} items total | ↑↓ nav | Enter: expand | B/Esc: back | t: theme | ?: help | q: quit", count);
+        let status_text = format!("{} items total | ↑↓ nav | Enter: expand | B/Esc: back | ?: help | q: quit", count);
         draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -183,10 +169,6 @@ impl Scene for TreeNavigatorScene {
         }
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
-            return true;
-        }
-        if self.keybindings.matches(actions::THEME, &key) {
-            self.cycle_theme();
             return true;
         }
         if self.tree.handle_key(key) {
@@ -314,7 +296,6 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("↑/↓", "Navigate tree"),
         ("Enter/→", "Expand folder"),
         ("←", "Collapse folder"),
-        ("t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
