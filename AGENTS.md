@@ -334,9 +334,9 @@ if self.show_help {
     let shortcuts = [
         ("↑/↓", "Navigate"),
         ("Enter", "Select"),
-        ("t", "Cycle theme"),
-        ("?", "Toggle help"),
-        ("q", "Quit"),
+        ("Ctrl+T", "Cycle theme"),
+        ("F1", "Toggle help"),
+        ("Ctrl+Q", "Quit"),
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
         let row = hy + 3 + i as u16;
