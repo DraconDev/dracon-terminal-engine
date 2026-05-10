@@ -223,7 +223,7 @@ impl Scene for FormDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Tab: next | Shift+Tab: prev | Enter: submit | t: theme | B/Esc: back | ?: help | q: quit ";
+        let nav = " Tab: next | Enter: submit | Drag ≡: reorder | t: theme | B/Esc: back | ?: help | q: quit ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -450,6 +450,7 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("Tab", "Next field"),
         ("Shift+Tab", "Previous field"),
         ("Enter", "Submit form"),
+        ("Drag ≡", "Reorder fields"),
         ("t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
