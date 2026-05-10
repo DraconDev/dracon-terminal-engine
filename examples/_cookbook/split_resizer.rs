@@ -605,15 +605,15 @@ impl SplitResizerApp {
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("Esc");
         let quit_key = self.keybindings.display(actions::QUIT).unwrap_or("q");
-        let lines = vec![
-            " Keyboard Shortcuts ",
-            " ────────────────── ",
-            " ←/→   Resize A panel",
-            " ↑/↓   Resize B panel",
-            &format!(" {}      Cycle theme ", theme_key),
-            " r      Reset sizes  ",
-            &format!(" {} / {}  Toggle help", help_key, back_key),
-            &format!(" {}      Quit         ", quit_key),
+        let lines: Vec<String> = vec![
+            " Keyboard Shortcuts ".to_string(),
+            " ────────────────── ".to_string(),
+            " ←/→   Resize A panel".to_string(),
+            " ↑/↓   Resize B panel".to_string(),
+            format!(" {}      Cycle theme ", theme_key),
+            " r      Reset sizes  ".to_string(),
+            format!(" {} / {}  Toggle help", help_key, back_key),
+            format!(" {}      Quit         ", quit_key),
         ];
         let start_y = y + 1;
         for (i, line) in lines.iter().enumerate() {
