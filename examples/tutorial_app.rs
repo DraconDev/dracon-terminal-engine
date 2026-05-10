@@ -612,45 +612,43 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         }
 
         if *self.show_help.borrow() {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 *self.show_help.borrow_mut() = false;
                 return true;
             }
             return false;
         }
 
-        match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('?') => {
-                *self.show_help.borrow_mut() = true;
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                let theme = *self.theme.borrow();
-                self.router.borrow_mut().on_theme_change(&theme);
-                true
-            }
-            KeyCode::Esc => {
-                self.router.borrow_mut().pop();
-                true
-            }
-            KeyCode::Enter => {
-                self.router.borrow_mut().push("task_detail");
-                true
-            }
-            KeyCode::Char('n') => {
-                self.router.borrow_mut().push("task_edit");
-                true
-            }
-            _ => {
-                // Delegate to current scene
-                self.router.borrow_mut().handle_key(key)
-            }
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if self.keybindings.matches(actions::HELP, &key) {
+            *self.show_help.borrow_mut() = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            let theme = *self.theme.borrow();
+            self.router.borrow_mut().on_theme_change(&theme);
+            return true;
+        }
+        if self.keybindings.matches(actions::BACK, &key) {
+            self.router.borrow_mut().pop();
+            return true;
+        }
+        if key.code == KeyCode::Enter {
+            self.router.borrow_mut().push("task_detail");
+            return true;
+        }
+        if self.keybindings.matches(actions::NEW_ITEM, &key) {
+            self.router.borrow_mut().push("task_edit");
+            return true;
+        }
+        // Delegate to current scene
+        self.router.borrow_mut().handle_key(key)
     }
 }
 

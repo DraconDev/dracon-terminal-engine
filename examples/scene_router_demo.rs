@@ -565,7 +565,9 @@ fn main() -> std::io::Result<()> {
     let router_for_input = Rc::clone(&router);
 
     let show_help_for_input = Rc::clone(&show_help);
-    let app_router = AppRouter::new(router_for_input, theme, should_quit, show_help_for_input);
+
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let app_router = AppRouter::new(router_for_input, theme, should_quit, show_help_for_input, keybindings);
 
     let mut app = App::new()?
         .title("Scene Router Demo")
