@@ -774,8 +774,11 @@ impl<'a> Ctx<'a> {
 
     /// Sets the current theme. Use this in Pattern 2 apps (on_tick closures)
     /// to change the framework theme so all child widgets receive the new theme.
+    /// The theme change is detected by `App::run()` after the tick callback
+    /// and propagated to all widgets automatically.
     pub fn set_theme(&mut self, theme: Theme) {
         *self.theme = theme;
+        self.compositor.set_clear_color(theme.bg);
     }
 
     /// Clears the entire terminal.
