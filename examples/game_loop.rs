@@ -352,13 +352,16 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
 }
 
 fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
+    let quit_key = kb.display(actions::QUIT).unwrap_or("q");
+    let help_key = kb.display(actions::HELP).unwrap_or("f1");
+    let back_key = kb.display(actions::BACK).unwrap_or("esc");
     let help_lines = [
         "╭────────────────────────────────────────────────────╮",
         "│              Game Loop Help                        │",
         "├────────────────────────────────────────────────────┤",
-        "│  q       — Quit                                    │",
-        "│  ?       — Toggle this help                        │",
-        "│  Esc     — Dismiss help                            │",
+        &format!("│  {:<7} — Quit                                    │", quit_key),
+        &format!("│  {:<7} — Toggle this help                        │", help_key),
+        &format!("│  {:<7} — Dismiss help                            │", back_key),
         "│  Space   — Toggle turbo mode                       │",
         "│  Click   — Spawn particle burst                    │",
         "├────────────────────────────────────────────────────┤",

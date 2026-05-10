@@ -95,9 +95,9 @@ impl InputDebugger {
         self.event_count += 1;
     }
 
-    fn render(&self) -> String {
+    fn render(&self, kb: &KeybindingSet) -> String {
         if self.show_help {
-            return self.render_help();
+            return self.render_help(kb);
         }
 
         let (w, h) = (80usize, 24usize);

@@ -216,14 +216,14 @@ impl LogMonitor {
 
         let lines = [
             "┌─ Log Monitor Help ─────────────┐",
-            &format!("│ {:<6} Clear all logs           │", self.kb_config.get(actions::NEW_ITEM).unwrap_or("c")),
-            &format!("│ {:<6} Resume auto-scroll       │", self.kb_config.get(actions::REFRESH).unwrap_or("r")),
-            &format!("│ {:<6} Cycle theme              │", self.kb_config.get(actions::THEME).unwrap_or("t")),
-            &format!("│ {:<6} Toggle this help         │", self.kb_config.get(actions::HELP).unwrap_or("?")),
-            &format!("│ {:<6} Dismiss help             │", self.kb_config.get(actions::BACK).unwrap_or("esc")),
+            &format!("│ {:<6} Clear all logs           │", self.keybindings.display(actions::NEW_ITEM).unwrap_or("c")),
+            &format!("│ {:<6} Resume auto-scroll       │", self.keybindings.display(actions::REFRESH).unwrap_or("r")),
+            &format!("│ {:<6} Cycle theme              │", self.keybindings.display(actions::THEME).unwrap_or("t")),
+            &format!("│ {:<6} Toggle this help         │", self.keybindings.display(actions::HELP).unwrap_or("?")),
+            &format!("│ {:<6} Dismiss help             │", self.keybindings.display(actions::BACK).unwrap_or("esc")),
             "│ Click  Toggle log level filter │",
             "│ Click  Pause/resume scroll      │",
-            &format!("│ {:<6} Quit application         │", self.kb_config.get(actions::QUIT).unwrap_or("q")),
+            &format!("│ {:<6} Quit application         │", self.keybindings.display(actions::QUIT).unwrap_or("q")),
             "└────────────────────────────────┘",
         ];
         let start_y = y + (h - lines.len()) / 2;
@@ -457,12 +457,12 @@ impl Widget for LogMonitor {
         let last_str = if s < 1 { "now" } else { &format!("{}s ago", s) };
         let auto_str = if self.auto_scroll { "auto" } else { "paused" };
         let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  {}: theme | {}: help | {}: dismiss | {}: clear | {}: resume | {}: quit", last_str, self.total_lines, auto_str,
-            self.kb_config.get(actions::THEME).unwrap_or("t"),
-            self.kb_config.get(actions::HELP).unwrap_or("?"),
-            self.kb_config.get(actions::BACK).unwrap_or("esc"),
-            self.kb_config.get(actions::NEW_ITEM).unwrap_or("c"),
-            self.kb_config.get(actions::REFRESH).unwrap_or("r"),
-            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+            self.keybindings.display(actions::THEME).unwrap_or("t"),
+            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::BACK).unwrap_or("esc"),
+            self.keybindings.display(actions::NEW_ITEM).unwrap_or("c"),
+            self.keybindings.display(actions::REFRESH).unwrap_or("r"),
+            self.keybindings.display(actions::QUIT).unwrap_or("q"),
         );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
