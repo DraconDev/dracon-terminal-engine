@@ -56,6 +56,7 @@ pub mod prelude {
         event_bus::{EventBus, Reactive, SubscriptionId},
         focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
+        keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Layout},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
