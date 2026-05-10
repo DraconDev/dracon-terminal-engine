@@ -26,6 +26,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector};
@@ -42,6 +43,8 @@ struct DebugOverlayPanel {
     theme: Theme,
     show_help: bool,
     should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl DebugOverlayPanel {
@@ -55,6 +58,8 @@ impl DebugOverlayPanel {
             theme,
             show_help: false,
             should_quit,
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 
