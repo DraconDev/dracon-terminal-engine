@@ -929,7 +929,8 @@ fn main() -> std::io::Result<()> {
     let (_w, _h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let form = SettingsForm::new(WidgetId::new(0), Theme::dracula());
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let form = SettingsForm::new(WidgetId::new(0), Theme::dracula(), keybindings.clone());
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
@@ -940,10 +941,7 @@ fn main() -> std::io::Result<()> {
         .theme(Theme::dracula());
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
     app.on_input(move |key| {
-        if key.code == KeyCode::Char('q')
-            && key.kind == KeyEventKind::Press
-            && key.modifiers.is_empty()
-        {
+        if keybindings.matches(actions::QUIT, &key) {
             should_quit.store(true, Ordering::SeqCst);
             true
         } else {
