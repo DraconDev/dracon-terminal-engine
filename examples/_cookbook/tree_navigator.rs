@@ -285,10 +285,14 @@ impl Widget for TreeNav {
         copy_plane(&mut plane, &detail_plane, detail_rect.x, detail_rect.y);
 
         // Status bar at bottom
+        let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+        let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
+        let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
         let status_text = format!(
-            "{} items | Total: {} | ↑↓: nav | Enter: expand | Left: up | t: theme | ?: help | q: quit",
+            "{} items | Total: {} | ↑↓: nav | Enter: expand | Left: up | {}: theme | {}: help | {}: quit",
             self.item_count(),
-            self.fs.total_items()
+            self.fs.total_items(),
+            kb_theme, kb_help, kb_quit
         );
         let status_bar = StatusBar::new(WidgetId::new(2)).add_segment(
             StatusSegment::new(&status_text)
