@@ -149,6 +149,8 @@ pub struct CardConfig<'a> {
     pub width: u16,
     pub height: u16,
     pub is_embedded: bool,
+    pub search_query: &'a str,
+    pub run_count: u32,
 }
 
 pub fn render_card(config: &CardConfig) -> Plane {
