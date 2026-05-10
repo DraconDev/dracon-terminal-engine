@@ -103,27 +103,6 @@ impl WidgetGalleryScene {
         Rect::new(x, y, card_w.saturating_sub(1), card_h.saturating_sub(1))
     }
 
-    fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
-            Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
-            Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
-            Theme::everforest(), Theme::monokai(), Theme::warm(),
-            Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
-        ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
-        self.checkbox.on_theme_change(&self.theme);
-        self.radio.on_theme_change(&self.theme);
-        self.slider.on_theme_change(&self.theme);
-        self.spinner.on_theme_change(&self.theme);
-        self.toggle.on_theme_change(&self.theme);
-        self.select.on_theme_change(&self.theme);
-        self.search.on_theme_change(&self.theme);
-        self.progress.on_theme_change(&self.theme);
-        self.button.on_theme_change(&self.theme);
-    }
 }
 
 impl Scene for WidgetGalleryScene {
@@ -216,7 +195,7 @@ impl Scene for WidgetGalleryScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ↑↓←→ nav | Enter: activate | t: theme | B/Esc: back | ?: help | q: quit ";
+        let nav = " ↑↓←→ nav | Enter: activate | B/Esc: back | ?: help | q: quit ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         // Help overlay
@@ -241,11 +220,6 @@ impl Scene for WidgetGalleryScene {
             self.show_help = true;
             return true;
         }
-        if self.keybindings.matches(actions::THEME, &key) {
-            self.cycle_theme();
-            return true;
-        }
-
         match key.code {
             KeyCode::Right | KeyCode::Down => {
                 self.selected = (self.selected + 1) % SLOTS.len();
@@ -391,7 +365,6 @@ fn draw_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
     let shortcuts = [
         ("↑↓←→", "Navigate cards"),
         ("Enter", "Activate widget"),
-        ("Tab/t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
