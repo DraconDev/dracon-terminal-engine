@@ -727,12 +727,12 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     app = app
         .on_input(move |key| {
-            if key.code == KeyCode::Char('?') && key.kind == KeyEventKind::Press {
+            if keybindings_input.matches(actions::HELP, &key) && key.kind == KeyEventKind::Press {
                 let mut h = show_help_input.borrow_mut();
                 *h = !*h;
                 return true;
             }
-            if key.code == KeyCode::Esc && key.kind == KeyEventKind::Press {
+            if keybindings_input.matches(actions::BACK, &key) && key.kind == KeyEventKind::Press {
                 let mut h = show_help_input.borrow_mut();
                 if *h {
                     *h = false;
@@ -740,7 +740,7 @@ fn main() -> std::io::Result<()> {
                 }
                 return false;
             }
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if keybindings_input.matches(actions::QUIT, &key) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {

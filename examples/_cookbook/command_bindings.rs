@@ -653,9 +653,9 @@ impl Widget for CommandBindings {
             let shortcuts = [
                 ("s", "Refresh all commands"),
                 ("p", "Pause/Resume auto-refresh"),
-                ("t", "Cycle theme"),
-                ("?", "Toggle this help"),
-                ("q", "Quit"),
+                (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle this help"),
+                (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let y_off = 3 + i;
@@ -751,11 +751,53 @@ fn main() -> std::io::Result<()> {
         .tick_interval(1000)
         .theme(Theme::nord())
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if key.kind != KeyEventKind::Press {
+                return false;
+            }
+            let mut view = view_for_input.borrow_mut();
+            if kb_input.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
                 true
+            } else if kb_input.matches(actions::THEME, &key) {
+                let themes = [
+                    Theme::dark(),
+                    Theme::light(),
+                    Theme::cyberpunk(),
+                    Theme::dracula(),
+                    Theme::nord(),
+                    Theme::catppuccin_mocha(),
+                    Theme::gruvbox_dark(),
+                    Theme::tokyo_night(),
+                    Theme::solarized_dark(),
+                    Theme::solarized_light(),
+                    Theme::one_dark(),
+                    Theme::rose_pine(),
+                    Theme::kanagawa(),
+                    Theme::everforest(),
+                    Theme::monokai(),
+                    Theme::warm(),
+                    Theme::cool(),
+                    Theme::forest(),
+                    Theme::sunset(),
+                    Theme::mono(),
+                ];
+                let idx = themes
+                    .iter()
+                    .position(|t| t.name == view.theme.name)
+                    .unwrap_or(0);
+                let next = themes[(idx + 1) % themes.len()];
+                view.on_theme_change(&next);
+                true
+            } else if kb_input.matches(actions::HELP, &key) {
+                view.show_help = !view.show_help;
+                view.dirty = true;
+                true
+            } else if view.show_help && kb_input.matches(actions::BACK, &key) {
+                view.show_help = false;
+                view.dirty = true;
+                true
             } else {
-                view_for_input.borrow_mut().handle_key(key)
+                view.handle_key(key)
             }
         })
         .on_tick(move |ctx, tick| {

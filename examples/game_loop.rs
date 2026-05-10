@@ -180,41 +180,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if poll_input(term.as_fd(), 0)? {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
-                for &byte in &buf[..n] {
-                    match parser.advance(byte) {
-                        Some(Event::Key(KeyEvent { code: KeyCode::Char('q'), .. })) => {
-                            write!(
-                                term,
-                                "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h"
-                            )?;
-                            term.flush()?;
-                            return Ok(());
-                        }
-                        Some(Event::Key(KeyEvent { code: KeyCode::Char('c'), ref modifiers, .. }))
-                            if modifiers.contains(KeyModifiers::CONTROL) =>
-                        {
-                            write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
-                            term.flush()?;
-                            return Ok(());
-                        }
-                        Some(Event::Key(KeyEvent { code: KeyCode::Char('?'), .. })) => {
-                            show_help = !show_help;
-                        }
-                        Some(Event::Key(KeyEvent { code: KeyCode::Esc, .. })) => {
-                            show_help = false;
-                        }
-                        Some(Event::Key(KeyEvent { code: KeyCode::Char(' '), .. })) => {
-                            state.turbo = !state.turbo;
-                        }
-                        Some(Event::Mouse(mouse)) => {
-                            if matches!(mouse.kind, MouseEventKind::Down(MouseButton::Left)) {
-                                state.spawn_burst(mouse.column as f32, mouse.row as f32, 20);
-                                state.click_count += 1;
-                            }
-                        }
-                        _ => {}
+            for &byte in &buf[..n] {
+                match parser.advance(byte) {
+                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::QUIT, key_event) => {
+                        write!(
+                            term,
+                            "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h"
+                        )?;
+                        term.flush()?;
+                        return Ok(());
                     }
+                    Some(Event::Key(KeyEvent { code: KeyCode::Char('c'), ref modifiers, .. }))
+                        if modifiers.contains(KeyModifiers::CONTROL) =>
+                    {
+                        write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
+                        term.flush()?;
+                        return Ok(());
+                    }
+                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::HELP, key_event) => {
+                        show_help = !show_help;
+                    }
+                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::DISMISS, key_event) => {
+                        show_help = false;
+                    }
+                    Some(Event::Key(KeyEvent { code: KeyCode::Char(' '), .. })) => {
+                        state.turbo = !state.turbo;
+                    }
+                    Some(Event::Mouse(mouse)) => {
+                        if matches!(mouse.kind, MouseEventKind::Down(MouseButton::Left)) {
+                            state.spawn_burst(mouse.column as f32, mouse.row as f32, 20);
+                            state.click_count += 1;
+                        }
+                    }
+                    _ => {}
                 }
+            }
             }
         }
 
