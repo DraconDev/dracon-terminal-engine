@@ -845,13 +845,15 @@ impl Widget for IdeApp {
 
         // Help overlay
         if self.show_help {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('?') => {
-                    self.show_help = false;
-                    return true;
-                }
-                _ => return true,
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::CANCEL, &key)
+                || self.keybindings.matches(actions::DISMISS, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
+                self.show_help = false;
+                return true;
             }
+            return true;
         }
 
         // Search mode
