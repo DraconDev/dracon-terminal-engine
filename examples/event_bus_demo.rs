@@ -130,7 +130,12 @@ impl EventBusApp {
         self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), t);
 
         // Status bar
-        let status = "↑/↓: counter | l: log | c: clear | t: theme | ?: help | Esc: dismiss | q: quit";
+        let status = format!("↑/↓: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+        );
         let sx = (area.width as usize - status.len().min(area.width as usize)) / 2;
         let sy = area.height - 1;
         for (i, c) in status.chars().take(area.width as usize).enumerate() {
@@ -353,8 +358,18 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+    let kb_input = keybindings.clone();
+
     let app = Rc::new(RefCell::new(EventBusApp::new(should_quit)));
+    {
+        let mut a = app.borrow_mut();
+        a.keybindings = keybindings;
+        a.kb_config = kb_config;
+    }
     let app_for_router = Rc::clone(&app);
+    let app_for_input = Rc::clone(&app);
 
     let mut app_ctx = App::new()?
         .title("Event Bus Demo")

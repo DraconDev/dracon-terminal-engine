@@ -472,14 +472,16 @@ impl Widget for MenuApp {
         }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
         }
 
         if self.context_menu.is_some() {
-            if let KeyCode::Esc = key.code {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.context_menu = None;
                 self.selected_idx = None;
             }
@@ -487,11 +489,11 @@ impl Widget for MenuApp {
         }
 
         if let Some(menu_idx) = self.active_menu {
+            if self.keybindings.matches(actions::BACK, &key) {
+                self.active_menu = None;
+                return true;
+            }
             match key.code {
-                KeyCode::Esc => {
-                    self.active_menu = None;
-                    true
-                }
                 KeyCode::Enter => {
                     if let Some(item_idx) = self.selected_idx {
                         self.do_menu(menu_idx, item_idx);
@@ -546,17 +548,18 @@ impl Widget for MenuApp {
                 }
                 _ => false,
             }
-        } else if let KeyCode::Char('q') = key.code {
+        } else if self.keybindings.matches(actions::QUIT, &key) {
+            self.toast("Goodbye!", ToastKind::Info);
             self.should_quit.store(true, Ordering::SeqCst);
             true
-        } else if let KeyCode::Esc = key.code {
+        } else if self.keybindings.matches(actions::BACK, &key) {
             self.active_menu = None;
             self.context_menu = None;
             true
-        } else if let KeyCode::Char('t') = key.code {
+        } else if self.keybindings.matches(actions::THEME, &key) {
             self.cycle_theme();
             true
-        } else if let KeyCode::Char('?') = key.code {
+        } else if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
             true
         } else {
