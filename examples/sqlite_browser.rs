@@ -77,6 +77,13 @@ impl SqliteBrowser {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme, db_path: &str) -> Self {
         let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme);
 
+        let mut kb_config = resolve_keybindings();
+        // Ensure example-specific bindings are present (fallback to current hardcoded behavior)
+        kb_config.bindings.entry(actions::THEME.to_string()).or_insert_with(|| "t".to_string());
+        kb_config.bindings.entry(actions::REFRESH.to_string()).or_insert_with(|| "r".to_string());
+        kb_config.bindings.entry(actions::EDIT.to_string()).or_insert_with(|| "e".to_string());
+        let keybindings = KeybindingSet::from_config(&kb_config);
+
         let status_bar = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new("SQLite Browser").with_fg(theme.primary))
             .add_segment(
