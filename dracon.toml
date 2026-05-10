@@ -1,0 +1,36 @@
+# Dracon Terminal Engine — Default Configuration
+#
+# This file defines the default keybindings and style for all examples.
+# Resolution order (later overrides earlier):
+#   1. Engine defaults (compiled-in)
+#   2. User global: ~/.config/dracon/dracon.toml
+#   3. Project-local: ./dracon.toml (this file)
+#
+# To customize for your user: copy this to ~/.config/dracon/dracon.toml
+# and change only the bindings you want to override.
+
+[keybindings]
+# Core navigation
+quit = "q"
+help = "?"
+theme = "t"
+back = "esc"
+submit = "enter"
+tab_next = "tab"
+tab_prev = "shift+tab"
+cancel = "esc"
+
+# Content editing
+new_item = "n"
+edit = "e"
+delete = "d"
+refresh = "r"
+search = "/"
+
+# IDE / Tab actions
+new_tab = "ctrl+t"
+close_tab = "ctrl+w"
+save = "ctrl+s"
+
+# Mouse is always enabled alongside keyboard
+# Drag handles are shown on reorderable lists
