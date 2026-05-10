@@ -350,13 +350,16 @@ impl Widget for TreeNav {
                 }
             }
             // Shortcuts
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
+            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts = [
                 ("↑/↓", "Navigate tree"),
                 ("→/Enter", "Expand folder"),
                 ("←", "Go up / Collapse"),
-                ("t", "Cycle theme"),
-                ("?", "Toggle help"),
-                ("Esc", "Dismiss help"),
+                (&kb_theme, "Cycle theme"),
+                (&kb_help, "Toggle help"),
+                (&kb_back, "Dismiss help"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;

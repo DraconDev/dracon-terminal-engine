@@ -276,13 +276,17 @@ impl TabbedApp {
             }
         }
         // Shortcuts
+        let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+        let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
+        let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+        let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
         let shortcuts = [
             ("←/→", "Switch tabs"),
             ("Click tab", "Switch tab"),
-            ("t", "Cycle theme"),
-            ("F1", "Toggle help"),
-            ("Esc", "Dismiss help"),
-            ("Ctrl+Q", "Quit"),
+            (&kb_theme, "Cycle theme"),
+            (&kb_help, "Toggle help"),
+            (&kb_back, "Dismiss help"),
+            (&kb_quit, "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
