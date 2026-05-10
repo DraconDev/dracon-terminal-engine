@@ -1428,10 +1428,14 @@ impl IdeApp {
                     ("Ctrl+F", "Search"),
                     ("F12", "Profiler"),
                     ("Ctrl+P", "Palette"),
-                    ("t", "Cycle theme"),
+                    (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
                 ],
             ),
-            ("General", &[("F1", "Toggle this help"), ("Esc", "Dismiss help"), ("Ctrl+Q", "Quit")]),
+            ("General", &[
+                (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+                (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+            ]),
         ];
 
         let mut row = sep_y + 1;
