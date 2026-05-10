@@ -220,7 +220,14 @@ impl Widget for FormApp {
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
-        let hint = "Tab: next | Enter: submit | t: theme | ?: help | Esc: dismiss | q: quit";
+        let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+        let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+        let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
+        let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
+        let hint = format!(
+            "Tab: next | Enter: submit | {}: theme | {}: help | {}: dismiss | {}: quit",
+            kb_theme, kb_help, kb_back, kb_quit
+        );
         for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
