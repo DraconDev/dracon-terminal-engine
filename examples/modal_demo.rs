@@ -44,15 +44,17 @@ use ratatui::layout::Rect;
 struct HelpOverlay<'a> {
     modal: Modal<'a>,
     visible: bool,
+    keybindings: KeybindingSet,
 }
 
 impl<'a> HelpOverlay<'a> {
-    fn new() -> Self {
+    fn new(keybindings: KeybindingSet) -> Self {
         let modal = Modal::new("Keyboard Shortcuts").with_size(40, 12);
 
         Self {
             modal,
             visible: false,
+            keybindings,
         }
     }
 }
@@ -100,12 +102,13 @@ impl<'a> Widget for HelpOverlay<'a> {
         }
         let mut plane = self.modal.render(area);
 
+        let kb = &self.keybindings;
         let shortcuts = [
-            ("t", "Cycle theme"),
-            ("F1", "Toggle help"),
-            ("Ctrl+Q", "Quit app"),
+            (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (kb.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
+            (kb.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit app"),
             ("Tab", "Cycle focus"),
-            ("Esc", "Close modal"),
+            (kb.display(actions::BACK).unwrap_or("esc"), "Close modal"),
             ("Enter", "Confirm"),
         ];
 
