@@ -14,7 +14,7 @@ use std::time::{Duration, Instant};
 use rand::Rng;
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::LogViewer;
@@ -48,7 +48,6 @@ struct LogMonitor {
     all_logs: Vec<String>,
     show_help: bool,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl LogMonitor {
@@ -69,7 +68,6 @@ impl LogMonitor {
             all_logs: Vec::new(),
             show_help: false,
             keybindings: KeybindingSet::default(),
-            kb_config: KeybindingConfig::default(),
         }
     }
 
@@ -599,12 +597,10 @@ fn main() -> Result<()> {
         .unwrap_or((80, 24));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
     let mon = Rc::new(RefCell::new(LogMonitor::new()));
     mon.borrow_mut().keybindings = keybindings;
-    mon.borrow_mut().kb_config = kb_config;
     let mon_for_tick = Rc::clone(&mon);
     let mon_for_input_router = Rc::clone(&mon);
     let mon_for_input_closure = Rc::clone(&mon);

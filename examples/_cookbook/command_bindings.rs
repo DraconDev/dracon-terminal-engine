@@ -44,7 +44,6 @@ struct CommandBindings {
     cpu_value: f32,
     show_help: bool,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl CommandBindings {
@@ -69,7 +68,6 @@ impl CommandBindings {
             cpu_value: 50.0,
             show_help: false,
             keybindings: KeybindingSet::default(),
-            kb_config: KeybindingConfig::default(),
         }
     }
 
@@ -739,12 +737,10 @@ fn main() -> std::io::Result<()> {
     std::thread::sleep(Duration::from_millis(500));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
     let view = Rc::new(RefCell::new(CommandBindings::new()));
     view.borrow_mut().keybindings = keybindings;
-    view.borrow_mut().kb_config = kb_config;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
     let view_for_input = Rc::clone(&view);

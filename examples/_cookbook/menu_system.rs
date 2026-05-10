@@ -46,7 +46,6 @@ struct MenuApp {
     theme: Theme,
     show_help: bool,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl MenuApp {

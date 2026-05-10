@@ -89,7 +89,6 @@ struct Table {
     dirty: bool,
     show_help: bool,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl Table {
@@ -112,7 +111,6 @@ impl Table {
             dirty: true,
             show_help: false,
             keybindings: KeybindingSet::default(),
-            kb_config: KeybindingConfig::default(),
         }
     }
 
@@ -702,14 +700,12 @@ fn main() -> std::io::Result<()> {
         .unwrap_or((80, 24));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
     let mut t = Table::new();
     t.set_area(Rect::new(0, 0, w, h));
     t.vis = (h as usize).saturating_sub(5).max(1);
     t.keybindings = keybindings;
-    t.kb_config = kb_config;
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);

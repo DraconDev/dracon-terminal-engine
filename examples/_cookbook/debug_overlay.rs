@@ -44,7 +44,6 @@ struct DebugOverlayPanel {
     show_help: bool,
     should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl DebugOverlayPanel {
@@ -59,7 +58,6 @@ impl DebugOverlayPanel {
             show_help: false,
             should_quit,
             keybindings: KeybindingSet::default(),
-            kb_config: KeybindingConfig::default(),
         }
     }
 
@@ -426,11 +424,9 @@ fn main() -> io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_config = resolve_keybindings();
 
     let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme, should_quit);
     debug_panel.keybindings = keybindings;
-    debug_panel.kb_config = kb_config;
     // panel.set_area is called by add_widget which sets area from Rect
 
     let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(theme);
