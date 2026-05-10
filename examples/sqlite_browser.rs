@@ -70,7 +70,6 @@ struct SqliteBrowser {
     toasts: Vec<Toast>,
     dirty: bool,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
 }
 
 impl SqliteBrowser {
