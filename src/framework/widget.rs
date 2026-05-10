@@ -91,6 +91,16 @@ pub trait Widget {
     /// Allows widgets to update their internal theme-dependent state.
     fn on_theme_change(&mut self, _theme: &crate::framework::theme::Theme) {}
 
+    /// Returns the widget's current theme, if it manages its own theme state.
+    ///
+    /// Used by the framework to detect when a widget has changed its theme
+    /// independently (e.g. Pattern-2 apps cycling themes via handle_key) and
+    /// sync it back to the App framework. Returns `None` by default — widgets
+    /// that manage their own theme should override this.
+    fn current_theme(&self) -> Option<crate::framework::theme::Theme> {
+        None
+    }
+
     /// Handles a keyboard event.
     /// Returns `true` if the event was consumed, `false` if it should bubble.
     fn handle_key(&mut self, _key: KeyEvent) -> bool {
