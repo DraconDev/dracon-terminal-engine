@@ -135,9 +135,9 @@ impl DebugOverlayPanel {
         // Draw help text
         let shortcuts = [
             ("F12", "Toggle overlay"),
-            (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Close overlay"),
-            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
+            (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Close overlay"),
+            (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = y + 2 + i as u16;

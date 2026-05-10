@@ -240,9 +240,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut p = Plane::new(1, w, h);
 
             if show_help {
-                render_help(&mut p, w, h);
+                render_help(&mut p, w, h, &keybindings);
             } else {
-                render_game(&mut p, &state, w, h, fps);
+                render_game(&mut p, &state, w, h, fps, &keybindings);
             }
 
             compositor.add_plane(p);
@@ -260,7 +260,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32) {
+fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &KeybindingSet) {
     // Stars
     let t = state.frame_count as f32 * 0.05;
     for star in &state.stars {

@@ -254,13 +254,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 term,
                                 "├────────────────────────────────────────────────────┤\r\n"
                             )?;
+                            let quit_key = keybindings.display(actions::QUIT).unwrap_or("q");
+                            let help_key = keybindings.display(actions::HELP).unwrap_or("f1");
                             write!(
                                 term,
-                                "│  q          — Quit                                 │\r\n"
+                                "│  {:<10} — Quit                                 │\r\n",
+                                quit_key
                             )?;
                             write!(
                                 term,
-                                "│  ?          — Toggle this help                     │\r\n"
+                                "│  {:<10} — Toggle this help                     │\r\n",
+                                help_key
                             )?;
                             write!(
                                 term,
