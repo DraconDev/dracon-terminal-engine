@@ -83,15 +83,6 @@ impl ThemeSwitcherScene {
         }
     }
 
-    fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
-        self.theme = THEMES[self.theme_index].1();
-        self.checkbox.on_theme_change(&self.theme);
-        self.button.on_theme_change(&self.theme);
-        self.gauge.on_theme_change(&self.theme);
-        self.badge.on_theme_change(&self.theme);
-    }
-
     fn render_swatch(&self, plane: &mut Plane, cfg: SwatchConfig) {
         let SwatchConfig { x, y, w, h, theme, selected } = cfg;
         let border = if selected { self.theme.primary } else { self.theme.outline };
@@ -221,7 +212,7 @@ impl Scene for ThemeSwitcherScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " t: cycle theme | B/Esc: back | ?: help | q: quit ";
+        let nav = " B/Esc: back | ?: help | q: quit ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -242,11 +233,6 @@ impl Scene for ThemeSwitcherScene {
         }
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
-            self.dirty = true;
-            return true;
-        }
-        if self.keybindings.matches(actions::THEME, &key) {
-            self.cycle_theme();
             self.dirty = true;
             return true;
         }
@@ -363,7 +349,6 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];

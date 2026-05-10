@@ -191,7 +191,6 @@ impl Scene for ModalDemoScene {
             let shortcuts = [
                 ("?", "Toggle help"),
                 ("c", "Show confirm"),
-                ("t", "Cycle theme"),
                 ("B/Esc", "Back to showcase"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
@@ -273,7 +272,7 @@ impl Scene for ModalDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ?: help | c: confirm | t: theme | B/Esc: back | q: quit ";
+        let nav = " ?: help | c: confirm | B/Esc: back | q: quit ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         plane
@@ -398,22 +397,7 @@ impl Scene for ModalDemoScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-impl ModalDemoScene {
-    fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
-            Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
-            Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
-            Theme::everforest(), Theme::monokai(), Theme::warm(),
-            Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
-        ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
-        self.help_modal.on_theme_change(&self.theme);
-        self.confirm_dialog.on_theme_change(&self.theme);
-    }
-}
+
 
 fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
     for (i, ch) in text.chars().enumerate() {
