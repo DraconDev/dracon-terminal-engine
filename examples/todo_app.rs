@@ -809,6 +809,8 @@ fn main() -> std::io::Result<()> {
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     let _ = app
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
@@ -834,12 +836,12 @@ fn main() -> std::io::Result<()> {
 
                 let shortcuts = [
                     ("↑/↓", "Navigate tasks"),
-                    ("Ctrl+N", "New task"),
+                    (keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"), "New task"),
                     ("Enter", "View task detail / confirm"),
-                    ("Esc", "Go back / cancel"),
-                    ("t", "Cycle theme"),
-                    ("F1", "Toggle this help"),
-                    ("Ctrl+Q", "Quit"),
+                    (keybindings.display(actions::BACK).unwrap_or("Esc"), "Go back / cancel"),
+                    (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                    (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+                    (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
                 ];
 
                 let hw = 42u16.min(w.saturating_sub(4));
