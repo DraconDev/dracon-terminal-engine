@@ -61,6 +61,8 @@ impl EventBusApp {
             should_quit,
             dirty: true,
             last_event: None,
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 

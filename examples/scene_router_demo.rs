@@ -479,52 +479,49 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        let kb = &self.keybindings;
 
         if *self.show_help.borrow() {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
                 *self.show_help.borrow_mut() = false;
                 return true;
             }
             return false;
         }
 
-        match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('?') => {
-                *self.show_help.borrow_mut() = true;
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                let theme = *self.theme.borrow();
-                self.router.borrow_mut().on_theme_change(&theme);
-                true
-            }
-            KeyCode::Esc => {
-                self.router.borrow_mut().pop();
-                true
-            }
-            KeyCode::Enter => {
-                let current = self.router.borrow().current().map(|s| s.to_string());
-                if let Some(current) = current {
-                    if current.as_str() == "home" {
-                        let router = self.router.borrow();
-                        // Check selected item on home screen - we'd need to query it
-                        // For simplicity, just go to profile
-                        drop(router);
-                        self.router.borrow_mut().push("profile");
-                    }
-                }
-                true
-            }
-            _ => {
-                // Delegate to current scene
-                self.router.borrow_mut().handle_key(key)
-            }
+        if kb.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if kb.matches(actions::HELP, &key) {
+            *self.show_help.borrow_mut() = true;
+            return true;
+        }
+        if kb.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            let theme = *self.theme.borrow();
+            self.router.borrow_mut().on_theme_change(&theme);
+            return true;
+        }
+        if kb.matches(actions::BACK, &key) {
+            self.router.borrow_mut().pop();
+            return true;
+        }
+        if key.code == KeyCode::Enter {
+            let current = self.router.borrow().current().map(|s| s.to_string());
+            if let Some(current) = current {
+                if current.as_str() == "home" {
+                    let router = self.router.borrow();
+                    // Check selected item on home screen - we'd need to query it
+                    // For simplicity, just go to profile
+                    drop(router);
+                    self.router.borrow_mut().push("profile");
+                }
+            }
+            return true;
+        }
+        // Delegate to current scene
+        self.router.borrow_mut().handle_key(key)
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
