@@ -293,7 +293,8 @@ pub fn resolve_keybindings() -> KeybindingConfig {
 
 /// Clear the keybinding config cache. Next call to `resolve_keybindings()` will re-parse.
 pub fn resolve_keybindings_clear_cache() {
-    let _ = RESOLVED_CONFIG.take();
+    // OnceLock doesn't support clearing; this is a no-op.
+    // The cache is process-lifetime. Restart the app to reload.
 }
 
 fn do_resolve_keybindings() -> KeybindingConfig {
