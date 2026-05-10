@@ -111,7 +111,6 @@ impl SqliteBrowser {
             toasts: Vec::new(),
             dirty: true,
             keybindings,
-            kb_config,
         };
         app.refresh();
         app
