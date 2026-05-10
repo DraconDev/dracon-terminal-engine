@@ -731,7 +731,8 @@ impl Widget for Showcase {
         if let Ok(guard) = self.returned_from.lock() {
             if let Some((ref name, time)) = *guard {
                 if time.elapsed() < Duration::from_secs(3) {
-                    let msg = format!("Returned from {} — Press ? for help", name);
+                    let help_key = self.keybindings.display(actions::HELP).unwrap_or("F1");
+                    let msg = format!("Returned from {} — Press {} for help", name, help_key);
                     let msg_y = (area.height as usize).saturating_sub(3);
                     let msg_x = ((area.width as usize).saturating_sub(msg.len() + 4)) / 2;
                     let msg_w = msg.len() + 4;
@@ -1015,22 +1016,22 @@ impl Widget for Showcase {
             );
 
             // Content
-            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
-            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
-            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
-            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t").to_string();
+            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1").to_string();
+            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q").to_string();
+            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc").to_string();
             let kb_quit_back = format!("{} / {}", kb_quit, kb_back);
-            let lines = [
+            let lines: Vec<(&str, &str)> = vec![
                 ("↑↓←→", "Navigate cards"),
                 ("Enter", "Launch selected"),
                 ("Space", "Show details"),
                 ("/", "Focus search"),
                 ("Tab", "Cycle categories"),
-                (kb_theme, "Cycle theme"),
+                (&kb_theme, "Cycle theme"),
                 ("d", "Debug overlay"),
                 ("i", "Input debug"),
-                (kb_quit_back.as_str(), "Quit"),
-                (kb_help, "Toggle this help"),
+                (&kb_quit_back, "Quit"),
+                (&kb_help, "Toggle this help"),
                 ("", ""),
                 ("Mouse", ""),
                 ("Click", "Select card"),
