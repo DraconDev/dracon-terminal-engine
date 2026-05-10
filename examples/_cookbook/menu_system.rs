@@ -65,11 +65,20 @@ impl MenuApp {
             MenuLabel("󰰈 View"),
             MenuLabel("󰋽 Help"),
         ];
+        let kb_config = resolve_keybindings();
+        let keybindings = KeybindingSet::from_config(&kb_config);
+        let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+        let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
+        let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
+        let kb_quit = kb_config.get(actions::QUIT).unwrap_or("Ctrl+Q");
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
             .add_segment(
-                StatusSegment::new("Ctrl+N|O|S: New|Open|Save | t: theme | ?: help | Esc: dismiss | Ctrl+Q: Quit")
-                    .with_fg(theme.fg_muted),
+                StatusSegment::new(&format!(
+                    "Ctrl+N|O|S: New|Open|Save | {}: theme | {}: help | {}: dismiss | {}: Quit",
+                    kb_theme, kb_help, kb_back, kb_quit
+                ))
+                .with_fg(theme.fg_muted),
             );
         Self {
             id,
@@ -84,6 +93,8 @@ impl MenuApp {
             should_quit,
             theme,
             show_help: false,
+            keybindings,
+            kb_config,
         }
     }
 

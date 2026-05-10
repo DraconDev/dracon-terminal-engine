@@ -402,34 +402,31 @@ impl Widget for InputRouter {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        let kb = &state.keybindings;
 
         if state.show_help {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('?') => {
-                    state.show_help = false;
-                    state.dirty = true;
-                    return true;
-                }
-                _ => return true,
+            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
+                state.show_help = false;
+                state.dirty = true;
+                return true;
             }
+            return true;
         }
 
-        match key.code {
-            KeyCode::Char('q') => {
-                state.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                state.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                state.show_help = !state.show_help;
-                state.dirty = true;
-                true
-            }
-            _ => state.counter.handle_key(key),
+        if kb.matches(actions::QUIT, &key) {
+            state.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if kb.matches(actions::THEME, &key) {
+            state.cycle_theme();
+            return true;
+        }
+        if kb.matches(actions::HELP, &key) {
+            state.show_help = !state.show_help;
+            state.dirty = true;
+            return true;
+        }
+        state.counter.handle_key(key)
     }
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let mut state = self.state.borrow_mut();
@@ -577,7 +574,9 @@ fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit)));
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
+    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings)));
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 
