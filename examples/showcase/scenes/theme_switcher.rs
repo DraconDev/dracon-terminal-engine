@@ -334,17 +334,23 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
         }
     }
 
-    for x in hx..hx + hw {
+    for x in hx + 1..hx + hw - 1 {
         let top = (hy * area.width + x) as usize;
         let bot = ((hy + hh - 1) * area.width + x) as usize;
         if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
         if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
     }
-    for y in hy..hy + hh {
+    for y in hy + 1..hy + hh - 1 {
         let left = (y * area.width + hx) as usize;
         let right = (y * area.width + hx + hw - 1) as usize;
         if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
         if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+    }
+    // Rounded corners
+    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+    for (ch, cx, cy) in corners {
+        let idx = (cy * area.width + cx) as usize;
+        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
     }
 
     let title = "Theme Switcher Help";
