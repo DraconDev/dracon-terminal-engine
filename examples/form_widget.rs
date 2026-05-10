@@ -13,6 +13,7 @@
 //!   q              — quit
 
 use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::Form;
@@ -30,6 +31,8 @@ struct FormApp {
     show_help: bool,
     submitted: bool,
     submit_time: Option<std::time::Instant>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 impl FormApp {
