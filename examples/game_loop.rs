@@ -163,6 +163,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
         .ok();
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     let mut frames = 0;
     let mut fps = 0;
     let mut fps_timer = Instant::now();

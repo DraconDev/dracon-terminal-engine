@@ -722,47 +722,6 @@ impl Widget for CommandBindings {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                let themes = [
-                    Theme::dark(),
-                    Theme::light(),
-                    Theme::cyberpunk(),
-                    Theme::dracula(),
-                    Theme::nord(),
-                    Theme::catppuccin_mocha(),
-                    Theme::gruvbox_dark(),
-                    Theme::tokyo_night(),
-                    Theme::solarized_dark(),
-                    Theme::solarized_light(),
-                    Theme::one_dark(),
-                    Theme::rose_pine(),
-                    Theme::kanagawa(),
-                    Theme::everforest(),
-                    Theme::monokai(),
-                    Theme::warm(),
-                    Theme::cool(),
-                    Theme::forest(),
-                    Theme::sunset(),
-                    Theme::mono(),
-                ];
-                let idx = themes
-                    .iter()
-                    .position(|t| t.name == self.theme.name)
-                    .unwrap_or(0);
-                let next = themes[(idx + 1) % themes.len()];
-                self.on_theme_change(&next);
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Esc if self.show_help => {
-                self.show_help = false;
-                self.dirty = true;
-                true
-            }
             _ => false,
         }
     }
@@ -772,7 +731,13 @@ fn main() -> std::io::Result<()> {
     println!("Command Bindings — s=refresh all, p=pause, Ctrl+C=quit\nStarting...");
     std::thread::sleep(Duration::from_millis(500));
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+    let kb_input = keybindings.clone();
+
     let view = Rc::new(RefCell::new(CommandBindings::new()));
+    view.borrow_mut().keybindings = keybindings;
+    view.borrow_mut().kb_config = kb_config;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
     let view_for_input = Rc::clone(&view);

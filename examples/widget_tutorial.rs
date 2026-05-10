@@ -641,6 +641,13 @@ fn main() -> std::io::Result<()> {
     let current_theme_idx = 0;
     let current_theme = themes[current_theme_idx];
 
+    let kb_config = resolve_keybindings();
+    let keybindings = KeybindingSet::from_config(&kb_config);
+    let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+    let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
+    let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
+    let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
+
     // ---- Create multiple ColorPicker instances ----
     //
     // We'll create a 2x2 grid of color pickers with different initial colors
@@ -665,12 +672,13 @@ fn main() -> std::io::Result<()> {
         .with_theme(current_theme);
 
     // Header and footer labels
-    let mut header = dracon_terminal_engine::framework::widgets::Label::new(
-        "←/→ to change color | Click swatch to cycle | Tab to navigate | ?: help | Esc: dismiss",
-    );
+    let mut header = dracon_terminal_engine::framework::widgets::Label::new(&format!(
+        "←/→ to change color | Click swatch to cycle | Tab to navigate | {}: help | {}: dismiss",
+        kb_help, kb_back
+    ));
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
-        "Theme: {} | ?: help | Esc: dismiss | q: quit",
-        theme_names[current_theme_idx]
+        "Theme: {} | {}: help | {}: dismiss | {}: quit",
+        theme_names[current_theme_idx], kb_help, kb_back, kb_quit
     ));
 
     // Propagate initial theme to all widgets
