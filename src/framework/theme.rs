@@ -1079,6 +1079,7 @@ impl Theme {
     }
 }
 
+impl Theme {
     /// Look up a theme by its `.name` field (case-insensitive).
     ///
     /// Supports all built-in themes: nord, dark, light, high_contrast,
