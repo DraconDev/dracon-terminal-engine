@@ -480,25 +480,27 @@ impl Widget for FileManagerApp {
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        match key.code {
-            KeyCode::Esc if self.show_help => {
+        if self.show_help {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.show_help = false;
                 self.dirty = true;
-                true
+                return true;
             }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('q') => {
-                // Handled by app on_input
-                false
-            }
+            return false;
+        }
+        if self.keybindings.matches(actions::QUIT, &key) {
+            return false; // bubble to app on_input for quit
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        match key.code {
             KeyCode::Down if self.selected + 1 < self.entries.len() => {
                 self.selected += 1;
                 self.list.scroll_to(self.selected);

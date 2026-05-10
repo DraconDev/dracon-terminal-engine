@@ -83,15 +83,15 @@ impl KeybindingConfig {
     /// Uses modifier keys to avoid conflicts with text input.
     pub fn defaults() -> Self {
         let mut bindings = HashMap::new();
-        // Core (always safe)
-        bindings.insert(actions::QUIT.to_string(), "ctrl+q".to_string());
+        // Core (TUI-friendly defaults)
+        bindings.insert(actions::QUIT.to_string(), "q".to_string());
         bindings.insert(actions::CANCEL.to_string(), "esc".to_string());
         bindings.insert(actions::BACK.to_string(), "esc".to_string());
         bindings.insert(actions::SUBMIT.to_string(), "enter".to_string());
         bindings.insert(actions::TAB_NEXT.to_string(), "tab".to_string());
         bindings.insert(actions::TAB_PREV.to_string(), "shift+tab".to_string());
-        // Help (F1 avoids ? conflict)
-        bindings.insert(actions::HELP.to_string(), "f1".to_string());
+        // Help (? is standard for TUI help overlays)
+        bindings.insert(actions::HELP.to_string(), "?".to_string());
         // Tabs (browser/IDE standard)
         bindings.insert(actions::NEW_TAB.to_string(), "ctrl+t".to_string());
         bindings.insert(actions::CLOSE_TAB.to_string(), "ctrl+w".to_string());

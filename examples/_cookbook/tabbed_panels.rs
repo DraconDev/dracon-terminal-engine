@@ -517,28 +517,30 @@ impl Widget for TabbedApp {
             return false;
         }
 
-        // Dismiss help on Esc or ?
+        // Dismiss help on back or help key
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
         }
 
         // Toggle help
-        if key.code == KeyCode::Char('?') {
+        if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
             return true;
         }
 
         // Cycle theme
-        if key.code == KeyCode::Char('t') {
+        if self.keybindings.matches(actions::THEME, &key) {
             self.cycle_theme();
             return true;
         }
 
-        // Quit on 'q'
-        if key.code == KeyCode::Char('q') {
+        // Quit
+        if self.keybindings.matches(actions::QUIT, &key) {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }
