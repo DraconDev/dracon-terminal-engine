@@ -135,9 +135,9 @@ impl DebugOverlayPanel {
         // Draw help text
         let shortcuts = [
             ("F12", "Toggle overlay"),
-            ("ESC", "Close overlay"),
-            ("t", "Cycle theme"),
-            ("q", "Quit"),
+            (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Close overlay"),
+            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = y + 2 + i as u16;
@@ -343,7 +343,12 @@ impl Widget for DebugOverlayPanel {
 
         // Status bar
         let status_y = plane.height.saturating_sub(1);
-        let hint = "F12: toggle | t: theme | ?: help | Esc: dismiss | q: quit";
+        let hint = format!("F12: toggle | {}: theme | {}: help | {}: dismiss | {}: quit",
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+        );
         for (i, c) in hint
             .chars()
             .take((plane.width as usize).saturating_sub(2))
@@ -372,7 +377,7 @@ impl Widget for DebugOverlayPanel {
 
         // Handle help overlay first
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
             }
             return true;
@@ -383,19 +388,19 @@ impl Widget for DebugOverlayPanel {
                 self.toggle();
                 true
             }
-            KeyCode::Char('q') => {
+            _ if self.keybindings.matches(actions::QUIT, &key) => {
                 self.should_quit.store(true, Ordering::SeqCst);
                 true
             }
-            KeyCode::Esc if self.visible => {
+            _ if self.visible && self.keybindings.matches(actions::BACK, &key) => {
                 self.toggle();
                 true
             }
-            KeyCode::Char('t') => {
+            _ if self.keybindings.matches(actions::THEME, &key) => {
                 self.cycle_theme();
                 true
             }
-            KeyCode::Char('?') => {
+            _ if self.keybindings.matches(actions::HELP, &key) => {
                 self.show_help = true;
                 true
             }
