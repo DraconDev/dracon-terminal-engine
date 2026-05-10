@@ -99,6 +99,8 @@ impl ChatState {
             theme,
             dirty: true,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 
