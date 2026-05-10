@@ -512,35 +512,35 @@ impl Widget for Dashboard {
             return false;
         }
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches("back", &key) || self.keybindings.matches("help", &key) {
                 self.show_help = false;
                 return true;
             }
             return true;
         }
 
+        if self.keybindings.matches("quit", &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches("theme", &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches("refresh", &key) {
+            self.data.refresh();
+            self.last_update = Instant::now();
+            return true;
+        }
+        if self.keybindings.matches("help", &key) {
+            self.show_help = !self.show_help;
+            return true;
+        }
+        if key.code == KeyCode::Char('p') {
+            self.paused = !self.paused;
+            return true;
+        }
         match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('p') => {
-                self.paused = !self.paused;
-                true
-            }
-            KeyCode::Char('r') => {
-                self.data.refresh();
-                self.last_update = Instant::now();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                true
-            }
             KeyCode::Up => {
                 if self.data.selected_process > 0 {
                     self.data.selected_process -= 1;
