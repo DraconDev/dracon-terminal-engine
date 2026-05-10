@@ -838,19 +838,77 @@ fn render_tree_connectors(plane: &mut Plane, x: u16, y: u16, prefix: &str, theme
 
 ## Keybinding Conventions
 
-### Standard Keybindings (All Examples Must Implement)
+### Config-Driven Keybindings
 
-| Key | Action | Modifier Guard Required |
-|-----|--------|------------------------|
-| `q` | Quit | No (pass through to app) |
-| `?` | Toggle help overlay | Yes (`key.modifiers.is_empty()`) |
-| `Esc` | Dismiss help / go back | No |
-| `t` | Cycle theme | Yes (`key.modifiers.is_empty()`) |
-| `Tab` | Navigate fields | No |
+All examples use the framework's `KeybindingSet` system from `src/framework/keybindings.rs`:
+
+```rust
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+
+// In your app struct:
+keybindings: KeybindingSet,
+
+// In new():
+keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+
+// In handle_key():
+if self.keybindings.matches(actions::QUIT, &key) {
+    self.should_quit.store(true, Ordering::SeqCst);
+    return true;
+}
+```
+
+**Never hardcode `KeyCode::Char('q')`, `KeyCode::Char('?')`, `KeyCode::Char('t')`, or `KeyCode::Esc` for standard actions.** Always use `keybindings.matches()` so users can customize via `dracon.toml`.
+
+### Standard Actions
+
+| Action | Constant | Default | Purpose |
+|--------|----------|---------|---------|
+| Quit | `actions::QUIT` | `ctrl+q` | Exit application |
+| Help | `actions::HELP` | `f1` | Toggle help overlay |
+| Back | `actions::BACK` | `esc` | Dismiss/go back |
+| Theme | `actions::THEME` | `ctrl+t` | Cycle theme |
+| Submit | `actions::SUBMIT` | `enter` | Confirm/submit |
+| Search | `actions::SEARCH` | `ctrl+f` | Open search |
+| New | `actions::NEW` | `ctrl+n` | New item/tab |
+| Close | `actions::CLOSE` | `ctrl+w` | Close item/tab |
+| Save | `actions::SAVE` | `ctrl+s` | Save |
+| Copy | `actions::COPY` | `ctrl+c` | Copy (when not quitting) |
+| Paste | `actions::PASTE` | `ctrl+v` | Paste |
+| Cut | `actions::CUT` | `ctrl+x` | Cut |
+| Delete | `actions::DELETE` | `delete` | Delete |
+| Refresh | `actions::REFRESH` | `f5` | Refresh/reload |
+| Pause | `actions::PAUSE` | `ctrl+p` | Pause/resume |
+
+### Conservative Philosophy
+
+**Modifier keys only for actions.** Single-letter keys conflict with text input:
+
+```rust
+// WRONG — 'q' quits even while typing in a search box
+KeyCode::Char('q') => { self.quit(); true }
+
+// RIGHT — Ctrl+Q quits, 'q' types normally
+if self.keybindings.matches(actions::QUIT, &key) { self.quit(); true }
+```
+
+This applies to all global actions: quit, help, theme, search, new, close, save.
+
+### Non-Configurable Keys (Keep Hardcoded)
+
+These are universal navigation/input primitives and should NOT be configurable:
+
+| Key | Purpose | Why Hardcoded |
+|-----|---------|---------------|
+| `↑/↓/←/→` | Navigate lists, move cursor | Universal |
+| `Enter` | Select, submit, expand | Universal |
+| `Tab` / `Shift+Tab` | Focus next/previous field | Universal |
+| `Backspace` | Delete character | Text input primitive |
+| `Char(c)` | Type character | Text input primitive |
 
 ### Modifier Guards
 
-**Always check `key.modifiers.is_empty()` on `Char` handlers** to prevent Ctrl+X from triggering single-char actions:
+**Always check `key.modifiers.is_empty()` on non-configurable `Char` handlers** to prevent Ctrl+X from triggering actions:
 
 ```rust
 // WRONG — Ctrl+P triggers pause
@@ -866,11 +924,11 @@ KeyCode::Char('p') if key.modifiers.is_empty() => {
 }
 ```
 
-This applies to ALL single-character handlers: `t`, `?`, `q` (if not handled by app), `n`, `d`, `p`, `s`, etc.
+This applies to app-specific shortcuts that remain hardcoded (e.g., `p` for pause in dashboard_builder).
 
 ### Backspace Semantics
 
-**Backspace is for delete only, never navigation.** Use `Esc` or arrow keys for going back/up:
+**Backspace is for delete only, never navigation.** Use `Esc` (BACK action) or arrow keys for going back/up:
 
 ```rust
 // WRONG — Backspace as navigation
@@ -895,9 +953,9 @@ KeyCode::Backspace if !self.input.is_empty() => {
 ### Help Overlay Standard
 
 All help overlays MUST:
-1. Toggle with `?` key
-2. Dismiss with `Esc` or `?`
-3. Mention `Esc: dismiss` in status bar / footer
+1. Toggle with help action (`F1` by default)
+2. Dismiss with back action (`Esc` by default) or re-pressing help
+3. Mention dismiss key in status bar / footer
 4. Use rounded corners (`╭╮╰╯`) with `theme.outline`
 5. Use `theme.surface_elevated` for background
 6. Show title centered with `theme.primary` + `Styles::BOLD`
@@ -906,10 +964,38 @@ All help overlays MUST:
 ### Status Bar / Footer Text
 
 All status bars MUST include:
-- `t: theme` (if theme cycling is supported)
-- `?: help` (if help overlay exists)
-- `Esc: dismiss` or `Esc: back` (if applicable)
-- `q: quit` (or equivalent quit shortcut)
+- Help key reference (e.g., `F1: help`)
+- Back/dismiss key reference (e.g., `Esc: dismiss`)
+- Quit key reference (e.g., `Ctrl+Q: quit`)
+- Theme key reference if theme cycling is supported (e.g., `Ctrl+T: theme`)
+
+### dracon.toml Configuration
+
+Users can override keybindings via `dracon.toml`:
+
+```toml
+[keybindings]
+quit = "ctrl+q"
+help = "f1"
+back = "esc"
+theme = "ctrl+t"
+search = "ctrl+f"
+new = "ctrl+n"
+close = "ctrl+w"
+save = "ctrl+s"
+```
+
+Resolution order:
+1. Engine defaults (conservative modifier keys)
+2. User global: `~/.config/dracon/dracon.toml`
+3. Project local: `./dracon.toml` (highest priority)
+
+### Showcase Launcher Keybinding Rules
+
+The showcase launcher is the **single source of truth** for theme cycling:
+- `t`/`T` cycles the global theme and propagates to all scenes via `scene_router.on_theme_change()`
+- Individual scenes must NOT implement their own `cycle_theme()` — they receive theme changes via `on_theme_change()`
+- All scenes must check `actions::BACK` **before** delegating to widgets to ensure `Esc` always works to go back
 
 ## Deferred / Out of Scope
 
