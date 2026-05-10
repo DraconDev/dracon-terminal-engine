@@ -263,7 +263,7 @@ impl<'a> ModalDemoApp<'a> {
                 }
                 return true;
             }
-            if key.code == KeyCode::Esc {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.show_confirm = false;
                 return true;
             }
@@ -272,7 +272,9 @@ impl<'a> ModalDemoApp<'a> {
 
         // Delegate to help overlay if visible
         if self.help_visible {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.help_visible = false;
                 return true;
             }
@@ -280,25 +282,23 @@ impl<'a> ModalDemoApp<'a> {
         }
 
         // Global shortcuts
-        match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.help_visible = true;
-                true
-            }
-            KeyCode::Enter => {
-                self.show_confirm = true;
-                true
-            }
-            _ => false,
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.help_visible = true;
+            return true;
+        }
+        if key.code == KeyCode::Enter {
+            self.show_confirm = true;
+            return true;
+        }
+        false
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {

@@ -256,27 +256,26 @@ impl Widget for FormApp {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            return true;
+        }
+        if self.keybindings.matches(actions::BACK, &key) {
+            if self.show_help {
+                self.show_help = false;
+                return true;
+            }
+            return false;
+        }
         match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                true
-            }
-            KeyCode::Esc => {
-                if self.show_help {
-                    self.show_help = false;
-                    true
-                } else {
-                    false
-                }
-            }
             KeyCode::Enter => {
                 self.submit_form();
                 true
