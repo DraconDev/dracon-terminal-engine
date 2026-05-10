@@ -54,6 +54,7 @@ struct WidgetGallery {
     should_quit: Arc<AtomicBool>,
     show_help: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
+    keybindings: KeybindingSet,
 }
 
 impl WidgetGallery {
@@ -81,6 +82,7 @@ impl WidgetGallery {
             should_quit: quit,
             show_help: false,
             zones: RefCell::new(ScopedZoneRegistry::new()),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

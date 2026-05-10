@@ -1079,19 +1079,21 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_input = keybindings.clone();
+
     let (_w, _h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let app_widget = TableApp::new(should_quit.clone(), Theme::nord());
+    let app_widget = TableApp::new(should_quit.clone(), Theme::nord(), keybindings);
 
     App::new()?
         .title("Table Widget Demo")
         .fps(30)
         .theme(Theme::nord())
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q')
+            if kb_input.matches(actions::QUIT, key)
                 && key.kind == KeyEventKind::Press
-                && key.modifiers.is_empty()
             {
                 should_quit.store(true, Ordering::SeqCst);
                 true

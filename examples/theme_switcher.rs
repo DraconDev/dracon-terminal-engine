@@ -285,19 +285,19 @@ impl Widget for ThemeHeader {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+        use dracon_terminal_engine::input::event::KeyEventKind;
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        if let KeyCode::Char('q') = key.code {
+        if self.keybindings.matches(actions::QUIT, &key) {
             self.should_quit.store(true, Ordering::SeqCst);
             true
-        } else if let KeyCode::Char('?') = key.code {
+        } else if self.keybindings.matches(actions::HELP, &key) {
             let new_val = !self.show_help.load(Ordering::SeqCst);
             self.show_help.store(new_val, Ordering::SeqCst);
             self.dirty = true;
             true
-        } else if let KeyCode::Esc = key.code {
+        } else if self.keybindings.matches(actions::BACK, &key) {
             if self.show_help.load(Ordering::SeqCst) {
                 self.show_help.store(false, Ordering::SeqCst);
                 self.dirty = true;
@@ -305,7 +305,7 @@ impl Widget for ThemeHeader {
             } else {
                 false
             }
-        } else if let KeyCode::Char('t') = key.code {
+        } else if self.keybindings.matches(actions::THEME, &key) {
             cycle_theme();
             self.dirty = true;
             true

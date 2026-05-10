@@ -367,10 +367,18 @@ impl Widget for FileManagerApp {
 
         // Status bar
         let status_y = area.height.saturating_sub(2);
+        let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+        let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+        let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
+        let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
         let status_text = format!(
-            " {} items | {} selected | t: theme | ?: help | Esc: dismiss | q: quit ",
+            " {} items | {} selected | {}: theme | {}: help | {}: dismiss | {}: quit ",
             self.entries.len(),
-            self.selected + 1
+            self.selected + 1,
+            kb_theme,
+            kb_help,
+            kb_back,
+            kb_quit
         );
         let sx = (area.width.saturating_sub(status_text.len() as u16)) / 2;
         for (i, c) in status_text
