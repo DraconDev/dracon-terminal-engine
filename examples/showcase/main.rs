@@ -93,8 +93,11 @@ fn main() -> std::io::Result<()> {
             // Remember what we launched for the return message
             *last_launched_for_tick.lock().unwrap() = Some(binary_name.clone());
 
-            // Set env var so the launched binary inherits our theme
+            // Set env vars so the launched binary inherits our theme
+            // and can report its final theme back via DTRON_THEME_FILE
             std::env::set_var("DTRON_THEME", ctx.theme().name);
+            let theme_return_path = std::env::temp_dir().join("dron_theme_return");
+            std::env::set_var("DTRON_THEME_FILE", theme_return_path.to_str().unwrap());
 
             let _ = ctx.suspend_terminal();
 
