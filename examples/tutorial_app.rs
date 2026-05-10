@@ -31,6 +31,7 @@
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
@@ -561,6 +562,7 @@ struct AppRouter {
     show_help: Rc<RefCell<bool>>,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl AppRouter {
@@ -579,6 +581,7 @@ impl AppRouter {
             show_help,
             id: WidgetId::new(100),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

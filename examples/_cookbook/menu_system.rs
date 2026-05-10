@@ -434,15 +434,19 @@ impl Widget for MenuApp {
                 }
             }
             // Shortcuts
+            let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+            let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+            let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
+            let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("Ctrl+Q");
             let shortcuts = [
                 ("↑/↓", "Navigate list"),
                 ("Ctrl+N", "New file"),
                 ("Ctrl+O", "Open"),
                 ("Ctrl+S", "Save"),
-                ("q / Ctrl+Q", "Quit"),
-                ("t", "Cycle theme"),
-                ("?", "Toggle help"),
-                ("Esc", "Dismiss help"),
+                (kb_quit, "Quit"),
+                (kb_theme, "Cycle theme"),
+                (kb_help, "Toggle help"),
+                (kb_back, "Dismiss help"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;

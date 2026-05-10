@@ -441,12 +441,14 @@ impl AppRouter {
         theme: Rc<RefCell<Theme>>,
         should_quit: Arc<AtomicBool>,
         show_help: Rc<RefCell<bool>>,
+        keybindings: KeybindingSet,
     ) -> Self {
         Self {
             router,
             theme,
             should_quit,
             show_help,
+            keybindings,
             id: WidgetId::new(100),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
