@@ -694,9 +694,9 @@ impl ChatState {
             ("↑/↓", "Scroll messages"),
             ("Enter", "Send message"),
             ("Type", "Compose"),
-            ("t", "Cycle theme"),
-            ("?", "Toggle help"),
-            ("q", "Quit"),
+            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle help"),
+            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
             ("Click", "Emoji / Send / Settings"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
