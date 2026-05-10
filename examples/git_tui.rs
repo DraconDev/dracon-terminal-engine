@@ -1229,7 +1229,7 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let should_quit = Arc<AtomicBool::new(false));
+    let should_quit = Arc::new(false);
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::nord();
