@@ -105,10 +105,10 @@ pub fn render_features_bar(
     let features = [
         ("37", "Widgets", theme.info),
         ("20", "Themes", theme.secondary),
-        ("🎨", "Animations", theme.warning),
-        ("🖱️", "Drag & Drop", theme.success),
-        ("⌨️", "Keyboard", theme.primary),
-        ("🖼️", "Sixel", theme.info),
+        ("~", "Animations", theme.warning),
+        ("DnD", "Drag & Drop", theme.success),
+        ("KEY", "Keyboard", theme.primary),
+        ("SIX", "Sixel", theme.info),
     ];
 
     let mut x = 2usize;

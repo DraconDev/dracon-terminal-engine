@@ -1432,7 +1432,7 @@ impl Showcase {
                 }
 
                 // Search bar click (no zone registered for this)
-                if y == 3 && (2..30).contains(&x) {
+                if y == 4 && (2..30).contains(&x) {
                     self.search_active = true;
                     return true;
                 }
