@@ -946,7 +946,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Settings Form")
         .fps(30)
-        .theme(Theme::dracula());
+        .theme(Theme::from_env_or(Theme::dracula()));
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
     app.on_input(move |key| {
         if keybindings.matches(actions::QUIT, &key) {

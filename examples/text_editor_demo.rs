@@ -1044,7 +1044,7 @@ fn main() -> std::io::Result<()> {
     App::new()?
         .title("Text Editor Demo")
         .fps(30)
-        .theme(Theme::nord())
+        .theme(Theme::from_env_or(Theme::nord()))
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();

@@ -1098,7 +1098,7 @@ fn main() -> std::io::Result<()> {
     App::new()?
         .title("Table Widget Demo")
         .fps(30)
-        .theme(Theme::nord())
+        .theme(Theme::from_env_or(Theme::nord()))
         .on_input(move |key| {
             if kb_input.matches(actions::QUIT, &key)
                 && key.kind == KeyEventKind::Press

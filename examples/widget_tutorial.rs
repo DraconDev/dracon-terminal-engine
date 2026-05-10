@@ -635,7 +635,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Widget Tutorial: ColorPicker")
         .fps(30)
-        .theme(Theme::nord());
+        .theme(Theme::from_env_or(Theme::nord()));
 
     // Current theme index (read-only for this tutorial)
     let current_theme_idx = 0;
