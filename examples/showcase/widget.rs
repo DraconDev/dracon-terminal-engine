@@ -1015,17 +1015,21 @@ impl Widget for Showcase {
             );
 
             // Content
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
+            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
+            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let lines = [
                 ("↑↓←→", "Navigate cards"),
                 ("Enter", "Launch selected"),
                 ("Space", "Show details"),
                 ("/", "Focus search"),
                 ("Tab", "Cycle categories"),
-                ("t", "Cycle theme"),
+                (kb_theme, "Cycle theme"),
                 ("d", "Debug overlay"),
                 ("i", "Input debug"),
-                ("q / Esc", "Quit"),
-                ("?", "Toggle this help"),
+                (&format!("{} / {}", kb_quit, kb_back), "Quit"),
+                (kb_help, "Toggle this help"),
                 ("", ""),
                 ("Mouse", ""),
                 ("Click", "Select card"),
