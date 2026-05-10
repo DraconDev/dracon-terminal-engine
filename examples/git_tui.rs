@@ -99,12 +99,18 @@ impl GitTui {
         }
         let keybindings = KeybindingSet::from_config(&config);
 
+        let hint = keybindings.format_hint(&[
+            ("1-4", "views"),
+            ("d", "diff"),
+            ("r", "refresh"),
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::BACK, "back"),
+            (actions::QUIT, "quit"),
+        ]);
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
-            .add_segment(
-                StatusSegment::new("1-4: views | d: diff | r: refresh | theme | help | back | quit")
-                    .with_fg(theme.fg_muted),
-            );
+            .add_segment(StatusSegment::new(&hint).with_fg(theme.fg_muted));
 
         let mut app = Self {
             should_quit,

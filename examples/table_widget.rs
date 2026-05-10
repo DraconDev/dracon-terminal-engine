@@ -801,7 +801,15 @@ impl Widget for TableApp {
         // === STATUS BAR ===
         let status_y = area.height.saturating_sub(1);
         let hint = format!(
-            "t: theme | ?: help | Esc: dismiss | ↑↓: nav | Enter: select | q: quit | {} users",
+            "{} | {} users",
+            self.keybindings.format_hint(&[
+                (actions::THEME, "theme"),
+                (actions::HELP, "help"),
+                (actions::BACK, "dismiss"),
+                ("↑↓", "nav"),
+                ("Enter", "select"),
+                (actions::QUIT, "quit"),
+            ]),
             self.filtered_users.len()
         );
         for (i, c) in hint

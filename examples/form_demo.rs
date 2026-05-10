@@ -627,7 +627,15 @@ impl Widget for SettingsForm {
 
         // === STATUS BAR ===
         let status_y = card_h.saturating_sub(1);
-        let hint = "Tab: next | Shift+Tab: prev | Enter: submit | Esc: clear | t: theme | ?: help | q: quit";
+        let hint = self.keybindings.format_hint(&[
+            ("Tab", "next"),
+            ("Shift+Tab", "prev"),
+            ("Enter", "submit"),
+            (actions::DISMISS, "clear"),
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::QUIT, "quit"),
+        ]);
         for (i, c) in hint.chars().take(card_w as usize - 2).enumerate() {
             let idx = (status_y * area.width + margin + 1 + i as u16) as usize;
             if idx < plane.cells.len() {
