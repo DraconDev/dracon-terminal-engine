@@ -644,6 +644,10 @@ impl Widget for InputRouter {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.target.borrow_mut().on_theme_change(theme);
+    }
 }
 
 fn main() -> std::io::Result<()> {
