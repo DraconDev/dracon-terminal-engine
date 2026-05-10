@@ -690,6 +690,8 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Rc::clone(&show_help);
     let show_help_render = Rc::clone(&show_help);
 
+    let keybindings_input = keybindings.clone();
+
     // ---- Add widgets to the app with their areas ----
     //
     // The area is (x, y, width, height) in terminal cells.
