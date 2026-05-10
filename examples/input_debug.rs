@@ -106,9 +106,12 @@ impl InputDebugger {
 
         // Header bar
         let elapsed = self.start_time.elapsed().as_secs();
+        let quit_key = kb.display(actions::QUIT).unwrap_or("q");
+        let help_key = kb.display(actions::HELP).unwrap_or("f1");
+        let back_key = kb.display(actions::BACK).unwrap_or("esc");
         let header = format!(
-            " 󰌌 Input Debugger │ {} events │ {}s │ q:quit ?:help Esc:dismiss c:clear ",
-            self.event_count, elapsed
+            " 󰌌 Input Debugger │ {} events │ {}s │ {}:quit {}:help {}:dismiss c:clear ",
+            self.event_count, elapsed, quit_key, help_key, back_key
         );
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w));
 
