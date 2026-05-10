@@ -701,9 +701,15 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+    let kb_input = keybindings.clone();
+
     let mut t = Table::new();
     t.set_area(Rect::new(0, 0, w, h));
-    t.vis = (h as usize).saturating_sub(5).max(1); // account for borders + header + status
+    t.vis = (h as usize).saturating_sub(5).max(1);
+    t.keybindings = keybindings;
+    t.kb_config = kb_config;
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
@@ -715,7 +721,7 @@ fn main() -> std::io::Result<()> {
     app.add_widget(Box::new(t), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if kb_input.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {
