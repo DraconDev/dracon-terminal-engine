@@ -684,7 +684,9 @@ impl Widget for SettingsForm {
         }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -697,30 +699,30 @@ impl Widget for SettingsForm {
             self.dirty = true;
         }
 
+        if self.keybindings.matches(actions::QUIT, &key) {
+            return false; // Let app handle quit
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = true;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::DISMISS, &key) {
+            self.clear_form();
+            return true;
+        }
+
         match key.code {
-            KeyCode::Char('q') if key.modifiers.is_empty() => {
-                // Let app handle quit
-                false
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = true;
-                self.dirty = true;
-                true
-            }
             KeyCode::Tab => {
                 if key.modifiers.contains(KeyModifiers::SHIFT) {
                     self.focus_prev();
                 } else {
                     self.focus_next();
                 }
-                true
-            }
-            KeyCode::Esc => {
-                self.clear_form();
                 true
             }
             KeyCode::Enter => {
