@@ -392,8 +392,8 @@ fn test_widget_current_theme_default_is_none() {
 fn test_widget_current_theme_returns_managed_theme() {
     let widget = ThemeAwareWidget::new(1, Theme::nord());
     assert_eq!(
-        widget.current_theme().map(|t| t.name),
-        Some("nord".to_string()),
+        widget.current_theme().map(|t| t.name.as_str()),
+        Some("nord"),
         "current_theme should return the widget's managed theme"
     );
 }
