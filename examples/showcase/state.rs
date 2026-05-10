@@ -62,6 +62,7 @@ pub struct Showcase {
     pub(crate) returned_from: Arc<Mutex<Option<(String, Instant)>>>,
     pub(crate) scene_router: SceneRouter,
     pub(crate) keybindings: KeybindingSet,
+    pub(crate) pending_app_theme: Arc<Mutex<Option<Theme>>>,
 }
 
 impl Showcase {
@@ -70,6 +71,7 @@ impl Showcase {
         pending: Arc<Mutex<Option<String>>>,
         fps: Arc<AtomicU64>,
         returned_from: Arc<Mutex<Option<(String, Instant)>>>,
+        pending_app_theme: Arc<Mutex<Option<Theme>>>,
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
