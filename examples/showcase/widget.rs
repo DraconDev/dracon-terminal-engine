@@ -652,6 +652,20 @@ impl Widget for Showcase {
             false,
         );
 
+        // Sort indicator
+        let sort_arrow = if self.sort_ascending { "▲" } else { "▼" };
+        let sort_text = format!(" {} {} ", sort_arrow, self.sort_field.label());
+        let sort_x = hint_x + hint.len() + 2;
+        draw_text(
+            &mut plane,
+            sort_x,
+            status_y,
+            &sort_text,
+            t.primary,
+            t.surface_elevated,
+            false,
+        );
+
         // Mouse coordinates (right side)
         if let Some((mx, my)) = self.mouse_pos {
             let coords = format!("{}:{}", mx, my);
