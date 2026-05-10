@@ -97,6 +97,7 @@ impl KeybindingConfig {
         bindings.insert(actions::REFRESH.to_string(), "r".to_string());
         bindings.insert(actions::SEARCH.to_string(), "/".to_string());
         bindings.insert(actions::CANCEL.to_string(), "esc".to_string());
+        bindings.insert(actions::TREE_MODE.to_string(), "p".to_string());
         Self { bindings }
     }
 
