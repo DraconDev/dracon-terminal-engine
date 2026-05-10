@@ -1351,6 +1351,8 @@ impl Showcase {
                             let idx = id - PALETTE_BASE;
                             self.pending_theme = Some(idx);
                             self.apply_filter();
+                            // Sync to scene_router and framework
+                            self.on_theme_change(&self.theme);
                             return true;
                         }
                         // FPS toggle
