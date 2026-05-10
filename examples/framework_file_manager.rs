@@ -60,6 +60,7 @@ struct FileManagerApp {
     area: Rect,
     dirty: bool,
     show_help: bool,
+    should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
     kb_config: KeybindingConfig,
 }

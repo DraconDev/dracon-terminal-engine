@@ -5,6 +5,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{ConfirmDialog, Modal};
@@ -22,6 +23,7 @@ pub struct ModalDemoScene {
     help_modal: Modal<'static>,
     confirm_dialog: ConfirmDialog,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl ModalDemoScene {
@@ -36,6 +38,7 @@ impl ModalDemoScene {
             help_modal: Modal::new("Keyboard Shortcuts").with_size(42, 12),
             confirm_dialog: ConfirmDialog::new("Confirm", "Delete item?"),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 }

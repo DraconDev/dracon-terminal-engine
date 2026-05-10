@@ -5,6 +5,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Button, Checkbox, Gauge, StatusBadge};
@@ -57,6 +58,7 @@ pub struct ThemeSwitcherScene {
     gauge: Gauge,
     badge: StatusBadge,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl ThemeSwitcherScene {
@@ -77,6 +79,7 @@ impl ThemeSwitcherScene {
             },
             badge: StatusBadge::new(WidgetId::new(13)).with_status("OK"),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

@@ -15,7 +15,7 @@ use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, Keybin
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::os::fd::AsFd;

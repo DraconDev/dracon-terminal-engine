@@ -343,10 +343,11 @@ struct TableApp {
     area: Rect,
     dirty: bool,
     should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
 }
 
 impl TableApp {
-    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme, keybindings: KeybindingSet) -> Self {
         let all_users = build_users();
         let filtered_users = all_users.clone();
 
@@ -405,6 +406,7 @@ impl TableApp {
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             should_quit,
+            keybindings,
         }
     }
 
