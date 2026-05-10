@@ -174,7 +174,12 @@ impl IdeApp {
             .add_segment(StatusSegment::new("Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
             .add_segment(
-                StatusSegment::new("t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new(&self.keybindings.format_hint(&[
+                    (actions::THEME, "theme"),
+                    (actions::HELP, "help"),
+                    (actions::BACK, "dismiss"),
+                    (actions::QUIT, "quit"),
+                ])).with_fg(self.theme.fg_muted),
             );
 
         let breadcrumbs =
@@ -391,7 +396,12 @@ impl IdeApp {
                 .add_segment(StatusSegment::new(lang).with_fg(self.theme.info))
                 .add_segment(StatusSegment::new("UTF-8").with_fg(self.theme.fg_muted))
                 .add_segment(
-                    StatusSegment::new("t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit").with_fg(self.theme.fg_muted),
+                    StatusSegment::new(&self.keybindings.format_hint(&[
+                        (actions::THEME, "theme"),
+                        (actions::HELP, "help"),
+                        (actions::BACK, "dismiss"),
+                        (actions::QUIT, "quit"),
+                    ])).with_fg(self.theme.fg_muted),
                 );
         }
     }
