@@ -168,18 +168,20 @@ impl IdeApp {
 
         let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme);
 
+        let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
         let status_bar = StatusBar::new(WidgetId::new(4))
             .add_segment(StatusSegment::new("Ready").with_fg(theme.success))
             .add_segment(StatusSegment::new("Ln 1, Col 1").with_fg(theme.fg_muted))
             .add_segment(StatusSegment::new("Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
             .add_segment(
-                StatusSegment::new(&self.keybindings.format_hint(&[
+                StatusSegment::new(&keybindings.format_hint(&[
                     (actions::THEME, "theme"),
                     (actions::HELP, "help"),
                     (actions::BACK, "dismiss"),
                     (actions::QUIT, "quit"),
-                ])).with_fg(self.theme.fg_muted),
+                ])).with_fg(theme.fg_muted),
             );
 
         let breadcrumbs =
@@ -300,7 +302,7 @@ impl IdeApp {
             breadcrumbs,
             command_palette,
             cmd_bridge,
-            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            keybindings,
             anim_frame: 0,
             last_anim: Instant::now(),
         }
