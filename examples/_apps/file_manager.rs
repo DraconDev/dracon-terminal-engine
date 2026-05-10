@@ -762,7 +762,7 @@ impl Widget for FileManager {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t);
+            render_help_overlay(&mut plane, area, t, &self.keybindings);
         }
 
         // Toast
@@ -1253,8 +1253,8 @@ fn render_box(
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
-    let help_w = 40u16.min(area.width - 4);
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb: &KeybindingSet) {
+    let help_w = 44u16.min(area.width - 4);
     let help_h = 14u16.min(area.height - 4);
     let help_x = (area.width - help_w) / 2;
     let help_y = (area.height - help_h) / 2;
@@ -1269,33 +1269,35 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         t.surface_elevated,
     );
 
-    let lines = [
-        ("  File Manager Help  ", true),
-        ("", false),
-        ("↑/↓       Navigate tree", false),
-        ("Enter     Open folder / Select file", false),
-        ("Esc       Go to parent directory", false),
-        ("n         New file", false),
-        ("f         New folder", false),
-        ("d         Delete selected", false),
-        ("m         Rename selected", false),
-        ("r         Refresh directory", false),
-        ("?         Toggle help", false),
-        ("Esc       Dismiss help", false),
-        ("q         Quit", false),
+    // Title
+    let title = "File Manager Help";
+    let tx = help_x + (help_w - title.len() as u16) / 2;
+    draw_text(plane, tx, help_y + 1, title, t.primary, t.surface_elevated, true);
+
+    // Two-column shortcuts
+    let kb_quit = kb.display(actions::QUIT).unwrap_or("Ctrl+Q");
+    let kb_back = kb.display(actions::BACK).unwrap_or("Esc");
+    let kb_help = kb.display(actions::HELP).unwrap_or("F1");
+    let kb_refresh = kb.display(actions::REFRESH).unwrap_or("F5");
+    let kb_new = kb.display(actions::NEW_ITEM).unwrap_or("Ctrl+N");
+    let kb_delete = kb.display(actions::DELETE).unwrap_or("Ctrl+D");
+
+    let shortcuts = [
+        ("↑/↓", "Navigate tree"),
+        ("Enter/→", "Open / select"),
+        (kb_back, "Parent directory"),
+        ("n", "New file"),
+        ("f", "New folder"),
+        (kb_delete, "Delete"),
+        ("m", "Rename"),
+        (kb_refresh, "Refresh"),
+        (kb_help, "Toggle help"),
+        (kb_quit, "Quit"),
     ];
-    for (i, (line, bold)) in lines.iter().enumerate() {
-        let y = help_y + 1 + i as u16;
-        let x = help_x + (help_w.saturating_sub(line.width() as u16)) / 2;
-        draw_text(
-            plane,
-            x,
-            y,
-            line,
-            if *bold { t.primary } else { t.fg },
-            t.surface_elevated,
-            *bold,
-        );
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = help_y + 3 + i as u16;
+        draw_text(plane, help_x + 2, row, key, t.primary, t.surface_elevated, false);
+        draw_text(plane, help_x + 16, row, desc, t.fg, t.surface_elevated, false);
     }
 }
 
