@@ -615,7 +615,7 @@ fn main() -> Result<()> {
     let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(Theme::nord());
 
     let router = InputRouter {
-        target: mon_for_input,
+        target: mon_for_input_router,
         id: WidgetId::new(100),
         area: Rect::new(0, 0, w, h),
     };
