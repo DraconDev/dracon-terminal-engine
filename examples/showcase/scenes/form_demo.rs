@@ -91,18 +91,6 @@ impl FormDemoScene {
         }
     }
 
-    fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::nord(),
-            Theme::cyberpunk(),
-            Theme::dracula(),
-            Theme::gruvbox_dark(),
-            Theme::tokyo_night(),
-        ];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        let next = themes[(idx + 1) % themes.len()];
-        self.on_theme_change(&next);
-    }
 }
 
 impl Scene for FormDemoScene {
@@ -226,7 +214,7 @@ impl Scene for FormDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Tab: next | Enter: submit | Drag ≡: reorder | t: theme | B/Esc: back | ?: help | q: quit ";
+        let nav = " Tab: next | Enter: submit | Drag ≡: reorder | B/Esc: back | ?: help | q: quit ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -259,12 +247,6 @@ impl Scene for FormDemoScene {
             self.dirty = true;
             return true;
         }
-        if self.keybindings.matches(actions::THEME, &key) {
-            self.cycle_theme();
-            self.dirty = true;
-            return true;
-        }
-
         if self.keybindings.matches(actions::BACK, &key) {
             return false; // Let parent (showcase) handle back → pop scene
         }
