@@ -1232,7 +1232,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let theme = Theme::nord();
+    let theme = Theme::from_env_or(Theme::nord());
     let git = GitTui::new(should_quit, theme);
 
     let mut app = App::new()?.title("Git TUI").fps(30).theme(theme);

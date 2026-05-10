@@ -580,7 +580,7 @@ impl TreeNav {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::cyberpunk();
+    let theme = Theme::from_env_or(Theme::cyberpunk());
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
