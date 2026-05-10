@@ -763,6 +763,7 @@ fn main() -> std::io::Result<()> {
     //
     // The closure is called each frame (render callback).
     // We render the help overlay here when visible.
+    let kb_config_for_help = kb_config.clone();
     let current_theme_for_help = current_theme;
     app.run(move |ctx| {
         if *show_help_render.borrow() {
@@ -846,12 +847,14 @@ fn main() -> std::io::Result<()> {
             }
 
             // Shortcuts
+            let kb_help = kb_config_for_help.get(actions::HELP).unwrap_or("?");
+            let kb_quit = kb_config_for_help.get(actions::QUIT).unwrap_or("q");
             let shortcuts = [
                 ("←/→", "Change color"),
                 ("Enter/Click", "Cycle color"),
                 ("Tab", "Navigate widgets"),
-                ("?", "Toggle help"),
-                ("q", "Quit"),
+                (kb_help, "Toggle help"),
+                (kb_quit, "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
