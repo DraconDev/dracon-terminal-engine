@@ -232,11 +232,11 @@ impl NetworkApp {
         let shortcuts = [
             ("↑/↓", "Navigate posts"),
             ("Enter", "View post details"),
-            (self.kb_config.get(actions::REFRESH).unwrap_or("r"), "Refresh data"),
-            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle this help"),
-            (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
+            (self.keybindings.display(actions::REFRESH).unwrap_or("r"), "Refresh data"),
+            (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle this help"),
+            (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+            (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
         ];
 
         let hw = 42u16.min(area.width.saturating_sub(4));

@@ -646,11 +646,11 @@ impl Widget for SqliteBrowser {
                     plane.cells[idx].style = Styles::BOLD;
                 }
             }
-            let kb_edit = self.kb_config.get(actions::EDIT).unwrap_or("e");
-            let kb_refresh = self.kb_config.get(actions::REFRESH).unwrap_or("r");
-            let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
-            let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
-            let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
+            let kb_edit = self.keybindings.display(actions::EDIT).unwrap_or("e");
+            let kb_refresh = self.keybindings.display(actions::REFRESH).unwrap_or("r");
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t");
+            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
+            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
             let shortcuts = [
                 ("↑/↓/j/k", "Navigate"),
                 ("Enter", "Select / Run query"),
