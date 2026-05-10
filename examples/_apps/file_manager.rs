@@ -863,7 +863,9 @@ impl Widget for FileManager {
         }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
