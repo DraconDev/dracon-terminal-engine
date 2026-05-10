@@ -216,14 +216,14 @@ impl LogMonitor {
 
         let lines = [
             "┌─ Log Monitor Help ─────────────┐",
-            "│ c      Clear all logs           │",
-            "│ r      Resume auto-scroll       │",
-            "│ t      Cycle theme              │",
-            "│ ?      Toggle this help         │",
-            "│ Esc    Dismiss help             │",
+            &format!("│ {:<6} Clear all logs           │", self.kb_config.get(actions::NEW_ITEM).unwrap_or("c")),
+            &format!("│ {:<6} Resume auto-scroll       │", self.kb_config.get(actions::REFRESH).unwrap_or("r")),
+            &format!("│ {:<6} Cycle theme              │", self.kb_config.get(actions::THEME).unwrap_or("t")),
+            &format!("│ {:<6} Toggle this help         │", self.kb_config.get(actions::HELP).unwrap_or("?")),
+            &format!("│ {:<6} Dismiss help             │", self.kb_config.get(actions::BACK).unwrap_or("esc")),
             "│ Click  Toggle log level filter │",
             "│ Click  Pause/resume scroll      │",
-            "│ q      Quit application         │",
+            &format!("│ {:<6} Quit application         │", self.kb_config.get(actions::QUIT).unwrap_or("q")),
             "└────────────────────────────────┘",
         ];
         let start_y = y + (h - lines.len()) / 2;
