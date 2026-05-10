@@ -45,6 +45,8 @@ pub struct Tree {
     dirty: bool,
     scroll_offset: usize,
     visible_count: u16,
+    on_select: Option<SelectCallback>,
+    area: std::cell::Cell<Rect>,
 }
 
 impl Tree {
@@ -59,6 +61,8 @@ impl Tree {
             dirty: true,
             scroll_offset: 0,
             visible_count: 10,
+            on_select: None,
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
 
