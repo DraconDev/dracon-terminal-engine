@@ -386,10 +386,10 @@ impl Widget for WidgetGallery {
             let shortcuts = [
                 ("↑↓←→", "Navigate cards"),
                 ("Enter", "Activate widget"),
-                ("Tab/t", "Cycle theme"),
-                ("?", "Toggle help"),
-                ("Esc", "Dismiss help"),
-                ("q", "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
+                (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;

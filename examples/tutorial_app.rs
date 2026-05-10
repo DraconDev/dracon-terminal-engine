@@ -718,11 +718,11 @@ fn main() -> std::io::Result<()> {
                 let shortcuts = [
                     ("↑/↓", "Navigate"),
                     ("Enter", "Select / view detail"),
-                    ("Ctrl+N", "New task"),
-                    ("Esc", "Go back"),
-                    ("t", "Cycle theme"),
-                    ("F1", "Toggle this help"),
-                    ("Ctrl+Q", "Quit"),
+                    (keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"), "New task"),
+                    (keybindings.display(actions::BACK).unwrap_or("Esc"), "Go back"),
+                    (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                    (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+                    (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
                 ];
 
                 let hw = 42u16.min(w.saturating_sub(4));
