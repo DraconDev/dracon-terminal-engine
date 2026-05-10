@@ -265,6 +265,10 @@ impl Scene for FormDemoScene {
             return true;
         }
 
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false; // Let parent (showcase) handle back → pop scene
+        }
+
         match key.code {
             KeyCode::Tab => { self.cycle_focus(true); self.dirty = true; true }
             KeyCode::BackTab => { self.cycle_focus(false); self.dirty = true; true }
@@ -274,15 +278,6 @@ impl Scene for FormDemoScene {
                 }
                 self.dirty = true;
                 true
-            }
-            KeyCode::Esc => {
-                if self.toast.is_some() {
-                    self.toast = None;
-                    self.dirty = true;
-                    true
-                } else {
-                    false // Let parent (showcase) handle Esc → pop back
-                }
             }
             _ => {
                 // Delegate to focused field
