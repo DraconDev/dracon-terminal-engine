@@ -1045,17 +1045,6 @@ fn main() -> std::io::Result<()> {
         .title("Text Editor Demo")
         .fps(30)
         .theme(Theme::nord())
-        .on_input(move |key| {
-            if key.code == KeyCode::Char('q')
-                && key.kind == KeyEventKind::Press
-                && key.modifiers.is_empty()
-            {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();

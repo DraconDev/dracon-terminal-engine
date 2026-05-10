@@ -580,7 +580,12 @@ impl ChatState {
         }
 
         // Right segment: hints
-        let hint = "t: theme | ?: help | Esc: dismiss | q: quit";
+        let hint = format!("{}: theme | {}: help | {}: dismiss | {}: quit",
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+        );
         let hint_x = (area.width as usize).saturating_sub(hint.len() + 2);
         for (i, c) in hint.chars().enumerate() {
             let idx = status_base + hint_x + i;
@@ -871,8 +876,16 @@ fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+
     let mut app = App::new()?.title("Chat Client").fps(30).theme(Theme::default());
     let chat = Rc::new(RefCell::new(ChatState::new(should_quit, Theme::default())));
+    {
+        let mut c = chat.borrow_mut();
+        c.keybindings = keybindings;
+        c.kb_config = kb_config;
+    }
     let chat_for_tick = Rc::clone(&chat);
     let chat_for_input = Rc::clone(&chat);
 

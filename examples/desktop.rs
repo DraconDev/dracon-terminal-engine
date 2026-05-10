@@ -198,6 +198,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
         .ok();
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     // Interaction State
     let mut dragging_window: Option<usize> = None;
     let mut drag_offset: (u16, u16) = (0, 0);
