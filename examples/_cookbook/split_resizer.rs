@@ -696,8 +696,10 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     let theme = Theme::cyberpunk();
-    let app = SplitResizerApp::new(WidgetId::new(1), theme, should_quit);
+    let app = SplitResizerApp::new(WidgetId::new(1), theme, should_quit, keybindings);
     let app_for_tick = Rc::new(RefCell::new(app));
     let app_for_render = Rc::clone(&app_for_tick);
 
