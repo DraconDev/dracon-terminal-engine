@@ -715,7 +715,7 @@ fn main() -> Result<()> {
         .title("Split Resizer")
         .fps(30)
         .tick_interval(200)
-        .theme(Theme::cyberpunk());
+        .theme(Theme::from_env_or(Theme::cyberpunk()));
 
     let router = InputRouter {
         target: app_for_render,
