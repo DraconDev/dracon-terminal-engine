@@ -765,7 +765,7 @@ fn main() -> std::io::Result<()> {
         .unwrap_or_else(|_| "/tmp/dracon_todo.db".to_string());
 
     println!("Todo App — Tasks saved to {}", db_path);
-    println!("Controls: ↑↓ nav | n new | Enter detail | t theme | ? help | q quit");
+    println!("Controls: ↑↓ nav | Ctrl+N new | Enter detail | t theme | F1 help | Ctrl+Q quit");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
     let should_quit = Arc::new(AtomicBool::new(false));
@@ -834,12 +834,12 @@ fn main() -> std::io::Result<()> {
 
                 let shortcuts = [
                     ("↑/↓", "Navigate tasks"),
-                    ("n", "New task"),
+                    ("Ctrl+N", "New task"),
                     ("Enter", "View task detail / confirm"),
                     ("Esc", "Go back / cancel"),
                     ("t", "Cycle theme"),
-                    ("?", "Toggle this help"),
-                    ("q", "Quit"),
+                    ("F1", "Toggle this help"),
+                    ("Ctrl+Q", "Quit"),
                 ];
 
                 let hw = 42u16.min(w.saturating_sub(4));

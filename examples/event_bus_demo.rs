@@ -79,29 +79,7 @@ impl EventBusApp {
             return false;
         }
 
-        if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
-                self.show_help = false;
-                self.dirty = true;
-                return true;
-            }
-            return true;
-        }
-
         match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = true;
-                self.dirty = true;
-                true
-            }
             KeyCode::Up | KeyCode::Char('+') | KeyCode::Char('=') => {
                 self.counter_value += 1;
                 self.last_event = Some(format!("CounterChanged({})", self.counter_value));
@@ -316,10 +294,10 @@ impl EventBusApp {
             ("↑/↓ or +/-", "Adjust counter"),
             ("l", "Log a message"),
             ("c", "Clear log"),
-            ("t", "Cycle theme"),
-            ("?", "Toggle help"),
-            ("Esc", "Dismiss help"),
-            ("q", "Quit"),
+            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle help"),
+            (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
