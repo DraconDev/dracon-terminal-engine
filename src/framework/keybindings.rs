@@ -78,26 +78,29 @@ pub struct KeybindingConfig {
 }
 
 impl KeybindingConfig {
-    /// Create with engine defaults — no customization needed.
+    /// Create with conservative defaults — no customization needed.
+    /// Uses modifier keys to avoid conflicts with text input.
     pub fn defaults() -> Self {
         let mut bindings = HashMap::new();
-        bindings.insert(actions::QUIT.to_string(), "q".to_string());
-        bindings.insert(actions::HELP.to_string(), "?".to_string());
-        bindings.insert(actions::THEME.to_string(), "t".to_string());
+        // Core (always safe)
+        bindings.insert(actions::QUIT.to_string(), "ctrl+q".to_string());
+        bindings.insert(actions::CANCEL.to_string(), "esc".to_string());
         bindings.insert(actions::BACK.to_string(), "esc".to_string());
         bindings.insert(actions::SUBMIT.to_string(), "enter".to_string());
         bindings.insert(actions::TAB_NEXT.to_string(), "tab".to_string());
         bindings.insert(actions::TAB_PREV.to_string(), "shift+tab".to_string());
+        // Help (F1 avoids ? conflict)
+        bindings.insert(actions::HELP.to_string(), "f1".to_string());
+        // Tabs (browser/IDE standard)
         bindings.insert(actions::NEW_TAB.to_string(), "ctrl+t".to_string());
         bindings.insert(actions::CLOSE_TAB.to_string(), "ctrl+w".to_string());
+        // File operations (universal standard)
         bindings.insert(actions::SAVE.to_string(), "ctrl+s".to_string());
-        bindings.insert(actions::DELETE.to_string(), "d".to_string());
-        bindings.insert(actions::NEW_ITEM.to_string(), "n".to_string());
-        bindings.insert(actions::EDIT.to_string(), "e".to_string());
-        bindings.insert(actions::REFRESH.to_string(), "r".to_string());
-        bindings.insert(actions::SEARCH.to_string(), "/".to_string());
-        bindings.insert(actions::CANCEL.to_string(), "esc".to_string());
-        bindings.insert(actions::TREE_MODE.to_string(), "p".to_string());
+        bindings.insert(actions::NEW_ITEM.to_string(), "ctrl+n".to_string());
+        bindings.insert(actions::DELETE.to_string(), "ctrl+d".to_string());
+        bindings.insert(actions::EDIT.to_string(), "ctrl+e".to_string());
+        // Search
+        bindings.insert(actions::SEARCH.to_string(), "ctrl+f".to_string());
         Self { bindings }
     }
 
