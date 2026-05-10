@@ -195,6 +195,7 @@ impl Showcase {
         if let Some(idx) = self.pending_theme.take() {
             self.theme = Self::themes()[idx % Self::themes().len()].1;
         }
+        self.search_query_lower = self.search_query.to_lowercase();
         self.filtered = self
             .examples
             .iter()
@@ -204,15 +205,41 @@ impl Showcase {
                 let matches_search = if self.search_query.is_empty() {
                     true
                 } else {
-                    let q = self.search_query.to_lowercase();
-                    ex.name.to_lowercase().contains(&q)
-                        || ex.description.to_lowercase().contains(&q)
-                        || ex.category.to_lowercase().contains(&q)
+                    let q = &self.search_query_lower;
+                    ex.name.to_lowercase().contains(q)
+                        || ex.description.to_lowercase().contains(q)
+                        || ex.category.to_lowercase().contains(q)
                 };
                 matches_category && matches_search
             })
             .map(|(i, _)| i)
             .collect();
+
+        // Sort filtered results
+        match self.sort_field {
+            SortField::Name => {
+                if self.sort_ascending {
+                    self.filtered.sort_by_key(|&i| self.examples[i].name);
+                } else {
+                    self.filtered.sort_by(|&a, &b| self.examples[b].name.cmp(self.examples[a].name));
+                }
+            }
+            SortField::Category => {
+                if self.sort_ascending {
+                    self.filtered.sort_by_key(|&i| self.examples[i].category);
+                } else {
+                    self.filtered.sort_by(|&a, &b| self.examples[b].category.cmp(self.examples[a].category));
+                }
+            }
+            SortField::RunCount => {
+                if self.sort_ascending {
+                    self.filtered.sort_by_key(|&i| self.run_counts[i]);
+                } else {
+                    self.filtered.sort_by(|&a, &b| self.run_counts[b].cmp(&self.run_counts[a]));
+                }
+            }
+        }
+
         self.selected = self.selected.min(self.filtered.len().saturating_sub(1));
     }
 
