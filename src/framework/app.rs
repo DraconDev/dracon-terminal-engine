@@ -277,6 +277,7 @@ impl App {
         widget.set_id(id);
         widget.set_area(area);
         widget.on_mount();
+        widget.on_theme_change(&self.theme);
         let focusable = widget.focusable();
         let cmds = widget.commands();
         self.widgets.borrow_mut().push(widget);
