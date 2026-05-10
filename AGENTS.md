@@ -506,7 +506,7 @@ Closure-based (Pattern 2) apps cannot access `App` state from `on_input`. To syn
 
 ```rust
 app.on_tick(move |ctx, _| {
-    let theme = ctx.app_theme();  // Get current framework theme
+    let theme = ctx.theme();  // Get current framework theme
     let mut app = app.borrow_mut();
     app.theme = theme.clone();     // Sync to app state
     app.tab_bar.on_theme_change(&theme);
@@ -516,7 +516,7 @@ app.on_tick(move |ctx, _| {
 ```
 
 **Key points:**
-- `ctx.app_theme()` returns the current framework theme
+- `ctx.theme()` returns the current framework theme
 - Must sync every tick because theme can change via `app.set_theme()` or global cycling
 - All child widgets need `on_theme_change()` calls
 - Store theme in app state so `render()` can use it
