@@ -56,9 +56,9 @@ impl Tree {
             selected_path: Vec::new(),
             hovered_path: None,
             theme: Theme::default(),
-            on_select: None,
-            area: std::cell::Cell::new(Rect::new(0, 0, 40, 20)),
             dirty: true,
+            scroll_offset: 0,
+            visible_count: 10,
         }
     }
 
