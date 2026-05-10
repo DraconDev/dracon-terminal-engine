@@ -488,12 +488,22 @@ impl Widget for Dashboard {
 
         // Footer
         let footer_y = area.height.saturating_sub(1);
-        let footer_text = " theme | help | back | pause | refresh | ↑↓: nav | quit ";
+        let footer_text = format!(
+            "{} | ↑↓: nav",
+            self.keybindings.format_hint(&[
+                (actions::THEME, "theme"),
+                (actions::PAUSE, "pause"),
+                (actions::REFRESH, "refresh"),
+                (actions::HELP, "help"),
+                (actions::BACK, "dismiss"),
+                (actions::QUIT, "quit"),
+            ])
+        );
         draw_text(
             &mut plane,
             2,
             footer_y,
-            footer_text,
+            &footer_text,
             t.fg_muted,
             t.bg,
             false,

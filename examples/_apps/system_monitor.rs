@@ -998,8 +998,17 @@ impl Widget for SystemMonitor {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let footer = " t: theme | p: tree | ?: help | Esc: dismiss | ↑/↓: nav | Click: select | q: quit ";
-        draw_text(&mut plane, 2, footer_y, footer, t.fg_muted, t.bg, false);
+        let footer = format!(
+            "{} | ↑/↓: nav | Click: select",
+            self.keybindings.format_hint(&[
+                (actions::THEME, "theme"),
+                (actions::TREE_MODE, "tree"),
+                (actions::HELP, "help"),
+                (actions::DISMISS, "dismiss"),
+                (actions::QUIT, "quit"),
+            ])
+        );
+        draw_text(&mut plane, 2, footer_y, &footer, t.fg_muted, t.bg, false);
 
         if self.show_help {
             render_help(&mut plane, area, t);
