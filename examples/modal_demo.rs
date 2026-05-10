@@ -206,6 +206,7 @@ impl<'a> ModalDemoApp<'a> {
             area: Rect::new(0, 0, 80, 24),
             should_quit,
             theme: Theme::dark(),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
