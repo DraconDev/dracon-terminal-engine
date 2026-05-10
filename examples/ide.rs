@@ -316,6 +316,19 @@ impl IdeApp {
         self.toasts.push(toast);
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.menu_bar.on_theme_change(&self.theme);
+        self.search_input.on_theme_change(&self.theme);
+        self.status_bar.on_theme_change(&self.theme);
+        self.tab_bar.on_theme_change(&self.theme);
+        self.file_tree.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
+        self.command_palette.on_theme_change(&self.theme);
+        self.profiler.on_theme_change(&self.theme);
+        self.toasts.clear();
+    }
+
     fn cycle_theme(&mut self) {
         let themes = [
             Theme::dark(),
