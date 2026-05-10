@@ -467,9 +467,15 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let app = NetworkApp::new(should_quit);
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+    let kb_input = keybindings.clone();
+
+    let mut app = NetworkApp::new(should_quit);
+    app.keybindings = keybindings;
+    app.kb_config = kb_config;
     let app_for_widget = Rc::new(RefCell::new(app));
-    let _app_for_tick = Rc::clone(&app_for_widget);
+    let app_for_input = Rc::clone(&app_for_widget);
 
     // Initial fetch
     app_for_widget.borrow_mut().refresh();
