@@ -167,6 +167,7 @@ impl crate::framework::widget::Widget for Tree {
 
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+        self.visible_count = area.height;
         self.dirty = true;
     }
 
