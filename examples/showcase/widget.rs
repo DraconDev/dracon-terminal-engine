@@ -1571,11 +1571,11 @@ impl Showcase {
         // Context menu takes priority
         if self.context_menu.is_some() {
             let menu_len = 4;
+            if self.keybindings.matches(actions::BACK, &key) {
+                self.context_menu = None;
+                return true;
+            }
             match key.code {
-                KeyCode::Esc => {
-                    self.context_menu = None;
-                    return true;
-                }
                 KeyCode::Up | KeyCode::Char('k') => {
                     self.context_menu_selected = self.context_menu_selected.saturating_sub(1);
                     return true;
