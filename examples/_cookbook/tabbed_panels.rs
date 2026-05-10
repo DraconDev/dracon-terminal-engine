@@ -280,9 +280,9 @@ impl TabbedApp {
             ("←/→", "Switch tabs"),
             ("Click tab", "Switch tab"),
             ("t", "Cycle theme"),
-            ("?", "Toggle help"),
+            ("F1", "Toggle help"),
             ("Esc", "Dismiss help"),
-            ("q", "Quit"),
+            ("Ctrl+Q", "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
@@ -481,7 +481,7 @@ impl Widget for TabbedApp {
         }
 
         let hint = format!(
-            "[Left/Right] Switch tabs | Active: {} | t: theme | ?: help | Esc: dismiss | q: quit",
+            "[Left/Right] Switch tabs | Active: {} | t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit",
             match self.active_tab() {
                 TAB_DASHBOARD => "Dashboard",
                 TAB_LOGS => "Logs",
