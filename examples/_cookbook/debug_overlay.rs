@@ -425,7 +425,12 @@ fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme, should_quit);
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let kb_config = resolve_keybindings();
+
+    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme, should_quit);
+    debug_panel.keybindings = keybindings;
+    debug_panel.kb_config = kb_config;
     // panel.set_area is called by add_widget which sets area from Rect
 
     let mut app = App::new()?.title("Debug Overlay Demo").fps(60).theme(theme);
