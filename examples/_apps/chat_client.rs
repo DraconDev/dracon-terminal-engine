@@ -167,100 +167,83 @@ impl ChatState {
 
         // Modal capture: when any modal is open, only Esc closes it
         if self.show_emoji_modal || self.show_settings_modal {
-            match key.code {
-                KeyCode::Esc => {
-                    self.show_emoji_modal = false;
-                    self.show_settings_modal = false;
-                    self.dirty = true;
-                    return true;
-                }
-                _ => return true, // Capture everything else
+            if self.keybindings.matches(actions::BACK, &key) {
+                self.show_emoji_modal = false;
+                self.show_settings_modal = false;
+                self.dirty = true;
+                return true;
             }
+            return true; // Capture everything else
         }
 
         // Help overlay: Esc or ? dismisses
         if self.show_help {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('?') => {
-                    self.show_help = false;
-                    self.dirty = true;
-                    return true;
-                }
-                _ => {}
-            }
-        }
-
-        match key.code {
-            KeyCode::Esc => {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
-                true
+                return true;
             }
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
+            return true;
+        }
+
+        if self.keybindings.matches(actions::BACK, &key) {
+            self.show_help = false;
+            self.dirty = true;
+            true
+        } else if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            true
+        } else if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            true
+        } else if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::Enter {
+            self.send_message();
+            true
+        } else if key.code == KeyCode::Backspace && !self.input_text.is_empty() {
+            self.input_text.pop();
+            self.cursor_pos = self.input_text.len();
+            self.dirty = true;
+            true
+        } else if let KeyCode::Char(ch) = key.code {
+            self.input_text.push(ch);
+            self.cursor_pos = self.input_text.len();
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::Left && self.cursor_pos > 0 {
+            self.cursor_pos -= 1;
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::Right && self.cursor_pos < self.input_text.len() {
+            self.cursor_pos += 1;
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::Home {
+            self.cursor_pos = 0;
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::End {
+            self.cursor_pos = self.input_text.len();
+            self.dirty = true;
+            true
+        } else if key.code == KeyCode::Up {
+            if self.scroll_offset > 0 {
+                self.scroll_offset -= 1;
                 self.dirty = true;
-                true
             }
-            KeyCode::Enter => {
-                self.send_message();
-                true
-            }
-            KeyCode::Backspace if !self.input_text.is_empty() => {
-                self.input_text.pop();
-                self.cursor_pos = self.input_text.len();
+            true
+        } else if key.code == KeyCode::Down {
+            let visible = (self.area.get().height.saturating_sub(5)).max(1) as usize;
+            if self.scroll_offset + visible < self.messages.len() {
+                self.scroll_offset += 1;
                 self.dirty = true;
-                true
             }
-            KeyCode::Char(ch) => {
-                self.input_text.push(ch);
-                self.cursor_pos = self.input_text.len();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Left if self.cursor_pos > 0 => {
-                self.cursor_pos -= 1;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Right if self.cursor_pos < self.input_text.len() => {
-                self.cursor_pos += 1;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Home => {
-                self.cursor_pos = 0;
-                self.dirty = true;
-                true
-            }
-            KeyCode::End => {
-                self.cursor_pos = self.input_text.len();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Up => {
-                if self.scroll_offset > 0 {
-                    self.scroll_offset -= 1;
-                    self.dirty = true;
-                }
-                true
-            }
-            KeyCode::Down => {
-                let visible = (self.area.get().height.saturating_sub(5)).max(1) as usize;
-                if self.scroll_offset + visible < self.messages.len() {
-                    self.scroll_offset += 1;
-                    self.dirty = true;
-                }
-                true
-            }
-            _ => false,
+            true
+        } else {
+            false
         }
     }
 

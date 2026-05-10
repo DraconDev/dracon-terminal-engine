@@ -520,7 +520,7 @@ impl Widget for EditorApp {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t);
+            render_help_overlay(&mut plane, area, t, &self.kb_config);
         }
 
         // Command palette overlay
@@ -901,7 +901,7 @@ fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
     (t.fg, Styles::empty())
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &KeybindingConfig) {
     let w = 50u16.min(area.width - 4);
     let h = 14u16.min(area.height - 4);
     let x = (area.width - w) / 2;
@@ -934,6 +934,11 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         true,
     );
 
+    let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+    let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
+    let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
+    let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
+
     let shortcuts = [
         ("Ctrl+T", "New tab"),
         ("Ctrl+W", "Close tab"),
@@ -941,10 +946,10 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("Ctrl+S", "Save mock"),
         ("Tab", "Next tab"),
         ("↑↓←→", "Navigate"),
-        ("t", "Cycle theme"),
-        ("?", "Toggle help"),
-        ("Esc", "Dismiss help / search"),
-        ("q", "Quit"),
+        (kb_theme, "Cycle theme"),
+        (kb_help, "Toggle help"),
+        (kb_back, "Dismiss help / search"),
+        (kb_quit, "Quit"),
     ];
 
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
