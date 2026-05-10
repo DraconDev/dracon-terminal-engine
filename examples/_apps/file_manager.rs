@@ -940,42 +940,50 @@ impl Widget for FileManager {
             }
         }
 
-        match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('r') => {
-                self.refresh();
-                true
-            }
-            KeyCode::Char('d') => {
-                if self.selected_path.is_some() {
-                    self.prompt = Some(FileManagerPrompt {
-                        kind: PromptKind::DeleteConfirm,
-                        buffer: String::new(),
-                        message: "Delete selected? (y/n): ".to_string(),
-                    });
-                    self.dirty = true;
-                } else {
-                    self.toast("No file selected", ToastKind::Warning);
-                }
-                true
-            }
-            KeyCode::Char('n') => {
+        // Use config-driven keybindings for app-level actions
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::REFRESH, &key) {
+            self.refresh();
+            return true;
+        }
+        if self.keybindings.matches(actions::DELETE, &key) {
+            if self.selected_path.is_some() {
                 self.prompt = Some(FileManagerPrompt {
-                    kind: PromptKind::NewFile,
+                    kind: PromptKind::DeleteConfirm,
                     buffer: String::new(),
-                    message: "New file name: ".to_string(),
+                    message: "Delete selected? (y/n): ".to_string(),
                 });
                 self.dirty = true;
-                true
+            } else {
+                self.toast("No file selected", ToastKind::Warning);
             }
-            KeyCode::Char('f') => {
+            return true;
+        }
+        if self.keybindings.matches(actions::NEW_ITEM, &key) {
+            self.prompt = Some(FileManagerPrompt {
+                kind: PromptKind::NewFile,
+                buffer: String::new(),
+                message: "New file name: ".to_string(),
+            });
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+
+        // Hardcoded keys for actions not in the standard set
+        match key.code {
+            KeyCode::Char('f') if key.modifiers.is_empty() => {
                 self.prompt = Some(FileManagerPrompt {
                     kind: PromptKind::NewFolder,
                     buffer: String::new(),
@@ -984,7 +992,7 @@ impl Widget for FileManager {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('m') => {
+            KeyCode::Char('m') if key.modifiers.is_empty() => {
                 if self.selected_path.is_some() {
                     self.prompt = Some(FileManagerPrompt {
                         kind: PromptKind::Rename,
@@ -995,11 +1003,6 @@ impl Widget for FileManager {
                 } else {
                     self.toast("No file selected", ToastKind::Warning);
                 }
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                self.dirty = true;
                 true
             }
             KeyCode::Char('c') if key.modifiers.is_empty() => {
