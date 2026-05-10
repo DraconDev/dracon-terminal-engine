@@ -171,6 +171,9 @@ impl Scene for TreeNavigatorScene {
             self.show_help = true;
             return true;
         }
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false;
+        }
         if self.tree.handle_key(key) {
             return true;
         }

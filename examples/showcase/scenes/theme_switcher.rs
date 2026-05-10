@@ -236,6 +236,9 @@ impl Scene for ThemeSwitcherScene {
             self.dirty = true;
             return true;
         }
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false;
+        }
         false
     }
 

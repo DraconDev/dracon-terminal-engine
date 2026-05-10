@@ -314,6 +314,9 @@ impl Scene for ModalDemoScene {
                 self.dirty = true;
                 return true;
             }
+            if self.keybindings.matches(actions::BACK, &key) {
+                return false;
+            }
             match key.code {
                 KeyCode::Char('c') | KeyCode::Char('C') if key.modifiers.is_empty() => { self.show_confirm = true; self.dirty = true; true }
                 _ => false,
