@@ -1441,6 +1441,10 @@ fn main() -> std::io::Result<()> {
             return;
         }
         let mut m = mon_for_tick.borrow_mut();
+        let app_theme = ctx.app_theme().clone();
+        if m.theme.name != app_theme.name {
+            m.on_theme_change(&app_theme);
+        }
         m.data.refresh();
         m.update_gauges();
         let (w, h) = ctx.compositor().size();
