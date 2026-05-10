@@ -600,13 +600,14 @@ fn main() -> std::io::Result<()> {
                 let mut help_plane = dracon_terminal_engine::compositor::Plane::new(0, w, h);
                 help_plane.z_index = 200;
 
+                let kb = &keybindings_for_tick;
                 let shortcuts = [
                     ("↑/↓", "Navigate menu"),
                     ("Enter", "Select / go forward"),
-                    ("Esc", "Go back"),
-                    ("t", "Cycle theme"),
-                    ("?", "Toggle this help"),
-                    ("q", "Quit"),
+                    (kb.display(actions::BACK).unwrap_or("esc"), "Go back"),
+                    (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                    (kb.display(actions::HELP).unwrap_or("?"), "Toggle this help"),
+                    (kb.display(actions::QUIT).unwrap_or("q"), "Quit"),
                 ];
 
                 let hw = 40u16.min(w.saturating_sub(4));
