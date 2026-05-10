@@ -536,6 +536,9 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         }
         handled
     }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(*self.theme.borrow())
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

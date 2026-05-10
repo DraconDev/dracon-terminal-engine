@@ -753,6 +753,9 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
         }
         self.router.borrow_mut().handle_key(key)
     }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(*self.theme.borrow())
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

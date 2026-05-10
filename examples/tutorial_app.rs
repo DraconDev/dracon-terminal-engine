@@ -650,6 +650,9 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         // Delegate to current scene
         self.router.borrow_mut().handle_key(key)
     }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(*self.theme.borrow())
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
