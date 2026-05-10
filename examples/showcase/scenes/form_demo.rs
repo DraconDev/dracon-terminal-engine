@@ -433,7 +433,6 @@ fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
         ("Shift+Tab", "Previous field"),
         ("Enter", "Submit form"),
         ("Drag ≡", "Reorder fields"),
-        ("t", "Cycle theme"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
