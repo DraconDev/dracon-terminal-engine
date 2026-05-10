@@ -16,7 +16,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{actions, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Gauge, StatusBadge};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -531,7 +531,7 @@ impl SystemMonitor {
             process_scroll: 0,
             show_help: false,
             tree_mode: false,
-            keybindings: KeybindingSet::from_config(&KeybindingConfig::resolve()),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             area: Rect::new(0, 0, 80, 24),
             should_quit,
         }
