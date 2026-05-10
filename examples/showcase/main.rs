@@ -93,6 +93,9 @@ fn main() -> std::io::Result<()> {
             // Remember what we launched for the return message
             *last_launched_for_tick.lock().unwrap() = Some(binary_name.clone());
 
+            // Set env var so the launched binary inherits our theme
+            std::env::set_var("DTRON_THEME", ctx.theme().name);
+
             let _ = ctx.suspend_terminal();
 
             // Auto-build if missing
