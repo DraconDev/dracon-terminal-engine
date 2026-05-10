@@ -536,7 +536,7 @@ impl Widget for Dashboard {
             self.show_help = !self.show_help;
             return true;
         }
-        if key.code == KeyCode::Char('p') {
+        if self.keybindings.matches("pause", &key) {
             self.paused = !self.paused;
             return true;
         }
