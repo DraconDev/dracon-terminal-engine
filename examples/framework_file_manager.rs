@@ -66,7 +66,7 @@ struct FileManagerApp {
 }
 
 impl FileManagerApp {
-    fn new(theme: Theme) -> Self {
+    fn new(theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let crumbs: Vec<String> = current_dir
             .components()
@@ -91,6 +91,7 @@ impl FileManagerApp {
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             show_help: false,
+            should_quit,
             keybindings,
             kb_config,
         }
