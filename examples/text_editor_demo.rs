@@ -94,12 +94,22 @@ impl EditorApp {
 
         let search = SearchInput::new(WidgetId::new(20)).with_theme(theme);
 
+        let kb_config = resolve_keybindings();
+        let keybindings = KeybindingSet::from_config(&kb_config);
+        let kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+        let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
+        let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
+        let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
+
         let status = StatusBar::new(WidgetId::new(30))
             .add_segment(StatusSegment::new("󰄛 Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("Ln 1, Col 1").with_fg(theme.fg_muted))
             .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
             .add_segment(
-                StatusSegment::new("t: theme | ?: help | Esc: dismiss | q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new(&format!(
+                    "{}: theme | {}: help | {}: dismiss | {}: quit",
+                    kb_theme, kb_help, kb_back, kb_quit
+                )).with_fg(theme.fg_muted),
             );
 
         let breadcrumbs = Breadcrumbs::new(vec!["src".into(), "main.rs".into()]);
@@ -193,6 +203,8 @@ impl EditorApp {
             should_quit,
             command_palette,
             cmd_bridge,
+            keybindings,
+            kb_config,
         }
     }
 

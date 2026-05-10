@@ -390,22 +390,6 @@ impl NetworkApp {
         }
 
         match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('r') if !self.view_detail => {
-                self.refresh();
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                true
-            }
             KeyCode::Up if !self.view_detail && !self.posts.is_empty() => {
                 if self.selected > 0 {
                     self.selected -= 1;
@@ -420,14 +404,6 @@ impl NetworkApp {
             }
             KeyCode::Enter if !self.posts.is_empty() => {
                 self.view_detail = !self.view_detail;
-                true
-            }
-            KeyCode::Esc if self.show_help => {
-                self.show_help = false;
-                true
-            }
-            KeyCode::Esc if self.view_detail => {
-                self.view_detail = false;
                 true
             }
             _ => false,

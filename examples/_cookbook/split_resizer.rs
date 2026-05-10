@@ -34,7 +34,7 @@ struct SplitResizerApp {
 }
 
 impl SplitResizerApp {
-    fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
+    fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
         Self {
             id,
             ra: DA,
@@ -47,6 +47,7 @@ impl SplitResizerApp {
             theme,
             show_help: false,
             should_quit,
+            keybindings,
         }
     }
 }
