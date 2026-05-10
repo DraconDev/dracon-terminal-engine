@@ -557,6 +557,7 @@ impl Widget for Showcase {
                 let draw_x = (x as i16 + offset_x).max(1) as usize;
                 let draw_y = (y as i16 + offset_y).max(1) as usize;
 
+                let run_count = self.run_counts.get(ex_idx).copied().unwrap_or(0);
                 let card_config = CardConfig {
                     ex,
                     idx: grid_idx,
@@ -567,6 +568,8 @@ impl Widget for Showcase {
                     width: card_w as u16,
                     height: card_h as u16,
                     is_embedded: self.is_embedded(ex.name),
+                    search_query: &self.search_query,
+                    run_count,
                 };
 
                 let card = render_card(&card_config);

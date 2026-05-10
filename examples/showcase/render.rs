@@ -153,6 +153,52 @@ pub struct CardConfig<'a> {
     pub run_count: u32,
 }
 
+/// Draw text with search term highlighted.
+fn draw_highlighted_text(
+    plane: &mut Plane,
+    x: usize,
+    y: usize,
+    text: &str,
+    normal_fg: Color,
+    bg: Color,
+    bold: bool,
+    search: &str,
+    highlight_color: Color,
+) {
+    if search.is_empty() || !text.to_lowercase().contains(&search.to_lowercase()) {
+        draw_text(plane, x, y, text, normal_fg, bg, bold);
+        return;
+    }
+    let lower = text.to_lowercase();
+    let q = search.to_lowercase();
+    let mut pos = x;
+    let mut remaining = 0usize;
+    while remaining < text.len() {
+        let rest = &text[remaining..];
+        let rest_lower = &lower[remaining..];
+        match rest_lower.find(&q) {
+            Some(start) => {
+                // Draw before match
+                if start > 0 {
+                    let before = &rest[..start];
+                    draw_text(plane, pos, y, before, normal_fg, bg, bold);
+                    pos += before.chars().count();
+                }
+                // Draw match highlighted
+                let match_str = &rest[start..start + q.len()];
+                draw_text(plane, pos, y, match_str, highlight_color, bg, true);
+                pos += match_str.chars().count();
+                remaining += start + q.len();
+            }
+            None => {
+                // Draw rest
+                draw_text(plane, pos, y, rest, normal_fg, bg, bold);
+                break;
+            }
+        }
+    }
+}
+
 pub fn render_card(config: &CardConfig) -> Plane {
     let mut plane = Plane::new(0, config.width, config.height);
     let t = &config.theme;
@@ -222,12 +268,30 @@ pub fn render_card(config: &CardConfig) -> Plane {
     let name_y = 3usize;
     let max_name_len = (card_w_usize - 4).min(24);
     let name_truncated: String = config.ex.name.chars().take(max_name_len).collect();
-    draw_text(&mut plane, 2, name_y, &name_truncated, t.fg, bg, true);
+    draw_highlighted_text(
+        &mut plane, 2, name_y, &name_truncated, t.fg, bg, true,
+        config.search_query, t.primary,
+    );
 
     let desc_y = 4usize;
     let max_desc_len = (card_w_usize - 4).min(24);
     let desc: String = config.ex.description.chars().take(max_desc_len).collect();
-    draw_text(&mut plane, 2, desc_y, &desc, t.fg_muted, bg, false);
+    draw_highlighted_text(
+        &mut plane, 2, desc_y, &desc, t.fg_muted, bg, false,
+        config.search_query, t.primary,
+    );
+
+    // Run count badge (bottom-right corner)
+    if config.run_count > 0 {
+        let run_text = format!(" {}x ", config.run_count);
+        let rx = card_w_usize.saturating_sub(run_text.len() + 2);
+        for (i, ch) in run_text.chars().enumerate() {
+            let px = rx + i;
+            if px < card_w_usize - 2 && name_y + 1 < card_h_usize - 1 {
+                set_cell(&mut plane, px, name_y + 1, ch, t.fg_on_accent, t.info);
+            }
+        }
+    }
 
     let preview_start_y = 6usize;
     let _preview_lines = card_h_usize.saturating_sub(preview_start_y + 1);
