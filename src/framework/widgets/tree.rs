@@ -191,6 +191,8 @@ impl crate::framework::widget::Widget for Tree {
         let width = plane.cells.len() / plane.height as usize;
         let mut row = 0usize;
         let hovered = &self.hovered_path;
+        let skip = self.scroll_offset;
+        let max_rows = self.visible_count as usize;
 
         #[allow(clippy::too_many_arguments)]
         fn render_node(
@@ -202,30 +204,36 @@ impl crate::framework::widget::Widget for Tree {
             row: &mut usize,
             current_path: &mut Vec<usize>,
             hovered: &Option<Vec<usize>>,
+            skip: usize,
+            max_rows: usize,
         ) {
-            if *row >= plane.height as usize {
+            if *row >= max_rows {
                 return;
             }
-            let line = format!(
-                "{}{}{}",
-                prefix,
-                if node.expanded { "- " } else { "+ " },
-                node.label
-            );
             let is_hovered = hovered.as_ref().is_some_and(|h| h == current_path);
             let bg = if is_hovered { theme.hover_bg } else { theme.bg };
             let fg = theme.fg;
-            for (i, c) in line.chars().take(width).enumerate() {
-                let idx = (*row as u16 * plane.width + i as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx] = Cell {
-                        char: c,
-                        fg,
-                        bg,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
+
+            let skip_counter = *row + 1 <= skip;
+            if !skip_counter {
+                let line = format!(
+                    "{}{}{}",
+                    prefix,
+                    if node.expanded { "- " } else { "+ " },
+                    node.label
+                );
+                for (i, c) in line.chars().take(width).enumerate() {
+                    let idx = (*row - skip) as u16 * plane.width + i as u16;
+                    if (idx as usize) < plane.cells.len() {
+                        plane.cells[idx as usize] = Cell {
+                            char: c,
+                            fg,
+                            bg,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
+                    }
                 }
             }
             *row += 1;
@@ -243,12 +251,15 @@ impl crate::framework::widget::Widget for Tree {
                         row,
                         current_path,
                         hovered,
+                        skip,
+                        max_rows,
                     );
                     current_path.pop();
                 }
             }
         }
 
+        let mut actual_row = 0usize;
         for (i, node) in self.root.iter().enumerate() {
             let mut path = vec![i];
             render_node(
@@ -257,9 +268,11 @@ impl crate::framework::widget::Widget for Tree {
                 &mut plane,
                 &self.theme,
                 width,
-                &mut row,
+                &mut actual_row,
                 &mut path,
                 hovered,
+                skip,
+                max_rows,
             );
         }
 
