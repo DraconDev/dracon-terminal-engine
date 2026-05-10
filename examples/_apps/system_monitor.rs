@@ -16,6 +16,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Gauge, StatusBadge};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -494,6 +495,7 @@ struct SystemMonitor {
     process_scroll: usize,
     show_help: bool,
     tree_mode: bool,
+    keybindings: KeybindingSet,
     area: Rect,
     should_quit: Arc<AtomicBool>,
 }
@@ -529,6 +531,7 @@ impl SystemMonitor {
             process_scroll: 0,
             show_help: false,
             tree_mode: false,
+            keybindings: KeybindingSet::from_config(&KeybindingConfig::resolve()),
             area: Rect::new(0, 0, 80, 24),
             should_quit,
         }
