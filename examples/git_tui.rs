@@ -1125,7 +1125,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
-fn render_help_overlay(&self, plane: &mut Plane, area: Rect, t: Theme) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &KeybindingSet) {
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
         ("↑/↓ or j/k", "Navigate"),
