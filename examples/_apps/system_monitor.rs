@@ -1011,8 +1011,9 @@ impl Widget for SystemMonitor {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        let kb = &self.keybindings;
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if kb.matches(key, actions::DISMISS) || kb.matches(key, actions::HELP) {
                 self.show_help = false;
                 return true;
             }
@@ -1025,25 +1026,27 @@ impl Widget for SystemMonitor {
             self.data.processes.len()
         };
         let max_scroll = view_count.saturating_sub(1);
+
+        if kb.matches(key, actions::QUIT) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if kb.matches(key, actions::THEME) {
+            self.cycle_theme();
+            return true;
+        }
+        if kb.matches(key, actions::TREE_MODE) {
+            self.tree_mode = !self.tree_mode;
+            self.process_scroll = 0;
+            self.selected_process = None;
+            return true;
+        }
+        if kb.matches(key, actions::HELP) {
+            self.show_help = !self.show_help;
+            return true;
+        }
+
         match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('p') => {
-                self.tree_mode = !self.tree_mode;
-                self.process_scroll = 0;
-                self.selected_process = None;
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                true
-            }
             KeyCode::Up => {
                 let n = self.selected_process.unwrap_or(0);
                 if n > 0 {
