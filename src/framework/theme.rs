@@ -1079,53 +1079,52 @@ impl Theme {
     }
 }
 
-// Theme resolution helpers
-
-/// Look up a theme by its `.name` field (case-insensitive).
-///
-/// Supports all built-in themes: nord, dark, light, high_contrast,
-/// cyberpunk, dracula, catppuccin_mocha, gruvbox_dark, tokyo_night,
-/// solarized_dark, solarized_light, one_dark, rose_pine, kanagawa,
-/// everforest, monokai, warm, cool, forest, sunset, mono.
-pub fn theme_from_name(name: &str) -> Option<Theme> {
-    match name.to_ascii_lowercase().as_str() {
-        "dark" => Some(Self::dark()),
-        "light" => Some(Self::light()),
-        "high_contrast" => Some(Self::high_contrast()),
-        "cyberpunk" => Some(Self::cyberpunk()),
-        "dracula" => Some(Self::dracula()),
-        "nord" => Some(Self::nord()),
-        "catppuccin_mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
-        "gruvbox_dark" | "gruvbox" => Some(Self::gruvbox_dark()),
-        "tokyo_night" | "tokyo-night" => Some(Self::tokyo_night()),
-        "solarized_dark" => Some(Self::solarized_dark()),
-        "solarized_light" => Some(Self::solarized_light()),
-        "one_dark" | "one-dark" => Some(Self::one_dark()),
-        "rose_pine" | "rose-pine" => Some(Self::rose_pine()),
-        "kanagawa" => Some(Self::kanagawa()),
-        "everforest" => Some(Self::everforest()),
-        "monokai" => Some(Self::monokai()),
-        "warm" => Some(Self::warm()),
-        "cool" => Some(Self::cool()),
-        "forest" => Some(Self::forest()),
-        "sunset" => Some(Self::sunset()),
-        "mono" => Some(Self::mono()),
-        _ => None,
+    /// Look up a theme by its `.name` field (case-insensitive).
+    ///
+    /// Supports all built-in themes: nord, dark, light, high_contrast,
+    /// cyberpunk, dracula, catppuccin_mocha, gruvbox_dark, tokyo_night,
+    /// solarized_dark, solarized_light, one_dark, rose_pine, kanagawa,
+    /// everforest, monokai, warm, cool, forest, sunset, mono.
+    pub fn from_name(name: &str) -> Option<Theme> {
+        match name.to_ascii_lowercase().as_str() {
+            "dark" => Some(Self::dark()),
+            "light" => Some(Self::light()),
+            "high_contrast" => Some(Self::high_contrast()),
+            "cyberpunk" => Some(Self::cyberpunk()),
+            "dracula" => Some(Self::dracula()),
+            "nord" => Some(Self::nord()),
+            "catppuccin_mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
+            "gruvbox_dark" | "gruvbox" => Some(Self::gruvbox_dark()),
+            "tokyo_night" | "tokyo-night" => Some(Self::tokyo_night()),
+            "solarized_dark" => Some(Self::solarized_dark()),
+            "solarized_light" => Some(Self::solarized_light()),
+            "one_dark" | "one-dark" => Some(Self::one_dark()),
+            "rose_pine" | "rose-pine" => Some(Self::rose_pine()),
+            "kanagawa" => Some(Self::kanagawa()),
+            "everforest" => Some(Self::everforest()),
+            "monokai" => Some(Self::monokai()),
+            "warm" => Some(Self::warm()),
+            "cool" => Some(Self::cool()),
+            "forest" => Some(Self::forest()),
+            "sunset" => Some(Self::sunset()),
+            "mono" => Some(Self::mono()),
+            _ => None,
+        }
     }
-}
 
-/// Resolve a theme from the `DTRON_THEME` environment variable, or fall back
-/// to `default`. Call this at the top of any example's `main()` so it inherits
-/// the showcase's selected theme:
-///
-/// ```ignore
-/// .theme(Theme::from_env_or(Theme::nord()))
-/// ```
-pub fn from_env_or(default: Theme) -> Theme {
-    std::env::var("DTRON_THEME")
-        .ok()
-        .and_then(|n| theme_from_name(&n))
-        .unwrap_or(default)
+    /// Resolve a theme from the `DTRON_THEME` environment variable, or fall
+    /// back to `default`. Call this at the top of any example's `main()` so
+    /// it inherits the showcase's selected theme:
+    ///
+    /// ```ignore
+    /// .theme(Theme::from_env_or(Theme::nord()))
+    /// ```
+    pub fn from_env_or(default: Theme) -> Theme {
+        std::env::var("DTRON_THEME")
+            .ok()
+            .and_then(|n| Self::from_name(&n))
+            .unwrap_or(default)
+    }
 }
 
 impl Default for Theme {
