@@ -341,26 +341,22 @@ impl Scene for FormDemoScene {
                 }
                 false
             }
-            MouseEventKind::Moved => {
-                if self.dragging.is_some() {
-                    if let Some(idx) = row_idx {
-                        if self.drag_hover != Some(idx) {
-                            self.drag_hover = Some(idx);
-                            self.dirty = true;
-                        }
+            MouseEventKind::Moved if self.dragging.is_some() => {
+                if let Some(idx) = row_idx {
+                    if self.drag_hover != Some(idx) {
+                        self.drag_hover = Some(idx);
+                        self.dirty = true;
                     }
-                    true
-                } else {
-                    false
                 }
+                true
             }
-            MouseEventKind::Down(MouseButton::Right) => {
-                if self.dragging.is_some() {
-                    self.dragging = None;
-                    self.drag_hover = None;
-                    self.dirty = true;
-                    true
-                } else {
+            MouseEventKind::Moved => false,
+            MouseEventKind::Down(MouseButton::Right) if self.dragging.is_some() => {
+                self.dragging = None;
+                self.drag_hover = None;
+                self.dirty = true;
+                true
+            }
                     false
                 }
             }
