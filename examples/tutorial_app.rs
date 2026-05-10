@@ -201,7 +201,7 @@ impl Scene for TaskListScreen {
         }
 
         // Status bar
-        let status = "↑↓: nav | Enter: detail | n: new | t: theme | ?: help | Esc: dismiss | q: quit";
+        let status = "↑↓: nav | Enter: detail | Ctrl+N: new | t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
