@@ -729,13 +729,25 @@ impl Widget for FileManager {
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
+        let hint = format!(
+            "{} | f: folder | m: rename",
+            self.keybindings.format_hint(&[
+                (actions::NEW_ITEM, "new"),
+                (actions::DELETE, "delete"),
+                (actions::REFRESH, "refresh"),
+                (actions::THEME, "theme"),
+                (actions::HELP, "help"),
+                (actions::BACK, "dismiss"),
+                (actions::QUIT, "quit"),
+            ])
+        );
         let status = StatusBar::new(WidgetId::new(4))
             .add_segment(
                 StatusSegment::new(&format!("{} items", self.root.child_count()))
                     .with_fg(t.fg_muted),
             )
             .add_segment(
-                StatusSegment::new("n: new | f: folder | m: rename | d: delete | r: refresh | t: theme | ?: help | Esc: dismiss | q: quit")
+                StatusSegment::new(&hint)
                     .with_fg(t.primary),
             );
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));

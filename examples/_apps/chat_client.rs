@@ -580,12 +580,12 @@ impl ChatState {
         }
 
         // Right segment: hints
-        let hint = format!("{}: theme | {}: help | {}: dismiss | {}: quit",
-            self.kb_config.get(actions::THEME).unwrap_or("t"),
-            self.kb_config.get(actions::HELP).unwrap_or("?"),
-            self.kb_config.get(actions::BACK).unwrap_or("esc"),
-            self.kb_config.get(actions::QUIT).unwrap_or("q"),
-        );
+        let hint = self.keybindings.format_hint(&[
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::BACK, "dismiss"),
+            (actions::QUIT, "quit"),
+        ]);
         let hint_x = (area.width as usize).saturating_sub(hint.len() + 2);
         for (i, c) in hint.chars().enumerate() {
             let idx = status_base + hint_x + i;

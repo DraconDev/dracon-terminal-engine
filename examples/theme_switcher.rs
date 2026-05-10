@@ -1083,7 +1083,12 @@ impl Widget for StatusBarWidget {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 5;
         let t = get_current_theme();
-        let hint = "t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit";
+        let hint = self.keybindings.format_hint(&[
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::BACK, "dismiss"),
+            (actions::QUIT, "quit"),
+        ]);
         for (i, c) in hint.chars().take(area.width as usize).enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;
@@ -1129,7 +1134,8 @@ fn main() -> Result<()> {
     let help_overlay = HelpOverlay::new(WidgetId::new(7), Arc::clone(&show_help));
     let _help_id = app.add_widget(Box::new(help_overlay), Rect::new(0, 0, 80, 24));
 
-    let status_bar = StatusBarWidget::new(WidgetId::new(8));
+    let status_keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let status_bar = StatusBarWidget::new(WidgetId::new(8), status_keybindings);
     let _status_id = app.add_widget(Box::new(status_bar), Rect::new(0, 23, 80, 1));
 
     let _ = app
