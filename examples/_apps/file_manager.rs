@@ -198,6 +198,7 @@ struct FileManager {
     theme: Theme,
     show_help: bool,
     is_dragging_split: bool,
+    keybindings: KeybindingSet,
 }
 
 impl FileManager {
