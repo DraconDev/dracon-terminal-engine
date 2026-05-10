@@ -107,79 +107,79 @@ impl Widget for SplitResizerApp {
         if key.kind != KeyEventKind::Press {
             return false;
         }
-        match key.code {
-            KeyCode::Char('q') => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('r') => {
-                self.ra = DA;
-                self.rb = DB;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Left => {
-                self.ra = (self.ra - 0.05).max(0.1);
-                self.dirty = true;
-                true
-            }
-            KeyCode::Right => {
-                self.ra = (self.ra + 0.05).min(0.9);
-                self.dirty = true;
-                true
-            }
-            KeyCode::Up | KeyCode::Down => {
-                if self.sel.is_none() {
-                    self.sel = Some(1);
-                }
-                self.rb =
-                    (self.rb + if key.code == KeyCode::Up { -0.05 } else { 0.05 }).clamp(0.1, 0.9);
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('t') => {
-                let themes = [
-                    Theme::dark(),
-                    Theme::light(),
-                    Theme::cyberpunk(),
-                    Theme::dracula(),
-                    Theme::nord(),
-                    Theme::catppuccin_mocha(),
-                    Theme::gruvbox_dark(),
-                    Theme::tokyo_night(),
-                    Theme::solarized_dark(),
-                    Theme::solarized_light(),
-                    Theme::one_dark(),
-                    Theme::rose_pine(),
-                    Theme::kanagawa(),
-                    Theme::everforest(),
-                    Theme::monokai(),
-                    Theme::warm(),
-                    Theme::cool(),
-                    Theme::forest(),
-                    Theme::sunset(),
-                    Theme::mono(),
-                ];
-                let idx = themes
-                    .iter()
-                    .position(|t| t.name == self.theme.name)
-                    .unwrap_or(0);
-                self.theme = themes[(idx + 1) % themes.len()];
-                self.dirty = true;
-                true
-            }
-            KeyCode::Esc if self.show_help => {
-                self.show_help = false;
-                self.dirty = true;
-                true
-            }
-            _ => false,
+        let kb = &self.keybindings;
+
+        if kb.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if key.code == KeyCode::Char('r') && key.modifiers.is_empty() {
+            self.ra = DA;
+            self.rb = DB;
+            self.dirty = true;
+            return true;
+        }
+        if kb.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if key.code == KeyCode::Left && key.modifiers.is_empty() {
+            self.ra = (self.ra - 0.05).max(0.1);
+            self.dirty = true;
+            return true;
+        }
+        if key.code == KeyCode::Right && key.modifiers.is_empty() {
+            self.ra = (self.ra + 0.05).min(0.9);
+            self.dirty = true;
+            return true;
+        }
+        if (key.code == KeyCode::Up || key.code == KeyCode::Down) && key.modifiers.is_empty() {
+            if self.sel.is_none() {
+                self.sel = Some(1);
+            }
+            self.rb =
+                (self.rb + if key.code == KeyCode::Up { -0.05 } else { 0.05 }).clamp(0.1, 0.9);
+            self.dirty = true;
+            return true;
+        }
+        if kb.matches(actions::THEME, &key) {
+            let themes = [
+                Theme::dark(),
+                Theme::light(),
+                Theme::cyberpunk(),
+                Theme::dracula(),
+                Theme::nord(),
+                Theme::catppuccin_mocha(),
+                Theme::gruvbox_dark(),
+                Theme::tokyo_night(),
+                Theme::solarized_dark(),
+                Theme::solarized_light(),
+                Theme::one_dark(),
+                Theme::rose_pine(),
+                Theme::kanagawa(),
+                Theme::everforest(),
+                Theme::monokai(),
+                Theme::warm(),
+                Theme::cool(),
+                Theme::forest(),
+                Theme::sunset(),
+                Theme::mono(),
+            ];
+            let idx = themes
+                .iter()
+                .position(|t| t.name == self.theme.name)
+                .unwrap_or(0);
+            self.theme = themes[(idx + 1) % themes.len()];
+            self.dirty = true;
+            return true;
+        }
+        if kb.matches(actions::DISMISS, &key) && self.show_help {
+            self.show_help = false;
+            self.dirty = true;
+            return true;
+        }
+        false
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {

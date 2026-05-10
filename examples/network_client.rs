@@ -102,6 +102,8 @@ impl NetworkApp {
             theme: Theme::nord(),
             show_help: false,
             should_quit,
+            keybindings: KeybindingSet::default(),
+            kb_config: KeybindingConfig::default(),
         }
     }
 
