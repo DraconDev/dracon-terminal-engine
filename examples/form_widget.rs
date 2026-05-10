@@ -80,15 +80,19 @@ impl FormApp {
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
         let t = &self.theme;
+        let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
+        let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
+        let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
+        let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
         let help_lines = [
             "╭─ Controls ──────────────────╮",
             "│ Tab/Shift+Tab  Cycle fields │",
             "│ Type           Enter value  │",
             "│ Enter          Submit form  │",
-            "│ t              Cycle theme  │",
-            "│ ?              Toggle help  │",
-            "│ Esc            Dismiss help │",
-            "│ q              Quit         │",
+            &format!("│ {:<14} Cycle theme  │", kb_theme),
+            &format!("│ {:<14} Toggle help  │", kb_help),
+            &format!("│ {:<14} Dismiss help │", kb_back),
+            &format!("│ {:<14} Quit         │", kb_quit),
             "╰─────────────────────────────╯",
         ];
         let w = 32.min(area.width.saturating_sub(4));

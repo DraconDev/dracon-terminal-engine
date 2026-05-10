@@ -34,6 +34,7 @@ use std::time::Duration;
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widgets::{
     Button, ConfirmDialog, ConfirmResult, Label, Modal, Toast, ToastKind,
 };
@@ -166,6 +167,7 @@ struct ModalDemoApp<'a> {
     area: Rect,
     should_quit: Arc<AtomicBool>,
     theme: Theme,
+    keybindings: KeybindingSet,
 }
 
 impl<'a> ModalDemoApp<'a> {
