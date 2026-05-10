@@ -247,11 +247,8 @@ impl KeybindingSet {
     /// Get the display string for an action (e.g. "quit" -> "q").
     pub fn display(&self, action: &str) -> Option<&str> {
         // We don't store the original string, but we can format the KeyEvent
-        self.bindings.get(action).map(|e| {
-            // This is a simple formatter; for display purposes it's usually fine
-            // The actual display is cached elsewhere
-            action // placeholder - we'll add a reverse lookup if needed
-        });
+        // For now, return None; the actual display is handled by the caller
+        let _ = action;
         None
     }
 
