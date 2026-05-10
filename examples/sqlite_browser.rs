@@ -895,7 +895,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let theme = Theme::nord();
+    let theme = Theme::from_env_or(Theme::nord());
     let browser = SqliteBrowser::new(should_quit, theme, &db_path);
 
     let mut app = App::new()?.title("SQLite Browser").fps(30).theme(theme);

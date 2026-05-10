@@ -419,7 +419,7 @@ fn main() -> io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let theme = Theme::dark();
+    let theme = Theme::from_env_or(Theme::dark());
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
