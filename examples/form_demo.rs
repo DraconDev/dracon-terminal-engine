@@ -94,6 +94,7 @@ impl SettingsForm {
             show_help: false,
             area: Rect::new(0, 0, 70, 18),
             dirty: true,
+            keybindings,
         }
     }
 
