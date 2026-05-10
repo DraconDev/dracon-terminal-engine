@@ -80,6 +80,7 @@ struct GitTui {
 
     // Help overlay
     show_help: bool,
+    keybindings: KeybindingSet,
 }
 
 impl GitTui {
@@ -88,6 +89,15 @@ impl GitTui {
         let mut tab_bar = TabBar::new_with_id(WidgetId::new(1), tabs);
         tab_bar.set_active(0);
         tab_bar.on_theme_change(&theme);
+
+        let mut config = resolve_keybindings();
+        if config.get(actions::THEME).is_none() {
+            config.bindings.insert(actions::THEME.to_string(), "t".to_string());
+        }
+        if config.get(actions::REFRESH).is_none() {
+            config.bindings.insert(actions::REFRESH.to_string(), "r".to_string());
+        }
+        let keybindings = KeybindingSet::from_config(&config);
 
         let status_bar = StatusBar::new(WidgetId::new(2))
             .add_segment(StatusSegment::new("Git TUI").with_fg(theme.primary))
@@ -114,6 +124,7 @@ impl GitTui {
             dirty: true,
             last_refresh: Instant::now(),
             show_help: false,
+            keybindings,
         };
         app.refresh();
         app

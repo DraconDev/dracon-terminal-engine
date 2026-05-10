@@ -858,64 +858,64 @@ impl Widget for IdeApp {
 
         // Search mode
         if self.show_search {
-            match key.code {
-                KeyCode::Esc => {
-                    self.show_search = false;
-                    return true;
-                }
-                _ => {
-                    let handled = self.search_input.handle_key(key);
-                    if handled {
-                        return true;
-                    }
-                }
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::CANCEL, &key)
+                || self.keybindings.matches(actions::DISMISS, &key)
+            {
+                self.show_search = false;
+                return true;
+            }
+            let handled = self.search_input.handle_key(key);
+            if handled {
+                return true;
             }
         }
 
         // Global shortcuts
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            return true;
+        }
+        if self.keybindings.matches(actions::SAVE, &key) {
+            if let Some(tab) = self.active_tab_mut() {
+                tab.modified = false;
+            }
+            self.update_status();
+            self.toast("File saved", ToastKind::Success);
+            return true;
+        }
+        if self.keybindings.matches(actions::SEARCH, &key) {
+            self.show_search = !self.show_search;
+            return true;
+        }
+        if self.keybindings.matches(actions::NEW_TAB, &key) {
+            let new_id = self.tabs.len();
+            self.tabs
+                .push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1)));
+            self.active_tab = new_id;
+            self.sync_tab_bar();
+            return true;
+        }
+        if self.keybindings.matches(actions::CLOSE_TAB, &key) {
+            if self.tabs.len() > 1 {
+                self.tabs.remove(self.active_tab);
+                self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                self.sync_tab_bar();
+            }
+            return true;
+        }
+
         match key.code {
-            KeyCode::Char('q') if key.modifiers.is_empty() => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
-                true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                true
-            }
             KeyCode::Char('o') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.toast("Open file dialog (mock)", ToastKind::Info);
-                true
-            }
-            KeyCode::Char('s') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                if let Some(tab) = self.active_tab_mut() {
-                    tab.modified = false;
-                }
-                self.update_status();
-                self.toast("File saved", ToastKind::Success);
-                true
-            }
-            KeyCode::Char('f') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                self.show_search = !self.show_search;
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                let new_id = self.tabs.len();
-                self.tabs
-                    .push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1)));
-                self.active_tab = new_id;
-                self.sync_tab_bar();
-                true
-            }
-            KeyCode::Char('w') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                if self.tabs.len() > 1 {
-                    self.tabs.remove(self.active_tab);
-                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
-                    self.sync_tab_bar();
-                }
                 true
             }
             KeyCode::F(12) => {
