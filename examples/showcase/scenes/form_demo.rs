@@ -415,7 +415,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
 
 fn draw_help(plane: &mut Plane, area: Rect, t: Theme) {
     let hw = 42u16.min(area.width.saturating_sub(4));
-    let hh = 10u16.min(area.height.saturating_sub(4));
+    let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
 
