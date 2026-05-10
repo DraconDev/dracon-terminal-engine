@@ -231,7 +231,7 @@ impl KeybindingSet {
     /// Check if a key event matches an action.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// if keybindings.matches("quit", key) {
     ///     // quit the app
     /// }
