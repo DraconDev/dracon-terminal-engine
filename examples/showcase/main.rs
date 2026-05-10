@@ -127,6 +127,20 @@ fn main() -> std::io::Result<()> {
                 .current_dir(&exe_dir)
                 .status();
 
+            // Check if the child reported its final theme back
+            if theme_return_path.exists() {
+                if let Ok(theme_name) = std::fs::read_to_string(&theme_return_path) {
+                    let theme_name = theme_name.trim().to_string();
+                    if !theme_name.is_empty() {
+                        if let Some(theme) = Theme::from_name(&theme_name) {
+                            ctx.set_theme(theme);
+                        }
+                    }
+                }
+                let _ = std::fs::remove_file(&theme_return_path);
+            }
+            std::env::remove_var("DTRON_THEME_FILE");
+
             let _ = ctx.resume_terminal();
 
             // Non-blocking drain of any stray input bytes left by the child.
