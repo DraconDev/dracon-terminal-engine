@@ -95,7 +95,6 @@ impl KeybindingConfig {
         let mut bindings = HashMap::new();
         // Core (always safe)
         bindings.insert(actions::QUIT.to_string(), "ctrl+q".to_string());
-        bindings.insert(actions::CANCEL.to_string(), "esc".to_string());
         bindings.insert(actions::BACK.to_string(), "esc".to_string());
         bindings.insert(actions::SUBMIT.to_string(), "enter".to_string());
         bindings.insert(actions::TAB_NEXT.to_string(), "tab".to_string());
@@ -113,7 +112,6 @@ impl KeybindingConfig {
         // Search
         bindings.insert(actions::THEME.to_string(), "t".to_string());
         bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
-        bindings.insert(actions::DISMISS.to_string(), "esc".to_string());
         bindings.insert(actions::PAUSE.to_string(), "p".to_string());
         Self { bindings }
     }
