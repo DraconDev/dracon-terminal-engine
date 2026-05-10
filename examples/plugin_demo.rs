@@ -464,6 +464,10 @@ impl Widget for InputRouter {
 
         false
     }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.state.borrow_mut().on_theme_change(theme);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
