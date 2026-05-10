@@ -386,29 +386,25 @@ impl Widget for TreeNav {
         }
 
         if self.show_help {
-            if key.code == KeyCode::Esc || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
             }
             return true;
         }
 
-        match key.code {
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.cycle_theme();
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            true
+        } else if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = true;
+            true
+        } else {
+            if self.tree.handle_key(key) {
+                self.current_path = self.tree.get_selected_path().to_vec();
+                self.update_breadcrumbs();
                 true
-            }
-            KeyCode::Char('?') => {
-                self.show_help = true;
-                true
-            }
-            _ => {
-                if self.tree.handle_key(key) {
-                    self.current_path = self.tree.get_selected_path().to_vec();
-                    self.update_breadcrumbs();
-                    true
-                } else {
-                    false
-                }
+            } else {
+                false
             }
         }
     }
@@ -589,11 +585,13 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let quit_keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     let mut app = App::new()?.title("Tree Navigator").fps(30).theme(theme);
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if quit_keybindings.matches(actions::QUIT, &key) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {
