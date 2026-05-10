@@ -289,17 +289,48 @@ impl Scene for FormDemoScene {
         }
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if self.show_help {
             return true;
         }
-        if let MouseEventKind::Down(MouseButton::Left) = kind {
-            let start_y = 2u16;
-            let field_h = 2u16;
-            if row >= start_y && row < start_y + FIELD_COUNT as u16 * field_h {
-                let idx = (row - start_y) / field_h;
-                if idx < FIELD_COUNT as u16 {
-                    let field_id = idx as usize;
+
+        let start_y = 2u16;
+        let field_h = 2u16;
+
+        // Calculate which row the mouse is over (if any)
+        let row_idx = if row >= start_y && row < start_y + FIELD_COUNT as u16 * field_h {
+            Some(((row - start_y) / field_h) as usize)
+        } else {
+            None
+        };
+
+        match kind {
+            MouseEventKind::Down(MouseButton::Left) => {
+                if let Some(idx) = row_idx {
+                    if col < 2 && self.dragging.is_none() {
+                        // Start drag on handle
+                        self.dragging = Some(idx);
+                        self.drag_hover = Some(idx);
+                        self.dirty = true;
+                        return true;
+                    }
+                    if self.dragging.is_some() {
+                        // Complete drag
+                        if let Some(drag_idx) = self.dragging {
+                            if let Some(hover_idx) = self.drag_hover {
+                                if drag_idx != hover_idx {
+                                    // Swap fields in field_order
+                                    self.field_order.swap(drag_idx, hover_idx);
+                                }
+                            }
+                        }
+                        self.dragging = None;
+                        self.drag_hover = None;
+                        self.dirty = true;
+                        return true;
+                    }
+                    // Normal click: focus field or submit
+                    let field_id = self.field_order[idx];
                     if field_id == FIELD_SUBMIT {
                         self.submit();
                     } else {
@@ -308,9 +339,33 @@ impl Scene for FormDemoScene {
                     self.dirty = true;
                     return true;
                 }
+                false
             }
+            MouseEventKind::Moved => {
+                if self.dragging.is_some() {
+                    if let Some(idx) = row_idx {
+                        if self.drag_hover != Some(idx) {
+                            self.drag_hover = Some(idx);
+                            self.dirty = true;
+                        }
+                    }
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEventKind::Down(MouseButton::Right) => {
+                if self.dragging.is_some() {
+                    self.dragging = None;
+                    self.drag_hover = None;
+                    self.dirty = true;
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
-        false
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
