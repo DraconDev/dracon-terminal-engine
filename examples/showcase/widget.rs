@@ -629,37 +629,22 @@ impl Widget for Showcase {
             set_cell(&mut plane, x, status_y, ' ', t.fg, bg);
         }
 
-        let hints = [
-            ("↑↓←→", "nav"),
-            ("Enter", "launch"),
-            ("/", "search"),
-            ("Tab", "category"),
-            ("t", "theme"),
-            ("q", "quit"),
-        ];
-        let mut hint_x = 2usize;
-        for (key, desc) in hints.iter() {
-            draw_text(
-                &mut plane,
-                hint_x,
-                status_y,
-                key,
-                t.primary,
-                t.surface_elevated,
-                true,
-            );
-            hint_x += key.len();
-            draw_text(
-                &mut plane,
-                hint_x,
-                status_y,
-                desc,
-                t.fg_muted,
-                t.surface_elevated,
-                false,
-            );
-            hint_x += desc.len() + 3;
-        }
+        let hint = self.keybindings.format_hint(&[
+            (actions::THEME, "theme"),
+            (actions::HELP, "help"),
+            (actions::BACK, "dismiss"),
+            (actions::QUIT, "quit"),
+        ]);
+        let hint_x = 2usize;
+        draw_text(
+            &mut plane,
+            hint_x,
+            status_y,
+            &hint,
+            t.fg_muted,
+            t.surface_elevated,
+            false,
+        );
 
         // Mouse coordinates (right side)
         if let Some((mx, my)) = self.mouse_pos {
