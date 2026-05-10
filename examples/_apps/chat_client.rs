@@ -879,7 +879,7 @@ fn main() -> io::Result<()> {
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let kb_config = resolve_keybindings();
 
-    let mut app = App::new()?.title("Chat Client").fps(30).theme(Theme::default());
+    let mut app = App::new()?.title("Chat Client").fps(30).theme(Theme::from_env_or(Theme::default()));
     let chat = Rc::new(RefCell::new(ChatState::new(should_quit, Theme::default())));
     {
         let mut c = chat.borrow_mut();
