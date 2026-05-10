@@ -21,6 +21,7 @@
 //!   q           — quit
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::framework::widgets::{List, StatusBar, StatusSegment};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -622,6 +623,7 @@ struct TodoRouter {
     delete_target: Option<i64>,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
+    keybindings: KeybindingSet,
 }
 
 impl TodoRouter {

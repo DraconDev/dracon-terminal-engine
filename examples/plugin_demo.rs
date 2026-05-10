@@ -22,6 +22,7 @@ use std::time::Duration;
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
@@ -309,6 +310,7 @@ struct PluginDemoState {
     theme: Theme,
     dirty: bool,
     should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
 }
 
 impl PluginDemoState {
