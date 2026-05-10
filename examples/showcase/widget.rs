@@ -629,12 +629,15 @@ impl Widget for Showcase {
             set_cell(&mut plane, x, status_y, ' ', t.fg, bg);
         }
 
-        let hint = self.keybindings.format_hint(&[
-            (actions::THEME, "theme"),
-            (actions::HELP, "help"),
-            (actions::BACK, "dismiss"),
-            (actions::QUIT, "quit"),
-        ]);
+        let hint = format!(
+            "↑↓←→ nav | Enter launch | / search | Tab cat | {}",
+            self.keybindings.format_hint(&[
+                (actions::THEME, "theme"),
+                (actions::HELP, "help"),
+                (actions::BACK, "dismiss"),
+                (actions::QUIT, "quit"),
+            ])
+        );
         let hint_x = 2usize;
         draw_text(
             &mut plane,
