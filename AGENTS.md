@@ -438,6 +438,16 @@ All examples MUST use `Theme::from_env_or(default)` instead of hardcoded theme c
 
 **`Theme::from_env_or(default)`:** Reads `DTRON_THEME` env var, does case-insensitive lookup against all 20+ built-in theme names. Falls back to `default` if env var is unset, empty, or names an unknown theme.
 
+### Theme Return via `DTRON_THEME_FILE`
+
+When a launched example binary cycles its theme and exits, the showcase can adopt the final theme. This uses a **theme return file** mechanism:
+
+1. **Showcase** sets `DTRON_THEME_FILE` env var to a temp file path before spawning the child binary
+2. **App framework** (`App::run()`) writes `self.theme.name` to that file after the event loop exits, just before returning `Ok(())`
+3. **Showcase** reads the file after the child exits, calls `ctx.set_theme(Theme::from_name(...))`, and removes the file
+
+This is **automatic** for any example using the `App` framework — no per-example changes needed. Raw terminal examples (like `desktop.rs`, `game_loop.rs`) that don't use `App::run()` won't write back unless they manually check for `DTRON_THEME_FILE` on exit.
+
 ### Widget Background Pattern
 
 All widgets MUST fill their plane background with `self.theme.bg` to avoid black (`Color::Reset`) holes:
