@@ -58,6 +58,7 @@ impl FormDemoScene {
             submit: Button::with_id(WidgetId::new(15), "Submit"),
             toast: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
