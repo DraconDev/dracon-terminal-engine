@@ -488,7 +488,7 @@ impl Widget for Dashboard {
 
         // Footer
         let footer_y = area.height.saturating_sub(1);
-        let footer_text = " t: theme | ?: help | Esc: dismiss | p: pause | r: refresh | ↑↓: nav | q: quit ";
+        let footer_text = " theme | help | back | pause | refresh | ↑↓: nav | quit ";
         draw_text(
             &mut plane,
             2,
@@ -898,7 +898,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Dashboard Builder — Live system metrics | t:theme p:pause r:refresh q:quit");
+    println!("Dashboard Builder — Live system metrics | Keys are configurable");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));
@@ -910,7 +910,8 @@ fn main() -> std::io::Result<()> {
         .theme(Theme::nord())
         .tick_interval(1000);
 
-    let dashboard = Dashboard::new(should_quit);
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let dashboard = Dashboard::new(should_quit, keybindings);
     app.add_widget(Box::new(dashboard), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {
