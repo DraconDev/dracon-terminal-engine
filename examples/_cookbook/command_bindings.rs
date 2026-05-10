@@ -752,7 +752,7 @@ fn main() -> std::io::Result<()> {
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .theme(Theme::nord())
+        .theme(Theme::from_env_or(Theme::nord()))
         .on_input(move |key| {
             if key.kind != KeyEventKind::Press {
                 return false;
