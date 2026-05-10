@@ -111,6 +111,8 @@ impl Showcase {
         scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
         scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(Theme::nord())));
 
+        let run_counts = vec![0u32; examples.len()];
+
         Self {
             examples,
             filtered,
@@ -157,6 +159,10 @@ impl Showcase {
             scene_router,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             pending_app_theme,
+            run_counts,
+            sort_field: SortField::Name,
+            sort_ascending: true,
+            search_query_lower: String::new(),
         }
     }
 
