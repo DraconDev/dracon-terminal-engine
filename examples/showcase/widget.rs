@@ -1535,11 +1535,20 @@ impl Showcase {
 
 impl Showcase {
     fn dispatch_key(&mut self, key: KeyEvent) -> bool {
-        // If a scene is active, delegate to it
+        // If a scene is active, handle global keys first, then delegate
         if self.scene_router.current().is_some() {
             // q always quits from any scene
             if let KeyCode::Char('q') = key.code {
                 self.should_quit.store(true, Ordering::SeqCst);
+                return true;
+            }
+            // t cycles theme globally
+            if let KeyCode::Char('t') = key.code {
+                let themes = Self::themes();
+                let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
+                self.pending_theme = Some((current + 1) % themes.len());
+                self.apply_filter();
+                self.scene_router.on_theme_change(&self.theme);
                 return true;
             }
             if let KeyCode::Char('b') | KeyCode::Char('B') = key.code {
