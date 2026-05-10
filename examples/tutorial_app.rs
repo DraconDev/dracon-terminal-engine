@@ -690,6 +690,8 @@ fn main() -> std::io::Result<()> {
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+
     let _ = app
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
