@@ -59,6 +59,7 @@ pub mod actions {
     pub const CANCEL: &str = "cancel";
     pub const DISMISS: &str = "dismiss";
     pub const TREE_MODE: &str = "tree_mode";
+    pub const PAUSE: &str = "pause";
 }
 
 /// A mapping from action names to keybinding strings.
@@ -103,6 +104,7 @@ impl KeybindingConfig {
         bindings.insert(actions::THEME.to_string(), "t".to_string());
         bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
         bindings.insert(actions::DISMISS.to_string(), "esc".to_string());
+        bindings.insert(actions::PAUSE.to_string(), "p".to_string());
         Self { bindings }
     }
 
