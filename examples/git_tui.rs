@@ -1039,6 +1039,101 @@ impl GitTui {
     }
 }
 
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &KeybindingSet) {
+    let shortcuts = [
+        ("1-4", "Switch views (Status/Log/Diff/Branches)"),
+        ("↑/↓ or j/k", "Navigate"),
+        (keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
+        ("d", "View diff for selected file"),
+        ("r", "Refresh"),
+        (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+        (keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
+        (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+        (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+    ];
+
+    let help_w = 48u16;
+    let help_h = (shortcuts.len() as u16 + 3).min(area.height - 2);
+    let help_x = (area.width.saturating_sub(help_w)) / 2;
+    let help_y = (area.height.saturating_sub(help_h)) / 2;
+
+    // Draw rounded border box
+    for row in help_y..help_y + help_h {
+        for col in help_x..help_x + help_w {
+            let idx = (row * plane.width + col) as usize;
+            if idx >= plane.cells.len() {
+                continue;
+            }
+            let is_border = row == help_y
+                || row == help_y + help_h - 1
+                || col == help_x
+                || col == help_x + help_w - 1;
+            let is_corner = (row == help_y || row == help_y + help_h - 1)
+                && (col == help_x || col == help_x + help_w - 1);
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].fg = if is_corner { t.primary } else { t.outline };
+            if is_border {
+                if row == help_y && col == help_x {
+                    plane.cells[idx].char = '╭';
+                } else if row == help_y && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╮';
+                } else if row == help_y + help_h - 1 && col == help_x {
+                    plane.cells[idx].char = '╰';
+                } else if row == help_y + help_h - 1 && col == help_x + help_w - 1 {
+                    plane.cells[idx].char = '╯';
+                } else if row == help_y || row == help_y + help_h - 1 {
+                    plane.cells[idx].char = '─';
+                } else {
+                    plane.cells[idx].char = '│';
+                }
+            } else {
+                plane.cells[idx].char = ' ';
+            }
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Title
+    let title = "Git TUI — Help";
+    let tx = help_x + (help_w - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((help_y + 1) * plane.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+            plane.cells[idx].bg = t.surface_elevated;
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    // Two-column layout: keys (theme.primary) + descriptions (theme.fg)
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = help_y + 3 + i as u16;
+        if row >= help_y + help_h - 1 {
+            break;
+        }
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 2 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * plane.width + help_x + 16 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].bg = t.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
+
 fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
     if w < 2 || h < 2 {
         return;
