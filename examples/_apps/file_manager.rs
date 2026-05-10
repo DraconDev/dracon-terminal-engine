@@ -235,6 +235,7 @@ impl FileManager {
             theme,
             show_help: false,
             is_dragging_split: false,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         };
         fm.update_breadcrumbs();
         fm
