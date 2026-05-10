@@ -341,6 +341,13 @@ impl PluginDemoState {
         }
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.clock.on_theme_change(theme);
+        self.counter.on_theme_change(theme);
+        self.dirty = true;
+    }
+
     fn cycle_theme(&mut self) {
         let themes = [
             Theme::nord(),
