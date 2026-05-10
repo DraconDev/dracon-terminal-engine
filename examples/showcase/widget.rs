@@ -1538,13 +1538,11 @@ impl Showcase {
     fn dispatch_key(&mut self, key: KeyEvent) -> bool {
         // If a scene is active, handle global keys first, then delegate
         if self.scene_router.current().is_some() {
-            // q always quits from any scene
-            if let KeyCode::Char('q') = key.code {
+            if self.keybindings.matches(actions::QUIT, &key) {
                 self.should_quit.store(true, Ordering::SeqCst);
                 return true;
             }
-            // t cycles theme globally
-            if let KeyCode::Char('t') = key.code {
+            if self.keybindings.matches(actions::THEME, &key) {
                 let themes = Self::themes();
                 let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
                 self.pending_theme = Some((current + 1) % themes.len());
@@ -1552,12 +1550,7 @@ impl Showcase {
                 self.scene_router.on_theme_change(&self.theme);
                 return true;
             }
-            if let KeyCode::Char('b') | KeyCode::Char('B') = key.code {
-                self.scene_router.pop();
-                return true;
-            }
-            // Esc: let scene handle first (help dismiss), if not consumed, pop back
-            if let KeyCode::Esc = key.code {
+            if self.keybindings.matches(actions::BACK, &key) {
                 if !self.scene_router.handle_key(key) {
                     self.scene_router.pop();
                 }

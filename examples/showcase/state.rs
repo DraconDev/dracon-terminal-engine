@@ -125,6 +125,7 @@ impl Showcase {
             toast_anim: None,
             returned_from,
             scene_router,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
