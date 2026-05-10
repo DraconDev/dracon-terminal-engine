@@ -9,7 +9,7 @@
 //!   Enter        — stage/unstage (status) or checkout (branches)
 //!   d            — view diff for selected file
 //!   r            — refresh
-//!   q            — quit
+//!   Configurable — theme, help, back, quit (see keybindings)
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -1126,10 +1126,10 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         ("Enter", "Stage/unstage or checkout"),
         ("d", "View diff for selected file"),
         ("r", "Refresh"),
-        ("t", "Cycle theme"),
-        ("Esc", "Dismiss help"),
-        ("?", "Toggle this help"),
-        ("q", "Quit"),
+        ("[theme]", "Cycle theme"),
+        ("[back]", "Dismiss help / go back"),
+        ("[help]", "Toggle this help"),
+        ("[quit]", "Quit"),
     ];
 
     let help_w = 48u16;
