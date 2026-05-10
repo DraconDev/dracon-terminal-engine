@@ -11,6 +11,7 @@
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
@@ -139,6 +140,7 @@ struct TabbedApp {
     should_quit: Arc<AtomicBool>,
     show_help: bool,
     theme: Theme,
+    keybindings: KeybindingSet,
 }
 
 impl TabbedApp {
