@@ -1129,13 +1129,13 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &Ke
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
         ("↑/↓ or j/k", "Navigate"),
-        (self.keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
+        (keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
         ("d", "View diff for selected file"),
         ("r", "Refresh"),
-        (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-        (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
-        (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
-        (self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+        (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+        (keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
+        (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
+        (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
     ];
 
     let help_w = 48u16;
