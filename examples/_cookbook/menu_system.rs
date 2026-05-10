@@ -64,8 +64,7 @@ impl MenuApp {
             MenuLabel("󰰈 View"),
             MenuLabel("󰋽 Help"),
         ];
-        let kb_config = resolve_keybindings();
-        let keybindings = KeybindingSet::from_config(&kb_config);
+        let keybindings = KeybindingSet::from_config(&resolve_keybindings());
         let kb_theme = keybindings.display(actions::THEME).unwrap_or("t");
         let kb_help = keybindings.display(actions::HELP).unwrap_or("?");
         let kb_back = keybindings.display(actions::BACK).unwrap_or("Esc");
