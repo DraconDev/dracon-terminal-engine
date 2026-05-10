@@ -15,6 +15,7 @@ use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Modal, Toast, ToastKind};
@@ -58,6 +59,8 @@ struct ChatState {
     theme: Theme,
     dirty: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
+    keybindings: KeybindingSet,
+    kb_config: KeybindingConfig,
 }
 
 // Zone IDs for mouse dispatch
