@@ -256,6 +256,13 @@ impl Showcase {
     pub fn launch_selected(&mut self) {
         let example = self.selected_example().cloned();
         if let Some(ex) = example {
+            // Increment run count
+            if let Some(ex_idx) = self.filtered.get(self.selected) {
+                if *ex_idx < self.run_counts.len() {
+                    self.run_counts[*ex_idx] += 1;
+                }
+            }
+
             if self.is_embedded(ex.name) {
                 // Launch embedded scene
                 self.scene_router.push(ex.name);
