@@ -273,6 +273,28 @@ impl KeybindingSet {
     pub fn actions(&self) -> impl Iterator<Item = &String> {
         self.bindings.keys()
     }
+
+    /// Format a status bar hint from action/label pairs.
+    ///
+    /// # Example
+    /// ```ignore
+    /// let hint = keybindings.format_hint(&[
+    ///     ("quit", "quit"),
+    ///     ("help", "help"),
+    ///     ("theme", "theme"),
+    /// ]);
+    /// // -> "ctrl+q: quit | ?: help | t: theme"
+    /// ```
+    pub fn format_hint(&self, pairs: &[(&str, &str)]) -> String {
+        pairs
+            .iter()
+            .filter_map(|(action, label)| {
+                self.display(action)
+                    .map(|key| format!("{}: {}", key, label))
+            })
+            .collect::<Vec<_>>()
+            .join(" | ")
+    }
 }
 
 impl Default for KeybindingSet {
