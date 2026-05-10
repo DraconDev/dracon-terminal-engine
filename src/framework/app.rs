@@ -549,6 +549,7 @@ impl App {
 
             if self.last_tick_time.elapsed() >= self.tick_interval {
                 if let Some(ref mut tick_fn) = *self.on_tick.borrow_mut() {
+                    let prev_theme_name = self.theme.name.clone();
                     tick_fn(
                         &mut Ctx {
                             compositor: &mut self.compositor,
@@ -566,6 +567,16 @@ impl App {
                         },
                         self.tick_count,
                     );
+                    // If the theme was changed during the on_tick callback
+                    // (via Ctx::set_theme), propagate it to all widgets.
+                    if self.theme.name != prev_theme_name {
+                        self.compositor.set_clear_color(self.theme.bg);
+                        self.dirty_tracker.mark_all_dirty();
+                        for widget in self.widgets.borrow_mut().iter_mut() {
+                            widget.on_theme_change(&self.theme);
+                            widget.mark_dirty();
+                        }
+                    }
                     self.tick_count += 1;
                     self.last_tick_time = Instant::now();
                 }
