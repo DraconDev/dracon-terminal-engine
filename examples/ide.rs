@@ -1118,14 +1118,12 @@ impl Widget for IdeApp {
                                 self.update_breadcrumbs();
                                 self.update_status();
                             }
-                            1 => {
-                                if self.tabs.len() > 1 {
-                                    self.tabs.remove(self.active_tab);
-                                    self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
-                                    self.sync_tab_bar();
-                                    self.update_breadcrumbs();
-                                    self.update_status();
-                                }
+                            1 if self.tabs.len() > 1 => {
+                                self.tabs.remove(self.active_tab);
+                                self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                                self.sync_tab_bar();
+                                self.update_breadcrumbs();
+                                self.update_status();
                             }
                             2 => {
                                 if let Some(tab) = self.active_tab_mut() {
