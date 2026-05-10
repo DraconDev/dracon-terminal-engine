@@ -175,7 +175,13 @@ impl NetworkApp {
         }
 
         // Status hint
-        let hint = "↑↓:nav | Enter:detail | r:refresh | t:theme | ?:help | Esc:dismiss | q:quit";
+        let hint = format!("↑↓:nav | Enter:detail | {}:refresh | {}:theme | {}:help | {}:dismiss | {}:quit",
+            self.kb_config.get(actions::REFRESH).unwrap_or("r"),
+            self.kb_config.get(actions::THEME).unwrap_or("t"),
+            self.kb_config.get(actions::HELP).unwrap_or("?"),
+            self.kb_config.get(actions::BACK).unwrap_or("esc"),
+            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+        );
         let hint_x = area.width as usize - hint.len() - 2;
         for (i, c) in hint.chars().enumerate() {
             let idx = (area.width as usize) + hint_x + i;
@@ -224,11 +230,11 @@ impl NetworkApp {
         let shortcuts = [
             ("↑/↓", "Navigate posts"),
             ("Enter", "View post details"),
-            ("r", "Refresh data"),
-            ("t", "Cycle theme"),
-            ("?", "Toggle this help"),
-            ("Esc", "Dismiss help"),
-            ("q", "Quit"),
+            (self.kb_config.get(actions::REFRESH).unwrap_or("r"), "Refresh data"),
+            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
+            (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle this help"),
+            (self.kb_config.get(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
         ];
 
         let hw = 42u16.min(area.width.saturating_sub(4));

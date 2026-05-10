@@ -657,7 +657,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Tutorial: Building Your First Dracon App | ?: help | Esc: dismiss | q: quit");
+    println!("Tutorial: Building Your First Dracon App | F1: help | Esc: dismiss | Ctrl+Q: quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));
@@ -716,11 +716,11 @@ fn main() -> std::io::Result<()> {
                 let shortcuts = [
                     ("↑/↓", "Navigate"),
                     ("Enter", "Select / view detail"),
-                    ("n", "New task"),
+                    ("Ctrl+N", "New task"),
                     ("Esc", "Go back"),
                     ("t", "Cycle theme"),
-                    ("?", "Toggle this help"),
-                    ("q", "Quit"),
+                    ("F1", "Toggle this help"),
+                    ("Ctrl+Q", "Quit"),
                 ];
 
                 let hw = 42u16.min(w.saturating_sub(4));
