@@ -655,7 +655,7 @@ fn main() -> io::Result<()> {
         if state.show_help {
             let mut plane = Plane::new(0, w, h);
             plane.fill_bg(state.theme.bg);
-            render_help(&mut plane, Rect::new(0, 0, w, h), &state.theme);
+            render_help(&mut plane, Rect::new(0, 0, w, h), &state.theme, &state.keybindings);
             ctx.add_plane(plane);
         }
     })

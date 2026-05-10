@@ -567,6 +567,7 @@ fn main() -> std::io::Result<()> {
     let show_help_for_input = Rc::clone(&show_help);
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let keybindings_for_tick = keybindings.clone();
     let app_router = AppRouter::new(router_for_input, theme, should_quit, show_help_for_input, keybindings);
 
     let mut app = App::new()?
