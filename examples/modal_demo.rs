@@ -396,6 +396,9 @@ impl Widget for ModalDemoRouter {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.target.borrow().theme)
+    }
 }
 
 fn main() -> io::Result<()> {

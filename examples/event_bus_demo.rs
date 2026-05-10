@@ -347,6 +347,9 @@ impl Widget for InputRouter {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.app.borrow_mut().theme = *theme;
     }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.app.borrow().theme)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
