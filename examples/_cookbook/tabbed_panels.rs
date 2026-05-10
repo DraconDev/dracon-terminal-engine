@@ -160,6 +160,7 @@ impl TabbedApp {
             should_quit,
             show_help: false,
             theme,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
