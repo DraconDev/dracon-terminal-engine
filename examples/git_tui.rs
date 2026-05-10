@@ -1220,3 +1220,31 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
+
+fn main() -> std::io::Result<()> {
+    println!("Git TUI — Real Git interface");
+    println!("1-4: views | r: refresh | keys configurable");
+    std::thread::sleep(Duration::from_millis(300));
+
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
+
+    let should_quit = Arc<AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let theme = Theme::nord();
+    let git = GitTui::new(should_quit, theme);
+
+    let mut app = App::new()?.title("Git TUI").fps(30).theme(theme);
+    app.add_widget(Box::new(git), Rect::new(0, 0, w, h));
+
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_ctx| {})?;
+
+    println!("\nGit TUI exited cleanly");
+    Ok(())
+}
