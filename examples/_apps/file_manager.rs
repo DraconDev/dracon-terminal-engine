@@ -1279,7 +1279,6 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb: &KeybindingS
     let kb_back = kb.display(actions::BACK).unwrap_or("Esc");
     let kb_help = kb.display(actions::HELP).unwrap_or("F1");
     let kb_refresh = kb.display(actions::REFRESH).unwrap_or("F5");
-    let kb_new = kb.display(actions::NEW_ITEM).unwrap_or("Ctrl+N");
     let kb_delete = kb.display(actions::DELETE).unwrap_or("Ctrl+D");
 
     let shortcuts = [
