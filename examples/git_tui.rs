@@ -17,6 +17,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     StatusBar, StatusSegment, TabBar, Toast, ToastKind,
 };
+use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;

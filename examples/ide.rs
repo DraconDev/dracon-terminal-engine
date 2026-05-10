@@ -121,6 +121,9 @@ struct IdeApp {
     // Help overlay
     show_help: bool,
 
+    // Keybindings
+    keybindings: KeybindingSet,
+
     // Animation
     anim_frame: u8,
     last_anim: Instant,
@@ -171,7 +174,7 @@ impl IdeApp {
             .add_segment(StatusSegment::new("Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
             .add_segment(
-                StatusSegment::new("t: theme | ?: help | Esc: dismiss | q: quit").with_fg(theme.fg_muted),
+                StatusSegment::new("t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit").with_fg(theme.fg_muted),
             );
 
         let breadcrumbs =
@@ -292,6 +295,8 @@ impl IdeApp {
             breadcrumbs,
             command_palette,
             cmd_bridge,
+            show_help: false,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             anim_frame: 0,
             last_anim: Instant::now(),
         }
@@ -387,7 +392,7 @@ impl IdeApp {
                 .add_segment(StatusSegment::new(lang).with_fg(self.theme.info))
                 .add_segment(StatusSegment::new("UTF-8").with_fg(self.theme.fg_muted))
                 .add_segment(
-                    StatusSegment::new("t: theme | ?: help | Esc: dismiss | q: quit").with_fg(self.theme.fg_muted),
+                    StatusSegment::new("t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit").with_fg(self.theme.fg_muted),
                 );
         }
     }
@@ -816,18 +821,21 @@ impl Widget for IdeApp {
 
         // Modal takes priority
         if self.show_settings {
-            match key.code {
-                KeyCode::Esc | KeyCode::Char('q') => {
-                    self.show_settings = false;
-                    return true;
-                }
-                _ => return true,
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::QUIT, &key)
+            {
+                self.show_settings = false;
+                return true;
             }
+            return true;
         }
 
         // Context menu
         if self.context_menu.is_some() {
-            if key.code == KeyCode::Esc {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::CANCEL, &key)
+                || self.keybindings.matches(actions::DISMISS, &key)
+            {
                 self.context_menu = None;
                 self.context_menu_pos = None;
                 return true;

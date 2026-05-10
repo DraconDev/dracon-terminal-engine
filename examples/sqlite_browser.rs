@@ -111,6 +111,8 @@ impl SqliteBrowser {
             status_bar,
             toasts: Vec::new(),
             dirty: true,
+            keybindings,
+            kb_config,
         };
         app.refresh();
         app
@@ -682,110 +684,105 @@ impl Widget for SqliteBrowser {
         }
 
         if self.editing_query {
-            match key.code {
-                KeyCode::Esc => {
-                    self.editing_query = false;
-                    self.query = self.search_input.query().to_string();
+            if self.keybindings.matches(actions::BACK, &key) {
+                self.editing_query = false;
+                self.query = self.search_input.query().to_string();
+                self.dirty = true;
+                true
+            } else if self.keybindings.matches(actions::SUBMIT, &key) {
+                self.editing_query = false;
+                self.query = self.search_input.query().to_string();
+                self.run_query(&self.query.clone());
+                true
+            } else {
+                let handled = self.search_input.handle_key(key);
+                if handled {
                     self.dirty = true;
-                    true
                 }
-                KeyCode::Enter => {
-                    self.editing_query = false;
-                    self.query = self.search_input.query().to_string();
-                    self.run_query(&self.query.clone());
-                    true
-                }
-                _ => {
-                    let handled = self.search_input.handle_key(key);
-                    if handled {
-                        self.dirty = true;
-                    }
-                    handled
-                }
+                handled
             }
         } else {
-            match key.code {
-                KeyCode::Esc if self.show_help => {
-                    self.show_help = false;
-                    self.dirty = true;
-                    true
-                }
-                KeyCode::Char('q') => {
-                    self.should_quit.store(true, Ordering::SeqCst);
-                    true
-                }
-                KeyCode::Char('r') => {
-                    self.refresh();
-                    self.toast("Refreshed", ToastKind::Info);
-                    true
-                }
-                KeyCode::Char('e') => {
-                    self.editing_query = true;
-                    self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme);
-                    self.active_panel = Panel::Query;
-                    self.dirty = true;
-                    true
-                }
-                KeyCode::Char('t') => {
-                    self.cycle_theme();
-                    true
-                }
-                KeyCode::Char('?') => {
-                    self.show_help = !self.show_help;
-                    self.dirty = true;
-                    true
-                }
-                KeyCode::Tab => {
-                    self.active_panel = match self.active_panel {
-                        Panel::Tables => Panel::Query,
-                        Panel::Query => Panel::Results,
-                        Panel::Results => Panel::Tables,
-                    };
-                    self.dirty = true;
-                    true
-                }
-                KeyCode::Down | KeyCode::Char('j') => {
-                    match self.active_panel {
-                        Panel::Tables if self.selected_table + 1 < self.tables.len() => {
-                            self.selected_table += 1;
-                            self.dirty = true;
-                        }
-                        Panel::Results => {
-                            if let Some(ref mut table) = self.results_table {
-                                table.handle_key(key);
+            if self.keybindings.matches(actions::BACK, &key) && self.show_help {
+                self.show_help = false;
+                self.dirty = true;
+                true
+            } else if self.keybindings.matches(actions::QUIT, &key) {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            } else if self.keybindings.matches(actions::REFRESH, &key) {
+                self.refresh();
+                self.toast("Refreshed", ToastKind::Info);
+                true
+            } else if self.keybindings.matches(actions::EDIT, &key) {
+                self.editing_query = true;
+                self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme);
+                self.active_panel = Panel::Query;
+                self.dirty = true;
+                true
+            } else if self.keybindings.matches(actions::THEME, &key) {
+                self.cycle_theme();
+                true
+            } else if self.keybindings.matches(actions::HELP, &key) {
+                self.show_help = !self.show_help;
+                self.dirty = true;
+                true
+            } else {
+                match key.code {
+                    KeyCode::Tab => {
+                        self.active_panel = match self.active_panel {
+                            Panel::Tables => Panel::Query,
+                            Panel::Query => Panel::Results,
+                            Panel::Results => Panel::Tables,
+                        };
+                        self.dirty = true;
+                        true
+                    }
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        match self.active_panel {
+                            Panel::Tables if self.selected_table + 1 < self.tables.len() => {
+                                self.selected_table += 1;
                                 self.dirty = true;
                             }
+                            Panel::Results => {
+                                if let Some(ref mut table) = self.results_table {
+                                    table.handle_key(key);
+                                    self.dirty = true;
+                                }
+                            }
+                            _ => {}
                         }
-                        _ => {}
+                        true
                     }
-                    true
-                }
-                KeyCode::Up | KeyCode::Char('k') => {
-                    match self.active_panel {
-                        Panel::Tables if self.selected_table > 0 => {
-                            self.selected_table -= 1;
-                            self.dirty = true;
-                        }
-                        Panel::Results => {
-                            if let Some(ref mut table) = self.results_table {
-                                table.handle_key(key);
+                    KeyCode::Up | KeyCode::Char('k') => {
+                        match self.active_panel {
+                            Panel::Tables if self.selected_table > 0 => {
+                                self.selected_table -= 1;
                                 self.dirty = true;
                             }
+                            Panel::Results => {
+                                if let Some(ref mut table) = self.results_table {
+                                    table.handle_key(key);
+                                    self.dirty = true;
+                                }
+                            }
+                            _ => {}
                         }
-                        _ => {}
+                        true
                     }
-                    true
-                }
-                KeyCode::Enter => {
-                    if self.active_panel == Panel::Tables {
-                        if let Some(table) = self.tables.get(self.selected_table) {
-                            self.query = format!("SELECT * FROM {} LIMIT 10", table);
-                            self.run_query(&self.query.clone());
+                    KeyCode::Enter => {
+                        if self.active_panel == Panel::Tables {
+                            if let Some(table) = self.tables.get(self.selected_table) {
+                                self.query = format!("SELECT * FROM {} LIMIT 10", table);
+                                self.run_query(&self.query.clone());
+                            }
                         }
+                        true
                     }
-                    true
+                    _ => false,
                 }
-                _ => false,
+            }
+        }
+    }
             }
         }
     }
