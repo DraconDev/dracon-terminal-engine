@@ -57,8 +57,10 @@ fn main() -> std::io::Result<()> {
     let returned_for_tick = Arc::clone(&returned_from);
     let last_launched: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
     let last_launched_for_tick = Arc::clone(&last_launched);
+    let pending_app_theme: Arc<Mutex<Option<Theme>>> = Arc::new(Mutex::new(None));
+    let pending_app_theme_tick = Arc::clone(&pending_app_theme);
 
-    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, returned_from);
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, returned_from, pending_app_theme);
 
     let mut app = App::new()?
         .title("Dracon Showcase")
