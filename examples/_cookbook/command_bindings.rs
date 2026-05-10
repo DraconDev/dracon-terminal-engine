@@ -516,10 +516,10 @@ impl Widget for CommandBindings {
         let status = format!(
             "  {}  |  tick: {}  |  {}: theme | {}: help | {}: dismiss | {}: quit",
             auto_str, self.tick,
-            self.kb_config.get(actions::THEME).unwrap_or("t"),
-            self.kb_config.get(actions::HELP).unwrap_or("?"),
-            self.kb_config.get(actions::BACK).unwrap_or("esc"),
-            self.kb_config.get(actions::QUIT).unwrap_or("q"),
+            self.keybindings.display(actions::THEME).unwrap_or("t"),
+            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::BACK).unwrap_or("esc"),
+            self.keybindings.display(actions::QUIT).unwrap_or("q"),
         );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
@@ -657,9 +657,9 @@ impl Widget for CommandBindings {
             let shortcuts = [
                 ("s", "Refresh all commands"),
                 ("p", "Pause/Resume auto-refresh"),
-                (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
-                (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle this help"),
-                (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle this help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let y_off = 3 + i;
@@ -693,7 +693,10 @@ impl Widget for CommandBindings {
             }
 
             // hint
-            let hint = " Press ? or Esc to close ";
+            let hint = format!(" Press {} or {} to close ",
+                self.keybindings.display(actions::HELP).unwrap_or("?"),
+                self.keybindings.display(actions::BACK).unwrap_or("Esc"),
+            );
             for (i, c) in hint.chars().enumerate() {
                 let idx = (hy + help_h - 2) * w + hx + (help_w - hint.len()) / 2 + i;
                 if idx < p.cells.len() {
