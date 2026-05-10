@@ -127,7 +127,7 @@ impl KeybindingConfig {
         }
 
         let mut modifiers = KeyModifiers::empty();
-        let mut key_part = parts[parts.len() - 1];
+        let key_part = parts[parts.len() - 1];
 
         for part in &parts[..parts.len() - 1] {
             match part.to_lowercase().as_str() {
