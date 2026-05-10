@@ -61,6 +61,7 @@ pub struct Showcase {
     pub(crate) toast_anim: Option<usize>,
     pub(crate) returned_from: Arc<Mutex<Option<(String, Instant)>>>,
     pub(crate) scene_router: SceneRouter,
+    pub(crate) keybindings: KeybindingSet,
 }
 
 impl Showcase {
