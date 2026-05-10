@@ -30,6 +30,7 @@ pub mod event_bus;
 pub mod event_dispatcher;
 pub mod focus;
 pub mod hitzone;
+pub mod keybindings;
 pub mod layout;
 pub mod plugin;
 pub mod scroll;
