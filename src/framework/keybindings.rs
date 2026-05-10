@@ -204,8 +204,8 @@ impl KeybindingConfig {
 /// Also validates that there are no conflicting bindings.
 #[derive(Debug, Clone)]
 pub struct KeybindingSet {
-    /// action name -> parsed KeyEvent
-    bindings: HashMap<String, KeyEvent>,
+    /// action name -> (parsed KeyEvent, original display string)
+    bindings: HashMap<String, (KeyEvent, String)>,
 }
 
 impl KeybindingSet {
@@ -226,7 +226,7 @@ impl KeybindingSet {
                     );
                 }
                 seen.insert(event, action.clone());
-                bindings.insert(action.clone(), event);
+                bindings.insert(action.clone(), (event, binding_str.clone()));
             } else {
                 eprintln!(
                     "[dracon] invalid keybinding for '{}': '{}'",
@@ -247,19 +247,16 @@ impl KeybindingSet {
     /// }
     /// ```
     pub fn matches(&self, action: &str, event: &KeyEvent) -> bool {
-        if let Some(expected) = self.bindings.get(action) {
+        if let Some((expected, _)) = self.bindings.get(action) {
             expected.code == event.code && expected.modifiers == event.modifiers
         } else {
             false
         }
     }
 
-    /// Get the display string for an action (e.g. "quit" -> "q").
+    /// Get the display string for an action (e.g. "quit" -> "ctrl+q").
     pub fn display(&self, action: &str) -> Option<&str> {
-        // We don't store the original string, but we can format the KeyEvent
-        // For now, return None; the actual display is handled by the caller
-        let _ = action;
-        None
+        self.bindings.get(action).map(|(_, s)| s.as_str())
     }
 
     /// Get all bound actions.
