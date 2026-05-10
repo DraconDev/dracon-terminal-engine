@@ -449,6 +449,23 @@ When a launched example binary cycles its theme and exits, the showcase can adop
 
 This is **automatic** for any example using the `App` framework — no per-example changes needed. Raw terminal examples (like `desktop.rs`, `game_loop.rs`) that don't use `App::run()` won't write back unless they manually check for `DTRON_THEME_FILE` on exit.
 
+### Pattern 2 Theme Sync via `Widget::current_theme()`
+
+Pattern-2 apps (InputRouter + manual rendering) manage their own `self.theme` field and cycle themes via `handle_key`. To sync the widget's local theme back to the framework:
+
+1. **Override `current_theme()`** on the InputRouter:
+```rust
+fn current_theme(&self) -> Option<Theme> {
+    Some(self.app.borrow().theme)  // or self.monitor, self.state, etc.
+}
+```
+
+2. **Framework detects it automatically**: After `handle_key()` returns, `App::run()` calls `widget.current_theme()`. If it returns a theme different from `App.theme`, the framework calls `self.set_theme(theme)`, which triggers `on_theme_change()` propagation to all widgets.
+
+**This is critical for `DTRON_THEME_FILE`**: When the App framework writes the final theme to the return file on exit, it writes `self.theme.name`. If Pattern-2 apps don't sync their local theme back via `current_theme()`, the file will contain the stale theme.
+
+All 12 Pattern-2 examples implement this: `system_monitor`, `log_monitor`, `split_resizer`, `plugin_demo`, `ide`, `tabbed_panels`, `chat_client`, `event_bus_demo`, `modal_demo`, `scene_router_demo`, `todo_app`, `tutorial_app`.
+
 ### Widget Background Pattern
 
 All widgets MUST fill their plane background with `self.theme.bg` to avoid black (`Color::Reset`) holes:
