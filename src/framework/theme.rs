@@ -1090,7 +1090,7 @@ impl Theme {
         match name.to_ascii_lowercase().as_str() {
             "dark" => Some(Self::dark()),
             "light" => Some(Self::light()),
-            "high_contrast" => Some(Self::high_contrast()),
+            "high_contrast" | "high-contrast" => Some(Self::high_contrast()),
             "cyberpunk" => Some(Self::cyberpunk()),
             "dracula" => Some(Self::dracula()),
             "nord" => Some(Self::nord()),
