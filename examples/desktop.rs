@@ -155,9 +155,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let size = get_window_size(stdout().as_fd()).unwrap_or((80, 24));
     let mut compositor = Compositor::new(size.0, size.1);
-    compositor.set_clear_color(dracon_terminal_engine::compositor::plane::Color::Rgb(
-        16, 16, 24,
-    ));
+    compositor.set_clear_color(theme.bg);
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
