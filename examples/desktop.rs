@@ -136,6 +136,12 @@ fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Inherit theme from showcase launcher via DTRON_THEME env var
+    let theme = std::env::var("DTRON_THEME")
+        .ok()
+        .and_then(|n| Theme::from_name(&n))
+        .unwrap_or_else(Theme::dark);
+
     let mut term = Terminal::new(stdout())?;
 
     // Enter Alt Screen for "Desktop" feel
