@@ -396,3 +396,74 @@ fn test_widget_current_theme_returns_managed_theme() {
         "current_theme should return the widget's managed theme"
     );
 }
+
+// === DTRON_THEME_FILE round-trip (showcase child return mechanism) ===
+
+#[test]
+fn test_dtron_theme_file_round_trip() {
+    // Simulate the showcase → child → showcase theme return flow
+    let tmp_path = std::env::temp_dir().join("dte_theme_prop_test");
+    let original = std::env::var("DTRON_THEME_FILE").ok();
+
+    // Showcase sets DTRON_THEME_FILE before spawning child
+    std::env::set_var("DTRON_THEME_FILE", &tmp_path);
+
+    // Child app writes its final theme name on exit (simulating App::run())
+    let child_final_theme = Theme::gruvbox_dark();
+    let _ = std::fs::write(&tmp_path, &child_final_theme.name);
+
+    // Showcase reads the file after child exits
+    let theme_name = std::fs::read_to_string(&tmp_path).unwrap();
+    let theme_name = theme_name.trim();
+    let resolved = Theme::from_name(theme_name);
+
+    assert!(
+        resolved.is_some(),
+        "theme name '{}' should resolve after round-trip",
+        theme_name
+    );
+    assert_eq!(
+        resolved.unwrap().name,
+        "gruvbox_dark",
+        "resolved theme should match what child wrote"
+    );
+
+    // Cleanup
+    let _ = std::fs::remove_file(&tmp_path);
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME_FILE", v),
+        None => std::env::remove_var("DTRON_THEME_FILE"),
+    }
+}
+
+#[test]
+fn test_dtron_theme_file_hyphenated_theme_name() {
+    // Verify that hyphenated theme names written to DTRON_THEME_FILE
+    // resolve correctly (regression test for showcase inheritance bug)
+    let tmp_path = std::env::temp_dir().join("dte_theme_hyphen_test");
+    let original = std::env::var("DTRON_THEME_FILE").ok();
+
+    std::env::set_var("DTRON_THEME_FILE", &tmp_path);
+
+    // Child writes hyphenated name (as it appears in .name field)
+    let _ = std::fs::write(&tmp_path, "catppuccin-mocha");
+
+    let theme_name = std::fs::read_to_string(&tmp_path).unwrap();
+    let resolved = Theme::from_name(theme_name.trim());
+
+    assert!(
+        resolved.is_some(),
+        "hyphenated theme name 'catppuccin-mocha' should resolve"
+    );
+    assert_eq!(
+        resolved.unwrap().name,
+        "catppuccin-mocha",
+        "resolved theme name should preserve original hyphenated form"
+    );
+
+    let _ = std::fs::remove_file(&tmp_path);
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME_FILE", v),
+        None => std::env::remove_var("DTRON_THEME_FILE"),
+    }
+}
