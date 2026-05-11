@@ -172,6 +172,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
+    // Helper to write theme back to showcase if DTRON_THEME_FILE is set
+    let write_theme_file = || {
+        if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
+            let _ = std::fs::write(&path, &theme.name);
+        }
+    };
+
     let mut frames = 0;
     let mut fps = 0;
     let mut fps_timer = Instant::now();
