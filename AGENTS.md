@@ -439,6 +439,8 @@ All examples MUST use `Theme::from_env_or(default)` instead of hardcoded theme c
 
 **`Theme::from_env_or(default)`:** Reads `DTRON_THEME` env var, does case-insensitive lookup against all 20+ built-in theme names. Falls back to `default` if env var is unset, empty, or names an unknown theme.
 
+**Hyphen/underscore normalization:** `Theme::from_name()` normalizes input by converting hyphens to underscores before matching (`"catppuccin-mocha"` and `"catppuccin_mocha"` both resolve). This prevents mismatches when a theme's `.name` field uses hyphens but the env var or user input uses underscores, or vice versa. All new themes should register their match arm using the underscore form and rely on the normalization layer.
+
 ### Theme Return via `DTRON_THEME_FILE`
 
 When a launched example binary cycles its theme and exits, the showcase can adopt the final theme. This uses a **theme return file** mechanism:
