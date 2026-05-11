@@ -682,3 +682,133 @@ fn test_theme_mono_primary() {
 fn test_theme_mono_secondary() {
     assert_rgb(&Theme::mono(), "secondary", 162, 172, 188);
 }
+
+// === Theme::from_name() tests ===
+
+#[test]
+fn test_from_name_all_themes_by_exact_name() {
+    let themes = [
+        ("dark", Theme::dark()),
+        ("light", Theme::light()),
+        ("high_contrast", Theme::high_contrast()),
+        ("cyberpunk", Theme::cyberpunk()),
+        ("dracula", Theme::dracula()),
+        ("nord", Theme::nord()),
+        ("catppuccin-mocha", Theme::catppuccin_mocha()),
+        ("gruvbox-dark", Theme::gruvbox_dark()),
+        ("tokyo-night", Theme::tokyo_night()),
+        ("solarized-dark", Theme::solarized_dark()),
+        ("solarized-light", Theme::solarized_light()),
+        ("one-dark", Theme::one_dark()),
+        ("rose-pine", Theme::rose_pine()),
+        ("kanagawa", Theme::kanagawa()),
+        ("everforest", Theme::everforest()),
+        ("monokai", Theme::monokai()),
+        ("warm", Theme::warm()),
+        ("cool", Theme::cool()),
+        ("forest", Theme::forest()),
+        ("sunset", Theme::sunset()),
+        ("mono", Theme::mono()),
+    ];
+    for (name, expected) in themes.iter() {
+        let resolved = Theme::from_name(name).expect(&format!("should resolve theme: {}", name));
+        assert_eq!(resolved.name, expected.name, "name mismatch for {}", name);
+        assert_eq!(resolved.bg, expected.bg, "bg mismatch for {}", name);
+    }
+}
+
+#[test]
+fn test_from_name_hyphenated_aliases() {
+    assert_eq!(Theme::from_name("catppuccin-mocha").unwrap().name, "catppuccin-mocha");
+    assert_eq!(Theme::from_name("gruvbox-dark").unwrap().name, "gruvbox-dark");
+    assert_eq!(Theme::from_name("solarized-dark").unwrap().name, "solarized-dark");
+    assert_eq!(Theme::from_name("solarized-light").unwrap().name, "solarized-light");
+    assert_eq!(Theme::from_name("tokyo-night").unwrap().name, "tokyo-night");
+    assert_eq!(Theme::from_name("one-dark").unwrap().name, "one-dark");
+    assert_eq!(Theme::from_name("rose-pine").unwrap().name, "rose-pine");
+    assert_eq!(Theme::from_name("high-contrast").unwrap().name, "high_contrast");
+}
+
+#[test]
+fn test_from_name_underscore_aliases() {
+    assert_eq!(Theme::from_name("catppuccin_mocha").unwrap().name, "catppuccin-mocha");
+    assert_eq!(Theme::from_name("gruvbox_dark").unwrap().name, "gruvbox-dark");
+    assert_eq!(Theme::from_name("solarized_dark").unwrap().name, "solarized-dark");
+    assert_eq!(Theme::from_name("solarized_light").unwrap().name, "solarized-light");
+    assert_eq!(Theme::from_name("tokyo_night").unwrap().name, "tokyo-night");
+    assert_eq!(Theme::from_name("one_dark").unwrap().name, "one-dark");
+    assert_eq!(Theme::from_name("rose_pine").unwrap().name, "rose-pine");
+    assert_eq!(Theme::from_name("high_contrast").unwrap().name, "high_contrast");
+}
+
+#[test]
+fn test_from_name_case_insensitive() {
+    assert_eq!(Theme::from_name("DARK").unwrap().name, "dark");
+    assert_eq!(Theme::from_name("Dark").unwrap().name, "dark");
+    assert_eq!(Theme::from_name("NORD").unwrap().name, "nord");
+    assert_eq!(Theme::from_name("Catppuccin-Mocha").unwrap().name, "catppuccin-mocha");
+}
+
+#[test]
+fn test_from_name_unknown_returns_none() {
+    assert!(Theme::from_name("nonexistent").is_none());
+    assert!(Theme::from_name("").is_none());
+}
+
+#[test]
+fn test_from_name_short_aliases() {
+    assert_eq!(Theme::from_name("catppuccin").unwrap().name, "catppuccin-mocha");
+    assert_eq!(Theme::from_name("gruvbox").unwrap().name, "gruvbox-dark");
+}
+
+// === Theme::from_env_or() tests ===
+
+#[test]
+fn test_from_env_or_uses_env_var() {
+    // Save original value to restore later
+    let original = std::env::var("DTRON_THEME").ok();
+    std::env::set_var("DTRON_THEME", "nord");
+    let theme = Theme::from_env_or(Theme::dark());
+    assert_eq!(theme.name, "nord");
+    // Restore
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME", v),
+        None => std::env::remove_var("DTRON_THEME"),
+    }
+}
+
+#[test]
+fn test_from_env_or_falls_back_on_invalid_name() {
+    let original = std::env::var("DTRON_THEME").ok();
+    std::env::set_var("DTRON_THEME", "nonexistent_theme");
+    let theme = Theme::from_env_or(Theme::dark());
+    assert_eq!(theme.name, "dark");
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME", v),
+        None => std::env::remove_var("DTRON_THEME"),
+    }
+}
+
+#[test]
+fn test_from_env_or_falls_back_when_unset() {
+    let original = std::env::var("DTRON_THEME").ok();
+    std::env::remove_var("DTRON_THEME");
+    let theme = Theme::from_env_or(Theme::light());
+    assert_eq!(theme.name, "light");
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME", v),
+        None => {}
+    }
+}
+
+#[test]
+fn test_from_env_or_hyphenated_theme_name() {
+    let original = std::env::var("DTRON_THEME").ok();
+    std::env::set_var("DTRON_THEME", "catppuccin-mocha");
+    let theme = Theme::from_env_or(Theme::dark());
+    assert_eq!(theme.name, "catppuccin-mocha");
+    match original {
+        Some(v) => std::env::set_var("DTRON_THEME", v),
+        None => std::env::remove_var("DTRON_THEME"),
+    }
+}
