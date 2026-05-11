@@ -1094,7 +1094,7 @@ impl Theme {
             "cyberpunk" => Some(Self::cyberpunk()),
             "dracula" => Some(Self::dracula()),
             "nord" => Some(Self::nord()),
-            "catppuccin_mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
+            "catppuccin_mocha" | "catppuccin-mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
             "gruvbox_dark" | "gruvbox" => Some(Self::gruvbox_dark()),
             "tokyo_night" | "tokyo-night" => Some(Self::tokyo_night()),
             "solarized_dark" => Some(Self::solarized_dark()),
