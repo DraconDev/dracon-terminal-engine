@@ -11,6 +11,7 @@
 
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseEventKind};
 use dracon_terminal_engine::input::parser::Parser;
 use signal_hook::consts::signal::SIGINT;
@@ -196,6 +197,12 @@ impl InputDebugger {
 }
 
 fn main() -> io::Result<()> {
+    // Inherit theme from showcase launcher via DTRON_THEME env var
+    let theme = std::env::var("DTRON_THEME")
+        .ok()
+        .and_then(|n| Theme::from_name(&n))
+        .unwrap_or_else(Theme::dark);
+
     println!("Preparing to enter Raw Mode...");
     println!("Type 'q' to quit, '?' for help.");
     std::thread::sleep(std::time::Duration::from_secs(1));
