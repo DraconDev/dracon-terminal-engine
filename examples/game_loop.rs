@@ -188,6 +188,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if should_quit.load(Ordering::SeqCst) {
             write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
             term.flush()?;
+            write_theme_file();
             return Ok(());
         }
         // Poll Input
@@ -202,6 +203,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h"
                         )?;
                         term.flush()?;
+                        write_theme_file();
                         return Ok(());
                     }
                     Some(Event::Key(KeyEvent { code: KeyCode::Char('c'), ref modifiers, .. }))
