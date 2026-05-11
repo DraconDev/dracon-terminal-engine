@@ -9,6 +9,7 @@ use dracon_terminal_engine::{
     compositor::engine::Compositor,
     compositor::plane::{Cell, Plane},
     framework::keybindings::{actions, resolve_keybindings, KeybindingSet},
+    framework::theme::Theme,
     input::event::{Event, KeyCode, KeyEvent, KeyModifiers},
     input::parser::Parser,
     Terminal,
