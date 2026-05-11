@@ -205,6 +205,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
+    // Helper to write theme back to showcase if DTRON_THEME_FILE is set
+    let write_theme_file = || {
+        if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
+            let _ = std::fs::write(&path, &theme.name);
+        }
+    };
+
     // Interaction State
     let mut dragging_window: Option<usize> = None;
     let mut drag_offset: (u16, u16) = (0, 0);
@@ -214,6 +221,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if should_quit.load(Ordering::SeqCst) {
             write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h")?;
             term.flush()?;
+            write_theme_file();
             return Ok(());
         }
         // Input Handling
