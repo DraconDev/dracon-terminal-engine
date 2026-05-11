@@ -227,6 +227,13 @@ fn main() -> io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
+    // Helper to write theme back to showcase if DTRON_THEME_FILE is set
+    let write_theme_file = || {
+        if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
+            let _ = std::fs::write(&path, &theme.name);
+        }
+    };
+
     // Initial render
     write!(term, "{}", debugger.render(&keybindings))?;
     term.flush()?;
@@ -238,6 +245,7 @@ fn main() -> io::Result<()> {
                 "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1004l\x1b[?1006l\x1b[?1007l\x1b[?2004l\x1b[?7h\x1b[?1049l"
             );
             let _ = term.flush();
+            write_theme_file();
             return Ok(());
         }
         let n = handle.read(&mut buf)?;
