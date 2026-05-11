@@ -238,6 +238,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
                             )?;
                             term.flush()?;
+                            write_theme_file();
                             return Ok(());
                         }
                         Event::Key(KeyEvent {
@@ -250,6 +251,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
                             )?;
                             term.flush()?;
+                            write_theme_file();
                             return Ok(());
                         }
                         Event::Key(ref key_event) if keybindings.matches(actions::HELP, key_event) => {

@@ -15,6 +15,7 @@ use dracon_terminal_engine::compositor::engine::Compositor;
 use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEventKind};
 use dracon_terminal_engine::input::parser::Parser;
 use signal_hook::consts::signal::SIGINT;
