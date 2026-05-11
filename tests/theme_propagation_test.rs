@@ -424,7 +424,7 @@ fn test_dtron_theme_file_round_trip() {
     );
     assert_eq!(
         resolved.unwrap().name,
-        "gruvbox_dark",
+        "gruvbox-dark",
         "resolved theme should match what child wrote"
     );
 
