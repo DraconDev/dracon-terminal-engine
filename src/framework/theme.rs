@@ -1087,20 +1087,23 @@ impl Theme {
     /// solarized_dark, solarized_light, one_dark, rose_pine, kanagawa,
     /// everforest, monokai, warm, cool, forest, sunset, mono.
     pub fn from_name(name: &str) -> Option<Theme> {
-        match name.to_ascii_lowercase().as_str() {
+        // Normalize: lowercase, and treat hyphens as underscores so
+        // "catppuccin-mocha" resolves the same as "catppuccin_mocha".
+        let normalized = name.to_ascii_lowercase().replace('-', "_");
+        match normalized.as_str() {
             "dark" => Some(Self::dark()),
             "light" => Some(Self::light()),
-            "high_contrast" | "high-contrast" => Some(Self::high_contrast()),
+            "high_contrast" => Some(Self::high_contrast()),
             "cyberpunk" => Some(Self::cyberpunk()),
             "dracula" => Some(Self::dracula()),
             "nord" => Some(Self::nord()),
-            "catppuccin_mocha" | "catppuccin-mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
-            "gruvbox_dark" | "gruvbox-dark" | "gruvbox" => Some(Self::gruvbox_dark()),
-            "tokyo_night" | "tokyo-night" => Some(Self::tokyo_night()),
-            "solarized_dark" | "solarized-dark" => Some(Self::solarized_dark()),
-            "solarized_light" | "solarized-light" => Some(Self::solarized_light()),
-            "one_dark" | "one-dark" => Some(Self::one_dark()),
-            "rose_pine" | "rose-pine" => Some(Self::rose_pine()),
+            "catppuccin_mocha" | "catppuccin" => Some(Self::catppuccin_mocha()),
+            "gruvbox_dark" | "gruvbox" => Some(Self::gruvbox_dark()),
+            "tokyo_night" => Some(Self::tokyo_night()),
+            "solarized_dark" => Some(Self::solarized_dark()),
+            "solarized_light" => Some(Self::solarized_light()),
+            "one_dark" => Some(Self::one_dark()),
+            "rose_pine" => Some(Self::rose_pine()),
             "kanagawa" => Some(Self::kanagawa()),
             "everforest" => Some(Self::everforest()),
             "monokai" => Some(Self::monokai()),
