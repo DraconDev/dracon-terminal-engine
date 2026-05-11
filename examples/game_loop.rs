@@ -143,6 +143,12 @@ impl GameState {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Inherit theme from showcase launcher via DTRON_THEME env var
+    let theme = std::env::var("DTRON_THEME")
+        .ok()
+        .and_then(|n| Theme::from_name(&n))
+        .unwrap_or_else(Theme::dark);
+
     let mut term = Terminal::new(io::stdout())?;
 
     write!(term, "\x1b[?1000h\x1b[?1003h\x1b[?1006h\x1b[?25l")?;
@@ -150,7 +156,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (mut w, mut h) = dracon_terminal_engine::backend::tty::get_window_size(term.as_fd())?;
     let mut compositor = Compositor::new(w, h);
-    compositor.set_clear_color(Color::Rgb(8, 8, 16));
+    compositor.set_clear_color(theme.bg);
     let mut parser = Parser::new();
     let mut stdin = io::stdin();
 
