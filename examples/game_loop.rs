@@ -211,6 +211,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     {
                         write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
                         term.flush()?;
+                        write_theme_file();
                         return Ok(());
                     }
                     Some(Event::Key(ref key_event)) if keybindings.matches(actions::HELP, key_event) => {
