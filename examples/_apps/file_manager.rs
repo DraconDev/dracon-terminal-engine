@@ -263,7 +263,7 @@ struct FileManager {
     loading_path: Option<PathBuf>,
     spinner_frame: usize,
     #[cfg(feature = "async")]
-    pending_operation: StdRefCell<AsyncFsNodes>,
+    pending_operation: RefCell<AsyncFsNodes>,
 }
 
 impl FileManager {
