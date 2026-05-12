@@ -11,7 +11,7 @@ use dracon_terminal_engine::framework::widgets::{
 use ratatui::layout::Rect;
 
 /// All built-in themes to test against.
-fn all_themes() -> Vec<Theme> {
+fn all_themes() -> &'static [Theme] {
     Theme::all()
 }
 
