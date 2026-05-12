@@ -92,8 +92,8 @@ impl Layout {
         Layout {
             constraints: self.constraints.clone(),
             direction: self.direction,
-            spacing: self.spacing,
-            margin: 0, // Nested layouts don't inherit margin by default
+            spacing: 0, // Nested layouts don't apply spacing to children
+            margin: 0,   // Nested layouts don't inherit margin by default
             name: self.name,
         }
     }
