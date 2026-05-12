@@ -1548,21 +1548,40 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let fm = FileManager::new(WidgetId::new(1), should_quit, theme);
+    let fm = FileManager::new(WidgetId::new(1), Arc::clone(&should_quit), theme);
+
+    // Use InputRouter pattern for async polling support
+    let fm = Rc::new(RefCell::new(fm));
+    let fm_for_router = Rc::clone(&fm);
+    let fm_for_tick = Rc::clone(&fm);
+
+    let router = FileManagerRouter {
+        target: fm_for_router,
+        id: WidgetId::new(1),
+        area: std::cell::Cell::new(Rect::new(0, 0, w, h)),
+    };
 
     let mut app = App::new()?.title("File Manager").fps(30).theme(theme);
-    app.add_widget(Box::new(fm), Rect::new(0, 0, w, h));
+    app.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
+            return;
         }
+
         // Poll async operations and advance spinner
-        if let Some(w) = ctx.get_widget(WidgetId::new(1)) {
-            if let Some(fm) = w.downcast_mut::<FileManager>() {
-                fm.poll_async_result();
-                fm.advance_spinner();
-            }
+        let mut fm = fm_for_tick.borrow_mut();
+        fm.poll_async_result();
+        fm.advance_spinner();
+
+        let (w, h) = ctx.compositor().size();
+        let area = Rect::new(0, 0, w, h);
+
+        if fm.needs_render() {
+            let plane = fm.render(area);
+            ctx.add_plane(plane);
+            fm.clear_dirty();
         }
     })
     .run(|_| {})?;
