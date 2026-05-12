@@ -13,6 +13,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
+#[cfg(feature = "async")]
+use std::cell::RefCell as StdRefCell;
+
+// Spinner frames
+const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
+
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
@@ -61,6 +67,12 @@ struct ChatState {
     zones: RefCell<ScopedZoneRegistry<usize>>,
     keybindings: KeybindingSet,
     kb_config: KeybindingConfig,
+    // Async state
+    is_sending: bool,
+    pending_message: Option<String>,
+    spinner_frame: usize,
+    #[cfg(feature = "async")]
+    pending_send: StdRefCell<Option<tokio::task::JoinHandle<()>>>,
 }
 
 // Zone IDs for mouse dispatch
@@ -101,6 +113,12 @@ impl ChatState {
             zones: RefCell::new(ScopedZoneRegistry::new()),
             keybindings: KeybindingSet::default(),
             kb_config: KeybindingConfig::default(),
+            // Async state
+            is_sending: false,
+            pending_message: None,
+            spinner_frame: 0,
+            #[cfg(feature = "async")]
+            pending_send: StdRefCell::new(None),
         }
     }
 
@@ -150,12 +168,64 @@ impl ChatState {
             return;
         }
         let text = std::mem::take(&mut self.input_text);
-        self.messages.push(Message::new("You", &text, "Now", true));
+        self.pending_message = Some(text.clone());
+        self.is_sending = true;
+        self.spinner_frame = 0;
         self.cursor_pos = 0;
-        self.scroll_to_bottom();
-        self.show_toast = true;
-        self.toast_message = "Message sent!".to_string();
         self.dirty = true;
+
+        #[cfg(feature = "async")]
+        {
+            let text_clone = text.clone();
+            let handle = tokio::spawn(async move {
+                // Simulate network delay for message send
+                tokio::time::sleep(Duration::from_millis(800)).await;
+                // In a real app, this would send to a server
+                ()
+            });
+            *self.pending_send.borrow_mut() = Some(handle);
+        }
+
+        #[cfg(not(feature = "async"))]
+        {
+            // Fallback: add message immediately with simulated delay
+            self.messages.push(Message::new("You", &text, "Now", true));
+            self.scroll_to_bottom();
+            self.show_toast = true;
+            self.toast_message = "Message sent!".to_string();
+            self.is_sending = false;
+            self.pending_message = None;
+        }
+    }
+
+    #[cfg(feature = "async")]
+    fn poll_send_result(&mut self) {
+        let mut handle_opt = self.pending_send.borrow_mut();
+        if let Some(handle) = handle_opt.take() {
+            if handle.is_finished() {
+                // Send completed
+                if let Some(text) = self.pending_message.take() {
+                    self.messages.push(Message::new("You", &text, "Now", true));
+                    self.scroll_to_bottom();
+                    self.show_toast = true;
+                    self.toast_message = "Message sent!".to_string();
+                }
+                self.is_sending = false;
+                self.dirty = true;
+            } else {
+                *handle_opt = Some(handle);
+            }
+        }
+    }
+
+    #[cfg(not(feature = "async"))]
+    fn poll_send_result(&mut self) {}
+
+    fn advance_spinner(&mut self) {
+        if self.is_sending {
+            self.spinner_frame = (self.spinner_frame + 1) % SPINNER_FRAMES.len();
+            self.dirty = true;
+        }
     }
 
     // ── Input Handling ────────────────────────────────────────────────────────
@@ -542,12 +612,40 @@ impl ChatState {
         // Send button zone
         let send_x = (area.width as usize).saturating_sub(5);
         self.zones.borrow_mut().register(ZONE_SEND_BTN, send_x as u16, input_row + 1, 5, 1);
-        for (i, c) in "[➤]".chars().enumerate() {
-            let idx = base_idx + send_x + i;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = if i == 1 { t.primary } else { t.secondary };
-                plane.cells[idx].style = if i == 1 { Styles::BOLD } else { Styles::empty() };
+
+        // Show spinner if sending, otherwise send button
+        if self.is_sending {
+            let spinner_text = format!("{} ", SPINNER_FRAMES[self.spinner_frame]);
+            for (i, c) in spinner_text.chars().enumerate() {
+                let idx = base_idx + send_x + i;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+        } else {
+            for (i, c) in "[➤]".chars().enumerate() {
+                let idx = base_idx + send_x + i;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = if i == 1 { t.primary } else { t.secondary };
+                    plane.cells[idx].style = if i == 1 { Styles::BOLD } else { Styles::empty() };
+                }
+            }
+        }
+
+        if self.is_sending {
+            // Block input while sending
+            let input_y = input_row;
+            let spinner_msg = format!("{} Sending...", SPINNER_FRAMES[self.spinner_frame]);
+            for (i, c) in spinner_msg.chars().enumerate() {
+                let idx = base_idx + 4 + i;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].bg = t.input_bg;
+                }
             }
         }
 
@@ -907,6 +1005,11 @@ fn main() -> io::Result<()> {
         }
 
         let mut chat = chat_for_tick.borrow_mut();
+
+        // Poll async send operation
+        chat.poll_send_result();
+        chat.advance_spinner();
+
         let (w, h) = ctx.compositor().size();
         let area = Rect::new(0, 0, w, h);
 

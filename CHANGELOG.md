@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-05-12
+
+### Added
+
+#### Initial Release
+
+- **37 Framework Widgets** — Autocomplete, Breadcrumbs, Button, Calendar, Checkbox, CommandPalette, ConfirmDialog, ContextMenu, DebugOverlay, EventLogger, Form, Gauge, Hud, KeyValueGrid, Label, List, LogViewer, MenuBar, Modal, NotificationCenter, PasswordInput, Profiler, ProgressBar, Radio, RichText, SearchInput, Select, Slider, Spinner, SplitPane, StatusBadge, StatusBar, StreamingText, TabBar, Table, TextEditorAdapter, Toast, Toggle, Tooltip, Tree, WidgetInspector
+
+- **TextEditor** — Full-featured code editor with:
+  - Syntax highlighting via syntect (20+ built-in grammars)
+  - Undo/redo with persistent `.file.undo` support
+  - Filter mode for highlighting matching lines
+  - Multi-cursor editing
+  - Per-file config via `.file.dte.json`
+
+- **Application Framework** — One-import entry point:
+  - `App` and `Ctx` for event loop and state management
+  - Dirty rendering with `needs_render()` optimization
+  - Theme system with 20+ built-in themes
+  - HitZone system for declarative click/drag regions
+  - Drag-and-drop with ghost rendering
+  - Animation system with easing curves
+  - Focus manager for tab-order navigation
+  - Layout engine with constraint-based sizing
+
+- **Compositor** — Z-indexed layer system:
+  - TrueColor (RGB), ANSI 256, Reset colors
+  - Style flags: Bold, Italic, Underline
+  - Visual filters: Dim, Invert, Scanline, Pulse, Glitch
+  - Braille compositing for sub-cell precision
+
+- **Input System** — SGR mouse parsing, keyboard chords, modifiers
+
+- **System Monitoring** — `SystemMonitor` for CPU, memory, disk, process metrics
+
+- **30+ Examples** — Including showcase launcher, file manager, system monitor, chat client, IDE, todo app
+
+### Changed
+
+- Migrated from internal versioning to semantic versioning (0.1.0)
+
+### Documentation
+
+- README with quick start guide and feature overview
+- AGENTS.md for development guidelines
+- CONTRIBUTING.md for contribution process
+
 ## [29.11.0] - 2026-05-08
 
 ### Added
