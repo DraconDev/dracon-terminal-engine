@@ -209,32 +209,43 @@ impl NetworkApp {
         #[cfg(feature = "async")]
         {
             // Check if we have a pending operation
-            let mut handle_guard = self.pending_fetch.borrow_mut();
-            if let Some(handle) = handle_guard.as_mut() {
-                if handle.is_finished() {
-                    // Take ownership of the handle to poll it
-                    let result = handle.now_or_never();
-                    *handle_guard = None;
-                    drop(handle_guard); // Release the borrow before mutating self
-
-                    match result {
-                        Some(Ok(posts)) => {
-                            self.posts = posts;
-                            self.selected = 0;
-                            self.loading = false;
-                            return true;
+            let finished = {
+                let mut handle_guard = self.pending_fetch.borrow_mut();
+                if let Some(handle) = handle_guard.as_mut() {
+                    if handle.is_finished() {
+                        // Take ownership of the handle
+                        let handle = handle_guard.take().unwrap();
+                        drop(handle_guard);
+                        // Block on the result since is_finished() returned true
+                        let result = tokio::runtime::Handle::current().block_on(handle);
+                        match result {
+                            Ok(Ok(posts)) => {
+                                self.posts = posts;
+                                self.selected = 0;
+                                self.loading = false;
+                                Some(true)
+                            }
+                            Ok(Err(e)) => {
+                                self.error = Some(e);
+                                self.loading = false;
+                                Some(true)
+                            }
+                            Err(e) => {
+                                self.error = Some(e.to_string());
+                                self.loading = false;
+                                Some(true)
+                            }
                         }
-                        Some(Err(e)) => {
-                            self.error = Some(e);
-                            self.loading = false;
-                            return true;
-                        }
-                        None => {
-                            // Not ready yet
-                            return false;
-                        }
+                    } else {
+                        None
                     }
+                } else {
+                    None
                 }
+            };
+
+            if let Some(result) = finished {
+                return result;
             }
         }
         false
