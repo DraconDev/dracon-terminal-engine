@@ -222,6 +222,28 @@ impl App {
         self
     }
 
+    /// Dispatches a bracketed-paste text string as synthetic key events to the focused widget.
+    /// Converts newlines to Enter, tabs to Tab, and other chars to KeyCode::Char.
+    fn dispatch_paste(&mut self, text: &str) {
+        if let Some(focused) = self.focus_manager.focused() {
+            for ch in text.chars() {
+                let code = match ch {
+                    '\r' | '\n' => crate::input::event::KeyCode::Enter,
+                    '\t' => crate::input::event::KeyCode::Tab,
+                    c => crate::input::event::KeyCode::Char(c),
+                };
+                let key = crate::input::event::KeyEvent {
+                    code,
+                    modifiers: crate::input::event::KeyModifiers::empty(),
+                    kind: crate::input::event::KeyEventKind::Press,
+                };
+                if let Some(mut widget) = self.widget_mut(focused) {
+                    let _ = widget.handle_key(key);
+                }
+            }
+        }
+    }
+
     /// Registers a callback that fires every `tick_interval` milliseconds.
     /// The callback receives the context and the tick count.
     pub fn on_tick<F>(self, f: F) -> Self
@@ -504,6 +526,9 @@ impl App {
                                                 );
                                             }
                                         }
+                                    }
+                                    Event::Paste(text) => {
+                                        self.dispatch_paste(text);
                                     }
                                     _ => {}
                                 }
