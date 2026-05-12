@@ -774,6 +774,7 @@ impl Widget for InputRouter {
     fn set_area(&mut self, _area: Rect) {}
     fn z_index(&self) -> u16 { 0 }
     fn needs_render(&self) -> bool { false }
+    fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         self.view.borrow_mut().handle_key(key)
     }
