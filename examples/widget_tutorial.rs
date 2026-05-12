@@ -606,7 +606,7 @@ impl Widget for ColorPicker {
 
 impl Default for ColorPicker {
     fn default() -> Self {
-        Self::new()
+        Self::new(Theme::default())
     }
 }
 
@@ -651,22 +651,18 @@ fn main() -> std::io::Result<()> {
     // to demonstrate that each instance maintains its own state.
 
     // Row 1: Red and Green pickers
-    let red_picker = ColorPicker::new()
-        .initial_color("Red")
-        .with_theme(current_theme);
+    let red_picker = ColorPicker::new(current_theme)
+        .initial_color("Red");
 
-    let green_picker = ColorPicker::new()
-        .initial_color("Green")
-        .with_theme(current_theme);
+    let green_picker = ColorPicker::new(current_theme)
+        .initial_color("Green");
 
     // Row 2: Blue and Yellow pickers
-    let blue_picker = ColorPicker::new()
-        .initial_color("Blue")
-        .with_theme(current_theme);
+    let blue_picker = ColorPicker::new(current_theme)
+        .initial_color("Blue");
 
-    let yellow_picker = ColorPicker::new()
-        .initial_color("Yellow")
-        .with_theme(current_theme);
+    let yellow_picker = ColorPicker::new(current_theme)
+        .initial_color("Yellow");
 
     // Header and footer labels
     let mut header = dracon_terminal_engine::framework::widgets::Label::new(

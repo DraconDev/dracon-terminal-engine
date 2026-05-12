@@ -554,7 +554,8 @@ fn main() -> std::io::Result<()> {
     let show_help = Rc::new(RefCell::new(false));
     let show_help_for_tick = Rc::clone(&show_help);
 
-    let theme = Rc::new(RefCell::new(Theme::nord()));
+    let env_theme = Theme::from_env_or(Theme::nord());
+    let theme = Rc::new(RefCell::new(env_theme));
     let theme_for_tick = Rc::clone(&theme);
 
     let mut router = SceneRouter::new();

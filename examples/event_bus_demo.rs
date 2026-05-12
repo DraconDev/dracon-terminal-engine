@@ -52,11 +52,11 @@ struct EventBusApp {
 }
 
 impl EventBusApp {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         Self {
             counter_value: 0,
             messages: vec!["Event bus demo started".into()],
-            theme: Theme::nord(),
+            theme,
             show_help: false,
             should_quit,
             dirty: true,
@@ -362,12 +362,13 @@ fn main() -> std::io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let env_theme = Theme::from_env_or(Theme::nord());
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
-    let app = Rc::new(RefCell::new(EventBusApp::new(should_quit)));
+    let app = Rc::new(RefCell::new(EventBusApp::new(should_quit, env_theme)));
     {
         let mut a = app.borrow_mut();
         a.keybindings = keybindings;

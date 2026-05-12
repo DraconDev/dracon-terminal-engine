@@ -314,7 +314,7 @@ struct PluginDemoState {
 }
 
 impl PluginDemoState {
-    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet, theme: Theme) -> Self {
         let mut registry = PluginRegistry::new();
 
         // Register custom widgets
@@ -323,10 +323,10 @@ impl PluginDemoState {
 
         // Create instances via registry
         let clock = registry
-            .create("clock", WidgetId::new(1), Theme::default())
+            .create("clock", WidgetId::new(1), theme)
             .unwrap();
         let counter = registry
-            .create("counter", WidgetId::new(2), Theme::default())
+            .create("counter", WidgetId::new(2), theme)
             .unwrap();
 
         Self {
@@ -334,7 +334,7 @@ impl PluginDemoState {
             clock,
             counter,
             show_help: false,
-            theme: Theme::nord(),
+            theme,
             dirty: true,
             should_quit,
             keybindings,
@@ -587,10 +587,11 @@ fn main() -> io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let env_theme = Theme::from_env_or(Theme::nord());
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings)));
+    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings, env_theme)));
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 

@@ -473,7 +473,8 @@ fn main() -> std::io::Result<()> {
     let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
-    let mut app = NetworkApp::new(should_quit);
+    let env_theme = Theme::from_env_or(Theme::nord());
+    let mut app = NetworkApp::new(should_quit, env_theme);
     app.keybindings = keybindings;
     app.kb_config = kb_config;
     let app_for_widget = Rc::new(RefCell::new(app));
@@ -485,7 +486,7 @@ fn main() -> std::io::Result<()> {
     let mut framework = App::new()?
         .title("Network Client")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .theme(env_theme);
 
     let widget = NetworkWidget {
         app: app_for_widget,

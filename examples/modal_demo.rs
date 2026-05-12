@@ -174,7 +174,7 @@ struct ModalDemoApp<'a> {
 }
 
 impl<'a> ModalDemoApp<'a> {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let label = Label::new(
             "Modal Demo\n\
              ──────────\n\
@@ -209,7 +209,7 @@ impl<'a> ModalDemoApp<'a> {
             help_btn,
             area: Rect::new(0, 0, 80, 24),
             should_quit,
-            theme: Theme::dark(),
+            theme,
             keybindings,
         }
     }
@@ -404,15 +404,15 @@ impl Widget for ModalDemoRouter {
 fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let env_theme = Theme::from_env_or(Theme::dark());
 
-    let demo = Rc::new(RefCell::new(ModalDemoApp::new(should_quit)));
+    let demo = Rc::new(RefCell::new(ModalDemoApp::new(should_quit, env_theme)));
     let demo_for_render = Rc::clone(&demo);
     let demo_for_input = Rc::clone(&demo);
 
     let mut app = App::new()?.title("Modal Demo").fps(30).theme(Theme::from_env_or(Theme::dark()));
 
-    let theme = Theme::dark();
-    app.set_theme(theme);
+    app.set_theme(env_theme);
 
     // Register input router so keyboard/mouse events reach the demo
     let router = ModalDemoRouter {

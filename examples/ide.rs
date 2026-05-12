@@ -143,7 +143,7 @@ impl IdeApp {
         let tab_titles = vec!["main.rs", "lib.rs"];
         let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_titles);
 
-        let file_tree = build_sample_tree();
+        let file_tree = build_sample_tree(theme);
 
         let menu_bar = MenuBar::new(WidgetId::new(1))
             .with_theme(theme)
@@ -519,7 +519,7 @@ fn file_icon(name: &str) -> &'static str {
     }
 }
 
-fn build_sample_tree() -> Tree {
+fn build_sample_tree(theme: Theme) -> Tree {
     let root = TreeNode {
         label: "󰉋 workspace".into(),
         expanded: true,
@@ -580,7 +580,7 @@ fn build_sample_tree() -> Tree {
 
     Tree::new(WidgetId::new(10))
         .with_root(vec![root])
-        .with_theme(Theme::default())
+        .with_theme(theme)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
