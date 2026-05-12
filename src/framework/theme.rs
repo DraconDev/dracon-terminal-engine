@@ -246,7 +246,7 @@ impl Theme {
             hover_bg: Color::Rgb(60, 60, 60),
             focus_bg: Color::Rgb(0, 60, 120),
             focus_border: Color::Rgb(0, 200, 255),
-            scrollbar_width: 2,
+            scrollbar_width: 1,
         }
     }
 
@@ -1129,6 +1129,37 @@ impl Theme {
             .and_then(|n| Self::from_name(&n))
             .unwrap_or(default)
     }
+
+    /// Return all built-in themes.
+    ///
+    /// Useful for theme cycling UIs, tests, and iterating over every
+    /// available color scheme.
+    pub fn all() -> Vec<Theme> {
+        vec![
+            Self::dark(),
+            Self::light(),
+            Self::high_contrast(),
+            Self::cyberpunk(),
+            Self::dracula(),
+            Self::nord(),
+            Self::catppuccin_mocha(),
+            Self::gruvbox_dark(),
+            Self::tokyo_night(),
+            Self::solarized_dark(),
+            Self::solarized_light(),
+            Self::one_dark(),
+            Self::rose_pine(),
+            Self::kanagawa(),
+            Self::everforest(),
+            Self::monokai(),
+            Self::warm(),
+            Self::cool(),
+            Self::forest(),
+            Self::sunset(),
+            Self::mono(),
+        ]
+    }
+}
 
     /// Return all built-in themes.
     ///
