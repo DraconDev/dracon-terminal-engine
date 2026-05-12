@@ -45,7 +45,6 @@ use std::rc::Rc;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct FileManagerRouter {
-    target: Rc<RefCell<FileManager>>,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
 }
@@ -350,11 +349,7 @@ impl FileManager {
             let mut handle_guard = self.pending_operation.borrow_mut();
             if let Some(handle) = handle_guard.as_mut() {
                 if handle.is_finished() {
-                    // Abort the task to get the result - this is safe since we checked is_finished
-                    // Use try_join! or just abort and return None
-                    let result = tokio::task::JoinError;
-                    // We need to await the handle properly
-                    // Since is_finished() returned true, we can use block_on
+                    // Since is_finished() returned true, we can safely block_on
                     true
                 } else {
                     false

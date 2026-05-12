@@ -14,6 +14,7 @@ use ratatui::layout::Rect;
 pub struct CalendarScene {
     theme: Theme,
     show_help: bool,
+    calendar: Calendar,
     selected_date: Option<String>,
     keybindings: KeybindingSet,
 }
@@ -23,6 +24,7 @@ impl CalendarScene {
         Self {
             theme,
             show_help: false,
+            calendar: Calendar::new().with_theme(theme),
             selected_date: None,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
