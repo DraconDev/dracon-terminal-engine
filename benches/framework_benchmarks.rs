@@ -3,6 +3,9 @@
 //! Run with: `cargo bench`
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use dracon_terminal_engine::compositor::pool::{
+    acquire_plane_cells, release_plane_cells, CellPool,
+};
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::animation::{Animation, AnimationManager, Easing};
 use dracon_terminal_engine::framework::focus::FocusManager;
