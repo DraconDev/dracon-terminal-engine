@@ -24,7 +24,7 @@ use crate::framework::command::{AppConfig, BoundCommand, CommandRunner};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::event_bus::EventBus;
 use crate::framework::focus::FocusManager;
-use crate::framework::logging::{frame_span, log_key_event, log_mouse_event};
+use crate::framework::logging::{log_key_event, log_mouse_event};
 use crate::framework::scene_router::SceneRouter;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};

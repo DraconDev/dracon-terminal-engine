@@ -3,7 +3,7 @@
 //!
 //! Shows how to:
 //! - Define a custom widget with factory function
-//! - Register it with PluginRegistry
+//! - Register external plugins via PluginRegistry
 //! - Dynamically create widgets by name
 //! - Use PluginRegistry in an App
 //!
@@ -27,8 +27,22 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
+// Import plugin widgets from _plugins directory
+use crate::plugins::stat_widget::{create_stat_widget as create_stat, STAT_WIDGET_NAME};
+use crate::plugins::welcome_widget::{create_welcome_widget as create_welcome, WELCOME_WIDGET_NAME};
+
+// Re-export plugins module
+mod plugins {
+    pub mod stat_widget {
+        include!("_plugins/stat_widget.rs");
+    }
+    pub mod welcome_widget {
+        include!("_plugins/welcome_widget.rs");
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
-// CUSTOM WIDGET: ClockWidget
+// IN-PLUGIN WIDGET: ClockWidget (defined inline for demonstration)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct ClockWidget {
@@ -150,7 +164,7 @@ fn clock_factory(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CUSTOM WIDGET: CounterWidget
+// IN-PLUGIN WIDGET: CounterWidget (defined inline for demonstration)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct CounterWidget {
@@ -306,6 +320,8 @@ struct PluginDemoState {
     registry: PluginRegistry,
     clock: Box<dyn Widget>,
     counter: Box<dyn Widget>,
+    stat: Box<dyn Widget>,
+    welcome: Box<dyn Widget>,
     show_help: bool,
     theme: Theme,
     dirty: bool,
@@ -317,9 +333,13 @@ impl PluginDemoState {
     fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet, theme: Theme) -> Self {
         let mut registry = PluginRegistry::new();
 
-        // Register custom widgets
+        // Register inline widgets
         registry.register("clock", clock_factory);
         registry.register("counter", counter_factory);
+
+        // Register external plugins
+        registry.register(STAT_WIDGET_NAME, create_stat);
+        registry.register(WELCOME_WIDGET_NAME, create_welcome);
 
         // Create instances via registry
         let clock = registry
@@ -328,11 +348,19 @@ impl PluginDemoState {
         let counter = registry
             .create("counter", WidgetId::new(2), theme)
             .unwrap();
+        let stat = registry
+            .create(STAT_WIDGET_NAME, WidgetId::new(3), theme)
+            .unwrap();
+        let welcome = registry
+            .create(WELCOME_WIDGET_NAME, WidgetId::new(4), theme)
+            .unwrap();
 
         Self {
             registry,
             clock,
             counter,
+            stat,
+            welcome,
             show_help: false,
             theme,
             dirty: true,
@@ -345,6 +373,8 @@ impl PluginDemoState {
         self.theme = *theme;
         self.clock.on_theme_change(theme);
         self.counter.on_theme_change(theme);
+        self.stat.on_theme_change(theme);
+        self.welcome.on_theme_change(theme);
         self.dirty = true;
     }
 
@@ -363,6 +393,8 @@ impl PluginDemoState {
         self.theme = themes[(idx + 1) % themes.len()];
         self.clock.on_theme_change(&self.theme);
         self.counter.on_theme_change(&self.theme);
+        self.stat.on_theme_change(&self.theme);
+        self.welcome.on_theme_change(&self.theme);
         self.dirty = true;
     }
 }
@@ -478,8 +510,8 @@ impl Widget for InputRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
-    let hw = 36u16.min(area.width.saturating_sub(4));
-    let hh = 13u16.min(area.height.saturating_sub(4));
+    let hw = 44u16.min(area.width.saturating_sub(4));
+    let hh = 15u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
 
@@ -547,10 +579,8 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 
     // Shortcuts
     let shortcuts = [
-        ("+/-", "Adjust counter"),
-        ("←/→", "Adjust counter"),
+        ("+/- or ←/→", "Adjust counter"),
         ("Click", "Toggle clock format"),
-        ("Click +/-", "Adjust counter"),
         ("Click [R]", "Reset counter"),
         (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
         (kb.display(actions::HELP).unwrap_or("?"), "Toggle help"),
@@ -567,7 +597,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
             }
         }
         for (j, c) in desc.chars().enumerate() {
-            let idx = (row * area.width + hx + 14 + j as u16) as usize;
+            let idx = (row * area.width + hx + 20 + j as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg;
@@ -581,7 +611,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> io::Result<()> {
-    println!("Plugin Demo — Clock and Counter widgets loaded via PluginRegistry");
+    println!("Plugin Demo — Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry");
     println!("+/- or ←/→ to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
@@ -636,17 +666,29 @@ fn main() -> io::Result<()> {
                 plane.cells[idx].fg = state.theme.secondary;
             }
 
-            // Render widgets
-            let clock_area = Rect::new(2, 3, 20, 3);
-            let counter_area = Rect::new(25, 3, 15, 3);
+            // Render widgets in a layout
+            // Welcome widget (top left, large banner)
+            let welcome_area = Rect::new(2, 3, 40, 9);
+            state.welcome.set_area(welcome_area);
+            let welcome_plane = state.welcome.render(welcome_area);
+            ctx.add_plane(welcome_plane);
 
+            // Stat widget (top right)
+            let stat_area = Rect::new(44, 3, 28, 7);
+            state.stat.set_area(stat_area);
+            let stat_plane = state.stat.render(stat_area);
+            ctx.add_plane(stat_plane);
+
+            // Clock widget (bottom left)
+            let clock_area = Rect::new(2, 14, 20, 3);
             state.clock.set_area(clock_area);
-            state.counter.set_area(counter_area);
-
             let clock_plane = state.clock.render(clock_area);
-            let counter_plane = state.counter.render(counter_area);
-
             ctx.add_plane(clock_plane);
+
+            // Counter widget (bottom right of clock)
+            let counter_area = Rect::new(24, 14, 15, 3);
+            state.counter.set_area(counter_area);
+            let counter_plane = state.counter.render(counter_area);
             ctx.add_plane(counter_plane);
 
             // Status bar

@@ -44,8 +44,9 @@ pub mod widgets;
 /// The prelude module.
 pub mod prelude {
     pub use crate::compositor::{Cell, Color, Compositor, CellPool, Plane, PoolConfig, Styles};
-    pub use crate::error::{DraconError, Result};
     pub use crate::framework::widget::WidgetId;
+    pub use crate::frame_span;
+    pub use crate::frame_span_debug;
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx},
@@ -60,7 +61,7 @@ pub mod prelude {
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Direction, Layout},
-        logging::{init_logger, init_logger_from_env, frame_span, frame_span_debug},
+        logging::{init_logger, init_logger_from_env},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},

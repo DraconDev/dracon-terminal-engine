@@ -15,7 +15,6 @@
 //! init_logger_from_env();
 //! ```
 
-use tracing::Span;
 use tracing_subscriber::{
     fmt::{self, format::FmtSpan},
     EnvFilter,
@@ -56,8 +55,6 @@ pub fn init_logger() {
 pub fn init_logger_from_env() {
     // If RUST_LOG is not set, default to info
     let env = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string());
-    let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("info"));
 
     // Try to use the user's RUST_LOG, but default to info if it's empty
     let filter = if env.is_empty() {
@@ -164,7 +161,7 @@ macro_rules! frame_span_debug {
 /// log_key_event(&key);
 /// ```
 #[cfg(feature = "debug_events")]
-pub fn log_key_event(key: &dracon_terminal_engine::input::event::KeyEvent) {
+pub fn log_key_event(key: &crate::input::event::KeyEvent) {
     tracing::debug!(
         code = ?key.code,
         modifiers = ?key.modifiers,
@@ -181,7 +178,7 @@ pub fn log_key_event(key: &dracon_terminal_engine::input::event::KeyEvent) {
 /// log_mouse_event(&mouse_event);
 /// ```
 #[cfg(feature = "debug_events")]
-pub fn log_mouse_event(event: &dracon_terminal_engine::input::event::MouseEvent) {
+pub fn log_mouse_event(event: &crate::input::event::MouseEvent) {
     tracing::debug!(
         col = event.column,
         row = event.row,
@@ -193,6 +190,12 @@ pub fn log_mouse_event(event: &dracon_terminal_engine::input::event::MouseEvent)
 // Re-export for convenience
 #[cfg(feature = "debug_events")]
 pub use crate::input::event::{KeyEvent, MouseEvent};
+
+#[cfg(not(feature = "debug_events"))]
+mod re_exports {
+    pub use crate::input::event::KeyEvent;
+    pub use crate::input::event::MouseEvent;
+}
 
 #[cfg(test)]
 mod tests {
