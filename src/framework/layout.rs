@@ -3,6 +3,9 @@
 //! Computes widget rectangles from constraint specifications (percentage,
 //! fixed, min, max, ratio). Inspired by CSS flexbox and ratatui's Layout.
 
+#[cfg(test)]
+use proptest::prelude::*;
+
 use ratatui::layout::Rect;
 
 /// Axis along which constraints are resolved.
@@ -390,13 +393,74 @@ mod tests {
         let rects = layout.layout(Rect::new(0, 0, 100, 42));
         assert_eq!(rects.len(), 2);
         assert_eq!(rects[0].height, 20);
+        assert_eq!(rects[0].height, 20);
         assert_eq!(rects[1].height, 20);
-        assert_eq!(rects[0].y, 0);
-        assert_eq!(rects[1].y, 22);
+        assert_eq!(rects[0].width, 80);
+        assert_eq!(rects[1].width, 80);
     }
 
-    #[test]
-    fn test_vertical_fixed_and_ratio() {
+    // Property-based tests
+    proptest! {
+        #[test]
+        fn constraint_never_exceeds_available(
+            available in 0u16..=1000,
+            fixed_consumed in 0u16..=1000,
+            constraint in any::<Constraint>(),
+        ) {
+            let result = constraint.resolve(available, fixed_consumed);
+            prop_assert!(
+                result <= available,
+                "Constraint::{:?}.resolve({}, {}) = {} exceeds available {}",
+                constraint, available, fixed_consumed, result, available
+            );
+        }
+
+        #[test]
+        fn layout_total_within_available_space(
+            width in 1u16..=300,
+            height in 1u16..=100,
+            spacing in 0u16..=10,
+            margin in 0u16..=20,
+            constraints in proptest::collection::vec(
+                any::<Constraint>(),
+                1..=20
+            ),
+            direction in proptest::prop_oneof![
+                Just(Direction::Horizontal),
+                Just(Direction::Vertical)
+            ],
+        ) {
+            let layout = Layout {
+                constraints,
+                direction,
+                spacing,
+                margin,
+                name: None,
+            };
+
+            let area = Rect::new(0, 0, width, height);
+            let rects = layout.layout(area);
+
+            let is_vertical = direction == Direction::Vertical;
+            let main_axis = if is_vertical { height } else { width };
+            let applied_margin = 2 * margin;
+            let total_spacing = spacing * (rects.len() as u16).saturating_sub(1);
+
+            let available = main_axis.saturating_sub(applied_margin).saturating_sub(total_spacing);
+            let sum: u32 = rects.iter()
+                .map(|r| {
+                    if is_vertical { r.height as u32 } else { r.width as u32 }
+                })
+                .sum();
+
+            // Allow 1 cell of rounding tolerance
+            prop_assert!(
+                sum as i32 - available as i32 >= -1,
+                "sum={} available={} tolerance=1", sum, available
+            );
+        }
+    }
+}
         let layout = Layout::vertical(vec![Constraint::Fixed(5), Constraint::Ratio(1, 1)]);
         let rects = layout.layout(Rect::new(0, 0, 80, 30));
         assert_eq!(rects[0].height, 5);

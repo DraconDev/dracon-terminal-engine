@@ -92,15 +92,7 @@ pub struct App {
 impl App {
     /// Creates a new `App` with a linked terminal.
     /// Returns an error if the terminal cannot be initialized.
-    #[cfg(feature = "tracing")]
-    #[instrument(skip_all, fields(title = "Dracon App"))]
-    pub fn new() -> io::Result<Self> {
-        Self::new_impl()
-    }
-
-    /// Creates a new `App` with a linked terminal.
-    /// Returns an error if the terminal cannot be initialized.
-    #[cfg(not(feature = "tracing"))]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all, fields(title = "Dracon App")))]
     pub fn new() -> io::Result<Self> {
         Self::new_impl()
     }
@@ -228,8 +220,7 @@ impl App {
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual
     /// configuration of each widget.
-    #[cfg(feature = "tracing")]
-    #[instrument(skip(self), fields(theme_name = %theme.name))]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self), fields(theme_name = %theme.name)))]
     pub fn set_theme(&mut self, theme: Theme) -> &mut Self {
         self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
