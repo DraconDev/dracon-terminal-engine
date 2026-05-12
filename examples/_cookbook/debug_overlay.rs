@@ -21,43 +21,75 @@
 //! Press arrow keys, click, or type to see events logged.
 //! Press F12 to toggle the debug overlay panel.
 
+use std::cell::{Cell, RefCell};
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector};
+use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector, WidgetNode};
 use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;
 
 struct DebugOverlayPanel {
     id: WidgetId,
-    profiler: Profiler,
-    inspector: WidgetInspector,
-    event_logger: EventLogger,
+    profiler: RefCell<Profiler>,
+    inspector: RefCell<WidgetInspector>,
+    event_logger: RefCell<EventLogger>,
     visible: bool,
     theme: Theme,
     show_help: bool,
     should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
+    frame_count: Cell<u64>,
+    start_time: Instant,
 }
 
 impl DebugOverlayPanel {
     fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
+        let mut inspector = WidgetInspector::new(WidgetId::new(180));
+        let hierarchy = vec![
+            WidgetNode {
+                id: WidgetId::new(1),
+                label: "App".to_string(),
+                children: vec![
+                    WidgetNode {
+                        id: WidgetId::new(160),
+                        label: "Profiler".to_string(),
+                        children: vec![],
+                    },
+                    WidgetNode {
+                        id: WidgetId::new(180),
+                        label: "WidgetInspector".to_string(),
+                        children: vec![],
+                    },
+                    WidgetNode {
+                        id: WidgetId::new(170),
+                        label: "EventLogger".to_string(),
+                        children: vec![],
+                    },
+                ],
+            },
+        ];
+        inspector.set_hierarchy(hierarchy);
+
         Self {
             id,
-            profiler: Profiler::new(WidgetId::new(160)),
-            inspector: WidgetInspector::new(WidgetId::new(180)),
-            event_logger: EventLogger::new(WidgetId::new(170)),
+            profiler: RefCell::new(Profiler::new(WidgetId::new(160))),
+            inspector: RefCell::new(inspector),
+            event_logger: RefCell::new(EventLogger::new(WidgetId::new(170))),
             visible: false,
             theme,
             show_help: false,
             should_quit,
             keybindings: KeybindingSet::default(),
+            frame_count: Cell::new(0),
+            start_time: Instant::now(),
         }
     }
 
