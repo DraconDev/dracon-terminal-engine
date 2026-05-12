@@ -189,7 +189,7 @@ impl Plane {
 
             // Get the grapheme cluster bytes
             let remaining = text[byte_offset..].as_bytes();
-            let Some((c, _char_len)) = char::from_utf8(remaining)
+            let Some((c, _char_len)) = std::str::from_utf8(remaining)
                 .ok()
                 .and_then(|s| s.chars().next())
                 .map(|c| (c, c.len_utf8()))
@@ -237,7 +237,7 @@ impl Plane {
         let bytes = text.as_bytes();
         let remaining = &bytes[byte_offset..];
 
-        let Some((c, char_len)) = char::from_utf8(remaining)
+        let Some((c, char_len)) = std::str::from_utf8(remaining)
             .ok()
             .and_then(|s| s.chars().next())
             .map(|c| (c, c.len_utf8()))
@@ -249,7 +249,7 @@ impl Plane {
         if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
             let next_offset = byte_offset + char_len;
             if next_offset < bytes.len() {
-                if let Some((next_c, _)) = char::from_utf8(&bytes[next_offset..])
+                if let Some((next_c, _)) = std::str::from_utf8(&bytes[next_offset..])
                     .ok()
                     .and_then(|s| s.chars().next())
                 {
@@ -273,7 +273,7 @@ impl Plane {
 
         while pos < bytes.len() {
             let remaining = &bytes[pos..];
-            if let Some((next_c, next_len)) = char::from_utf8(remaining)
+            if let Some((next_c, next_len)) = std::str::from_utf8(remaining)
                 .ok()
                 .and_then(|s| s.chars().next())
                 .map(|c| (c, c.len_utf8()))
