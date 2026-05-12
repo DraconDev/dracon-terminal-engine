@@ -3,6 +3,7 @@
 pub mod autocomplete;
 pub mod breadcrumbs;
 pub mod button;
+pub mod calendar;
 pub mod checkbox;
 pub mod command_palette;
 pub mod confirm_dialog;
@@ -44,6 +45,7 @@ pub mod widget_inspector;
 pub use autocomplete::Autocomplete;
 pub use breadcrumbs::Breadcrumbs;
 pub use button::Button;
+pub use calendar::Calendar;
 pub use checkbox::Checkbox;
 pub use command_palette::{CommandItem, CommandPalette};
 pub use confirm_dialog::{ConfirmDialog, ConfirmResult};
