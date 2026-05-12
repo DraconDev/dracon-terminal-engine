@@ -68,7 +68,7 @@ impl Calendar {
             on_range_select: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 25, 10)),
             dirty: true,
-            zones: ScopedZoneRegistry::new(),
+            zones: RefCell::new(ScopedZoneRegistry::new()),
         }
     }
 
@@ -89,7 +89,7 @@ impl Calendar {
             on_range_select: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 25, 10)),
             dirty: true,
-            zones: ScopedZoneRegistry::new(),
+            zones: RefCell::new(ScopedZoneRegistry::new()),
         }
     }
 
@@ -331,7 +331,7 @@ impl crate::framework::widget::Widget for Calendar {
         plane.fill_bg(self.theme.bg);
 
         // Clear hit zones and register new ones
-        self.zones.clear();
+        self.zones.borrow_mut().clear();
 
         let today = Local::now().date_naive();
         let cal_width = 20u16;
