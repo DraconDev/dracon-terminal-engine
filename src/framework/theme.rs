@@ -391,7 +391,7 @@ impl Theme {
     /// Creates the Catppuccin Mocha theme — warm, soothing pastel dark theme.
     pub fn catppuccin_mocha() -> Self {
         Self {
-            name: "catppuccin-mocha",
+            name: "catppuccin_mocha",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 38, 56),
@@ -437,7 +437,7 @@ impl Theme {
     /// Creates the Gruvbox Dark theme — retro warm dark theme with earthy tones.
     pub fn gruvbox_dark() -> Self {
         Self {
-            name: "gruvbox-dark",
+            name: "gruvbox_dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 40, 40),
             surface: Color::Rgb(50, 48, 45),
@@ -483,7 +483,7 @@ impl Theme {
     /// Creates the Tokyo Night theme — vivid blue accents on a dark background.
     pub fn tokyo_night() -> Self {
         Self {
-            name: "tokyo-night",
+            name: "tokyo_night",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(32, 34, 44),
             surface: Color::Rgb(38, 40, 52),
@@ -529,7 +529,7 @@ impl Theme {
     /// Creates the Solarized Dark theme — precision-engineered dark theme.
     pub fn solarized_dark() -> Self {
         Self {
-            name: "solarized-dark",
+            name: "solarized_dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 43, 54),
             surface: Color::Rgb(0, 50, 62),
@@ -575,7 +575,7 @@ impl Theme {
     /// Creates the Solarized Light theme — precision-engineered light theme.
     pub fn solarized_light() -> Self {
         Self {
-            name: "solarized-light",
+            name: "solarized_light",
             kind: ThemeKind::Light,
             bg: Color::Rgb(253, 246, 227),
             surface: Color::Rgb(253, 249, 240),
@@ -621,7 +621,7 @@ impl Theme {
     /// Creates the One Dark theme — Atom editor's iconic dark theme.
     pub fn one_dark() -> Self {
         Self {
-            name: "one-dark",
+            name: "one_dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 44, 52),
             surface: Color::Rgb(48, 52, 62),
@@ -667,7 +667,7 @@ impl Theme {
     /// Creates the Rosé Pine theme — elegant muted rose tones.
     pub fn rose_pine() -> Self {
         Self {
-            name: "rose-pine",
+            name: "rose_pine",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 36, 54),
