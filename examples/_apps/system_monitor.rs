@@ -479,10 +479,9 @@ struct SystemMonitor {
 }
 
 impl SystemMonitor {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let mut data = SystemData::new();
         data.refresh();
-        let theme = Theme::nord();
         Self {
             cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU %")
                 .with_theme(theme)
@@ -1377,7 +1376,8 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit)));
+    let env_theme = Theme::from_env_or(Theme::nord());
+    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit, env_theme)));
     let mon_for_tick = Rc::clone(&monitor);
     let mon_for_input = Rc::clone(&monitor);
 
@@ -1385,7 +1385,7 @@ fn main() -> std::io::Result<()> {
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .theme(env_theme);
 
     let router = InputRouter {
         monitor: mon_for_input,

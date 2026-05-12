@@ -100,16 +100,17 @@ impl Showcase {
         fps: Arc<AtomicU64>,
         returned_from: Arc<Mutex<Option<(String, Instant)>>>,
         pending_app_theme: Arc<Mutex<Option<Theme>>>,
+        theme: Theme,
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
         let mut scene_router = SceneRouter::new()
             .with_default_transition(SceneTransition::Fade);
-        scene_router.register("widget_gallery", Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(Theme::nord())));
-        scene_router.register("theme_switcher", Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(Theme::nord())));
-        scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(Theme::nord())));
-        scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(Theme::nord())));
-        scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(Theme::nord())));
+        scene_router.register("widget_gallery", Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(theme)));
+        scene_router.register("theme_switcher", Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(theme)));
+        scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(theme)));
+        scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(theme)));
+        scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(theme)));
 
         let run_counts = vec![0u32; examples.len()];
 
@@ -120,7 +121,7 @@ impl Showcase {
             category_filter: None,
             search_query: String::new(),
             search_active: false,
-            theme: Theme::nord(),
+            theme,
             pending_theme: None,
             should_quit,
             pending_binary: pending,

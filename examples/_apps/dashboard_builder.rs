@@ -342,12 +342,12 @@ struct Dashboard {
 }
 
 impl Dashboard {
-    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, keybindings: KeybindingSet, theme: Theme) -> Self {
         let mut data = SystemData::new();
         data.refresh();
         Self {
             data,
-            theme: Theme::nord(),
+            theme,
             theme_index: 0,
             paused: false,
             area: Rect::new(0, 0, 80, 24),
@@ -876,8 +876,9 @@ fn main() -> std::io::Result<()> {
         .theme(Theme::from_env_or(Theme::nord()))
         .tick_interval(1000);
 
+    let env_theme = Theme::from_env_or(Theme::nord());
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let dashboard = Dashboard::new(should_quit, keybindings);
+    let dashboard = Dashboard::new(should_quit, keybindings, env_theme);
     app.add_widget(Box::new(dashboard), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {
