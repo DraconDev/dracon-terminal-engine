@@ -110,7 +110,7 @@ class DraconTUIContentProvider {
         this._state.output = '';
         this._changeEvent.fire(this._state.uri);
     }
-    provideTextDocumentContent(uri) {
+    provideTextDocumentContent(_uri) {
         const theme = vscode.workspace.getConfiguration('dracon').get('theme', 'nord');
         const themeConfig = THEME_COLORS[theme] || THEME_COLORS.nord;
         return this.generateHtml(this._state.output, themeConfig);
@@ -188,7 +188,7 @@ class DraconTUIContentProvider {
 </body>
 </html>`;
     }
-    convertToStyledHtml(output, theme) {
+    convertToStyledHtml(output, _theme) {
         // Escape HTML entities
         let html = output
             .replace(/&/g, '&amp;')
@@ -594,7 +594,7 @@ class PreviewManager {
 </body>
 </html>`;
     }
-    convertToStyledOutput(output, theme) {
+    convertToStyledOutput(output, _theme) {
         // Escape HTML entities
         let html = output
             .replace(/&/g, '&amp;')

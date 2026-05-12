@@ -1,7 +1,7 @@
 [package]
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -13,18 +13,8 @@ documentation = "https://docs.rs/dracon-terminal-engine"
 keywords = ["terminal", "tui", "framework", "compositor", "cli"]
 categories = ["command-line-interface", "gui"]
 
-# Exclude files that are not part of the library
-exclude = [
-    ".dracon/",
-    "extensions/",
-    "rust_out",
-    ".sisyphus/",
-    "plans/",
-    "*.md:!README.md:!CHANGELOG.md:!CODE_OF_CONDUCT.md:!CONTRIBUTING.md:!AGENTS.md:!AI_GUIDE.md",
-]
+[dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
-ratatui = { version = "0.29", default-features = false }
-unicode-width = "0.1"
 chrono = { version = "0.4", features = ["serde", "clock"] }
 signal-hook = "0.3"
 serde = { version = "1.0", features = ["derive"] }
@@ -178,7 +168,7 @@ path = "examples/plugin_demo.rs"
 
 [features]
 default = []
-async = ["tokio"]
+async = ["tokio/rt-multi-thread", "tokio/sync", "tokio/time", "tokio/macros", "tokio/process", "tokio/io-util", "tokio/fs"]
 
 [[bench]]
 name = "framework_benchmarks"

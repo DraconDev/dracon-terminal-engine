@@ -208,31 +208,32 @@ impl NetworkApp {
     fn poll_fetch(&mut self) -> bool {
         #[cfg(feature = "async")]
         {
-            let mut handle_opt = self.pending_fetch.borrow_mut();
-            if let Some(handle) = handle_opt.take() {
+            // Check if we have a pending operation
+            let mut handle_guard = self.pending_fetch.borrow_mut();
+            if let Some(handle) = handle_guard.as_mut() {
                 if handle.is_finished() {
-                    match handle.now_or_never() {
-                        Some(Ok(Ok(posts))) => {
+                    // Take ownership of the handle to poll it
+                    let result = handle.now_or_never();
+                    *handle_guard = None;
+                    drop(handle_guard); // Release the borrow before mutating self
+
+                    match result {
+                        Some(Ok(posts)) => {
                             self.posts = posts;
                             self.selected = 0;
                             self.loading = false;
-                        }
-                        Some(Ok(Err(e))) => {
-                            self.error = Some(e);
-                            self.loading = false;
+                            return true;
                         }
                         Some(Err(e)) => {
-                            self.error = Some(format!("Task error: {}", e));
+                            self.error = Some(e);
                             self.loading = false;
+                            return true;
                         }
                         None => {
-                            *handle_opt = Some(handle);
+                            // Not ready yet
                             return false;
                         }
                     }
-                    return true;
-                } else {
-                    *handle_opt = Some(handle);
                 }
             }
         }

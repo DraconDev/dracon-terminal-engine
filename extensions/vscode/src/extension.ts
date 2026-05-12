@@ -103,7 +103,7 @@ class DraconTUIContentProvider implements vscode.TextDocumentContentProvider {
         this._changeEvent.fire(this._state.uri);
     }
 
-    provideTextDocumentContent(uri: vscode.Uri): string {
+    provideTextDocumentContent(_uri: vscode.Uri): string {
         const theme = vscode.workspace.getConfiguration('dracon').get<string>('theme', 'nord');
         const themeConfig = THEME_COLORS[theme] || THEME_COLORS.nord;
 
@@ -185,7 +185,7 @@ class DraconTUIContentProvider implements vscode.TextDocumentContentProvider {
 </html>`;
     }
 
-    private convertToStyledHtml(output: string, theme: ThemeConfig): string {
+    private convertToStyledHtml(output: string, _theme: ThemeConfig): string {
         // Escape HTML entities
         let html = output
             .replace(/&/g, '&amp;')
@@ -372,7 +372,7 @@ class PreviewManager {
     private lspClient: DraconLspClient | null = null;
     private currentExamplePath: string = '';
     private statusBarItem: vscode.StatusBarItem;
-    private decorationCollection: vscode.TextEditorDecorationType[] = [];
+    private _decorationCollection: vscode.TextEditorDecorationType[] = [];
     private terminalOutput: string = '';
     private terminalBuffer: string = '';
     private animationFrame: NodeJS.Timeout | null = null;
@@ -687,7 +687,7 @@ class PreviewManager {
 </html>`;
     }
 
-    private convertToStyledOutput(output: string, theme: ThemeConfig): string {
+    private convertToStyledOutput(output: string, _theme: ThemeConfig): string {
         // Escape HTML entities
         let html = output
             .replace(/&/g, '&amp;')

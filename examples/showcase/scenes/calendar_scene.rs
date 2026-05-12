@@ -7,11 +7,10 @@ use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, Keybin
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::Calendar;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
 pub struct CalendarScene {
-    calendar: Calendar,
     theme: Theme,
     show_help: bool,
     selected_date: Option<String>,
@@ -21,7 +20,6 @@ pub struct CalendarScene {
 impl CalendarScene {
     pub fn new(theme: Theme) -> Self {
         Self {
-            calendar: Calendar::new().with_theme(theme),
             theme,
             show_help: false,
             selected_date: None,
@@ -120,7 +118,7 @@ impl Scene for CalendarScene {
     }
 
     fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
-        let cal_area = Rect::new(2, 2, self.area.get().width.saturating_sub(4), self.area.get().height.saturating_sub(6));
+        let cal_area = Rect::new(2, 2, 76, 20);
         let rel_col = col.saturating_sub(cal_area.x);
         let rel_row = row.saturating_sub(cal_area.y);
         if self.calendar.handle_mouse(kind, rel_col, rel_row) {
@@ -140,20 +138,6 @@ impl Scene for CalendarScene {
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-
-    fn area(&self) -> Rect {
-        self.area.get()
-    }
-
-    fn set_area(&mut self, area: Rect) {
-        self.calendar.set_area(area);
-    }
-}
-
-impl CalendarScene {
-    fn area(&self) -> std::cell::Cell<Rect> {
-        std::cell::Cell::new(Rect::new(0, 0, 80, 24))
-    }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
