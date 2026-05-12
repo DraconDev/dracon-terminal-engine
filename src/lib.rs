@@ -10,15 +10,23 @@
 //! ```no_run
 //! use dracon_terminal_engine::prelude::*;
 //!
+//! // Pattern 1 — Widget trait (auto-render)
+//! struct MyApp {
+//!     theme: Theme,
+//! }
+//! impl Widget for MyApp {
+//!     fn render(&self, area: Rect) -> Plane {
+//!         let mut plane = Plane::new(0, area.width, area.height);
+//!         plane.fill_bg(self.theme.bg);
+//!         plane.put_str(0, 0, "Hello from Dracon!");
+//!         plane
+//!     }
+//!     fn needs_render(&self) -> bool { true }
+//! }
+//!
 //! App::new().unwrap()
 //!     .title("My App")
-//!     .fps(30)
-//!     .on_tick(|ctx, _tick| {
-//!         let (w, h) = ctx.compositor().size();
-//!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
-//!         let plane = list.render(Rect::new(0, 0, w, h));
-//!         ctx.add_plane(plane);
-//!     })
+//!     .add_widget(Box::new(MyApp { theme: Theme::dark() }), Rect::new(0, 0, 80, 24))
 //!     .run();
 //! ```
 //!
