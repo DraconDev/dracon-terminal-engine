@@ -786,15 +786,14 @@ fn main() -> std::io::Result<()> {
     std::thread::sleep(Duration::from_millis(500));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_input = keybindings.clone();
+
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
 
     let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone())));
     view.borrow_mut().keybindings = keybindings;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
-
-    let should_quit = Arc::new(AtomicBool::new(false));
-    let quit_check = Arc::clone(&should_quit);
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
