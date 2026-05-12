@@ -1,6 +1,7 @@
 [package]
+[package]
 name = "dracon-terminal-engine"
-version = "0.1.17"
+version = "0.1.11"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -11,7 +12,16 @@ homepage = "https://github.com/DraconDev/dracon-terminal-engine"
 documentation = "https://docs.rs/dracon-terminal-engine"
 keywords = ["terminal", "tui", "framework", "compositor", "cli"]
 categories = ["command-line-interface", "gui"]
-[dependencies]
+
+# Exclude files that are not part of the library
+exclude = [
+    ".dracon/",
+    "extensions/",
+    "rust_out",
+    ".sisyphus/",
+    "plans/",
+    "*.md:!README.md:!CHANGELOG.md:!CODE_OF_CONDUCT.md:!CONTRIBUTING.md:!AGENTS.md:!AI_GUIDE.md",
+]
 bitflags = { version = "2.4", features = ["serde"] }
 ratatui = { version = "0.29", default-features = false }
 unicode-width = "0.1"

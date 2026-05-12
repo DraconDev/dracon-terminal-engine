@@ -292,10 +292,16 @@ impl FileManager {
 
     #[cfg(feature = "async")]
     fn poll_async_result(&mut self) {
-        let mut handle_opt = self.pending_operation.borrow_mut();
-        if let Some(handle) = handle_opt.take() {
+        // Check if we have a pending operation
+        let mut handle_guard = self.pending_operation.borrow_mut();
+        if let Some(handle) = handle_guard.as_mut() {
             if handle.is_finished() {
-                match handle.now_or_never() {
+                // Take ownership of the handle to poll it
+                let result = handle.now_or_never();
+                *handle_guard = None;
+                drop(handle_guard); // Release the borrow before mutating self
+
+                match result {
                     Some(Ok(Some(nodes))) => {
                         // Build tree from loaded nodes
                         let children: Vec<FsNode> = nodes
@@ -320,17 +326,13 @@ impl FileManager {
                         self.toast(&format!("Load error: {}", e), ToastKind::Error);
                     }
                     None => {
-                        // Not ready yet, put it back
-                        *handle_opt = Some(handle);
+                        // Not ready yet
                         return;
                     }
                 }
                 self.is_loading = false;
                 self.loading_path = None;
                 self.dirty = true;
-            } else {
-                // Not finished, put it back
-                *handle_opt = Some(handle);
             }
         }
     }
