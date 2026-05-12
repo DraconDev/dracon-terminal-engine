@@ -1,11 +1,12 @@
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 struct AutocompleteDemo {
+    id: WidgetId,
+    area: Rect,
     should_quit: Rc<AtomicBool>,
     theme: Theme,
     autocomplete: Autocomplete,
@@ -61,6 +62,8 @@ impl AutocompleteDemo {
             });
 
         Self {
+            id: WidgetId::new(1),
+            area: Rect::default(),
             should_quit,
             theme,
             autocomplete,
@@ -74,6 +77,12 @@ impl Widget for AutocompleteDemo {
     fn needs_render(&self) -> bool {
         self.dirty || self.autocomplete.needs_render()
     }
+
+    fn id(&self) -> WidgetId { self.id }
+
+    fn area(&self) -> Rect { self.area }
+
+    fn set_area(&mut self, area: Rect) { self.area = area; }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
