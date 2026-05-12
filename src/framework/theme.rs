@@ -36,6 +36,9 @@ pub enum ThemeKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Theme {
     pub name: &'static str,
+    /// Human-friendly display label (e.g. "Solarized Dark", "Rosé Pine").
+    /// Used for theme cycling menus and the showcase launcher.
+    pub display_name: &'static str,
     pub kind: ThemeKind,
 
     // Surface / Elevation
