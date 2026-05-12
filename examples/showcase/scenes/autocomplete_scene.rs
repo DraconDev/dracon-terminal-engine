@@ -7,10 +7,10 @@ use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, Keybin
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::Autocomplete;
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::Autocomplete;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
-use ratatui::layout::Rect;
-use std::cell::RefCell;
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 
 pub struct AutocompleteScene {
     autocomplete: Autocomplete,
