@@ -116,6 +116,7 @@ impl Theme {
     pub fn dark() -> Self {
         Self {
             name: "dark",
+            display_name: "Dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(16, 16, 24),
             surface: Color::Rgb(24, 24, 36),
@@ -162,6 +163,7 @@ impl Theme {
     pub fn light() -> Self {
         Self {
             name: "light",
+            display_name: "Light",
             kind: ThemeKind::Light,
             bg: Color::Rgb(250, 250, 250),
             surface: Color::Rgb(255, 255, 255),
@@ -211,6 +213,7 @@ impl Theme {
     pub fn high_contrast() -> Self {
         Self {
             name: "high_contrast",
+            display_name: "High Contrast",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 0, 0),
             surface: Color::Rgb(20, 20, 20),
@@ -257,6 +260,7 @@ impl Theme {
     pub fn cyberpunk() -> Self {
         Self {
             name: "cyberpunk",
+            display_name: "Cyberpunk",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 0, 0),
             surface: Color::Rgb(10, 10, 15),
@@ -303,6 +307,7 @@ impl Theme {
     pub fn dracula() -> Self {
         Self {
             name: "dracula",
+            display_name: "Dracula",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 42, 54),
             surface: Color::Rgb(48, 50, 64),
@@ -349,6 +354,7 @@ impl Theme {
     pub fn nord() -> Self {
         Self {
             name: "nord",
+            display_name: "Nord",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(46, 52, 64),
             surface: Color::Rgb(52, 58, 72),
@@ -395,6 +401,7 @@ impl Theme {
     pub fn catppuccin_mocha() -> Self {
         Self {
             name: "catppuccin_mocha",
+            display_name: "Catppuccin",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 38, 56),
@@ -441,6 +448,7 @@ impl Theme {
     pub fn gruvbox_dark() -> Self {
         Self {
             name: "gruvbox_dark",
+            display_name: "Gruvbox",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 40, 40),
             surface: Color::Rgb(50, 48, 45),
@@ -487,6 +495,7 @@ impl Theme {
     pub fn tokyo_night() -> Self {
         Self {
             name: "tokyo_night",
+            display_name: "Tokyo Night",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(32, 34, 44),
             surface: Color::Rgb(38, 40, 52),
@@ -533,6 +542,7 @@ impl Theme {
     pub fn solarized_dark() -> Self {
         Self {
             name: "solarized_dark",
+            display_name: "Solarized Dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 43, 54),
             surface: Color::Rgb(0, 50, 62),
@@ -625,6 +635,7 @@ impl Theme {
     pub fn one_dark() -> Self {
         Self {
             name: "one_dark",
+            display_name: "One Dark",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 44, 52),
             surface: Color::Rgb(48, 52, 62),
@@ -671,6 +682,7 @@ impl Theme {
     pub fn rose_pine() -> Self {
         Self {
             name: "rose_pine",
+            display_name: "Rosé Pine",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 36, 54),
