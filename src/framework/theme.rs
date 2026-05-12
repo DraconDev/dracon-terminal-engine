@@ -589,6 +589,7 @@ impl Theme {
     pub fn solarized_light() -> Self {
         Self {
             name: "solarized_light",
+            display_name: "Solarized Light",
             kind: ThemeKind::Light,
             bg: Color::Rgb(253, 246, 227),
             surface: Color::Rgb(253, 249, 240),
@@ -729,6 +730,7 @@ impl Theme {
     pub fn kanagawa() -> Self {
         Self {
             name: "kanagawa",
+            display_name: "Kanagawa",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(38, 40, 64),
             surface: Color::Rgb(44, 46, 72),
@@ -775,6 +777,7 @@ impl Theme {
     pub fn everforest() -> Self {
         Self {
             name: "everforest",
+            display_name: "Everforest",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(43, 48, 40),
             surface: Color::Rgb(50, 55, 48),
@@ -821,6 +824,7 @@ impl Theme {
     pub fn monokai() -> Self {
         Self {
             name: "monokai",
+            display_name: "Monokai",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(39, 40, 34),
             surface: Color::Rgb(46, 47, 40),
@@ -867,6 +871,7 @@ impl Theme {
     pub fn warm() -> Self {
         Self {
             name: "warm",
+            display_name: "Warm",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(28, 26, 24),
             surface: Color::Rgb(36, 34, 30),
@@ -913,6 +918,7 @@ impl Theme {
     pub fn cool() -> Self {
         Self {
             name: "cool",
+            display_name: "Cool",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(24, 26, 32),
             surface: Color::Rgb(30, 32, 40),
@@ -959,6 +965,7 @@ impl Theme {
     pub fn forest() -> Self {
         Self {
             name: "forest",
+            display_name: "Forest",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(24, 30, 26),
             surface: Color::Rgb(30, 38, 32),
@@ -1005,6 +1012,7 @@ impl Theme {
     pub fn sunset() -> Self {
         Self {
             name: "sunset",
+            display_name: "Sunset",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(32, 24, 26),
             surface: Color::Rgb(40, 30, 32),
@@ -1051,6 +1059,7 @@ impl Theme {
     pub fn mono() -> Self {
         Self {
             name: "mono",
+            display_name: "Mono",
             kind: ThemeKind::Dark,
             bg: Color::Rgb(26, 28, 32),
             surface: Color::Rgb(34, 36, 42),
