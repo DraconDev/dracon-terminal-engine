@@ -236,9 +236,40 @@ mod tests {
     }
 
     #[test]
-    fn test_empty_layout() {
-        let layout = Layout::new(vec![]);
-        let rects = layout.layout(Rect::new(0, 0, 100, 20));
-        assert!(rects.is_empty());
+    fn test_vertical_layout() {
+        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .direction(Direction::Vertical);
+        let rects = layout.layout(Rect::new(0, 0, 100, 40));
+        assert_eq!(rects.len(), 2);
+        assert_eq!(rects[0].height, 20);
+        assert_eq!(rects[1].height, 20);
+        assert_eq!(rects[0].width, 100);
+        assert_eq!(rects[0].x, 0);
+        assert_eq!(rects[0].y, 0);
+        assert_eq!(rects[1].y, 20);
+    }
+
+    #[test]
+    fn test_vertical_with_spacing() {
+        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .direction(Direction::Vertical)
+            .spacing(2);
+        let rects = layout.layout(Rect::new(0, 0, 100, 42));
+        assert_eq!(rects.len(), 2);
+        assert_eq!(rects[0].height, 20);
+        assert_eq!(rects[1].height, 20);
+        assert_eq!(rects[0].y, 0);
+        assert_eq!(rects[1].y, 22);
+    }
+
+    #[test]
+    fn test_vertical_fixed_and_ratio() {
+        let layout =
+            Layout::new(vec![Constraint::Fixed(5), Constraint::Ratio(1, 1)])
+                .direction(Direction::Vertical);
+        let rects = layout.layout(Rect::new(0, 0, 80, 30));
+        assert_eq!(rects[0].height, 5);
+        assert_eq!(rects[1].height, 25);
+        assert_eq!(rects[0].width, 80);
     }
 }
