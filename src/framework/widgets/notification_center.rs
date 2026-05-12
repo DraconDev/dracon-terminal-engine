@@ -4,7 +4,7 @@
 //! Notifications auto-dismiss after a configurable duration and can be
 //! clicked to dismiss immediately.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Color, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
