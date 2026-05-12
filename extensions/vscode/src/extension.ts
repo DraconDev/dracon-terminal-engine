@@ -372,7 +372,6 @@ class PreviewManager {
     private lspClient: DraconLspClient | null = null;
     private currentExamplePath: string = '';
     private statusBarItem: vscode.StatusBarItem;
-    private _decorationCollection: vscode.TextEditorDecorationType[] = [];
     private terminalOutput: string = '';
     private terminalBuffer: string = '';
     private animationFrame: NodeJS.Timeout | null = null;

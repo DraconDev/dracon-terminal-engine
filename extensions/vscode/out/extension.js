@@ -342,7 +342,6 @@ class PreviewManager {
         this.previewPanel = null;
         this.lspClient = null;
         this.currentExamplePath = '';
-        this.decorationCollection = [];
         this.terminalOutput = '';
         this.terminalBuffer = '';
         this.animationFrame = null;
