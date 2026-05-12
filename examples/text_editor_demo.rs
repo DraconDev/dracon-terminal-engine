@@ -16,6 +16,7 @@
 //!   Ctrl+W      — close tab
 //!   Ctrl+F      — toggle search
 //!   Ctrl+S      — save mock
+//!   F12         — toggle profiler
 //!   Tab         — next tab
 //!   ↑/↓/←/→     — navigate
 //!   t           — cycle theme
@@ -37,6 +38,7 @@ use std::os::fd::AsFd;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 
 struct Tab {
     title: String,
