@@ -276,8 +276,92 @@ impl ChatState {
     #[cfg(not(feature = "async"))]
     fn poll_send_result(&mut self) {}
 
+    #[cfg(feature = "async")]
+    fn start_fetch(&mut self) {
+        self.is_loading = true;
+        self.loading_error = None;
+        self.spinner_frame = 0;
+        self.dirty = true;
+
+
+        let handle = tokio::spawn(async move {
+            let client = reqwest::Client::new();
+            match client
+                .get(&format!("{}/posts", API_BASE))
+                .send()
+                .await
+            {
+                Ok(response) => {
+                    match response.json::<Vec<Post>>().await {
+                        Ok(posts) => {
+                            let messages: Vec<Message> = posts.into_iter().map(Message::from).collect();
+                            Ok(messages)
+                        }
+                        Err(e) => Err(format!("Failed to parse response: {}", e)),
+                    }
+                }
+                Err(e) => Err(format!("Network error: {}", e)),
+            }
+        });
+        *self.pending_fetch.borrow_mut() = Some(handle);
+    }
+
+    #[cfg(not(feature = "async"))]
+    fn start_fetch(&mut self) {
+        self.is_loading = false;
+        self.loading_error = Some("Async feature not enabled".to_string());
+        self.dirty = true;
+    }
+
+    #[cfg(feature = "async")]
+    fn poll_fetch_result(&mut self) {
+        let finished = {
+            let mut handle_opt = self.pending_fetch.borrow_mut();
+            if let Some(handle) = handle_opt.as_mut() {
+                if handle.is_finished() {
+                    let handle = handle_opt.take().unwrap();
+                    drop(handle_opt);
+                    let result = tokio::runtime::Handle::current().block_on(handle);
+                    match result {
+                        Ok(Ok(msgs)) => {
+                            self.messages = msgs;
+                            self.scroll_to_bottom();
+                            true
+                        }
+                        Ok(Err(e)) => {
+                            self.loading_error = Some(e);
+                            true
+                        }
+                        Err(e) => {
+                            self.loading_error = Some(format!("Task error: {}", e));
+                            true
+                        }
+                    }
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        };
+
+        if finished {
+            self.is_loading = false;
+            self.dirty = true;
+        }
+    }
+
+    #[cfg(not(feature = "async"))]
+    fn poll_fetch_result(&mut self) {}
+
+
+    fn refresh(&mut self) {
+        self.messages.clear();
+        self.start_fetch();
+    }
+
     fn advance_spinner(&mut self) {
-        if self.is_sending {
+        if self.is_loading || self.is_sending {
             self.spinner_frame = (self.spinner_frame + 1) % SPINNER_FRAMES.len();
             self.dirty = true;
         }
@@ -324,6 +408,9 @@ impl ChatState {
         } else if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
             self.dirty = true;
+            true
+        } else if self.keybindings.matches(actions::REFRESH, &key) {
+            self.refresh();
             true
         } else if key.code == KeyCode::Enter {
             self.send_message();
@@ -400,6 +487,10 @@ impl ChatState {
                 Some(ZONE_SETTINGS_BTN) => {
                     self.show_settings_modal = true;
                     self.dirty = true;
+                    return true;
+                }
+                Some(ZONE_REFRESH_BTN) => {
+                    self.refresh();
                     return true;
                 }
                 _ => {}

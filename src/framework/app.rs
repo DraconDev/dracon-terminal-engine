@@ -412,6 +412,7 @@ impl App {
 
         while running.load(Ordering::SeqCst) {
             let frame_start = Instant::now();
+            let _frame_span = tracing::debug_span!("frame").entered();
 
             if resize_flag.load(Ordering::SeqCst) {
                 resize_flag.store(false, Ordering::SeqCst);
@@ -427,6 +428,7 @@ impl App {
             }
 
             let stdin_fd = stdin.as_fd();
+            let _input_span = tracing::debug_span!("input_parsing").entered();
             match tty::poll_input(stdin_fd, 20) {
                 Ok(true) => {
                     let mut chunk_buf = [0u8; 1024];
@@ -436,6 +438,12 @@ impl App {
                         }
                         for byte in chunk_buf.iter().take(n) {
                             if let Some(event) = self.parser.advance(*byte) {
+                                #[cfg(feature = "debug_events")]
+                                match &event {
+                                    Event::Key(k) => log_key_event(k),
+                                    Event::Mouse(m) => log_mouse_event(m),
+                                    _ => {}
+                                }
                                 match &event {
                                     Event::Resize(w, h) => {
                                         self.compositor.resize(*w, *h);
@@ -543,6 +551,12 @@ impl App {
                 }
                 Ok(false) => {
                     if let Some(evt) = self.parser.check_timeout() {
+                        #[cfg(feature = "debug_events")]
+                        match &evt {
+                            Event::Key(k) => log_key_event(k),
+                            Event::Mouse(m) => log_mouse_event(m),
+                            _ => {}
+                        }
                         match &evt {
                             Event::Resize(w, h) => {
                                 self.compositor.resize(*w, *h);
