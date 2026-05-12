@@ -1,8 +1,8 @@
 //! Calendar/Date picker widget with month navigation and date range selection.
 
-use chrono::{Datelike, Local, NaiveDate, Weekday};
+use chrono::{Datelike, Local, NaiveDate};
 
-use crate::compositor::{Cell, Plane, Styles};
+use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
@@ -392,15 +392,15 @@ impl crate::framework::widget::Widget for Calendar {
         let offset = self.start_offset() as usize;
         let days_in_month = self.days_in_month() as usize;
 
-        for week in 0..6 {
-            for day_of_week in 0..7 {
-                let cell_index = week * 7 + day_of_week;
+        for week in 0..6u8 {
+            for day_of_week in 0..7u8 {
+                let cell_index = (week as usize) * 7 + (day_of_week as usize);
                 let day_num = cell_index.saturating_sub(offset) + 1;
 
                 let cell_x = cal_x + (day_of_week as u16) * 3;
-                let cell_y = grid_start_y + week;
+                let cell_y = grid_start_y + week as u16;
 
-                if cell_index >= offset && day_num <= days_in_month as i32 {
+                if cell_index >= offset && day_num <= days_in_month {
                     let date = NaiveDate::from_ymd_opt(self.year, self.month as u32, day_num as u32)
                         .unwrap();
                     let day_str = format!("{:>2}", day_num);
