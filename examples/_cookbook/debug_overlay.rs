@@ -126,9 +126,9 @@ impl DebugOverlayPanel {
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         // Propagate theme to all child widgets
-        self.profiler.on_theme_change(&self.theme);
-        self.inspector.on_theme_change(&self.theme);
-        self.event_logger.on_theme_change(&self.theme);
+        self.profiler.borrow_mut().on_theme_change(&self.theme);
+        self.inspector.borrow_mut().on_theme_change(&self.theme);
+        self.event_logger.borrow_mut().on_theme_change(&self.theme);
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
@@ -202,16 +202,18 @@ impl Widget for DebugOverlayPanel {
         Rect::new(0, 0, 80, 24)
     }
     fn set_area(&mut self, area: Rect) {
-        self.profiler.set_area(Rect::new(0, 1, 25, 8));
-        self.inspector.set_area(Rect::new(26, 1, 25, 8));
+        self.profiler.borrow_mut().set_area(Rect::new(0, 1, 25, 8));
+        self.inspector.borrow_mut().set_area(Rect::new(26, 1, 25, 8));
         self.event_logger
+            .borrow_mut()
             .set_area(Rect::new(0, 10, area.width, area.height.saturating_sub(11)));
     }
     fn z_index(&self) -> u16 {
         200
     }
     fn needs_render(&self) -> bool {
-        self.visible || self.show_help
+        // Always re-render when visible so profiler metrics animate
+        true
     }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
@@ -220,15 +222,59 @@ impl Widget for DebugOverlayPanel {
     }
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = *theme;
-        self.profiler.on_theme_change(theme);
-        self.inspector.on_theme_change(theme);
-        self.event_logger.on_theme_change(theme);
+        self.profiler.borrow_mut().on_theme_change(theme);
+        self.inspector.borrow_mut().on_theme_change(theme);
+        self.event_logger.borrow_mut().on_theme_change(theme);
     }
 
     fn render(&self, area: Rect) -> Plane {
         if !self.visible {
             return Plane::new(0, area.width, area.height);
         }
+
+        // Update profiler with mock metrics each frame
+        let frame = self.frame_count.get() + 1;
+        self.frame_count.set(frame);
+        let elapsed = self.start_time.elapsed();
+        let variable = ((frame as f64 / 60.0).sin() * 5.0 + 10.0) as u64;
+        let metrics = vec![
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "FPS".to_string(),
+                value: Duration::from_millis(16),
+                call_count: frame,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Render".to_string(),
+                value: Duration::from_micros(500 + (frame % 200) * 3),
+                call_count: frame,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Input".to_string(),
+                value: Duration::from_micros(120 + (frame % 50) * 2),
+                call_count: frame,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Layout".to_string(),
+                value: Duration::from_micros(350),
+                call_count: frame,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Composite".to_string(),
+                value: Duration::from_micros(480 + (frame % 100)),
+                call_count: frame,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Memory".to_string(),
+                value: Duration::from_millis(variable),
+                call_count: 1,
+            },
+            dracon_terminal_engine::framework::widgets::Metric {
+                name: "Uptime".to_string(),
+                value: elapsed,
+                call_count: 1,
+            },
+        ];
+        self.profiler.borrow_mut().set_metrics(metrics);
 
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 200;
@@ -322,7 +368,7 @@ impl Widget for DebugOverlayPanel {
         }
 
         let profiler_area = Rect::new(1, 2, 23, 6);
-        let prof_plane = self.profiler.render(profiler_area);
+        let prof_plane = self.profiler.borrow().render(profiler_area);
         for y in 0..prof_plane.height {
             for x in 0..prof_plane.width {
                 let src_idx = (y * prof_plane.width + x) as usize;
@@ -337,7 +383,7 @@ impl Widget for DebugOverlayPanel {
         }
 
         let inspector_area = Rect::new(27, 2, 23, 6);
-        let insp_plane = self.inspector.render(inspector_area);
+        let insp_plane = self.inspector.borrow().render(inspector_area);
         for y in 0..insp_plane.height {
             for x in 0..insp_plane.width {
                 let src_idx = (y * insp_plane.width + x) as usize;
@@ -357,7 +403,7 @@ impl Widget for DebugOverlayPanel {
             area.width.saturating_sub(2),
             area.height.saturating_sub(12),
         );
-        let log_plane = self.event_logger.render(logger_area);
+        let log_plane = self.event_logger.borrow().render(logger_area);
         for y in 0..log_plane.height {
             for x in 0..log_plane.width {
                 let src_idx = (y * log_plane.width + x) as usize;
