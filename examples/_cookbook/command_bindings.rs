@@ -44,10 +44,11 @@ struct CommandBindings {
     cpu_value: f32,
     show_help: bool,
     keybindings: KeybindingSet,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl CommandBindings {
-    fn new() -> Self {
+    fn new(should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id: WidgetId::new(0),
             gauge: Gauge::new("CPU")
@@ -68,6 +69,7 @@ impl CommandBindings {
             cpu_value: 50.0,
             show_help: false,
             keybindings: KeybindingSet::default(),
+            should_quit,
         }
     }
 
@@ -718,7 +720,8 @@ impl Widget for CommandBindings {
             return false;
         }
         if self.keybindings.matches(actions::QUIT, &key) {
-            return false; // Let framework handle quit
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = [
@@ -785,11 +788,10 @@ fn main() -> std::io::Result<()> {
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let kb_input = keybindings.clone();
 
-    let view = Rc::new(RefCell::new(CommandBindings::new()));
+    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone())));
     view.borrow_mut().keybindings = keybindings;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
-    let view_for_input = Rc::clone(&view);
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
