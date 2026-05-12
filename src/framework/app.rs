@@ -566,6 +566,9 @@ impl App {
                                     }
                                 }
                             }
+                            Event::Paste(text) => {
+                                self.dispatch_paste(text);
+                            }
                             _ => {}
                         }
                     }

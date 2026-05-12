@@ -5,6 +5,16 @@
 
 use ratatui::layout::Rect;
 
+/// Axis along which constraints are resolved.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Direction {
+    /// Distribute constraints horizontally (default).
+    #[default]
+    Horizontal,
+    /// Distribute constraints vertically.
+    Vertical,
+}
+
 /// A constraint that defines how a dimension is sized.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Constraint {
