@@ -272,4 +272,11 @@ mod tests {
         assert_eq!(rects[1].height, 25);
         assert_eq!(rects[0].width, 80);
     }
+
+    #[test]
+    fn test_empty_layout() {
+        let layout = Layout::new(vec![]);
+        let rects = layout.layout(Rect::new(0, 0, 100, 20));
+        assert!(rects.is_empty());
+    }
 }
