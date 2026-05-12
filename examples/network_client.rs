@@ -614,6 +614,7 @@ fn main() -> std::io::Result<()> {
     app.kb_config = kb_config;
     let app_for_widget = Rc::new(RefCell::new(app));
     let app_for_input = Rc::clone(&app_for_widget);
+    let app_for_tick = Rc::clone(&app_for_input);
 
     // Initial fetch
     app_for_widget.borrow_mut().refresh();
@@ -663,7 +664,7 @@ fn main() -> std::io::Result<()> {
                 ctx.stop();
             }
             // Poll async fetch and advance spinner
-            let mut app = app_for_input.borrow_mut();
+            let mut app = app_for_tick.borrow_mut();
             if app.poll_fetch() || app.loading {
                 app.advance_spinner();
                 app.dirty = true;
