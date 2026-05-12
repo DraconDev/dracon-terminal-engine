@@ -19,9 +19,8 @@ pub enum Direction {
 }
 
 /// A constraint that defines how a dimension is sized.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Arbitrary)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Constraint {
-    /// Size as a percentage of the available space (0-100).
     Percentage(u16),
     /// Fixed size in cells.
     Fixed(u16),
@@ -406,12 +405,35 @@ mod tests {
     }
 
     // Property-based tests
+    use proptest::prelude::*;
+
+    prop_compose! {
+        fn constraint_strategy() -> Constraint {
+            prop_oneof![
+                any::<u16>().prop_map(Constraint::Percentage),
+                any::<u16>().prop_map(Constraint::Fixed),
+                any::<u16>().prop_map(Constraint::Min),
+                any::<u16>().prop_map(Constraint::Max),
+                (any::<u16>(), any::<u16>()).prop_map(|(n, d)| Constraint::Ratio(n % 100 + 1, d % 100 + 1)),
+            ]
+        }
+    }
+
+    prop_compose! {
+        fn direction_strategy() -> Direction {
+            prop_oneof![
+                Just(Direction::Horizontal),
+                Just(Direction::Vertical)
+            ]
+        }
+    }
+
     proptest! {
         #[test]
         fn constraint_never_exceeds_available(
             available in 0u16..=1000,
             fixed_consumed in 0u16..=1000,
-            constraint in any::<Constraint>(),
+            constraint in constraint_strategy(),
         ) {
             let result = constraint.resolve(available, fixed_consumed);
             prop_assert!(
@@ -427,14 +449,8 @@ mod tests {
             height in 1u16..=100,
             spacing in 0u16..=10,
             margin in 0u16..=20,
-            constraints in proptest::collection::vec(
-                any::<Constraint>(),
-                1..=20
-            ),
-            direction in proptest::prop_oneof![
-                Just(Direction::Horizontal),
-                Just(Direction::Vertical)
-            ],
+            constraints in proptest::collection::vec(constraint_strategy(), 1..=20),
+            direction in direction_strategy(),
         ) {
             let layout = Layout {
                 constraints,

@@ -53,33 +53,13 @@ impl StatWidget {
         }
     }
 
-    /// Refreshes system stats.
-    pub fn refresh(&self) {
-        self.sys.borrow_mut().refresh_all();
-    }
-
-    /// Gets the current CPU load as a percentage (0.0 - 100.0).
-    fn cpu_usage(&self) -> f32 {
-        self.sys.borrow().global_cpu_usage()
-    }
-
-    /// Gets the used memory in bytes.
-    fn used_memory(&self) -> u64 {
-        self.sys.borrow().used_memory()
-    }
-
-    /// Gets the total memory in bytes.
-    fn total_memory(&self) -> u64 {
-        self.sys.borrow().total_memory()
-    }
-
     /// Gets memory usage as a percentage (0.0 - 100.0).
     fn memory_usage(&self) -> f32 {
-        let total = self.total_memory();
+        let total = self.sys.borrow().total_memory();
         if total == 0 {
             return 0.0;
         }
-        (self.used_memory() as f32 / total as f32) * 100.0
+        (self.sys.borrow().used_memory() as f32 / total as f32) * 100.0
     }
 }
 
@@ -121,7 +101,7 @@ impl Widget for StatWidget {
         plane.fill_bg(t.bg);
 
         // Refresh stats
-        self.sys.borrow_mut().refresh_cpu();
+        self.sys.borrow_mut().refresh_cpu_all();
         let cpu = self.sys.borrow().global_cpu_usage();
         let mem_pct = self.memory_usage();
         let mem_used = self.used_memory() / (1024 * 1024); // MB
