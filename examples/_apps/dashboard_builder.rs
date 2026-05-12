@@ -405,7 +405,7 @@ impl Widget for Dashboard {
 
         // Header
         let title = " System Dashboard ";
-        let theme_label = format!(" {} ", THEMES[self.theme_index]);
+        let theme_label = format!(" {} ", Theme::all()[self.theme_index].name);
         let status = if self.paused {
             " ⏸ PAUSED "
         } else {
