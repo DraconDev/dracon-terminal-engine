@@ -176,7 +176,7 @@ impl Widget for Showcase {
                 }
             })
             .filter(|idx| *idx < themes.len());
-        for (i, (_name, theme)) in themes.iter().enumerate() {
+        for (i, theme) in themes.iter().enumerate() {
             if i >= visible_themes {
                 break;
             }
@@ -1560,7 +1560,7 @@ impl Showcase {
             }
             if self.keybindings.matches(actions::THEME, &key) {
                 let themes = Self::themes();
-                let current = themes.iter().position(|(_, t)| t.name == self.theme.name).unwrap_or(0);
+                let current = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
                 self.scene_router.on_theme_change(&self.theme);

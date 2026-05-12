@@ -166,34 +166,13 @@ impl Showcase {
         }
     }
 
-    pub fn themes() -> Vec<(&'static str, Theme)> {
-        vec![
-            ("dark", Theme::dark()),
-            ("light", Theme::light()),
-            ("cyberpunk", Theme::cyberpunk()),
-            ("dracula", Theme::dracula()),
-            ("nord", Theme::nord()),
-            ("catppuccin", Theme::catppuccin_mocha()),
-            ("gruvbox", Theme::gruvbox_dark()),
-            ("tokyo-night", Theme::tokyo_night()),
-            ("solarized-dark", Theme::solarized_dark()),
-            ("solarized-light", Theme::solarized_light()),
-            ("one-dark", Theme::one_dark()),
-            ("rose-pine", Theme::rose_pine()),
-            ("kanagawa", Theme::kanagawa()),
-            ("everforest", Theme::everforest()),
-            ("monokai", Theme::monokai()),
-            ("warm", Theme::warm()),
-            ("cool", Theme::cool()),
-            ("forest", Theme::forest()),
-            ("sunset", Theme::sunset()),
-            ("mono", Theme::mono()),
-        ]
+    pub fn themes() -> Vec<Theme> {
+        Theme::all().into_iter().filter(|t| t.name != "high_contrast").collect()
     }
 
     pub fn apply_filter(&mut self) {
         if let Some(idx) = self.pending_theme.take() {
-            self.theme = Self::themes()[idx % Self::themes().len()].1;
+            self.theme = Self::themes()[idx % Self::themes().len()];
         }
         self.search_query_lower = self.search_query.to_lowercase();
         self.filtered = self
