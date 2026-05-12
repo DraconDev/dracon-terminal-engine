@@ -286,7 +286,6 @@ impl Widget for FormApp {
 }
 
 fn main() -> std::io::Result<()> {
-fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
