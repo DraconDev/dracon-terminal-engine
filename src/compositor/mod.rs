@@ -4,6 +4,8 @@
 pub mod engine;
 #[doc = "Visual filters for planes (Dim, Invert, Scanline, Pulse, Glitch)."]
 pub mod filter;
+#[doc = "Object pool for Plane and Cell allocation to reduce per-frame allocations."]
+pub mod pool;
 #[doc = "Plane, Cell, Color, and Styles types."]
 pub mod plane;
 
@@ -11,3 +13,7 @@ pub mod plane;
 pub use engine::Compositor;
 /// Re-exports types for plane-based rendering: [`Cell`], [`Color`], [`Plane`], and [`Styles`].
 pub use plane::{Cell, Color, Plane, Styles};
+/// Re-exports pool types: [`PlanePool`], [`CellPool`], [`PoolConfig`], [`acquire_plane_from_pool`], [`release_plane_to_pool`].
+pub use pool::{
+    acquire_plane_from_pool, release_plane_to_pool, CellPool, PlanePool, PoolConfig,
+};
