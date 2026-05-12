@@ -167,7 +167,7 @@ impl Showcase {
     }
 
     pub fn themes() -> Vec<Theme> {
-        Theme::all().into_iter().filter(|t| t.name != "high_contrast").collect()
+        Theme::all().iter().filter(|t| t.name != "high_contrast").copied().collect()
     }
 
     pub fn apply_filter(&mut self) {
