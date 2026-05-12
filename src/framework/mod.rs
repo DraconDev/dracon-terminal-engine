@@ -44,7 +44,7 @@ pub mod widgets;
 
 /// The prelude module.
 pub mod prelude {
-    pub use crate::compositor::{Cell, Color, Compositor, CellPool, Plane, PoolConfig, Styles};
+    pub use crate::compositor::{Cell, CellPool, Color, Compositor, Plane, PoolConfig, Styles};
     pub use crate::framework::widget::WidgetId;
     #[cfg(feature = "tracing")]
     pub use crate::frame_span;
@@ -77,4 +77,5 @@ pub mod prelude {
     #[cfg(feature = "tracing")]
     pub use tracing::instrument;
     pub use crate::Terminal;
+    pub use ratatui::layout::Rect;
 }
