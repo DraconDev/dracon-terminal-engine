@@ -90,6 +90,9 @@ pub fn category_color(t: Theme, cat: &str) -> Color {
         "apps" => t.warning,
         "cookbook" => t.info,
         "tools" => t.secondary,
+        "input" => t.primary,
+        "data" => t.success,
+        "accessibility" => t.info,
         _ => t.fg_muted,
     }
 }
@@ -356,6 +359,12 @@ pub fn render_card(config: &CardConfig) -> Plane {
             render_command_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
+        "calendar" => render_calendar_preview(&mut plane, config.theme, card_phase, config.width),
+        "rich_text" => render_rich_text_preview(&mut plane, config.theme, card_phase, config.width),
+        "autocomplete" => render_autocomplete_preview(&mut plane, config.theme, card_phase, config.width),
+        "notification_center" => render_notification_preview(&mut plane, config.theme, card_phase, config.width),
+        "accessibility" => render_accessibility_preview(&mut plane, config.theme, card_phase, config.width),
+        "cell_pool" => render_cell_pool_preview(&mut plane, config.theme, card_phase, config.width),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
                 let py = preview_start_y + i;

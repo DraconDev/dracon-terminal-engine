@@ -327,12 +327,13 @@ fn bench_cellpool_roundtrip(c: &mut Criterion) {
 
 fn bench_cellpool_hit_vs_miss(c: &mut Criterion) {
     c.bench_function("cellpool_hit_80x24_1000_pooled", |b| {
-        // Pre-populate pool with 1000 cells (enough for one 80x24 plane = 1920 cells)
+        // Pre-populate pool with cells (enough for one 80x24 plane = 1920 cells)
         // This simulates a pool hit scenario where cells are already available
         let mut pool = CellPool::new();
-        // Warm up the pool
+        // Warm up the pool by acquiring and releasing cells multiple times
         for _ in 0..1000 {
-            pool.release_cells(80, 24, pool.acquire_cells(80 * 24));
+            let cells = pool.acquire_cells(80 * 24);
+            pool.release_cells(80, 24, cells);
         }
         b.iter(|| {
             let cells = acquire_plane_cells(&mut pool, 80, 24);

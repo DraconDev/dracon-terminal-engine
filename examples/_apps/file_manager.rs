@@ -13,6 +13,7 @@
 //!   d             — delete selected
 //!   m             — rename selected
 //!   r             — refresh directory
+//!   l             — load directory (async)
 //!   ?             — help overlay
 //!   q             — quit
 
@@ -32,6 +33,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use unicode_width::UnicodeWidthStr;
+
+#[cfg(feature = "async")]
+use std::cell::RefCell as StdRefCell;
+
+// Spinner animation states
+const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
 
 enum PromptKind {
     DeleteConfirm,
@@ -199,6 +206,12 @@ struct FileManager {
     show_help: bool,
     is_dragging_split: bool,
     keybindings: KeybindingSet,
+    // Async state
+    is_loading: bool,
+    loading_path: Option<PathBuf>,
+    spinner_frame: usize,
+    #[cfg(feature = "async")]
+    pending_operation: StdRefCell<Option<tokio::task::JoinHandle<Option<Vec<FsNode>>>>},
 }
 
 impl FileManager {
@@ -236,6 +249,12 @@ impl FileManager {
             show_help: false,
             is_dragging_split: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            // Async state
+            is_loading: false,
+            loading_path: None,
+            spinner_frame: 0,
+            #[cfg(feature = "async")]
+            pending_operation: StdRefCell::new(None),
         };
         fm.update_breadcrumbs();
         fm
@@ -249,6 +268,116 @@ impl FileManager {
             .with_theme(self.theme);
         self.dirty = true;
         self.toast("Directory refreshed", ToastKind::Info);
+    }
+
+    #[cfg(feature = "async")]
+    fn start_async_load(&mut self, path: PathBuf) {
+        use tokio::fs;
+
+        self.is_loading = true;
+        self.loading_path = Some(path.clone());
+        self.spinner_frame = 0;
+        self.dirty = true;
+
+        // Spawn async task to read directory
+        let handle = tokio::spawn(async move {
+            Self::read_dir_async(&path).await
+        });
+
+        *self.pending_operation.borrow_mut() = Some(handle);
+    }
+
+    #[cfg(feature = "async")]
+    fn poll_async_result(&mut self) {
+        let mut handle_opt = self.pending_operation.borrow_mut();
+        if let Some(handle) = handle_opt.take() {
+            if handle.is_finished() {
+                match handle.now_or_never() {
+                    Some(Ok(Some(nodes))) => {
+                        // Build tree from loaded nodes
+                        let children: Vec<FsNode> = nodes
+                            .into_iter()
+                            .map(|node| FsNode::build_tree(&node.path, 1))
+                            .collect();
+
+                        // Update root with new children
+                        self.root.children = children;
+                        self.tree = Tree::new(WidgetId::new(2))
+                            .with_root(vec![self.root.to_tree_node(true)])
+                            .with_theme(self.theme);
+                        self.tree_path.clear();
+                        self.selected_path = None;
+                        self.update_breadcrumbs();
+                        self.toast("Directory loaded async", ToastKind::Success);
+                    }
+                    Some(Ok(None)) => {
+                        self.toast("Failed to read directory", ToastKind::Error);
+                    }
+                    Some(Err(e)) => {
+                        self.toast(&format!("Load error: {}", e), ToastKind::Error);
+                    }
+                    None => {
+                        // Not ready yet, put it back
+                        *handle_opt = Some(handle);
+                        return;
+                    }
+                }
+                self.is_loading = false;
+                self.loading_path = None;
+                self.dirty = true;
+            } else {
+                // Not finished, put it back
+                *handle_opt = Some(handle);
+            }
+        }
+    }
+
+    #[cfg(feature = "async")]
+    async fn read_dir_async(path: &PathBuf) -> Option<Vec<FsNode>> {
+        use tokio::fs;
+
+        let mut entries = fs::read_dir(path).await.ok()?;
+        let mut nodes = Vec::new();
+
+        while let Some(entry) = entries.next_entry().await.ok()? {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let path = entry.path();
+            let meta = entry.metadata().await.ok();
+            let is_dir = meta.as_ref().map(|m| m.is_dir()).unwrap_or(false);
+            let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+
+            nodes.push(FsNode {
+                name,
+                path,
+                is_dir,
+                size,
+                children: Vec::new(),
+            });
+        }
+
+        nodes.sort_by(|a, b| match (a.is_dir, b.is_dir) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
+        });
+
+        Some(nodes)
+    }
+
+    #[cfg(not(feature = "async"))]
+    fn start_async_load(&mut self, _path: PathBuf) {
+        // Fallback to sync load when async is not enabled
+        self.refresh();
+    }
+
+    #[cfg(not(feature = "async"))]
+    fn poll_async_result(&mut self) {}
+
+    fn advance_spinner(&mut self) {
+        if self.is_loading {
+            self.spinner_frame = (self.spinner_frame + 1) % SPINNER_FRAMES.len();
+            self.dirty = true;
+        }
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
@@ -730,7 +859,7 @@ impl Widget for FileManager {
         // Status bar
         let status_y = area.height.saturating_sub(1);
         let hint = format!(
-            "{} | f: folder | m: rename",
+            "{} | f: folder | m: rename | l: async load",
             self.keybindings.format_hint(&[
                 (actions::NEW_ITEM, "new"),
                 (actions::DELETE, "delete"),
@@ -756,6 +885,62 @@ impl Widget for FileManager {
                 let base = (status_y * area.width) as usize;
                 if base + i < plane.cells.len() {
                     plane.cells[base + i] = c.clone();
+                }
+            }
+        }
+
+        // Loading spinner overlay
+        if self.is_loading {
+            let spinner_text = format!(
+                "{} Loading {}...",
+                SPINNER_FRAMES[self.spinner_frame],
+                self.loading_path
+                    .as_ref()
+                    .and_then(|p| p.file_name())
+                    .map(|n| n.to_string_lossy().into_owned())
+                    .unwrap_or_else(|| "...".to_string())
+            );
+            let sw = spinner_text.len() as u16 + 4;
+            let sh = 3u16;
+            let sx = (area.width.saturating_sub(sw)) / 2;
+            let sy = area.height / 2;
+
+            // Background
+            for y in sy..sy + sh {
+                for x in sx..sx + sw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+
+            // Border
+            let corners = [('╭', sx, sy), ('╮', sx + sw - 1, sy), ('╰', sx, sy + sh - 1), ('╯', sx + sw - 1, sy + sh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.primary; }
+            }
+            for x in sx + 1..sx + sw - 1 {
+                let top = (sy * area.width + x) as usize;
+                let bot = ((sy + sh - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in sy + 1..sy + sh - 1 {
+                let left = (y * area.width + sx) as usize;
+                let right = (y * area.width + sx + sw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+
+            // Spinner text
+            for (i, c) in spinner_text.chars().enumerate() {
+                let idx = ((sy + 1) * area.width + sx + 2 + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
                 }
             }
         }
@@ -966,6 +1151,14 @@ impl Widget for FileManager {
         if self.keybindings.matches(actions::REFRESH, &key) {
             self.refresh();
             return true;
+        }
+        // 'l' key for async load
+        if let KeyCode::Char('l') = key.code {
+            if key.modifiers.is_empty() && !self.is_loading {
+                let path = self.selected_path.clone().unwrap_or_else(|| self.root.path.clone());
+                self.start_async_load(path);
+                return true;
+            }
         }
         if self.keybindings.matches(actions::DELETE, &key) {
             if self.selected_path.is_some() {
@@ -1339,8 +1532,9 @@ fn format_permissions(mode: u32) -> String {
 }
 
 fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
-    println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | ?: help | q: quit");
+    println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | l: async load | ?: help | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
@@ -1359,8 +1553,15 @@ fn main() -> std::io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
         }
+        // Poll async operations and advance spinner
+        if let Some(w) = ctx.get_widget(WidgetId::new(1)) {
+            if let Some(fm) = w.downcast_mut::<FileManager>() {
+                fm.poll_async_result();
+                fm.advance_spinner();
+            }
+        }
     })
-    .run(|_ctx| {})?;
+    .run(|_| {})?;
 
     println!("\nFile manager exited cleanly");
     Ok(())
