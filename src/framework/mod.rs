@@ -44,6 +44,7 @@ pub mod widgets;
 /// The prelude module.
 pub mod prelude {
     pub use crate::compositor::{Cell, Color, Compositor, CellPool, Plane, PoolConfig, Styles};
+    pub use crate::error::{DraconError, Result};
     pub use crate::framework::widget::WidgetId;
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},

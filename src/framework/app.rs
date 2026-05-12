@@ -214,6 +214,7 @@ impl App {
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual
     /// configuration of each widget.
+    #[instrument(skip(self), fields(theme_name = %theme.name))]
     pub fn set_theme(&mut self, theme: Theme) -> &mut Self {
         self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
@@ -362,6 +363,7 @@ impl App {
     ///
     /// Reads input, fires tick callbacks, and invokes the render callback
     /// each frame until the user presses Ctrl+C or [`App::stop`] is called.
+    #[instrument(skip_all, fields(title = %self.title, fps = %self.fps))]
     pub fn run<F>(mut self, mut f: F) -> io::Result<()>
     where
         F: FnMut(&mut Ctx),

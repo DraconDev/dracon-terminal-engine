@@ -401,13 +401,11 @@ impl FileManager {
     }
 
     #[cfg(feature = "async")]
-    #[cfg(feature = "async")]
     async fn read_dir_async(path: &PathBuf) -> Option<Vec<FsNode>> {
         use tokio::fs;
 
         let mut entries = fs::read_dir(path).await.ok()?;
         let mut nodes = Vec::new();
-
 
         while let Some(entry) = entries.next_entry().await.ok()? {
             let name = entry.file_name().to_string_lossy().into_owned();

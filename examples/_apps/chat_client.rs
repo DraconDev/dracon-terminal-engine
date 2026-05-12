@@ -16,6 +16,9 @@ use std::time::Duration;
 // Spinner frames
 const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
 
+// JSONPlaceholder API base URL
+const API_BASE: &str = "https://jsonplaceholder.typicode.com";
+
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
@@ -24,6 +27,16 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Modal, Toast, ToastKind};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
+
+#[derive(Clone)]
+#[derive(Clone, serde::Deserialize)]
+struct Post {
+    userId: u32,
+    id: u32,
+    title: String,
+    body: String,
+}
+
 
 #[derive(Clone)]
 struct Message {
@@ -44,6 +57,28 @@ impl Message {
     }
 }
 
+impl From<Post> for Message {
+    fn from(post: Post) -> Self {
+        // Truncate title and body for chat display
+        let title = if post.title.len() > 40 {
+            format!("{}...", &post.title[..37])
+        } else {
+            post.title
+        };
+        let body = if post.body.len() > 60 {
+            format!("{}...", &post.body[..57])
+        } else {
+            post.body
+        };
+        let text = format!("{}: {}", title, body);
+        Self {
+            sender: format!("User #{}", post.userId),
+            text,
+            time: chrono_lite_timestamp(),
+            is_read: false,
+        }
+    }
+}
 struct ChatState {
     messages: Vec<Message>,
     input_text: String,
@@ -64,11 +99,15 @@ struct ChatState {
     zones: RefCell<ScopedZoneRegistry<usize>>,
     keybindings: KeybindingSet,
     kb_config: KeybindingConfig,
-    // Async state
+    // Async state for loading posts
+    is_loading: bool,
+    loading_error: Option<String>,
+    spinner_frame: usize,
+    #[cfg(feature = "async")]
+    pending_fetch: RefCell<Option<tokio::task::JoinHandle<Result<Vec<Message>, String>>>>,
+    // Async state for sending messages
     is_sending: bool,
     pending_message: Option<String>,
-    spinner_frame: usize,
-    error: Option<String>,
     #[cfg(feature = "async")]
     pending_send: RefCell<Option<tokio::task::JoinHandle<()>>>,
 }
@@ -77,18 +116,12 @@ struct ChatState {
 const ZONE_EMOJI_BTN: usize = 1;
 const ZONE_SEND_BTN: usize = 2;
 const ZONE_SETTINGS_BTN: usize = 3;
+const ZONE_REFRESH_BTN: usize = 4;
 
 impl ChatState {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
-        let now = chrono_lite_timestamp();
         Self {
-            messages: vec![
-                Message::new("Alice", "Hey, how's the project going?", &now, true),
-                Message::new("Bob", "Going well! Just finished the new widget.", &now, true),
-                Message::new("Alice", "Nice! Can you send me the code?", &now, true),
-                Message::new("Bob", "Sure, I'll share it after review.", &now, true),
-                Message::new("Alice", "Perfect, thanks!", &now, false),
-            ],
+            messages: Vec::new(), // Start empty, fetch on init
             input_text: String::new(),
             cursor_pos: 0,
             show_emoji_modal: false,
@@ -111,11 +144,15 @@ impl ChatState {
             zones: RefCell::new(ScopedZoneRegistry::new()),
             keybindings: KeybindingSet::default(),
             kb_config: KeybindingConfig::default(),
-            // Async state
+            // Async state for loading
+            is_loading: true, // Start loading immediately
+            loading_error: None,
+            spinner_frame: 0,
+            #[cfg(feature = "async")]
+            pending_fetch: RefCell::new(None),
+            // Async state for sending
             is_sending: false,
             pending_message: None,
-            spinner_frame: 0,
-            error: None,
             #[cfg(feature = "async")]
             pending_send: RefCell::new(None),
         }
