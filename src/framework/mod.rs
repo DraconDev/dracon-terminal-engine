@@ -57,7 +57,7 @@ pub mod prelude {
         focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
-        layout::{Constraint, Layout},
+        layout::{Constraint, Direction, Layout},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},
