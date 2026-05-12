@@ -92,14 +92,14 @@ struct NetworkApp {
 }
 
 impl NetworkApp {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         Self {
             posts: vec![],
             selected: 0,
             loading: true,
             error: None,
             view_detail: false,
-            theme: Theme::nord(),
+            theme,
             show_help: false,
             should_quit,
             keybindings: KeybindingSet::default(),

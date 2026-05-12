@@ -938,7 +938,8 @@ fn main() -> std::io::Result<()> {
         .unwrap_or((80, 24));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let form = SettingsForm::new(WidgetId::new(0), Theme::dracula(), keybindings.clone());
+    let env_theme = Theme::from_env_or(Theme::dracula());
+    let form = SettingsForm::new(WidgetId::new(0), env_theme, keybindings.clone());
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
@@ -946,7 +947,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Settings Form")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::dracula()));
+        .theme(env_theme);
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
     app.on_tick(move |ctx, _tick| {
         if quit_check.load(Ordering::SeqCst) {

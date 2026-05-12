@@ -68,8 +68,7 @@ struct EditorApp {
 }
 
 impl EditorApp {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
-        let theme = Theme::nord();
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
 
         let tabs = vec![
             Tab {

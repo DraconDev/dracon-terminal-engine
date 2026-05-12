@@ -173,26 +173,26 @@ impl ColorPicker {
     // PART 3: CONSTRUCTOR AND BUILDER PATTERN
     // ========================================================================
 
-    /// Creates a new ColorPicker with default settings.
+    /// Creates a new ColorPicker with the given theme.
     /// Default color is the first in the preset list (Red).
-    pub fn new() -> Self {
+    pub fn new(theme: Theme) -> Self {
         Self {
             id: WidgetId::default_id(),
             selected_index: 0,
-            theme: Theme::default(),
+            theme,
             area: std::cell::Cell::new(Rect::new(0, 0, 30, 5)),
             dirty: true,
             hitzones: HitZoneGroup::new(),
         }
     }
 
-    /// Creates a ColorPicker with a specific widget ID.
+    /// Creates a ColorPicker with a specific widget ID and theme.
     /// Used internally when App assigns IDs.
-    pub fn with_id(id: WidgetId) -> Self {
+    pub fn with_id(id: WidgetId, theme: Theme) -> Self {
         Self {
             id,
             selected_index: 0,
-            theme: Theme::default(),
+            theme,
             area: std::cell::Cell::new(Rect::new(0, 0, 30, 5)),
             dirty: true,
             hitzones: HitZoneGroup::new(),

@@ -1092,13 +1092,14 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let env_theme = Theme::from_env_or(Theme::nord());
 
-    let app_widget = TableApp::new(should_quit, Theme::nord(), keybindings);
+    let app_widget = TableApp::new(should_quit, env_theme, keybindings);
 
     let mut app = App::new()?
         .title("Table Widget Demo")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .theme(env_theme);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {
