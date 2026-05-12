@@ -717,6 +717,33 @@ impl Widget for CommandBindings {
         if key.kind != KeyEventKind::Press {
             return false;
         }
+        if self.keybindings.matches(actions::QUIT, &key) {
+            return false; // Let framework handle quit
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            let themes = [
+                Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
+                Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
+                Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
+                Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
+                Theme::everforest(), Theme::monokai(), Theme::warm(),
+                Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
+            ];
+            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            let next = themes[(idx + 1) % themes.len()];
+            self.on_theme_change(&next);
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if self.show_help && self.keybindings.matches(actions::BACK, &key) {
+            self.show_help = false;
+            self.dirty = true;
+            return true;
+        }
         match key.code {
             KeyCode::Char('s') if key.modifiers.is_empty() => {
                 self.refresh_all();
@@ -729,6 +756,25 @@ impl Widget for CommandBindings {
             }
             _ => false,
         }
+    }
+}
+
+struct InputRouter {
+    view: Rc<RefCell<CommandBindings>>,
+}
+
+impl Widget for InputRouter {
+    fn id(&self) -> WidgetId { WidgetId::new(9999) }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect { Rect::new(0, 0, 0, 0) }
+    fn set_area(&mut self, _area: Rect) {}
+    fn z_index(&self) -> u16 { 0 }
+    fn needs_render(&self) -> bool { false }
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.view.borrow_mut().handle_key(key)
+    }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.view.borrow().theme)
     }
 }
 
