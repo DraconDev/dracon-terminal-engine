@@ -285,17 +285,20 @@ impl LspServer {
         }
     }
 
-    fn handle_text_document_did_save(&mut self, uri: &str) {
+    fn handle_text_document_did_save(&mut self, _uri: &str) {
         // Trigger recompilation on save
         self.trigger_preview_rebuild();
     }
 
     fn trigger_preview_rebuild(&mut self) {
+        // Clone workspace root before stopping preview
+        let root = self.workspace_root.clone();
+
         // Stop any existing preview
         self.stop_preview();
 
         // Start new compilation
-        if let Some(ref root) = self.workspace_root {
+        if let Some(ref root) = root {
             self.start_preview_compilation(root);
         }
     }
@@ -573,8 +576,9 @@ impl JsonRpcHandler {
             if let Some(colon) = line.find(':') {
                 let key = line[..colon].trim().to_string();
                 let value = line[colon + 1..].trim().to_string();
-                headers.insert(key.to_lowercase(), value);
-                if key.to_lowercase() == "content-length" {
+                let value_lower = key.to_lowercase();
+                headers.insert(value_lower.clone(), value.clone());
+                if value_lower == "content-length" {
                     content_length = value.parse().ok();
                 }
             }
