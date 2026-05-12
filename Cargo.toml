@@ -24,7 +24,6 @@ exclude = [
 
 [features]
 default = []
-tracing = ["dep:tracing"]
 debug_events = []
 
 [dependencies]
