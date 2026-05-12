@@ -254,6 +254,7 @@ impl EditorApp {
         self.search.on_theme_change(&self.theme);
         self.status_bar.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
+        self.profiler.on_theme_change(&self.theme);
         self.dirty = true;
     }
 
@@ -316,6 +317,9 @@ impl EditorApp {
             }
             "cycle-theme" => {
                 self.cycle_theme();
+            }
+            "toggle-profiler" => {
+                self.show_profiler = !self.show_profiler;
             }
             "show-shortcuts" => {
                 self.show_help = true;
