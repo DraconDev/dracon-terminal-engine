@@ -948,15 +948,7 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::from_env_or(Theme::dracula()));
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
-    app.on_input(move |key| {
-        if keybindings.matches(actions::QUIT, &key) {
-            should_quit.store(true, Ordering::SeqCst);
-            true
-        } else {
-            false
-        }
-    })
-    .on_tick(move |ctx, _tick| {
+    app.on_tick(move |ctx, _tick| {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
         }

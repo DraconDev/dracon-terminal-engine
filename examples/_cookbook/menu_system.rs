@@ -529,25 +529,41 @@ impl Widget for MenuApp {
         } else if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
                 KeyCode::Char('n') => {
-                    self.toast("New file created", ToastKind::Success);
-                    true
+                    if self.keybindings.matches(actions::NEW, &key) {
+                        self.toast("New file created", ToastKind::Success);
+                        true
+                    } else {
+                        false
+                    }
                 }
                 KeyCode::Char('o') => {
                     self.toast("Opened file dialog", ToastKind::Info);
                     true
                 }
                 KeyCode::Char('s') => {
-                    self.toast("Saved!", ToastKind::Success);
-                    true
+                    if self.keybindings.matches(actions::SAVE, &key) {
+                        self.toast("Saved!", ToastKind::Success);
+                        true
+                    } else {
+                        false
+                    }
                 }
                 KeyCode::Char('q') => {
-                    self.toast("Goodbye!", ToastKind::Info);
-                    self.should_quit.store(true, Ordering::SeqCst);
-                    true
+                    if self.keybindings.matches(actions::QUIT, &key) {
+                        self.toast("Goodbye!", ToastKind::Info);
+                        self.should_quit.store(true, Ordering::SeqCst);
+                        true
+                    } else {
+                        false
+                    }
                 }
                 KeyCode::Char('v') => {
-                    self.toast("Pasted from clipboard", ToastKind::Info);
-                    true
+                    if self.keybindings.matches(actions::PASTE, &key) {
+                        self.toast("Pasted from clipboard", ToastKind::Info);
+                        true
+                    } else {
+                        false
+                    }
                 }
                 KeyCode::Char('a') => {
                     self.toast("All items selected", ToastKind::Info);
