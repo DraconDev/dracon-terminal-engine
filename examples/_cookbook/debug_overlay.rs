@@ -447,6 +447,10 @@ impl Widget for DebugOverlayPanel {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
+        let ts = format!("{:?}", Instant::now());
+        let desc = format!("Key {:?} mods={:?}", key.code, key.modifiers);
+        self.event_logger.borrow_mut().log(&ts, &desc);
+
         if key.kind != KeyEventKind::Press {
             return false;
         }
@@ -484,7 +488,11 @@ impl Widget for DebugOverlayPanel {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let ts = format!("{:?}", Instant::now());
+        let desc = format!("Mouse {:?} at ({},{})", kind, col, row);
+        self.event_logger.borrow_mut().log(&ts, &desc);
+
         if self.visible && row == 0 && col >= self.area().width.saturating_sub(9) {
             self.toggle();
             return true;
