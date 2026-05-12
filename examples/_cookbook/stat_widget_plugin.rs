@@ -336,7 +336,7 @@ fn draw_rect_border(plane: &mut Plane, area: Rect, theme: &Theme) {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> std::io::Result<()> {
     let env_theme = Theme::from_env_or(Theme::nord());
     let app = App::new()?
         .theme(env_theme);
