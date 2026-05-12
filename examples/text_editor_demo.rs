@@ -546,6 +546,33 @@ impl Widget for EditorApp {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
+        // Update profiler metrics on every interaction
+        self.frame_count += 1;
+        let fc = self.frame_count;
+        let variable = ((fc as f64 / 10.0).sin() * 3.0 + 8.0) as u64;
+        self.profiler.set_metrics(vec![
+            Metric {
+                name: "render".to_string(),
+                value: Duration::from_micros(500 + (fc % 150) * 4),
+                call_count: fc,
+            },
+            Metric {
+                name: "input".to_string(),
+                value: Duration::from_micros(80 + (fc % 40)),
+                call_count: fc,
+            },
+            Metric {
+                name: "layout".to_string(),
+                value: Duration::from_micros(200),
+                call_count: fc,
+            },
+            Metric {
+                name: "memory".to_string(),
+                value: Duration::from_millis(variable),
+                call_count: 1,
+            },
+        ]);
+
         if key.kind != KeyEventKind::Press {
             return false;
         }
