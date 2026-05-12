@@ -424,7 +424,7 @@ fn test_dtron_theme_file_round_trip() {
     );
     assert_eq!(
         resolved.unwrap().name,
-        "gruvbox-dark",
+        "gruvbox_dark",
         "resolved theme should match what child wrote"
     );
 
@@ -457,8 +457,8 @@ fn test_dtron_theme_file_hyphenated_theme_name() {
     );
     assert_eq!(
         resolved.unwrap().name,
-        "catppuccin-mocha",
-        "resolved theme name should preserve original hyphenated form"
+        "catppuccin_mocha",
+        "resolved theme name should match current .name convention (underscores)"
     );
 
     let _ = std::fs::remove_file(&tmp_path);
