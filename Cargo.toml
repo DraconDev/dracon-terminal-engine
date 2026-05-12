@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.51"
+version = "0.1.52"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -25,6 +25,7 @@ exclude = [
 [features]
 default = []
 debug_events = []
+async = ["dep:tokio"]
 
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
