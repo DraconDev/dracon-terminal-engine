@@ -28,7 +28,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-// instrument macro auto-imported
+use tracing::instrument;
 
 const HISTORY_SIZE: usize = 60;
 
@@ -130,7 +130,7 @@ impl SystemData {
         self.read_processes();
     }
 
-    #[tracing::instrument(skip(self))]
+    #[instrument(skip(self))]
     fn read_cpu(&mut self) {
         let mut pct = 0.0;
         if let Ok(content) = fs::read_to_string("/proc/stat") {
@@ -159,7 +159,7 @@ impl SystemData {
         self.cpu_hist.push(pct.clamp(0.0, 100.0));
     }
 
-    #[tracing::instrument(skip(self))]
+    #[instrument(skip(self))]
     fn read_memory(&mut self) {
         if let Ok(content) = fs::read_to_string("/proc/meminfo") {
             let mut total_kb = 0u64;
@@ -185,7 +185,7 @@ impl SystemData {
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[instrument(skip(self))]
     fn read_disk(&mut self) -> (f64, f64) {
         let mut read_b = 0u64;
         let mut write_b = 0u64;
@@ -215,7 +215,7 @@ impl SystemData {
         (dr, dw)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[instrument(skip(self))]
     fn read_network(&mut self) -> (f64, f64) {
         let mut rx_b = 0u64;
         let mut tx_b = 0u64;
@@ -268,7 +268,7 @@ impl SystemData {
             .unwrap_or((0.0, 0.0, 0.0))
     }
 
-    #[tracing::instrument(skip_all, fields(count = self.processes.len()))]
+    #[instrument(skip_all, fields(count = self.processes.len()))]
     fn read_processes(&mut self) {
         self.processes.clear();
         if let Ok(entries) = fs::read_dir("/proc") {
