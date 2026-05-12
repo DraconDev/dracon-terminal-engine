@@ -92,6 +92,10 @@ name = "rich_text"
 path = "examples/_cookbook/rich_text.rs"
 
 [[example]]
+name = "calendar"
+path = "examples/_cookbook/calendar.rs"
+
+[[example]]
 name = "autocomplete"
 path = "examples/_cookbook/autocomplete.rs"
 
