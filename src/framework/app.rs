@@ -34,6 +34,7 @@ use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
+#[cfg(feature = "tracing")]
 use tracing::instrument;
 use std::cell::Ref;
 use std::cell::RefCell;
@@ -413,6 +414,7 @@ impl App {
 
         while running.load(Ordering::SeqCst) {
             let frame_start = Instant::now();
+            #[cfg(feature = "tracing")]
             let _frame_span = tracing::debug_span!("frame").entered();
 
             if resize_flag.load(Ordering::SeqCst) {
@@ -429,6 +431,7 @@ impl App {
             }
 
             let stdin_fd = stdin.as_fd();
+            #[cfg(feature = "tracing")]
             let _input_span = tracing::debug_span!("input_parsing").entered();
             match tty::poll_input(stdin_fd, 20) {
                 Ok(true) => {

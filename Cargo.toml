@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.35"
+version = "0.1.36"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -22,6 +22,11 @@ exclude = [
     "LICENSE-APACHE",
 ]
 
+[features]
+default = []
+tracing = ["dep:tracing"]
+debug_events = []
+
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
 ratatui = { version = "0.29", default-features = false }
@@ -36,7 +41,7 @@ syntect = "5.2"
 tokio = { version = "1.38.0", optional = true, features = ["rt-multi-thread", "sync", "time", "macros", "process", "io-util", "fs"] }
 regex = "1.10"
 rusqlite = { version = "0.32", features = ["bundled"] }
-tracing = "0.1"
+tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
@@ -182,7 +187,7 @@ path = "examples/plugin_demo.rs"
 
 [features]
 default = []
-async = ["tokio/rt-multi-thread", "tokio/sync", "tokio/time", "tokio/macros", "tokio/process", "tokio/io-util", "tokio/fs"]
+async = ["tokio/rt-multi-thread", "tokio/sync", "tokio/time", "tokio/macros", "tokio/process", "tokio/io-util", "tokio/fs", "dracon-terminal-engine/tracing"]
 debug_events = []
 
 [[bench]]
