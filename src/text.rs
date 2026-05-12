@@ -229,7 +229,7 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
         while byte_offset < bytes.len() {
             // Peek at next character
             let remaining = &bytes[byte_offset..];
-            let Some((next_c, next_len)) = char::from_utf8(remaining)
+            let Some((next_c, next_len)) = std::str::from_utf8(remaining)
                 .ok()
                 .and_then(|s| s.chars().next())
                 .map(|c| (c, c.len_utf8()))
