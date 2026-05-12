@@ -32,6 +32,7 @@ pub mod focus;
 pub mod hitzone;
 pub mod keybindings;
 pub mod layout;
+#[cfg(feature = "tracing")]
 pub mod logging;
 pub mod plugin;
 pub mod scroll;
@@ -61,7 +62,6 @@ pub mod prelude {
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Direction, Layout},
-        logging::{init_logger, init_logger_from_env},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},

@@ -185,15 +185,9 @@ pub fn log_mouse_event(event: &crate::input::event::MouseEvent) {
     );
 }
 
-// Re-export for convenience
+// Re-export for convenience when debug_events is enabled
 #[cfg(feature = "debug_events")]
 pub use crate::input::event::{KeyEvent, MouseEvent};
-
-#[cfg(not(feature = "debug_events"))]
-mod re_exports {
-    pub use crate::input::event::KeyEvent;
-    pub use crate::input::event::MouseEvent;
-}
 
 #[cfg(test)]
 mod tests {

@@ -14,16 +14,14 @@ use std::cell::Cell;
 /// Plugin identifier for registration
 pub const WELCOME_WIDGET_NAME: &str = "welcome_widget";
 
-/// Factory function to create WelcomeWidget instances.
-/// Exported with no_mangle for dynamic loading.
-#[no_mangle]
-pub extern "C" fn create_welcome_widget(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
+/// Creates a WelcomeWidget factory function for PluginRegistry.
+pub fn welcome_widget_factory(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
     Box::new(WelcomeWidget::new(id, theme))
 }
 
 /// Register this plugin with a registry.
 pub fn register(registry: &mut PluginRegistry) {
-    let _ = registry.register(WELCOME_WIDGET_NAME, create_welcome_widget);
+    let _ = registry.register(WELCOME_WIDGET_NAME, welcome_widget_factory);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -107,7 +105,7 @@ impl Widget for WelcomeWidget {
             "║  / ___ |/ / / / /_/ / / / /          ║",
             "║ /_/  |_/_/ /_/\\__,_/ /_/_/           ║",
             "║   Terminal Engine                     ║",
-            "║   v".to_string() + &self.version + "                           ║",
+            &format!("║   v{}                           ║", self.version),
             "╚══════════════════════════════════════╝",
         ];
 

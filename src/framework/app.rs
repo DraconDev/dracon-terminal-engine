@@ -92,6 +92,7 @@ pub struct App {
 impl App {
     /// Creates a new `App` with a linked terminal.
     /// Returns an error if the terminal cannot be initialized.
+    #[cfg(feature = "tracing")]
     #[instrument(skip_all, fields(title = "Dracon App"))]
     pub fn new() -> io::Result<Self> {
         let terminal = Terminal::new(io::stdout())?;
@@ -216,6 +217,7 @@ impl App {
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual
     /// configuration of each widget.
+    #[cfg(feature = "tracing")]
     #[instrument(skip(self), fields(theme_name = %theme.name))]
     pub fn set_theme(&mut self, theme: Theme) -> &mut Self {
         self.compositor.set_clear_color(theme.bg);
@@ -365,6 +367,7 @@ impl App {
     ///
     /// Reads input, fires tick callbacks, and invokes the render callback
     /// each frame until the user presses Ctrl+C or [`App::stop`] is called.
+    #[cfg(feature = "tracing")]
     #[instrument(skip_all, fields(title = %self.title, fps = %self.fps))]
     pub fn run<F>(mut self, mut f: F) -> io::Result<()>
     where

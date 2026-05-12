@@ -28,8 +28,8 @@ use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, M
 use ratatui::layout::Rect;
 
 // Import plugin widgets from _plugins directory
-use crate::plugins::stat_widget::{create_stat_widget as create_stat, STAT_WIDGET_NAME};
-use crate::plugins::welcome_widget::{create_welcome_widget as create_welcome, WELCOME_WIDGET_NAME};
+use crate::plugins::stat_widget::{stat_widget_factory as create_stat, STAT_WIDGET_NAME};
+use crate::plugins::welcome_widget::{welcome_widget_factory as create_welcome, WELCOME_WIDGET_NAME};
 
 // Re-export plugins module
 mod plugins {
