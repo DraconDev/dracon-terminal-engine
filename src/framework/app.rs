@@ -34,8 +34,6 @@ use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
-#[cfg(feature = "tracing")]
-use tracing::instrument;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -369,8 +367,7 @@ impl App {
     ///
     /// Reads input, fires tick callbacks, and invokes the render callback
     /// each frame until the user presses Ctrl+C or [`App::stop`] is called.
-    #[cfg(feature = "tracing")]
-    #[instrument(skip_all, fields(title = %self.title, fps = %self.fps))]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all, fields(title = %self.title, fps = %self.fps)))]
     pub fn run<F>(mut self, mut f: F) -> io::Result<()>
     where
         F: FnMut(&mut Ctx),

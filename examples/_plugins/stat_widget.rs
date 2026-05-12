@@ -30,12 +30,11 @@ pub fn register(registry: &mut PluginRegistry) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// A widget that displays system statistics (CPU and memory usage).
-#[derive(Default)]
 pub struct StatWidget {
     id: WidgetId,
     area: Cell<Rect>,
     theme: Theme,
-    sys: System,
+    sys: std::cell::RefCell<System>,
 }
 
 impl StatWidget {
@@ -47,23 +46,28 @@ impl StatWidget {
             id,
             area: Cell::new(Rect::new(0, 0, 28, 7)),
             theme,
-            sys,
+            sys: std::cell::RefCell::new(sys),
         }
+    }
+
+    /// Refreshes system stats.
+    pub fn refresh(&self) {
+        self.sys.borrow_mut().refresh_all();
     }
 
     /// Gets the current CPU load as a percentage (0.0 - 100.0).
     fn cpu_usage(&self) -> f32 {
-        self.sys.global_cpu_usage()
+        self.sys.borrow().global_cpu_usage()
     }
 
     /// Gets the used memory in bytes.
     fn used_memory(&self) -> u64 {
-        self.sys.used_memory()
+        self.sys.borrow().used_memory()
     }
 
     /// Gets the total memory in bytes.
     fn total_memory(&self) -> u64 {
-        self.sys.total_memory()
+        self.sys.borrow().total_memory()
     }
 
     /// Gets memory usage as a percentage (0.0 - 100.0).
@@ -114,7 +118,8 @@ impl Widget for StatWidget {
         plane.fill_bg(t.bg);
 
         // Refresh stats
-        let cpu = self.cpu_usage();
+        self.sys.borrow_mut().refresh_cpu();
+        let cpu = self.sys.borrow().global_cpu_usage();
         let mem_pct = self.memory_usage();
         let mem_used = self.used_memory() / (1024 * 1024); // MB
         let mem_total = self.total_memory() / (1024 * 1024); // MB

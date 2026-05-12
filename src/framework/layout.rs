@@ -454,13 +454,16 @@ mod tests {
                 .sum();
 
             // Allow 1 cell of rounding tolerance
+            // Allow 1 cell of rounding tolerance
             prop_assert!(
                 sum as i32 - available as i32 >= -1,
                 "sum={} available={} tolerance=1", sum, available
             );
         }
     }
-}
+
+    #[test]
+    fn test_vertical_with_fixed_and_ratio() {
         let layout = Layout::vertical(vec![Constraint::Fixed(5), Constraint::Ratio(1, 1)]);
         let rects = layout.layout(Rect::new(0, 0, 80, 30));
         assert_eq!(rects[0].height, 5);
