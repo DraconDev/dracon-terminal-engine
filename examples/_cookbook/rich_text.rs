@@ -1,5 +1,4 @@
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::rc::Rc;
@@ -33,18 +32,19 @@ You can write `let x = 42;` inline or refer to `functions` and `types`.
 *Try cycling themes with Ctrl+T to see how colors adapt.*
 "#;
 
-    let mut rich_text = RichText::with_id(WidgetId::new(1), markdown);
-    rich_text.with_theme(theme);
+    let rich_text = RichText::with_id(WidgetId::new(1), markdown).with_theme(theme);
 
-    App::new()?
-        .title("Rich Text Demo")
+    let mut app = App::new()?;
+    app.add_widget(Box::new(rich_text), Rect::new(2, 1, 76, 22));
+
+    let q = quit;
+    app.title("Rich Text Demo")
         .fps(30)
         .theme(theme)
-        .add_widget(Box::new(rich_text), Rect::new(2, 1, 76, 22))
         .on_input(move |key| {
             use dracon_terminal_engine::input::event::{KeyCode, KeyModifiers};
             if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
-                quit.store(true, Ordering::SeqCst);
+                q.store(true, Ordering::SeqCst);
                 true
             } else {
                 false
