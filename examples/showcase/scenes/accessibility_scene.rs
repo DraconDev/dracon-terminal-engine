@@ -8,9 +8,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::{Button, Checkbox};
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
-use std::cell::RefCell;
 
 pub struct AccessibilityScene {
     theme: Theme,
@@ -31,6 +30,7 @@ impl AccessibilityScene {
             announcements: Vec::new(),
             checkbox: Checkbox::new(WidgetId::new(200), "Enable notifications"),
             submit_btn: Button::with_id(WidgetId::new(201), "Submit"),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 

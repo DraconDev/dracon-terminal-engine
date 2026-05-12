@@ -61,7 +61,30 @@ const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "�
 
 #[cfg(feature = "async")]
 fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, String>> + Send {
-    async { fetch_posts_sync() }
+    async {
+        let output = tokio::process::Command::new("curl")
+            .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+            .output()
+            .await
+            .map_err(|e| format!("Failed to run curl: {}", e))?;
+
+        if !output.status.success() {
+            return Err(format!("curl exited with code: {:?}", output.status.code()));
+        }
+
+        let json_str = String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
+        let json: serde_json::Value =
+            serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
+
+        let posts = json
+            .as_array()
+            .ok_or("Expected JSON array")?
+            .iter()
+            .filter_map(Post::from_json)
+            .collect();
+
+        Ok(posts)
+    }
 }
 
 #[cfg(not(feature = "async"))]
@@ -545,8 +568,8 @@ impl Widget for NetworkWidget {
     fn needs_render(&self) -> bool {
         self.app.borrow().dirty || self.app.borrow().loading
     }
-    fn render(&mut self, area: Rect) -> Plane {
-        let app = self.app.borrow_mut();
+    fn render(&self, area: Rect) -> Plane {
+        let mut app = self.app.borrow_mut();
         app.dirty = false;  // Clear dirty after render
         if app.show_help {
             app.render_help(area)

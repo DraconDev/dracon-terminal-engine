@@ -200,21 +200,41 @@ impl ChatState {
 
     #[cfg(feature = "async")]
     fn poll_send_result(&mut self) {
-        let mut handle_opt = self.pending_send.borrow_mut();
-        if let Some(handle) = handle_opt.take() {
-            if handle.is_finished() {
-                // Send completed
-                if let Some(text) = self.pending_message.take() {
-                    self.messages.push(Message::new("You", &text, "Now", true));
-                    self.scroll_to_bottom();
-                    self.show_toast = true;
-                    self.toast_message = "Message sent!".to_string();
+        let finished = {
+            let mut handle_opt = self.pending_send.borrow_mut();
+            if let Some(handle) = handle_opt.take() {
+                if handle.is_finished() {
+                    // Take the result synchronously if ready
+                    match handle.try_now_or_never() {
+                        Some(Ok(())) => true,
+                        Some(Err(e)) => {
+                            self.error = Some(format!("Send error: {}", e));
+                            true
+                        }
+                        None => {
+                            // Put it back if not ready
+                            *handle_opt = Some(handle);
+                            false
+                        }
+                    }
+                } else {
+                    *handle_opt = Some(handle);
+                    false
                 }
-                self.is_sending = false;
-                self.dirty = true;
             } else {
-                *handle_opt = Some(handle);
+                false
             }
+        };
+
+        if finished {
+            if let Some(text) = self.pending_message.take() {
+                self.messages.push(Message::new("You", &text, "Now", true));
+                self.scroll_to_bottom();
+                self.show_toast = true;
+                self.toast_message = "Message sent!".to_string();
+            }
+            self.is_sending = false;
+            self.dirty = true;
         }
     }
 
