@@ -19,7 +19,7 @@ pub enum Direction {
 }
 
 /// A constraint that defines how a dimension is sized.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Arbitrary)]
 pub enum Constraint {
     /// Size as a percentage of the available space (0-100).
     Percentage(u16),
@@ -31,6 +31,12 @@ pub enum Constraint {
     Max(u16),
     /// Ratio of remaining space after fixed/min constraints (numerator/denominator).
     Ratio(u16, u16),
+}
+
+impl Default for Constraint {
+    fn default() -> Self {
+        Constraint::Percentage(100)
+    }
 }
 
 impl Constraint {
