@@ -50,6 +50,7 @@ static CURRENT_THEME_INDEX: AtomicUsize = AtomicUsize::new(0);
 fn vscode_dark() -> Theme {
     Theme {
         name: "vscode-dark",
+        display_name: "VS Code Dark",
         kind: ThemeKind::Dark,
         bg: Color::Rgb(30, 30, 30),
         surface: Color::Rgb(38, 38, 38),
@@ -95,6 +96,7 @@ fn vscode_dark() -> Theme {
 fn vscode_light() -> Theme {
     Theme {
         name: "vscode-light",
+        display_name: "VS Code Light",
         kind: ThemeKind::Light,
         bg: Color::Rgb(255, 255, 255),
         surface: Color::Rgb(255, 255, 255),
