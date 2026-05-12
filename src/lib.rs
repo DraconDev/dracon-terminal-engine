@@ -16,7 +16,8 @@
 //!     .on_tick(|ctx, _tick| {
 //!         let (w, h) = ctx.compositor().size();
 //!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
-//!         ctx.add_plane(list.render(Rect::new(0, 0, w, h)));
+//!         let plane = list.render(Rect::new(0, 0, w, h));
+//!         ctx.add_plane(plane);
 //!     })
 //!     .run();
 //! ```
