@@ -1,5 +1,7 @@
 //! Calendar/Date picker widget with month navigation and date range selection.
 
+use std::cell::RefCell;
+
 use chrono::{Datelike, Local, NaiveDate};
 
 use crate::compositor::{Plane, Styles};
@@ -44,8 +46,8 @@ pub struct Calendar {
     on_range_select: Option<DateRangeSelectCallback>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
-    /// Hit zones registered each frame.
-    zones: ScopedZoneRegistry<ZoneId>,
+    /// Hit zones registered each frame (using RefCell for interior mutability).
+    zones: RefCell<ScopedZoneRegistry<ZoneId>>,
 }
 
 impl Calendar {

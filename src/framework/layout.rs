@@ -50,19 +50,51 @@ impl Constraint {
 }
 
 /// Lays out child constraints into rectangles based on available space.
+#[derive(Clone, Debug)]
 pub struct Layout {
     constraints: Vec<Constraint>,
-    spacing: u16,
     direction: Direction,
+    spacing: u16,
+    margin: u16,
+    name: Option<&'static str>,
 }
 
 impl Layout {
-    /// Creates a new Layout with the given constraints.
+    /// Creates a new Layout with horizontal direction.
     pub fn new(constraints: Vec<Constraint>) -> Self {
         Self {
             constraints,
+            direction: Direction::Horizontal,
             spacing: 0,
-            direction: Direction::default(),
+            margin: 0,
+            name: None,
+        }
+    }
+
+    /// Creates a new Layout with horizontal direction (alias for `new()`).
+    pub fn horizontal(constraints: Vec<Constraint>) -> Self {
+        Self::new(constraints)
+    }
+
+    /// Creates a new Layout with vertical direction.
+    pub fn vertical(constraints: Vec<Constraint>) -> Self {
+        Self {
+            constraints,
+            direction: Direction::Vertical,
+            spacing: 0,
+            margin: 0,
+            name: None,
+        }
+    }
+
+    /// Creates a sub-layout from a child rect.
+    pub fn nested(&self, rect: Rect) -> Layout {
+        Layout {
+            constraints: self.constraints.clone(),
+            direction: self.direction,
+            spacing: self.spacing,
+            margin: 0, // Nested layouts don't inherit margin by default
+            name: self.name,
         }
     }
 
@@ -75,6 +107,18 @@ impl Layout {
     /// Sets the spacing between children in cells.
     pub fn spacing(mut self, spacing: u16) -> Self {
         self.spacing = spacing;
+        self
+    }
+
+    /// Sets the outer margin (padding) around the layout area.
+    pub fn margin(mut self, margin: u16) -> Self {
+        self.margin = margin;
+        self
+    }
+
+    /// Sets a debug label for the layout.
+    pub fn name(mut self, name: &'static str) -> Self {
+        self.name = Some(name);
         self
     }
 
@@ -93,6 +137,12 @@ impl Layout {
         let is_vertical = self.direction == Direction::Vertical;
         let main_axis = if is_vertical { area.height } else { area.width };
         let cross_axis = if is_vertical { area.width } else { area.height };
+
+        // Apply margin to both axes
+        let main_axis = main_axis.saturating_sub(2 * self.margin);
+        let cross_axis = cross_axis.saturating_sub(2 * self.margin);
+        let main_start = if is_vertical { area.y + self.margin } else { area.x + self.margin };
+        let cross_start = if is_vertical { area.x + self.margin } else { area.y + self.margin };
 
         let total_spacing = self.spacing * (self.constraints.len() as u16 - 1).saturating_sub(0);
         let available = main_axis.saturating_sub(total_spacing);
@@ -162,12 +212,12 @@ impl Layout {
             }
         }
 
-        let mut pos = if is_vertical { area.y } else { area.x };
+        let mut pos = main_start;
         for (i, size) in sizes.iter().enumerate() {
             let rect = if is_vertical {
-                Rect::new(area.x, pos, cross_axis, *size)
+                Rect::new(cross_start, pos, cross_axis, *size)
             } else {
-                Rect::new(pos, area.y, *size, cross_axis)
+                Rect::new(pos, cross_start, *size, cross_axis)
             };
             results.push(rect);
             if i < sizes.len() - 1 {
@@ -185,7 +235,8 @@ mod tests {
 
     #[test]
     fn test_percentage_layout() {
-        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
+        let layout =
+            Layout::horizontal(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects.len(), 2);
         assert_eq!(rects[0].width, 50);
@@ -193,16 +244,100 @@ mod tests {
     }
 
     #[test]
+    fn test_vertical_constructor() {
+        let layout =
+            Layout::vertical(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
+        let rects = layout.layout(Rect::new(0, 0, 100, 40));
+        assert_eq!(rects.len(), 2);
+        assert_eq!(rects[0].height, 20);
+        assert_eq!(rects[1].height, 20);
+    }
+
+    #[test]
+    fn test_nested_layout() {
+        let parent = Layout::horizontal(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .spacing(2);
+        let child_rect = parent.layout(Rect::new(0, 0, 100, 20))[0];
+        let nested = parent.nested(child_rect);
+        let nested_rects = nested.layout(Rect::new(0, 0, 100, 20));
+        assert_eq!(nested_rects.len(), 2);
+        assert_eq!(nested_rects[0].width, 50);
+        assert_eq!(nested_rects[1].width, 50);
+    }
+
+    #[test]
+    fn test_margin() {
+        let layout = Layout::horizontal(vec![Constraint::Percentage(100)]).margin(5);
+        let rects = layout.layout(Rect::new(0, 0, 100, 20));
+        assert_eq!(rects[0].x, 5);
+        assert_eq!(rects[0].y, 5);
+        assert_eq!(rects[0].width, 90);
+        assert_eq!(rects[0].height, 10);
+    }
+
+    #[test]
+    fn test_margin_vertical() {
+        let layout = Layout::vertical(vec![Constraint::Percentage(100)]).margin(3);
+        let rects = layout.layout(Rect::new(0, 0, 80, 50));
+        assert_eq!(rects[0].x, 3);
+        assert_eq!(rects[0].y, 3);
+        assert_eq!(rects[0].width, 74);
+        assert_eq!(rects[0].height, 44);
+    }
+
+    #[test]
+    fn test_spacing_with_margin() {
+        let layout = Layout::horizontal(vec![Constraint::Fixed(20), Constraint::Fixed(20)])
+            .spacing(5)
+            .margin(10);
+        let rects = layout.layout(Rect::new(0, 0, 100, 20));
+        assert_eq!(rects[0].x, 10);
+        assert_eq!(rects[1].x, 35);
+        assert_eq!(rects[0].width, 20);
+        assert_eq!(rects[1].width, 20);
+    }
+
+    #[test]
+    fn test_nested_with_spacing() {
+        let parent = Layout::horizontal(vec![Constraint::Fixed(50), Constraint::Fixed(50)])
+            .spacing(2);
+        let child_rect = parent.layout(Rect::new(0, 0, 102, 20))[0];
+        let nested = parent.nested(child_rect).spacing(1);
+        let nested_rects = nested.layout(Rect::new(0, 0, 50, 20));
+        assert_eq!(nested_rects.len(), 2);
+        assert_eq!(nested_rects[0].x, 0);
+        assert_eq!(nested_rects[1].x, 21);
+    }
+
+    #[test]
+    fn test_layout_debug_name() {
+        let layout = Layout::horizontal(vec![Constraint::Percentage(100)]).name("main");
+        let debug_str = format!("{:?}", layout);
+        assert!(debug_str.contains("main"));
+    }
+
+    #[test]
     fn test_fixed_and_percentage() {
-        let layout = Layout::new(vec![Constraint::Fixed(20), Constraint::Percentage(80)]);
+        let layout =
+            Layout::horizontal(vec![Constraint::Fixed(20), Constraint::Percentage(80)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 20);
         assert_eq!(rects[1].width, 80);
     }
 
     #[test]
+    fn test_horizontal_alias() {
+        let layout1 = Layout::new(vec![Constraint::Percentage(100)]);
+        let layout2 = Layout::horizontal(vec![Constraint::Percentage(100)]);
+        let rects1 = layout1.layout(Rect::new(0, 0, 100, 20));
+        let rects2 = layout2.layout(Rect::new(0, 0, 100, 20));
+        assert_eq!(rects1, rects2);
+    }
+
+    #[test]
     fn test_min_constraint() {
-        let layout = Layout::new(vec![Constraint::Min(30), Constraint::Percentage(50)]);
+        let layout =
+            Layout::horizontal(vec![Constraint::Min(30), Constraint::Percentage(50)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 30);
         assert_eq!(rects[1].width, 70);
@@ -210,7 +345,7 @@ mod tests {
 
     #[test]
     fn test_ratio() {
-        let layout = Layout::new(vec![Constraint::Ratio(1, 3), Constraint::Ratio(2, 3)]);
+        let layout = Layout::horizontal(vec![Constraint::Ratio(1, 3), Constraint::Ratio(2, 3)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 33);
         assert_eq!(rects[1].width, 66);
@@ -218,8 +353,8 @@ mod tests {
 
     #[test]
     fn test_spacing() {
-        let layout =
-            Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)]).spacing(5);
+        let layout = Layout::horizontal(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .spacing(5);
         let rects = layout.layout(Rect::new(0, 0, 105, 20));
         assert_eq!(rects[0].width, 50);
         assert_eq!(rects[1].width, 50);
@@ -229,7 +364,7 @@ mod tests {
 
     #[test]
     fn test_max_constraint() {
-        let layout = Layout::new(vec![Constraint::Fixed(50), Constraint::Max(20)]);
+        let layout = Layout::horizontal(vec![Constraint::Fixed(50), Constraint::Max(20)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 50);
         assert_eq!(rects[1].width, 20);
@@ -237,8 +372,7 @@ mod tests {
 
     #[test]
     fn test_vertical_layout() {
-        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .direction(Direction::Vertical);
+        let layout = Layout::vertical(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 40));
         assert_eq!(rects.len(), 2);
         assert_eq!(rects[0].height, 20);
@@ -251,8 +385,7 @@ mod tests {
 
     #[test]
     fn test_vertical_with_spacing() {
-        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .direction(Direction::Vertical)
+        let layout = Layout::vertical(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .spacing(2);
         let rects = layout.layout(Rect::new(0, 0, 100, 42));
         assert_eq!(rects.len(), 2);
@@ -264,9 +397,7 @@ mod tests {
 
     #[test]
     fn test_vertical_fixed_and_ratio() {
-        let layout =
-            Layout::new(vec![Constraint::Fixed(5), Constraint::Ratio(1, 1)])
-                .direction(Direction::Vertical);
+        let layout = Layout::vertical(vec![Constraint::Fixed(5), Constraint::Ratio(1, 1)]);
         let rects = layout.layout(Rect::new(0, 0, 80, 30));
         assert_eq!(rects[0].height, 5);
         assert_eq!(rects[1].height, 25);
@@ -275,8 +406,19 @@ mod tests {
 
     #[test]
     fn test_empty_layout() {
-        let layout = Layout::new(vec![]);
+        let layout = Layout::horizontal(vec![]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert!(rects.is_empty());
+    }
+
+    #[test]
+    fn test_vertical_layout_with_direction() {
+        // Test backward compatibility with direction() method
+        let layout = Layout::new(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .direction(Direction::Vertical);
+        let rects = layout.layout(Rect::new(0, 0, 100, 40));
+        assert_eq!(rects.len(), 2);
+        assert_eq!(rects[0].height, 20);
+        assert_eq!(rects[1].height, 20);
     }
 }
