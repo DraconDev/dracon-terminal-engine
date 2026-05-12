@@ -277,6 +277,8 @@ impl Plane {
 
     /// Consumes the grapheme cluster starting at byte_offset and returns the number of bytes consumed.
     fn consume_grapheme_cluster(text: &str, byte_offset: usize) -> usize {
+        use crate::text::grapheme_width;
+
         let bytes = text.as_bytes();
         let remaining = &bytes[byte_offset..];
 
@@ -288,7 +290,14 @@ impl Plane {
             return 1; // Invalid UTF-8, consume 1 byte
         };
 
-        let mut pos = byte_offset + char_len;
+        // Skip regional indicators (flags) - they only start clusters, don't extend them
+        let mut pos = byte_offset;
+        if matches!(_c, '\u{1F1E6}'..='\u{1F1FF}') {
+            // Skip the single RI, let the main loop handle pairs
+            return char_len;
+        }
+
+        pos += char_len;
 
         while pos < bytes.len() {
             let rem = &bytes[pos..];
@@ -306,13 +315,19 @@ impl Plane {
                 continue;
             }
 
-            // Regional indicator after base? Don't consume (start of new grapheme)
+            // Skin tone modifiers extend the cluster
+            if matches!(next_c, '\u{1F3FB}'..='\u{1F3FF}') {
+                pos += next_len;
+                continue;
+            }
+
+            // Regional indicator starts a new grapheme
             if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                 break;
             }
 
             // Zero-width characters are part of this cluster
-            if crate::text::grapheme_width(next_c) == 0 {
+            if grapheme_width(next_c) == 0 {
                 pos += next_len;
                 continue;
             }
