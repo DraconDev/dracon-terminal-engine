@@ -1,12 +1,14 @@
 //! Plugin System Demo — StatWidget
 //!
-//! Demonstrates the dynamic widget loading system using `WidgetFactory`.
+//! Demonstrates the dynamic widget loading system using `PluginRegistry`.
 //! Run with: `cargo run --example stat_widget_plugin`
 //!
 //! This plugin exposes a `StatWidget` that displays a labeled metric
-//! with a value, trend arrow, and color-coded threshold.
+//! with a value and color-coded border.
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::plugin::PluginRegistry;
+use dracon_terminal_engine::framework::widget::WidgetId;
 
 // ============================================================================
 // PLUGIN: StatWidget — dynamically registered and loaded
@@ -14,9 +16,11 @@ use dracon_terminal_engine::framework::prelude::*;
 
 /// A simple stat/metric display widget provided by a plugin.
 pub struct StatWidget {
+    id: WidgetId,
     label: String,
     value: String,
     trend: Trend,
+    area: Rect,
 }
 
 #[derive(Clone, Copy)]
@@ -27,19 +31,26 @@ enum Trend {
 }
 
 impl StatWidget {
-    pub fn new(label: &str, value: &str) -> Self {
+    pub fn new(label: &str, value: &str, trend: Trend) -> Self {
         Self {
+            id: WidgetId::new(0),
             label: label.to_string(),
             value: value.to_string(),
-            trend: Trend::Neutral,
+            trend,
+            area: Rect::default(),
         }
     }
 }
 
 impl Widget for StatWidget {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        plane.fill_bg(theme.bg);
+        plane.fill_bg(self.area.bg);
 
         let inner_w = area.width.saturating_sub(2);
 
@@ -48,7 +59,8 @@ impl Widget for StatWidget {
         for (i, c) in label_text.chars().enumerate() {
             let x = area.x + 1 + i as u16;
             if x < area.x + area.width - 1 {
-                let idx = (area.y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+                let idx = (area.y as usize * plane.width as usize + x as usize)
+                    .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = theme.fg_muted;
             }
@@ -61,7 +73,8 @@ impl Widget for StatWidget {
         for (i, c) in value_text.chars().enumerate() {
             let x = value_x + i as u16;
             if x < area.x + area.width - 1 {
-                let idx = (value_y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+                let idx = (value_y as usize * plane.width as usize + x as usize)
+                    .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = theme.primary;
                 plane.cells[idx].style = Styles::BOLD;
@@ -76,14 +89,16 @@ impl Widget for StatWidget {
             (area.x + area.width - 1, area.y + area.height - 1, '┘'),
         ];
         for (x, y, ch) in corners {
-            let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = (y as usize * plane.width as usize + x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = ch;
             plane.cells[idx].fg = theme.outline;
         }
         // Top/bottom borders
         for x in (area.x + 1)..(area.x + area.width - 1) {
             for y in [area.y, area.y + area.height - 1] {
-                let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+                let idx = (y as usize * plane.width as usize + x as usize)
+                    .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = theme.outline;
             }
@@ -91,7 +106,8 @@ impl Widget for StatWidget {
         // Left/right borders
         for y in (area.y + 1)..(area.y + area.height - 1) {
             for x in [area.x, area.x + area.width - 1] {
-                let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+                let idx = (y as usize * plane.width as usize + x as usize)
+                    .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = '│';
                 plane.cells[idx].fg = theme.outline;
             }
@@ -104,9 +120,10 @@ impl Widget for StatWidget {
             let (ch, color) = match self.trend {
                 Trend::Up => ('▲', theme.success),
                 Trend::Down => ('▼', theme.error),
-                Trend::Neutral => ('◆', theme.dim),
+                Trend::Neutral => ('◆', theme.fg_muted),
             };
-            let idx = (trend_y as usize * plane.width as usize + trend_x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = (trend_y as usize * plane.width as usize + trend_x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = ch;
             plane.cells[idx].fg = color;
         }
@@ -135,35 +152,46 @@ fn truncate(s: &str, max: usize) -> String {
 }
 
 // ============================================================================
-// APP: PluginLoader — demonstrates WidgetFactory loading
+// APP: PluginLoader — demonstrates PluginRegistry loading
 // ============================================================================
 
 struct PluginLoader {
-    factory: WidgetFactory,
+    registry: PluginRegistry,
     loaded_widgets: Vec<Box<dyn Widget>>,
+    next_id: usize,
     dirty: bool,
     theme: Theme,
 }
 
 impl PluginLoader {
     fn new(theme: Theme) -> Self {
-        let mut factory = WidgetFactory::new();
+        let mut registry = PluginRegistry::new();
 
-        // Register the StatWidget plugin
-        factory.register("stat", |_config| {
-            Box::new(StatWidget::new("CPU", "67%")) as Box<dyn Widget>
+        // Register the StatWidget plugin factory
+        registry.register("stat", |id, _theme| {
+            let widgets = [
+                ("CPU", "67%", Trend::Neutral),
+                ("Memory", "4.2 GB", Trend::Up),
+                ("Disk", "512 GB", Trend::Neutral),
+                ("Network", "↑ 2.4 MB/s", Trend::Up),
+            ];
+            let (label, value, trend) = widgets[id.0 as usize % 4];
+            Box::new(StatWidget::new(label, value, trend)) as Box<dyn Widget>
         });
 
         Self {
-            factory,
+            registry,
             loaded_widgets: Vec::new(),
+            next_id: 0,
             dirty: true,
             theme,
         }
     }
 
     fn load_plugin(&mut self) {
-        if let Some(widget) = self.factory.create("stat") {
+        let id = WidgetId::new(self.next_id as u32);
+        self.next_id += 1;
+        if let Some(widget) = self.registry.create("stat", id, self.theme) {
             self.loaded_widgets.push(widget);
             self.dirty = true;
         }
@@ -171,6 +199,11 @@ impl PluginLoader {
 }
 
 impl Widget for PluginLoader {
+    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect { Rect::default() }
+    fn set_area(&mut self, _area: Rect) {}
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
@@ -180,7 +213,8 @@ impl Widget for PluginLoader {
         let tx = (area.width.saturating_sub(title.len() as u16)) / 2;
         for (i, c) in title.chars().enumerate() {
             let x = area.x + tx + i as u16;
-            let idx = ((area.y + 1) as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = ((area.y + 1) as usize * plane.width as usize + x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = c;
             plane.cells[idx].fg = self.theme.primary;
             plane.cells[idx].style = Styles::BOLD;
@@ -211,7 +245,9 @@ impl Widget for PluginLoader {
             let hx = (area.width.saturating_sub(hint.len() as u16)) / 2;
             let hy = area.y + area.height / 2;
             for (i, c) in hint.chars().enumerate() {
-                let idx = (hy as usize * plane.width as usize + (area.x + hx + i as u16) as usize).min(plane.cells.len().saturating_sub(1));
+                let x = area.x + hx + i as u16;
+                let idx = (hy as usize * plane.width as usize + x as usize)
+                    .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = self.theme.fg_muted;
             }
@@ -221,7 +257,8 @@ impl Widget for PluginLoader {
         let footer = "  1: CPU  2: Memory  3: Disk  4: Network  |  F1: help  |  Ctrl+Q: quit  ";
         for (i, c) in footer.chars().enumerate() {
             let x = area.x + i as u16;
-            let idx = ((area.y + area.height - 1) as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = ((area.y + area.height - 1) as usize * plane.width as usize + x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = c;
             plane.cells[idx].fg = self.theme.fg_muted;
             plane.cells[idx].bg = self.theme.surface;
@@ -256,8 +293,10 @@ fn overlay_plane(target: &mut Plane, source: &Plane, ox: u16, oy: u16) {
             let tx = ox + sx;
             let ty = oy + sy;
             if tx >= target.width || ty >= target.height { continue; }
-            let src_idx = (sy as usize * source.width as usize + sx as usize).min(source.cells.len().saturating_sub(1));
-            let tgt_idx = (ty as usize * target.width as usize + tx as usize).min(target.cells.len().saturating_sub(1));
+            let src_idx = (sy as usize * source.width as usize + sx as usize)
+                .min(source.cells.len().saturating_sub(1));
+            let tgt_idx = (ty as usize * target.width as usize + tx as usize)
+                .min(target.cells.len().saturating_sub(1));
             let cell = &source.cells[src_idx];
             if !cell.transparent {
                 target.cells[tgt_idx] = cell.clone();
@@ -274,20 +313,23 @@ fn draw_rect_border(plane: &mut Plane, area: Rect, theme: &Theme) {
         (area.x + area.width - 1, area.y + area.height - 1, '┘'),
     ];
     for (x, y, ch) in corners {
-        let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+        let idx = (y as usize * plane.width as usize + x as usize)
+            .min(plane.cells.len().saturating_sub(1));
         plane.cells[idx].char = ch;
         plane.cells[idx].fg = theme.outline;
     }
     for x in (area.x + 1)..(area.x + area.width - 1) {
         for y in [area.y, area.y + area.height - 1] {
-            let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = (y as usize * plane.width as usize + x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = '─';
             plane.cells[idx].fg = theme.outline;
         }
     }
     for y in (area.y + 1)..(area.y + area.height - 1) {
         for x in [area.x, area.x + area.width - 1] {
-            let idx = (y as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
+            let idx = (y as usize * plane.width as usize + x as usize)
+                .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = '│';
             plane.cells[idx].fg = theme.outline;
         }
