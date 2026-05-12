@@ -108,6 +108,7 @@ struct FsNode {
     path: PathBuf,
     is_dir: bool,
     size: u64,
+    modified: Option<u64>, // Unix timestamp
     children: Vec<FsNode>,
 }
 
@@ -176,11 +177,15 @@ impl FsNode {
                 let meta = e.metadata().ok();
                 let is_dir = meta.as_ref().map(|m| m.is_dir()).unwrap_or(false);
                 let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+                let modified = meta.as_ref().and_then(|m| m.modified().ok())
+                    .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                    .map(|d| d.as_secs());
                 FsNode {
                     name,
                     path,
                     is_dir,
                     size,
+                    modified,
                     children: Vec::new(),
                 }
             })
@@ -202,6 +207,9 @@ impl FsNode {
         let is_dir = path.is_dir();
         let meta = std::fs::metadata(path).ok();
         let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+        let modified = meta.as_ref().and_then(|m| m.modified().ok())
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs());
 
         let children = if is_dir && depth < 3 {
             Self::read_dir(path)
@@ -218,6 +226,7 @@ impl FsNode {
             path: path.clone(),
             is_dir,
             size,
+            modified,
             children,
         }
     }
@@ -266,14 +275,15 @@ struct FileManager {
 
 impl FileManager {
     fn new(id: WidgetId, should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
-        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-        let root = FsNode::build_tree(&cwd, 0);
+        // Start at /home directory instead of CWD
+        let home_path = PathBuf::from("/home");
+        let root = FsNode::build_tree(&home_path, 0);
 
         let tree = Tree::new(WidgetId::new(2))
             .with_root(vec![root.to_tree_node(true)])
             .with_theme(theme);
 
-        let segments: Vec<String> = cwd
+        let segments: Vec<String> = home_path
             .components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
@@ -311,8 +321,8 @@ impl FileManager {
     }
 
     fn refresh(&mut self) {
-        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-        self.root = FsNode::build_tree(&cwd, 0);
+        let home_path = PathBuf::from("/home");
+        self.root = FsNode::build_tree(&home_path, 0);
         self.tree = Tree::new(WidgetId::new(2))
             .with_root(vec![self.root.to_tree_node(true)])
             .with_theme(self.theme);
@@ -391,11 +401,13 @@ impl FileManager {
     }
 
     #[cfg(feature = "async")]
+    #[cfg(feature = "async")]
     async fn read_dir_async(path: &PathBuf) -> Option<Vec<FsNode>> {
         use tokio::fs;
 
         let mut entries = fs::read_dir(path).await.ok()?;
         let mut nodes = Vec::new();
+
 
         while let Some(entry) = entries.next_entry().await.ok()? {
             let name = entry.file_name().to_string_lossy().into_owned();
@@ -403,12 +415,16 @@ impl FileManager {
             let meta = entry.metadata().await.ok();
             let is_dir = meta.as_ref().map(|m| m.is_dir()).unwrap_or(false);
             let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+            let modified = meta.as_ref().and_then(|m| m.modified().ok())
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|d| d.as_secs());
 
             nodes.push(FsNode {
                 name,
                 path,
                 is_dir,
                 size,
+                modified,
                 children: Vec::new(),
             });
         }
@@ -421,7 +437,6 @@ impl FileManager {
 
         Some(nodes)
     }
-
     #[cfg(not(feature = "async"))]
     fn start_async_load(&mut self, _path: PathBuf) {
         // Fallback to sync load when async is not enabled
@@ -754,8 +769,22 @@ impl Widget for FileManager {
                         t.surface_elevated,
                     );
 
+                    // Path bar at top of detail pane
+                    let path_str = node.path.to_string_lossy().into_owned();
+                    draw_text(
+                        &mut plane,
+                        detail_x,
+                        hh + 1,
+                        &format!("Path: {}", &path_str),
+                        t.fg_muted,
+                        t.surface_elevated,
+                        false,
+                    );
+
+
                     let dx = detail_x + 1;
-                    let dy = hh + 1;
+                    let dy = hh + 1 + if path_str.len() > detail_w as usize { 1 } else { 0 };
+
 
                     // File icon and name
                     let sym = node.file_symbol();
@@ -770,17 +799,19 @@ impl Widget for FileManager {
                         true,
                     );
 
+
                     // Metadata with badges
                     let mut meta_y = dy + 2;
                     let icon_col = 3;
                     let label_col = 14;
+
 
                     // Type badge
                     draw_text(
                         &mut plane,
                         dx + icon_col,
                         meta_y,
-                        "󰈔 Type:",
+                        "Type:",
                         t.fg_muted,
                         t.surface_elevated,
                         false,
@@ -804,7 +835,7 @@ impl Widget for FileManager {
                             &mut plane,
                             dx + icon_col,
                             meta_y,
-                            "󰆼 Size:",
+                            "Size:",
                             t.fg_muted,
                             t.surface_elevated,
                             false,
@@ -821,35 +852,38 @@ impl Widget for FileManager {
                         meta_y += 1;
                     }
 
+                    // Use stored modified time if available
+                    if let Some(modified_ts) = node.modified {
+                        let time = format_unix_timestamp(modified_ts);
+                        draw_text(
+                            &mut plane,
+                            dx + icon_col,
+                            meta_y,
+                            "Changed:",
+                            t.fg_muted,
+                            t.surface_elevated,
+                            false,
+                        );
+                        draw_text(
+                            &mut plane,
+                            dx + label_col,
+                            meta_y,
+                            &time,
+                            t.fg,
+                            t.surface_elevated,
+                            false,
+                        );
+                        meta_y += 1;
+                    }
+
+                    // Permissions from metadata
                     if let Ok(meta) = std::fs::metadata(&node.path) {
-                        if let Ok(modified) = meta.modified() {
-                            let time = format_system_time(modified);
-                            draw_text(
-                                &mut plane,
-                                dx + icon_col,
-                                meta_y,
-                                "󰃰 Changed:",
-                                t.fg_muted,
-                                t.surface_elevated,
-                                false,
-                            );
-                            draw_text(
-                                &mut plane,
-                                dx + label_col,
-                                meta_y,
-                                &time,
-                                t.fg,
-                                t.surface_elevated,
-                                false,
-                            );
-                            meta_y += 1;
-                        }
                         let perms = format_permissions(meta.permissions().mode());
                         draw_text(
                             &mut plane,
                             dx + icon_col,
                             meta_y,
-                            "󰿆 Access:",
+                            "Access:",
                             t.fg_muted,
                             t.surface_elevated,
                             false,
@@ -865,7 +899,6 @@ impl Widget for FileManager {
                         );
                         meta_y += 1;
                     }
-
                     // File preview for text files
                     if !node.is_dir && detail_h > 10 {
                         let preview_y = meta_y + 2;
@@ -1561,6 +1594,13 @@ fn format_size(size: u64) -> String {
     } else {
         format!("{:.1} GB", size as f64 / (1024.0 * 1024.0 * 1024.0))
     }
+}
+
+fn format_unix_timestamp(secs: u64) -> String {
+    let hours = (secs / 3600) % 24;
+    let mins = (secs / 60) % 60;
+    let days = secs / 86400;
+    format!("{}d {:02}:{:02}", days, hours, mins)
 }
 
 fn format_system_time(time: std::time::SystemTime) -> String {

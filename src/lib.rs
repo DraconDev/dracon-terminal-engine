@@ -68,6 +68,9 @@ pub mod system;
 #[doc = "General utilities (visual width, truncate, formatting helpers)."]
 pub mod utils;
 
+#[doc = "Unified error types for the engine."]
+pub mod error;
+
 #[doc = "Text handling utilities with Unicode grapheme cluster awareness."]
 pub mod text;
 
@@ -83,6 +86,9 @@ pub mod widgets;
 
 // Compositor primitives
 pub use compositor::{Cell, Color, Compositor, Plane, Styles};
+
+// Error type
+pub use error::DraconError;
 
 // Core terminal
 pub use core::terminal::Terminal;

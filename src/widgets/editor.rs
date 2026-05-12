@@ -1,3 +1,4 @@
+use crate::error::DraconError;
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
@@ -373,12 +374,35 @@ impl TextEditor {
         }
     }
 
+    /// Saves the editor content to the current file path.
+    /// Returns a [`DraconError`] on failure.
+    pub fn save_err(&mut self) -> Result<(), DraconError> {
+        if let Some(ref path) = self.file_path {
+            std::fs::write(path, self.get_content()).map_err(DraconError::from)?;
+            self.save_undo_stack().map_err(DraconError::from)?;
+            self.modified = false;
+            Ok(())
+        } else {
+            Err(DraconError::io_msg("No file path set. Use save_as_err() instead."))
+        }
+    }
+
     /// Saves the editor content to a new file path and sets it as the current path.
     /// Also saves the undo stack to `.new_filename.undo`.
     pub fn save_as(&mut self, path: &PathBuf) -> std::io::Result<()> {
         std::fs::write(path, self.get_content())?;
         self.file_path = Some(path.clone());
         self.save_undo_stack()?;
+        self.modified = false;
+        Ok(())
+    }
+
+    /// Saves the editor content to a new file path and sets it as the current path.
+    /// Returns a [`DraconError`] on failure.
+    pub fn save_as_err(&mut self, path: &PathBuf) -> Result<(), DraconError> {
+        std::fs::write(path, self.get_content()).map_err(DraconError::from)?;
+        self.file_path = Some(path.clone());
+        self.save_undo_stack().map_err(DraconError::from)?;
         self.modified = false;
         Ok(())
     }
@@ -459,11 +483,39 @@ impl TextEditor {
         Ok(())
     }
 
+    /// Saves editor settings to a `.filename.dte.json` config file.
+    /// Returns a [`DraconError`] on failure.
+    pub fn save_config_err(&self) -> Result<(), DraconError> {
+        if let Some(cfg_path) = self.config_path() {
+            let config = EditorConfig {
+                tab_size: 4,
+                show_line_numbers: self.show_line_numbers,
+                word_wrap: self.wrap,
+                show_indent_guides: self.show_indent_guides,
+                show_status_bar: self.show_status_bar,
+            };
+            let content = serde_json::to_string_pretty(&config)
+                .map_err(|e| DraconError::Serialize(e.to_string()))?;
+            std::fs::write(cfg_path, content).map_err(DraconError::from)?;
+        }
+        Ok(())
+    }
+
     /// Saves the undo stack to a `.filename.undo` file alongside the original file.
     pub fn save_undo_stack(&self) -> std::io::Result<()> {
         if let Some(undo_path) = self.undo_path() {
             let encoded: Vec<String> = self.history.iter().map(|lines| lines.join("\n")).collect();
             std::fs::write(undo_path, encoded.join("\n---\n"))?;
+        }
+        Ok(())
+    }
+
+    /// Saves the undo stack to a `.filename.undo` file alongside the original file.
+    /// Returns a [`DraconError`] on failure.
+    pub fn save_undo_stack_err(&self) -> Result<(), DraconError> {
+        if let Some(undo_path) = self.undo_path() {
+            let encoded: Vec<String> = self.history.iter().map(|lines| lines.join("\n")).collect();
+            std::fs::write(undo_path, encoded.join("\n---\n")).map_err(DraconError::from)?;
         }
         Ok(())
     }

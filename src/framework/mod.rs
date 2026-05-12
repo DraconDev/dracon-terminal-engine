@@ -32,6 +32,7 @@ pub mod focus;
 pub mod hitzone;
 pub mod keybindings;
 pub mod layout;
+pub mod logging;
 pub mod plugin;
 pub mod scroll;
 pub mod scene_router;
@@ -58,6 +59,7 @@ pub mod prelude {
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Direction, Layout},
+        logging::{init_logger, init_logger_from_env, frame_span, frame_span_debug},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},
@@ -68,5 +70,6 @@ pub mod prelude {
         Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent,
         MouseEventKind,
     };
+    pub use tracing::instrument;
     pub use crate::Terminal;
 }

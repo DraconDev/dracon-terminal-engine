@@ -24,6 +24,7 @@ use crate::framework::command::{AppConfig, BoundCommand, CommandRunner};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::event_bus::EventBus;
 use crate::framework::focus::FocusManager;
+use crate::framework::logging::{frame_span, log_key_event, log_mouse_event};
 use crate::framework::scene_router::SceneRouter;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
@@ -32,6 +33,7 @@ use crate::input::parser::Parser;
 use crate::Terminal;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
+use tracing::instrument;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -88,6 +90,7 @@ pub struct App {
 impl App {
     /// Creates a new `App` with a linked terminal.
     /// Returns an error if the terminal cannot be initialized.
+    #[instrument(skip_all, fields(title = "Dracon App"))]
     pub fn new() -> io::Result<Self> {
         let terminal = Terminal::new(io::stdout())?;
         let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
