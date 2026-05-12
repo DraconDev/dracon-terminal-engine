@@ -1,0 +1,32 @@
+{
+    "defaultSeverity": "warning",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "quotemark": [true, "single"],
+        "semicolon": [true, "always"],
+        "trailing-comma": [true, {
+            "multiline": "always",
+            "singleline": "never"
+        }],
+        "indent": [true, "spaces", 4],
+        "line-length": [true, 120],
+        "max-line-length": [true, 120],
+        "no-console": [true, "log", "warn", "error"],
+        "no-debugger": true,
+        "no-trailing-whitespace": true,
+        "object-literal-sort-keys": false,
+        "variable-name": [true, "allow-leading-underscore"],
+        "prefer-const": true,
+        "no-var-keyword": true,
+        "arrow-return-shorthand": true,
+        "class-name": true,
+        "comment-format": [true, "check-space"],
+        "no-shadowed-variable": true,
+        "no-unused-expression": true,
+        "no-use-before-declare": true
+    },
+    "rulesDirectory": []
+}

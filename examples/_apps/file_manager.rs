@@ -40,6 +40,9 @@ use std::cell::RefCell as StdRefCell;
 // Spinner animation states
 const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
 
+#[cfg(feature = "async")]
+type AsyncFsNodes = Option<tokio::task::JoinHandle<Option<Vec<FsNode>>>>;
+
 enum PromptKind {
     DeleteConfirm,
     NewFile,
@@ -211,7 +214,7 @@ struct FileManager {
     loading_path: Option<PathBuf>,
     spinner_frame: usize,
     #[cfg(feature = "async")]
-    pending_operation: StdRefCell<Option<tokio::task::JoinHandle<Option<Vec<FsNode>>>>},
+    pending_operation: StdRefCell<AsyncFsNodes>,
 }
 
 impl FileManager {

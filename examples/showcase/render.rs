@@ -1187,6 +1187,204 @@ fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w:
     }
 }
 
+fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+    // Animated calendar preview showing month navigation
+    let months = ["January", "February", "March", "April", "May", "June"];
+    let month_idx = ((phase * 0.3).floor() as usize) % months.len();
+    let title = format!("{} 2026", months[month_idx]);
+    draw_text(plane, 1, 5, &title, t.fg, t.surface, true);
+
+    let headers = "Mo Tu We Th Fr Sa Su";
+    draw_text(plane, 1, 6, headers, t.fg_muted, t.surface, false);
+
+    let day_grid = [
+        "    1  2  3  4  5",
+        " 6  7  8  9 10 11 12",
+        "13 14 15 16 17 18 19",
+        "20 21 22 23 24 25 26",
+        "27 28 29 30 31     ",
+    ];
+
+    let offset = ((phase * 0.5).floor() as usize) % 2;
+    for (i, row) in day_grid.iter().enumerate() {
+        let y = 7 + i;
+        if y > 11 {
+            break;
+        }
+        let truncated: String = row.chars().skip(offset).take(22).collect();
+        let fg = if i == 1 { t.primary } else { t.fg_subtle };
+        draw_text(plane, 1, y, &truncated, fg, t.surface, false);
+    }
+
+    // Highlight selected day
+    let sel = (((phase * 0.8).sin() * 0.5 + 0.5) * 30.0).round() as usize % 31 + 1;
+    draw_text(plane, 1, 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, false);
+}
+
+fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
+    let lines = [
+        ("# Heading", t.primary, true),
+        ("**Bold** and *italic*", t.fg, false),
+        ("`inline code`", t.secondary, false),
+        ("- List item", t.fg_muted, false),
+        ("[link](https://)", t.info, false),
+    ];
+
+    for (i, (text, color, bold)) in lines.iter().enumerate() {
+        let y = 5 + i;
+        if y > 10 {
+            break;
+        }
+        let truncated: String = text.chars().take(22).collect();
+        draw_text(plane, 1, y, &truncated, *color, t.surface, *bold);
+    }
+}
+
+fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+    // Input field
+    draw_text(plane, 1, 5, "[rust           ]", t.fg, t.surface, false);
+    let cursor_visible = (phase * 3.0).fract() < 0.6;
+    if cursor_visible {
+        set_cell(plane, 6, 5, '█', t.primary, t.surface);
+    }
+
+    // Dropdown suggestions
+    let suggestions = [
+        ("rustacean", t.fg_subtle),
+        ("> rust", t.primary),
+        ("rust-analyzer", t.fg_subtle),
+        ("rustdoc", t.fg_subtle),
+        ("rustfmt", t.fg_subtle),
+    ];
+
+    let highlight_idx = ((phase * 2.0).floor() as usize) % suggestions.len();
+    for (i, (text, color)) in suggestions.iter().enumerate() {
+        let y = 6 + i;
+        if y > 10 {
+            break;
+        }
+        let fg = if i == highlight_idx { t.primary } else { *color };
+        let prefix = if i == highlight_idx { "> " } else { "  " };
+        let full_text = format!("{}{}", prefix, text);
+        let truncated: String = full_text.chars().take(20).collect();
+        draw_text(plane, 1, y, &truncated, fg, t.surface, i == highlight_idx);
+    }
+}
+
+fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+    let notifications = [
+        (NotificationType::Info, "Info", "File saved", t.info),
+        (NotificationType::Success, "Success", "Build complete", t.success),
+        (NotificationType::Warning, "Warning", "Low memory", t.warning),
+        (NotificationType::Error, "Error", "Connection failed", t.error),
+    ];
+
+    let offset = ((phase * 0.3).floor() as usize) % notifications.len();
+    let count = 2.min(notifications.len());
+
+    for i in 0..count {
+        let idx = (offset + i) % notifications.len();
+        let (kind, title, msg, color) = &notifications[idx];
+        let y = 5 + i * 3;
+        if y > 11 {
+            break;
+        }
+
+        let icon = match kind {
+            NotificationType::Info => "i",
+            NotificationType::Success => "✔",
+            NotificationType::Warning => "!",
+            NotificationType::Error => "✖",
+        };
+
+        // Card background
+        set_cell(plane, 16, y, '╭', t.outline, t.surface);
+        for cx in 17..25 {
+            set_cell(plane, cx, y, '─', t.outline, t.surface);
+        }
+        set_cell(plane, 25, y, '╮', t.outline, t.surface);
+
+        // Icon and title
+        draw_text(plane, 17, y, &format!(" {} {}", icon, title), *color, t.surface, true);
+
+        // Message
+        set_cell(plane, 16, y + 1, '│', t.outline, t.surface);
+        let truncated: String = msg.chars().take(8).collect();
+        draw_text(plane, 17, y + 1, &truncated, t.fg, t.surface, false);
+        set_cell(plane, 25, y + 1, '│', t.outline, t.surface);
+
+        // Bottom border
+        set_cell(plane, 16, y + 2, '╰', t.outline, t.surface);
+        for cx in 17..25 {
+            set_cell(plane, cx, y + 2, '─', t.outline, t.surface);
+        }
+        set_cell(plane, 25, y + 2, '╯', t.outline, t.surface);
+    }
+}
+
+#[derive(Clone, Copy)]
+enum NotificationType {
+    Info,
+    Success,
+    Warning,
+    Error,
+}
+
+fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
+    draw_text(plane, 1, 5, "OSC 99 Announcements:", t.primary, t.surface, true);
+
+    let items = [
+        ("Role:", "button"),
+        ("Label:", "Submit"),
+        ("Shortcut:", "Ctrl+Enter"),
+        ("Level:", "assertive"),
+        ("Terminal:", "NVDA"),
+    ];
+
+    for (i, (label, value)) in items.iter().enumerate() {
+        let y = 6 + i;
+        if y > 10 {
+            break;
+        }
+        draw_text(plane, 1, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, 12, y, value, t.fg, t.surface, false);
+    }
+
+    // Animated indicator
+    let status = "● enabled";
+    draw_text(plane, 1, 11, status, t.success, t.surface, false);
+}
+
+fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+    draw_text(plane, 1, 5, "Cell Pool Stats:", t.primary, t.surface, true);
+
+    // Animated stats
+    let acquired = 1920 + ((phase * 10.0).sin() * 50.0) as i32;
+    let released = 1872 + ((phase * 10.0).sin() * 48.0) as i32;
+    let active = acquired - released;
+
+    let stats = [
+        ("Acquired:", format!("{}", acquired)),
+        ("Released:", format!("{}", released)),
+        ("Active:", format!("{}", active)),
+        ("Reuse rate:", format!("{:.1}%", 97.5 + (phase * 0.5).sin() as f64 * 0.5)),
+    ];
+
+    for (i, (label, value)) in stats.iter().enumerate() {
+        let y = 6 + i;
+        if y > 9 {
+            break;
+        }
+        draw_text(plane, 1, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, 12, y, value, t.fg, t.surface, false);
+    }
+
+    // Progress bar visualization
+    let usage = ((active as f32 / acquired as f32) * 20.0).round() as usize;
+    let bar = format!("Mem: [{}{}]", "█".repeat(usage.min(20)), "░".repeat(20 - usage.min(20)));
+    draw_text(plane, 1, 11, &bar, t.info, t.surface, false);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // WIDGET IMPL
 // ═══════════════════════════════════════════════════════════════════════════════
