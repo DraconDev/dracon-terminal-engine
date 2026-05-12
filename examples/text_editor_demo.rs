@@ -420,6 +420,10 @@ impl Widget for EditorApp {
         self.dirty = true;
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme)
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         let t = self.theme;
@@ -1036,22 +1040,17 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let (_w, _h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
-        .unwrap_or((80, 24));
+    let app_widget = EditorApp::new(should_quit);
 
-    let app_widget = EditorApp::new(should_quit.clone());
-
-    App::new()?
+    let mut app = App::new()?
         .title("Text Editor Demo")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()))
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
-        .run(move |ctx| {
-            let (w, h) = ctx.compositor().size();
-            ctx.add_plane(app_widget.render(Rect::new(0, 0, w, h)));
-        })
+        .theme(Theme::from_env_or(Theme::nord()));
+    app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_| {})
 }
