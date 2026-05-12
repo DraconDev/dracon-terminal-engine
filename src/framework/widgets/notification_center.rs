@@ -192,11 +192,6 @@ impl crate::framework::widget::Widget for NotificationCenter {
 
     fn mark_dirty(&mut self) {
         self.dirty = true;
-    }
-
-    fn clear_dirty(&mut self) {
-        self.dirty = false;
-    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(9500, area.width, area.height);
