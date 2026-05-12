@@ -1,28 +1,22 @@
-//! Object pool for Plane and Cell allocation.
+//! Object pool for Cell allocation.
 //!
-//! Reduces allocation pressure by recycling objects across frames.
-//! Pooled planes and cells are reset and reused, avoiding the cost of
+//! Reduces allocation pressure by recycling cell vectors across frames.
+//! Pooled cells are returned to the pool and reused, avoiding the cost of
 //! `Vec::with_capacity()` and `Cell::default()` on every render.
 //!
 //! # Usage
 //!
 //! ```rust,ignore
-//! let mut plane_pool = PlanePool::new();
 //! let mut cell_pool = CellPool::new();
 //!
-//! // Acquire a plane from the pool
-//! let mut plane = plane_pool.acquire(0, 80, 24, &mut cell_pool);
-//! // ... render into plane ...
-//! // Return to pool (reset, not dropped)
-//! plane_pool.release(plane);
+//! // Acquire cells for a plane
+//! let cells = cell_pool.acquire_cells(80 * 24);
+//! // ... use cells in a Plane ...
+//! // Return cells to pool when done
+//! cell_pool.release_cells(width, height, cells);
 //! ```
 
-use super::plane::{Cell, Color, Plane, Styles};
-use std::mem;
-
-/// Maximum number of planes to retain in the pool.
-/// Planes larger than this are deallocated immediately.
-const MAX_PLANE_POOL_SIZE: usize = 32;
+use super::plane::Cell;
 
 /// Maximum number of cells to retain in the pool.
 /// Pool is capped to avoid unbounded memory growth.
@@ -31,8 +25,6 @@ const MAX_CELL_POOL_SIZE: usize = 100_000;
 /// Shared pool configuration.
 #[derive(Debug, Clone, Copy)]
 pub struct PoolConfig {
-    /// Maximum number of pooled planes.
-    pub max_planes: usize,
     /// Maximum number of pooled cells.
     pub max_cells: usize,
     /// Initial capacity for the free list.
@@ -42,114 +34,15 @@ pub struct PoolConfig {
 impl Default for PoolConfig {
     fn default() -> Self {
         Self {
-            max_planes: MAX_PLANE_POOL_SIZE,
             max_cells: MAX_CELL_POOL_SIZE,
             initial_capacity: 64,
         }
     }
 }
 
-/// A pool of recycled [`Plane`] objects.
-///
-/// Planes are acquired from the pool and returned after use.
-/// When returned, planes are cleared and held for reuse. If the pool
-/// is full, returned planes are dropped (deallocated).
-///
-/// # Thread Safety
-///
-/// Not thread-safe. Use per-thread pools or a `Mutex<PlanePool>` if
-/// sharing across threads is needed.
-#[derive(Debug)]
-pub struct PlanePool {
-    config: PoolConfig,
-    /// Stack of available planes, keyed by (width, height).
-    free: Vec<PooledPlane>,
-}
-
-#[derive(Debug)]
-struct PooledPlane {
-    plane: Plane,
-    cell_pool: *mut Vec<Cell>,
-}
-
-impl PlanePool {
-    /// Creates a new empty plane pool.
-    pub fn new() -> Self {
-        Self::with_config(PoolConfig::default())
-    }
-
-    /// Creates a plane pool with custom configuration.
-    pub fn with_config(config: PoolConfig) -> Self {
-        Self {
-            config,
-            free: Vec::with_capacity(config.initial_capacity),
-        }
-    }
-
-    /// Returns the number of planes currently in the pool.
-    pub fn len(&self) -> usize {
-        self.free.len()
-    }
-
-    /// Returns true if the pool is empty.
-    pub fn is_empty(&self) -> bool {
-        self.free.is_empty()
-    }
-
-    /// Acquires a plane from the pool, creating one if empty.
-    ///
-    /// The returned plane has `width × height` cells initialized
-    /// from the cell pool. If no pool entry matches, a fresh plane
-    /// is allocated.
-    ///
-    /// The `cell_pool` parameter is used to source pre-allocated cells.
-    #[allow(clippy::mut_from_ref)] // SAFETY: pool entry is extracted then consumed
-    pub fn acquire(&mut self, id: usize, width: u16, height: u16, cell_pool: &mut CellPool) -> Plane {
-        // Try to find a matching pool entry
-        let idx = self.free.iter().position(|p| {
-            p.plane.width == width && p.plane.height == height
-        });
-
-        if let Some(idx) = idx {
-            // Reuse pooled plane — extract and forget the cell_pool ref
-            plane.clear();
-            return plane;
-        }
-
-        // No matching pool entry — allocate fresh
-        Plane::new(id, width, height)
-    }
-
-    /// Returns a plane to the pool for reuse.
-    ///
-    /// The plane is cleared and added to the free list if the pool
-    /// has capacity. Otherwise it is dropped.
-    ///
-    /// The plane's `id` field is preserved across the pool cycle.
-    pub fn release(&mut self, plane: Plane) {
-        if self.free.len() >= self.config.max_planes {
-            // Pool full — drop the plane
-            return;
-        }
-
-        // Wrap the plane with a null cell_pool reference (not used on release)
-        let pooled = PooledPlane {
-            plane,
-            cell_pool: std::ptr::null_mut(),
-        };
-        self.free.push(pooled);
-    }
-}
-
-impl Default for PlanePool {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 /// A pool of recycled [`Cell`] objects.
 ///
-/// Cells are acquired in bulk and returned individually or in bulk.
+/// Cells are acquired in bulk and returned in bulk.
 /// This reduces the per-frame allocation pressure from widgets that
 /// create many planes per tick.
 ///
@@ -187,6 +80,7 @@ impl CellPool {
     }
 
     /// Returns the total number of cells currently in the pool.
+    #[inline]
     pub fn total_cells(&self) -> usize {
         self.free.iter().map(|b| b.cells.len()).sum()
     }
@@ -197,10 +91,8 @@ impl CellPool {
     /// has fewer than `count` cells available, the shortfall is
     /// allocated freshly.
     pub fn acquire_cells(&mut self, count: usize) -> Vec<Cell> {
-        // Try to find a block with at least `count` cells
         let mut acquired = Vec::with_capacity(count);
 
-        // Drain from existing blocks
         while acquired.len() < count {
             // Find the block with the most cells
             let largest_idx = self
@@ -210,34 +102,34 @@ impl CellPool {
                 .max_by_key(|(_, b)| b.cells.len())
                 .map(|(idx, _)| idx);
 
-            if let Some(idx) = largest_idx {
-                let block = &mut self.free[idx];
-                let needed = count - acquired.len();
+            match largest_idx {
+                Some(idx) => {
+                    let needed = count - acquired.len();
+                    let block_len = self.free[idx].cells.len();
 
-                if block.cells.len() >= needed {
-                    // Take exactly what we need
-                    for _ in 0..needed {
-                        let cell = block.cells.pop().unwrap();
-                        acquired.push(cell);
-                    }
-                    // Remove block if empty
-                    if block.cells.is_empty() {
+                    if block_len >= needed {
+                        // Take exactly what we need from this block
+                        for _ in 0..needed {
+                            acquired.push(self.free[idx].cells.pop().unwrap());
+                        }
+                        if self.free[idx].cells.is_empty() {
+                            self.free.swap_remove(idx);
+                        }
+                    } else {
+                        // Take all cells from this block
+                        for cell in self.free[idx].cells.drain(..) {
+                            acquired.push(cell);
+                        }
                         self.free.swap_remove(idx);
                     }
-                } else {
-                    // Take all from this block
-                    for cell in block.cells.drain(..) {
-                        acquired.push(cell);
+                }
+                None => {
+                    // No blocks left — allocate fresh
+                    for _ in 0..(count - acquired.len()) {
+                        acquired.push(Cell::default());
                     }
-                    self.free.swap_remove(idx);
+                    break;
                 }
-            } else {
-                // No blocks left — allocate fresh
-                let remaining = count - acquired.len();
-                for _ in 0..remaining {
-                    acquired.push(Cell::default());
-                }
-                break;
             }
         }
 
@@ -246,19 +138,20 @@ impl CellPool {
 
     /// Returns cells to the pool for reuse.
     ///
-    /// Cells are stored in blocks keyed by a synthetic `width × height`
-    /// identifier. The pool caps total cells at `config.max_cells` —
-    /// excess cells are dropped.
-    pub fn release_cells(&mut self, width: u16, height: u16, cells: Vec<Cell>) {
+    /// Cells are stored in blocks keyed by a `width × height` identifier.
+    /// The pool caps total cells at `config.max_cells` — excess cells are dropped.
+    pub fn release_cells(&mut self, _width: u16, _height: u16, cells: Vec<Cell>) {
+        if cells.is_empty() {
+            return;
+        }
         let total = self.total_cells();
         if total + cells.len() > self.config.max_cells {
             // Pool would exceed limit — drop cells
             return;
         }
-
         self.free.push(CellBlock {
-            width,
-            height,
+            width: _width,
+            height: _height,
             cells,
         });
     }
@@ -279,39 +172,17 @@ impl Default for CellPool {
     }
 }
 
-/// Acquires a plane with pooled cell allocation.
+/// Convenience function to acquire cells for a plane of given dimensions.
 ///
-/// This is a convenience function that acquires a plane and its cells
-/// from the shared pool, then configures the plane for immediate use.
-///
-/// # Example
-///
-/// ```rust,ignore
-/// let mut pool = PlanePool::new();
-/// let mut cell_pool = CellPool::new();
-///
-/// let plane = acquire_plane_from_pool(&mut pool, 0, 80, 24, &mut cell_pool);
-/// // ... use plane ...
-/// release_plane_to_pool(&mut pool, plane, &mut cell_pool);
-/// ```
-pub fn acquire_plane_from_pool(
-    plane_pool: &mut PlanePool,
-    cell_pool: &mut CellPool,
-    id: usize,
-    width: u16,
-    height: u16,
-) -> Plane {
+/// Returns a Vec of cells ready to be placed in a Plane.
+#[inline]
+pub fn acquire_plane_cells(pool: &mut CellPool, width: u16, height: u16) -> Vec<Cell> {
     let count = (width.max(1) as usize) * (height.max(1) as usize);
-    let cells = cell_pool.acquire_cells(count);
-    let mut plane = Plane::new(id, width, height);
-    plane.cells = cells;
-    plane
+    pool.acquire_cells(count)
 }
 
-/// Releases a plane back to the pool, recycling its cells.
-pub fn release_plane_to_pool(_plane_pool: &mut PlanePool, cell_pool: &mut CellPool, mut plane: Plane) {
-    // Take cells out of the plane before returning it
-    let cells = std::mem::take(&mut plane.cells);
-    cell_pool.release_cells(plane.width, plane.height, cells);
-    plane_pool.release(plane);
+/// Convenience function to release cells back to the pool.
+#[inline]
+pub fn release_plane_cells(pool: &mut CellPool, width: u16, height: u16, cells: Vec<Cell>) {
+    pool.release_cells(width, height, cells)
 }

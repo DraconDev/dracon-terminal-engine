@@ -13,7 +13,7 @@ pub mod plane;
 pub use engine::Compositor;
 /// Re-exports types for plane-based rendering: [`Cell`], [`Color`], [`Plane`], and [`Styles`].
 pub use plane::{Cell, Color, Plane, Styles};
-/// Re-exports pool types: [`PlanePool`], [`CellPool`], [`PoolConfig`], [`acquire_plane_from_pool`], [`release_plane_to_pool`].
+/// Re-exports pool types: [`CellPool`], [`PoolConfig`], [`acquire_plane_cells`], [`release_plane_cells`].
 pub use pool::{
-    acquire_plane_from_pool, release_plane_to_pool, CellPool, PlanePool, PoolConfig,
+    acquire_plane_cells, release_plane_cells, CellPool, PoolConfig,
 };
