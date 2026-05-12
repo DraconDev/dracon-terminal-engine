@@ -1673,7 +1673,7 @@ impl Showcase {
                 let themes = Self::themes();
                 let current = themes
                     .iter()
-                    .position(|(_, t)| t.name == self.theme.name)
+                    .position(|t| t.name == self.theme.name)
                     .unwrap_or(0);
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
