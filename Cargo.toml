@@ -38,6 +38,7 @@ regex = "1.10"
 rusqlite = { version = "0.32", features = ["bundled"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+tracing-derive = "0.2"
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 libc = "0.2"
@@ -47,9 +48,6 @@ rand = "0.8"
 tempfile = "3.10"
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.4"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
-tracing-derive = "0.3"
 
 [[example]]
 name = "file_manager"
