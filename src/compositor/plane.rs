@@ -178,37 +178,121 @@ impl Plane {
 
     /// Writes a string starting at the given position. Returns the x position after writing.
     pub fn put_str(&mut self, mut x: u16, y: u16, text: &str) -> u16 {
-        use unicode_width::UnicodeWidthChar;
+        use crate::text::grapheme_indices;
 
-        for c in text.chars() {
+        let indices = grapheme_indices(text);
+
+        for (byte_offset, visual_col) in indices {
             if x >= self.width {
                 break;
             }
 
-            let width = c.width().unwrap_or(0);
-            if width == 0 {
+            // Get the grapheme cluster bytes
+            let remaining = text[byte_offset..].as_bytes();
+            let Some((c, _char_len)) = char::from_utf8(remaining)
+                .ok()
+                .and_then(|s| s.chars().next())
+                .map(|c| (c, c.len_utf8()))
+            else {
                 continue;
-            } // Skip zero-width chars
+            };
+
+            // Get the width of this character (including handling of paired regional indicators)
+            let width = self.grapheme_width_for_char(text, byte_offset);
 
             // If it's a wide char (width 2), we need to ensure space
             if width == 2 && x + 1 >= self.width {
                 break;
             }
 
-            self.put_char(x, y, c);
+            // Write the character
+            let idx = (y * self.width + x) as usize;
+            if idx < self.cells.len() {
+                self.cells[idx].char = c;
+                self.cells[idx].transparent = false;
+                self.cells[idx].skip = false;
+            }
 
+            // Mark next cell as padding for wide characters
             if width == 2 {
-                let idx = (y * self.width + x + 1) as usize;
-                if idx < self.cells.len() {
-                    self.cells[idx].char = ' ';
-                    self.cells[idx].transparent = false;
-                    self.cells[idx].skip = true;
+                let next_idx = idx + 1;
+                if next_idx < self.cells.len() {
+                    self.cells[next_idx].char = ' ';
+                    self.cells[next_idx].transparent = false;
+                    self.cells[next_idx].skip = true;
                 }
             }
 
             x += width as u16;
         }
+
         x
+    }
+
+    /// Helper to get the visual width of a grapheme cluster at the given byte offset.
+    /// Handles regional indicator pairs (flags) correctly.
+    fn grapheme_width_for_char(&self, text: &str, byte_offset: usize) -> u8 {
+        use crate::text::grapheme_width;
+
+        let bytes = text.as_bytes();
+        let remaining = &bytes[byte_offset..];
+
+        let Some((c, char_len)) = char::from_utf8(remaining)
+            .ok()
+            .and_then(|s| s.chars().next())
+            .map(|c| (c, c.len_utf8()))
+        else {
+            return 1;
+        };
+
+        // Regional indicator pair detection
+        if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
+            let next_offset = byte_offset + char_len;
+            if next_offset < bytes.len() {
+                if let Some((next_c, _)) = char::from_utf8(&bytes[next_offset..])
+                    .ok()
+                    .and_then(|s| s.chars().next())
+                {
+                    if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
+                        return 2; // Flag emoji pair
+                    }
+                }
+            }
+            return 0; // Single regional indicator has no width
+        }
+
+        // ZWJ and other zero-width characters
+        let base_width = grapheme_width(c);
+        if base_width == 0 {
+            return 0;
+        }
+
+        // Check for combining marks following this base character
+        let mut width = base_width as usize;
+        let mut pos = byte_offset + char_len;
+
+        while pos < bytes.len() {
+            let remaining = &bytes[pos..];
+            if let Some((next_c, next_len)) = char::from_utf8(remaining)
+                .ok()
+                .and_then(|s| s.chars().next())
+                .map(|c| (c, c.len_utf8()))
+            {
+                if next_c == '\u{200D}' {
+                    // ZWJ continues the sequence
+                    pos += next_len;
+                    continue;
+                }
+                if grapheme_width(next_c) == 0 {
+                    // Combining mark included in this cluster, doesn't add width
+                    pos += next_len;
+                    continue;
+                }
+            }
+            break;
+        }
+
+        width as u8
     }
 
     /// Sets the filter for this plane.

@@ -172,7 +172,7 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             .min(bytes.len() - byte_offset);
 
         // Get the current character
-        let Some((c, len)) = char::from_utf8(&bytes[byte_offset..byte_offset + char_bytes])
+        let Some((c, len)) = std::str::from_utf8(&bytes[byte_offset..byte_offset + char_bytes])
             .ok()
             .and_then(|s| s.chars().next())
             .map(|c| (c, c.len_utf8()))
@@ -193,7 +193,7 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             let next_offset = byte_offset + len;
             if next_offset < bytes.len() {
                 if let Some((next_c, next_len)) =
-                    char::from_utf8(&bytes[next_offset..]).ok().and_then(|s| s.chars().next())
+                    std::str::from_utf8(&bytes[next_offset..]).ok().and_then(|s| s.chars().next())
                 {
                     if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                         // Flag emoji: both RIs together take 2 cells
