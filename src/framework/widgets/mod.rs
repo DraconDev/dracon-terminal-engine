@@ -1,6 +1,5 @@
 //! Built-in framework widgets.
 
-pub mod breadcrumbs;
 pub mod autocomplete;
 pub mod breadcrumbs;
 pub mod button;
@@ -41,6 +40,7 @@ pub mod toggle;
 pub mod tooltip;
 pub mod tree;
 pub mod widget_inspector;
+pub use autocomplete::Autocomplete;
 pub use breadcrumbs::Breadcrumbs;
 pub use button::Button;
 pub use checkbox::Checkbox;
