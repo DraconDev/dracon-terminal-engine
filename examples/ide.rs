@@ -22,7 +22,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, CommandItem, CommandPalette, ContextAction, ContextMenu, MenuBar, MenuEntry,
-    MenuItem, Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar, Toast, ToastKind,
+    MenuItem, Metric, Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar, Toast, ToastKind,
     Tooltip, Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -492,6 +492,37 @@ impl IdeApp {
                 self.tooltip_timer = None;
             }
         }
+
+        // Update profiler metrics
+        let frame = self.anim_frame as u64 + 1;
+        let variable = ((frame as f64 / 10.0).sin() * 3.0 + 8.0) as u64;
+        self.profiler.set_metrics(vec![
+            Metric {
+                name: "render".to_string(),
+                value: Duration::from_micros(600 + (frame % 150) * 4),
+                call_count: frame,
+            },
+            Metric {
+                name: "layout".to_string(),
+                value: Duration::from_micros(200 + (frame % 80) * 2),
+                call_count: frame,
+            },
+            Metric {
+                name: "input".to_string(),
+                value: Duration::from_micros(80 + (frame % 40)),
+                call_count: frame,
+            },
+            Metric {
+                name: "composite".to_string(),
+                value: Duration::from_micros(400 + (frame % 100) * 3),
+                call_count: frame,
+            },
+            Metric {
+                name: "memory".to_string(),
+                value: Duration::from_millis(variable),
+                call_count: 1,
+            },
+        ]);
     }
 }
 
