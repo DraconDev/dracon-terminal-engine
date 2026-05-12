@@ -53,6 +53,7 @@ impl Constraint {
 pub struct Layout {
     constraints: Vec<Constraint>,
     spacing: u16,
+    direction: Direction,
 }
 
 impl Layout {
@@ -61,7 +62,14 @@ impl Layout {
         Self {
             constraints,
             spacing: 0,
+            direction: Direction::default(),
         }
+    }
+
+    /// Sets the layout direction (horizontal or vertical).
+    pub fn direction(mut self, direction: Direction) -> Self {
+        self.direction = direction;
+        self
     }
 
     /// Sets the spacing between children in cells.
