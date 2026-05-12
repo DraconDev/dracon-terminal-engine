@@ -178,27 +178,73 @@ impl Plane {
 
     /// Writes a string starting at the given position. Returns the x position after writing.
     pub fn put_str(&mut self, mut x: u16, y: u16, text: &str) -> u16 {
-        use crate::text::grapheme_indices;
+        use crate::text::grapheme_width;
 
-        let indices = grapheme_indices(text);
+        let bytes = text.as_bytes();
+        let mut byte_offset = 0;
 
-        for (byte_offset, visual_col) in indices {
+        while byte_offset < bytes.len() {
             if x >= self.width {
                 break;
             }
 
-            // Get the grapheme cluster bytes
-            let remaining = text[byte_offset..].as_bytes();
-            let Some((c, _char_len)) = std::str::from_utf8(remaining)
+            // Get the grapheme cluster info
+            let remaining = &bytes[byte_offset..];
+            let Some((c, char_len)) = std::str::from_utf8(remaining)
                 .ok()
                 .and_then(|s| s.chars().next())
                 .map(|c| (c, c.len_utf8()))
             else {
+                // Invalid UTF-8, skip byte
+                byte_offset += 1;
+                x += 1;
                 continue;
             };
 
-            // Get the width of this character (including handling of paired regional indicators)
-            let width = self.grapheme_width_for_char(text, byte_offset);
+            // Check if this is a regional indicator pair (flag emoji)
+            if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
+                let next_offset = byte_offset + char_len;
+                if next_offset < bytes.len() {
+                    if let Some((next_c, _)) = std::str::from_utf8(&bytes[next_offset..])
+                        .ok()
+                        .and_then(|s| s.chars().next())
+                    {
+                        if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
+                            // Flag emoji: write both regional indicators
+                            if x + 1 >= self.width {
+                                break;
+                            }
+                            let idx = (y * self.width + x) as usize;
+                            self.cells[idx].char = c;
+                            self.cells[idx].transparent = false;
+                            self.cells[idx].skip = false;
+
+                            let next_idx = idx + 1;
+                            self.cells[next_idx].char = next_c;
+                            self.cells[next_idx].transparent = false;
+                            self.cells[next_idx].skip = true;
+
+                            x += 2;
+                            byte_offset += char_len + next_c.len_utf8();
+                            continue;
+                        }
+                    }
+                }
+                // Single regional indicator: skip (zero-width)
+                byte_offset += char_len;
+                continue;
+            }
+
+            // Get width of this grapheme cluster
+            let width = grapheme_width(c);
+
+            // Skip zero-width characters
+            if width == 0 {
+                // Skip combining marks, ZWJ, etc. by consuming them
+                let consumed = Self::consume_grapheme_cluster(text, byte_offset);
+                byte_offset += consumed;
+                continue;
+            }
 
             // If it's a wide char (width 2), we need to ensure space
             if width == 2 && x + 1 >= self.width {
@@ -207,92 +253,73 @@ impl Plane {
 
             // Write the character
             let idx = (y * self.width + x) as usize;
-            if idx < self.cells.len() {
-                self.cells[idx].char = c;
-                self.cells[idx].transparent = false;
-                self.cells[idx].skip = false;
-            }
+            self.cells[idx].char = c;
+            self.cells[idx].transparent = false;
+            self.cells[idx].skip = false;
 
             // Mark next cell as padding for wide characters
             if width == 2 {
                 let next_idx = idx + 1;
-                if next_idx < self.cells.len() {
-                    self.cells[next_idx].char = ' ';
-                    self.cells[next_idx].transparent = false;
-                    self.cells[next_idx].skip = true;
-                }
+                self.cells[next_idx].char = ' ';
+                self.cells[next_idx].transparent = false;
+                self.cells[next_idx].skip = true;
             }
 
+            // Consume the full grapheme cluster (including combining marks)
+            let consumed = Self::consume_grapheme_cluster(text, byte_offset);
+            byte_offset += consumed;
             x += width as u16;
         }
 
         x
     }
 
-    /// Helper to get the visual width of a grapheme cluster at the given byte offset.
-    /// Handles regional indicator pairs (flags) correctly.
-    fn grapheme_width_for_char(&self, text: &str, byte_offset: usize) -> u8 {
-        use crate::text::grapheme_width;
-
+    /// Consumes the grapheme cluster starting at byte_offset and returns the number of bytes consumed.
+    fn consume_grapheme_cluster(text: &str, byte_offset: usize) -> usize {
         let bytes = text.as_bytes();
         let remaining = &bytes[byte_offset..];
 
-        let Some((c, char_len)) = std::str::from_utf8(remaining)
+        let Some((_c, char_len)) = std::str::from_utf8(remaining)
             .ok()
             .and_then(|s| s.chars().next())
             .map(|c| (c, c.len_utf8()))
         else {
-            return 1;
+            return 1; // Invalid UTF-8, consume 1 byte
         };
 
-        // Regional indicator pair detection
-        if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
-            let next_offset = byte_offset + char_len;
-            if next_offset < bytes.len() {
-                if let Some(next_c) = std::str::from_utf8(&bytes[next_offset..])
-                    .ok()
-                    .and_then(|s| s.chars().next())
-                {
-                    if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
-                        return 2; // Flag emoji pair
-                    }
-                }
-            }
-            return 0; // Single regional indicator has no width
-        }
-
-        // ZWJ and other zero-width characters
-        let base_width = grapheme_width(c);
-        if base_width == 0 {
-            return 0;
-        }
-
-        // Check for combining marks following this base character
-        let mut width = base_width as usize;
         let mut pos = byte_offset + char_len;
 
         while pos < bytes.len() {
-            let remaining = &bytes[pos..];
-            if let Some((next_c, next_len)) = std::str::from_utf8(remaining)
+            let rem = &bytes[pos..];
+            let Some((next_c, next_len)) = std::str::from_utf8(rem)
                 .ok()
                 .and_then(|s| s.chars().next())
                 .map(|c| (c, c.len_utf8()))
-            {
-                if next_c == '\u{200D}' {
-                    // ZWJ continues the sequence
-                    pos += next_len;
-                    continue;
-                }
-                if grapheme_width(next_c) == 0 {
-                    // Combining mark included in this cluster, doesn't add width
-                    pos += next_len;
-                    continue;
-                }
+            else {
+                break;
+            };
+
+            // ZWJ continues the cluster
+            if next_c == '\u{200D}' {
+                pos += next_len;
+                continue;
             }
+
+            // Regional indicator after base? Don't consume (start of new grapheme)
+            if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
+                break;
+            }
+
+            // Zero-width characters are part of this cluster
+            if crate::text::grapheme_width(next_c) == 0 {
+                pos += next_len;
+                continue;
+            }
+
             break;
         }
 
-        width as u8
+        pos - byte_offset
     }
 
     /// Sets the filter for this plane.
