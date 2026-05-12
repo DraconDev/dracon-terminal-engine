@@ -1535,9 +1535,6 @@ fn format_permissions(mode: u32) -> String {
         if mode & 0o002 != 0 { 'w' } else { '-' },
         if mode & 0o001 != 0 { 'x' } else { '-' },
     ];
-    perms.iter().collect()
-}
-
 fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
     println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | l: async load | ?: help | q: quit");
