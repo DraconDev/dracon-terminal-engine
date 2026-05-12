@@ -306,7 +306,7 @@ mod tests {
         let nested_rects = nested.layout(Rect::new(0, 0, 50, 20));
         assert_eq!(nested_rects.len(), 2);
         assert_eq!(nested_rects[0].x, 0);
-        assert_eq!(nested_rects[1].x, 21);
+        assert_eq!(nested_rects[1].x, 51); // spacing=1 between two Fixed(50) in available=49
     }
 
     #[test]
