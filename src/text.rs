@@ -205,23 +205,19 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
                 continue;
             }
 
-            // Extended pictographic with ZWJ - extend cluster
-            if next_width == 2 || next_width == 1 && is_extended_pictographic(next_c) {
+            // Check if next char is followed by ZWJ - if so, include it in cluster
+            // This handles emoji sequences like "👩‍👧" (woman + ZWJ + girl)
+            if next_width > 0 {
                 // Check if followed by ZWJ
                 let mut temp_iter = chars.clone();
-                temp_iter.next(); // consume peeked char
+                temp_iter.next(); // consume peeked char for inspection
                 if let Some(&zwj_c) = temp_iter.peek() {
                     if zwj_c == '\u{200D}' {
-                        let next_len = next_c.len_utf8();
+                        // Next emoji is part of this cluster via ZWJ
+                        let emoji_len = next_c.len_utf8();
                         chars.next(); // consume next_c
                         chars.next(); // consume ZWJ
-                        byte_offset += next_len + 3;
-
-                        // Extend the current cluster
-                        if let Some(last) = result.last_mut() {
-                            last.0 = byte_offset; // Move start to this base
-                            last.1 = visual_column;
-                        }
+                        byte_offset += emoji_len + 3;
                         in_zwj_sequence = true;
                         continue;
                     }
