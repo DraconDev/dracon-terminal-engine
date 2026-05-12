@@ -46,7 +46,7 @@ struct DebugOverlayPanel {
     show_help: bool,
     should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
-    frame_count: Cell<u64>,
+    frame_count: StdCell<u64>,
     start_time: Instant,
 }
 
@@ -88,7 +88,7 @@ impl DebugOverlayPanel {
             show_help: false,
             should_quit,
             keybindings: KeybindingSet::default(),
-            frame_count: Cell::new(0),
+            frame_count: StdCell::new(0),
             start_time: Instant::now(),
         }
     }
