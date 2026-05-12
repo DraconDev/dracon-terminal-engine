@@ -35,8 +35,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use unicode_width::UnicodeWidthStr;
-
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -87,8 +85,6 @@ impl Widget for FileManagerRouter {
         Some(self.target.borrow().theme)
     }
 }
-#[cfg(feature = "async")]
-use std::cell::RefCell as StdRefCell;
 
 // Spinner animation states
 const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
@@ -310,7 +306,7 @@ impl FileManager {
             loading_path: None,
             spinner_frame: 0,
             #[cfg(feature = "async")]
-            pending_operation: StdRefCell::new(None),
+            pending_operation: RefCell::new(None),
         };
         fm.update_breadcrumbs();
         fm

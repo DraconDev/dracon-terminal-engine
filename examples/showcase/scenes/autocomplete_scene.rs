@@ -10,6 +10,7 @@ use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::Autocomplete;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use ratatui::layout::Rect;
 
 pub struct AutocompleteScene {
     autocomplete: Autocomplete,

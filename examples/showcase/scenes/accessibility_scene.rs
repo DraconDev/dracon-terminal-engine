@@ -9,7 +9,7 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{Button, Checkbox};
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 pub struct AccessibilityScene {
@@ -189,7 +189,11 @@ impl Scene for AccessibilityScene {
 
         if col >= cb_area.x && col < cb_area.x + cb_area.width && row == cb_area.y {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
-                self.checkbox.handle_key(KeyEvent::new(KeyEventKind::Press, KeyCode::Enter));
+                self.checkbox.handle_key(KeyEvent {
+                    code: KeyCode::Enter,
+                    modifiers: KeyModifiers::empty(),
+                    kind: KeyEventKind::Press,
+                });
                 return true;
             }
         }
