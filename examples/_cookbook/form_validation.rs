@@ -1,5 +1,4 @@
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::rc::Rc;
@@ -32,15 +31,17 @@ fn main() -> std::io::Result<()> {
             ValidationRule::MaxLength(200),
         ]);
 
-    App::new()?
-        .title("Form Validation Demo")
+    let mut app = App::new()?;
+    app.add_widget(Box::new(form), Rect::new(2, 2, 50, 18));
+
+    let q = quit;
+    app.title("Form Validation Demo")
         .fps(30)
         .theme(theme)
-        .add_widget(Box::new(form), Rect::new(2, 2, 50, 18))
         .on_input(move |key| {
             use dracon_terminal_engine::input::event::{KeyCode, KeyModifiers};
             if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
-                quit.store(true, Ordering::SeqCst);
+                q.store(true, Ordering::SeqCst);
                 true
             } else {
                 false

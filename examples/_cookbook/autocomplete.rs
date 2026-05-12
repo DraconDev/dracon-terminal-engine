@@ -154,13 +154,15 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let app = AutocompleteDemo::new(Rc::clone(&should_quit), theme);
 
-    App::new()?
-        .title("Autocomplete Demo")
+    let mut app = App::new()?;
+    app.add_widget(Box::new(app), Rect::new(0, 0, 80, 24));
+
+    let q = should_quit;
+    app.title("Autocomplete Demo")
         .fps(30)
         .theme(theme)
-        .add_widget(Box::new(app), Rect::new(0, 0, 80, 24))
-        .run(|ctx| {
-            if should_quit.load(Ordering::SeqCst) {
+        .run(move |ctx| {
+            if q.load(Ordering::SeqCst) {
                 ctx.stop();
             }
         })
