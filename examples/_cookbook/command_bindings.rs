@@ -794,80 +794,40 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    App::new()?
+    let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
+        .unwrap_or((80, 24));
+
+    let mut app = App::new()?
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .theme(Theme::from_env_or(Theme::nord()))
-        .on_input(move |key| {
-            if key.kind != KeyEventKind::Press {
-                return false;
-            }
-            let mut view = view_for_input.borrow_mut();
-            if kb_input.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else if kb_input.matches(actions::THEME, &key) {
-                let themes = [
-                    Theme::dark(),
-                    Theme::light(),
-                    Theme::cyberpunk(),
-                    Theme::dracula(),
-                    Theme::nord(),
-                    Theme::catppuccin_mocha(),
-                    Theme::gruvbox_dark(),
-                    Theme::tokyo_night(),
-                    Theme::solarized_dark(),
-                    Theme::solarized_light(),
-                    Theme::one_dark(),
-                    Theme::rose_pine(),
-                    Theme::kanagawa(),
-                    Theme::everforest(),
-                    Theme::monokai(),
-                    Theme::warm(),
-                    Theme::cool(),
-                    Theme::forest(),
-                    Theme::sunset(),
-                    Theme::mono(),
-                ];
-                let idx = themes
-                    .iter()
-                    .position(|t| t.name == view.theme.name)
-                    .unwrap_or(0);
-                let next = themes[(idx + 1) % themes.len()];
-                view.on_theme_change(&next);
-                true
-            } else if kb_input.matches(actions::HELP, &key) {
-                view.show_help = !view.show_help;
-                view.dirty = true;
-                true
-            } else if view.show_help && kb_input.matches(actions::BACK, &key) {
-                view.show_help = false;
-                view.dirty = true;
-                true
-            } else {
-                view.handle_key(key)
-            }
-        })
-        .on_tick(move |ctx, tick| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-                return;
-            }
-            let mut view = view_for_tick.borrow_mut();
-            view.tick(tick);
-            view.mark_dirty();
-            let (w, h) = ctx.compositor().size();
-            if view.area.width != w || view.area.height != h {
-                view.set_area(Rect::new(0, 0, w, h));
-            }
-            if view.needs_render() {
-                let area = view.area;
-                let plane = view.render(area);
-                view.clear_dirty();
-                drop(view);
-                ctx.add_plane(plane);
-            }
-        })
-        .run(|_| {})
+        .theme(Theme::from_env_or(Theme::nord()));
+
+    // Add InputRouter widget so framework can detect theme changes via current_theme()
+    app.add_widget(
+        Box::new(InputRouter { view: Rc::clone(&view) }),
+        Rect::new(0, 0, w, h),
+    );
+
+    app.on_tick(move |ctx, tick| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
+        let mut view = view_for_tick.borrow_mut();
+        view.tick(tick);
+        view.mark_dirty();
+        let (w, h) = ctx.compositor().size();
+        if view.area.width != w || view.area.height != h {
+            view.set_area(Rect::new(0, 0, w, h));
+        }
+        if view.needs_render() {
+            let area = view.area;
+            let plane = view.render(area);
+            view.clear_dirty();
+            drop(view);
+            ctx.add_plane(plane);
+        }
+    })
+    .run(|_| {})
 }
