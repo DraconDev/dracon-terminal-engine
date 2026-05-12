@@ -1197,6 +1197,8 @@ fn main() -> io::Result<()> {
         let mut c = chat.borrow_mut();
         c.keybindings = keybindings;
         c.kb_config = kb_config;
+        // Start fetching posts on init
+        c.start_fetch();
     }
     let chat_for_tick = Rc::clone(&chat);
     let chat_for_input = Rc::clone(&chat);
@@ -1216,7 +1218,8 @@ fn main() -> io::Result<()> {
 
         let mut chat = chat_for_tick.borrow_mut();
 
-        // Poll async send operation
+        // Poll async fetch and send operations
+        chat.poll_fetch_result();
         chat.poll_send_result();
         chat.advance_spinner();
 

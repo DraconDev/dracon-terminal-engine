@@ -133,6 +133,15 @@ impl Widget for StatusBadge {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        let _span = tracing::debug_span!(
+            "StatusBadge::render",
+            id = %self.id.0,
+            status = %self.status,
+            width = area.width,
+            height = area.height
+        )
+        .entered();
+
         let status_upper = self.status.to_uppercase();
         let (fg, bg, label) =
             if status_upper.contains("OK") || status_upper.contains("GREEN") || status_upper == "1"

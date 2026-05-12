@@ -1,0 +1,23 @@
+[package]
+name = "dracon-plugins"
+version = "0.1.0"
+edition = "2021"
+description = "Example plugins for Dracon Terminal Engine"
+authors = ["Dracon <dracon@void>"]
+
+[dependencies]
+dracon-terminal-engine = { path = "../..", features = [] }
+sysinfo = "0.32"
+
+[lib]
+name = "dracon_plugins"
+crate-type = ["cdylib", "rlib"]
+path = "lib.rs"
+
+[[example]]
+name = "stat_widget"
+path = "stat_widget.rs"
+
+[[example]]
+name = "welcome_widget"
+path = "welcome_widget.rs"

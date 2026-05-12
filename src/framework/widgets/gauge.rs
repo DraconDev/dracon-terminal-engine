@@ -203,6 +203,16 @@ impl Widget for Gauge {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        let _span = tracing::debug_span!(
+            "Gauge::render",
+            id = %self.id.0,
+            label = %self.label,
+            value = self.value,
+            width = area.width,
+            height = area.height
+        )
+        .entered();
+
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
 
