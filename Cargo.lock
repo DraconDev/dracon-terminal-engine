@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "dracon-terminal-engine"
-version = "29.11.519"
+version = "29.11.520"
 dependencies = [
  "bitflags",
  "chrono",
