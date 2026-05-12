@@ -594,8 +594,10 @@ impl App {
                 }
                 Err(_) => {}
             }
+            drop(_input_span);
 
             {
+                let _widget_span = tracing::debug_span!("widget_dispatch").entered();
                 let mut widgets = self.widgets.borrow_mut();
                 let mut sorted: Vec<_> = widgets.iter_mut().collect();
                 sorted.sort_by_key(|w| w.z_index());
@@ -604,10 +606,18 @@ impl App {
                         continue;
                     }
                     let area = w.area();
+                    let _render_span = tracing::debug_span!(
+                        "widget_render",
+                        widget_id = w.id().0,
+                        width = area.width,
+                        height = area.height
+                    )
+                    .entered();
                     let plane = w.render(area);
                     w.clear_dirty();
                     self.compositor.add_plane(plane);
                 }
+                drop(_widget_span);
             }
 
             if self.last_tick_time.elapsed() >= self.tick_interval {

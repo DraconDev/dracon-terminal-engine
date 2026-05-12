@@ -525,13 +525,29 @@ impl ChatState {
             }
         }
 
-        // Online status
+        // Online status (show "Loading..." or "Online" depending on state)
         let status_x = (area.width as usize).saturating_sub(12);
-        for (i, c) in "Online".chars().enumerate() {
+        let status_text = if self.is_loading {
+            "Loading..."
+        } else {
+            "Online"
+        };
+        for (i, c) in status_text.chars().enumerate() {
             let idx = status_x + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.success;
+                plane.cells[idx].fg = if self.is_loading { t.warning } else { t.success };
+            }
+        }
+
+        // Refresh button zone
+        let refresh_x = area.width.saturating_sub(13);
+        self.zones.borrow_mut().register(ZONE_REFRESH_BTN, refresh_x, 0, 7, 1);
+        for (i, c) in "[R]".chars().enumerate() {
+            let idx = refresh_x as usize + i;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.secondary;
             }
         }
 
@@ -559,6 +575,54 @@ impl ChatState {
         let visible_count = (list_h as usize).saturating_sub(2).max(1);
         let start = self.scroll_offset;
         let end = (start + visible_count).min(self.messages.len());
+
+        // Loading state — show spinner centered in message area
+        if self.is_loading {
+            let spinner_text = format!(
+                "{} Fetching posts from JSONPlaceholder...",
+                SPINNER_FRAMES[self.spinner_frame]
+            );
+            let center_x = (area.width.saturating_sub(spinner_text.len() as u16)) / 2;
+            let center_y = header_h + list_h / 2;
+            for (i, c) in spinner_text.chars().enumerate() {
+                let idx = (center_y * area.width + center_x + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+            let hint = "Click [R] to refresh";
+            let hint_x = (area.width.saturating_sub(hint.len() as u16)) / 2;
+            for (i, c) in hint.chars().enumerate() {
+                let idx = ((center_y + 1) * area.width + hint_x + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg_muted;
+                }
+            }
+        } else if self.messages.is_empty() && self.loading_error.is_some() {
+            // Error state
+            let err_msg = format!("Error: {}", self.loading_error.as_ref().unwrap());
+            let center_x = (area.width.saturating_sub(err_msg.len() as u16)) / 2;
+            let center_y = header_h + list_h / 2;
+            for (i, c) in err_msg.chars().enumerate() {
+                let idx = (center_y * area.width + center_x + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.error;
+                }
+            }
+            let hint = "Click [R] to retry";
+            let hint_x = (area.width.saturating_sub(hint.len() as u16)) / 2;
+            for (i, c) in hint.chars().enumerate() {
+                let idx = ((center_y + 1) * area.width + hint_x + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg_muted;
+                }
+            }
+        }
 
         for (i, msg) in self.messages[start..end].iter().enumerate() {
             let row = header_h + 1 + i as u16;
