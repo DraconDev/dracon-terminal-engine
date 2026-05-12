@@ -88,7 +88,7 @@ impl Layout {
     }
 
     /// Creates a sub-layout from a child rect.
-    pub fn nested(&self, rect: Rect) -> Layout {
+    pub fn nested(&self, _rect: Rect) -> Layout {
         Layout {
             constraints: self.constraints.clone(),
             direction: self.direction,

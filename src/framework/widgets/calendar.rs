@@ -347,7 +347,7 @@ impl crate::framework::widget::Widget for Calendar {
                 plane.cells[idx].fg = self.theme.primary;
                 plane.cells[idx].style = Styles::empty();
             }
-            self.zones.register(ZoneId::PrevMonth, cal_x.saturating_sub(2), cal_y, 1, 1);
+            self.zones.borrow_mut().register(ZoneId::PrevMonth, cal_x.saturating_sub(2), cal_y, 1, 1);
         }
 
         // Month/Year title
@@ -371,7 +371,7 @@ impl crate::framework::widget::Widget for Calendar {
                 plane.cells[idx].fg = self.theme.primary;
                 plane.cells[idx].style = Styles::empty();
             }
-            self.zones.register(ZoneId::NextMonth, next_btn_x, cal_y, 1, 1);
+            self.zones.borrow_mut().register(ZoneId::NextMonth, next_btn_x, cal_y, 1, 1);
         }
 
         // === DAY HEADERS (Mo Tu We Th Fr Sa Su) ===
@@ -439,7 +439,7 @@ impl crate::framework::widget::Widget for Calendar {
                     }
 
                     // Register hit zone for this day
-                    self.zones.register(ZoneId::Day(cell_index), cell_x, cell_y, 2, 1);
+                    self.zones.borrow_mut().register(ZoneId::Day(cell_index), cell_x, cell_y, 2, 1);
                 } else {
                     // Empty cell
                     for j in 0..2u16 {
@@ -538,8 +538,22 @@ impl crate::framework::widget::Widget for Calendar {
     fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
         use crate::input::event::MouseEventKind;
 
-        // Dispatch to hit zones
-        if let Some(zone_id) = self.zones.dispatch(col, row) {
+        // Dispatch to hit zones - clone the zone_id to avoid borrow conflicts
+        let zone_id = self.zones.borrow().dispatch(col, row);
+        if zone_id.is_none() {
+            // Click outside calendar
+            match kind {
+                MouseEventKind::Moved => {
+                    if self.hovered_day.is_some() {
+                        self.hovered_day = None;
+                        self.dirty = true;
+                    }
+                    false
+                }
+                _ => false,
+            }
+        } else {
+            let zone_id = zone_id.unwrap();
             match kind {
                 MouseEventKind::Moved => {
                     if let ZoneId::Day(idx) = zone_id {
@@ -572,18 +586,6 @@ impl crate::framework::widget::Widget for Calendar {
                     }
                 }
                 _ => true,
-            }
-        } else {
-            // Click outside calendar
-            match kind {
-                MouseEventKind::Moved => {
-                    if self.hovered_day.is_some() {
-                        self.hovered_day = None;
-                        self.dirty = true;
-                    }
-                    false
-                }
-                _ => false,
             }
         }
     }

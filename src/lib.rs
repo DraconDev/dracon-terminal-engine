@@ -70,6 +70,8 @@ pub mod system;
 
 #[doc = "General utilities (visual width, truncate, formatting helpers)."]
 pub mod utils;
+#[doc = "Text handling utilities with Unicode grapheme cluster awareness."]
+pub mod text;
 #[doc = "Visual helpers: icons, OSC strings (clipboard, hyperlink, bell), sync mode 2026."]
 pub mod visuals;
 #[doc = "Built-in widgets (TextEditor with syntect highlighting, TextInput)."]
