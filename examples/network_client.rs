@@ -499,16 +499,19 @@ impl NetworkApp {
                 if self.selected > 0 {
                     self.selected -= 1;
                 }
+                self.dirty = true;
                 true
             }
             KeyCode::Down if !self.view_detail && !self.posts.is_empty() => {
                 if self.selected + 1 < self.posts.len() {
                     self.selected += 1;
                 }
+                self.dirty = true;
                 true
             }
             KeyCode::Enter if !self.posts.is_empty() => {
                 self.view_detail = !self.view_detail;
+                self.dirty = true;
                 true
             }
             _ => false,
@@ -540,7 +543,7 @@ impl Widget for NetworkWidget {
         self.area.set(area);
     }
     fn needs_render(&self) -> bool {
-        true
+        self.app.borrow().dirty || self.app.borrow().loading
     }
     fn render(&self, area: Rect) -> Plane {
         let app = self.app.borrow();
