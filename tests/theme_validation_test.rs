@@ -12,28 +12,7 @@ use ratatui::layout::Rect;
 
 /// All built-in themes to test against.
 fn all_themes() -> Vec<Theme> {
-    vec![
-        Theme::dark(),
-        Theme::light(),
-        Theme::cyberpunk(),
-        Theme::dracula(),
-        Theme::nord(),
-        Theme::catppuccin_mocha(),
-        Theme::gruvbox_dark(),
-        Theme::tokyo_night(),
-        Theme::solarized_dark(),
-        Theme::solarized_light(),
-        Theme::one_dark(),
-        Theme::rose_pine(),
-        Theme::kanagawa(),
-        Theme::everforest(),
-        Theme::monokai(),
-        Theme::warm(),
-        Theme::cool(),
-        Theme::forest(),
-        Theme::sunset(),
-        Theme::mono(),
-    ]
+    Theme::all()
 }
 
 /// Assert that every cell in the plane has bg != Color::Reset.

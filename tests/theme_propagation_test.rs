@@ -308,23 +308,7 @@ fn test_default_widget_on_theme_change_is_noop() {
 
 #[test]
 fn test_all_themes_produce_different_divider_colors() {
-    let themes = [
-        Theme::dark(),
-        Theme::light(),
-        Theme::cyberpunk(),
-        Theme::dracula(),
-        Theme::nord(),
-        Theme::catppuccin_mocha(),
-        Theme::gruvbox_dark(),
-        Theme::tokyo_night(),
-        Theme::solarized_dark(),
-        Theme::solarized_light(),
-        Theme::one_dark(),
-        Theme::rose_pine(),
-        Theme::kanagawa(),
-        Theme::everforest(),
-        Theme::monokai(),
-    ];
+    let themes = Theme::all();
 
     let colors: Vec<_> = themes.iter().map(|t| t.fg_muted).collect();
 

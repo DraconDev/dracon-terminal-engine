@@ -467,29 +467,24 @@ fn test_theme_debug() {
 
 #[test]
 fn test_all_themes_have_scrollbar_width_1() {
-    for theme in [
-        Theme::dark(),
-        Theme::light(),
-        Theme::cyberpunk(),
-        Theme::dracula(),
-        Theme::nord(),
-        Theme::catppuccin_mocha(),
-        Theme::gruvbox_dark(),
-        Theme::tokyo_night(),
-        Theme::solarized_dark(),
-        Theme::solarized_light(),
-        Theme::one_dark(),
-        Theme::rose_pine(),
-        Theme::kanagawa(),
-        Theme::everforest(),
-        Theme::monokai(),
-    ] {
+    for theme in Theme::all() {
         assert_eq!(
             theme.scrollbar_width, 1,
             "scrollbar_width for {} should be 1",
             theme.name
         );
     }
+}
+
+#[test]
+fn test_theme_all_returns_21_themes() {
+    let themes = Theme::all();
+    assert_eq!(themes.len(), 21, "Theme::all() should return 21 themes");
+    // Verify no duplicate names
+    let mut names: Vec<&str> = themes.iter().map(|t| t.name).collect();
+    names.sort();
+    names.dedup();
+    assert_eq!(names.len(), 21, "all 21 themes should have unique names");
 }
 
 // === No color is Color::Reset in built-in themes ===
