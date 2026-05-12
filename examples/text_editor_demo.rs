@@ -999,6 +999,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &Keyb
         ("Ctrl+W", "Close tab"),
         ("Ctrl+F", "Search"),
         ("Ctrl+S", "Save mock"),
+        ("F12", "Toggle profiler"),
         ("Tab", "Next tab"),
         ("↑↓←→", "Navigate"),
         (kb_theme, "Cycle theme"),
