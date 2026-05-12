@@ -134,11 +134,6 @@ pub fn grapheme_width(c: char) -> u8 {
         return 2;
     }
 
-    // Emoji that are typically wide (displayed at 2 cells in most terminals)
-    // These are primarily emoji that contain regional indicators or other wide elements
-    // Note: Most emoji are actually narrow (1 cell) in modern terminals
-    // The unicode-width crate handles most of these correctly
-
     // Use unicode-width for other cases
     use unicode_width::UnicodeWidthChar;
     UnicodeWidthChar::width(c).unwrap_or(1) as u8
@@ -172,10 +167,11 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             .min(bytes.len() - byte_offset);
 
         // Get the current character
-        let Some((c, len)) = std::str::from_utf8(&bytes[byte_offset..byte_offset + char_bytes])
-            .ok()
-            .and_then(|s| s.chars().next())
-            .map(|c| (c, c.len_utf8()))
+        let Some((c, len)) =
+            std::str::from_utf8(&bytes[byte_offset..byte_offset + char_bytes])
+                .ok()
+                .and_then(|s| s.chars().next())
+                .map(|c| (c, c.len_utf8()))
         else {
             // Invalid UTF-8, treat as single byte
             if byte_offset + 1 < bytes.len() {
@@ -187,16 +183,16 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
         };
 
         // Handle regional indicator symbols (U+1F1E6 to U+1F1FF)
-        // Handle regional indicator symbols (U+1F1E6 to U+1F1FF)
         // These form 2-cell flag emojis when in pairs
         if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
             // Check if there's a second regional indicator following
             let next_offset = byte_offset + len;
             if next_offset < bytes.len() {
-                if let Some(next_c) =
-                    std::str::from_utf8(&bytes[next_offset..]).ok().and_then(|s| s.chars().next())
+                if let Some((next_c, next_len)) =
+                    std::str::from_utf8(&bytes[next_offset..])
+                        .ok()
+                        .and_then(|s| s.chars().next())
                 {
-                    let next_len = next_c.len_utf8();
                     if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                         // Flag emoji: both RIs together take 2 cells
                         result.push((byte_offset, visual_column));
@@ -231,13 +227,15 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
         while byte_offset < bytes.len() {
             // Peek at next character
             let remaining = &bytes[byte_offset..];
-            let Some((next_c, next_len)) = std::str::from_utf8(remaining)
-                .ok()
-                .and_then(|s| s.chars().next())
-                .map(|c| (c, c.len_utf8()))
+            let Some((next_c, next_len)) =
+                std::str::from_utf8(remaining)
+                    .ok()
+                    .and_then(|s| s.chars().next())
+                    .map(|c| (c, c.len_utf8()))
             else {
                 break;
             };
+
             // ZWJ continues the cluster
             if next_c == '\u{200D}' {
                 byte_offset += next_len;
@@ -447,8 +445,8 @@ mod tests {
 
         // Should be: US_flag, space, France_flag
         assert_eq!(indices.len(), 3);
-        assert_eq!(indices[0].1, 0);  // US flag starts at 0 (takes 2)
-        assert_eq!(indices[1].1, 2);  // space at 2
-        assert_eq!(indices[2].1, 3);  // France flag at 3 (takes 2)
+        assert_eq!(indices[0].1, 0); // US flag starts at 0 (takes 2)
+        assert_eq!(indices[1].1, 2); // space at 2
+        assert_eq!(indices[2].1, 3); // France flag at 3 (takes 2)
     }
 }
