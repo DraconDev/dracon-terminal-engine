@@ -42,7 +42,7 @@ impl AutocompleteScene {
             autocomplete: Autocomplete::new(WidgetId::new(100), suggestions)
                 .with_theme(theme)
                 .with_max_visible(6)
-                .on_select(|s| { /* selection callback */ }),
+                .on_select(|_s| { /* selection callback */ }),
             theme,
             show_help: false,
             selected_item: None,
@@ -87,8 +87,8 @@ impl Scene for AutocompleteScene {
         // Autocomplete widget area
         let input_area = Rect::new(area.x + 2, area.y + 3, 30, 1);
         let dropdown_area = Rect::new(area.x + 2, area.y + 4, 30, 10);
-        self.autocomplete.set_area(input_area);
-        let ac_plane = self.autocomplete.render(dropdown_area.union(input_area));
+        let ac_area = Rect::new(input_area.x, input_area.y, input_area.width, input_area.height + dropdown_area.height);
+        let ac_plane = self.autocomplete.render(ac_area);
         blit_to(&mut plane, &ac_plane, input_area.x as usize, input_area.y as usize);
 
         // Selected item display

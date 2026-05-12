@@ -35,8 +35,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use unicode_width::UnicodeWidthStr;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // INPUT ROUTER FOR ASYNC POLLING

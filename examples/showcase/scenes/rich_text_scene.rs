@@ -8,7 +8,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::RichText;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
 pub struct RichTextScene {

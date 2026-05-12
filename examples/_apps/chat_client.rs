@@ -14,7 +14,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 #[cfg(feature = "async")]
-use std::cell::RefCell as StdRefCell;
+use std::cell::RefCell;
 
 // Spinner frames
 const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
@@ -71,8 +71,9 @@ struct ChatState {
     is_sending: bool,
     pending_message: Option<String>,
     spinner_frame: usize,
+    error: Option<String>,
     #[cfg(feature = "async")]
-    pending_send: StdRefCell<Option<tokio::task::JoinHandle<()>>>,
+    pending_send: RefCell<Option<tokio::task::JoinHandle<()>>>,
 }
 
 // Zone IDs for mouse dispatch
@@ -117,8 +118,9 @@ impl ChatState {
             is_sending: false,
             pending_message: None,
             spinner_frame: 0,
+            error: None,
             #[cfg(feature = "async")]
-            pending_send: StdRefCell::new(None),
+            pending_send: RefCell::new(None),
         }
     }
 
@@ -208,17 +210,13 @@ impl ChatState {
                     let handle = handle_opt.take().unwrap();
                     drop(handle_opt); // Release borrow
 
-                    // Poll the handle
-                    match handle.now_or_never() {
-                        Some(Ok(())) => true,
-                        Some(Err(e)) => {
+                    // Block on the result since is_finished() returned true
+                    let result = tokio::runtime::Handle::current().block_on(handle);
+                    match result {
+                        Ok(()) => true,
+                        Err(e) => {
                             self.error = Some(format!("Send error: {}", e));
                             true
-                        }
-                        None => {
-                            // Not ready yet - put it back
-                            *self.pending_send.borrow_mut() = Some(handle);
-                            false
                         }
                     }
                 } else {

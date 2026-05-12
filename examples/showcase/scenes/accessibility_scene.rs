@@ -168,13 +168,13 @@ impl Scene for AccessibilityScene {
             KeyCode::Char('t') => {
                 self.enabled = !self.enabled;
                 if self.enabled {
-                    self.announce("Accessibility announcements enabled".to_string());
+                    self.announce("Accessibility announcements enabled");
                 }
                 true
             }
             _ => {
                 if self.checkbox.handle_key(key.clone()) {
-                    self.announce(format!("Checkbox: {}", if self.checkbox.is_checked() { "checked" } else { "unchecked" }));
+                    self.announce(&format!("Checkbox: {}", if self.checkbox.is_checked() { "checked" } else { "unchecked" }));
                     true
                 } else {
                     self.submit_btn.handle_key(key)
@@ -199,7 +199,7 @@ impl Scene for AccessibilityScene {
         }
         if col >= btn_area.x && col < btn_area.x + btn_area.width && row == btn_area.y {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
-                self.announce("Form submitted successfully".to_string());
+                self.announce("Form submitted successfully");
                 return true;
             }
         }
