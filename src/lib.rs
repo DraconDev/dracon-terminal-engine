@@ -7,26 +7,29 @@
 //!
 //! ## Quick Start
 //!
-//! ```no_run
+//! ```ignore
+//! // Pattern 1 — Widget trait (auto-render)
 //! use dracon_terminal_engine::prelude::*;
 //!
-//! // Pattern 1 — Widget trait (auto-render)
-//! struct MyApp {
-//!     theme: Theme,
-//! }
+//! struct MyApp { theme: Theme }
 //! impl Widget for MyApp {
-//!     fn render(&self, area: Rect) -> Plane {
-//!         let mut plane = Plane::new(0, area.width, area.height);
-//!         plane.fill_bg(self.theme.bg);
-//!         plane.put_str(0, 0, "Hello from Dracon!");
-//!         plane
-//!     }
+//!     fn id(&self) -> WidgetId { WidgetId::new() }
+//!     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
 //!     fn needs_render(&self) -> bool { true }
+//!     fn render(&self, area: Rect) -> Plane {
+//!         let mut p = Plane::new(0, area.width, area.height);
+//!         p.fill_bg(self.theme.bg);
+//!         p.put_str(0, 0, "Hello from Dracon!");
+//!         p
+//!     }
 //! }
 //!
+//! // Pattern 2 — Closure-based (manual render)
 //! App::new().unwrap()
 //!     .title("My App")
-//!     .add_widget(Box::new(MyApp { theme: Theme::dark() }), Rect::new(0, 0, 80, 24))
+//!     .on_tick(|ctx, _tick| {
+//!         ctx.add_plane(Plane::new(0, 80, 24)); // render here
+//!     })
 //!     .run();
 //! ```
 //!
