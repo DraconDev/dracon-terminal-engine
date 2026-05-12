@@ -35,7 +35,6 @@ impl NotificationCenterScene {
     }
 
     fn add_random_notification(&mut self) {
-        use std::time::Duration;
         let kinds = [
             (NotificationKind::Info, "Info", "New message received"),
             (NotificationKind::Success, "Done", "Task completed"),
