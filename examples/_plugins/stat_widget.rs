@@ -104,8 +104,8 @@ impl Widget for StatWidget {
         self.sys.borrow_mut().refresh_cpu_all();
         let cpu = self.sys.borrow().global_cpu_usage();
         let mem_pct = self.memory_usage();
-        let mem_used = self.used_memory() / (1024 * 1024); // MB
-        let mem_total = self.total_memory() / (1024 * 1024); // MB
+        let mem_used = self.sys.borrow().used_memory() / (1024 * 1024); // MB
+        let mem_total = self.sys.borrow().total_memory() / (1024 * 1024); // MB
 
         // Draw border
         for col in 0..28 {

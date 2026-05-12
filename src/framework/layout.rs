@@ -32,12 +32,6 @@ pub enum Constraint {
     Ratio(u16, u16),
 }
 
-impl Default for Constraint {
-    fn default() -> Self {
-        Constraint::Percentage(100)
-    }
-}
-
 impl Constraint {
     /// Resolves a constraint against the available space, given fixed amounts already consumed.
     pub fn resolve(self, available: u16, fixed_consumed: u16) -> u16 {
