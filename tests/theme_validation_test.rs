@@ -135,7 +135,7 @@ fn test_all_21_themes_no_panic() {
     let themes = all_themes();
     assert_eq!(themes.len(), 21, "Expected 21 themes");
 
-    for theme in &themes {
+    for theme in themes {
         let mut cb = Checkbox::new(WidgetId::new(1), "Test");
         cb.on_theme_change(theme);
         let _ = cb.render(Rect::new(0, 0, 20, 1));
