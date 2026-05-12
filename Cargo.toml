@@ -1,17 +1,18 @@
 [package]
+[package]
 name = "dracon-terminal-engine"
-version = "29.11.622"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
+license-file = "LICENSE-MIT"
 authors = ["Dracon <dracon@void>"]
 readme = "README.md"
-description = "A terminal application framework for Rust — App, widgets, compositor, themes, and 20 built-in themes"
+description = "A terminal application framework for Rust with composable widgets, z-indexed compositor, themes, and TextEditor"
 repository = "https://github.com/DraconDev/dracon-terminal-engine"
 homepage = "https://github.com/DraconDev/dracon-terminal-engine"
 documentation = "https://docs.rs/dracon-terminal-engine"
 keywords = ["terminal", "tui", "framework", "compositor", "cli"]
-categories = ["command-line-interface", "rendering"]
-
+categories = ["command-line-interface", "gui"]
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
 ratatui = { version = "0.29", default-features = false }

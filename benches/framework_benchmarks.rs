@@ -272,6 +272,85 @@ fn bench_theme_creation(c: &mut Criterion) {
 }
 
 // =============================================================================
+// CellPool Benchmarks
+// =============================================================================
+
+fn bench_cellpool_acquire_vs_plane_new(c: &mut Criterion) {
+    c.bench_function("cellpool_acquire_80x24_vs_plane_new", |b| {
+        b.iter(|| {
+            let mut pool = CellPool::new();
+            black_box(acquire_plane_cells(&mut pool, 80, 24))
+        })
+    });
+
+    c.bench_function("plane_new_80x24", |b| {
+        b.iter(|| Plane::new(black_box(0), black_box(80), black_box(24)))
+    });
+
+    c.bench_function("cellpool_acquire_200x60_vs_plane_new", |b| {
+        b.iter(|| {
+            let mut pool = CellPool::new();
+            black_box(acquire_plane_cells(&mut pool, 200, 60))
+        })
+    });
+
+    c.bench_function("plane_new_200x60", |b| {
+        b.iter(|| Plane::new(black_box(0), black_box(200), black_box(60)))
+    });
+}
+
+fn bench_cellpool_roundtrip(c: &mut Criterion) {
+    c.bench_function("cellpool_acquire_release_80x24", |b| {
+        let mut pool = CellPool::new();
+        b.iter(|| {
+            let cells = acquire_plane_cells(&mut pool, 80, 24);
+            release_plane_cells(&mut pool, 80, 24, cells);
+        })
+    });
+
+    c.bench_function("plane_new_80x24", |b| {
+        b.iter(|| Plane::new(black_box(0), black_box(80), black_box(24)))
+    });
+
+    c.bench_function("cellpool_acquire_release_200x60", |b| {
+        let mut pool = CellPool::new();
+        b.iter(|| {
+            let cells = acquire_plane_cells(&mut pool, 200, 60);
+            release_plane_cells(&mut pool, 200, 60, cells);
+        })
+    });
+
+    c.bench_function("plane_new_200x60", |b| {
+        b.iter(|| Plane::new(black_box(0), black_box(200), black_box(60)))
+    });
+}
+
+fn bench_cellpool_hit_vs_miss(c: &mut Criterion) {
+    c.bench_function("cellpool_hit_80x24_1000_pooled", |b| {
+        // Pre-populate pool with 1000 cells (enough for one 80x24 plane = 1920 cells)
+        // This simulates a pool hit scenario where cells are already available
+        let mut pool = CellPool::new();
+        // Warm up the pool
+        for _ in 0..1000 {
+            pool.release_cells(80, 24, pool.acquire_cells(80 * 24));
+        }
+        b.iter(|| {
+            let cells = acquire_plane_cells(&mut pool, 80, 24);
+            release_plane_cells(&mut pool, 80, 24, cells);
+        })
+    });
+
+    c.bench_function("cellpool_miss_80x24_empty_pool", |b| {
+        // Empty pool - simulates a pool miss where cells must be freshly allocated
+        let mut pool = CellPool::new();
+        b.iter(|| {
+            let cells = acquire_plane_cells(&mut pool, 80, 24);
+            release_plane_cells(&mut pool, 80, 24, cells);
+        })
+    });
+}
+
+// =============================================================================
 // Group Definitions
 // =============================================================================
 
@@ -286,5 +365,11 @@ criterion_group!(focus, bench_focus_navigation);
 criterion_group!(animation, bench_animation_tick, bench_animation_value);
 criterion_group!(hitzone, bench_hitzone_dispatch, bench_scoped_zone_registry);
 criterion_group!(theme, bench_theme_creation);
+criterion_group!(
+    cell_pool,
+    bench_cellpool_acquire_vs_plane_new,
+    bench_cellpool_roundtrip,
+    bench_cellpool_hit_vs_miss
+);
 
-criterion_main!(compositor, widgets, focus, animation, hitzone, theme);
+criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool);

@@ -1,0 +1,103 @@
+{
+  "name": "dracon-tui-preview",
+  "displayName": "Dracon TUI Preview",
+  "description": "Live TUI preview for Dracon Terminal Engine",
+  "version": "0.1.0",
+  "publisher": "dracon",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage: rust",
+    "onCommand: dracon.startPreview"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dracon.startPreview",
+        "title": "Start TUI Preview",
+        "category": "Dracon"
+      },
+      {
+        "command": "dracon.stopPreview",
+        "title": "Stop TUI Preview",
+        "category": "Dracon"
+      },
+      {
+        "command": "dracon.refreshPreview",
+        "title": "Refresh TUI Preview",
+        "category": "Dracon"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "dracon.startPreview",
+          "when": "editorLangId == rust",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "dracon.startPreview",
+          "when": "editorLangId == rust",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Dracon TUI Preview",
+      "properties": {
+        "dracon.showcasePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/target/debug/showcase",
+          "description": "Path to the Dracon showcase binary"
+        },
+        "dracon.theme": {
+          "type": "string",
+          "default": "nord",
+          "description": "Default theme for TUI preview",
+          "enum": [
+            "nord",
+            "dracula",
+            "monokai",
+            "solarized",
+            "gruvbox",
+            "cyberpunk"
+          ]
+        },
+        "dracon.lspServerPath": {
+          "type": "string",
+          "default": "${workspaceFolder}/target/debug/dracon-lsp",
+          "description": "Path to the Dracon LSP server binary"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "dracon-tui",
+        "aliases": ["Dracon TUI"],
+        "moniker": "dracon-tui"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "cd ext && npm install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@types/mocha": "^10.0.0",
+    "typescript": "^5.3.0",
+    "tslint": "^6.1.3"
+  },
+  "dependencies": {}
+}
