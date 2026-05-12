@@ -15,6 +15,7 @@
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
+use std::os::fd::AsFd;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -155,7 +156,7 @@ impl CommandBindings {
 
 impl Default for CommandBindings {
     fn default() -> Self {
-        Self::new()
+        Self::new(Arc::new(AtomicBool::new(false)))
     }
 }
 
