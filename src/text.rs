@@ -187,14 +187,16 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
         };
 
         // Handle regional indicator symbols (U+1F1E6 to U+1F1FF)
+        // Handle regional indicator symbols (U+1F1E6 to U+1F1FF)
         // These form 2-cell flag emojis when in pairs
         if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
             // Check if there's a second regional indicator following
             let next_offset = byte_offset + len;
             if next_offset < bytes.len() {
-                if let Some((next_c, next_len)) =
+                if let Some(next_c) =
                     std::str::from_utf8(&bytes[next_offset..]).ok().and_then(|s| s.chars().next())
                 {
+                    let next_len = next_c.len_utf8();
                     if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                         // Flag emoji: both RIs together take 2 cells
                         result.push((byte_offset, visual_column));
@@ -236,7 +238,6 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             else {
                 break;
             };
-
             // ZWJ continues the cluster
             if next_c == '\u{200D}' {
                 byte_offset += next_len;
