@@ -43,12 +43,10 @@ regex = "1.10"
 rusqlite = { version = "0.32", features = ["bundled"] }
 tracing = { version = "0.1", default-features = false, features = ["std"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
+unicode-segmentation = "1.10"
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 libc = "0.2"
-
-[dependencies]
-unicode-segmentation = "1.10"
 
 [dev-dependencies]
 tempfile = "3.10"
