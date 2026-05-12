@@ -361,7 +361,8 @@ impl Widget for Autocomplete {
                 if row == 0 {
                     false
                 } else if self.dropdown_open {
-                    if let Some(abs_idx) = self.zones.borrow().dispatch(col, row) {
+                    let zone_hit = self.zones.borrow().dispatch(col, row);
+                    if let Some(abs_idx) = zone_hit {
                         if self.selected != Some(abs_idx) {
                             self.selected = Some(abs_idx);
                             self.dirty = true;
@@ -378,7 +379,8 @@ impl Widget for Autocomplete {
                 if row == 0 {
                     self.base.handle_mouse(kind, col, row)
                 } else if self.dropdown_open {
-                    if let Some(abs_idx) = self.zones.borrow().dispatch(col, row) {
+                    let zone_hit = self.zones.borrow().dispatch(col, row);
+                    if let Some(abs_idx) = zone_hit {
                         self.select_suggestion(abs_idx);
                         true
                     } else {
