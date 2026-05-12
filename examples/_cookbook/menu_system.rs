@@ -529,7 +529,7 @@ impl Widget for MenuApp {
         } else if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
                 KeyCode::Char('n') => {
-                    if self.keybindings.matches(actions::NEW, &key) {
+                    if self.keybindings.matches(actions::NEW_ITEM, &key) {
                         self.toast("New file created", ToastKind::Success);
                         true
                     } else {
@@ -558,12 +558,8 @@ impl Widget for MenuApp {
                     }
                 }
                 KeyCode::Char('v') => {
-                    if self.keybindings.matches(actions::PASTE, &key) {
-                        self.toast("Pasted from clipboard", ToastKind::Info);
-                        true
-                    } else {
-                        false
-                    }
+                    self.toast("Pasted from clipboard", ToastKind::Info);
+                    true
                 }
                 KeyCode::Char('a') => {
                     self.toast("All items selected", ToastKind::Info);
