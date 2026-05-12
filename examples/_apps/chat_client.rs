@@ -249,7 +249,7 @@ impl ChatState {
                     match result {
                         Ok(()) => true,
                         Err(e) => {
-                            self.error = Some(format!("Send error: {}", e));
+                            self.loading_error = Some(format!("Send error: {}", e));
                             true
                         }
                     }

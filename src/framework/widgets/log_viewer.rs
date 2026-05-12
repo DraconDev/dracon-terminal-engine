@@ -246,6 +246,16 @@ impl Widget for LogViewer {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        let _span = tracing::debug_span!(
+            "LogViewer::render",
+            id = %self.id.0,
+            lines = self.lines.len(),
+            auto_scroll = self.auto_scroll,
+            width = area.width,
+            height = area.height
+        )
+        .entered();
+
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
 
