@@ -101,7 +101,7 @@ fn test_key_value_grid_dirty_lifecycle() {
 fn test_key_value_grid_with_theme() {
     let theme = Theme::gruvbox_dark();
     let grid = KeyValueGrid::new().with_theme(theme);
-    assert_eq!(grid.theme.name, "gruvbox-dark");
+    assert_eq!(grid.theme.name, "gruvbox_dark");
 }
 
 #[test]
