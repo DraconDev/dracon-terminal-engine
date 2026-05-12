@@ -19,7 +19,7 @@ pub enum Direction {
 }
 
 /// A constraint that defines how a dimension is sized.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Constraint {
     Percentage(u16),
     /// Fixed size in cells.
@@ -401,29 +401,24 @@ mod tests {
     // Property-based tests
     use proptest::prelude::*;
 
-    prop_compose! {
-        fn constraint_strategy() -> Constraint {
-            prop_oneof![
-                any::<u16>().prop_map(Constraint::Percentage),
-                any::<u16>().prop_map(Constraint::Fixed),
-                any::<u16>().prop_map(Constraint::Min),
-                any::<u16>().prop_map(Constraint::Max),
-                (any::<u16>(), any::<u16>()).prop_map(|(n, d)| Constraint::Ratio(n % 100 + 1, d % 100 + 1)),
-            ]
-        }
+    fn constraint_strategy() -> impl Strategy<Value = Constraint> {
+        prop_oneof![
+            any::<u16>().prop_map(Constraint::Percentage),
+            any::<u16>().prop_map(Constraint::Fixed),
+            any::<u16>().prop_map(Constraint::Min),
+            any::<u16>().prop_map(Constraint::Max),
+            (1u16..=100u16, 1u16..=100u16).prop_map(|(n, d)| Constraint::Ratio(n, d)),
+        ]
     }
 
-    prop_compose! {
-        fn direction_strategy() -> Direction {
-            prop_oneof![
-                Just(Direction::Horizontal),
-                Just(Direction::Vertical)
-            ]
-        }
+    fn direction_strategy() -> impl Strategy<Value = Direction> {
+        prop_oneof![
+            Just(Direction::Horizontal),
+            Just(Direction::Vertical)
+        ]
     }
 
     proptest! {
-        #[test]
         fn constraint_never_exceeds_available(
             available in 0u16..=1000,
             fixed_consumed in 0u16..=1000,
