@@ -115,6 +115,7 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
     let mut result = Vec::with_capacity(text.len() / 2);
     let mut byte_offset = 0usize;
     let mut visual_column = 0usize;
+    let mut in_zwj_sequence = false;
 
     let mut chars = text.chars().peekable();
 
@@ -125,6 +126,9 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
         // Handle regional indicator symbols (U+1F1E6 to U+1F1FF)
         // These form 2-cell flag emojis when in pairs
         if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
+            // Reset ZWJ sequence flag on new base
+            in_zwj_sequence = false;
+
             // Check if there's a second regional indicator following
             if let Some(&next_c) = chars.peek() {
                 if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
@@ -143,22 +147,32 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             continue;
         }
 
-        // Skip ZWJ characters - they're part of the previous grapheme
+        // ZWJ continues the previous grapheme
         if c == '\u{200D}' {
-            // ZWJ continues the previous grapheme
-            // Don't push a new cluster, just advance offset
+            in_zwj_sequence = true;
             byte_offset += char_len;
             continue;
         }
 
-        // Skip zero-width characters
+        // Zero-width characters (combining marks, etc.) continue the previous cluster
         if width == 0 {
             byte_offset += char_len;
             continue;
         }
 
-        // Record this grapheme cluster start
-        result.push((byte_offset, visual_column));
+        // At this point, c is a width > 0 character (base or extended pictographic)
+        if in_zwj_sequence {
+            // We're continuing a ZWJ sequence - extend the previous cluster
+            if let Some(last) = result.last_mut() {
+                last.0 = byte_offset; // Move start to this base
+                last.1 = visual_column;
+            }
+            in_zwj_sequence = false;
+        } else {
+            // Normal base character - start new cluster
+            result.push((byte_offset, visual_column));
+        }
+
         byte_offset += char_len;
 
         // Consume any following combining marks/modifiers that are part of this cluster
@@ -168,22 +182,53 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
                 let next_len = next_c.len_utf8();
                 chars.next();
                 byte_offset += next_len;
+                in_zwj_sequence = true;
                 continue;
             }
 
-            // Regional indicator after base? Don't consume
-            if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
-                break;
-            }
-
-            // Zero-width characters are part of this cluster
-            if grapheme_width(next_c) == 0 {
+            // Zero-width combining marks continue the cluster
+            let next_width = grapheme_width(next_c);
+            if next_width == 0 {
                 let next_len = next_c.len_utf8();
                 chars.next();
                 byte_offset += next_len;
                 continue;
             }
 
+            // Skin tone modifiers (U+1F3FB to U+1F3FF) extend the cluster
+            if matches!(next_c, '\u{1F3FB}'..='\u{1F3FF}') {
+                let next_len = next_c.len_utf8();
+                chars.next();
+                byte_offset += next_len;
+                // Add modifier width (typically 0, but track for completeness)
+                visual_column += next_width as usize;
+                continue;
+            }
+
+            // Extended pictographic with ZWJ - extend cluster
+            if next_width == 2 || next_width == 1 && is_extended_pictographic(next_c) {
+                // Check if followed by ZWJ
+                let mut temp_iter = chars.clone();
+                temp_iter.next(); // consume peeked char
+                if let Some(&zwj_c) = temp_iter.peek() {
+                    if zwj_c == '\u{200D}' {
+                        let next_len = next_c.len_utf8();
+                        chars.next(); // consume next_c
+                        chars.next(); // consume ZWJ
+                        byte_offset += next_len + 3;
+
+                        // Extend the current cluster
+                        if let Some(last) = result.last_mut() {
+                            last.0 = byte_offset; // Move start to this base
+                            last.1 = visual_column;
+                        }
+                        in_zwj_sequence = true;
+                        continue;
+                    }
+                }
+            }
+
+            // Next character starts a new cluster
             break;
         }
 
@@ -192,7 +237,6 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
 
     result
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
