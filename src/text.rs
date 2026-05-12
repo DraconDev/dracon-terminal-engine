@@ -188,11 +188,12 @@ pub fn grapheme_indices(text: &str) -> Vec<(usize, usize)> {
             // Check if there's a second regional indicator following
             let next_offset = byte_offset + len;
             if next_offset < bytes.len() {
-                if let Some((next_c, next_len)) =
+                if let Some(next_c) =
                     std::str::from_utf8(&bytes[next_offset..])
                         .ok()
                         .and_then(|s| s.chars().next())
                 {
+                    let next_len = next_c.len_utf8();
                     if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                         // Flag emoji: both RIs together take 2 cells
                         result.push((byte_offset, visual_column));
