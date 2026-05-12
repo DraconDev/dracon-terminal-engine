@@ -249,7 +249,7 @@ impl Plane {
         if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
             let next_offset = byte_offset + char_len;
             if next_offset < bytes.len() {
-                if let Some((next_c, _)) = std::str::from_utf8(&bytes[next_offset..])
+                if let Some(next_c) = std::str::from_utf8(&bytes[next_offset..])
                     .ok()
                     .and_then(|s| s.chars().next())
                 {

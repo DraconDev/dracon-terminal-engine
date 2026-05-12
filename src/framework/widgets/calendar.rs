@@ -524,7 +524,7 @@ impl crate::framework::widget::Widget for Calendar {
                 } else {
                     // Try to select today
                     if let Some(today_date) =
-                        NaiveDate::from_ymd_opt(today.year(), today.month() as u32, today.day())
+                        NaiveDate::from_ymd_opt(today.year(), today.month(), today.day())
                     {
                         self.select_date(today_date);
                     }
@@ -540,20 +540,8 @@ impl crate::framework::widget::Widget for Calendar {
 
         // Dispatch to hit zones - clone the zone_id to avoid borrow conflicts
         let zone_id = self.zones.borrow().dispatch(col, row);
-        if zone_id.is_none() {
-            // Click outside calendar
-            match kind {
-                MouseEventKind::Moved => {
-                    if self.hovered_day.is_some() {
-                        self.hovered_day = None;
-                        self.dirty = true;
-                    }
-                    false
-                }
-                _ => false,
-            }
-        } else {
-            let zone_id = zone_id.unwrap();
+        if let Some(zone_id) = zone_id {
+            // Click on calendar
             match kind {
                 MouseEventKind::Moved => {
                     if let ZoneId::Day(idx) = zone_id {
@@ -586,6 +574,18 @@ impl crate::framework::widget::Widget for Calendar {
                     }
                 }
                 _ => true,
+            }
+        } else {
+            // Click outside calendar
+            match kind {
+                MouseEventKind::Moved => {
+                    if self.hovered_day.is_some() {
+                        self.hovered_day = None;
+                        self.dirty = true;
+                    }
+                    false
+                }
+                _ => false,
             }
         }
     }
