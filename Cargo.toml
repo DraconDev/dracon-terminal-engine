@@ -1,9 +1,8 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-license-file = "LICENSE-MIT"
 authors = ["Dracon <dracon@void>"]
 readme = "README.md"
 description = "A terminal application framework for Rust with composable widgets, z-indexed compositor, themes, and TextEditor"

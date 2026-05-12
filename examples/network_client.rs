@@ -545,8 +545,9 @@ impl Widget for NetworkWidget {
     fn needs_render(&self) -> bool {
         self.app.borrow().dirty || self.app.borrow().loading
     }
-    fn render(&self, area: Rect) -> Plane {
-        let app = self.app.borrow();
+    fn render(&mut self, area: Rect) -> Plane {
+        let app = self.app.borrow_mut();
+        app.dirty = false;  // Clear dirty after render
         if app.show_help {
             app.render_help(area)
         } else if app.view_detail {
