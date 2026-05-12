@@ -107,7 +107,7 @@ impl<W: Write + AsFd> Terminal<W> {
         set_terminal_attr(fd, &termios)?;
         write!(
             self.output,
-            "\x1b[>1u\x1b[?1049h\x1b[?1003h\x1b[?1006h\x1b[?1007l\x1b[?7l\x1b[?25l"
+            "\x1b[>1u\x1b[?1049h\x1b[?1003h\x1b[?1006h\x1b[?1007l\x1b[?7l\x1b[?25l\x1b[?2004h"
         )?;
         write!(self.output, "\x1b[2J\x1b[H")?;
         self.output.flush()?;
