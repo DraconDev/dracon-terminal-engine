@@ -31,7 +31,6 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 const HISTORY_SIZE: usize = 60;
-const HISTORY_SIZE: usize = 60;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // METRIC HISTORY (Sparkline)
