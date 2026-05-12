@@ -130,7 +130,7 @@ impl NotificationCenter {
     }
 
     /// Removes expired notifications and returns true if any were removed.
-    fn prune_expired(&mut self) -> bool {
+    fn prune_expired(&self) -> bool {
         let before = self.notifications.borrow().len();
         self.notifications.borrow_mut().retain(|n| !n.is_expired());
         let after = self.notifications.borrow().len();
