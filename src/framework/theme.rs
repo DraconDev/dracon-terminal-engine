@@ -1187,6 +1187,13 @@ impl Theme {
             ]
         })
     }
+
+    /// Return an iterator over all built-in themes.
+    ///
+    /// Convenience wrapper around `Theme::all().iter()`.
+    pub fn iter() -> std::slice::Iter<'static, Theme> {
+        Self::all().iter()
+    }
 }
 
 impl Default for Theme {
