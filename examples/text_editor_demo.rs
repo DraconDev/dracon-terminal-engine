@@ -27,8 +27,8 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Breadcrumbs, CommandItem, CommandPalette, SearchInput, StatusBar, StatusSegment, TabBar, Tree,
-    TreeNode,
+    Breadcrumbs, CommandItem, CommandPalette, Metric, Profiler, SearchInput, StatusBar,
+    StatusSegment, TabBar, Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
@@ -65,6 +65,9 @@ struct EditorApp {
     cmd_bridge: Rc<RefCell<Option<String>>>,
     keybindings: KeybindingSet,
     kb_config: KeybindingConfig,
+    profiler: Profiler,
+    show_profiler: bool,
+    frame_count: u64,
 }
 
 impl EditorApp {
@@ -204,6 +207,9 @@ impl EditorApp {
             cmd_bridge,
             keybindings,
             kb_config,
+            profiler: Profiler::new(WidgetId::new(50)),
+            show_profiler: false,
+            frame_count: 0,
         }
     }
 
