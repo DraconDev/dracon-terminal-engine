@@ -2,83 +2,207 @@
 
 //! # Dracon Terminal Engine
 //!
-//! A z-indexed, event-driven terminal compositor runtime written in Rust.
+//! A terminal application framework for Rust with composable widgets,
+//! z-indexed compositor, themes, and TextEditor.
 //!
-//! ## Architecture
-//!
-//! The engine is organized into several layers:
-//!
-//! - **Core** — [`Terminal`] wraps the terminal in raw mode with RAII cleanup.
-//! - **Compositor** — [`Plane`] layers are composited via [`Compositor`] into a
-//!   single frame. Supports TrueColor, style flags, opacity, and per-plane
-//!   visual filters (Dim, Invert, Scanline, Pulse, Glitch).
-//! - **Input** — [`InputReader`] and [`Parser`] decode SGR mouse events and
-//!   extended keyboard sequences (chords, modifiers, extra buttons).
-//! - **Widgets** — `widgets::TextEditor` provides a full-featured code editor with syntax
-//!   highlighting via syntect. `widgets::TextInput` is a single-line text input widget.
-//! - **Integration** — [`ratatui`] bridge lets you drop in any ratatui widget.
-//! - **Visuals** — `visuals::icons` for file-type icons, `visuals::osc` for clipboard,
-//!   hyperlinks, bell, and notifications. `begin_sync`/`end_sync` implement
-//!   terminal mode 2026 for synchronized tear-free output.
-//! - **Backend** — `backend::tty` wraps low-level POSIX terminal ioctls.
-//! - **System** — [`SystemMonitor`] collects CPU, memory, disk, and process
-//!   metrics.
-//!
-//! ## Example
+//! ## Quick Start
 //!
 //! ```no_run
-//! use dracon_terminal_engine::framework::prelude::*;
-//! use dracon_terminal_engine::framework::widget::Widget;
-//! use ratatui::layout::Rect;
+//! use dracon_terminal_engine::prelude::*;
 //!
 //! App::new().unwrap()
 //!     .title("My App")
 //!     .fps(30)
 //!     .on_tick(|ctx, _tick| {
-//!         // Called every 250ms by default
-//!     })
-//!     .run(|ctx| {
 //!         let (w, h) = ctx.compositor().size();
-//!         let area = Rect::new(0, 0, w, h);
 //!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
-//!         ctx.add_plane(list.render(area));
-//!     });
+//!         ctx.add_plane(list.render(Rect::new(0, 0, w, h)));
+//!     })
+//!     .run();
 //! ```
 //!
-//! ## Version
+//! ## Architecture
 //!
-//! v28.519.0
+//! The engine is organized into several layers:
+//!
+//! - **App** — [`App`] and [`Ctx`] provide the one-import entry point with event loop
+//! - **Compositor** — [`Plane`] layers composited via [`Compositor`] with TrueColor and filters
+//! - **Widgets** — 37 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
+//! - **TextEditor** — Full-featured code editor with syntax highlighting via syntect
+//! - **Themes** — 20+ built-in themes (nord, dracula, catppuccin, gruvbox, etc.)
+//! - **Input** — SGR mouse parsing, keyboard chords, modifiers
+//! - **System** — [`SystemMonitor`] for CPU, memory, disk, process metrics
+//! - **Framework** — HitZone, DragDrop, Animation, Focus, Layout helpers
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Module declarations
+// ─────────────────────────────────────────────────────────────────────────────
 
 #[doc = "Terminal backend (POSIX tty ioctls, raw mode setup)."]
 pub mod backend;
+
 #[doc = "Z-indexed layer compositor (Plane, Compositor, Cell, Color, Styles, filters)."]
 pub mod compositor;
+
 #[doc = "Input contract types (UiRenderer, UiRuntime traits — used internally)."]
 pub mod contracts;
+
 #[doc = "Core terminal wrapper (RAII raw mode + alt screen)."]
 pub mod core;
-#[doc = "Framework: App, HitZone, ScrollContainer, widgets, theme — the one-import entry point."]
+
+#[doc = "Framework: App, widgets, themes, HitZone, ScrollContainer — the one-import entry point."]
 pub mod framework;
+
 #[doc = "Input reader (InputReader) + SGR mouse / chord parser."]
 pub mod input;
+
 #[doc = "Ratatui integration bridge."]
 pub mod integration;
+
 #[doc = "Layout helpers (grid, border, padding utilities)."]
 pub mod layout;
+
 #[doc = "System monitoring (CPU, memory, disk, processes)."]
 pub mod system;
 
 #[doc = "General utilities (visual width, truncate, formatting helpers)."]
 pub mod utils;
+
 #[doc = "Text handling utilities with Unicode grapheme cluster awareness."]
 pub mod text;
+
 #[doc = "Visual helpers: icons, OSC strings (clipboard, hyperlink, bell), sync mode 2026."]
 pub mod visuals;
-#[doc = "Built-in widgets (TextEditor with syntect highlighting, TextInput)."]
+
+#[doc = "Built-in widgets (TextEditor with syntect highlighting, TextInput, Hotkey, Panel)."]
 pub mod widgets;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Re-exports from all major modules
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Compositor primitives
 pub use compositor::{Cell, Color, Compositor, Plane, Styles};
+
+// Core terminal
 pub use core::terminal::Terminal;
-pub use framework::prelude; // App, Ctx, List, HitZone, etc.
+
+// Input system
 pub use input::{InputReader, Parser};
+
+// System monitoring
 pub use system::{DiskInfo, ProcessInfo, SystemData, SystemMonitor};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Framework re-exports (the main API surface)
+// ─────────────────────────────────────────────────────────────────────────────
+
+pub use framework::prelude;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Framework widgets (all 37) — accessible via prelude::*
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// The following widgets are exported from the prelude and accessible as:
+//   use dracon_terminal_engine::prelude::*;
+//
+// Individual widget modules are also available via:
+//   use dracon_terminal_engine::framework::widgets::*
+//
+// Widget list (37 total):
+//   1.  Autocomplete       - Text input with autocomplete suggestions
+//   2.  Breadcrumbs        - Clickable path breadcrumb navigation
+//   3.  Button             - Clickable button with hover states
+//   4.  Calendar           - Date picker calendar widget
+//   5.  Checkbox           - Toggle checkbox with label
+//   6.  CommandPalette     - Filterable command search overlay
+//   7.  ConfirmDialog      - Modal yes/no confirmation dialog
+//   8.  ContextMenu        - Right-click context menu
+//   9.  DebugOverlay       - Debug information overlay
+//  10.  EventLogger        - Event log viewer with filtering
+//  11.  Form               - Multi-field form with validation
+//  12.  Gauge              - Progress bar with warn/crit thresholds
+//  13.  Hud                - Heads-up display overlay
+//  14.  KeyValueGrid       - Key-value display grid
+//  15.  Label              - Static text label
+//  16.  List               - Scrollable list with selection
+//  17.  LogViewer          - Auto-scrolling log with severity
+//  18.  MenuBar            - Top menu bar with dropdowns
+//  19.  Modal              - Modal dialog container
+//  20.  NotificationCenter - Notification display system
+//  21.  PasswordInput      - Password input with masking
+//  22.  Profiler           - Performance profiling display
+//  23.  ProgressBar        - Progress indicator bar
+//  24.  Radio              - Radio button group
+//  25.  RichText           - Rich text display with formatting
+//  26.  SearchInput        - Search input with clear button
+//  27.  Select             - Dropdown select widget
+//  28.  Slider             - Horizontal slider control
+//  29.  Spinner            - Loading spinner animation
+//  30.  SplitPane          - Resizable split panel container
+//  31.  StatusBadge        - Colored status badge (OK/WARN/ERROR)
+//  32.  StatusBar          - Bottom status bar with segments
+//  33.  StreamingText      - Live-updating text display
+//  34.  TabBar             - Tab bar for panel switching
+//  35.  Table              - Sortable data table
+//  36.  TextEditorAdapter  - Adapter for TextEditor in framework
+//  37.  Toast              - Toast notification popup
+//  38.  Toggle             - Toggle switch control
+//  39.  Tooltip            - Hover tooltip popup
+//  40.  Tree               - Collapsible tree view
+//  41.  WidgetInspector    - Widget debugging inspector
+//
+// Additional helper types:
+// - CellTextFn<T>         - Table cell text formatter
+// - Column                - Table column definition
+// - TableRow              - Table row data wrapper
+// - ConfirmResult         - ConfirmDialog result enum
+// - ContextAction         - ContextMenu action definition
+// - LoggedEvent           - EventLogger log entry
+// - FormField             - Form field definition
+// - ValidationRule         - Form validation rule
+// - LogLevel              - Log line severity level
+// - LogLine               - Log line entry
+// - MenuEntry             - Menu bar entry
+// - MenuItem              - Menu dropdown item
+// - ModalResult<T>         - Modal result wrapper
+// - NotificationKind       - Notification severity
+// - Orientation           - SplitPane orientation
+// - Metric                - Profiler metric entry
+// - ScrollState           - Scroll position state
+// - TreeNode              - Tree node wrapper
+// - DragState             - HitZone drag state
+// - DragGhost             - Drag operation ghost
+// - DragPhase             - Drag lifecycle phase
+// - Animation             - Animation definition
+// - AnimationManager      - Animation controller
+// - Easing                - Easing function enum
+// - FocusManager          - Tab-order focus ring
+// - DirtyRegion           - Dirty region for render optimization
+// - DirtyRegionTracker    - Dirty region tracking
+// - EventBus              - Pub/sub event system
+// - Reactive<T>           - Observable value wrapper
+// - SubscriptionId         - Event subscription handle
+// - NavigationEvent        - Scene navigation event
+// - Scene                 - Scene trait for router
+// - SceneRouter           - Scene navigation controller
+// - PluginRegistry        - Dynamic widget loading
+// - WidgetFactory         - Widget factory trait
+// - KeybindingSet         - Keybinding configuration
+// - KeybindingConfig      - Keybinding loader
+// - Constraint            - Layout constraint
+// - Direction             - Layout direction
+// - Layout                - Constraint-based layout engine
+// - ScrollContainer       - Scrollable container wrapper
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Standalone widgets (TextEditor, TextInput, etc.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+pub use widgets::editor::TextEditor;
+pub use widgets::input::TextInput;
+pub use widgets::button::Button as StandaloneButton;
+pub use widgets::panel::Panel;
+pub use widgets::component::Component;
+pub use widgets::hotkey::Hotkey;
+pub use widgets::context_menu::ContextMenu as StandaloneContextMenu;
