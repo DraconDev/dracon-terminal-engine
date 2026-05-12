@@ -28,7 +28,6 @@ use dracon_terminal_engine::framework::widgets::{Modal, Toast, ToastKind};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
-#[derive(Clone)]
 #[derive(Clone, serde::Deserialize)]
 struct Post {
     userId: u32,
