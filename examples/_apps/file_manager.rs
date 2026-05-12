@@ -36,6 +36,57 @@ use std::sync::Arc;
 use std::time::Duration;
 use unicode_width::UnicodeWidthStr;
 
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INPUT ROUTER FOR ASYNC POLLING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+struct FileManagerRouter {
+    target: Rc<RefCell<FileManager>>,
+    id: WidgetId,
+    area: std::cell::Cell<Rect>,
+}
+
+impl Widget for FileManagerRouter {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false  // We handle rendering in on_tick
+    }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        self.target.borrow_mut().handle_key(key)
+    }
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        self.target.borrow_mut().handle_mouse(kind, col, row)
+    }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.target.borrow().theme)
+    }
+}
 #[cfg(feature = "async")]
 use std::cell::RefCell as StdRefCell;
 
