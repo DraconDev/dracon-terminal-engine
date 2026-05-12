@@ -72,6 +72,31 @@ pub fn grapheme_width(c: char) -> u8 {
 
 /// Check if a character is a wide character (CJK, etc.)
 fn is_wide_char(c: char) -> bool {
+    matches!(
+        c,
+        '\u{2E80}'..='\u{303E}'
+            | '\u{3040}'..='\u{309F}'
+            | '\u{30A0}'..='\u{30FF}'
+            | '\u{3100}'..='\u{312F}'
+            | '\u{3130}'..='\u{318F}'
+            | '\u{3190}'..='\u{319F}'
+            | '\u{31A0}'..='\u{31BF}'
+            | '\u{31C0}'..='\u{31EF}'
+            | '\u{31F0}'..='\u{31FF}'
+            | '\u{3200}'..='\u{32FF}'
+            | '\u{3300}'..='\u{4DBF}'
+            | '\u{4E00}'..='\u{9FFF}'
+            | '\u{A000}'..='\u{A48C}'
+            | '\u{A490}'..='\u{A4CF}'
+            | '\u{F900}'..='\u{FAFF}'
+            | '\u{20000}'..='\u{2A6DF}'
+            | '\u{2A700}'..='\u{2B73F}'
+            | '\u{2B740}'..='\u{2B81F}'
+            | '\u{2B820}'..='\u{2CEAF}'
+            | '\u{2CEB0}'..='\u{2EBEF}'
+            | '\u{30000}'..='\u{3134F}'
+    )
+}
 
 /// Returns an iterator over grapheme clusters in the text.
 ///
