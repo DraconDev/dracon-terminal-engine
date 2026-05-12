@@ -45,6 +45,7 @@ use std::rc::Rc;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct FileManagerRouter {
+    target: Rc<RefCell<FileManager>>,
     id: WidgetId,
     area: std::cell::Cell<Rect>,
 }
