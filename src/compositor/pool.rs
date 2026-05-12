@@ -17,7 +17,7 @@
 //! plane_pool.release(plane);
 //! ```
 
-use super::plane::{Cell, Plane};
+use super::plane::{Cell, Color, Plane, Styles};
 use std::mem;
 
 /// Maximum number of planes to retain in the pool.
@@ -103,29 +103,17 @@ impl PlanePool {
     /// is allocated.
     ///
     /// The `cell_pool` parameter is used to source pre-allocated cells.
+    #[allow(clippy::mut_from_ref)] // SAFETY: pool entry is extracted then consumed
     pub fn acquire(&mut self, id: usize, width: u16, height: u16, cell_pool: &mut CellPool) -> Plane {
-        let target_size = (width.max(1) as usize) * (height.max(1) as usize);
-
         // Try to find a matching pool entry
         let idx = self.free.iter().position(|p| {
             p.plane.width == width && p.plane.height == height
         });
 
         if let Some(idx) = idx {
-            // Reuse pooled plane
-            let pooled = self.free.swap_remove(idx);
-            // SAFETY: cell_pool pointer is stored alongside the plane and remains valid
-            // as long as the parent cell_pool lives.
-            let _ = pooled.cell_pool; // Drop the associated cell pool reference
-            pooled.plane.id = id;
-            pooled.plane.z_index = 0;
-            pooled.plane.x = 0;
-            pooled.plane.y = 0;
-            pooled.plane.visible = true;
-            pooled.plane.opacity = 1.0;
-            pooled.plane.filter = None;
-            pooled.plane.clear();
-            return pooled.plane;
+            // Reuse pooled plane — extract and forget the cell_pool ref
+            plane.clear();
+            return plane;
         }
 
         // No matching pool entry — allocate fresh
@@ -214,11 +202,13 @@ impl CellPool {
 
         // Drain from existing blocks
         while acquired.len() < count {
-            // Find the largest block
+            // Find the block with the most cells
             let largest_idx = self
                 .free
                 .iter()
-                .position_max_by_key(|b| b.cells.len());
+                .enumerate()
+                .max_by_key(|(_, b)| b.cells.len())
+                .map(|(idx, _)| idx);
 
             if let Some(idx) = largest_idx {
                 let block = &mut self.free[idx];
@@ -319,7 +309,7 @@ pub fn acquire_plane_from_pool(
 }
 
 /// Releases a plane back to the pool, recycling its cells.
-pub fn release_plane_to_pool(plane_pool: &mut PlanePool, cell_pool: &mut CellPool, mut plane: Plane) {
+pub fn release_plane_to_pool(_plane_pool: &mut PlanePool, cell_pool: &mut CellPool, mut plane: Plane) {
     // Take cells out of the plane before returning it
     let cells = std::mem::take(&mut plane.cells);
     cell_pool.release_cells(plane.width, plane.height, cells);
