@@ -63,6 +63,7 @@ pub use password_input::PasswordInput;
 pub use profiler::{Metric, Profiler};
 pub use progress_bar::ProgressBar;
 pub use radio::Radio;
+pub use rich_text::RichText;
 pub use search_input::SearchInput;
 pub use select::Select;
 pub use slider::Slider;
