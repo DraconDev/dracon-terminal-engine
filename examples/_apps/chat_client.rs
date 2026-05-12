@@ -202,23 +202,26 @@ impl ChatState {
     fn poll_send_result(&mut self) {
         let finished = {
             let mut handle_opt = self.pending_send.borrow_mut();
-            if let Some(handle) = handle_opt.take() {
+            if let Some(handle) = handle_opt.as_mut() {
                 if handle.is_finished() {
-                    // Take the result synchronously if ready
-                    match handle.try_now_or_never() {
+                    // Take ownership of the handle
+                    let handle = handle_opt.take().unwrap();
+                    drop(handle_opt); // Release borrow
+
+                    // Poll the handle
+                    match handle.now_or_never() {
                         Some(Ok(())) => true,
                         Some(Err(e)) => {
                             self.error = Some(format!("Send error: {}", e));
                             true
                         }
                         None => {
-                            // Put it back if not ready
-                            *handle_opt = Some(handle);
+                            // Not ready yet - put it back
+                            *self.pending_send.borrow_mut() = Some(handle);
                             false
                         }
                     }
                 } else {
-                    *handle_opt = Some(handle);
                     false
                 }
             } else {
