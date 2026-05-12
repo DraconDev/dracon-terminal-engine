@@ -15,10 +15,8 @@
 //! init_logger_from_env();
 //! ```
 
-use tracing_subscriber::{
-    fmt::{self, format::FmtSpan},
-    EnvFilter,
-};
+use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::EnvFilter;
 
 /// Initializes the tracing subscriber with console output and ANSI colors.
 ///
@@ -63,7 +61,7 @@ pub fn init_logger_from_env() {
         EnvFilter::try_from(env.as_str()).unwrap_or_else(|_| EnvFilter::new("info"))
     };
 
-    fmt()
+    tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_ansi(true)
         .with_target(true)
@@ -88,7 +86,7 @@ pub fn init_logger_from_env() {
 pub fn init_logger_with_level(level: &str) {
     let filter = EnvFilter::try_from(level).unwrap_or_else(|_| EnvFilter::new("info"));
 
-    fmt()
+    tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_ansi(true)
         .with_target(true)
