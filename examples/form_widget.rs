@@ -286,36 +286,22 @@ impl Widget for FormApp {
 }
 
 fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let app = Rc::new(RefCell::new(FormApp::new(should_quit, theme)));
-    let app_for_input = Rc::clone(&app);
-    let app_for_tick = Rc::clone(&app);
 
-    let mut app_widget = App::new()?.title("Form Widget Demo").fps(30).theme(theme);
-
-    app_widget.add_widget(
+    let mut app = App::new()?.title("Form Widget Demo").fps(30).theme(theme);
+    app.add_widget(
         Box::new(FormApp::new(quit_check.clone(), theme)),
         Rect::new(0, 0, 80, 24),
     );
 
-    app_widget
-        .on_input(move |key| app_for_input.borrow_mut().handle_key(key))
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-            let mut app = app_for_tick.borrow_mut();
-            if app.submitted {
-                if let Some(time) = app.submit_time {
-                    if time.elapsed().as_secs() >= 3 {
-                        app.submitted = false;
-                        ctx.mark_all_dirty();
-                    }
-                }
-            }
-        })
-        .run(|_ctx| {})
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_| {})
 }
