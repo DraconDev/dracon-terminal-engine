@@ -72,38 +72,6 @@ pub fn grapheme_width(c: char) -> u8 {
 
 /// Check if a character is a wide character (CJK, etc.)
 fn is_wide_char(c: char) -> bool {
-    matches!(
-        c,
-        // CJK Unified Ideographs and related
-        '\u{2E80}'..='\u{303E}' // CJK Radicals Supplement throughCJK
-            | '\u{3040}'..='\u{309F}' // Hiragana
-            | '\u{30A0}'..='\u{30FF}' // Katakana
-            | '\u{3100}'..='\u{312F}' // Bopomofo
-            | '\u{3130}'..='\u{318F}' // Hangul Compatibility Jamo
-            | '\u{3190}'..='\u{319F}' // Kanbun
-            | '\u{31A0}'..='\u{31BF}' // Bopomofo Extended
-            | '\u{31C0}'..='\u{31EF}' // CJK Strokes
-            | '\u{31F0}'..='\u{31FF}' // Katakana Phonetic Extensions
-            | '\u{3200}'..='\u{32FF}' // Enclosed CJK Letters and Months
-            | '\u{3300}'..='\u{4DBF}' // CJK Compatibility
-            | '\u{4E00}'..='\u{9FFF}' // CJK Unified Ideographs
-            | '\u{A000}'..='\u{A48C}' // Yi Syllables
-            | '\u{A490}'..='\u{A4CF}' // Yi Radicals
-            | '\u{F900}'..='\u{FAFF}' // CJK Compatibility Ideographs
-            | '\u{20000}'..='\u{2A6DF}' // CJK Unified Ideographs Extension B
-            | '\u{2A700}'..='\u{2B73F}' // CJK Unified Ideographs Extension C
-            | '\u{2B740}'..='\u{2B81F}' // CJK Unified Ideographs Extension D
-            | '\u{2B820}'..='\u{2CEAF}' // CJK Unified Ideographs Extension E
-            | '\u{2CEB0}'..='\u{2EBEF}' // CJK Unified Ideographs Extension F
-            | '\u{30000}'..='\u{3134F}' // CJK Unified Ideographs Extension G
-    )
-}
-
-/// Check if a character is a combining/zero-width character that should be
-/// skipped when counting as a separate grapheme cluster.
-fn is_combining_char(c: char) -> bool {
-    grapheme_width(c) == 0 && c != '\u{1F1E6}'..='\u{1F1FF}'.contains_char(c)
-}
 
 /// Returns an iterator over grapheme clusters in the text.
 ///
