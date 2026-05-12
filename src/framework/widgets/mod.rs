@@ -1,6 +1,8 @@
 //! Built-in framework widgets.
 
 pub mod breadcrumbs;
+pub mod autocomplete;
+pub mod breadcrumbs;
 pub mod button;
 pub mod checkbox;
 pub mod command_palette;
@@ -22,7 +24,6 @@ pub mod password_input;
 pub mod profiler;
 pub mod progress_bar;
 pub mod radio;
-pub mod rich_text;
 pub mod search_input;
 pub mod select;
 pub mod slider;
@@ -40,7 +41,6 @@ pub mod toggle;
 pub mod tooltip;
 pub mod tree;
 pub mod widget_inspector;
-
 pub use breadcrumbs::Breadcrumbs;
 pub use button::Button;
 pub use checkbox::Checkbox;
