@@ -22,8 +22,6 @@ use crate::framework::command::BoundCommand;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
-#[cfg(feature = "tracing")]
-use tracing::instrument;
 
 pub struct Gauge {
     pub id: WidgetId,

@@ -46,7 +46,9 @@ pub mod widgets;
 pub mod prelude {
     pub use crate::compositor::{Cell, Color, Compositor, CellPool, Plane, PoolConfig, Styles};
     pub use crate::framework::widget::WidgetId;
+    #[cfg(feature = "tracing")]
     pub use crate::frame_span;
+    #[cfg(feature = "tracing")]
     pub use crate::frame_span_debug;
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},

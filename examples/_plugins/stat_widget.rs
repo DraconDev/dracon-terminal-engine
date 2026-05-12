@@ -1,7 +1,7 @@
-//! Stat Widget Plugin — Displays system CPU and memory statistics.
-//!
-//! This widget is designed to be loaded dynamically as a plugin.
-//! It displays real-time CPU load percentage and memory usage.
+// Stat Widget Plugin — Displays system CPU and memory statistics.
+//
+// This widget is designed to be loaded dynamically as a plugin.
+// It displays real-time CPU load percentage and memory usage.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
