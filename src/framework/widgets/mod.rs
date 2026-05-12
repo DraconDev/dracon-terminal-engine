@@ -22,6 +22,7 @@ pub mod password_input;
 pub mod profiler;
 pub mod progress_bar;
 pub mod radio;
+pub mod rich_text;
 pub mod search_input;
 pub mod select;
 pub mod slider;
