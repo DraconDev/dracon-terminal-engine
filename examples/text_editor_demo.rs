@@ -542,6 +542,16 @@ impl Widget for EditorApp {
             blit(&mut plane, &pal_plane, 0, 0);
         }
 
+        // Profiler overlay
+        if self.show_profiler {
+            let prof_w = 24u16;
+            let prof_h = 6u16;
+            let prof_x = area.width.saturating_sub(prof_w);
+            let prof_y = tab_h + 1;
+            let prof_plane = self.profiler.render(Rect::new(prof_x, prof_y, prof_w, prof_h));
+            blit(&mut plane, &prof_plane, prof_x, prof_y);
+        }
+
         plane
     }
 
