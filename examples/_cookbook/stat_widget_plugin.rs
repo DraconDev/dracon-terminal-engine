@@ -213,7 +213,7 @@ impl Widget for PluginLoader {
             for (i, c) in hint.chars().enumerate() {
                 let idx = (hy as usize * plane.width as usize + (area.x + hx + i as u16) as usize).min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = self.theme.dim;
+                plane.cells[idx].fg = self.theme.fg_muted;
             }
         }
 
