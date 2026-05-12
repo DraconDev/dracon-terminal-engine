@@ -346,47 +346,57 @@ impl FileManager {
     #[cfg(feature = "async")]
     fn poll_async_result(&mut self) {
         // Check if we have a pending operation
-        let mut handle_guard = self.pending_operation.borrow_mut();
-        if let Some(handle) = handle_guard.as_mut() {
-            if handle.is_finished() {
-                // Take ownership of the handle to poll it
-                let result = handle.now_or_never();
-                *handle_guard = None;
-                drop(handle_guard); // Release the borrow before mutating self
-
-                match result {
-                    Some(Ok(Some(nodes))) => {
-                        // Build tree from loaded nodes
-                        let children: Vec<FsNode> = nodes
-                            .into_iter()
-                            .map(|node| FsNode::build_tree(&node.path, 1))
-                            .collect();
-
-                        // Update root with new children
-                        self.root.children = children;
-                        self.tree = Tree::new(WidgetId::new(2))
-                            .with_root(vec![self.root.to_tree_node(true)])
-                            .with_theme(self.theme);
-                        self.tree_path.clear();
-                        self.selected_path = None;
-                        self.update_breadcrumbs();
-                        self.toast("Directory loaded async", ToastKind::Success);
-                    }
-                    Some(Ok(None)) => {
-                        self.toast("Failed to read directory", ToastKind::Error);
-                    }
-                    Some(Err(e)) => {
-                        self.toast(&format!("Load error: {}", e), ToastKind::Error);
-                    }
-                    None => {
-                        // Not ready yet
-                        return;
-                    }
+        let finished = {
+            let mut handle_guard = self.pending_operation.borrow_mut();
+            if let Some(handle) = handle_guard.as_mut() {
+                if handle.is_finished() {
+                    // Abort the task to get the result - this is safe since we checked is_finished
+                    // Use try_join! or just abort and return None
+                    let result = tokio::task::JoinError;
+                    // We need to await the handle properly
+                    // Since is_finished() returned true, we can use block_on
+                    true
+                } else {
+                    false
                 }
-                self.is_loading = false;
-                self.loading_path = None;
-                self.dirty = true;
+            } else {
+                false
             }
+        };
+
+        if finished {
+            // Take the handle and await it
+            let handle = self.pending_operation.borrow_mut().take().unwrap();
+            let result = tokio::runtime::Handle::current().block_on(handle);
+
+            match result {
+                Ok(Some(nodes)) => {
+                    // Build tree from loaded nodes
+                    let children: Vec<FsNode> = nodes
+                        .into_iter()
+                        .map(|node| FsNode::build_tree(&node.path, 1))
+                        .collect();
+
+                    // Update root with new children
+                    self.root.children = children;
+                    self.tree = Tree::new(WidgetId::new(2))
+                        .with_root(vec![self.root.to_tree_node(true)])
+                        .with_theme(self.theme);
+                    self.tree_path.clear();
+                    self.selected_path = None;
+                    self.update_breadcrumbs();
+                    self.toast("Directory loaded async", ToastKind::Success);
+                }
+                Ok(None) => {
+                    self.toast("Failed to read directory", ToastKind::Error);
+                }
+                Err(_) => {
+                    self.toast("Load error: task aborted", ToastKind::Error);
+                }
+            }
+            self.is_loading = false;
+            self.loading_path = None;
+            self.dirty = true;
         }
     }
 
