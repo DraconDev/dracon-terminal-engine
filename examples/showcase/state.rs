@@ -111,6 +111,12 @@ impl Showcase {
         scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(theme)));
         scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(theme)));
         scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(theme)));
+        scene_router.register("calendar", Box::new(crate::scenes::calendar_scene::CalendarScene::new(theme)));
+        scene_router.register("rich_text", Box::new(crate::scenes::rich_text_scene::RichTextScene::new(theme)));
+        scene_router.register("autocomplete", Box::new(crate::scenes::autocomplete_scene::AutocompleteScene::new(theme)));
+        scene_router.register("notification_center", Box::new(crate::scenes::notification_center_scene::NotificationCenterScene::new(theme)));
+        scene_router.register("accessibility", Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(theme)));
+        scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme)));
 
         let run_counts = vec![0u32; examples.len()];
 
