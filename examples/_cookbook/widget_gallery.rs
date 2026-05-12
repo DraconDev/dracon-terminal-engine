@@ -58,9 +58,8 @@ struct WidgetGallery {
 }
 
 impl WidgetGallery {
-    fn new(quit: Arc<AtomicBool>) -> Self {
+    fn new(quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let id = WidgetId::new(1);
-        let theme = Theme::nord();
         Self {
             id,
             selected: 0,
@@ -586,13 +585,14 @@ fn main() -> std::io::Result<()> {
 
     let running = Arc::new(AtomicBool::new(true));
     let running_clone = running.clone();
+    let env_theme = Theme::from_env_or(Theme::nord());
 
-    let gallery = WidgetGallery::new(running_clone.clone());
+    let gallery = WidgetGallery::new(running_clone.clone(), env_theme);
 
     let mut app = App::new()?
         .title("Widget Gallery")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .theme(env_theme);
 
     app.add_widget(Box::new(gallery), Rect::new(0, 0, 80, 24));
 

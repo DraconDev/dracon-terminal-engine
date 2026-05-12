@@ -92,7 +92,7 @@ struct Table {
 }
 
 impl Table {
-    fn new() -> Self {
+    fn new(theme: Theme) -> Self {
         let all: Vec<Person> = DATA
             .iter()
             .map(|(n, a, c, p)| Person(n.to_string(), *a, c.to_string(), p.to_string()))
@@ -106,7 +106,7 @@ impl Table {
             vis: 8,
             sort: Sort::None,
             search: SearchInput::new(WidgetId::new(1)),
-            theme: Theme::cyberpunk(),
+            theme,
             area: Rect::new(0, 0, 80, 20),
             dirty: true,
             show_help: false,
@@ -701,8 +701,9 @@ fn main() -> std::io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let kb_input = keybindings.clone();
+    let env_theme = Theme::from_env_or(Theme::cyberpunk());
 
-    let mut t = Table::new();
+    let mut t = Table::new(env_theme);
     t.set_area(Rect::new(0, 0, w, h));
     t.vis = (h as usize).saturating_sub(5).max(1);
     t.keybindings = keybindings;
@@ -713,7 +714,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Data Table Demo")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::cyberpunk()));
+        .theme(env_theme);
     app.add_widget(Box::new(t), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

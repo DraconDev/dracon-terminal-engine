@@ -49,7 +49,7 @@ struct CommandBindings {
 }
 
 impl CommandBindings {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         Self {
             id: WidgetId::new(0),
             gauge: Gauge::new("CPU")
@@ -62,7 +62,7 @@ impl CommandBindings {
                 .with_label("Connection"),
             log_viewer: LogViewer::with_id(WidgetId::new(5)).max_lines(200),
             streaming: StreamingText::with_id(WidgetId::new(6)).max_lines(50),
-            theme: Theme::nord(),
+            theme,
             area: Rect::new(0, 0, 80, 24),
             dirty: true,
             paused: false,
@@ -156,7 +156,7 @@ impl CommandBindings {
 
 impl Default for CommandBindings {
     fn default() -> Self {
-        Self::new(Arc::new(AtomicBool::new(false)))
+        Self::new(Arc::new(AtomicBool::new(false)), Theme::nord())
     }
 }
 
@@ -788,11 +788,12 @@ fn main() -> std::io::Result<()> {
     std::thread::sleep(Duration::from_millis(500));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let env_theme = Theme::from_env_or(Theme::nord());
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone())));
+    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone(), env_theme)));
     view.borrow_mut().keybindings = keybindings;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
@@ -804,7 +805,7 @@ fn main() -> std::io::Result<()> {
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .theme(env_theme);
 
     // Add InputRouter widget so framework can detect theme changes via current_theme()
     app.add_widget(

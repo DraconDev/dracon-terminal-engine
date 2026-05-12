@@ -144,12 +144,11 @@ struct TabbedApp {
 }
 
 impl TabbedApp {
-    fn new(should_quit: Arc<AtomicBool>) -> Self {
+    fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let tabbar = TabBar::new_with_id(
             WidgetId::new(1),
             vec!["Dashboard", "Logs", "Settings", "Stats"],
         );
-        let theme = Theme::nord();
         Self {
             tabbar,
             dashboard: DashboardState::new(WidgetId::new(10)),
@@ -654,18 +653,18 @@ impl Widget for InputRouter {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::from_env_or(Theme::cyberpunk());
+    let env_theme = Theme::from_env_or(Theme::cyberpunk());
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let app = Rc::new(RefCell::new(TabbedApp::new(should_quit)));
+    let app = Rc::new(RefCell::new(TabbedApp::new(should_quit, env_theme)));
     let app_for_tick = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(theme);
+    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(env_theme);
 
     // Register an InputRouter so keyboard/mouse events reach TabbedApp
     let router = InputRouter {

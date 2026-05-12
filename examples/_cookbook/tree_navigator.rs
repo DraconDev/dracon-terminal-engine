@@ -86,7 +86,7 @@ struct TreeNav {
 }
 
 impl TreeNav {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, theme: Theme) -> Self {
         let fs = MockFs {
             name: "root",
             is_dir: true,
@@ -145,7 +145,7 @@ impl TreeNav {
             breadcrumbs,
             fs,
             current_path: Vec::new(),
-            theme: Theme::default(),
+            theme,
             area: Rect::new(0, 0, 80, 24),
             show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -580,21 +580,20 @@ impl TreeNav {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::from_env_or(Theme::cyberpunk());
+    let env_theme = Theme::from_env_or(Theme::cyberpunk());
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut nav = TreeNav::new(WidgetId::new(0));
+    let mut nav = TreeNav::new(WidgetId::new(0), env_theme);
     nav.set_area(Rect::new(0, 0, w, h));
-    nav.theme = theme;
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
     let quit_keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(theme);
+    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(env_theme);
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

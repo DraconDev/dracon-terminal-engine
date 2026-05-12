@@ -51,7 +51,7 @@ struct LogMonitor {
 }
 
 impl LogMonitor {
-    fn new() -> Self {
+    fn new(theme: Theme) -> Self {
         Self {
             id: WidgetId::new(1),
             log_viewer: LogViewer::with_id(WidgetId::new(2)).max_lines(500),
@@ -64,7 +64,7 @@ impl LogMonitor {
             filter_warn: true,
             filter_error: true,
             filter_debug: true,
-            theme: Theme::nord(),
+            theme,
             all_logs: Vec::new(),
             show_help: false,
             keybindings: KeybindingSet::default(),
@@ -542,7 +542,7 @@ impl Widget for LogMonitor {
 
 impl Default for LogMonitor {
     fn default() -> Self {
-        Self::new()
+        Self::new(Theme::nord())
     }
 }
 
@@ -605,8 +605,9 @@ fn main() -> Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let kb_input = keybindings.clone();
+    let env_theme = Theme::from_env_or(Theme::nord());
 
-    let mon = Rc::new(RefCell::new(LogMonitor::new()));
+    let mon = Rc::new(RefCell::new(LogMonitor::new(env_theme)));
     mon.borrow_mut().keybindings = keybindings;
     let mon_for_tick = Rc::clone(&mon);
     let mon_for_input_router = Rc::clone(&mon);
@@ -615,7 +616,7 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(Theme::from_env_or(Theme::nord()));
+    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(env_theme);
 
     let router = InputRouter {
         target: mon_for_input_router,
