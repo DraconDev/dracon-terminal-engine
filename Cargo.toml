@@ -88,6 +88,18 @@ name = "debug_overlay"
 path = "examples/_cookbook/debug_overlay.rs"
 
 [[example]]
+name = "rich_text"
+path = "examples/_cookbook/rich_text.rs"
+
+[[example]]
+name = "autocomplete"
+path = "examples/_cookbook/autocomplete.rs"
+
+[[example]]
+name = "form_validation"
+path = "examples/_cookbook/form_validation.rs"
+
+[[example]]
 name = "showcase"
 path = "examples/showcase/main.rs"
 
