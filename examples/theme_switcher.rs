@@ -142,6 +142,7 @@ fn vscode_light() -> Theme {
 fn autumn() -> Theme {
     Theme {
         name: "autumn",
+        display_name: "Autumn",
         kind: ThemeKind::Dark,
         bg: Color::Rgb(40, 35, 30),
         surface: Color::Rgb(48, 42, 36),
