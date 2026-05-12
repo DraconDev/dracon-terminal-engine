@@ -8,10 +8,13 @@
 //! Controls:
 //!   ↑/↓      — navigate posts
 //!   Enter    — view post details
-//!   r        — refresh data
+//!   r        — refresh data (async)
 //!   t        — cycle theme
 //!   ?        — toggle help
 //!   q        — quit
+//!
+//! When `async` feature is enabled, data fetching uses tokio::process::Command
+//! for non-blocking curl execution.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
@@ -24,6 +27,9 @@ use std::process::Command;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+
+#[cfg(feature = "async")]
+use std::cell::RefCell as StdRefCell;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA MODEL
@@ -46,11 +52,20 @@ impl Post {
     }
 }
 
+// Spinner frames
+const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // API CLIENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-fn fetch_posts() -> Result<Vec<Post>, String> {
+#[cfg(feature = "async")]
+fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, String>> + Send {
+    async { fetch_posts_sync() }
+}
+
+#[cfg(not(feature = "async"))]
+fn fetch_posts_sync() -> Result<Vec<Post>, String> {
     let output = Command::new("curl")
         .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
         .output()
@@ -89,6 +104,11 @@ struct NetworkApp {
     should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
     kb_config: KeybindingConfig,
+    dirty: bool,
+    // Async state
+    spinner_frame: usize,
+    #[cfg(feature = "async")]
+    pending_fetch: StdRefCell<Option<tokio::task::JoinHandle<Result<Vec<Post>, String>>>>,
 }
 
 impl NetworkApp {
@@ -104,20 +124,103 @@ impl NetworkApp {
             should_quit,
             keybindings: KeybindingSet::default(),
             kb_config: KeybindingConfig::default(),
+            dirty: false,
+            // Async state
+            spinner_frame: 0,
+            #[cfg(feature = "async")]
+            pending_fetch: StdRefCell::new(None),
         }
     }
 
     fn refresh(&mut self) {
         self.loading = true;
         self.error = None;
-        match fetch_posts() {
-            Ok(posts) => {
-                self.posts = posts;
-                self.selected = 0;
-            }
-            Err(e) => self.error = Some(e),
+        self.spinner_frame = 0;
+        self.dirty = true;
+
+        #[cfg(feature = "async")]
+        {
+            // Spawn async fetch using tokio::process::Command
+            let handle = tokio::spawn(async move {
+                let output = tokio::process::Command::new("curl")
+                    .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+                    .output()
+                    .await
+                    .map_err(|e| format!("Failed to run curl: {}", e))?;
+
+                if !output.status.success() {
+                    return Err(format!("curl exited with code: {:?}", output.status.code()));
+                }
+
+                let json_str = String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
+                let json: serde_json::Value =
+                    serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
+
+                let posts = json
+                    .as_array()
+                    .ok_or("Expected JSON array")?
+                    .iter()
+                    .filter_map(Post::from_json)
+                    .collect();
+
+                Ok(posts)
+            });
+
+            *self.pending_fetch.borrow_mut() = Some(handle);
         }
-        self.loading = false;
+
+        #[cfg(not(feature = "async"))]
+        {
+            match fetch_posts_sync() {
+                Ok(posts) => {
+                    self.posts = posts;
+                    self.selected = 0;
+                }
+                Err(e) => self.error = Some(e),
+            }
+            self.loading = false;
+        }
+    }
+
+    fn poll_fetch(&mut self) -> bool {
+        #[cfg(feature = "async")]
+        {
+            let mut handle_opt = self.pending_fetch.borrow_mut();
+            if let Some(handle) = handle_opt.take() {
+                if handle.is_finished() {
+                    match handle.now_or_never() {
+                        Some(Ok(Ok(posts))) => {
+                            self.posts = posts;
+                            self.selected = 0;
+                            self.loading = false;
+                        }
+                        Some(Ok(Err(e))) => {
+                            self.error = Some(e);
+                            self.loading = false;
+                        }
+                        Some(Err(e)) => {
+                            self.error = Some(format!("Task error: {}", e));
+                            self.loading = false;
+                        }
+                        None => {
+                            *handle_opt = Some(handle);
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    *handle_opt = Some(handle);
+                }
+            }
+        }
+        false
+    }
+
+    fn advance_spinner(&mut self) {
+        if self.loading {
+            self.spinner_frame = (self.spinner_frame + 1) % SPINNER_FRAMES.len();
+            self.dirty = true;
+        }
     }
 
     fn cycle_theme(&mut self) {
@@ -151,16 +254,16 @@ impl NetworkApp {
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
+        let t = &self.theme;
 
-        // Status
+        // Status with spinner
         let status = if self.loading {
-            "Loading...".to_string()
+            format!("{} Loading...", SPINNER_FRAMES[self.spinner_frame])
         } else if let Some(ref e) = self.error {
             format!("Error: {}", e)
         } else {
             format!("{} posts loaded", self.posts.len())
         };
-
         let sx = 2usize;
         for (i, c) in status.chars().enumerate() {
             let idx = (area.width as usize) + sx + i;
@@ -530,6 +633,12 @@ fn main() -> std::io::Result<()> {
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {
                 ctx.stop();
+            }
+            // Poll async fetch and advance spinner
+            let mut app = app_for_input.borrow_mut();
+            if app.poll_fetch() || app.loading {
+                app.advance_spinner();
+                app.dirty = true;
             }
         })
         .run(|_| {})
