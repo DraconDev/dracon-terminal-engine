@@ -72,6 +72,7 @@ pub mod prelude {
         Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent,
         MouseEventKind,
     };
+    #[cfg(feature = "tracing")]
     pub use tracing::instrument;
     pub use crate::Terminal;
 }

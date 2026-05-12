@@ -246,6 +246,7 @@ impl Widget for LogViewer {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        #[cfg(feature = "tracing")]
         let _span = tracing::debug_span!(
             "LogViewer::render",
             id = %self.id.0,

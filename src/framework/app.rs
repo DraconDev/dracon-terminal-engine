@@ -598,9 +598,11 @@ impl App {
                 }
                 Err(_) => {}
             }
+            #[cfg(feature = "tracing")]
             drop(_input_span);
 
             {
+                #[cfg(feature = "tracing")]
                 let _widget_span = tracing::debug_span!("widget_dispatch").entered();
                 let mut widgets = self.widgets.borrow_mut();
                 let mut sorted: Vec<_> = widgets.iter_mut().collect();
@@ -610,6 +612,7 @@ impl App {
                         continue;
                     }
                     let area = w.area();
+                    #[cfg(feature = "tracing")]
                     let _render_span = tracing::debug_span!(
                         "widget_render",
                         widget_id = w.id().0,
@@ -621,6 +624,7 @@ impl App {
                     w.clear_dirty();
                     self.compositor.add_plane(plane);
                 }
+                #[cfg(feature = "tracing")]
                 drop(_widget_span);
             }
 

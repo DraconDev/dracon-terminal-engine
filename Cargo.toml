@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.36"
+version = "0.1.37"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -184,11 +184,6 @@ path = "examples/sqlite_browser.rs"
 [[example]]
 name = "plugin_demo"
 path = "examples/plugin_demo.rs"
-
-[features]
-default = []
-async = ["tokio/rt-multi-thread", "tokio/sync", "tokio/time", "tokio/macros", "tokio/process", "tokio/io-util", "tokio/fs", "dracon-terminal-engine/tracing"]
-debug_events = []
 
 [[bench]]
 name = "framework_benchmarks"

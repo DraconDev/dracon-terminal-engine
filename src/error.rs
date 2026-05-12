@@ -58,17 +58,8 @@ impl Clone for DraconError {
 impl PartialEq for DraconError {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (DraconError::Io(_), DraconError::Io(_)) => {
-                // Compare by kind and message
-                let kind_eq = match (self, other) {
-                    (DraconError::Io(a), DraconError::Io(b)) => a.kind() == b.kind(),
-                    _ => false,
-                };
-                let msg_eq = match (self, other) {
-                    (DraconError::Io(a), DraconError::Io(b)) => a.to_string() == b.to_string(),
-                    _ => false,
-                };
-                kind_eq && msg_eq
+            (DraconError::Io(a), DraconError::Io(b)) => {
+                a.kind() == b.kind() && a.to_string() == b.to_string()
             }
             (DraconError::Parse(a), DraconError::Parse(b)) => a == b,
             (DraconError::Widget(a), DraconError::Widget(b)) => a == b,
@@ -83,6 +74,7 @@ impl PartialEq for DraconError {
 }
 
 impl Eq for DraconError {}
+
 impl fmt::Display for DraconError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -94,37 +86,6 @@ impl fmt::Display for DraconError {
             DraconError::Clipboard(msg) => write!(f, "Clipboard error: {}", msg),
             DraconError::Serialize(msg) => write!(f, "Serialization error: {}", msg),
             DraconError::User(msg) => write!(f, "{}", msg),
-        }
-    }
-}
-
-impl PartialEq for DraconError {
-    fn eq(&self, other: &Self) -> bool {
-        self.to_string() == other.to_string()
-    }
-}
-
-impl Eq for DraconError {}
-
-impl Clone for DraconError {
-    fn clone(&self) -> Self {
-        match self {
-            DraconError::Io(e) => {
-                let kind = e.kind();
-                let msg = e.to_string();
-                if msg.is_empty() {
-                    DraconError::Io(io::Error::from(kind))
-                } else {
-                    DraconError::Io(io::Error::new(kind, msg))
-                }
-            }
-            DraconError::Parse(s) => DraconError::Parse(s.clone()),
-            DraconError::Widget(s) => DraconError::Widget(s.clone()),
-            DraconError::Theme(s) => DraconError::Theme(s.clone()),
-            DraconError::Config(s) => DraconError::Config(s.clone()),
-            DraconError::Clipboard(s) => DraconError::Clipboard(s.clone()),
-            DraconError::Serialize(s) => DraconError::Serialize(s.clone()),
-            DraconError::User(s) => DraconError::User(s.clone()),
         }
     }
 }
