@@ -317,7 +317,8 @@ impl crate::framework::widget::Widget for NotificationCenter {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if let MouseEventKind::Down(_) = kind {
-            if let Some(id) = self.zones.borrow().dispatch(col, row) {
+            let hit = self.zones.borrow().dispatch(col, row);
+            if let Some(id) = hit {
                 self.dismiss(id);
                 return true;
             }
