@@ -31,28 +31,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 const HISTORY_SIZE: usize = 60;
-const THEMES: &[&str] = &[
-    "nord",
-    "dracula",
-    "cyberpunk",
-    "gruvbox-dark",
-    "tokyo-night",
-    "catppuccin",
-    "solarized-dark",
-    "one-dark",
-    "rose-pine",
-    "kanagawa",
-    "everforest",
-    "monokai",
-    "solarized-light",
-    "light",
-    "dark",
-    "warm",
-    "cool",
-    "forest",
-    "sunset",
-    "mono",
-];
+const HISTORY_SIZE: usize = 60;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // METRIC HISTORY (Sparkline)
@@ -382,30 +361,8 @@ impl Dashboard {
     }
 
     fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % THEMES.len();
-        self.theme = match THEMES[self.theme_index] {
-            "nord" => Theme::nord(),
-            "dracula" => Theme::dracula(),
-            "cyberpunk" => Theme::cyberpunk(),
-            "gruvbox-dark" => Theme::gruvbox_dark(),
-            "tokyo-night" => Theme::tokyo_night(),
-            "catppuccin" => Theme::catppuccin_mocha(),
-            "solarized-dark" => Theme::solarized_dark(),
-            "one-dark" => Theme::one_dark(),
-            "rose-pine" => Theme::rose_pine(),
-            "kanagawa" => Theme::kanagawa(),
-            "everforest" => Theme::everforest(),
-            "monokai" => Theme::monokai(),
-            "solarized-light" => Theme::solarized_light(),
-            "light" => Theme::light(),
-            "dark" => Theme::dark(),
-            "warm" => Theme::warm(),
-            "cool" => Theme::cool(),
-            "forest" => Theme::forest(),
-            "sunset" => Theme::sunset(),
-            "mono" => Theme::mono(),
-            _ => Theme::nord(),
-        };
+        self.theme_index = (self.theme_index + 1) % Theme::all().len();
+        self.theme = Theme::all()[self.theme_index];
         self.split.on_theme_change(&self.theme);
     }
 }
