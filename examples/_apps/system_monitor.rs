@@ -29,28 +29,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-const THEMES: &[&str] = &[
-    "nord",
-    "dracula",
-    "cyberpunk",
-    "gruvbox-dark",
-    "tokyo-night",
-    "catppuccin",
-    "solarized-dark",
-    "one-dark",
-    "rose-pine",
-    "kanagawa",
-    "everforest",
-    "monokai",
-    "solarized-light",
-    "light",
-    "dark",
-    "warm",
-    "cool",
-    "forest",
-    "sunset",
-    "mono",
-];
 const HISTORY_SIZE: usize = 60;
 
 // ═══════════════════════════════════════════════════════════════════════════════
