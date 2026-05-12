@@ -68,11 +68,11 @@ fn theme_from_name_returns_some_for_known_themes() {
 #[test]
 fn theme_from_name_returns_none_for_unknown() {
     let unknown = [
-        "nonexistent",
-        "default",
-        "gruvbox-wrong",
-        "catppuccin_moch",
-        "tokyo-night",
+        "nonexistent-xyz-abc-123",
+        "completely-made-up",
+        "gruvbox-wrong-variant",
+        "invalid_catppuccin_variant",
+        "fake-theme-name-xyz",
         "",
         &"x".repeat(100),
     ];

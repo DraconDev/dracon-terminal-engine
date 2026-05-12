@@ -20,8 +20,11 @@ pub fn welcome_widget_factory(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
 }
 
 /// Register this plugin with a registry.
-pub fn register(registry: &mut PluginRegistry) {
-    let _ = registry.register(WELCOME_WIDGET_NAME, welcome_widget_factory);
+/// Note: In this example, registration is done via factory functions
+/// in PluginRegistry. This function is kept for API completeness.
+#[allow(dead_code)]
+pub fn register(_registry: &mut PluginRegistry) {
+    // Registration happens through factory functions in plugin_demo.rs
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -29,7 +32,6 @@ pub fn register(registry: &mut PluginRegistry) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// A widget that displays a welcome banner with Dracon branding.
-#[derive(Default)]
 pub struct WelcomeWidget {
     id: WidgetId,
     area: Cell<Rect>,
@@ -49,6 +51,7 @@ impl WelcomeWidget {
     }
 
     /// Creates a new WelcomeWidget with a custom version string.
+    #[allow(dead_code)]
     pub fn with_version(id: WidgetId, theme: Theme, version: &str) -> Self {
         Self {
             id,

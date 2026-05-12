@@ -21,8 +21,11 @@ pub fn stat_widget_factory(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
 }
 
 /// Register this plugin with a registry.
-pub fn register(registry: &mut PluginRegistry) {
-    let _ = registry.register(STAT_WIDGET_NAME, stat_widget_factory);
+/// Note: In this example, registration is done via factory functions
+/// in PluginRegistry. This function is kept for API completeness.
+#[allow(dead_code)]
+pub fn register(_registry: &mut PluginRegistry) {
+    // Registration happens through factory functions in plugin_demo.rs
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
