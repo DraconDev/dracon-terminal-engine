@@ -19,6 +19,8 @@ use crate::framework::command::BoundCommand;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
+#[cfg(feature = "tracing")]
+use tracing::instrument;
 
 #[derive(Debug, Clone)]
 pub struct StatusBadge {
@@ -133,6 +135,7 @@ impl Widget for StatusBadge {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        #[cfg(feature = "tracing")]
         let _span = tracing::debug_span!(
             "StatusBadge::render",
             id = %self.id.0,

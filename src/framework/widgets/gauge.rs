@@ -22,6 +22,8 @@ use crate::framework::command::BoundCommand;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
+#[cfg(feature = "tracing")]
+use tracing::instrument;
 
 pub struct Gauge {
     pub id: WidgetId,
@@ -203,6 +205,7 @@ impl Widget for Gauge {
     }
 
     fn render(&self, area: Rect) -> Plane {
+        #[cfg(feature = "tracing")]
         let _span = tracing::debug_span!(
             "Gauge::render",
             id = %self.id.0,

@@ -15,16 +15,14 @@ use sysinfo::System;
 /// Plugin identifier for registration
 pub const STAT_WIDGET_NAME: &str = "stat_widget";
 
-/// Factory function to create StatWidget instances.
-/// Exported with no_mangle for dynamic loading.
-#[no_mangle]
-pub extern "C" fn create_stat_widget(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
+/// Creates a StatWidget factory function for PluginRegistry.
+pub fn stat_widget_factory(id: WidgetId, theme: Theme) -> Box<dyn Widget> {
     Box::new(StatWidget::new(id, theme))
 }
 
 /// Register this plugin with a registry.
 pub fn register(registry: &mut PluginRegistry) {
-    let _ = registry.register(STAT_WIDGET_NAME, create_stat_widget);
+    let _ = registry.register(STAT_WIDGET_NAME, stat_widget_factory);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -51,11 +49,6 @@ impl StatWidget {
             theme,
             sys,
         }
-    }
-
-    /// Refreshes the system statistics.
-    pub fn refresh(&mut self) {
-        self.sys.refresh_all();
     }
 
     /// Gets the current CPU load as a percentage (0.0 - 100.0).
@@ -176,7 +169,7 @@ impl Widget for StatWidget {
                 };
             } else {
                 plane.cells[idx].char = '░';
-                plane.cells[idx].fg = t.dim;
+                plane.cells[idx].fg = t.fg_subtle;
             }
         }
 
@@ -211,7 +204,7 @@ impl Widget for StatWidget {
                 };
             } else {
                 plane.cells[idx].char = '░';
-                plane.cells[idx].fg = t.dim;
+                plane.cells[idx].fg = t.fg_subtle;
             }
         }
 
@@ -228,7 +221,7 @@ impl Widget for StatWidget {
         for (i, c) in mem_detail.chars().enumerate() {
             if 107 + i < plane.cells.len() {
                 plane.cells[107 + i].char = c;
-                plane.cells[107 + i].fg = t.dim;
+                plane.cells[107 + i].fg = t.fg_subtle;
             }
         }
 
