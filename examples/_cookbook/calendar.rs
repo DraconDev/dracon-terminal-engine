@@ -91,7 +91,8 @@ impl CalendarDemo {
     fn toggle_mode(&mut self) {
         self.range_mode = !self.range_mode;
         // Sync theme to newly active calendar
-        self.active_calendar_mut().on_theme_change(&self.theme);
+        let theme = self.theme;
+        self.active_calendar_mut().on_theme_change(&theme);
         self.dirty = true;
     }
 }
@@ -235,7 +236,7 @@ impl Widget for CalendarDemo {
             if let Some((start, end)) = *self.selected_range.borrow() {
                 let info = format!("Range: {} to {}", start, end);
                 for (i, c) in info.chars().enumerate() {
-                    let idx = (info_y * area.width + half + (half.len() - info.len() as u16) / 2 + i as u16)
+                    let idx = (info_y * area.width + half + (half - info.len() as u16) / 2 + i as u16)
                         as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = c;
