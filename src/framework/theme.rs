@@ -1158,30 +1158,34 @@ impl Theme {
     ///
     /// Useful for theme cycling UIs, tests, and iterating over every
     /// available color scheme.
-    pub fn all() -> Vec<Theme> {
-        vec![
-            Self::dark(),
-            Self::light(),
-            Self::high_contrast(),
-            Self::cyberpunk(),
-            Self::dracula(),
-            Self::nord(),
-            Self::catppuccin_mocha(),
-            Self::gruvbox_dark(),
-            Self::tokyo_night(),
-            Self::solarized_dark(),
-            Self::solarized_light(),
-            Self::one_dark(),
-            Self::rose_pine(),
-            Self::kanagawa(),
-            Self::everforest(),
-            Self::monokai(),
-            Self::warm(),
-            Self::cool(),
-            Self::forest(),
-            Self::sunset(),
-            Self::mono(),
-        ]
+    pub fn all() -> &'static [Theme] {
+        use std::sync::OnceLock;
+        static ALL_THEMES: OnceLock<Vec<Theme>> = OnceLock::new();
+        ALL_THEMES.get_or_init(|| {
+            vec![
+                Self::dark(),
+                Self::light(),
+                Self::high_contrast(),
+                Self::cyberpunk(),
+                Self::dracula(),
+                Self::nord(),
+                Self::catppuccin_mocha(),
+                Self::gruvbox_dark(),
+                Self::tokyo_night(),
+                Self::solarized_dark(),
+                Self::solarized_light(),
+                Self::one_dark(),
+                Self::rose_pine(),
+                Self::kanagawa(),
+                Self::everforest(),
+                Self::monokai(),
+                Self::warm(),
+                Self::cool(),
+                Self::forest(),
+                Self::sunset(),
+                Self::mono(),
+            ]
+        })
     }
 }
 
