@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.60"
+version = "0.1.61"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -185,6 +185,10 @@ path = "examples/sqlite_browser.rs"
 [[example]]
 name = "plugin_demo"
 path = "examples/plugin_demo.rs"
+
+[[example]]
+name = "stat_widget_plugin"
+path = "examples/_cookbook/stat_widget_plugin.rs"
 
 [[bench]]
 name = "framework_benchmarks"
