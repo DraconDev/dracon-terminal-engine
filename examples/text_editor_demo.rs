@@ -597,6 +597,11 @@ impl Widget for EditorApp {
         }
 
         match key.code {
+            KeyCode::F(12) => {
+                self.show_profiler = !self.show_profiler;
+                self.dirty = true;
+                true
+            }
             KeyCode::Char('f') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.show_search = !self.show_search;
                 self.dirty = true;
