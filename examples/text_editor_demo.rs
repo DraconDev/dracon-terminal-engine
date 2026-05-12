@@ -958,7 +958,7 @@ fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
 
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &KeybindingConfig) {
     let w = 50u16.min(area.width - 4);
-    let h = 14u16.min(area.height - 4);
+    let h = 15u16.min(area.height - 4);
     let x = (area.width - w) / 2;
     let y = (area.height - h) / 2;
 
