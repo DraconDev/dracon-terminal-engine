@@ -555,7 +555,7 @@ impl JsonRpcHandler {
         }
     }
 
-    fn read_message<R: Read>(&self, reader: &mut R) -> Option<LspMessage> {
+    fn read_message<R: Read + BufRead>(&self, reader: &mut R) -> Option<LspMessage> {
         let mut headers: HashMap<String, String> = HashMap::new();
         let mut content_length: Option<usize> = None;
 
@@ -603,10 +603,17 @@ impl JsonRpcHandler {
                 // Response
                 Some(LspMessage::Response(Response {
                     id: json["id"].clone(),
-                    result: json["result"].clone().into(),
-                    error: json["error"].clone().map(|e| LspError {
-                        code: e["code"].as_i64().unwrap_or(0) as i32,
-                        message: e["message"].as_str().unwrap_or("").to_string(),
+                    result: json.get("result").cloned(),
+                    error: json.get("error").and_then(|e| {
+                        e.get("code").and_then(|c| {
+                            let code = c.as_i64().unwrap_or(0) as i32;
+                            e.get("message").and_then(|m| {
+                                m.as_str().map(|msg| LspError {
+                                    code,
+                                    message: msg.to_string(),
+                                })
+                            })
+                        })
                     }),
                 }))
             }
@@ -632,38 +639,40 @@ impl JsonRpcHandler {
     fn handle_message(&mut self, message: LspMessage) -> Option<Value> {
         match message {
             LspMessage::Request(request) => {
-                let result = match request.method.as_str() {
+                let result: Option<Value> = match request.method.as_str() {
                     "initialize" => {
                         let params: InitializeParams =
                             serde_json::from_value(request.params).ok()?;
                         let result = self.server.initialize(params);
-                        Some(serde_json::to_value(result).ok().flatten())
+                        serde_json::to_value(result).ok()
                     }
-                    "shutdown" => Some(serde_json::to_value(()).ok()),
+                    "shutdown" => Some(serde_json::Value::Null),
                     "dracon/startPreview" => {
                         // Custom command to start preview
-                        if let Some(ref root) = self.server.workspace_root {
-                            self.server.start_preview_compilation(root);
+                        let root = self.server.workspace_root.clone();
+                        if let Some(ref root) = root {
+                            let root = root.clone();
+                            self.server.start_preview_compilation(&root);
                         }
-                        Some(serde_json::to_value(()).ok())
+                        Some(serde_json::Value::Null)
                     }
                     "dracon/stopPreview" => {
                         self.server.stop_preview();
-                        Some(serde_json::to_value(()).ok())
+                        Some(serde_json::Value::Null)
                     }
                     "dracon/getEvents" => {
                         // Custom method to get queued events
                         let events = self.server.process_queue();
-                        Some(serde_json::to_value(events).ok())
+                        Some(serde_json::to_value(events).unwrap_or_default())
                     }
                     "textDocument/hover" => {
                         // Simple hover implementation
-                        Some(serde_json::to_value(serde_json::json!({
+                        Some(serde_json::json!({
                             "contents": {
                                 "kind": "markdown",
                                 "value": "**Dracon TUI Preview**\n\nA live preview for Dracon Terminal Engine examples."
                             }
-                        })).ok())
+                        }))
                     }
                     _ => None,
                 };
