@@ -1532,7 +1532,6 @@ fn format_permissions(mode: u32) -> String {
 }
 
 fn main() -> std::io::Result<()> {
-fn main() -> std::io::Result<()> {
     println!("File Manager — Real filesystem browser");
     println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | l: async load | ?: help | q: quit");
     std::thread::sleep(Duration::from_millis(300));
