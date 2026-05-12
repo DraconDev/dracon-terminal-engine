@@ -130,10 +130,10 @@ fn test_table_no_black_background() {
 }
 
 #[test]
-fn test_all_20_themes_no_panic() {
+fn test_all_21_themes_no_panic() {
     // Sanity check: rendering every widget with every theme doesn't panic
     let themes = all_themes();
-    assert_eq!(themes.len(), 20, "Expected 20 themes");
+    assert_eq!(themes.len(), 21, "Expected 21 themes");
 
     for theme in &themes {
         let mut cb = Checkbox::new(WidgetId::new(1), "Test");
