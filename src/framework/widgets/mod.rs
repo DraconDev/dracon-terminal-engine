@@ -49,7 +49,7 @@ pub use confirm_dialog::{ConfirmDialog, ConfirmResult};
 pub use context_menu::{ContextAction, ContextMenu};
 pub use debug_overlay::DebugOverlay;
 pub use event_logger::{EventLogger, LoggedEvent};
-pub use form::Form;
+pub use form::{Form, FormField, ValidationRule};
 pub use gauge::Gauge;
 pub use hud::Hud;
 pub use key_value_grid::KeyValueGrid;
