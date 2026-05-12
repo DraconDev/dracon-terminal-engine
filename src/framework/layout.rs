@@ -90,8 +90,12 @@ impl Layout {
             return Vec::new();
         }
 
+        let is_vertical = self.direction == Direction::Vertical;
+        let main_axis = if is_vertical { area.height } else { area.width };
+        let cross_axis = if is_vertical { area.width } else { area.height };
+
         let total_spacing = self.spacing * (self.constraints.len() as u16 - 1).saturating_sub(0);
-        let available = area.width.saturating_sub(total_spacing);
+        let available = main_axis.saturating_sub(total_spacing);
 
         let mut results = Vec::with_capacity(self.constraints.len());
 
@@ -158,12 +162,16 @@ impl Layout {
             }
         }
 
-        let mut x = area.x;
+        let mut pos = if is_vertical { area.y } else { area.x };
         for (i, size) in sizes.iter().enumerate() {
-            let h = area.height;
-            results.push(Rect::new(x, area.y, *size, h));
+            let rect = if is_vertical {
+                Rect::new(area.x, pos, cross_axis, *size)
+            } else {
+                Rect::new(pos, area.y, *size, cross_axis)
+            };
+            results.push(rect);
             if i < sizes.len() - 1 {
-                x += *size + self.spacing;
+                pos += *size + self.spacing;
             }
         }
 
