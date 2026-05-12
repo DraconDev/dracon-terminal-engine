@@ -1,7 +1,7 @@
-//! Welcome Widget Plugin — Displays a welcome message with Dracon branding.
-//!
-//! This widget is designed to be loaded dynamically as a plugin.
-//! It shows a stylized welcome banner with version info.
+// Welcome Widget Plugin — Displays a welcome message with Dracon branding.
+//
+// This widget is designed to be loaded dynamically as a plugin.
+// It shows a stylized welcome banner with version info.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;

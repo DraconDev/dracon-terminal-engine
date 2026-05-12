@@ -95,6 +95,17 @@ impl App {
     #[cfg(feature = "tracing")]
     #[instrument(skip_all, fields(title = "Dracon App"))]
     pub fn new() -> io::Result<Self> {
+        Self::new_impl()
+    }
+
+    /// Creates a new `App` with a linked terminal.
+    /// Returns an error if the terminal cannot be initialized.
+    #[cfg(not(feature = "tracing"))]
+    pub fn new() -> io::Result<Self> {
+        Self::new_impl()
+    }
+
+    fn new_impl() -> io::Result<Self> {
         let terminal = Terminal::new(io::stdout())?;
         let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
 

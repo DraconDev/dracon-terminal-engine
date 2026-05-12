@@ -1,12 +1,11 @@
-//! Dracon Terminal Engine Plugins
-//!
-//! This library provides example plugins that can be loaded dynamically
-//! by the Dracon framework.
-//!
-//! # Widgets
-//!
-//! - `stat_widget` - Displays CPU and memory statistics
-//! - `welcome_widget` - Displays a welcome banner with Dracon branding
+// Dracon Terminal Engine Plugins
+//
+// This library provides example plugins that can be loaded dynamically
+// by the Dracon framework.
+//
+// Widgets:
+// - `stat_widget` - Displays CPU and memory statistics
+// - `welcome_widget` - Displays a welcome banner with Dracon branding
 
 pub mod stat_widget;
 pub mod welcome_widget;
