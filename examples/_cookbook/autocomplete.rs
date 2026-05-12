@@ -1,4 +1,5 @@
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
