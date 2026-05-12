@@ -21,6 +21,7 @@ pub struct StatWidget {
     value: String,
     trend: Trend,
     area: Rect,
+    theme: Theme,
 }
 
 #[derive(Clone, Copy)]
@@ -31,26 +32,27 @@ enum Trend {
 }
 
 impl StatWidget {
-    pub fn new(label: &str, value: &str, trend: Trend) -> Self {
+    pub fn new(label: &str, value: &str, trend: Trend, theme: Theme) -> Self {
         Self {
             id: WidgetId::new(0),
             label: label.to_string(),
             value: value.to_string(),
             trend,
             area: Rect::default(),
+            theme,
         }
     }
 }
 
 impl Widget for StatWidget {
     fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
     fn area(&self) -> Rect { self.area }
     fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn needs_render(&self) -> bool { true }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        plane.fill_bg(self.area.bg);
+        plane.fill_bg(self.theme.bg);
 
         let inner_w = area.width.saturating_sub(2);
 
@@ -62,7 +64,7 @@ impl Widget for StatWidget {
                 let idx = (area.y as usize * plane.width as usize + x as usize)
                     .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = theme.fg_muted;
+                plane.cells[idx].fg = self.theme.fg_muted;
             }
         }
 
@@ -76,7 +78,7 @@ impl Widget for StatWidget {
                 let idx = (value_y as usize * plane.width as usize + x as usize)
                     .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = theme.primary;
+                plane.cells[idx].fg = self.theme.primary;
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
@@ -92,7 +94,7 @@ impl Widget for StatWidget {
             let idx = (y as usize * plane.width as usize + x as usize)
                 .min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = ch;
-            plane.cells[idx].fg = theme.outline;
+            plane.cells[idx].fg = self.theme.outline;
         }
         // Top/bottom borders
         for x in (area.x + 1)..(area.x + area.width - 1) {
@@ -100,7 +102,7 @@ impl Widget for StatWidget {
                 let idx = (y as usize * plane.width as usize + x as usize)
                     .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = '─';
-                plane.cells[idx].fg = theme.outline;
+                plane.cells[idx].fg = self.theme.outline;
             }
         }
         // Left/right borders
@@ -109,7 +111,7 @@ impl Widget for StatWidget {
                 let idx = (y as usize * plane.width as usize + x as usize)
                     .min(plane.cells.len().saturating_sub(1));
                 plane.cells[idx].char = '│';
-                plane.cells[idx].fg = theme.outline;
+                plane.cells[idx].fg = self.theme.outline;
             }
         }
 
@@ -118,9 +120,9 @@ impl Widget for StatWidget {
         let trend_y = area.y + 1;
         if trend_x > area.x && trend_y < area.y + area.height {
             let (ch, color) = match self.trend {
-                Trend::Up => ('▲', theme.success),
-                Trend::Down => ('▼', theme.error),
-                Trend::Neutral => ('◆', theme.fg_muted),
+                Trend::Up => ('▲', self.theme.success),
+                Trend::Down => ('▼', self.theme.error),
+                Trend::Neutral => ('◆', self.theme.fg_muted),
             };
             let idx = (trend_y as usize * plane.width as usize + trend_x as usize)
                 .min(plane.cells.len().saturating_sub(1));
@@ -131,9 +133,9 @@ impl Widget for StatWidget {
         plane
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; }
     fn handle_key(&mut self, _key: KeyEvent) -> bool { false }
     fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
-    fn on_theme_change(&mut self, _theme: &Theme) {}
 }
 
 fn truncate(s: &str, max: usize) -> String {
@@ -168,15 +170,15 @@ impl PluginLoader {
         let mut registry = PluginRegistry::new();
 
         // Register the StatWidget plugin factory
-        registry.register("stat", |id, _theme| {
+        registry.register("stat", |id, theme| {
             let widgets = [
                 ("CPU", "67%", Trend::Neutral),
                 ("Memory", "4.2 GB", Trend::Up),
                 ("Disk", "512 GB", Trend::Neutral),
                 ("Network", "↑ 2.4 MB/s", Trend::Up),
             ];
-            let (label, value, trend) = widgets[id.0 as usize % 4];
-            Box::new(StatWidget::new(label, value, trend)) as Box<dyn Widget>
+            let (label, value, trend) = widgets[id.0 % 4];
+            Box::new(StatWidget::new(label, value, trend, theme)) as Box<dyn Widget>
         });
 
         Self {
@@ -189,7 +191,7 @@ impl PluginLoader {
     }
 
     fn load_plugin(&mut self) {
-        let id = WidgetId::new(self.next_id as u32);
+        let id = WidgetId::new(self.next_id);
         self.next_id += 1;
         if let Some(widget) = self.registry.create("stat", id, self.theme) {
             self.loaded_widgets.push(widget);
@@ -200,9 +202,10 @@ impl PluginLoader {
 
 impl Widget for PluginLoader {
     fn id(&self) -> WidgetId { WidgetId::new(0) }
-    fn set_id(&mut self, _id: WidgetId) {}
     fn area(&self) -> Rect { Rect::default() }
     fn set_area(&mut self, _area: Rect) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -269,6 +272,7 @@ impl Widget for PluginLoader {
         plane
     }
 
+    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; self.dirty = true; }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         use KeyCode::*;
         match key.code {
@@ -280,11 +284,7 @@ impl Widget for PluginLoader {
             _ => false,
         }
     }
-
     fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
-    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; self.dirty = true; }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn set_dirty(&mut self, dirty: bool) { self.dirty = dirty; }
 }
 
 fn overlay_plane(target: &mut Plane, source: &Plane, ox: u16, oy: u16) {
