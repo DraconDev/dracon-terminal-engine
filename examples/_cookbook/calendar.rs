@@ -128,7 +128,6 @@ impl Widget for CalendarDemo {
 
         // Render active calendar (centered in its half)
         let cal = self.active_calendar();
-        let cal_area = cal.area();
         let cal_height = 10u16;
         let cal_width = 25u16;
 
@@ -145,7 +144,7 @@ impl Widget for CalendarDemo {
                 let src_idx = (y * cal_width + x) as usize;
                 let dst_idx = ((single_y + y) * area.width + single_x + x) as usize;
                 if src_idx < temp_plane.cells.len() && dst_idx < plane.cells.len() {
-                    plane.cells[dst_idx] = temp_plane.cells[src_idx];
+                    plane.cells[dst_idx] = temp_plane.cells[src_idx].clone();
                 }
             }
         }
@@ -189,7 +188,7 @@ impl Widget for CalendarDemo {
                 let src_idx = (y * cal_width + x) as usize;
                 let dst_idx = ((range_y + y) * area.width + range_x + x) as usize;
                 if src_idx < temp_plane2.cells.len() && dst_idx < plane.cells.len() {
-                    let mut cell = temp_plane2.cells[src_idx];
+                    let mut cell = temp_plane2.cells[src_idx].clone();
                     // Dim inactive calendar
                     cell.fg = self.theme.fg_muted;
                     plane.cells[dst_idx] = cell;
