@@ -338,7 +338,7 @@ fn draw_rect_border(plane: &mut Plane, area: Rect, theme: &Theme) {
 
 fn main() -> std::io::Result<()> {
     let env_theme = Theme::from_env_or(Theme::nord());
-    let app = App::new()?
+    let mut app = App::new()?
         .theme(env_theme);
     let _ = app.add_widget(Box::new(PluginLoader::new(env_theme)), Rect::new(0, 0, 80, 24));
     app.run(|_| {});
