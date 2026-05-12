@@ -220,7 +220,8 @@ impl Widget for PluginLoader {
         // Footer
         let footer = "  1: CPU  2: Memory  3: Disk  4: Network  |  F1: help  |  Ctrl+Q: quit  ";
         for (i, c) in footer.chars().enumerate() {
-            let idx = ((area.y + area.height - 1) as usize * plane.width as usize + (area.x + i) as usize).min(plane.cells.len().saturating_sub(1));
+            let x = area.x + i as u16;
+            let idx = ((area.y + area.height - 1) as usize * plane.width as usize + x as usize).min(plane.cells.len().saturating_sub(1));
             plane.cells[idx].char = c;
             plane.cells[idx].fg = self.theme.fg_muted;
             plane.cells[idx].bg = self.theme.surface;
@@ -298,6 +299,6 @@ fn main() -> Result<()> {
     let app = App::new()?
         .theme(env_theme);
     let _ = app.add_widget(Box::new(PluginLoader::new(env_theme)), Rect::new(0, 0, 80, 24));
-    app.run()?;
+    app.run(|_| {});
     Ok(())
 }
