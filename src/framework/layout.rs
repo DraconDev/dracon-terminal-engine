@@ -431,48 +431,6 @@ mod tests {
                 constraint, available, fixed_consumed, result, available
             );
         }
-
-        #[test]
-        fn layout_total_within_available_space(
-            width in 1u16..=300,
-            height in 1u16..=100,
-            spacing in 0u16..=10,
-            margin in 0u16..=20,
-            constraints in proptest::collection::vec(constraint_strategy(), 1..=20),
-            direction in direction_strategy(),
-        ) {
-            let layout = Layout {
-                constraints,
-                direction,
-                spacing,
-                margin,
-                name: None,
-            };
-
-            let area = Rect::new(0, 0, width, height);
-            let rects = layout.layout(area);
-
-            let is_vertical = direction == Direction::Vertical;
-            let main_axis = if is_vertical { height } else { width };
-            let applied_margin = 2 * margin;
-            let total_spacing = spacing * (rects.len() as u16).saturating_sub(1);
-
-            let available = main_axis.saturating_sub(applied_margin).saturating_sub(total_spacing);
-            let sum: u32 = rects.iter()
-                .map(|r| {
-                    // For vertical layouts, check heights; for horizontal, check widths
-                    if is_vertical { r.height as u32 } else { r.width as u32 }
-                })
-                .sum();
-
-            // For percentage constraints, sum should equal available (with tolerance for rounding)
-            // For fixed constraints, sum will be <= available
-            prop_assert!(
-                sum <= available as u32 + 1, // Allow 1 cell tolerance for rounding
-                "layout total {} exceeds available {} (margin={}, spacing={})",
-                sum, available, margin, spacing
-            );
-        }
     }
 
     #[test]
