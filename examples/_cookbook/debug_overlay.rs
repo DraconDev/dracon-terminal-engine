@@ -21,7 +21,7 @@
 //! Press arrow keys, click, or type to see events logged.
 //! Press F12 to toggle the debug overlay panel.
 
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell as StdCell, RefCell};
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
