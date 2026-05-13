@@ -5,10 +5,11 @@
 
 use std::cell::RefCell;
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Color, Plane, Styles};
 use crate::framework::dragdrop::{DragGhost, DragManager, DragPhase, DropTarget};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
+use ratatui::layout::Rect;
 use unicode_width::UnicodeWidthStr;
 
 /// A card in the Kanban board.

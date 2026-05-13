@@ -231,28 +231,30 @@ impl EventBus {
     {
         let type_id = TypeId::of::<E>();
         let fired = Rc::new(std::cell::RefCell::new(false));
-        let fired_clone = fired.clone();
+
+        // Capture self pointer for unsubscription
         let bus = self as *const EventBus;
+        let mut subs = self.subscribers.borrow_mut();
+        let list = subs.entry(type_id).or_default();
+        let id = SubscriptionId(list.len());
+        let id_clone = id;
 
         let wrapped: EventCallback = Rc::new(move |any_event| {
-            if *fired_clone.borrow() {
+            if *fired.borrow() {
                 return;
             }
             if let Some(event) = any_event.downcast_ref::<E>() {
-                *fired_clone.borrow_mut() = true;
+                *fired.borrow_mut() = true;
                 callback(event.clone());
                 // Unsubscribe from the bus
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
-                        bus.unsubscribe::<E>(SubscriptionId(0)); // Simplified - uses first slot
+                        bus.unsubscribe::<E>(id_clone);
                     }
                 }
             }
         });
 
-        let mut subs = self.subscribers.borrow_mut();
-        let list = subs.entry(type_id).or_default();
-        let id = SubscriptionId(list.len());
         list.push(wrapped);
 
         if *self.trace.borrow() {
@@ -286,20 +288,25 @@ impl EventBus {
     {
         let type_id = TypeId::of::<E>();
         let fired = Rc::new(std::cell::RefCell::new(false));
-        let fired_clone = fired.clone();
+
+        // Capture self pointer for unsubscription
         let bus = self as *const EventBus;
+        let mut subs = self.subscribers.borrow_mut();
+        let list = subs.entry(type_id).or_default();
+        let id = SubscriptionId(list.len());
+        let id_clone = id;
 
         let wrapped: EventCallback = Rc::new(move |any_event| {
-            if *fired_clone.borrow() {
+            if *fired.borrow() {
                 return;
             }
             if let Some(event) = any_event.downcast_ref::<E>() {
-                *fired_clone.borrow_mut() = true;
+                *fired.borrow_mut() = true;
                 let event = event.clone();
                 // Unsubscribe from the bus
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
-                        bus.unsubscribe::<E>(SubscriptionId(0)); // Simplified - uses first slot
+                        bus.unsubscribe::<E>(id_clone);
                     }
                 }
                 // Spawn the async callback
@@ -309,9 +316,6 @@ impl EventBus {
             }
         });
 
-        let mut subs = self.subscribers.borrow_mut();
-        let list = subs.entry(type_id).or_default();
-        let id = SubscriptionId(list.len());
         list.push(wrapped);
 
         if *self.trace.borrow() {

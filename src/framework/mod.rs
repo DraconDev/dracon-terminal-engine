@@ -30,6 +30,7 @@ pub mod event_bus;
 pub mod event_dispatcher;
 pub mod focus;
 pub mod hitzone;
+pub mod i18n;
 pub mod keybindings;
 pub mod layout;
 #[cfg(feature = "tracing")]

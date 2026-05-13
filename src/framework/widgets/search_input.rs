@@ -108,3 +108,28 @@ impl Widget for SearchInput {
         self.base.theme = *theme;
     }
 }
+
+impl WidgetState for SearchInput {
+    fn state_id(&self) -> Option<&str> {
+        Some("search_input")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "text": self.base.text,
+            "cursor_pos": self.base.cursor_pos,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(text) = json.get("text").and_then(|v| v.as_str()) {
+            self.base.text = text.to_string();
+        }
+        if let Some(pos) = json.get("cursor_pos").and_then(|v| v.as_u64()) {
+            self.base.cursor_pos = pos as usize;
+        }
+        self.base.dirty = true;
+        Ok(())
+    }
+}
