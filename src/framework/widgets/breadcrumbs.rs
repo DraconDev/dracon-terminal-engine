@@ -14,7 +14,6 @@ use std::path::Path;
 /// Renders a "/"-separated sequence of clickable path segments. Clicking a segment
 /// fires the `on_navigate` callback with the segment index.
 pub struct Breadcrumbs {
-pub struct Breadcrumbs {
     id: WidgetId,
     path: Vec<String>,
     theme: Theme,
@@ -32,7 +31,7 @@ impl Breadcrumbs {
     pub fn new(segments: Vec<String>) -> Self {
         Self {
             id: WidgetId::default_id(),
-            segments,
+            path: segments,
             theme: Theme::default(),
             height: 1,
             clickable: true,
@@ -46,7 +45,7 @@ impl Breadcrumbs {
     pub fn new_with_id(id: WidgetId, segments: Vec<String>) -> Self {
         Self {
             id,
-            segments,
+            path: segments,
             theme: Theme::default(),
             height: 1,
             clickable: true,
@@ -138,13 +137,13 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         plane.fill_bg(self.theme.bg);
 
         // Calculate total width needed
-        let total_width: usize = self.segments.iter()
+        let total_width: usize = self.path.iter()
             .map(|s| s.width() + 2) // +2 for padding
             .sum::<usize>()
             .saturating_sub(1); // Subtract separator overhead
 
         // If too wide, truncate middle segments
-        let showable_segments = if total_width > area.width as usize && self.segments.len() > 2 {
+        let showable_segments = if total_width > area.width as usize && self.path.len() > 2 {
             let ellipsis = "...".to_string();
             let ellipsis_width = ellipsis.width();
 
@@ -159,20 +158,20 @@ impl crate::framework::widget::Widget for Breadcrumbs {
 
             // Add prefix segments
             for i in 0..prefix {
-                used_width += self.segments[i].width() + 2;
+                used_width += self.path[i].width() + 2;
             }
 
             // Add suffix segments
-            for i in (self.segments.len() - suffix)..self.segments.len() {
-                used_width += self.segments[i].width() + 2;
+            for i in (self.path.len() - suffix)..self.path.len() {
+                used_width += self.path[i].width() + 2;
             }
 
             // Add ellipsis
             used_width += ellipsis_width + 1;
 
             // Try to add middle segments until we hit the limit
-            for i in prefix..(self.segments.len() - suffix) {
-                let seg_width = self.segments[i].width() + 2;
+            for i in prefix..(self.path.len() - suffix) {
+                let seg_width = self.path[i].width() + 2;
                 if used_width + seg_width <= max_width {
                     show_suffix += 1;
                     used_width += seg_width;
@@ -181,12 +180,12 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 }
             }
 
-            Some((prefix, self.segments.len() - show_suffix))
+            Some((prefix, self.path.len() - show_suffix))
         } else {
             None
         };
 
-        let (omit_start, omit_end) = showable_segments.unwrap_or((0, self.segments.len()));
+        let (omit_start, omit_end) = showable_segments.unwrap_or((0, self.path.len()));
 
         let mut x: u16 = 0;
 
@@ -207,7 +206,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 x += 1;
             }
             // Separator after ellipsis
-            if x < area.width && omit_end < self.segments.len() {
+            if x < area.width && omit_end < self.path.len() {
                 let sep_idx = x as usize;
                 if sep_idx < plane.cells.len() {
                     plane.cells[sep_idx].char = '/';
@@ -218,7 +217,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         }
 
         // Render suffix segments
-        for i in omit_end..self.segments.len() {
+        for i in omit_end..self.path.len() {
             self.render_segment(&mut plane, i, area.width, &mut x, false);
         }
 
@@ -228,8 +227,8 @@ impl crate::framework::widget::Widget for Breadcrumbs {
 
 impl Breadcrumbs {
     fn render_segment(&self, plane: &mut Plane, i: usize, _width: u16, x: &mut u16, _is_prefix: bool) {
-        let segment = &self.segments[i];
-        let is_last = i == self.segments.len() - 1;
+        let segment = &self.path[i];
+        let is_last = i == self.path.len() - 1;
         let is_first = i == 0;
 
         let seg_width = (segment.width() as u16 + 2).min((80u16).saturating_sub(*x));
@@ -326,7 +325,7 @@ impl Breadcrumbs {
         let mut zones = Vec::new();
         let mut x: u16 = 0;
 
-        for (i, segment) in self.segments.iter().enumerate() {
+        for (i, segment) in self.path.iter().enumerate() {
             let is_first = i == 0;
 
             let seg_width = (segment.width() as u16 + 2).min(width.saturating_sub(x));
