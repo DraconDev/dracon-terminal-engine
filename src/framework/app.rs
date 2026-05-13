@@ -1114,7 +1114,7 @@ macro_rules! make_ctx {
         }};
     }
 
-    macro_rules! make_ctx {
+macro_rules! make_ctx {
         () => {{
             let mut compositor = Compositor::new(80, 24);
             let mut focus_manager = FocusManager::new();
@@ -1125,20 +1125,17 @@ macro_rules! make_ctx {
             let commands = RefCell::new(Vec::new());
             let event_bus = EventBus::new();
             let mut scene_router = SceneRouter::new();
-            Ctx {
-                compositor: &mut compositor,
-                theme: &mut theme,
-                frame_count: 0,
-                last_frame: &last_frame,
-                running: &FAKE_RUNNING,
-                terminal: &mut make_test_terminal().unwrap(),
-                focus_manager: &mut focus_manager,
-                animations: &mut animations,
-                dirty_tracker: &mut dirty_tracker,
-                commands: &commands,
-                event_bus: &event_bus,
-                scene_router: &mut scene_router,
-            }
+            (
+                compositor,
+                focus_manager,
+                dirty_tracker,
+                animations,
+                theme,
+                last_frame,
+                commands,
+                event_bus,
+                scene_router,
+            )
         }};
     }
 
