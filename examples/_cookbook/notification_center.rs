@@ -261,14 +261,14 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let app_widget = NotifierApp::new(Rc::clone(&should_quit), theme);
 
-    App::new()?
-        .title("Notification Center")
-        .fps(30)
-        .theme(theme)
-        .add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24))
-        .run(|ctx| {
-            if should_quit.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
+    let mut app = App::new()?;
+    app.title("Notification Center");
+    app.fps(30);
+    app.theme(theme);
+    app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
+    app.run(|ctx| {
+        if should_quit.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
 }
