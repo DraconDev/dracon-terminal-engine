@@ -36,6 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2026-05-13
 
+### Added
+
+- **Bracketed Paste** — Terminal enables bracketed paste mode (ESC[2004h); App dispatches paste events to widgets
+- **Vertical Layout** — `Layout::direction(Direction::Vertical)` and `Layout::vertical()` constructors
+- **CellPool** — Object pool for Cell allocation, reducing per-frame allocation pressure
+- **Accessibility** — `Role` enum, `Accessible` trait, `AccessibilityManager` with OSC 99/633 announcements
+- **Calendar/DatePicker** — Date selection widget with month/year navigation
+- **RichText** — Rich text renderer with headers, bold, italic, code blocks, links, lists
+- **Autocomplete** — Type-ahead suggestion widget with keyboard/mouse navigation
+- **NotificationCenter** — Queued notification stack with auto-dismiss
+- **Grapheme cluster awareness** — `grapheme_width()` for correct Unicode display width
+- **DraconError** — Unified error type for the engine
+- **Structured logging** — `DraconLogger` with `tracing` integration (behind `tracing` feature)
+- **Proptest** — Property-based tests for layout, grapheme width, theme colors
+- **Async feature** — `async = ["dep:tokio"]` for async I/O examples
+- **VSCode extension** — Live TUI preview extension in `extensions/vscode/`
+- **8 new cookbook examples** — accessibility, cell_pool, notification_center, stat_widget_plugin, rich_text, autocomplete, form_validation, calendar
+
+### Changed
+
+- Version aligned to semantic versioning (0.1.0 → 0.1.3)
+
 ## [0.1.0] - 2026-05-12
 
 ### Added
