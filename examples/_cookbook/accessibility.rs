@@ -151,12 +151,12 @@ impl Widget for AccessibleButton {
         }
 
         match kind {
-            MouseEventKind::Down(Left) => {
+            MouseEventKind::Down(MouseButton::Left) => {
                 self.pressed = true;
                 self.dirty = true;
                 true
             }
-            MouseEventKind::Up(Left) => {
+            MouseEventKind::Up(MouseButton::Left) => {
                 self.pressed = false;
                 self.dirty = true;
                 true
