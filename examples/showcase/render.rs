@@ -106,7 +106,7 @@ pub fn render_features_bar(
     phase: f64,
 ) -> usize {
     let features = [
-        ("37", "Widgets", theme.info),
+        ("43", "Widgets", theme.info),
         ("21", "Themes", theme.secondary),
         ("~", "Animations", theme.warning),
         ("DnD", "Drag & Drop", theme.success),
