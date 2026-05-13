@@ -65,8 +65,6 @@ pub struct I18n {
     locale: String,
     /// Translation map: key -> value
     translations: HashMap<String, String>,
-    /// Fallback locale
-    fallback_locale: String,
     /// Default fallback translations (English)
     fallback_map: HashMap<String, String>,
 }
@@ -83,7 +81,6 @@ impl I18n {
         let mut i18n = Self {
             locale: locale.to_string(),
             translations: HashMap::new(),
-            fallback_locale: "en".to_string(),
             fallback_map: HashMap::new(),
         };
         // Load default English translations
@@ -121,7 +118,6 @@ impl I18n {
         ];
 
         for path in search_paths {
-        for path in search_paths {
             if let Ok(content) = fs::read_to_string(&path) {
                 match serde_json::from_str::<serde_json::Value>(&content) {
                     Ok(value) => {
@@ -144,7 +140,8 @@ impl I18n {
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&'a self, key: &'a str) -> &'a str {
+    pub fn t<'a>(&'a self, key: &'a str) -> Cow<'a, str> {
+        // Try current locale
         if let Some(value) = self.translations.get(key) {
             return Cow::Borrowed(value);
         }
@@ -157,6 +154,7 @@ impl I18n {
     }
 
     /// Translate with interpolation support.
+    ///
     /// Replaces `{placeholder}` in the translation string with provided values.
     ///
     /// ```ignore
@@ -170,11 +168,15 @@ impl I18n {
             result = result.replace(&format!("{{{name}}}"), value);
         }
         result
-        result
     }
 
     /// Get all available translation keys.
     pub fn keys(&self) -> impl Iterator<Item = &str> {
+        self.translations.keys()
+            .chain(self.fallback_map.keys())
+            .map(|s| s.as_str())
+    }
+
     /// Check if a key exists in the current locale.
     pub fn contains(&self, key: &str) -> bool {
         self.translations.contains_key(key) || self.fallback_map.contains_key(key)

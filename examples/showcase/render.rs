@@ -683,18 +683,17 @@ fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
     draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, true);
 }
 
-fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
+fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
     let fields = [("Name:", "[___________]"), ("Email:", "[__________]")];
     for (i, (label, field)) in fields.iter().enumerate() {
-        let y = 5 + i * 2;
-        draw_text(plane, 2, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, 8, y, field, t.fg, t.surface, false);
+        let y = oy + 5 + i * 2;
+        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 8, y, field, t.fg, t.surface, false);
     }
     let btns = ["[Submit]", "[Cancel]"];
     for (i, btn) in btns.iter().enumerate() {
-        let x = 6 + i * 10;
         let fg = if i == 0 { t.primary } else { t.fg_muted };
-        draw_text(plane, x, 10, btn, fg, t.surface, true);
+        draw_text(plane, ox + 6 + i * 10, oy + 10, btn, fg, t.surface, true);
     }
 }
 
