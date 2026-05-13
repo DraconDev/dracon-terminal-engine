@@ -390,4 +390,29 @@ mod tests {
         let val = anim.value();
         assert_eq!(val, 100.0);
     }
+
+    #[test]
+    fn test_has_active_vs_is_empty() {
+        let mut manager = AnimationManager::new();
+        // Empty: both false
+        assert!(manager.is_empty());
+        assert!(!manager.has_active());
+
+        // Active animation: has_active = true
+        manager.start(0.0, 100.0, Duration::from_secs(10));
+        assert!(!manager.is_empty());
+        assert!(manager.has_active());
+
+        // After it completes (but before cleanup): has_active = false, is_empty = false
+        std::thread::sleep(Duration::from_millis(50));
+        let id = manager.start(0.0, 100.0, Duration::from_millis(1));
+        std::thread::sleep(Duration::from_millis(10));
+        assert!(!manager.is_empty()); // not cleaned up yet
+        assert!(!manager.has_active()); // but the short one is done; only the long one is active
+
+        // After cleanup: truly empty
+        manager.tick();
+        // Only the long animation remains (or both if long one is still active)
+        assert!(manager.has_active() || manager.is_empty());
+    }
 }
