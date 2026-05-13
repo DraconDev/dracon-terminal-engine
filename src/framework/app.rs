@@ -432,10 +432,7 @@ impl App {
                 }
             }
 
-            let stdin_fd = stdin.as_fd();
-            #[cfg(feature = "tracing")]
-            let _input_span = tracing::debug_span!("input_parsing").entered();
-            match tty::poll_input(stdin_fd, 1) {
+            match tty::poll_input(stdin.as_fd(), 1) {
                 Ok(true) => {
                     let mut chunk_buf = [0u8; 1024];
                     if let Ok(n) = stdin.read(&mut chunk_buf) {
@@ -556,9 +553,8 @@ impl App {
                     }
                     // Drain any remaining queued input (e.g. burst of scroll events)
                     // to prevent multi-frame lag from event queue buildup
-                    let _drain_limit = 64; // Safety limit to avoid infinite loops
-                    for _ in 0.._drain_limit {
-                        match tty::poll_input(stdin_fd, 0) {
+                    for _ in 0..64 {
+                        match tty::poll_input(stdin.as_fd(), 0) {
                             Ok(true) => {
                                 let mut drain_buf = [0u8; 1024];
                                 if let Ok(dn) = stdin.read(&mut drain_buf) {
