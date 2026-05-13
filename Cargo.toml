@@ -1,6 +1,5 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.93"
 version = "0.1.0"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
