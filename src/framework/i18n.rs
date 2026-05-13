@@ -139,6 +139,7 @@ impl I18n {
 
         Err(I18nError::LocaleNotFound(lang.to_string()))
     }
+
     /// Translate a key to the current locale.
     ///
     /// If the key is not found in the current locale, falls back to
