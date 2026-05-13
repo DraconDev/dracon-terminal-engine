@@ -542,37 +542,23 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
     }
 }
 
-fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let menus = ["File", "Edit", "View", "Help"];
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
     let menu_w = 8;
-
     for (i, menu) in menus.iter().enumerate() {
-        let x = 2 + i * (menu_w + 1);
+        let x = ox + 2 + i * (menu_w + 1);
         let is_highlighted = i == highlight_idx;
         let bg = if is_highlighted { t.primary } else { t.surface };
         let fg = if is_highlighted { t.fg_on_accent } else { t.fg };
-
-        for dx in 0..menu_w {
-            set_cell(plane, x + dx, 6, ' ', fg, bg);
-        }
+        for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6, ' ', fg, bg); }
         let text = format!(" {} ", menu);
-        draw_text(plane, x, 6, &text, fg, bg, false);
-
+        draw_text(plane, x, oy + 6, &text, fg, bg, false);
         if is_highlighted {
             for dy in 1..5 {
-                for dx in 0..menu_w {
-                    if dy == 4 {
-                        set_cell(plane, x + dx, 6 + dy, '─', t.primary, t.surface);
-                    } else {
-                        set_cell(plane, x + dx, 6 + dy, ' ', t.fg, t.surface);
-                    }
-                }
+                for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6 + dy, if dy == 4 { '─' } else { ' ' }, if dy == 4 { t.primary } else { t.fg }, t.surface); }
             }
-            let dropdown_items = ["New", "Open", "Save", "Exit"];
-            for (j, item) in dropdown_items.iter().enumerate() {
-                draw_text(plane, x + 1, 7 + j, item, t.fg, t.surface, false);
-            }
+            for (j, item) in ["New", "Open", "Save", "Exit"].iter().enumerate() { draw_text(plane, x + 1, oy + 7 + j, item, t.fg, t.surface, false); }
         }
     }
 }
