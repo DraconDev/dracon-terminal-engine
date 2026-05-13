@@ -591,7 +591,7 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
         if y > oy + 10 { break; }
         let val = value.clamp(0.0, 100.0) as u32;
         let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
-        let bar_str = format!("{}{}{}", label, " [", format!("{}{}", "█".repeat(filled), "░".repeat(10 - filled)));
+        let bar_str = format!("{}{}{}", label, " [", format_args!("{}{}", "█".repeat(filled), "░".repeat(10 - filled)));
         let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
         draw_text(plane, ox + 1, y, &bar_str, color, t.surface, false);
         set_cell(plane, ox + 14 + filled, y, ']', t.fg_muted, t.surface);
