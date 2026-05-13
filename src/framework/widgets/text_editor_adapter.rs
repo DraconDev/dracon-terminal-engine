@@ -3,8 +3,11 @@
 //! Wraps the standalone `TextEditor` widget (which implements ratatui's `Widget`)
 //! into the framework's `Widget` trait so it can be used with `App::add_widget()`.
 
+use std::cell::RefCell;
+
 use crate::compositor::Plane;
 use crate::framework::widget::WidgetId;
+use crate::framework::widgets::context_menu::ContextMenu;
 use crate::input::event::{Event, KeyEvent, MouseEvent, MouseEventKind};
 use crate::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
