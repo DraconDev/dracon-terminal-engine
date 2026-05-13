@@ -442,7 +442,7 @@ impl crate::framework::widget::Widget for Tree {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Right) => {
                 let adjusted_row = (row as usize).saturating_add(self.scroll_offset);
                 let adjusted_row = adjusted_row.min(u16::MAX as usize) as u16;
-                if let Some(path) = self.node_at_row(adjusted_row) {
+                if let Some(_path) = self.node_at_row(adjusted_row) {
                     if let Some(menu) = &mut *self.context_menu.borrow_mut() {
                         menu.show();
                         let area = self.area.get();
