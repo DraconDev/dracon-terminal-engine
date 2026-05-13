@@ -142,7 +142,7 @@ fn test_framework_button_handle_mouse_click_triggers_callback() {
             called_clone.set(true);
         });
         btn.set_area(rect(5, 5, 10, 1));
-        let result = btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 6, 5);
+        let result = btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 1, 0);
         assert!(result);
     }
     assert!(called.get());
@@ -164,7 +164,7 @@ fn test_framework_button_handle_mouse_right_click_returns_true_when_in_area() {
         called_clone.set(true);
     });
     btn.set_area(rect(5, 5, 10, 1));
-    let result = btn.handle_mouse(MouseEventKind::Down(MouseButton::Right), 6, 5);
+    let result = btn.handle_mouse(MouseEventKind::Down(MouseButton::Right), 1, 0);
     assert!(result);
 }
 
@@ -177,9 +177,9 @@ fn test_framework_button_multiple_clicks() {
             count_clone.set(count_clone.get() + 1);
         });
         btn.set_area(rect(5, 5, 10, 1));
-        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 6, 5);
-        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 6, 5);
-        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 6, 5);
+        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 1, 0);
+        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 1, 0);
+        btn.handle_mouse(MouseEventKind::Down(MouseButton::Left), 1, 0);
     }
     assert_eq!(count.get(), 3);
 }
