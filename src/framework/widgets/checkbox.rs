@@ -193,3 +193,24 @@ impl crate::framework::widget::Widget for Checkbox {
         self.theme = *theme;
     }
 }
+
+impl WidgetState for Checkbox {
+    fn state_id(&self) -> Option<&str> {
+        Some("checkbox")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "checked": self.checked,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(checked) = json.get("checked").and_then(|v| v.as_bool()) {
+            self.checked = checked;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
