@@ -6,7 +6,7 @@
 use std::cell::RefCell;
 
 use crate::compositor::Plane;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
 use crate::input::event::{Event, KeyEvent, MouseEvent, MouseEventKind};
 use crate::widgets::editor::TextEditor;
