@@ -320,7 +320,7 @@ pub fn render_card(
         "rich_text" => render_rich_text_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "notification_center" => render_notification_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "accessibility" => render_accessibility_preview(plane, config.theme, offset_x, offset_y),
+        "accessibility" => render_accessibility_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "cell_pool" => render_cell_pool_preview(plane, config.theme, card_phase, offset_x, offset_y),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
