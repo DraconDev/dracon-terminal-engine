@@ -85,6 +85,8 @@ pub struct App {
     command_tracking: RefCell<HashMap<WidgetId, (Instant, BoundCommand)>>,
     event_bus: EventBus,
     scene_router: crate::framework::scene_router::SceneRouter,
+    /// Last frame duration in milliseconds.
+    last_frame_duration_ms: f64,
 }
 
 impl App {
@@ -126,6 +128,7 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
+            last_frame_duration_ms: 0.0,
         })
     }
 
