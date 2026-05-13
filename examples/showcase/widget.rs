@@ -223,7 +223,7 @@ impl Widget for Showcase {
         let stats_text = format!(
             "  {} Examples  │  {} Widgets  │  {} Themes ",
             self.examples.len(),
-            37,
+            42,
             themes.len()
         );
         let stats_start = 2usize;
