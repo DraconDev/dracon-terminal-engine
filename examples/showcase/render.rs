@@ -627,25 +627,22 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: u
     }
 }
 
-fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let headers = " Name     | Age | City ";
     let sep = "----------|-----|------";
-    draw_text(plane, 1, 5, headers, t.primary, t.surface, false);
-    draw_text(plane, 1, 6, sep, t.outline, t.surface, false);
-    let rows = [
-        (" Alice   ", "  28 ", " NYC  "),
-        (" Bob     ", "  34 ", " LA   "),
-    ];
+    draw_text(plane, ox + 1, oy + 5, headers, t.primary, t.surface, false);
+    draw_text(plane, ox + 1, oy + 6, sep, t.outline, t.surface, false);
+    let rows = [(" Alice   ", "  28 ", " NYC  "), (" Bob     ", "  34 ", " LA   ")];
     let highlight_row = ((phase * 0.5).sin() * 0.5 + 0.5) > 0.5;
     for (i, (name, age, city)) in rows.iter().enumerate() {
-        let y = 7 + i;
+        let y = oy + 7 + i;
         let is_selected = highlight_row && i == 1;
         let fg = if is_selected { t.selection_fg } else { t.fg_subtle };
         let prefix = if is_selected { ">" } else { " " };
-        draw_text(plane, 1, y, prefix, t.primary, t.surface, true);
-        draw_text(plane, 2, y, name, fg, t.surface, false);
-        draw_text(plane, 12, y, age, t.fg_muted, t.surface, false);
-        draw_text(plane, 18, y, city, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 1, y, prefix, t.primary, t.surface, true);
+        draw_text(plane, ox + 2, y, name, fg, t.surface, false);
+        draw_text(plane, ox + 12, y, age, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 18, y, city, t.fg_muted, t.surface, false);
     }
 }
 

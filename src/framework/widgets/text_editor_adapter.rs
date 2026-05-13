@@ -41,6 +41,18 @@ impl TextEditorAdapter {
         }
     }
 
+    /// Creates a new adapter with a specific theme.
+    pub fn with_theme(theme: crate::framework::theme::Theme) -> Self {
+        Self {
+            id: WidgetId::default_id(),
+            editor: TextEditor::default(),
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
+            theme,
+            context_menu: RefCell::new(None),
+        }
+    }
+
     /// Returns a reference to the underlying [`TextEditor`].
     pub fn editor(&self) -> &TextEditor {
         &self.editor
