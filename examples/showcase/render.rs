@@ -328,9 +328,6 @@ pub fn render_card(config: &CardConfig) -> Plane {
         }
         "ide" => render_ide_preview(&mut plane, config.theme, card_phase, config.width),
         "desktop" => render_desktop_preview(&mut plane, config.theme, card_phase, config.width),
-        "chat_client" | "log_monitor" => {
-            render_scroll_preview(&mut plane, config.theme, card_phase, config.width)
-        }
         "git_tui" => render_git_tui_preview(&mut plane, config.theme, card_phase, config.width),
         "file_manager" => {
             render_file_manager_preview(&mut plane, config.theme, card_phase, config.width)
