@@ -74,6 +74,20 @@ pub trait Widget {
     /// Renders the widget into a `Plane` at the given area.
     fn render(&self, area: Rect) -> Plane;
 
+    /// Renders the widget directly into a target plane at the given offset.
+    ///
+    /// This is an optional optimization that allows widgets to render directly
+    /// into a sub-region without allocating an intermediate plane. The default
+    /// implementation calls `render()` then blits the result at the offset.
+    ///
+    /// Override this method to avoid the allocation when the widget can render
+    /// directly into the target plane's coordinate system.
+    fn draw_to(&mut self, target: &mut Plane, x: u16, y: u16) {
+        let area = self.area();
+        let plane = self.render(area);
+        target.blit_from(&plane, x, y);
+    }
+
     /// Called when the widget gains focus.
     fn on_focus(&mut self) {}
 
@@ -134,4 +148,28 @@ pub trait Widget {
     /// The default implementation does nothing — widgets that bind commands
     /// override this to update their internal state from `ParsedOutput`.
     fn apply_command_output(&mut self, _output: &ParsedOutput) {}
+}
+
+/// Trait for widgets that support state serialization to/from JSON.
+///
+/// Enables saving and restoring widget state for persistence, undo/redo,
+/// or application state snapshots.
+pub trait WidgetState {
+    /// Returns a unique identifier for this widget's state, or `None` if
+    /// this widget does not support serialization.
+    ///
+    /// The ID should be unique within the application context.
+    fn state_id(&self) -> Option<&str>;
+
+    /// Serializes the widget's current state to a JSON value.
+    ///
+    /// The returned value should be self-consistent and suitable for
+    /// later restoration via `from_json()`.
+    fn to_json(&self) -> JsonValue;
+
+    /// Restores the widget's state from a JSON value.
+    ///
+    /// Returns `Ok(())` on success, or an error if the JSON is invalid
+    /// or cannot be applied to this widget.
+    fn from_json(&mut self, json: &JsonValue) -> Result<(), DraconError>;
 }
