@@ -143,6 +143,7 @@ impl I18n {
     }
 
     /// Translate a key to the current locale.
+/// Translate a key to the current locale.
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
@@ -155,10 +156,9 @@ impl I18n {
         if let Some(value) = self.fallback_map.get(key) {
             return Cow::Borrowed(value.as_str());
         }
-        // Return the key itself as last resort
-        Cow::Borrowed(key)
+        // Return the key itself as last resort (must own it)
+        Cow::Owned(key.to_string())
     }
-
     /// Translate with interpolation support.
     ///
     /// Replaces `{placeholder}` in the translation string with provided values.

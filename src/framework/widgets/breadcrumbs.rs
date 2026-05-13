@@ -178,7 +178,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 }
             }
 
-            Some((1, 1 + show_suffix))
+            Some((prefix, self.segments.len() - show_suffix))
         } else {
             None
         };
