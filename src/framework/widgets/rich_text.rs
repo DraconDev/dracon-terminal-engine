@@ -222,19 +222,6 @@ impl RenderState {
     }
 }
 
-/// Inline render params: (plane, inlines, theme, state, width, height, fg, bg, style)
-type InlineRenderParams<'a> = (
-    &'a mut Plane,
-    &'a [Inline],
-    &'a Theme,
-    &'a mut RenderState,
-    u16,
-    u16,
-    Color,
-    Color,
-    Styles,
-);
-
 fn render_inline(params: InlineRenderParams) {
     let (plane, inlines, theme, state, width, height, fg, bg, style) = params;
     for inline in inlines {
