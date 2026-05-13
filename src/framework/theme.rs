@@ -12,6 +12,7 @@ use crate::compositor::Color;
 
 /// Whether this is a dark or light theme.
 #[non_exhaustive]
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ThemeKind {
     #[default]
@@ -34,6 +35,7 @@ pub enum ThemeKind {
 /// - `fg` — Primary text
 /// - `fg_muted` — Secondary text (labels, descriptions)
 /// - `fg_subtle` — Tertiary text (placeholders, hints)
+#[non_exhaustive]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Theme {

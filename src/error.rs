@@ -22,6 +22,7 @@ use std::result::Result as StdResult;
 /// - `User` — User-facing error messages
 #[derive(Debug)]
 #[non_exhaustive]
+#[non_exhaustive]
 pub enum DraconError {
     /// I/O related errors (file operations, streams, etc.)
     Io(io::Error),
