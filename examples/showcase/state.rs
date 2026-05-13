@@ -96,6 +96,11 @@ pub struct Showcase {
     pub(crate) search_query_lower: String,
     pub(crate) dirty: bool,
     pub(crate) last_render_second: u32,
+    /// Cached stats bar text ("N Examples | M Widgets | K Themes")
+    /// Only recomputed when filter changes.
+    pub(crate) cached_stats_text: String,
+    /// Cached category counts, recomputed only when examples list changes.
+    pub(crate) cached_cat_counts: [usize; 7],
 }
 
 impl Showcase {
