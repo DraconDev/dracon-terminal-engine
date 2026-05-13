@@ -1125,7 +1125,7 @@ macro_rules! with_ctx {
             let event_bus = EventBus::new();
             let mut scene_router = SceneRouter::new();
             let mut terminal = make_test_terminal().unwrap();
-            let $ctx = Ctx {
+            let mut $ctx = Ctx {
                 compositor: &mut compositor,
                 theme: &mut theme,
                 frame_count: 0,
