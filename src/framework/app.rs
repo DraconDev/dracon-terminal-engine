@@ -341,6 +341,7 @@ impl App {
             w.on_unmount();
         }
         self.widgets.borrow_mut().retain(|w| w.id() != id);
+        self.compositor.set_widget_count(self.widgets.borrow().len());
         self.focus_manager.unregister(id);
         self.command_tracking.borrow_mut().remove(&id);
     }
@@ -371,7 +372,7 @@ impl App {
 
     /// Returns the last frame duration in milliseconds.
     pub fn frame_time_ms(&self) -> f64 {
-        self.last_frame_duration_ms
+        self.compositor.last_frame_duration_ms()
     }
 
     /// Starts the application event loop.

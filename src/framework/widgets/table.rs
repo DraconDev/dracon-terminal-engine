@@ -1,10 +1,14 @@
 //! Sortable, selectable table widget with header and row hit zones.
 
 use std::cell::Cell;
+use std::cell::RefCell;
+use std::collections::HashSet;
 
 use crate::compositor::{Plane, Styles};
+use crate::framework::dragdrop::{DragGhost, DragManager};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
 /// A column definition for a `Table`.
@@ -25,6 +29,18 @@ pub struct TableRow<T> {
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
 pub type CellTextFn<T> = Box<dyn Fn(&T, usize) -> String>;
 pub type HeaderClickCallback = Box<dyn FnMut(usize)>;
+pub type SelectionChangeCallback<T> = Box<dyn FnMut(&HashSet<usize>)>;
+pub type UndoRedoCallback = Box<dyn FnMut()>;
+
+/// Inner state snapshot for undo/redo.
+#[derive(Clone)]
+pub struct TableState {
+    pub selected: usize,
+    pub offset: usize,
+    pub sort_column: Option<usize>,
+    pub sort_ascending: bool,
+    pub selected_indices: HashSet<usize>,
+}
 
 /// A sortable, selectable table with header and row hit zones.
 pub struct Table<T> {
