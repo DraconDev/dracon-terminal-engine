@@ -425,7 +425,7 @@ mod tests {
     }
 
     // Property-based tests
-    use proptest::prelude::*;
+    use std::hint::black_box;
 
     fn constraint_strategy() -> impl Strategy<Value = Constraint> {
         prop_oneof![
