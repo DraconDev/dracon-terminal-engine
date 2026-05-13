@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-05-13
+
+### Added
+
+- **Bracketed Paste** — Terminal enables bracketed paste mode (ESC[2004h); App dispatches paste events to widgets
+- **Vertical Layout** — `Layout::direction(Direction::Vertical)` and `Layout::vertical()` constructors
+- **CellPool** — Object pool for Cell allocation, reducing per-frame allocation pressure
+- **Accessibility** — `Role` enum, `Accessible` trait, `AccessibilityManager` with OSC 99/633 announcements
+- **Calendar/DatePicker** — Date selection widget with month/year navigation
+- **RichText** — Rich text renderer with headers, bold, italic, code blocks, links, lists
+- **Autocomplete** — Type-ahead suggestion widget with keyboard/mouse navigation
+- **NotificationCenter** — Queued notification stack with auto-dismiss
+- **Grapheme cluster awareness** — `grapheme_width()` for correct Unicode display width
+- **DraconError** — Unified error type for the engine
+- **Structured logging** — `DraconLogger` with `tracing` integration (behind `tracing` feature)
+- **Proptest** — Property-based tests for layout, grapheme width, theme colors
+- **Async feature** — `async = ["dep:tokio"]` for async I/O examples
+- **VSCode extension** — Live TUI preview extension in `extensions/vscode/`
+- **8 new cookbook examples** — accessibility, cell_pool, notification_center, stat_widget_plugin, rich_text, autocomplete, form_validation, calendar
+
+### Fixed
+
+- **Button widget mouse coordinates** — `handle_mouse` compared local coordinates against absolute screen positions; now correctly uses `col < area.width && row < area.height`
+- **Tree widget scroll offset** — `handle_mouse` didn't account for scroll_offset; clicking while scrolled selected wrong node
+- **Editor u16 underflow** — `mouse.column - area.x - gutter` replaced with `saturating_sub` in both wrap and non-wrap branches
+- **Calendar unwrap panic** — `NaiveDate::from_ymd_opt().unwrap()` replaced with safe fallback
+- **Editor unwrap on chars** — `text.chars().next().unwrap()` replaced with `unwrap_or('\u{FFFD}')`
+- **6 examples with dead input** — `text_editor_demo`, `table_widget`, `widget_tutorial`, `form_widget`, `form_demo` had broken Widget/on_input patterns; all converted to proper Pattern 1 or Pattern 2
+- **Showcase category clicks** — Sidebar only recognized 4 of 7 categories; now all 7 work (all, apps, input, data, cookbook, tools, accessibility)
+- **Showcase FPS counter** — Overlapped by toggle checkbox; repositioned
+- **Showcase features/stats** — "37 Widgets" → 41, "20 Themes" → 21
+- **Nerd Font icons** — Replaced with standard Unicode for universal terminal compatibility
+- **Theme propagation** — All 44 examples now use `Theme::from_env_or()` instead of hardcoded themes
+- **Pattern 2 `current_theme()` sync** — All 12 Pattern 2 examples now implement `current_theme()` for DTRON_THEME_FILE
+- **Autocomplete/NotificationCenter examples** — Now render their widgets visibly
+- **CellPool example** — Now quittable via Ctrl+Q
+- **3 button tests** — Updated to use local coordinates matching the Button fix
+
+### Changed
+
+- `DraconError` and `Rect` added to prelude for one-import usage
+- `Widget` trait added to prelude
+- Widget count: 37 → 41 framework widgets
+- Theme count: 20 → 21 built-in themes
+- Version aligned to semantic versioning (0.1.0 → 0.1.3)
+
 ## [0.1.0] - 2026-05-12
 
 ### Added
