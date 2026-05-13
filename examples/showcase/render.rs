@@ -317,7 +317,7 @@ pub fn render_card(
         "form_demo" | "form_widget" => render_form_preview(plane, config.theme, offset_x, offset_y),
         "framework_file_manager" => render_framework_fm_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "calendar" => render_calendar_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "rich_text" => render_rich_text_preview(plane, config.theme, offset_x, offset_y),
+        "rich_text" => render_rich_text_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "notification_center" => render_notification_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "accessibility" => render_accessibility_preview(plane, config.theme, offset_x, offset_y),
