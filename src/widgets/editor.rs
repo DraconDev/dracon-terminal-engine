@@ -1200,7 +1200,7 @@ impl TextEditor {
                     let screen_row = self.scroll_row + rel_row;
                     match self.source_row_from_visual(screen_row, width) {
                         Some((row, segment_idx, _)) => {
-                            let rel_col = (mouse.column - area.x - gutter as u16) as usize;
+                            let rel_col = mouse.column.saturating_sub(area.x + gutter as u16) as usize;
                             let visual_x = segment_idx * width + rel_col;
                             let byte_idx = self.get_byte_index_from_visual(row, visual_x);
                             (row, byte_idx)

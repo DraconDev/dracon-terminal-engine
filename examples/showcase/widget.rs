@@ -1423,9 +1423,10 @@ impl Showcase {
                             _ => {}
                         },
                         // Sidebar categories (CAT_BASE + i)
-                        id if (CAT_BASE..CAT_BASE + 4).contains(&id) => {
-                            let cats: [Option<&str>; 4] =
-                                [None, Some("apps"), Some("cookbook"), Some("tools")];
+                        id if (CAT_BASE..CAT_BASE + 7).contains(&id) => {
+                            let cats: [Option<&str>; 7] =
+                                [None, Some("apps"), Some("input"), Some("data"),
+                                 Some("cookbook"), Some("tools"), Some("accessibility")];
                             self.category_filter = cats[id - CAT_BASE];
                             self.apply_filter();
                             return true;
@@ -1459,7 +1460,7 @@ impl Showcase {
                 }
 
                 // Search bar click (no zone registered for this)
-                if y == 4 && (2..30).contains(&x) {
+                if y == 4 && (2..area.width.saturating_sub(2)).contains(&x) {
                     self.search_active = true;
                     return true;
                 }
