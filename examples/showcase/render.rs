@@ -68,7 +68,7 @@ pub fn draw_text(
     text: &str,
     fg: Color,
     bg: Color,
-    style: Styles,
+    bold: bool,
 ) {
     for (i, ch) in text.chars().enumerate() {
         let idx = y * plane.width as usize + x + i;
@@ -77,7 +77,7 @@ pub fn draw_text(
                 char: ch,
                 fg,
                 bg,
-                style,
+                style: if bold { Styles::BOLD } else { Styles::empty() },
                 transparent: false,
                 skip: false,
             };
@@ -123,7 +123,7 @@ pub fn render_features_bar(
         // Separator
         if i > 0 {
             let sep = " │ ";
-            draw_text(plane, x, y, sep, theme.outline, theme.bg, false);
+            draw_text(plane, x, y, sep, theme.outline, theme.bg, Styles::empty());
             x += sep.len();
         }
 
@@ -134,7 +134,7 @@ pub fn render_features_bar(
 
         // Label
         let label_fg = if is_pulse_high { theme.fg } else { theme.fg_muted };
-        draw_text(plane, x, y, label, label_fg, theme.bg, false);
+        draw_text(plane, x, y, label, label_fg, theme.bg, Styles::empty());
         x += label.len();
     }
 
@@ -164,12 +164,12 @@ fn draw_text_at(
     text: &str,
     normal_fg: Color,
     bg: Color,
-    style: Styles,
+    bold: bool,
     search: &str,
     highlight_color: Color,
 ) {
     if search.is_empty() || !text.to_lowercase().contains(&search.to_lowercase()) {
-        draw_text(plane, x, y, text, normal_fg, bg, style);
+        draw_text(plane, x, y, text, normal_fg, bg, bold);
         return;
     }
     let lower = text.to_lowercase();
@@ -183,16 +183,16 @@ fn draw_text_at(
             Some(start) => {
                 if start > 0 {
                     let before = &rest[..start];
-                    draw_text(plane, pos, y, before, normal_fg, bg, style);
+                    draw_text(plane, pos, y, before, normal_fg, bg, bold);
                     pos += before.chars().count();
                 }
                 let match_str = &rest[start..start + q.len()];
-                draw_text(plane, pos, y, match_str, highlight_color, bg, Styles::BOLD);
+                draw_text(plane, pos, y, match_str, highlight_color, bg, true);
                 pos += match_str.chars().count();
                 remaining += start + q.len();
             }
             None => {
-                draw_text(plane, pos, y, rest, normal_fg, bg, style);
+                draw_text(plane, pos, y, rest, normal_fg, bg, bold);
                 break;
             }
         }
@@ -327,7 +327,7 @@ pub fn render_card(
                 let py = preview_start_y + i;
                 if py < offset_y + card_h_usize - 1 {
                     let preview_line: String = line.chars().take(card_w_usize - 4).collect();
-                    draw_text(plane, offset_x + 2, py, &preview_line, t.fg_subtle, bg, false);
+                    draw_text(plane, offset_x + 2, py, &preview_line, t.fg_subtle, bg, Styles::empty());
                 }
             }
         }
@@ -352,7 +352,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize,
         let val = value.clamp(0.0, 100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
         let color = if val > 80.0 { t.error } else if val > 60.0 { t.warning } else { t.success };
-        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty());
         set_cell(plane, ox + 6, y, '[', t.fg_muted, t.surface);
         for j in 0..bar_w {
             let ch = if j < fill { '█' } else { '░' };
@@ -379,10 +379,10 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
     for y in oy + 6..oy + 12 {
         set_cell(plane, ox + split_x, y, '│', t.primary, t.surface_elevated);
     }
-    draw_text(plane, ox + 2, oy + 7, "A", t.fg, t.surface_elevated, false);
-    draw_text(plane, ox + split_x + 2, oy + 7, "B", t.fg, t.surface, false);
+    draw_text(plane, ox + 2, oy + 7, "A", t.fg, t.surface_elevated, Styles::empty());
+    draw_text(plane, ox + split_x + 2, oy + 7, "B", t.fg, t.surface, Styles::empty());
     let label = format!("{}:{}", split_x, 26 - split_x);
-    draw_text(plane, ox + w / 2 - 3, oy + 11, &label, t.fg_muted, t.bg, false);
+    draw_text(plane, ox + w / 2 - 3, oy + 11, &label, t.fg_muted, t.bg, Styles::empty());
 }
 
 fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -396,7 +396,7 @@ fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy
         let py = oy + 6 + i;
         if py > oy + 11 { break; }
         let truncated: String = line.chars().take(24).collect();
-        draw_text(plane, ox + 2, py, &truncated, t.fg_subtle, t.surface, false);
+        draw_text(plane, ox + 2, py, &truncated, t.fg_subtle, t.surface, Styles::empty());
     }
 }
 
@@ -416,7 +416,7 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, ox: usize, oy: usize) {
         }
     }
     let name = format!("  {}  ", t.name);
-    draw_text(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, false);
+    draw_text(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, Styles::empty());
 }
 
 fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -425,19 +425,19 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy:
         let py = oy + 6 + i;
         if py > oy + 10 { break; }
         let text: String = check.chars().take(12).collect();
-        draw_text(plane, ox + 2, py, &text, t.fg_subtle, t.surface, false);
+        draw_text(plane, ox + 2, py, &text, t.fg_subtle, t.surface, Styles::empty());
     }
     let slider_y = oy + 10;
     let slider_w = 18;
     let thumb = ((phase * 2.0).sin() * 0.5 + 0.5 * slider_w as f64).round() as usize;
     let thumb = thumb.min(slider_w - 1);
-    draw_text(plane, ox + 2, slider_y, "[", t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 2, slider_y, "[", t.fg_muted, t.surface, Styles::empty());
     for i in 0..slider_w {
         let ch = if i == thumb { '#' } else if i < thumb { '=' } else { '-' };
         let fg = if i == thumb { t.primary } else { t.fg_muted };
         set_cell(plane, ox + 3 + i, slider_y, ch, fg, t.surface);
     }
-    draw_text(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, Styles::empty());
 }
 
 fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -454,7 +454,7 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy:
             if py < oy + 13 {
                 let text: String = line.chars().take(20).collect();
                 let fg = if line.contains("active") { t.primary } else { t.fg_subtle };
-                draw_text(plane, ox + 2, py, &text, fg, t.surface, false);
+                draw_text(plane, ox + 2, py, &text, fg, t.surface, Styles::empty());
             }
         }
     }
@@ -488,8 +488,8 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: us
     for (i, (num, code)) in lines.iter().enumerate() {
         let py = oy + 6 + i;
         if py > oy + 10 { break; }
-        draw_text(plane, ox + 1, py, num, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 3, py, code, t.fg, t.surface, false);
+        draw_text(plane, ox + 1, py, num, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 3, py, code, t.fg, t.surface, Styles::empty());
     }
     if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 4, oy + 6, '▎', t.primary, t.surface); }
 }
@@ -520,10 +520,10 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy
 
 fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, true);
-    draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, false);
+    draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, Styles::empty());
     let phases = [[(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)], [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)], [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)], [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)]];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
-    for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text(plane, ox + 2, oy + 9 + i, text, *color, t.surface, false); }
+    for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text(plane, ox + 2, oy + 9 + i, text, *color, t.surface, Styles::empty()); }
 }
 
 fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -537,7 +537,7 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         let icon = if *is_dir { "v" } else { ">" };
         let text = format!("{}{}", icon, name);
         let fg = if *is_dir { t.warning } else { t.fg_subtle };
-        draw_text(plane, ox + 2, py, &text, fg, t.surface, false);
+        draw_text(plane, ox + 2, py, &text, fg, t.surface, Styles::empty());
     }
 }
 
@@ -552,12 +552,12 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize
         let fg = if is_highlighted { t.fg_on_accent } else { t.fg };
         for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6, ' ', fg, bg); }
         let text = format!(" {} ", menu);
-        draw_text(plane, x, oy + 6, &text, fg, bg, false);
+        draw_text(plane, x, oy + 6, &text, fg, bg, Styles::empty());
         if is_highlighted {
             for dy in 1..5 {
                 for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6 + dy, if dy == 4 { '─' } else { ' ' }, if dy == 4 { t.primary } else { t.fg }, t.surface); }
             }
-            for (j, item) in ["New", "Open", "Save", "Exit"].iter().enumerate() { draw_text(plane, x + 1, oy + 7 + j, item, t.fg, t.surface, false); }
+            for (j, item) in ["New", "Open", "Save", "Exit"].iter().enumerate() { draw_text(plane, x + 1, oy + 7 + j, item, t.fg, t.surface, Styles::empty()); }
         }
     }
 }
@@ -593,7 +593,7 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
         let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
         let bar_str = format!("{}{}{}", label, " [", format_args!("{}{}", "█".repeat(filled), "░".repeat(10 - filled)));
         let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
-        draw_text(plane, ox + 1, y, &bar_str, color, t.surface, false);
+        draw_text(plane, ox + 1, y, &bar_str, color, t.surface, Styles::empty());
         set_cell(plane, ox + 14 + filled, y, ']', t.fg_muted, t.surface);
     }
 }
@@ -608,7 +608,7 @@ fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy
     }
     for x in ox + 1..ox + 19 { set_cell(plane, x, oy + 6, '─', t.outline, t.surface_elevated); }
     for y in oy + 6..oy + 11 { for x in ox + 1..ox + 20 { set_cell(plane, x, y, ' ', t.fg, t.surface_elevated); } }
-    draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, false);
+    draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, Styles::empty());
 }
 
 fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -621,16 +621,16 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: u
         let x = (ox as i16 + 2 + offset).clamp(ox as i16 + 1, ox as i16 + 20) as usize;
         let truncated: String = line.chars().skip(x.saturating_sub(ox + 2)).take(22).collect();
         let prefix = if truncated.starts_with('|') { "│" } else { " " };
-        draw_text(plane, ox + 1, y, prefix, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 2, y, &truncated, t.fg_subtle, t.surface, false);
+        draw_text(plane, ox + 1, y, prefix, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 2, y, &truncated, t.fg_subtle, t.surface, Styles::empty());
     }
 }
 
 fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let headers = " Name     | Age | City ";
     let sep = "----------|-----|------";
-    draw_text(plane, ox + 1, oy + 5, headers, t.primary, t.surface, false);
-    draw_text(plane, ox + 1, oy + 6, sep, t.outline, t.surface, false);
+    draw_text(plane, ox + 1, oy + 5, headers, t.primary, t.surface, Styles::empty());
+    draw_text(plane, ox + 1, oy + 6, sep, t.outline, t.surface, Styles::empty());
     let rows = [(" Alice   ", "  28 ", " NYC  "), (" Bob     ", "  34 ", " LA   ")];
     let highlight_row = ((phase * 0.5).sin() * 0.5 + 0.5) > 0.5;
     for (i, (name, age, city)) in rows.iter().enumerate() {
@@ -639,29 +639,29 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
         let fg = if is_selected { t.selection_fg } else { t.fg_subtle };
         let prefix = if is_selected { ">" } else { " " };
         draw_text(plane, ox + 1, y, prefix, t.primary, t.surface, true);
-        draw_text(plane, ox + 2, y, name, fg, t.surface, false);
-        draw_text(plane, ox + 12, y, age, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 18, y, city, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 2, y, name, fg, t.surface, Styles::empty());
+        draw_text(plane, ox + 12, y, age, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 18, y, city, t.fg_muted, t.surface, Styles::empty());
     }
 }
 
 fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let keys = ["Key: ArrowUp  0x2191", "Mod: Ctrl+Shift"];
-    for (i, key) in keys.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, key, t.fg_subtle, t.surface, false); }
+    for (i, key) in keys.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, key, t.fg_subtle, t.surface, Styles::empty()); }
     let mx = (phase * 30.0).sin() as i16 + 40;
     let my = (phase * 20.0).sin() as i16 + 10;
-    draw_text(plane, ox + 1, oy + 8, &format!("Mouse: {:3}, {:2} [L-down]", mx, my), t.primary, t.surface, false);
+    draw_text(plane, ox + 1, oy + 8, &format!("Mouse: {:3}, {:2} [L-down]", mx, my), t.primary, t.surface, Styles::empty());
     let wheel = if (phase * 2.0).sin() > 0.0 { "+1" } else { "-1" };
-    draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, Styles::empty());
 }
 
 fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["1 | fn main() {", "2 |   println!();", "3 | }"];
-    for (i, line) in lines.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, line, t.fg_subtle, t.surface, false); }
+    for (i, line) in lines.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, line, t.fg_subtle, t.surface, Styles::empty()); }
     let cursor_x = ox + 7 + ((phase * 2.0).sin() * 0.5 + 0.5) as usize * 5;
     set_cell(plane, cursor_x.min(ox + 17), oy + 7, '▎', t.primary, t.surface);
     let lang = "  [rust] UTF-8 ";
-    draw_text(plane, ox + 26 - lang.len(), oy + 10, lang, t.fg_muted, t.bg, false);
+    draw_text(plane, ox + 26 - lang.len(), oy + 10, lang, t.fg_muted, t.bg, Styles::empty());
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 3, oy + 6, '█', t.primary, t.surface); }
 }
 
@@ -686,8 +686,8 @@ fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: 
     let fields = [("Name:", "[___________]"), ("Email:", "[__________]")];
     for (i, (label, field)) in fields.iter().enumerate() {
         let y = oy + 5 + i * 2;
-        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 8, y, field, t.fg, t.surface, false);
+        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 8, y, field, t.fg, t.surface, Styles::empty());
     }
     let btns = ["[Submit]", "[Cancel]"];
     for (i, btn) in btns.iter().enumerate() {
@@ -697,7 +697,7 @@ fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: 
 }
 
 fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, false);
+    draw_text(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, Styles::empty());
     set_cell(plane, ox + 1, oy + 6, '├', t.outline, t.surface);
     for cx in ox + 2..ox + 24 { set_cell(plane, cx, oy + 6, '─', t.outline, t.surface); }
     set_cell(plane, ox + 24, oy + 6, '┤', t.outline, t.surface);
@@ -705,8 +705,8 @@ fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
     for (i, (name, size)) in rows.iter().enumerate() {
         let y = oy + 7 + i;
         let fg = if name.ends_with('/') { t.primary } else { t.fg_subtle };
-        draw_text(plane, ox + 2, y, name, fg, t.surface, false);
-        draw_text(plane, ox + 14, y, size, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 2, y, name, fg, t.surface, Styles::empty());
+        draw_text(plane, ox + 14, y, size, t.fg_muted, t.surface, Styles::empty());
     }
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 2, oy + 8, '█', t.primary, t.surface); }
 }
@@ -716,7 +716,7 @@ fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, o
     let month_idx = ((phase * 0.3).floor() as usize) % months.len();
     let title = format!("{} 2026", months[month_idx]);
     draw_text(plane, ox + 1, oy + 5, &title, t.fg, t.surface, true);
-    draw_text(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, Styles::empty());
     let day_grid = ["    1  2  3  4  5", " 6  7  8  9 10 11 12", "13 14 15 16 17 18 19", "20 21 22 23 24 25 26", "27 28 29 30 31     "];
     let offset = ((phase * 0.5).floor() as usize) % 2;
     for (i, row) in day_grid.iter().enumerate() {
@@ -724,10 +724,10 @@ fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, o
         if y > oy + 11 { break; }
         let truncated: String = row.chars().skip(offset).take(22).collect();
         let fg = if i == 1 { t.primary } else { t.fg_subtle };
-        draw_text(plane, ox + 1, y, &truncated, fg, t.surface, false);
+        draw_text(plane, ox + 1, y, &truncated, fg, t.surface, Styles::empty());
     }
     let sel = (((phase * 0.8).sin() * 0.5 + 0.5) * 30.0).round() as usize % 31 + 1;
-    draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, Styles::empty());
 }
 
 fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
@@ -741,7 +741,7 @@ fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize,
 }
 
 fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, false);
+    draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, Styles::empty());
     if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 6, oy + 5, '█', t.primary, t.surface); }
     let suggestions = ["rust-analyzer", "rustc", "cargo", "rustfmt", "clippy"];
     let offset = ((phase * 0.5).sin() * 2.0).round() as i16;
@@ -752,8 +752,8 @@ fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         let x = (ox + 2 + x_offset as usize).min(ox + 18);
         let fg = if i == 0 { t.primary } else { t.fg_subtle };
         let prefix = if i == 0 { "> " } else { "  " };
-        draw_text(plane, x, y, prefix, t.fg_muted, t.surface, false);
-        draw_text(plane, x + 2, y, s, fg, t.surface, false);
+        draw_text(plane, x, y, prefix, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, x + 2, y, s, fg, t.surface, Styles::empty());
     }
 }
 fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -771,7 +771,7 @@ fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         draw_text(plane, ox + 17, y, &format!(" {} {}", icon, title), *color, t.surface, true);
         set_cell(plane, ox + 16, y + 1, '│', t.outline, t.surface);
         let truncated: String = msg.chars().take(8).collect();
-        draw_text(plane, ox + 17, y + 1, &truncated, t.fg, t.surface, false);
+        draw_text(plane, ox + 17, y + 1, &truncated, t.fg, t.surface, Styles::empty());
         for cx in ox + 17..ox + 25 { set_cell(plane, cx, y + 1, ' ', t.fg, t.surface); }
         set_cell(plane, ox + 25, y + 1, '│', t.outline, t.surface);
         set_cell(plane, ox + 16, y + 2, '╰', t.outline, t.surface);
@@ -794,10 +794,10 @@ fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: us
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
         if y > oy + 10 { break; }
-        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 12, y, value, t.fg, t.surface, false);
+        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 12, y, value, t.fg, t.surface, Styles::empty());
     }
-    draw_text(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, false);
+    draw_text(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, Styles::empty());
 }
 
 fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -806,12 +806,12 @@ fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
     for (i, (label, value)) in stats.iter().enumerate() {
         let y = oy + 6 + i;
         if y > oy + 10 { break; }
-        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, ox + 8, y, value, t.success, t.surface, false);
+        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty());
+        draw_text(plane, ox + 8, y, value, t.success, t.surface, Styles::empty());
     }
     let hit_rate = (95.0 - (phase * 3.0).sin() * 10.0).max(0.0) as u32;
     let bar_str = format!("[{}{}]", "█".repeat((hit_rate / 10) as usize), "░".repeat(10 - (hit_rate / 10) as usize));
-    draw_text(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, false);
+    draw_text(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, Styles::empty());
 }
 // ═══════════════════════════════════════════════════════════════════════════════
 // WIDGET IMPL
