@@ -186,6 +186,8 @@ impl Showcase {
             search_query_lower: String::new(),
             dirty: true,
             last_render_second: 0,
+            cached_stats_text: String::new(),
+            cached_cat_counts: [0usize; 7],
         }
     }
 
@@ -244,6 +246,24 @@ impl Showcase {
         }
 
         self.selected = self.selected.min(self.filtered.len().saturating_sub(1));
+
+        // Recompute cached stats text
+        self.cached_stats_text = format!(
+            "  {} Examples  │  {} Widgets  │  {} Themes ",
+            self.examples.len(),
+            43,
+            self.cached_themes.len()
+        );
+
+        // Recompute cached category counts
+        let categories = ["all", "apps", "input", "data", "cookbook", "tools", "accessibility"];
+        for (i, cat) in categories.iter().enumerate() {
+            self.cached_cat_counts[i] = if *cat == "all" {
+                self.examples.len()
+            } else {
+                self.examples.iter().filter(|e| e.category == *cat).count()
+            };
+        }
     }
 
     pub fn selected_example(&self) -> Option<&ExampleMeta> {
