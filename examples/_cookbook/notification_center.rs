@@ -6,6 +6,8 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 struct NotifierApp {
+    id: WidgetId,
+    area: Rect,
     should_quit: Rc<AtomicBool>,
     theme: Theme,
     notification_center: NotificationCenter,
@@ -19,6 +21,8 @@ impl NotifierApp {
         nc.info("Welcome", "Press buttons below to trigger notifications.");
         nc.success("Ready", "Notification center is active.");
         Self {
+            id: WidgetId::new(1),
+            area: Rect::default(),
             should_quit,
             theme,
             notification_center: nc,
@@ -39,6 +43,15 @@ impl NotifierApp {
 }
 
 impl Widget for NotifierApp {
+    fn id(&self) -> WidgetId { self.id }
+
+    fn area(&self) -> Rect { self.area }
+
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.notification_center.set_area(Rect::new(0, 4, area.width, area.height.saturating_sub(4)));
+    }
+
     fn needs_render(&self) -> bool {
         self.dirty || self.notification_center.needs_render()
     }
@@ -60,15 +73,17 @@ impl Widget for NotifierApp {
         }
 
         // Render the notification center widget
-        let nc_area = Rect::new(0, 4, area.width, area.height - 4);
-        self.notification_center.set_area(nc_area);
+        let nc_area = Rect::new(0, 4, area.width, area.height.saturating_sub(4));
         let nc_plane = self.notification_center.render(nc_area);
-        for y in 0..nc_area.height {
-            for x in 0..nc_area.width {
-                let src_idx = (y * nc_area.width + x) as usize;
+        for y in 0..nc_plane.height {
+            for x in 0..nc_plane.width {
+                let src_idx = (y * nc_plane.width + x) as usize;
                 let dst_idx = ((nc_area.y + y) * area.width + (nc_area.x + x)) as usize;
-                if src_idx < nc_plane.cells.len() && dst_idx < plane.cells.len() && !nc_plane.cells[src_idx].transparent {
-                    plane.cells[dst_idx] = nc_plane.cells[src_idx];
+                if src_idx < nc_plane.cells.len() && dst_idx < plane.cells.len() {
+                    let src = &nc_plane.cells[src_idx];
+                    if !src.transparent {
+                        plane.cells[dst_idx] = nc_plane.cells[src_idx].clone();
+                    }
                 }
             }
         }
