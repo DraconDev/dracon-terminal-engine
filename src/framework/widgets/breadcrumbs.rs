@@ -153,7 +153,6 @@ impl crate::framework::widget::Widget for Breadcrumbs {
             let max_width = area.width as usize;
             let mut used_width = 0;
             let mut show_prefix = prefix;
-            let mut show_suffix = suffix;
 
             // Add prefix segments
             for i in 0..prefix {

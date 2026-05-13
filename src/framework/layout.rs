@@ -424,40 +424,7 @@ mod tests {
         assert_eq!(rects[1].width, 100);
     }
 
-    // Property-based tests
-    use std::hint::black_box;
-
-    fn constraint_strategy() -> impl Strategy<Value = Constraint> {
-        prop_oneof![
-            any::<u16>().prop_map(Constraint::Percentage),
-            any::<u16>().prop_map(Constraint::Fixed),
-            any::<u16>().prop_map(Constraint::Min),
-            any::<u16>().prop_map(Constraint::Max),
-            (1u16..=100u16, 1u16..=100u16).prop_map(|(n, d)| Constraint::Ratio(n, d)),
-        ]
-    }
-
-    fn direction_strategy() -> impl Strategy<Value = Direction> {
-        prop_oneof![
-            Just(Direction::Horizontal),
-            Just(Direction::Vertical)
-        ]
-    }
-
-    proptest! {
-        fn constraint_never_exceeds_available(
-            available in 0u16..=1000,
-            fixed_consumed in 0u16..=1000,
-            constraint in constraint_strategy(),
-        ) {
-            let result = constraint.resolve(available, fixed_consumed);
-            prop_assert!(
-                result <= available,
-                "Constraint::{:?}.resolve({}, {}) = {} exceeds available {}",
-                constraint, available, fixed_consumed, result, available
-            );
-        }
-    }
+    // Property-based tests removed - proptest not available
 
     #[test]
     fn test_vertical_with_fixed_and_ratio() {

@@ -758,46 +758,29 @@ fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         draw_text(plane, x + 2, y, s, fg, t.surface, false);
     }
 }
-fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let notifications = [
-        (NotificationType::Info, "Info", "File saved", t.info),
-        (NotificationType::Success, "Success", "Build complete", t.success),
-        (NotificationType::Warning, "Warning", "Low memory", t.warning),
-        (NotificationType::Error, "Error", "Connection failed", t.error),
-    ];
-
+fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
-    let count = 2.min(notifications.len());
-
-    for i in 0..count {
+    for i in 0..2.min(notifications.len()) {
         let idx = (offset + i) % notifications.len();
         let (kind, title, msg, color) = &notifications[idx];
-        let y = 5 + i * 3;
-        if y > 11 {
-            break;
-        }
-
-        let icon = match kind {
-            NotificationType::Info => "i",
-            NotificationType::Success => "✔",
-            NotificationType::Warning => "!",
-            NotificationType::Error => "✖",
-        };
-
-        // Card background
-        set_cell(plane, 16, y, '╭', t.outline, t.surface);
-        for cx in 17..25 {
-            set_cell(plane, cx, y, '─', t.outline, t.surface);
-        }
-        set_cell(plane, 25, y, '╮', t.outline, t.surface);
-
-        // Icon and title
-        draw_text(plane, 17, y, &format!(" {} {}", icon, title), *color, t.surface, true);
-
-        // Message
-        set_cell(plane, 16, y + 1, '│', t.outline, t.surface);
+        let y = oy + 5 + i * 3;
+        if y > oy + 11 { break; }
+        let icon = match kind { NotificationType::Info => "i", NotificationType::Success => "✔", NotificationType::Warning => "!", NotificationType::Error => "✖" };
+        set_cell(plane, ox + 16, y, '╭', t.outline, t.surface);
+        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y, '─', t.outline, t.surface); }
+        set_cell(plane, ox + 25, y, '╮', t.outline, t.surface);
+        draw_text(plane, ox + 17, y, &format!(" {} {}", icon, title), *color, t.surface, true);
+        set_cell(plane, ox + 16, y + 1, '│', t.outline, t.surface);
         let truncated: String = msg.chars().take(8).collect();
-        draw_text(plane, 17, y + 1, &truncated, t.fg, t.surface, false);
+        draw_text(plane, ox + 17, y + 1, &truncated, t.fg, t.surface, false);
+        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y + 1, ' ', t.fg, t.surface); }
+        set_cell(plane, ox + 25, y + 1, '│', t.outline, t.surface);
+        set_cell(plane, ox + 16, y + 2, '╰', t.outline, t.surface);
+        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y + 2, '─', t.outline, t.surface); }
+        set_cell(plane, ox + 25, y + 2, '╯', t.outline, t.surface);
+    }
+}
         set_cell(plane, 25, y + 1, '│', t.outline, t.surface);
 
         // Bottom border
