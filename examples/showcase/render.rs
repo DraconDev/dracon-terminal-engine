@@ -349,11 +349,8 @@ pub fn render_card(config: &CardConfig) -> Plane {
         "framework_file_manager" => {
             render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
         }
-        "sqlite_browser" => {
         "framework_file_manager" => {
             render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
-        }
-            render_debug_overlay_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
         "calendar" => render_calendar_preview(&mut plane, config.theme, card_phase, config.width),
