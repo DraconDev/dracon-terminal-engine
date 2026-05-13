@@ -156,8 +156,8 @@ pub struct CardConfig<'a> {
     pub run_count: u32,
 }
 
-/// Draw text with search term highlighted.
-fn draw_highlighted_text(
+/// Draw text with optional search highlighting at absolute coordinates.
+fn draw_text_at(
     plane: &mut Plane,
     x: usize,
     y: usize,
@@ -181,20 +181,17 @@ fn draw_highlighted_text(
         let rest_lower = &lower[remaining..];
         match rest_lower.find(&q) {
             Some(start) => {
-                // Draw before match
                 if start > 0 {
                     let before = &rest[..start];
                     draw_text(plane, pos, y, before, normal_fg, bg, bold);
                     pos += before.chars().count();
                 }
-                // Draw match highlighted
                 let match_str = &rest[start..start + q.len()];
                 draw_text(plane, pos, y, match_str, highlight_color, bg, true);
                 pos += match_str.chars().count();
                 remaining += start + q.len();
             }
             None => {
-                // Draw rest
                 draw_text(plane, pos, y, rest, normal_fg, bg, bold);
                 break;
             }

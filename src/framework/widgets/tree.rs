@@ -389,9 +389,18 @@ impl crate::framework::widget::Widget for Tree {
     fn handle_mouse(
         &mut self,
         kind: crate::input::event::MouseEventKind,
-        _col: u16,
+        col: u16,
         row: u16,
     ) -> bool {
+        // Check if context menu is visible
+        if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+            if menu.is_visible() {
+                if menu.handle_mouse(kind, col, row) {
+                    return true;
+                }
+            }
+        }
+
         match kind {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 let adjusted_row = (row as usize).saturating_add(self.scroll_offset);
@@ -429,6 +438,27 @@ impl crate::framework::widget::Widget for Tree {
                 }
                 false
             }
+            // Right-click: Show context menu
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Right) => {
+                let adjusted_row = (row as usize).saturating_add(self.scroll_offset);
+                let adjusted_row = adjusted_row.min(u16::MAX as usize) as u16;
+                if let Some(path) = self.node_at_row(adjusted_row) {
+                    if let Some(menu) = &mut *self.context_menu.borrow_mut() {
+                        menu.show();
+                        let area = self.area.get();
+                        menu.set_anchor(area.x + col, area.y + row);
+                        self.dirty = true;
+                    }
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::Drag(_) => {
+                if self.drag_manager.borrow().is_dragging() {
+                    let area = self.area.get();
+                    self.drag_manager.borrow_mut().move_ghost(area.x + col, area.y + row);
+                }
+                true
+            }
             crate::input::event::MouseEventKind::ScrollDown => {
                 let total = self.count_visible_nodes();
                 let max_offset = total.saturating_sub(self.visible_count as usize);
@@ -453,5 +483,34 @@ impl crate::framework::widget::Widget for Tree {
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
+    }
+}
+
+impl WidgetState for Tree {
+    fn state_id(&self) -> Option<&str> {
+        Some("tree")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected_path": Self::path_to_string(&self.selected_path),
+            "scroll_offset": self.scroll_offset,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(path_str) = json.get("selected_path").and_then(|v| v.as_str()) {
+            let path: Vec<usize> = path_str
+                .split('.')
+                .filter_map(|s| s.parse().ok())
+                .collect();
+            self.selected_path = path;
+        }
+        if let Some(offset) = json.get("scroll_offset").and_then(|v| v.as_u64()) {
+            self.scroll_offset = offset as usize;
+        }
+        self.dirty = true;
+        Ok(())
     }
 }
