@@ -91,6 +91,8 @@ pub struct Showcase {
     pub(crate) sort_field: SortField,
     pub(crate) sort_ascending: bool,
     pub(crate) search_query_lower: String,
+    pub(crate) dirty: bool,
+    pub(crate) last_render_second: u32,
 }
 
 impl Showcase {
@@ -170,6 +172,8 @@ impl Showcase {
             sort_field: SortField::Name,
             sort_ascending: true,
             search_query_lower: String::new(),
+            dirty: true,
+            last_render_second: 0,
         }
     }
 

@@ -28,10 +28,34 @@ impl Widget for Showcase {
         0
     }
     fn needs_render(&self) -> bool {
-        true
+        // Re-render when dirty, or when the clock second changes,
+        // or when animations are active
+        if self.dirty {
+            return true;
+        }
+        let now = chrono::Local::now();
+        let current_second = now.timestamp_subsec_millis() / 1000;
+        if current_second != self.last_render_second {
+            return true;
+        }
+        // Active animations always need re-rendering
+        if self.animations.has_active() {
+            return true;
+        }
+        // Active scene always renders
+        if self.scene_router.current().is_some() {
+            return true;
+        }
+        false
     }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+        let now = chrono::Local::now();
+        self.last_render_second = now.timestamp_subsec_millis() / 1000;
+    }
     fn focusable(&self) -> bool {
         true
     }
