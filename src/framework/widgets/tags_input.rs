@@ -222,12 +222,12 @@ impl TagsInput {
                 .collect();
         }
         self.selected_suggestion = None;
+}
+        self.selected_suggestion = None;
         if self.filtered_suggestions.len() == 1 {
             self.selected_suggestion = Some(0);
         }
     }
-
-    fn select_suggestion(&mut self, index: usize) {
         if index < self.filtered_suggestions.len() {
             let suggestion = self.filtered_suggestions[index].clone();
             self.add_tag(suggestion);
@@ -389,8 +389,8 @@ impl crate::framework::widget::Widget for TagsInput {
             }
 
             // Cursor
-            if self.focused && x + 1 + self.input_text.len() as u16 < area.width {
-                let cursor_x = text_x + self.input_text.len() as u16;
+            if self.focused && x + 1 + (self.input_text.len() as u16) < area.width {
+                let cursor_x = text_x + (self.input_text.len() as u16);
                 let cursor_idx = (y * area.width + cursor_x) as usize;
                 if cursor_idx < plane.cells.len() {
                     plane.cells[cursor_idx].char = '_';

@@ -2,6 +2,7 @@
 
 use dracon_terminal_engine::framework::prelude::*;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));

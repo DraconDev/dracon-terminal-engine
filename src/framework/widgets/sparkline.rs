@@ -413,7 +413,7 @@ impl crate::framework::widget::Widget for Sparkline {
                 let point_idx = if num_points == 1 {
                     0
                 } else {
-                    ((rel_col.saturating_sub(1) as f64) / point_width).round() as usize
+                    (((rel_col.saturating_sub(1) as f64) / point_width).round() as usize)
                         .min(num_points - 1)
                 };
 
