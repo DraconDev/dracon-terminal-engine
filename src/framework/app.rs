@@ -1339,60 +1339,18 @@ macro_rules! with_ctx {
 
     #[test]
     fn test_ctx_split_v() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        ctx.split_v(|_top, _bottom| {});
+        with_ctx!(mut ctx, {
+            ctx.split_v(|_top, _bottom| {});
+        });
     }
 
     #[test]
     fn test_ctx_layout() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        use crate::framework::layout::Constraint;
-        let rects = ctx.layout(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
-        assert_eq!(rects.len(), 2);
+        with_ctx!(ctx, {
+            use crate::framework::layout::Constraint;
+            let rects = ctx.layout(vec![Constraint::Percentage(50), Constraint::Percentage(50)]);
+            assert_eq!(rects.len(), 2);
+        });
     }
 
     #[test]
