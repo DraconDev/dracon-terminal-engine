@@ -612,30 +612,18 @@ fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy
     draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, false);
 }
 
-fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let lines = [
-        "v root/",
-        "| v src/",
-        "| | > main.rs",
-        "| | > lib.rs",
-        "| v target/",
-    ];
+fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let lines = ["v root/", "| v src/", "| | > main.rs", "| | > lib.rs", "| v target/"];
     let scroll = ((phase * 0.5).sin() * 1.5) as i16;
     for (i, line) in lines.iter().enumerate() {
-        let y = 6 + i;
-        if !(6..=11).contains(&y) {
-            continue;
-        }
+        let y = oy + 6 + i;
+        if !(oy + 6..=oy + 11).contains(&y) { continue; }
         let offset = if i == 2 { scroll } else { 0 };
-        let x = (2i16 + offset).clamp(1, 20) as usize;
-        let truncated: String = line.chars().skip(x.saturating_sub(2)).take(22).collect();
-        let prefix = if truncated.starts_with('|') {
-            "│"
-        } else {
-            " "
-        };
-        draw_text(plane, 1, y, prefix, t.fg_muted, t.surface, false);
-        draw_text(plane, 2, y, &truncated, t.fg_subtle, t.surface, false);
+        let x = (ox as i16 + 2 + offset).clamp(ox as i16 + 1, ox as i16 + 20) as usize;
+        let truncated: String = line.chars().skip(x.saturating_sub(ox + 2)).take(22).collect();
+        let prefix = if truncated.starts_with('|') { "│" } else { " " };
+        draw_text(plane, ox + 1, y, prefix, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 2, y, &truncated, t.fg_subtle, t.surface, false);
     }
 }
 
