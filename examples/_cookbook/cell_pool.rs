@@ -13,11 +13,12 @@ struct PoolDemo {
 }
 
 impl PoolDemo {
-    fn new(theme: Theme) -> Self {
+    fn new(theme: Theme, should_quit: Rc<AtomicBool>) -> Self {
         Self {
             cell_pool: CellPool::new(),
             theme,
             dirty: true,
+            should_quit,
         }
     }
 }
@@ -99,7 +100,10 @@ impl Widget for PoolDemo {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => true,
+            KeyCode::Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.should_quit.store(true, Ordering::SeqCst);
+                true
+            }
             _ => false,
         }
     }
@@ -112,7 +116,9 @@ impl Widget for PoolDemo {
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
-    let demo = PoolDemo::new(theme);
+    let should_quit = Rc::new(AtomicBool::new(false));
+    let quit_clone = Rc::clone(&should_quit);
+    let demo = PoolDemo::new(theme, should_quit);
 
     let mut app = App::new()?;
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
@@ -120,5 +126,10 @@ fn main() -> std::io::Result<()> {
     app.title("CellPool Demo")
         .fps(30)
         .theme(theme)
+        .on_tick(move |ctx, _| {
+            if quit_clone.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
         .run(|ctx| {})
 }
