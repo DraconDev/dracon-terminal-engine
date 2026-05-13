@@ -1112,32 +1112,7 @@ macro_rules! make_ctx {
                 scene_router: &mut scene_router,
             }
         }};
-    }
-
-macro_rules! make_ctx {
-        () => {{
-            let mut compositor = Compositor::new(80, 24);
-            let mut focus_manager = FocusManager::new();
-            let mut dirty_tracker = DirtyRegionTracker::new();
-            let mut animations = AnimationManager::new();
-            let mut theme = Theme::default();
-            let last_frame = Instant::now();
-            let commands = RefCell::new(Vec::new());
-            let event_bus = EventBus::new();
-            let mut scene_router = SceneRouter::new();
-            (
-                compositor,
-                focus_manager,
-                dirty_tracker,
-                animations,
-                theme,
-                last_frame,
-                commands,
-                event_bus,
-                scene_router,
-            )
-        }};
-    }
+}
 
     #[test]
     fn test_app_new() {
