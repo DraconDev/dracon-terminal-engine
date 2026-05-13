@@ -256,17 +256,25 @@ pub fn render_card(config: &CardConfig) -> Plane {
         }
     }
 
+    // Embedded badge
+    let mut next_badge_x = badge_x + badge.len() + 1;
+    if config.is_embedded {
+        let embed_badge = " ⚡ ";
+        for (i, ch) in embed_badge.chars().enumerate() {
+            let px = next_badge_x + i;
+            if px < card_w_usize - 2 {
+                set_cell(&mut plane, px, badge_y, ch, t.bg, t.success);
+            }
+        }
+        next_badge_x += embed_badge.len() + 1;
+    }
+
     // NEW badge for recently added examples
     let new_examples = ["calendar", "rich_text", "autocomplete", "notification_center", "accessibility", "cell_pool"];
     if new_examples.contains(&config.ex.name) {
         let new_badge = " NEW ";
-        let new_x = if config.is_embedded {
-            badge_x + badge.len() + 1 + " ⚡ ".len() + 1
-        } else {
-            badge_x + badge.len() + 1
-        };
         for (i, ch) in new_badge.chars().enumerate() {
-            let px = new_x + i;
+            let px = next_badge_x + i;
             if px < card_w_usize - 2 {
                 set_cell(&mut plane, px, badge_y, ch, t.fg_on_accent, t.warning);
             }
