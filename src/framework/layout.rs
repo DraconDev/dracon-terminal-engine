@@ -9,19 +9,21 @@ use proptest::prelude::*;
 
 use std::cell::RefCell;
 use ratatui::layout::Rect;
+use ratatui::layout::Rect;
+#[allow(unused)]
+use std::cell::RefCell;
 
 /// Axis along which constraints are resolved.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
     /// Distribute constraints horizontally (default).
-    #[default]
     Horizontal,
     /// Distribute constraints vertically.
     Vertical,
 }
-
 /// A constraint that defines how a dimension is sized.
-    Percentage(u16),
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Constraint {
     /// Fixed size in cells.
     Fixed(u16),
     /// Minimum size in cells.
