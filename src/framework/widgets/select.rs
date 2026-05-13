@@ -260,3 +260,28 @@ impl crate::framework::widget::Widget for Select {
         self.theme = *theme;
     }
 }
+
+impl WidgetState for Select {
+    fn state_id(&self) -> Option<&str> {
+        Some("select")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected": self.selected,
+            "expanded": self.expanded,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(selected) = json.get("selected").and_then(|v| v.as_u64()) {
+            self.selected = selected as usize;
+        }
+        if let Some(expanded) = json.get("expanded").and_then(|v| v.as_bool()) {
+            self.expanded = expanded;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
