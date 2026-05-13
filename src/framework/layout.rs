@@ -27,6 +27,8 @@ pub enum Constraint {
     Min(u16),
     /// Maximum size in cells.
     Max(u16),
+    /// Percentage of available space (0-100).
+    Percentage(u16),
     /// Ratio of remaining space after fixed/min constraints (numerator/denominator).
     Ratio(u16, u16),
 }
