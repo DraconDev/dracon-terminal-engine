@@ -9,6 +9,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// Callback type for tag add events.
 pub type TagAddCallback = Box<dyn FnMut(String)>;

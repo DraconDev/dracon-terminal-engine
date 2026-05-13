@@ -8,6 +8,7 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// Callback type for color change events.
 pub type ColorChangeCallback = Box<dyn FnMut(Color)>;

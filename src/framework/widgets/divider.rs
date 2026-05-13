@@ -5,6 +5,7 @@
 use crate::compositor::Plane;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// Direction of the divider.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

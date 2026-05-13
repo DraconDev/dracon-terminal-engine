@@ -5,6 +5,7 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// Callback type for when the value changes.
 pub type ProgressChangeCallback = Box<dyn FnMut(f64)>;
