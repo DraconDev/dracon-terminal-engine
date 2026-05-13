@@ -789,29 +789,16 @@ enum NotificationType {
     Error,
 }
 
-fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
-    draw_text(plane, 1, 5, "OSC 99 Announcements:", t.primary, t.surface, true);
-
-    let items = [
-        ("Role:", "button"),
-        ("Label:", "Submit"),
-        ("Shortcut:", "Ctrl+Enter"),
-        ("Level:", "assertive"),
-        ("Terminal:", "NVDA"),
-    ];
-
+fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+    draw_text(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, true);
+    let items = [("Role:", "button"), ("Label:", "Submit"), ("Shortcut:", "Ctrl+Enter"), ("Level:", "assertive"), ("Terminal:", "NVDA")];
     for (i, (label, value)) in items.iter().enumerate() {
-        let y = 6 + i;
-        if y > 10 {
-            break;
-        }
-        draw_text(plane, 1, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, 12, y, value, t.fg, t.surface, false);
+        let y = oy + 6 + i;
+        if y > oy + 10 { break; }
+        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 12, y, value, t.fg, t.surface, false);
     }
-
-    // Animated indicator
-    let status = "● enabled";
-    draw_text(plane, 1, 11, status, t.success, t.surface, false);
+    draw_text(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, false);
 }
 
 fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
