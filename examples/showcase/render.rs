@@ -441,255 +441,104 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy:
     draw_text(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, false);
 }
 
-fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let lines = [
-        "  line 0  ▸ active",
-        "  line 1",
-        "  line 2",
-        "  line 3",
-        "  line 4",
-        "  line 5",
-        "  line 6",
-        "  line 7",
-        "  line 8",
-        "  line 9",
-        "  line 10",
-        "  line 11",
-        "  line 12",
-        "  line 13",
-        "  line 14",
-    ];
-
+fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let lines = ["  line 0  ▸ active", "  line 1", "  line 2", "  line 3", "  line 4", "  line 5", "  line 6", "  line 7", "  line 8", "  line 9", "  line 10", "  line 11", "  line 12", "  line 13", "  line 14"];
     let view_h = 6usize;
     let offset = ((phase * 2.0).sin() * 4.0).round() as usize;
     let offset = offset.min(lines.len().saturating_sub(view_h));
-
     let track_x = 24usize;
     let track_h = view_h;
-
     for (i, line) in lines.iter().enumerate() {
         let view_idx = i.saturating_sub(offset);
         if view_idx < view_h {
-            let py = 6 + view_idx;
-            if py < 13 {
+            let py = oy + 6 + view_idx;
+            if py < oy + 13 {
                 let text: String = line.chars().take(20).collect();
-                let fg = if line.contains("active") {
-                    t.primary
-                } else {
-                    t.fg_subtle
-                };
-                draw_text(plane, 2, py, &text, fg, t.surface, false);
+                let fg = if line.contains("active") { t.primary } else { t.fg_subtle };
+                draw_text(plane, ox + 2, py, &text, fg, t.surface, false);
             }
         }
     }
-
     let thumb_len = ((view_h as f32 / lines.len() as f32) * track_h as f32).ceil() as usize;
     let thumb_len = thumb_len.max(1);
     let max_offset = lines.len().saturating_sub(view_h);
-    let thumb_pos = if max_offset == 0 {
-        0
-    } else {
-        (offset * (track_h.saturating_sub(thumb_len)))
-            .checked_div(max_offset)
-            .unwrap_or(0)
-    };
-
+    let thumb_pos = if max_offset == 0 { 0 } else { (offset * (track_h.saturating_sub(thumb_len))).checked_div(max_offset).unwrap_or(0) };
     for y in 0..track_h {
-        let cy = 6 + y;
-        if cy >= 13 {
-            break;
-        }
-        let ch = if y >= thumb_pos && y < thumb_pos + thumb_len {
-            '█'
-        } else {
-            '░'
-        };
-        let fg = if y >= thumb_pos && y < thumb_pos + thumb_len {
-            t.primary
-        } else {
-            t.fg_muted
-        };
-        set_cell(plane, track_x, cy, ch, fg, t.surface);
+        let cy = oy + 6 + y;
+        if cy >= oy + 13 { break; }
+        let ch = if y >= thumb_pos && y < thumb_pos + thumb_len { '█' } else { '░' };
+        let fg = if y >= thumb_pos && y < thumb_pos + thumb_len { t.primary } else { t.fg_muted };
+        set_cell(plane, ox + track_x, cy, ch, fg, t.surface);
     }
 }
 
-fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    // Tab bar with active/inactive tabs
-    let tabs = [
-        (" main.rs ", true),
-        (" lib.rs ", false),
-        (" mod.rs ", false),
-    ];
-    let mut tab_x = 1usize;
+fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
+    let mut tab_x = ox + 1;
     let mut active_tab_start = 0usize;
     let mut active_tab_len = 0usize;
     for (label, active) in &tabs {
         let fg = if *active { t.fg_on_accent } else { t.fg_muted };
         let bg = if *active { t.primary_active } else { t.surface };
-        draw_text(plane, tab_x, 5, label, fg, bg, *active);
-        if *active {
-            active_tab_start = tab_x;
-            active_tab_len = label.len();
-        }
+        draw_text(plane, tab_x, oy + 5, label, fg, bg, *active);
+        if *active { active_tab_start = tab_x; active_tab_len = label.len(); }
         tab_x += label.len() + 1;
     }
-    // Underline for active tab
-    for dx in 0..active_tab_len {
-        set_cell(
-            plane,
-            active_tab_start + dx,
-            5 + 1,
-            '▔',
-            t.primary_active,
-            t.surface,
-        );
-    }
-
-    // Code lines with line numbers
-    let lines = [
-        ("1", "fn main() {"),
-        ("2", "    let x = 42;"),
-        ("3", "    println!(\"{}\", x);"),
-        ("4", "}"),
-    ];
+    for dx in 0..active_tab_len { set_cell(plane, active_tab_start + dx, oy + 6, '▔', t.primary_active, t.surface); }
+    let lines = [("1", "fn main() {"), ("2", "    let x = 42;"), ("3", "    println!(\"{}\", x);"), ("4", "}")];
     for (i, (num, code)) in lines.iter().enumerate() {
-        let py = 6 + i;
-        if py > 10 {
-            break;
-        }
-        draw_text(plane, 1, py, num, t.fg_muted, t.surface, false);
-        draw_text(plane, 3, py, code, t.fg, t.surface, false);
+        let py = oy + 6 + i;
+        if py > oy + 10 { break; }
+        draw_text(plane, ox + 1, py, num, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 3, py, code, t.fg, t.surface, false);
     }
-    // Blinking cursor on line 3 (the empty line after code)
-    let cursor_visible = (phase * 3.0).fract() < 0.6;
-    if cursor_visible {
-        set_cell(plane, 4, 6, '▎', t.primary, t.surface);
-    }
+    if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 4, oy + 6, '▎', t.primary, t.surface); }
 }
 
-fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let wins = [
-        (1, 6, 8, 4, t.primary),
-        (11, 7, 8, 4, t.warning),
-        (6, 9, 10, 3, t.info),
-    ];
-    let offsets = [
-        ((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16),
-        ((phase * 18.0).sin() as i16, (phase * 12.0).sin() as i16),
-        (0, 0),
-    ];
+fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let wins = [(1, 6, 8, 4, t.primary), (11, 7, 8, 4, t.warning), (6, 9, 10, 3, t.info)];
+    let offsets = [((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16), ((phase * 18.0).sin() as i16, (phase * 12.0).sin() as i16), (0, 0)];
     for (i, (x, y, w, h, color)) in wins.iter().enumerate() {
-        let ox = offsets[i].0;
-        let oy = offsets[i].1;
-        let wx = (*x as i16 + ox).max(1) as usize;
-        let wy = (*y as i16 + oy).max(6) as usize;
+        let ox2 = offsets[i].0;
+        let oy2 = offsets[i].1;
+        let wx = (*x as i16 + ox2).max(1) as usize;
+        let wy = (*y as i16 + oy2).max(6) as usize;
         let wx = wx.min(20);
         let wy = wy.min(11);
-
-        set_cell(plane, wx, wy, '┌', *color, t.surface);
-        for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy, '─', *color, t.surface);
-        }
-        set_cell(plane, wx + w - 1, wy, '┐', *color, t.surface);
+        set_cell(plane, ox + wx, oy + wy, '┌', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy, '─', *color, t.surface); }
+        set_cell(plane, ox + wx + w - 1, oy + wy, '┐', *color, t.surface);
         for dy in 1..h - 1 {
-            set_cell(plane, wx, wy + dy, '│', *color, t.surface);
-            for dx in 1..w - 1 {
-                set_cell(plane, wx + dx, wy + dy, ' ', *color, t.surface);
-            }
-            set_cell(plane, wx + w - 1, wy + dy, '│', *color, t.surface);
+            set_cell(plane, ox + wx, oy + wy + dy, '│', *color, t.surface);
+            for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy + dy, ' ', *color, t.surface); }
+            set_cell(plane, ox + wx + w - 1, oy + wy + dy, '│', *color, t.surface);
         }
-        set_cell(plane, wx, wy + h - 1, '└', *color, t.surface);
-        for dx in 1..w - 1 {
-            set_cell(plane, wx + dx, wy + h - 1, '─', *color, t.surface);
-        }
-        set_cell(plane, wx + w - 1, wy + h - 1, '┘', *color, t.surface);
+        set_cell(plane, ox + wx, oy + wy + h - 1, '└', *color, t.surface);
+        for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy + h - 1, '─', *color, t.surface); }
+        set_cell(plane, ox + wx + w - 1, oy + wy + h - 1, '┘', *color, t.surface);
     }
 }
 
-fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    // Branch header
-    draw_text(
-        plane,
-        2,
-        6,
-        " main ",
-        t.fg_on_accent,
-        t.primary_active,
-        true,
-    );
-    draw_text(
-        plane,
-        2,
-        7,
-        "Status: 3 files changed",
-        t.fg,
-        t.surface,
-        false,
-    );
-
-    // Animated diff lines cycling through different statuses
-    let phases = [
-        [
-            (" M src/main.rs", t.warning),
-            (" A Cargo.toml", t.success),
-            ("?? README.md", t.error),
-        ],
-        [
-            (" M Cargo.toml", t.warning),
-            (" D old.rs", t.error),
-            (" A new.rs", t.success),
-        ],
-        [
-            ("?? config.yml", t.error),
-            (" M lib.rs", t.warning),
-            (" A test.rs", t.success),
-        ],
-        [
-            (" D removed.rs", t.error),
-            (" M updated.rs", t.warning),
-            ("?? unknown.py", t.error),
-        ],
-    ];
+fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, true);
+    draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, false);
+    let phases = [[(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)], [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)], [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)], [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)]];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
-    let lines = &phases[phase_idx];
-    for (i, (text, color)) in lines.iter().enumerate() {
-        draw_text(plane, 2, 9 + i, text, *color, t.surface, false);
-    }
+    for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text(plane, ox + 2, oy + 9 + i, text, *color, t.surface, false); }
 }
 
-fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let items = [
-        (0, "home/", true, 0),
-        (1, "user/", true, 1),
-        (2, "  src/", true, 2),
-        (3, "    main.rs", false, -1),
-        (3, "    lib.rs", false, -1),
-        (2, "  docs/", true, 1),
-        (3, "    README.md", false, -1),
-    ];
+fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let items = [(0, "home/", true, 0), (1, "user/", true, 1), (2, "  src/", true, 2), (3, "    main.rs", false, -1), (3, "    lib.rs", false, -1), (2, "  docs/", true, 1), (3, "    README.md", false, -1)];
     let expand_phase = ((phase * 0.5).sin() * 4.0).round() as usize % 4;
-    let visible_depth = if expand_phase == 0 {
-        1
-    } else if expand_phase == 1 {
-        2
-    } else if expand_phase == 2 {
-        3
-    } else {
-        4
-    };
-
+    let visible_depth = if expand_phase == 0 { 1 } else if expand_phase == 1 { 2 } else if expand_phase == 2 { 3 } else { 4 };
     for (i, (indent, name, is_dir, _)) in items.iter().enumerate() {
-        if *indent as usize > visible_depth {
-            continue;
-        }
-        let py = 6 + i;
-        if py > 12 {
-            break;
-        }
+        if *indent as usize > visible_depth { continue; }
+        let py = oy + 6 + i;
+        if py > oy + 12 { break; }
         let icon = if *is_dir { "v" } else { ">" };
         let text = format!("{}{}", icon, name);
         let fg = if *is_dir { t.warning } else { t.fg_subtle };
-        draw_text(plane, 2, py, &text, fg, t.surface, false);
+        draw_text(plane, ox + 2, py, &text, fg, t.surface, false);
     }
 }
 

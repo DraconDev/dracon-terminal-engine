@@ -538,8 +538,8 @@ impl crate::framework::widget::Widget for Kanban {
                     true
                 }
                 KeyCode::Right => {
-                    let visible = (self.area.get().width / (self.column_width + 1)) as usize;
-                    if (self.scroll_offset as usize) + visible < self.columns.len() {
+                    let visible = (self.area.get().width / (self.column_width + 1)) as u16;
+                    if self.scroll_offset + visible < self.columns.len() as u16 {
                         self.scroll_offset += 1;
                         self.dirty = true;
                     }
@@ -669,8 +669,8 @@ impl crate::framework::widget::Widget for Kanban {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                let visible = (area.width / (self.column_width + 1)) as usize;
-                if (self.scroll_offset as usize) + visible < self.columns.len() {
+                let visible = (area.width / (self.column_width + 1)) as u16;
+                if self.scroll_offset + visible < self.columns.len() as u16 {
                     self.scroll_offset += 1;
                     self.dirty = true;
                 }
