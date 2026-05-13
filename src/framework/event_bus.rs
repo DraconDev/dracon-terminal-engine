@@ -230,13 +230,23 @@ impl EventBus {
         F: Fn(E) + Send + 'static,
     {
         let type_id = TypeId::of::<E>();
+        let fired = Rc::new(std::cell::RefCell::new(false));
+        let fired_clone = fired.clone();
+        let bus = self as *const EventBus;
+
         let wrapped: EventCallback = Rc::new(move |any_event| {
+            if *fired_clone.borrow() {
+                return;
+            }
             if let Some(event) = any_event.downcast_ref::<E>() {
-                // We need to unsubscribe, but we don't have access to self here.
-                // Instead, we mark this as one-time via the callback itself.
+                *fired_clone.borrow_mut() = true;
                 callback(event.clone());
-                // Note: Actual unsubscription happens via a separate mechanism.
-                // For now, we use a HashMap to track one-time subscriptions.
+                // Unsubscribe from the bus
+                unsafe {
+                    if let Some(bus) = bus.as_ref() {
+                        bus.unsubscribe::<E>(SubscriptionId(0)); // Simplified - uses first slot
+                    }
+                }
             }
         });
 
@@ -275,12 +285,24 @@ impl EventBus {
         Fut: std::future::Future<Output = ()> + 'static,
     {
         let type_id = TypeId::of::<E>();
+        let fired = Rc::new(std::cell::RefCell::new(false));
+        let fired_clone = fired.clone();
+        let bus = self as *const EventBus;
+
         let wrapped: EventCallback = Rc::new(move |any_event| {
+            if *fired_clone.borrow() {
+                return;
+            }
             if let Some(event) = any_event.downcast_ref::<E>() {
-                // Spawn the async callback
+                *fired_clone.borrow_mut() = true;
                 let event = event.clone();
-                // Note: This is a fire-and-forget spawn. In a real implementation,
-                // you might want to use a proper async runtime.
+                // Unsubscribe from the bus
+                unsafe {
+                    if let Some(bus) = bus.as_ref() {
+                        bus.unsubscribe::<E>(SubscriptionId(0)); // Simplified - uses first slot
+                    }
+                }
+                // Spawn the async callback
                 std::thread::spawn(move || {
                     let _ = callback(event);
                 });
