@@ -646,33 +646,14 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
     }
 }
 
-fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let key_y = 6;
-    let keys = [
-        "Key: ArrowUp  0x2191".to_string(),
-        "Mod: Ctrl+Shift".to_string(),
-    ];
-    for (i, key) in keys.iter().enumerate() {
-        draw_text(plane, 1, key_y + i, key, t.fg_subtle, t.surface, false);
-    }
+fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let keys = ["Key: ArrowUp  0x2191", "Mod: Ctrl+Shift"];
+    for (i, key) in keys.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, key, t.fg_subtle, t.surface, false); }
     let mx = (phase * 30.0).sin() as i16 + 40;
     let my = (phase * 20.0).sin() as i16 + 10;
-    let mouse_str = format!("Mouse: {:3}, {:2} [L-down]", mx, my);
-    draw_text(plane, 1, 8, &mouse_str, t.primary, t.surface, false);
-    let wheel = if (phase * 2.0).sin() > 0.0 {
-        "+1"
-    } else {
-        "-1"
-    };
-    draw_text(
-        plane,
-        1,
-        9,
-        &format!("Wheel: {}", wheel),
-        t.fg_muted,
-        t.surface,
-        false,
-    );
+    draw_text(plane, ox + 1, oy + 8, &format!("Mouse: {:3}, {:2} [L-down]", mx, my), t.primary, t.surface, false);
+    let wheel = if (phase * 2.0).sin() > 0.0 { "+1" } else { "-1" };
+    draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, false);
 }
 
 fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
