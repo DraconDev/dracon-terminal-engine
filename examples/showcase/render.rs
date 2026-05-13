@@ -656,25 +656,14 @@ fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize
     draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, false);
 }
 
-fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
+fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["1 | fn main() {", "2 |   println!();", "3 | }"];
-    for (i, line) in lines.iter().enumerate() {
-        let y = 5 + i;
-        let is_cursor = i == 1;
-        let line_color = if is_cursor { t.primary } else { t.fg_subtle };
-        draw_text(plane, 1, y, line, line_color, t.surface, false);
-        if is_cursor {
-            let cursor_x = 2 + line.len();
-            set_cell(plane, cursor_x, y, '█', t.primary, t.surface);
-        }
-    }
+    for (i, line) in lines.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, line, t.fg_subtle, t.surface, false); }
+    let cursor_x = ox + 7 + ((phase * 2.0).sin() * 0.5 + 0.5) as usize * 5;
+    set_cell(plane, cursor_x.min(ox + 17), oy + 7, '▎', t.primary, t.surface);
     let lang = "  [rust] UTF-8 ";
-    let lang_x = 26 - lang.len();
-    draw_text(plane, lang_x, 10, lang, t.fg_muted, t.bg, false);
-    let blink = (phase * 2.0).sin() > 0.0;
-    if blink {
-        set_cell(plane, 3, 6, '█', t.primary, t.surface);
-    }
+    draw_text(plane, ox + 26 - lang.len(), oy + 10, lang, t.fg_muted, t.bg, false);
+    if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 3, oy + 6, '█', t.primary, t.surface); }
 }
 
 fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {

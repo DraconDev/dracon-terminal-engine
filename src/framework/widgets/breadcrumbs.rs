@@ -222,7 +222,9 @@ impl crate::framework::widget::Widget for Breadcrumbs {
 
         plane
     }
+}
 
+impl Breadcrumbs {
     fn render_segment(&self, plane: &mut Plane, i: usize, _width: u16, x: &mut u16, _is_prefix: bool) {
         let segment = &self.segments[i];
         let is_last = i == self.segments.len() - 1;
@@ -290,6 +292,9 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         col: u16,
         row: u16,
     ) -> bool {
+        if !self.clickable {
+            return false;
+        }
         if row != 0 {
             return false;
         }
