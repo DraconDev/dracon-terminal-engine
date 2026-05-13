@@ -90,6 +90,7 @@ pub struct Showcase {
     pub(crate) run_counts: Vec<u32>,
     pub(crate) sort_field: SortField,
     pub(crate) sort_ascending: bool,
+    pub(crate) cached_themes: Vec<Theme>,
     pub(crate) search_query_lower: String,
     pub(crate) dirty: bool,
     pub(crate) last_render_second: u32,
@@ -121,6 +122,8 @@ impl Showcase {
         scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme)));
 
         let run_counts = vec![0u32; examples.len()];
+
+        let cached_themes = Theme::all().iter().filter(|t| t.name != "high_contrast").copied().collect();
 
         Self {
             examples,
@@ -171,19 +174,21 @@ impl Showcase {
             run_counts,
             sort_field: SortField::Name,
             sort_ascending: true,
+            cached_themes,
             search_query_lower: String::new(),
             dirty: true,
             last_render_second: 0,
         }
     }
 
-    pub fn themes() -> Vec<Theme> {
-        Theme::all().iter().filter(|t| t.name != "high_contrast").copied().collect()
+    pub fn themes(&self) -> &[Theme] {
+        &self.cached_themes
     }
 
     pub fn apply_filter(&mut self) {
         if let Some(idx) = self.pending_theme.take() {
-            self.theme = Self::themes()[idx % Self::themes().len()];
+            let themes = &self.cached_themes;
+            self.theme = themes[idx % themes.len()];
         }
         self.search_query_lower = self.search_query.to_lowercase();
         self.filtered = self
