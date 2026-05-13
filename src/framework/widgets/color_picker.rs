@@ -146,9 +146,10 @@ impl ColorPicker {
     }
 
     fn update_color(&mut self) {
-        self.hex_value = color_to_hex(self.color());
+        let color = self.color();
+        self.hex_value = color_to_hex(color);
         if let Some(ref mut cb) = self.on_color_change {
-            cb(self.color());
+            cb(color);
         }
     }
 }
@@ -336,7 +337,8 @@ impl crate::framework::widget::Widget for ColorPicker {
                     return true;
                 }
                 KeyCode::Enter => {
-                    self.set_hex(&self.hex_value);
+                    let hex = self.hex_value.clone();
+                    self.set_hex(&hex);
                     self.input_focused = false;
                     self.update_color();
                     return true;

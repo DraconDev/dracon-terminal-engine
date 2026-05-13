@@ -221,7 +221,7 @@ impl TagsInput {
                 .cloned()
                 .collect();
         }
-        self.selected_suggestion = self.filtered_suggestions.is_empty().then(|| None);
+        self.selected_suggestion = None;
         if self.filtered_suggestions.len() == 1 {
             self.selected_suggestion = Some(0);
         }
