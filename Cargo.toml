@@ -1,6 +1,6 @@
 [package]
 name = "dracon-terminal-engine"
-version = "0.1.75"
+version = "0.1.76"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
@@ -56,6 +56,7 @@ rand = "0.8"
 tempfile = "3.10"
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.4"
+insta = { version = "1.40", features = ["yaml"] }
 
 [[example]]
 name = "system_monitor"
