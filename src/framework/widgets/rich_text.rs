@@ -40,18 +40,18 @@ fn parse_blocks(text: &str) -> Vec<Block> {
 
     while let Some(line) = lines.next() {
         let trimmed = line.trim_start();
-        if trimmed.starts_with("# ") {
-            blocks.push(Block::Header(1, parse_inline(&trimmed[2..])));
-        } else if trimmed.starts_with("## ") {
-            blocks.push(Block::Header(2, parse_inline(&trimmed[3..])));
-        } else if trimmed.starts_with("### ") {
-            blocks.push(Block::Header(3, parse_inline(&trimmed[4..])));
-        } else if trimmed.starts_with("#### ") {
-            blocks.push(Block::Header(4, parse_inline(&trimmed[5..])));
-        } else if trimmed.starts_with("##### ") {
-            blocks.push(Block::Header(5, parse_inline(&trimmed[6..])));
-        } else if trimmed.starts_with("###### ") {
-            blocks.push(Block::Header(6, parse_inline(&trimmed[7..])));
+        if let Some(rest) = trimmed.strip_prefix("# ") {
+            blocks.push(Block::Header(1, parse_inline(rest)));
+        } else if let Some(rest) = trimmed.strip_prefix("## ") {
+            blocks.push(Block::Header(2, parse_inline(rest)));
+        } else if let Some(rest) = trimmed.strip_prefix("### ") {
+            blocks.push(Block::Header(3, parse_inline(rest)));
+        } else if let Some(rest) = trimmed.strip_prefix("#### ") {
+            blocks.push(Block::Header(4, parse_inline(rest)));
+        } else if let Some(rest) = trimmed.strip_prefix("##### ") {
+            blocks.push(Block::Header(5, parse_inline(rest)));
+        } else if let Some(rest) = trimmed.strip_prefix("###### ") {
+            blocks.push(Block::Header(6, parse_inline(rest)));
         } else if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
             blocks.push(Block::ListItem(parse_inline(&trimmed[2..])));
         } else if trimmed.is_empty() {

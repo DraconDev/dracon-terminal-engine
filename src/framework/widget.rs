@@ -185,5 +185,5 @@ pub trait WidgetState {
     ///
     /// Returns `Ok(())` on success, or an error if the JSON is invalid
     /// or cannot be applied to this widget.
-    fn from_json(&mut self, json: &JsonValue) -> Result<(), DraconError>;
+    fn apply_json(&mut self, json: &JsonValue) -> Result<(), DraconError>;
 }

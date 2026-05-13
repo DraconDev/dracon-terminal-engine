@@ -256,11 +256,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         }
 
         let hex_start = hex_x + hex_label.len() as u16;
-        let hex_display = if self.input_focused {
-            self.hex_value.clone()
-        } else {
-            self.hex_value.clone()
-        };
+        let hex_display = self.hex_value.clone();
         let hex_bg = if self.input_focused {
             self.theme.primary_active
         } else {
@@ -440,7 +436,7 @@ impl crate::framework::widget::Widget for ColorPicker {
                 }
                 true
             }
-            crate::input::event::MouseEventKind::Down(btn) if btn == crate::input::event::MouseButton::Left => {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 let slider_start_y = 6u16;
                 let slider_width = (area.width.saturating_sub(4)).max(20);
 

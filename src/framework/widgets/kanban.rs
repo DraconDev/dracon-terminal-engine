@@ -383,11 +383,7 @@ impl crate::framework::widget::Widget for Kanban {
                     let idx = (cy * area.width + col_x) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = '│';
-                        plane.cells[idx].fg = if card.color.is_some() {
-                            card.color.unwrap()
-                        } else {
-                            self.theme.outline
-                        };
+                        plane.cells[idx].fg = card.color.unwrap_or(self.theme.outline);
                     }
                 }
                 // Right border
@@ -399,11 +395,7 @@ impl crate::framework::widget::Widget for Kanban {
                     let idx = (cy * area.width + col_x + self.column_width - 1) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = '│';
-                        plane.cells[idx].fg = if card.color.is_some() {
-                            card.color.unwrap()
-                        } else {
-                            self.theme.outline
-                        };
+                        plane.cells[idx].fg = card.color.unwrap_or(self.theme.outline);
                     }
                 }
 
@@ -538,7 +530,7 @@ impl crate::framework::widget::Widget for Kanban {
                     true
                 }
                 KeyCode::Right => {
-                    let visible = (self.area.get().width / (self.column_width + 1));
+                    let visible = self.area.get().width / (self.column_width + 1);
                     if self.scroll_offset + visible < self.columns.len() as u16 {
                         self.scroll_offset += 1;
                         self.dirty = true;
@@ -608,7 +600,7 @@ impl crate::framework::widget::Widget for Kanban {
                 }
                 true
             }
-            crate::input::event::MouseEventKind::Down(btn) if btn == crate::input::event::MouseButton::Left => {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 let rel_col = col.saturating_sub(area.x);
                 let rel_row = row.saturating_sub(area.y);
 
@@ -667,7 +659,7 @@ impl crate::framework::widget::Widget for Kanban {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                let visible = (area.width / (self.column_width + 1));
+                let visible = area.width / (self.column_width + 1);
                 if self.scroll_offset + visible < self.columns.len() as u16 {
                     self.scroll_offset += 1;
                     self.dirty = true;
