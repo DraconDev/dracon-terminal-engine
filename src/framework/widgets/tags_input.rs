@@ -282,7 +282,7 @@ impl crate::framework::widget::Widget for TagsInput {
         let tag_height = 1u16;
         let input_height = 1u16;
         let suggestions_height = self.filtered_suggestions.len().min(5) as u16;
-        let total_height = 1 + tag_height + input_height + if !self.filtered_suggestions.is_empty() { suggestions_height + 1 } else { 0 };
+        let _total_height = 1 + tag_height + input_height + if !self.filtered_suggestions.is_empty() { suggestions_height + 1 } else { 0 };
 
         let mut y = 0u16;
 
@@ -588,6 +588,7 @@ impl crate::framework::widget::Widget for TagsInput {
         row: u16,
     ) -> bool {
         let area = self.area.get();
+        let _ = row;
 
         match kind {
             crate::input::event::MouseEventKind::Down(btn) if btn == crate::input::event::MouseButton::Left => {
