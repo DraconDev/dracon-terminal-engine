@@ -539,7 +539,7 @@ impl crate::framework::widget::Widget for Kanban {
                 }
                 KeyCode::Right => {
                     let visible = (self.area.get().width / (self.column_width + 1)) as usize;
-                    if self.scroll_offset + visible < self.columns.len() {
+                    if (self.scroll_offset as usize) + visible < self.columns.len() {
                         self.scroll_offset += 1;
                         self.dirty = true;
                     }
