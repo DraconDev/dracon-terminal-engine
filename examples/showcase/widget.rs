@@ -374,9 +374,9 @@ impl Widget for Showcase {
         // Primitives bar - live widget demo
         let prim_y = 5usize;
         let state_0 = if self.primitive_toggle {
-            " �checkmark Toggle"
+            " ✓ Toggle"
         } else {
-            " 󰠱 Toggle"
+            " ○ Toggle"
         };
         let state_1 = {
             let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
