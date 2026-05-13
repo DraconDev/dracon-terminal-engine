@@ -9,6 +9,7 @@ struct PoolDemo {
     cell_pool: CellPool,
     theme: Theme,
     dirty: bool,
+    should_quit: Rc<AtomicBool>,
 }
 
 impl PoolDemo {

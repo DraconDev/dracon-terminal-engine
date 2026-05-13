@@ -101,6 +101,20 @@ impl Widget for AutocompleteDemo {
             }
         }
 
+        // Render the autocomplete widget
+        let auto_area = Rect::new(4, 4, area.width - 8, 3);
+        self.autocomplete.set_area(auto_area);
+        let auto_plane = self.autocomplete.render(auto_area);
+        for y in 0..auto_area.height {
+            for x in 0..auto_area.width {
+                let src_idx = (y * auto_area.width + x) as usize;
+                let dst_idx = ((auto_area.y + y) * area.width + (auto_area.x + x)) as usize;
+                if src_idx < auto_plane.cells.len() && dst_idx < plane.cells.len() && !auto_plane.cells[src_idx].transparent {
+                    plane.cells[dst_idx] = auto_plane.cells[src_idx];
+                }
+            }
+        }
+
         // Selected value display
         if let Some(ref val) = *self.selected.borrow() {
             let label = format!("Selected: {}", val);

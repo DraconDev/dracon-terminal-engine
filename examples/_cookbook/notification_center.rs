@@ -59,6 +59,20 @@ impl Widget for NotifierApp {
             }
         }
 
+        // Render the notification center widget
+        let nc_area = Rect::new(0, 4, area.width, area.height - 4);
+        self.notification_center.set_area(nc_area);
+        let nc_plane = self.notification_center.render(nc_area);
+        for y in 0..nc_area.height {
+            for x in 0..nc_area.width {
+                let src_idx = (y * nc_area.width + x) as usize;
+                let dst_idx = ((nc_area.y + y) * area.width + (nc_area.x + x)) as usize;
+                if src_idx < nc_plane.cells.len() && dst_idx < plane.cells.len() && !nc_plane.cells[src_idx].transparent {
+                    plane.cells[dst_idx] = nc_plane.cells[src_idx];
+                }
+            }
+        }
+
         // Buttons
         let labels = [
             ("Info (i)", NotificationKind::Info, self.theme.info),
