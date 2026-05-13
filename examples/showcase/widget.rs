@@ -1309,6 +1309,82 @@ impl Widget for Showcase {
             }
         }
 
+        // Profiler overlay: shows performance metrics
+        if self.show_profiler {
+            let panel_w = 40usize;
+            let panel_h = 12usize;
+            let panel_x = (area.width as usize).saturating_sub(panel_w + 2);
+            let panel_y = 2usize;
+
+            // Background
+            for cy in 0..panel_h {
+                for cx in 0..panel_w {
+                    let px = panel_x + cx;
+                    let py = panel_y + cy;
+                    if px < area.width as usize && py < area.height as usize {
+                        set_cell(&mut plane, px, py, ' ', t.fg, t.surface_elevated);
+                    }
+                }
+            }
+
+            // Border
+            draw_rounded_border(
+                &mut plane,
+                Rect::new(panel_x as u16, panel_y as u16, panel_w as u16, panel_h as u16),
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
+
+            // Title
+            let title = " PROFILER [F12] ";
+            draw_text(&mut plane, panel_x + 2, panel_y + 1, title, t.primary, t.surface_elevated, true);
+
+            // Get stats from cached values
+            let fps = self.fps.load(Ordering::Relaxed);
+            let cards = self.filtered.len();
+            let frame_elapsed = self.card_start.elapsed().as_secs_f64();
+            let frame_ms = (frame_elapsed * 1000.0).min(999.0);
+
+            // Profiler stats
+            let stats = [
+                ("FPS", format!("{}", fps)),
+                ("Frame", format!("{:.1}ms", frame_ms)),
+                ("Cards", format!("{}", cards)),
+                ("Selected", format!("{}", self.selected)),
+                ("Hover", format!("{:?}", self.hovered_card)),
+                ("Search", if self.search_active { "active" } else { "idle" }.to_string()),
+                ("Debug", if self.show_debug { "on" } else { "off" }.to_string()),
+                ("Help", if self.show_help { "on" } else { "off" }.to_string()),
+            ];
+
+            for (i, (label, value)) in stats.iter().enumerate() {
+                let row = panel_y + 3 + i / 2;
+                let col_offset = if i % 2 == 0 { 0 } else { panel_w / 2 };
+                if row < panel_y + panel_h - 1 {
+                    let label_text = format!("{}:", label);
+                    draw_text(
+                        &mut plane,
+                        panel_x + 2 + col_offset,
+                        row,
+                        &label_text,
+                        t.fg_muted,
+                        t.surface_elevated,
+                        false,
+                    );
+                    draw_text(
+                        &mut plane,
+                        panel_x + 2 + col_offset + label_text.len(),
+                        row,
+                        &value,
+                        t.primary,
+                        t.surface_elevated,
+                        false,
+                    );
+                }
+            }
+        }
+
         plane
     }
 
