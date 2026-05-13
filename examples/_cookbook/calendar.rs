@@ -279,7 +279,11 @@ impl Widget for CalendarDemo {
                 self.should_quit.store(true, Ordering::SeqCst);
                 true
             }
-            KeyCode::Char('t') if key.modifiers.is_empty() | KeyCode::Char('T') if key.modifiers.is_empty() => {
+            KeyCode::Char('t') if key.modifiers.is_empty() => {
+                self.toggle_mode();
+                true
+            }
+            KeyCode::Char('T') if key.modifiers.is_empty() => {
                 self.toggle_mode();
                 true
             }

@@ -263,7 +263,7 @@ impl Widget for Showcase {
         }
 
         // Search icon
-        let search_icon = if self.search_active { "󰍺" } else { "󰼈" };
+        let search_icon = if self.search_active { ">" } else { "/" };
         draw_text(
             &mut plane,
             2,
