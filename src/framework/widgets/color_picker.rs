@@ -487,7 +487,7 @@ impl crate::framework::widget::Widget for ColorPicker {
 }
 
 impl ColorPicker {
-    fn render_slider(&self, plane: &mut Plane, idx: u16, y: u16, width: u16, label: &str, value: f32, kind: SliderKind) {
+    fn render_slider(&self, plane: &mut Plane, _idx: u16, y: u16, width: u16, label: &str, value: f32, kind: SliderKind) {
         let area = self.area.get();
         let x = 2u16;
 

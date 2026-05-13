@@ -182,7 +182,7 @@ impl crate::framework::widget::Widget for ProgressRing {
 
         // Draw the ring using block characters
         let radius = ring_width as f64 / 2.0;
-        let inner_radius = radius - 1.0;
+        let _inner_radius = radius - 1.0;
 
         // Ring characters for different progress positions
         // The ring is drawn using quarter characters
