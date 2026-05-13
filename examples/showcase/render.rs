@@ -349,9 +349,6 @@ pub fn render_card(config: &CardConfig) -> Plane {
         "framework_file_manager" => {
             render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
         }
-        "framework_file_manager" => {
-            render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
-        }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
         "calendar" => render_calendar_preview(&mut plane, config.theme, card_phase, config.width),
         "rich_text" => render_rich_text_preview(&mut plane, config.theme, card_phase, config.width),
