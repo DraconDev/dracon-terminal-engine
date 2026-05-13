@@ -1,6 +1,5 @@
 ---
 source: tests/widget_snapshot_tests.rs
-assertion_line: 98
 expression: output
 ---
 Name: _                                 

@@ -1087,7 +1087,7 @@ mod tests {
     }
 
 macro_rules! with_ctx {
-        ($ctx:ident, $body:expr) => {{
+        (mut $ctx:ident, $body:expr) => {{
             let mut compositor = Compositor::new(80, 24);
             let mut focus_manager = FocusManager::new();
             let mut dirty_tracker = DirtyRegionTracker::new();
@@ -1099,6 +1099,33 @@ macro_rules! with_ctx {
             let mut scene_router = SceneRouter::new();
             let mut terminal = make_test_terminal().unwrap();
             let mut $ctx = Ctx {
+                compositor: &mut compositor,
+                theme: &mut theme,
+                frame_count: 0,
+                last_frame: &last_frame,
+                running: &FAKE_RUNNING,
+                terminal: &mut terminal,
+                focus_manager: &mut focus_manager,
+                animations: &mut animations,
+                dirty_tracker: &mut dirty_tracker,
+                commands: &commands,
+                event_bus: &event_bus,
+                scene_router: &mut scene_router,
+            };
+            $body
+        }};
+        ($ctx:ident, $body:expr) => {{
+            let mut compositor = Compositor::new(80, 24);
+            let mut focus_manager = FocusManager::new();
+            let mut dirty_tracker = DirtyRegionTracker::new();
+            let mut animations = AnimationManager::new();
+            let mut theme = Theme::default();
+            let last_frame = Instant::now();
+            let commands = RefCell::new(Vec::new());
+            let event_bus = EventBus::new();
+            let mut scene_router = SceneRouter::new();
+            let mut terminal = make_test_terminal().unwrap();
+            let $ctx = Ctx {
                 compositor: &mut compositor,
                 theme: &mut theme,
                 frame_count: 0,
@@ -1355,32 +1382,11 @@ macro_rules! with_ctx {
 
     #[test]
     fn test_ctx_run_command() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        let (stdout, _stderr, code) = ctx.run_command("echo test_run_command");
-        assert!(stdout.contains("test_run_command"));
-        assert_eq!(code, 0);
+        with_ctx!(ctx, {
+            let (stdout, _stderr, code) = ctx.run_command("echo test_run_command");
+            assert!(stdout.contains("test_run_command"));
+            assert_eq!(code, 0);
+        });
     }
 
     #[test]
@@ -1395,6 +1401,9 @@ macro_rules! with_ctx {
             BoundCommand::new("test cmd 1"),
             BoundCommand::new("test cmd 2"),
         ]);
+        let event_bus = EventBus::new();
+        let mut scene_router = SceneRouter::new();
+        let mut terminal = make_test_terminal().unwrap();
 
         let ctx = Ctx {
             compositor: &mut compositor,
@@ -1402,13 +1411,13 @@ macro_rules! with_ctx {
             frame_count: 0,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
+            terminal: &mut terminal,
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
+            event_bus: &event_bus,
+            scene_router: &mut scene_router,
         };
 
         let cmds = ctx.available_commands();
