@@ -601,8 +601,8 @@ impl Widget for Showcase {
                 // Reuse card buffer to avoid per-card Plane allocation
                 {
                     let mut buf = self.card_buffer.borrow_mut();
-                    render_card(&card_config, &mut buf);
-                    plane.blit_from(&buf, draw_x as u16, draw_y as u16);
+                    render_card(&card_config, &mut buf, draw_x, draw_y);
+                    plane.blit_from(&buf, 0, 0);
                 }
 
                 const CARD_BASE: usize = 500;
