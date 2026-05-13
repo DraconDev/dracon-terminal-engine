@@ -35,7 +35,7 @@ bitflags! {
 }
 
 /// A single cell in the terminal.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Cell {
     /// The character displayed in this cell.
     pub char: char,

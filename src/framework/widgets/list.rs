@@ -651,7 +651,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 if idx >= self.items.len() {
                     return false;
                 }
-                if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+                if let Some(menu) = &mut *self.context_menu.borrow_mut() {
                     menu.show();
                     let area = self.area.get();
                     menu.with_anchor(area.x + col, area.y + row);

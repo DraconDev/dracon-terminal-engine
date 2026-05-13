@@ -52,6 +52,9 @@ pub struct Table<T> {
     visible_count: usize,
     theme: Theme,
     on_select: Option<SelectCallback<T>>,
+    on_selection_change: Option<SelectionChangeCallback<T>>,
+    on_undo: Option<UndoRedoCallback>,
+    on_redo: Option<UndoRedoCallback>,
     cell_text_fn: Option<CellTextFn<T>>,
     on_header_click: Option<HeaderClickCallback>,
     sort_column: Option<usize>,
@@ -59,6 +62,18 @@ pub struct Table<T> {
     area: Cell<Rect>,
     dirty: bool,
     hovered_row: Option<usize>,
+    // Multi-select
+    allow_multi_select: bool,
+    selected_indices: HashSet<usize>,
+    last_selected: Option<usize>,
+    // Drag and drop
+    drag_manager: RefCell<DragManager<usize>>,
+    // Context menu
+    context_menu: RefCell<Option<ContextMenu>>,
+    // Undo/redo
+    enable_undo: bool,
+    undo_stack: Vec<TableState>,
+    redo_stack: Vec<TableState>,
 }
 
 impl<T: Clone + ToString> Table<T> {
