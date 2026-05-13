@@ -385,10 +385,8 @@ pub fn render_card(config: &CardConfig, buffer: &mut Plane) {
     }
 
     if is_selected {
-        draw_text(&mut plane, 1, card_h_usize / 2, "►", t.primary, bg, true);
+        draw_text(plane, 1, card_h_usize / 2, "►", t.primary, bg, true);
     }
-
-    plane
 }
 
 fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
