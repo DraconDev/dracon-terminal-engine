@@ -26,6 +26,7 @@ exclude = [
 default = []
 debug_events = []
 async = ["dep:tokio"]
+tracing = ["dep:tracing"]
 
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
