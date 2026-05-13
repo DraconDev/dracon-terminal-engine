@@ -26,7 +26,7 @@ exclude = [
 default = []
 debug_events = []
 async = ["dep:tokio"]
-tracing = ["dep:tracing"]
+tracing = ["dep:tracing", "dep:tracing-subscriber"]
 
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
@@ -42,8 +42,8 @@ syntect = "5.2"
 tokio = { version = "1.38.0", optional = true, features = ["rt-multi-thread", "sync", "time", "macros", "process", "io-util", "fs"] }
 regex = "1.10"
 rusqlite = { version = "0.32", features = ["bundled"] }
-tracing = { version = "0.1", default-features = false, features = ["std", "tracing-attributes"] }
-tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
+tracing = { version = "0.1", optional = true, default-features = false, features = ["std", "tracing-attributes"] }
+tracing-subscriber = { version = "0.3", optional = true, default-features = false, features = ["env-filter", "fmt"] }
 unicode-segmentation = "1.10"
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
