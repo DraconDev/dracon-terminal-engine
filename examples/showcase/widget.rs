@@ -449,14 +449,14 @@ impl Widget for Showcase {
         // Category sidebar
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
-        let categories = ["all", "apps", "cookbook", "tools"];
+        let categories = ["all", "apps", "input", "data", "cookbook", "tools", "accessibility"];
         const CAT_BASE: usize = 300;
         // Determine hovered sidebar category
         let hovered_cat = self
             .mouse_pos
             .filter(|(mx, my)| {
                 let y = *my as usize;
-                (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + 8
+                (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + categories.len() * 2
             })
             .map(|(_, my)| (my as usize - sidebar_start_y) / 2)
             .filter(|idx| *idx < categories.len());
@@ -474,8 +474,11 @@ impl Widget for Showcase {
             let (icon, label) = match *cat {
                 "all" => ("◈", " ALL "),
                 "apps" => ("▣", " APPS "),
+                "input" => ("⌨", " INPUT "),
+                "data" => ("◆", " DATA "),
                 "cookbook" => ("◉", " COOKBOOK "),
                 "tools" => ("◦", " TOOLS "),
+                "accessibility" => ("◊", " A11Y "),
                 _ => ("•", *cat),
             };
             let icon_fg = if is_hovered || is_active {
@@ -1699,7 +1702,7 @@ impl Showcase {
                     true
                 }
                 KeyCode::Tab => {
-                    let categories = [None, Some("apps"), Some("cookbook"), Some("tools")];
+                    let categories = [None, Some("apps"), Some("input"), Some("data"), Some("cookbook"), Some("tools"), Some("accessibility")];
                     let current = categories
                         .iter()
                         .position(|&c| c == self.category_filter)
