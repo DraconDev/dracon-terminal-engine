@@ -18,6 +18,7 @@ pub struct Breadcrumbs {
     segments: Vec<String>,
     theme: Theme,
     height: u16,
+    clickable: bool,
     on_navigate: Option<Box<dyn FnMut(usize)>>,
     area: std::cell::Cell<Rect>,
     dirty: bool,

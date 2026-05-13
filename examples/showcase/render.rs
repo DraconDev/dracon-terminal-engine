@@ -563,160 +563,39 @@ fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize
     }
 }
 
-fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let modal_x = 4;
-    let modal_y = 5;
-    let modal_w = 18;
-    let modal_h = 7;
-    let border_color = t.warning;
-
-    set_cell(
-        plane,
-        modal_x,
-        modal_y,
-        '┌',
-        border_color,
-        t.surface_elevated,
-    );
-    for dx in 1..modal_w - 1 {
-        set_cell(
-            plane,
-            modal_x + dx,
-            modal_y,
-            '─',
-            border_color,
-            t.surface_elevated,
-        );
+fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let (mx, my, mw, mh) = (ox + 4, oy + 5, 18, 7);
+    let bc = t.warning;
+    set_cell(plane, mx, my, '┌', bc, t.surface_elevated);
+    for dx in 1..mw - 1 { set_cell(plane, mx + dx, my, '─', bc, t.surface_elevated); }
+    set_cell(plane, mx + mw - 1, my, '┐', bc, t.surface_elevated);
+    for dy in 1..mh - 1 {
+        set_cell(plane, mx, my + dy, '│', bc, t.surface_elevated);
+        for dx in 1..mw - 1 { set_cell(plane, mx + dx, my + dy, ' ', bc, t.surface_elevated); }
+        set_cell(plane, mx + mw - 1, my + dy, '│', bc, t.surface_elevated);
     }
-    set_cell(
-        plane,
-        modal_x + modal_w - 1,
-        modal_y,
-        '┐',
-        border_color,
-        t.surface_elevated,
-    );
-    for dy in 1..modal_h - 1 {
-        set_cell(
-            plane,
-            modal_x,
-            modal_y + dy,
-            '│',
-            border_color,
-            t.surface_elevated,
-        );
-        for dx in 1..modal_w - 1 {
-            set_cell(
-                plane,
-                modal_x + dx,
-                modal_y + dy,
-                ' ',
-                border_color,
-                t.surface_elevated,
-            );
-        }
-        set_cell(
-            plane,
-            modal_x + modal_w - 1,
-            modal_y + dy,
-            '│',
-            border_color,
-            t.surface_elevated,
-        );
-    }
-    set_cell(
-        plane,
-        modal_x,
-        modal_y + modal_h - 1,
-        '└',
-        border_color,
-        t.surface_elevated,
-    );
-    for dx in 1..modal_w - 1 {
-        set_cell(
-            plane,
-            modal_x + dx,
-            modal_y + modal_h - 1,
-            '─',
-            border_color,
-            t.surface_elevated,
-        );
-    }
-    set_cell(
-        plane,
-        modal_x + modal_w - 1,
-        modal_y + modal_h - 1,
-        '┘',
-        border_color,
-        t.surface_elevated,
-    );
-
+    set_cell(plane, mx, my + mh - 1, '└', bc, t.surface_elevated);
+    for dx in 1..mw - 1 { set_cell(plane, mx + dx, my + mh - 1, '─', bc, t.surface_elevated); }
+    set_cell(plane, mx + mw - 1, my + mh - 1, '┘', bc, t.surface_elevated);
     let text = " Confirm? ";
-    let text_x = modal_x + (modal_w - text.len()) / 2;
-    draw_text(
-        plane,
-        text_x,
-        modal_y + 2,
-        text,
-        t.fg,
-        t.surface_elevated,
-        true,
-    );
-
-    let yes_text = "[ Yes ]";
-    let no_text = "[ No  ]";
-    let btn_y = modal_y + 4;
-    let yes_x = modal_x + 3;
-    let no_x = modal_x + 10;
+    draw_text(plane, mx + (mw - text.len()) / 2, my + 2, text, t.fg, t.surface_elevated, true);
     let pulse = (phase * 3.0).sin() * 0.5 + 0.5;
     let yes_fg = if pulse > 0.5 { t.success } else { t.fg_muted };
-    draw_text(
-        plane,
-        yes_x,
-        btn_y,
-        yes_text,
-        yes_fg,
-        t.surface_elevated,
-        true,
-    );
-    draw_text(
-        plane,
-        no_x,
-        btn_y,
-        no_text,
-        t.fg_muted,
-        t.surface_elevated,
-        true,
-    );
+    draw_text(plane, mx + 3, my + 4, "[ Yes ]", yes_fg, t.surface_elevated, true);
+    draw_text(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, true);
 }
 
-fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let items = [
-        ("CPU", (phase * 25.0).sin() * 30.0 + 55.0),
-        ("MEM", (phase * 20.0).sin() * 20.0 + 65.0),
-        ("NET", (phase * 15.0).sin() * 40.0 + 50.0),
-    ];
+fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let items = [("CPU", (phase * 25.0).sin() * 30.0 + 55.0), ("MEM", (phase * 20.0).sin() * 20.0 + 65.0), ("NET", (phase * 15.0).sin() * 40.0 + 50.0)];
     for (i, (label, value)) in items.iter().enumerate() {
-        let y = 6 + i;
-        if y > 10 {
-            break;
-        }
+        let y = oy + 6 + i;
+        if y > oy + 10 { break; }
         let val = value.clamp(0.0, 100.0) as u32;
         let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
-        let bar_str = format!(
-            "{} [{}{}]",
-            label,
-            "█".repeat(filled),
-            "░".repeat(10 - filled)
-        );
-        let color = if val > 80 {
-            t.error
-        } else if val > 50 {
-            t.warning
-        } else {
-            t.success
-        };
-        draw_text(plane, 1, y, &bar_str, color, t.surface, false);
+        let bar_str = format!("{}{}{}", label, " [", format!("{}{}", "█".repeat(filled), "░".repeat(10 - filled)));
+        let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
+        draw_text(plane, ox + 1, y, &bar_str, color, t.surface, false);
+        set_cell(plane, ox + 14 + filled, y, ']', t.fg_muted, t.surface);
     }
 }
 

@@ -54,6 +54,7 @@
 //! }
 //! ```
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs;
 
@@ -139,22 +140,22 @@ impl I18n {
     }
 
     /// Translate a key to the current locale.
+    /// Translate a key to the current locale.
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&self, key: &'a str) -> &'a str {
+    pub fn t(&self, key: &str) -> Cow<'_, str> {
         // Try current locale
         if let Some(value) = self.translations.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Fall back to English
         if let Some(value) = self.fallback_map.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Return the key itself as last resort
-        key
+        Cow::Borrowed(key)
     }
-
     /// Translate with interpolation support.
     ///
     /// Replaces `{placeholder}` in the translation string with provided values.
@@ -164,7 +165,7 @@ impl I18n {
     /// // If "items_count" is "{count} items", returns "5 items"
     /// ```
     pub fn t_interpolate(&self, key: &str, vars: &[(&str, &str)]) -> String {
-        let template = self.t(key).to_string();
+        let template = self.t(key).as_ref().to_string();
         let mut result = template;
         for (name, value) in vars {
             result = result.replace(&format!("{{{name}}}"), value);
@@ -401,15 +402,15 @@ mod tests {
     #[test]
     fn test_i18n_t_builtin() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("button.ok"), "OK");
-        assert_eq!(i18n.t("button.cancel"), "Cancel");
-        assert_eq!(i18n.t("nav.quit"), "Quit");
+        assert_eq!(i18n.t("button.ok").as_ref(), "OK");
+        assert_eq!(i18n.t("button.cancel").as_ref(), "Cancel");
+        assert_eq!(i18n.t("nav.quit").as_ref(), "Quit");
     }
 
     #[test]
     fn test_i18n_t_unknown_key() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("unknown.key"), "unknown.key");
+        assert_eq!(i18n.t("unknown.key").as_ref(), "unknown.key");
     }
 
     #[test]
@@ -423,7 +424,7 @@ mod tests {
     fn test_i18n_add() {
         let mut i18n = I18n::new("en");
         i18n.add("custom.key", "Custom Value");
-        assert_eq!(i18n.t("custom.key"), "Custom Value");
+        assert_eq!(i18n.t("custom.key").as_ref(), "Custom Value");
     }
 
     #[test]
