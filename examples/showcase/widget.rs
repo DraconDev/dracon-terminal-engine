@@ -530,12 +530,8 @@ impl Widget for Showcase {
             zones.register(CAT_BASE + i, 0, cat_y as u16, sidebar_w as u16, 1);
             drop(zones);
 
-            // Count badge
-            let count = if *cat == "all" {
-                self.examples.len()
-            } else {
-                self.examples.iter().filter(|e| e.category == *cat).count()
-            };
+            // Count badge (cached, no per-frame allocation)
+            let count = self.cached_cat_counts[i];
             let count_str = format!("{:>2}", count);
             draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, false);
         }
