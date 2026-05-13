@@ -23,9 +23,11 @@ exclude = [
 ]
 
 [features]
-default = []
+# Enable debug event logging (mouse/key events to stderr)
 debug_events = []
+# Enable async runtime support (tokio)
 async = ["dep:tokio"]
+# Enable tracing/structured logging
 tracing = ["dep:tracing", "dep:tracing-subscriber"]
 
 [dependencies]
