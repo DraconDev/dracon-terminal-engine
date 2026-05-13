@@ -435,7 +435,7 @@ impl App {
             let stdin_fd = stdin.as_fd();
             #[cfg(feature = "tracing")]
             let _input_span = tracing::debug_span!("input_parsing").entered();
-            match tty::poll_input(stdin_fd, 20) {
+            match tty::poll_input(stdin_fd, 1) {
                 Ok(true) => {
                     let mut chunk_buf = [0u8; 1024];
                     if let Ok(n) = stdin.read(&mut chunk_buf) {
@@ -552,6 +552,91 @@ impl App {
                                     _ => {}
                                 }
                             }
+                        }
+                    }
+                    // Drain any remaining queued input (e.g. burst of scroll events)
+                    // to prevent multi-frame lag from event queue buildup
+                    let _drain_limit = 64; // Safety limit to avoid infinite loops
+                    for _ in 0.._drain_limit {
+                        match tty::poll_input(stdin_fd, 0) {
+                            Ok(true) => {
+                                let mut drain_buf = [0u8; 1024];
+                                if let Ok(dn) = stdin.read(&mut drain_buf) {
+                                    if dn == 0 { break; }
+                                    for byte in drain_buf.iter().take(dn) {
+                                        if let Some(event) = self.parser.advance(*byte) {
+                                            match &event {
+                                                Event::Resize(w, h) => {
+                                                    self.compositor.resize(*w, *h);
+                                                    self.dirty_tracker.mark_all_dirty();
+                                                    let rect = Rect::new(0, 0, *w, *h);
+                                                    for w in self.widgets.borrow_mut().iter_mut() {
+                                                        w.set_area(rect);
+                                                        w.mark_dirty();
+                                                    }
+                                                }
+                                                Event::Key(k) => {
+                                                    if k.code == crate::input::event::KeyCode::Char('c')
+                                                        && k.modifiers.contains(
+                                                            crate::input::event::KeyModifiers::CONTROL,
+                                                        )
+                                                    {
+                                                        running.store(false, Ordering::SeqCst);
+                                                    } else if let Some(focused) = self.focus_manager.focused() {
+                                                        let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
+                                                            let _ = widget.handle_key(*k);
+                                                            widget.current_theme()
+                                                        } else {
+                                                            None
+                                                        };
+                                                        if let Some(theme) = new_theme {
+                                                            if theme.name != self.theme.name {
+                                                                self.set_theme(theme);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                Event::Mouse(mouse_event) => {
+                                                    let col = mouse_event.column;
+                                                    let row = mouse_event.row;
+                                                    let target_id = {
+                                                        let widgets = self.widgets.borrow();
+                                                        let mut sorted: Vec<_> = widgets.iter().collect();
+                                                        sorted.sort_by_key(|w| w.z_index());
+                                                        sorted
+                                                            .into_iter()
+                                                            .find(|w| {
+                                                                let a = w.area();
+                                                                col >= a.x
+                                                                    && col < a.x + a.width
+                                                                    && row >= a.y
+                                                                    && row < a.y + a.height
+                                                            })
+                                                            .map(|w| w.id())
+                                                    };
+                                                    if let Some(id) = target_id {
+                                                        if let Some(mut widget) = self.widget_mut(id) {
+                                                            let a = widget.area();
+                                                            let local_col = col.saturating_sub(a.x);
+                                                            let local_row = row.saturating_sub(a.y);
+                                                            let _ = widget.handle_mouse(
+                                                                mouse_event.kind,
+                                                                local_col,
+                                                                local_row,
+                                                            );
+                                                        }
+                                                    }
+                                                }
+                                                Event::Paste(text) => {
+                                                    self.dispatch_paste(text);
+                                                }
+                                                _ => {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            _ => break, // No more data or error — stop draining
                         }
                     }
                 }
