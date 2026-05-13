@@ -403,16 +403,16 @@ mod tests {
         assert!(!manager.is_empty());
         assert!(manager.has_active());
 
-        // After it completes (but before cleanup): has_active = false, is_empty = false
-        std::thread::sleep(Duration::from_millis(50));
-        let id = manager.start(0.0, 100.0, Duration::from_millis(1));
+        // Completed-but-not-cleaned animation: has_active = false, is_empty = false
+        let mut manager2 = AnimationManager::new();
+        manager2.start(0.0, 100.0, Duration::from_millis(1));
         std::thread::sleep(Duration::from_millis(10));
-        assert!(!manager.is_empty()); // not cleaned up yet
-        assert!(!manager.has_active()); // but the short one is done; only the long one is active
+        assert!(!manager2.is_empty()); // not cleaned up yet
+        assert!(!manager2.has_active()); // but the animation is done
 
         // After cleanup: truly empty
-        manager.tick();
-        // Only the long animation remains (or both if long one is still active)
-        assert!(manager.has_active() || manager.is_empty());
+        manager2.tick();
+        assert!(manager2.is_empty());
+        assert!(!manager2.has_active());
     }
 }
