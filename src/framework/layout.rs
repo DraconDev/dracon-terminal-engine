@@ -4,11 +4,12 @@
 //! fixed, min, max, ratio). Inspired by CSS flexbox and ratatui's Layout.
 
 #[cfg(test)]
+#[cfg(test)]
 use proptest::prelude::*;
 
 use ratatui::layout::Rect;
+#[allow(unused)]
 use std::cell::RefCell;
-
 /// Axis along which constraints are resolved.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Direction {
@@ -146,9 +147,12 @@ impl Layout {
     /// Results are cached to avoid recalculation when called with the same area.
     pub fn layout(&self, area: Rect) -> Vec<Rect> {
         // Check cache first
-        if let Some((cached_area, cached_result)) = self.cached_layout.borrow().as_ref() {
-            if cached_area == &area {
-                return cached_result.clone();
+        {
+            let cached = self.cached_layout.borrow();
+            if let Some((cached_area, cached_result)) = cached.as_ref() {
+                if cached_area == &area {
+                    return cached_result.clone();
+                }
             }
         }
 
