@@ -71,7 +71,7 @@ impl Sparkline {
 
     /// Sets the height of the sparkline in cells.
     pub fn with_height(mut self, height: u16) -> Self {
-        self.height = height.max(1).min(10);
+        self.height = height.clamp(1, 10);
         self
     }
 
