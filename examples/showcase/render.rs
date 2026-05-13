@@ -666,30 +666,21 @@ fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 3, oy + 6, '█', t.primary, t.surface); }
 }
 
-fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    let snake_y = 7.0 + (phase * 3.0).sin() * 1.5;
-    let snake_x = 12.0 + (phase * 2.0).cos() * 3.0;
-    let sy = snake_y.round() as usize;
-    let sx = snake_x.round() as usize;
-    let min_px = sx.saturating_sub(1).max(8);
-    let max_px = (sx + 1).min(20);
-    let min_py = sy.saturating_sub(1).max(6);
-    let max_py = (sy + 1).min(10);
+fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    let (snake_y, snake_x) = (7.0 + (phase * 3.0).sin() * 1.5, 12.0 + (phase * 2.0).cos() * 3.0);
+    let (sy, sx) = (snake_y.round() as usize, snake_x.round() as usize);
+    let (min_px, max_px) = (sx.saturating_sub(1).max(8), (sx + 1).min(20));
+    let (min_py, max_py) = (sy.saturating_sub(1).max(6), (sy + 1).min(10));
     for py in min_py..=max_py {
         for px in min_px..=max_px {
-            let dx = px as i32 - snake_x as i32;
-            let dy = py as i32 - snake_y as i32;
+            let (dx, dy) = (px as i32 - snake_x as i32, py as i32 - snake_y as i32);
             let dist_sq = dx * dx + dy * dy;
-            let is_snake = dist_sq <= 2 && dist_sq > 0;
-            let ch = if is_snake { '█' } else { ' ' };
-            let color = if is_snake { t.success } else { t.surface };
+            let (ch, color) = if dist_sq <= 2 && dist_sq > 0 { ('█', t.success) } else { (' ', t.surface) };
             set_cell(plane, px, py, ch, color, t.surface);
         }
     }
-    let score = ((phase * 10.0).sin() * 10.0) as i32 + 42;
-    let score_str = format!("  Score: {:3}  ", score);
-    let score_x = 12 - score_str.len() / 2;
-    draw_text(plane, score_x, 11, &score_str, t.warning, t.surface, true);
+    let score_str = format!("  Score: {:3}  ", ((phase * 10.0).sin() * 10.0) as i32 + 42);
+    draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, true);
 }
 
 fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
