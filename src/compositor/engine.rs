@@ -8,6 +8,8 @@ pub struct Compositor {
     width: u16,
     height: u16,
     last_frame: Vec<Cell>,
+    /// Reusable final composition buffer (avoids per-frame allocation).
+    final_buffer: Vec<Cell>,
     /// Background color for cells not covered by any plane.
     /// Set this to the theme background to avoid black gaps.
     clear_color: Color,
@@ -16,11 +18,18 @@ pub struct Compositor {
 impl Compositor {
     /// Creates a new Compositor with the given dimensions.
     pub fn new(width: u16, height: u16) -> Self {
+        let size = (width as u32 * height as u32) as usize;
+        let default_cell = Cell {
+            bg: Color::Rgb(16, 16, 24),
+            transparent: false,
+            ..Cell::default()
+        };
         Self {
             planes: Vec::new(),
             width,
             height,
-            last_frame: vec![Cell::default(); (width as u32 * height as u32) as usize],
+            last_frame: vec![Cell::default(); size],
+            final_buffer: vec![default_cell; size],
             clear_color: Color::Rgb(16, 16, 24),
         }
     }
@@ -198,7 +207,14 @@ impl Compositor {
     pub fn resize(&mut self, width: u16, height: u16) {
         self.width = width;
         self.height = height;
-        self.last_frame = vec![Cell::default(); (width * height) as usize];
+        let size = (width as u32 * height as u32) as usize;
+        self.last_frame = vec![Cell::default(); size];
+        let default_cell = Cell {
+            bg: self.clear_color,
+            transparent: false,
+            ..Cell::default()
+        };
+        self.final_buffer = vec![default_cell; size];
     }
 
     fn sort_planes(&mut self) {
@@ -207,14 +223,15 @@ impl Compositor {
 
     /// Renders the compositor state to the given writer, outputting terminal escape codes.
     pub fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()> {
-        let mut final_buffer = vec![
-            Cell {
-                bg: self.clear_color,
-                transparent: false,
-                ..Cell::default()
-            };
-            (self.width * self.height) as usize
-        ];
+        // Reuse the final_buffer across frames — reset cells instead of reallocating
+        let clear_cell = Cell {
+            bg: self.clear_color,
+            transparent: false,
+            ..Cell::default()
+        };
+        for cell in self.final_buffer.iter_mut() {
+            *cell = clear_cell.clone();
+        }
 
         let mut layers = Vec::new();
         for i in 0..self.planes.len() {
@@ -243,24 +260,28 @@ impl Compositor {
                         filter.apply(&mut src_cell, abs_x, abs_y, 0.0);
                     }
 
-                    blend_cells(&mut final_buffer[dest_idx], &src_cell, plane.opacity);
+                    blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
                 }
             }
         }
 
-        write!(writer, "\x1b[?2026h")?;
+        // Buffer all output into a Vec<u8> and issue a single write_all() call.
+        // This reduces syscalls from ~12K individual write!() calls to just 1.
+        let mut buf: Vec<u8> = Vec::with_capacity(self.width as usize * self.height as usize * 20);
+
+        write!(buf, "\x1b[?2026h")?;
 
         let mut current_fg = Color::Reset;
         let mut current_bg = Color::Reset;
         let mut current_style = Styles::empty();
 
-        write!(writer, "\x1b[?7l")?;
+        write!(buf, "\x1b[?7l")?;
 
         for y in 0..self.height {
             let mut line_cursor_moved = false;
             for x in 0..self.width {
                 let idx = (y * self.width + x) as usize;
-                let cell = &final_buffer[idx];
+                let cell = &self.final_buffer[idx];
                 let last_cell = &self.last_frame[idx];
 
                 if cell.skip {
@@ -273,7 +294,7 @@ impl Compositor {
                 }
 
                 if !line_cursor_moved {
-                    write!(writer, "\x1b[{};{}H", y + 1, x + 1)?;
+                    write!(buf, "\x1b[{};{}H", y + 1, x + 1)?;
                     line_cursor_moved = true;
                 }
 
@@ -281,23 +302,23 @@ impl Compositor {
                     let diff = cell.style ^ current_style;
                     if diff.contains(Styles::BOLD) {
                         if cell.style.contains(Styles::BOLD) {
-                            write!(writer, "\x1b[1m")?;
+                            buf.extend_from_slice(b"\x1b[1m");
                         } else {
-                            write!(writer, "\x1b[22m")?;
+                            buf.extend_from_slice(b"\x1b[22m");
                         }
                     }
                     if diff.contains(Styles::ITALIC) {
                         if cell.style.contains(Styles::ITALIC) {
-                            write!(writer, "\x1b[3m")?;
+                            buf.extend_from_slice(b"\x1b[3m");
                         } else {
-                            write!(writer, "\x1b[23m")?;
+                            buf.extend_from_slice(b"\x1b[23m");
                         }
                     }
                     if diff.contains(Styles::UNDERLINE) {
                         if cell.style.contains(Styles::UNDERLINE) {
-                            write!(writer, "\x1b[4m")?;
+                            buf.extend_from_slice(b"\x1b[4m");
                         } else {
-                            write!(writer, "\x1b[24m")?;
+                            buf.extend_from_slice(b"\x1b[24m");
                         }
                     }
                     current_style = cell.style;
@@ -305,28 +326,31 @@ impl Compositor {
 
                 if cell.fg != current_fg {
                     match cell.fg {
-                        Color::Reset => write!(writer, "\x1b[39m")?,
-                        Color::Ansi(c) => write!(writer, "\x1b[38;5;{}m", c)?,
-                        Color::Rgb(r, g, b) => write!(writer, "\x1b[38;2;{};{};{}m", r, g, b)?,
+                        Color::Reset => buf.extend_from_slice(b"\x1b[39m"),
+                        Color::Ansi(c) => write!(buf, "\x1b[38;5;{}m", c)?,
+                        Color::Rgb(r, g, b) => write!(buf, "\x1b[38;2;{};{};{}m", r, g, b)?,
                     }
                     current_fg = cell.fg;
                 }
                 if cell.bg != current_bg {
                     match cell.bg {
-                        Color::Reset => write!(writer, "\x1b[49m")?,
-                        Color::Ansi(c) => write!(writer, "\x1b[48;5;{}m", c)?,
-                        Color::Rgb(r, g, b) => write!(writer, "\x1b[48;2;{};{};{}m", r, g, b)?,
+                        Color::Reset => buf.extend_from_slice(b"\x1b[49m"),
+                        Color::Ansi(c) => write!(buf, "\x1b[48;5;{}m", c)?,
+                        Color::Rgb(r, g, b) => write!(buf, "\x1b[48;2;{};{};{}m", r, g, b)?,
                     }
                     current_bg = cell.bg;
                 }
-                write!(writer, "{}", cell.char)?;
+                write!(buf, "{}", cell.char)?;
             }
         }
 
-        write!(writer, "\x1b[?7h")?;
-        write!(writer, "\x1b[?2026l")?;
+        write!(buf, "\x1b[?7h")?;
+        write!(buf, "\x1b[?2026l")?;
 
-        self.last_frame = final_buffer;
+        // Single syscall to write the entire frame
+        writer.write_all(&buf)?;
+
+        self.last_frame.copy_from_slice(&self.final_buffer);
         self.planes.clear();
         writer.flush()?;
         Ok(())
