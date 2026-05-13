@@ -166,6 +166,27 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        // Check if context menu is visible
+        if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+            if menu.is_visible() {
+                let area = self.area.get();
+                if menu.handle_mouse(kind, col - area.x, row - area.y) {
+                    return true;
+                }
+            }
+        }
+
+        // Right-click: Show context menu
+        if let MouseEventKind::Down(crate::input::event::MouseButton::Right) = kind {
+            if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+                menu.show();
+                let area = self.area.get();
+                menu.with_anchor(area.x + col, area.y + row);
+                self.dirty = true;
+            }
+            return true;
+        }
+
         let area = self.area.get();
         let mouse = MouseEvent {
             kind,
@@ -182,5 +203,42 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
+    }
+}
+
+impl WidgetState for TextEditorAdapter {
+    fn state_id(&self) -> Option<&str> {
+        Some("text_editor")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "content": self.editor.get_content(),
+            "cursor_row": self.editor.cursor_row,
+            "cursor_col": self.editor.cursor_col,
+            "scroll_row": self.editor.scroll_row,
+            "scroll_col": self.editor.scroll_col,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(content) = json.get("content").and_then(|v| v.as_str()) {
+            self.editor.set_content(content);
+        }
+        if let Some(row) = json.get("cursor_row").and_then(|v| v.as_u64()) {
+            self.editor.cursor_row = row as usize;
+        }
+        if let Some(col) = json.get("cursor_col").and_then(|v| v.as_u64()) {
+            self.editor.cursor_col = col as usize;
+        }
+        if let Some(row) = json.get("scroll_row").and_then(|v| v.as_u64()) {
+            self.editor.scroll_row = row as usize;
+        }
+        if let Some(col) = json.get("scroll_col").and_then(|v| v.as_u64()) {
+            self.editor.scroll_col = col as usize;
+        }
+        self.dirty = true;
+        Ok(())
     }
 }
