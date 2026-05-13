@@ -33,7 +33,7 @@ impl Widget for Showcase {
         if self.dirty {
             return true;
         }
-        let now = chrono::Local::now();
+        let now = Local::now();
         let current_second = now.num_seconds_from_midnight();
         if current_second != self.last_render_second {
             // Cache clock text when second changes to avoid formatting in render()
@@ -55,7 +55,7 @@ impl Widget for Showcase {
     }
     fn clear_dirty(&mut self) {
         self.dirty = false;
-        let now = chrono::Local::now();
+        let now = Local::now();
         self.last_render_second = now.num_seconds_from_midnight();
     }
     fn focusable(&self) -> bool {
