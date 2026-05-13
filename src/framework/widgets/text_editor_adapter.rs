@@ -224,7 +224,6 @@ impl WidgetState for TextEditorAdapter {
 
     fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(content) = json.get("content").and_then(|v| v.as_str()) {
-            self.editor.content = content.to_string();
             self.editor.lines = if content.is_empty() {
                 vec![String::new()]
             } else {

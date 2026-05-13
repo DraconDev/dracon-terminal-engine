@@ -21,14 +21,14 @@ pub enum Direction {
 /// A constraint that defines how a dimension is sized.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Constraint {
+    /// Percentage of available space (0-100).
+    Percentage(u16),
     /// Fixed size in cells.
     Fixed(u16),
     /// Minimum size in cells.
     Min(u16),
     /// Maximum size in cells.
     Max(u16),
-    /// Percentage of available space (0-100).
-    Percentage(u16),
     /// Ratio of remaining space after fixed/min constraints (numerator/denominator).
     Ratio(u16, u16),
 }
