@@ -1,4 +1,5 @@
 use bitflags::bitflags;
+use ratatui::layout::Rect;
 
 /// Terminal color representation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

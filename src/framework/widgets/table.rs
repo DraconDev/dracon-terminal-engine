@@ -586,6 +586,43 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 }
                 true
             }
+            // Ctrl+Z: Undo
+            KeyCode::Char('z') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                self.undo();
+                true
+            }
+            // Ctrl+Y: Redo
+            KeyCode::Char('y') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                self.redo();
+                true
+            }
+            // Ctrl+A: Select all (in multi-select mode)
+            KeyCode::Char('a') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                if self.allow_multi_select {
+                    self.push_undo();
+                    self.selected_indices.clear();
+                    for i in 0..self.rows.len() {
+                        self.selected_indices.insert(i);
+                    }
+                    self.selected = 0;
+                    self.dirty = true;
+                    if let Some(ref mut cb) = self.on_selection_change {
+                        cb(&self.selected_indices);
+                    }
+                }
+                true
+            }
+            // Escape: Clear selection
+            KeyCode::Esc => {
+                if self.allow_multi_select && !self.selected_indices.is_empty() {
+                    self.selected_indices.clear();
+                    self.dirty = true;
+                    if let Some(ref mut cb) = self.on_selection_change {
+                        cb(&self.selected_indices);
+                    }
+                }
+                true
+            }
             _ => false,
         }
     }
@@ -596,6 +633,15 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         col: u16,
         row: u16,
     ) -> bool {
+        // Check if context menu is visible
+        if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+            if menu.is_visible() {
+                if menu.handle_mouse(kind, col, row) {
+                    return true;
+                }
+            }
+        }
+
         match kind {
             crate::input::event::MouseEventKind::Moved => {
                 if row == 0 {
@@ -651,11 +697,45 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 if idx >= self.rows.len() {
                     return false;
                 }
+
+                // Track for shift-click range selection
+                if self.allow_multi_select {
+                    self.last_selected = Some(idx);
+                }
+
                 self.selected = idx;
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.rows[idx].data);
                 }
                 self.dirty = true;
+                true
+            }
+            // Right-click: Show context menu
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Right) => {
+                if row == 0 {
+                    return false;
+                }
+                let rel_row = row.saturating_sub(1);
+                if rel_row >= self.visible_count as u16 {
+                    return false;
+                }
+                let idx = self.offset + rel_row as usize;
+                if idx >= self.rows.len() {
+                    return false;
+                }
+                if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+                    menu.show();
+                    let area = self.area.get();
+                    menu.with_anchor(area.x + col, area.y + row);
+                    self.dirty = true;
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::Drag(_) => {
+                if self.drag_manager.borrow().is_dragging() {
+                    let area = self.area.get();
+                    self.drag_manager.borrow_mut().move_ghost(area.x + col, area.y + row);
+                }
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
@@ -675,5 +755,47 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
+    }
+}
+
+impl<T: Clone + ToString> WidgetState for Table<T> {
+    fn state_id(&self) -> Option<&str> {
+        Some("table")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected": self.selected,
+            "offset": self.offset,
+            "sort_column": self.sort_column,
+            "sort_ascending": self.sort_ascending,
+            "selected_indices": self.selected_indices.iter().collect::<Vec<_>>(),
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(selected) = json.get("selected").and_then(|v| v.as_u64()) {
+            self.selected = selected as usize;
+        }
+        if let Some(offset) = json.get("offset").and_then(|v| v.as_u64()) {
+            self.offset = offset as usize;
+        }
+        if let Some(sort_col) = json.get("sort_column").and_then(|v| v.as_u64()) {
+            self.sort_column = Some(sort_col as usize);
+        }
+        if let Some(ascending) = json.get("sort_ascending").and_then(|v| v.as_bool()) {
+            self.sort_ascending = ascending;
+        }
+        if let Some(indices) = json.get("selected_indices").and_then(|v| v.as_array()) {
+            self.selected_indices.clear();
+            for idx in indices {
+                if let Some(i) = idx.as_u64() {
+                    self.selected_indices.insert(i as usize);
+                }
+            }
+        }
+        self.dirty = true;
+        Ok(())
     }
 }

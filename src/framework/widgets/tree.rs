@@ -2,9 +2,13 @@
 //!
 //! Renders a collapsible tree with expand/collapse state per node.
 
+use std::cell::RefCell;
+
 use crate::compositor::{Cell, Plane, Styles};
+use crate::framework::dragdrop::{DragGhost, DragManager};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
 /// A node in the tree hierarchy with a label and optional children.
@@ -47,6 +51,10 @@ pub struct Tree {
     visible_count: u16,
     on_select: Option<SelectCallback>,
     area: std::cell::Cell<Rect>,
+    // Drag and drop
+    drag_manager: RefCell<DragManager<String>>,
+    // Context menu
+    context_menu: RefCell<Option<ContextMenu>>,
 }
 
 impl Tree {
