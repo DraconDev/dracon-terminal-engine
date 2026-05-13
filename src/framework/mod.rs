@@ -64,7 +64,7 @@ pub mod prelude {
         event_bus::{EventBus, Reactive, SubscriptionId},
         focus::FocusManager,
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
-        i18n::{tr, trf, I18n, I18nError},
+        i18n::{tr, I18n, I18nError},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Direction, Layout},
         plugin::{PluginRegistry, WidgetFactory},

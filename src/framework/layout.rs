@@ -72,6 +72,7 @@ impl Layout {
             spacing: 0,
             margin: 0,
             name: None,
+            cached_layout: RefCell::new(None),
         }
     }
 
@@ -88,6 +89,7 @@ impl Layout {
             spacing: 0,
             margin: 0,
             name: None,
+            cached_layout: RefCell::new(None),
         }
     }
 
@@ -99,7 +101,13 @@ impl Layout {
             spacing: 0, // Nested layouts don't apply spacing to children
             margin: 0,   // Nested layouts don't inherit margin by default
             name: self.name,
+            cached_layout: RefCell::new(None),
         }
+    }
+
+    /// Invalidates the layout cache, forcing a recalculation on the next call.
+    pub fn invalidate_cache(&mut self) {
+        *self.cached_layout.borrow_mut() = None;
     }
 
     /// Sets the layout direction (horizontal or vertical).
@@ -133,7 +141,16 @@ impl Layout {
     /// Constraints are resolved in two passes:
     /// 1. Fixed, Min, and Max constraints are pre-allocated.
     /// 2. Percentage and Ratio constraints share the remainder.
+    ///
+    /// Results are cached to avoid recalculation when called with the same area.
     pub fn layout(&self, area: Rect) -> Vec<Rect> {
+        // Check cache first
+        if let Some((cached_area, cached_result)) = self.cached_layout.borrow().as_ref() {
+            if cached_area == &area {
+                return cached_result.clone();
+            }
+        }
+
         if self.constraints.is_empty() {
             return Vec::new();
         }
