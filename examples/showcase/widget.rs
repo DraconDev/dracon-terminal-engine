@@ -86,7 +86,7 @@ impl Widget for Showcase {
         self.zones.borrow_mut().clear();
 
         // Title bar with decorative border
-        let title_text = " 󰣇 Dracon Terminal Engine ";
+        let title_text = " ★ Dracon Terminal Engine ";
         let title_x = 2usize;
         let title_y = 0usize;
 
@@ -119,6 +119,7 @@ impl Widget for Showcase {
         }
 
         // FPS counter (right-aligned)
+        let mut right_x = area.width as usize;
         if self.show_fps {
             let fps_val = self.fps.load(Ordering::Relaxed);
             let fps_text = format!("{} FPS", fps_val);
@@ -127,12 +128,13 @@ impl Widget for Showcase {
                 draw_text(
                     &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false,
                 );
+                right_x = fps_x;
             }
         }
 
-        // FPS toggle checkbox
+        // FPS toggle checkbox (left of FPS counter when visible)
         let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
-        let toggle_x = area.width as usize - fps_toggle.len() - 2;
+        let toggle_x = right_x.saturating_sub(fps_toggle.len() + 2);
         draw_text(
             &mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false,
         );
