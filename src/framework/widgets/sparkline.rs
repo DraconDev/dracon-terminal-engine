@@ -199,7 +199,7 @@ impl crate::framework::widget::Widget for Sparkline {
         self.dirty = true;
     }
 
-    fn clear_dirty(&self) {
+    fn clear_dirty(&mut self) {
         // Intentionally do not clear dirty - sparklines may need frequent updates
     }
 
