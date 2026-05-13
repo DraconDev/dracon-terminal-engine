@@ -588,7 +588,7 @@ impl crate::framework::widget::Widget for TagsInput {
         let _ = row;
 
         match kind {
-            crate::input::event::MouseEventKind::Down(btn) if btn == crate::input::event::MouseButton::Left => {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 // Check if clicking on a tag's remove button
                 // (assuming remove is triggered by clicking on the tag)
                 let mut x = 0u16;
