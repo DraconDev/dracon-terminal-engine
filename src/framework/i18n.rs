@@ -190,7 +190,6 @@ impl I18n {
     }
 
     /// Load built-in English translations.
-    /// Load built-in English translations.
     fn load_builtin_en(&mut self) {
         self.fallback_map = HashMap::from([
             // Common UI strings
@@ -220,8 +219,7 @@ impl I18n {
             ("msg.info", "Information"),
             ("msg.confirm", "Confirm"),
             ("msg.delete_confirm", "Are you sure you want to delete this?"),
-        ]);
-    }
+            // Status
             ("status.loading", "Loading"),
             ("status.ready", "Ready"),
             ("status.error", "Error"),
