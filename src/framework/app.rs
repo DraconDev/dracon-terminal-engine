@@ -173,6 +173,7 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
+            last_frame_duration_ms: 0.0,
         };
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
@@ -364,6 +365,16 @@ impl App {
     /// Returns the number of registered widgets.
     pub fn widget_count(&self) -> usize {
         self.widgets.borrow().len()
+    }
+
+    /// Returns the number of planes in the compositor.
+    pub fn plane_count(&self) -> usize {
+        self.compositor.planes.len()
+    }
+
+    /// Returns the last frame duration in milliseconds.
+    pub fn frame_time_ms(&self) -> f64 {
+        self.last_frame_duration_ms
     }
 
     /// Starts the application event loop.
@@ -801,6 +812,8 @@ impl App {
             self.animations.tick();
 
             frame_count.fetch_add(1, Ordering::SeqCst);
+            let frame_elapsed = self.last_frame_time.elapsed().as_secs_f64() * 1000.0;
+            self.last_frame_duration_ms = frame_elapsed;
             self.last_frame_time = Instant::now();
 
             let elapsed = frame_start.elapsed();
