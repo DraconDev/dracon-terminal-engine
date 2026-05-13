@@ -316,7 +316,6 @@ pub fn render_card(
         "game_loop" => render_game_loop_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "form_demo" | "form_widget" => render_form_preview(plane, config.theme, offset_x, offset_y),
         "framework_file_manager" => render_framework_fm_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "table_widget" => render_table_widget_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "calendar" => render_calendar_preview(plane, config.theme, card_phase, offset_x, offset_y),
         "rich_text" => render_rich_text_preview(plane, config.theme, offset_x, offset_y),
         "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y),
