@@ -2,7 +2,7 @@
 //!
 //! A circular progress indicator using Unicode block characters.
 
-use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;

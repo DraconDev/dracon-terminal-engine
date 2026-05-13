@@ -422,7 +422,7 @@ impl crate::framework::widget::Widget for ColorPicker {
             crate::input::event::MouseEventKind::Moved => {
                 // Determine which slider is hovered
                 let slider_start_y = 6u16;
-                let slider_width = (area.width.saturating_sub(4)).max(20);
+                let _slider_width = (area.width.saturating_sub(4)).max(20);
 
                 for (i, kind) in [SliderKind::Hue, SliderKind::Saturation, SliderKind::Lightness].iter().enumerate() {
                     let slider_y = slider_start_y + (i as u16) * 2;

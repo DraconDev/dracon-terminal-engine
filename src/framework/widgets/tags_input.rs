@@ -2,8 +2,6 @@
 //!
 //! A widget for entering and managing tags/chips with autocomplete support.
 
-use std::cell::RefCell;
-
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Color, Plane, Styles};
