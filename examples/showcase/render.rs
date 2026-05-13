@@ -731,22 +731,13 @@ fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, o
     draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, false);
 }
 
-fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
-    let lines = [
-        ("# Heading", t.primary, true),
-        ("**Bold** and *italic*", t.fg, false),
-        ("`inline code`", t.secondary, false),
-        ("- List item", t.fg_muted, false),
-        ("[link](https://)", t.info, false),
-    ];
-
+fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+    let lines = [("# Heading", t.primary, true), ("**Bold** and *italic*", t.fg, false), ("`inline code`", t.secondary, false), ("- List item", t.fg_muted, false), ("[link](https://)", t.info, false)];
     for (i, (text, color, bold)) in lines.iter().enumerate() {
-        let y = 5 + i;
-        if y > 10 {
-            break;
-        }
+        let y = oy + 5 + i;
+        if y > oy + 10 { break; }
         let truncated: String = text.chars().take(22).collect();
-        draw_text(plane, 1, y, &truncated, *color, t.surface, *bold);
+        draw_text(plane, ox + 1, y, &truncated, *color, t.surface, *bold);
     }
 }
 

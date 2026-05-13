@@ -622,9 +622,9 @@ impl crate::framework::widget::Widget for Kanban {
                         self.select_card(col_idx, card_idx);
 
                         if self.on_card_move.is_some() {
-                        self.is_dragging_card = true;
-                        self.drag_card_pos = Some((col_idx, card_idx));
-                    }
+                            self.is_dragging_card = true;
+                            self.drag_card_pos = Some((col_idx, card_idx));
+                        }
                     }
                 } else if col_idx < self.columns.len() {
                     // Clicked on column header - select first card
