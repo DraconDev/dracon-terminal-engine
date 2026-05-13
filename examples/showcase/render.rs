@@ -350,12 +350,9 @@ pub fn render_card(config: &CardConfig) -> Plane {
             render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "sqlite_browser" => {
-            render_sqlite_preview(&mut plane, config.theme, card_phase, config.width)
+        "framework_file_manager" => {
+            render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
         }
-        "widget_tutorial" => {
-            render_tutorial_preview(&mut plane, config.theme, card_phase, config.width)
-        }
-        "debug_overlay" => {
             render_debug_overlay_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
