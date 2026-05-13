@@ -1351,10 +1351,13 @@ impl Widget for Showcase {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        // Any mouse event should trigger a re-render (hover, click, scroll)
-        self.dirty = true;
         self.mouse_pos = Some((col, row));
         let consumed = self.dispatch_mouse(kind, col, row);
+        // Only re-render when a state change actually occurred (hover, click, scroll)
+        // Mouse moves that don't change anything don't trigger re-renders
+        if consumed {
+            self.dirty = true;
+        }
         if self.show_input_debug {
             let mouse_desc = format!("{:?} at ({}, {})", kind, col, row);
             let status = if consumed { "CONSUMED" } else { "ignored" };
