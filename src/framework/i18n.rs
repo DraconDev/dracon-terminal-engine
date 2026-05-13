@@ -137,24 +137,23 @@ impl I18n {
         }
 
         Err(I18nError::LocaleNotFound(lang.to_string()))
-    }
+        Err(I18nError::LocaleNotFound(lang.to_string()))
     }
 
     /// Translate a key to the current locale.
-    ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&'a self, key: &'a str) -> &'a str {
+    pub fn t<'a>(&'a self, key: &'a str) -> Cow<'a, str> {
         // Try current locale
         if let Some(value) = self.translations.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Fall back to English
         if let Some(value) = self.fallback_map.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Return the key itself as last resort
-        key
+        Cow::Borrowed(key)
     }
 
     /// Translate with interpolation support.
