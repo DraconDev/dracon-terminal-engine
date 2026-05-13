@@ -59,6 +59,8 @@ pub struct Layout {
     spacing: u16,
     margin: u16,
     name: Option<&'static str>,
+    /// Cached layout result for performance optimization.
+    cached_layout: RefCell<Option<(Rect, Vec<Rect>)>>,
 }
 
 impl Layout {

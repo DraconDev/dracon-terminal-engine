@@ -181,3 +181,24 @@ impl crate::framework::widget::Widget for Toggle {
         self.theme = *theme;
     }
 }
+
+impl WidgetState for Toggle {
+    fn state_id(&self) -> Option<&str> {
+        Some("toggle")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "state": self.state,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(state) = json.get("state").and_then(|v| v.as_bool()) {
+            self.state = state;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
