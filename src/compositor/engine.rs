@@ -350,7 +350,7 @@ impl Compositor {
         // Single syscall to write the entire frame
         writer.write_all(&buf)?;
 
-        self.last_frame.copy_from_slice(&self.final_buffer);
+        self.last_frame.clone_from_slice(&self.final_buffer);
         self.planes.clear();
         writer.flush()?;
         Ok(())
