@@ -146,9 +146,7 @@ impl Widget for AccessibleButton {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if col < self.area.x || col >= self.area.x + self.area.width
-            || row < self.area.y || row >= self.area.y + self.area.height
-        {
+        if col >= self.area.width || row >= self.area.height {
             return false;
         }
 
@@ -501,18 +499,17 @@ fn main() -> std::io::Result<()> {
     let demo = AccessibilityDemo::new(theme);
 
     let mut app = App::new()?;
-    app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
-
     app.title("Accessibility Demo")
         .fps(30)
-        .theme(theme)
-        .on_input(move |key| {
+        .theme(theme);
+    app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
+    app.on_input(move |key| {
             use dracon_terminal_engine::input::event::KeyCode;
             if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 q.store(true, Ordering::SeqCst);
             }
-        })
-        .run(move |ctx| {
+        });
+    app.run(move |ctx| {
             if should_quit.load(Ordering::SeqCst) {
                 ctx.stop();
             }
