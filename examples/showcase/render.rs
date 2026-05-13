@@ -712,38 +712,23 @@ fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 2, oy + 8, '█', t.primary, t.surface); }
 }
 
-fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    // Animated calendar preview showing month navigation
+fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let months = ["January", "February", "March", "April", "May", "June"];
     let month_idx = ((phase * 0.3).floor() as usize) % months.len();
     let title = format!("{} 2026", months[month_idx]);
-    draw_text(plane, 1, 5, &title, t.fg, t.surface, true);
-
-    let headers = "Mo Tu We Th Fr Sa Su";
-    draw_text(plane, 1, 6, headers, t.fg_muted, t.surface, false);
-
-    let day_grid = [
-        "    1  2  3  4  5",
-        " 6  7  8  9 10 11 12",
-        "13 14 15 16 17 18 19",
-        "20 21 22 23 24 25 26",
-        "27 28 29 30 31     ",
-    ];
-
+    draw_text(plane, ox + 1, oy + 5, &title, t.fg, t.surface, true);
+    draw_text(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, false);
+    let day_grid = ["    1  2  3  4  5", " 6  7  8  9 10 11 12", "13 14 15 16 17 18 19", "20 21 22 23 24 25 26", "27 28 29 30 31     "];
     let offset = ((phase * 0.5).floor() as usize) % 2;
     for (i, row) in day_grid.iter().enumerate() {
-        let y = 7 + i;
-        if y > 11 {
-            break;
-        }
+        let y = oy + 7 + i;
+        if y > oy + 11 { break; }
         let truncated: String = row.chars().skip(offset).take(22).collect();
         let fg = if i == 1 { t.primary } else { t.fg_subtle };
-        draw_text(plane, 1, y, &truncated, fg, t.surface, false);
+        draw_text(plane, ox + 1, y, &truncated, fg, t.surface, false);
     }
-
-    // Highlight selected day
     let sel = (((phase * 0.8).sin() * 0.5 + 0.5) * 30.0).round() as usize % 31 + 1;
-    draw_text(plane, 1, 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, false);
+    draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, false);
 }
 
 fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {

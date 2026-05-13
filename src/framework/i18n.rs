@@ -138,10 +138,12 @@ impl I18n {
 
     /// Translate a key to the current locale.
 /// Translate a key to the current locale.
+/// Translate a key to the current locale.
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&self, key: &'a str) -> &'a str {
+    pub fn t<'a>(&self, key: &'a str) -> Cow<'a, str> {
+        // Try current locale
         if let Some(value) = self.translations.get(key) {
             return Cow::Borrowed(value);
         }
@@ -152,7 +154,6 @@ impl I18n {
         // Return the key itself as last resort
         Cow::Borrowed(key)
     }
-
     /// Translate with interpolation support.
     ///
     /// Replaces `{placeholder}` in the translation string with provided values.
