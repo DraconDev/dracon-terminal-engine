@@ -1,0 +1,10 @@
+---
+source: tests/widget_snapshot_tests.rs
+assertion_line: 45
+expression: output
+---
+ Item One           
+ Item Two           
+ Item Three         
+ Item Four          
+ Item Five

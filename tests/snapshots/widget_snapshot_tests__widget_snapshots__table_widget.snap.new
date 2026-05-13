@@ -1,0 +1,9 @@
+---
+source: tests/widget_snapshot_tests.rs
+assertion_line: 64
+expression: output
+---
+ Value              
+ Alice     Alice    
+ Bob       Bob      
+ Charlie   Charlie
