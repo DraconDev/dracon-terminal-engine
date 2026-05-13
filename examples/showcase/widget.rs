@@ -539,7 +539,7 @@ impl Widget for Showcase {
             // Count badge (cached, no per-frame allocation)
             let count = self.cached_cat_counts[i];
             let count_str = format!("{:>2}", count);
-            draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, false);
+            draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, Styles::empty());
         }
 
         // Grid of cards — responsive sizing
@@ -631,7 +631,7 @@ impl Widget for Showcase {
             }
             draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, true);
             let rest: String = scroll_text.chars().skip(2).collect();
-            draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, false);
+            draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, Styles::empty());
         }
 
         // Status bar with gradient effect
@@ -904,7 +904,7 @@ impl Widget for Showcase {
                         } else {
                             t.surface_elevated
                         };
-                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, bg, false);
+                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, bg, Styles::empty());
                     }
                 }
             }
@@ -1235,7 +1235,7 @@ impl Widget for Showcase {
                 if self.search_active { "active" } else { "idle" }
             );
             let dbg_info_y = dbg_y + 2;
-            draw_text(&mut plane, 2, dbg_info_y, &dbg_info, t.error, t.bg, false);
+            draw_text(&mut plane, 2, dbg_info_y, &dbg_info, t.error, t.bg, Styles::empty());
         }
 
         // Input debug overlay
