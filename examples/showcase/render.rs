@@ -68,7 +68,7 @@ pub fn draw_text(
     text: &str,
     fg: Color,
     bg: Color,
-    bold: bool,
+    style: Styles,
 ) {
     for (i, ch) in text.chars().enumerate() {
         let idx = y * plane.width as usize + x + i;
@@ -77,7 +77,7 @@ pub fn draw_text(
                 char: ch,
                 fg,
                 bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
+                style,
                 transparent: false,
                 skip: false,
             };
@@ -157,6 +157,7 @@ pub struct CardConfig<'a> {
 }
 
 /// Draw text with optional search highlighting at absolute coordinates.
+#[allow(clippy::too_many_arguments)]
 fn draw_text_at(
     plane: &mut Plane,
     x: usize,
