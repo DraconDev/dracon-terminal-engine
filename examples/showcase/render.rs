@@ -802,35 +802,19 @@ fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: us
 }
 
 fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    draw_text(plane, 1, 5, "Cell Pool Stats:", t.primary, t.surface, true);
-
-    // Animated stats
-    let acquired = 1920 + ((phase * 10.0).sin() * 50.0) as i32;
-    let released = 1872 + ((phase * 10.0).sin() * 48.0) as i32;
-    let active = acquired - released;
-
-    let stats = [
-        ("Acquired:", format!("{}", acquired)),
-        ("Released:", format!("{}", released)),
-        ("Active:", format!("{}", active)),
-        ("Reuse rate:", format!("{:.1}%", 97.5 + (phase * 0.5).sin() as f64 * 0.5)),
-    ];
-
+fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    draw_text(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, true);
+    let stats = [("Avail:", format!("{:>4}", 1024 - ((phase * 5.0).sin() * 200.0).round() as i32)), ("Used:", format!("{:>4}", ((phase * 5.0).sin() * 200.0).round() as i32)), ("Hit:", format!("{:>3}%", 95 - ((phase * 3.0).sin() * 10.0) as i32))];
     for (i, (label, value)) in stats.iter().enumerate() {
-        let y = 6 + i;
-        if y > 9 {
-            break;
-        }
-        draw_text(plane, 1, y, label, t.fg_muted, t.surface, false);
-        draw_text(plane, 12, y, value, t.fg, t.surface, false);
+        let y = oy + 6 + i;
+        if y > oy + 10 { break; }
+        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, false);
+        draw_text(plane, ox + 8, y, value, t.success, t.surface, false);
     }
-
-    // Progress bar visualization
-    let usage = ((active as f32 / acquired as f32) * 20.0).round() as usize;
-    let bar = format!("Mem: [{}{}]", "█".repeat(usage.min(20)), "░".repeat(20 - usage.min(20)));
-    draw_text(plane, 1, 11, &bar, t.info, t.surface, false);
+    let hit_rate = (95.0 - (phase * 3.0).sin() * 10.0).max(0.0) as u32;
+    let bar_str = format!("[{}{}]", "█".repeat((hit_rate / 10) as usize), "░".repeat(10 - (hit_rate / 10) as usize));
+    draw_text(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, false);
 }
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // WIDGET IMPL
 // ═══════════════════════════════════════════════════════════════════════════════
