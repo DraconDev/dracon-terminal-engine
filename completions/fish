@@ -1,0 +1,48 @@
+# fish completion for cargo-dracon
+
+# Subcommands
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'run' -d 'Build and execute the local binary'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'build' -d 'Compile the package'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'test' -d 'Run the tests'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'benchmark' -d 'Run benchmarks'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'check' -d 'Check the package without compiling'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'clean' -d 'Remove build artifacts'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'doc' -d 'Build documentation'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'install' -d 'Install a binary or package'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'uninstall' -d 'Remove a binary or package'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'search' -d 'Search for packages'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'update' -d 'Update dependencies'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'publish' -d 'Publish the package'
+complete -c cargo-dracon -n '__fish_use_subcommand' -a 'help' -d 'Display help information'
+
+# Global options
+complete -c cargo-dracon -l help -s h -d 'Display help information'
+complete -c cargo-dracon -l version -s V -d 'Display version information'
+complete -c cargo-dracon -l verbose -s v -d 'Use verbose output'
+complete -c cargo-dracon -l quiet -s q -d 'Suppress output'
+complete -c cargo-dracon -l color -d 'Control colors' -r -f -a 'always auto never'
+complete -c cargo-dracon -l frozen -d 'Do not update dependencies'
+complete -c cargo-dracon -l locked -d 'Do not update lock file'
+complete -c cargo-dracon -l offline -d 'Do not access network'
+complete -c cargo-dracon -l package -s p -d 'Specify package'
+complete -c cargo-dracon -l manifest-path -d 'Path to manifest file' -r -f
+
+# Run/build/check options
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l example -d 'Run example'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l bin -d 'Run binary'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l lib -d 'Run library tests'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l release -d 'Use release profile'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l features -d 'Specify features'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from run build check test benchmark' -l profile -d 'Specify build profile' -r -f -a 'dev release'
+
+# Install/uninstall options
+complete -c cargo-dracon -n '__fish_seen_subcommand_from install uninstall' -l bin -d 'Install binaries'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from install uninstall' -l lib -d 'Install library'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from install uninstall' -l root -d 'Installation directory' -r -f -d 'Directory'
+
+# Publish options
+complete -c cargo-dracon -n '__fish_seen_subcommand_from publish package' -l dry-run -d 'Perform checks without publishing'
+complete -c cargo-dracon -n '__fish_seen_subcommand_from publish' -l token -d 'Access token' -r
+
+# Search
+complete -c cargo-dracon -n '__fish_seen_subcommand_from search' -d 'Search query'

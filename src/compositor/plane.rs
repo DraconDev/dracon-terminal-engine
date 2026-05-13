@@ -400,6 +400,37 @@ impl Plane {
         }
     }
 
+    /// Fast bulk blit that uses memcpy when the source plane is fully opaque.
+    ///
+    /// This is significantly faster than `blit_from` because it uses
+    /// `copy_from_slice` when the source has no transparent cells.
+    /// When the source contains transparent cells, it falls back to
+    /// the per-cell blit approach.
+    ///
+    /// # Performance
+    ///
+    /// - **Fully opaque source**: Uses `copy_from_slice` for O(n) bulk copy
+    /// - **Contains transparent cells**: Falls back to `blit_from` behavior
+    ///
+    /// # Panics
+    ///
+    /// Panics if source dimensions differ from destination blit area dimensions.
+    pub fn blit_from_fast(&mut self, source: &Plane) {
+        // Fast path: if all cells are opaque, use bulk copy
+        if source.cells.iter().all(|c| !c.transparent) {
+            // Validate dimensions match for bulk copy
+            if source.width == self.width && source.height == self.height {
+                self.cells.copy_from_slice(&source.cells);
+            } else {
+                // Dimensions differ, need to blit with offset (0, 0)
+                self.blit_from(source, 0, 0);
+            }
+        } else {
+            // Fallback: use per-cell blit for transparent cell handling
+            self.blit_from(source, 0, 0);
+        }
+    }
+
     /// Resets all cells to transparent defaults without reallocating the underlying Vec.
     /// Use this to reuse a Plane across frames instead of creating a new one each time.
     pub fn reset_cells(&mut self) {

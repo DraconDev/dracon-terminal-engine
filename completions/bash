@@ -1,0 +1,40 @@
+# bash completion for cargo-dracon
+_cargo_dracon_complete()
+{
+    local cur prev words cword
+    _init_completion -n := || return
+
+    # Subcommands
+    local subcommands="run build test benchmark check clean doc install uninstall search update
+                       package publish login logout owner pkgid search yank unyank version help"
+
+    # Common options
+    local global_opts="--verbose -v --quiet -q --color --frozen --locked --offline
+                       --dry-run --package -p --workspace --exclude --jobs -j --keep-going
+                       --manifest-path --message-format --build-plan"
+
+    case "$cur" in
+        --*)
+            COMPREPLY=($(compgen -W "$global_opts" -- "$cur"))
+            ;;
+        -*)
+            COMPREPLY=($(compgen -W "-h --help -V --version" -- "$cur"))
+            ;;
+        *)
+            # Check if we're completing a subcommand
+            local cmd="${words[1]}"
+            case "$cmd" in
+                run|test|bench|check|build)
+                    COMPREPLY=($(compgen -W "--example --bin --lib --release --features
+                                           --profile --target-dir --out-dir --manifest-path
+                                           -p --package -v --verbose -q --quiet" -- "$cur"))
+                    ;;
+                *)
+                    COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+complete -F _cargo_dracon_complete cargo-dracon

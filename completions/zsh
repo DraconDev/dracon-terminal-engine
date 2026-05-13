@@ -1,0 +1,86 @@
+#compdef cargo-dracon
+
+# zsh completion for cargo-dracon
+
+local -a _subcommands
+_subcommands=(
+    'run:build and execute the local binary'
+    'build:compile the package'
+    'test:run the tests'
+    'benchmark:run benchmarks'
+    'check:check the package without compiling'
+    'clean:remove build artifacts'
+    'doc:build documentation'
+    'install:install a binary or package'
+    'uninstall:remove a binary or package'
+    'search:search for packages'
+    'update:update dependencies'
+    'package:assemble the local package'
+    'publish:publish the package'
+    'version:display version information'
+    'help:display help information'
+)
+
+_cargo_dracon()
+{
+    local -a _global_opts
+    _global_opts=(
+        '--help[display help information]'
+        '--version[display version information]'
+        {-v,--verbose}'[use verbose output]'
+        {-q,--quiet}'[suppress output]'
+        '--color=[control colors]:color:(always auto never)'
+        '--frozen[do not update dependencies]'
+        '--locked[do not update lock file]'
+        '--offline[do not access network]'
+        {-p,--package}'[specify package]:package:'
+        '--manifest-path=[path to manifest file]:manifest:_files'
+    )
+
+    local -a _run_opts
+    _run_opts=(
+        '--example[run example]:example name:'
+        '--bin[run binary]:binary name:'
+        '--lib[run library tests]'
+        '--release[use release profile]'
+        '--features[specify features]:features:'
+        '--profile=[specify build profile]:profile:(dev release)'
+    )
+
+    _arguments -C \
+        '1: :->command' \
+        '*: :->args' \
+        $_global_opts
+
+    case $state in
+        command)
+            _describe 'subcommand' _subcommands
+            ;;
+        args)
+            case $words[1] in
+                run|test|bench)
+                    _arguments $_run_opts
+                    ;;
+                build|check|clean|doc)
+                    _arguments $_run_opts
+                    ;;
+                install|uninstall)
+                    _arguments \
+                        '--bin[install binaries]' \
+                        '--lib[install library]' \
+                        '--root=[specify installation directory]:directory:_files -/'
+                    ;;
+                search)
+                    _arguments '1:search query:'
+                    ;;
+                publish|package)
+                    _arguments \
+                        '--dry-run[perform checks without publishing]' \
+                        '--token=[specify access token]:token:'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_cargo_dracon "$@"
