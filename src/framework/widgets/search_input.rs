@@ -2,8 +2,8 @@
 //!
 //! A single-line text input optimized for search queries.
 
-use crate::framework::widget::Widget;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
+use crate::framework::widgets::text_input_base::BaseInput;
 use ratatui::layout::Rect;
 
 /// A search input widget with a query buffer and submit callback.
