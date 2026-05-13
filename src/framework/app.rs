@@ -923,6 +923,21 @@ impl<'a> Ctx<'a> {
         self.animations
     }
 
+    /// Returns the number of registered widgets.
+    pub fn widget_count(&self) -> usize {
+        self.compositor.widget_count()
+    }
+
+    /// Returns the number of planes in the compositor.
+    pub fn plane_count(&self) -> usize {
+        self.compositor.planes.len()
+    }
+
+    /// Returns the last frame duration in milliseconds.
+    pub fn frame_time_ms(&self) -> f64 {
+        self.compositor.last_frame_duration_ms()
+    }
+
     /// Returns a mutable reference to the animation manager.
     pub fn animations_mut(&mut self) -> &mut AnimationManager {
         self.animations

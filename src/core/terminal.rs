@@ -1,6 +1,6 @@
 use crate::backend::tty::{get_terminal_attr, make_raw, set_terminal_attr, Termios};
-use std::env;
-use std::io::{self, Write};
+use crate::framework::dragdrop::DragManager;
+use crate::framework::widget::WidgetId;
 use std::os::fd::{AsFd, BorrowedFd};
 
 /// Cursor shape for terminal cursor style sequences.
@@ -149,6 +149,7 @@ impl<W: Write + AsFd> Terminal<W> {
         Ok(Self {
             original_termios,
             output: writer,
+            capabilities: Capabilities::detect(),
         })
     }
 
@@ -156,6 +157,7 @@ impl<W: Write + AsFd> Terminal<W> {
         Ok(Self {
             original_termios: unsafe { std::mem::zeroed() },
             output: writer,
+            capabilities: Capabilities::detect(),
         })
     }
 
