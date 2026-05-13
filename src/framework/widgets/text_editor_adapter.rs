@@ -181,7 +181,7 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
             if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
                 menu.show();
                 let area = self.area.get();
-                menu.with_anchor(area.x + col, area.y + row);
+                menu.set_anchor(area.x + col, area.y + row);
                 self.dirty = true;
             }
             return true;
@@ -224,7 +224,17 @@ impl WidgetState for TextEditorAdapter {
 
     fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(content) = json.get("content").and_then(|v| v.as_str()) {
-            self.editor.set_content(content);
+            // Rebuild the editor with the loaded content
+            *self = TextEditorAdapter::with_theme(self.theme.clone());
+            // Clear existing content and set new content
+            self.editor.lines = if content.is_empty() {
+                vec![String::new()]
+            } else {
+                content.lines().map(|s| s.to_string()).collect()
+            };
+            if self.editor.lines.is_empty() {
+                self.editor.lines.push(String::new());
+            }
         }
         if let Some(row) = json.get("cursor_row").and_then(|v| v.as_u64()) {
             self.editor.cursor_row = row as usize;

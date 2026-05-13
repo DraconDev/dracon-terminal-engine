@@ -670,7 +670,7 @@ impl crate::framework::widget::Widget for Kanban {
             }
             crate::input::event::MouseEventKind::ScrollDown => {
                 let visible = (area.width / (self.column_width + 1)) as usize;
-                if self.scroll_offset + visible < self.columns.len() {
+                if (self.scroll_offset as usize) + visible < self.columns.len() {
                     self.scroll_offset += 1;
                     self.dirty = true;
                 }
