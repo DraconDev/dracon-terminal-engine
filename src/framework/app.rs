@@ -1285,7 +1285,7 @@ macro_rules! with_ctx {
         with_ctx!(mut ctx, {
             let id = WidgetId(42);
             ctx.set_focus(id);
-            assert!(ctx.focused().is_some() || ctx.focused().is_none());
+            let _ = ctx.focused();
         });
     }
 
