@@ -177,8 +177,9 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
         }
 
         // Right-click: Show context menu
+        // Right-click: Show context menu
         if let MouseEventKind::Down(crate::input::event::MouseButton::Right) = kind {
-            if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+            if let Some(menu) = &mut *self.context_menu.borrow_mut() {
                 menu.show();
                 let area = self.area.get();
                 menu.set_anchor(area.x + col, area.y + row);
@@ -186,7 +187,6 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
             }
             return true;
         }
-
         let area = self.area.get();
         let mouse = MouseEvent {
             kind,
@@ -223,10 +223,10 @@ impl WidgetState for TextEditorAdapter {
     }
 
     fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(content) = json.get("content").and_then(|v| v.as_str()) {
-            // Rebuild the editor with the loaded content
-            *self = TextEditorAdapter::with_theme(self.theme.clone());
-            // Clear existing content and set new content
+            self.editor.content = content.to_string();
+        }
             self.editor.lines = if content.is_empty() {
                 vec![String::new()]
             } else {
