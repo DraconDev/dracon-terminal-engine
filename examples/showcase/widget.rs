@@ -1790,7 +1790,7 @@ impl Showcase {
                     self.show_debug = !self.show_debug;
                     true
                 }
-                KeyCode::F12 => {
+                KeyCode::F(12) => {
                     self.show_profiler = !self.show_profiler;
                     true
                 }

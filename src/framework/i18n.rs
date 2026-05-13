@@ -54,6 +54,7 @@
 //! }
 //! ```
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs;
 
@@ -64,8 +65,6 @@ pub struct I18n {
     locale: String,
     /// Translation map: key -> value
     translations: HashMap<String, String>,
-    /// Fallback locale
-    fallback_locale: String,
     /// Default fallback translations (English)
     fallback_map: HashMap<String, String>,
 }
@@ -82,7 +81,6 @@ impl I18n {
         let mut i18n = Self {
             locale: locale.to_string(),
             translations: HashMap::new(),
-            fallback_locale: "en".to_string(),
             fallback_map: HashMap::new(),
         };
         // Load default English translations
@@ -142,17 +140,17 @@ impl I18n {
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t(&self, key: &str) -> &str {
+    pub fn t<'a>(&'a self, key: &'a str) -> Cow<'a, str> {
         // Try current locale
         if let Some(value) = self.translations.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Fall back to English
         if let Some(value) = self.fallback_map.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Return the key itself as last resort
-        key
+        Cow::Borrowed(key)
     }
 
     /// Translate with interpolation support.
@@ -164,7 +162,7 @@ impl I18n {
     /// // If "items_count" is "{count} items", returns "5 items"
     /// ```
     pub fn t_interpolate(&self, key: &str, vars: &[(&str, &str)]) -> String {
-        let template = self.t(key).to_string();
+        let template = self.t(key).as_ref().to_string();
         let mut result = template;
         for (name, value) in vars {
             result = result.replace(&format!("{{{name}}}"), value);
@@ -174,8 +172,7 @@ impl I18n {
 
     /// Get all available translation keys.
     pub fn keys(&self) -> impl Iterator<Item = &str> {
-        self.translations
-            .keys()
+        self.translations.keys()
             .chain(self.fallback_map.keys())
             .map(|s| s.as_str())
     }
@@ -239,11 +236,7 @@ impl I18n {
     }
 
     /// Flatten nested JSON object into dot-notation keys.
-    fn flatten_json(
-        obj: &serde_json::Map<String, serde_json::Value>,
-        prefix: &str,
-        map: &mut HashMap<String, String>,
-    ) {
+    fn flatten_json(obj: &serde_json::Map<String, serde_json::Value>, prefix: &str, map: &mut HashMap<String, String>) {
         for (key, value) in obj {
             let full_key = if prefix.is_empty() {
                 key.clone()
@@ -285,9 +278,9 @@ pub enum I18nError {
 impl std::fmt::Display for I18nError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            I18nError::LocaleNotFound(lang) => write!(f, "Locale not found: {lang}"),
-            I18nError::ParseError(msg) => write!(f, "Failed to parse locale: {msg}"),
-            I18nError::IoError(msg) => write!(f, "I/O error: {msg}"),
+            I18nError::LocaleNotFound(lang) => write!(f, "Locale not found: {}", lang),
+            I18nError::ParseError(msg) => write!(f, "Failed to parse locale: {}", msg),
+            I18nError::IoError(msg) => write!(f, "I/O error: {}", msg),
         }
     }
 }
@@ -406,15 +399,15 @@ mod tests {
     #[test]
     fn test_i18n_t_builtin() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("button.ok"), "OK");
-        assert_eq!(i18n.t("button.cancel"), "Cancel");
-        assert_eq!(i18n.t("nav.quit"), "Quit");
+        assert_eq!(i18n.t("button.ok").as_ref(), "OK");
+        assert_eq!(i18n.t("button.cancel").as_ref(), "Cancel");
+        assert_eq!(i18n.t("nav.quit").as_ref(), "Quit");
     }
 
     #[test]
     fn test_i18n_t_unknown_key() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("unknown.key"), "unknown.key");
+        assert_eq!(i18n.t("unknown.key").as_ref(), "unknown.key");
     }
 
     #[test]
@@ -428,7 +421,7 @@ mod tests {
     fn test_i18n_add() {
         let mut i18n = I18n::new("en");
         i18n.add("custom.key", "Custom Value");
-        assert_eq!(i18n.t("custom.key"), "Custom Value");
+        assert_eq!(i18n.t("custom.key").as_ref(), "Custom Value");
     }
 
     #[test]
@@ -500,9 +493,9 @@ mod tests {
     #[test]
     fn test_i18n_error_display() {
         let err = I18nError::LocaleNotFound("fr".to_string());
-        assert_eq!(format!("{err}"), "Locale not found: fr");
+        assert_eq!(format!("{}", err), "Locale not found: fr");
 
         let err = I18nError::ParseError("invalid json".to_string());
-        assert_eq!(format!("{err}"), "Failed to parse locale: invalid json");
+        assert_eq!(format!("{}", err), "Failed to parse locale: invalid json");
     }
 }
