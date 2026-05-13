@@ -697,32 +697,19 @@ fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: 
     }
 }
 
-fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    draw_text(plane, 2, 5, "/ home/ user/", t.primary, t.surface, false);
-    set_cell(plane, 1, 6, '├', t.outline, t.surface);
-    for cx in 2..24 {
-        set_cell(plane, cx, 6, '─', t.outline, t.surface);
-    }
-    set_cell(plane, 24, 6, '┤', t.outline, t.surface);
-    let rows = [
-        ("src/", "  -   "),
-        ("main.rs", " 1.2KB"),
-        ("lib.rs", "  842B"),
-    ];
+fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    draw_text(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, false);
+    set_cell(plane, ox + 1, oy + 6, '├', t.outline, t.surface);
+    for cx in ox + 2..ox + 24 { set_cell(plane, cx, oy + 6, '─', t.outline, t.surface); }
+    set_cell(plane, ox + 24, oy + 6, '┤', t.outline, t.surface);
+    let rows = [("src/", "  -   "), ("main.rs", " 1.2KB"), ("lib.rs", "  842B")];
     for (i, (name, size)) in rows.iter().enumerate() {
-        let y = 7 + i;
-        let fg = if name.ends_with('/') {
-            t.primary
-        } else {
-            t.fg_subtle
-        };
-        draw_text(plane, 2, y, name, fg, t.surface, false);
-        draw_text(plane, 14, y, size, t.fg_muted, t.surface, false);
+        let y = oy + 7 + i;
+        let fg = if name.ends_with('/') { t.primary } else { t.fg_subtle };
+        draw_text(plane, ox + 2, y, name, fg, t.surface, false);
+        draw_text(plane, ox + 14, y, size, t.fg_muted, t.surface, false);
     }
-    let pulse = (phase * 2.0).sin() > 0.0;
-    if pulse {
-        set_cell(plane, 2, 8, '█', t.primary, t.surface);
-    }
+    if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 2, oy + 8, '█', t.primary, t.surface); }
 }
 
 fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
