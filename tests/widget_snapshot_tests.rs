@@ -186,7 +186,7 @@ fn test_tree_snapshot_basic() {
         ]),
         TreeNode::new("Another Root", vec![]),
     ];
-    let tree = Tree::new(nodes);
+    let tree = Tree::new(WidgetId::default_id()).with_root(nodes);
     let area = Rect::new(0, 0, 30, 10);
     let plane = tree.render(area);
     let snapshot = plane_to_snapshot(&plane);
@@ -201,7 +201,7 @@ fn test_tree_snapshot_expanded() {
             TreeNode::new("Personal", vec![]),
         ]),
     ];
-    let mut tree = Tree::new(nodes);
+    let mut tree = Tree::new(WidgetId::default_id()).with_root(nodes);
     tree.expand(0); // Expand first node
     let area = Rect::new(0, 0, 30, 10);
     let plane = tree.render(area);
@@ -218,7 +218,7 @@ fn test_tree_snapshot_deep() {
             ]),
         ]),
     ];
-    let tree = Tree::new(nodes);
+    let tree = Tree::new(WidgetId::default_id()).with_root(nodes);
     let area = Rect::new(0, 0, 40, 10);
     let plane = tree.render(area);
     let snapshot = plane_to_snapshot(&plane);
@@ -368,7 +368,7 @@ fn test_tree_wide() {
             TreeNode::new("Very Long Child Name", vec![]),
         ]),
     ];
-    let tree = Tree::new(nodes);
+    let tree = Tree::new(WidgetId::default_id()).with_root(nodes);
     let area = Rect::new(0, 0, 50, 8);
     let plane = tree.render(area);
     let snapshot = plane_to_snapshot(&plane);
