@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use crate::compositor::{Plane, Styles};
 use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widget::WidgetId;
 use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
@@ -723,10 +723,10 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 if idx >= self.rows.len() {
                     return false;
                 }
-                if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+                if let Some(menu) = &mut *self.context_menu.borrow_mut() {
                     menu.show();
                     let area = self.area.get();
-                    menu.with_anchor(area.x + col, area.y + row);
+                    menu.set_anchor(area.x + col, area.y + row);
                     self.dirty = true;
                 }
                 true

@@ -5,9 +5,9 @@
 use std::cell::RefCell;
 
 use crate::compositor::{Cell, Plane, Styles};
-use crate::framework::dragdrop::{DragGhost, DragManager};
+use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widget::WidgetId;
 use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
@@ -92,6 +92,25 @@ impl Tree {
     pub fn on_select(mut self, f: impl FnMut(&str) + 'static) -> Self {
         self.on_select = Some(Box::new(f));
         self
+    }
+
+    /// Sets a context menu to show on right-click.
+    pub fn with_context_menu(mut self, menu: ContextMenu) -> Self {
+        self.context_menu = RefCell::new(Some(menu));
+        self
+    }
+
+    /// Returns the drag manager for this tree.
+    pub fn drag_manager(&self) -> &RefCell<DragManager<String>> {
+        &self.drag_manager
+    }
+
+    /// Returns the current selection path as a dot-separated string.
+    fn path_to_string(path: &[usize]) -> String {
+        path.iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>()
+            .join(".")
     }
 
     pub fn set_selected_path(&mut self, path: Vec<usize>) {
