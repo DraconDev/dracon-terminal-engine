@@ -1460,7 +1460,7 @@ impl Showcase {
                 }
 
                 // Search bar click (no zone registered for this)
-                if y == 4 && (2..area.width.saturating_sub(2)).contains(&x) {
+                if y == 4 && (2..self.area.width.saturating_sub(2)).contains(&x) {
                     self.search_active = true;
                     return true;
                 }
