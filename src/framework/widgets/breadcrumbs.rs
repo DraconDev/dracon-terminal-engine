@@ -32,6 +32,7 @@ impl Breadcrumbs {
             segments,
             theme: Theme::default(),
             height: 1,
+            clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
@@ -45,6 +46,7 @@ impl Breadcrumbs {
             segments,
             theme: Theme::default(),
             height: 1,
+            clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
@@ -63,6 +65,7 @@ impl Breadcrumbs {
             segments,
             theme: Theme::default(),
             height: 1,
+            clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
@@ -82,6 +85,12 @@ impl Breadcrumbs {
         F: FnMut(usize) + 'static,
     {
         self.on_navigate = Some(Box::new(f));
+        self
+    }
+
+    /// Sets whether the breadcrumb segments are clickable.
+    pub fn clickable(mut self, clickable: bool) -> Self {
+        self.clickable = clickable;
         self
     }
 }

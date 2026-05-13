@@ -599,33 +599,17 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
     }
 }
 
-fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, _card_w: u16) {
+fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
     let tabs = ["Tab1", "Tab2", "Tab3+"];
-    let mut x = 1;
     for (i, tab) in tabs.iter().enumerate() {
         let is_active = i == 0;
         let fg = if is_active { t.primary } else { t.fg_muted };
-        let bg = if is_active {
-            t.surface_elevated
-        } else {
-            t.surface
-        };
-        for (j, ch) in tab.chars().enumerate() {
-            set_cell(plane, x + j, 5, ch, fg, bg);
-        }
-        x += tab.len() + 1;
+        let bg = if is_active { t.surface_elevated } else { t.surface };
+        for (j, ch) in tab.chars().enumerate() { set_cell(plane, ox + 1 + j + i * 5, oy + 5, ch, fg, bg); }
     }
-    set_cell(plane, 0, 6, '├', t.outline, t.surface);
-    for cx in 1..25 {
-        set_cell(plane, cx, 6, '─', t.outline, t.surface);
-    }
-    set_cell(plane, 25, 6, '┤', t.outline, t.surface);
-    let content = "  Panel Content Here  ";
-    draw_text(plane, 2, 8, content, t.fg, t.surface, false);
-    let lines = ["  Line 1", "  Line 2", "  Line 3"];
-    for (i, line) in lines.iter().enumerate() {
-        draw_text(plane, 2, 9 + i, line, t.fg_subtle, t.surface, false);
-    }
+    for x in ox + 1..ox + 19 { set_cell(plane, x, oy + 6, '─', t.outline, t.surface_elevated); }
+    for y in oy + 6..oy + 11 { for x in ox + 1..ox + 20 { set_cell(plane, x, y, ' ', t.fg, t.surface_elevated); } }
+    draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, false);
 }
 
 fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
