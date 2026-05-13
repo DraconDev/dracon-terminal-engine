@@ -3,13 +3,13 @@
 mod widget_snapshots {
     use dracon_terminal_engine::compositor::Plane;
     use dracon_terminal_engine::framework::theme::Theme;
+    use dracon_terminal_engine::framework::widget::Widget;
     use dracon_terminal_engine::framework::widgets::form::Form;
     use dracon_terminal_engine::framework::widgets::list::List;
-    use dracon_terminal_engine::framework::widgets::table::Column;
-    use dracon_terminal_engine::framework::widgets::table::Table;
+    use dracon_terminal_engine::framework::widgets::table::{Column, Table};
     use dracon_terminal_engine::framework::widgets::tree::{Tree, TreeNode};
-    use dracon_terminal_engine::framework::widget::WidgetId;
     use ratatui::layout::Rect;
+
     /// Helper to render a widget and serialize its Plane to a string for comparison.
     fn render_widget_to_string<W: Widget>(widget: &W, width: u16, height: u16) -> String {
         let area = Rect::new(0, 0, width, height);
@@ -53,11 +53,13 @@ mod widget_snapshots {
             Column { header: "Value".to_string(), width: 8 },
         ];
         let rows = vec![
-            TableRow { data: "Alice" },
-            TableRow { data: "Bob" },
-            TableRow { data: "Charlie" },
+            "Alice".to_string(),
+            "Bob".to_string(),
+            "Charlie".to_string(),
         ];
-        let table = Table::new(columns).with_rows(rows).with_theme(theme);
+        let table = Table::new(columns)
+            .with_rows(rows)
+            .with_theme(theme);
         let output = render_widget_to_string(&table, 20, 5);
         insta::assert_snapshot!("table_widget", output);
     }
@@ -87,12 +89,11 @@ mod widget_snapshots {
     #[test]
     fn test_form_snapshot() {
         let theme = Theme::default();
-        let fields = vec![
-            FormField::new("Name", ""),
-            FormField::new("Email", ""),
-            FormField::new("Password", ""),
-        ];
-        let form = Form::new(fields).with_theme(theme);
+        let form = Form::new(Default::default())
+            .add_field("Name")
+            .add_field("Email")
+            .add_field("Password")
+            .with_theme(theme);
         let output = render_widget_to_string(&form, 40, 8);
         insta::assert_snapshot!("form_widget", output);
     }
