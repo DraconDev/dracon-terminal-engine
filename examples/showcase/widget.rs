@@ -34,7 +34,7 @@ impl Widget for Showcase {
             return true;
         }
         let now = chrono::Local::now();
-        let current_second = now.timestamp_subsec_millis() / 1000;
+        let current_second = now.num_seconds_from_midnight();
         if current_second != self.last_render_second {
             return true;
         }
@@ -54,7 +54,7 @@ impl Widget for Showcase {
     fn clear_dirty(&mut self) {
         self.dirty = false;
         let now = chrono::Local::now();
-        self.last_render_second = now.timestamp_subsec_millis() / 1000;
+        self.last_render_second = now.num_seconds_from_midnight();
     }
     fn focusable(&self) -> bool {
         true
