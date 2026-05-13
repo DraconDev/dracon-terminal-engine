@@ -399,9 +399,16 @@ impl Widget for Showcase {
         };
         let state_1 = {
             let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
-            let filled: String = (0..pos).map(|_| '▓').collect();
-            let empty: String = (pos..10).map(|_| '░').collect();
-            format!(" Slider [{}{}]", filled, empty)
+            // Build slider bar without per-iterator allocation
+            let mut slider_buf = [0u8; 30]; // enough for 10 multi-byte chars
+            let mut slider_len = 0usize;
+            for i in 0..10 {
+                let ch = if i < pos { '▓' } else { '░' };
+                ch.encode_utf8(&mut slider_buf[slider_len..]);
+                slider_len += ch.len_utf8();
+            }
+            let slider_str = std::str::from_utf8(&slider_buf[..slider_len]).unwrap_or("░░░░░░░░░░");
+            format!(" Slider [{}]", slider_str)
         };
         let state_2 = if self.primitive_checkbox {
             " ☑ Check"
