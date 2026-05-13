@@ -169,8 +169,9 @@ fn draw_text_at(
     search: &str,
     highlight_color: Color,
 ) {
+    let style = if bold { Styles::BOLD } else { Styles::empty() };
     if search.is_empty() || !text.to_lowercase().contains(&search.to_lowercase()) {
-        draw_text(plane, x, y, text, normal_fg, bg, bold);
+        draw_text(plane, x, y, text, normal_fg, bg, style);
         return;
     }
     let lower = text.to_lowercase();
@@ -184,16 +185,16 @@ fn draw_text_at(
             Some(start) => {
                 if start > 0 {
                     let before = &rest[..start];
-                    draw_text(plane, pos, y, before, normal_fg, bg, bold);
+                    draw_text(plane, pos, y, before, normal_fg, bg, style);
                     pos += before.chars().count();
                 }
                 let match_str = &rest[start..start + q.len()];
-                draw_text(plane, pos, y, match_str, highlight_color, bg, true);
+                draw_text(plane, pos, y, match_str, highlight_color, bg, Styles::BOLD);
                 pos += match_str.chars().count();
                 remaining += start + q.len();
             }
             None => {
-                draw_text(plane, pos, y, rest, normal_fg, bg, bold);
+                draw_text(plane, pos, y, rest, normal_fg, bg, style);
                 break;
             }
         }
@@ -335,7 +336,7 @@ pub fn render_card(
     }
 
     if is_selected {
-        draw_text(plane, offset_x + 1, offset_y + card_h_usize / 2, "►", t.primary, bg, true);
+        draw_text(plane, offset_x + 1, offset_y + card_h_usize / 2, "►", t.primary, bg, Styles::BOLD);
     }
 }
 
@@ -362,7 +363,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize,
         }
         set_cell(plane, ox + 7 + bar_w, y, ']', t.fg_muted, t.surface);
         let pct = format!("{:>3}%", val.round() as u32);
-        draw_text(plane, ox + 7 + bar_w + 2, y, &pct, color, t.surface, true);
+        draw_text(plane, ox + 7 + bar_w + 2, y, &pct, color, t.surface, Styles::BOLD);
     }
 }
 
@@ -521,7 +522,7 @@ fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy
 }
 
 fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, true);
+    draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, Styles::BOLD);
     draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, Styles::empty());
     let phases = [[(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)], [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)], [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)], [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)]];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
@@ -579,11 +580,11 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize,
     for dx in 1..mw - 1 { set_cell(plane, mx + dx, my + mh - 1, '─', bc, t.surface_elevated); }
     set_cell(plane, mx + mw - 1, my + mh - 1, '┘', bc, t.surface_elevated);
     let text = " Confirm? ";
-    draw_text(plane, mx + (mw - text.len()) / 2, my + 2, text, t.fg, t.surface_elevated, true);
+    draw_text(plane, mx + (mw - text.len()) / 2, my + 2, text, t.fg, t.surface_elevated, Styles::BOLD);
     let pulse = (phase * 3.0).sin() * 0.5 + 0.5;
     let yes_fg = if pulse > 0.5 { t.success } else { t.fg_muted };
-    draw_text(plane, mx + 3, my + 4, "[ Yes ]", yes_fg, t.surface_elevated, true);
-    draw_text(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, true);
+    draw_text(plane, mx + 3, my + 4, "[ Yes ]", yes_fg, t.surface_elevated, Styles::BOLD);
+    draw_text(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, Styles::BOLD);
 }
 
 fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
@@ -640,7 +641,7 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
         let is_selected = highlight_row && i == 1;
         let fg = if is_selected { t.selection_fg } else { t.fg_subtle };
         let prefix = if is_selected { ">" } else { " " };
-        draw_text(plane, ox + 1, y, prefix, t.primary, t.surface, true);
+        draw_text(plane, ox + 1, y, prefix, t.primary, t.surface, Styles::BOLD);
         draw_text(plane, ox + 2, y, name, fg, t.surface, Styles::empty());
         draw_text(plane, ox + 12, y, age, t.fg_muted, t.surface, Styles::empty());
         draw_text(plane, ox + 18, y, city, t.fg_muted, t.surface, Styles::empty());
@@ -681,7 +682,7 @@ fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
         }
     }
     let score_str = format!("  Score: {:3}  ", ((phase * 10.0).sin() * 10.0) as i32 + 42);
-    draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, true);
+    draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, Styles::BOLD);
 }
 
 fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
@@ -694,7 +695,7 @@ fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: 
     let btns = ["[Submit]", "[Cancel]"];
     for (i, btn) in btns.iter().enumerate() {
         let fg = if i == 0 { t.primary } else { t.fg_muted };
-        draw_text(plane, ox + 6 + i * 10, oy + 10, btn, fg, t.surface, true);
+        draw_text(plane, ox + 6 + i * 10, oy + 10, btn, fg, t.surface, Styles::BOLD);
     }
 }
 
@@ -717,7 +718,7 @@ fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, o
     let months = ["January", "February", "March", "April", "May", "June"];
     let month_idx = ((phase * 0.3).floor() as usize) % months.len();
     let title = format!("{} 2026", months[month_idx]);
-    draw_text(plane, ox + 1, oy + 5, &title, t.fg, t.surface, true);
+    draw_text(plane, ox + 1, oy + 5, &title, t.fg, t.surface, Styles::BOLD);
     draw_text(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, Styles::empty());
     let day_grid = ["    1  2  3  4  5", " 6  7  8  9 10 11 12", "13 14 15 16 17 18 19", "20 21 22 23 24 25 26", "27 28 29 30 31     "];
     let offset = ((phase * 0.5).floor() as usize) % 2;
@@ -770,7 +771,7 @@ fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         set_cell(plane, ox + 16, y, '╭', t.outline, t.surface);
         for cx in ox + 17..ox + 25 { set_cell(plane, cx, y, '─', t.outline, t.surface); }
         set_cell(plane, ox + 25, y, '╮', t.outline, t.surface);
-        draw_text(plane, ox + 17, y, &format!(" {} {}", icon, title), *color, t.surface, true);
+        draw_text(plane, ox + 17, y, &format!(" {} {}", icon, title), *color, t.surface, Styles::BOLD);
         set_cell(plane, ox + 16, y + 1, '│', t.outline, t.surface);
         let truncated: String = msg.chars().take(8).collect();
         draw_text(plane, ox + 17, y + 1, &truncated, t.fg, t.surface, Styles::empty());
@@ -791,7 +792,7 @@ enum NotificationType {
 }
 
 fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, true);
+    draw_text(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, Styles::BOLD);
     let items = [("Role:", "button"), ("Label:", "Submit"), ("Shortcut:", "Ctrl+Enter"), ("Level:", "assertive"), ("Terminal:", "NVDA")];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
@@ -803,7 +804,7 @@ fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: us
 }
 
 fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, true);
+    draw_text(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, Styles::BOLD);
     let stats = [("Avail:", format!("{:>4}", 1024 - ((phase * 5.0).sin() * 200.0).round() as i32)), ("Used:", format!("{:>4}", ((phase * 5.0).sin() * 200.0).round() as i32)), ("Hit:", format!("{:>3}%", 95 - ((phase * 3.0).sin() * 10.0) as i32))];
     for (i, (label, value)) in stats.iter().enumerate() {
         let y = oy + 6 + i;
