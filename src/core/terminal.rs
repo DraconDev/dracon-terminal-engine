@@ -212,6 +212,70 @@ impl<W: Write + AsFd> Terminal<W> {
         self.output.flush()?;
         Ok(())
     }
+
+    // ── Capabilities ────────────────────────────────────────────────────────
+
+    /// Returns the terminal capabilities detected from $TERM.
+    pub fn capabilities(&self) -> &Capabilities {
+        &self.capabilities
+    }
+
+    // ── Custom Escape Sequences ────────────────────────────────────────────
+
+    /// Emit a raw OSC/DCS sequence directly to the terminal.
+    ///
+    /// Use this for advanced terminal control that isn't covered by
+    /// other methods. The sequence should not include the final ST or BEL.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// // Set window title
+    /// terminal.emit("\x1b]0;My Title\x07")?;
+    /// // Set foreground color
+    /// terminal.emit("\x1b]10;#FF0000\x07")?;
+    /// ```
+    pub fn emit(&mut self, seq: &str) -> io::Result<()> {
+        self.output.write_all(seq.as_bytes()).map_err(io::Error::other)
+    }
+
+    /// Set the terminal window title.
+    ///
+    /// Uses OSC 0 (icon name + window title) or OSC 21 (window title only)
+    /// depending on the sequence. Falls back gracefully if the terminal
+    /// doesn't support titles.
+    pub fn set_title(&mut self, title: &str) -> io::Result<()> {
+        if !self.capabilities.supports_title() {
+            return Ok(());
+        }
+        write!(self.output, "\x1b]0;{title}\x07").map_err(io::Error::other)
+    }
+
+    /// Set the terminal icon name (usually shown in taskbar/dock).
+    ///
+    /// Uses OSC 1. Only supported by some terminal emulators.
+    pub fn set_icon(&mut self, icon: &str) -> io::Result<()> {
+        write!(self.output, "\x1b]1;{icon}\x07").map_err(io::Error::other)
+    }
+
+    /// Set the cursor shape/style.
+    ///
+    /// Uses the DECSCUSR sequence (CSI Ps SP q) with values:
+    /// 0=blinking block, 1=blinking block (default), 2=steady block,
+    /// 3=blinking underline, 4=steady underline, 5=blinking bar, 6=steady bar.
+    ///
+    /// Note: Not all terminals support all shapes.
+    pub fn set_cursor_style(&mut self, shape: CursorShape) -> io::Result<()> {
+        let code = match shape {
+            CursorShape::Block => 2,
+            CursorShape::Underline => 4,
+            CursorShape::Bar => 6,
+            CursorShape::BlinkingBlock => 1,
+            CursorShape::BlinkingUnderline => 3,
+            CursorShape::BlinkingBar => 5,
+        };
+        write!(self.output, "\x1b[{code} q").map_err(io::Error::other)
+    }
 }
 
 impl<W: Write + AsFd> Write for Terminal<W> {
