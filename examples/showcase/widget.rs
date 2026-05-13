@@ -139,7 +139,7 @@ impl Widget for Showcase {
                 &clock_text,
                 t.fg_on_accent,
                 t.primary,
-                false,
+                Styles::empty(),
             );
         }
         drop(clock_text);
@@ -152,7 +152,7 @@ impl Widget for Showcase {
             let fps_x = area.width as usize - fps_text.len() - 2;
             if fps_x > title_x + title_text.len() {
                 draw_text(
-                    &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, false,
+                    &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, Styles::empty(),
                 );
                 right_x = fps_x;
             }

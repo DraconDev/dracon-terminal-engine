@@ -129,7 +129,7 @@ pub fn render_features_bar(
 
         // Icon with pulse effect
         let icon_fg = if is_pulse_high { *color } else { theme.fg_muted };
-        draw_text(plane, x, y, icon, icon_fg, theme.bg, is_pulse_high);
+        draw_text(plane, x, y, icon, icon_fg, theme.bg, if is_pulse_high { Styles::BOLD } else { Styles::empty() });
         x += icon.chars().count();
 
         // Label
@@ -482,7 +482,7 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: us
     for (label, active) in &tabs {
         let fg = if *active { t.fg_on_accent } else { t.fg_muted };
         let bg = if *active { t.primary_active } else { t.surface };
-        draw_text(plane, tab_x, oy + 5, label, fg, bg, *active);
+        draw_text(plane, tab_x, oy + 5, label, fg, bg, if *active { Styles::BOLD } else { Styles::empty() });
         if *active { active_tab_start = tab_x; active_tab_len = label.len(); }
         tab_x += label.len() + 1;
     }
@@ -739,7 +739,7 @@ fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize,
         let y = oy + 5 + i;
         if y > oy + 10 { break; }
         let truncated: String = text.chars().take(22).collect();
-        draw_text(plane, ox + 1, y, &truncated, *color, t.surface, *bold);
+        draw_text(plane, ox + 1, y, &truncated, *color, t.surface, if *bold { Styles::BOLD } else { Styles::empty() });
     }
 }
 
