@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 use unicode_width::UnicodeWidthStr;
 
