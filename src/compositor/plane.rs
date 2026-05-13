@@ -443,4 +443,38 @@ impl Plane {
             cell.skip = false;
         }
     }
+
+    /// Extracts a sub-plane from this plane at the specified rectangle.
+    ///
+    /// Returns a new plane containing only the cells within the given rect.
+    /// The returned plane has its position set to the rectangle's position
+    /// and shares the same z-index as the source.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let full_plane = Plane::new(0, 80, 24);
+    /// // ... fill full_plane with content ...
+    /// let sub = full_plane.crop(Rect::new(10, 5, 20, 10));
+    /// // sub is a 20x10 plane positioned at (10, 5)
+    /// ```
+    pub fn crop(&self, rect: Rect) -> Plane {
+        let rect = rect.intersection(ratatui::layout::Rect::new(0, 0, self.width, self.height));
+        let mut plane = Plane::new(self.id, rect.width, rect.height);
+        plane.x = rect.x;
+        plane.y = rect.y;
+        plane.z_index = self.z_index;
+
+        for py in 0..rect.height {
+            for px in 0..rect.width {
+                let src_idx = ((rect.y + py) * self.width + (rect.x + px)) as usize;
+                let dst_idx = (py * rect.width + px) as usize;
+                if src_idx < self.cells.len() && dst_idx < plane.cells.len() {
+                    plane.cells[dst_idx] = self.cells[src_idx];
+                }
+            }
+        }
+
+        plane
+    }
 }

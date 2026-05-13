@@ -652,9 +652,11 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                     return false;
                 }
                 if let Some(menu) = &mut *self.context_menu.borrow_mut() {
-                    menu.show();
                     let area = self.area.get();
-                    menu.with_anchor(area.x + col, area.y + row);
+                    let mut menu_clone = menu.clone();
+                    menu_clone.show();
+                    menu_clone.with_anchor(area.x + col, area.y + row);
+                    *menu = menu_clone;
                     self.dirty = true;
                 }
                 true
