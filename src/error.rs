@@ -115,7 +115,7 @@ impl DraconError {
     /// Creates an I/O error from a message.
     pub fn io_msg(msg: impl Into<String>) -> Self {
         let msg = msg.into();
-        DraconError::Io(io::Error::new(io::ErrorKind::Other, msg))
+        DraconError::Io(io::Error::other(msg))
     }
 
     /// Creates a parse error from a message.
@@ -159,7 +159,7 @@ impl From<DraconError> for io::Error {
     fn from(err: DraconError) -> Self {
         match err {
             DraconError::Io(e) => e,
-            other => io::Error::new(io::ErrorKind::Other, other.to_string()),
+            other => io::Error::other(other.to_string()),
         }
     }
 }

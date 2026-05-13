@@ -480,7 +480,7 @@ impl SceneRouter {
                 let threshold = (progress * 10.0) as u8;
                 for i in 0..from.cells.len().min(to.cells.len()) {
                     let use_to = (i % 10) < threshold as usize || progress >= 1.0;
-                    result.cells[i] = if use_to { to.cells[i].clone() } else { from.cells[i].clone() };
+                    result.cells[i] = if use_to { to.cells[i] } else { from.cells[i] };
                 }
             }
             SceneTransition::SlideLeft => {
@@ -493,13 +493,13 @@ impl SceneRouter {
                         if from_x < width && from_x < from.width {
                             let from_idx = (y * from.width + from_x) as usize;
                             if from_idx < from.cells.len() {
-                                result.cells[idx] = from.cells[from_idx].clone();
+                                result.cells[idx] = from.cells[from_idx];
                             }
                         }
                         if to_x < width && to_x < to.width {
                             let to_idx = (y * to.width + to_x) as usize;
                             if to_idx < to.cells.len() {
-                                result.cells[idx] = to.cells[to_idx].clone();
+                                result.cells[idx] = to.cells[to_idx];
                             }
                         }
                     }
@@ -515,13 +515,13 @@ impl SceneRouter {
                         if from_x < width && from_x < from.width {
                             let from_idx = (y * from.width + from_x) as usize;
                             if from_idx < from.cells.len() {
-                                result.cells[idx] = from.cells[from_idx].clone();
+                                result.cells[idx] = from.cells[from_idx];
                             }
                         }
                         if to_x < width && to_x < to.width {
                             let to_idx = (y * to.width + to_x) as usize;
                             if to_idx < to.cells.len() {
-                                result.cells[idx] = to.cells[to_idx].clone();
+                                result.cells[idx] = to.cells[to_idx];
                             }
                         }
                     }
@@ -530,7 +530,7 @@ impl SceneRouter {
             _ => {
                 // For other transitions, just show the target scene
                 for i in 0..from.cells.len().min(to.cells.len()) {
-                    result.cells[i] = if progress > 0.5 { to.cells[i].clone() } else { from.cells[i].clone() };
+                    result.cells[i] = if progress > 0.5 { to.cells[i] } else { from.cells[i] };
                 }
             }
         }

@@ -212,7 +212,7 @@ impl AnnounceLevel {
 /// announce(&mut writer, "Email field: invalid address", AnnounceLevel::Assertive)?;
 /// ```
 pub fn announce<W: Write>(writer: &mut W, text: &str, level: AnnounceLevel) -> io::Result<()> {
-    let escaped = text.replace('\x07', "").replace('\x1b', "");
+    let escaped = text.replace(['\x07', '\x1b'], "");
     write!(writer, "\x1b]99;{};{}\x07", level.as_str(), escaped)
 }
 
@@ -234,7 +234,7 @@ pub fn announce_with_meta<W: Write>(
 
     // Build the param string
     let params = format!("{},{},{},{}", role_str, label_str, value_str, desc_str);
-    let escaped = params.replace('\x07', "").replace('\x1b', "");
+    let escaped = params.replace(['\x07', '\x1b'], "");
 
     write!(writer, "\x1b]99;{};{}\x07", level.as_str(), escaped)
 }

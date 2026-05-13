@@ -321,7 +321,7 @@ impl crate::framework::widget::Widget for Kanban {
             // Column title
             let title_len = col.title.width().min(self.column_width as usize - 2);
             for (j, ch) in col.title.chars().take(title_len).enumerate() {
-                let idx = (1u16 * area.width + col_x + 1 + j as u16) as usize;
+                let idx = (area.width + col_x + 1 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = self.theme.primary;
@@ -333,7 +333,7 @@ impl crate::framework::widget::Widget for Kanban {
             let count_text = format!("({})", col.cards.len());
             let count_x = col_x + self.column_width.saturating_sub(count_text.len() as u16 + 1);
             for (j, ch) in count_text.chars().enumerate() {
-                let idx = (1u16 * area.width + count_x + j as u16) as usize;
+                let idx = (area.width + count_x + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = self.theme.fg_muted;
@@ -538,7 +538,7 @@ impl crate::framework::widget::Widget for Kanban {
                     true
                 }
                 KeyCode::Right => {
-                    let visible = (self.area.get().width / (self.column_width + 1)) as u16;
+                    let visible = (self.area.get().width / (self.column_width + 1));
                     if self.scroll_offset + visible < self.columns.len() as u16 {
                         self.scroll_offset += 1;
                         self.dirty = true;
@@ -667,7 +667,7 @@ impl crate::framework::widget::Widget for Kanban {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                let visible = (area.width / (self.column_width + 1)) as u16;
+                let visible = (area.width / (self.column_width + 1));
                 if self.scroll_offset + visible < self.columns.len() as u16 {
                     self.scroll_offset += 1;
                     self.dirty = true;

@@ -158,7 +158,7 @@ impl Compositor {
         };
 
         for i in 0..plane.cells.len() {
-            plane.cells[i] = cell.clone();
+            plane.cells[i] = cell;
         }
         self.add_plane(plane);
     }
@@ -257,7 +257,7 @@ impl Compositor {
             ..Cell::default()
         };
         for cell in self.final_buffer.iter_mut() {
-            *cell = clear_cell.clone();
+            *cell = clear_cell;
         }
 
         let mut layers = Vec::new();
@@ -281,7 +281,7 @@ impl Compositor {
 
                     let src_idx = (py * plane.width + px) as usize;
                     let dest_idx = (abs_y * self.width + abs_x) as usize;
-                    let mut src_cell = plane.cells[src_idx].clone();
+                    let mut src_cell = plane.cells[src_idx];
 
                     if let Some(filter) = &plane.filter {
                         filter.apply(&mut src_cell, abs_x, abs_y, 0.0);

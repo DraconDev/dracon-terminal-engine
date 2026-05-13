@@ -304,7 +304,7 @@ impl crate::framework::widget::Widget for Sparkline {
             let dy = (y2 as i32 - y1 as i32).abs();
             let sx = if x1 < x2 { 1 } else { -1 };
             let sy = if y1 < y2 { 1 } else { -1 };
-            let mut err = dx as i32 - dy as i32;
+            let mut err = dx - dy;
 
             let mut x = x1 as i32;
             let mut y = y1 as i32;
@@ -324,12 +324,12 @@ impl crate::framework::widget::Widget for Sparkline {
                 }
 
                 let e2 = 2 * err;
-                if e2 > -dy as i32 {
-                    err -= dy as i32;
+                if e2 > -dy {
+                    err -= dy;
                     x += sx;
                 }
-                if e2 < dx as i32 {
-                    err += dx as i32;
+                if e2 < dx {
+                    err += dx;
                     y += sy;
                 }
             }
@@ -365,7 +365,7 @@ impl crate::framework::widget::Widget for Sparkline {
             // Max on right
             for (i, ch) in max_text.chars().enumerate().take(5) {
                 let x = area.width.saturating_sub(6 + i as u16);
-                let idx = (1 * area.width + x) as usize;
+                let idx = (area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = self.theme.error;

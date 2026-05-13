@@ -394,11 +394,10 @@ impl crate::framework::widget::Widget for Tree {
     ) -> bool {
         // Check if context menu is visible
         if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
-            if menu.is_visible() {
-                if menu.handle_mouse(kind, col, row) {
+            if menu.is_visible()
+                && menu.handle_mouse(kind, col, row) {
                     return true;
                 }
-            }
         }
 
         match kind {

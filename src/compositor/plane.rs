@@ -395,7 +395,7 @@ impl Plane {
                 let src_idx = src_base + col;
                 let src_cell = &source.cells[src_idx];
                 if !src_cell.transparent && !src_cell.skip {
-                    self.cells[dst_base + col] = src_cell.clone();
+                    self.cells[dst_base + col] = *src_cell;
                 }
             }
         }

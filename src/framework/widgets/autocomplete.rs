@@ -176,7 +176,7 @@ impl Widget for Autocomplete {
         let input_plane = self.base.render_input(Rect::new(0, 0, area.width, 1));
         for i in 0..input_plane.cells.len() {
             if i < plane.cells.len() {
-                plane.cells[i] = input_plane.cells[i].clone();
+                plane.cells[i] = input_plane.cells[i];
             }
         }
 
@@ -390,27 +390,21 @@ impl Widget for Autocomplete {
                     false
                 }
             }
-            MouseEventKind::ScrollDown => {
-                if self.dropdown_open {
+            MouseEventKind::ScrollDown
+                if self.dropdown_open => {
                     let max_offset = self.filtered.len().saturating_sub(self.max_visible);
                     if self.offset < max_offset {
                         self.offset += 1;
                         self.dirty = true;
                     }
                     true
-                } else {
-                    false
                 }
-            }
-            MouseEventKind::ScrollUp => {
-                if self.dropdown_open {
+            MouseEventKind::ScrollUp
+                if self.dropdown_open => {
                     self.offset = self.offset.saturating_sub(1);
                     self.dirty = true;
                     true
-                } else {
-                    false
                 }
-            }
             _ => false,
         }
     }

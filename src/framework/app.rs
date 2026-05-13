@@ -823,7 +823,7 @@ impl App {
         // If DTRON_THEME_FILE is set, write the final theme name so the
         // parent process (e.g. showcase) can pick it up after this app exits.
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
-            let _ = std::fs::write(&path, &self.theme.name);
+            let _ = std::fs::write(&path, self.theme.name);
         }
 
         Ok(())
