@@ -4,13 +4,12 @@
 //! fixed, min, max, ratio). Inspired by CSS flexbox and ratatui's Layout.
 
 #[cfg(test)]
-#[cfg(test)]
 use proptest::prelude::*;
 
 use ratatui::layout::Rect;
-use ratatui::layout::Rect;
 #[allow(unused)]
 use std::cell::RefCell;
+
 /// Axis along which constraints are resolved.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {

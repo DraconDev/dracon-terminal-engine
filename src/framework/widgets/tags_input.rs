@@ -340,7 +340,6 @@ impl crate::framework::widget::Widget for TagsInput {
             };
 
             // Input border
-            let input_x = x;
             for col in 0..(area.width.saturating_sub(x)) {
                 let idx = (y * area.width + x + col) as usize;
                 if idx < plane.cells.len() {
