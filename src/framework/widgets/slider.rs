@@ -252,3 +252,23 @@ impl crate::framework::widget::Widget for Slider {
         self.theme = *theme;
     }
 }
+
+impl WidgetState for Slider {
+    fn state_id(&self) -> Option<&str> {
+        Some("slider")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "value": self.value,
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(value) = json.get("value").and_then(|v| v.as_f64()) {
+            self.set_value(value as f32);
+        }
+        Ok(())
+    }
+}

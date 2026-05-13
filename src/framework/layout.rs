@@ -7,10 +7,8 @@
 #[cfg(test)]
 use proptest::prelude::*;
 
-use ratatui::layout::Rect;
-#[allow(unused)]
 use std::cell::RefCell;
-/// Axis along which constraints are resolved.
+use ratatui::layout::Rect;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Direction {
     /// Distribute constraints horizontally (default).

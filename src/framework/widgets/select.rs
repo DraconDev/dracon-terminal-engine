@@ -6,7 +6,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A dropdown select widget for choosing from a list of options.
