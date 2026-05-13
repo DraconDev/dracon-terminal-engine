@@ -69,10 +69,10 @@ pub struct Kanban {
 
 /// Internal data for card drag operations.
 #[derive(Debug, Clone)]
-struct CardDragData {
-    card_id: String,
-    source_col: usize,
-    source_idx: usize,
+pub struct CardDragData {
+    pub card_id: String,
+    pub _source_col: usize,
+    pub _source_idx: usize,
 }
 
 /// A column in the Kanban board.

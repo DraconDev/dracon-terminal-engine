@@ -39,7 +39,7 @@
 //!
 //! - **App** — [`App`] and [`Ctx`] provide the one-import entry point with event loop
 //! - **Compositor** — [`Plane`] layers composited via [`Compositor`] with TrueColor and filters
-//! - **Widgets** — 41 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
+//! - **Widgets** — 43 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
 //! - **TextEditor** — Full-featured code editor with syntax highlighting via syntect
 //! - **Themes** — 21 built-in themes (nord, dracula, catppuccin, gruvbox, etc.)
 //! - **Input** — SGR mouse parsing, keyboard chords, modifiers
