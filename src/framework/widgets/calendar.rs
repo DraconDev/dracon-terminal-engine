@@ -404,7 +404,7 @@ impl crate::framework::widget::Widget for Calendar {
 
                 if cell_index >= offset && day_num <= days_in_month {
                     let date = NaiveDate::from_ymd_opt(self.year, self.month as u32, day_num as u32)
-                        .unwrap();
+                        .unwrap_or_else(|| NaiveDate::from_ymd_opt(2000, 1, 1).unwrap());
                     let day_str = format!("{:>2}", day_num);
 
                     // Determine cell styling

@@ -2320,7 +2320,7 @@ impl Widget for &TextEditor {
 
                         if break_idx == 0 && !text.is_empty() {
                             // Force break if even a single char doesn't fit
-                            let first_char = text.chars().next().unwrap();
+                            let first_char = text.chars().next().unwrap_or('\u{FFFD}');
                             break_idx = first_char.len_utf8();
                             break_width = first_char.width().unwrap_or(0);
                         }
@@ -2484,7 +2484,7 @@ impl Widget for &TextEditor {
                         }
 
                         if break_idx == 0 && !text.is_empty() {
-                            let first_char = text.chars().next().unwrap();
+                            let first_char = text.chars().next().unwrap_or('\u{FFFD}');
                             break_idx = first_char.len_utf8();
                             break_width = first_char.width().unwrap_or(0);
                         }
