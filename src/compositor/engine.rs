@@ -13,6 +13,10 @@ pub struct Compositor {
     /// Background color for cells not covered by any plane.
     /// Set this to the theme background to avoid black gaps.
     clear_color: Color,
+    /// Last frame duration in milliseconds.
+    last_frame_duration_ms: f64,
+    /// Number of registered widgets (for metrics).
+    widget_count: usize,
 }
 
 impl Compositor {
@@ -31,7 +35,29 @@ impl Compositor {
             last_frame: vec![Cell::default(); size],
             final_buffer: vec![default_cell; size],
             clear_color: Color::Rgb(16, 16, 24),
+            last_frame_duration_ms: 0.0,
+            widget_count: 0,
         }
+    }
+
+    /// Returns the number of registered widgets.
+    pub fn widget_count(&self) -> usize {
+        self.widget_count
+    }
+
+    /// Sets the number of registered widgets (called by App).
+    pub fn set_widget_count(&mut self, count: usize) {
+        self.widget_count = count;
+    }
+
+    /// Returns the last frame duration in milliseconds.
+    pub fn last_frame_duration_ms(&self) -> f64 {
+        self.last_frame_duration_ms
+    }
+
+    /// Sets the last frame duration (called by App after each frame).
+    pub fn set_last_frame_duration(&mut self, ms: f64) {
+        self.last_frame_duration_ms = ms;
     }
 
     /// Sets the background color for cells not covered by any plane.
@@ -215,6 +241,7 @@ impl Compositor {
             ..Cell::default()
         };
         self.final_buffer = vec![default_cell; size];
+        self.widget_count = 0;
     }
 
     fn sort_planes(&mut self) {

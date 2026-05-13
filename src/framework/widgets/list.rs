@@ -6,15 +6,15 @@ use std::collections::HashSet;
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
-use crate::framework::dragdrop::{DragGhost, DragManager, DragPhase};
+use crate::framework::dragdrop::DragManager;
 use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widget::WidgetId;
 use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
-pub type SelectionChangeCallback<T> = Box<dyn FnMut(&HashSet<usize>)>;
+pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
 pub type UndoRedoCallback = Box<dyn FnMut()>;
 
 /// Inner state snapshot for undo/redo.
@@ -541,6 +541,43 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 }
                 true
             }
+            // Ctrl+Z: Undo
+            KeyCode::Char('z') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                self.undo();
+                true
+            }
+            // Ctrl+Y: Redo
+            KeyCode::Char('y') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                self.redo();
+                true
+            }
+            // Ctrl+A: Select all (in multi-select mode)
+            KeyCode::Char('a') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+                if self.allow_multi_select {
+                    self.push_undo();
+                    self.selected_indices.clear();
+                    for i in 0..self.items.len() {
+                        self.selected_indices.insert(i);
+                    }
+                    self.selected = 0;
+                    self.dirty = true;
+                    if let Some(ref mut cb) = self.on_selection_change {
+                        cb(&self.selected_indices);
+                    }
+                }
+                true
+            }
+            // Escape: Clear selection
+            KeyCode::Esc => {
+                if self.allow_multi_select && !self.selected_indices.is_empty() {
+                    self.selected_indices.clear();
+                    self.dirty = true;
+                    if let Some(ref mut cb) = self.on_selection_change {
+                        cb(&self.selected_indices);
+                    }
+                }
+                true
+            }
             _ => false,
         }
     }
@@ -551,6 +588,15 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         col: u16,
         row: u16,
     ) -> bool {
+        // Check if context menu is visible
+        if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+            if menu.is_visible() {
+                if menu.handle_mouse(kind, col, row) {
+                    return true;
+                }
+            }
+        }
+
         match kind {
             crate::input::event::MouseEventKind::Moved => {
                 if col >= self.width || row >= self.visible_count as u16 {
@@ -582,11 +628,70 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 if idx >= self.items.len() {
                     return false;
                 }
+
+                // Multi-select handling
+                if self.allow_multi_select && key_modifiers_contains_ctrl(&key) {
+                    // Would need to check modifiers in mouse, but we don't have them in handle_mouse
+                    // For now, handle Ctrl+click via keyboard after the fact
+                }
+
                 self.selected = idx;
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.items[idx]);
                 }
                 self.dirty = true;
+                true
+            }
+            // Right-click: Show context menu
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Right) => {
+                if col >= self.width || row >= self.visible_count as u16 {
+                    return false;
+                }
+                let idx = self.offset + row as usize;
+                if idx >= self.items.len() {
+                    return false;
+                }
+                if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
+                    menu.show();
+                    let area = self.area.get();
+                    menu.with_anchor(area.x + col, area.y + row);
+                    self.dirty = true;
+                }
+                true
+            }
+            // Drag handling - detect drag start and end
+            crate::input::event::MouseEventKind::Drag(crate::input::event::MouseButton::Left) => {
+                if self.drag_manager.borrow().is_dragging() {
+                    let area = self.area.get();
+                    self.drag_manager.borrow_mut().move_ghost(area.x + col, area.y + row);
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::Drag(crate::input::event::MouseButton::Left, crate::input::event::MouseButton::Left) => {
+                // Drag start
+                if col < self.width && row < self.visible_count as u16 {
+                    let idx = self.offset + row as usize;
+                    if idx < self.items.len() {
+                        self.drag_manager.borrow_mut().start_drag(
+                            idx,
+                            idx,
+                            DragGhost::new(self.items[idx].to_string()),
+                        );
+                    }
+                }
+                true
+            }
+            crate::input::event::MouseEventKind::Drag(crate::input::event::MouseButton::Left, crate::input::event::MouseButton::Left, crate::input::event::MouseButton::Left) => {
+                // Drag end (drop)
+                let area = self.area.get();
+                let final_x = area.x + col;
+                let final_y = area.y + row;
+                self.drag_manager.borrow_mut().move_ghost(final_x, final_y);
+                if let Some(target_idx) = self.drag_manager.borrow_mut().end_drag() {
+                    // Item dropped - trigger callback or reorder
+                    let _ = target_idx;
+                    self.dirty = true;
+                }
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
