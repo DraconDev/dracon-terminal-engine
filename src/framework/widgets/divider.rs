@@ -308,9 +308,8 @@ impl Divider {
             let label_y = area.height / 2;
 
             // Draw label vertically (each char on a separate row)
-            let mut char_index = 0u16;
-            for ch in label_text.chars() {
-                let y = label_y.saturating_sub(char_index);
+            for (char_index, ch) in label_text.chars().enumerate() {
+                let y = label_y.saturating_sub(char_index as u16);
                 if y < area.height {
                     let idx = (y * area.width + 1) as usize;
                     if idx < plane.cells.len() {
@@ -319,7 +318,6 @@ impl Divider {
                         plane.cells[idx].style = crate::compositor::Styles::DIM;
                     }
                 }
-                char_index += 1;
             }
         }
     }

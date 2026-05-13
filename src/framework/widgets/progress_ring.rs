@@ -43,8 +43,7 @@ impl ProgressRing {
         }
     }
 
-    /// Creates a ProgressRing with 50% progress.
-
+/// Creates a ProgressRing with 50% progress.
     /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
@@ -320,7 +319,7 @@ impl crate::framework::widget::Widget for ProgressRing {
         row: u16,
     ) -> bool {
         match kind {
-            crate::input::event::MouseEventKind::Down(btn) if btn == crate::input::event::MouseButton::Left => {
+            crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 let area = self.area.get();
                 let rel_x = col.saturating_sub(area.x) as i32;
                 let rel_y = row.saturating_sub(area.y) as i32;
