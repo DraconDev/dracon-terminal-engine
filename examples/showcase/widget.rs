@@ -246,18 +246,13 @@ impl Widget for Showcase {
 
         // Stats bar
         let stats_y = 2usize;
-        let stats_text = format!(
-            "  {} Examples  │  {} Widgets  │  {} Themes ",
-            self.examples.len(),
-            43,
-            themes.len()
-        );
+        let stats_text = &self.cached_stats_text;
         let stats_start = 2usize;
         draw_text(
             &mut plane,
             stats_start,
             stats_y,
-            &stats_text,
+            stats_text,
             t.fg,
             t.bg,
             true,

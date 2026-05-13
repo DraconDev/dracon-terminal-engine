@@ -132,7 +132,7 @@ impl Showcase {
 
         let cached_themes = Theme::all().iter().filter(|t| t.name != "high_contrast").copied().collect();
 
-        Self {
+        let mut showcase = Self {
             examples,
             filtered,
             selected: 0,
@@ -188,7 +188,10 @@ impl Showcase {
             last_render_second: 0,
             cached_stats_text: String::new(),
             cached_cat_counts: [0usize; 7],
-        }
+        };
+        // Initialize cached stats text and category counts
+        showcase.apply_filter();
+        showcase
     }
 
     pub fn themes(&self) -> &[Theme] {
