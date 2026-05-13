@@ -3,13 +3,13 @@
 mod widget_snapshots {
     use dracon_terminal_engine::compositor::Plane;
     use dracon_terminal_engine::framework::theme::Theme;
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::framework::widgets::form::{Form, FormField};
+    use dracon_terminal_engine::framework::widgets::form::Form;
     use dracon_terminal_engine::framework::widgets::list::List;
-    use dracon_terminal_engine::framework::widgets::table::{Column, Table, TableRow};
+    use dracon_terminal_engine::framework::widgets::table::Column;
+    use dracon_terminal_engine::framework::widgets::table::Table;
     use dracon_terminal_engine::framework::widgets::tree::{Tree, TreeNode};
+    use dracon_terminal_engine::framework::widget::WidgetId;
     use ratatui::layout::Rect;
-
     /// Helper to render a widget and serialize its Plane to a string for comparison.
     fn render_widget_to_string<W: Widget>(widget: &W, width: u16, height: u16) -> String {
         let area = Rect::new(0, 0, width, height);
