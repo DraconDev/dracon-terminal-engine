@@ -24,6 +24,8 @@ pub struct TextEditorAdapter {
     area: std::cell::Cell<Rect>,
     dirty: bool,
     theme: crate::framework::theme::Theme,
+    // Context menu
+    context_menu: RefCell<Option<ContextMenu>>,
 }
 
 impl TextEditorAdapter {
@@ -35,6 +37,7 @@ impl TextEditorAdapter {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
             theme: crate::framework::theme::Theme::default(),
+            context_menu: RefCell::new(None),
         }
     }
 
@@ -51,6 +54,12 @@ impl TextEditorAdapter {
     /// Sets the screen area allocated to this widget.
     pub fn set_area(&mut self, area: Rect) {
         self.area.set(area);
+    }
+
+    /// Sets a context menu to show on right-click.
+    pub fn with_context_menu(mut self, menu: ContextMenu) -> Self {
+        self.context_menu = RefCell::new(Some(menu));
+        self
     }
 }
 

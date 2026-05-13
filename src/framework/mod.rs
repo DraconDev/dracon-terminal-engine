@@ -46,7 +46,7 @@ pub mod widgets;
 pub mod prelude {
     pub use crate::compositor::{Cell, CellPool, Color, Compositor, Plane, PoolConfig, Styles};
     pub use crate::error::DraconError;
-    pub use crate::framework::widget::{Widget, WidgetId};
+    pub use crate::framework::widget::{Widget, WidgetId, WidgetState};
     #[cfg(feature = "tracing")]
     pub use crate::frame_span;
     #[cfg(feature = "tracing")]
