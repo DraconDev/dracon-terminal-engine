@@ -365,7 +365,9 @@ impl crate::framework::widget::Widget for Tree {
     ) -> bool {
         match kind {
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                if let Some(path) = self.node_at_row(row) {
+                let adjusted_row = (row as usize).saturating_add(self.scroll_offset);
+                let adjusted_row = adjusted_row.min(u16::MAX as usize) as u16;
+                if let Some(path) = self.node_at_row(adjusted_row) {
                     if let Some((node, _)) = self.get_selected_node(&self.root, &path) {
                         if node.expanded && !node.children.is_empty() {
                             self.selected_path = path;
