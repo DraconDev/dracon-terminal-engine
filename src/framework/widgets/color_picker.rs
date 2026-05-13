@@ -281,13 +281,13 @@ impl crate::framework::widget::Widget for ColorPicker {
         let slider_width = (area.width.saturating_sub(4)).max(20);
 
         // Hue slider
-        self.render_slider(&mut plane, 0, slider_start_y, slider_width, "H", self.hue / 360.0 * 100.0, SliderKind::Hue);
+        self.render_slider((&mut plane, 0, slider_start_y, slider_width, "H", self.hue / 360.0 * 100.0, SliderKind::Hue));
 
         // Saturation slider
-        self.render_slider(&mut plane, 1, slider_start_y + 2, slider_width, "S", self.saturation, SliderKind::Saturation);
+        self.render_slider((&mut plane, 1, slider_start_y + 2, slider_width, "S", self.saturation, SliderKind::Saturation));
 
         // Lightness slider
-        self.render_slider(&mut plane, 2, slider_start_y + 4, slider_width, "L", self.lightness, SliderKind::Lightness);
+        self.render_slider((&mut plane, 2, slider_start_y + 4, slider_width, "L", self.lightness, SliderKind::Lightness));
 
         // === HSL Values Display ===
         let values_y = slider_start_y + 7;
@@ -487,6 +487,7 @@ type SliderParams<'a> = (&'a mut Plane, u16, u16, u16, &'a str, f32, SliderKind)
 
 impl ColorPicker {
     fn render_slider(&self, params: SliderParams) {
+        let (plane, _idx, y, width, label, value, kind) = params;
         let area = self.area.get();
         let x = 2u16;
 

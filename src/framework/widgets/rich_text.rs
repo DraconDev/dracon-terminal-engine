@@ -153,7 +153,7 @@ fn parse_inline(text: &str) -> Vec<Inline> {
 }
 
 // ---------------------------------------------------------------------------
-// Renderer
+// Render state
 // ---------------------------------------------------------------------------
 
 struct RenderState {
@@ -161,21 +161,37 @@ struct RenderState {
     y: u16,
 }
 
+/// Word render params: (plane, word, width, height, fg, bg, style)
+type WriteWordParams<'a> = (
+    &'a mut Plane,
+    &'a str,
+    u16,
+    u16,
+    Color,
+    Color,
+    Styles,
+);
+
+/// Inline render params: (plane, inlines, theme, state, width, height, fg, bg, style)
+type InlineRenderParams<'a> = (
+    &'a mut Plane,
+    &'a [Inline],
+    &'a Theme,
+    &'a mut RenderState,
+    u16,
+    u16,
+    Color,
+    Color,
+    Styles,
+);
+
 impl RenderState {
     fn new() -> Self {
         Self { x: 0, y: 0 }
     }
 
-    fn write_word(
-        &mut self,
-        plane: &mut Plane,
-        word: &str,
-        width: u16,
-        height: u16,
-        fg: Color,
-        bg: Color,
-        style: Styles,
-    ) -> bool {
+    fn write_word(&mut self, params: WriteWordParams) -> bool {
+        let (plane, word, width, height, fg, bg, style) = params;
         let word_width = word.chars().map(|c| c.width().unwrap_or(0)).sum::<usize>() as u16;
 
         if self.x + word_width > width && self.x > 0 && word_width <= width {
@@ -206,61 +222,43 @@ impl RenderState {
     }
 }
 
-/// Text style tuple: (foreground color, background color, text style)
-pub type TextStyle = (Color, Color, Styles);
+/// Inline render params: (plane, inlines, theme, state, width, height, fg, bg, style)
+type InlineRenderParams<'a> = (
+    &'a mut Plane,
+    &'a [Inline],
+    &'a Theme,
+    &'a mut RenderState,
+    u16,
+    u16,
+    Color,
+    Color,
+    Styles,
+);
 
-/// Render bounds: (width, height)
-pub type RenderBounds = (u16, u16);
-
-fn render_inline(
-    plane: &mut Plane,
-    inlines: &[Inline],
-    theme: &Theme,
-    state: &mut RenderState,
-    width: u16,
-    height: u16,
-    fg: Color,
-    bg: Color,
-    style: Styles,
-) {
+fn render_inline(params: InlineRenderParams) {
+    let (plane, inlines, theme, state, width, height, fg, bg, style) = params;
     for inline in inlines {
         match inline {
             Inline::Text(text) => {
                 for word in text.split_inclusive(' ') {
-                    if !state.write_word(plane, word, width, height, fg, bg, style) {
+                    if !state.write_word((plane, word, width, height, fg, bg, style)) {
                         return;
                     }
                 }
             }
             Inline::Bold(children) => {
                 render_inline(
-                    plane,
-                    children,
-                    theme,
-                    state,
-                    width,
-                    height,
-                    theme.fg,
-                    bg,
-                    style | Styles::BOLD,
+                    (plane, children, theme, state, width, height, theme.fg, bg, style | Styles::BOLD)
                 );
             }
             Inline::Italic(children) => {
                 render_inline(
-                    plane,
-                    children,
-                    theme,
-                    state,
-                    width,
-                    height,
-                    theme.fg,
-                    bg,
-                    style | Styles::ITALIC,
+                    (plane, children, theme, state, width, height, theme.fg, bg, style | Styles::ITALIC)
                 );
             }
             Inline::Code(text) => {
                 for word in text.split_inclusive(' ') {
-                    if !state.write_word(plane, word, width, height, theme.fg, theme.secondary, style)
+                    if !state.write_word((plane, word, width, height, theme.fg, theme.secondary, style))
                     {
                         return;
                     }
@@ -268,74 +266,8 @@ fn render_inline(
             }
             Inline::Link { text, .. } => {
                 for word in text.split_inclusive(' ') {
-                    if !state.write_word(
-                        plane,
-                        word,
-                        width,
-                        height,
-                        theme.info,
-                        bg,
-                        style | Styles::UNDERLINE,
-                    ) {
+                    if !state.write_word((plane, word, width, height, theme.info, bg, style | Styles::UNDERLINE)) {
                         return;
-                    }
-                }
-            }
-        }
-    }
-}
-                }
-            }
-            Inline::Bold(children) => {
-                if !render_inline(
-                    plane,
-                    children,
-                    theme,
-                    state,
-                    width,
-                    height,
-                    theme.fg,
-                    bg,
-                    style | Styles::BOLD,
-                ) {
-                    return false;
-                }
-            }
-            Inline::Italic(children) => {
-                if !render_inline(
-                    plane,
-                    children,
-                    theme,
-                    state,
-                    width,
-                    height,
-                    theme.fg,
-                    bg,
-                    style | Styles::ITALIC,
-                ) {
-                    return false;
-                }
-            }
-            Inline::Code(text) => {
-                for word in text.split_inclusive(' ') {
-                    if !state.write_word(plane, word, width, height, theme.fg, theme.secondary, style)
-                    {
-                        return false;
-                    }
-                }
-            }
-            Inline::Link { text, .. } => {
-                for word in text.split_inclusive(' ') {
-                    if !state.write_word(
-                        plane,
-                        word,
-                        width,
-                        height,
-                        theme.info,
-                        bg,
-                        style | Styles::UNDERLINE,
-                    ) {
-                        return false;
                     }
                 }
             }
@@ -364,15 +296,7 @@ fn render_block(
                 state.x = indent;
             }
             render_inline(
-                plane,
-                inlines,
-                theme,
-                state,
-                width,
-                height,
-                header_fg,
-                theme.bg,
-                header_style,
+                (plane, inlines, theme, state, width, height, header_fg, theme.bg, header_style)
             );
             state.x = 0;
             state.y += 1;
@@ -383,15 +307,7 @@ fn render_block(
         }
         Block::Paragraph(inlines) => {
             render_inline(
-                plane,
-                inlines,
-                theme,
-                state,
-                width,
-                height,
-                theme.fg,
-                theme.bg,
-                Styles::empty(),
+                (plane, inlines, theme, state, width, height, theme.fg, theme.bg, Styles::empty())
             );
             state.x = 0;
             state.y += 1;
@@ -409,15 +325,7 @@ fn render_block(
                 }
             }
             render_inline(
-                plane,
-                inlines,
-                theme,
-                state,
-                width,
-                height,
-                theme.fg,
-                theme.bg,
-                Styles::empty(),
+                (plane, inlines, theme, state, width, height, theme.fg, theme.bg, Styles::empty())
             );
             state.x = 0;
             state.y += 1;
