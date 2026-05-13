@@ -88,6 +88,100 @@ pub struct App {
 }
 
 impl App {
+    fn dispatch_key(&mut self, k: &crate::input::event::KeyEvent, running: &std::sync::atomic::AtomicBool) {
+        if k.code == crate::input::event::KeyCode::Char('c')
+            && k.modifiers.contains(crate::input::event::KeyModifiers::CONTROL)
+        {
+            running.store(false, Ordering::SeqCst);
+        } else if k.code == crate::input::event::KeyCode::Tab {
+            let old = self.focus_manager.focused();
+            if k.modifiers.contains(crate::input::event::KeyModifiers::SHIFT) {
+                let _ = self.focus_manager.tab_prev();
+            } else {
+                let _ = self.focus_manager.tab_next();
+            }
+            let new = self.focus_manager.focused();
+            if new != old {
+                if let Some(old_id) = old {
+                    if let Some(mut w) = self.widget_mut(old_id) {
+                        w.on_blur();
+                    }
+                }
+                if let Some(new_id) = new {
+                    if let Some(mut w) = self.widget_mut(new_id) {
+                        w.on_focus();
+                    }
+                }
+            }
+        } else if let Some(focused) = self.focus_manager.focused() {
+            let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
+                let _ = widget.handle_key(*k);
+                widget.current_theme()
+            } else {
+                None
+            };
+            if let Some(theme) = new_theme {
+                if theme.name != self.theme.name {
+                    self.set_theme(theme);
+                }
+            }
+        }
+    }
+
+    fn dispatch_resize(&mut self, w: u16, h: u16) {
+        self.compositor.resize(w, h);
+        self.dirty_tracker.mark_all_dirty();
+        let rect = Rect::new(0, 0, w, h);
+        for w in self.widgets.borrow_mut().iter_mut() {
+            w.set_area(rect);
+            w.mark_dirty();
+        }
+    }
+
+    fn dispatch_mouse(&mut self, col: u16, row: u16, mouse_event: &crate::input::event::MouseEvent) {
+        let target_id = {
+            let widgets = self.widgets.borrow();
+            let mut sorted: Vec<_> = widgets.iter().collect();
+            sorted.sort_by_key(|w| w.z_index());
+            sorted
+                .into_iter()
+                .find(|w| {
+                    let a = w.area();
+                    col >= a.x && col < a.x + a.width && row >= a.y && row < a.y + a.height
+                })
+                .map(|w| w.id())
+        };
+        if let Some(id) = target_id {
+            let old = self.focus_manager.focused();
+            if old != Some(id) {
+                if let Some(old_id) = old {
+                    if let Some(mut w) = self.widget_mut(old_id) {
+                        w.on_blur();
+                    }
+                }
+                self.focus_manager.set_focus(id);
+                if let Some(mut w) = self.widget_mut(id) {
+                    w.on_focus();
+                }
+            }
+            if let Some(mut widget) = self.widget_mut(id) {
+                let a = widget.area();
+                let local_col = col.saturating_sub(a.x);
+                let local_row = row.saturating_sub(a.y);
+                let _ = widget.handle_mouse(mouse_event.kind, local_col, local_row);
+            }
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, running: &std::sync::atomic::AtomicBool) {
+        match event {
+            Event::Resize(w, h) => self.dispatch_resize(*w, *h),
+            Event::Key(k) => self.dispatch_key(k, running),
+            Event::Mouse(mouse_event) => self.dispatch_mouse(mouse_event.column, mouse_event.row, mouse_event),
+            Event::Paste(text) => self.dispatch_paste(text),
+            _ => {}
+        }
+    }
     /// Creates a new `App` with a linked terminal.
     /// Returns an error if the terminal cannot be initialized.
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all, fields(title = "Dracon App")))]
@@ -460,105 +554,9 @@ impl App {
                                     _ => {}
                                 }
                                 match &event {
-                                    Event::Resize(w, h) => {
-                                        self.compositor.resize(*w, *h);
-                                        self.dirty_tracker.mark_all_dirty();
-                                        let rect = Rect::new(0, 0, *w, *h);
-                                        for w in self.widgets.borrow_mut().iter_mut() {
-                                            w.set_area(rect);
-                                            w.mark_dirty();
-                                        }
-                                    }
-                                    Event::Key(k) => {
-                                        if k.code == crate::input::event::KeyCode::Char('c')
-                                            && k.modifiers.contains(
-                                                crate::input::event::KeyModifiers::CONTROL,
-                                            )
-                                        {
-                                            running.store(false, Ordering::SeqCst);
-                                        } else if k.code == crate::input::event::KeyCode::Tab {
-                                            let old = self.focus_manager.focused();
-                                            if k.modifiers
-                                                .contains(crate::input::event::KeyModifiers::SHIFT)
-                                            {
-                                                let _ = self.focus_manager.tab_prev();
-                                            } else {
-                                                let _ = self.focus_manager.tab_next();
-                                            }
-                                            let new = self.focus_manager.focused();
-                                            if new != old {
-                                                if let Some(old_id) = old {
-                                                    if let Some(mut w) = self.widget_mut(old_id) {
-                                                        w.on_blur();
-                                                    }
-                                                }
-                                                if let Some(new_id) = new {
-                                                    if let Some(mut w) = self.widget_mut(new_id) {
-                                                        w.on_focus();
-                                                    }
-                                                }
-                                            }
-                                        } else if let Some(focused) = self.focus_manager.focused() {
-                                            let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
-                                                let _ = widget.handle_key(*k);
-                                                widget.current_theme()
-                                            } else {
-                                                None
-                                            };
-                                            if let Some(theme) = new_theme {
-                                                if theme.name != self.theme.name {
-                                                    self.set_theme(theme);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    Event::Mouse(mouse_event) => {
-                                        let col = mouse_event.column;
-                                        let row = mouse_event.row;
-                                        let target_id = {
-                                            let widgets = self.widgets.borrow();
-                                            let mut sorted: Vec<_> = widgets.iter().collect();
-                                            sorted.sort_by_key(|w| w.z_index());
-                                            sorted
-                                                .into_iter()
-                                                .find(|w| {
-                                                    let a = w.area();
-                                                    col >= a.x
-                                                        && col < a.x + a.width
-                                                        && row >= a.y
-                                                        && row < a.y + a.height
-                                                })
-                                                .map(|w| w.id())
-                                        };
-                                        if let Some(id) = target_id {
-                                            let old = self.focus_manager.focused();
-                                            if old != Some(id) {
-                                                if let Some(old_id) = old {
-                                                    if let Some(mut w) = self.widget_mut(old_id) {
-                                                        w.on_blur();
-                                                    }
-                                                }
-                                                self.focus_manager.set_focus(id);
-                                                if let Some(mut w) = self.widget_mut(id) {
-                                                    w.on_focus();
-                                                }
-                                            }
-                                            if let Some(mut widget) = self.widget_mut(id) {
-                                                let a = widget.area();
-                                                let local_col = col.saturating_sub(a.x);
-                                                let local_row = row.saturating_sub(a.y);
-                                                let _ = widget.handle_mouse(
-                                                    mouse_event.kind,
-                                                    local_col,
-                                                    local_row,
-                                                );
-                                            }
-                                        }
-                                    }
-                                    Event::Paste(text) => {
-                                        self.dispatch_paste(text);
-                                    }
+                                    #[cfg(feature = "debug_events")]
                                     _ => {}
+                                    _ => { self.handle_event(&event, &running); }
                                 }
                             }
                         }
@@ -573,73 +571,7 @@ impl App {
                                     if dn == 0 { break; }
                                     for byte in drain_buf.iter().take(dn) {
                                         if let Some(event) = self.parser.advance(*byte) {
-                                            match &event {
-                                                Event::Resize(w, h) => {
-                                                    self.compositor.resize(*w, *h);
-                                                    self.dirty_tracker.mark_all_dirty();
-                                                    let rect = Rect::new(0, 0, *w, *h);
-                                                    for w in self.widgets.borrow_mut().iter_mut() {
-                                                        w.set_area(rect);
-                                                        w.mark_dirty();
-                                                    }
-                                                }
-                                                Event::Key(k) => {
-                                                    if k.code == crate::input::event::KeyCode::Char('c')
-                                                        && k.modifiers.contains(
-                                                            crate::input::event::KeyModifiers::CONTROL,
-                                                        )
-                                                    {
-                                                        running.store(false, Ordering::SeqCst);
-                                                    } else if let Some(focused) = self.focus_manager.focused() {
-                                                        let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
-                                                            let _ = widget.handle_key(*k);
-                                                            widget.current_theme()
-                                                        } else {
-                                                            None
-                                                        };
-                                                        if let Some(theme) = new_theme {
-                                                            if theme.name != self.theme.name {
-                                                                self.set_theme(theme);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                Event::Mouse(mouse_event) => {
-                                                    let col = mouse_event.column;
-                                                    let row = mouse_event.row;
-                                                    let target_id = {
-                                                        let widgets = self.widgets.borrow();
-                                                        let mut sorted: Vec<_> = widgets.iter().collect();
-                                                        sorted.sort_by_key(|w| w.z_index());
-                                                        sorted
-                                                            .into_iter()
-                                                            .find(|w| {
-                                                                let a = w.area();
-                                                                col >= a.x
-                                                                    && col < a.x + a.width
-                                                                    && row >= a.y
-                                                                    && row < a.y + a.height
-                                                            })
-                                                            .map(|w| w.id())
-                                                    };
-                                                    if let Some(id) = target_id {
-                                                        if let Some(mut widget) = self.widget_mut(id) {
-                                                            let a = widget.area();
-                                                            let local_col = col.saturating_sub(a.x);
-                                                            let local_row = row.saturating_sub(a.y);
-                                                            let _ = widget.handle_mouse(
-                                                                mouse_event.kind,
-                                                                local_col,
-                                                                local_row,
-                                                            );
-                                                        }
-                                                    }
-                                                }
-                                                Event::Paste(text) => {
-                                                    self.dispatch_paste(text);
-                                                }
-                                                _ => {}
-                                            }
+                                            self.handle_event(&event, &running);
                                         }
                                     }
                                 }
@@ -656,39 +588,7 @@ impl App {
                             Event::Mouse(m) => log_mouse_event(m),
                             _ => {}
                         }
-                        match &evt {
-                            Event::Resize(w, h) => {
-                                self.compositor.resize(*w, *h);
-                                self.dirty_tracker.mark_all_dirty();
-                                for w in self.widgets.borrow_mut().iter_mut() {
-                                    w.mark_dirty();
-                                }
-                            }
-                            Event::Key(k) => {
-                                if k.code == crate::input::event::KeyCode::Char('c')
-                                    && k.modifiers
-                                        .contains(crate::input::event::KeyModifiers::CONTROL)
-                                {
-                                    running.store(false, Ordering::SeqCst);
-                                } else if let Some(focused) = self.focus_manager.focused() {
-                                    let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
-                                        let _ = widget.handle_key(*k);
-                                        widget.current_theme()
-                                    } else {
-                                        None
-                                    };
-                                    if let Some(theme) = new_theme {
-                                        if theme.name != self.theme.name {
-                                            self.set_theme(theme);
-                                        }
-                                    }
-                                }
-                            }
-                            Event::Paste(text) => {
-                                self.dispatch_paste(text);
-                            }
-                            _ => {}
-                        }
+                        self.handle_event(&evt, &running);
                     }
                 }
                 Err(_) => {}

@@ -105,7 +105,6 @@ impl Compositor {
     /// Adds a plane to the compositor, inserting it at the correct z-index position.
     pub fn add_plane(&mut self, plane: Plane) {
         self.planes.push(plane);
-        self.sort_planes();
     }
 
     /// Draws text at the specified position with the given colors and style.
@@ -260,14 +259,9 @@ impl Compositor {
             *cell = clear_cell;
         }
 
-        let mut layers = Vec::new();
-        for i in 0..self.planes.len() {
-            layers.push((self.planes[i].z_index, i));
-        }
-        layers.sort_by_key(|a| a.0);
+        self.sort_planes();
 
-        for (_, plane_idx) in layers {
-            let plane = &self.planes[plane_idx];
+        for plane in &self.planes {
             if !plane.visible {
                 continue;
             }

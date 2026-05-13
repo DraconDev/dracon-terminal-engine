@@ -21,6 +21,7 @@ use std::result::Result as StdResult;
 /// - `Serialize` — Serialization/deserialization errors
 /// - `User` — User-facing error messages
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum DraconError {
     /// I/O related errors (file operations, streams, etc.)
     Io(io::Error),
