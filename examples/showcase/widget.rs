@@ -175,7 +175,7 @@ impl Widget for Showcase {
 
         // Theme palette bar
         let palette_y = 1usize;
-        let themes = Self::themes();
+        let themes = self.themes();
         let square_w = 2usize;
         let gap = 1usize;
         let max_visible = (area.width as usize).saturating_sub(4) / (square_w + gap);
@@ -1387,7 +1387,7 @@ impl Showcase {
                 if let Some(zone_id) = clicked_zone {
                     match zone_id {
                         // Theme palette swatches (PALETTE_BASE + i)
-                        id if (PALETTE_BASE..PALETTE_BASE + Self::themes().len()).contains(&id) => {
+                        id if (PALETTE_BASE..PALETTE_BASE + self.themes().len()).contains(&id) => {
                             let idx = id - PALETTE_BASE;
                             self.pending_theme = Some(idx);
                             self.apply_filter();
@@ -1581,7 +1581,7 @@ impl Showcase {
                 return true;
             }
             if self.keybindings.matches(actions::THEME, &key) {
-                let themes = Self::themes();
+                let themes = self.themes();
                 let current = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
@@ -1692,7 +1692,7 @@ impl Showcase {
                 return true;
             }
             if self.keybindings.matches(actions::THEME, &key) {
-                let themes = Self::themes();
+                let themes = self.themes();
                 let current = themes
                     .iter()
                     .position(|t| t.name == self.theme.name)
