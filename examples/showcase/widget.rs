@@ -2,7 +2,7 @@ use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 use crate::render::CardConfig;
-use chrono::Local;
+use chrono::{Local, Timelike};
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::keybindings::actions;
 use dracon_terminal_engine::framework::prelude::*;
@@ -39,7 +39,7 @@ impl Widget for Showcase {
             return true;
         }
         // Active animations always need re-rendering
-        if self.animations.has_active() {
+        if !self.animations.is_empty() {
             return true;
         }
         // Active scene always renders
