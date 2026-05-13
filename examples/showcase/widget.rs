@@ -1371,7 +1371,7 @@ impl Showcase {
                 if let Some(zone_id) = clicked_zone {
                     match zone_id {
                         // Theme palette swatches (PALETTE_BASE + i)
-                        id if (PALETTE_BASE..PALETTE_BASE + 20).contains(&id) => {
+                        id if (PALETTE_BASE..PALETTE_BASE + Self::themes().len()).contains(&id) => {
                             let idx = id - PALETTE_BASE;
                             self.pending_theme = Some(idx);
                             self.apply_filter();
