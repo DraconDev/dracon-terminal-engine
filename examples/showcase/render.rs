@@ -440,6 +440,7 @@ fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy:
     draw_text(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, Styles::empty());
 }
 
+#[allow(dead_code)]
 fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["  line 0  ▸ active", "  line 1", "  line 2", "  line 3", "  line 4", "  line 5", "  line 6", "  line 7", "  line 8", "  line 9", "  line 10", "  line 11", "  line 12", "  line 13", "  line 14"];
     let view_h = 6usize;

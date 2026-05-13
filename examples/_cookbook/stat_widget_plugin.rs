@@ -25,8 +25,9 @@ pub struct StatWidget {
 }
 
 #[derive(Clone, Copy)]
-pub(crate) enum Trend {
+pub enum Trend {
     Up,
+    #[allow(dead_code)]
     Down,
     Neutral,
 }

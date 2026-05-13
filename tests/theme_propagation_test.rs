@@ -343,6 +343,7 @@ impl ThemeAwareWidget {
         }
     }
 
+    #[allow(dead_code)]
     fn cycle_theme(&mut self) {
         self.theme = Theme::cyberpunk();
     }

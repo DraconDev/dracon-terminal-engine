@@ -17,6 +17,7 @@ use std::time::Duration;
 const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"];
 
 // JSONPlaceholder API base URL
+#[allow(dead_code)]
 const API_BASE: &str = "https://jsonplaceholder.typicode.com";
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
