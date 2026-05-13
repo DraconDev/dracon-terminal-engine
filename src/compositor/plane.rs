@@ -364,4 +364,52 @@ impl Plane {
             *cell = Cell::default();
         }
     }
+
+    /// Blits (copies) non-transparent, non-skip cells from `source` into this plane
+    /// at the given destination offset. This is significantly faster than creating
+    /// intermediate planes and manually cloning cells, as it avoids allocation entirely.
+    ///
+    /// Only cells where `source.cells[src].transparent == false && skip == false` are copied.
+    /// Cells outside the destination plane's bounds are silently clipped.
+    pub fn blit_from(&mut self, source: &Plane, dest_x: u16, dest_y: u16) {
+        let src_w = source.width as usize;
+        let src_h = source.height as usize;
+        let dst_w = self.width as usize;
+        let dst_h = self.height as usize;
+        let dx = dest_x as usize;
+        let dy = dest_y as usize;
+
+        // Skip entirely if offset is out of bounds
+        if dx >= dst_w || dy >= dst_h {
+            return;
+        }
+
+        let max_rows = (src_h).min(dst_h - dy);
+        let max_cols = (src_w).min(dst_w - dx);
+
+        for row in 0..max_rows {
+            let src_base = row * src_w;
+            let dst_base = (dy + row) * dst_w + dx;
+            for col in 0..max_cols {
+                let src_idx = src_base + col;
+                let src_cell = &source.cells[src_idx];
+                if !src_cell.transparent && !src_cell.skip {
+                    self.cells[dst_base + col] = src_cell.clone();
+                }
+            }
+        }
+    }
+
+    /// Resets all cells to transparent defaults without reallocating the underlying Vec.
+    /// Use this to reuse a Plane across frames instead of creating a new one each time.
+    pub fn reset_cells(&mut self) {
+        for cell in &mut self.cells {
+            cell.char = ' ';
+            cell.fg = Color::Reset;
+            cell.bg = Color::Reset;
+            cell.style = Styles::empty();
+            cell.transparent = true;
+            cell.skip = false;
+        }
+    }
 }
