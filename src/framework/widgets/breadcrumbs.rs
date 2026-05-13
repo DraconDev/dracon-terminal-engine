@@ -257,7 +257,9 @@ impl crate::framework::widget::Widget for Breadcrumbs {
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
         self.theme = *theme;
     }
+}
 
+impl Breadcrumbs {
     fn render_segment(&self, plane: &mut Plane, i: usize, _width: u16, x: &mut u16, _is_prefix: bool) {
         let segment = &self.segments[i];
         let is_last = i == self.segments.len() - 1;
