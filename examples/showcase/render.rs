@@ -210,7 +210,7 @@ pub fn render_card(config: &CardConfig, buffer: &mut Plane) {
     } else {
         buffer.reset_cells();
     }
-    let plane = buffer;
+    let mut plane = buffer;
     let t = &config.theme;
     let card_w_usize = config.width as usize;
     let card_h_usize = config.height as usize;
