@@ -629,7 +629,7 @@ impl Widget for Showcase {
             for i in 0..scroll_text.len() + 4 {
                 set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
             }
-            draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, true);
+            draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, Styles::BOLD);
             let rest: String = scroll_text.chars().skip(2).collect();
             draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, Styles::empty());
         }
@@ -754,7 +754,7 @@ impl Widget for Showcase {
                 );
 
                 // Message text
-                draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, true);
+                draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, Styles::BOLD);
             }
         }
 
@@ -785,7 +785,7 @@ impl Widget for Showcase {
                     set_cell(&mut plane, msg_x + msg_w - 1, msg_y, '┐', t.success, t.success);
 
                     // Message text
-                    draw_text(&mut plane, msg_x + 2, msg_y, &msg, t.bg, t.success, true);
+                    draw_text(&mut plane, msg_x + 2, msg_y, &msg, t.bg, t.success, Styles::BOLD);
                 }
             }
         }
@@ -1224,7 +1224,7 @@ impl Widget for Showcase {
                     set_cell(&mut plane, dbg_x + cx, dbg_y, '─', t.bg, t.error);
                 }
             }
-            draw_text(&mut plane, dbg_x + 2, dbg_y, dbg_text, t.bg, t.error, true);
+            draw_text(&mut plane, dbg_x + 2, dbg_y, dbg_text, t.bg, t.error, Styles::BOLD);
 
             let dbg_info = format!(
                 "FPS:{:>3} | Cards:{:>2} | Selected:{:>2} | Hover:{:>2?} | Search:{:>5}",
@@ -1339,7 +1339,7 @@ impl Widget for Showcase {
 
             // Title
             let title = " PROFILER [F12] ";
-            draw_text(&mut plane, panel_x + 2, panel_y + 1, title, t.primary, t.surface_elevated, true);
+            draw_text(&mut plane, panel_x + 2, panel_y + 1, title, t.primary, t.surface_elevated, Styles::BOLD);
 
             // Get stats from cached values
             let fps = self.fps.load(Ordering::Relaxed);
