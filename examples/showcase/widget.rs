@@ -602,23 +602,7 @@ impl Widget for Showcase {
                 };
 
                 let card = render_card(&card_config);
-
-                for cy in 0..card_h {
-                    for cx in 0..card_w {
-                        let src_idx = cy * card_w + cx;
-                        let dst_x = draw_x + cx;
-                        let dst_y = draw_y + cy;
-                        if dst_x < area.width as usize && dst_y < area.height as usize {
-                            let dst_idx = dst_y * area.width as usize + dst_x;
-                            if src_idx < card.cells.len()
-                                && dst_idx < plane.cells.len()
-                                && !card.cells[src_idx].transparent
-                            {
-                                plane.cells[dst_idx] = card.cells[src_idx].clone();
-                            }
-                        }
-                    }
-                }
+                plane.blit_from(&card, draw_x as u16, draw_y as u16);
 
                 const CARD_BASE: usize = 500;
                 let mut zones = self.zones.borrow_mut();
