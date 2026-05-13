@@ -88,8 +88,8 @@ impl Sparkline {
 
     /// Sets the data and recomputes the range.
     pub fn with_data(mut self, data: Vec<f64>) -> Self {
-        self.data = data;
         let (min, max) = Self::compute_range(&data);
+        self.data = data;
         self.min_value = min;
         self.max_value = max;
         self.dirty = true;
