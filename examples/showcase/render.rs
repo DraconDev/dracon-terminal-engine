@@ -68,7 +68,7 @@ pub fn draw_text(
     text: &str,
     fg: Color,
     bg: Color,
-    bold: bool,
+    style: Styles,
 ) {
     for (i, ch) in text.chars().enumerate() {
         let idx = y * plane.width as usize + x + i;
@@ -77,7 +77,7 @@ pub fn draw_text(
                 char: ch,
                 fg,
                 bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
+                style,
                 transparent: false,
                 skip: false,
             };
@@ -164,12 +164,12 @@ fn draw_text_at(
     text: &str,
     normal_fg: Color,
     bg: Color,
-    bold: bool,
+    style: Styles,
     search: &str,
     highlight_color: Color,
 ) {
     if search.is_empty() || !text.to_lowercase().contains(&search.to_lowercase()) {
-        draw_text(plane, x, y, text, normal_fg, bg, bold);
+        draw_text(plane, x, y, text, normal_fg, bg, style);
         return;
     }
     let lower = text.to_lowercase();
@@ -183,16 +183,16 @@ fn draw_text_at(
             Some(start) => {
                 if start > 0 {
                     let before = &rest[..start];
-                    draw_text(plane, pos, y, before, normal_fg, bg, bold);
+                    draw_text(plane, pos, y, before, normal_fg, bg, style);
                     pos += before.chars().count();
                 }
                 let match_str = &rest[start..start + q.len()];
-                draw_text(plane, pos, y, match_str, highlight_color, bg, true);
+                draw_text(plane, pos, y, match_str, highlight_color, bg, Styles::BOLD);
                 pos += match_str.chars().count();
                 remaining += start + q.len();
             }
             None => {
-                draw_text(plane, pos, y, rest, normal_fg, bg, bold);
+                draw_text(plane, pos, y, rest, normal_fg, bg, style);
                 break;
             }
         }

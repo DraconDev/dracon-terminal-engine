@@ -10,7 +10,6 @@ struct NotifierApp {
     should_quit: Rc<AtomicBool>,
     theme: Theme,
     notification_center: NotificationCenter,
-    buttons: Vec<(String, Rect, NotificationKind)>,
     dirty: bool,
 }
 
@@ -25,7 +24,6 @@ impl NotifierApp {
             should_quit,
             theme,
             notification_center: nc,
-            buttons: Vec::new(),
             dirty: true,
         }
     }

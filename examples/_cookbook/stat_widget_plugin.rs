@@ -341,6 +341,6 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .theme(env_theme);
     let _ = app.add_widget(Box::new(PluginLoader::new(env_theme)), Rect::new(0, 0, 80, 24));
-    app.run(|_| {});
+    app.run(|_| {})?;
     Ok(())
 }

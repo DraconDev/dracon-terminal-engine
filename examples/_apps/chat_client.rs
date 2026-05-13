@@ -32,7 +32,6 @@ use ratatui::layout::Rect;
 struct Post {
     #[serde(rename = "userId")]
     user_id: u32,
-    id: u32,
     title: String,
     body: String,
 }
