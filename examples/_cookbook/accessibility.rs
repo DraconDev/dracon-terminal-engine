@@ -496,8 +496,8 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let demo = AccessibilityDemo::new(theme);
 
-    let mut app = App::new()?;
-    app.title("Accessibility Demo")
+    let mut app = App::new()?
+        .title("Accessibility Demo")
         .fps(30)
         .theme(theme);
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));

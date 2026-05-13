@@ -400,15 +400,15 @@ mod tests {
     #[test]
     fn test_i18n_t_builtin() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("button.ok").as_ref(), "OK");
-        assert_eq!(i18n.t("button.cancel").as_ref(), "Cancel");
-        assert_eq!(i18n.t("nav.quit").as_ref(), "Quit");
+        assert_eq!(&*i18n.t("button.ok"), "OK");
+        assert_eq!(&*i18n.t("button.cancel"), "Cancel");
+        assert_eq!(&*i18n.t("nav.quit"), "Quit");
     }
 
     #[test]
     fn test_i18n_t_unknown_key() {
         let i18n = I18n::new("en");
-        assert_eq!(i18n.t("unknown.key").as_ref(), "unknown.key");
+        assert_eq!(&*i18n.t("unknown.key"), "unknown.key");
     }
 
     #[test]
@@ -422,7 +422,7 @@ mod tests {
     fn test_i18n_add() {
         let mut i18n = I18n::new("en");
         i18n.add("custom.key", "Custom Value");
-        assert_eq!(i18n.t("custom.key").as_ref(), "Custom Value");
+        assert_eq!(&*i18n.t("custom.key"), "Custom Value");
     }
 
     #[test]

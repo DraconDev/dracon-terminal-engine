@@ -742,36 +742,22 @@ fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize,
 }
 
 fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
-    // Input field
-    draw_text(plane, 1, 5, "[rust           ]", t.fg, t.surface, false);
-    let cursor_visible = (phase * 3.0).fract() < 0.6;
-    if cursor_visible {
-        set_cell(plane, 6, 5, '█', t.primary, t.surface);
-    }
-
-    // Dropdown suggestions
-    let suggestions = [
-        ("rustacean", t.fg_subtle),
-        ("> rust", t.primary),
-        ("rust-analyzer", t.fg_subtle),
-        ("rustdoc", t.fg_subtle),
-        ("rustfmt", t.fg_subtle),
-    ];
-
-    let highlight_idx = ((phase * 2.0).floor() as usize) % suggestions.len();
-    for (i, (text, color)) in suggestions.iter().enumerate() {
-        let y = 6 + i;
-        if y > 10 {
-            break;
-        }
-        let fg = if i == highlight_idx { t.primary } else { *color };
-        let prefix = if i == highlight_idx { "> " } else { "  " };
-        let full_text = format!("{}{}", prefix, text);
-        let truncated: String = full_text.chars().take(20).collect();
-        draw_text(plane, 1, y, &truncated, fg, t.surface, i == highlight_idx);
+fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+    draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, false);
+    if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 6, oy + 5, '█', t.primary, t.surface); }
+    let suggestions = ["rust-analyzer", "rustc", "cargo", "rustfmt", "clippy"];
+    let offset = ((phase * 0.5).sin() * 2.0).round() as i16;
+    for (i, s) in suggestions.iter().enumerate() {
+        let y = oy + 6 + i;
+        if y > oy + 10 { break; }
+        let x_offset = if i == 0 { offset } else { 0 };
+        let x = (ox + 2 + x_offset as usize).min(ox + 18);
+        let fg = if i == 0 { t.primary } else { t.fg_subtle };
+        let prefix = if i == 0 { "> " } else { "  " };
+        draw_text(plane, x, y, prefix, t.fg_muted, t.surface, false);
+        draw_text(plane, x + 2, y, s, fg, t.surface, false);
     }
 }
-
 fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
     let notifications = [
         (NotificationType::Info, "Info", "File saved", t.info),
