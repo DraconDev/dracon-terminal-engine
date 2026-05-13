@@ -137,9 +137,19 @@ impl AnimationManager {
         self.animations.len()
     }
 
-    /// Returns true if there are no active animations.
+    /// Returns true if there are no animations (including completed ones
+    /// not yet cleaned up). See [`Self::has_active`] for a check that
+    /// excludes completed animations.
     pub fn is_empty(&self) -> bool {
         self.animations.is_empty()
+    }
+
+    /// Returns true if there are any animations that haven't completed yet.
+    /// Unlike [`Self::is_empty`], this returns `false` if the only animations
+    /// remaining have already finished (they'll be cleaned up on the next
+    /// [`Self::tick`] call).
+    pub fn has_active(&self) -> bool {
+        self.animations.iter().any(|a| !a.is_done())
     }
 }
 

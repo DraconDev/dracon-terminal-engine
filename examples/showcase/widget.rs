@@ -29,7 +29,7 @@ impl Widget for Showcase {
     }
     fn needs_render(&self) -> bool {
         // Re-render when dirty, or when the clock second changes,
-        // or when animations are active
+        // or when animations are actively running (not just completed-but-uncleaned)
         if self.dirty {
             return true;
         }
@@ -38,8 +38,8 @@ impl Widget for Showcase {
         if current_second != self.last_render_second {
             return true;
         }
-        // Active animations always need re-rendering
-        if !self.animations.is_empty() {
+        // Only re-render if animations are actually still running
+        if self.animations.has_active() {
             return true;
         }
         // Active scene always renders
