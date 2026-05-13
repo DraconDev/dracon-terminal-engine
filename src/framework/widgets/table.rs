@@ -52,7 +52,7 @@ pub struct Table<T> {
     visible_count: usize,
     theme: Theme,
     on_select: Option<SelectCallback<T>>,
-    on_selection_change: Option<SelectionChangeCallback<T>>,
+    on_selection_change: Option<SelectionChangeCallback>,
     on_undo: Option<UndoRedoCallback>,
     on_redo: Option<UndoRedoCallback>,
     cell_text_fn: Option<CellTextFn<T>>,
@@ -182,6 +182,126 @@ impl<T: Clone + ToString> Table<T> {
     {
         self.on_header_click = Some(Box::new(f));
         self
+    }
+
+    /// Registers a callback invoked when the selection changes (including multi-select).
+    pub fn on_selection_change(mut self, f: impl FnMut(&HashSet<usize>) + 'static) -> Self {
+        self.on_selection_change = Some(Box::new(f));
+        self
+    }
+
+    /// Registers a callback invoked when undo is triggered (Ctrl+Z).
+    pub fn on_undo(mut self, f: impl FnMut() + 'static) -> Self {
+        self.on_undo = Some(Box::new(f));
+        self
+    }
+
+    /// Registers a callback invoked when redo is triggered (Ctrl+Y).
+    pub fn on_redo(mut self, f: impl FnMut() + 'static) -> Self {
+        self.on_redo = Some(Box::new(f));
+        self
+    }
+
+    /// Enables multi-select mode.
+    pub fn with_multi_select(mut self, enabled: bool) -> Self {
+        self.allow_multi_select = enabled;
+        self
+    }
+
+    /// Enables undo/redo support.
+    pub fn with_undo(mut self, enabled: bool) -> Self {
+        self.enable_undo = enabled;
+        self
+    }
+
+    /// Sets a context menu to show on right-click.
+    pub fn with_context_menu(mut self, menu: ContextMenu) -> Self {
+        self.context_menu = RefCell::new(Some(menu));
+        self
+    }
+
+    /// Returns the set of selected row indices in multi-select mode.
+    pub fn selected_indices(&self) -> &HashSet<usize> {
+        &self.selected_indices
+    }
+
+    /// Clears the current selection.
+    pub fn clear_selection(&mut self) {
+        if !self.selected_indices.is_empty() {
+            self.selected_indices.clear();
+            self.dirty = true;
+        }
+    }
+
+    /// Returns the drag manager for this table.
+    pub fn drag_manager(&self) -> &RefCell<DragManager<usize>> {
+        &self.drag_manager
+    }
+
+    /// Takes a snapshot of the current state for undo/redo.
+    fn snapshot(&self) -> TableState {
+        TableState {
+            selected: self.selected,
+            offset: self.offset,
+            sort_column: self.sort_column,
+            sort_ascending: self.sort_ascending,
+            selected_indices: self.selected_indices.clone(),
+        }
+    }
+
+    /// Pushes the current state onto the undo stack.
+    fn push_undo(&mut self) {
+        if self.enable_undo {
+            self.redo_stack.clear();
+            self.undo_stack.push(self.snapshot());
+            if self.undo_stack.len() > 50 {
+                self.undo_stack.remove(0);
+            }
+        }
+    }
+
+    /// Undo last operation.
+    fn undo(&mut self) {
+        if self.enable_undo && !self.undo_stack.is_empty() {
+            if let Some(state) = self.undo_stack.pop() {
+                let snapshot = self.snapshot();
+                self.redo_stack.push(snapshot);
+                self.apply_state(&state);
+            }
+            if let Some(ref mut cb) = self.on_undo {
+                cb();
+            }
+        }
+    }
+
+    /// Redo last undone operation.
+    fn redo(&mut self) {
+        if self.enable_undo && !self.redo_stack.is_empty() {
+            if let Some(state) = self.redo_stack.pop() {
+                let snapshot = self.snapshot();
+                self.undo_stack.push(snapshot);
+                self.apply_state(&state);
+            }
+            if let Some(ref mut cb) = self.on_redo {
+                cb();
+            }
+        }
+    }
+
+    /// Applies a state snapshot to the table.
+    fn apply_state(&mut self, state: &TableState) {
+        self.selected = state.selected.min(self.rows.len().saturating_sub(1));
+        self.offset = state.offset;
+        self.sort_column = state.sort_column;
+        self.sort_ascending = state.sort_ascending;
+        self.selected_indices = state.selected_indices.clone();
+        if self.selected >= self.offset + self.visible_count {
+            self.offset = self.selected.saturating_sub(self.visible_count) + 1;
+        }
+        if self.selected < self.offset {
+            self.offset = self.selected;
+        }
+        self.dirty = true;
     }
 
     /// Sets the active sort column and direction for rendering indicators.
