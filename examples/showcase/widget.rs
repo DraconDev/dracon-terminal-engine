@@ -1332,6 +1332,9 @@ impl Widget for Showcase {
             return false;
         }
 
+        // Any key press should trigger a re-render
+        self.dirty = true;
+
         // Log input event for debug
         let key_desc = format!("{:?}", key.code);
         let mods = format!("{:?}", key.modifiers);
@@ -1348,6 +1351,8 @@ impl Widget for Showcase {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        // Any mouse event should trigger a re-render (hover, click, scroll)
+        self.dirty = true;
         self.mouse_pos = Some((col, row));
         let consumed = self.dispatch_mouse(kind, col, row);
         if self.show_input_debug {
