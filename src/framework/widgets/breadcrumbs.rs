@@ -9,6 +9,9 @@ use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 use std::path::Path;
 
+/// Callback type for breadcrumb navigation events.
+type NavigateCallback = Box<dyn FnMut(usize) + 'static>;
+
 /// A path breadcrumb navigation widget.
 ///
 /// Renders a "/"-separated sequence of clickable path segments. Clicking a segment
