@@ -71,6 +71,8 @@ impl Tree {
             visible_count: 10,
             on_select: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            drag_manager: RefCell::new(DragManager::new()),
+            context_menu: RefCell::new(None),
         }
     }
 

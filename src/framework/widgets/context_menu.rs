@@ -96,6 +96,13 @@ impl ContextMenu {
         self
     }
 
+    /// Sets the anchor position for the menu (mutable variant).
+    pub fn set_anchor(&mut self, x: u16, y: u16) {
+        self.anchor_x = x;
+        self.anchor_y = y;
+        self.dirty = true;
+    }
+
     /// Returns whether the menu is currently visible.
     pub fn is_visible(&self) -> bool {
         self.visible
