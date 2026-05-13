@@ -177,7 +177,6 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
         }
 
         // Right-click: Show context menu
-        // Right-click: Show context menu
         if let MouseEventKind::Down(crate::input::event::MouseButton::Right) = kind {
             if let Some(menu) = &mut *self.context_menu.borrow_mut() {
                 menu.show();
@@ -222,8 +221,10 @@ impl WidgetState for TextEditorAdapter {
         })
     }
 
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
 fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(content) = json.get("content").and_then(|v| v.as_str()) {
+            let lines: Vec<String> = if content.is_empty() {
                 vec![String::new()]
             } else {
                 content.lines().map(|s| s.to_string()).collect()
