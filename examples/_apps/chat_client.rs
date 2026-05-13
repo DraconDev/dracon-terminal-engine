@@ -30,7 +30,8 @@ use ratatui::layout::Rect;
 
 #[derive(Clone, serde::Deserialize)]
 struct Post {
-    userId: u32,
+    #[serde(rename = "userId")]
+    user_id: u32,
     id: u32,
     title: String,
     body: String,
@@ -71,7 +72,7 @@ impl From<Post> for Message {
         };
         let text = format!("{}: {}", title, body);
         Self {
-            sender: format!("User #{}", post.userId),
+            sender: format!("User #{}", post.user_id),
             text,
             time: chrono_lite_timestamp(),
             is_read: false,

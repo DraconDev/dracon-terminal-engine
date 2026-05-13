@@ -25,7 +25,7 @@ pub struct StatWidget {
 }
 
 #[derive(Clone, Copy)]
-enum Trend {
+pub(crate) enum Trend {
     Up,
     Down,
     Neutral,
