@@ -56,7 +56,6 @@
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 
 /// Internationalization state and translation lookup.
 #[derive(Debug, Clone)]
@@ -175,7 +174,9 @@ impl I18n {
 
     /// Get all available translation keys.
     pub fn keys(&self) -> impl Iterator<Item = &str> {
-        self.translations.keys().chain(self.fallback_map.keys())
+        self.translations.keys()
+            .chain(self.fallback_map.keys())
+            .map(|s| s.as_str())
     }
 
     /// Check if a key exists in the current locale.
@@ -188,6 +189,7 @@ impl I18n {
         self.translations.insert(key.to_string(), value.to_string());
     }
 
+    /// Load built-in English translations.
     /// Load built-in English translations.
     fn load_builtin_en(&mut self) {
         self.fallback_map = HashMap::from([
@@ -218,9 +220,8 @@ impl I18n {
             ("msg.info", "Information"),
             ("msg.confirm", "Confirm"),
             ("msg.delete_confirm", "Are you sure you want to delete this?"),
-            // Status
-            ("status.connected", "Connected"),
-            ("status.disconnected", "Disconnected"),
+        ]);
+    }
             ("status.loading", "Loading"),
             ("status.ready", "Ready"),
             ("status.error", "Error"),

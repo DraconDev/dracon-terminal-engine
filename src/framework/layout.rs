@@ -246,6 +246,9 @@ impl Layout {
             }
         }
 
+        // Cache the result
+        *self.cached_layout.borrow_mut() = Some((area, results.clone()));
+
         results
     }
 }
