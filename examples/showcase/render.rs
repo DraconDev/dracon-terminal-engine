@@ -741,7 +741,6 @@ fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize,
     }
 }
 
-fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u16) {
 fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, false);
     if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 6, oy + 5, '█', t.primary, t.surface); }

@@ -152,7 +152,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
             // Calculate how many segments can fit
             let max_width = area.width as usize;
             let mut used_width = 0;
-            let mut show_prefix = prefix;
+            let mut show_suffix = suffix;
 
             // Add prefix segments
             for i in 0..prefix {
@@ -178,7 +178,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
                 }
             }
 
-            Some((show_prefix, self.segments.len() - show_suffix))
+            Some((1, 1 + show_suffix))
         } else {
             None
         };

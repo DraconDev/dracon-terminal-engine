@@ -147,14 +147,14 @@ impl I18n {
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&'a self, key: &'a str) -> Cow<'a, str> {
+    pub fn t(&self, key: &str) -> Cow<'_, str> {
         // Try current locale
         if let Some(value) = self.translations.get(key) {
-            return Cow::Borrowed(value);
+            return Cow::Borrowed(value.as_str());
         }
         // Fall back to English
         if let Some(value) = self.fallback_map.get(key) {
-            return Cow::Borrowed(value);
+            return Cow::Borrowed(value.as_str());
         }
         // Return the key itself as last resort
         Cow::Borrowed(key)
