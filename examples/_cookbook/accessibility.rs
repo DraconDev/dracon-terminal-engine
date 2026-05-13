@@ -493,8 +493,6 @@ impl Widget for AccessibilityDemo {
 }
 
 fn main() -> std::io::Result<()> {
-    let should_quit = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let q = should_quit.clone();
     let theme = Theme::from_env_or(Theme::nord());
     let demo = AccessibilityDemo::new(theme);
 
@@ -503,15 +501,5 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(theme);
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
-    app.on_input(move |key| {
-            use dracon_terminal_engine::input::event::KeyCode;
-            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
-                q.store(true, Ordering::SeqCst);
-            }
-        });
-    app.run(move |ctx| {
-            if should_quit.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
+    app.run(|_| {})
 }
