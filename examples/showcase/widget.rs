@@ -1063,6 +1063,7 @@ impl Widget for Showcase {
                 (&kb_theme, "Cycle theme"),
                 ("d", "Debug overlay"),
                 ("i", "Input debug"),
+                ("F12", "Profiler"),
                 (&kb_quit_back, "Quit / Dismiss"),
                 (&kb_help, "Toggle this help"),
                 ("", ""),

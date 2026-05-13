@@ -247,3 +247,4 @@ impl WidgetState for TextEditorAdapter {
         self.dirty = true;
         Ok(())
     }
+}
