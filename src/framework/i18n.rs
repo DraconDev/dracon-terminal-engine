@@ -54,6 +54,7 @@
 //! }
 //! ```
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs;
 
@@ -142,20 +143,21 @@ impl I18n {
     }
 
     /// Translate a key to the current locale.
+    /// Translate a key to the current locale.
     ///
     /// If the key is not found in the current locale, falls back to
     /// English (built-in) translations, then returns the key itself.
-    pub fn t<'a>(&self, key: &'a str) -> &'a str {
+    pub fn t<'a>(&'a self, key: &'a str) -> Cow<'a, str> {
         // Try current locale
         if let Some(value) = self.translations.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Fall back to English
         if let Some(value) = self.fallback_map.get(key) {
-            return value;
+            return Cow::Borrowed(value);
         }
         // Return the key itself as last resort
-        key
+        Cow::Borrowed(key)
     }
 
     /// Translate with interpolation support.
@@ -167,14 +169,13 @@ impl I18n {
     /// // If "items_count" is "{count} items", returns "5 items"
     /// ```
     pub fn t_interpolate(&self, key: &str, vars: &[(&str, &str)]) -> String {
-        let template = self.t(key).to_string();
+        let template = self.t(key).as_ref().to_string();
         let mut result = template;
         for (name, value) in vars {
             result = result.replace(&format!("{{{name}}}"), value);
         }
         result
     }
-
     /// Get all available translation keys.
     pub fn keys(&self) -> impl Iterator<Item = &str> {
         self.translations

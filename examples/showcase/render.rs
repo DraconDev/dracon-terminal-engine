@@ -781,16 +781,6 @@ fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         set_cell(plane, ox + 25, y + 2, '╯', t.outline, t.surface);
     }
 }
-        set_cell(plane, 25, y + 1, '│', t.outline, t.surface);
-
-        // Bottom border
-        set_cell(plane, 16, y + 2, '╰', t.outline, t.surface);
-        for cx in 17..25 {
-            set_cell(plane, cx, y + 2, '─', t.outline, t.surface);
-        }
-        set_cell(plane, 25, y + 2, '╯', t.outline, t.surface);
-    }
-}
 
 #[derive(Clone, Copy)]
 enum NotificationType {
