@@ -4,12 +4,14 @@
 //! when creating many planes per frame.
 
 use dracon_terminal_engine::framework::prelude::*;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 struct PoolDemo {
     cell_pool: CellPool,
     theme: Theme,
     dirty: bool,
-    should_quit: Rc<AtomicBool>,
+    should_quit: Arc<AtomicBool>,
 }
 
 impl PoolDemo {
