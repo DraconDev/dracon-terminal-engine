@@ -1,7 +1,6 @@
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -261,10 +260,10 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let app_widget = NotifierApp::new(Rc::clone(&should_quit), theme);
 
-    let mut app = App::new()?;
-    app.title("Notification Center");
-    app.fps(30);
-    app.theme(theme);
+    let mut app = App::new()?
+        .title("Notification Center")
+        .fps(30)
+        .theme(theme);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.run(|ctx| {
         if should_quit.load(Ordering::SeqCst) {
