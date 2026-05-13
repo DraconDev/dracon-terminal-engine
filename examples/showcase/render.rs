@@ -107,7 +107,7 @@ pub fn render_features_bar(
 ) -> usize {
     let features = [
         ("37", "Widgets", theme.info),
-        ("20", "Themes", theme.secondary),
+        ("21", "Themes", theme.secondary),
         ("~", "Animations", theme.warning),
         ("DnD", "Drag & Drop", theme.success),
         ("KEY", "Keyboard", theme.primary),
@@ -350,13 +350,13 @@ pub fn render_card(config: &CardConfig) -> Plane {
             render_framework_fm_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "sqlite_browser" => {
-            render_file_manager_preview(&mut plane, config.theme, card_phase, config.width)
+            render_sqlite_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "widget_tutorial" => {
-            render_widget_preview(&mut plane, config.theme, card_phase, config.width)
+            render_tutorial_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "debug_overlay" => {
-            render_command_preview(&mut plane, config.theme, card_phase, config.width)
+            render_debug_overlay_preview(&mut plane, config.theme, card_phase, config.width)
         }
         "table_widget" => render_table_preview(&mut plane, config.theme, card_phase, config.width),
         "calendar" => render_calendar_preview(&mut plane, config.theme, card_phase, config.width),
@@ -1385,10 +1385,6 @@ fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, _card_w: u1
     draw_text(plane, 1, 11, &bar, t.info, t.surface, false);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// WIDGET IMPL
-// ═══════════════════════════════════════════════════════════════════════════════
-// WIDGET IMPL
 // ═══════════════════════════════════════════════════════════════════════════════
 // WIDGET IMPL
 // ═══════════════════════════════════════════════════════════════════════════════
