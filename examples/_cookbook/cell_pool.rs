@@ -118,8 +118,8 @@ impl Widget for PoolDemo {
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
-    let should_quit = Rc::new(AtomicBool::new(false));
-    let quit_clone = Rc::clone(&should_quit);
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_clone = Arc::clone(&should_quit);
     let demo = PoolDemo::new(theme, should_quit);
 
     let mut app = App::new()?;
