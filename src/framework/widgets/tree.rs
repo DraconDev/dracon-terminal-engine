@@ -385,7 +385,9 @@ impl crate::framework::widget::Widget for Tree {
                 true
             }
             crate::input::event::MouseEventKind::Moved => {
-                if let Some(path) = self.node_at_row(row) {
+                let adjusted_row = (row as usize).saturating_add(self.scroll_offset);
+                let adjusted_row = adjusted_row.min(u16::MAX as usize) as u16;
+                if let Some(path) = self.node_at_row(adjusted_row) {
                     if self.hovered_path.as_ref() != Some(&path) {
                         self.hovered_path = Some(path);
                         self.dirty = true;
