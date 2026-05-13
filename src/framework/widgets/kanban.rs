@@ -6,7 +6,7 @@
 use std::cell::RefCell;
 
 use crate::compositor::{Color, Plane, Styles};
-use crate::framework::dragdrop::{DragGhost, DragManager, DragPhase, DropTarget};
+use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
@@ -621,12 +621,10 @@ impl crate::framework::widget::Widget for Kanban {
                     if card_idx < self.columns[col_idx].cards.len() {
                         self.select_card(col_idx, card_idx);
 
-                        // Start drag if enabled
-                        if let Some(f) = self.on_card_move.as_ref() {
-                            let _ = f; // suppress unused warning
-                        }
+                        if self.on_card_move.is_some() {
                         self.is_dragging_card = true;
                         self.drag_card_pos = Some((col_idx, card_idx));
+                    }
                     }
                 } else if col_idx < self.columns.len() {
                     // Clicked on column header - select first card
