@@ -101,6 +101,8 @@ pub struct Showcase {
     pub(crate) cached_stats_text: String,
     /// Cached category counts, recomputed only when examples list changes.
     pub(crate) cached_cat_counts: [usize; 7],
+    /// Cached clock text ("HH:MM:SS"), updated once per second.
+    pub(crate) cached_clock_text: RefCell<String>,
 }
 
 impl Showcase {
@@ -188,6 +190,7 @@ impl Showcase {
             last_render_second: 0,
             cached_stats_text: String::new(),
             cached_cat_counts: [0usize; 7],
+            cached_clock_text: RefCell::new(String::new()),
         };
         // Initialize cached stats text and category counts
         showcase.apply_filter();

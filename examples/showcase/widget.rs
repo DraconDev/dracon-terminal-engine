@@ -36,6 +36,8 @@ impl Widget for Showcase {
         let now = chrono::Local::now();
         let current_second = now.num_seconds_from_midnight();
         if current_second != self.last_render_second {
+            // Cache clock text when second changes to avoid formatting in render()
+            *self.cached_clock_text.borrow_mut() = now.format("%H:%M:%S").to_string();
             return true;
         }
         // Only re-render if animations are actually still running
@@ -126,9 +128,8 @@ impl Widget for Showcase {
             set_cell(&mut plane, x, title_y, ' ', t.primary, t.primary);
         }
 
-        // Live clock
-        let now = Local::now();
-        let clock_text = now.format("%H:%M:%S").to_string();
+        // Live clock (cached in needs_render, updated once per second)
+        let clock_text = self.cached_clock_text.borrow();
         let clock_x = title_x + title_text.len() + 2;
         if clock_x + clock_text.len() < area.width as usize - 10 {
             draw_text(
@@ -141,6 +142,7 @@ impl Widget for Showcase {
                 false,
             );
         }
+        drop(clock_text);
 
         // FPS counter (right-aligned)
         let mut right_x = area.width as usize;
