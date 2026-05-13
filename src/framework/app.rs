@@ -553,11 +553,7 @@ impl App {
                                     Event::Mouse(m) => log_mouse_event(m),
                                     _ => {}
                                 }
-                                match &event {
-                                    #[cfg(feature = "debug_events")]
-                                    _ => {}
-                                    _ => { self.handle_event(&event, &running); }
-                                }
+                                self.handle_event(&event, &running);
                             }
                         }
                     }

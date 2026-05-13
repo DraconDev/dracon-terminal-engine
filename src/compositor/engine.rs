@@ -103,7 +103,7 @@ impl Compositor {
     }
 
     /// Adds a plane to the compositor, inserting it at the correct z-index position.
-pub fn add_plane(&mut self, plane: Plane) {
+    pub fn add_plane(&mut self, plane: Plane) {
         self.planes.push(plane);
     }
 

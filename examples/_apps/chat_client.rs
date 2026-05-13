@@ -102,12 +102,12 @@ struct ChatState {
     is_loading: bool,
     loading_error: Option<String>,
     spinner_frame: usize,
-    #[cfg(feature = "r#async")]
+    #[cfg(feature = "async")]
     pending_fetch: RefCell<Option<tokio::task::JoinHandle<Result<Vec<Message>, String>>>>,
     // Async state for sending messages
     is_sending: bool,
     pending_message: Option<String>,
-    #[cfg(feature = "r#async")]
+    #[cfg(feature = "async")]
     pending_send: RefCell<Option<tokio::task::JoinHandle<()>>>,
 }
 
@@ -147,12 +147,12 @@ impl ChatState {
             is_loading: true, // Start loading immediately
             loading_error: None,
             spinner_frame: 0,
-            #[cfg(feature = "r#async")]
+            #[cfg(feature = "async")]
             pending_fetch: RefCell::new(None),
             // Async state for sending
             is_sending: false,
             pending_message: None,
-            #[cfg(feature = "r#async")]
+            #[cfg(feature = "async")]
             pending_send: RefCell::new(None),
         }
     }
@@ -209,7 +209,7 @@ impl ChatState {
         self.cursor_pos = 0;
         self.dirty = true;
 
-        #[cfg(feature = "r#async")]
+        #[cfg(feature = "async")]
         {
             let text_clone = text.clone();
             let handle = tokio::spawn(async move {
@@ -221,7 +221,7 @@ impl ChatState {
             *self.pending_send.borrow_mut() = Some(handle);
         }
 
-        #[cfg(not(feature = "r#async"))]
+        #[cfg(not(feature = "async"))]
         {
             // Fallback: add message immediately with simulated delay
             self.messages.push(Message::new("You", &text, "Now", true));
@@ -233,7 +233,7 @@ impl ChatState {
         }
     }
 
-    #[cfg(feature = "r#async")]
+    #[cfg(feature = "async")]
     fn poll_send_result(&mut self) {
         let finished = {
             let mut handle_opt = self.pending_send.borrow_mut();
@@ -272,10 +272,10 @@ impl ChatState {
         }
     }
 
-    #[cfg(not(feature = "r#async"))]
+    #[cfg(not(feature = "async"))]
     fn poll_send_result(&mut self) {}
 
-    #[cfg(feature = "r#async")]
+    #[cfg(feature = "async")]
     fn start_fetch(&mut self) {
         self.is_loading = true;
         self.loading_error = None;
@@ -305,14 +305,14 @@ impl ChatState {
         *self.pending_fetch.borrow_mut() = Some(handle);
     }
 
-    #[cfg(not(feature = "r#async"))]
+    #[cfg(not(feature = "async"))]
     fn start_fetch(&mut self) {
         self.is_loading = false;
         self.loading_error = Some("Async feature not enabled".to_string());
         self.dirty = true;
     }
 
-    #[cfg(feature = "r#async")]
+    #[cfg(feature = "async")]
     fn poll_fetch_result(&mut self) {
         let finished = {
             let mut handle_opt = self.pending_fetch.borrow_mut();
@@ -350,7 +350,7 @@ impl ChatState {
         }
     }
 
-    #[cfg(not(feature = "r#async"))]
+    #[cfg(not(feature = "async"))]
     fn poll_fetch_result(&mut self) {}
 
 

@@ -1266,25 +1266,25 @@ impl Theme {
             Color::Rgb(0, 0, 0)
         };
         let primary_hover = Color::Rgb(
-            primary_r.saturating_add(16.min(255 - primary_r) / 8),
-            primary_g.saturating_add(16.min(255 - primary_g) / 8),
-            primary_b.saturating_add(16.min(255 - primary_b) / 8),
+            primary_r.saturating_add(16.min((255 - primary_r) / 8)),
+            primary_g.saturating_add(16.min((255 - primary_g) / 8)),
+            primary_b.saturating_add(16.min((255 - primary_b) / 8)),
         );
         let primary_active = Color::Rgb(
-            primary_r.saturating_add(30.min(255 - primary_r) / 4),
-            primary_g.saturating_add(30.min(255 - primary_g) / 4),
-            primary_b.saturating_add(30.min(255 - primary_b) / 4),
+            primary_r.saturating_add(30.min((255 - primary_r) / 4)),
+            primary_g.saturating_add(30.min((255 - primary_g) / 4)),
+            primary_b.saturating_add(30.min((255 - primary_b) / 4)),
         );
         let secondary = fg;
         let secondary_hover = Color::Rgb(
-            fg_r.saturating_add(12.min(255 - fg_r) / 8),
-            fg_g.saturating_add(12.min(255 - fg_g) / 8),
-            fg_b.saturating_add(12.min(255 - fg_b) / 8),
+            fg_r.saturating_add(12.min((255 - fg_r) / 8)),
+            fg_g.saturating_add(12.min((255 - fg_g) / 8)),
+            fg_b.saturating_add(12.min((255 - fg_b) / 8)),
         );
         let secondary_active = Color::Rgb(
-            fg_r.saturating_add(20.min(255 - fg_r) / 6),
-            fg_g.saturating_add(20.min(255 - fg_g) / 6),
-            fg_b.saturating_add(20.min(255 - fg_b) / 6),
+            fg_r.saturating_add(20.min((255 - fg_r) / 6)),
+            fg_g.saturating_add(20.min((255 - fg_g) / 6)),
+            fg_b.saturating_add(20.min((255 - fg_b) / 6)),
         );
         let (outline_r, outline_g, outline_b) = (
             bg_r.saturating_add(30.min((255 - bg_r) / 4)),
@@ -1303,7 +1303,11 @@ impl Theme {
             bg_b.saturating_add(25.min((255 - bg_b) / 5)),
         );
         let error = Color::Rgb(235, 75, 75);
-        let error_bg = Color::Rgb(bg_r.saturating_add(20), bg_g.saturating_mul(2 / 3), bg_b.saturating_mul(2 / 3));
+        let error_bg = Color::Rgb(
+            bg_r.saturating_add(20),
+            (bg_g as u32 * 2 / 3) as u8,
+            (bg_b as u32 * 2 / 3) as u8,
+        );
         let success = Color::Rgb(73, 201, 73);
         let success_bg = Color::Rgb(20, 50, 20);
         let warning = Color::Rgb(227, 180, 60);
@@ -1329,9 +1333,9 @@ impl Theme {
             bg_b.saturating_add(10),
         );
         let scrollbar_thumb = Color::Rgb(
-            outline_r.saturating_add(30.min(255 - outline_r) / 4),
-            outline_g.saturating_add(30.min(255 - outline_g) / 4),
-            outline_b.saturating_add(30.min(255 - outline_b) / 4),
+            outline_r.saturating_add(30.min((255 - outline_r) / 4)),
+            outline_g.saturating_add(30.min((255 - outline_g) / 4)),
+            outline_b.saturating_add(30.min((255 - outline_b) / 4)),
         );
         let scrollbar_thumb_hover = outline;
         let disabled_fg = Color::Rgb(fg_muted_r, fg_muted_g, fg_muted_b);
