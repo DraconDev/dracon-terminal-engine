@@ -4,24 +4,23 @@
 //! fixed, min, max, ratio). Inspired by CSS flexbox and ratatui's Layout.
 
 #[cfg(test)]
+#[cfg(test)]
 use proptest::prelude::*;
 
-use ratatui::layout::Rect;
-use ratatui::layout::Rect;
-#[allow(unused)]
 use std::cell::RefCell;
+use ratatui::layout::Rect;
 
 /// Axis along which constraints are resolved.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Direction {
     /// Distribute constraints horizontally (default).
+    #[default]
     Horizontal,
     /// Distribute constraints vertically.
     Vertical,
 }
+
 /// A constraint that defines how a dimension is sized.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Constraint {
     Percentage(u16),
     /// Fixed size in cells.
     Fixed(u16),
