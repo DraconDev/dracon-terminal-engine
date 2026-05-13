@@ -14,16 +14,19 @@ use std::path::Path;
 /// Renders a "/"-separated sequence of clickable path segments. Clicking a segment
 /// fires the `on_navigate` callback with the segment index.
 pub struct Breadcrumbs {
+pub struct Breadcrumbs {
     id: WidgetId,
-    segments: Vec<String>,
+    path: Vec<String>,
     theme: Theme,
+    width: u16,
+    #[allow(dead_code)]
     height: u16,
     clickable: bool,
-    on_navigate: Option<Box<dyn FnMut(usize)>>,
+    on_navigate: Option<NavigateCallback>,
     area: std::cell::Cell<Rect>,
     dirty: bool,
+    scroll_offset: u16,
 }
-
 impl Breadcrumbs {
     /// Creates a `Breadcrumbs` from a list of segment strings.
     pub fn new(segments: Vec<String>) -> Self {

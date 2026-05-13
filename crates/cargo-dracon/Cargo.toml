@@ -1,0 +1,20 @@
+[package]
+name = "cargo-dracon"
+version = "0.1.0"
+edition = "2021"
+authors = ["Dracon Terminal Engine Team"]
+description = "CLI tool for creating and managing Dracon Terminal Engine projects"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/DraconDev/dracon-terminal-engine"
+keywords = ["terminal", "tui", "cli", "dracon"]
+categories = ["command-line-interface"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+anyhow = "1.0"
+
+[[bin]]
+name = "cargo-dracon"
+path = "src/main.rs"
