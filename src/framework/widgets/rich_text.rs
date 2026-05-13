@@ -206,6 +206,12 @@ impl RenderState {
     }
 }
 
+/// Text style tuple: (foreground color, background color, text style)
+pub type TextStyle = (Color, Color, Styles);
+
+/// Render bounds: (width, height)
+pub type RenderBounds = (u16, u16);
+
 fn render_inline(
     plane: &mut Plane,
     inlines: &[Inline],
@@ -216,18 +222,18 @@ fn render_inline(
     fg: Color,
     bg: Color,
     style: Styles,
-) {
+) -> bool {
     for inline in inlines {
         match inline {
             Inline::Text(text) => {
                 for word in text.split_inclusive(' ') {
                     if !state.write_word(plane, word, width, height, fg, bg, style) {
-                        return;
+                        return false;
                     }
                 }
             }
             Inline::Bold(children) => {
-                render_inline(
+                if !render_inline(
                     plane,
                     children,
                     theme,
@@ -237,10 +243,12 @@ fn render_inline(
                     theme.fg,
                     bg,
                     style | Styles::BOLD,
-                );
+                ) {
+                    return false;
+                }
             }
             Inline::Italic(children) => {
-                render_inline(
+                if !render_inline(
                     plane,
                     children,
                     theme,
@@ -250,13 +258,15 @@ fn render_inline(
                     theme.fg,
                     bg,
                     style | Styles::ITALIC,
-                );
+                ) {
+                    return false;
+                }
             }
             Inline::Code(text) => {
                 for word in text.split_inclusive(' ') {
                     if !state.write_word(plane, word, width, height, theme.fg, theme.secondary, style)
                     {
-                        return;
+                        return false;
                     }
                 }
             }
@@ -271,7 +281,7 @@ fn render_inline(
                         bg,
                         style | Styles::UNDERLINE,
                     ) {
-                        return;
+                        return false;
                     }
                 }
             }

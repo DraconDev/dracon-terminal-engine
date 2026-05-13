@@ -23,8 +23,11 @@ pub enum ValidationRule {
     /// Regex pattern match.
     Regex(String),
     /// Custom validator returning an error message if invalid.
-    Custom(Box<dyn Fn(&str) -> Option<String>>),
+    Custom(ValidatorFn),
 }
+
+/// Callback for custom validation.
+pub type ValidatorFn = Box<dyn Fn(&str) -> Option<String>>;
 
 impl ValidationRule {
     /// Validates a value against this rule, returning an error message if invalid.
