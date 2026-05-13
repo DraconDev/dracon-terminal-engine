@@ -202,8 +202,15 @@ fn draw_highlighted_text(
     }
 }
 
-pub fn render_card(config: &CardConfig) -> Plane {
-    let mut plane = Plane::new(0, config.width, config.height);
+pub fn render_card(config: &CardConfig, buffer: &mut Plane) {
+    // Reset and resize buffer if dimensions changed
+    let need_resize = buffer.width != config.width || buffer.height != config.height;
+    if need_resize {
+        *buffer = Plane::new(0, config.width, config.height);
+    } else {
+        buffer.reset_cells();
+    }
+    let plane = buffer;
     let t = &config.theme;
     let card_w_usize = config.width as usize;
     let card_h_usize = config.height as usize;
