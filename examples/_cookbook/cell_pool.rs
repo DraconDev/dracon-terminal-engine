@@ -15,7 +15,7 @@ struct PoolDemo {
 }
 
 impl PoolDemo {
-    fn new(theme: Theme, should_quit: Rc<AtomicBool>) -> Self {
+    fn new(theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             cell_pool: CellPool::new(),
             theme,
