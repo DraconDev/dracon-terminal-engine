@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 
 use crate::compositor::{Plane, Styles};
-use crate::framework::dragdrop::{DragGhost, DragManager};
+use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
@@ -29,7 +29,7 @@ pub struct TableRow<T> {
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
 pub type CellTextFn<T> = Box<dyn Fn(&T, usize) -> String>;
 pub type HeaderClickCallback = Box<dyn FnMut(usize)>;
-pub type SelectionChangeCallback<T> = Box<dyn FnMut(&HashSet<usize>)>;
+pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
 pub type UndoRedoCallback = Box<dyn FnMut()>;
 
 /// Inner state snapshot for undo/redo.
@@ -88,6 +88,9 @@ impl<T: Clone + ToString> Table<T> {
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
+            on_selection_change: None,
+            on_undo: None,
+            on_redo: None,
             cell_text_fn: None,
             on_header_click: None,
             sort_column: None,
@@ -95,6 +98,14 @@ impl<T: Clone + ToString> Table<T> {
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
             hovered_row: None,
+            allow_multi_select: false,
+            selected_indices: HashSet::new(),
+            last_selected: None,
+            drag_manager: RefCell::new(DragManager::new()),
+            context_menu: RefCell::new(None),
+            enable_undo: false,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
@@ -109,6 +120,9 @@ impl<T: Clone + ToString> Table<T> {
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
+            on_selection_change: None,
+            on_undo: None,
+            on_redo: None,
             cell_text_fn: None,
             on_header_click: None,
             sort_column: None,
@@ -116,6 +130,14 @@ impl<T: Clone + ToString> Table<T> {
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
             hovered_row: None,
+            allow_multi_select: false,
+            selected_indices: HashSet::new(),
+            last_selected: None,
+            drag_manager: RefCell::new(DragManager::new()),
+            context_menu: RefCell::new(None),
+            enable_undo: false,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
