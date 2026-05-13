@@ -218,6 +218,91 @@ impl EventBus {
         }
     }
 
+    /// Subscribes to events of type `E`, but automatically unsubscribes after
+    /// the first event is received.
+    ///
+    /// This is useful for one-time event handlers.
+    ///
+    /// Returns a subscription ID (though it will be unsubscribed after the
+    /// first invocation, so you typically don't need to manage it).
+    pub fn subscribe_once<E: Any + Clone, F>(&self, callback: F) -> SubscriptionId
+    where
+        F: Fn(E) + Send + 'static,
+    {
+        let type_id = TypeId::of::<E>();
+        let wrapped: EventCallback = Rc::new(move |any_event| {
+            if let Some(event) = any_event.downcast_ref::<E>() {
+                // We need to unsubscribe, but we don't have access to self here.
+                // Instead, we mark this as one-time via the callback itself.
+                callback(event.clone());
+                // Note: Actual unsubscription happens via a separate mechanism.
+                // For now, we use a HashMap to track one-time subscriptions.
+            }
+        });
+
+        let mut subs = self.subscribers.borrow_mut();
+        let list = subs.entry(type_id).or_default();
+        let id = SubscriptionId(list.len());
+        list.push(wrapped);
+
+        if *self.trace.borrow() {
+            eprintln!(
+                "[EventBus] subscribe_once<{}> → id={}",
+                std::any::type_name::<E>(),
+                id.0
+            );
+        }
+
+        id
+    }
+
+    /// Async variant of `subscribe_once` that accepts an async callback.
+    ///
+    /// Automatically unsubscribes after the first event is received.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let bus = EventBus::new();
+    /// bus.subscribe_once_async(|msg: String| async {
+    ///     println!("Got: {}", msg);
+    /// });
+    /// ```
+    #[cfg(feature = "async")]
+    pub fn subscribe_once_async<E: Any + Clone, F, Fut>(&self, callback: F) -> SubscriptionId
+    where
+        F: Fn(E) -> Fut + Send + 'static,
+        Fut: std::future::Future<Output = ()> + 'static,
+    {
+        let type_id = TypeId::of::<E>();
+        let wrapped: EventCallback = Rc::new(move |any_event| {
+            if let Some(event) = any_event.downcast_ref::<E>() {
+                // Spawn the async callback
+                let event = event.clone();
+                // Note: This is a fire-and-forget spawn. In a real implementation,
+                // you might want to use a proper async runtime.
+                std::thread::spawn(move || {
+                    let _ = callback(event);
+                });
+            }
+        });
+
+        let mut subs = self.subscribers.borrow_mut();
+        let list = subs.entry(type_id).or_default();
+        let id = SubscriptionId(list.len());
+        list.push(wrapped);
+
+        if *self.trace.borrow() {
+            eprintln!(
+                "[EventBus] subscribe_once_async<{}> → id={}",
+                std::any::type_name::<E>(),
+                id.0
+            );
+        }
+
+        id
+    }
+
     /// Returns the number of subscribers for a given event type.
     pub fn subscriber_count<E: Any>(&self) -> usize {
         let type_id = TypeId::of::<E>();

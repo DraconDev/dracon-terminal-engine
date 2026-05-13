@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use crate::compositor::{Plane, Styles};
 use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
