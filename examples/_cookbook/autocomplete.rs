@@ -96,7 +96,7 @@ impl Widget for AutocompleteDemo {
         let title = "Autocomplete Demo — Type to filter fruits";
         let tx = (area.width - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
-            let idx = (1 * area.width + tx + i as u16) as usize;
+            let idx = (area.width + tx + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = self.theme.primary;
@@ -114,7 +114,7 @@ impl Widget for AutocompleteDemo {
                 if src_idx < auto_plane.cells.len() && dst_idx < plane.cells.len() {
                     let src = &auto_plane.cells[src_idx];
                     if !src.transparent {
-                        plane.cells[dst_idx] = auto_plane.cells[src_idx].clone();
+                        plane.cells[dst_idx] = auto_plane.cells[src_idx];
                     }
                 }
             }

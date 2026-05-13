@@ -3,8 +3,6 @@
 //! Computes widget rectangles from constraint specifications (percentage,
 //! fixed, min, max, ratio). Inspired by CSS flexbox and ratatui's Layout.
 
-#[cfg(test)]
-use proptest::prelude::*;
 
 use ratatui::layout::Rect;
 #[allow(unused)]

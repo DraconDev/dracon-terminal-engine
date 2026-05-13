@@ -394,7 +394,7 @@ fn test_dtron_theme_file_round_trip() {
 
     // Child app writes its final theme name on exit (simulating App::run())
     let child_final_theme = Theme::gruvbox_dark();
-    let _ = std::fs::write(&tmp_path, &child_final_theme.name);
+    let _ = std::fs::write(&tmp_path, child_final_theme.name);
 
     // Showcase reads the file after child exits
     let theme_name = std::fs::read_to_string(&tmp_path).unwrap();

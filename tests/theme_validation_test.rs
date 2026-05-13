@@ -38,7 +38,7 @@ fn assert_no_black_background(plane: &Plane, widget_name: &str) {
 fn test_checkbox_no_black_background() {
     for theme in all_themes() {
         let mut cb = Checkbox::new(WidgetId::new(1), "Test");
-        cb.on_theme_change(&theme);
+        cb.on_theme_change(theme);
         let plane = cb.render(Rect::new(0, 0, 20, 1));
         assert_no_black_background(&plane, "Checkbox");
     }
@@ -48,7 +48,7 @@ fn test_checkbox_no_black_background() {
 fn test_button_no_black_background() {
     for theme in all_themes() {
         let mut btn = Button::with_id(WidgetId::new(1), "Click");
-        btn.on_theme_change(&theme);
+        btn.on_theme_change(theme);
         let plane = btn.render(Rect::new(0, 0, 15, 1));
         assert_no_black_background(&plane, "Button");
     }
@@ -58,7 +58,7 @@ fn test_button_no_black_background() {
 fn test_label_no_black_background() {
     for theme in all_themes() {
         let mut label = Label::new("Hello");
-        label.on_theme_change(&theme);
+        label.on_theme_change(theme);
         let plane = label.render(Rect::new(0, 0, 10, 1));
         assert_no_black_background(&plane, "Label");
     }
@@ -68,7 +68,7 @@ fn test_label_no_black_background() {
 fn test_toggle_no_black_background() {
     for theme in all_themes() {
         let mut toggle = Toggle::new(WidgetId::new(1), "Dark");
-        toggle.on_theme_change(&theme);
+        toggle.on_theme_change(theme);
         let plane = toggle.render(Rect::new(0, 0, 20, 1));
         assert_no_black_background(&plane, "Toggle");
     }
@@ -78,7 +78,7 @@ fn test_toggle_no_black_background() {
 fn test_spinner_no_black_background() {
     for theme in all_themes() {
         let mut spinner = Spinner::new(WidgetId::new(1));
-        spinner.on_theme_change(&theme);
+        spinner.on_theme_change(theme);
         let plane = spinner.render(Rect::new(0, 0, 10, 1));
         assert_no_black_background(&plane, "Spinner");
     }
@@ -88,7 +88,7 @@ fn test_spinner_no_black_background() {
 fn test_progress_bar_no_black_background() {
     for theme in all_themes() {
         let mut pb = ProgressBar::new(WidgetId::new(1));
-        pb.on_theme_change(&theme);
+        pb.on_theme_change(theme);
         let plane = pb.render(Rect::new(0, 0, 30, 1));
         assert_no_black_background(&plane, "ProgressBar");
     }
@@ -103,7 +103,7 @@ fn test_list_no_black_background() {
             "Cherry".to_string(),
         ];
         let mut list = List::new(items);
-        list.on_theme_change(&theme);
+        list.on_theme_change(theme);
         let plane = list.render(Rect::new(0, 0, 20, 5));
         assert_no_black_background(&plane, "List");
     }
@@ -123,7 +123,7 @@ fn test_table_no_black_background() {
             },
         ];
         let mut table: Table<String> = Table::new_with_id(WidgetId::new(1), columns);
-        table.on_theme_change(&theme);
+        table.on_theme_change(theme);
         let plane = table.render(Rect::new(0, 0, 40, 4));
         assert_no_black_background(&plane, "Table");
     }
@@ -155,7 +155,7 @@ fn test_select_no_black_background() {
     for theme in all_themes() {
         let mut select =
             Select::new(WidgetId::new(1)).with_options(vec!["A".to_string(), "B".to_string()]);
-        select.on_theme_change(&theme);
+        select.on_theme_change(theme);
         let plane = select.render(Rect::new(0, 0, 20, 1));
         assert_no_black_background(&plane, "Select");
     }
@@ -165,7 +165,7 @@ fn test_select_no_black_background() {
 fn test_slider_no_black_background() {
     for theme in all_themes() {
         let mut slider = Slider::new(WidgetId::new(1)).with_range(0.0, 100.0);
-        slider.on_theme_change(&theme);
+        slider.on_theme_change(theme);
         let plane = slider.render(Rect::new(0, 0, 30, 1));
         assert_no_black_background(&plane, "Slider");
     }
@@ -175,7 +175,7 @@ fn test_slider_no_black_background() {
 fn test_radio_no_black_background() {
     for theme in all_themes() {
         let mut radio = Radio::new(WidgetId::new(1), "Option");
-        radio.on_theme_change(&theme);
+        radio.on_theme_change(theme);
         let plane = radio.render(Rect::new(0, 0, 20, 1));
         assert_no_black_background(&plane, "Radio");
     }
@@ -185,7 +185,7 @@ fn test_radio_no_black_background() {
 fn test_search_input_no_black_background() {
     for theme in all_themes() {
         let mut search = SearchInput::new(WidgetId::new(1));
-        search.on_theme_change(&theme);
+        search.on_theme_change(theme);
         let plane = search.render(Rect::new(0, 0, 30, 1));
         assert_no_black_background(&plane, "SearchInput");
     }

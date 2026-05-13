@@ -111,7 +111,7 @@ impl Scene for CalendarScene {
             return false;
         }
 
-        if self.calendar.handle_key(key.clone()) {
+        if self.calendar.handle_key(key) {
             if let Some(date) = self.calendar.selected() {
                 self.selected_date = Some(date.to_string());
             }
@@ -169,7 +169,7 @@ fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
         if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
-            dest.cells[idx] = cell.clone();
+            dest.cells[idx] = *cell;
         }
     }
 }

@@ -813,7 +813,7 @@ impl Widget for IdeApp {
                     let src_idx = (y * area.width + x) as usize;
                     let dst_idx = ((my + y) * area.width + mx + x) as usize;
                     if src_idx < modal_plane.cells.len() && dst_idx < plane.cells.len() {
-                        plane.cells[dst_idx] = modal_plane.cells[src_idx].clone();
+                        plane.cells[dst_idx] = modal_plane.cells[src_idx];
                     }
                 }
             }
@@ -837,7 +837,7 @@ impl Widget for IdeApp {
                     if src_idx < pal_plane.cells.len() && dst_idx < plane.cells.len() {
                         let src_cell = &pal_plane.cells[src_idx];
                         if !src_cell.transparent {
-                            plane.cells[dst_idx] = src_cell.clone();
+                            plane.cells[dst_idx] = *src_cell;
                         }
                     }
                 }
@@ -1283,7 +1283,7 @@ impl IdeApp {
             let y = (i / src.width as usize) as u16 + dy;
             let idx = (y * dst.width + x) as usize;
             if idx < dst.cells.len() && x < dst.width && y < dst.height {
-                dst.cells[idx] = cell.clone();
+                dst.cells[idx] = *cell;
             }
         }
     }

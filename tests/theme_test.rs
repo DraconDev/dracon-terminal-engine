@@ -706,7 +706,7 @@ fn test_from_name_all_themes_by_exact_name() {
         ("mono", Theme::mono()),
     ];
     for (name, expected) in themes.iter() {
-        let resolved = Theme::from_name(name).expect(&format!("should resolve theme: {}", name));
+        let resolved = Theme::from_name(name).unwrap_or_else(|| panic!("should resolve theme: {}", name));
         assert_eq!(resolved.name, expected.name, "name mismatch for {}", name);
         assert_eq!(resolved.bg, expected.bg, "bg mismatch for {}", name);
     }
@@ -790,10 +790,7 @@ fn test_from_env_or_falls_back_when_unset() {
     std::env::remove_var("DTRON_THEME");
     let theme = Theme::from_env_or(Theme::light());
     assert_eq!(theme.name, "light");
-    match original {
-        Some(v) => std::env::set_var("DTRON_THEME", v),
-        None => {}
-    }
+    if let Some(v) = original { std::env::set_var("DTRON_THEME", v) }
 }
 
 #[test]

@@ -259,7 +259,7 @@ impl Widget for FileManagerApp {
                 }
                 let dst = ((1 + y) * area.width + (1 + x)) as usize;
                 if src < bc_plane.cells.len() && dst < plane.cells.len() {
-                    plane.cells[dst] = bc_plane.cells[src].clone();
+                    plane.cells[dst] = bc_plane.cells[src];
                 }
             }
         }
@@ -279,7 +279,7 @@ impl Widget for FileManagerApp {
                 }
                 let dst = ((2 + y) * area.width + (1 + x)) as usize;
                 if src < list_plane.cells.len() && dst < plane.cells.len() {
-                    plane.cells[dst] = list_plane.cells[src].clone();
+                    plane.cells[dst] = list_plane.cells[src];
                 }
             }
         }

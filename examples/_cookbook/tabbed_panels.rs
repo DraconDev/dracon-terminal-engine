@@ -42,7 +42,7 @@ fn copy_plane(dest: &mut Plane, src: &Plane, dest_x: u16, dest_y: u16) {
             if dx < dest.width && dy < dest.height {
                 let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
                 if dest_idx < dest.cells.len() {
-                    dest.cells[dest_idx] = src.cells[src_idx].clone();
+                    dest.cells[dest_idx] = src.cells[src_idx];
                 }
             }
         }

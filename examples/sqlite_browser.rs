@@ -517,7 +517,7 @@ impl Widget for SqliteBrowser {
                 let dst_y = results_y + 1 + row as u16;
                 let idx = (dst_y * area.width + dst_x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx] = c.clone();
+                    plane.cells[idx] = *c;
                 }
             }
             // Row count badge
@@ -563,7 +563,7 @@ impl Widget for SqliteBrowser {
             if !c.transparent && i < plane.cells.len() {
                 let base = (status_y * area.width) as usize;
                 if base + i < plane.cells.len() {
-                    plane.cells[base + i] = c.clone();
+                    plane.cells[base + i] = *c;
                 }
             }
         }
@@ -576,7 +576,7 @@ impl Widget for SqliteBrowser {
                 if !c.transparent && j < plane.cells.len() {
                     let base = (toast_y * area.width + 2) as usize;
                     if base + j < plane.cells.len() {
-                        plane.cells[base + j] = c.clone();
+                        plane.cells[base + j] = *c;
                     }
                 }
             }

@@ -34,7 +34,6 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
-use std::os::fd::AsFd;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -1085,7 +1084,7 @@ fn blit(dst: &mut Plane, src: &Plane, dx: u16, dy: u16) {
         let y = (i / src.width as usize) as u16 + dy;
         let idx = (y * dst.width + x) as usize;
         if idx < dst.cells.len() && x < dst.width && y < dst.height {
-            dst.cells[idx] = cell.clone();
+            dst.cells[idx] = *cell;
         }
     }
 }

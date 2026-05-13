@@ -116,7 +116,7 @@ impl Widget for FrameworkDemo {
                 if src_idx < list_plane.cells.len() {
                     let dest_idx = (y * area.width + x) as usize;
                     if dest_idx < p.cells.len() {
-                        p.cells[dest_idx] = list_plane.cells[src_idx].clone();
+                        p.cells[dest_idx] = list_plane.cells[src_idx];
                     }
                 }
             }

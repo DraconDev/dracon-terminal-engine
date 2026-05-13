@@ -81,7 +81,7 @@ impl Widget for NotifierApp {
                 if src_idx < nc_plane.cells.len() && dst_idx < plane.cells.len() {
                     let src = &nc_plane.cells[src_idx];
                     if !src.transparent {
-                        plane.cells[dst_idx] = nc_plane.cells[src_idx].clone();
+                        plane.cells[dst_idx] = nc_plane.cells[src_idx];
                     }
                 }
             }

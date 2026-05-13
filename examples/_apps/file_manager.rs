@@ -698,7 +698,7 @@ impl Widget for FileManager {
         let bc_plane = self.breadcrumbs.render(Rect::new(0, 0, area.width, hh));
         for (i, c) in bc_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
-                plane.cells[i] = c.clone();
+                plane.cells[i] = *c;
             }
         }
 
@@ -728,7 +728,7 @@ impl Widget for FileManager {
             let col = i % tree_plane.width as usize;
             let idx = (hh + row as u16) * area.width + col as u16;
             if (idx as usize) < plane.cells.len() {
-                plane.cells[idx as usize] = c.clone();
+                plane.cells[idx as usize] = *c;
             }
         }
 
@@ -744,7 +744,7 @@ impl Widget for FileManager {
             let col = i % divider.width as usize;
             let idx = (hh + row as u16 + divider.y) * area.width + (divider.x + col as u16);
             if (idx as usize) < plane.cells.len() {
-                plane.cells[idx as usize] = c.clone();
+                plane.cells[idx as usize] = *c;
             }
         }
 
@@ -973,7 +973,7 @@ impl Widget for FileManager {
             if !c.transparent && i < plane.cells.len() {
                 let base = (status_y * area.width) as usize;
                 if base + i < plane.cells.len() {
-                    plane.cells[base + i] = c.clone();
+                    plane.cells[base + i] = *c;
                 }
             }
         }
@@ -1052,7 +1052,7 @@ impl Widget for FileManager {
                     if !c.transparent && i < plane.cells.len() {
                         let base = ((status_y.saturating_sub(1)) * area.width + 2) as usize;
                         if base + i < plane.cells.len() {
-                            plane.cells[base + i] = c.clone();
+                            plane.cells[base + i] = *c;
                         }
                     }
                 }
@@ -1121,7 +1121,7 @@ impl Widget for FileManager {
                     if x < area.width && y < area.height {
                         let idx = (y * area.width + x) as usize;
                         if idx < plane.cells.len() {
-                            plane.cells[idx] = c.clone();
+                            plane.cells[idx] = *c;
                         }
                     }
                 }

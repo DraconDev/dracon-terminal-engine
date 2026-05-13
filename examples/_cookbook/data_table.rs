@@ -276,7 +276,7 @@ impl Widget for Table {
                 }
                 let dst_idx = ((y + inner_y) * area.width + (x + 1)) as usize;
                 if src_idx < search_plane.cells.len() && dst_idx < p.cells.len() {
-                    p.cells[dst_idx] = search_plane.cells[src_idx].clone();
+                    p.cells[dst_idx] = search_plane.cells[src_idx];
                 }
             }
         }

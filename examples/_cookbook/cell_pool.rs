@@ -133,5 +133,5 @@ fn main() -> std::io::Result<()> {
                 ctx.stop();
             }
         })
-        .run(|ctx| {})
+        .run(|_ctx| {})
 }

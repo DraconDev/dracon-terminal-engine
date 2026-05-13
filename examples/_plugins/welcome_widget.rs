@@ -119,10 +119,10 @@ impl Widget for WelcomeWidget {
                     plane.cells[start_idx + col].char = c;
 
                     // Color the dragon face differently
-                    if row == 1 && (col >= 4 && col <= 25) {
+                    if row == 1 && (4..=25).contains(&col) {
                         plane.cells[start_idx + col].fg = t.primary;
                         plane.cells[start_idx + col].style = Styles::BOLD;
-                    } else if row >= 2 && row <= 5 && col > 0 && col < 39 {
+                    } else if (2..=5).contains(&row) && col > 0 && col < 39 {
                         plane.cells[start_idx + col].fg = t.secondary;
                     } else if row == 6 {
                         // "Terminal Engine" text

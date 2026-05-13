@@ -819,7 +819,7 @@ fn blit_plane(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
         }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
-            dest.cells[idx] = cell.clone();
+            dest.cells[idx] = *cell;
         }
     }
 }

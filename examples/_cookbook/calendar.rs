@@ -144,7 +144,7 @@ impl Widget for CalendarDemo {
                 let src_idx = (y * cal_width + x) as usize;
                 let dst_idx = ((single_y + y) * area.width + single_x + x) as usize;
                 if src_idx < temp_plane.cells.len() && dst_idx < plane.cells.len() {
-                    plane.cells[dst_idx] = temp_plane.cells[src_idx].clone();
+                    plane.cells[dst_idx] = temp_plane.cells[src_idx];
                 }
             }
         }
@@ -188,7 +188,7 @@ impl Widget for CalendarDemo {
                 let src_idx = (y * cal_width + x) as usize;
                 let dst_idx = ((range_y + y) * area.width + range_x + x) as usize;
                 if src_idx < temp_plane2.cells.len() && dst_idx < plane.cells.len() {
-                    let mut cell = temp_plane2.cells[src_idx].clone();
+                    let mut cell = temp_plane2.cells[src_idx];
                     // Dim inactive calendar
                     cell.fg = self.theme.fg_muted;
                     plane.cells[dst_idx] = cell;

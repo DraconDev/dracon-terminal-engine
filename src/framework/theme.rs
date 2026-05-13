@@ -1393,9 +1393,9 @@ fn ansi_to_rgb(n: u8) -> (u8, u8, u8) {
         8..=15 => ((n - 8) * 40 + 128, (n - 8) * 40 + 128, (n - 8) * 40 + 128),
         _ => {
             let idx = n.saturating_sub(16);
-            let r = ((idx / 36) % 6) as u8 * 51;
-            let g = ((idx / 6) % 6) as u8 * 51;
-            let b = (idx % 6) as u8 * 51;
+            let r = ((idx / 36) % 6) * 51;
+            let g = ((idx / 6) % 6) * 51;
+            let b = (idx % 6) * 51;
             (r, g, b)
         }
     }

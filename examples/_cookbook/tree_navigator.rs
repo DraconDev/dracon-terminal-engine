@@ -266,7 +266,7 @@ impl Widget for TreeNav {
                     let dy = dest_y + sy;
                     if dx < dest.width && dy < dest.height {
                         let dest_idx = (dy as usize) * (dest.width as usize) + (dx as usize);
-                        dest.cells[dest_idx] = src.cells[src_idx].clone();
+                        dest.cells[dest_idx] = src.cells[src_idx];
                     }
                 }
             }

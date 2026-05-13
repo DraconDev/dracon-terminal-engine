@@ -1231,7 +1231,7 @@ fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
         }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
-            dest.cells[idx] = cell.clone();
+            dest.cells[idx] = *cell;
         }
     }
 }
@@ -1405,7 +1405,7 @@ fn main() -> std::io::Result<()> {
             return;
         }
         let mut m = mon_for_tick.borrow_mut();
-        let app_theme = ctx.theme().clone();
+        let app_theme = *ctx.theme();
         if m.theme.name != app_theme.name {
             m.on_theme_change(&app_theme);
         }

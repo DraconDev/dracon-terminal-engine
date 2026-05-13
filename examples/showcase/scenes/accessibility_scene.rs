@@ -173,7 +173,7 @@ impl Scene for AccessibilityScene {
                 true
             }
             _ => {
-                if self.checkbox.handle_key(key.clone()) {
+                if self.checkbox.handle_key(key) {
                     self.announce(&format!("Checkbox: {}", if self.checkbox.is_checked() { "checked" } else { "unchecked" }));
                     true
                 } else {
@@ -243,7 +243,7 @@ fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
         if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
-            dest.cells[idx] = cell.clone();
+            dest.cells[idx] = *cell;
         }
     }
 }

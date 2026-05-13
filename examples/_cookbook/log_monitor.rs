@@ -445,7 +445,7 @@ impl Widget for LogMonitor {
             if src_y < area.height - 1 && src_x < area.width - 1 {
                 let target = src_y as usize * w + src_x as usize;
                 if target < p.cells.len() {
-                    p.cells[target] = c.clone();
+                    p.cells[target] = *c;
                 }
             }
         }

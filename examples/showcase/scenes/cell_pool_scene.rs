@@ -109,7 +109,7 @@ impl Scene for CellPoolScene {
         for (i, (label, value)) in stats.iter().enumerate() {
             let y = stats_y + 1 + i as u16;
             draw_text(&mut plane, 2, y, label, t.fg_muted, t.bg, false);
-            draw_text(&mut plane, 20, y, &value, t.fg, t.bg, true);
+            draw_text(&mut plane, 20, y, value, t.fg, t.bg, true);
         }
 
         // Reuse rate

@@ -1377,7 +1377,7 @@ impl Widget for Showcase {
                         &mut plane,
                         panel_x + 2 + col_offset + label_text.len(),
                         row,
-                        &value,
+                        value,
                         t.primary,
                         t.surface_elevated,
                         false,

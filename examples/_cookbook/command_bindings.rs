@@ -177,7 +177,7 @@ fn blit_plane(src: &Plane, dst: &mut Plane, dst_x: u16, dst_y: u16) {
             }
             let dst_idx = dy as usize * dst.width as usize + dx as usize;
             if dst_idx < dst.cells.len() {
-                dst.cells[dst_idx] = src.cells[src_idx].clone();
+                dst.cells[dst_idx] = src.cells[src_idx];
             }
         }
     }

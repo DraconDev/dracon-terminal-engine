@@ -315,7 +315,7 @@ impl Scene for TaskListScreen {
                     let dst_idx = ((y + 2) * area.width + x) as usize;
                     if src_idx < list_plane.cells.len() && dst_idx < plane.cells.len()
                         && !list_plane.cells[src_idx].transparent {
-                            plane.cells[dst_idx] = list_plane.cells[src_idx].clone();
+                            plane.cells[dst_idx] = list_plane.cells[src_idx];
                         }
                 }
             }
@@ -327,7 +327,7 @@ impl Scene for TaskListScreen {
         for x in 0..area.width {
             let idx = (status_y * area.width + x) as usize;
             if idx < plane.cells.len() && (x as usize) < status_plane.cells.len() {
-                plane.cells[idx] = status_plane.cells[x as usize].clone();
+                plane.cells[idx] = status_plane.cells[x as usize];
             }
         }
 

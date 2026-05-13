@@ -333,7 +333,7 @@ impl Widget for GitTui {
         let tab_plane = self.tab_bar.render(Rect::new(0, 0, area.width, tab_h));
         for (i, c) in tab_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
-                plane.cells[i] = c.clone();
+                plane.cells[i] = *c;
             }
         }
 
@@ -375,7 +375,7 @@ impl Widget for GitTui {
             if !c.transparent && i < plane.cells.len() {
                 let base = (status_y * area.width) as usize;
                 if base + i < plane.cells.len() {
-                    plane.cells[base + i] = c.clone();
+                    plane.cells[base + i] = *c;
                 }
             }
         }
@@ -388,7 +388,7 @@ impl Widget for GitTui {
                 if !c.transparent && j < plane.cells.len() {
                     let base = (toast_y * area.width + 2) as usize;
                     if base + j < plane.cells.len() {
-                        plane.cells[base + j] = c.clone();
+                        plane.cells[base + j] = *c;
                     }
                 }
             }

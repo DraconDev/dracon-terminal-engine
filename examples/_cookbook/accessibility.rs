@@ -10,7 +10,7 @@
 //! and interact with the controls to hear announcements.
 
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::visuals::accessibility::{Accessibility, AnnounceLevel, Role};
+use dracon_terminal_engine::visuals::accessibility::{Accessibility, Role};
 
 /// A simple accessible button widget.
 struct AccessibleButton {
@@ -87,11 +87,11 @@ impl Widget for AccessibleButton {
         let start_x = (area.width.saturating_sub(label_len + 2)) / 2;
 
         for x in 0..area.width {
-            plane.cells[(x as usize)].char = '─';
-            plane.cells[(x as usize)].fg = self.theme.outline;
-            plane.cells[(x as usize)].transparent = false;
+            plane.cells[x as usize].char = '─';
+            plane.cells[x as usize].fg = self.theme.outline;
+            plane.cells[x as usize].transparent = false;
 
-            let last_row_idx = ((area.height - 1) * area.width + x as u16) as usize;
+            let last_row_idx = ((area.height - 1) * area.width + x) as usize;
             if last_row_idx < plane.cells.len() {
                 plane.cells[last_row_idx].char = '─';
                 plane.cells[last_row_idx].fg = self.theme.outline;
@@ -385,7 +385,7 @@ impl Widget for AccessibilityDemo {
             let abs_y = self.submit_btn.area.y + local_y as u16;
             let dest_idx = (abs_y * area.width + abs_x) as usize;
             if dest_idx < plane.cells.len() && !cell.transparent {
-                plane.cells[dest_idx] = cell.clone();
+                plane.cells[dest_idx] = *cell;
             }
         }
 
@@ -397,7 +397,7 @@ impl Widget for AccessibilityDemo {
             let abs_y = self.cancel_btn.area.y + local_y as u16;
             let dest_idx = (abs_y * area.width + abs_x) as usize;
             if dest_idx < plane.cells.len() && !cell.transparent {
-                plane.cells[dest_idx] = cell.clone();
+                plane.cells[dest_idx] = *cell;
             }
         }
 
@@ -409,7 +409,7 @@ impl Widget for AccessibilityDemo {
             let abs_y = self.notifications_toggle.area.y + local_y as u16;
             let dest_idx = (abs_y * area.width + abs_x) as usize;
             if dest_idx < plane.cells.len() && !cell.transparent {
-                plane.cells[dest_idx] = cell.clone();
+                plane.cells[dest_idx] = *cell;
             }
         }
 
@@ -421,7 +421,7 @@ impl Widget for AccessibilityDemo {
             let abs_y = self.sound_toggle.area.y + local_y as u16;
             let dest_idx = (abs_y * area.width + abs_x) as usize;
             if dest_idx < plane.cells.len() && !cell.transparent {
-                plane.cells[dest_idx] = cell.clone();
+                plane.cells[dest_idx] = *cell;
             }
         }
 
@@ -451,10 +451,10 @@ impl Widget for AccessibilityDemo {
             true
         } else {
             // Delegate to sub-widgets
-            let handled = self.submit_btn.handle_key(key.clone())
-                || self.cancel_btn.handle_key(key.clone())
-                || self.notifications_toggle.handle_key(key.clone())
-                || self.sound_toggle.handle_key(key.clone());
+            let handled = self.submit_btn.handle_key(key)
+                || self.cancel_btn.handle_key(key)
+                || self.notifications_toggle.handle_key(key)
+                || self.sound_toggle.handle_key(key);
             if handled {
                 self.dirty = true;
             }
@@ -463,15 +463,15 @@ impl Widget for AccessibilityDemo {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.submit_btn.handle_mouse(kind.clone(), col, row) {
+        if self.submit_btn.handle_mouse(kind, col, row) {
             self.dirty = true;
             return true;
         }
-        if self.cancel_btn.handle_mouse(kind.clone(), col, row) {
+        if self.cancel_btn.handle_mouse(kind, col, row) {
             self.dirty = true;
             return true;
         }
-        if self.notifications_toggle.handle_mouse(kind.clone(), col, row) {
+        if self.notifications_toggle.handle_mouse(kind, col, row) {
             self.dirty = true;
             return true;
         }

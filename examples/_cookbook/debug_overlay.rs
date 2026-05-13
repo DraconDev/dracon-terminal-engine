@@ -377,7 +377,7 @@ impl Widget for DebugOverlayPanel {
                 }
                 let dst_idx = ((y + 2) * plane.width + x + 1) as usize;
                 if src_idx < prof_plane.cells.len() && dst_idx < plane.cells.len() {
-                    plane.cells[dst_idx] = prof_plane.cells[src_idx].clone();
+                    plane.cells[dst_idx] = prof_plane.cells[src_idx];
                 }
             }
         }
@@ -392,7 +392,7 @@ impl Widget for DebugOverlayPanel {
                 }
                 let dst_idx = ((y + 2) * plane.width + x + 27) as usize;
                 if src_idx < insp_plane.cells.len() && dst_idx < plane.cells.len() {
-                    plane.cells[dst_idx] = insp_plane.cells[src_idx].clone();
+                    plane.cells[dst_idx] = insp_plane.cells[src_idx];
                 }
             }
         }
@@ -412,7 +412,7 @@ impl Widget for DebugOverlayPanel {
                 }
                 let dst_idx = ((y + 11) * plane.width + x + 1) as usize;
                 if src_idx < log_plane.cells.len() && dst_idx < plane.cells.len() {
-                    plane.cells[dst_idx] = log_plane.cells[src_idx].clone();
+                    plane.cells[dst_idx] = log_plane.cells[src_idx];
                 }
             }
         }

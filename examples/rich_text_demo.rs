@@ -85,7 +85,7 @@ fn main() {
                 if dy >= h as usize || dx >= w as usize { continue; }
                 let idx = dy * w as usize + dx;
                 if idx < plane.cells.len() {
-                    plane.cells[idx] = cell.clone();
+                    plane.cells[idx] = *cell;
                 }
             }
 
@@ -101,7 +101,7 @@ fn main() {
 
             let footer = " q: quit | F1: help | Ctrl+T: cycle theme ";
             for (i, ch) in footer.chars().enumerate() {
-                let idx = (footer_y as usize * w as usize + 2 + i) as usize;
+                let idx = footer_y as usize * w as usize + 2 + i;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = theme.fg_muted;

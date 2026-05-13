@@ -328,7 +328,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
         if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
         let idx = dy * dest.width as usize + dx;
         if idx < dest.cells.len() {
-            dest.cells[idx] = cell.clone();
+            dest.cells[idx] = *cell;
         }
     }
 }

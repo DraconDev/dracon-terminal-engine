@@ -225,7 +225,7 @@ impl Widget for PluginLoader {
 
         // Loaded widgets area
         let widget_area = Rect::new(area.x + 2, area.y + 3, area.width - 4, area.height - 8);
-        let cols = 4.max(1);
+        let cols = 4;
         let cell_w = widget_area.width / cols;
         let cell_h = 6u16;
 
@@ -299,7 +299,7 @@ fn overlay_plane(target: &mut Plane, source: &Plane, ox: u16, oy: u16) {
                 .min(target.cells.len().saturating_sub(1));
             let cell = &source.cells[src_idx];
             if !cell.transparent {
-                target.cells[tgt_idx] = cell.clone();
+                target.cells[tgt_idx] = *cell;
             }
         }
     }

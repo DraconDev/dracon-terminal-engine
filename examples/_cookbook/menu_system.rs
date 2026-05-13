@@ -311,7 +311,7 @@ impl Widget for MenuApp {
         let menu_plane = self.render_menu_bar(Rect::new(0, 0, area.width, hdr));
         for (i, c) in menu_plane.cells.iter().enumerate() {
             if !c.transparent {
-                plane.cells[i] = c.clone();
+                plane.cells[i] = *c;
             }
         }
 
@@ -321,7 +321,7 @@ impl Widget for MenuApp {
             for (i, c) in dp.cells.iter().enumerate() {
                 let idx = base_idx + i;
                 if !c.transparent && idx < plane.cells.len() {
-                    plane.cells[idx] = c.clone();
+                    plane.cells[idx] = *c;
                 }
             }
         }
@@ -333,7 +333,7 @@ impl Widget for MenuApp {
             let dest_y = i as u16 / list_plane.width;
             let idx = (dest_y * area.width + dest_x + 2) as usize;
             if !c.transparent && idx < plane.cells.len() {
-                plane.cells[idx] = c.clone();
+                plane.cells[idx] = *c;
             }
         }
 
@@ -344,7 +344,7 @@ impl Widget for MenuApp {
                     if !c.transparent {
                         let idx = (y as u16 * area.width + x as u16) as usize;
                         if idx < plane.cells.len() {
-                            plane.cells[idx] = c.clone();
+                            plane.cells[idx] = *c;
                         }
                     }
                 }
@@ -359,7 +359,7 @@ impl Widget for MenuApp {
                         if !c.transparent {
                             let idx = (y as u16 * area.width + x as u16) as usize;
                             if idx < plane.cells.len() {
-                                plane.cells[idx] = c.clone();
+                                plane.cells[idx] = *c;
                             }
                         }
                     }
@@ -375,7 +375,7 @@ impl Widget for MenuApp {
         for (i, c) in status_plane.cells.iter().enumerate() {
             let idx = status_base + i;
             if !c.transparent && idx < plane.cells.len() {
-                plane.cells[idx] = c.clone();
+                plane.cells[idx] = *c;
             }
         }
 
@@ -528,35 +528,26 @@ impl Widget for MenuApp {
             }
         } else if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
-                KeyCode::Char('n') => {
-                    if self.keybindings.matches(actions::NEW_ITEM, &key) {
+                KeyCode::Char('n')
+                    if self.keybindings.matches(actions::NEW_ITEM, &key) => {
                         self.toast("New file created", ToastKind::Success);
                         true
-                    } else {
-                        false
                     }
-                }
                 KeyCode::Char('o') => {
                     self.toast("Opened file dialog", ToastKind::Info);
                     true
                 }
-                KeyCode::Char('s') => {
-                    if self.keybindings.matches(actions::SAVE, &key) {
+                KeyCode::Char('s')
+                    if self.keybindings.matches(actions::SAVE, &key) => {
                         self.toast("Saved!", ToastKind::Success);
                         true
-                    } else {
-                        false
                     }
-                }
-                KeyCode::Char('q') => {
-                    if self.keybindings.matches(actions::QUIT, &key) {
+                KeyCode::Char('q')
+                    if self.keybindings.matches(actions::QUIT, &key) => {
                         self.toast("Goodbye!", ToastKind::Info);
                         self.should_quit.store(true, Ordering::SeqCst);
                         true
-                    } else {
-                        false
                     }
-                }
                 KeyCode::Char('v') => {
                     self.toast("Pasted from clipboard", ToastKind::Info);
                     true
