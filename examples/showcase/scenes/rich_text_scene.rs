@@ -18,18 +18,44 @@ pub struct RichTextScene {
     keybindings: KeybindingSet,
 }
 
-const SAMPLE_MARKDOWN: &str = r#"# Welcome to RichText
+const SAMPLE_MARKDOWN: &str = r#"# RichText Widget
 
-This widget renders **Markdown** with *styling*.
+A powerful Markdown renderer with **bold**, *italic*, `inline code`, and more.
 
 ## Features
 
-- **Bold** and *italic* text
-- `inline code` support
-- [Links](https://example.com)
+- **Bold** and *italic* text support
+- `inline code` blocks
+- [Links](https://example.com) with underline styling
+- Unordered lists with bullet markers
+- Multi-level headers (H1-H6)
+- Word wrapping for long content
+- Plain paragraphs flow naturally
 
-Plain paragraphs flow naturally.
-"#;
+### Code Block Demo
+
+```rust
+fn main() {
+    println!("Hello, RichText!");
+}
+```
+
+### Nested Formatting
+
+You can combine **bold and `code`** in the same paragraph.
+
+### Links and Lists
+
+- [Documentation](https://docs.example.com)
+- [GitHub Repository](https://github.com/example)
+- [API Reference](https://api.example.com)
+
+### Plain Text
+
+This is a regular paragraph demonstrating how plain text
+wraps across multiple lines when it exceeds the container width.
+
+Try the widget with various markdown content!"#;
 
 impl RichTextScene {
     pub fn new(theme: Theme) -> Self {
@@ -85,7 +111,7 @@ impl Scene for RichTextScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Supports: # ## **bold** *italic* `code` - list [link](url) | B/Esc: back | ?: help ";
+        let nav = " Markdown: # ## **bold** *italic* `code` - list [link](url) | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {

@@ -103,7 +103,7 @@ pub use compositor::{Cell, Color, Compositor, Plane, Styles};
 pub use error::DraconError;
 
 // Core terminal
-pub use core::terminal::Terminal;
+pub use core::terminal::{Capabilities, CursorShape, Terminal};
 
 // Input system
 pub use input::{InputReader, Parser};

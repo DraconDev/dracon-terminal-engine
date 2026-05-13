@@ -105,9 +105,9 @@ impl ExampleMeta {
                 name: "rich_text",
                 category: "data",
                 description: "Markdown rendering with styling",
-                binary_name: "rich_text",
+                binary_name: "rich_text_demo",
                 preview: &[
-                    "# Heading",
+                    "# RichText Widget",
                     "**Bold** and *italic*",
                     "`inline code`",
                     "- List item",

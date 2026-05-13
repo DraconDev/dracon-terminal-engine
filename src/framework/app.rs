@@ -126,7 +126,6 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
-            last_frame_duration_ms: 0.0,
         })
     }
 
@@ -171,7 +170,6 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
-            last_frame_duration_ms: 0.0,
         };
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
@@ -811,7 +809,7 @@ impl App {
 
             frame_count.fetch_add(1, Ordering::SeqCst);
             let frame_elapsed = self.last_frame_time.elapsed().as_secs_f64() * 1000.0;
-            self.last_frame_duration_ms = frame_elapsed;
+            self.compositor.set_last_frame_duration(frame_elapsed);
             self.last_frame_time = Instant::now();
 
             let elapsed = frame_start.elapsed();
