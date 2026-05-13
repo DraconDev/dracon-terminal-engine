@@ -265,7 +265,7 @@ impl WidgetState for Slider {
         })
     }
 
-    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(value) = json.get("value").and_then(|v| v.as_f64()) {
             self.set_value(value as f32);
         }

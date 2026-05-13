@@ -121,7 +121,7 @@ impl WidgetState for SearchInput {
         })
     }
 
-    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(text) = json.get("text").and_then(|v| v.as_str()) {
             self.base.text = text.to_string();
         }

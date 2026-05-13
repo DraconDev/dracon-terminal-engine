@@ -206,7 +206,7 @@ impl WidgetState for Checkbox {
         })
     }
 
-    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(checked) = json.get("checked").and_then(|v| v.as_bool()) {
             self.checked = checked;
         }

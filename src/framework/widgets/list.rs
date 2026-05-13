@@ -699,7 +699,7 @@ impl<T: Clone + ToString> WidgetState for List<T> {
         })
     }
 
-    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let (Some(selected), Some(offset)) = (
             json.get("selected").and_then(|v| v.as_u64()),
             json.get("offset").and_then(|v| v.as_u64()),

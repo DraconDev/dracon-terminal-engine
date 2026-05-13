@@ -498,7 +498,7 @@ impl WidgetState for Tree {
         })
     }
 
-    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(path_str) = json.get("selected_path").and_then(|v| v.as_str()) {
             let path: Vec<usize> = path_str
                 .split('.')

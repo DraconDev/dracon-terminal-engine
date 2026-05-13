@@ -43,10 +43,7 @@ impl ProgressRing {
         }
     }
 
-    /// Creates a ProgressRing with default 50% progress.
-    pub fn default() -> Self {
-        Self::new(0.5)
-    }
+    /// Creates a ProgressRing with 50% progress.
 
     /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
