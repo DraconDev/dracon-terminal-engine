@@ -6,6 +6,7 @@
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
+use ratatui::layout::Rect;
 
 /// Callback type for point click events.
 pub type PointClickCallback = Box<dyn FnMut(usize, f64)>;
