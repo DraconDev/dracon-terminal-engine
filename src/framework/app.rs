@@ -1086,8 +1086,8 @@ mod tests {
         crate::Terminal::new(io::stdout())
     }
 
-macro_rules! make_ctx {
-        () => {{
+macro_rules! with_ctx {
+        ($ctx:ident, $body:expr) => {{
             let mut compositor = Compositor::new(80, 24);
             let mut focus_manager = FocusManager::new();
             let mut dirty_tracker = DirtyRegionTracker::new();
@@ -1097,22 +1097,24 @@ macro_rules! make_ctx {
             let commands = RefCell::new(Vec::new());
             let event_bus = EventBus::new();
             let mut scene_router = SceneRouter::new();
-            Ctx {
+            let mut terminal = make_test_terminal().unwrap();
+            let mut $ctx = Ctx {
                 compositor: &mut compositor,
                 theme: &mut theme,
                 frame_count: 0,
                 last_frame: &last_frame,
                 running: &FAKE_RUNNING,
-                terminal: &mut make_test_terminal().unwrap(),
+                terminal: &mut terminal,
                 focus_manager: &mut focus_manager,
                 animations: &mut animations,
                 dirty_tracker: &mut dirty_tracker,
                 commands: &commands,
                 event_bus: &event_bus,
                 scene_router: &mut scene_router,
-            }
+            };
+            $body
         }};
-}
+    }
 
     #[test]
     fn test_app_new() {
@@ -1229,195 +1231,67 @@ macro_rules! make_ctx {
 
     #[test]
     fn test_ctx_available_commands_empty() {
-        let _app = App::new().unwrap();
-        let ctx = make_ctx!();
-        let cmds = ctx.available_commands();
-        assert!(cmds.is_empty());
+        with_ctx!(ctx, {
+            let cmds = ctx.available_commands();
+            assert!(cmds.is_empty());
+        });
     }
 
     #[test]
     fn test_ctx_add_plane() {
-        let _app = App::new().unwrap();
-        let mut ctx = make_ctx!();
-        let plane = Plane::new(0, 20, 10);
-        ctx.add_plane(plane);
-        assert_eq!(ctx.compositor().planes.len(), 1);
+        with_ctx!(mut ctx, {
+            let plane = Plane::new(0, 20, 10);
+            ctx.add_plane(plane);
+            assert_eq!(ctx.compositor().planes.len(), 1);
+        });
     }
 
     #[test]
     fn test_ctx_mark_dirty() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = std::time::Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        ctx.mark_dirty(0, 0, 80, 24);
+        with_ctx!(mut ctx, {
+            ctx.mark_dirty(0, 0, 80, 24);
+        });
     }
 
     #[test]
     fn test_ctx_set_focus() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = std::time::Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        let id = WidgetId(42);
-        ctx.set_focus(id);
-        assert!(ctx.focused().is_some() || ctx.focused().is_none());
+        with_ctx!(mut ctx, {
+            let id = WidgetId(42);
+            ctx.set_focus(id);
+            assert!(ctx.focused().is_some() || ctx.focused().is_none());
+        });
     }
 
     #[test]
     fn test_ctx_theme_access() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = std::time::Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        assert!(ctx.theme().name == "default" || ctx.theme().name == "dark");
+        with_ctx!(ctx, {
+            assert!(ctx.theme().name == "default" || ctx.theme().name == "dark");
+        });
     }
 
     #[test]
     fn test_ctx_mark_all_dirty() {
-        let _app = App::new().unwrap();
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        ctx.mark_all_dirty();
-        assert!(dirty_tracker.needs_full_refresh());
+        with_ctx!(mut ctx, {
+            ctx.mark_all_dirty();
+            assert!(ctx.dirty_tracker.needs_full_refresh());
+        });
     }
 
     #[test]
     fn test_ctx_clear() {
-        let _app = App::new().unwrap();
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        ctx.clear();
-        assert!(dirty_tracker.needs_full_refresh());
+        with_ctx!(mut ctx, {
+            ctx.clear();
+            assert!(ctx.dirty_tracker.needs_full_refresh());
+        });
     }
 
     #[test]
     fn test_ctx_compositor_access() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        let (w, h) = ctx.compositor().size();
-        assert_eq!(w, 80);
-        assert_eq!(h, 24);
+        with_ctx!(ctx, {
+            let (w, h) = ctx.compositor().size();
+            assert_eq!(w, 80);
+            assert_eq!(h, 24);
+        });
     }
 
     #[test]
@@ -1429,6 +1303,9 @@ macro_rules! make_ctx {
         let mut theme = Theme::default();
         let last_frame = std::time::Instant::now();
         let commands = RefCell::new(Vec::new());
+        let event_bus = EventBus::new();
+        let mut scene_router = SceneRouter::new();
+        let mut terminal = make_test_terminal().unwrap();
 
         let ctx = Ctx {
             compositor: &mut compositor,
@@ -1436,13 +1313,13 @@ macro_rules! make_ctx {
             frame_count: 100,
             last_frame: &last_frame,
             running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
+            terminal: &mut terminal,
             focus_manager: &mut focus_manager,
             animations: &mut animations,
             dirty_tracker: &mut dirty_tracker,
             commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
+            event_bus: &event_bus,
+            scene_router: &mut scene_router,
         };
 
         let _fps = ctx.fps();
@@ -1450,34 +1327,13 @@ macro_rules! make_ctx {
 
     #[test]
     fn test_ctx_split_h() {
-        let mut compositor = Compositor::new(80, 24);
-        let mut focus_manager = FocusManager::new();
-        let mut dirty_tracker = DirtyRegionTracker::new();
-        let mut animations = AnimationManager::new();
-        let mut theme = Theme::default();
-        let last_frame = Instant::now();
-        let commands = RefCell::new(Vec::new());
-
-        let mut ctx = Ctx {
-            compositor: &mut compositor,
-            theme: &mut theme,
-            frame_count: 0,
-            last_frame: &last_frame,
-            running: &FAKE_RUNNING,
-            terminal: &mut make_test_terminal().unwrap(),
-            focus_manager: &mut focus_manager,
-            animations: &mut animations,
-            dirty_tracker: &mut dirty_tracker,
-            commands: &commands,
-            event_bus: &EventBus::new(),
-            scene_router: &mut SceneRouter::new(),
-        };
-
-        ctx.split_h(|left, right| {
-            let a = left.area();
-            let b = right.area();
-            assert!(a.width > 0);
-            assert!(b.width > 0);
+        with_ctx!(mut ctx, {
+            ctx.split_h(|left, right| {
+                let a = left.area();
+                let b = right.area();
+                assert!(a.width > 0);
+                assert!(b.width > 0);
+            });
         });
     }
 
