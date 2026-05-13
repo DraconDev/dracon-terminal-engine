@@ -45,6 +45,7 @@ pub mod widgets;
 /// The prelude module.
 pub mod prelude {
     pub use crate::compositor::{Cell, CellPool, Color, Compositor, Plane, PoolConfig, Styles};
+    pub use crate::error::DraconError;
     pub use crate::framework::widget::{Widget, WidgetId};
     #[cfg(feature = "tracing")]
     pub use crate::frame_span;

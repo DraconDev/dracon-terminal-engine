@@ -39,9 +39,9 @@
 //!
 //! - **App** — [`App`] and [`Ctx`] provide the one-import entry point with event loop
 //! - **Compositor** — [`Plane`] layers composited via [`Compositor`] with TrueColor and filters
-//! - **Widgets** — 37 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
+//! - **Widgets** — 41 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
 //! - **TextEditor** — Full-featured code editor with syntax highlighting via syntect
-//! - **Themes** — 20+ built-in themes (nord, dracula, catppuccin, gruvbox, etc.)
+//! - **Themes** — 21 built-in themes (nord, dracula, catppuccin, gruvbox, etc.)
 //! - **Input** — SGR mouse parsing, keyboard chords, modifiers
 //! - **System** — [`SystemMonitor`] for CPU, memory, disk, process metrics
 //! - **Framework** — HitZone, DragDrop, Animation, Focus, Layout helpers
@@ -118,7 +118,7 @@ pub use system::{DiskInfo, ProcessInfo, SystemData, SystemMonitor};
 pub use framework::prelude;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Framework widgets (all 37) — accessible via prelude::*
+// Framework widgets (all 41) — accessible via prelude::*
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // The following widgets are exported from the prelude and accessible as:
@@ -127,7 +127,7 @@ pub use framework::prelude;
 // Individual widget modules are also available via:
 //   use dracon_terminal_engine::framework::widgets::*
 //
-// Widget list (37 total):
+// Widget list (41 total):
 //   1.  Autocomplete       - Text input with autocomplete suggestions
 //   2.  Breadcrumbs        - Clickable path breadcrumb navigation
 //   3.  Button             - Clickable button with hover states
