@@ -48,49 +48,14 @@ const ALL_THEMES: &[(&str, ThemeFactory)] = &[
 static CURRENT_THEME_INDEX: AtomicUsize = AtomicUsize::new(0);
 
 fn vscode_dark() -> Theme {
-    Theme {
-        name: "vscode-dark",
-        display_name: "VS Code Dark",
-        kind: ThemeKind::Dark,
-        bg: Color::Rgb(30, 30, 30),
-        surface: Color::Rgb(38, 38, 38),
-        surface_elevated: Color::Rgb(48, 48, 48),
-        fg: Color::Rgb(204, 204, 204),
-        fg_muted: Color::Rgb(140, 140, 140),
-        fg_subtle: Color::Rgb(100, 100, 100),
-        fg_on_accent: Color::Rgb(255, 255, 255),
-        primary: Color::Rgb(0, 122, 204),
-        primary_hover: Color::Rgb(30, 142, 224),
-        primary_active: Color::Rgb(0, 102, 184),
-        secondary: Color::Rgb(204, 204, 204),
-        secondary_hover: Color::Rgb(224, 224, 224),
-        secondary_active: Color::Rgb(184, 184, 184),
-        outline: Color::Rgb(63, 63, 63),
-        outline_variant: Color::Rgb(50, 50, 50),
-        divider: Color::Rgb(55, 55, 55),
-        error: Color::Rgb(235, 75, 75),
-        error_bg: Color::Rgb(60, 20, 20),
-        success: Color::Rgb(73, 201, 73),
-        success_bg: Color::Rgb(20, 50, 20),
-        warning: Color::Rgb(227, 180, 60),
-        warning_bg: Color::Rgb(55, 45, 20),
-        info: Color::Rgb(0, 122, 204),
-        info_bg: Color::Rgb(20, 40, 60),
-        selection_bg: Color::Rgb(62, 62, 62),
-        selection_fg: Color::Rgb(255, 255, 255),
-        input_bg: Color::Rgb(35, 35, 35),
-        input_fg: Color::Rgb(204, 204, 204),
-        input_border: Color::Rgb(63, 63, 63),
-        scrollbar_track: Color::Rgb(40, 40, 40),
-        scrollbar_thumb: Color::Rgb(90, 90, 90),
-        scrollbar_thumb_hover: Color::Rgb(110, 110, 110),
-        disabled_fg: Color::Rgb(90, 90, 90),
-        disabled_bg: Color::Rgb(45, 45, 45),
-        hover_bg: Color::Rgb(55, 55, 55),
-        focus_bg: Color::Rgb(65, 65, 65),
-        focus_border: Color::Rgb(0, 122, 204),
-        scrollbar_width: 1,
-    }
+    Theme::custom(
+        "vscode-dark",
+        "VS Code Dark",
+        ThemeKind::Dark,
+        Color::Rgb(30, 30, 30),
+        Color::Rgb(204, 204, 204),
+        Color::Rgb(0, 122, 204),
+    )
 }
 
 fn vscode_light() -> Theme {

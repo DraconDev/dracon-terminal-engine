@@ -1196,6 +1196,209 @@ impl Theme {
     pub fn iter() -> std::slice::Iter<'static, Theme> {
         Self::all().iter()
     }
+
+    /// Create a custom theme with the essential fields. All remaining fields
+    /// get sensible defaults (muted variants, standard borders, neutral scrollbar).
+    ///
+    /// Use this instead of struct literals when you need a custom theme
+    /// (e.g., for theming demos or app-specific color schemes).
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Theme::custom(
+    ///     "vscode-dark",
+    ///     "VS Code Dark",
+    ///     ThemeKind::Dark,
+    ///     Color::Rgb(30, 30, 30),  // bg
+    ///     Color::Rgb(204, 204, 204), // fg
+    ///     Color::Rgb(0, 122, 204),  // primary
+    /// )
+    /// ```
+    pub fn custom(
+        name: &'static str,
+        display_name: &'static str,
+        kind: ThemeKind,
+        bg: Color,
+        fg: Color,
+        primary: Color,
+    ) -> Self {
+        let (bg_r, bg_g, bg_b) = match bg {
+            Color::Rgb(r, g, b) => (r, g, b),
+            Color::Ansi(n) => {
+                let (r, g, b) = ansi_to_rgb(n);
+                (r, g, b)
+            }
+            Color::Reset => (0, 0, 0),
+        };
+        let (fg_r, fg_g, fg_b) = match fg {
+            Color::Rgb(r, g, b) => (r, g, b),
+            Color::Ansi(n) => {
+                let (r, g, b) = ansi_to_rgb(n);
+                (r, g, b)
+            }
+            Color::Reset => (204, 204, 204),
+        };
+        let (primary_r, primary_g, primary_b) = match primary {
+            Color::Rgb(r, g, b) => (r, g, b),
+            Color::Ansi(n) => {
+                let (r, g, b) = ansi_to_rgb(n);
+                (r, g, b)
+            }
+            Color::Reset => (0, 122, 204),
+        };
+
+        let surface_r = bg_r.saturating_add(12.min((255 - bg_r) / 8));
+        let surface_g = bg_g.saturating_add(12.min((255 - bg_g) / 8));
+        let surface_b = bg_b.saturating_add(12.min((255 - bg_b) / 8));
+        let surface_elevated_r = bg_r.saturating_add(20.min((255 - bg_r) / 6));
+        let surface_elevated_g = bg_g.saturating_add(20.min((255 - bg_g) / 6));
+        let surface_elevated_b = bg_b.saturating_add(20.min((255 - bg_b) / 6));
+        let fg_muted_r = fg_r.saturating_sub((fg_r - bg_r) / 3);
+        let fg_muted_g = fg_g.saturating_sub((fg_g - bg_g) / 3);
+        let fg_muted_b = fg_b.saturating_sub((fg_b - bg_b) / 3);
+        let fg_subtle_r = fg_r.saturating_sub((fg_r - bg_r) / 6);
+        let fg_subtle_g = fg_g.saturating_sub((fg_g - bg_g) / 6);
+        let fg_subtle_b = fg_b.saturating_sub((fg_b - bg_b) / 6);
+        let fg_on_accent = if kind == ThemeKind::Dark {
+            Color::Rgb(255, 255, 255)
+        } else {
+            Color::Rgb(0, 0, 0)
+        };
+        let primary_hover = Color::Rgb(
+            primary_r.saturating_add(16.min(255 - primary_r) / 8),
+            primary_g.saturating_add(16.min(255 - primary_g) / 8),
+            primary_b.saturating_add(16.min(255 - primary_b) / 8),
+        );
+        let primary_active = Color::Rgb(
+            primary_r.saturating_add(30.min(255 - primary_r) / 4),
+            primary_g.saturating_add(30.min(255 - primary_g) / 4),
+            primary_b.saturating_add(30.min(255 - primary_b) / 4),
+        );
+        let secondary = fg;
+        let secondary_hover = Color::Rgb(
+            fg_r.saturating_add(12.min(255 - fg_r) / 8),
+            fg_g.saturating_add(12.min(255 - fg_g) / 8),
+            fg_b.saturating_add(12.min(255 - fg_b) / 8),
+        );
+        let secondary_active = Color::Rgb(
+            fg_r.saturating_add(20.min(255 - fg_r) / 6),
+            fg_g.saturating_add(20.min(255 - fg_g) / 6),
+            fg_b.saturating_add(20.min(255 - fg_b) / 6),
+        );
+        let (outline_r, outline_g, outline_b) = (
+            bg_r.saturating_add(30.min((255 - bg_r) / 4)),
+            bg_g.saturating_add(30.min((255 - bg_g) / 4)),
+            bg_b.saturating_add(30.min((255 - bg_b) / 4)),
+        );
+        let outline = Color::Rgb(outline_r, outline_g, outline_b);
+        let outline_variant = Color::Rgb(
+            bg_r.saturating_add(20.min((255 - bg_r) / 6)),
+            bg_g.saturating_add(20.min((255 - bg_g) / 6)),
+            bg_b.saturating_add(20.min((255 - bg_b) / 6)),
+        );
+        let divider = Color::Rgb(
+            bg_r.saturating_add(25.min((255 - bg_r) / 5)),
+            bg_g.saturating_add(25.min((255 - bg_g) / 5)),
+            bg_b.saturating_add(25.min((255 - bg_b) / 5)),
+        );
+        let error = Color::Rgb(235, 75, 75);
+        let error_bg = Color::Rgb(bg_r.saturating_add(20), bg_g.saturating_mul(2 / 3), bg_b.saturating_mul(2 / 3));
+        let success = Color::Rgb(73, 201, 73);
+        let success_bg = Color::Rgb(20, 50, 20);
+        let warning = Color::Rgb(227, 180, 60);
+        let warning_bg = Color::Rgb(55, 45, 20);
+        let info = primary;
+        let info_bg = Color::Rgb(
+            bg_r.saturating_add(10),
+            bg_g.saturating_add(10),
+            bg_b.saturating_add(15),
+        );
+        let selection_bg = Color::Rgb(
+            bg_r.saturating_add(primary_r / 4),
+            bg_g.saturating_add(primary_g / 4),
+            bg_b.saturating_add(primary_b / 4),
+        );
+        let selection_fg = fg_on_accent;
+        let input_bg = Color::Rgb(surface_r, surface_g, surface_b);
+        let input_fg = fg;
+        let input_border = outline;
+        let scrollbar_track = Color::Rgb(
+            bg_r.saturating_add(10),
+            bg_g.saturating_add(10),
+            bg_b.saturating_add(10),
+        );
+        let scrollbar_thumb = Color::Rgb(
+            outline_r.saturating_add(30.min(255 - outline_r) / 4),
+            outline_g.saturating_add(30.min(255 - outline_g) / 4),
+            outline_b.saturating_add(30.min(255 - outline_b) / 4),
+        );
+        let scrollbar_thumb_hover = outline;
+        let disabled_fg = Color::Rgb(fg_muted_r, fg_muted_g, fg_muted_b);
+        let disabled_bg = Color::Rgb(surface_r, surface_g, surface_b);
+        let hover_bg = Color::Rgb(surface_r, surface_g, surface_b);
+        let focus_bg = Color::Rgb(surface_elevated_r, surface_elevated_g, surface_elevated_b);
+        let focus_border = primary;
+
+        Self {
+            name,
+            display_name,
+            kind,
+            bg,
+            surface: Color::Rgb(surface_r, surface_g, surface_b),
+            surface_elevated: Color::Rgb(surface_elevated_r, surface_elevated_g, surface_elevated_b),
+            fg,
+            fg_muted: Color::Rgb(fg_muted_r, fg_muted_g, fg_muted_b),
+            fg_subtle: Color::Rgb(fg_subtle_r, fg_subtle_g, fg_subtle_b),
+            fg_on_accent,
+            primary,
+            primary_hover,
+            primary_active,
+            secondary,
+            secondary_hover,
+            secondary_active,
+            outline,
+            outline_variant,
+            divider,
+            error,
+            error_bg,
+            success,
+            success_bg,
+            warning,
+            warning_bg,
+            info,
+            info_bg,
+            selection_bg,
+            selection_fg,
+            input_bg,
+            input_fg,
+            input_border,
+            scrollbar_track,
+            scrollbar_thumb,
+            scrollbar_thumb_hover,
+            disabled_fg,
+            disabled_bg,
+            hover_bg,
+            focus_bg,
+            focus_border,
+            scrollbar_width: 1,
+        }
+    }
+}
+
+fn ansi_to_rgb(n: u8) -> (u8, u8, u8) {
+    match n {
+        0..=5 => (n * 51, n * 51, n * 51),
+        6..=7 => (128, 128, 128),
+        8..=15 => ((n - 8) * 40 + 128, (n - 8) * 40 + 128, (n - 8) * 40 + 128),
+        _ => {
+            let idx = n.saturating_sub(16);
+            let r = ((idx / 36) % 6) as u8 * 51;
+            let g = ((idx / 6) % 6) as u8 * 51;
+            let b = (idx % 6) as u8 * 51;
+            (r, g, b)
+        }
+    }
 }
 
 impl Default for Theme {
