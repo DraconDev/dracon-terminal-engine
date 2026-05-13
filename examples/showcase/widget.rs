@@ -162,7 +162,7 @@ impl Widget for Showcase {
         let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
         let toggle_x = right_x.saturating_sub(fps_toggle.len() + 2);
         draw_text(
-            &mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, false,
+            &mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, Styles::empty(),
         );
         // Zone: FPS toggle
         let mut zones = self.zones.borrow_mut();
@@ -257,7 +257,7 @@ impl Widget for Showcase {
             stats_text,
             t.fg,
             t.bg,
-            true,
+            Styles::BOLD,
         );
         for x in stats_start + stats_text.len()..area.width as usize - 2 {
             set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
@@ -292,7 +292,7 @@ impl Widget for Showcase {
             search_icon,
             t.fg_on_accent,
             search_bg,
-            false,
+            Styles::empty(),
         );
 
         // Search text or placeholder
@@ -312,7 +312,7 @@ impl Widget for Showcase {
                         "type to search...",
                         t.fg_muted,
                         search_bg,
-                        false,
+                        Styles::empty(),
                     );
                 }
                 // Always show cursor when active, even if empty
@@ -336,7 +336,7 @@ impl Widget for Showcase {
                     &self.search_query,
                     t.fg_on_accent,
                     search_bg,
-                    false,
+                    Styles::empty(),
                 );
                 // Cursor at end of query
                 let cursor_x = content_x + self.search_query.len();
@@ -363,7 +363,7 @@ impl Widget for Showcase {
                 "press / to search",
                 t.fg_muted,
                 search_bg,
-                false,
+                Styles::empty(),
             );
         }
 
@@ -388,7 +388,7 @@ impl Widget for Showcase {
                 &feedback_text,
                 feedback_color,
                 t.bg,
-                false,
+                Styles::empty(),
             );
         }
 
@@ -468,7 +468,7 @@ impl Widget for Showcase {
                 t.surface
             };
             draw_text(
-                &mut plane, prim_x, prim_y, state, state_fg, state_bg, hovered,
+                &mut plane, prim_x, prim_y, state, state_fg, state_bg, if hovered { Styles::BOLD } else { Styles::empty() },
             );
             prim_x += state.len() + 4;
         }
@@ -520,7 +520,7 @@ impl Widget for Showcase {
                 icon,
                 icon_fg,
                 bg_cat,
-                is_active || is_hovered,
+                if is_active || is_hovered { Styles::BOLD } else { Styles::empty() },
             );
             draw_text(
                 &mut plane,
@@ -529,7 +529,7 @@ impl Widget for Showcase {
                 label,
                 fg,
                 bg_cat,
-                is_active || is_hovered,
+                if is_active || is_hovered { Styles::BOLD } else { Styles::empty() },
             );
             // Register zone for this category
             let mut zones = self.zones.borrow_mut();
@@ -663,7 +663,7 @@ impl Widget for Showcase {
             &hint,
             t.fg_muted,
             t.surface_elevated,
-            false,
+            Styles::empty(),
         );
 
         // Sort indicator
@@ -677,7 +677,7 @@ impl Widget for Showcase {
             &sort_text,
             t.primary,
             t.surface_elevated,
-            false,
+            Styles::empty(),
         );
 
         // Mouse coordinates (right side)
@@ -692,7 +692,7 @@ impl Widget for Showcase {
                     &coords,
                     t.fg_muted,
                     t.surface_elevated,
-                    false,
+                    Styles::empty(),
                 );
             }
         }
@@ -995,7 +995,7 @@ impl Widget for Showcase {
                         text,
                         t.fg,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                 }
             }
@@ -1043,7 +1043,7 @@ impl Widget for Showcase {
                 title,
                 t.primary,
                 t.surface_elevated,
-                true,
+                Styles::BOLD,
             );
 
             // Content
@@ -1083,7 +1083,7 @@ impl Widget for Showcase {
                         key_text,
                         t.primary,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                     draw_text(
                         &mut plane,
@@ -1092,7 +1092,7 @@ impl Widget for Showcase {
                         desc,
                         t.fg,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                 }
             }
@@ -1149,7 +1149,7 @@ impl Widget for Showcase {
                         &title,
                         t.primary,
                         t.surface_elevated,
-                        true,
+                        Styles::BOLD,
                     );
 
                     // Category badge
@@ -1161,7 +1161,7 @@ impl Widget for Showcase {
                         &badge,
                         t.fg_on_accent,
                         category_color(t, ex.category),
-                        false,
+                        Styles::empty(),
                     );
 
                     // Description
@@ -1173,7 +1173,7 @@ impl Widget for Showcase {
                         &desc,
                         t.fg,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
 
                     // Preview lines
@@ -1188,7 +1188,7 @@ impl Widget for Showcase {
                                 &preview_line,
                                 t.fg_subtle,
                                 t.surface_elevated,
-                                false,
+                                Styles::empty(),
                             );
                         }
                     }
@@ -1201,7 +1201,7 @@ impl Widget for Showcase {
                         "Press Space or Esc to close",
                         t.fg_muted,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                 }
             }
@@ -1280,7 +1280,7 @@ impl Widget for Showcase {
                     " Input Debug [i] ",
                     t.warning,
                     t.surface_elevated,
-                    true,
+                    Styles::BOLD,
                 );
 
                 // Events (newest first)
@@ -1303,7 +1303,7 @@ impl Widget for Showcase {
                             &truncated,
                             fg,
                             t.surface_elevated,
-                            false,
+                            Styles::empty(),
                         );
                     }
                 }
@@ -1371,7 +1371,7 @@ impl Widget for Showcase {
                         &label_text,
                         t.fg_muted,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                     draw_text(
                         &mut plane,
@@ -1380,7 +1380,7 @@ impl Widget for Showcase {
                         value,
                         t.primary,
                         t.surface_elevated,
-                        false,
+                        Styles::empty(),
                     );
                 }
             }
