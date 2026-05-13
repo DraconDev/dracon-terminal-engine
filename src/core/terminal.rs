@@ -1,12 +1,109 @@
 use crate::backend::tty::{get_terminal_attr, make_raw, set_terminal_attr, Termios};
+use std::env;
 use std::io::{self, Write};
 use std::os::fd::{AsFd, BorrowedFd};
+
+/// Cursor shape for terminal cursor style sequences.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CursorShape {
+    /// Block cursor (█)
+    Block,
+    /// Underline cursor (_)
+    Underline,
+    /// Bar cursor (▏)
+    Bar,
+    /// blinking variants
+    BlinkingBlock,
+    BlinkingUnderline,
+    BlinkingBar,
+}
+
+/// Terminal capability detection and custom escape sequence utilities.
+pub struct Capabilities {
+    term: String,
+}
+
+impl Capabilities {
+    /// Detect terminal capabilities from $TERM environment variable.
+    pub fn detect() -> Self {
+        let term = env::var("TERM").unwrap_or_else(|_| "dumb".to_string());
+        Self { term }
+    }
+
+    /// Returns the raw $TERM value.
+    pub fn term(&self) -> &str {
+        &self.term
+    }
+
+    /// Check if the terminal likely supports truecolor (24-bit color).
+    ///
+    /// Terminals known to support truecolor: xterm-256color, screen-256color,
+    /// tmux-256color, iterm2, konsole, gnome-terminal, etc.
+    pub fn supports_truecolor(&self) -> bool {
+        let term_lower = self.term.to_lowercase();
+        // Known truecolor-capable terminals
+        if term_lower.contains("256color") || term_lower.contains("truecolor") {
+            return true;
+        }
+        // Known non-truecolor or limited terminals
+        if term_lower == "dumb" || term_lower.starts_with("vt100") || term_lower == "ansi" {
+            return false;
+        }
+        // Common modern terminals
+        let truecolor_terms = [
+            "xterm", "screen", "tmux", "rxvt", "kitty", "alacritty", "wezterm",
+            "ghostty", "foot", "konsole", "gnome", "terminology", "eterm",
+        ];
+        truecolor_terms.iter().any(|t| term_lower.contains(t))
+    }
+
+    /// Check if the terminal supports SGR mouse mode (extended mouse reporting).
+    ///
+    /// Most modern terminals (xterm, tmux, screen, kitty, etc.) support this.
+    pub fn supports_mouse(&self) -> bool {
+        let term_lower = self.term.to_lowercase();
+        // Known mouse-capable terminals
+        if term_lower.contains("xterm") || term_lower.contains("screen")
+            || term_lower.contains("tmux") || term_lower.contains("rxvt")
+            || term_lower.contains("kitty") || term_lower.contains("wezterm")
+            || term_lower.contains("foot") || term_lower.contains("alacritty")
+            || term_lower.contains("ghostty") || term_lower.contains("konsole")
+            || term_lower.contains("gnome") || term_lower.contains("terminology") {
+            return true;
+        }
+        // Default to likely supported for unknown modern terminals
+        !term_lower.is_empty() && term_lower != "dumb"
+    }
+
+    /// Check if the terminal supports Unicode wide character rendering.
+    ///
+    /// Most modern terminals support this. Returns true for known supportive
+    /// terminals, false for dumb/minimal terminals.
+    pub fn supports_unicode_width(&self) -> bool {
+        let term_lower = self.term.to_lowercase();
+        term_lower != "dumb" && !term_lower.starts_with("vt100")
+    }
+
+    /// Check if the terminal supports setting window title via OSC sequences.
+    ///
+    /// OSC 0 (icon name + window title) and OSC 21 (window title only) are
+    /// supported by most terminal emulators.
+    pub fn supports_title(&self) -> bool {
+        let term_lower = self.term.to_lowercase();
+        // Dumb terminals and some very old ones don't support titles
+        if term_lower == "dumb" || term_lower.starts_with("vt100") {
+            return false;
+        }
+        true
+    }
+}
 
 /// The main RAII wrapper for the terminal.
 /// When this struct is dropped, the terminal is restored to its original state.
 pub struct Terminal<W: Write + AsFd> {
     original_termios: Termios,
     output: W,
+    capabilities: Capabilities,
 }
 
 impl<W: Write + AsFd> Drop for Terminal<W> {

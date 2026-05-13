@@ -14,6 +14,17 @@ use crate::framework::widgets::context_menu::ContextMenu;
 use ratatui::layout::Rect;
 
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
+pub type SelectionChangeCallback<T> = Box<dyn FnMut(&HashSet<usize>)>;
+pub type UndoRedoCallback = Box<dyn FnMut()>;
+
+/// Inner state snapshot for undo/redo.
+#[derive(Clone)]
+pub struct ListState {
+    pub items: Vec<String>,
+    pub selected: usize,
+    pub offset: usize,
+    pub selected_indices: HashSet<usize>,
+}
 
 pub struct List<T> {
     id: WidgetId,
@@ -23,11 +34,26 @@ pub struct List<T> {
     visible_count: usize,
     theme: Theme,
     on_select: Option<SelectCallback<T>>,
+    on_selection_change: Option<SelectionChangeCallback<T>>,
+    on_undo: Option<UndoRedoCallback>,
+    on_redo: Option<UndoRedoCallback>,
     item_height: u16,
     width: u16,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     hovered: Option<usize>,
+    // Multi-select
+    allow_multi_select: bool,
+    selected_indices: HashSet<usize>,
+    last_selected: Option<usize>,
+    // Drag and drop
+    drag_manager: RefCell<DragManager<usize>>,
+    // Context menu
+    context_menu: RefCell<Option<ContextMenu>>,
+    // Undo/redo
+    enable_undo: bool,
+    undo_stack: Vec<ListState>,
+    redo_stack: Vec<ListState>,
 }
 
 impl<T: Clone + ToString> List<T> {
@@ -41,11 +67,22 @@ impl<T: Clone + ToString> List<T> {
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
+            on_selection_change: None,
+            on_undo: None,
+            on_redo: None,
             item_height: 1,
             width: 40,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
             dirty: true,
             hovered: None,
+            allow_multi_select: false,
+            selected_indices: HashSet::new(),
+            last_selected: None,
+            drag_manager: RefCell::new(DragManager::new()),
+            context_menu: RefCell::new(None),
+            enable_undo: false,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
@@ -59,11 +96,22 @@ impl<T: Clone + ToString> List<T> {
             visible_count: 10,
             theme: Theme::default(),
             on_select: None,
+            on_selection_change: None,
+            on_undo: None,
+            on_redo: None,
             item_height: 1,
             width: 40,
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 10)),
             dirty: true,
             hovered: None,
+            allow_multi_select: false,
+            selected_indices: HashSet::new(),
+            last_selected: None,
+            drag_manager: RefCell::new(DragManager::new()),
+            context_menu: RefCell::new(None),
+            enable_undo: false,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
