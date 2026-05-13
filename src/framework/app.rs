@@ -311,6 +311,7 @@ impl App {
         let focusable = widget.focusable();
         let cmds = widget.commands();
         self.widgets.borrow_mut().push(widget);
+        self.compositor.set_widget_count(self.widgets.borrow().len());
         self.focus_manager.register(id, focusable);
 
         // Auto-focus first widget if nothing is focused yet

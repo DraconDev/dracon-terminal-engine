@@ -685,3 +685,38 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         self.theme = *theme;
     }
 }
+
+impl<T: Clone + ToString> WidgetState for List<T> {
+    fn state_id(&self) -> Option<&str> {
+        Some("list")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected": self.selected,
+            "offset": self.offset,
+            "selected_indices": self.selected_indices.iter().collect::<Vec<_>>(),
+        })
+    }
+
+    fn from_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let (Some(selected), Some(offset)) = (
+            json.get("selected").and_then(|v| v.as_u64()),
+            json.get("offset").and_then(|v| v.as_u64()),
+        ) {
+            self.selected = selected as usize;
+            self.offset = offset as usize;
+        }
+        if let Some(indices) = json.get("selected_indices").and_then(|v| v.as_array()) {
+            self.selected_indices.clear();
+            for idx in indices {
+                if let Some(i) = idx.as_u64() {
+                    self.selected_indices.insert(i as usize);
+                }
+            }
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
