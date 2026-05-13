@@ -33,11 +33,13 @@ impl Breadcrumbs {
             id: WidgetId::default_id(),
             path: segments,
             theme: Theme::default(),
+            width: 0,
             height: 1,
             clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
+            scroll_offset: 0,
         }
     }
 
@@ -47,11 +49,13 @@ impl Breadcrumbs {
             id,
             path: segments,
             theme: Theme::default(),
+            width: 0,
             height: 1,
             clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
+            scroll_offset: 0,
         }
     }
 
@@ -64,13 +68,15 @@ impl Breadcrumbs {
             .collect();
         Self {
             id: WidgetId::default_id(),
-            segments,
+            path: segments,
             theme: Theme::default(),
+            width: 0,
             height: 1,
             clickable: true,
             on_navigate: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 1)),
             dirty: true,
+            scroll_offset: 0,
         }
     }
 
