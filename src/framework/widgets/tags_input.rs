@@ -222,12 +222,12 @@ impl TagsInput {
                 .collect();
         }
         self.selected_suggestion = None;
-}
-        self.selected_suggestion = None;
         if self.filtered_suggestions.len() == 1 {
             self.selected_suggestion = Some(0);
         }
     }
+
+    fn select_suggestion(&mut self, index: usize) {
         if index < self.filtered_suggestions.len() {
             let suggestion = self.filtered_suggestions[index].clone();
             self.add_tag(suggestion);
