@@ -65,7 +65,7 @@ fn main() -> std::io::Result<()> {
 
     let mut app = App::new()?
         .title("Dracon Showcase")
-        .fps(30)
+        .fps(15)
         .theme(Theme::from_env_or(Theme::nord()));
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
 
