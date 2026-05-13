@@ -385,9 +385,9 @@ impl Widget for Showcase {
             format!(" Slider [{}{}]", filled, empty)
         };
         let state_2 = if self.primitive_checkbox {
-            " 󰗈 Check"
+            " ☑ Check"
         } else {
-            " 󰗐 Check"
+            " ☐ Check"
         };
         let state_3 = {
             let sel = self.primitive_radio;
@@ -399,9 +399,9 @@ impl Widget for Showcase {
             format!(" Radio {}", s)
         };
         let state_4 = if self.primitive_button || self.primitive_button_time.is_some() {
-            " 󰜎 Clicked!"
+            " ✦ Clicked!"
         } else {
-            " 󰏦 Button"
+            " ◇ Button"
         };
         let prim_controls: [(&str, &str); 5] = [
             ("", state_0),
