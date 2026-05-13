@@ -29,3 +29,8 @@ cyber = "run --example cyberpunk_dashboard"
 
 # Build all examples at once
 build-examples = "build --examples"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 16

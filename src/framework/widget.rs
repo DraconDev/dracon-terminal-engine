@@ -3,7 +3,10 @@
 //! All framework widgets implement this trait to enable composition,
 //! focus management, and event routing.
 
+use serde_json::Value as JsonValue;
+
 use crate::compositor::Plane;
+use crate::error::DraconError;
 use crate::framework::command::{BoundCommand, ParsedOutput};
 use crate::input::event::{KeyEvent, MouseEventKind};
 use ratatui::layout::Rect;
