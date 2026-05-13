@@ -482,8 +482,11 @@ impl crate::framework::widget::Widget for ColorPicker {
     }
 }
 
+/// Slider render params: (plane, idx, y, width, label, value, kind)
+type SliderParams<'a> = (&'a mut Plane, u16, u16, u16, &'a str, f32, SliderKind);
+
 impl ColorPicker {
-    fn render_slider(&self, plane: &mut Plane, _idx: u16, y: u16, width: u16, label: &str, value: f32, kind: SliderKind) {
+    fn render_slider(&self, params: SliderParams) {
         let area = self.area.get();
         let x = 2u16;
 

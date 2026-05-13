@@ -222,14 +222,68 @@ fn render_inline(
     fg: Color,
     bg: Color,
     style: Styles,
-) -> bool {
+) {
     for inline in inlines {
         match inline {
             Inline::Text(text) => {
                 for word in text.split_inclusive(' ') {
                     if !state.write_word(plane, word, width, height, fg, bg, style) {
-                        return false;
+                        return;
                     }
+                }
+            }
+            Inline::Bold(children) => {
+                render_inline(
+                    plane,
+                    children,
+                    theme,
+                    state,
+                    width,
+                    height,
+                    theme.fg,
+                    bg,
+                    style | Styles::BOLD,
+                );
+            }
+            Inline::Italic(children) => {
+                render_inline(
+                    plane,
+                    children,
+                    theme,
+                    state,
+                    width,
+                    height,
+                    theme.fg,
+                    bg,
+                    style | Styles::ITALIC,
+                );
+            }
+            Inline::Code(text) => {
+                for word in text.split_inclusive(' ') {
+                    if !state.write_word(plane, word, width, height, theme.fg, theme.secondary, style)
+                    {
+                        return;
+                    }
+                }
+            }
+            Inline::Link { text, .. } => {
+                for word in text.split_inclusive(' ') {
+                    if !state.write_word(
+                        plane,
+                        word,
+                        width,
+                        height,
+                        theme.info,
+                        bg,
+                        style | Styles::UNDERLINE,
+                    ) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
                 }
             }
             Inline::Bold(children) => {
