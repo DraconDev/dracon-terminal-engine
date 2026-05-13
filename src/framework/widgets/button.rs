@@ -163,10 +163,7 @@ impl crate::framework::widget::Widget for Button {
         row: u16,
     ) -> bool {
         let area = self.area.get();
-        let inside = col >= area.x
-            && col < area.x + area.width
-            && row >= area.y
-            && row < area.y + area.height;
+        let inside = col < area.width && row < area.height;
 
         match kind {
             crate::input::event::MouseEventKind::Moved => {
