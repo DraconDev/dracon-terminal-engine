@@ -1210,7 +1210,7 @@ impl TextEditor {
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
-                        let rel_col = (mouse.column - area.x - gutter as u16) as usize;
+                        let rel_col = (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
                         let target_visual = self.scroll_col + rel_col;
                         self.get_byte_index_from_visual(row, target_visual)
                     } else {
@@ -1268,7 +1268,7 @@ impl TextEditor {
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
-                        let rel_col = (mouse.column - area.x - gutter as u16) as usize;
+                        let rel_col = (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
                         let target_visual = self.scroll_col + rel_col;
                         self.get_byte_index_from_visual(row, target_visual)
                     } else {
