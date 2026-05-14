@@ -666,7 +666,7 @@ impl GitTui {
 
             let mut row = sub_y;
             if !staged.is_empty() {
-                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, &t);
+                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t.clone());
                 draw_text(
                     plane,
                     3,
@@ -710,7 +710,7 @@ impl GitTui {
             }
 
             if !modified.is_empty() {
-                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, &t);
+                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t.clone());
                 draw_text(
                     plane,
                     3,
@@ -756,7 +756,7 @@ impl GitTui {
             }
 
             if !untracked.is_empty() {
-                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, &t);
+                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t.clone());
                 draw_text(
                     plane,
                     3,
@@ -816,7 +816,7 @@ impl GitTui {
         let list_y = y + 2;
         let list_h = h.saturating_sub(3);
         if list_h > 2 {
-            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, &t);
+            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t.clone());
         }
 
         for (i, commit) in self.commits.iter().enumerate() {
