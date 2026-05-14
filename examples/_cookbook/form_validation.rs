@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
         .add_field("Email")
         .add_field("Password")
         .add_field("Bio")
-        .with_theme(theme)
+        .with_theme(theme.clone())
         .with_validation(0, vec![
             ValidationRule::Required,
             ValidationRule::MinLength(3),

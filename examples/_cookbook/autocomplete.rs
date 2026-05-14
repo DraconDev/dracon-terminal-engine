@@ -56,7 +56,7 @@ impl AutocompleteDemo {
         let sel = selected.clone();
         let mut autocomplete = Autocomplete::new(WidgetId::new(2), suggestions);
         autocomplete = autocomplete
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .with_max_visible(8)
             .on_select(move |s| {
                 *sel.borrow_mut() = Some(s.to_string());
