@@ -960,7 +960,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
         }
     }
 
-    draw_rounded_border(plane, x, y, w, h, t.clone());
+    draw_rounded_border(plane, x, y, w, h, t);
 
     let title = "User Directory Help";
     let title_x = x + (w - title.len() as u16) / 2;
@@ -1003,7 +1003,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     );
 }
 
-fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 3 || h < 2 {
         return;
     }
