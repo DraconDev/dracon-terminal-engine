@@ -434,17 +434,17 @@ fn test_theme_default_is_dark() {
 #[test]
 fn test_theme_clone() {
     let a = Theme::cyberpunk();
-    let b = a;
-    assert_eq!(a.name, b.name);
+    let b = a.clone();
+    assert_eq!(&*a.name, &*b.name);
     assert_eq!(a.bg, b.bg);
     assert_eq!(a.fg, b.fg);
 }
 
 #[test]
-fn test_theme_copy() {
+fn test_theme_clone_is_independent() {
     let a = Theme::dracula();
-    let b = a;
-    assert_eq!(a.name, b.name);
+    let b = a.clone();
+    assert_eq!(&*a.name, &*b.name);
 }
 
 #[test]
@@ -481,7 +481,7 @@ fn test_theme_all_returns_21_themes() {
     let themes = Theme::all();
     assert_eq!(themes.len(), 21, "Theme::all() should return 21 themes");
     // Verify no duplicate names
-    let mut names: Vec<&str> = themes.iter().map(|t| t.name).collect();
+    let mut names: Vec<String> = themes.iter().map(|t| t.name.to_string()).collect();
     names.sort();
     names.dedup();
     assert_eq!(names.len(), 21, "all 21 themes should have unique names");
