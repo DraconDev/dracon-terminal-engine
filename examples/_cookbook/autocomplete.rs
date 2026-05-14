@@ -181,7 +181,7 @@ impl Widget for AutocompleteDemo {
 fn main() -> std::io::Result<()> {
     let should_quit = Rc::new(AtomicBool::new(false));
     let theme = Theme::from_env_or(Theme::nord());
-    let demo = AutocompleteDemo::new(Rc::clone(&should_quit), theme);
+    let demo = AutocompleteDemo::new(Rc::clone(&should_quit), theme.clone());
 
     let mut app = App::new()?;
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
