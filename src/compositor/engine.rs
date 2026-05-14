@@ -76,7 +76,9 @@ impl Compositor {
     pub fn tick(&mut self, _delta: f32) {}
 
     /// Returns the topmost visible plane at the given coordinates, if any.
-    pub fn hit_test(&self, x: u16, y: u16) -> Option<&Plane> {
+    /// Sorts planes by z-index first to ensure correct top-to-bottom ordering.
+    pub fn hit_test(&mut self, x: u16, y: u16) -> Option<&Plane> {
+        self.sort_planes();
         for plane in self.planes.iter().rev() {
             if !plane.visible {
                 continue;
@@ -282,7 +284,7 @@ impl Compositor {
                     let mut src_cell = plane.cells[src_idx];
 
                     if let Some(filter) = &plane.filter {
-                        filter.apply(&mut src_cell, abs_x, abs_y, 0.0);
+                        filter.apply(&mut src_cell, abs_x, abs_y, render_time);
                     }
 
                     blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
