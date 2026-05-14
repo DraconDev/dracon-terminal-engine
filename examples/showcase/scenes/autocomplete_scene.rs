@@ -40,7 +40,7 @@ impl AutocompleteScene {
         let suggestions: Vec<String> = SUGGESTIONS.iter().map(|s| s.to_string()).collect();
         Self {
             autocomplete: Autocomplete::new(WidgetId::new(100), suggestions)
-                .with_theme(theme)
+                .with_theme(theme.clone())
                 .with_max_visible(6)
                 .on_select(|_s| { /* selection callback */ }),
             theme,

@@ -568,7 +568,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = FileManagerApp::new(theme, should_quit);
+    let mut app = FileManagerApp::new(theme.clone(), should_quit);
     app.set_area(Rect::new(0, 0, w, h));
 
     let mut app_widget = App::new()?.title("File Manager").fps(30).theme(theme);
