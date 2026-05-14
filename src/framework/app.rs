@@ -742,10 +742,11 @@ impl App {
 
         // Restore the previous panic hook so our custom one (which holds
         // a raw pointer into self) doesn't dangle after this method returns.
-        if let Ok(mut hook) = previous_hook.lock() {
-            let _ = std::mem::replace(&mut *hook, Box::new(|_| {}));
+        let _our_hook = std::panic::take_hook();
+        if let Ok(mut guard) = previous_hook.lock() {
+            let original = std::mem::replace(&mut *guard, Box::new(|_| {}));
+            std::panic::set_hook(original);
         }
-        std::panic::set_hook(std::mem::replace(&mut *previous_hook.lock().unwrap(), Box::new(|_| {})));
 
         // If DTRON_THEME_FILE is set, write the final theme name so the
         // parent process (e.g. showcase) can pick it up after this app exits.
