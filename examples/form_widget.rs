@@ -38,7 +38,7 @@ struct FormApp {
 impl FormApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
         let form = Form::new(WidgetId::new(1))
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .add_field("Full Name")
             .add_field("Email Address")
             .add_field("Company")

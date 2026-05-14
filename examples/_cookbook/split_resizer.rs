@@ -94,11 +94,11 @@ impl Widget for SplitResizerApp {
         let h = 1u16;
         let ch = area.height - 2 * h;
         let c = Rect::new(0, h, area.width, ch);
-        self.render_header(Rect::new(0, 0, area.width, h), t, &mut p);
-        self.render_content(c, t, &mut p);
-        self.render_status(Rect::new(0, area.height - h, area.width, h), t, &mut p);
+        self.render_header(Rect::new(0, 0, area.width, h), &t, &mut p);
+        self.render_content(c, &t, &mut p);
+        self.render_status(Rect::new(0, area.height - h, area.width, h), &t, &mut p);
         if self.show_help {
-            self.render_help_overlay(&mut p, t);
+            self.render_help_overlay(&mut p, &t);
         }
         p
     }
