@@ -183,7 +183,7 @@ impl Widget for WidgetGallery {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             self.update_bg(cell);
