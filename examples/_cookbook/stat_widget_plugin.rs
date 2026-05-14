@@ -194,7 +194,7 @@ impl PluginLoader {
     fn load_plugin(&mut self) {
         let id = WidgetId::new(self.next_id);
         self.next_id += 1;
-        if let Some(widget) = self.registry.create("stat", id, self.theme) {
+        if let Some(widget) = self.registry.create("stat", id, self.theme.clone()) {
             self.loaded_widgets.push(widget);
             self.dirty = true;
         }
