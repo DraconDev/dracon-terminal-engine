@@ -228,3 +228,24 @@ impl crate::framework::widget::Widget for TabBar {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for TabBar {
+    fn state_id(&self) -> Option<&str> {
+        Some("tabbar")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "active_tab": self.active,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(active) = json.get("active_tab").and_then(|v| v.as_u64()) {
+            self.set_active(active as usize);
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
