@@ -99,7 +99,7 @@ impl Widget for Showcase {
         }
 
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme.clone();
+        let t = &self.theme;
 
         // Background fill
         for cell in plane.cells.iter_mut() {
