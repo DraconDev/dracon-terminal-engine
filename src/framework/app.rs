@@ -736,6 +736,10 @@ impl App {
             }
         }
 
+        // Restore the previous panic hook so our custom one (which holds
+        // a raw pointer into self) doesn't dangle after this method returns.
+        let _ = std::panic::take_hook();
+
         // If DTRON_THEME_FILE is set, write the final theme name so the
         // parent process (e.g. showcase) can pick it up after this app exits.
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
