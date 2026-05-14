@@ -147,6 +147,7 @@ impl IdeApp {
 
         let menu_bar = MenuBar::new(WidgetId::new(1))
             .with_theme(theme.clone())
+            .with_entries(vec![
                 MenuEntry::new("File")
                     .add_item(MenuItem::new("New Tab (Ctrl+T)"))
                     .add_item(MenuItem::new("Open (Ctrl+O)"))
