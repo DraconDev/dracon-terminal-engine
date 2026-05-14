@@ -476,7 +476,7 @@ impl Scene for AddTaskScreen {
             let input_y = y + 1;
             let max_width = (area.width - 4) as usize;
             let display = if value.len() > max_width {
-                &value[value.len() - max_width..].clone()
+                &value[value.len() - max_width..]
             } else {
                 value.as_str()
             };
@@ -787,7 +787,7 @@ fn main() -> std::io::Result<()> {
     let mut router = SceneRouter::new();
     let initial_theme = theme.borrow().clone();
 
-    let mut list_screen = TaskListScreen::new(initial_theme);
+    let mut list_screen = TaskListScreen::new(initial_theme.clone());
     if let Ok(state_ref) = state.try_borrow() {
         list_screen.update_tasks(&state_ref.tasks);
     }
