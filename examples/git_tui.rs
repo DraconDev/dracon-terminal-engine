@@ -294,7 +294,7 @@ impl Widget for GitTui {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
 
         for cell in plane.cells.iter_mut() {
@@ -338,10 +338,10 @@ impl Widget for GitTui {
             );
         } else {
             match self.view {
-                GitView::Status => self.render_status(&mut plane, content_y, content_h, t.clone()),
-                GitView::Log => self.render_log(&mut plane, content_y, content_h, t.clone()),
-                GitView::Diff => self.render_diff(&mut plane, content_y, content_h, t.clone()),
-                GitView::Branches => self.render_branches(&mut plane, content_y, content_h, t.clone()),
+                GitView::Status => self.render_status(&mut plane, content_y, content_h, t),
+                GitView::Log => self.render_log(&mut plane, content_y, content_h, t),
+                GitView::Diff => self.render_diff(&mut plane, content_y, content_h, t),
+                GitView::Branches => self.render_branches(&mut plane, content_y, content_h, t),
             }
         }
 
@@ -375,7 +375,7 @@ impl Widget for GitTui {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t.clone(), &self.keybindings);
+            render_help_overlay(&mut plane, area, t, &self.keybindings);
         }
 
         plane
@@ -636,7 +636,7 @@ impl Widget for GitTui {
 }
 
 impl GitTui {
-    fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: Theme) {
+    fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: &Theme) {
         let header = " 󰊢 Status";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
@@ -666,7 +666,7 @@ impl GitTui {
 
             let mut row = sub_y;
             if !staged.is_empty() {
-                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t.clone());
+                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t);
                 draw_text(
                     plane,
                     3,
