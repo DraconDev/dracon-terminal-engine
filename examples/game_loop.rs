@@ -12,7 +12,7 @@
 
 use dracon_terminal_engine::backend::tty::poll_input;
 use dracon_terminal_engine::compositor::engine::Compositor;
-use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
+use dracon_terminal_engine::compositor::plane::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::theme::Theme;
