@@ -11,15 +11,15 @@
 //!   Enter   — launch selected example
 //!   /       — focus search bar
 //!   Tab     — cycle categories
-//!   t       — cycle theme
+//!   F2      — cycle theme
 //!   d       — toggle debug overlay
-//!   ?       — toggle help
+//!   F1      — toggle help
 //!   Space   — preview card (modal)
 //!   1-5     — interact with primitives bar
 //!   right-click — context menu (Launch / Copy name / Filter by category)
-//!   q       — quit
+//!   Ctrl+Q  — quit
 //!
-//! When an example is launched, press `q` or `Esc` in the example to return to the showcase.
+//! When an example is launched, press the quit key in the example to return to the showcase.
 //! A "Returned from [example]" toast will appear when you come back.
 
 use std::io::Read;

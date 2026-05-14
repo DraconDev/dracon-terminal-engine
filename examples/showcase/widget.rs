@@ -1042,7 +1042,7 @@ impl Widget for Showcase {
             );
 
             // Content
-            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("t").to_string();
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("F2").to_string();
             let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1").to_string();
             let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q").to_string();
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc").to_string();

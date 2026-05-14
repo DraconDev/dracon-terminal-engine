@@ -237,10 +237,10 @@ impl Scene for ThemeSwitcherScene {
                 if col >= x && col < x + swatch_w && row >= y && row < y + swatch_h {
                     self.theme_index = i;
                     self.theme = theme.clone();
-                    self.checkbox.on_theme_change(&self.theme);
-                    self.button.on_theme_change(&self.theme);
-                    self.gauge.on_theme_change(&self.theme);
-                    self.badge.on_theme_change(&self.theme);
+                    self.checkbox.on_theme_change(theme);
+                    self.button.on_theme_change(theme);
+                    self.gauge.on_theme_change(theme);
+                    self.badge.on_theme_change(theme);
                     self.dirty = true;
                     return true;
                 }
