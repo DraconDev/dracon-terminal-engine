@@ -521,8 +521,7 @@ impl Widget for MenuApp {
                         self.toast("Saved!", ToastKind::Success);
                         true
                     }
-                KeyCode::Char('q')
-                    if self.keybindings.matches(actions::QUIT, &key) => {
+                _ if self.keybindings.matches(actions::QUIT, &key) => {
                         self.toast("Goodbye!", ToastKind::Info);
                         self.should_quit.store(true, Ordering::SeqCst);
                         true
