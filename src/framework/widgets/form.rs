@@ -386,7 +386,7 @@ impl crate::framework::widget::Widget for Form {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char(ch) => {
+            KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == KeyModifiers::SHIFT => {
                 if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
                     field.value.push(ch);
                     field.error = None;
@@ -403,10 +403,9 @@ impl crate::framework::widget::Widget for Form {
                 true
             }
             KeyCode::Home => {
-                if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
-                    field.value.clear();
-                    field.error = None;
-                    self.dirty = true;
+                if let Some(ref mut _field) = self.fields.get_mut(self.focused_field) {
+                    // Home should move cursor to start in future cursor-tracking impl
+                    // For now, no-op (was incorrectly clearing the field)
                 }
                 true
             }

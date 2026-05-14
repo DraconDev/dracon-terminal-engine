@@ -193,12 +193,14 @@ impl BaseInput {
         col: u16,
         _row: u16,
     ) -> bool {
-        if col < self.text.len() as u16 {
+        if (col as usize) <= self.text.len() {
             self.cursor_pos = col as usize;
             self.dirty = true;
             true
         } else {
-            false
+            self.cursor_pos = self.text.len();
+            self.dirty = true;
+            true
         }
     }
 }
