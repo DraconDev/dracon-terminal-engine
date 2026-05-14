@@ -1000,6 +1000,10 @@ impl Widget for IdeApp {
                 self.open_command_palette();
                 true
             }
+            KeyCode::Char('g') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.toast("Go to line: Enter line number", ToastKind::Info);
+                true
+            }
             KeyCode::Tab if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.active_tab = (self.active_tab + 1) % self.tabs.len();
                 self.tab_bar.set_active(self.active_tab);
