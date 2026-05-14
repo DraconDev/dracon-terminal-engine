@@ -445,7 +445,7 @@ fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
 }
 
 #[allow(dead_code)]
-fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["  line 0  ▸ active", "  line 1", "  line 2", "  line 3", "  line 4", "  line 5", "  line 6", "  line 7", "  line 8", "  line 9", "  line 10", "  line 11", "  line 12", "  line 13", "  line 14"];
     let view_h = 6usize;
     let offset = ((phase * 2.0).sin() * 4.0).round() as usize;
@@ -476,7 +476,7 @@ fn render_scroll_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy:
     }
 }
 
-fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_ide_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
     let mut tab_x = ox + 1;
     let mut active_tab_start = 0usize;
@@ -499,7 +499,7 @@ fn render_ide_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: us
     if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 4, oy + 6, '▎', t.primary, t.surface); }
 }
 
-fn render_desktop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let wins = [(1, 6, 8, 4, t.primary), (11, 7, 8, 4, t.warning), (6, 9, 10, 3, t.info)];
     let offsets = [((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16), ((phase * 18.0).sin() as i16, (phase * 12.0).sin() as i16), (0, 0)];
     for (i, (x, y, w, h, color)) in wins.iter().enumerate() {
