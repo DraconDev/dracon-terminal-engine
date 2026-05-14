@@ -63,10 +63,7 @@ impl EditorTab {
         }
     }
 
-    fn with_path(mut self, path: PathBuf) -> Self {
-        self.path = Some(path);
-        self
-    }
+
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
