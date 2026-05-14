@@ -5,9 +5,10 @@
 //! clicked to dismiss immediately.
 
 use crate::compositor::{Color, Plane, Styles};
+use crate::error::DraconError;
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::input::event::MouseEventKind;
 use ratatui::layout::Rect;
 use std::cell::RefCell;

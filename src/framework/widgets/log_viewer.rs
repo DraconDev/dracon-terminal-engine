@@ -18,9 +18,10 @@
 use std::collections::VecDeque;
 
 use crate::compositor::{Cell, Color, Plane, Styles};
+use crate::error::DraconError;
 use crate::framework::command::{BoundCommand, ParsedOutput};
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone)]
