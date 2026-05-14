@@ -139,7 +139,7 @@ impl Scene for WidgetGalleryScene {
         for (slot, &(_row, _col, name, icon)) in SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, area);
             let is_selected = slot == self.selected;
-            render_card_border(&mut plane, rect, t, is_selected);
+            render_card_border(&mut plane, rect, t.clone(), is_selected);
 
             let title = format!("{} {}", icon, name);
             draw_text(&mut plane, rect.x + 1, rect.y + 1, &title, t.primary, t.surface, true);
