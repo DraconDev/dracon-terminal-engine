@@ -218,7 +218,7 @@ impl Widget for WidgetGallery {
             let rect = self.slot_rect(slot, area);
             let is_selected = slot == self.selected;
 
-            render_card_border(&mut plane, rect, t, is_selected);
+            render_card_border(&mut plane, rect, t.clone(), is_selected);
 
             // Title with icon
             let title = format!("{} {}", icon, name);
