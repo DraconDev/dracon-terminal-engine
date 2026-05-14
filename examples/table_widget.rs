@@ -960,7 +960,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
         }
     }
 
-    draw_rounded_border(plane, x, y, w, h, t);
+    draw_rounded_border(plane, x, y, w, h, t.clone());
 
     let title = "User Directory Help";
     let title_x = x + (w - title.len() as u16) / 2;

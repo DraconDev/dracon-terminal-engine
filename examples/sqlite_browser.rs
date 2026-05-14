@@ -74,7 +74,7 @@ struct SqliteBrowser {
 
 impl SqliteBrowser {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme, db_path: &str) -> Self {
-        let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme);
+        let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme.clone());
 
         let mut kb_config = resolve_keybindings();
         // Ensure example-specific bindings are present (fallback to current hardcoded behavior)
