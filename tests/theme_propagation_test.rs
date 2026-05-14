@@ -429,6 +429,7 @@ fn test_dtron_theme_file_round_trip() {
 
 #[test]
 fn test_dtron_theme_file_hyphenated_theme_name() {
+    let _guard = ENV_LOCK.lock().unwrap();
     // Verify that hyphenated theme names written to DTRON_THEME_FILE
     // resolve correctly (regression test for showcase inheritance bug)
     let tmp_path = std::env::temp_dir().join("dte_theme_hyphen_test");
