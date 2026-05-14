@@ -734,7 +734,7 @@ impl Widget for TableApp {
                 // Status badge
                 let badge = format!(" {} {} ", user.status.icon(), user.status.label());
                 let badge_x = content_x + name_text.len() as u16;
-                let badge_color = user.status.color(t.clone());
+                let badge_color = user.status.color(t);
                 for (i, c) in badge.chars().enumerate() {
                     let idx = (content_y * area.width + badge_x + i as u16) as usize;
                     if idx < plane.cells.len() {
@@ -814,7 +814,7 @@ impl Widget for TableApp {
             0,
             card_w,
             area.height.saturating_sub(1),
-            t.clone(),
+            t,
         );
 
         // === HELP OVERLAY ===
@@ -943,7 +943,7 @@ impl Widget for TableApp {
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let w = 52u16.min(area.width - 4);
     let h = 14u16.min(area.height - 4);
     let x = (area.width - w) / 2;
