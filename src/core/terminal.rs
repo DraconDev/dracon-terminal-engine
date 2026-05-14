@@ -115,11 +115,7 @@ pub struct Terminal<W: Write + AsFd> {
 
 impl<W: Write + AsFd> Drop for Terminal<W> {
     fn drop(&mut self) {
-        // cleanup: show cursor, disable mouse, exit sync update, leave alt screen, pop kitty keyboard
-        let _ = write!(
-            self.output,
-            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l\x1b[?2004l"
-        );
+        let _ = write!(self.output, "{}", RESTORE_SEQ);
         let _ = self.output.flush();
         // Restore terminal attributes (skip in null mode)
         if !self.is_null_mode {
