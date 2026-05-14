@@ -497,7 +497,6 @@ impl App {
         F: FnMut(&mut Ctx),
     {
         let running = self.running.clone();
-        let resize_flag = self.resize_flag.clone();
         let frame_count = self.frame_count.clone();
 
         let title = self.title.clone();
