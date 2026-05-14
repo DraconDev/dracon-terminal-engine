@@ -187,6 +187,7 @@ pub trait Widget {
 /// (object-safe). Widgets that need async mount/unmount hooks should
 /// implement both `Widget` and `AsyncWidget`.
 #[cfg(feature = "async")]
+#[allow(async_fn_in_trait)]
 pub trait AsyncWidget: Widget {
     /// Called when the widget is mounted (async variant).
     ///
