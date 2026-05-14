@@ -401,8 +401,7 @@ impl Widget for SqliteBrowser {
             0,
             right_rect.width.saturating_sub(1),
             query_h + 1,
-            t,
-            query_active,
+            t.clone(),
         );
         let query_bg = if query_active {
             t.surface_elevated
