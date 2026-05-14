@@ -6,7 +6,7 @@ use std::os::fd::{AsFd, BorrowedFd};
 /// Common escape sequence to restore the terminal state:
 /// end sync update, show cursor, reset cursor keys, disable synchronized update,
 /// disable all mouse modes, enable line wrap, exit alt screen, disable bracketed paste.
-const RESTORE_SEQ: &str =
+pub const RESTORE_SEQ: &str =
     "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l\x1b[?2004l";
 
 /// Cursor shape for terminal cursor style sequences.
@@ -198,10 +198,7 @@ impl<W: Write + AsFd> Terminal<W> {
 
     /// Temporarily restore terminal to normal mode for child processes.
     pub fn suspend(&mut self) -> io::Result<()> {
-        let _ = write!(
-            self.output,
-            "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l\x1b[?2004l"
-        );
+        let _ = write!(self.output, "{}", RESTORE_SEQ);
         let _ = self.output.flush();
         if !self.is_null_mode {
             if let Some(ref termios) = self.original_termios {

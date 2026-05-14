@@ -32,6 +32,7 @@ use crate::framework::widget::{Widget, WidgetId};
 use crate::input::event::{Event, KeyEvent};
 use crate::input::parser::Parser;
 use crate::Terminal;
+use crate::core::terminal::RESTORE_SEQ;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
 use std::cell::Ref;
