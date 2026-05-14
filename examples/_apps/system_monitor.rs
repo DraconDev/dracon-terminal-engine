@@ -489,22 +489,22 @@ impl SystemMonitor {
         data.refresh();
         Self {
             cpu_gauge: Gauge::with_id(WidgetId::new(1), "CPU %")
-                .with_theme(theme)
+                .with_theme(theme.clone())
                 .warn_threshold(70.0)
                 .crit_threshold(90.0),
             mem_gauge: Gauge::with_id(WidgetId::new(2), "Memory %")
-                .with_theme(theme)
+                .with_theme(theme.clone())
                 .warn_threshold(80.0)
                 .crit_threshold(95.0),
             disk_gauge: Gauge::with_id(WidgetId::new(3), "I/O")
-                .with_theme(theme)
+                .with_theme(theme.clone())
                 .warn_threshold(75.0)
                 .crit_threshold(90.0),
             net_gauge: Gauge::with_id(WidgetId::new(4), "Network")
-                .with_theme(theme)
+                .with_theme(theme.clone())
                 .warn_threshold(80.0)
                 .crit_threshold(95.0),
-            status_badge: StatusBadge::new(WidgetId::new(5)).with_theme(theme),
+            status_badge: StatusBadge::new(WidgetId::new(5)).with_theme(theme.clone()),
             data,
             theme_index: 0,
             theme,
