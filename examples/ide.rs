@@ -995,9 +995,8 @@ impl Widget for IdeApp {
                 true
             }
             _ => {
-                if let Some(tab) = self.active_tab_mut() {
-                    let editor_area = Rect::new(0, 0, self.area.width.saturating_sub(22), self.area.height.saturating_sub(4));
-                    let handled = tab.adapter.handle_key(key);
+                if self.tabs.get(self.active_tab).is_some() {
+                    let handled = self.tabs[self.active_tab].adapter.handle_key(key);
                     if handled {
                         self.update_status();
                         self.sync_tab_bar();
@@ -1110,7 +1109,7 @@ impl Widget for IdeApp {
         }
 
         // Editor mouse events
-        if let Some(tab) = self.active_tab_mut() {
+        {
             let menu_h = 1u16;
             let tab_h = 1u16;
             let tree_w = 18u16;
@@ -1120,8 +1119,9 @@ impl Widget for IdeApp {
             let status_h = 1u16;
             let search_h = if self.show_search { 3u16 } else { 0u16 };
             let content_h = self.area.height.saturating_sub(content_y + status_h + search_h);
+            let has_tab = self.tabs.get(self.active_tab).is_some();
 
-            if editor_w > 0 && content_h > 1 {
+            if has_tab && editor_w > 0 && content_h > 1 {
                 let text_y = content_y + 1;
                 let text_h = content_h.saturating_sub(1);
                 let text_w = editor_w.saturating_sub(2);
@@ -1131,7 +1131,7 @@ impl Widget for IdeApp {
                 {
                     let rel_col = col - (editor_x + 1);
                     let rel_row = row - text_y;
-                    let handled = tab.adapter.handle_mouse(kind, rel_col, rel_row);
+                    let handled = self.tabs[self.active_tab].adapter.handle_mouse(kind, rel_col, rel_row);
                     if handled {
                         self.update_status();
                     }
