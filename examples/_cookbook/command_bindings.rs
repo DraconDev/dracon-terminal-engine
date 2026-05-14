@@ -475,7 +475,7 @@ impl Widget for CommandBindings {
         blit_plane(&kvp, &mut p, 55, 5);
 
         // ── Card: Log (bottom-left) ──
-        render_card(&mut p, 2, 12, 38, 10, t);
+        render_card(&mut p, 2, 12, 38, 10, &t);
         let log_title = " 󰑊 Activity Log ";
         for (i, c) in log_title.chars().enumerate() {
             p.cells[12 * w + 3 + i] = Cell {
@@ -492,7 +492,7 @@ impl Widget for CommandBindings {
         blit_plane(&lp, &mut p, 3, 14);
 
         // ── Card: Streaming (bottom-right) ──
-        render_card(&mut p, 42, 12, 36, 10, t);
+        render_card(&mut p, 42, 12, 36, 10, &t);
         let stream_title = " 󰅐 Live Stream ";
         for (i, c) in stream_title.chars().enumerate() {
             p.cells[12 * w + 43 + i] = Cell {
