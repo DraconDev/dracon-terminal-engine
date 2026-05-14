@@ -201,16 +201,24 @@ impl<W: Write + AsFd> Terminal<W> {
             "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l\x1b[?2004l"
         );
         let _ = self.output.flush();
-        let _ = set_terminal_attr(self.output.as_fd(), &self.original_termios);
+        if !self.is_null_mode {
+            if let Some(ref termios) = self.original_termios {
+                let _ = set_terminal_attr(self.output.as_fd(), termios);
+            }
+        }
         Ok(())
     }
 
     /// Re-enter raw mode + alternate screen after suspend().
     pub fn resume(&mut self) -> io::Result<()> {
-        let fd = self.output.as_fd();
-        let mut termios = self.original_termios;
-        make_raw(&mut termios);
-        set_terminal_attr(fd, &termios)?;
+        if !self.is_null_mode {
+            let fd = self.output.as_fd();
+            if let Some(ref termios) = self.original_termios {
+                let mut raw = *termios;
+                make_raw(&mut raw);
+                set_terminal_attr(fd, &raw)?;
+            }
+        }
         write!(
             self.output,
             "\x1b[>1u\x1b[?1049h\x1b[?1003h\x1b[?1006h\x1b[?1007l\x1b[?7l\x1b[?25l\x1b[?2004h"
