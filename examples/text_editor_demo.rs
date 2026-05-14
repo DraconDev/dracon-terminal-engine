@@ -787,7 +787,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb_config: &Key
     }
 
     // Border
-    draw_rounded_border(plane, x, y, w, h, t.clone());
+    draw_rounded_border(plane, x, y, w, h, t);
 
     // Title
     let title = "Keyboard Shortcuts";
@@ -844,7 +844,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb_config: &Key
     );
 }
 
-fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 3 || h < 2 {
         return;
     }
