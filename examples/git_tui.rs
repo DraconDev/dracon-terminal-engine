@@ -816,7 +816,7 @@ impl GitTui {
         let list_y = y + 2;
         let list_h = h.saturating_sub(3);
         if list_h > 2 {
-            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t.clone());
+            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t);
         }
 
         for (i, commit) in self.commits.iter().enumerate() {
@@ -857,7 +857,7 @@ impl GitTui {
         }
     }
 
-    fn render_diff(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+    fn render_diff(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
         let header = " 󰊢 Diff";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
@@ -870,7 +870,7 @@ impl GitTui {
                 content_y,
                 plane.width.saturating_sub(4),
                 content_h,
-                t.clone(),
+                t,
             );
         }
 
