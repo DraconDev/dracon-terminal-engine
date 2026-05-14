@@ -259,6 +259,12 @@ impl crate::framework::widget::Widget for Breadcrumbs {
     }
 }
 
+impl crate::framework::widget::WidgetState for Breadcrumbs {
+    fn state_id(&self) -> Option<&str> { None }
+    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+}
+
 impl Breadcrumbs {
     fn render_segment(&self, plane: &mut Plane, i: usize, _width: u16, x: &mut u16, _is_prefix: bool) {
         let segment = &self.segments[i];
