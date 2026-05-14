@@ -9,6 +9,8 @@ use crate::data::ExampleMeta;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 pub fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, selected: bool) {
+    let ox = area.x as usize;
+    let oy = area.y as usize;
     let w = area.width as usize;
     let h = area.height as usize;
     if w < 2 || h < 2 {
@@ -22,27 +24,27 @@ pub fn draw_rounded_border(plane: &mut Plane, area: Rect, fg: Color, bg: Color, 
     };
 
     // Corners
-    set_cell(plane, 0, 0, chars.0, fg, bg);
-    set_cell(plane, w - 1, 0, chars.1, fg, bg);
-    set_cell(plane, 0, h - 1, chars.2, fg, bg);
-    set_cell(plane, w - 1, h - 1, chars.3, fg, bg);
+    set_cell(plane, ox, oy, chars.0, fg, bg);
+    set_cell(plane, ox + w - 1, oy, chars.1, fg, bg);
+    set_cell(plane, ox, oy + h - 1, chars.2, fg, bg);
+    set_cell(plane, ox + w - 1, oy + h - 1, chars.3, fg, bg);
 
     // Top/bottom edges
     for x in 1..w - 1 {
-        set_cell(plane, x, 0, chars.4, fg, bg);
-        set_cell(plane, x, h - 1, chars.4, fg, bg);
+        set_cell(plane, ox + x, oy, chars.4, fg, bg);
+        set_cell(plane, ox + x, oy + h - 1, chars.4, fg, bg);
     }
 
     // Left/right edges
     for y in 1..h - 1 {
-        set_cell(plane, 0, y, chars.5, fg, bg);
-        set_cell(plane, w - 1, y, chars.5, fg, bg);
+        set_cell(plane, ox, oy + y, chars.5, fg, bg);
+        set_cell(plane, ox + w - 1, oy + y, chars.5, fg, bg);
     }
 
     // Fill background
     for y in 1..h - 1 {
         for x in 1..w - 1 {
-            set_cell(plane, x, y, ' ', fg, bg);
+            set_cell(plane, ox + x, oy + y, ' ', fg, bg);
         }
     }
 }
