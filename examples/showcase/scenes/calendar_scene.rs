@@ -174,7 +174,7 @@ fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
     }
 }
 
-fn draw_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 44u16.min(area.width.saturating_sub(4));
     let hh = 10u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
