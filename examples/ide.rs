@@ -927,8 +927,15 @@ impl Widget for IdeApp {
                 self.show_search = false;
                 return true;
             }
+            let query_before = self.search_submit.lock().unwrap().clone();
             let handled = self.search_input.handle_key(key);
             if handled {
+                let query_after = self.search_submit.lock().unwrap().clone();
+                if !query_after.is_empty() && query_after != query_before {
+                    if let Some(tab) = self.active_tab_ref() {
+                        tab.adapter.editor_mut().set_filter(&query_after);
+                    }
+                }
                 return true;
             }
         }
