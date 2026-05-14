@@ -110,7 +110,7 @@ impl Scene for WidgetGalleryScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -139,7 +139,7 @@ impl Scene for WidgetGalleryScene {
         for (slot, &(_row, _col, name, icon)) in SLOTS.iter().enumerate() {
             let rect = self.slot_rect(slot, area);
             let is_selected = slot == self.selected;
-            render_card_border(&mut plane, rect, t.clone(), is_selected);
+            render_card_border(&mut plane, rect, t, is_selected);
 
             let title = format!("{} {}", icon, name);
             draw_text(&mut plane, rect.x + 1, rect.y + 1, &title, t.primary, t.surface, true);
@@ -288,7 +288,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
-fn render_card_border(plane: &mut Plane, rect: Rect, t: Theme, selected: bool) {
+fn render_card_border(plane: &mut Plane, rect: Rect, t: &Theme, selected: bool) {
     let (x, y, w, h) = (rect.x, rect.y, rect.width, rect.height);
     let border = if selected { t.primary } else { t.outline };
     let bg = if selected { t.surface_elevated } else { t.surface };
