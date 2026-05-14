@@ -212,7 +212,7 @@ impl Calendar {
                 self.range_end = None;
             } else if self.range_end.is_none() {
                 // Ensure start <= end
-                let start = self.range_start.unwrap();
+                let start = self.range_start.unwrap_or(date);
                 if date >= start {
                     self.range_end = Some(date);
                 } else {
