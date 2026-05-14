@@ -273,7 +273,7 @@ impl Widget for SettingsForm {
         let card_h = area.height.saturating_sub(2);
 
         // Card border
-        draw_rounded_border(&mut plane, margin, 0, card_w, card_h, t);
+        draw_rounded_border(&mut plane, margin, 0, card_w, card_h, t.clone());
 
         // Fill card background
         for y in 1..card_h.saturating_sub(1) {
@@ -642,7 +642,7 @@ impl Widget for SettingsForm {
                 }
             }
 
-            draw_rounded_border(&mut plane, toast_x, toast_y, toast_w, toast_h, t);
+            draw_rounded_border(&mut plane, toast_x, toast_y, toast_w, toast_h, t.clone());
 
             let toast_text = format!(" 󰄬 {} ", self.toast_message);
             let text_x = toast_x + (toast_w - toast_text.len() as u16) / 2;
