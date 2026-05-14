@@ -690,7 +690,7 @@ impl Dashboard {
                 };
 
                 let name = if proc.name.len() > 14 {
-                    &proc.name[..14].clone()
+                    &proc.name[..14]
                 } else {
                     &proc.name
                 };
