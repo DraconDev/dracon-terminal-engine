@@ -703,7 +703,7 @@ impl Widget for TableApp {
         let detail_y = table_y + table_h;
         if detail_y + detail_h <= area.height && self.selected_user().is_some() {
             // Rounded border for detail panel
-            draw_rounded_border(&mut plane, margin, detail_y, card_w, detail_h, t);
+            draw_rounded_border(&mut plane, margin, detail_y, card_w, detail_h, t.clone());
 
             // Fill background inside border
             for dy in 1..detail_h.saturating_sub(1) {
@@ -734,7 +734,7 @@ impl Widget for TableApp {
                 // Status badge
                 let badge = format!(" {} {} ", user.status.icon(), user.status.label());
                 let badge_x = content_x + name_text.len() as u16;
-                let badge_color = user.status.color(t);
+                let badge_color = user.status.color(t.clone());
                 for (i, c) in badge.chars().enumerate() {
                     let idx = (content_y * area.width + badge_x + i as u16) as usize;
                     if idx < plane.cells.len() {
