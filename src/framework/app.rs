@@ -74,7 +74,6 @@ pub struct App {
     last_frame_time: Instant,
     last_tick_time: Instant,
     tick_interval: Duration,
-    resize_flag: Arc<AtomicBool>,
     tick_count: u64,
     on_tick: RefCell<Option<TickCallback>>,
     widgets: RefCell<Vec<Box<dyn Widget>>>,
