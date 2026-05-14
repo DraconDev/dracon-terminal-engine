@@ -266,7 +266,7 @@ impl Widget for Showcase {
         // Features highlight bar
         let features_y = 3usize;
         let phase = self.card_start.elapsed().as_secs_f64();
-        crate::render::render_features_bar(&mut plane, t.clone(), features_y, phase);
+        crate::render::render_features_bar(&mut plane, t, features_y, phase);
 
         // Search bar with icon and better styling
         let search_y = 4usize;
@@ -1155,7 +1155,7 @@ impl Widget for Showcase {
                         modal_y + 3,
                         &badge,
                         t.fg_on_accent,
-                        category_color(t.clone(), ex.category),
+                        category_color(t, ex.category),
                         Styles::empty(),
                     );
 
