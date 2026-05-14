@@ -72,7 +72,7 @@ impl Scene for RichTextScene {
     fn scene_id(&self) -> &str { "rich_text" }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
