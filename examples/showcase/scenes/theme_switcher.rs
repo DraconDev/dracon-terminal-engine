@@ -12,7 +12,6 @@ use dracon_terminal_engine::framework::widgets::{Button, Checkbox, Gauge, Status
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
-/// Type alias for theme factory entries.
 /// Configuration for rendering a single theme swatch.
 struct SwatchConfig<'a> {
     x: u16,
