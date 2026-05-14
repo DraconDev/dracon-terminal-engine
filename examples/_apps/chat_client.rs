@@ -907,7 +907,7 @@ impl ChatState {
 
         // ── Help Overlay ──────────────────────────────────────────────────────
         if self.show_help {
-            self.render_help(&mut plane, area, t);
+            self.render_help(&mut plane, area, &t);
         }
 
         plane

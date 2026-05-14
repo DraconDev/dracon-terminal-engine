@@ -466,7 +466,7 @@ fn main() -> io::Result<()> {
             let toast = Toast::new(WidgetId::new(200), &demo.toast_message)
                 .with_kind(ToastKind::Success)
                 .with_duration(Duration::from_secs(2))
-                .with_theme(demo.theme);
+                .with_theme(demo.theme.clone());
 
             let toast_area = Rect::new((w.saturating_sub(40)) / 2, h.saturating_sub(3), 40, 1);
             ctx.add_plane(toast.render(toast_area));
@@ -477,7 +477,7 @@ fn main() -> io::Result<()> {
         let mut status_plane = Plane::new(0, w, 1);
         status_plane.set_absolute_position(0, h.saturating_sub(1));
         status_plane.set_z_index(1000);
-        let t = demo.theme;
+        let t = demo.theme.clone();
         let hint = "t: theme | F1: help | Esc: dismiss | Enter: confirm | Ctrl+Q: quit";
         for (i, c) in hint.chars().take(w as usize).enumerate() {
             if i < status_plane.cells.len() {
