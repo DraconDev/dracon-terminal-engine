@@ -451,7 +451,7 @@ impl Widget for SqliteBrowser {
             right_rect.width.saturating_sub(1),
             results_h,
             t.clone(),
-        );
+            results_active,
         let results_bg = if results_active {
             t.surface_elevated
         } else {
@@ -873,7 +873,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let browser = SqliteBrowser::new(should_quit, theme, &db_path);
+    let browser = SqliteBrowser::new(should_quit, theme.clone(), &db_path);
 
     let mut app = App::new()?.title("SQLite Browser").fps(30).theme(theme);
     app.add_widget(Box::new(browser), Rect::new(0, 0, w, h));
