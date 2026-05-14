@@ -76,7 +76,7 @@ impl ThemeSwitcherScene {
                         _ => '─',
                     };
                 } else if row == y + 1 && col > x && col < x + w - 1 {
-                    let name = theme.name;
+                    let name = &theme.name;
                     let name_x = x + 1 + (w.saturating_sub(2).saturating_sub(name.len() as u16)) / 2;
                     if col >= name_x && (col - name_x) < name.len() as u16 {
                         let ch = name.chars().nth((col - name_x) as usize).unwrap_or(' ');

@@ -60,7 +60,7 @@ Try the widget with various markdown content!"#;
 impl RichTextScene {
     pub fn new(theme: Theme) -> Self {
         Self {
-            rich_text: RichText::new(SAMPLE_MARKDOWN).with_theme(theme),
+            rich_text: RichText::new(SAMPLE_MARKDOWN).with_theme(theme.clone()),
             theme,
             show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
