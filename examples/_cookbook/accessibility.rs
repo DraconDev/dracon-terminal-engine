@@ -295,16 +295,16 @@ impl AccessibilityDemo {
         Self {
             id: WidgetId::new(1),
             area: Rect::default(),
-            theme,
+            theme: theme.clone(),
             show_help: false,
             dirty: true,
-            submit_btn: AccessibleButton::new(WidgetId::new(2), "Submit", theme),
-            cancel_btn: AccessibleButton::new(WidgetId::new(3), "Cancel", theme),
+            submit_btn: AccessibleButton::new(WidgetId::new(2), "Submit", theme.clone()),
+            cancel_btn: AccessibleButton::new(WidgetId::new(3), "Cancel", theme.clone()),
             notifications_toggle: AccessibleToggle::new(
                 WidgetId::new(4),
                 "Enable notifications",
                 true,
-                theme,
+                theme.clone(),
             ),
             sound_toggle: AccessibleToggle::new(
                 WidgetId::new(5),
@@ -494,7 +494,7 @@ impl Widget for AccessibilityDemo {
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
-    let demo = AccessibilityDemo::new(theme);
+    let demo = AccessibilityDemo::new(theme.clone());
 
     let mut app = App::new()?
         .title("Accessibility Demo")
