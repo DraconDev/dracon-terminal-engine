@@ -5,9 +5,8 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
-use crate::error::DraconError;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{WidgetId, WidgetState};
+use crate::framework::widget::WidgetId;
 use ratatui::layout::Rect;
 
 /// A single menu item with a label and optional action.
