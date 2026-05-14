@@ -4,7 +4,7 @@ use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 
 fn assert_theme_name(t: &Theme, expected_name: &str) {
-    assert_eq!(t.name, expected_name);
+    assert_eq!(&*t.name, expected_name);
 }
 
 fn assert_rgb(t: &Theme, field: &str, r: u8, g: u8, b: u8) {
