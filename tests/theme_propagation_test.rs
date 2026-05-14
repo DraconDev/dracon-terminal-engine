@@ -383,10 +383,15 @@ fn test_widget_current_theme_returns_managed_theme() {
     );
 }
 
+use std::sync::Mutex;
+
+static ENV_LOCK: Mutex<()> = Mutex::new(());
+
 // === DTRON_THEME_FILE round-trip (showcase child return mechanism) ===
 
 #[test]
 fn test_dtron_theme_file_round_trip() {
+    let _guard = ENV_LOCK.lock().unwrap();
     // Simulate the showcase → child → showcase theme return flow
     let tmp_path = std::env::temp_dir().join("dte_theme_prop_test");
     let original = std::env::var("DTRON_THEME_FILE").ok();
@@ -442,7 +447,7 @@ fn test_dtron_theme_file_hyphenated_theme_name() {
         "hyphenated theme name 'catppuccin-mocha' should resolve"
     );
     assert_eq!(
-        resolved.unwrap().name,
+        &*resolved.unwrap().name,
         "catppuccin_mocha",
         "resolved theme name should match current .name convention (underscores)"
     );
