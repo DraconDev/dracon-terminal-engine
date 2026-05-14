@@ -523,7 +523,7 @@ fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, o
     }
 }
 
-fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_git_tui_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, Styles::BOLD);
     draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, Styles::empty());
     let phases = [[(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)], [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)], [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)], [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)]];
@@ -531,7 +531,7 @@ fn render_git_tui_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy
     for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text(plane, ox + 2, oy + 9 + i, text, *color, t.surface, Styles::empty()); }
 }
 
-fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_file_manager_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let items = [(0, "home/", true, 0), (1, "user/", true, 1), (2, "  src/", true, 2), (3, "    main.rs", false, -1), (3, "    lib.rs", false, -1), (2, "  docs/", true, 1), (3, "    README.md", false, -1)];
     let expand_phase = ((phase * 0.5).sin() * 4.0).round() as usize % 4;
     let visible_depth = if expand_phase == 0 { 1 } else if expand_phase == 1 { 2 } else if expand_phase == 2 { 3 } else { 4 };
@@ -546,7 +546,7 @@ fn render_file_manager_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
     }
 }
 
-fn render_menu_system_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let menus = ["File", "Edit", "View", "Help"];
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
     let menu_w = 8;
