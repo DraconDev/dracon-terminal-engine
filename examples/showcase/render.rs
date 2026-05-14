@@ -392,9 +392,9 @@ fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy:
 fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
-        format!("CPU:  [{}{}]", "█".repeat((phase * 4.0).sin() as usize * 2 + 2), "░".repeat(6)),
-        format!("Mem:  [{}{}]", "█".repeat((phase * 3.0).sin() as usize * 2 + 3), "░".repeat(5)),
-        format!("Net:  [{}{}]", "█".repeat((phase * 2.0).sin() as usize * 2 + 1), "░".repeat(7)),
+        format!("CPU:  [{}{}]", "█".repeat(((phase * 4.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(6)),
+        format!("Mem:  [{}{}]", "█".repeat(((phase * 3.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(5)),
+        format!("Net:  [{}{}]", "█".repeat(((phase * 2.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(7)),
     ];
     for (i, line) in lines.iter().enumerate() {
         let py = oy + 6 + i;
@@ -448,7 +448,7 @@ fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
 fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["  line 0  ▸ active", "  line 1", "  line 2", "  line 3", "  line 4", "  line 5", "  line 6", "  line 7", "  line 8", "  line 9", "  line 10", "  line 11", "  line 12", "  line 13", "  line 14"];
     let view_h = 6usize;
-    let offset = ((phase * 2.0).sin() * 4.0).round() as usize;
+    let offset = ((phase * 2.0).sin() * 4.0).round().max(0.0) as usize;
     let offset = offset.min(lines.len().saturating_sub(view_h));
     let track_x = 24usize;
     let track_h = view_h;
