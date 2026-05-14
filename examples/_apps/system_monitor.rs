@@ -657,13 +657,13 @@ impl Widget for SystemMonitor {
 
         // Gauge labels and values
         let gauges = [
-            ("󰍛 CPU", self.data.cpu_hist.current(), t),
-            ("󰘚 Memory", self.data.mem_hist.current(), t),
-            ("󰋊 Disk I/O", self.data.disk_hist.current(), t),
-            ("󰀂 Network", self.data.net_hist.current(), t),
+            (" CPU", self.data.cpu_hist.current()),
+            (" Memory", self.data.mem_hist.current()),
+            (" Disk I/O", self.data.disk_hist.current()),
+            (" Network", self.data.net_hist.current()),
         ];
 
-        for (i, (label, val, _)) in gauges.iter().enumerate() {
+        for (i, (label, val)) in gauges.iter().enumerate() {
             let gx = i as u16 * qw;
             let gcolor = if *val >= 90.0 {
                 t.error
@@ -674,7 +674,7 @@ impl Widget for SystemMonitor {
             };
 
             // Card border
-            render_card_border(&mut plane, gx, gauge_y, qw, gauge_h, t);
+            render_card_border(&mut plane, gx, gauge_y, qw, gauge_h, t.clone());
 
             // Label
             draw_text(
