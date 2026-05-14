@@ -745,7 +745,7 @@ fn render_rich_text_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize
     }
 }
 
-fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, Styles::empty());
     if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 6, oy + 5, '█', t.primary, t.surface); }
     let suggestions = ["rust-analyzer", "rustc", "cargo", "rustfmt", "clippy"];
@@ -761,7 +761,7 @@ fn render_autocomplete_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usiz
         draw_text(plane, x + 2, y, s, fg, t.surface, Styles::empty());
     }
 }
-fn render_notification_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
     for i in 0..2.min(notifications.len()) {
