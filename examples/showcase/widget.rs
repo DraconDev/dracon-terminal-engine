@@ -1761,6 +1761,10 @@ impl Showcase {
                 _ => false,
             }
         } else {
+            // Esc is a no-op in the launcher to prevent accidental quit
+            if key.code == KeyCode::Esc && key.modifiers.is_empty() {
+                return true;
+            }
             if self.keybindings.matches(actions::QUIT, &key) {
                 self.should_quit.store(true, Ordering::SeqCst);
                 return true;
