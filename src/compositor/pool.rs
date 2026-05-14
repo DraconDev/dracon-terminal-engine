@@ -128,7 +128,7 @@ impl CellPool {
                         remaining = 0;
                     } else {
                         let mut cells = std::mem::take(&mut self.free[idx].cells);
-                        acquired.extend(cells.drain(..));
+                        acquired.append(&mut cells);
                         self.free.swap_remove(idx);
                         remaining -= block_len;
                     }
