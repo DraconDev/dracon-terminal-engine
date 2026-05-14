@@ -1322,7 +1322,7 @@ impl IdeApp {
     }
 }
 
-fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 3 || h < 2 {
         return;
     }
@@ -1355,7 +1355,7 @@ fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: The
     }
 }
 
-fn draw_rounded_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn draw_rounded_box(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 3 || h < 2 {
         return;
     }
