@@ -93,6 +93,7 @@ struct IdeApp {
     // Search
     show_search: bool,
     search_input: SearchInput,
+    search_submit: Arc<Mutex<String>>,
 
     // Status
     status_bar: StatusBar,
