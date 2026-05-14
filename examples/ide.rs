@@ -171,7 +171,13 @@ impl IdeApp {
                     .add_item(MenuItem::new("About")),
             ]);
 
-        let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme.clone());
+        let search_submit = Arc::new(Mutex::new(String::new()));
+        let search_submit_cb = search_submit.clone();
+        let search_input = SearchInput::new(WidgetId::new(3))
+            .with_theme(theme.clone())
+            .on_submit(move |query| {
+                *search_submit_cb.lock().unwrap() = query.to_string();
+            });
 
         let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
