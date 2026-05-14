@@ -809,7 +809,7 @@ impl Widget for SqliteBrowser {
     }
 }
 
-fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme, active: bool) {
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, active: bool) {
     if w < 3 || h < 2 {
         return;
     }
