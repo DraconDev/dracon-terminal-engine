@@ -701,7 +701,7 @@ fn render_form_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy:
     }
 }
 
-fn render_framework_fm_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_framework_fm_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, Styles::empty());
     set_cell(plane, ox + 1, oy + 6, '├', t.outline, t.surface);
     for cx in ox + 2..ox + 24 { set_cell(plane, cx, oy + 6, '─', t.outline, t.surface); }
