@@ -453,6 +453,7 @@ impl Widget for SqliteBrowser {
             results_h,
             t.clone(),
             results_active,
+        );
         let results_bg = if results_active {
             t.surface_elevated
         } else {
