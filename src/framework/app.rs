@@ -502,14 +502,11 @@ impl App {
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
 
         let terminal_ptr = &mut self.terminal as *mut Terminal<io::Stdout> as usize;
-        let previous_hook = Arc::new(std::sync::Mutex::new(std::panic::take_hook()));
+        let previous_hook = Arc::new(Mutex::new(std::panic::take_hook()));
         let prev_hook_clone = previous_hook.clone();
         std::panic::set_hook(Box::new(move |info| {
             let t = unsafe { &mut *(terminal_ptr as *mut Terminal<io::Stdout>) };
-            let _ = write!(
-                t,
-                "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1007l\x1b[?7h\x1b[?1049l\x1b[?2004l"
-            );
+            let _ = write!(t, "{}", RESTORE_SEQ);
             let _ = t.flush();
             if let Ok(mut hook) = prev_hook_clone.lock() {
                 let original = std::mem::replace(&mut *hook, Box::new(|_| {}));
