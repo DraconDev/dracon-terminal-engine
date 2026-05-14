@@ -942,9 +942,9 @@ impl<'a> Ctx<'a> {
         )
         .ratio(0.5);
         let (r1, r2) = split.split(Rect::new(0, 0, w, h));
-        let mut left = crate::framework::widgets::split::SplitPane::from_rect(r1);
-        let mut right = crate::framework::widgets::split::SplitPane::from_rect(r2);
-        f(&mut left, &mut right);
+        let mut top = crate::framework::widgets::split::SplitPane::from_rect(r1);
+        let mut bottom = crate::framework::widgets::split::SplitPane::from_rect(r2);
+        f(&mut top, &mut bottom);
     }
 
     // ── Event Bus ───────────────────────────────────────────────────────────
