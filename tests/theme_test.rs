@@ -752,8 +752,8 @@ fn test_from_name_unknown_returns_none() {
 
 #[test]
 fn test_from_name_short_aliases() {
-    assert_eq!(Theme::from_name("catppuccin").unwrap().name, "catppuccin_mocha");
-    assert_eq!(Theme::from_name("gruvbox").unwrap().name, "gruvbox_dark");
+    assert_eq!(&*Theme::from_name("catppuccin").unwrap().name, "catppuccin_mocha");
+    assert_eq!(&*Theme::from_name("gruvbox").unwrap().name, "gruvbox_dark");
 }
 
 // === Theme::from_env_or() tests ===
@@ -764,7 +764,7 @@ fn test_from_env_or_uses_env_var() {
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "nord");
     let theme = Theme::from_env_or(Theme::dark());
-    assert_eq!(theme.name, "nord");
+    assert_eq!(&*theme.name, "nord");
     // Restore
     match original {
         Some(v) => std::env::set_var("DTRON_THEME", v),
@@ -777,7 +777,7 @@ fn test_from_env_or_falls_back_on_invalid_name() {
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "nonexistent_theme");
     let theme = Theme::from_env_or(Theme::dark());
-    assert_eq!(theme.name, "dark");
+    assert_eq!(&*theme.name, "dark");
     match original {
         Some(v) => std::env::set_var("DTRON_THEME", v),
         None => std::env::remove_var("DTRON_THEME"),
@@ -789,7 +789,7 @@ fn test_from_env_or_falls_back_when_unset() {
     let original = std::env::var("DTRON_THEME").ok();
     std::env::remove_var("DTRON_THEME");
     let theme = Theme::from_env_or(Theme::light());
-    assert_eq!(theme.name, "light");
+    assert_eq!(&*theme.name, "light");
     if let Some(v) = original { std::env::set_var("DTRON_THEME", v) }
 }
 
@@ -798,7 +798,7 @@ fn test_from_env_or_hyphenated_theme_name() {
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "catppuccin-mocha");
     let theme = Theme::from_env_or(Theme::dark());
-    assert_eq!(theme.name, "catppuccin_mocha");
+    assert_eq!(&*theme.name, "catppuccin_mocha");
     match original {
         Some(v) => std::env::set_var("DTRON_THEME", v),
         None => std::env::remove_var("DTRON_THEME"),
