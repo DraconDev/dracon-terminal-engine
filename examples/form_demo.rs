@@ -257,7 +257,7 @@ impl Widget for SettingsForm {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.form_theme.clone();
+        let t = &self.form_theme;
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = self.z_index() as i32;
 
@@ -273,7 +273,7 @@ impl Widget for SettingsForm {
         let card_h = area.height.saturating_sub(2);
 
         // Card border
-        draw_rounded_border(&mut plane, margin, 0, card_w, card_h, t.clone());
+        draw_rounded_border(&mut plane, margin, 0, card_w, card_h, t);
 
         // Fill card background
         for y in 1..card_h.saturating_sub(1) {
@@ -642,7 +642,7 @@ impl Widget for SettingsForm {
                 }
             }
 
-            draw_rounded_border(&mut plane, toast_x, toast_y, toast_w, toast_h, t.clone());
+            draw_rounded_border(&mut plane, toast_x, toast_y, toast_w, toast_h, t);
 
             let toast_text = format!(" 󰄬 {} ", self.toast_message);
             let text_x = toast_x + (toast_w - toast_text.len() as u16) / 2;
