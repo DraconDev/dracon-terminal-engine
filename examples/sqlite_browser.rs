@@ -402,7 +402,7 @@ impl Widget for SqliteBrowser {
             right_rect.width.saturating_sub(1),
             query_h + 1,
             t.clone(),
-        );
+            query_active,
         let query_bg = if query_active {
             t.surface_elevated
         } else {
@@ -450,8 +450,7 @@ impl Widget for SqliteBrowser {
             results_y,
             right_rect.width.saturating_sub(1),
             results_h,
-            t,
-            results_active,
+            t.clone(),
         );
         let results_bg = if results_active {
             t.surface_elevated
