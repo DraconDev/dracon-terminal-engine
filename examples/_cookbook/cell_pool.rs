@@ -120,7 +120,7 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_clone = Arc::clone(&should_quit);
-    let demo = PoolDemo::new(theme, should_quit);
+    let demo = PoolDemo::new(theme.clone(), should_quit);
 
     let mut app = App::new()?;
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
