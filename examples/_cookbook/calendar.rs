@@ -43,7 +43,7 @@ impl CalendarDemo {
         let sd = selected_date.clone();
         let mut cal_single = Calendar::new();
         cal_single = cal_single
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .on_select(move |date| {
                 *sd.borrow_mut() = Some(date);
             });
@@ -52,7 +52,7 @@ impl CalendarDemo {
         let sr = selected_range.clone();
         let mut cal_range = Calendar::new();
         cal_range = cal_range
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .with_range_mode()
             .on_range_select(move |start, end| {
                 *sr.borrow_mut() = Some((start, end));
