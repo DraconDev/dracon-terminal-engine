@@ -89,11 +89,29 @@ pub struct App {
 
 impl App {
     fn dispatch_key(&mut self, k: &crate::input::event::KeyEvent, running: &std::sync::atomic::AtomicBool) {
-        if k.code == crate::input::event::KeyCode::Char('c')
+        // Ctrl+Q: always quit, no delegation
+        if k.code == crate::input::event::KeyCode::Char('q')
             && k.modifiers.contains(crate::input::event::KeyModifiers::CONTROL)
         {
             running.store(false, Ordering::SeqCst);
-        } else if k.code == crate::input::event::KeyCode::Tab {
+            return;
+        }
+
+        // Esc: widget gets first dibs, then quit if not consumed
+        if k.code == crate::input::event::KeyCode::Esc
+            && k.modifiers.is_empty()
+        {
+            let consumed = self.focus_manager.focused()
+                .and_then(|id| self.widget_mut(id))
+                .map(|mut w| w.handle_key(*k))
+                .unwrap_or(false);
+            if !consumed {
+                running.store(false, Ordering::SeqCst);
+            }
+            return;
+        }
+
+        if k.code == crate::input::event::KeyCode::Tab {
             let old = self.focus_manager.focused();
             if k.modifiers.contains(crate::input::event::KeyModifiers::SHIFT) {
                 let _ = self.focus_manager.tab_prev();
