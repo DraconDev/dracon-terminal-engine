@@ -595,7 +595,7 @@ impl Widget for SystemMonitor {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -674,7 +674,7 @@ impl Widget for SystemMonitor {
             };
 
             // Card border
-            render_card_border(&mut plane, gx, gauge_y, qw, gauge_h, t.clone());
+            render_card_border(&mut plane, gx, gauge_y, qw, gauge_h, t);
 
             // Label
             draw_text(
@@ -760,7 +760,7 @@ impl Widget for SystemMonitor {
         // ── Process List ──
         let list_y = badge_y + 2;
         let list_h = area.height.saturating_sub(list_y + 2);
-        render_card_border(&mut plane, 0, list_y, area.width, list_h, t.clone());
+        render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
 
         let header_y = list_y + 1;
         let header_text =
