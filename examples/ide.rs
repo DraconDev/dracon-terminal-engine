@@ -146,8 +146,7 @@ impl IdeApp {
         let file_tree = build_sample_tree(theme.clone());
 
         let menu_bar = MenuBar::new(WidgetId::new(1))
-            .with_theme(theme)
-            .with_entries(vec![
+            .with_theme(theme.clone())
                 MenuEntry::new("File")
                     .add_item(MenuItem::new("New Tab (Ctrl+T)"))
                     .add_item(MenuItem::new("Open (Ctrl+O)"))
