@@ -1155,7 +1155,7 @@ impl Widget for Showcase {
                         modal_y + 3,
                         &badge,
                         t.fg_on_accent,
-                        category_color(t, ex.category),
+                        category_color(t.clone(), ex.category),
                         Styles::empty(),
                     );
 
