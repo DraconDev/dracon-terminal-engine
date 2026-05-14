@@ -673,8 +673,8 @@ fn main() -> std::io::Result<()> {
 
     let mut router = SceneRouter::new();
     let initial_theme = theme.borrow().clone();
-    router.register("task_list", Box::new(TaskListScreen::new(initial_theme)));
-    router.register("task_detail", Box::new(TaskDetailScreen::new(initial_theme)));
+    router.register("task_list", Box::new(TaskListScreen::new(initial_theme.clone())));
+    router.register("task_detail", Box::new(TaskDetailScreen::new(initial_theme.clone())));
     router.register("task_edit", Box::new(TaskEditScreen::new(initial_theme)));
     router.push("task_list");
 
