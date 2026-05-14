@@ -431,10 +431,10 @@ impl Widget for Dashboard {
             .split(Rect::new(0, header_h, area.width, content_h));
 
         // Left panel: metric cards
-        self.render_metrics_card(&mut plane, left_rect, t.clone());
+        self.render_metrics_card(&mut plane, left_rect, t);
 
         // Right panel: process list
-        self.render_process_panel(&mut plane, right_rect, t.clone());
+        self.render_process_panel(&mut plane, right_rect, t);
 
         // Divider
         let div = self
@@ -574,7 +574,7 @@ impl Widget for Dashboard {
 }
 
 impl Dashboard {
-    fn render_metrics_card(&self, plane: &mut Plane, area: Rect, t: Theme) {
+    fn render_metrics_card(&self, plane: &mut Plane, area: Rect, t: &Theme) {
         // 2x2 grid of metric cards
         let card_w = area.width / 2;
         let card_h = area.height / 3;
@@ -599,7 +599,7 @@ impl Dashboard {
             };
 
             render_card_border(plane, x, y, w, h, t.outline, t.surface);
-            let status_color = metric.status_color(t.clone());
+            let status_color = metric.status_color(t);
 
             // Title with icon
             let title = format!("{} {}", icon, label);
