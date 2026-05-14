@@ -152,9 +152,10 @@ impl<W: Write + AsFd> Terminal<W> {
         writer.flush()?;
 
         Ok(Self {
-            original_termios,
+            original_termios: Some(original_termios),
             output: writer,
             capabilities: Capabilities::detect(),
+            is_null_mode: false,
         })
     }
 
