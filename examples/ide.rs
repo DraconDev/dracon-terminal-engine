@@ -993,7 +993,17 @@ impl Widget for IdeApp {
             }
             _ => {
                 if self.tabs.get(self.active_tab).is_some() {
-                    let handled = self.tabs[self.active_tab].adapter.handle_key(key);
+                    let editor_x = self.tree_w + 1;
+                    let content_y = self.menu_h + self.tab_h;
+                    let status_h = 1u16;
+                    let search_h = if self.show_search { 3u16 } else { 0u16 };
+                    let content_h = self.area.height.saturating_sub(content_y + status_h + search_h);
+                    let editor_content_h = content_h.saturating_sub(1);
+                    let editor_content_w = self.area.width.saturating_sub(editor_x + 2);
+                    let editor_area = Rect::new(editor_x + 1, content_y + 1, editor_content_w, editor_content_h);
+                    let tab = &mut self.tabs[self.active_tab];
+                    tab.adapter.set_area(editor_area);
+                    let handled = tab.adapter.handle_key(key);
                     if handled {
                         self.update_status();
                         self.sync_tab_bar();
