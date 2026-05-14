@@ -452,7 +452,7 @@ impl Widget for EditorApp {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme.clone();
+        let t = &self.theme;
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -493,7 +493,7 @@ impl Widget for EditorApp {
 
         if editor_w > 0 && content_h > 2 {
             // Rounded border
-            draw_rounded_border(&mut plane, editor_x, editor_y, editor_w, content_h, t.clone());
+            draw_rounded_border(&mut plane, editor_x, editor_y, editor_w, content_h, t);
 
             // Breadcrumbs inside editor
             let bc_plane =
@@ -769,7 +769,7 @@ impl Widget for EditorApp {
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &KeybindingConfig) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb_config: &KeybindingConfig) {
     let w = 50u16.min(area.width - 4);
     let h = 15u16.min(area.height - 4);
     let x = (area.width - w) / 2;
