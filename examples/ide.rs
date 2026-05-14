@@ -932,7 +932,7 @@ impl Widget for IdeApp {
             if handled {
                 let query_after = self.search_submit.lock().unwrap().clone();
                 if !query_after.is_empty() && query_after != query_before {
-                    if let Some(tab) = self.active_tab_ref() {
+                    if let Some(tab) = self.active_tab_mut() {
                         tab.adapter.editor_mut().set_filter(&query_after);
                     }
                 }
