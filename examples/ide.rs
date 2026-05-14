@@ -269,7 +269,8 @@ impl IdeApp {
         let cmd_bridge_clone = cmd_bridge.clone();
         let command_palette = CommandPalette::new(palette_commands)
             .with_size(45, 18)
-            .with_theme(theme.clone())(move |cmd_id| {
+            .with_theme(theme.clone())
+            .on_execute(move |cmd_id| {
                 *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
             });
 
@@ -691,10 +692,7 @@ impl Widget for IdeApp {
                     editor_w.saturating_sub(2),
                     editor_content_h,
                     tab,
-                    t,
-                );
-            } else {
-                // Empty state - no tabs open
+                    t.clone(),
                 let empty_msg = " 󰈙 No file open ";
                 let empty_y = editor_y + editor_content_h / 2;
                 let empty_x =
