@@ -650,7 +650,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit, theme);
+    let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit, theme.clone());
     app_widget.set_area(Rect::new(0, 0, w, h));
 
     let mut app = App::new()?.title("Menu System Demo").fps(30).theme(theme);
