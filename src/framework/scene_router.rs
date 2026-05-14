@@ -239,7 +239,7 @@ impl SceneRouter {
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
             if let Some(ref theme) = self.theme {
-                scene.on_theme_change(&theme);
+                scene.on_theme_change(theme);
             }
         }
 
@@ -304,7 +304,7 @@ impl SceneRouter {
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
             if let Some(ref theme) = self.theme {
-                scene.on_theme_change(&theme);
+                scene.on_theme_change(theme);
             }
         }
 
@@ -332,7 +332,7 @@ impl SceneRouter {
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
             if let Some(ref theme) = self.theme {
-                scene.on_theme_change(&theme);
+                scene.on_theme_change(theme);
             }
         }
 
