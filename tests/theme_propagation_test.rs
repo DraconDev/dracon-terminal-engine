@@ -378,7 +378,7 @@ fn test_widget_current_theme_default_is_none() {
 fn test_widget_current_theme_returns_managed_theme() {
     let widget = ThemeAwareWidget::new(1, Theme::nord());
     assert!(
-        widget.current_theme().map(|t| t.name == "nord").unwrap_or(false),
+        widget.current_theme().map(|t| &*t.name == "nord").unwrap_or(false),
         "current_theme should return the widget's managed theme"
     );
 }
@@ -396,7 +396,7 @@ fn test_dtron_theme_file_round_trip() {
 
     // Child app writes its final theme name on exit (simulating App::run())
     let child_final_theme = Theme::gruvbox_dark();
-    let _ = std::fs::write(&tmp_path, child_final_theme.name);
+    let _ = std::fs::write(&tmp_path, &*child_final_theme.name);
 
     // Showcase reads the file after child exits
     let theme_name = std::fs::read_to_string(&tmp_path).unwrap();
@@ -409,7 +409,7 @@ fn test_dtron_theme_file_round_trip() {
         theme_name
     );
     assert_eq!(
-        resolved.unwrap().name,
+        &*resolved.unwrap().name,
         "gruvbox_dark",
         "resolved theme should match what child wrote"
     );
