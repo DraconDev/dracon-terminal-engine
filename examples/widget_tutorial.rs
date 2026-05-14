@@ -218,7 +218,7 @@ impl ColorPicker {
 
     /// Returns a reference to the currently selected preset color.
     pub fn selected_color(&self) -> &'static PresetColor {
-        &PresetColor::PRESETS[self.selected_index].clone()
+        &PresetColor::PRESETS[self.selected_index]
     }
 
     /// Cycles to the next color in the preset list (wraps around).
