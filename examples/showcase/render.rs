@@ -793,7 +793,7 @@ enum NotificationType {
     Error,
 }
 
-fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_accessibility_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, Styles::BOLD);
     let items = [("Role:", "button"), ("Label:", "Submit"), ("Shortcut:", "Ctrl+Enter"), ("Level:", "assertive"), ("Terminal:", "NVDA")];
     for (i, (label, value)) in items.iter().enumerate() {
@@ -805,7 +805,7 @@ fn render_accessibility_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: us
     draw_text(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, Styles::empty());
 }
 
-fn render_cell_pool_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_cell_pool_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     draw_text(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, Styles::BOLD);
     let stats = [("Avail:", format!("{:>4}", 1024 - ((phase * 5.0).sin() * 200.0).round() as i32)), ("Used:", format!("{:>4}", ((phase * 5.0).sin() * 200.0).round() as i32)), ("Hit:", format!("{:>3}%", 95 - ((phase * 3.0).sin() * 10.0) as i32))];
     for (i, (label, value)) in stats.iter().enumerate() {
