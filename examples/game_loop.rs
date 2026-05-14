@@ -358,11 +358,12 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
         quit_key,
     );
     p.put_str(0, 0, &hud);
-    // HUD background
+    // HUD background and foreground
     for i in 0..hud.len().min(w as usize) {
         let idx = i;
         if idx < p.cells.len() {
             p.cells[idx].bg = Color::Rgb(30, 30, 40);
+            p.cells[idx].fg = Color::Rgb(210, 210, 220);
             p.cells[idx].transparent = false;
         }
     }
