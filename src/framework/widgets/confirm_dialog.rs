@@ -18,10 +18,7 @@
 //! ```
 
 use crate::compositor::{Cell, Color, Plane, Styles};
-use crate::error::DraconError;
-use crate::framework::command::BoundCommand;
-use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId, WidgetState};
+use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
