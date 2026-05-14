@@ -191,3 +191,24 @@ impl crate::framework::widget::Widget for Radio {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for Radio {
+    fn state_id(&self) -> Option<&str> {
+        Some("radio")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected": self.selected,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(selected) = json.get("selected").and_then(|v| v.as_bool()) {
+            self.selected = selected;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

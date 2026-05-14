@@ -436,3 +436,40 @@ impl crate::framework::widget::Widget for Form {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for Form {
+    fn state_id(&self) -> Option<&str> {
+        Some("form")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        let field_values: Vec<serde_json::Value> = self
+            .fields
+            .iter()
+            .map(|f| json!({"label": f.label, "value": f.value}))
+            .collect();
+        json!({
+            "focused_field": self.focused_field,
+            "fields": field_values,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(focused) = json.get("focused_field").and_then(|v| v.as_u64()) {
+            self.focused_field = focused as usize;
+        }
+        if let Some(fields) = json.get("fields").and_then(|v| v.as_array()) {
+            for (i, field_json) in fields.iter().enumerate() {
+                if let (Some(value), Some(_field)) = (
+                    field_json.get("value").and_then(|v| v.as_str()),
+                    self.fields.get_mut(i),
+                ) {
+                    _field.value = value.to_string();
+                }
+            }
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
