@@ -192,7 +192,7 @@ impl Tree {
             }
             current = &mut current[path[i]].children;
         }
-        let last_idx = *path.last().unwrap();
+        let last_idx = *path.last().unwrap_or(&0);
         if last_idx < current.len() {
             current[last_idx].expanded = !current[last_idx].expanded;
         }
