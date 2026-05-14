@@ -374,7 +374,6 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let help_key = kb.display(actions::HELP).unwrap_or("f1");
     let back_key = kb.display(actions::BACK).unwrap_or("esc");
     let fg = Color::Rgb(200, 200, 210);
-    let bg = Color::Rgb(20, 20, 30);
     let accent = Color::Rgb(255, 200, 100);
     let dim = Color::Rgb(120, 120, 130);
     let box_bg = Color::Rgb(25, 25, 35);
