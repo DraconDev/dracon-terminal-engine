@@ -870,11 +870,7 @@ impl GitTui {
                 content_y,
                 plane.width.saturating_sub(4),
                 content_h,
-                t,
-            );
-        }
-
-        let lines: Vec<&str> = self.diff_content.lines().collect();
+                t.clone(),: Vec<&str> = self.diff_content.lines().collect();
         let visible = (content_h as usize).saturating_sub(2);
 
         for (i, line) in lines.iter().take(visible).enumerate() {
