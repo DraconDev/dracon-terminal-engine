@@ -161,3 +161,40 @@ impl crate::framework::widget::Widget for Toast {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for Toast {
+    fn state_id(&self) -> Option<&str> {
+        Some("toast")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        let kind_str = match self.kind {
+            ToastKind::Info => "info",
+            ToastKind::Success => "success",
+            ToastKind::Warning => "warning",
+            ToastKind::Error => "error",
+        };
+        json!({
+            "message": self.message,
+            "kind": kind_str,
+            "visible": !self.is_expired(),
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(message) = json.get("message").and_then(|v| v.as_str()) {
+            self.message = message.to_string();
+        }
+        if let Some(kind) = json.get("kind").and_then(|v| v.as_str()) {
+            self.kind = match kind {
+                "success" => ToastKind::Success,
+                "warning" => ToastKind::Warning,
+                "error" => ToastKind::Error,
+                _ => ToastKind::Info,
+            };
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

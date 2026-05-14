@@ -123,3 +123,21 @@ impl Widget for PasswordInput {
         self.base.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for PasswordInput {
+    fn state_id(&self) -> Option<&str> {
+        Some("password_input")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "visible": true,
+        })
+    }
+
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        self.base.dirty = true;
+        Ok(())
+    }
+}
