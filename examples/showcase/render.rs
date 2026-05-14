@@ -660,7 +660,7 @@ fn render_input_debug_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
     draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, Styles::empty());
 }
 
-fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_text_editor_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["1 | fn main() {", "2 |   println!();", "3 | }"];
     for (i, line) in lines.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, line, t.fg_subtle, t.surface, Styles::empty()); }
     let cursor_x = ox + 7 + ((phase * 2.0).sin() * 0.5 + 0.5) as usize * 5;
@@ -670,7 +670,7 @@ fn render_text_editor_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 3, oy + 6, '█', t.primary, t.surface); }
 }
 
-fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_game_loop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let (snake_y, snake_x) = (7.0 + (phase * 3.0).sin() * 1.5, 12.0 + (phase * 2.0).cos() * 3.0);
     let (sy, sx) = (snake_y.round() as usize, snake_x.round() as usize);
     let (min_px, max_px) = (sx.saturating_sub(1).max(8), (sx + 1).min(20));
@@ -687,7 +687,7 @@ fn render_game_loop_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
     draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, Styles::BOLD);
 }
 
-fn render_form_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_form_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
     let fields = [("Name:", "[___________]"), ("Email:", "[__________]")];
     for (i, (label, field)) in fields.iter().enumerate() {
         let y = oy + 5 + i * 2;
