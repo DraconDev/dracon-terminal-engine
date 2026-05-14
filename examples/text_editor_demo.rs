@@ -37,7 +37,7 @@ use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 struct Tab {
