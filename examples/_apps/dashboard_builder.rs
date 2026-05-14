@@ -75,7 +75,7 @@ impl MetricHistory {
         self.values.iter().copied().fold(0.0, f64::max)
     }
 
-    fn status_color(&self, theme: Theme) -> Color {
+    fn status_color(&self, theme: &Theme) -> Color {
         let v = self.current();
         if v >= self.crit_threshold {
             theme.error
@@ -390,7 +390,7 @@ impl Widget for Dashboard {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
