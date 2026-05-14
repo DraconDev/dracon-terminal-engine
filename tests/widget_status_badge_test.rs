@@ -125,7 +125,7 @@ fn test_status_badge_with_theme() {
     let theme = Theme::cyberpunk();
     let badge = StatusBadge::new(dracon_terminal_engine::framework::widget::WidgetId::new(1))
         .with_theme(theme);
-    assert_eq!(badge.theme.name, "cyberpunk");
+    assert_eq!(&*badge.theme.name, "cyberpunk");
 }
 
 #[test]

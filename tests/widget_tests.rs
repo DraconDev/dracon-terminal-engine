@@ -593,7 +593,7 @@ fn test_status_badge_new() {
 #[test]
 fn test_status_badge_with_theme() {
     let badge = StatusBadge::new(WidgetId::new(1)).with_theme(Theme::cyberpunk());
-    assert_eq!(badge.theme.name, "cyberpunk");
+    assert_eq!(&*badge.theme.name, "cyberpunk");
 }
 
 #[test]

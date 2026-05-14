@@ -147,7 +147,7 @@ fn test_log_viewer_dirty_lifecycle() {
 fn test_log_viewer_with_theme() {
     let theme = Theme::nord();
     let lv = LogViewer::new().with_theme(theme);
-    assert_eq!(lv.theme.name, "nord");
+    assert_eq!(&*lv.theme.name, "nord");
 }
 
 #[test]

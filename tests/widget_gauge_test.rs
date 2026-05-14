@@ -119,7 +119,7 @@ fn test_gauge_dirty_lifecycle() {
 fn test_gauge_with_theme() {
     let theme = Theme::nord();
     let g = Gauge::new("CPU").with_theme(theme);
-    assert_eq!(g.theme.name, "nord");
+    assert_eq!(&*g.theme.name, "nord");
 }
 
 #[test]

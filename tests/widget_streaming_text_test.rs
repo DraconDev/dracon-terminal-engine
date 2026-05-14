@@ -133,7 +133,7 @@ fn test_streaming_text_dirty_lifecycle() {
 fn test_streaming_text_with_theme() {
     let theme = Theme::solarized_dark();
     let st = StreamingText::new().with_theme(theme);
-    assert_eq!(st.theme.name, "solarized_dark");
+    assert_eq!(&*st.theme.name, "solarized_dark");
 }
 
 #[test]

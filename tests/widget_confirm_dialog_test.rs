@@ -107,7 +107,7 @@ fn test_confirm_dialog_dirty_lifecycle() {
 fn test_confirm_dialog_with_theme() {
     let theme = Theme::cyberpunk();
     let dlg = ConfirmDialog::new("t", "m").with_theme(theme);
-    assert_eq!(dlg.theme.name, "cyberpunk");
+    assert_eq!(&*dlg.theme.name, "cyberpunk");
 }
 
 #[test]

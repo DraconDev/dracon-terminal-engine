@@ -19,7 +19,7 @@ fn test_base_input_new() {
 fn test_base_input_with_theme() {
     let id = WidgetId::new(1);
     let base = BaseInput::new(id, "placeholder").with_theme(Theme::cyberpunk());
-    assert_eq!(base.theme.name, "cyberpunk");
+    assert_eq!(&*base.theme.name, "cyberpunk");
 }
 
 #[test]
