@@ -48,7 +48,7 @@ impl Scene for ModalDemoScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
