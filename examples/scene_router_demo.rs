@@ -379,7 +379,7 @@ impl Scene for ProfileScreen {
         let info = [
             ("Name:", "Alice"),
             ("Role:", "Developer"),
-            ("Theme:", t.name),
+            ("Theme:", &*t.name),
         ];
         for (i, (label, value)) in info.iter().enumerate() {
             let y = 3 + i as u16;
