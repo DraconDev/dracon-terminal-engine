@@ -565,7 +565,7 @@ impl Widget for TableApp {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme.clone();
+        let t = &self.theme;
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -703,7 +703,7 @@ impl Widget for TableApp {
         let detail_y = table_y + table_h;
         if detail_y + detail_h <= area.height && self.selected_user().is_some() {
             // Rounded border for detail panel
-            draw_rounded_border(&mut plane, margin, detail_y, card_w, detail_h, t.clone());
+            draw_rounded_border(&mut plane, margin, detail_y, card_w, detail_h, t);
 
             // Fill background inside border
             for dy in 1..detail_h.saturating_sub(1) {
