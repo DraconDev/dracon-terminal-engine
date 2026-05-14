@@ -128,7 +128,7 @@ impl Showcase {
         scene_router.register("autocomplete", Box::new(crate::scenes::autocomplete_scene::AutocompleteScene::new(theme.clone())));
         scene_router.register("notification_center", Box::new(crate::scenes::notification_center_scene::NotificationCenterScene::new(theme.clone())));
         scene_router.register("accessibility", Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(theme.clone())));
-        scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme)));
+        scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 
