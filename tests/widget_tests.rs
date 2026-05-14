@@ -1432,5 +1432,5 @@ fn test_all_themes_are_dark_or_light() {
 #[test]
 fn test_theme_dark_is_default() {
     let default = Theme::default();
-    assert_eq!(default.name, "dark");
+    assert_eq!(&*default.name, "dark");
 }

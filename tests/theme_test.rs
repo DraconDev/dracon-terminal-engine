@@ -707,7 +707,7 @@ fn test_from_name_all_themes_by_exact_name() {
     ];
     for (name, expected) in themes.iter() {
         let resolved = Theme::from_name(name).unwrap_or_else(|| panic!("should resolve theme: {}", name));
-        assert_eq!(resolved.name, expected.name, "name mismatch for {}", name);
+        assert_eq!(&*resolved.name, &*expected.name, "name mismatch for {}", name);
         assert_eq!(resolved.bg, expected.bg, "bg mismatch for {}", name);
     }
 }
