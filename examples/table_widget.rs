@@ -385,7 +385,7 @@ impl TableApp {
         };
 
         let mut table = Table::new(columns)
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .with_rows(filtered_users.clone())
             .with_cell_text_fn(cell_fn)
             .on_select(|_user| {});
