@@ -361,7 +361,7 @@ impl Dashboard {
 
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % Theme::all().len();
-        self.theme = Theme::all()[self.theme_index];
+        self.theme = Theme::all()[self.theme_index].clone();
         self.split.on_theme_change(&self.theme);
     }
 }
@@ -431,7 +431,7 @@ impl Widget for Dashboard {
             .split(Rect::new(0, header_h, area.width, content_h));
 
         // Left panel: metric cards
-        self.render_metrics_card(&mut plane, left_rect, t);
+        self.render_metrics_card(&mut plane, left_rect, t.clone());
 
         // Right panel: process list
         self.render_process_panel(&mut plane, right_rect, t);
