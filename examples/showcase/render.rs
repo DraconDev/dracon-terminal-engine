@@ -533,7 +533,7 @@ fn render_git_tui_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, o
 
 fn render_file_manager_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let items = [(0, "home/", true, 0), (1, "user/", true, 1), (2, "  src/", true, 2), (3, "    main.rs", false, -1), (3, "    lib.rs", false, -1), (2, "  docs/", true, 1), (3, "    README.md", false, -1)];
-    let expand_phase = ((phase * 0.5).sin() * 4.0).round() as usize % 4;
+    let expand_phase = ((phase * 0.5).sin() * 4.0).round().max(0.0) as usize % 4;
     let visible_depth = if expand_phase == 0 { 1 } else if expand_phase == 1 { 2 } else if expand_phase == 2 { 3 } else { 4 };
     for (i, (indent, name, is_dir, _)) in items.iter().enumerate() {
         if *indent as usize > visible_depth { continue; }
