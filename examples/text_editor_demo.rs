@@ -468,15 +468,15 @@ impl Widget for EditorApp {
             let text_y = editor_y + 1;
             let text_h = content_h.saturating_sub(2);
             if let Some(tab) = self.active_tab() {
-                render_editor_content(
-                    &mut plane,
-                    editor_x + 1,
-                    text_y,
-                    editor_w - 2,
-                    text_h,
-                    tab,
-                    &t,
-                );
+                    render_editor_content(
+                        &mut plane,
+                        editor_x + 1,
+                        text_y,
+                        editor_w - 2,
+                        text_h,
+                        tab,
+                        t.clone(),
+                    );
             }
         }
 
