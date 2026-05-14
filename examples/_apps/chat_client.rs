@@ -560,7 +560,7 @@ impl ChatState {
         if self.is_loading {
             let spinner_text = format!(
                 "{} Fetching posts from JSONPlaceholder...",
-                SPINNER_FRAMES[self.spinner_frame].clone()
+                SPINNER_FRAMES[self.spinner_frame]
             );
             let center_x = (area.width.saturating_sub(spinner_text.len() as u16)) / 2;
             let center_y = header_h + list_h / 2;
