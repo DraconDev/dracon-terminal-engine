@@ -372,31 +372,58 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let quit_key = kb.display(actions::QUIT).unwrap_or("q");
     let help_key = kb.display(actions::HELP).unwrap_or("f1");
     let back_key = kb.display(actions::BACK).unwrap_or("esc");
+    let fg = Color::Rgb(200, 200, 210);
+    let bg = Color::Rgb(20, 20, 30);
+    let accent = Color::Rgb(255, 200, 100);
+    let dim = Color::Rgb(120, 120, 130);
+    let box_bg = Color::Rgb(25, 25, 35);
     let help_lines = [
-        "╭────────────────────────────────────────────────────╮",
-        "│              Game Loop Help                        │",
-        "├────────────────────────────────────────────────────┤",
-        &format!("│  {:<7} — Quit                                    │", quit_key),
-        &format!("│  {:<7} — Toggle this help                        │", help_key),
-        &format!("│  {:<7} — Dismiss help                            │", back_key),
-        "│  Space   — Toggle turbo mode                       │",
-        "│  Click   — Spawn particle burst                    │",
-        "├────────────────────────────────────────────────────┤",
-        "│  Features:                                         │",
-        "│    • 60fps animation loop                          │",
-        "│    • Particle physics with gravity                 │",
-        "│    • Starfield with twinkling                      │",
-        "│    • Mouse interaction                             │",
-        "│    • Rocket with trail effect                      │",
-        "╰────────────────────────────────────────────────────╯",
+        ("╭────────────────────────────────────────────────────╮", box_bg),
+        ("│              Game Loop Help                        │", box_bg),
+        ("├────────────────────────────────────────────────────┤", box_bg),
+        (&format!("│  {:<7} — Quit                                    │", quit_key), box_bg),
+        (&format!("│  {:<7} — Toggle this help                        │", help_key), box_bg),
+        (&format!("│  {:<7} — Dismiss help                            │", back_key), box_bg),
+        ("│  Space   — Toggle turbo mode                       │", box_bg),
+        ("│  Click   — Spawn particle burst                    │", box_bg),
+        ("├────────────────────────────────────────────────────┤", box_bg),
+        ("│  Features:                                         │", box_bg),
+        ("│    • 60fps animation loop                          │", box_bg),
+        ("│    • Particle physics with gravity                 │", box_bg),
+        ("│    • Starfield with twinkling                      │", box_bg),
+        ("│    • Mouse interaction                             │", box_bg),
+        ("│    • Rocket with trail effect                      │", box_bg),
+        ("╰────────────────────────────────────────────────────╯", box_bg),
     ];
 
     let start_y = (h as usize - help_lines.len()) / 2;
-    for (i, line) in help_lines.iter().enumerate() {
+    for (i, (line, line_bg)) in help_lines.iter().enumerate() {
         let y = start_y + i;
         let x = (w as usize - line.len()) / 2;
         if y < h as usize {
-            p.put_str(x as u16, y as u16, line);
+            for (ci, ch) in line.chars().enumerate() {
+                let px = x + ci;
+                if px < w as usize {
+                    let idx = y * w as usize + px;
+                    let cell_fg = if ch == '│' || ch == '╭' || ch == '╮' || ch == '├' || ch == '┤' || ch == '╰' || ch == '╯' || ch == '─' {
+                        dim
+                    } else if ch == '•' {
+                        accent
+                    } else {
+                        fg
+                    };
+                    if idx < p.cells.len() {
+                        p.cells[idx] = Cell {
+                            char: ch,
+                            fg: cell_fg,
+                            bg: *line_bg,
+                            style: Styles::empty(),
+                            transparent: false,
+                            skip: false,
+                        };
+                    }
+                }
+            }
         }
     }
 }
