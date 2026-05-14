@@ -681,3 +681,49 @@ impl crate::framework::widget::Widget for Kanban {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for Kanban {
+    fn state_id(&self) -> Option<&str> {
+        Some("kanban")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({
+            "columns": self.columns.iter().map(|col| serde_json::json!({
+                "title": col.title,
+                "items": col.cards.iter().map(|c| c.title.clone()).collect::<Vec<_>>(),
+            })).collect::<Vec<_>>(),
+            "scroll_offset": self.scroll_offset,
+            "selected_card": self.selected_card.map(|(col, idx)| vec![col, idx]),
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(columns) = json.get("columns").and_then(|v| v.as_array()) {
+            self.columns.clear();
+            for col_val in columns {
+                let title = col_val.get("title").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                let items = col_val.get("items").and_then(|v| v.as_array()).map(|arr| {
+                    arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect::<Vec<_>>()
+                }).unwrap_or_default();
+                let mut col = KanbanColumn { title, cards: Vec::new() };
+                for (i, item) in items.iter().enumerate() {
+                    col.cards.push(KanbanCard::new(i.to_string(), item));
+                }
+                self.columns.push(col);
+            }
+        }
+        if let Some(offset) = json.get("scroll_offset").and_then(|v| v.as_u64()) {
+            self.scroll_offset = offset as u16;
+        }
+        if let Some(sel) = json.get("selected_card").and_then(|v| v.as_array()) {
+            if sel.len() == 2 {
+                if let (Some(col), Some(idx)) = (sel[0].as_u64(), sel[1].as_u64()) {
+                    self.selected_card = Some((col as usize, idx as usize));
+                }
+            }
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

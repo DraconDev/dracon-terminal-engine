@@ -469,3 +469,30 @@ impl Widget for ConfirmDialog {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for ConfirmDialog {
+    fn state_id(&self) -> Option<&str> {
+        Some("confirm_dialog")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({
+            "result": self.result.map(|r| match r {
+                ConfirmResult::Confirmed => "confirmed",
+                ConfirmResult::Cancelled => "cancelled",
+            }),
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(result) = json.get("result").and_then(|v| v.as_str()) {
+            self.result = match result {
+                "confirmed" => Some(ConfirmResult::Confirmed),
+                "cancelled" => Some(ConfirmResult::Cancelled),
+                _ => None,
+            };
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
