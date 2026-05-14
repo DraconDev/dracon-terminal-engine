@@ -125,7 +125,7 @@ impl LogViewer {
             ParsedOutput::Lines(log_lines) => {
                 for line in log_lines {
                     let raw = line.text.clone();
-                    if self.filter.is_none() || raw.contains(self.filter.as_ref().unwrap()) {
+                    if self.filter.is_none() || raw.contains(self.filter.as_deref().unwrap_or("")) {
                         if self.lines.len() >= self.max_lines {
                             self.lines.pop_front();
                         }

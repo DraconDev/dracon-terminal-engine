@@ -152,7 +152,7 @@ impl Calendar {
         } else {
             NaiveDate::from_ymd_opt(self.year, self.month as u32 + 1, 1)
         };
-        let next = next_month.unwrap();
+        let next = next_month.unwrap_or(NaiveDate::MAX);
         next.pred_opt().map(|d| d.day()).unwrap_or(30)
     }
 
