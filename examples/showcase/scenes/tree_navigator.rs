@@ -91,7 +91,7 @@ impl Scene for TreeNavigatorScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -137,7 +137,7 @@ impl Scene for TreeNavigatorScene {
         let detail_x = split_x + 1;
         let detail_w = area.width.saturating_sub(detail_x);
         let detail_area = Rect::new(detail_x, 4, detail_w, area.height.saturating_sub(8));
-        render_detail(&mut plane, detail_area, t.clone());
+        render_detail(&mut plane, detail_area, t);
 
         // Status bar
         let footer_y = area.height.saturating_sub(1);
