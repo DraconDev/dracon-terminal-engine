@@ -434,7 +434,7 @@ impl Widget for Dashboard {
         self.render_metrics_card(&mut plane, left_rect, t.clone());
 
         // Right panel: process list
-        self.render_process_panel(&mut plane, right_rect, t);
+        self.render_process_panel(&mut plane, right_rect, t.clone());
 
         // Divider
         let div = self
@@ -599,7 +599,7 @@ impl Dashboard {
             };
 
             render_card_border(plane, x, y, w, h, t.outline, t.surface);
-            let status_color = metric.status_color(t);
+            let status_color = metric.status_color(t.clone());
 
             // Title with icon
             let title = format!("{} {}", icon, label);
