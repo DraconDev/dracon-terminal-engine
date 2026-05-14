@@ -231,7 +231,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
     }
 }
 
-fn render_detail(plane: &mut Plane, area: Rect, t: Theme) {
+fn render_detail(plane: &mut Plane, area: Rect, t: &Theme) {
     for y in area.y..area.y + area.height {
         for x in area.x..area.x + area.width {
             let idx = (y * plane.width + x) as usize;
