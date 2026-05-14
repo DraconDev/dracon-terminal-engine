@@ -533,3 +533,28 @@ impl crate::framework::widget::Widget for CommandPalette {
         false
     }
 }
+
+impl crate::framework::widget::WidgetState for CommandPalette {
+    fn state_id(&self) -> Option<&str> {
+        Some("command_palette")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "visible": self.visible,
+            "query": self.search_query,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(visible) = json.get("visible").and_then(|v| v.as_bool()) {
+            self.visible = visible;
+        }
+        if let Some(query) = json.get("query").and_then(|v| v.as_str()) {
+            self.search_query = query.to_string();
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
