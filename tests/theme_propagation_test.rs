@@ -1,6 +1,7 @@
 //! Tests for theme propagation through the widget system.
 
 use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use dracon_terminal_engine::compositor::{Color, Plane};
@@ -133,13 +134,13 @@ fn test_mock_widget_tracks_theme_changes() {
 #[test]
 fn test_mock_widget_records_theme_name() {
     let mut w = MockWidget::new(1);
-    assert!(w.current_theme.get().is_none());
+    assert!(w.current_theme.borrow().is_none());
 
     w.on_theme_change(&Theme::dracula());
-    assert_eq!(w.current_theme.get(), Some("dracula"));
+    assert_eq!(*w.current_theme.borrow(), Some("dracula".to_string()));
 
     w.on_theme_change(&Theme::nord());
-    assert_eq!(w.current_theme.get(), Some("nord"));
+    assert_eq!(*w.current_theme.borrow(), Some("nord".to_string()));
 }
 
 // === App::set_theme integration ===
@@ -363,7 +364,7 @@ impl Widget for ThemeAwareWidget {
         Plane::new(0, 80, 24)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.theme)
+        Some(self.theme.clone())
     }
 }
 
