@@ -931,7 +931,7 @@ impl GitTui {
         if !locals.is_empty() {
             let section_h = (locals.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, t.clone());
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
             draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
             draw_text(
@@ -976,7 +976,7 @@ impl GitTui {
         if !remotes.is_empty() {
             let section_h = (remotes.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, t.clone());
+                draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
             draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
             draw_text(
@@ -1018,7 +1018,7 @@ impl GitTui {
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &KeybindingSet) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, keybindings: &KeybindingSet) {
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
         ("↑/↓ or j/k", "Navigate"),
@@ -1113,7 +1113,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, keybindings: &Ke
     }
 }
 
-fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 2 || h < 2 {
         return;
     }
