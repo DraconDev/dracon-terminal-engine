@@ -920,7 +920,7 @@ impl GitTui {
         }
     }
 
-    fn render_branches(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+    fn render_branches(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
         let header = " 󰊢 Branches";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
