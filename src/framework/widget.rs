@@ -47,6 +47,18 @@ pub trait Widget {
     }
 
     /// Returns the z-index for layering (higher = on top).
+    ///
+    /// Recommended z-index ranges:
+    ///
+    /// | Range   | Layer                              |
+    /// |---------|------------------------------------|
+    /// | 0       | Background/base widgets            |
+    /// | 5       | Content areas (panels, split panes) |
+    /// | 10      | Interactive widgets (lists, forms, editors) |
+    /// | 50      | Overlays (tooltips, dropdowns)      |
+    /// | 100     | Modal dialogs                       |
+    /// | 500     | Toasts/notifications                |
+    /// | 9000    | Drag ghost (reserved)               |
     fn z_index(&self) -> u16 {
         0
     }

@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 //! Utility functions for terminal UI rendering, file operations, and system interactions.
 
 use chrono::{DateTime, Local};

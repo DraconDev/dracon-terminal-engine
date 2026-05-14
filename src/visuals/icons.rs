@@ -62,6 +62,44 @@ pub enum Icon {
     Videos,
     /// Rust source file icon.
     Rust,
+    /// C source file icon.
+    C,
+    /// C++ source file icon.
+    Cpp,
+    /// Go source file icon.
+    Go,
+    /// Java source file icon.
+    Java,
+    /// Kotlin source file icon.
+    Kotlin,
+    /// Python source file icon.
+    Python,
+    /// Ruby source file icon.
+    Ruby,
+    /// PHP source file icon.
+    Php,
+    /// HTML file icon.
+    Html,
+    /// CSS file icon.
+    Css,
+    /// YAML file icon.
+    Yaml,
+    /// XML file icon.
+    Xml,
+    /// SQL file icon.
+    Sql,
+    /// Shell script icon.
+    Shell,
+    /// LaTeX/typeset document icon.
+    Tex,
+    /// Lock file icon.
+    Lock,
+    /// Docker/containers icon.
+    Docker,
+    /// Build system icon (Make, CMake).
+    Build,
+    /// Config/dotfile icon.
+    Config,
     /// JSON file icon.
     Json,
     /// TOML file icon.
@@ -122,20 +160,45 @@ impl Icon {
             .and_then(|e| e.to_str())
             .unwrap_or("")
             .to_lowercase();
+        let name_lower = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_lowercase();
         let icon = match ext.as_str() {
             "rs" => Icon::Rust,
+            "c" | "h" => Icon::C,
+            "cpp" | "cc" | "cxx" | "hpp" => Icon::Cpp,
+            "go" => Icon::Go,
+            "java" => Icon::Java,
+            "kt" => Icon::Kotlin,
+            "py" => Icon::Python,
+            "rb" => Icon::Ruby,
+            "php" => Icon::Php,
+            "html" => Icon::Html,
+            "css" | "scss" => Icon::Css,
+            "yaml" | "yml" => Icon::Yaml,
+            "xml" => Icon::Xml,
             "json" => Icon::Json,
+            "sql" => Icon::Sql,
             "toml" => Icon::Toml,
             "md" => Icon::Markdown,
-            "sh" | "bash" | "py" | "js" | "ts" => Icon::Script,
-            _ => match category {
-                FileCategory::Archive => Icon::Archive,
-                FileCategory::Image => Icon::Image,
-                FileCategory::Audio => Icon::Audio,
-                FileCategory::Video => Icon::Videos,
-                FileCategory::Script => Icon::Script,
-                FileCategory::Document => Icon::Document,
-                _ => Icon::File,
+            "sh" | "bash" | "zsh" | "fish" => Icon::Shell,
+            "tex" | "rst" => Icon::Tex,
+            "lock" => Icon::Lock,
+            "env" | "ini" | "cfg" | "conf" => Icon::Config,
+            _ => match name_lower.as_str() {
+                "dockerfile" => Icon::Docker,
+                "makefile" | "cmake" => Icon::Build,
+                _ => match category {
+                    FileCategory::Archive => Icon::Archive,
+                    FileCategory::Image => Icon::Image,
+                    FileCategory::Audio => Icon::Audio,
+                    FileCategory::Video => Icon::Videos,
+                    FileCategory::Script => Icon::Script,
+                    FileCategory::Document => Icon::Document,
+                    _ => Icon::File,
+                },
             },
         };
         icon.get(icon_mode)
@@ -174,6 +237,25 @@ impl Icon {
                 Icon::Music => "󰝚 ",
                 Icon::Videos => "󰐊 ",
                 Icon::Rust => "󱘗 ",
+                Icon::C => "󰅴 ",
+                Icon::Cpp => "󰙲 ",
+                Icon::Go => "󰟓 ",
+                Icon::Java => "󰬇 ",
+                Icon::Kotlin => "󰲙 ",
+                Icon::Python => "󰌠 ",
+                Icon::Ruby => "󰴍 ",
+                Icon::Php => "󰌞 ",
+                Icon::Html => "󰌝 ",
+                Icon::Css => "󰌜 ",
+                Icon::Yaml => "󰂷 ",
+                Icon::Xml => "󰒝 ",
+                Icon::Sql => "󰆼 ",
+                Icon::Shell => "󰞷 ",
+                Icon::Tex => "󰊠 ",
+                Icon::Lock => "󰌾 ",
+                Icon::Docker => "󰡨 ",
+                Icon::Build => "󱁤 ",
+                Icon::Config => "󰒓 ",
                 Icon::Json => "󬭦 ",
                 Icon::Toml => "󱘗 ",
                 Icon::Markdown => "󰍔 ",
@@ -217,6 +299,25 @@ impl Icon {
                 Icon::Music => "♪ ",
                 Icon::Videos => "► ",
                 Icon::Rust => "R ",
+                Icon::C => "C ",
+                Icon::Cpp => "C+ ",
+                Icon::Go => "G ",
+                Icon::Java => "J ",
+                Icon::Kotlin => "K ",
+                Icon::Python => "Py ",
+                Icon::Ruby => "Rb ",
+                Icon::Php => "P ",
+                Icon::Html => "<> ",
+                Icon::Css => "# ",
+                Icon::Yaml => "Y ",
+                Icon::Xml => "<> ",
+                Icon::Sql => "S ",
+                Icon::Shell => "$ ",
+                Icon::Tex => "T ",
+                Icon::Lock => "🔒 ",
+                Icon::Docker => "D ",
+                Icon::Build => "B ",
+                Icon::Config => "⚙ ",
                 Icon::Json => "{ ",
                 Icon::Toml => "T ",
                 Icon::Markdown => "M ",
@@ -260,6 +361,25 @@ impl Icon {
                 Icon::Music => "[M] ",
                 Icon::Videos => "[V] ",
                 Icon::Rust => "[R] ",
+                Icon::C => "[C] ",
+                Icon::Cpp => "[C+] ",
+                Icon::Go => "[G] ",
+                Icon::Java => "[J] ",
+                Icon::Kotlin => "[K] ",
+                Icon::Python => "[Py] ",
+                Icon::Ruby => "[Rb] ",
+                Icon::Php => "[P] ",
+                Icon::Html => "[<] ",
+                Icon::Css => "[#] ",
+                Icon::Yaml => "[Y] ",
+                Icon::Xml => "[X] ",
+                Icon::Sql => "[S] ",
+                Icon::Shell => "[X] ",
+                Icon::Tex => "[T] ",
+                Icon::Lock => "[L] ",
+                Icon::Docker => "[D] ",
+                Icon::Build => "[B] ",
+                Icon::Config => "[C] ",
                 Icon::Json => "[J] ",
                 Icon::Toml => "[T] ",
                 Icon::Markdown => "[M] ",

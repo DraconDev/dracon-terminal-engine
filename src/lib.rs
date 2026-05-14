@@ -1,5 +1,3 @@
-#![allow(missing_docs)]
-
 //! # Dracon Terminal Engine
 //!
 //! A terminal application framework for Rust with composable widgets,

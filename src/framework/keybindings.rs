@@ -187,6 +187,31 @@ impl KeybindingConfig {
             "f10" => KeyCode::F(10),
             "f11" => KeyCode::F(11),
             "f12" => KeyCode::F(12),
+            "f13" => KeyCode::F(13),
+            "f14" => KeyCode::F(14),
+            "f15" => KeyCode::F(15),
+            "f16" => KeyCode::F(16),
+            "f17" => KeyCode::F(17),
+            "f18" => KeyCode::F(18),
+            "f19" => KeyCode::F(19),
+            "f20" => KeyCode::F(20),
+            // Keypad digits (no dedicated Keypad variant; map to Char)
+            "kp0" => KeyCode::Char('0'),
+            "kp1" => KeyCode::Char('1'),
+            "kp2" => KeyCode::Char('2'),
+            "kp3" => KeyCode::Char('3'),
+            "kp4" => KeyCode::Char('4'),
+            "kp5" => KeyCode::Char('5'),
+            "kp6" => KeyCode::Char('6'),
+            "kp7" => KeyCode::Char('7'),
+            "kp8" => KeyCode::Char('8'),
+            "kp9" => KeyCode::Char('9'),
+            // Media keys — placeholder Char mappings until dedicated KeyCode variants are added
+            "media_play" => KeyCode::Char('\u{10A5F}'),  // TODO: replace with KeyCode::MediaPlay
+            "media_pause" => KeyCode::Char('\u{23F8}'),  // TODO: replace with KeyCode::MediaPause
+            "media_stop" => KeyCode::Char('\u{23F9}'),   // TODO: replace with KeyCode::MediaStop
+            "media_next" => KeyCode::Char('\u{23ED}'),   // TODO: replace with KeyCode::MediaNext
+            "media_prev" => KeyCode::Char('\u{23EE}'),   // TODO: replace with KeyCode::MediaPrev
             s if s.len() == 1 => {
                 let ch = s.chars().next()?;
                 KeyCode::Char(ch)
@@ -256,6 +281,12 @@ impl KeybindingSet {
     /// ```
     pub fn matches(&self, action: &str, event: &KeyEvent) -> bool {
         if let Some((expected, _)) = self.bindings.get(action) {
+            if expected.kind == KeyEventKind::Press
+                && event.kind != KeyEventKind::Press
+                && event.kind != KeyEventKind::Repeat
+            {
+                return false;
+            }
             expected.code == event.code && expected.modifiers == event.modifiers
         } else {
             false
