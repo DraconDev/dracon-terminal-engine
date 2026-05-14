@@ -123,10 +123,10 @@ impl EventBusApp {
         let half_w = area.width / 2;
 
         // Left panel: Counter
-        self.render_counter(&mut plane, Rect::new(1, 1, half_w - 2, area.height - 2), t);
+        self.render_counter(&mut plane, Rect::new(1, 1, half_w - 2, area.height - 2), &t);
 
         // Right panel: Event Log
-        self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), t);
+        self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), &t);
 
         // Status bar
         let status = format!("↑/↓: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
@@ -148,7 +148,7 @@ impl EventBusApp {
 
         // Help overlay
         if self.show_help {
-            self.render_help(&mut plane, area, t);
+            self.render_help(&mut plane, area, &t);
         }
 
         plane
