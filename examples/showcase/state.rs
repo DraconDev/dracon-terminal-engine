@@ -132,7 +132,7 @@ impl Showcase {
 
         let run_counts = vec![0u32; examples.len()];
 
-        let cached_themes: Vec<Theme> = Theme::all().iter().filter(|t| t.name != "high_contrast").cloned().collect();
+        let cached_themes: Vec<Theme> = Theme::all().iter().filter(|t| &*t.name != "high_contrast").cloned().collect();
 
         let mut showcase = Self {
             examples,
