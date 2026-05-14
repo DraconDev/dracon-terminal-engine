@@ -310,8 +310,9 @@ impl EventBus {
                     }
                 }
                 // Spawn the async callback
+                let cb = callback.clone();
                 std::thread::spawn(move || {
-                    let _ = callback(event);
+                    let _ = cb(event);
                 });
             }
         });
