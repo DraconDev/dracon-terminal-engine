@@ -521,7 +521,7 @@ impl Widget for LogMonitor {
 
 impl Default for LogMonitor {
     fn default() -> Self {
-        Self::new(Theme::nord())
+        Self::new(Theme::from_env_or(Theme::nord()))
     }
 }
 
