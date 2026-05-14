@@ -375,7 +375,7 @@ impl Widget for GitTui {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, &t, &self.keybindings);
+            render_help_overlay(&mut plane, area, t.clone(), &self.keybindings);
         }
 
         plane
