@@ -661,20 +661,29 @@ impl App {
             {
                 let now = Instant::now();
                 let mut to_reschedule: Vec<(WidgetId, BoundCommand)> = Vec::new();
-                let tracked: HashMap<WidgetId, (Instant, BoundCommand)> =
-                    self.command_tracking.borrow().clone();
-                for (wid, (last_run, cmd)) in tracked.iter() {
-                    let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
-                    if interval.is_zero() || now.duration_since(*last_run) < interval {
-                        continue;
+                let mut expired: Vec<WidgetId> = Vec::new();
+                {
+                    let tracked = self.command_tracking.borrow();
+                    for (&wid, (last_run, cmd)) in tracked.iter() {
+                        let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
+                        if interval.is_zero() || now.duration_since(*last_run) < interval {
+                            continue;
+                        }
+                        expired.push(wid);
                     }
-                    if let Some(mut w) = self.widget_mut(*wid) {
+                }
+                for wid in expired {
+                    let cmd = match self.command_tracking.borrow().get(&wid) {
+                        Some((_, c)) => c.clone(),
+                        None => continue,
+                    };
+                    if let Some(mut w) = self.widget_mut(wid) {
                         let runner = CommandRunner::new(&cmd.command);
                         let (stdout, stderr, exit_code) = runner.run_sync();
                         let output = cmd.parse_output(&stdout, &stderr, exit_code);
                         w.apply_command_output(&output);
                         w.mark_dirty();
-                        to_reschedule.push((*wid, cmd.clone()));
+                        to_reschedule.push((wid, cmd));
                     }
                 }
                 for (wid, cmd) in to_reschedule {

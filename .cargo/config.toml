@@ -20,12 +20,7 @@ form = "run --example form_demo"
 theme = "run --example theme_switcher"
 modal = "run --example modal_demo"
 tutorial = "run --example widget_tutorial"
-cdash = "run --example command_dashboard"
-fdemo = "run --example framework_demo"
-fchat = "run --example framework_chat"
 ffm = "run --example framework_file_manager"
-fwidgets = "run --example framework_widgets"
-cyber = "run --example cyberpunk_dashboard"
 
 # Build all examples at once
 build-examples = "build --examples"
