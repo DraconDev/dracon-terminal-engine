@@ -372,3 +372,9 @@ impl crate::framework::widget::Widget for ProgressRing {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for ProgressRing {
+    fn state_id(&self) -> Option<&str> { None }
+    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+}
