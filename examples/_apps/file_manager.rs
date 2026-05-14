@@ -1040,7 +1040,6 @@ impl Widget for FileManager {
 
         // Prompt overlay
         if let Some(ref prompt) = self.prompt {
-            let t = self.theme.clone();
             let pw = 50u16.min(area.width.saturating_sub(4));
             let ph = 3u16;
             let px = (area.width - pw) / 2;
@@ -1514,7 +1513,7 @@ fn render_box(
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb: &KeybindingSet) {
+fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let help_w = 44u16.min(area.width - 4);
     let help_h = 14u16.min(area.height - 4);
     let help_x = (area.width - help_w) / 2;
