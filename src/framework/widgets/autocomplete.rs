@@ -414,3 +414,29 @@ impl Widget for Autocomplete {
         self.base.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for Autocomplete {
+    fn state_id(&self) -> Option<&str> {
+        Some("autocomplete")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "query": self.base.text,
+            "visible": self.dropdown_open,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(query) = json.get("query").and_then(|v| v.as_str()) {
+            self.base.text = query.to_string();
+            self.base.cursor_pos = query.len();
+        }
+        if let Some(visible) = json.get("visible").and_then(|v| v.as_bool()) {
+            self.dropdown_open = visible;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

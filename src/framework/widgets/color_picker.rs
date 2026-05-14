@@ -482,6 +482,27 @@ impl crate::framework::widget::Widget for ColorPicker {
     }
 }
 
+impl crate::framework::widget::WidgetState for ColorPicker {
+    fn state_id(&self) -> Option<&str> {
+        Some("color_picker")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "selected_color": self.hex_value,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(hex) = json.get("selected_color").and_then(|v| v.as_str()) {
+            self.set_hex(hex);
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
+
 /// Slider render params: (plane, idx, y, width, label, value, kind)
 type SliderParams<'a> = (&'a mut Plane, u16, u16, u16, &'a str, f32, SliderKind);
 
