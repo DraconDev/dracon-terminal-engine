@@ -341,7 +341,7 @@ impl Widget for SqliteBrowser {
 
         // Left panel: tables
         let left_active = matches!(self.active_panel, Panel::Tables);
-        draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t, left_active);
+        draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t.clone(), left_active);
         let left_bg = if left_active {
             t.surface_elevated
         } else {
