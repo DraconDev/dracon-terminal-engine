@@ -1389,7 +1389,7 @@ fn test_all_themes_have_unique_names() {
         Theme::sunset(),
         Theme::mono(),
     ];
-    let mut names: Vec<&str> = themes.iter().map(|t| t.name).collect();
+    let mut names: Vec<String> = themes.iter().map(|t| t.name.to_string()).collect();
     names.sort();
     names.dedup();
     assert_eq!(names.len(), 20, "Expected 20 unique theme names");

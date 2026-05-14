@@ -763,12 +763,11 @@ fn test_from_name_short_aliases() {
 
 #[test]
 fn test_from_env_or_uses_env_var() {
-    // Save original value to restore later
+    let _guard = ENV_LOCK.lock().unwrap();
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "nord");
     let theme = Theme::from_env_or(Theme::dark());
     assert_eq!(&*theme.name, "nord");
-    // Restore
     match original {
         Some(v) => std::env::set_var("DTRON_THEME", v),
         None => std::env::remove_var("DTRON_THEME"),
@@ -777,6 +776,7 @@ fn test_from_env_or_uses_env_var() {
 
 #[test]
 fn test_from_env_or_falls_back_on_invalid_name() {
+    let _guard = ENV_LOCK.lock().unwrap();
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "nonexistent_theme");
     let theme = Theme::from_env_or(Theme::dark());
@@ -789,6 +789,7 @@ fn test_from_env_or_falls_back_on_invalid_name() {
 
 #[test]
 fn test_from_env_or_falls_back_when_unset() {
+    let _guard = ENV_LOCK.lock().unwrap();
     let original = std::env::var("DTRON_THEME").ok();
     std::env::remove_var("DTRON_THEME");
     let theme = Theme::from_env_or(Theme::light());
@@ -798,6 +799,7 @@ fn test_from_env_or_falls_back_when_unset() {
 
 #[test]
 fn test_from_env_or_hyphenated_theme_name() {
+    let _guard = ENV_LOCK.lock().unwrap();
     let original = std::env::var("DTRON_THEME").ok();
     std::env::set_var("DTRON_THEME", "catppuccin-mocha");
     let theme = Theme::from_env_or(Theme::dark());
