@@ -704,7 +704,22 @@ impl Widget for EditorApp {
             }
             _ => {
                 if self.tabs.get(self.active_tab).is_some() {
-                    let handled = self.tabs[self.active_tab].adapter.handle_key(key);
+                    let sidebar_w = 16u16;
+                    let tab_h = 1u16;
+                    let status_h = 1u16;
+                    let search_h = if self.show_search { 2u16 } else { 0u16 };
+                    let content_y = tab_h;
+                    let content_h = self.area.height.saturating_sub(tab_h + status_h + search_h);
+                    let editor_x = sidebar_w + 1;
+                    let editor_y = content_y;
+                    let editor_w = self.area.width.saturating_sub(editor_x);
+                    let text_h = content_h.saturating_sub(2);
+                    let text_w = editor_w.saturating_sub(2);
+                    let text_y = editor_y + 1;
+                    let editor_area = Rect::new(editor_x + 1, text_y, text_w, text_h);
+                    let tab = &mut self.tabs[self.active_tab];
+                    tab.adapter.set_area(editor_area);
+                    let handled = tab.adapter.handle_key(key);
                     if handled {
                         self.sync_tab_bar();
                         self.update_status();
