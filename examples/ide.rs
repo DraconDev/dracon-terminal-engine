@@ -645,7 +645,7 @@ impl Widget for IdeApp {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme.clone();
+        let t = &self.theme;
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -693,7 +693,7 @@ impl Widget for IdeApp {
         let editor_w = area.width.saturating_sub(editor_x);
         if editor_w > 0 && content_h > 0 {
             // Rounded border around editor
-            draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t.clone());
+            draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t);
 
             // Breadcrumbs
             let bc_plane = self.breadcrumbs.render(Rect::new(
@@ -1207,14 +1207,13 @@ impl IdeApp {
     }
 
     fn render_help_overlay(&self, plane: &mut Plane) {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let w = 60.min(plane.width);
         let h = 20.min(plane.height);
         let x = (plane.width - w) / 2;
         let y = (plane.height - h) / 2;
 
-        // Draw rounded border and fill
-        draw_rounded_box(plane, x, y, w, h, t.clone());
+        draw_rounded_box(plane, x, y, w, h, t);
 
         let title = "Keyboard Shortcuts";
         for (i, ch) in title.chars().enumerate() {
