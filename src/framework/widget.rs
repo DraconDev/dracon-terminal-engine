@@ -104,15 +104,16 @@ pub trait Widget {
     ///
     /// Use this for async initialization like loading resources or fetching data.
     /// The default implementation is empty.
-    #[cfg(feature = "async")]
-    async fn on_mount_async(&mut self) {}
-
-    /// Called when the widget is unmounted (async variant).
     ///
-    /// Use this for async cleanup like saving state or closing connections.
-    /// The default implementation is empty.
+    /// This is a separate trait from `Widget` because async methods are not
+    /// dyn-compatible (object-safe). Implement this on widgets that need
+    /// async lifecycle hooks alongside the `Widget` trait.
     #[cfg(feature = "async")]
-    async fn on_unmount_async(&mut self) {}
+    trait AsyncWidget: Widget {
+        async fn on_mount_async(&mut self) {}
+
+        async fn on_unmount_async(&mut self) {}
+    }
 
     /// Sets the widget's ID.
     /// Called by `App::add_widget` to sync the App-assigned ID with the widget.
