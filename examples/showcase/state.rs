@@ -4,7 +4,6 @@ use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::animation::AnimationManager;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet};
@@ -93,7 +92,7 @@ pub struct Showcase {
     pub(crate) sort_field: SortField,
     pub(crate) sort_ascending: bool,
     pub(crate) cached_themes: Vec<Theme>,
-    pub(crate) card_buffer: RefCell<Plane>, // Reused across card renders to avoid per-frame allocation
+
     pub(crate) search_query_lower: String,
     pub(crate) dirty: bool,
     pub(crate) last_render_second: u32,
@@ -186,7 +185,7 @@ impl Showcase {
             sort_field: SortField::Name,
             sort_ascending: true,
             cached_themes,
-            card_buffer: RefCell::new(Plane::new(0, 32, 16)), // Default card buffer size
+
             search_query_lower: String::new(),
             dirty: true,
             last_render_second: 0,
