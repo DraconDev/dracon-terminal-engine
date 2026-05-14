@@ -257,7 +257,7 @@ impl Widget for SettingsForm {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.form_theme;
+        let t = self.form_theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = self.z_index() as i32;
 

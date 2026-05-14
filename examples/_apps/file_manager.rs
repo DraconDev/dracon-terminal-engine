@@ -1619,7 +1619,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let fm = FileManager::new(WidgetId::new(1), Arc::clone(&should_quit), theme);
+    let fm = FileManager::new(WidgetId::new(1), Arc::clone(&should_quit), theme.clone());
 
     // Use InputRouter pattern for async polling support
     let fm = Rc::new(RefCell::new(fm));
