@@ -191,12 +191,12 @@ pub trait AsyncWidget: Widget {
     /// Called when the widget is mounted (async variant).
     ///
     /// Use this for async initialization like loading resources or fetching data.
-    fn on_mount_async(&mut self) -> impl std::future::Future<Output = ()> + Send + '_ {}
+    async fn on_mount_async(&mut self) {}
 
     /// Called when the widget is unmounted (async variant).
     ///
     /// Use this for async cleanup like saving state or closing connections.
-    fn on_unmount_async(&mut self) -> impl std::future::Future<Output = ()> + Send + '_ {}
+    async fn on_unmount_async(&mut self) {}
 }
 
 /// Trait for widgets that support state serialization to/from JSON.
