@@ -72,7 +72,7 @@ impl UserStatus {
         }
     }
 
-    fn color(self, theme: Theme) -> Color {
+    fn color(self, theme: &Theme) -> Color {
         match self {
             UserStatus::Active => theme.success,
             UserStatus::Away => theme.warning,
