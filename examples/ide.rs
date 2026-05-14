@@ -302,6 +302,7 @@ impl IdeApp {
             file_tree,
             show_search: false,
             search_input,
+            search_submit,
             status_bar,
             toasts: Vec::new(),
             tooltip: None,
