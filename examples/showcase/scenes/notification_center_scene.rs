@@ -21,7 +21,7 @@ pub struct NotificationCenterScene {
 
 impl NotificationCenterScene {
     pub fn new(theme: Theme) -> Self {
-        let mut nc = NotificationCenter::new(theme);
+        let mut nc = NotificationCenter::new(theme.clone());
         // Add some initial notifications
         nc.info("Welcome", "NotificationCenter demo started");
         nc.success("Success", "Files saved successfully");

@@ -22,7 +22,7 @@ pub struct CalendarScene {
 impl CalendarScene {
     pub fn new(theme: Theme) -> Self {
         Self {
-            theme,
+            theme: theme.clone(),
             show_help: false,
             calendar: Calendar::new().with_theme(theme),
             selected_date: None,
