@@ -166,7 +166,7 @@ impl IdeApp {
                     .add_item(MenuItem::new("About")),
             ]);
 
-        let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme);
+        let search_input = SearchInput::new(WidgetId::new(3)).with_theme(theme.clone());
 
         let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
@@ -269,8 +269,7 @@ impl IdeApp {
         let cmd_bridge_clone = cmd_bridge.clone();
         let command_palette = CommandPalette::new(palette_commands)
             .with_size(45, 18)
-            .with_theme(theme)
-            .on_execute(move |cmd_id| {
+            .with_theme(theme.clone())(move |cmd_id| {
                 *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
             });
 
