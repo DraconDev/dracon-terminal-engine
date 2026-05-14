@@ -5,7 +5,7 @@
 //! - Tab bar: switch between open files
 //! - File tree sidebar with icons
 //! - Search bar overlay
-//! - Syntax highlighting (Rust basics)
+//! - Syntax highlighting (via TextEditor)
 //! - Line numbers with current line highlight
 //! - Status bar with position, language, encoding
 //! - Theme cycling (t)
@@ -29,9 +29,10 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, CommandItem, CommandPalette, Metric, Profiler, SearchInput, StatusBar,
-    StatusSegment, TabBar, Tree, TreeNode,
+    StatusSegment, TabBar, TextEditorAdapter, Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
+use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -41,10 +42,7 @@ use std::time::Duration;
 
 struct Tab {
     title: String,
-    content: String,
-    cursor_line: usize,
-    cursor_col: usize,
-    modified: bool,
+    adapter: TextEditorAdapter,
 }
 
 struct EditorApp {
@@ -77,17 +75,17 @@ impl EditorApp {
         let tabs = vec![
             Tab {
                 title: "main.rs".to_string(),
-                content: "use std::io::{self, Write};\n\nfn main() -> io::Result<()> {\n    println!(\"Hello, World!\");\n    Ok(())\n}\n".to_string(),
-                cursor_line: 0,
-                cursor_col: 0,
-                modified: false,
+                adapter: TextEditorAdapter::new(
+                    WidgetId::new(100),
+                    TextEditor::with_content("use std::io::{self, Write};\n\nfn main() -> io::Result<()> {\n    println!(\"Hello, World!\");\n    Ok(())\n}\n"),
+                ),
             },
             Tab {
                 title: "lib.rs".to_string(),
-                content: "/// A greeting function\npub fn greet(name: &str) -> String {\n    format!(\"Hello, {}!\", name)\n}\n".to_string(),
-                cursor_line: 0,
-                cursor_col: 0,
-                modified: false,
+                adapter: TextEditorAdapter::new(
+                    WidgetId::new(101),
+                    TextEditor::with_content("/// A greeting function\npub fn greet(name: &str) -> String {\n    format!(\"Hello, {}!\", name)\n}\n"),
+                ),
             },
         ];
 
@@ -189,7 +187,7 @@ impl EditorApp {
                 *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
             });
 
-        Self {
+        let mut app = Self {
             id: WidgetId::new(0),
             tabs,
             active_tab: 0,
@@ -211,7 +209,13 @@ impl EditorApp {
             profiler: Profiler::new(WidgetId::new(50)),
             show_profiler: false,
             frame_count: 0,
+        };
+
+        for tab in &mut app.tabs {
+            tab.adapter.on_theme_change(&app.theme);
         }
+
+        app
     }
 
     fn active_tab(&self) -> Option<&Tab> {
@@ -235,6 +239,9 @@ impl EditorApp {
         self.status_bar.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
         self.profiler.on_theme_change(&self.theme);
+        for tab in &mut self.tabs {
+            tab.adapter.on_theme_change(&self.theme);
+        }
         self.dirty = true;
     }
 
@@ -243,7 +250,7 @@ impl EditorApp {
             .tabs
             .iter()
             .map(|t| {
-                if t.modified {
+                if t.adapter.editor().modified {
                     format!("{} ×", t.title)
                 } else {
                     t.title.clone()
@@ -256,6 +263,31 @@ impl EditorApp {
         );
         self.tab_bar.set_active(self.active_tab);
         self.tab_bar.on_theme_change(&self.theme);
+    }
+
+    fn update_status(&mut self) {
+        if let Some(tab) = self.active_tab() {
+            let editor = tab.adapter.editor();
+            self.status_bar = StatusBar::new(WidgetId::new(30))
+                .add_segment(StatusSegment::new("󰄛 Rust").with_fg(self.theme.info))
+                .add_segment(
+                    StatusSegment::new(&format!(
+                        "Ln {}, Col {}",
+                        editor.cursor_row + 1,
+                        editor.cursor_col + 1
+                    ))
+                    .with_fg(self.theme.fg_muted),
+                )
+                .add_segment(StatusSegment::new("UTF-8").with_fg(self.theme.fg_muted))
+                .add_segment(
+                    StatusSegment::new(&self.keybindings.format_hint(&[
+                        (actions::THEME, "theme"),
+                        (actions::HELP, "help"),
+                        (actions::BACK, "dismiss"),
+                        (actions::QUIT, "quit"),
+                    ])).with_fg(self.theme.fg_muted),
+                );
+        }
     }
 
     fn open_command_palette(&mut self) {
@@ -271,12 +303,14 @@ impl EditorApp {
         match cmd_id {
             "new-tab" => {
                 let new_id = self.tabs.len();
+                let mut adapter = TextEditorAdapter::new(
+                    WidgetId::new(100 + new_id),
+                    TextEditor::with_content("// New file\n"),
+                );
+                adapter.on_theme_change(&self.theme);
                 self.tabs.push(Tab {
                     title: format!("untitled-{}.rs", new_id + 1),
-                    content: "// New file\n".to_string(),
-                    cursor_line: 0,
-                    cursor_col: 0,
-                    modified: false,
+                    adapter,
                 });
                 self.active_tab = new_id;
                 self.sync_tab_bar();
@@ -288,7 +322,7 @@ impl EditorApp {
             }
             "save" => {
                 if let Some(tab) = self.active_tab_mut() {
-                    tab.modified = false;
+                    tab.adapter.editor_mut().modified = false;
                 }
                 self.sync_tab_bar();
             }
@@ -406,6 +440,9 @@ impl Widget for EditorApp {
         self.file_tree.on_theme_change(theme);
         self.search.on_theme_change(theme);
         self.tab_bar.on_theme_change(theme);
+        for tab in &mut self.tabs {
+            tab.adapter.on_theme_change(theme);
+        }
         self.dirty = true;
     }
 
@@ -464,19 +501,16 @@ impl Widget for EditorApp {
                     .render(Rect::new(editor_x + 1, editor_y, editor_w - 2, 1));
             blit(&mut plane, &bc_plane, editor_x + 1, editor_y);
 
-            // Editor content
+            // Editor content via TextEditorAdapter
             let text_y = editor_y + 1;
             let text_h = content_h.saturating_sub(2);
-            if let Some(tab) = self.active_tab() {
-                    render_editor_content(
-                        &mut plane,
-                        editor_x + 1,
-                        text_y,
-                        editor_w - 2,
-                        text_h,
-                        tab,
-                        t.clone(),
-                    );
+            let text_w = editor_w.saturating_sub(2);
+            if text_w > 0 && text_h > 0 {
+                if let Some(tab) = self.active_tab() {
+                    let editor_area = Rect::new(editor_x + 1, text_y, text_w, text_h);
+                    let editor_plane = tab.adapter.render(editor_area);
+                    blit(&mut plane, &editor_plane, editor_x + 1, text_y);
+                }
             }
         }
 
@@ -619,7 +653,7 @@ impl Widget for EditorApp {
         }
         if self.keybindings.matches(actions::SAVE, &key) {
             if let Some(tab) = self.active_tab_mut() {
-                tab.modified = false;
+                tab.adapter.editor_mut().modified = false;
             }
             self.sync_tab_bar();
             self.dirty = true;
@@ -627,12 +661,14 @@ impl Widget for EditorApp {
         }
         if self.keybindings.matches(actions::NEW_TAB, &key) {
             let new_id = self.tabs.len();
+            let mut adapter = TextEditorAdapter::new(
+                WidgetId::new(100 + new_id),
+                TextEditor::with_content("// New file\n"),
+            );
+            adapter.on_theme_change(&self.theme);
             self.tabs.push(Tab {
                 title: format!("untitled-{}.rs", new_id + 1),
-                content: "// New file\n".to_string(),
-                cursor_line: 0,
-                cursor_col: 0,
-                modified: false,
+                adapter,
             });
             self.active_tab = new_id;
             self.sync_tab_bar();
@@ -666,114 +702,20 @@ impl Widget for EditorApp {
                 self.dirty = true;
                 true
             }
-            KeyCode::Up => {
+            _ => {
                 if let Some(tab) = self.active_tab_mut() {
-                    if tab.cursor_line > 0 {
-                        tab.cursor_line -= 1;
+                    let editor_area = Rect::new(0, 0, self.area.width.saturating_sub(20), self.area.height.saturating_sub(4));
+                    let handled = tab.adapter.handle_key(key);
+                    if handled {
+                        self.sync_tab_bar();
+                        self.update_status();
+                        self.dirty = true;
                     }
+                    handled
+                } else {
+                    false
                 }
-                self.dirty = true;
-                true
             }
-            KeyCode::Down => {
-                if let Some(tab) = self.active_tab_mut() {
-                    let lines: Vec<&str> = tab.content.lines().collect();
-                    if tab.cursor_line + 1 < lines.len() {
-                        tab.cursor_line += 1;
-                    }
-                }
-                self.dirty = true;
-                true
-            }
-            KeyCode::Left => {
-                if let Some(tab) = self.active_tab_mut() {
-                    if tab.cursor_col > 0 {
-                        tab.cursor_col -= 1;
-                    }
-                }
-                self.dirty = true;
-                true
-            }
-            KeyCode::Right => {
-                if let Some(tab) = self.active_tab_mut() {
-                    let lines: Vec<&str> = tab.content.lines().collect();
-                    if let Some(line) = lines.get(tab.cursor_line) {
-                        if tab.cursor_col < line.len() {
-                            tab.cursor_col += 1;
-                        }
-                    }
-                }
-                self.dirty = true;
-                true
-            }
-            KeyCode::Backspace => {
-                if let Some(tab) = self.active_tab_mut() {
-                    let lines: Vec<&str> = tab.content.lines().collect();
-                    if tab.cursor_col > 0 {
-                        // Delete character before cursor on current line
-                        let mut new_content = String::new();
-                        for (i, line) in lines.iter().enumerate() {
-                            if i > 0 { new_content.push('\n'); }
-                            if i == tab.cursor_line {
-                                new_content.push_str(&line[..tab.cursor_col - 1]);
-                                new_content.push_str(&line[tab.cursor_col..]);
-                            } else {
-                                new_content.push_str(line);
-                            }
-                        }
-                        tab.content = new_content;
-                        tab.cursor_col -= 1;
-                        tab.modified = true;
-                    } else if tab.cursor_line > 0 {
-                        // At start of line: join with previous line
-                        let prev_line_len = lines[tab.cursor_line - 1].len();
-                        let mut new_content = String::new();
-                        for (i, line) in lines.iter().enumerate() {
-                            if i == tab.cursor_line { continue; }
-                            if i > 0 && i != tab.cursor_line { new_content.push('\n'); }
-                            if i == tab.cursor_line - 1 {
-                                new_content.push_str(line);
-                                new_content.push_str(lines[tab.cursor_line]);
-                            } else {
-                                new_content.push_str(line);
-                            }
-                        }
-                        tab.content = new_content;
-                        tab.cursor_line -= 1;
-                        tab.cursor_col = prev_line_len;
-                        tab.modified = true;
-                    }
-                }
-                self.sync_tab_bar();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char(c) => {
-                if let Some(tab) = self.active_tab_mut() {
-                    let lines: Vec<&str> = tab.content.lines().collect();
-                    let mut new_content = String::new();
-                    for (i, line) in lines.iter().enumerate() {
-                        if i > 0 {
-                            new_content.push('\n');
-                        }
-                        if i == tab.cursor_line {
-                            let col = tab.cursor_col.min(line.len());
-                            new_content.push_str(&line[..col]);
-                            new_content.push(c);
-                            new_content.push_str(&line[col..]);
-                            tab.cursor_col = col + 1;
-                        } else {
-                            new_content.push_str(line);
-                        }
-                    }
-                    tab.content = new_content;
-                    tab.modified = true;
-                }
-                self.sync_tab_bar();
-                self.dirty = true;
-                true
-            }
-            _ => false,
         }
     }
 
@@ -798,142 +740,33 @@ impl Widget for EditorApp {
                 }
             }
         }
+
+        if let Some(tab) = self.active_tab_mut() {
+            let sidebar_w = 16u16;
+            let tab_h = 1u16;
+            let editor_x = sidebar_w + 1;
+            let editor_w = self.area.width.saturating_sub(editor_x);
+            if editor_w > 0 && self.area.height > tab_h + 2 {
+                let text_y = tab_h + 1;
+                let text_h = self.area.height.saturating_sub(tab_h + 3);
+                let text_w = editor_w.saturating_sub(2);
+                if text_w > 0 && text_h > 0
+                    && col >= editor_x + 1 && col < editor_x + 1 + text_w
+                    && row >= text_y && row < text_y + text_h
+                {
+                    let rel_col = col - (editor_x + 1);
+                    let rel_row = row - text_y;
+                    let handled = tab.adapter.handle_mouse(kind, rel_col, rel_row);
+                    if handled {
+                        self.dirty = true;
+                    }
+                    return handled;
+                }
+            }
+        }
+
         false
     }
-}
-
-fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab: &Tab, t: Theme) {
-    let lines: Vec<&str> = tab.content.lines().collect();
-    let line_num_width = lines.len().to_string().len().max(2) as u16;
-    let content_x = x + line_num_width + 1;
-
-    for (i, line) in lines.iter().enumerate().take(h as usize) {
-        let row = y + i as u16;
-        if row >= plane.height {
-            break;
-        }
-
-        // Line number
-        let num = format!("{:>width$} ", i + 1, width = line_num_width as usize);
-        for (j, ch) in num.chars().enumerate() {
-            let idx = (row * plane.width + x + j as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx] = Cell {
-                    char: ch,
-                    fg: t.fg_muted,
-                    bg: if i == tab.cursor_line {
-                        t.surface_elevated
-                    } else {
-                        t.bg
-                    },
-                    style: Styles::empty(),
-                    transparent: false,
-                    skip: false,
-                };
-            }
-        }
-
-        // Line content with basic syntax highlighting
-        for (j, ch) in line
-            .chars()
-            .enumerate()
-            .take((w - line_num_width - 1) as usize)
-        {
-            let col = content_x + j as u16;
-            let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() || col >= plane.width {
-                break;
-            }
-
-            let (fg, style) = syntax_color(line, j, t.clone());
-
-            plane.cells[idx] = Cell {
-                char: ch,
-                fg,
-                bg: if i == tab.cursor_line {
-                    t.surface_elevated
-                } else {
-                    t.bg
-                },
-                style,
-                transparent: false,
-                skip: false,
-            };
-        }
-    }
-
-    // Cursor
-    let cursor_row = y + tab.cursor_line as u16;
-    let cursor_col = content_x + tab.cursor_col as u16;
-    if cursor_row < plane.height && cursor_col < plane.width {
-        let idx = (cursor_row * plane.width + cursor_col) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx].bg = t.primary_active;
-            plane.cells[idx].fg = t.fg_on_accent;
-        }
-    }
-}
-
-fn syntax_color(line: &str, col: usize, t: Theme) -> (Color, Styles) {
-    let keywords = [
-        "fn", "let", "mut", "pub", "use", "if", "else", "for", "while", "match", "impl", "struct",
-        "enum", "trait", "type", "return", "self", "true", "false", "const", "static", "async",
-        "await",
-    ];
-    let types = [
-        "String", "Vec", "Option", "Result", "i32", "u32", "f64", "bool", "char", "usize",
-    ];
-
-    // Check if we're in a comment
-    if let Some(pos) = line.find("//") {
-        if col >= pos {
-            return (t.fg_muted, Styles::empty());
-        }
-    }
-
-    // Check if we're in a string literal
-    let mut in_string = false;
-    let mut string_start = 0;
-    for (i, c) in line.chars().enumerate() {
-        if c == '"' {
-            if in_string {
-                if col >= string_start && col <= i {
-                    return (t.success, Styles::empty());
-                }
-                in_string = false;
-            } else {
-                in_string = true;
-                string_start = i;
-            }
-        }
-    }
-    if in_string && col >= string_start {
-        return (t.success, Styles::empty());
-    }
-
-    // Check for keywords and types
-    for word in keywords {
-        if let Some(pos) = line.find(word) {
-            if col >= pos && col < pos + word.len() {
-                return (t.primary, Styles::BOLD);
-            }
-        }
-    }
-    for word in types {
-        if let Some(pos) = line.find(word) {
-            if col >= pos && col < pos + word.len() {
-                return (t.warning, Styles::BOLD);
-            }
-        }
-    }
-
-    // Numbers
-    let chars: Vec<char> = line.chars().collect();
-    if col < chars.len() && chars[col].is_ascii_digit() {
-        return (t.warning, Styles::empty());
-    }
-
-    (t.fg, Styles::empty())
 }
 
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &KeybindingConfig) {
