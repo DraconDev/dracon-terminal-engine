@@ -639,7 +639,7 @@ impl Dashboard {
         }
     }
 
-    fn render_process_panel(&self, plane: &mut Plane, area: Rect, t: Theme) {
+    fn render_process_panel(&self, plane: &mut Plane, area: Rect, t: &Theme) {
         render_card_border(
             plane,
             area.x,
@@ -824,7 +824,7 @@ fn blit_plane(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
     }
 }
 
-fn render_help(plane: &mut Plane, area: Rect, t: Theme) {
+fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 50u16.min(area.width.saturating_sub(4));
     let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
