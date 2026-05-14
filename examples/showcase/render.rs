@@ -369,7 +369,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize
     }
 }
 
-fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let split_x = (4.0 + (phase * 0.5).sin() * 3.0).round() as usize;
     let split_x = split_x.min(25);
     let w = 26;
@@ -389,7 +389,7 @@ fn render_split_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
     draw_text(plane, ox + w / 2 - 3, oy + 11, &label, t.fg_muted, t.bg, Styles::empty());
 }
 
-fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
         format!("CPU:  [{}{}]", "█".repeat((phase * 4.0).sin() as usize * 2 + 2), "░".repeat(6)),
@@ -404,7 +404,7 @@ fn render_command_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy
     }
 }
 
-fn render_theme_preview(plane: &mut Plane, t: Theme, ox: usize, oy: usize) {
+fn render_theme_preview(plane: &mut Plane, t: &Theme, ox: usize, oy: usize) {
     let colors = [t.primary, t.primary_hover, t.success, t.warning, t.error, t.info, t.fg, t.bg];
     let cols = 4;
     let swatch_size = 3;
@@ -423,7 +423,7 @@ fn render_theme_preview(plane: &mut Plane, t: Theme, ox: usize, oy: usize) {
     draw_text(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, Styles::empty());
 }
 
-fn render_widget_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let checks = ["[x] Alpha", "[ ] Beta", "[x] Gamma"];
     for (i, check) in checks.iter().enumerate() {
         let py = oy + 6 + i;
