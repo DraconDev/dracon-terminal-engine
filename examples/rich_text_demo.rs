@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::from_env_or(Theme::nord()))
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.modifiers.is_empty() {
+            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 q.store(true, Ordering::SeqCst);
             }
             false
