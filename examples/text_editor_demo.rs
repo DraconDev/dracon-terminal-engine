@@ -53,6 +53,7 @@ struct EditorApp {
     file_tree: Tree,
     show_search: bool,
     search: SearchInput,
+    search_submit: Arc<Mutex<String>>,
     status_bar: StatusBar,
     breadcrumbs: Breadcrumbs,
     show_help: bool,
@@ -93,7 +94,13 @@ impl EditorApp {
 
         let tree = build_file_tree(theme.clone());
 
-        let search = SearchInput::new(WidgetId::new(20)).with_theme(theme.clone());
+        let search_submit = Arc::new(Mutex::new(String::new()));
+        let search_submit_cb = search_submit.clone();
+        let search = SearchInput::new(WidgetId::new(20))
+            .with_theme(theme.clone())
+            .on_submit(move |query| {
+                *search_submit_cb.lock().unwrap() = query.to_string();
+            });
 
         let kb_config = resolve_keybindings();
         let keybindings = KeybindingSet::from_config(&kb_config);
