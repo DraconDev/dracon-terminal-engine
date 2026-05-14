@@ -616,7 +616,7 @@ fn render_tabbed_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, o
     draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, Styles::empty());
 }
 
-fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_tree_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = ["v root/", "| v src/", "| | > main.rs", "| | > lib.rs", "| v target/"];
     let scroll = ((phase * 0.5).sin() * 1.5) as i16;
     for (i, line) in lines.iter().enumerate() {
@@ -631,7 +631,7 @@ fn render_tree_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: u
     }
 }
 
-fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_table_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let headers = " Name     | Age | City ";
     let sep = "----------|-----|------";
     draw_text(plane, ox + 1, oy + 5, headers, t.primary, t.surface, Styles::empty());
@@ -650,7 +650,7 @@ fn render_table_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: 
     }
 }
 
-fn render_input_debug_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_input_debug_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let keys = ["Key: ArrowUp  0x2191", "Mod: Ctrl+Shift"];
     for (i, key) in keys.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, key, t.fg_subtle, t.surface, Styles::empty()); }
     let mx = (phase * 30.0).sin() as i16 + 40;
