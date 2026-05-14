@@ -281,13 +281,13 @@ impl FileManager {
 
         let tree = Tree::new(WidgetId::new(2))
             .with_root(vec![root.to_tree_node(true)])
-            .with_theme(theme);
+            .with_theme(theme.clone());
 
         let segments: Vec<String> = home_path
             .components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
-        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(theme);
+        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(theme.clone());
 
         let mut fm = Self {
             id,
