@@ -27,6 +27,7 @@ use crate::framework::focus::FocusManager;
 #[cfg(feature = "debug_events")]
 use crate::framework::logging::{log_key_event, log_mouse_event};
 use crate::framework::scene_router::SceneRouter;
+use crate::framework::keybindings::{actions, KeybindingSet, resolve_keybindings};
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use crate::input::event::{Event, KeyEvent};
@@ -86,6 +87,7 @@ pub struct App {
     command_tracking: RefCell<HashMap<WidgetId, (Instant, BoundCommand)>>,
     event_bus: EventBus,
     scene_router: crate::framework::scene_router::SceneRouter,
+    keybindings: KeybindingSet,
 }
 
 impl App {
@@ -238,6 +240,7 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         })
     }
 
