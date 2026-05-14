@@ -76,10 +76,11 @@ impl Compositor {
     pub fn tick(&mut self, _delta: f32) {}
 
     /// Returns the topmost visible plane at the given coordinates, if any.
-    /// Sorts planes by z-index first to ensure correct top-to-bottom ordering.
-    pub fn hit_test(&mut self, x: u16, y: u16) -> Option<&Plane> {
-        self.sort_planes();
-        for plane in self.planes.iter().rev() {
+    /// Scans all planes and returns the one with the highest z-index that
+    /// contains a non-transparent cell at (x, y).
+    pub fn hit_test(&self, x: u16, y: u16) -> Option<&Plane> {
+        let mut best: Option<&Plane> = None;
+        for plane in self.planes.iter() {
             if !plane.visible {
                 continue;
             }
@@ -92,11 +93,15 @@ impl Compositor {
                 let ly = y - plane.y;
                 let idx = (ly * plane.width + lx) as usize;
                 if !plane.cells[idx].transparent {
-                    return Some(plane);
+                    match best {
+                        None => best = Some(plane),
+                        Some(prev) if plane.z_index > prev.z_index => best = Some(plane),
+                        _ => {}
+                    }
                 }
             }
         }
-        None
+        best
     }
 
     /// Returns the width and height of the compositor.
