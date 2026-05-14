@@ -641,14 +641,14 @@ fn main() -> std::io::Result<()> {
     // to demonstrate that each instance maintains its own state.
 
     // Row 1: Red and Green pickers
-    let red_picker = ColorPicker::new(current_theme)
+    let red_picker = ColorPicker::new(current_theme.clone())
         .initial_color("Red");
 
-    let green_picker = ColorPicker::new(current_theme)
+    let green_picker = ColorPicker::new(current_theme.clone())
         .initial_color("Green");
 
     // Row 2: Blue and Yellow pickers
-    let blue_picker = ColorPicker::new(current_theme)
+    let blue_picker = ColorPicker::new(current_theme.clone())
         .initial_color("Blue");
 
     let yellow_picker = ColorPicker::new(current_theme)
