@@ -557,8 +557,8 @@ fn main() -> std::io::Result<()> {
 
     let mut router = SceneRouter::new();
     let initial_theme = theme.borrow().clone();
-    router.register("home", Box::new(HomeScreen::new(initial_theme)));
-    router.register("settings", Box::new(SettingsScreen::new(initial_theme)));
+    router.register("home", Box::new(HomeScreen::new(initial_theme.clone())));
+    router.register("settings", Box::new(SettingsScreen::new(initial_theme.clone())));
     router.register("profile", Box::new(ProfileScreen::new(initial_theme)));
     router.push("home");
 
