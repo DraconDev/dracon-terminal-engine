@@ -693,6 +693,9 @@ impl Widget for IdeApp {
                     editor_content_h,
                     tab,
                     t.clone(),
+                );
+            } else {
+                // Empty state - no tabs open
                 let empty_msg = " 󰈙 No file open ";
                 let empty_y = editor_y + editor_content_h / 2;
                 let empty_x =
@@ -1614,12 +1617,12 @@ fn is_keyword(line: &str, pos: usize) -> bool {
         "async", "await",
     ];
     // Find the word boundary around position
-    let before: String = line[..pos.min(line.len())].clone()
+    let before: String = line[..pos.min(line.len())]
         .chars()
         .rev()
         .take_while(|c| c.is_alphanumeric() || *c == '_')
         .collect();
-    let after: String = line[pos.min(line.len())..].clone()
+    let after: String = line[pos.min(line.len())..]
         .chars()
         .take_while(|c| c.is_alphanumeric() || *c == '_')
         .collect();
@@ -1680,7 +1683,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let theme = Theme::from_env_or(Theme::nord());
-    let app = Rc::new(RefCell::new(IdeApp::new(should_quit, theme)));
+    let app = Rc::new(RefCell::new(IdeApp::new(should_quit, theme.clone())));
     let app_for_tick = Rc::clone(&app);
 
     let mut app_widget = App::new()?.title("Dracon IDE").fps(30).theme(theme);
