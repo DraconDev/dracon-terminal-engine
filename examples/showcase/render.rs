@@ -87,7 +87,7 @@ pub fn draw_text(
     }
 }
 
-pub fn category_color(t: Theme, cat: &str) -> Color {
+pub fn category_color(t: &Theme, cat: &str) -> Color {
     match cat {
         "apps" => t.warning,
         "cookbook" => t.info,
@@ -103,7 +103,7 @@ pub fn category_color(t: Theme, cat: &str) -> Color {
 /// Returns the width consumed.
 pub fn render_features_bar(
     plane: &mut Plane,
-    theme: Theme,
+    theme: &Theme,
     y: usize,
     phase: f64,
 ) -> usize {
@@ -149,7 +149,7 @@ pub struct CardConfig<'a> {
     pub idx: usize,
     pub selected_idx: usize,
     pub hovered_idx: Option<usize>,
-    pub theme: Theme,
+    pub theme: &'a Theme,
     pub phase: f64,
     pub width: u16,
     pub height: u16,
