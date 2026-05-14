@@ -595,3 +595,33 @@ impl crate::framework::widget::Widget for Calendar {
         self.dirty = true;
     }
 }
+
+impl crate::framework::widget::WidgetState for Calendar {
+    fn state_id(&self) -> Option<&str> {
+        Some("calendar")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        let selected_date = self.selected.map(|d| d.to_string());
+        json!({
+            "selected_date": selected_date,
+            "month": self.month,
+            "year": self.year,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(date_str) = json.get("selected_date").and_then(|v| v.as_str()) {
+            self.selected = NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok();
+        }
+        if let Some(month) = json.get("month").and_then(|v| v.as_u64()) {
+            self.month = month as u8;
+        }
+        if let Some(year) = json.get("year").and_then(|v| v.as_i64()) {
+            self.year = year as i32;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

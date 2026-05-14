@@ -665,3 +665,27 @@ impl crate::framework::widget::Widget for TagsInput {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for TagsInput {
+    fn state_id(&self) -> Option<&str> {
+        Some("tags_input")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "tags": self.tags,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(tags) = json.get("tags").and_then(|v| v.as_array()) {
+            self.tags = tags
+                .iter()
+                .filter_map(|v| v.as_str().map(String::from))
+                .collect();
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
