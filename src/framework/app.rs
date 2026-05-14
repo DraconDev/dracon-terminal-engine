@@ -546,19 +546,6 @@ impl App {
             #[cfg(feature = "tracing")]
             let _frame_span = tracing::debug_span!("frame").entered();
 
-            if resize_flag.load(Ordering::SeqCst) {
-                resize_flag.store(false, Ordering::SeqCst);
-                if let Ok((w, h)) = tty::get_window_size(io::stdout().as_fd()) {
-                    self.compositor.resize(w, h);
-                    self.dirty_tracker.mark_all_dirty();
-                    let rect = Rect::new(0, 0, w, h);
-                    for w in self.widgets.borrow_mut().iter_mut() {
-                        w.set_area(rect);
-                        w.mark_dirty();
-                    }
-                }
-            }
-
             match tty::poll_input(stdin.as_fd(), 1) {
                 Ok(true) => {
                     let mut chunk_buf = [0u8; 1024];
