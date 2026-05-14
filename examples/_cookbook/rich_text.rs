@@ -32,7 +32,7 @@ You can write `let x = 42;` inline or refer to `functions` and `types`.
 *Try cycling themes with Ctrl+T to see how colors adapt.*
 "#;
 
-    let rich_text = RichText::with_id(WidgetId::new(1), markdown).with_theme(theme);
+    let rich_text = RichText::with_id(WidgetId::new(1), markdown).with_theme(theme.clone());
 
     let mut app = App::new()?;
     app.add_widget(Box::new(rich_text), Rect::new(2, 1, 76, 22));
