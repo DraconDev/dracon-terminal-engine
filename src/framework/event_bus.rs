@@ -283,7 +283,7 @@ impl EventBus {
     #[cfg(feature = "async")]
     pub fn subscribe_once_async<E: Any + Clone + Send, F, Fut>(&self, callback: F) -> SubscriptionId
     where
-        F: Fn(E) -> Fut + Send + 'static,
+        F: Fn(E) -> Fut + Clone + Send + 'static,
         Fut: std::future::Future<Output = ()> + 'static,
     {
         let type_id = TypeId::of::<E>();
