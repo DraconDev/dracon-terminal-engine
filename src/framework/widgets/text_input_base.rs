@@ -204,3 +204,33 @@ impl BaseInput {
         }
     }
 }
+
+impl crate::framework::widget::WidgetState for BaseInput {
+    fn state_id(&self) -> Option<&str> {
+        Some("text_input")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({
+            "text": self.text,
+            "cursor_pos": self.cursor_pos,
+            "input_bg": format!("{:?}", self.theme.input_bg),
+            "input_fg": format!("{:?}", self.theme.fg),
+            "focused": self.focused,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(text) = json.get("text").and_then(|v| v.as_str()) {
+            self.text = text.to_string();
+        }
+        if let Some(pos) = json.get("cursor_pos").and_then(|v| v.as_u64()) {
+            self.cursor_pos = pos as usize;
+        }
+        if let Some(focused) = json.get("focused").and_then(|v| v.as_bool()) {
+            self.focused = focused;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
