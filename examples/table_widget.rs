@@ -814,7 +814,7 @@ impl Widget for TableApp {
             0,
             card_w,
             area.height.saturating_sub(1),
-            t,
+            t.clone(),
         );
 
         // === HELP OVERLAY ===
