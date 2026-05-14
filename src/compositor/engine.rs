@@ -289,7 +289,7 @@ impl Compositor {
                     let mut src_cell = plane.cells[src_idx];
 
                     if let Some(filter) = &plane.filter {
-                        filter.apply(&mut src_cell, abs_x, abs_y, render_time);
+                        filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
                     }
 
                     blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
