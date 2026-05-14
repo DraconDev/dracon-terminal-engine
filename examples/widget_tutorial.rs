@@ -651,7 +651,7 @@ fn main() -> std::io::Result<()> {
     let blue_picker = ColorPicker::new(current_theme.clone())
         .initial_color("Blue");
 
-    let yellow_picker = ColorPicker::new(current_theme)
+    let yellow_picker = ColorPicker::new(current_theme.clone())
         .initial_color("Yellow");
 
     // Header and footer labels
