@@ -161,9 +161,10 @@ impl<W: Write + AsFd> Terminal<W> {
 
     fn new_null_mode(writer: W) -> io::Result<Self> {
         Ok(Self {
-            original_termios: unsafe { std::mem::zeroed() },
+            original_termios: None,
             output: writer,
             capabilities: Capabilities::detect(),
+            is_null_mode: true,
         })
     }
 
