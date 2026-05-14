@@ -24,7 +24,7 @@ impl std::fmt::Display for Message {
 }
 
 fn main() -> std::io::Result<()> {
-    let theme = Theme::cyberpunk();
+    let theme = Theme::from_env_or(Theme::cyberpunk());
 
     let now = chrono_lite_timestamp();
     let messages = vec![
@@ -62,7 +62,7 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(theme)
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {

@@ -36,7 +36,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Command Dashboard")
         .fps(30)
-        .theme(Theme::nord());
+        .theme(Theme::from_env_or(Theme::nord()));
 
     // Create gauges bound to real commands
     let cpu_gauge = Gauge::new("CPU %").max(100.0).bind_command(
@@ -75,7 +75,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     app = app
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {
