@@ -166,6 +166,7 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         for cell in &mut plane.cells {
             cell.bg = self.theme.bg;
             cell.fg = self.theme.fg;
+            cell.transparent = false;
         }
 
         let border_char: char = '─';

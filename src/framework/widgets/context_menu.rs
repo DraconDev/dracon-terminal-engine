@@ -205,6 +205,7 @@ impl crate::framework::widget::Widget for ContextMenu {
         for cell in &mut plane.cells {
             cell.bg = self.theme.bg;
             cell.fg = self.theme.fg;
+            cell.transparent = false;
         }
 
         for (i, (label, _action)) in self.items.iter().enumerate() {

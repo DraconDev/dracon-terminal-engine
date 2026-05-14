@@ -246,7 +246,10 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 callback(event.clone());
-                // Unsubscribe from the bus
+                // SAFETY: The `bus` Weak reference is only upgraded if the EventBus
+                // still exists. Unsubscribe removes the callback from the internal
+                // list, which is safe because we are currently inside that callback
+                // (RwLock is released between dispatch and this point).
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
                         bus.unsubscribe::<E>(id_clone);
@@ -303,7 +306,8 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 let event = event.clone();
-                // Unsubscribe from the bus
+                // SAFETY: Same as sync variant — Weak only upgrades if bus is alive,
+                // and we're inside the callback so RwLock is not held.
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
                         bus.unsubscribe::<E>(id_clone);
