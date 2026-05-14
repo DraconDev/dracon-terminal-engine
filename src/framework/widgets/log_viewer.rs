@@ -56,7 +56,7 @@ pub struct LogViewer {
 impl LogViewer {
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             lines: VecDeque::new(),
             max_lines: 500,
             auto_scroll: true,
@@ -411,6 +411,6 @@ impl Widget for LogViewer {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

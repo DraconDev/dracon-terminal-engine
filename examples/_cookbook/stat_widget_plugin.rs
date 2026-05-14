@@ -134,7 +134,7 @@ impl Widget for StatWidget {
         plane
     }
 
-    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; }
+    fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); }
     fn handle_key(&mut self, _key: KeyEvent) -> bool { false }
     fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
 }
@@ -273,7 +273,7 @@ impl Widget for PluginLoader {
         plane
     }
 
-    fn on_theme_change(&mut self, theme: &Theme) { self.theme = *theme; self.dirty = true; }
+    fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); self.dirty = true; }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         use KeyCode::*;
         match key.code {
@@ -340,8 +340,8 @@ fn draw_rect_border(plane: &mut Plane, area: Rect, theme: &Theme) {
 fn main() -> std::io::Result<()> {
     let env_theme = Theme::from_env_or(Theme::nord());
     let mut app = App::new()?
-        .theme(env_theme);
-    let _ = app.add_widget(Box::new(PluginLoader::new(env_theme)), Rect::new(0, 0, 80, 24));
+        .theme(env_theme.clone());
+    let _ = app.add_widget(Box::new(PluginLoader::new(env_theme.clone())), Rect::new(0, 0, 80, 24));
     app.run(|_| {})?;
     Ok(())
 }

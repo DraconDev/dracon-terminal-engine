@@ -217,7 +217,7 @@ pub fn render_card(
 
     let is_selected = config.idx == config.selected_idx;
     let is_hovered = Some(config.idx) == config.hovered_idx;
-    let cat_color = category_color(config.theme, config.ex.category);
+    let cat_color = category_color(config.theme.clone(), config.ex.category);
 
     let card_phase = config.phase + (config.idx as f64 * 0.73);
 
@@ -300,32 +300,32 @@ pub fn render_card(
     let preview_start_y = offset_y + 6;
 
     match config.ex.name {
-        "system_monitor" => render_live_gauge_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "split_resizer" => render_split_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "command_bindings" => render_command_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "theme_switcher" => render_theme_preview(plane, config.theme, offset_x, offset_y),
-        "widget_gallery" => render_widget_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "ide" => render_ide_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "desktop" => render_desktop_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "git_tui" => render_git_tui_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "file_manager" => render_file_manager_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "menu_system" => render_menu_system_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "modal_demo" => render_modal_demo_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "dashboard_builder" => render_dashboard_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "tabbed_panels" => render_tabbed_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "tree_navigator" => render_tree_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "data_table" => render_table_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "input_debug" => render_input_debug_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "text_editor_demo" => render_text_editor_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "game_loop" => render_game_loop_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "form_demo" | "form_widget" => render_form_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "framework_file_manager" => render_framework_fm_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "calendar" => render_calendar_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "rich_text" => render_rich_text_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "notification_center" => render_notification_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "accessibility" => render_accessibility_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "cell_pool" => render_cell_pool_preview(plane, config.theme, card_phase, offset_x, offset_y),
+        "system_monitor" => render_live_gauge_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "split_resizer" => render_split_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "command_bindings" => render_command_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "theme_switcher" => render_theme_preview(plane, config.theme.clone(), offset_x, offset_y),
+        "widget_gallery" => render_widget_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "ide" => render_ide_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "desktop" => render_desktop_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "git_tui" => render_git_tui_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "file_manager" => render_file_manager_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "menu_system" => render_menu_system_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "modal_demo" => render_modal_demo_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "dashboard_builder" => render_dashboard_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "tabbed_panels" => render_tabbed_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "tree_navigator" => render_tree_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "data_table" => render_table_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "input_debug" => render_input_debug_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "text_editor_demo" => render_text_editor_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "game_loop" => render_game_loop_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "form_demo" | "form_widget" => render_form_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "framework_file_manager" => render_framework_fm_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "calendar" => render_calendar_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "rich_text" => render_rich_text_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "autocomplete" => render_autocomplete_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "notification_center" => render_notification_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "accessibility" => render_accessibility_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
+        "cell_pool" => render_cell_pool_preview(plane, config.theme.clone(), card_phase, offset_x, offset_y),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
                 let py = preview_start_y + i;

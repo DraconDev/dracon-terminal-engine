@@ -143,7 +143,7 @@ impl IdeApp {
         let tab_titles = vec!["main.rs", "lib.rs"];
         let tab_bar = TabBar::new_with_id(WidgetId::new(2), tab_titles);
 
-        let file_tree = build_sample_tree(theme);
+        let file_tree = build_sample_tree(theme.clone());
 
         let menu_bar = MenuBar::new(WidgetId::new(1))
             .with_theme(theme)
@@ -312,12 +312,12 @@ impl IdeApp {
         let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
             .with_kind(kind)
             .with_duration(Duration::from_secs(2))
-            .with_theme(self.theme);
+            .with_theme(self.theme.clone());
         self.toasts.push(toast);
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.menu_bar.on_theme_change(&self.theme);
         self.search_input.on_theme_change(&self.theme);
         self.status_bar.on_theme_change(&self.theme);
@@ -335,7 +335,7 @@ impl IdeApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
 
         self.menu_bar.on_theme_change(&self.theme);
         self.search_input.on_theme_change(&self.theme);
@@ -622,7 +622,7 @@ impl Widget for IdeApp {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme;
+        let t = self.theme.clone();
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -670,7 +670,7 @@ impl Widget for IdeApp {
         let editor_w = area.width.saturating_sub(editor_x);
         if editor_w > 0 && content_h > 0 {
             // Rounded border around editor
-            draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t);
+            draw_rounded_border(&mut plane, editor_x, content_y, editor_w, content_h, t.clone());
 
             // Breadcrumbs
             let bc_plane = self.breadcrumbs.render(Rect::new(
@@ -1225,7 +1225,7 @@ impl Widget for IdeApp {
                     ],
                 )
                 .with_anchor(col, row)
-                .with_theme(self.theme),
+                .with_theme(self.theme.clone()),
             );
             self.context_menu_pos = Some((col, row));
             return true;
@@ -1239,7 +1239,7 @@ impl Widget for IdeApp {
                 (_, 1) => "Tabs\nSwitch between open files",
                 (_, _) => return false,
             };
-            self.tooltip = Some(Tooltip::new(WidgetId::new(60), text).with_theme(self.theme));
+            self.tooltip = Some(Tooltip::new(WidgetId::new(60), text).with_theme(self.theme.clone()));
             self.tooltip_timer = Some(Instant::now());
             return true;
         }
@@ -1391,21 +1391,21 @@ impl IdeApp {
                     .map(|c| c.as_os_str().to_string_lossy().into_owned())
                     .collect()
             } else {
-                vec!["src".into(), tab.title.clone()]
+                vec!["src".into(), tab.title.clone()].clone()
             };
             self.breadcrumbs = Breadcrumbs::new(segments);
         }
     }
 
     fn render_help_overlay(&self, plane: &mut Plane) {
-        let t = self.theme;
+        let t = self.theme.clone();
         let w = 60.min(plane.width);
         let h = 20.min(plane.height);
         let x = (plane.width - w) / 2;
         let y = (plane.height - h) / 2;
 
         // Draw rounded border and fill
-        draw_rounded_box(plane, x, y, w, h, t);
+        draw_rounded_box(plane, x, y, w, h, t.clone());
 
         let title = "Keyboard Shortcuts";
         for (i, ch) in title.chars().enumerate() {
@@ -1426,14 +1426,19 @@ impl IdeApp {
             }
         }
 
+        let kb_save = self.keybindings.display(actions::SAVE).unwrap_or("ctrl+s");
+        let kb_new_tab = self.keybindings.display(actions::NEW_TAB).unwrap_or("ctrl+t");
+        let kb_close_tab = self.keybindings.display(actions::CLOSE_TAB).unwrap_or("ctrl+w");
+        let kb_search = self.keybindings.display(actions::SEARCH).unwrap_or("ctrl+f");
+
         let shortcuts: [(&str, &[(&str, &str)]); 4] = [
             (
                 "File",
                 &[
                     ("Ctrl+O", "Open file"),
-                    ("Ctrl+S", "Save file"),
-                    ("Ctrl+T", "New tab"),
-                    ("Ctrl+W", "Close tab"),
+                    (kb_save, "Save file"),
+                    (kb_new_tab, "New tab"),
+                    (kb_close_tab, "Close tab"),
                 ],
             ),
             (
@@ -1448,7 +1453,7 @@ impl IdeApp {
             (
                 "View",
                 &[
-                    ("Ctrl+F", "Search"),
+                    (kb_search, "Search"),
                     ("F12", "Profiler"),
                     ("Ctrl+P", "Palette"),
                     (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
@@ -1612,12 +1617,12 @@ fn is_keyword(line: &str, pos: usize) -> bool {
         "async", "await",
     ];
     // Find the word boundary around position
-    let before: String = line[..pos.min(line.len())]
+    let before: String = line[..pos.min(line.len())].clone()
         .chars()
         .rev()
         .take_while(|c| c.is_alphanumeric() || *c == '_')
         .collect();
-    let after: String = line[pos.min(line.len())..]
+    let after: String = line[pos.min(line.len())..].clone()
         .chars()
         .take_while(|c| c.is_alphanumeric() || *c == '_')
         .collect();
@@ -1749,6 +1754,6 @@ impl Widget for IdeInputRouter {
         self.app.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.app.borrow().theme)
+        Some(self.app.borrow().theme.clone())
     }
 }

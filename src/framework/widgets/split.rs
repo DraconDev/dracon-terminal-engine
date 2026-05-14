@@ -32,7 +32,7 @@ impl SplitPane {
     /// Creates a new `SplitPane` in the given orientation with a 50/50 split.
     pub fn new(orientation: Orientation) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             ratio: 0.5,
             orientation,
             divider_char: '│',
@@ -68,7 +68,7 @@ impl SplitPane {
             Orientation::Vertical
         };
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             ratio: 0.5,
             orientation,
             divider_char: '│',

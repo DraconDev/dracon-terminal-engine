@@ -96,7 +96,7 @@ impl Widget for StatWidget {
     }
 
     fn render(&self, _area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, 28, 7);
         plane.fill_bg(t.bg);
 
@@ -225,6 +225,6 @@ impl Widget for StatWidget {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

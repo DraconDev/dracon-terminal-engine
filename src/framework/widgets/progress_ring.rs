@@ -29,7 +29,7 @@ impl ProgressRing {
     /// Creates a new ProgressRing with the given initial progress.
     pub fn new(progress: f64) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             progress: progress.clamp(0.0, 1.0),
             size: 5,
             color: Color::Ansi(12), // cyan
@@ -369,6 +369,6 @@ impl crate::framework::widget::Widget for ProgressRing {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

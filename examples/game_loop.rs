@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-#![allow(clippy::manual_is_multiple_of)]
+#![allow(clippy::manual_is_multiple_of)].clone()
 //! Game Loop — 60fps animation demo with particles and mouse interaction.
 //!
 //! A visual showcase of the compositor's animation capabilities.
@@ -175,7 +175,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Helper to write theme back to showcase if DTRON_THEME_FILE is set
     let write_theme_file = || {
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
-            let _ = std::fs::write(&path, theme.name);
+            let _ = std::fs::write(&path, theme.name.as_bytes());
         }
     };
 

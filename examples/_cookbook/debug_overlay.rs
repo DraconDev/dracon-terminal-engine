@@ -103,7 +103,7 @@ impl DebugOverlayPanel {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         // Propagate theme to all child widgets
         self.profiler.borrow_mut().on_theme_change(&self.theme);
         self.inspector.borrow_mut().on_theme_change(&self.theme);
@@ -200,7 +200,7 @@ impl Widget for DebugOverlayPanel {
         true
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.profiler.borrow_mut().on_theme_change(theme);
         self.inspector.borrow_mut().on_theme_change(theme);
         self.event_logger.borrow_mut().on_theme_change(theme);
@@ -315,7 +315,7 @@ impl Widget for DebugOverlayPanel {
                 (y * plane.width) as usize,
                 (y * plane.width + 25) as usize,
                 (y * plane.width + area.width.saturating_sub(1)) as usize,
-            ]
+            ].clone()
             .iter()
             {
                 if *idx < plane.cells.len() {

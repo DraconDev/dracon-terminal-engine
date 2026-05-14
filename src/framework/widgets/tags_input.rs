@@ -48,7 +48,7 @@ impl TagsInput {
     /// Creates a new TagsInput widget with optional initial tags.
     pub fn new(tags: Vec<String>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             tags,
             input_text: String::new(),
             placeholder: "Add tag...".to_string(),
@@ -662,6 +662,6 @@ impl crate::framework::widget::Widget for TagsInput {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

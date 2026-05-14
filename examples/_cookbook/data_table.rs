@@ -120,7 +120,7 @@ impl Table {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.search.on_theme_change(&self.theme);
         self.dirty = true;
     }
@@ -174,7 +174,7 @@ impl Widget for Table {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.search.on_theme_change(theme);
     }
 
@@ -682,7 +682,7 @@ fn main() -> std::io::Result<()> {
     let kb_input = keybindings.clone();
     let env_theme = Theme::from_env_or(Theme::cyberpunk());
 
-    let mut t = Table::new(env_theme);
+    let mut t = Table::new(env_theme.clone());
     t.set_area(Rect::new(0, 0, w, h));
     t.vis = (h as usize).saturating_sub(5).max(1);
     t.keybindings = keybindings;
@@ -693,7 +693,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Data Table Demo")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
     app.add_widget(Box::new(t), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

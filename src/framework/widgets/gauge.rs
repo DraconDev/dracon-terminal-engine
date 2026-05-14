@@ -39,7 +39,7 @@ pub struct Gauge {
 impl Gauge {
     pub fn new(label: &str) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             label: label.to_string(),
             value: 0.0,
             max: 100.0,
@@ -251,6 +251,6 @@ impl Widget for Gauge {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

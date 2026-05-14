@@ -54,7 +54,7 @@ pub mod prelude {
     pub use crate::frame_span_debug;
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
-        app::{App, Ctx},
+        app::{App, Ctx, WidgetRef, WidgetRefMut},
         command::{
             AppConfig, AreaConfig, BoundCommand, CommandRunner, LayoutConfig, LoggedLine,
             OutputParser, ParsedOutput, ParserConfig, WidgetConfig,

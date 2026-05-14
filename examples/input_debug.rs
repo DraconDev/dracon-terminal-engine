@@ -230,7 +230,7 @@ fn main() -> io::Result<()> {
     // Helper to write theme back to showcase if DTRON_THEME_FILE is set
     let write_theme_file = || {
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
-            let _ = std::fs::write(&path, theme.name);
+            let _ = std::fs::write(&path, theme.name.as_bytes());
         }
     };
 

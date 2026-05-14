@@ -46,7 +46,7 @@ impl ContextMenu {
     /// Creates a new `ContextMenu` from a list of label/action pairs.
     pub fn new(items: Vec<(&'static str, ContextAction)>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             items: items.into_iter().map(|(s, a)| (s.to_string(), a)).collect(),
             theme: Theme::default(),
             width: 20,
@@ -322,6 +322,6 @@ impl crate::framework::widget::Widget for ContextMenu {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

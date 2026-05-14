@@ -7,6 +7,12 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use ratatui::layout::Rect;
 
+/// Default scrollbar width in cells.
+///
+/// Prefer this constant over `Theme::scrollbar_width`, which is deprecated
+/// because layout dimensions should not be coupled to color/style themes.
+pub const DEFAULT_SCROLLBAR_WIDTH: u16 = 1;
+
 /// Holds scroll position, content height, and viewport height for virtual scrolling.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ScrollState {
@@ -83,7 +89,7 @@ impl ScrollContainer {
         Self {
             state: ScrollState::default(),
             scrollbar_visible: true,
-            scrollbar_width: 1,
+            scrollbar_width: DEFAULT_SCROLLBAR_WIDTH,
             scrollbar_track: Color::Rgb(30, 30, 40),
             scrollbar_thumb: Color::Rgb(80, 80, 100),
         }

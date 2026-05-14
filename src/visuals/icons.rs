@@ -395,4 +395,18 @@ impl Icon {
             },
         }
     }
+
+    /// Returns the display width (in terminal cells) of this icon in the given mode.
+    ///
+    /// - ASCII mode: always 1 (single-width characters)
+    /// - Nerd Font / Unicode mode: 2 (icons may occupy 2 cells due to
+    ///   wide CJK/emoji characters or private-use-area glyphs)
+    ///
+    /// Use this for correct padding in fixed-width layouts.
+    pub fn width(&self, mode: IconMode) -> usize {
+        match mode {
+            IconMode::ASCII => 1,
+            IconMode::Nerd | IconMode::Unicode => 2,
+        }
+    }
 }

@@ -1,4 +1,5 @@
 use crate::compositor::plane::{Cell, Color, Plane, Styles};
+use crate::framework::dirty_regions::DirtyRegionTracker;
 use std::io::{self, Write};
 
 /// Composites multiple planes into a single render target.
@@ -17,6 +18,8 @@ pub struct Compositor {
     last_frame_duration_ms: f64,
     /// Number of registered widgets (for metrics).
     widget_count: usize,
+    /// Dirty region tracker for partial screen updates.
+    dirty_regions: DirtyRegionTracker,
 }
 
 impl Compositor {
@@ -37,6 +40,7 @@ impl Compositor {
             clear_color: Color::Rgb(16, 16, 24),
             last_frame_duration_ms: 0.0,
             widget_count: 0,
+            dirty_regions: DirtyRegionTracker::new(),
         }
     }
 
@@ -250,6 +254,19 @@ impl Compositor {
         self.widget_count = 0;
     }
 
+    /// Sets dirty region info from the given tracker for partial rendering.
+    /// The compositor copies the relevant state; the caller retains ownership.
+    pub fn set_dirty_regions(&mut self, regions: &DirtyRegionTracker) {
+        self.dirty_regions.clear();
+        if regions.needs_full_refresh() {
+            self.dirty_regions.mark_all_dirty();
+        } else {
+            for r in regions.dirty_regions() {
+                self.dirty_regions.mark_dirty(r.x, r.y, r.width, r.height);
+            }
+        }
+    }
+
     fn sort_planes(&mut self) {
         self.planes.sort_by_key(|a| a.z_index);
     }
@@ -260,45 +277,106 @@ impl Compositor {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs_f64();
-        // Reuse the final_buffer across frames — reset cells instead of reallocating
+
         let clear_cell = Cell {
             bg: self.clear_color,
             transparent: false,
             ..Cell::default()
         };
-        for cell in self.final_buffer.iter_mut() {
-            *cell = clear_cell;
-        }
 
-        self.sort_planes();
+        let full_refresh = self.dirty_regions.needs_full_refresh();
+        let regions = self.dirty_regions.dirty_regions().to_vec();
 
-        for plane in &self.planes {
-            if !plane.visible {
-                continue;
+        if full_refresh || regions.is_empty() {
+            for cell in self.final_buffer.iter_mut() {
+                *cell = clear_cell;
             }
-            for py in 0..plane.height {
-                for px in 0..plane.width {
-                    let abs_x = plane.x.saturating_add(px);
+
+            self.sort_planes();
+
+            for plane in &self.planes {
+                if !plane.visible {
+                    continue;
+                }
+                for py in 0..plane.height {
+                    for px in 0..plane.width {
+                        let abs_x = plane.x.saturating_add(px);
+                        let abs_y = plane.y.saturating_add(py);
+                        if abs_x >= self.width || abs_y >= self.height {
+                            continue;
+                        }
+
+                        let src_idx = (py * plane.width + px) as usize;
+                        let dest_idx = (abs_y * self.width + abs_x) as usize;
+                        let mut src_cell = plane.cells[src_idx];
+
+                        if let Some(filter) = &plane.filter {
+                            filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
+                        }
+
+                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
+                    }
+                }
+            }
+        } else {
+            for region in &regions {
+                let y_end = (region.y + region.height).min(self.height);
+                let x_end = (region.x + region.width).min(self.width);
+                for y in region.y..y_end {
+                    for x in region.x..x_end {
+                        let idx = (y * self.width + x) as usize;
+                        self.final_buffer[idx] = clear_cell;
+                    }
+                }
+            }
+
+            self.sort_planes();
+
+            for plane in &self.planes {
+                if !plane.visible {
+                    continue;
+                }
+                for py in 0..plane.height {
                     let abs_y = plane.y.saturating_add(py);
-                    if abs_x >= self.width || abs_y >= self.height {
+                    if abs_y >= self.height {
                         continue;
                     }
+                    for px in 0..plane.width {
+                        let abs_x = plane.x.saturating_add(px);
+                        if abs_x >= self.width {
+                            continue;
+                        }
 
-                    let src_idx = (py * plane.width + px) as usize;
-                    let dest_idx = (abs_y * self.width + abs_x) as usize;
-                    let mut src_cell = plane.cells[src_idx];
+                        let mut in_dirty = false;
+                        for region in &regions {
+                            if abs_x >= region.x
+                                && abs_x < region.x + region.width
+                                && abs_y >= region.y
+                                && abs_y < region.y + region.height
+                            {
+                                in_dirty = true;
+                                break;
+                            }
+                        }
+                        if !in_dirty {
+                            continue;
+                        }
 
-                    if let Some(filter) = &plane.filter {
-                        filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
+                        let src_idx = (py * plane.width + px) as usize;
+                        let dest_idx = (abs_y * self.width + abs_x) as usize;
+                        let mut src_cell = plane.cells[src_idx];
+
+                        if let Some(filter) = &plane.filter {
+                            filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
+                        }
+
+                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
                     }
-
-                    blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
                 }
             }
         }
 
         // Buffer all output into a Vec<u8> and issue a single write_all() call.
-        // This reduces syscalls from ~12K individual write!() calls to just 1.
         let mut buf: Vec<u8> = Vec::with_capacity(self.width as usize * self.height as usize * 20);
 
         write!(buf, "\x1b[?2026h")?;
@@ -308,6 +386,22 @@ impl Compositor {
         let mut current_style = Styles::empty();
 
         write!(buf, "\x1b[?7l")?;
+
+        let check_cell = |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
+            if full_refresh || regions.is_empty() {
+                return true;
+            }
+            for region in regions {
+                if x >= region.x
+                    && x < region.x + region.width
+                    && y >= region.y
+                    && y < region.y + region.height
+                {
+                    return true;
+                }
+            }
+            false
+        };
 
         for y in 0..self.height {
             let mut line_cursor_moved = false;
@@ -320,7 +414,14 @@ impl Compositor {
                     continue;
                 }
 
-                if cell == last_cell {
+                if !check_cell(x, y, &regions) {
+                    if cell == last_cell {
+                        line_cursor_moved = false;
+                        continue;
+                    }
+                    // Cell outside dirty regions but changed — still output it
+                    // (can happen if a plane partially overlaps a dirty region)
+                } else if cell == last_cell {
                     line_cursor_moved = false;
                     continue;
                 }
@@ -379,11 +480,11 @@ impl Compositor {
         write!(buf, "\x1b[?7h")?;
         write!(buf, "\x1b[?2026l")?;
 
-        // Single syscall to write the entire frame
         writer.write_all(&buf)?;
 
         self.last_frame.clone_from_slice(&self.final_buffer);
         self.planes.clear();
+        self.dirty_regions.clear();
         writer.flush()?;
         Ok(())
     }

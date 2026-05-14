@@ -238,7 +238,7 @@ impl SceneRouter {
         // Enter new scene
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
-            if let Some(theme) = self.theme {
+            if let Some(ref theme) = self.theme {
                 scene.on_theme_change(&theme);
             }
         }
@@ -303,7 +303,7 @@ impl SceneRouter {
 
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
-            if let Some(theme) = self.theme {
+            if let Some(ref theme) = self.theme {
                 scene.on_theme_change(&theme);
             }
         }
@@ -331,7 +331,7 @@ impl SceneRouter {
 
         if let Some(scene) = self.scenes.get_mut(id) {
             scene.on_enter();
-            if let Some(theme) = self.theme {
+            if let Some(ref theme) = self.theme {
                 scene.on_theme_change(&theme);
             }
         }
@@ -561,7 +561,7 @@ impl SceneRouter {
 
     /// Propagates theme change to all registered scenes.
     pub fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = Some(*theme);
+        self.theme = Some(theme.clone());
         for scene in self.scenes.values_mut() {
             scene.on_theme_change(theme);
         }

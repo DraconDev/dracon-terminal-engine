@@ -48,7 +48,7 @@ pub struct ConfirmDialog {
 impl ConfirmDialog {
     pub fn new(title: &str, message: &str) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             title: title.to_string(),
             message: message.to_string(),
             confirm_label: "Confirm".to_string(),
@@ -468,6 +468,6 @@ impl Widget for ConfirmDialog {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

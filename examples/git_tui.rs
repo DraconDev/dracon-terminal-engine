@@ -150,7 +150,7 @@ impl GitTui {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.tab_bar.on_theme_change(&self.theme);
         self.status_bar.on_theme_change(&self.theme);
         for toast in &mut self.toasts {
@@ -164,7 +164,7 @@ impl GitTui {
         let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
             .with_kind(kind)
             .with_duration(Duration::from_secs(2))
-            .with_theme(self.theme);
+            .with_theme(self.theme.clone());
         self.toasts.push(toast);
         self.dirty = true;
     }
@@ -294,7 +294,7 @@ impl Widget for GitTui {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
 
         for cell in plane.cells.iter_mut() {
@@ -338,10 +338,10 @@ impl Widget for GitTui {
             );
         } else {
             match self.view {
-                GitView::Status => self.render_status(&mut plane, content_y, content_h, t),
-                GitView::Log => self.render_log(&mut plane, content_y, content_h, t),
-                GitView::Diff => self.render_diff(&mut plane, content_y, content_h, t),
-                GitView::Branches => self.render_branches(&mut plane, content_y, content_h, t),
+                GitView::Status => self.render_status(&mut plane, content_y, content_h, t.clone()),
+                GitView::Log => self.render_log(&mut plane, content_y, content_h, t.clone()),
+                GitView::Diff => self.render_diff(&mut plane, content_y, content_h, t.clone()),
+                GitView::Branches => self.render_branches(&mut plane, content_y, content_h, t.clone()),
             }
         }
 
@@ -375,7 +375,7 @@ impl Widget for GitTui {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, &self.keybindings);
+            render_help_overlay(&mut plane, area, &t, &self.keybindings);
         }
 
         plane
@@ -666,7 +666,7 @@ impl GitTui {
 
             let mut row = sub_y;
             if !staged.is_empty() {
-                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, t);
+                render_section_card(plane, 2, row, 40, (staged.len() + 3) as u16, &t);
                 draw_text(
                     plane,
                     3,
@@ -710,7 +710,7 @@ impl GitTui {
             }
 
             if !modified.is_empty() {
-                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t);
+                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, &t);
                 draw_text(
                     plane,
                     3,
@@ -756,7 +756,7 @@ impl GitTui {
             }
 
             if !untracked.is_empty() {
-                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t);
+                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, &t);
                 draw_text(
                     plane,
                     3,
@@ -816,7 +816,7 @@ impl GitTui {
         let list_y = y + 2;
         let list_h = h.saturating_sub(3);
         if list_h > 2 {
-            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, t);
+            draw_rounded_border(plane, 2, list_y, plane.width.saturating_sub(4), list_h, &t);
         }
 
         for (i, commit) in self.commits.iter().enumerate() {
@@ -834,7 +834,7 @@ impl GitTui {
 
             let hash = &commit.hash;
             let msg = if commit.message.len() > 35 {
-                &commit.message[..35]
+                &commit.message[..35].clone()
             } else {
                 &commit.message
             };
@@ -899,7 +899,7 @@ impl GitTui {
             };
 
             let truncated = if line.len() > plane.width as usize - 8 {
-                &line[..plane.width as usize - 8]
+                &line[..plane.width as usize - 8].clone()
             } else {
                 line
             };
@@ -931,7 +931,7 @@ impl GitTui {
         if !locals.is_empty() {
             let section_h = (locals.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, t);
+                draw_rounded_border(plane, 2, row, 40, section_h, &t);
             }
             draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
             draw_text(
@@ -976,7 +976,7 @@ impl GitTui {
         if !remotes.is_empty() {
             let section_h = (remotes.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, t);
+                draw_rounded_border(plane, 2, row, 40, section_h, &t);
             }
             draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
             draw_text(

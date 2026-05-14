@@ -63,7 +63,7 @@ impl Widget for Showcase {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.scene_router.on_theme_change(theme);
     }
 
@@ -71,7 +71,7 @@ impl Widget for Showcase {
         // If a scene is active, delegate to it with title bar
         if let Some(scene_name) = self.scene_router.current() {
             let mut plane = self.scene_router.render(area);
-            let t = self.theme;
+            let t = self.theme.clone();
             // Draw scene title bar at top
             let title = format!(" {} ", scene_name);
             for (i, c) in title.chars().enumerate() {
@@ -99,7 +99,7 @@ impl Widget for Showcase {
         }
 
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme;
+        let t = self.theme.clone();
 
         // Background fill
         for cell in plane.cells.iter_mut() {
@@ -1659,7 +1659,7 @@ impl Showcase {
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
                 self.scene_router.on_theme_change(&self.theme);
-                *self.pending_app_theme.lock().unwrap() = Some(self.theme);
+                *self.pending_app_theme.lock().unwrap() = Some(self.theme.clone());
                 return true;
             }
             if self.keybindings.matches(actions::BACK, &key) {
@@ -1777,7 +1777,7 @@ impl Showcase {
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
                 self.scene_router.on_theme_change(&self.theme);
-                *self.pending_app_theme.lock().unwrap() = Some(self.theme);
+                *self.pending_app_theme.lock().unwrap() = Some(self.theme.clone());
                 return true;
             }
             match key.code {

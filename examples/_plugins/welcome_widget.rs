@@ -95,7 +95,7 @@ impl Widget for WelcomeWidget {
     }
 
     fn render(&self, _area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, 40, 9);
         plane.fill_bg(t.bg);
 
@@ -151,6 +151,6 @@ impl Widget for WelcomeWidget {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

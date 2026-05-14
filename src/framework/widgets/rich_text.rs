@@ -339,7 +339,7 @@ impl RichText {
     pub fn new(content: &str) -> Self {
         let blocks = parse_blocks(content);
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             content: content.to_string(),
             blocks,
             theme: Theme::default(),
@@ -424,6 +424,6 @@ impl Widget for RichText {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

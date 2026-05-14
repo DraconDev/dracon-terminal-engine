@@ -110,7 +110,7 @@ impl Scene for WidgetGalleryScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -254,7 +254,7 @@ impl Scene for WidgetGalleryScene {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.checkbox.on_theme_change(theme);
         self.radio.on_theme_change(theme);
         self.slider.on_theme_change(theme);

@@ -93,7 +93,7 @@ impl EditorApp {
 
         let tab_bar = TabBar::new_with_id(WidgetId::new(10), vec!["main.rs", "lib.rs"]);
 
-        let tree = build_file_tree(theme);
+        let tree = build_file_tree(theme.clone());
 
         let search = SearchInput::new(WidgetId::new(20)).with_theme(theme);
 
@@ -228,7 +228,7 @@ impl EditorApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.tab_bar.on_theme_change(&self.theme);
         self.file_tree.on_theme_change(&self.theme);
         self.search.on_theme_change(&self.theme);
@@ -402,7 +402,7 @@ impl Widget for EditorApp {
         true
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.file_tree.on_theme_change(theme);
         self.search.on_theme_change(theme);
         self.tab_bar.on_theme_change(theme);
@@ -410,12 +410,12 @@ impl Widget for EditorApp {
     }
 
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.theme)
+        Some(self.theme.clone())
     }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme;
+        let t = self.theme.clone();
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -456,7 +456,7 @@ impl Widget for EditorApp {
 
         if editor_w > 0 && content_h > 2 {
             // Rounded border
-            draw_rounded_border(&mut plane, editor_x, editor_y, editor_w, content_h, t);
+            draw_rounded_border(&mut plane, editor_x, editor_y, editor_w, content_h, t.clone());
 
             // Breadcrumbs inside editor
             let bc_plane =
@@ -475,7 +475,7 @@ impl Widget for EditorApp {
                     editor_w - 2,
                     text_h,
                     tab,
-                    t,
+                    &t,
                 );
             }
         }
@@ -612,6 +612,48 @@ impl Widget for EditorApp {
             self.dirty = true;
             return true;
         }
+        if self.keybindings.matches(actions::SEARCH, &key) {
+            self.show_search = !self.show_search;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::SAVE, &key) {
+            if let Some(tab) = self.active_tab_mut() {
+                tab.modified = false;
+            }
+            self.sync_tab_bar();
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::NEW_TAB, &key) {
+            let new_id = self.tabs.len();
+            self.tabs.push(Tab {
+                title: format!("untitled-{}.rs", new_id + 1),
+                content: "// New file\n".to_string(),
+                cursor_line: 0,
+                cursor_col: 0,
+                modified: false,
+            });
+            self.active_tab = new_id;
+            self.sync_tab_bar();
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::CLOSE_TAB, &key) {
+            if self.tabs.len() > 1 {
+                self.tabs.remove(self.active_tab);
+                self.active_tab = self.active_tab.min(self.tabs.len() - 1);
+                self.sync_tab_bar();
+                self.dirty = true;
+            }
+            return true;
+        }
+        if self.keybindings.matches(actions::TAB_NEXT, &key) {
+            self.active_tab = (self.active_tab + 1) % self.tabs.len();
+            self.tab_bar.set_active(self.active_tab);
+            self.dirty = true;
+            return true;
+        }
 
         match key.code {
             KeyCode::F(12) => {
@@ -619,50 +661,8 @@ impl Widget for EditorApp {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('f') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                self.show_search = !self.show_search;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('s') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                if let Some(tab) = self.active_tab_mut() {
-                    tab.modified = false;
-                }
-                self.sync_tab_bar();
-                self.dirty = true;
-                true
-            }
             KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.open_command_palette();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                let new_id = self.tabs.len();
-                self.tabs.push(Tab {
-                    title: format!("untitled-{}.rs", new_id + 1),
-                    content: "// New file\n".to_string(),
-                    cursor_line: 0,
-                    cursor_col: 0,
-                    modified: false,
-                });
-                self.active_tab = new_id;
-                self.sync_tab_bar();
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('w') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                if self.tabs.len() > 1 {
-                    self.tabs.remove(self.active_tab);
-                    self.active_tab = self.active_tab.min(self.tabs.len() - 1);
-                    self.sync_tab_bar();
-                    self.dirty = true;
-                }
-                true
-            }
-            KeyCode::Tab => {
-                self.active_tab = (self.active_tab + 1) % self.tabs.len();
-                self.tab_bar.set_active(self.active_tab);
                 self.dirty = true;
                 true
             }
@@ -845,7 +845,7 @@ fn render_editor_content(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, tab:
                 break;
             }
 
-            let (fg, style) = syntax_color(line, j, t);
+            let (fg, style) = syntax_color(line, j, t.clone());
 
             plane.cells[idx] = Cell {
                 char: ch,
@@ -954,7 +954,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &Keyb
     }
 
     // Border
-    draw_rounded_border(plane, x, y, w, h, t);
+    draw_rounded_border(plane, x, y, w, h, t.clone());
 
     // Title
     let title = "Keyboard Shortcuts";
@@ -973,14 +973,19 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: Theme, kb_config: &Keyb
     let kb_help = kb_config.get(actions::HELP).unwrap_or("?");
     let kb_back = kb_config.get(actions::BACK).unwrap_or("Esc");
     let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
+    let kb_new_tab = kb_config.get(actions::NEW_TAB).unwrap_or("ctrl+t");
+    let kb_close_tab = kb_config.get(actions::CLOSE_TAB).unwrap_or("ctrl+w");
+    let kb_search = kb_config.get(actions::SEARCH).unwrap_or("ctrl+f");
+    let kb_save = kb_config.get(actions::SAVE).unwrap_or("ctrl+s");
+    let kb_tab_next = kb_config.get(actions::TAB_NEXT).unwrap_or("tab");
 
     let shortcuts = [
-        ("Ctrl+T", "New tab"),
-        ("Ctrl+W", "Close tab"),
-        ("Ctrl+F", "Search"),
-        ("Ctrl+S", "Save mock"),
+        (kb_new_tab, "New tab"),
+        (kb_close_tab, "Close tab"),
+        (kb_search, "Search"),
+        (kb_save, "Save mock"),
         ("F12", "Toggle profiler"),
-        ("Tab", "Next tab"),
+        (kb_tab_next, "Next tab"),
         ("↑↓←→", "Navigate"),
         (kb_theme, "Cycle theme"),
         (kb_help, "Toggle help"),
@@ -1073,12 +1078,12 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let app_widget = EditorApp::new(should_quit, env_theme);
+    let app_widget = EditorApp::new(should_quit, env_theme.clone());
 
     let mut app = App::new()?
         .title("Text Editor Demo")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

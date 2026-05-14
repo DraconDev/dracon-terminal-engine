@@ -396,7 +396,7 @@ impl Scene for TaskListScreen {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.task_list.on_theme_change(theme);
         self.status_bar.on_theme_change(theme);
         self.dirty = true;
@@ -447,7 +447,7 @@ impl Scene for AddTaskScreen {
 
     fn render(&self, area: Rect) -> dracon_terminal_engine::compositor::Plane {
         let mut plane = dracon_terminal_engine::compositor::Plane::new(0, area.width, area.height);
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -476,7 +476,7 @@ impl Scene for AddTaskScreen {
             let input_y = y + 1;
             let max_width = (area.width - 4) as usize;
             let display = if value.len() > max_width {
-                &value[value.len() - max_width..]
+                &value[value.len() - max_width..].clone()
             } else {
                 value.as_str()
             };
@@ -600,7 +600,7 @@ impl Scene for AddTaskScreen {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
@@ -652,7 +652,7 @@ impl TodoRouter {
         let themes = Theme::all();
         let mut theme = self.theme.borrow_mut();
         let idx = themes.iter().position(|t| t.name == theme.name).unwrap_or(0);
-        *theme = themes[(idx + 1) % themes.len()];
+        *theme = themes[(idx + 1) % themes.len()].clone();
     }
 
     fn refresh_task_list(&self) {
@@ -732,7 +732,7 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
         }
         if self.keybindings.matches(actions::THEME, &key) {
             self.cycle_theme();
-            let theme = *self.theme.borrow();
+            let theme = self.theme.borrow().clone();
             self.router.borrow_mut().on_theme_change(&theme);
             return true;
         }
@@ -751,7 +751,7 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
         self.router.borrow_mut().handle_key(key)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(*self.theme.borrow())
+        Some(self.theme.borrow().clone())
     }
 }
 
@@ -774,7 +774,7 @@ fn main() -> std::io::Result<()> {
     let show_help_for_tick = Rc::clone(&show_help);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let theme = Rc::new(RefCell::new(env_theme));
+    let theme = Rc::new(RefCell::new(env_theme.clone()));
 
     let state = match AppState::new(&db_path) {
         Ok(s) => Rc::new(RefCell::new(s)),
@@ -785,7 +785,7 @@ fn main() -> std::io::Result<()> {
     };
 
     let mut router = SceneRouter::new();
-    let initial_theme = *theme.borrow();
+    let initial_theme = theme.borrow().clone();
 
     let mut list_screen = TaskListScreen::new(initial_theme);
     if let Ok(state_ref) = state.try_borrow() {
@@ -820,7 +820,7 @@ fn main() -> std::io::Result<()> {
             }
 
             let mut router = router.borrow_mut();
-            let theme = *theme_for_tick.borrow();
+            let theme = theme_for_tick.borrow().clone();
 
             if router.needs_render() {
                 let (w, h) = ctx.compositor().size();

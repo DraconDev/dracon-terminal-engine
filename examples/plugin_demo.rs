@@ -88,7 +88,7 @@ impl Widget for ClockWidget {
         false
     }
     fn render(&self, _area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, 20, 3);
         plane.fill_bg(t.bg);
 
@@ -154,7 +154,7 @@ impl Widget for ClockWidget {
         false
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 
@@ -210,7 +210,7 @@ impl Widget for CounterWidget {
         false
     }
     fn render(&self, _area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, 15, 3);
         plane.fill_bg(t.bg);
 
@@ -304,7 +304,7 @@ impl Widget for CounterWidget {
         false
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 
@@ -370,7 +370,7 @@ impl PluginDemoState {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.clock.on_theme_change(theme);
         self.counter.on_theme_change(theme);
         self.stat.on_theme_change(theme);
@@ -384,7 +384,7 @@ impl PluginDemoState {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.clock.on_theme_change(&self.theme);
         self.counter.on_theme_change(&self.theme);
         self.stat.on_theme_change(&self.theme);
@@ -495,7 +495,7 @@ impl Widget for InputRouter {
         self.state.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.state.borrow().theme)
+        Some(self.state.borrow().theme.clone())
     }
 }
 
@@ -615,7 +615,7 @@ fn main() -> io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings, env_theme)));
+    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings, env_theme.clone())));
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 

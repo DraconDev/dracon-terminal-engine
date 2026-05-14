@@ -104,7 +104,7 @@ impl SettingsForm {
             .iter()
             .position(|t| t.name == self.form_theme.name)
             .unwrap_or(0);
-        self.form_theme = themes[(idx + 1) % themes.len()];
+        self.form_theme = themes[(idx + 1) % themes.len()].clone();
         self.username.on_theme_change(&self.form_theme);
         self.email.on_theme_change(&self.form_theme);
         self.password.on_theme_change(&self.form_theme);
@@ -918,7 +918,7 @@ fn main() -> std::io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let env_theme = Theme::from_env_or(Theme::dracula());
-    let form = SettingsForm::new(WidgetId::new(0), env_theme, keybindings.clone());
+    let form = SettingsForm::new(WidgetId::new(0), env_theme.clone(), keybindings.clone());
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
@@ -926,7 +926,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Settings Form")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
     app.add_widget(Box::new(form), Rect::new(0, 0, 70, 18));
     app.on_tick(move |ctx, _tick| {
         if quit_check.load(Ordering::SeqCst) {

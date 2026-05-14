@@ -45,7 +45,7 @@ impl ColorPicker {
     /// Creates a new ColorPicker with default color (red).
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             hue: 0.0,
             saturation: 100.0,
             lightness: 50.0,
@@ -65,7 +65,7 @@ impl ColorPicker {
         let (h, s, l) = color_to_hsl(color);
         let hex = color_to_hex(color);
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             hue: h,
             saturation: s,
             lightness: l,
@@ -85,7 +85,7 @@ impl ColorPicker {
         let color = hex_to_color(hex);
         let (h, s, l) = color_to_hsl(color);
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             hue: h,
             saturation: s,
             lightness: l,
@@ -478,7 +478,7 @@ impl crate::framework::widget::Widget for ColorPicker {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 

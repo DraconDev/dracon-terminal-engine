@@ -528,7 +528,7 @@ impl SystemMonitor {
 
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % Theme::all().len();
-        self.theme = Theme::all()[self.theme_index];
+        self.theme = Theme::all()[self.theme_index].clone();
         self.cpu_gauge.on_theme_change(&self.theme);
         self.mem_gauge.on_theme_change(&self.theme);
         self.disk_gauge.on_theme_change(&self.theme);
@@ -595,7 +595,7 @@ impl Widget for SystemMonitor {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -1366,7 +1366,7 @@ impl Widget for InputRouter {
         self.monitor.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.monitor.borrow().theme)
+        Some(self.monitor.borrow().theme.clone())
     }
 }
 
@@ -1382,7 +1382,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit, env_theme)));
+    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit, env_theme.clone())));
     let mon_for_tick = Rc::clone(&monitor);
     let mon_for_input = Rc::clone(&monitor);
 
@@ -1390,7 +1390,7 @@ fn main() -> std::io::Result<()> {
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
-        .theme(env_theme);
+        .theme(env_theme.clone());
 
     let router = InputRouter {
         monitor: mon_for_input,
@@ -1405,7 +1405,7 @@ fn main() -> std::io::Result<()> {
             return;
         }
         let mut m = mon_for_tick.borrow_mut();
-        let app_theme = *ctx.theme();
+        let app_theme = ctx.theme().clone();
         if m.theme.name != app_theme.name {
             m.on_theme_change(&app_theme);
         }

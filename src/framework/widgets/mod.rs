@@ -19,6 +19,7 @@ pub mod kanban;
 pub mod key_value_grid;
 pub mod label;
 pub mod list;
+pub mod list_common;
 pub mod log_viewer;
 pub mod menu_bar;
 pub mod modal;

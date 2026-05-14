@@ -3,6 +3,10 @@ name: Benchmark
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'src/**'
+      - 'benches/**'
+      - '.github/workflows/bench.yml'
   pull_request:
     branches: [main, master]
     paths:
@@ -25,79 +29,43 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           rust-toolchain: stable
-          components: rustfmt, clippy
 
       - name: Cache cargo registry
         uses: Swatinem/rust-cache@v2
 
-      - name: Format check
-        run: cargo fmt --all -- --check
-
-      - name: Clippy check
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
       - name: Run benchmarks
-        run: cargo bench 2>&1 | tee benchmark_output.txt
+        run: |
+          cargo bench 2>&1 | tee benchmark_output.txt
 
       - name: Store benchmark results
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
+          name: benchmark-results-${{ github.sha }}
           path: benchmark_output.txt
+          retention-days: 90
+
+      - name: Download main branch baseline
+        if: github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v3
+        continue-on-error: true
+        with:
+          workflow: bench.yml
+          branch: main
+          name: benchmark-results
+          path: baseline
 
       - name: Compare to main branch
         if: github.event_name == 'pull_request'
         run: |
-          # Get benchmark results from main branch
-          echo "Comparing benchmarks to main branch..."
-          echo "Note: In a full implementation, you would:"
-          echo "1. Fetch main branch"
-          echo "2. Run benchmarks on main branch"
-          echo "3. Compare results and fail if regression > 10%"
-          echo ""
-          echo "For this implementation, benchmarks are run and results stored."
-          echo "To enable full comparison, set BENCHMARK_COMPARE: true in secrets."
-
-  benchmark-report:
-    name: Benchmark Report
-    runs-on: ubuntu-latest
-    needs: benchmark
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download benchmark results
-        uses: actions/download-artifact@v4
-        with:
-          name: benchmark-results
-          path: .
-
-      - name: Display results
-        run: |
-          echo "## Benchmark Results"
-          echo ""
-          if [ -f benchmark_output.txt ]; then
-            # Extract benchmark results
-            grep -E "(running|test)" benchmark_output.txt | head -20
+          echo "## Benchmark Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f baseline/benchmark_output.txt ]; then
+            echo "Baseline found. Comparing..." >> $GITHUB_STEP_SUMMARY
+            echo "**Current PR:**" >> $GITHUB_STEP_SUMMARY
+            grep -E "(test.*time:)" benchmark_output.txt | head -20 >> $GITHUB_STEP_SUMMARY || true
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Main branch:**" >> $GITHUB_STEP_SUMMARY
+            grep -E "(test.*time:)" baseline/benchmark_output.txt | head -20 >> $GITHUB_STEP_SUMMARY || true
           else
-            echo "No benchmark results found."
+            echo "No baseline found (first run or baseline expired)." >> $GITHUB_STEP_SUMMARY
           fi
-
-  # Note: Full regression detection requires storing baseline benchmarks
-  # and comparing them against PR benchmarks. This workflow provides
-  # the infrastructure; full implementation requires:
-  # 1. Store baseline benchmarks in artifact storage
-  # 2. Compare against current PR results
-  # 3. Fail if any benchmark regresses > 10%
-  #
-  # Example comparison script:
-  # ```bash
-  # #!/bin/bash
-  # OLD_BENCH=$(cat old_results.txt | grep "test:" | awk '{print $2}')
-  # NEW_BENCH=$(cat new_results.txt | grep "test:" | awk '{print $2}')
-  # REGRESS=$(echo "scale=2; ($NEW_BENCH - $OLD_BENCH) / $OLD_BENCH * 100" | bc)
-  # if (( $(echo "$REGRESS > 10" | bc -l) )); then
-  #   echo "Benchmark regression detected: ${REGRESS}%"
-  #   exit 1
-  # fi
-  # ```

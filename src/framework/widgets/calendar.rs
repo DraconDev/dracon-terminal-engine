@@ -55,7 +55,7 @@ impl Calendar {
     pub fn new() -> Self {
         let today = Local::now().date_naive();
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             month: today.month() as u8,
             year: today.year(),
             selected: None,
@@ -591,7 +591,7 @@ impl crate::framework::widget::Widget for Calendar {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 }

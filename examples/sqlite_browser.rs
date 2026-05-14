@@ -131,7 +131,7 @@ impl SqliteBrowser {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.status_bar.on_theme_change(&self.theme);
         self.search_input.on_theme_change(&self.theme);
         if let Some(ref mut table) = self.results_table {
@@ -191,7 +191,7 @@ impl SqliteBrowser {
             "Using mock database (sqlite3 not available)",
             ToastKind::Warning,
         );
-        vec!["users".to_string(), "posts".to_string()]
+        vec!["users".to_string(), "posts".to_string()].clone()
     }
 
     fn run_query(&mut self, query: &str) {
@@ -235,7 +235,7 @@ impl SqliteBrowser {
             })
             .collect();
         let rows: Vec<RowData> = self.results_rows.clone();
-        let mut table = Table::new(columns).with_theme(self.theme).with_rows(rows);
+        let mut table = Table::new(columns).with_theme(self.theme.clone()).with_rows(rows);
         table.set_visible_count(20);
         self.results_table = Some(table);
         self.dirty = true;
@@ -275,7 +275,7 @@ impl SqliteBrowser {
         let toast = Toast::new(WidgetId::new(100 + self.toasts.len()), msg)
             .with_kind(kind)
             .with_duration(Duration::from_secs(2))
-            .with_theme(self.theme);
+            .with_theme(self.theme.clone());
         self.toasts.push(toast);
         self.dirty = true;
     }
@@ -310,7 +310,7 @@ impl Widget for SqliteBrowser {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.status_bar.on_theme_change(theme);
         self.search_input.on_theme_change(theme);
         if let Some(table) = &mut self.results_table {
@@ -323,7 +323,7 @@ impl Widget for SqliteBrowser {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
 
         for cell in plane.cells.iter_mut() {
@@ -697,7 +697,7 @@ impl Widget for SqliteBrowser {
                 true
             } else if self.keybindings.matches(actions::EDIT, &key) {
                 self.editing_query = true;
-                self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme);
+                self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme.clone());
                 self.active_panel = Panel::Query;
                 self.dirty = true;
                 true

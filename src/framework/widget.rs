@@ -4,6 +4,7 @@
 //! focus management, and event routing.
 
 use serde_json::Value as JsonValue;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::compositor::Plane;
 use crate::error::DraconError;
@@ -25,12 +26,30 @@ impl WidgetId {
     pub fn default_id() -> Self {
         Self(0)
     }
+
+    /// Generates a new unique `WidgetId` using an atomic counter.
+    /// Use this in widget constructors for auto-assigned IDs.
+    pub fn next() -> Self {
+        static COUNTER: AtomicUsize = AtomicUsize::new(1);
+        Self(COUNTER.fetch_add(1, Ordering::Relaxed))
+    }
 }
 
 /// Trait implemented by all framework widgets.
 ///
 /// Provides a consistent interface for rendering, event handling,
 /// and focus management across all widgets.
+///
+/// ## Future decomposition
+///
+/// For a future 1.0 release, this trait may be decomposed into:
+/// - `Renderable`: render, needs_render, mark_dirty, clear_dirty
+/// - `Focusable`: focusable, on_focus, on_blur, cursor_position
+/// - `Themable`: on_theme_change, current_theme
+/// - `Commandable`: commands, apply_command_output
+/// - `InputHandler`: handle_key, handle_mouse
+///
+/// `Widget` would remain as a convenience supertrait combining all of them.
 pub trait Widget {
     /// Returns the unique identifier for this widget.
     fn id(&self) -> WidgetId;

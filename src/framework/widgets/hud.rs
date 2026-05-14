@@ -25,7 +25,7 @@ impl Hud {
     /// Creates a new `Hud` with the given z-index.
     pub fn new(z_index: u16) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             z_index,
             visible: true,
             width: 30,
@@ -213,7 +213,7 @@ impl crate::framework::widget::Widget for Hud {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 
     fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {

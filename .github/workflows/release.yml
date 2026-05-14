@@ -15,6 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          rust-toolchain: stable
+
+      - name: Cache cargo registry
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release examples
+        run: cargo build --release --examples
+
+      - name: Package example binaries
+        run: |
+          mkdir -p release-binaries
+          for bin in target/release/examples/*; do
+            if [ -f "$bin" ] && [ -x "$bin" ]; then
+              cp "$bin" release-binaries/
+            fi
+          done
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -23,5 +43,13 @@ jobs:
             LICENSE-APACHE
             README.md
             CHANGELOG.md
+            release-binaries/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # TODO: Enable when ready for crates.io publishing
+      # - name: Publish to crates.io (dry run)
+      #   run: cargo publish --dry-run
+      #
+      # - name: Publish to crates.io
+      #   run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

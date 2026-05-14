@@ -120,6 +120,6 @@ impl Widget for PasswordInput {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.base.theme = *theme;
+        self.base.theme = theme.clone();
     }
 }

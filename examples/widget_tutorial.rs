@@ -218,7 +218,7 @@ impl ColorPicker {
 
     /// Returns a reference to the currently selected preset color.
     pub fn selected_color(&self) -> &'static PresetColor {
-        &PresetColor::PRESETS[self.selected_index]
+        &PresetColor::PRESETS[self.selected_index].clone()
     }
 
     /// Cycles to the next color in the preset list (wraps around).
@@ -512,7 +512,7 @@ impl Widget for ColorPicker {
     /// Called when the application theme changes.
     /// We update our cached theme and mark dirty to re-render.
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
@@ -629,7 +629,7 @@ fn main() -> std::io::Result<()> {
 
     // Current theme index (read-only for this tutorial)
     let current_theme_idx = 0;
-    let current_theme = themes[current_theme_idx];
+    let current_theme = themes[current_theme_idx].clone();
 
     let kb_config = resolve_keybindings();
     let _keybindings = KeybindingSet::from_config(&kb_config);
@@ -660,7 +660,7 @@ fn main() -> std::io::Result<()> {
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
         "Theme: {}",
-        theme_names[current_theme_idx]
+        &themes[current_theme_idx].display_name
     ));
 
     // Propagate initial theme to all widgets

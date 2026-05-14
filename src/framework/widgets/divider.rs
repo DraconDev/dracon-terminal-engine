@@ -53,7 +53,7 @@ impl Divider {
     /// Creates a new horizontal divider.
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             direction: DividerDirection::Horizontal,
             style: DividerStyle::Solid,
             label: None,
@@ -67,7 +67,7 @@ impl Divider {
     /// Creates a vertical divider.
     pub fn vertical() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             direction: DividerDirection::Vertical,
             style: DividerStyle::Solid,
             label: None,
@@ -190,7 +190,7 @@ impl crate::framework::widget::Widget for Divider {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 

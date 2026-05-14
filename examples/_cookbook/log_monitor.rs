@@ -130,13 +130,13 @@ impl LogMonitor {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.log_viewer.on_theme_change(&self.theme);
         self.dirty = true;
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let w = 42.min(area.width as usize);
         let h = 14.min(area.height as usize);
         let x = (area.width as usize - w) / 2;
@@ -255,13 +255,13 @@ impl Widget for LogMonitor {
         self.dirty = false;
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.log_viewer.on_theme_change(theme);
         self.dirty = true;
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut p = Plane::new(0, area.width, area.height);
 
         for c in p.cells.iter_mut() {
@@ -571,7 +571,7 @@ impl Widget for InputRouter {
         self.target.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 
@@ -586,7 +586,7 @@ fn main() -> Result<()> {
     let kb_input = keybindings.clone();
     let env_theme = Theme::from_env_or(Theme::nord());
 
-    let mon = Rc::new(RefCell::new(LogMonitor::new(env_theme)));
+    let mon = Rc::new(RefCell::new(LogMonitor::new(env_theme.clone())));
     mon.borrow_mut().keybindings = keybindings;
     let mon_for_tick = Rc::clone(&mon);
     let mon_for_input_router = Rc::clone(&mon);
@@ -595,7 +595,7 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(env_theme);
+    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(env_theme.clone());
 
     let router = InputRouter {
         target: mon_for_input_router,

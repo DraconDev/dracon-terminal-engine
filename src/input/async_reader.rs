@@ -15,6 +15,10 @@ pub struct AsyncInputReader;
 #[cfg(feature = "async")]
 impl AsyncInputReader {
     /// Spawns the async reader task and returns a handle to it.
+    ///
+    /// NOTE: This uses `tokio::task::block_in_place` + 20ms polling, which is NOT truly
+    /// async — it ties up a thread pool thread and adds latency. True async stdin would
+    /// require `tokio::fs::read` on `/dev/stdin` (platform-specific) or the `async-std` crate.
     pub fn spawn<F>(mut callback: F) -> tokio::task::JoinHandle<()>
     where
         F: FnMut(crate::input::event::Event) + Send + 'static,

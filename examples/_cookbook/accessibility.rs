@@ -166,7 +166,7 @@ impl Widget for AccessibleButton {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 }
@@ -271,7 +271,7 @@ impl Widget for AccessibleToggle {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 }
@@ -483,7 +483,7 @@ impl Widget for AccessibilityDemo {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.submit_btn.on_theme_change(theme);
         self.cancel_btn.on_theme_change(theme);
         self.notifications_toggle.on_theme_change(theme);

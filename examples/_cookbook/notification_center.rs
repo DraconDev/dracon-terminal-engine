@@ -247,7 +247,7 @@ impl Widget for NotifierApp {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.notification_center.on_theme_change(theme);
         self.dirty = true;
     }

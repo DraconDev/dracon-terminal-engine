@@ -14,7 +14,7 @@ use dracon_terminal_engine::framework::widgets::SplitPane;
 struct MockWidget {
     id: WidgetId,
     theme_changes: Rc<Cell<usize>>,
-    current_theme: Rc<Cell<Option<&'static str>>>,
+    current_theme: Rc<Cell<Option<String>>>,
     area: std::cell::Cell<ratatui::layout::Rect>,
 }
 
@@ -52,7 +52,7 @@ impl Widget for MockWidget {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme_changes.set(self.theme_changes.get() + 1);
-        self.current_theme.set(Some(theme.name));
+        self.current_theme.set(Some(theme.name.to_string()));
     }
 }
 

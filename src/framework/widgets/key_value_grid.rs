@@ -35,7 +35,7 @@ pub struct KeyValueGrid {
 impl KeyValueGrid {
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             pairs: BTreeMap::new(),
             separator: "  ".to_string(),
             theme: Theme::default(),
@@ -248,6 +248,6 @@ impl Widget for KeyValueGrid {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

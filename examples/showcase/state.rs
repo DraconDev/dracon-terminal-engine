@@ -26,7 +26,7 @@ pub enum SortField {
 
 impl SortField {
     pub fn all() -> [SortField; 3] {
-        [SortField::Name, SortField::Category, SortField::RunCount]
+        [SortField::Name, SortField::Category, SortField::RunCount].clone()
     }
     pub fn label(&self) -> &'static str {
         match self {
@@ -132,7 +132,7 @@ impl Showcase {
 
         let run_counts = vec![0u32; examples.len()];
 
-        let cached_themes = Theme::all().iter().filter(|t| t.name != "high_contrast").copied().collect();
+        let cached_themes: Vec<Theme> = Theme::all().iter().filter(|t| t.name != "high_contrast").cloned().collect();
 
         let mut showcase = Self {
             examples,
@@ -205,7 +205,7 @@ impl Showcase {
     pub fn apply_filter(&mut self) {
         if let Some(idx) = self.pending_theme.take() {
             let themes = &self.cached_themes;
-            self.theme = themes[idx % themes.len()];
+            self.theme = themes[idx % themes.len()].clone();
         }
         self.search_query_lower = self.search_query.to_lowercase();
         self.filtered = self

@@ -35,12 +35,12 @@ pub enum ThemeKind {
 /// - `fg_muted` — Secondary text (labels, descriptions)
 /// - `fg_subtle` — Tertiary text (placeholders, hints)
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Theme {
-    pub name: &'static str,
+    pub name: std::sync::Arc<str>,
     /// Human-friendly display label (e.g. "Solarized Dark", "Rosé Pine").
     /// Used for theme cycling menus and the showcase launcher.
-    pub display_name: &'static str,
+    pub display_name: std::sync::Arc<str>,
     pub kind: ThemeKind,
 
     // Surface / Elevation
@@ -110,6 +110,10 @@ pub struct Theme {
     pub focus_border: Color,
 
     // Scrollbar width
+    /// **Deprecated:** Layout dimensions should not live in Theme.
+    /// Use [`crate::framework::scroll::DEFAULT_SCROLLBAR_WIDTH`] instead.
+    /// This field is kept for backward compatibility and will be removed in a future release.
+    #[doc(hidden)]
     pub scrollbar_width: u16,
 }
 
@@ -117,8 +121,8 @@ impl Theme {
     /// Creates a dark theme with muted colors suitable for low-light environments.
     pub fn dark() -> Self {
         Self {
-            name: "dark",
-            display_name: "Dark",
+            name: "dark".into(),
+            display_name: "Dark".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(16, 16, 24),
             surface: Color::Rgb(24, 24, 36),
@@ -164,8 +168,8 @@ impl Theme {
     /// Creates a light theme with high contrast suitable for bright environments.
     pub fn light() -> Self {
         Self {
-            name: "light",
-            display_name: "Light",
+            name: "light".into(),
+            display_name: "Light".into(),
             kind: ThemeKind::Light,
             bg: Color::Rgb(250, 250, 250),
             surface: Color::Rgb(255, 255, 255),
@@ -214,8 +218,8 @@ impl Theme {
     /// Ideal for users with low vision or color blindness.
     pub fn high_contrast() -> Self {
         Self {
-            name: "high_contrast",
-            display_name: "High Contrast",
+            name: "high_contrast".into(),
+            display_name: "High Contrast".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 0, 0),
             surface: Color::Rgb(20, 20, 20),
@@ -261,8 +265,8 @@ impl Theme {
     /// Creates a cyberpunk-themed dark theme with neon green and hot pink accents.
     pub fn cyberpunk() -> Self {
         Self {
-            name: "cyberpunk",
-            display_name: "Cyberpunk",
+            name: "cyberpunk".into(),
+            display_name: "Cyberpunk".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 0, 0),
             surface: Color::Rgb(10, 10, 15),
@@ -308,8 +312,8 @@ impl Theme {
     /// Creates the Dracula theme — iconic dark purple aesthetic with vivid accents.
     pub fn dracula() -> Self {
         Self {
-            name: "dracula",
-            display_name: "Dracula",
+            name: "dracula".into(),
+            display_name: "Dracula".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 42, 54),
             surface: Color::Rgb(48, 50, 64),
@@ -355,8 +359,8 @@ impl Theme {
     /// Creates the Nord theme — arctic blue-gray palette.
     pub fn nord() -> Self {
         Self {
-            name: "nord",
-            display_name: "Nord",
+            name: "nord".into(),
+            display_name: "Nord".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(46, 52, 64),
             surface: Color::Rgb(52, 58, 72),
@@ -402,8 +406,8 @@ impl Theme {
     /// Creates the Catppuccin Mocha theme — warm, soothing pastel dark theme.
     pub fn catppuccin_mocha() -> Self {
         Self {
-            name: "catppuccin_mocha",
-            display_name: "Catppuccin",
+            name: "catppuccin_mocha".into(),
+            display_name: "Catppuccin".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 38, 56),
@@ -449,8 +453,8 @@ impl Theme {
     /// Creates the Gruvbox Dark theme — retro warm dark theme with earthy tones.
     pub fn gruvbox_dark() -> Self {
         Self {
-            name: "gruvbox_dark",
-            display_name: "Gruvbox",
+            name: "gruvbox_dark".into(),
+            display_name: "Gruvbox".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 40, 40),
             surface: Color::Rgb(50, 48, 45),
@@ -496,8 +500,8 @@ impl Theme {
     /// Creates the Tokyo Night theme — vivid blue accents on a dark background.
     pub fn tokyo_night() -> Self {
         Self {
-            name: "tokyo_night",
-            display_name: "Tokyo Night",
+            name: "tokyo_night".into(),
+            display_name: "Tokyo Night".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(32, 34, 44),
             surface: Color::Rgb(38, 40, 52),
@@ -543,8 +547,8 @@ impl Theme {
     /// Creates the Solarized Dark theme — precision-engineered dark theme.
     pub fn solarized_dark() -> Self {
         Self {
-            name: "solarized_dark",
-            display_name: "Solarized Dark",
+            name: "solarized_dark".into(),
+            display_name: "Solarized Dark".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(0, 43, 54),
             surface: Color::Rgb(0, 50, 62),
@@ -590,8 +594,8 @@ impl Theme {
     /// Creates the Solarized Light theme — precision-engineered light theme.
     pub fn solarized_light() -> Self {
         Self {
-            name: "solarized_light",
-            display_name: "Solarized Light",
+            name: "solarized_light".into(),
+            display_name: "Solarized Light".into(),
             kind: ThemeKind::Light,
             bg: Color::Rgb(253, 246, 227),
             surface: Color::Rgb(253, 249, 240),
@@ -637,8 +641,8 @@ impl Theme {
     /// Creates the One Dark theme — Atom editor's iconic dark theme.
     pub fn one_dark() -> Self {
         Self {
-            name: "one_dark",
-            display_name: "One Dark",
+            name: "one_dark".into(),
+            display_name: "One Dark".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(40, 44, 52),
             surface: Color::Rgb(48, 52, 62),
@@ -684,8 +688,8 @@ impl Theme {
     /// Creates the Rosé Pine theme — elegant muted rose tones.
     pub fn rose_pine() -> Self {
         Self {
-            name: "rose_pine",
-            display_name: "Rosé Pine",
+            name: "rose_pine".into(),
+            display_name: "Rosé Pine".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(30, 30, 46),
             surface: Color::Rgb(38, 36, 54),
@@ -731,8 +735,8 @@ impl Theme {
     /// Creates the Kanagawa theme — inspired by Hokusai's art with deep blues and golds.
     pub fn kanagawa() -> Self {
         Self {
-            name: "kanagawa",
-            display_name: "Kanagawa",
+            name: "kanagawa".into(),
+            display_name: "Kanagawa".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(38, 40, 64),
             surface: Color::Rgb(44, 46, 72),
@@ -778,8 +782,8 @@ impl Theme {
     /// Creates the Everforest theme — comfortable forest green dark theme.
     pub fn everforest() -> Self {
         Self {
-            name: "everforest",
-            display_name: "Everforest",
+            name: "everforest".into(),
+            display_name: "Everforest".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(43, 48, 40),
             surface: Color::Rgb(50, 55, 48),
@@ -825,8 +829,8 @@ impl Theme {
     /// Creates the Monokai theme — classic syntax highlighting colors.
     pub fn monokai() -> Self {
         Self {
-            name: "monokai",
-            display_name: "Monokai",
+            name: "monokai".into(),
+            display_name: "Monokai".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(39, 40, 34),
             surface: Color::Rgb(46, 47, 40),
@@ -872,8 +876,8 @@ impl Theme {
     /// Creates the Warm theme — cozy amber and bronze tones.
     pub fn warm() -> Self {
         Self {
-            name: "warm",
-            display_name: "Warm",
+            name: "warm".into(),
+            display_name: "Warm".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(28, 26, 24),
             surface: Color::Rgb(36, 34, 30),
@@ -919,8 +923,8 @@ impl Theme {
     /// Creates the Cool theme — purple and ice blue tones.
     pub fn cool() -> Self {
         Self {
-            name: "cool",
-            display_name: "Cool",
+            name: "cool".into(),
+            display_name: "Cool".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(24, 26, 32),
             surface: Color::Rgb(30, 32, 40),
@@ -966,8 +970,8 @@ impl Theme {
     /// Creates the Forest theme — moss green and pine tones.
     pub fn forest() -> Self {
         Self {
-            name: "forest",
-            display_name: "Forest",
+            name: "forest".into(),
+            display_name: "Forest".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(24, 30, 26),
             surface: Color::Rgb(30, 38, 32),
@@ -1013,8 +1017,8 @@ impl Theme {
     /// Creates the Sunset theme — orange coral and pink tones.
     pub fn sunset() -> Self {
         Self {
-            name: "sunset",
-            display_name: "Sunset",
+            name: "sunset".into(),
+            display_name: "Sunset".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(32, 24, 26),
             surface: Color::Rgb(40, 30, 32),
@@ -1060,8 +1064,8 @@ impl Theme {
     /// Creates the Mono theme — soft silver monochrome.
     pub fn mono() -> Self {
         Self {
-            name: "mono",
-            display_name: "Mono",
+            name: "mono".into(),
+            display_name: "Mono".into(),
             kind: ThemeKind::Dark,
             bg: Color::Rgb(26, 28, 32),
             surface: Color::Rgb(34, 36, 42),
@@ -1216,8 +1220,8 @@ impl Theme {
     /// )
     /// ```
     pub fn custom(
-        name: &'static str,
-        display_name: &'static str,
+        name: impl Into<std::sync::Arc<str>>,
+        display_name: impl Into<std::sync::Arc<str>>,
         kind: ThemeKind,
         bg: Color,
         fg: Color,
@@ -1345,8 +1349,8 @@ impl Theme {
         let focus_border = primary;
 
         Self {
-            name,
-            display_name,
+            name: name.into(),
+            display_name: display_name.into(),
             kind,
             bg,
             surface: Color::Rgb(surface_r, surface_g, surface_b),

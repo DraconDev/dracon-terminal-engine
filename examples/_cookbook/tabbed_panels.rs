@@ -169,7 +169,7 @@ impl TabbedApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.tabbar.on_theme_change(&self.theme);
         self.dashboard.cpu.on_theme_change(&self.theme);
         self.dashboard.memory.on_theme_change(&self.theme);
@@ -400,7 +400,7 @@ impl Widget for TabbedApp {
     fn clear_dirty(&mut self) {}
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.tabbar.on_theme_change(&self.theme);
         self.dashboard.cpu.on_theme_change(&self.theme);
         self.dashboard.memory.on_theme_change(&self.theme);
@@ -417,7 +417,7 @@ impl Widget for TabbedApp {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let theme = self.theme;
+        let theme = self.theme.clone();
         for cell in plane.cells.iter_mut() {
             cell.bg = theme.bg;
             cell.fg = theme.fg;
@@ -627,7 +627,7 @@ impl Widget for InputRouter {
         self.target.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 
@@ -639,11 +639,11 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let app = Rc::new(RefCell::new(TabbedApp::new(should_quit, env_theme)));
+    let app = Rc::new(RefCell::new(TabbedApp::new(should_quit, env_theme.clone())));
     let app_for_tick = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(env_theme);
+    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(env_theme.clone());
 
     // Register an InputRouter so keyboard/mouse events reach TabbedApp
     let router = InputRouter {

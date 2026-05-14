@@ -61,7 +61,7 @@ fn main() -> std::io::Result<()> {
     let pending_app_theme_tick = Arc::clone(&pending_app_theme);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, returned_from, pending_app_theme, env_theme);
+    let showcase = Showcase::new(should_quit, pending.clone(), fps_counter, returned_from, pending_app_theme, env_theme.clone());
 
     let mut app = App::new()?
         .title("Dracon Showcase")

@@ -19,7 +19,7 @@ impl Label {
     /// Creates a new Label with the given text.
     pub fn new(text: &str) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             text: text.to_string(),
             theme: Theme::default(),
             style: Styles::empty(),
@@ -121,6 +121,6 @@ impl crate::framework::widget::Widget for Label {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

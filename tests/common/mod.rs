@@ -100,7 +100,7 @@ pub fn assert_rgb(t: &Theme, field: &str, r: u8, g: u8, b: u8) {
 pub struct TrackingWidget {
     pub id: dracon_terminal_engine::framework::widget::WidgetId,
     pub theme_changes: Rc<Cell<usize>>,
-    pub current_theme: Rc<Cell<Option<&'static str>>>,
+    pub current_theme: Rc<Cell<Option<String>>>,
     pub focus_count: Rc<Cell<usize>>,
     pub blur_count: Rc<Cell<usize>>,
     pub area: std::cell::Cell<Rect>,
@@ -150,7 +150,7 @@ impl Widget for TrackingWidget {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme_changes.set(self.theme_changes.get() + 1);
-        self.current_theme.set(Some(theme.name));
+        self.current_theme.set(Some(theme.name.to_string()));
     }
 
     fn on_focus(&mut self) {

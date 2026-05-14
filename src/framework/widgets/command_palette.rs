@@ -50,7 +50,7 @@ impl CommandPalette {
     /// Creates a new `CommandPalette` with the given commands.
     pub fn new(commands: Vec<CommandItem>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             commands,
             search_query: String::new(),
             selected_index: 0,
@@ -181,12 +181,12 @@ impl crate::framework::widget::Widget for CommandPalette {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
 
         // Background

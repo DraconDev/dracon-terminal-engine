@@ -19,7 +19,7 @@
 //! [keybindings]
 //! quit = "q"
 //! help = "?"
-//! theme = "t"
+//! theme = "f2"
 //! back = "esc"
 //! submit = "enter"
 //! new_tab = "ctrl+t"
@@ -110,7 +110,8 @@ impl KeybindingConfig {
         bindings.insert(actions::DELETE.to_string(), "ctrl+d".to_string());
         bindings.insert(actions::EDIT.to_string(), "ctrl+e".to_string());
         // Search
-        bindings.insert(actions::THEME.to_string(), "t".to_string());
+        bindings.insert(actions::SEARCH.to_string(), "ctrl+f".to_string());
+        bindings.insert(actions::THEME.to_string(), "f2".to_string());
         bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
         bindings.insert(actions::PAUSE.to_string(), "p".to_string());
         Self { bindings }
@@ -269,6 +270,15 @@ impl KeybindingSet {
         }
 
         Self { bindings }
+    }
+
+    /// Reloads keybindings from disk (re-reads dracon.toml).
+    ///
+    /// Call this when you want to pick up config changes at runtime
+    /// without restarting the application.
+    pub fn reload(&mut self) {
+        let config = resolve_keybindings();
+        *self = Self::from_config(&config);
     }
 
     /// Check if a key event matches an action.

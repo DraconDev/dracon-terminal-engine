@@ -91,7 +91,7 @@ impl CalendarDemo {
     fn toggle_mode(&mut self) {
         self.range_mode = !self.range_mode;
         // Sync theme to newly active calendar
-        let theme = self.theme;
+        let theme = self.theme.clone();
         self.active_calendar_mut().on_theme_change(&theme);
         self.dirty = true;
     }
@@ -331,7 +331,7 @@ impl Widget for CalendarDemo {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.calendar_single.on_theme_change(theme);
         self.calendar_range.on_theme_change(theme);
         self.dirty = true;

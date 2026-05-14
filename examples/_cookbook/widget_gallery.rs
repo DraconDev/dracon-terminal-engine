@@ -91,7 +91,7 @@ impl WidgetGallery {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.checkbox.on_theme_change(&self.theme);
         self.radio.on_theme_change(&self.theme);
         self.slider.on_theme_change(&self.theme);
@@ -170,7 +170,7 @@ impl Widget for WidgetGallery {
         true
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.checkbox.on_theme_change(theme);
         self.radio.on_theme_change(theme);
         self.slider.on_theme_change(theme);
@@ -183,7 +183,7 @@ impl Widget for WidgetGallery {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             self.update_bg(cell);
@@ -566,12 +566,12 @@ fn main() -> std::io::Result<()> {
     let running_clone = running.clone();
     let env_theme = Theme::from_env_or(Theme::nord());
 
-    let gallery = WidgetGallery::new(running_clone.clone(), env_theme);
+    let gallery = WidgetGallery::new(running_clone.clone(), env_theme.clone());
 
     let mut app = App::new()?
         .title("Widget Gallery")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
 
     app.add_widget(Box::new(gallery), Rect::new(0, 0, 80, 24));
 

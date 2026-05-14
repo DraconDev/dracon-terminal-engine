@@ -23,7 +23,7 @@ impl TabBar {
     /// Creates a new `TabBar` from a list of tab labels.
     pub fn new(tabs: Vec<&str>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             tabs: tabs.iter().map(|s| s.to_string()).collect(),
             active: 0,
             theme: Theme::default(),
@@ -225,6 +225,6 @@ impl crate::framework::widget::Widget for TabBar {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

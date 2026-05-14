@@ -22,7 +22,7 @@ impl Button {
     /// Creates a new Button with the given label.
     pub fn new(label: &str) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             label: label.to_string(),
             theme: Theme::default(),
             on_click: None,
@@ -190,6 +190,24 @@ impl crate::framework::widget::Widget for Button {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
+    }
+}
+
+impl crate::framework::widget::WidgetState for Button {
+    fn state_id(&self) -> Option<&str> {
+        Some("button")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({"label": self.label})
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(label) = json.get("label").and_then(|v| v.as_str()) {
+            self.label = label.to_string();
+            self.dirty = true;
+        }
+        Ok(())
     }
 }

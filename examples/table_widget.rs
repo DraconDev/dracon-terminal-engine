@@ -325,7 +325,7 @@ fn build_users() -> Vec<User> {
             email: "zack@corp.io".into(),
             join_date: "2024-01-15".into(),
         },
-    ]
+    ].clone()
 }
 
 struct TableApp {
@@ -486,7 +486,7 @@ impl TableApp {
         let sort_col = self.sort_column;
         let sort_asc = self.sort_ascending;
         let mut new_table = Table::new(columns)
-            .with_theme(self.theme)
+            .with_theme(self.theme.clone())
             .with_rows(self.filtered_users.clone())
             .with_cell_text_fn(cell_fn)
             .on_select(|_user| {});
@@ -502,7 +502,7 @@ impl TableApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.table.on_theme_change(&self.theme);
         self.rebuild_table();
     }
@@ -555,17 +555,17 @@ impl Widget for TableApp {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.rebuild_table();
     }
 
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.theme)
+        Some(self.theme.clone())
     }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = self.theme;
+        let t = self.theme.clone();
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -1072,12 +1072,12 @@ fn main() -> std::io::Result<()> {
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let env_theme = Theme::from_env_or(Theme::nord());
 
-    let app_widget = TableApp::new(should_quit, env_theme, keybindings);
+    let app_widget = TableApp::new(should_quit, env_theme.clone(), keybindings);
 
     let mut app = App::new()?
         .title("Table Widget Demo")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

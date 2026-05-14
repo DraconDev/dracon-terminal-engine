@@ -86,7 +86,7 @@ impl Kanban {
     /// Creates a new empty Kanban board.
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             columns: Vec::new(),
             theme: Theme::default(),
             column_width: 20,
@@ -119,7 +119,7 @@ impl Kanban {
             .collect();
 
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             columns: cols,
             theme: Theme::default(),
             column_width: 20,
@@ -678,6 +678,6 @@ impl crate::framework::widget::Widget for Kanban {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

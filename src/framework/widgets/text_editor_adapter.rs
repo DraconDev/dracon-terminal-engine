@@ -44,7 +44,7 @@ impl TextEditorAdapter {
     /// Creates a new adapter with a specific theme.
     pub fn with_theme(theme: crate::framework::theme::Theme) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             editor: TextEditor::default(),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
@@ -213,7 +213,7 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 

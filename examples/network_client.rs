@@ -261,7 +261,7 @@ impl NetworkApp {
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
     }
 
     fn render_list(&self, area: Rect) -> Plane {
@@ -270,7 +270,7 @@ impl NetworkApp {
             cell.bg = self.theme.bg;
         }
 
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         // Title bar
         let title = "🌐 Network Client — JSONPlaceholder API";
@@ -283,7 +283,7 @@ impl NetworkApp {
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         // Status with spinner
         let status = if self.loading {
@@ -360,7 +360,7 @@ impl NetworkApp {
             cell.bg = self.theme.bg;
         }
 
-        let t = &self.theme;
+        let t = self.theme.clone();
         let shortcuts = [
             ("↑/↓", "Navigate posts"),
             ("Enter", "View post details"),
@@ -468,7 +468,7 @@ impl NetworkApp {
             cell.bg = self.theme.bg;
         }
 
-        let t = &self.theme;
+        let t = self.theme.clone();
         let post = &self.posts[self.selected];
 
         // Header
@@ -589,11 +589,11 @@ impl Widget for NetworkWidget {
         self.app.borrow_mut().handle_key(key)
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.app.borrow_mut().theme = *theme;
+        self.app.borrow_mut().theme = theme.clone();
     }
 
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.app.borrow().theme)
+        Some(self.app.borrow().theme.clone())
     }
 }
 
@@ -614,7 +614,7 @@ fn main() -> std::io::Result<()> {
     let kb_input = keybindings.clone();
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let mut app = NetworkApp::new(should_quit, env_theme);
+    let mut app = NetworkApp::new(should_quit, env_theme.clone());
     app.keybindings = keybindings;
     app.kb_config = kb_config;
     let app_for_widget = Rc::new(RefCell::new(app));
@@ -627,7 +627,7 @@ fn main() -> std::io::Result<()> {
     let mut framework = App::new()?
         .title("Network Client")
         .fps(30)
-        .theme(env_theme);
+        .theme(env_theme.clone());
 
     let widget = NetworkWidget {
         app: app_for_widget,

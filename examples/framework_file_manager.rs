@@ -130,7 +130,7 @@ impl FileManagerApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.list.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
         self.dirty = true;
@@ -172,7 +172,7 @@ impl Widget for FileManagerApp {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
@@ -554,7 +554,7 @@ impl Widget for FileManagerApp {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.list.on_theme_change(theme);
         self.dirty = true;
     }

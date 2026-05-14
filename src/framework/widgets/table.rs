@@ -9,6 +9,7 @@ use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
+use crate::framework::widgets::list_common::{ListNavigation, render_scroll_indicator};
 use ratatui::layout::Rect;
 
 /// A column definition for a `Table`.
@@ -47,9 +48,6 @@ pub struct Table<T> {
     id: WidgetId,
     columns: Vec<Column>,
     rows: Vec<TableRow<T>>,
-    selected: usize,
-    offset: usize,
-    visible_count: usize,
     theme: Theme,
     on_select: Option<SelectCallback<T>>,
     on_selection_change: Option<SelectionChangeCallback>,
@@ -61,31 +59,21 @@ pub struct Table<T> {
     sort_ascending: bool,
     area: Cell<Rect>,
     dirty: bool,
-    hovered_row: Option<usize>,
-    // Multi-select
-    allow_multi_select: bool,
-    selected_indices: HashSet<usize>,
-    last_selected: Option<usize>,
     // Drag and drop
     drag_manager: RefCell<DragManager<usize>>,
     // Context menu
     context_menu: RefCell<Option<ContextMenu>>,
-    // Undo/redo
-    enable_undo: bool,
-    undo_stack: Vec<TableState>,
-    redo_stack: Vec<TableState>,
+    // Shared navigation state
+    nav: ListNavigation<TableState>,
 }
 
 impl<T: Clone + ToString> Table<T> {
     /// Creates a new `Table` with the given column definitions.
     pub fn new(columns: Vec<Column>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             columns,
             rows: Vec::new(),
-            selected: 0,
-            offset: 0,
-            visible_count: 10,
             theme: Theme::default(),
             on_select: None,
             on_selection_change: None,
@@ -97,15 +85,9 @@ impl<T: Clone + ToString> Table<T> {
             sort_ascending: true,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
-            hovered_row: None,
-            allow_multi_select: false,
-            selected_indices: HashSet::new(),
-            last_selected: None,
             drag_manager: RefCell::new(DragManager::new()),
             context_menu: RefCell::new(None),
-            enable_undo: false,
-            undo_stack: Vec::new(),
-            redo_stack: Vec::new(),
+            nav: ListNavigation::new(),
         }
     }
 
@@ -115,9 +97,6 @@ impl<T: Clone + ToString> Table<T> {
             id,
             columns,
             rows: Vec::new(),
-            selected: 0,
-            offset: 0,
-            visible_count: 10,
             theme: Theme::default(),
             on_select: None,
             on_selection_change: None,
@@ -129,15 +108,9 @@ impl<T: Clone + ToString> Table<T> {
             sort_ascending: true,
             area: Cell::new(Rect::new(0, 0, 80, 20)),
             dirty: true,
-            hovered_row: None,
-            allow_multi_select: false,
-            selected_indices: HashSet::new(),
-            last_selected: None,
             drag_manager: RefCell::new(DragManager::new()),
             context_menu: RefCell::new(None),
-            enable_undo: false,
-            undo_stack: Vec::new(),
-            redo_stack: Vec::new(),
+            nav: ListNavigation::new(),
         }
     }
 
@@ -204,13 +177,13 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Enables multi-select mode.
     pub fn with_multi_select(mut self, enabled: bool) -> Self {
-        self.allow_multi_select = enabled;
+        self.nav.allow_multi_select = enabled;
         self
     }
 
     /// Enables undo/redo support.
     pub fn with_undo(mut self, enabled: bool) -> Self {
-        self.enable_undo = enabled;
+        self.nav.enable_undo = enabled;
         self
     }
 
@@ -222,13 +195,12 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Returns the set of selected row indices in multi-select mode.
     pub fn selected_indices(&self) -> &HashSet<usize> {
-        &self.selected_indices
+        &self.nav.selected_indices
     }
 
     /// Clears the current selection.
     pub fn clear_selection(&mut self) {
-        if !self.selected_indices.is_empty() {
-            self.selected_indices.clear();
+        if self.nav.clear_selection() {
             self.dirty = true;
         }
     }
@@ -241,33 +213,18 @@ impl<T: Clone + ToString> Table<T> {
     /// Takes a snapshot of the current state for undo/redo.
     fn snapshot(&self) -> TableState {
         TableState {
-            selected: self.selected,
-            offset: self.offset,
+            selected: self.nav.selected,
+            offset: self.nav.offset,
             sort_column: self.sort_column,
             sort_ascending: self.sort_ascending,
-            selected_indices: self.selected_indices.clone(),
-        }
-    }
-
-    /// Pushes the current state onto the undo stack.
-    fn push_undo(&mut self) {
-        if self.enable_undo {
-            self.redo_stack.clear();
-            self.undo_stack.push(self.snapshot());
-            if self.undo_stack.len() > 50 {
-                self.undo_stack.remove(0);
-            }
+            selected_indices: self.nav.selected_indices.clone(),
         }
     }
 
     /// Undo last operation.
     fn undo(&mut self) {
-        if self.enable_undo && !self.undo_stack.is_empty() {
-            if let Some(state) = self.undo_stack.pop() {
-                let snapshot = self.snapshot();
-                self.redo_stack.push(snapshot);
-                self.apply_state(&state);
-            }
+        if let Some(state) = self.nav.undo(self.snapshot()) {
+            self.apply_state(&state);
             if let Some(ref mut cb) = self.on_undo {
                 cb();
             }
@@ -276,12 +233,8 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Redo last undone operation.
     fn redo(&mut self) {
-        if self.enable_undo && !self.redo_stack.is_empty() {
-            if let Some(state) = self.redo_stack.pop() {
-                let snapshot = self.snapshot();
-                self.undo_stack.push(snapshot);
-                self.apply_state(&state);
-            }
+        if let Some(state) = self.nav.redo(self.snapshot()) {
+            self.apply_state(&state);
             if let Some(ref mut cb) = self.on_redo {
                 cb();
             }
@@ -290,17 +243,12 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Applies a state snapshot to the table.
     fn apply_state(&mut self, state: &TableState) {
-        self.selected = state.selected.min(self.rows.len().saturating_sub(1));
-        self.offset = state.offset;
+        self.nav.selected = state.selected.min(self.rows.len().saturating_sub(1));
+        self.nav.offset = state.offset;
         self.sort_column = state.sort_column;
         self.sort_ascending = state.sort_ascending;
-        self.selected_indices = state.selected_indices.clone();
-        if self.selected >= self.offset + self.visible_count {
-            self.offset = self.selected.saturating_sub(self.visible_count) + 1;
-        }
-        if self.selected < self.offset {
-            self.offset = self.selected;
-        }
+        self.nav.selected_indices = state.selected_indices.clone();
+        self.nav.clamp_scroll();
         self.dirty = true;
     }
 
@@ -313,12 +261,12 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Returns the index of the currently selected row.
     pub fn selected_index(&self) -> usize {
-        self.selected
+        self.nav.selected
     }
 
     /// Returns a reference to the selected row's data, or `None`.
     pub fn get_selected(&self) -> Option<&T> {
-        self.rows.get(self.selected).map(|r| &r.data)
+        self.rows.get(self.nav.selected).map(|r| &r.data)
     }
 
     /// Returns the number of rows.
@@ -333,8 +281,8 @@ impl<T: Clone + ToString> Table<T> {
 
     /// Returns `(start, end)` indices of the currently visible rows.
     pub fn viewport(&self) -> (usize, usize) {
-        let start = self.offset;
-        let end = (self.offset + self.visible_count).min(self.rows.len());
+        let start = self.nav.offset;
+        let end = (self.nav.offset + self.nav.visible_count).min(self.rows.len());
         (start, end)
     }
 
@@ -343,17 +291,17 @@ impl<T: Clone + ToString> Table<T> {
         if index >= self.rows.len() {
             return;
         }
-        self.selected = index;
-        if self.selected < self.offset {
-            self.offset = self.selected;
-        } else if self.selected >= self.offset + self.visible_count {
-            self.offset = self.selected.saturating_sub(self.visible_count) + 1;
+        self.nav.selected = index;
+        if self.nav.selected < self.nav.offset {
+            self.nav.offset = self.nav.selected;
+        } else if self.nav.selected >= self.nav.offset + self.nav.visible_count {
+            self.nav.offset = self.nav.selected.saturating_sub(self.nav.visible_count) + 1;
         }
     }
 
     /// Sets how many rows are visible at once.
     pub fn set_visible_count(&mut self, count: usize) {
-        self.visible_count = count;
+        self.nav.visible_count = count;
     }
 
     fn cell_text(&self, row: &TableRow<T>, col: usize) -> String {
@@ -453,14 +401,14 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         let visible_rows: Vec<_> = self
             .rows
             .iter()
-            .skip(self.offset)
-            .take(self.visible_count)
+            .skip(self.nav.offset)
+            .take(self.nav.visible_count)
             .collect();
 
         for (i, row) in visible_rows.iter().enumerate() {
             let y = 1 + i;
-            let is_selected = self.offset + i == self.selected;
-            let is_hovered = self.hovered_row == Some(self.offset + i);
+            let is_selected = self.nav.offset + i == self.nav.selected;
+            let is_hovered = self.nav.hovered == Some(self.nav.offset + i);
             let bg = if is_selected {
                 self.theme.selection_bg
             } else if is_hovered {
@@ -506,38 +454,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             }
         }
 
-        // Scroll position indicator
         let total = self.rows.len();
         let visible = visible_rows.len();
-        if total > visible && area.height > 1 {
-            let indicator = format!(
-                " {}–{}/{} ",
-                self.offset + 1,
-                (self.offset + visible).min(total),
-                total
-            );
-            let badge_len = indicator.len();
-            let badge_x = (area.width as usize).saturating_sub(badge_len);
-            let badge_y = (area.height as usize).saturating_sub(1);
-            let bg = self.theme.surface_elevated;
-            let fg = self.theme.fg_muted;
-
-            for x in badge_x..(area.width as usize) {
-                let idx = badge_y * area.width as usize + x;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = bg;
-                }
-            }
-
-            for (i, c) in indicator.chars().enumerate() {
-                let idx = badge_y * area.width as usize + badge_x + i;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = c;
-                    plane.cells[idx].fg = fg;
-                    plane.cells[idx].bg = bg;
-                }
-            }
-        }
+        render_scroll_indicator(&mut plane, area, self.nav.offset, total, visible, &self.theme);
 
         plane
     }
@@ -549,76 +468,57 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         }
         match key.code {
             KeyCode::Down => {
-                if self.selected + 1 < self.rows.len() {
-                    self.selected += 1;
-                    if self.selected >= self.offset + self.visible_count {
-                        self.offset = self.selected.saturating_sub(self.visible_count) + 1;
-                    }
+                if self.nav.move_down(self.rows.len()) {
                     self.dirty = true;
                 }
                 true
             }
             KeyCode::Up => {
-                if self.selected > 0 {
-                    self.selected -= 1;
-                    if self.selected < self.offset {
-                        self.offset = self.selected;
-                    }
+                if self.nav.move_up() {
                     self.dirty = true;
                 }
                 true
             }
             KeyCode::Home => {
-                self.selected = 0;
-                self.offset = 0;
+                self.nav.move_home();
                 self.dirty = true;
                 true
             }
             KeyCode::End => {
-                self.selected = self.rows.len().saturating_sub(1);
-                self.offset = self.rows.len().saturating_sub(self.visible_count);
+                self.nav.move_end(self.rows.len());
                 self.dirty = true;
                 true
             }
             KeyCode::Enter => {
                 if let Some(f) = self.on_select.as_mut() {
-                    f(&self.rows[self.selected].data);
+                    f(&self.rows[self.nav.selected].data);
                 }
                 true
             }
-            // Ctrl+Z: Undo
             KeyCode::Char('z') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
                 self.undo();
                 true
             }
-            // Ctrl+Y: Redo
             KeyCode::Char('y') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
                 self.redo();
                 true
             }
-            // Ctrl+A: Select all (in multi-select mode)
             KeyCode::Char('a') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
-                if self.allow_multi_select {
-                    self.push_undo();
-                    self.selected_indices.clear();
-                    for i in 0..self.rows.len() {
-                        self.selected_indices.insert(i);
-                    }
-                    self.selected = 0;
+                if self.nav.allow_multi_select {
+                    self.nav.push_undo(self.snapshot());
+                    self.nav.select_all(self.rows.len());
                     self.dirty = true;
                     if let Some(ref mut cb) = self.on_selection_change {
-                        cb(&self.selected_indices);
+                        cb(&self.nav.selected_indices);
                     }
                 }
                 true
             }
-            // Escape: Clear selection
             KeyCode::Esc => {
-                if self.allow_multi_select && !self.selected_indices.is_empty() {
-                    self.selected_indices.clear();
+                if self.nav.allow_multi_select && self.nav.clear_selection() {
                     self.dirty = true;
                     if let Some(ref mut cb) = self.on_selection_change {
-                        cb(&self.selected_indices);
+                        cb(&self.nav.selected_indices);
                     }
                 }
                 true
@@ -633,7 +533,6 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         col: u16,
         row: u16,
     ) -> bool {
-        // Check if context menu is visible
         if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
             if menu.is_visible()
                 && menu.handle_mouse(kind, col, row) {
@@ -644,37 +543,36 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         match kind {
             crate::input::event::MouseEventKind::Moved => {
                 if row == 0 {
-                    if self.hovered_row.is_some() {
-                        self.hovered_row = None;
+                    if self.nav.hovered.is_some() {
+                        self.nav.hovered = None;
                         self.dirty = true;
                     }
                     return false;
                 }
                 let rel_row = row.saturating_sub(1);
-                if rel_row >= self.visible_count as u16 {
-                    if self.hovered_row.is_some() {
-                        self.hovered_row = None;
+                if rel_row >= self.nav.visible_count as u16 {
+                    if self.nav.hovered.is_some() {
+                        self.nav.hovered = None;
                         self.dirty = true;
                     }
                     return false;
                 }
-                let idx = self.offset + rel_row as usize;
+                let idx = self.nav.offset + rel_row as usize;
                 if idx >= self.rows.len() {
-                    if self.hovered_row.is_some() {
-                        self.hovered_row = None;
+                    if self.nav.hovered.is_some() {
+                        self.nav.hovered = None;
                         self.dirty = true;
                     }
                     return false;
                 }
-                if self.hovered_row != Some(idx) {
-                    self.hovered_row = Some(idx);
+                if self.nav.hovered != Some(idx) {
+                    self.nav.hovered = Some(idx);
                     self.dirty = true;
                 }
                 true
             }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
                 if row == 0 {
-                    // Header click — determine which column
                     let mut col_x: u16 = 0;
                     for (i, column) in self.columns.iter().enumerate() {
                         let w = column.width;
@@ -689,36 +587,34 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                     return false;
                 }
                 let rel_row = row.saturating_sub(1);
-                if rel_row >= self.visible_count as u16 {
+                if rel_row >= self.nav.visible_count as u16 {
                     return false;
                 }
-                let idx = self.offset + rel_row as usize;
+                let idx = self.nav.offset + rel_row as usize;
                 if idx >= self.rows.len() {
                     return false;
                 }
 
-                // Track for shift-click range selection
-                if self.allow_multi_select {
-                    self.last_selected = Some(idx);
+                if self.nav.allow_multi_select {
+                    self.nav.last_selected = Some(idx);
                 }
 
-                self.selected = idx;
+                self.nav.selected = idx;
                 if let Some(f) = self.on_select.as_mut() {
                     f(&self.rows[idx].data);
                 }
                 self.dirty = true;
                 true
             }
-            // Right-click: Show context menu
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Right) => {
                 if row == 0 {
                     return false;
                 }
                 let rel_row = row.saturating_sub(1);
-                if rel_row >= self.visible_count as u16 {
+                if rel_row >= self.nav.visible_count as u16 {
                     return false;
                 }
-                let idx = self.offset + rel_row as usize;
+                let idx = self.nav.offset + rel_row as usize;
                 if idx >= self.rows.len() {
                     return false;
                 }
@@ -738,13 +634,12 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 true
             }
             crate::input::event::MouseEventKind::ScrollDown => {
-                self.offset =
-                    (self.offset + 1).min(self.rows.len().saturating_sub(self.visible_count));
+                self.nav.scroll_down(self.rows.len());
                 self.dirty = true;
                 true
             }
             crate::input::event::MouseEventKind::ScrollUp => {
-                self.offset = self.offset.saturating_sub(1);
+                self.nav.scroll_up();
                 self.dirty = true;
                 true
             }
@@ -753,7 +648,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 
@@ -765,20 +660,20 @@ impl<T: Clone + ToString> WidgetState for Table<T> {
     fn to_json(&self) -> serde_json::Value {
         use serde_json::json;
         json!({
-            "selected": self.selected,
-            "offset": self.offset,
+            "selected": self.nav.selected,
+            "offset": self.nav.offset,
             "sort_column": self.sort_column,
             "sort_ascending": self.sort_ascending,
-            "selected_indices": self.selected_indices.iter().collect::<Vec<_>>(),
+            "selected_indices": self.nav.selected_indices.iter().collect::<Vec<_>>(),
         })
     }
 
     fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(selected) = json.get("selected").and_then(|v| v.as_u64()) {
-            self.selected = selected as usize;
+            self.nav.selected = selected as usize;
         }
         if let Some(offset) = json.get("offset").and_then(|v| v.as_u64()) {
-            self.offset = offset as usize;
+            self.nav.offset = offset as usize;
         }
         if let Some(sort_col) = json.get("sort_column").and_then(|v| v.as_u64()) {
             self.sort_column = Some(sort_col as usize);
@@ -787,10 +682,10 @@ impl<T: Clone + ToString> WidgetState for Table<T> {
             self.sort_ascending = ascending;
         }
         if let Some(indices) = json.get("selected_indices").and_then(|v| v.as_array()) {
-            self.selected_indices.clear();
+            self.nav.selected_indices.clear();
             for idx in indices {
                 if let Some(i) = idx.as_u64() {
-                    self.selected_indices.insert(i as usize);
+                    self.nav.selected_indices.insert(i as usize);
                 }
             }
         }

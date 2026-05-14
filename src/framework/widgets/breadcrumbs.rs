@@ -32,7 +32,7 @@ impl Breadcrumbs {
     /// Creates a `Breadcrumbs` from a list of segment strings.
     pub fn new(segments: Vec<String>) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             segments,
             theme: Theme::default(),
             height: 1,
@@ -65,7 +65,7 @@ impl Breadcrumbs {
             .filter(|s| !s.is_empty())
             .collect();
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             segments,
             theme: Theme::default(),
             height: 1,
@@ -255,7 +255,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }
 

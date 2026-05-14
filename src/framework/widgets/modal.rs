@@ -39,7 +39,7 @@ impl<'a> Modal<'a> {
     /// Creates a new `Modal` with the given title and default OK/Cancel buttons.
     pub fn new(title: &'a str) -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             title,
             width: 40,
             height: 5,
@@ -360,6 +360,6 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

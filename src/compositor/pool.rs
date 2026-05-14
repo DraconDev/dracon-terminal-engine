@@ -91,42 +91,50 @@ impl CellPool {
     /// Returns a Vec of cells, default-initialized. If the pool
     /// has fewer than `count` cells available, the shortfall is
     /// allocated freshly.
+    ///
+    /// Uses best-fit selection: prefers the block closest in size to the
+    /// request to reduce fragmentation (avoids splitting large blocks
+    /// for small requests). Uses bulk `split_off` instead of per-cell
+    /// `pop()` for O(1) per block instead of O(n) per cell.
     pub fn acquire_cells(&mut self, count: usize) -> Vec<Cell> {
         let mut acquired = Vec::with_capacity(count);
+        let mut remaining = count;
 
-        while acquired.len() < count {
-            // Find the block with the most cells
-            let largest_idx = self
+        while remaining > 0 {
+            let best_idx = self
                 .free
                 .iter()
                 .enumerate()
-                .max_by_key(|(_, b)| b.cells.len())
-                .map(|(idx, _)| idx);
+                .filter(|(_, b)| b.cells.len() >= remaining)
+                .min_by_key(|(_, b)| b.cells.len())
+                .map(|(idx, _)| idx)
+                .or_else(|| {
+                    self.free
+                        .iter()
+                        .enumerate()
+                        .max_by_key(|(_, b)| b.cells.len())
+                        .map(|(idx, _)| idx)
+                });
 
-            match largest_idx {
+            match best_idx {
                 Some(idx) => {
-                    let needed = count - acquired.len();
                     let block_len = self.free[idx].cells.len();
-
-                    if block_len >= needed {
-                        // Take exactly what we need from this block
-                        for _ in 0..needed {
-                            acquired.push(self.free[idx].cells.pop().unwrap());
-                        }
+                    if block_len >= remaining {
+                        let split = self.free[idx].cells.split_off(block_len - remaining);
+                        acquired.extend(split);
                         if self.free[idx].cells.is_empty() {
                             self.free.swap_remove(idx);
                         }
+                        remaining = 0;
                     } else {
-                        // Take all cells from this block
-                        for cell in self.free[idx].cells.drain(..) {
-                            acquired.push(cell);
-                        }
+                        let mut cells = std::mem::take(&mut self.free[idx].cells);
+                        acquired.extend(cells.drain(..));
                         self.free.swap_remove(idx);
+                        remaining -= block_len;
                     }
                 }
                 None => {
-                    // No blocks left — allocate fresh
-                    for _ in 0..(count - acquired.len()) {
+                    for _ in 0..remaining {
                         acquired.push(Cell::default());
                     }
                     break;

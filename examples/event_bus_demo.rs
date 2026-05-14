@@ -69,7 +69,7 @@ impl EventBusApp {
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.dirty = true;
     }
 
@@ -111,7 +111,7 @@ impl EventBusApp {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
 
         // Fill background
@@ -342,10 +342,10 @@ impl Widget for InputRouter {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.app.borrow_mut().theme = *theme;
+        self.app.borrow_mut().theme = theme.clone();
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.app.borrow().theme)
+        Some(self.app.borrow().theme.clone())
     }
 }
 
@@ -365,7 +365,7 @@ fn main() -> std::io::Result<()> {
     let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
-    let app = Rc::new(RefCell::new(EventBusApp::new(should_quit, env_theme)));
+    let app = Rc::new(RefCell::new(EventBusApp::new(should_quit, env_theme.clone())));
     {
         let mut a = app.borrow_mut();
         a.keybindings = keybindings;

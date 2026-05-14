@@ -97,7 +97,7 @@ impl Scene for HomeScreen {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         // Background
         for cell in plane.cells.iter_mut() {
@@ -206,7 +206,7 @@ impl Scene for HomeScreen {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
@@ -240,7 +240,7 @@ impl Scene for SettingsScreen {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -324,7 +324,7 @@ impl Scene for SettingsScreen {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
@@ -357,7 +357,7 @@ impl Scene for ProfileScreen {
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -412,7 +412,7 @@ impl Scene for ProfileScreen {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
@@ -458,7 +458,7 @@ impl AppRouter {
         let themes = Theme::all();
         let mut theme = self.theme.borrow_mut();
         let idx = themes.iter().position(|t| t.name == theme.name).unwrap_or(0);
-        *theme = themes[(idx + 1) % themes.len()];
+        *theme = themes[(idx + 1) % themes.len()].clone();
     }
 }
 
@@ -496,7 +496,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         }
         if kb.matches(actions::THEME, &key) {
             self.cycle_theme();
-            let theme = *self.theme.borrow();
+            let theme = self.theme.borrow().clone();
             self.router.borrow_mut().on_theme_change(&theme);
             return true;
         }
@@ -534,7 +534,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         handled
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(*self.theme.borrow())
+        Some(self.theme.borrow().clone())
     }
 }
 
@@ -552,11 +552,11 @@ fn main() -> std::io::Result<()> {
     let show_help_for_tick = Rc::clone(&show_help);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let theme = Rc::new(RefCell::new(env_theme));
+    let theme = Rc::new(RefCell::new(env_theme.clone()));
     let theme_for_tick = Rc::clone(&theme);
 
     let mut router = SceneRouter::new();
-    let initial_theme = *theme.borrow();
+    let initial_theme = theme.borrow().clone();
     router.register("home", Box::new(HomeScreen::new(initial_theme)));
     router.register("settings", Box::new(SettingsScreen::new(initial_theme)));
     router.register("profile", Box::new(ProfileScreen::new(initial_theme)));
@@ -586,7 +586,7 @@ fn main() -> std::io::Result<()> {
             }
 
             let mut router = router.borrow_mut();
-            let theme = *theme_for_tick.borrow();
+            let theme = theme_for_tick.borrow().clone();
 
             if router.needs_render() {
                 let (w, h) = ctx.compositor().size();

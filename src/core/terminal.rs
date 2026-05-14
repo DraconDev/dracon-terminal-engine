@@ -27,13 +27,27 @@ pub enum CursorShape {
 /// Terminal capability detection and custom escape sequence utilities.
 pub struct Capabilities {
     term: String,
+    colorterm: Option<String>,
+    term_program: Option<String>,
+    kitty_window_id: bool,
 }
 
 impl Capabilities {
-    /// Detect terminal capabilities from $TERM environment variable.
+    /// Detect terminal capabilities from environment variables.
+    ///
+    /// Checks `$TERM`, `$COLORTERM`, `$TERM_PROGRAM`, and `$KITTY_WINDOW_ID`
+    /// to determine color, mouse, and feature support.
     pub fn detect() -> Self {
         let term = env::var("TERM").unwrap_or_else(|_| "dumb".to_string());
-        Self { term }
+        let colorterm = env::var("COLORTERM").ok();
+        let term_program = env::var("TERM_PROGRAM").ok();
+        let kitty_window_id = env::var("KITTY_WINDOW_ID").is_ok();
+        Self {
+            term,
+            colorterm,
+            term_program,
+            kitty_window_id,
+        }
     }
 
     /// Returns the raw $TERM value.
@@ -43,19 +57,40 @@ impl Capabilities {
 
     /// Check if the terminal likely supports truecolor (24-bit color).
     ///
-    /// Terminals known to support truecolor: xterm-256color, screen-256color,
-    /// tmux-256color, iterm2, konsole, gnome-terminal, etc.
+    /// Checks `$COLORTERM` (set to `truecolor` or `24bit` by many terminals),
+    /// `$TERM_PROGRAM` (set by iTerm2, VSCode, etc.), and `$KITTY_WINDOW_ID`
+    /// (confirms kitty terminal) before falling back to `$TERM` matching.
     pub fn supports_truecolor(&self) -> bool {
+        if let Some(ref ct) = self.colorterm {
+            let ct_lower = ct.to_lowercase();
+            if ct_lower == "truecolor" || ct_lower == "24bit" {
+                return true;
+            }
+        }
+
+        if let Some(ref tp) = self.term_program {
+            let tp_lower = tp.to_lowercase();
+            if tp_lower.contains("iterm")
+                || tp_lower.contains("vscode")
+                || tp_lower.contains("hyper")
+                || tp_lower.contains("wezterm")
+                || tp_lower.contains("ghostty")
+            {
+                return true;
+            }
+        }
+
+        if self.kitty_window_id {
+            return true;
+        }
+
         let term_lower = self.term.to_lowercase();
-        // Known truecolor-capable terminals
         if term_lower.contains("256color") || term_lower.contains("truecolor") {
             return true;
         }
-        // Known non-truecolor or limited terminals
         if term_lower == "dumb" || term_lower.starts_with("vt100") || term_lower == "ansi" {
             return false;
         }
-        // Common modern terminals
         let truecolor_terms = [
             "xterm", "screen", "tmux", "rxvt", "kitty", "alacritty", "wezterm",
             "ghostty", "foot", "konsole", "gnome", "terminology", "eterm",

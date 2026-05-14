@@ -181,6 +181,10 @@ impl Plane {
     pub fn put_str(&mut self, mut x: u16, y: u16, text: &str) -> u16 {
         use crate::text::grapheme_width;
 
+        // SAFETY: `text` is a valid &str, so all byte slices derived from
+        // it at valid char boundaries are guaranteed valid UTF-8.
+        // We track byte offsets carefully and only advance by `len_utf8()`
+        // which always lands on a char boundary.
         let bytes = text.as_bytes();
         let mut byte_offset = 0;
 
@@ -189,77 +193,52 @@ impl Plane {
                 break;
             }
 
-            // Get the grapheme cluster info
-            let remaining = &bytes[byte_offset..];
-            let Some((c, char_len)) = std::str::from_utf8(remaining)
-                .ok()
-                .and_then(|s| s.chars().next())
-                .map(|c| (c, c.len_utf8()))
-            else {
-                // Invalid UTF-8, skip byte
-                byte_offset += 1;
-                x += 1;
-                continue;
-            };
+            let (c, char_len) = unsafe { next_char_unchecked(bytes, byte_offset) };
 
-            // Check if this is a regional indicator pair (flag emoji)
             if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
                 let next_offset = byte_offset + char_len;
                 if next_offset < bytes.len() {
-                    if let Some(next_c) = std::str::from_utf8(&bytes[next_offset..])
-                        .ok()
-                        .and_then(|s| s.chars().next())
-                    {
-                        let next_len = next_c.len_utf8();
-                        if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
-                            // Flag emoji: write both regional indicators
-                            if x + 1 >= self.width {
-                                break;
-                            }
-                            let idx = (y * self.width + x) as usize;
-                            self.cells[idx].char = c;
-                            self.cells[idx].transparent = false;
-                            self.cells[idx].skip = false;
-
-                            let next_idx = idx + 1;
-                            self.cells[next_idx].char = next_c;
-                            self.cells[next_idx].transparent = false;
-                            self.cells[next_idx].skip = true;
-
-                            x += 2;
-                            byte_offset += char_len + next_len;
-                            continue;
+                    let (next_c, next_len) = unsafe { next_char_unchecked(bytes, next_offset) };
+                    if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
+                        if x + 1 >= self.width {
+                            break;
                         }
+                        let idx = (y * self.width + x) as usize;
+                        self.cells[idx].char = c;
+                        self.cells[idx].transparent = false;
+                        self.cells[idx].skip = false;
+
+                        let next_idx = idx + 1;
+                        self.cells[next_idx].char = next_c;
+                        self.cells[next_idx].transparent = false;
+                        self.cells[next_idx].skip = true;
+
+                        x += 2;
+                        byte_offset += char_len + next_len;
+                        continue;
                     }
                 }
-                // Single regional indicator: skip (zero-width)
                 byte_offset += char_len;
                 continue;
             }
 
-            // Get width of this grapheme cluster
             let width = grapheme_width(c);
 
-            // Skip zero-width characters
             if width == 0 {
-                // Skip combining marks, ZWJ, etc. by consuming them
                 let consumed = Self::consume_grapheme_cluster(text, byte_offset);
                 byte_offset += consumed;
                 continue;
             }
 
-            // If it's a wide char (width 2), we need to ensure space
             if width == 2 && x + 1 >= self.width {
                 break;
             }
 
-            // Write the character
             let idx = (y * self.width + x) as usize;
             self.cells[idx].char = c;
             self.cells[idx].transparent = false;
             self.cells[idx].skip = false;
 
-            // Mark next cell as padding for wide characters
             if width == 2 {
                 let next_idx = idx + 1;
                 self.cells[next_idx].char = ' ';
@@ -267,7 +246,6 @@ impl Plane {
                 self.cells[next_idx].skip = true;
             }
 
-            // Consume the full grapheme cluster (including combining marks)
             let consumed = Self::consume_grapheme_cluster(text, byte_offset);
             byte_offset += consumed;
             x += width as u16;
@@ -280,54 +258,37 @@ impl Plane {
     fn consume_grapheme_cluster(text: &str, byte_offset: usize) -> usize {
         use crate::text::grapheme_width;
 
+        // SAFETY: Same rationale as put_str — `text` is valid UTF-8 and
+        // byte_offset is always advanced by char_len which lands on a
+        // valid char boundary.
         let bytes = text.as_bytes();
-        let remaining = &bytes[byte_offset..];
 
-        let Some((_c, char_len)) = std::str::from_utf8(remaining)
-            .ok()
-            .and_then(|s| s.chars().next())
-            .map(|c| (c, c.len_utf8()))
-        else {
-            return 1; // Invalid UTF-8, consume 1 byte
-        };
+        let (c, char_len) = unsafe { next_char_unchecked(bytes, byte_offset) };
 
-        // Skip regional indicators (flags) - they only start clusters, don't extend them
         let mut pos = byte_offset;
-        if matches!(_c, '\u{1F1E6}'..='\u{1F1FF}') {
-            // Skip the single RI, let the main loop handle pairs
+        if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
             return char_len;
         }
 
         pos += char_len;
 
         while pos < bytes.len() {
-            let rem = &bytes[pos..];
-            let Some((next_c, next_len)) = std::str::from_utf8(rem)
-                .ok()
-                .and_then(|s| s.chars().next())
-                .map(|c| (c, c.len_utf8()))
-            else {
-                break;
-            };
+            let (next_c, next_len) = unsafe { next_char_unchecked(bytes, pos) };
 
-            // ZWJ continues the cluster
             if next_c == '\u{200D}' {
                 pos += next_len;
                 continue;
             }
 
-            // Skin tone modifiers extend the cluster
             if matches!(next_c, '\u{1F3FB}'..='\u{1F3FF}') {
                 pos += next_len;
                 continue;
             }
 
-            // Regional indicator starts a new grapheme
             if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                 break;
             }
 
-            // Zero-width characters are part of this cluster
             if grapheme_width(next_c) == 0 {
                 pos += next_len;
                 continue;
@@ -410,24 +371,44 @@ impl Plane {
     ///
     /// # Performance
     ///
-    /// - **Fully opaque source**: Uses `copy_from_slice` for O(n) bulk copy
+    /// - **Fully opaque source, exact dimensions**: Single `copy_from_slice` for O(n) bulk copy
+    /// - **Fully opaque source, smaller than dest**: Per-row `copy_from_slice` on the overlapping region
     /// - **Contains transparent cells**: Falls back to `blit_from` behavior
-    ///
-    /// # Panics
-    ///
-    /// Panics if source dimensions differ from destination blit area dimensions.
     pub fn blit_from_fast(&mut self, source: &Plane) {
-        // Fast path: if all cells are opaque, use bulk copy
         if source.cells.iter().all(|c| !c.transparent) {
-            // Validate dimensions match for bulk copy
             if source.width == self.width && source.height == self.height {
                 self.cells.copy_from_slice(&source.cells);
+            } else if source.width == self.width {
+                let copy_rows = (source.height as usize).min(self.height as usize);
+                let src_stride = source.width as usize;
+                let dst_stride = self.width as usize;
+                for row in 0..copy_rows {
+                    let src_start = row * src_stride;
+                    let src_end = src_start + src_stride;
+                    let dst_start = row * dst_stride;
+                    let dst_end = dst_start + src_stride;
+                    if dst_end <= self.cells.len() && src_end <= source.cells.len() {
+                        self.cells[dst_start..dst_end]
+                            .copy_from_slice(&source.cells[src_start..src_end]);
+                    }
+                }
             } else {
-                // Dimensions differ, need to blit with offset (0, 0)
-                self.blit_from(source, 0, 0);
+                let copy_rows = (source.height as usize).min(self.height as usize);
+                let copy_cols = (source.width as usize).min(self.width as usize);
+                let src_stride = source.width as usize;
+                let dst_stride = self.width as usize;
+                for row in 0..copy_rows {
+                    let src_start = row * src_stride;
+                    let dst_start = row * dst_stride;
+                    if dst_start + copy_cols <= self.cells.len()
+                        && src_start + copy_cols <= source.cells.len()
+                    {
+                        self.cells[dst_start..dst_start + copy_cols]
+                            .copy_from_slice(&source.cells[src_start..src_start + copy_cols]);
+                    }
+                }
             }
         } else {
-            // Fallback: use per-cell blit for transparent cell handling
             self.blit_from(source, 0, 0);
         }
     }
@@ -478,4 +459,18 @@ impl Plane {
 
         plane
     }
+}
+
+/// Reads the next char and its byte length from `bytes` starting at `offset`.
+///
+/// # Safety
+///
+/// `offset` must be a valid char boundary within `bytes`, and `bytes` must
+/// be valid UTF-8. Both invariants hold when `bytes` comes from a `&str` and
+/// `offset` is advanced only by previous `len_utf8()` values.
+#[inline]
+unsafe fn next_char_unchecked(bytes: &[u8], offset: usize) -> (char, usize) {
+    let s = std::str::from_utf8_unchecked(&bytes[offset..]);
+    let c = s.chars().next().unwrap();
+    (c, c.len_utf8())
 }

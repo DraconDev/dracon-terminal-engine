@@ -70,7 +70,7 @@ fn main() {
 }
 ```"#;
 
-            let rich_text = RichText::new(content).with_theme(*theme);
+            let rich_text = RichText::new(content).with_theme(theme.clone());
             let content_area = Rect::new(2, 3, w.saturating_sub(4), h.saturating_sub(6));
             let content_plane = rich_text.render(content_area);
 

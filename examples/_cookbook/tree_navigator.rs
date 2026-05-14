@@ -158,7 +158,7 @@ impl TreeNav {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
     }
@@ -204,7 +204,7 @@ impl Widget for TreeNav {
     fn clear_dirty(&mut self) {}
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 
     fn focusable(&self) -> bool {
@@ -564,7 +564,7 @@ fn main() -> std::io::Result<()> {
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())
         .unwrap_or((80, 24));
 
-    let mut nav = TreeNav::new(WidgetId::new(0), env_theme);
+    let mut nav = TreeNav::new(WidgetId::new(0), env_theme.clone());
     nav.set_area(Rect::new(0, 0, w, h));
 
     let should_quit = Arc::new(AtomicBool::new(false));
@@ -572,7 +572,7 @@ fn main() -> std::io::Result<()> {
 
     let quit_keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(env_theme);
+    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(env_theme.clone());
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

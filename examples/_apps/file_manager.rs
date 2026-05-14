@@ -80,7 +80,7 @@ impl Widget for FileManagerRouter {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 
@@ -325,7 +325,7 @@ impl FileManager {
         self.root = FsNode::build_tree(&home_path, 0);
         self.tree = Tree::new(WidgetId::new(2))
             .with_root(vec![self.root.to_tree_node(true)])
-            .with_theme(self.theme);
+            .with_theme(self.theme.clone());
         self.dirty = true;
         self.toast("Directory refreshed", ToastKind::Info);
     }
@@ -381,7 +381,7 @@ impl FileManager {
                     self.root.children = children;
                     self.tree = Tree::new(WidgetId::new(2))
                         .with_root(vec![self.root.to_tree_node(true)])
-                        .with_theme(self.theme);
+                        .with_theme(self.theme.clone());
                     self.tree_path.clear();
                     self.selected_path = None;
                     self.update_breadcrumbs();
@@ -456,7 +456,7 @@ impl FileManager {
             Toast::new(WidgetId::new(100), msg)
                 .with_kind(kind)
                 .with_duration(Duration::from_secs(2))
-                .with_theme(self.theme),
+                .with_theme(self.theme.clone()),
         );
         self.dirty = true;
     }
@@ -467,7 +467,7 @@ impl FileManager {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.tree.on_theme_change(&self.theme);
         self.breadcrumbs.on_theme_change(&self.theme);
         self.split.on_theme_change(&self.theme);
@@ -485,7 +485,7 @@ impl FileManager {
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
         self.breadcrumbs =
-            Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(self.theme);
+            Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(self.theme.clone());
     }
 
     fn navigate_to(&mut self, path: PathBuf) {
@@ -494,7 +494,7 @@ impl FileManager {
             self.root = FsNode::build_tree(&canonical, 0);
             self.tree = Tree::new(WidgetId::new(2))
                 .with_root(vec![self.root.to_tree_node(true)])
-                .with_theme(self.theme);
+                .with_theme(self.theme.clone());
             self.tree_path.clear();
             self.selected_path = None;
             self.update_breadcrumbs();
@@ -518,7 +518,7 @@ impl FileManager {
                 .map(|s| s.to_string())
                 .collect()
         } else {
-            vec!["<binary file>".to_string()]
+            vec!["<binary file>".to_string()].clone()
         }
     }
 
@@ -583,13 +583,13 @@ impl FileManager {
             ("New File", ContextAction::Copy),
             ("Delete", ContextAction::Cut),
             ("Refresh", ContextAction::Edit),
-        ]
+        ].clone()
     }
 
     fn make_context_menu(&self, anchor_x: u16, anchor_y: u16) -> ContextMenu {
         ContextMenu::new_with_id(WidgetId::new(50), Self::context_menu_items())
             .with_anchor(anchor_x, anchor_y)
-            .with_theme(self.theme)
+            .with_theme(self.theme.clone())
     }
 
     fn execute_context_action(&mut self, action: &ContextAction) {
@@ -660,7 +660,7 @@ impl Widget for FileManager {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
 
         for cell in plane.cells.iter_mut() {
@@ -1040,7 +1040,7 @@ impl Widget for FileManager {
 
         // Prompt overlay
         if let Some(ref prompt) = self.prompt {
-            let t = self.theme;
+            let t = self.theme.clone();
             let pw = 50u16.min(area.width.saturating_sub(4));
             let ph = 3u16;
             let px = (area.width - pw) / 2;

@@ -56,7 +56,7 @@ impl Widget for StatWidget {
         let mut plane = Plane::new(self.id.0 as u16, area.width, area.height);
         plane.fill_bg(self.theme.bg);
 
-        let t = &self.theme;
+        let t = self.theme.clone();
         let label = &self.label;
         let value = &self.value;
 
@@ -91,11 +91,11 @@ impl Widget for StatWidget {
         true
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.accent = theme.primary;
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.theme)
+        Some(self.theme.clone())
     }
 }
 
@@ -137,7 +137,7 @@ impl PluginDemoApp {
                 reg.create("stat_mem", WidgetId::new(2), theme).unwrap(),
                 reg.create("stat_disk", WidgetId::new(3), theme).unwrap(),
                 reg.create("stat_net", WidgetId::new(4), theme).unwrap(),
-            ]
+            ].clone()
         };
 
         Self {
@@ -155,7 +155,7 @@ impl PluginDemoApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.dirty = true;
     }
 }
@@ -172,7 +172,7 @@ impl Widget for PluginDemoApp {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
-        let t = &self.theme;
+        let t = self.theme.clone();
 
         // Title bar
         plane.fill_bg(t.surface);
@@ -381,12 +381,12 @@ impl Widget for PluginDemoApp {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.theme)
+        Some(self.theme.clone())
     }
 }
 
@@ -396,7 +396,7 @@ impl Widget for PluginDemoApp {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_theme = Theme::from_env_or(Theme::nord());
-    let theme = env_theme;
+    let theme = env_theme.clone();
 
     let app = PluginDemoApp::new(theme);
 

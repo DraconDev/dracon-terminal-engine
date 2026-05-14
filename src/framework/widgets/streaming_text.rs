@@ -39,7 +39,7 @@ pub struct StreamingText {
 impl StreamingText {
     pub fn new() -> Self {
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             content: String::new(),
             lines: VecDeque::new(),
             max_lines: 200,
@@ -242,6 +242,6 @@ impl Widget for StreamingText {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

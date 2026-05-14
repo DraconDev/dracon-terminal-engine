@@ -220,7 +220,7 @@ impl<'a> ModalDemoApp<'a> {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.label.on_theme_change(&self.theme);
         self.confirm_dialog.on_theme_change(&self.theme);
         self.confirm_btn.on_theme_change(&self.theme);
@@ -376,7 +376,7 @@ impl Widget for ModalDemoRouter {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 
@@ -385,13 +385,13 @@ fn main() -> io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     let env_theme = Theme::from_env_or(Theme::dark());
 
-    let demo = Rc::new(RefCell::new(ModalDemoApp::new(should_quit, env_theme)));
+    let demo = Rc::new(RefCell::new(ModalDemoApp::new(should_quit, env_theme.clone())));
     let demo_for_render = Rc::clone(&demo);
     let demo_for_input = Rc::clone(&demo);
 
     let mut app = App::new()?.title("Modal Demo").fps(30).theme(Theme::from_env_or(Theme::dark()));
 
-    app.set_theme(env_theme);
+    app.set_theme(env_theme.clone());
 
     // Register input router so keyboard/mouse events reach the demo
     let router = ModalDemoRouter {

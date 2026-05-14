@@ -55,8 +55,8 @@ impl Autocomplete {
 
     /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
+        self.base.theme = theme.clone();
         self.theme = theme;
-        self.base.theme = theme;
         self
     }
 
@@ -410,7 +410,7 @@ impl Widget for Autocomplete {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
-        self.base.theme = *theme;
+        self.theme = theme.clone();
+        self.base.theme = theme.clone();
     }
 }

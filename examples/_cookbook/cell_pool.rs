@@ -111,7 +111,7 @@ impl Widget for PoolDemo {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 }

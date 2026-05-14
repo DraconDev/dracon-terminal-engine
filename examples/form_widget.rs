@@ -62,7 +62,7 @@ impl FormApp {
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.form.borrow_mut().on_theme_change(&self.theme);
     }
 
@@ -72,7 +72,7 @@ impl FormApp {
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let kb_theme = self.kb_config.get(actions::THEME).unwrap_or("t");
         let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
         let kb_back = self.kb_config.get(actions::BACK).unwrap_or("Esc");
@@ -146,7 +146,7 @@ impl FormApp {
     }
 
     fn render_submitted_banner(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let msg = " ✓ Form submitted successfully! ";
         let w = msg.len() as u16 + 4;
         let h = 3u16;
@@ -186,7 +186,7 @@ impl Widget for FormApp {
     fn focusable(&self) -> bool { true }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.form.borrow_mut().on_theme_change(theme);
     }
 

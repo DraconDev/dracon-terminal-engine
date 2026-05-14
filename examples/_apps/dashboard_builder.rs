@@ -390,7 +390,7 @@ impl Widget for Dashboard {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -690,7 +690,7 @@ impl Dashboard {
                 };
 
                 let name = if proc.name.len() > 14 {
-                    &proc.name[..14]
+                    &proc.name[..14].clone()
                 } else {
                     &proc.name
                 };
@@ -878,7 +878,7 @@ fn main() -> std::io::Result<()> {
 
     let env_theme = Theme::from_env_or(Theme::nord());
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let dashboard = Dashboard::new(should_quit, keybindings, env_theme);
+    let dashboard = Dashboard::new(should_quit, keybindings, env_theme.clone());
     app.add_widget(Box::new(dashboard), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {

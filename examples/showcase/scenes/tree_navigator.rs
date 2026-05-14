@@ -91,7 +91,7 @@ impl Scene for TreeNavigatorScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -192,7 +192,7 @@ impl Scene for TreeNavigatorScene {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.tree.on_theme_change(theme);
         self.breadcrumbs.on_theme_change(theme);
     }

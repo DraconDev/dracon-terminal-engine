@@ -39,6 +39,8 @@ use signal_hook::consts::signal::{SIGINT, SIGTERM};
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
+use std::ops::Deref;
+use std::ops::DerefMut;
 use std::collections::HashMap;
 use std::io::{self, Read, Write};
 use std::os::fd::AsFd;
@@ -63,6 +65,42 @@ use std::time::{Duration, Instant};
 /// ```
 /// Tick callback type alias for cleaner signatures.
 pub(crate) type TickCallback = Box<dyn FnMut(&mut Ctx, u64) + 'static>;
+
+/// Opaque wrapper around `Ref<'_, Box<dyn Widget>>` that hides the `RefCell`
+/// borrow guard from the public API.
+///
+/// Derefs to `Box<dyn Widget>`, so callers can use widget methods directly.
+pub struct WidgetRef<'a> {
+    inner: Ref<'a, Box<dyn Widget>>,
+}
+
+impl<'a> Deref for WidgetRef<'a> {
+    type Target = Box<dyn Widget>;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+/// Opaque wrapper around `RefMut<'_, Box<dyn Widget>>` that hides the `RefCell`
+/// borrow guard from the public API.
+///
+/// Derefs to `Box<dyn Widget>`, so callers can use widget methods directly.
+pub struct WidgetRefMut<'a> {
+    inner: RefMut<'a, Box<dyn Widget>>,
+}
+
+impl<'a> Deref for WidgetRefMut<'a> {
+    type Target = Box<dyn Widget>;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<'a> DerefMut for WidgetRefMut<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
 
 pub struct App {
     terminal: Terminal<io::Stdout>,
@@ -333,7 +371,7 @@ impl App {
         self.theme = theme;
         self.dirty_tracker.mark_all_dirty();
         for widget in self.widgets.borrow_mut().iter_mut() {
-            widget.on_theme_change(&theme);
+            widget.on_theme_change(&self.theme);
             widget.mark_dirty();
         }
         self
@@ -456,17 +494,21 @@ impl App {
     }
 
     /// Returns an immutable reference to a widget by ID.
-    pub fn widget(&self, id: WidgetId) -> Option<Ref<'_, Box<dyn Widget>>> {
+    pub fn widget(&self, id: WidgetId) -> Option<WidgetRef<'_>> {
         let widgets = self.widgets.borrow();
         let idx = widgets.iter().position(|w| w.id() == id)?;
-        Some(Ref::map(widgets, |w| &w[idx]))
+        Some(WidgetRef {
+            inner: Ref::map(widgets, |w| &w[idx]),
+        })
     }
 
     /// Returns a mutable reference to a widget by ID.
-    pub fn widget_mut(&mut self, id: WidgetId) -> Option<RefMut<'_, Box<dyn Widget>>> {
+    pub fn widget_mut(&mut self, id: WidgetId) -> Option<WidgetRefMut<'_>> {
         let widgets = self.widgets.borrow_mut();
         let idx = widgets.iter().position(|w| w.id() == id)?;
-        Some(RefMut::map(widgets, |w| &mut w[idx]))
+        Some(WidgetRefMut {
+            inner: RefMut::map(widgets, |w| &mut w[idx]),
+        })
     }
 
     /// Returns the number of registered widgets.
@@ -482,6 +524,155 @@ impl App {
     /// Returns the last frame duration in milliseconds.
     pub fn frame_time_ms(&self) -> f64 {
         self.compositor.last_frame_duration_ms()
+    }
+
+    fn poll_and_dispatch_input(&mut self, stdin: &mut io::Stdin) {
+        let running = self.running.clone();
+        match tty::poll_input(stdin.as_fd(), 1) {
+            Ok(true) => {
+                let mut chunk_buf = [0u8; 1024];
+                if let Ok(n) = stdin.read(&mut chunk_buf) {
+                    if n == 0 {
+                        // EOF - shouldn't happen for stdin
+                    }
+                    for byte in chunk_buf.iter().take(n) {
+                        if let Some(event) = self.parser.advance(*byte) {
+                            #[cfg(feature = "debug_events")]
+                            match &event {
+                                Event::Key(k) => log_key_event(k),
+                                Event::Mouse(m) => log_mouse_event(m),
+                                _ => {}
+                            }
+                            self.handle_event(&event, &running);
+                        }
+                    }
+                }
+                for _ in 0..64 {
+                    match tty::poll_input(stdin.as_fd(), 0) {
+                        Ok(true) => {
+                            let mut drain_buf = [0u8; 1024];
+                            if let Ok(dn) = stdin.read(&mut drain_buf) {
+                                if dn == 0 { break; }
+                                for byte in drain_buf.iter().take(dn) {
+                                    if let Some(event) = self.parser.advance(*byte) {
+                                        self.handle_event(&event, &running);
+                                    }
+                                }
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+            }
+            Ok(false) => {
+                if let Some(evt) = self.parser.check_timeout() {
+                    #[cfg(feature = "debug_events")]
+                    match &evt {
+                        Event::Key(k) => log_key_event(k),
+                        Event::Mouse(m) => log_mouse_event(m),
+                        _ => {}
+                    }
+                    self.handle_event(&evt, &running);
+                }
+            }
+            Err(_) => {}
+        }
+    }
+
+    fn render_dirty_widgets(&mut self) {
+        #[cfg(feature = "tracing")]
+        let _widget_span = tracing::debug_span!("widget_dispatch").entered();
+        let mut widgets = self.widgets.borrow_mut();
+        let mut sorted: Vec<_> = widgets.iter_mut().collect();
+        sorted.sort_by_key(|w| w.z_index());
+        for w in sorted {
+            if !w.needs_render() {
+                continue;
+            }
+            let area = w.area();
+            #[cfg(feature = "tracing")]
+            let _render_span = tracing::debug_span!(
+                "widget_render",
+                widget_id = w.id().0,
+                width = area.width,
+                height = area.height
+            )
+            .entered();
+            let plane = w.render(area);
+            w.clear_dirty();
+            self.compositor.add_plane(plane);
+        }
+    }
+
+    fn run_tick_callback(&mut self, frame_count: &Arc<AtomicU64>) {
+        if self.last_tick_time.elapsed() < self.tick_interval {
+            return;
+        }
+        if let Some(ref mut tick_fn) = *self.on_tick.borrow_mut() {
+            let prev_theme_name = self.theme.name.clone();
+            tick_fn(
+                &mut Ctx {
+                    compositor: &mut self.compositor,
+                    theme: &mut self.theme,
+                    frame_count: frame_count.load(Ordering::SeqCst),
+                    last_frame: &self.last_frame_time,
+                    terminal: &mut self.terminal,
+                    focus_manager: &mut self.focus_manager,
+                    animations: &mut self.animations,
+                    dirty_tracker: &mut self.dirty_tracker,
+                    commands: &self.commands,
+                    running: &self.running,
+                    event_bus: &self.event_bus,
+                    scene_router: &mut self.scene_router,
+                },
+                self.tick_count,
+            );
+            if self.theme.name != prev_theme_name {
+                self.compositor.set_clear_color(self.theme.bg);
+                self.dirty_tracker.mark_all_dirty();
+                for widget in self.widgets.borrow_mut().iter_mut() {
+                    widget.on_theme_change(&self.theme);
+                    widget.mark_dirty();
+                }
+            }
+            self.tick_count += 1;
+            self.last_tick_time = Instant::now();
+        }
+    }
+
+    fn run_periodic_commands(&mut self) {
+        let now = Instant::now();
+        let mut to_reschedule: Vec<(WidgetId, BoundCommand)> = Vec::new();
+        let mut expired: Vec<WidgetId> = Vec::new();
+        {
+            let tracked = self.command_tracking.borrow();
+            for (&wid, (last_run, cmd)) in tracked.iter() {
+                let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
+                if interval.is_zero() || now.duration_since(*last_run) < interval {
+                    continue;
+                }
+                expired.push(wid);
+            }
+        }
+        for wid in expired {
+            let cmd = match self.command_tracking.borrow().get(&wid) {
+                Some((_, c)) => c.clone(),
+                None => continue,
+            };
+            if let Some(mut w) = self.widget_mut(wid) {
+                let runner = CommandRunner::new(&cmd.command);
+                let (stdout, stderr, exit_code) = runner.run_sync();
+                let output = cmd.parse_output(&stdout, &stderr, exit_code);
+                w.apply_command_output(&output);
+                w.mark_dirty();
+                to_reschedule.push((wid, cmd));
+            }
+        }
+        for (wid, cmd) in to_reschedule {
+            self.command_tracking
+                .borrow_mut()
+                .insert(wid, (Instant::now(), cmd));
+        }
     }
 
     /// Starts the application event loop.
@@ -529,7 +720,6 @@ impl App {
         let mut stdin = io::stdin();
         let frame_duration = Duration::from_secs_f64(1.0 / self.fps as f64);
 
-        // One-time: sync widget areas to compositor size on first frame
         let (w, h) = self.compositor.size();
         let full_rect = Rect::new(0, 0, w, h);
         for w in self.widgets.borrow_mut().iter_mut() {
@@ -545,156 +735,16 @@ impl App {
             #[cfg(feature = "tracing")]
             let _input_span = tracing::debug_span!("input_poll").entered();
 
-            match tty::poll_input(stdin.as_fd(), 1) {
-                Ok(true) => {
-                    let mut chunk_buf = [0u8; 1024];
-                    if let Ok(n) = stdin.read(&mut chunk_buf) {
-                        if n == 0 {
-                            // EOF - shouldn't happen for stdin
-                        }
-                        for byte in chunk_buf.iter().take(n) {
-                            if let Some(event) = self.parser.advance(*byte) {
-                                #[cfg(feature = "debug_events")]
-                                match &event {
-                                    Event::Key(k) => log_key_event(k),
-                                    Event::Mouse(m) => log_mouse_event(m),
-                                    _ => {}
-                                }
-                                self.handle_event(&event, &running);
-                            }
-                        }
-                    }
-                    // Drain any remaining queued input (e.g. burst of scroll events)
-                    // to prevent multi-frame lag from event queue buildup
-                    for _ in 0..64 {
-                        match tty::poll_input(stdin.as_fd(), 0) {
-                            Ok(true) => {
-                                let mut drain_buf = [0u8; 1024];
-                                if let Ok(dn) = stdin.read(&mut drain_buf) {
-                                    if dn == 0 { break; }
-                                    for byte in drain_buf.iter().take(dn) {
-                                        if let Some(event) = self.parser.advance(*byte) {
-                                            self.handle_event(&event, &running);
-                                        }
-                                    }
-                                }
-                            }
-                            _ => break, // No more data or error — stop draining
-                        }
-                    }
-                }
-                Ok(false) => {
-                    if let Some(evt) = self.parser.check_timeout() {
-                        #[cfg(feature = "debug_events")]
-                        match &evt {
-                            Event::Key(k) => log_key_event(k),
-                            Event::Mouse(m) => log_mouse_event(m),
-                            _ => {}
-                        }
-                        self.handle_event(&evt, &running);
-                    }
-                }
-                Err(_) => {}
-            }
+            self.poll_and_dispatch_input(&mut stdin);
+
             #[cfg(feature = "tracing")]
             drop(_input_span);
 
-            {
-                #[cfg(feature = "tracing")]
-                let _widget_span = tracing::debug_span!("widget_dispatch").entered();
-                let mut widgets = self.widgets.borrow_mut();
-                let mut sorted: Vec<_> = widgets.iter_mut().collect();
-                sorted.sort_by_key(|w| w.z_index());
-                for w in sorted {
-                    if !w.needs_render() {
-                        continue;
-                    }
-                    let area = w.area();
-                    #[cfg(feature = "tracing")]
-                    let _render_span = tracing::debug_span!(
-                        "widget_render",
-                        widget_id = w.id().0,
-                        width = area.width,
-                        height = area.height
-                    )
-                    .entered();
-                    let plane = w.render(area);
-                    w.clear_dirty();
-                    self.compositor.add_plane(plane);
-                }
-                #[cfg(feature = "tracing")]
-                drop(_widget_span);
-            }
+            self.render_dirty_widgets();
 
-            if self.last_tick_time.elapsed() >= self.tick_interval {
-                if let Some(ref mut tick_fn) = *self.on_tick.borrow_mut() {
-                    let prev_theme_name = self.theme.name;
-                    tick_fn(
-                        &mut Ctx {
-                            compositor: &mut self.compositor,
-                            theme: &mut self.theme,
-                            frame_count: frame_count.load(Ordering::SeqCst),
-                            last_frame: &self.last_frame_time,
-                            terminal: &mut self.terminal,
-                            focus_manager: &mut self.focus_manager,
-                            animations: &mut self.animations,
-                            dirty_tracker: &mut self.dirty_tracker,
-                            commands: &self.commands,
-                            running: &self.running,
-                            event_bus: &self.event_bus,
-                            scene_router: &mut self.scene_router,
-                        },
-                        self.tick_count,
-                    );
-                    // If the theme was changed during the on_tick callback
-                    // (via Ctx::set_theme), propagate it to all widgets.
-                    if self.theme.name != prev_theme_name {
-                        self.compositor.set_clear_color(self.theme.bg);
-                        self.dirty_tracker.mark_all_dirty();
-                        for widget in self.widgets.borrow_mut().iter_mut() {
-                            widget.on_theme_change(&self.theme);
-                            widget.mark_dirty();
-                        }
-                    }
-                    self.tick_count += 1;
-                    self.last_tick_time = Instant::now();
-                }
-            }
+            self.run_tick_callback(&frame_count);
 
-            {
-                let now = Instant::now();
-                let mut to_reschedule: Vec<(WidgetId, BoundCommand)> = Vec::new();
-                let mut expired: Vec<WidgetId> = Vec::new();
-                {
-                    let tracked = self.command_tracking.borrow();
-                    for (&wid, (last_run, cmd)) in tracked.iter() {
-                        let interval = Duration::from_secs(cmd.refresh_seconds.unwrap_or(0));
-                        if interval.is_zero() || now.duration_since(*last_run) < interval {
-                            continue;
-                        }
-                        expired.push(wid);
-                    }
-                }
-                for wid in expired {
-                    let cmd = match self.command_tracking.borrow().get(&wid) {
-                        Some((_, c)) => c.clone(),
-                        None => continue,
-                    };
-                    if let Some(mut w) = self.widget_mut(wid) {
-                        let runner = CommandRunner::new(&cmd.command);
-                        let (stdout, stderr, exit_code) = runner.run_sync();
-                        let output = cmd.parse_output(&stdout, &stderr, exit_code);
-                        w.apply_command_output(&output);
-                        w.mark_dirty();
-                        to_reschedule.push((wid, cmd));
-                    }
-                }
-                for (wid, cmd) in to_reschedule {
-                    self.command_tracking
-                        .borrow_mut()
-                        .insert(wid, (Instant::now(), cmd));
-                }
-            }
+            self.run_periodic_commands();
 
             f(&mut Ctx {
                 compositor: &mut self.compositor,
@@ -711,11 +761,8 @@ impl App {
                 scene_router: &mut self.scene_router,
             });
 
-            // Only render when there are planes to composite.
-            // Prevents a black screen when no widget needs rendering:
-            // with empty planes, the compositor's final_buffer is all-black
-            // and the diff against the previous frame overwrites every cell.
             if !self.compositor.planes.is_empty() {
+                self.compositor.set_dirty_regions(&self.dirty_tracker);
                 self.compositor.render(&mut self.terminal)?;
             }
 
@@ -732,18 +779,14 @@ impl App {
             }
         }
 
-        // Restore the previous panic hook so our custom one (which holds
-        // a raw pointer into self) doesn't dangle after this method returns.
         let _our_hook = std::panic::take_hook();
         if let Ok(mut guard) = previous_hook.lock() {
             let original = std::mem::replace(&mut *guard, Box::new(|_| {}));
             std::panic::set_hook(original);
         }
 
-        // If DTRON_THEME_FILE is set, write the final theme name so the
-        // parent process (e.g. showcase) can pick it up after this app exits.
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
-            let _ = std::fs::write(&path, self.theme.name);
+            let _ = std::fs::write(&path, self.theme.name.as_bytes());
         }
 
         Ok(())
@@ -896,8 +939,8 @@ impl<'a> Ctx<'a> {
     /// The theme change is detected by `App::run()` after the tick callback
     /// and propagated to all widgets automatically.
     pub fn set_theme(&mut self, theme: Theme) {
-        *self.theme = theme;
         self.compositor.set_clear_color(theme.bg);
+        *self.theme = theme;
     }
 
     /// Clears the entire terminal.
@@ -1261,7 +1304,7 @@ macro_rules! with_ctx {
         app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         let theme = Theme::cyberpunk();
         app.set_theme(theme);
-        assert_eq!(app.theme.name, "cyberpunk");
+        assert_eq!(&*app.theme.name, "cyberpunk");
     }
 
     #[test]
@@ -1312,7 +1355,7 @@ macro_rules! with_ctx {
     #[test]
     fn test_ctx_theme_access() {
         with_ctx!(ctx, {
-            assert!(ctx.theme().name == "default" || ctx.theme().name == "dark");
+            assert!(ctx.theme().name == Arc::from("default") || ctx.theme().name == Arc::from("dark"));
         });
     }
 

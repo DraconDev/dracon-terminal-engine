@@ -79,12 +79,12 @@ impl Widget for SplitResizerApp {
         self.dirty = false;
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.dirty = true;
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 0;
         for c in p.cells.iter_mut() {
@@ -149,7 +149,7 @@ impl Widget for SplitResizerApp {
                 .iter()
                 .position(|t| t.name == self.theme.name)
                 .unwrap_or(0);
-            self.theme = themes[(idx + 1) % themes.len()];
+            self.theme = themes[(idx + 1) % themes.len()].clone();
             self.dirty = true;
             return true;
         }
@@ -678,7 +678,7 @@ impl Widget for InputRouter {
         self.target.borrow_mut().on_theme_change(theme);
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 

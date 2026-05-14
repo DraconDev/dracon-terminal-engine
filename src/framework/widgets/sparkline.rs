@@ -34,7 +34,7 @@ impl Sparkline {
     pub fn new(data: Vec<f64>) -> Self {
         let (min, max) = Self::compute_range(&data);
         Self {
-            id: WidgetId::default_id(),
+            id: WidgetId::next(),
             data,
             color: Color::Ansi(12), // cyan
             fill_color: None,
@@ -437,6 +437,6 @@ impl crate::framework::widget::Widget for Sparkline {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

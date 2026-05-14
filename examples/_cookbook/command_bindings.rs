@@ -309,7 +309,7 @@ impl Widget for CommandBindings {
         self.dirty = false;
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.gauge.on_theme_change(theme);
         self.kv_grid.on_theme_change(theme);
         self.status.on_theme_change(theme);
@@ -319,7 +319,7 @@ impl Widget for CommandBindings {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut p = Plane::new(0, area.width, area.height);
 
         for c in p.cells.iter_mut() {
@@ -727,7 +727,7 @@ impl Widget for CommandBindings {
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = Theme::all();
             let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-            let next = themes[(idx + 1) % themes.len()];
+            let next = themes[(idx + 1) % themes.len()].clone();
             self.on_theme_change(&next);
             return true;
         }
@@ -772,7 +772,7 @@ impl Widget for InputRouter {
         self.view.borrow_mut().handle_key(key)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.view.borrow().theme)
+        Some(self.view.borrow().theme.clone())
     }
 }
 
@@ -786,7 +786,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone(), env_theme)));
+    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone(), env_theme.clone())));
     view.borrow_mut().keybindings = keybindings;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
@@ -798,7 +798,7 @@ fn main() -> std::io::Result<()> {
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .theme(env_theme);
+        .theme(env_theme.clone());
 
     // Add InputRouter widget so framework can detect theme changes via current_theme()
     app.add_widget(

@@ -174,6 +174,6 @@ impl crate::framework::widget::Widget for StatusBar {
     }
 
     fn on_theme_change(&mut self, theme: &crate::framework::theme::Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
     }
 }

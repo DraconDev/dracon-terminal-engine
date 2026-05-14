@@ -101,7 +101,7 @@ impl MenuApp {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.status_bar.on_theme_change(&self.theme);
         self.list.on_theme_change(&self.theme);
     }
@@ -266,7 +266,7 @@ impl Widget for MenuApp {
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.list.on_theme_change(theme);
         self.status_bar.on_theme_change(theme);
         for toast in &mut self.toasts {

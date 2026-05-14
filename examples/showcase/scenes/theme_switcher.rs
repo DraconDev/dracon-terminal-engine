@@ -94,7 +94,7 @@ impl Scene for ThemeSwitcherScene {
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
-        let t = self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -236,7 +236,7 @@ impl Scene for ThemeSwitcherScene {
                 }
                 if col >= x && col < x + swatch_w && row >= y && row < y + swatch_h {
                     self.theme_index = i;
-                    self.theme = *theme;
+                    self.theme = theme.clone();
                     self.checkbox.on_theme_change(&self.theme);
                     self.button.on_theme_change(&self.theme);
                     self.gauge.on_theme_change(&self.theme);
@@ -250,7 +250,7 @@ impl Scene for ThemeSwitcherScene {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.theme = *theme;
+        self.theme = theme.clone();
         self.checkbox.on_theme_change(theme);
         self.button.on_theme_change(theme);
         self.gauge.on_theme_change(theme);

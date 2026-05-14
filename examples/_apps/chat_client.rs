@@ -169,7 +169,7 @@ impl ChatState {
             .iter()
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
-        self.theme = themes[(idx + 1) % themes.len()];
+        self.theme = themes[(idx + 1) % themes.len()].clone();
         self.emoji_modal.on_theme_change(&self.theme);
         self.settings_modal.on_theme_change(&self.theme);
         self.dirty = true;
@@ -483,7 +483,7 @@ impl ChatState {
     // ── Rendering ─────────────────────────────────────────────────────────────
 
     fn render(&self, area: Rect) -> Plane {
-        let t = &self.theme;
+        let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(t.bg);
 
@@ -560,7 +560,7 @@ impl ChatState {
         if self.is_loading {
             let spinner_text = format!(
                 "{} Fetching posts from JSONPlaceholder...",
-                SPINNER_FRAMES[self.spinner_frame]
+                SPINNER_FRAMES[self.spinner_frame].clone()
             );
             let center_x = (area.width.saturating_sub(spinner_text.len() as u16)) / 2;
             let center_y = header_h + list_h / 2;
@@ -1084,7 +1084,7 @@ impl ChatState {
                 Toast::new(WidgetId::new(200), &toast_msg)
                     .with_kind(ToastKind::Success)
                     .with_duration(Duration::from_secs(2))
-                    .with_theme(self.theme)
+                    .with_theme(self.theme.clone())
                     .render(Rect::new(w.saturating_sub(25).max(1), h.saturating_sub(4), 20, 1)),
             );
             self.show_toast = false;
@@ -1136,7 +1136,7 @@ impl Widget for ChatInputRouter {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
     fn current_theme(&self) -> Option<Theme> {
-        Some(self.target.borrow().theme)
+        Some(self.target.borrow().theme.clone())
     }
 }
 
@@ -1170,8 +1170,8 @@ fn main() -> io::Result<()> {
     let kb_config = resolve_keybindings();
 
     let env_theme = Theme::from_env_or(Theme::default());
-    let mut app = App::new()?.title("Chat Client").fps(30).theme(env_theme);
-    let chat = Rc::new(RefCell::new(ChatState::new(should_quit, env_theme)));
+    let mut app = App::new()?.title("Chat Client").fps(30).theme(env_theme.clone());
+    let chat = Rc::new(RefCell::new(ChatState::new(should_quit, env_theme.clone())));
     {
         let mut c = chat.borrow_mut();
         c.keybindings = keybindings;
