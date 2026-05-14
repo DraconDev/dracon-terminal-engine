@@ -101,9 +101,10 @@ impl Capabilities {
 /// The main RAII wrapper for the terminal.
 /// When this struct is dropped, the terminal is restored to its original state.
 pub struct Terminal<W: Write + AsFd> {
-    original_termios: Termios,
+    original_termios: Option<Termios>,
     output: W,
     capabilities: Capabilities,
+    is_null_mode: bool,
 }
 
 impl<W: Write + AsFd> Drop for Terminal<W> {
