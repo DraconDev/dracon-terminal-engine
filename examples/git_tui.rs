@@ -1149,7 +1149,7 @@ fn render_section_card(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Th
     }
 }
 
-fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: Theme) {
+fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
     if w < 3 || h < 2 {
         return;
     }
