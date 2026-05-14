@@ -363,3 +363,26 @@ impl<'a> crate::framework::widget::Widget for Modal<'a> {
         self.theme = theme.clone();
     }
 }
+
+impl<'a> crate::framework::widget::WidgetState for Modal<'a> {
+    fn state_id(&self) -> Option<&str> {
+        Some("modal")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "visible": self.result.is_none(),
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(visible) = json.get("visible").and_then(|v| v.as_bool()) {
+            if visible {
+                self.result = None;
+            }
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}

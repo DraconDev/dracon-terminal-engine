@@ -325,3 +325,24 @@ impl crate::framework::widget::Widget for ContextMenu {
         self.theme = theme.clone();
     }
 }
+
+impl crate::framework::widget::WidgetState for ContextMenu {
+    fn state_id(&self) -> Option<&str> {
+        Some("context_menu")
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+        json!({
+            "visible": self.visible,
+        })
+    }
+
+    fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        if let Some(visible) = json.get("visible").and_then(|v| v.as_bool()) {
+            self.visible = visible;
+        }
+        self.dirty = true;
+        Ok(())
+    }
+}
