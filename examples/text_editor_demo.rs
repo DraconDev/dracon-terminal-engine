@@ -95,7 +95,7 @@ impl EditorApp {
 
         let tree = build_file_tree(theme.clone());
 
-        let search = SearchInput::new(WidgetId::new(20)).with_theme(theme);
+        let search = SearchInput::new(WidgetId::new(20)).with_theme(theme.clone());
 
         let kb_config = resolve_keybindings();
         let keybindings = KeybindingSet::from_config(&kb_config);
@@ -184,7 +184,7 @@ impl EditorApp {
         let cmd_bridge_clone = cmd_bridge.clone();
         let command_palette = CommandPalette::new(palette_commands)
             .with_size(45, 18)
-            .with_theme(theme)
+            .with_theme(theme.clone())
             .on_execute(move |cmd_id| {
                 *cmd_bridge_clone.borrow_mut() = Some(cmd_id.to_string());
             });
