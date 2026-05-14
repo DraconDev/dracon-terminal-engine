@@ -139,18 +139,16 @@ impl BaseInput {
                 true
             }
             KeyCode::Backspace => {
-                if self.cursor_pos > 0 && !self.text.is_empty() {
-                    self.text.pop();
-                    self.cursor_pos = self.cursor_pos.saturating_sub(1);
+                if !self.text.is_empty() && self.cursor_pos > 0 {
+                    self.cursor_pos -= 1;
+                    self.text.remove(self.cursor_pos);
                     self.dirty = true;
                 }
                 true
             }
             KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == crate::input::event::KeyModifiers::SHIFT => {
-                self.text.push(ch);
-                if self.cursor_pos < self.text.len() {
-                    self.cursor_pos = self.text.len();
-                }
+                self.text.insert(self.cursor_pos, ch);
+                self.cursor_pos += 1;
                 self.dirty = true;
                 true
             }
