@@ -458,7 +458,7 @@ impl Widget for TabbedApp {
         match self.active_tab() {
             TAB_DASHBOARD => render_dashboard(&mut plane, &self.dashboard, content_area),
             TAB_LOGS => render_logs(&mut plane, &self.logs, content_area),
-            TAB_SETTINGS => render_settings(&mut plane, &self.settings, content_area, theme),
+            TAB_SETTINGS => render_settings(&mut plane, &self.settings, content_area, theme.clone()),
             TAB_STATS => render_stats(&mut plane, &self.stats, content_area),
             _ => {}
         }
