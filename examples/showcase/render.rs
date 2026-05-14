@@ -754,7 +754,11 @@ fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
         let y = oy + 6 + i;
         if y > oy + 10 { break; }
         let x_offset = if i == 0 { offset } else { 0 };
-        let x = (ox + 2 + x_offset as usize).min(ox + 18);
+        let x = if x_offset >= 0 {
+            (ox + 2 + x_offset as usize).min(ox + 18)
+        } else {
+            (ox + 2).saturating_sub(x_offset.unsigned_abs() as usize)
+        };
         let fg = if i == 0 { t.primary } else { t.fg_subtle };
         let prefix = if i == 0 { "> " } else { "  " };
         draw_text(plane, x, y, prefix, t.fg_muted, t.surface, Styles::empty());

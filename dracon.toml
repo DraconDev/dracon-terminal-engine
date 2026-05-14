@@ -14,7 +14,7 @@
 quit = "ctrl+q"          # Emergency quit — not single-key to avoid accidents
 help = "f1"              # F1 is universal help; ? conflicts with text input
 cancel = "esc"           # Dismiss overlays, cancel operations
-back = "esc"             # Go back / close modal
+back = "ctrl+esc"        # Go back / close modal (distinct from cancel)
 submit = "enter"         # Confirm / submit form
 tab_next = "tab"         # Navigate to next field
 tab_prev = "shift+tab"   # Navigate to previous field
