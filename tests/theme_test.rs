@@ -738,10 +738,10 @@ fn test_from_name_underscore_aliases() {
 
 #[test]
 fn test_from_name_case_insensitive() {
-    assert_eq!(Theme::from_name("DARK").unwrap().name, "dark");
-    assert_eq!(Theme::from_name("Dark").unwrap().name, "dark");
-    assert_eq!(Theme::from_name("NORD").unwrap().name, "nord");
-    assert_eq!(Theme::from_name("Catppuccin-Mocha").unwrap().name, "catppuccin_mocha");
+    assert_eq!(&*Theme::from_name("DARK").unwrap().name, "dark");
+    assert_eq!(&*Theme::from_name("Dark").unwrap().name, "dark");
+    assert_eq!(&*Theme::from_name("NORD").unwrap().name, "nord");
+    assert_eq!(&*Theme::from_name("Catppuccin-Mocha").unwrap().name, "catppuccin_mocha");
 }
 
 #[test]
