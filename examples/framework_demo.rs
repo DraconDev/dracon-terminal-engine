@@ -133,10 +133,10 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.title("Framework Demo").fps(30).theme(Theme::cyberpunk());
+    let mut app = App::new()?.title("Framework Demo").fps(30).theme(Theme::from_env_or(Theme::cyberpunk()));
     app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0))), Rect::new(0, 0, w, h));
     app.on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.kind == KeyEventKind::Press {
+            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {
