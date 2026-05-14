@@ -15,7 +15,7 @@ struct NotifierApp {
 
 impl NotifierApp {
     fn new(should_quit: Rc<AtomicBool>, theme: Theme) -> Self {
-        let mut nc = NotificationCenter::new(theme);
+        let mut nc = NotificationCenter::new(theme.clone());
         nc.info("Welcome", "Press buttons below to trigger notifications.");
         nc.success("Ready", "Notification center is active.");
         Self {
@@ -256,7 +256,7 @@ impl Widget for NotifierApp {
 fn main() -> std::io::Result<()> {
     let should_quit = Rc::new(AtomicBool::new(false));
     let theme = Theme::from_env_or(Theme::nord());
-    let app_widget = NotifierApp::new(Rc::clone(&should_quit), theme);
+    let app_widget = NotifierApp::new(Rc::clone(&should_quit), theme.clone());
 
     let mut app = App::new()?
         .title("Notification Center")
