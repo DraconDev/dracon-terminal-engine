@@ -343,16 +343,16 @@ impl PluginDemoState {
 
         // Create instances via registry
         let clock = registry
-            .create("clock", WidgetId::new(1), theme)
+            .create("clock", WidgetId::new(1), theme.clone())
             .unwrap();
         let counter = registry
-            .create("counter", WidgetId::new(2), theme)
+            .create("counter", WidgetId::new(2), theme.clone())
             .unwrap();
         let stat = registry
-            .create(STAT_WIDGET_NAME, WidgetId::new(3), theme)
+            .create(STAT_WIDGET_NAME, WidgetId::new(3), theme.clone())
             .unwrap();
         let welcome = registry
-            .create(WELCOME_WIDGET_NAME, WidgetId::new(4), theme)
+            .create(WELCOME_WIDGET_NAME, WidgetId::new(4), theme.clone())
             .unwrap();
 
         Self {
