@@ -451,7 +451,7 @@ impl Widget for SqliteBrowser {
             results_y,
             right_rect.width.saturating_sub(1),
             results_h,
-            t.clone(),
+            t,
             results_active,
         );
         let results_bg = if results_active {
