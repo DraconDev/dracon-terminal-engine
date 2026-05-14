@@ -760,7 +760,7 @@ impl Widget for SystemMonitor {
         // ── Process List ──
         let list_y = badge_y + 2;
         let list_h = area.height.saturating_sub(list_y + 2);
-        render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
+        render_card_border(&mut plane, 0, list_y, area.width, list_h, t.clone());
 
         let header_y = list_y + 1;
         let header_text =
