@@ -323,7 +323,7 @@ impl Widget for SqliteBrowser {
     }
 
     fn render(&self, area: Rect) -> Plane {
-        let t = self.theme.clone();
+        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
 
         for cell in plane.cells.iter_mut() {
@@ -341,7 +341,7 @@ impl Widget for SqliteBrowser {
 
         // Left panel: tables
         let left_active = matches!(self.active_panel, Panel::Tables);
-        draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t.clone(), left_active);
+        draw_rounded_border(&mut plane, 0, 0, left_rect.width, content_h, t, left_active);
         let left_bg = if left_active {
             t.surface_elevated
         } else {
@@ -401,7 +401,7 @@ impl Widget for SqliteBrowser {
             0,
             right_rect.width.saturating_sub(1),
             query_h + 1,
-            t.clone(),
+            t,
             query_active,
         );
         let query_bg = if query_active {
