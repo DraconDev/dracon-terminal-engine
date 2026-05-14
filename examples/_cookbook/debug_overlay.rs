@@ -490,7 +490,7 @@ fn main() -> io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme, should_quit);
+    let mut debug_panel = DebugOverlayPanel::new(WidgetId::new(42), theme.clone(), should_quit);
     debug_panel.keybindings = keybindings;
     // panel.set_area is called by add_widget which sets area from Rect
 
