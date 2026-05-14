@@ -379,13 +379,7 @@ impl PluginDemoState {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::nord(),
-            Theme::cyberpunk(),
-            Theme::dracula(),
-            Theme::gruvbox_dark(),
-            Theme::tokyo_night(),
-        ];
+        let themes = Theme::all();
         let idx = themes
             .iter()
             .position(|t| t.name == self.theme.name)

@@ -13,31 +13,6 @@ use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseButton, 
 use ratatui::layout::Rect;
 
 /// Type alias for theme factory entries.
-type ThemeEntry = (&'static str, fn() -> Theme);
-
-const THEMES: &[ThemeEntry] = &[
-    ("Dark", Theme::dark),
-    ("Light", Theme::light),
-    ("Dracula", Theme::dracula),
-    ("Nord", Theme::nord),
-    ("Cyberpunk", Theme::cyberpunk),
-    ("Monokai", Theme::monokai),
-    ("Gruvbox", Theme::gruvbox_dark),
-    ("Tokyo Night", Theme::tokyo_night),
-    ("Catppuccin", Theme::catppuccin_mocha),
-    ("Solarized", Theme::solarized_dark),
-    ("One Dark", Theme::one_dark),
-    ("Rose Pine", Theme::rose_pine),
-    ("Kanagawa", Theme::kanagawa),
-    ("Everforest", Theme::everforest),
-    ("Forest", Theme::forest),
-    ("Sunset", Theme::sunset),
-    ("Warm", Theme::warm),
-    ("Cool", Theme::cool),
-    ("Mono", Theme::mono),
-    ("High Contrast", Theme::high_contrast),
-];
-
 /// Configuration for rendering a single theme swatch.
 struct SwatchConfig<'a> {
     x: u16,
@@ -131,7 +106,7 @@ impl Scene for ThemeSwitcherScene {
         // Title
         let title = " Theme Switcher ";
         draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
-        let hint = format!(" {} / {} ", self.theme_index + 1, THEMES.len());
+        let hint = format!(" {} / {} ", self.theme_index + 1, Theme::all().len());
         draw_text(&mut plane, area.width.saturating_sub(hint.len() as u16 + 2), 0,
                   &hint, t.secondary, t.bg, false);
 
@@ -146,21 +121,21 @@ impl Scene for ThemeSwitcherScene {
 
         // Theme grid (4 columns)
         let cols: u16 = 4;
-        let _rows = (THEMES.len() as u16).div_ceil(cols);
+        let _rows = (Theme::all().len() as u16).div_ceil(cols);
         let swatch_w = (area.width.saturating_sub(2)) / cols;
         let swatch_h = 3u16;
         let start_y = 2u16;
 
-        for (i, (_name, factory)) in THEMES.iter().enumerate() {
+        for (i, theme) in Theme::all().iter().enumerate() {
             let col = i as u16 % cols;
             let row = i as u16 / cols;
             let x = 1 + col * swatch_w;
             let y = start_y + row * swatch_h;
             if y + swatch_h >= area.height.saturating_sub(8) { break; }
 
-            let theme = factory();
+            // theme is already &Theme from iterator
             let selected = i == self.theme_index;
-            self.render_swatch(&mut plane, SwatchConfig { x, y, w: swatch_w, h: swatch_h, theme: &theme, selected });
+            self.render_swatch(&mut plane, SwatchConfig { x, y, w: swatch_w, h: swatch_h, theme, selected });
 
             if selected {
                 // Draw indicator arrow
@@ -252,7 +227,7 @@ impl Scene for ThemeSwitcherScene {
             let swatch_w = (area.width.saturating_sub(2)) / cols;
             let swatch_h = 3u16;
             let start_y = 2u16;
-            for (i, (_name, factory)) in THEMES.iter().enumerate() {
+            for (i, theme) in Theme::all().iter().enumerate() {
                 let col_idx = i as u16 % cols;
                 let row_idx = i as u16 / cols;
                 let x = 1 + col_idx * swatch_w;
@@ -262,7 +237,7 @@ impl Scene for ThemeSwitcherScene {
                 }
                 if col >= x && col < x + swatch_w && row >= y && row < y + swatch_h {
                     self.theme_index = i;
-                    self.theme = factory();
+                    self.theme = *theme;
                     self.checkbox.on_theme_change(&self.theme);
                     self.button.on_theme_change(&self.theme);
                     self.gauge.on_theme_change(&self.theme);

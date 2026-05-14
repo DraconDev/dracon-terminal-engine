@@ -67,10 +67,7 @@ impl EventBusApp {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::nord(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::catppuccin_mocha(), Theme::gruvbox_dark(), Theme::tokyo_night(),
-        ];
+        let themes = Theme::all();
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.dirty = true;

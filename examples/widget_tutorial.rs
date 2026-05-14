@@ -619,13 +619,7 @@ impl Default for ColorPicker {
 /// - Handle keyboard navigation between widgets
 fn main() -> std::io::Result<()> {
     // List of themes to cycle through
-    let themes: Vec<Theme> = vec![
-        Theme::nord(),
-        Theme::dracula(),
-        Theme::cyberpunk(),
-        Theme::gruvbox_dark(),
-    ];
-    let theme_names: Vec<&str> = vec!["nord", "dracula", "cyberpunk", "gruvbox-dark"];
+    let themes: Vec<Theme> = Theme::all().to_vec();
 
     // ---- Create the App with builder pattern ----
     let mut app = App::new()?

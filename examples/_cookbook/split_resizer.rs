@@ -144,28 +144,7 @@ impl Widget for SplitResizerApp {
             return true;
         }
         if kb.matches(actions::THEME, &key) {
-            let themes = [
-                Theme::dark(),
-                Theme::light(),
-                Theme::cyberpunk(),
-                Theme::dracula(),
-                Theme::nord(),
-                Theme::catppuccin_mocha(),
-                Theme::gruvbox_dark(),
-                Theme::tokyo_night(),
-                Theme::solarized_dark(),
-                Theme::solarized_light(),
-                Theme::one_dark(),
-                Theme::rose_pine(),
-                Theme::kanagawa(),
-                Theme::everforest(),
-                Theme::monokai(),
-                Theme::warm(),
-                Theme::cool(),
-                Theme::forest(),
-                Theme::sunset(),
-                Theme::mono(),
-            ];
+            let themes = Theme::all();
             let idx = themes
                 .iter()
                 .position(|t| t.name == self.theme.name)

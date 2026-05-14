@@ -164,27 +164,7 @@ impl ChatState {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::nord(),
-            Theme::cyberpunk(),
-            Theme::dracula(),
-            Theme::gruvbox_dark(),
-            Theme::tokyo_night(),
-            Theme::solarized_dark(),
-            Theme::solarized_light(),
-            Theme::monokai(),
-            Theme::one_dark(),
-            Theme::catppuccin_mocha(),
-            Theme::rose_pine(),
-            Theme::kanagawa(),
-            Theme::everforest(),
-            Theme::light(),
-            Theme::warm(),
-            Theme::cool(),
-            Theme::forest(),
-            Theme::sunset(),
-            Theme::mono(),
-        ];
+        let themes = Theme::all();
         let idx = themes
             .iter()
             .position(|t| t.name == self.theme.name)

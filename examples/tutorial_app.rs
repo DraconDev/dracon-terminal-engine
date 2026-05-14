@@ -586,10 +586,7 @@ impl AppRouter {
     }
 
     fn cycle_theme(&self) {
-        let themes = [
-            Theme::nord(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::catppuccin_mocha(), Theme::gruvbox_dark(), Theme::tokyo_night(),
-        ];
+        let themes = Theme::all();
         let mut theme = self.theme.borrow_mut();
         let idx = themes.iter().position(|t| t.name == theme.name).unwrap_or(0);
         *theme = themes[(idx + 1) % themes.len()];

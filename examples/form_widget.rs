@@ -60,14 +60,7 @@ impl FormApp {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [
-            Theme::dark(), Theme::light(), Theme::cyberpunk(), Theme::dracula(),
-            Theme::nord(), Theme::catppuccin_mocha(), Theme::gruvbox_dark(),
-            Theme::tokyo_night(), Theme::solarized_dark(), Theme::solarized_light(),
-            Theme::one_dark(), Theme::rose_pine(), Theme::kanagawa(),
-            Theme::everforest(), Theme::monokai(), Theme::warm(),
-            Theme::cool(), Theme::forest(), Theme::sunset(), Theme::mono(),
-        ];
+        let themes = Theme::all();
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()];
         self.form.borrow_mut().on_theme_change(&self.theme);
