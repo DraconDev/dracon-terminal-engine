@@ -216,7 +216,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
     }
 }
 
-fn draw_help_overlay(plane: &mut Plane, area: Rect, t: Theme) {
+fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 44u16.min(area.width.saturating_sub(4));
     let hh = 10u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
