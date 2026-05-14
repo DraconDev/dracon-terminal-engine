@@ -19,7 +19,6 @@ pub struct ListNavigation<S: Clone> {
     pub enable_undo: bool,
     pub undo_stack: Vec<S>,
     pub redo_stack: Vec<S>,
-    }
 }
 
 impl<S: Clone> Default for ListNavigation<S> {
