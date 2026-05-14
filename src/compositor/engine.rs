@@ -249,6 +249,10 @@ impl Compositor {
 
     /// Renders the compositor state to the given writer, outputting terminal escape codes.
     pub fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()> {
+        let render_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs_f64();
         // Reuse the final_buffer across frames — reset cells instead of reallocating
         let clear_cell = Cell {
             bg: self.clear_color,
