@@ -48,7 +48,7 @@ impl Widget for FrameworkDemo {
     fn focusable(&self) -> bool { true }
 
     fn render(&self, area: Rect) -> Plane {
-        let theme = Theme::cyberpunk();
+        let theme = Theme::from_env_or(Theme::cyberpunk());
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
         let (left_rect, right_rect) = split.split(area);
 
