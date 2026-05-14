@@ -156,7 +156,7 @@ impl CommandBindings {
 
 impl Default for CommandBindings {
     fn default() -> Self {
-        Self::new(Arc::new(AtomicBool::new(false)), Theme::nord())
+        Self::new(Arc::new(AtomicBool::new(false)), Theme::from_env_or(Theme::nord()))
     }
 }
 
