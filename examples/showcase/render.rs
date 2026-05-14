@@ -716,7 +716,7 @@ fn render_framework_fm_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
     if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 2, oy + 8, '█', t.primary, t.surface); }
 }
 
-fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_calendar_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let months = ["January", "February", "March", "April", "May", "June"];
     let month_idx = ((phase * 0.3).floor() as usize) % months.len();
     let title = format!("{} 2026", months[month_idx]);
@@ -735,7 +735,7 @@ fn render_calendar_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, o
     draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, Styles::empty());
 }
 
-fn render_rich_text_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_rich_text_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
     let lines = [("# Heading", t.primary, true), ("**Bold** and *italic*", t.fg, false), ("`inline code`", t.secondary, false), ("- List item", t.fg_muted, false), ("[link](https://)", t.info, false)];
     for (i, (text, color, bold)) in lines.iter().enumerate() {
         let y = oy + 5 + i;
