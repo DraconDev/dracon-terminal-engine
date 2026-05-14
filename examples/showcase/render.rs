@@ -567,7 +567,7 @@ fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
     }
 }
 
-fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let (mx, my, mw, mh) = (ox + 4, oy + 5, 18, 7);
     let bc = t.warning;
     set_cell(plane, mx, my, '┌', bc, t.surface_elevated);
@@ -589,7 +589,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize,
     draw_text(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, Styles::BOLD);
 }
 
-fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, oy: usize) {
+fn render_dashboard_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let items = [("CPU", (phase * 25.0).sin() * 30.0 + 55.0), ("MEM", (phase * 20.0).sin() * 20.0 + 65.0), ("NET", (phase * 15.0).sin() * 40.0 + 50.0)];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
@@ -603,7 +603,7 @@ fn render_dashboard_preview(plane: &mut Plane, t: Theme, phase: f64, ox: usize, 
     }
 }
 
-fn render_tabbed_preview(plane: &mut Plane, t: Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_tabbed_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
     let tabs = ["Tab1", "Tab2", "Tab3+"];
     for (i, tab) in tabs.iter().enumerate() {
         let is_active = i == 0;
