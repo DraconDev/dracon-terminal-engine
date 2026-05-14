@@ -92,18 +92,12 @@ pub struct App {
 
 impl App {
     fn dispatch_key(&mut self, k: &crate::input::event::KeyEvent, running: &std::sync::atomic::AtomicBool) {
-        // Ctrl+Q: always quit, no delegation
-        if k.code == crate::input::event::KeyCode::Char('q')
-            && k.modifiers.contains(crate::input::event::KeyModifiers::CONTROL)
-        {
+        if self.keybindings.matches(actions::QUIT, k) {
             running.store(false, Ordering::SeqCst);
             return;
         }
 
-        // Esc: widget gets first dibs, then quit if not consumed
-        if k.code == crate::input::event::KeyCode::Esc
-            && k.modifiers.is_empty()
-        {
+        if self.keybindings.matches(actions::BACK, k) {
             let consumed = self.focus_manager.focused()
                 .and_then(|id| self.widget_mut(id))
                 .map(|mut w| w.handle_key(*k))
@@ -284,6 +278,7 @@ impl App {
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         };
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
