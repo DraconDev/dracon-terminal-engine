@@ -2,6 +2,9 @@
 
 use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
+use std::sync::Mutex;
+
+static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 fn assert_theme_name(t: &Theme, expected_name: &str) {
     assert_eq!(&*t.name, expected_name);
