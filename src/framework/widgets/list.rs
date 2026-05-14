@@ -535,7 +535,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
 
 impl<T: Clone + ToString> WidgetState for List<T> {
     fn state_id(&self) -> Option<&str> {
-        Some("list")
+        None
     }
 
     fn to_json(&self) -> serde_json::Value {
@@ -543,7 +543,6 @@ impl<T: Clone + ToString> WidgetState for List<T> {
         json!({
             "selected": self.nav.selected,
             "offset": self.nav.offset,
-            "selected_indices": self.nav.selected_indices.iter().collect::<Vec<_>>(),
         })
     }
 
@@ -554,14 +553,6 @@ impl<T: Clone + ToString> WidgetState for List<T> {
         ) {
             self.nav.selected = selected as usize;
             self.nav.offset = offset as usize;
-        }
-        if let Some(indices) = json.get("selected_indices").and_then(|v| v.as_array()) {
-            self.nav.selected_indices.clear();
-            for idx in indices {
-                if let Some(i) = idx.as_u64() {
-                    self.nav.selected_indices.insert(i as usize);
-                }
-            }
         }
         self.dirty = true;
         Ok(())

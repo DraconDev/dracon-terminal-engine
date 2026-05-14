@@ -654,40 +654,23 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
 
 impl<T: Clone + ToString> WidgetState for Table<T> {
     fn state_id(&self) -> Option<&str> {
-        Some("table")
+        None
     }
 
     fn to_json(&self) -> serde_json::Value {
         use serde_json::json;
         json!({
-            "selected": self.nav.selected,
-            "offset": self.nav.offset,
             "sort_column": self.sort_column,
             "sort_ascending": self.sort_ascending,
-            "selected_indices": self.nav.selected_indices.iter().collect::<Vec<_>>(),
         })
     }
 
     fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
-        if let Some(selected) = json.get("selected").and_then(|v| v.as_u64()) {
-            self.nav.selected = selected as usize;
-        }
-        if let Some(offset) = json.get("offset").and_then(|v| v.as_u64()) {
-            self.nav.offset = offset as usize;
-        }
         if let Some(sort_col) = json.get("sort_column").and_then(|v| v.as_u64()) {
             self.sort_column = Some(sort_col as usize);
         }
         if let Some(ascending) = json.get("sort_ascending").and_then(|v| v.as_bool()) {
             self.sort_ascending = ascending;
-        }
-        if let Some(indices) = json.get("selected_indices").and_then(|v| v.as_array()) {
-            self.nav.selected_indices.clear();
-            for idx in indices {
-                if let Some(i) = idx.as_u64() {
-                    self.nav.selected_indices.insert(i as usize);
-                }
-            }
         }
         self.dirty = true;
         Ok(())
