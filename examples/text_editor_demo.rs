@@ -202,6 +202,7 @@ impl EditorApp {
             file_tree: tree,
             show_search: false,
             search,
+            search_submit,
             status_bar: status,
             breadcrumbs,
             show_help: false,
@@ -635,7 +636,16 @@ impl Widget for EditorApp {
                 self.dirty = true;
                 return true;
             }
+            let query_before = self.search_submit.lock().unwrap().clone();
             let handled = self.search.handle_key(key);
+            if handled {
+                let query_after = self.search_submit.lock().unwrap().clone();
+                if !query_after.is_empty() && query_after != query_before {
+                    if let Some(tab) = self.active_tab_mut() {
+                        tab.adapter.editor_mut().set_filter(&query_after);
+                    }
+                }
+            }
             self.dirty = true;
             return handled;
         }
