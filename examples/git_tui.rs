@@ -710,7 +710,7 @@ impl GitTui {
             }
 
             if !modified.is_empty() {
-                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t.clone());
+                render_section_card(plane, 2, row, 40, (modified.len() + 3) as u16, t);
                 draw_text(
                     plane,
                     3,
@@ -756,7 +756,7 @@ impl GitTui {
             }
 
             if !untracked.is_empty() {
-                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t.clone());
+                render_section_card(plane, 2, row, 40, (untracked.len() + 3) as u16, t);
                 draw_text(
                     plane,
                     3,
@@ -802,7 +802,7 @@ impl GitTui {
         }
     }
 
-    fn render_log(&self, plane: &mut Plane, y: u16, h: u16, t: Theme) {
+    fn render_log(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
         let header = " 󰊢 Commit History";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
