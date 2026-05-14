@@ -542,6 +542,9 @@ impl App {
             #[cfg(feature = "tracing")]
             let _frame_span = tracing::debug_span!("frame").entered();
 
+            #[cfg(feature = "tracing")]
+            let _input_span = tracing::debug_span!("input_poll").entered();
+
             match tty::poll_input(stdin.as_fd(), 1) {
                 Ok(true) => {
                     let mut chunk_buf = [0u8; 1024];
