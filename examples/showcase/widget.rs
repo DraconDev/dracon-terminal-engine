@@ -589,7 +589,7 @@ impl Widget for Showcase {
                     idx: grid_idx,
                     selected_idx: self.selected,
                     hovered_idx: self.hovered_card,
-                    theme: t,
+                    theme: t.clone(),
                     phase: self.card_start.elapsed().as_secs_f64(),
                     width: card_w as u16,
                     height: card_h as u16,
