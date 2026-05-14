@@ -834,7 +834,7 @@ impl GitTui {
 
             let hash = &commit.hash;
             let msg = if commit.message.len() > 35 {
-                &commit.message[..35].clone()
+                &commit.message[..35]
             } else {
                 &commit.message
             };
@@ -899,7 +899,7 @@ impl GitTui {
             };
 
             let truncated = if line.len() > plane.width as usize - 8 {
-                &line[..plane.width as usize - 8].clone()
+                &line[..plane.width as usize - 8]
             } else {
                 line
             };
@@ -931,7 +931,7 @@ impl GitTui {
         if !locals.is_empty() {
             let section_h = (locals.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, &t);
+                draw_rounded_border(plane, 2, row, 40, section_h, t.clone());
             }
             draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
             draw_text(
@@ -976,7 +976,7 @@ impl GitTui {
         if !remotes.is_empty() {
             let section_h = (remotes.len() + 3) as u16;
             if section_h > 2 && row + section_h < y + h {
-                draw_rounded_border(plane, 2, row, 40, section_h, &t);
+                draw_rounded_border(plane, 2, row, 40, section_h, t.clone());
             }
             draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
             draw_text(
