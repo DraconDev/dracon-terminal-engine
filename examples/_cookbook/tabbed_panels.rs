@@ -417,7 +417,7 @@ impl Widget for TabbedApp {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let theme = self.theme.clone();
+        let theme = &self.theme;
         for cell in plane.cells.iter_mut() {
             cell.bg = theme.bg;
             cell.fg = theme.fg;
