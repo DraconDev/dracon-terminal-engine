@@ -980,7 +980,7 @@ impl Widget for FileManager {
                     .map(|n| n.to_string_lossy().into_owned())
                     .unwrap_or_else(|| "...".to_string())
             );
-            let sw = spinner_text.len() as u16 + 4;
+            let sw = spinner_text.chars().count() as u16 + 4;
             let sh = 3u16;
             let sx = (area.width.saturating_sub(sw)) / 2;
             let sy = area.height / 2;

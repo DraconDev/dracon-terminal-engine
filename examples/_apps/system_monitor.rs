@@ -623,7 +623,7 @@ impl Widget for SystemMonitor {
         let theme_label = format!(" {} ", Theme::all()[self.theme_index].name);
 
         // Left: hostname + cores
-        let left_info = format!(" 󰣇 {} | {} cores | {} ", hostname, cores, uptime);
+        let left_info = format!(" # {} | {} cores | {} ", hostname, cores, uptime);
         draw_text(&mut plane, 2, 0, &left_info, t.primary, t.bg, true);
 
         // Right: theme label
@@ -645,10 +645,10 @@ impl Widget for SystemMonitor {
         } else {
             0
         };
-        let info_text = format!(" 󰍛 Load: {:.2} {:.2} {:.2} | 󰘚 Memory: {:.0}/{:.0} MB ({}%) | 󰋊 Disk I/O: {:.1} MB/s | 󰀂 Network: {:.1} MB/s ",
+        let info_text = format!(" Load: {:.2} {:.2} {:.2} | Memory: {:.0}/{:.0} MB ({}%) | Disk I/O: {:.1} MB/s | Network: {:.1} MB/s ",
             l1, l5, l15, mem_used, mem_total, mem_pct,
             self.data.disk_hist.current(), self.data.net_hist.current());
-        let info_x = (area.width.saturating_sub(info_text.len() as u16)) / 2;
+        let info_x = (area.width.saturating_sub(info_text.chars().count() as u16)) / 2;
         draw_text(&mut plane, info_x, 1, &info_text, t.fg_muted, t.bg, false);
 
         // Separator
@@ -774,7 +774,7 @@ impl Widget for SystemMonitor {
 
         let header_y = list_y + 1;
         let header_text =
-            " 󰀽 PID      NAME             CPU%    MEM     STATE  ";
+            " PID      NAME             CPU%    MEM     STATE  ";
         draw_text(
             &mut plane,
             2,
@@ -792,7 +792,7 @@ impl Widget for SystemMonitor {
                 &mut plane,
                 cx.saturating_sub(10),
                 cy,
-                " 󰓇 Collecting process data... ",
+                " Collecting process data... ",
                 t.fg_muted,
                 t.surface,
                 false,
