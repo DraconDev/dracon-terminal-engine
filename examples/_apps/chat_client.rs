@@ -543,7 +543,7 @@ impl ChatState {
         // Settings button zone
         let settings_x = area.width.saturating_sub(6);
         self.zones.borrow_mut().register(ZONE_SETTINGS_BTN, settings_x, 0, 6, 1);
-        for (i, c) in "[⚙]".chars().enumerate() {
+        for (i, c) in "[S]".chars().enumerate() {
             let idx = settings_x as usize + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
@@ -772,7 +772,7 @@ impl ChatState {
         // Emoji button zone
         let base_idx = ((input_row + 1) * area.width + 3) as usize;
         self.zones.borrow_mut().register(ZONE_EMOJI_BTN, 3, input_row + 1, 4, 1);
-        for (i, c) in "[📎]".chars().enumerate() {
+        for (i, c) in "[+]".chars().enumerate() {
             let idx = base_idx + i;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
@@ -824,7 +824,7 @@ impl ChatState {
                 }
             }
         } else {
-            for (i, c) in "[➤]".chars().enumerate() {
+            for (i, c) in "[>]".chars().enumerate() {
                 let idx = base_idx + send_x + i;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
