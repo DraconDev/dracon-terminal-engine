@@ -82,7 +82,7 @@ impl Scene for CalendarScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ←→ month | Enter: select | c: clear | B/Esc: back | ?: help ";
+        let nav = " ←→ month | Enter: select | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         // Help overlay

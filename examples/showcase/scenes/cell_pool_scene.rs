@@ -172,7 +172,7 @@ impl Scene for CellPoolScene {
         }
 
         match key.code {
-            KeyCode::Char(' ') => {
+            KeyCode::Char(' ') if key.modifiers.is_empty() => {
                 self.simulate_allocation();
                 true
             }

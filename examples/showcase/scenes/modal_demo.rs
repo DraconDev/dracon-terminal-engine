@@ -290,14 +290,14 @@ impl Scene for ModalDemoScene {
         // Handle confirm dialog buttons
         if self.show_confirm {
             match key.code {
-                KeyCode::Enter | KeyCode::Char('y') | KeyCode::Char('Y') => {
+                KeyCode::Enter | KeyCode::Char('y') | KeyCode::Char('Y') if key.modifiers.is_empty() => {
                     self.show_confirm = false;
                     self.show_toast = true;
                     self.toast_message = "Confirmed!".to_string();
                     self.dirty = true;
                     true
                 }
-                KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N') => {
+                KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N') if key.code == KeyCode::Esc || key.modifiers.is_empty() => {
                     self.show_confirm = false;
                     self.dirty = true;
                     true
