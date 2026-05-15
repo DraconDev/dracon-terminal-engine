@@ -603,17 +603,6 @@ impl Widget for Showcase {
                 };
 
                 render_card(&card_config, &mut plane, draw_x, draw_y);
-
-                const CARD_BASE: usize = 500;
-                let mut zones = self.zones.borrow_mut();
-                zones.register(
-                    CARD_BASE + grid_idx,
-                    draw_x as u16,
-                    draw_y as u16,
-                    card_w as u16,
-                    card_h as u16,
-                );
-                drop(zones);
             }
         }
 
