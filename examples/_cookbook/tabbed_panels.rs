@@ -489,7 +489,7 @@ impl Widget for TabbedApp {
 
         // Help overlay
         if self.show_help {
-            self.render_help_overlay(&mut plane, area, &theme);
+            self.render_help_overlay(&mut plane, area, theme);
         }
 
         plane

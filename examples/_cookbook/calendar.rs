@@ -357,15 +357,11 @@ impl Widget for CalendarDemo {
             self.toggle_mode();
             return true;
         }
-        match key.code {
-            _ => {
-                let handled = self.active_calendar_mut().handle_key(key);
-                if handled {
-                    self.dirty = true;
-                }
-                handled
-            }
+        let handled = self.active_calendar_mut().handle_key(key);
+        if handled {
+            self.dirty = true;
         }
+        handled
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {

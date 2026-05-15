@@ -392,9 +392,9 @@ fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy:
 fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
-        format!("CPU:  [{}{}]", "█".repeat(((phase * 4.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(6)),
-        format!("Mem:  [{}{}]", "█".repeat(((phase * 3.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(5)),
-        format!("Net:  [{}{}]", "█".repeat(((phase * 2.0).sin() + 1.0) as usize * 1 + 1), "░".repeat(7)),
+        format!("CPU:  [{}{}]", "█".repeat(((phase * 4.0).sin() + 1.0) as usize), "░".repeat(6)),
+        format!("Mem:  [{}{}]", "█".repeat(((phase * 3.0).sin() + 1.0) as usize), "░".repeat(5)),
+        format!("Net:  [{}{}]", "█".repeat(((phase * 2.0).sin() + 1.0) as usize), "░".repeat(7)),
     ];
     for (i, line) in lines.iter().enumerate() {
         let py = oy + 6 + i;

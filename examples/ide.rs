@@ -1155,7 +1155,7 @@ impl Widget for IdeApp {
                 let text_h = content_h.saturating_sub(1);
                 let text_w = editor_w.saturating_sub(2);
                 if text_w > 0 && text_h > 0
-                    && col >= editor_x + 1 && col < editor_x + 1 + text_w
+                    && col > editor_x && col < editor_x + 1 + text_w
                     && row >= text_y && row < text_y + text_h
                 {
                     let rel_col = col - (editor_x + 1);

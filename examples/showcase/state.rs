@@ -26,7 +26,7 @@ pub enum SortField {
 
 impl SortField {
     pub fn all() -> [SortField; 3] {
-        [SortField::Name, SortField::Category, SortField::RunCount].clone()
+        [SortField::Name, SortField::Category, SortField::RunCount]
     }
     pub fn label(&self) -> &'static str {
         match self {
