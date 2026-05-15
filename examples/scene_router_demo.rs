@@ -479,7 +479,7 @@ impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
         let kb = &self.keybindings;
 
         if *self.show_help.borrow() {
-            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
+            if kb.matches(actions::BACK, &key) || kb.matches(actions::HELP, &key) {
                 *self.show_help.borrow_mut() = false;
                 return true;
             }

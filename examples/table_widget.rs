@@ -832,7 +832,7 @@ impl Widget for TableApp {
         let kb = &self.keybindings;
 
         if self.show_help {
-            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
+            if kb.matches(actions::BACK, &key) || kb.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
                 return true;

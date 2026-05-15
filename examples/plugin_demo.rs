@@ -438,7 +438,7 @@ impl Widget for InputRouter {
         let kb = &state.keybindings;
 
         if state.show_help {
-            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
+            if kb.matches(actions::BACK, &key) || kb.matches(actions::HELP, &key) {
                 state.show_help = false;
                 state.dirty = true;
                 return true;

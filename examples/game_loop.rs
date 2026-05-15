@@ -206,7 +206,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Some(Event::Key(ref key_event)) if keybindings.matches(actions::HELP, key_event) => {
                         show_help = !show_help;
                     }
-                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::DISMISS, key_event) => {
+                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::BACK, key_event) => {
                         show_help = false;
                     }
                     Some(Event::Key(KeyEvent { code: KeyCode::Char(' '), .. })) => {

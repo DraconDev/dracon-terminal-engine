@@ -974,7 +974,7 @@ impl Widget for SystemMonitor {
                 (actions::THEME, "theme"),
                 (actions::TREE_MODE, "tree"),
                 (actions::HELP, "help"),
-                (actions::DISMISS, "dismiss"),
+                (actions::BACK, "dismiss"),
                 (actions::QUIT, "quit"),
             ])
         );
@@ -992,7 +992,7 @@ impl Widget for SystemMonitor {
         }
         let kb = &self.keybindings;
         if self.show_help {
-            if kb.matches(actions::DISMISS, &key) || kb.matches(actions::HELP, &key) {
+            if kb.matches(actions::BACK, &key) || kb.matches(actions::HELP, &key) {
                 self.show_help = false;
                 return true;
             }
