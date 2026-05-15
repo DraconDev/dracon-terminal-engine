@@ -867,12 +867,6 @@ fn render_rich_text_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize
 fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
     let max_x = ox + card_w - 2;
     let max_y = oy + card_w / 2 + 4;
-    let input_w = (card_w - 4).min(17).max(4);
-    let input_text = format!("{}{}{}",
-        "rust",
-        " ".repeat(input_text_width(input_w, 4)),
-        "]"
-    );
     draw_text_bounded(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     if (phase * 3.0).fract() < 0.6 { set_cell_bounded(plane, ox + 6, oy + 5, '█', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
     let suggestions = ["rust-analyzer", "rustc", "cargo", "rustfmt", "clippy"];
@@ -882,7 +876,7 @@ fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
         if y > oy + 10 || y > max_y { break; }
         let x_offset = if i == 0 { offset } else { 0 };
         let x = if x_offset >= 0 {
-            (ox + 2 + x_offset as usize).min(max_x - 1)
+            (ox + 2 + x_offset as usize).min(max_x.saturating_sub(1))
         } else {
             (ox + 2).saturating_sub(x_offset.unsigned_abs() as usize)
         };
@@ -892,8 +886,6 @@ fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
         draw_text_bounded(plane, x + 2, y, s, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
-
-fn input_text_width(_input_w: usize, _text_len: usize) -> usize { 0 }
 fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
