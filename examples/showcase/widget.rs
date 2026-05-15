@@ -1435,31 +1435,63 @@ impl Widget for Showcase {
 }
 
 impl Showcase {
+    fn card_at_mouse(&self, col: u16, row: u16) -> Option<usize> {
+        let sidebar_w = 14usize;
+        let sidebar_start_y = 6usize;
+        let grid_start_x = sidebar_w + 2;
+        let grid_start_y = sidebar_start_y + 1;
+        let area = self.area;
+        let available_w = (area.width as usize).saturating_sub(grid_start_x);
+        let (card_w, card_h) = if available_w >= 90 {
+            (32usize, 16usize)
+        } else if available_w >= 60 {
+            (28usize, 14usize)
+        } else {
+            (24usize, 12usize)
+        };
+        let cols = self.cols.get().max(1);
+        let c = col as usize;
+        let r = row as usize;
+        if c < grid_start_x || r < grid_start_y {
+            return None;
+        }
+        let rel_x = c - grid_start_x;
+        let rel_y = r - grid_start_y;
+        let cell_x = rel_x % (card_w + 2);
+        let cell_y = rel_y % (card_h + 1);
+        if cell_x >= card_w || cell_y >= card_h {
+            return None;
+        }
+        let col_idx = rel_x / (card_w + 2);
+        let row_idx = rel_y / (card_h + 1);
+        if col_idx >= cols {
+            return None;
+        }
+        let grid_idx = row_idx * cols + col_idx;
+        if grid_idx < self.filtered.len() {
+            Some(grid_idx)
+        } else {
+            None
+        }
+    }
+
     fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         // If a scene is active, delegate to it
         if self.scene_router.current().is_some() {
             return self.scene_router.handle_mouse(kind, col, row);
         }
 
-        let sidebar_w = 14usize;
-        let sidebar_start_y = 6usize;
-        let _grid_start_x = sidebar_w + 2;
-        let _grid_start_y = sidebar_start_y + 1;
-        let _card_w = 28usize;
-        let _card_h = 14usize;
-
         const PRIM_BASE: usize = 100;
         const PALETTE_BASE: usize = 200;
         const CAT_BASE: usize = 300;
         const FPS_ZONE: usize = 400;
-        const CARD_BASE: usize = 500;
 
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 let y = row as usize;
                 let x = col as usize;
 
-                // Zone-based dispatch — query the registry populated during render
+                // Zone-based dispatch for non-card elements
                 let clicked_zone = self.zones.borrow().dispatch(col, row);
                 if let Some(zone_id) = clicked_zone {
                     match zone_id {
@@ -1485,11 +1517,8 @@ impl Showcase {
                                 return true;
                             }
                             1 => {
-                                // Slider: click position determines direction
-                                // Slider zone starts at prim_x=2, format: " Slider [▓▓▓░░░░░░░]"
-                                // Thumb position is at ~2 + 9 + 1 + thumb_pos
                                 let slider_zone_x = 2usize;
-                                let slider_label_w = 9usize; // " Slider ["
+                                let slider_label_w = 9usize;
                                 let track_w = 10usize;
                                 let thumb_pos = (self.primitive_slider * track_w as f32).round() as usize;
                                 let thumb_x = slider_zone_x + slider_label_w + thumb_pos;
@@ -1524,32 +1553,30 @@ impl Showcase {
                             self.apply_filter();
                             return true;
                         }
-                        // Cards (CARD_BASE + grid_idx)
-                        id if id >= CARD_BASE => {
-                            let card_idx = id - CARD_BASE;
-                            if card_idx < self.filtered.len() {
-                                let now = Instant::now();
-                                let is_double_click = self
-                                    .last_click_time
-                                    .zip(self.last_click_idx)
-                                    .map(|(time, idx)| {
-                                        idx == card_idx
-                                            && now.duration_since(time).as_millis() < 300
-                                    })
-                                    .unwrap_or(false);
-                                if is_double_click {
-                                    self.selected = card_idx;
-                                    self.launch_selected();
-                                } else {
-                                    self.selected = card_idx;
-                                }
-                                self.last_click_time = Some(now);
-                                self.last_click_idx = Some(card_idx);
-                                return true;
-                            }
-                        }
                         _ => {}
                     }
+                }
+
+                // Card click — use grid math instead of zones (deterministic, no animation drift)
+                if let Some(card_idx) = self.card_at_mouse(col, row) {
+                    let now = Instant::now();
+                    let is_double_click = self
+                        .last_click_time
+                        .zip(self.last_click_idx)
+                        .map(|(time, idx)| {
+                            idx == card_idx
+                                && now.duration_since(time).as_millis() < 300
+                        })
+                        .unwrap_or(false);
+                    if is_double_click {
+                        self.selected = card_idx;
+                        self.launch_selected();
+                    } else {
+                        self.selected = card_idx;
+                    }
+                    self.last_click_time = Some(now);
+                    self.last_click_idx = Some(card_idx);
+                    return true;
                 }
 
                 // Search bar click (no zone registered for this)
@@ -1561,17 +1588,13 @@ impl Showcase {
                 false
             }
             MouseEventKind::Down(MouseButton::Right) => {
-                // Use zone dispatch for right-click on cards
-                let clicked_zone = self.zones.borrow().dispatch(col, row);
-                if let Some(zone_id) = clicked_zone {
-                    if zone_id >= CARD_BASE {
-                        let card_idx = zone_id - CARD_BASE;
-                        if card_idx < self.filtered.len() {
-                            self.selected = card_idx;
-                            self.context_menu = Some((card_idx, col, row));
-                            self.context_menu_selected = 0;
-                            return true;
-                        }
+                // Card right-click — use grid math
+                if let Some(card_idx) = self.card_at_mouse(col, row) {
+                    if card_idx < self.filtered.len() {
+                        self.selected = card_idx;
+                        self.context_menu = Some((card_idx, col, row));
+                        self.context_menu_selected = 0;
+                        return true;
                     }
                 }
                 self.context_menu = None;
@@ -1592,48 +1615,45 @@ impl Showcase {
                         self.primitive_button_time = None;
                     }
                 }
-                // Use zone dispatch for hover detection
-                let hovered_zone = self.zones.borrow().dispatch(col, row);
-                if let Some(zone_id) = hovered_zone {
-                    if zone_id >= CARD_BASE {
-                        let card_idx = zone_id - CARD_BASE;
-                        if card_idx < self.filtered.len() {
-                            // Start hover animation if entering new card
-                            if self.hovered_card != Some(card_idx) {
-                                let anim_id =
-                                    self.animations.start(0.0, 1.0, Duration::from_millis(200));
-                                if card_idx >= self.card_hover_anim.len() {
-                                    self.card_hover_anim.resize(card_idx + 1, None);
-                                }
-                                self.card_hover_anim[card_idx] = Some(anim_id);
-                            }
-                            self.hovered_card = Some(card_idx);
-                            // Start or update tooltip timer
-                            match self.tooltip_timer {
-                                None => {
-                                    self.tooltip_timer = Some(Instant::now());
-                                    self.tooltip_pos = Some((col, row));
-                                }
-                                Some(time) => {
-                                    if time.elapsed().as_millis() >= 500 {
-                                        if let Some(&ex_idx) = self.filtered.get(card_idx) {
-                                            if let Some(ex) = self.examples.get(ex_idx) {
-                                                self.tooltip_text =
-                                                    Some(ex.description.to_string());
-                                                self.tooltip_pos = Some((col, row));
-                                            }
-                                        }
+                // Card hover — use grid math (no animation drift, no circular dependency)
+                if let Some(card_idx) = self.card_at_mouse(col, row) {
+                    if self.hovered_card != Some(card_idx) {
+                        let anim_id =
+                            self.animations.start(0.0, 1.0, Duration::from_millis(200));
+                        if card_idx >= self.card_hover_anim.len() {
+                            self.card_hover_anim.resize(card_idx + 1, None);
+                        }
+                        self.card_hover_anim[card_idx] = Some(anim_id);
+                    }
+                    self.hovered_card = Some(card_idx);
+                    // Start or update tooltip timer
+                    match self.tooltip_timer {
+                        None => {
+                            self.tooltip_timer = Some(Instant::now());
+                            self.tooltip_pos = Some((col, row));
+                        }
+                        Some(time) => {
+                            if time.elapsed().as_millis() >= 500 {
+                                if let Some(&ex_idx) = self.filtered.get(card_idx) {
+                                    if let Some(ex) = self.examples.get(ex_idx) {
+                                        self.tooltip_text =
+                                            Some(ex.description.to_string());
+                                        self.tooltip_pos = Some((col, row));
                                     }
                                 }
                             }
-                            return true;
                         }
                     }
+                    return true;
+                }
+                // Check non-card zones for hover (palette, sidebar, primitives)
+                let hovered_zone = self.zones.borrow().dispatch(col, row);
+                if hovered_zone.is_some() {
+                    return true;
                 }
                 // Clear hover and start exit animations
                 if let Some(prev_hover) = self.hovered_card {
                     if prev_hover < self.card_hover_anim.len() {
-                        // Start reverse animation
                         let anim_id = self.animations.start(1.0, 0.0, Duration::from_millis(150));
                         self.card_hover_anim[prev_hover] = Some(anim_id);
                     }
