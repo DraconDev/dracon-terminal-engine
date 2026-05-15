@@ -741,24 +741,34 @@ fn render_table_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy:
     }
 }
 
-fn render_input_debug_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_input_debug_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let keys = ["Key: ArrowUp  0x2191", "Mod: Ctrl+Shift"];
-    for (i, key) in keys.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, key, t.fg_subtle, t.surface, Styles::empty()); }
+    for (i, key) in keys.iter().enumerate() { let max_len = max_x - (ox + 1) + 1; let t_str: String = key.chars().take(max_len).collect(); draw_text_bounded(plane, ox + 1, oy + 6 + i, &t_str, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y); }
     let mx = (phase * 30.0).sin() as i16 + 40;
     let my = (phase * 20.0).sin() as i16 + 10;
-    draw_text(plane, ox + 1, oy + 8, &format!("Mouse: {:3}, {:2} [L-down]", mx, my), t.primary, t.surface, Styles::empty());
+    let mouse_text = format!("Mouse: {:3}, {:2} [L-down]", mx, my);
+    let max_len = max_x - (ox + 1) + 1;
+    let truncated: String = mouse_text.chars().take(max_len).collect();
+    draw_text_bounded(plane, ox + 1, oy + 8, &truncated, t.primary, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     let wheel = if (phase * 2.0).sin() > 0.0 { "+1" } else { "-1" };
-    draw_text(plane, ox + 1, oy + 9, &format!("Wheel: {}", wheel), t.fg_muted, t.surface, Styles::empty());
+    let wheel_text = format!("Wheel: {}", wheel);
+    let truncated2: String = wheel_text.chars().take(max_len).collect();
+    draw_text_bounded(plane, ox + 1, oy + 9, &truncated2, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_text_editor_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_text_editor_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let lines = ["1 | fn main() {", "2 |   println!();", "3 | }"];
-    for (i, line) in lines.iter().enumerate() { draw_text(plane, ox + 1, oy + 6 + i, line, t.fg_subtle, t.surface, Styles::empty()); }
+    for (i, line) in lines.iter().enumerate() { let max_len = max_x - (ox + 1) + 1; let t_str: String = line.chars().take(max_len).collect(); draw_text_bounded(plane, ox + 1, oy + 6 + i, &t_str, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y); }
     let cursor_x = ox + 7 + ((phase * 2.0).sin() * 0.5 + 0.5) as usize * 5;
-    set_cell(plane, cursor_x.min(ox + 17), oy + 7, '▎', t.primary, t.surface);
+    set_cell_bounded(plane, cursor_x.min(max_x), oy + 7, '▎', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y);
     let lang = "  [rust] UTF-8 ";
-    draw_text(plane, ox + 26 - lang.len(), oy + 10, lang, t.fg_muted, t.bg, Styles::empty());
-    if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 3, oy + 6, '█', t.primary, t.surface); }
+    let lang_x = max_x.saturating_sub(lang.len()).max(ox + 2);
+    draw_text_bounded(plane, lang_x, oy + 10, lang, t.fg_muted, t.bg, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    if (phase * 2.0).sin() > 0.0 { set_cell_bounded(plane, ox + 3, oy + 6, '█', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
 }
 
 fn render_game_loop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
