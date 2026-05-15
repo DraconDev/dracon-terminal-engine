@@ -22,6 +22,10 @@ pub struct AccessibilityScene {
     keybindings: KeybindingSet,
 }
 
+// Layout constants shared between render() and handle_mouse()
+const INFO_Y: u16 = 4;
+const WIDGET_Y_OFFSET: u16 = 6; // offset from info_y to widget section
+
 impl AccessibilityScene {
     pub fn new(theme: Theme) -> Self {
         Self {
