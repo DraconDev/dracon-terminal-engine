@@ -79,6 +79,9 @@ impl Widget for FileManagerRouter {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.target.borrow_mut().on_theme_change(theme);
+    }
     fn current_theme(&self) -> Option<Theme> {
         Some(self.target.borrow().theme.clone())
     }
@@ -461,6 +464,15 @@ impl FileManager {
         self.dirty = true;
     }
 
+    fn propagate_theme(&mut self) {
+        self.tree.on_theme_change(&self.theme);
+        self.breadcrumbs.on_theme_change(&self.theme);
+        self.split.on_theme_change(&self.theme);
+        if let Some(ref mut cm) = self.context_menu {
+            cm.on_theme_change(&self.theme);
+        }
+    }
+
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes
@@ -468,14 +480,15 @@ impl FileManager {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
-        self.tree.on_theme_change(&self.theme);
-        self.breadcrumbs.on_theme_change(&self.theme);
-        self.split.on_theme_change(&self.theme);
-        if let Some(ref mut cm) = self.context_menu {
-            cm.on_theme_change(&self.theme);
-        }
+        self.propagate_theme();
         self.dirty = true;
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.propagate_theme();
+        self.dirty = true;
     }
 
     fn update_breadcrumbs(&mut self) {
@@ -1638,6 +1651,15 @@ fn main() -> std::io::Result<()> {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
             return;
+        }
+
+        // Sync theme from framework
+        {
+            let mut fm = fm_for_tick.borrow_mut();
+            let app_theme = ctx.theme().clone();
+            if fm.theme.name != app_theme.name {
+                fm.on_theme_change(&app_theme);
+            }
         }
 
         // Poll async operations and advance spinner

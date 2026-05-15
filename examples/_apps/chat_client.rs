@@ -142,8 +142,8 @@ impl ChatState {
             theme,
             dirty: true,
             zones: RefCell::new(ScopedZoneRegistry::new()),
-            keybindings: KeybindingSet::default(),
-            kb_config: KeybindingConfig::default(),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            kb_config: resolve_keybindings(),
             // Async state for loading
             is_loading: true, // Start loading immediately
             loading_error: None,
