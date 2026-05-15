@@ -695,7 +695,7 @@ fn render_tabbed_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, o
     }
     let line_w = (card_w - 2).min(19);
     for x in ox + 1..ox + line_w + 1 { set_cell_bounded(plane, x, oy + 6, '─', t.outline, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); }
-    for y in oy + 6..oy + 11.min(oy + card_w / 2 + 6) { for x in ox + 1..ox + (card_w - 1).min(20) + 1 { set_cell_bounded(plane, x, y, ' ', t.fg, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); } }
+    for y in oy + 6..(oy + 11).min(max_y + 1) { for x in ox + 1..ox + (card_w - 1).min(20) + 1 { set_cell_bounded(plane, x, y, ' ', t.fg, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); } }
     draw_text_bounded(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
