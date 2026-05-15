@@ -513,6 +513,10 @@ impl Widget for Showcase {
             } else {
                 t.fg_muted
             };
+            // Fill entire sidebar row with background first
+            for x in 0..sidebar_w {
+                set_cell(&mut plane, x, cat_y, ' ', fg, bg_cat);
+            }
             draw_text(
                 &mut plane,
                 1,
@@ -539,7 +543,7 @@ impl Widget for Showcase {
             // Count badge (cached, no per-frame allocation)
             let count = self.cached_cat_counts[i];
             let count_str = format!("{:>2}", count);
-            draw_text(&mut plane, 13, cat_y, &count_str, t.fg_muted, bg_cat, Styles::empty());
+            draw_text(&mut plane, 12, cat_y, &count_str, t.fg_muted, bg_cat, Styles::empty());
         }
 
         // Grid of cards — responsive sizing
