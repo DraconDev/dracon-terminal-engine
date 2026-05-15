@@ -86,9 +86,7 @@ impl Widget for PoolDemo {
 
         if area.height > 0 {
             let sb_y = area.height - 1;
-            let status = format!(
-                " Ctrl+T: theme | F1: help | Ctrl+Q: quit",
-            );
+            let status = " Ctrl+T: theme | F1: help | Ctrl+Q: quit";
             for (j, c) in status.chars().enumerate() {
                 let x = j as u16;
                 if x >= area.width {
