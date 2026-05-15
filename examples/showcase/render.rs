@@ -642,7 +642,7 @@ fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
 fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
     let max_x = ox + card_w - 2;
     let max_y = oy + card_w / 2 + 4;
-    let mw = (card_w - 6).min(18).max(8);
+    let mw = (card_w - 6).clamp(8, 18);
     let mh = 7;
     let mx = ox + (card_w - mw) / 2;
     let my = oy + 5;
@@ -669,7 +669,7 @@ fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize
 fn render_dashboard_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
     let max_x = ox + card_w - 2;
     let max_y = oy + card_w / 2 + 4;
-    let bar_len = (card_w - 12).min(10).max(4);
+    let bar_len = (card_w - 12).clamp(4, 10);
     let items = [("CPU", (phase * 25.0).sin() * 30.0 + 55.0), ("MEM", (phase * 20.0).sin() * 20.0 + 65.0), ("NET", (phase * 15.0).sin() * 40.0 + 50.0)];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
@@ -726,7 +726,7 @@ fn render_table_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy:
     let sep = "---------|-----|------";
     draw_text_bounded(plane, ox + 1, oy + 5, headers, t.primary, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     draw_text_bounded(plane, ox + 1, oy + 6, sep, t.outline, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
-    let name_w = (card_w - 8).min(10).max(4);
+    let name_w = (card_w - 8).clamp(4, 10);
     let rows = [(" Alice   ", "  28 ", " NYC  "), (" Bob     ", "  34 ", " LA   ")];
     let highlight_row = ((phase * 0.5).sin() * 0.5 + 0.5) > 0.5;
     for (i, (name, age, city)) in rows.iter().enumerate() {
