@@ -451,7 +451,9 @@ fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, o
     }
 }
 
-fn render_theme_preview(plane: &mut Plane, t: &Theme, ox: usize, oy: usize) {
+fn render_theme_preview(plane: &mut Plane, t: &Theme, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let colors = [t.primary, t.primary_hover, t.success, t.warning, t.error, t.info, t.fg, t.bg];
     let cols = 4;
     let swatch_size = 3;
@@ -460,14 +462,14 @@ fn render_theme_preview(plane: &mut Plane, t: &Theme, ox: usize, oy: usize) {
         let row = i / cols;
         let x = ox + 2 + col * (swatch_size + 1);
         let y = oy + 6 + row * 2;
-        if y > oy + 11 { break; }
+        if y > oy + 11 || y > max_y { break; }
         for dx in 0..swatch_size {
-            set_cell(plane, x + dx, y, ' ', t.fg, *color);
-            set_cell(plane, x + dx, y + 1, ' ', t.fg, *color);
+            set_cell_bounded(plane, x + dx, y, ' ', t.fg, *color, ox + 1, max_x, oy + 1, max_y);
+            set_cell_bounded(plane, x + dx, y + 1, ' ', t.fg, *color, ox + 1, max_x, oy + 1, max_y);
         }
     }
     let name = format!("  {}  ", t.name);
-    draw_text(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, Styles::empty());
+    draw_text_bounded(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
 fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
