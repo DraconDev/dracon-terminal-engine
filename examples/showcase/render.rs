@@ -814,7 +814,7 @@ fn render_framework_fm_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
     let max_y = oy + card_w / 2 + 4;
     draw_text_bounded(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     set_cell_bounded(plane, ox + 1, oy + 6, '├', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
-    let line_w = (card_w - 4).min(22).max(4);
+    let line_w = (card_w - 4).clamp(4, 22);
     for cx in ox + 2..ox + line_w + 2 { set_cell_bounded(plane, cx, oy + 6, '─', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y); }
     set_cell_bounded(plane, ox + line_w + 2, oy + 6, '┤', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
     let rows = [("src/", "  -   "), ("main.rs", " 1.2KB"), ("lib.rs", "  842B")];
@@ -893,7 +893,7 @@ fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
     let max_y = oy + card_w / 2 + 4;
     let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
-    let notif_w = (card_w - 4).min(10).max(6);
+    let notif_w = (card_w - 4).clamp(6, 10);
     let notif_x = ox + card_w - notif_w - 2;
     for i in 0..2.min(notifications.len()) {
         let idx = (offset + i) % notifications.len();
@@ -951,7 +951,7 @@ fn render_cell_pool_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize,
         draw_text_bounded(plane, ox + 8, y, value, t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let hit_rate = (95.0 - (phase * 3.0).sin() * 10.0).max(0.0) as u32;
-    let bar_len = (card_w - 6).min(10).max(4);
+    let bar_len = (card_w - 6).clamp(4, 10);
     let filled = (hit_rate / 10) as usize;
     let bar_str = format!("[{}{}]", "█".repeat(filled.min(bar_len)), "░".repeat(bar_len - filled.min(bar_len)));
     draw_text_bounded(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
