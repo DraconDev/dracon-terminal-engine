@@ -274,7 +274,7 @@ fn main() -> io::Result<()> {
                     Event::Key(key_event) if keybindings.matches(actions::HELP, key_event) => {
                         debugger.show_help = !debugger.show_help;
                     }
-                    Event::Key(key_event) if keybindings.matches(actions::DISMISS, key_event) => {
+                    Event::Key(key_event) if keybindings.matches(actions::BACK, key_event) => {
                         debugger.show_help = false;
                     }
                     Event::Key(KeyEvent { code: KeyCode::Char('c'), modifiers, .. })
