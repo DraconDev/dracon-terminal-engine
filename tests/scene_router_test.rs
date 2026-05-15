@@ -128,6 +128,49 @@ fn test_router_pop_root_not_allowed() {
 }
 
 #[test]
+fn test_router_pop_force_clears_last_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+
+    let popped = router.pop_force();
+    assert!(popped);
+    assert_eq!(router.current(), None);
+    assert_eq!(router.stack_depth(), 0);
+}
+
+#[test]
+fn test_router_pop_force_empty_stack() {
+    let mut router = SceneRouter::new();
+    let popped = router.pop_force();
+    assert!(!popped);
+}
+
+#[test]
+fn test_router_pop_force_exits_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.register("settings", Box::new(TestScene::new("settings")));
+
+    router.push("home");
+    router.push("settings");
+
+    let popped = router.pop_force();
+    assert!(popped);
+    assert_eq!(router.current(), Some("home"));
+
+    let settings = router.get_scene("settings").unwrap();
+    let settings = settings as &dyn std::any::Any;
+    let settings = settings.downcast_ref::<TestScene>().unwrap();
+    assert!(settings.exited);
+
+    let home = router.get_scene("home").unwrap();
+    let home = home as &dyn std::any::Any;
+    let home = home.downcast_ref::<TestScene>().unwrap();
+    assert!(home.resumed);
+}
+
+#[test]
 fn test_router_replace() {
     let mut router = SceneRouter::new();
     router.register("home", Box::new(TestScene::new("home")));
