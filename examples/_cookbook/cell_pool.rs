@@ -88,13 +88,13 @@ impl Widget for PoolDemo {
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         use std::sync::atomic::Ordering;
         match key.code {
-            KeyCode::Char('a') => {
+            KeyCode::Char('a') if key.modifiers.is_empty() => {
                 // Acquire a batch of cells (simulating widget render)
                 let _cells = self.cell_pool.acquire_cells(80 * 24);
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('r') => {
+            KeyCode::Char('r') if key.modifiers.is_empty() => {
                 // Release cells back (simulating end of frame)
                 // In real usage, cells would be placed back in the pool
                 // via release_plane_cells() after render

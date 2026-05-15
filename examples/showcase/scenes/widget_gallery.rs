@@ -195,7 +195,7 @@ impl Scene for WidgetGalleryScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ↑↓←→ nav | Enter: activate | B/Esc: back | ?: help | q: quit ";
+        let nav = " ↑↓←→ nav | Enter: activate | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         // Help overlay

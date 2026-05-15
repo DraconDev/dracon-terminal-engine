@@ -278,7 +278,7 @@ impl Scene for ModalDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ?: help | c: confirm | B/Esc: back | q: quit ";
+        let nav = " ?: help | c: confirm | B/Esc: back ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         plane

@@ -433,7 +433,7 @@ impl Widget for WidgetGallery {
                 };
                 true
             }
-            KeyCode::Enter | KeyCode::Char(' ') => self.widget_mut(self.selected).handle_key(key),
+            KeyCode::Enter | KeyCode::Char(' ') if key.modifiers.is_empty() => self.widget_mut(self.selected).handle_key(key),
             _ => self.widget_mut(self.selected).handle_key(key),
         }
     }

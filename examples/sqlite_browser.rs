@@ -719,7 +719,7 @@ impl Widget for SqliteBrowser {
                         self.dirty = true;
                         true
                     }
-                    KeyCode::Down | KeyCode::Char('j') => {
+                    KeyCode::Down | KeyCode::Char('j') if key.modifiers.is_empty() => {
                         match self.active_panel {
                             Panel::Tables if self.selected_table + 1 < self.tables.len() => {
                                 self.selected_table += 1;
@@ -735,7 +735,7 @@ impl Widget for SqliteBrowser {
                         }
                         true
                     }
-                    KeyCode::Up | KeyCode::Char('k') => {
+                    KeyCode::Up | KeyCode::Char('k') if key.modifiers.is_empty() => {
                         match self.active_panel {
                             Panel::Tables if self.selected_table > 0 => {
                                 self.selected_table -= 1;

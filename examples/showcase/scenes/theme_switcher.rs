@@ -186,7 +186,7 @@ impl Scene for ThemeSwitcherScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " B/Esc: back | ?: help | q: quit ";
+        let nav = " B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
