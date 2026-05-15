@@ -664,64 +664,80 @@ fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize
     draw_text_bounded(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_dashboard_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_dashboard_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let bar_len = (card_w - 12).min(10).max(4);
     let items = [("CPU", (phase * 25.0).sin() * 30.0 + 55.0), ("MEM", (phase * 20.0).sin() * 20.0 + 65.0), ("NET", (phase * 15.0).sin() * 40.0 + 50.0)];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
-        if y > oy + 10 { break; }
+        if y > oy + 10 || y > max_y { break; }
         let val = value.clamp(0.0, 100.0) as u32;
-        let filled = ((val as f64 / 100.0) * 10.0).round() as usize;
-        let bar_str = format!("{}{}{}", label, " [", format_args!("{}{}", "█".repeat(filled), "░".repeat(10 - filled)));
+        let filled = ((val as f64 / 100.0) * bar_len as f64).round() as usize;
+        let bar_str = format!("{} {}", label, format_args!("{}{}{}", "[", "█".repeat(filled.min(bar_len)), "░".repeat(bar_len - filled.min(bar_len))));
         let color = if val > 80 { t.error } else if val > 50 { t.warning } else { t.success };
-        draw_text(plane, ox + 1, y, &bar_str, color, t.surface, Styles::empty());
-        set_cell(plane, ox + 14 + filled, y, ']', t.fg_muted, t.surface);
+        let max_text_len = max_x - (ox + 1) + 1;
+        let truncated: String = bar_str.chars().take(max_text_len).collect();
+        draw_text_bounded(plane, ox + 1, y, &truncated, color, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        set_cell_bounded(plane, ox + 6 + bar_len + 1, y, ']', t.fg_muted, t.surface, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_tabbed_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_tabbed_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let tabs = ["Tab1", "Tab2", "Tab3+"];
     for (i, tab) in tabs.iter().enumerate() {
         let is_active = i == 0;
         let fg = if is_active { t.primary } else { t.fg_muted };
         let bg = if is_active { t.surface_elevated } else { t.surface };
-        for (j, ch) in tab.chars().enumerate() { set_cell(plane, ox + 1 + j + i * 5, oy + 5, ch, fg, bg); }
+        for (j, ch) in tab.chars().enumerate() { set_cell_bounded(plane, ox + 1 + j + i * 5, oy + 5, ch, fg, bg, ox + 1, max_x, oy + 1, max_y); }
     }
-    for x in ox + 1..ox + 19 { set_cell(plane, x, oy + 6, '─', t.outline, t.surface_elevated); }
-    for y in oy + 6..oy + 11 { for x in ox + 1..ox + 20 { set_cell(plane, x, y, ' ', t.fg, t.surface_elevated); } }
-    draw_text(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, Styles::empty());
+    let line_w = (card_w - 2).min(19);
+    for x in ox + 1..ox + line_w + 1 { set_cell_bounded(plane, x, oy + 6, '─', t.outline, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); }
+    for y in oy + 6..oy + 11.min(oy + card_w / 2 + 6) { for x in ox + 1..ox + (card_w - 1).min(20) + 1 { set_cell_bounded(plane, x, y, ' ', t.fg, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); } }
+    draw_text_bounded(plane, ox + 3, oy + 8, "Tab content here", t.fg_muted, t.surface_elevated, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_tree_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_tree_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let lines = ["v root/", "| v src/", "| | > main.rs", "| | > lib.rs", "| v target/"];
     let scroll = ((phase * 0.5).sin() * 1.5) as i16;
+    let max_text_len = max_x - (ox + 2) + 1;
     for (i, line) in lines.iter().enumerate() {
         let y = oy + 6 + i;
-        if !(oy + 6..=oy + 11).contains(&y) { continue; }
+        if !(oy + 6..=oy + 11).contains(&y) || y > max_y { continue; }
         let offset = if i == 2 { scroll } else { 0 };
         let x = (ox as i16 + 2 + offset).clamp(ox as i16 + 1, ox as i16 + 20) as usize;
-        let truncated: String = line.chars().skip(x.saturating_sub(ox + 2)).take(22).collect();
+        let truncated: String = line.chars().skip(x.saturating_sub(ox + 2)).take(max_text_len).collect();
         let prefix = if truncated.starts_with('|') { "│" } else { " " };
-        draw_text(plane, ox + 1, y, prefix, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 2, y, &truncated, t.fg_subtle, t.surface, Styles::empty());
+        draw_text_bounded(plane, ox + 1, y, prefix, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 2, y, &truncated, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_table_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    let headers = " Name     | Age | City ";
-    let sep = "----------|-----|------";
-    draw_text(plane, ox + 1, oy + 5, headers, t.primary, t.surface, Styles::empty());
-    draw_text(plane, ox + 1, oy + 6, sep, t.outline, t.surface, Styles::empty());
+fn render_table_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let headers = " Name    | Age | City ";
+    let sep = "---------|-----|------";
+    draw_text_bounded(plane, ox + 1, oy + 5, headers, t.primary, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, ox + 1, oy + 6, sep, t.outline, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    let name_w = (card_w - 8).min(10).max(4);
     let rows = [(" Alice   ", "  28 ", " NYC  "), (" Bob     ", "  34 ", " LA   ")];
     let highlight_row = ((phase * 0.5).sin() * 0.5 + 0.5) > 0.5;
     for (i, (name, age, city)) in rows.iter().enumerate() {
         let y = oy + 7 + i;
+        if y > max_y { break; }
         let is_selected = highlight_row && i == 1;
         let fg = if is_selected { t.selection_fg } else { t.fg_subtle };
         let prefix = if is_selected { ">" } else { " " };
-        draw_text(plane, ox + 1, y, prefix, t.primary, t.surface, Styles::BOLD);
-        draw_text(plane, ox + 2, y, name, fg, t.surface, Styles::empty());
-        draw_text(plane, ox + 12, y, age, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 18, y, city, t.fg_muted, t.surface, Styles::empty());
+        draw_text_bounded(plane, ox + 1, y, prefix, t.primary, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
+        let name_trunc: String = name.chars().take(name_w).collect();
+        draw_text_bounded(plane, ox + 2, y, &name_trunc, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 2 + name_w, y, age, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 2 + name_w + 6, y, city, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
 
