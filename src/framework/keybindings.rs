@@ -114,6 +114,7 @@ impl KeybindingConfig {
         bindings.insert(actions::THEME.to_string(), "f2".to_string());
         bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
         bindings.insert(actions::PAUSE.to_string(), "p".to_string());
+        bindings.insert(actions::DISMISS.to_string(), "ctrl+c".to_string());
         Self { bindings }
     }
 

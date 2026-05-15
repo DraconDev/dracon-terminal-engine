@@ -131,7 +131,7 @@ impl Widget for Showcase {
         // Live clock (cached in needs_render, updated once per second)
         let clock_text = self.cached_clock_text.borrow();
         let clock_x = title_x + title_text.len() + 2;
-        if clock_x + clock_text.len() < area.width as usize - 10 {
+        if clock_x + clock_text.len() < (area.width as usize).saturating_sub(10) {
             draw_text(
                 &mut plane,
                 clock_x,
@@ -149,7 +149,7 @@ impl Widget for Showcase {
         if self.show_fps {
             let fps_val = self.fps.load(Ordering::Relaxed);
             let fps_text = format!("{} FPS", fps_val);
-            let fps_x = area.width as usize - fps_text.len() - 2;
+            let fps_x = (area.width as usize).saturating_sub(fps_text.len()).saturating_sub(2);
             if fps_x > title_x + title_text.len() {
                 draw_text(
                     &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, Styles::empty(),
@@ -259,7 +259,7 @@ impl Widget for Showcase {
             t.bg,
             Styles::BOLD,
         );
-        for x in stats_start + stats_text.len()..area.width as usize - 2 {
+        for x in stats_start + stats_text.len()..(area.width as usize).saturating_sub(2) {
             set_cell(&mut plane, x, stats_y, '─', t.outline, t.bg);
         }
 
@@ -279,7 +279,7 @@ impl Widget for Showcase {
         };
 
         // Draw search bar background
-        for x in 2..area.width as usize - 2 {
+        for x in 2..(area.width as usize).saturating_sub(2) {
             set_cell(&mut plane, x, search_y, ' ', t.fg, search_bg);
         }
 
@@ -549,8 +549,8 @@ impl Widget for Showcase {
         // Grid of cards — responsive sizing
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
-        let available_w = area.width as usize - grid_start_x;
-        let available_h = area.height as usize - grid_start_y - 2;
+        let available_w = (area.width as usize).saturating_sub(grid_start_x);
+        let available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
 
         // Responsive card sizing
         let (card_w, card_h) = if available_w >= 90 {
