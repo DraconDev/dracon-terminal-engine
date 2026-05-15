@@ -4,7 +4,7 @@
 //! documented in AGENTS.md, including theme propagation, keybinding usage, and
 //! help overlay structure.
 
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
