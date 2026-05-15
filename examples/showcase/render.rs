@@ -777,7 +777,7 @@ fn render_game_loop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize,
     let (snake_y, snake_x) = (7.0 + (phase * 3.0).sin() * 1.5, 12.0 + (phase * 2.0).cos() * 3.0);
     let (sy, sx) = (snake_y.round() as usize, snake_x.round() as usize);
     let (min_px, max_px) = (sx.saturating_sub(1).max(8), (sx + 1).min(card_w - 4));
-    let (min_py, max_py) = (sy.saturating_sub(1).max(6), (sy + 1).min(card_w / 2 + 3));
+    let (min_py, max_py) = (sy.saturating_sub(1).max(6), (sy + 1).min(max_y));
     for py in min_py..=max_py {
         for px in min_px..=max_px {
             let (dx, dy) = (px as i32 - snake_x as i32, py as i32 - snake_y as i32);
