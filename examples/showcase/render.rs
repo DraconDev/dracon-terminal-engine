@@ -637,26 +637,31 @@ fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
     }
 }
 
-fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    let (mx, my, mw, mh) = (ox + 4, oy + 5, 18, 7);
+fn render_modal_demo_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let mw = (card_w - 6).min(18).max(8);
+    let mh = 7;
+    let mx = ox + (card_w - mw) / 2;
+    let my = oy + 5;
     let bc = t.warning;
-    set_cell(plane, mx, my, '┌', bc, t.surface_elevated);
-    for dx in 1..mw - 1 { set_cell(plane, mx + dx, my, '─', bc, t.surface_elevated); }
-    set_cell(plane, mx + mw - 1, my, '┐', bc, t.surface_elevated);
+    set_cell_bounded(plane, mx, my, '┌', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
+    for dx in 1..mw - 1 { set_cell_bounded(plane, mx + dx, my, '─', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); }
+    set_cell_bounded(plane, mx + mw - 1, my, '┐', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
     for dy in 1..mh - 1 {
-        set_cell(plane, mx, my + dy, '│', bc, t.surface_elevated);
-        for dx in 1..mw - 1 { set_cell(plane, mx + dx, my + dy, ' ', bc, t.surface_elevated); }
-        set_cell(plane, mx + mw - 1, my + dy, '│', bc, t.surface_elevated);
+        set_cell_bounded(plane, mx, my + dy, '│', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
+        for dx in 1..mw - 1 { set_cell_bounded(plane, mx + dx, my + dy, ' ', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, mx + mw - 1, my + dy, '│', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
     }
-    set_cell(plane, mx, my + mh - 1, '└', bc, t.surface_elevated);
-    for dx in 1..mw - 1 { set_cell(plane, mx + dx, my + mh - 1, '─', bc, t.surface_elevated); }
-    set_cell(plane, mx + mw - 1, my + mh - 1, '┘', bc, t.surface_elevated);
+    set_cell_bounded(plane, mx, my + mh - 1, '└', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
+    for dx in 1..mw - 1 { set_cell_bounded(plane, mx + dx, my + mh - 1, '─', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y); }
+    set_cell_bounded(plane, mx + mw - 1, my + mh - 1, '┘', bc, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
     let text = " Confirm? ";
-    draw_text(plane, mx + (mw - text.len()) / 2, my + 2, text, t.fg, t.surface_elevated, Styles::BOLD);
+    draw_text_bounded(plane, mx + (mw - text.len()) / 2, my + 2, text, t.fg, t.surface_elevated, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
     let pulse = (phase * 3.0).sin() * 0.5 + 0.5;
     let yes_fg = if pulse > 0.5 { t.success } else { t.fg_muted };
-    draw_text(plane, mx + 3, my + 4, "[ Yes ]", yes_fg, t.surface_elevated, Styles::BOLD);
-    draw_text(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, Styles::BOLD);
+    draw_text_bounded(plane, mx + 3, my + 4, "[ Yes ]", yes_fg, t.surface_elevated, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, mx + 10, my + 4, "[ No  ]", t.fg_muted, t.surface_elevated, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
 }
 
 fn render_dashboard_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
