@@ -416,17 +416,17 @@ impl Widget for Showcase {
         };
         let state_3 = {
             let sel = self.primitive_radio;
-            let opts = ["①", "②", "③"];
+            let opts = ["1", "2", "3"];
             let mut s = String::new();
             for (j, _o) in opts.iter().enumerate() {
-                s.push_str(if j == sel { "*" } else { "( )" });
+                s.push_str(if j == sel { "*" } else { "." });
             }
             format!(" Radio {}", s)
         };
         let state_4 = if self.primitive_button || self.primitive_button_time.is_some() {
             " * Clicked!"
         } else {
-            " ◇ Button"
+            " o Button"
         };
         let prim_controls: [(&str, &str); 5] = [
             ("", state_0),
