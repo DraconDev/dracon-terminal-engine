@@ -360,10 +360,20 @@ impl Dashboard {
         }
     }
 
+    fn propagate_theme(&mut self) {
+        self.split.on_theme_change(&self.theme);
+    }
+
     fn cycle_theme(&mut self) {
         self.theme_index = (self.theme_index + 1) % Theme::all().len();
         self.theme = Theme::all()[self.theme_index].clone();
-        self.split.on_theme_change(&self.theme);
+        self.propagate_theme();
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.theme_index = Theme::all().iter().position(|t| t.name == theme.name).unwrap_or(0);
+        self.propagate_theme();
     }
 }
 
@@ -388,6 +398,10 @@ impl Widget for Dashboard {
     fn clear_dirty(&mut self) {}
     fn focusable(&self) -> bool {
         true
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        Dashboard::on_theme_change(self, theme);
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -468,7 +482,7 @@ impl Widget for Dashboard {
 
         // Help overlay
         if self.show_help {
-            render_help(&mut plane, area, t);
+            render_help(&mut plane, area, t, &self.keybindings);
         }
 
         plane
@@ -479,31 +493,31 @@ impl Widget for Dashboard {
             return false;
         }
         if self.show_help {
-            if self.keybindings.matches("back", &key) || self.keybindings.matches("help", &key) {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
                 return true;
             }
             return true;
         }
 
-        if self.keybindings.matches("quit", &key) {
+        if self.keybindings.matches(actions::QUIT, &key) {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }
-        if self.keybindings.matches("theme", &key) {
+        if self.keybindings.matches(actions::THEME, &key) {
             self.cycle_theme();
             return true;
         }
-        if self.keybindings.matches("refresh", &key) {
+        if self.keybindings.matches(actions::REFRESH, &key) {
             self.data.refresh();
             self.last_update = Instant::now();
             return true;
         }
-        if self.keybindings.matches("help", &key) {
+        if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
             return true;
         }
-        if self.keybindings.matches("pause", &key) {
+        if self.keybindings.matches(actions::PAUSE, &key) {
             self.paused = !self.paused;
             return true;
         }
@@ -825,38 +839,61 @@ fn blit_plane(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
     }
 }
 
-fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
+fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let hw = 50u16.min(area.width.saturating_sub(4));
     let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
 
     render_card_border(plane, hx, hy, hw, hh, t.outline, t.surface_elevated);
-    let lines = [
-        (" Dashboard Controls ", true),
-        ("", false),
-        ("t          Cycle theme", false),
-        ("p          Pause/resume updates", false),
-        ("r          Force refresh", false),
-        ("↑/↓        Navigate process list", false),
-        ("?          Toggle this help", false),
-        ("Esc        Dismiss help", false),
-        ("q          Quit", false),
-        ("", false),
-        (" Mouse: scroll process list  ", false),
+
+    let title = "Dashboard Help";
+    let tx = hx + (hw - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((hy + 1) * plane.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+            plane.cells[idx].bg = t.surface_elevated;
+        }
+    }
+
+    let kb_theme = kb.display(actions::THEME).unwrap_or("t");
+    let kb_pause = kb.display(actions::PAUSE).unwrap_or("p");
+    let kb_refresh = kb.display(actions::REFRESH).unwrap_or("r");
+    let kb_help = kb.display(actions::HELP).unwrap_or("?");
+    let kb_back = kb.display(actions::BACK).unwrap_or("Esc");
+    let kb_quit = kb.display(actions::QUIT).unwrap_or("q");
+
+    let shortcuts = [
+        ("↑/↓", "Navigate process list"),
+        (kb_theme, "Cycle theme"),
+        (kb_pause, "Pause/resume updates"),
+        (kb_refresh, "Force refresh"),
+        (kb_help, "Toggle this help"),
+        (kb_back, "Dismiss help"),
+        ("Scroll", "Process list"),
+        (kb_quit, "Quit"),
     ];
-    for (i, (line, bold)) in lines.iter().enumerate() {
-        let y = hy + 1 + i as u16;
-        let x = hx + (hw.saturating_sub(line.len() as u16)) / 2;
-        draw_text(
-            plane,
-            x,
-            y,
-            line,
-            if *bold { t.primary } else { t.fg },
-            t.surface_elevated,
-            *bold,
-        );
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = hy + 3 + i as u16;
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * plane.width + hx + 2 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+            }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * plane.width + hx + 14 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].bg = t.surface_elevated;
+            }
+        }
     }
 }
 
