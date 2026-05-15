@@ -164,7 +164,7 @@ impl Scene for FormDemoScene {
 
             // Drag handle indicator on left
             if !is_dragged {
-                let handle = if is_hover_target { ">" } else { "≡" };
+                let handle = if is_hover_target { ">" } else { "=" };
                 draw_text(&mut plane, 0, y, handle, t.fg_muted, row_bg, false);
             }
 
@@ -214,7 +214,7 @@ impl Scene for FormDemoScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Tab: next | Enter: submit | Drag ≡: reorder | B/Esc: back | ?: help ";
+        let nav = " Tab: next | Enter: submit | Drag =: reorder | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -438,7 +438,7 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
         ("Tab", "Next field"),
         ("Shift+Tab", "Previous field"),
         ("Enter", "Submit form"),
-        ("Drag ≡", "Reorder fields"),
+        ("Drag =", "Reorder fields"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];

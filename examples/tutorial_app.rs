@@ -424,7 +424,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Title
-        let title = if self.task_id.is_some() { "Edit️  Edit Task" } else { "[+] New Task" };
+        let title = if self.task_id.is_some() { "Edit  Edit Task" } else { "[+] New Task" };
         for (i, c) in title.chars().enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;

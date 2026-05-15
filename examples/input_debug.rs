@@ -83,7 +83,7 @@ impl InputDebugger {
         } else {
             let head: String = bytes[..4].iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(" ");
             let tail: String = bytes[bytes.len()-4..].iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(" ");
-            format!("{} … {} ({}B)", head, tail, bytes.len())
+            format!("{} ... {} ({}B)", head, tail, bytes.len())
         }
     }
 

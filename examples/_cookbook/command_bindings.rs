@@ -511,7 +511,7 @@ impl Widget for CommandBindings {
 
         // ── Status bar ──
         let auto_str = if self.paused {
-            "⏸ PAUSED"
+            "|| PAUSED"
         } else {
             "> RUNNING"
         };

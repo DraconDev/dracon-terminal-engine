@@ -128,7 +128,7 @@ impl MenuApp {
         match menu_idx {
             0 => match item_idx {
                 0 => "New New (Ctrl+N)",
-                1 => "�的控制 Open (Ctrl+O)",
+                1 => "?的控制 Open (Ctrl+O)",
                 2 => "Save Save (Ctrl+S)",
                 3 => "Exit Exit (Ctrl+Q)",
                 _ => "",

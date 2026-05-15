@@ -749,7 +749,7 @@ impl Widget for WidgetDemoPanel {
             if i > 0 {
                 let idx = breadcrumb_row * area.width as usize + x as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = '›';
+                    plane.cells[idx].char = '>';
                     plane.cells[idx].fg = theme.fg_muted;
                 }
                 x += 1;

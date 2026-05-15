@@ -14,7 +14,7 @@
 //! - Debug tools render at high z-index (170-200) above main content
 //! - EventLogger records ALL events even when overlay is hidden
 //! - Profiler updates every frame with mock metrics
-//! - ESC or × closes the debug overlay
+//! - ESC or x closes the debug overlay
 //!
 //! ## Usage
 //!

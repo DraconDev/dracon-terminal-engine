@@ -259,7 +259,7 @@ impl EditorApp {
             .iter()
             .map(|t| {
                 if t.adapter.editor().modified {
-                    format!("{} ×", t.title)
+                    format!("{} x", t.title)
                 } else {
                     t.title.clone()
                 }

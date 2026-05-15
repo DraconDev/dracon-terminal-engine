@@ -143,9 +143,9 @@ fn truncate(s: &str, max: usize) -> String {
     let mut r = String::new();
     let mut taken = 0;
     for c in s.chars() {
-        let cw = if c == '…' { 0 } else { 1 };
+        let cw = if c == '...' { 0 } else { 1 };
         if taken + cw >= max {
-            r.push('…');
+            r.push('...');
             break;
         }
         r.push(c);

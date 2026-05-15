@@ -248,7 +248,7 @@ impl Scene for SettingsScreen {
         }
 
         // Title
-        let title = "[S]️  Settings";
+        let title = "[S]  Settings";
         for (i, c) in title.chars().enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
