@@ -431,32 +431,32 @@ impl Widget for GitTui {
         }
 
         match key.code {
-            KeyCode::Char('1') => {
+            KeyCode::Char('1') if key.modifiers.is_empty() => {
                 self.view = GitView::Status;
                 self.tab_bar.set_active(0);
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('2') => {
+            KeyCode::Char('2') if key.modifiers.is_empty() => {
                 self.view = GitView::Log;
                 self.tab_bar.set_active(1);
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('3') => {
+            KeyCode::Char('3') if key.modifiers.is_empty() => {
                 self.view = GitView::Diff;
                 self.tab_bar.set_active(2);
                 self.diff_content = self.read_full_diff();
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('4') => {
+            KeyCode::Char('4') if key.modifiers.is_empty() => {
                 self.view = GitView::Branches;
                 self.tab_bar.set_active(3);
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('d') => {
+            KeyCode::Char('d') if key.modifiers.is_empty() => {
                 if self.view == GitView::Status {
                     if let Some(file) = self.files.get(self.selected_file) {
                         self.diff_content = self.read_diff(&file.path);
@@ -467,7 +467,7 @@ impl Widget for GitTui {
                 }
                 true
             }
-            KeyCode::Down | KeyCode::Char('j') => {
+            KeyCode::Down | KeyCode::Char('j') if key.modifiers.is_empty() => {
                 match self.view {
                     GitView::Status if self.selected_file + 1 < self.files.len() => {
                         self.selected_file += 1;
@@ -485,7 +485,7 @@ impl Widget for GitTui {
                 }
                 true
             }
-            KeyCode::Up | KeyCode::Char('k') => {
+            KeyCode::Up | KeyCode::Char('k') if key.modifiers.is_empty() => {
                 match self.view {
                     GitView::Status if self.selected_file > 0 => {
                         self.selected_file -= 1;
