@@ -771,101 +771,129 @@ fn render_text_editor_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
     if (phase * 2.0).sin() > 0.0 { set_cell_bounded(plane, ox + 3, oy + 6, '█', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
 }
 
-fn render_game_loop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_game_loop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let (snake_y, snake_x) = (7.0 + (phase * 3.0).sin() * 1.5, 12.0 + (phase * 2.0).cos() * 3.0);
     let (sy, sx) = (snake_y.round() as usize, snake_x.round() as usize);
-    let (min_px, max_px) = (sx.saturating_sub(1).max(8), (sx + 1).min(20));
-    let (min_py, max_py) = (sy.saturating_sub(1).max(6), (sy + 1).min(10));
+    let (min_px, max_px) = (sx.saturating_sub(1).max(8), (sx + 1).min(card_w - 4));
+    let (min_py, max_py) = (sy.saturating_sub(1).max(6), (sy + 1).min(card_w / 2 + 3));
     for py in min_py..=max_py {
         for px in min_px..=max_px {
             let (dx, dy) = (px as i32 - snake_x as i32, py as i32 - snake_y as i32);
             let dist_sq = dx * dx + dy * dy;
             let (ch, color) = if dist_sq <= 2 && dist_sq > 0 { ('█', t.success) } else { (' ', t.surface) };
-            set_cell(plane, px, py, ch, color, t.surface);
+            set_cell_bounded(plane, px, py, ch, color, t.surface, ox + 1, max_x, oy + 1, max_y);
         }
     }
     let score_str = format!("  Score: {:3}  ", ((phase * 10.0).sin() * 10.0) as i32 + 42);
-    draw_text(plane, ox + 12 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, Styles::BOLD);
+    draw_text_bounded(plane, ox + (card_w - 2) / 2 - score_str.len() / 2, oy + 11, &score_str, t.warning, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_form_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_form_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let fields = [("Name:", "[___________]"), ("Email:", "[__________]")];
     for (i, (label, field)) in fields.iter().enumerate() {
         let y = oy + 5 + i * 2;
-        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 8, y, field, t.fg, t.surface, Styles::empty());
+        if y > max_y { break; }
+        draw_text_bounded(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 8, y, field, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let btns = ["[Submit]", "[Cancel]"];
     for (i, btn) in btns.iter().enumerate() {
         let fg = if i == 0 { t.primary } else { t.fg_muted };
-        draw_text(plane, ox + 6 + i * 10, oy + 10, btn, fg, t.surface, Styles::BOLD);
+        draw_text_bounded(plane, ox + 6 + i * 10, oy + 10, btn, fg, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_framework_fm_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, Styles::empty());
-    set_cell(plane, ox + 1, oy + 6, '├', t.outline, t.surface);
-    for cx in ox + 2..ox + 24 { set_cell(plane, cx, oy + 6, '─', t.outline, t.surface); }
-    set_cell(plane, ox + 24, oy + 6, '┤', t.outline, t.surface);
+fn render_framework_fm_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    draw_text_bounded(plane, ox + 2, oy + 5, "/ home/ user/", t.primary, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    set_cell_bounded(plane, ox + 1, oy + 6, '├', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+    let line_w = (card_w - 4).min(22).max(4);
+    for cx in ox + 2..ox + line_w + 2 { set_cell_bounded(plane, cx, oy + 6, '─', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y); }
+    set_cell_bounded(plane, ox + line_w + 2, oy + 6, '┤', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
     let rows = [("src/", "  -   "), ("main.rs", " 1.2KB"), ("lib.rs", "  842B")];
     for (i, (name, size)) in rows.iter().enumerate() {
         let y = oy + 7 + i;
+        if y > max_y { break; }
         let fg = if name.ends_with('/') { t.primary } else { t.fg_subtle };
-        draw_text(plane, ox + 2, y, name, fg, t.surface, Styles::empty());
-        draw_text(plane, ox + 14, y, size, t.fg_muted, t.surface, Styles::empty());
+        let name_max = max_x - (ox + 2) + 1;
+        let name_trunc: String = name.chars().take(name_max).collect();
+        draw_text_bounded(plane, ox + 2, y, &name_trunc, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 14, y, size, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
-    if (phase * 2.0).sin() > 0.0 { set_cell(plane, ox + 2, oy + 8, '█', t.primary, t.surface); }
+    if (phase * 2.0).sin() > 0.0 { set_cell_bounded(plane, ox + 2, oy + 8, '█', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
 }
 
-fn render_calendar_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_calendar_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let months = ["January", "February", "March", "April", "May", "June"];
     let month_idx = ((phase * 0.3).floor() as usize) % months.len();
     let title = format!("{} 2026", months[month_idx]);
-    draw_text(plane, ox + 1, oy + 5, &title, t.fg, t.surface, Styles::BOLD);
-    draw_text(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, Styles::empty());
+    draw_text_bounded(plane, ox + 1, oy + 5, &title, t.fg, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, ox + 1, oy + 6, "Mo Tu We Th Fr Sa Su", t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     let day_grid = ["    1  2  3  4  5", " 6  7  8  9 10 11 12", "13 14 15 16 17 18 19", "20 21 22 23 24 25 26", "27 28 29 30 31     "];
     let offset = ((phase * 0.5).floor() as usize) % 2;
     for (i, row) in day_grid.iter().enumerate() {
         let y = oy + 7 + i;
-        if y > oy + 11 { break; }
-        let truncated: String = row.chars().skip(offset).take(22).collect();
+        if y > oy + 11 || y > max_y { break; }
+        let max_len = max_x - (ox + 1) + 1;
+        let truncated: String = row.chars().skip(offset).take(max_len).collect();
         let fg = if i == 1 { t.primary } else { t.fg_subtle };
-        draw_text(plane, ox + 1, y, &truncated, fg, t.surface, Styles::empty());
+        draw_text_bounded(plane, ox + 1, y, &truncated, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let sel = (((phase * 0.8).sin() * 0.5 + 0.5) * 30.0).round() as usize % 31 + 1;
-    draw_text(plane, ox + 1, oy + 11, &format!("Selected: 2026-{:>2}-{:>2}", month_idx + 1, sel.min(28)), t.fg_muted, t.surface, Styles::empty());
+    let sel_text = format!("Sel: {}-{:>2}-{:>2}", month_idx + 1, sel.min(28));
+    draw_text_bounded(plane, ox + 1, oy + 11, &sel_text, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_rich_text_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
+fn render_rich_text_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let lines = [("# Heading", t.primary, true), ("**Bold** and *italic*", t.fg, false), ("`inline code`", t.secondary, false), ("- List item", t.fg_muted, false), ("[link](https://)", t.info, false)];
     for (i, (text, color, bold)) in lines.iter().enumerate() {
         let y = oy + 5 + i;
-        if y > oy + 10 { break; }
-        let truncated: String = text.chars().take(22).collect();
-        draw_text(plane, ox + 1, y, &truncated, *color, t.surface, if *bold { Styles::BOLD } else { Styles::empty() });
+        if y > oy + 10 || y > max_y { break; }
+        let max_len = max_x - (ox + 1) + 1;
+        let truncated: String = text.chars().take(max_len).collect();
+        draw_text_bounded(plane, ox + 1, y, &truncated, *color, t.surface, if *bold { Styles::BOLD } else { Styles::empty() }, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, Styles::empty());
-    if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 6, oy + 5, '█', t.primary, t.surface); }
+fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let input_w = (card_w - 4).min(17).max(4);
+    let input_text = format!("{}{}{}",
+        "rust",
+        " ".repeat(input_text_width(input_w, 4)),
+        "]"
+    );
+    draw_text_bounded(plane, ox + 1, oy + 5, "[rust           ]", t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    if (phase * 3.0).fract() < 0.6 { set_cell_bounded(plane, ox + 6, oy + 5, '█', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
     let suggestions = ["rust-analyzer", "rustc", "cargo", "rustfmt", "clippy"];
     let offset = ((phase * 0.5).sin() * 2.0).round() as i16;
     for (i, s) in suggestions.iter().enumerate() {
         let y = oy + 6 + i;
-        if y > oy + 10 { break; }
+        if y > oy + 10 || y > max_y { break; }
         let x_offset = if i == 0 { offset } else { 0 };
         let x = if x_offset >= 0 {
-            (ox + 2 + x_offset as usize).min(ox + 18)
+            (ox + 2 + x_offset as usize).min(max_x - 1)
         } else {
             (ox + 2).saturating_sub(x_offset.unsigned_abs() as usize)
         };
         let fg = if i == 0 { t.primary } else { t.fg_subtle };
         let prefix = if i == 0 { "> " } else { "  " };
-        draw_text(plane, x, y, prefix, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, x + 2, y, s, fg, t.surface, Styles::empty());
+        draw_text_bounded(plane, x, y, prefix, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, x + 2, y, s, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
+
+fn input_text_width(_input_w: usize, _text_len: usize) -> usize { 0 }
 fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
     let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
