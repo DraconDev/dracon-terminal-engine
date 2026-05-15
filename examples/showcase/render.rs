@@ -417,14 +417,14 @@ fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy:
     let split_x = (4.0 + (phase * 0.5).sin() * 3.0).round() as usize;
     let split_x = split_x.min(card_w - 4).max(2);
     let w = (card_w - 2).min(26);
-    for y in oy + 6..oy + 12.min(oy + card_w / 2 + 6) {
+    for y in oy + 6..(oy + 12).min(max_y + 1) {
         for x in ox + 1..ox + w {
             let bg = if x - ox <= split_x { t.surface_elevated } else { t.surface };
             let fg = if x - ox <= split_x { t.fg_muted } else { t.fg_subtle };
             set_cell_bounded(plane, x, y, ' ', fg, bg, ox + 1, max_x, oy + 1, max_y);
         }
     }
-    for y in oy + 6..oy + 12.min(oy + card_w / 2 + 6) {
+    for y in oy + 6..(oy + 12).min(max_y + 1) {
         set_cell_bounded(plane, ox + split_x, y, '│', t.primary, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
     }
     draw_text_bounded(plane, ox + 2, oy + 7, "A", t.fg, t.surface_elevated, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
