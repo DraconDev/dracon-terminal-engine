@@ -176,7 +176,7 @@ impl Scene for CellPoolScene {
                 self.simulate_allocation();
                 true
             }
-            KeyCode::Char('r') => {
+            KeyCode::Char('r') if key.modifiers.is_empty() => {
                 self.pool = CellPool::new();
                 self.acquired = 0;
                 self.released = 0;

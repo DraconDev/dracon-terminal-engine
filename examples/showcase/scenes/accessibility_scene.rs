@@ -165,7 +165,7 @@ impl Scene for AccessibilityScene {
         }
 
         match key.code {
-            KeyCode::Char('t') => {
+            KeyCode::Char('t') if key.modifiers.is_empty() => {
                 self.enabled = !self.enabled;
                 if self.enabled {
                     self.announce("Accessibility announcements enabled");
