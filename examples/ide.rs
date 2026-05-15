@@ -895,8 +895,6 @@ impl Widget for IdeApp {
         // Context menu
         if self.context_menu.is_some() {
             if self.keybindings.matches(actions::BACK, &key)
-                || self.keybindings.matches(actions::CANCEL, &key)
-                || self.keybindings.matches(actions::DISMISS, &key)
             {
                 self.context_menu = None;
                 self.context_menu_pos = None;
@@ -908,8 +906,6 @@ impl Widget for IdeApp {
         // Help overlay
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key)
-                || self.keybindings.matches(actions::CANCEL, &key)
-                || self.keybindings.matches(actions::DISMISS, &key)
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
@@ -921,8 +917,6 @@ impl Widget for IdeApp {
         // Search mode
         if self.show_search {
             if self.keybindings.matches(actions::BACK, &key)
-                || self.keybindings.matches(actions::CANCEL, &key)
-                || self.keybindings.matches(actions::DISMISS, &key)
             {
                 self.show_search = false;
                 return true;
