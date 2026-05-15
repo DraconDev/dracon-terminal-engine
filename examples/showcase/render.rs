@@ -558,7 +558,9 @@ fn render_ide_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: u
     if (phase * 3.0).fract() < 0.6 { set_cell_bounded(plane, ox + 4, oy + 6, '▎', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
 }
 
-fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let wins = [(1, 6, 8, 4, t.primary), (11, 7, 8, 4, t.warning), (6, 9, 10, 3, t.info)];
     let offsets = [((phase * 20.0).sin() as i16, (phase * 15.0).sin() as i16), ((phase * 18.0).sin() as i16, (phase * 12.0).sin() as i16), (0, 0)];
     for (i, (x, y, w, h, color)) in wins.iter().enumerate() {
@@ -566,62 +568,71 @@ fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, o
         let oy2 = offsets[i].1;
         let wx = (*x as i16 + ox2).max(1) as usize;
         let wy = (*y as i16 + oy2).max(6) as usize;
-        let wx = wx.min(20);
+        let wx = wx.min(card_w - 4);
         let wy = wy.min(11);
-        set_cell(plane, ox + wx, oy + wy, '┌', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy, '─', *color, t.surface); }
-        set_cell(plane, ox + wx + w - 1, oy + wy, '┐', *color, t.surface);
+        set_cell_bounded(plane, ox + wx, oy + wy, '┌', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
+        for dx in 1..w - 1 { set_cell_bounded(plane, ox + wx + dx, oy + wy, '─', *color, t.surface, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, ox + wx + w - 1, oy + wy, '┐', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
         for dy in 1..h - 1 {
-            set_cell(plane, ox + wx, oy + wy + dy, '│', *color, t.surface);
-            for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy + dy, ' ', *color, t.surface); }
-            set_cell(plane, ox + wx + w - 1, oy + wy + dy, '│', *color, t.surface);
+            set_cell_bounded(plane, ox + wx, oy + wy + dy, '│', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
+            for dx in 1..w - 1 { set_cell_bounded(plane, ox + wx + dx, oy + wy + dy, ' ', *color, t.surface, ox + 1, max_x, oy + 1, max_y); }
+            set_cell_bounded(plane, ox + wx + w - 1, oy + wy + dy, '│', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
         }
-        set_cell(plane, ox + wx, oy + wy + h - 1, '└', *color, t.surface);
-        for dx in 1..w - 1 { set_cell(plane, ox + wx + dx, oy + wy + h - 1, '─', *color, t.surface); }
-        set_cell(plane, ox + wx + w - 1, oy + wy + h - 1, '┘', *color, t.surface);
+        set_cell_bounded(plane, ox + wx, oy + wy + h - 1, '└', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
+        for dx in 1..w - 1 { set_cell_bounded(plane, ox + wx + dx, oy + wy + h - 1, '─', *color, t.surface, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, ox + wx + w - 1, oy + wy + h - 1, '┘', *color, t.surface, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_git_tui_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, Styles::BOLD);
-    draw_text(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, Styles::empty());
+fn render_git_tui_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    draw_text_bounded(plane, ox + 2, oy + 6, " main ", t.fg_on_accent, t.primary_active, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, ox + 2, oy + 7, "Status: 3 files changed", t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     let phases = [[(" M src/main.rs", t.warning), (" A Cargo.toml", t.success), ("?? README.md", t.error)], [(" M Cargo.toml", t.warning), (" D old.rs", t.error), (" A new.rs", t.success)], [("?? config.yml", t.error), (" M lib.rs", t.warning), (" A test.rs", t.success)], [(" D removed.rs", t.error), (" M updated.rs", t.warning), ("?? unknown.py", t.error)]];
     let phase_idx = ((phase * 0.3).floor() as usize) % phases.len();
-    for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text(plane, ox + 2, oy + 9 + i, text, *color, t.surface, Styles::empty()); }
+    for (i, (text, color)) in phases[phase_idx].iter().enumerate() { draw_text_bounded(plane, ox + 2, oy + 9 + i, text, *color, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y); }
 }
 
-fn render_file_manager_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_file_manager_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let items = [(0, "home/", true, 0), (1, "user/", true, 1), (2, "  src/", true, 2), (3, "    main.rs", false, -1), (3, "    lib.rs", false, -1), (2, "  docs/", true, 1), (3, "    README.md", false, -1)];
     let expand_phase = ((phase * 0.5).sin() * 4.0).round().max(0.0) as usize % 4;
     let visible_depth = if expand_phase == 0 { 1 } else if expand_phase == 1 { 2 } else if expand_phase == 2 { 3 } else { 4 };
     for (i, (indent, name, is_dir, _)) in items.iter().enumerate() {
         if *indent as usize > visible_depth { continue; }
         let py = oy + 6 + i;
-        if py > oy + 12 { break; }
+        if py > oy + 12 || py > max_y { break; }
         let icon = if *is_dir { "v" } else { ">" };
         let text = format!("{}{}", icon, name);
+        let max_len = max_x - (ox + 2) + 1;
+        let truncated: String = text.chars().take(max_len).collect();
         let fg = if *is_dir { t.warning } else { t.fg_subtle };
-        draw_text(plane, ox + 2, py, &text, fg, t.surface, Styles::empty());
+        draw_text_bounded(plane, ox + 2, py, &truncated, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    let menus = ["File", "Edit", "View", "Help"];
+fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let menus = if card_w >= 40 { ["File", "Edit", "View", "Help"] } else if card_w >= 28 { ["File", "Edit", "View"] } else { ["File", "Edit"] };
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
-    let menu_w = 8;
+    let menu_w = (card_w / menus.len().max(1)).min(8).max(4);
     for (i, menu) in menus.iter().enumerate() {
         let x = ox + 2 + i * (menu_w + 1);
+        if x > max_x { break; }
         let is_highlighted = i == highlight_idx;
         let bg = if is_highlighted { t.primary } else { t.surface };
         let fg = if is_highlighted { t.fg_on_accent } else { t.fg };
-        for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6, ' ', fg, bg); }
+        for dx in 0..menu_w { set_cell_bounded(plane, x + dx, oy + 6, ' ', fg, bg, ox + 1, max_x, oy + 1, max_y); }
         let text = format!(" {} ", menu);
-        draw_text(plane, x, oy + 6, &text, fg, bg, Styles::empty());
+        draw_text_bounded(plane, x, oy + 6, &text, fg, bg, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
         if is_highlighted {
             for dy in 1..5 {
-                for dx in 0..menu_w { set_cell(plane, x + dx, oy + 6 + dy, if dy == 4 { '─' } else { ' ' }, if dy == 4 { t.primary } else { t.fg }, t.surface); }
+                for dx in 0..menu_w { set_cell_bounded(plane, x + dx, oy + 6 + dy, if dy == 4 { '─' } else { ' ' }, if dy == 4 { t.primary } else { t.fg }, t.surface, ox + 1, max_x, oy + 1, max_y); }
             }
-            for (j, item) in ["New", "Open", "Save", "Exit"].iter().enumerate() { draw_text(plane, x + 1, oy + 7 + j, item, t.fg, t.surface, Styles::empty()); }
+            for (j, item) in ["New", "Open", "Save", "Exit"].iter().enumerate() { draw_text_bounded(plane, x + 1, oy + 7 + j, item, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y); }
         }
     }
 }
