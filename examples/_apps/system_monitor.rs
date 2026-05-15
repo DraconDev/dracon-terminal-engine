@@ -526,14 +526,24 @@ impl SystemMonitor {
         self.area.height.saturating_sub(16).max(1) as usize
     }
 
-    fn cycle_theme(&mut self) {
-        self.theme_index = (self.theme_index + 1) % Theme::all().len();
-        self.theme = Theme::all()[self.theme_index].clone();
+    fn propagate_theme(&mut self) {
         self.cpu_gauge.on_theme_change(&self.theme);
         self.mem_gauge.on_theme_change(&self.theme);
         self.disk_gauge.on_theme_change(&self.theme);
         self.net_gauge.on_theme_change(&self.theme);
         self.status_badge.on_theme_change(&self.theme);
+    }
+
+    fn cycle_theme(&mut self) {
+        self.theme_index = (self.theme_index + 1) % Theme::all().len();
+        self.theme = Theme::all()[self.theme_index].clone();
+        self.propagate_theme();
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.theme_index = Theme::all().iter().position(|t| t.name == theme.name).unwrap_or(0);
+        self.propagate_theme();
     }
 
     fn update_gauges(&mut self) {
@@ -1294,30 +1304,40 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
         }
     }
 
-    let lines = [
-        (" System Monitor Help ", true),
-        ("", false),
-        ("t          Cycle theme (15 themes)", false),
-        ("p          Toggle tree view", false),
-        ("?          Toggle this help", false),
-        ("Esc        Dismiss help", false),
-        ("↑/↓        Navigate process list", false),
-        ("Click      Select process", false),
-        ("Scroll     Scroll process list", false),
-        ("q          Quit", false),
+    let kb_theme = kb.display(actions::THEME).unwrap_or("t");
+    let kb_help = kb.display(actions::HELP).unwrap_or("?");
+    let kb_back = kb.display(actions::BACK).unwrap_or("Esc");
+    let kb_quit = kb.display(actions::QUIT).unwrap_or("Ctrl+Q");
+    let kb_tree = kb.display(actions::TREE_MODE).unwrap_or("p");
+
+    let shortcuts = [
+        ("↑/↓", "Navigate process list"),
+        (kb_tree, "Toggle tree view"),
+        (kb_theme, "Cycle theme (15 themes)"),
+        (kb_help, "Toggle this help"),
+        (kb_back, "Dismiss help"),
+        ("Click", "Select process"),
+        ("Scroll", "Scroll process list"),
+        (kb_quit, "Quit"),
     ];
-    for (i, (line, bold)) in lines.iter().enumerate() {
-        let y = hy + 1 + i as u16;
-        let x = hx + (hw.saturating_sub(line.len() as u16)) / 2;
-        draw_text(
-            plane,
-            x,
-            y,
-            line,
-            if *bold { t.primary } else { t.fg },
-            t.surface_elevated,
-            *bold,
-        );
+    for (i, (key, desc)) in shortcuts.iter().enumerate() {
+        let row = hy + 1 + i as u16;
+        for (j, c) in key.chars().enumerate() {
+            let idx = (row * plane.width + hx + 2 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.primary;
+                plane.cells[idx].bg = t.surface_elevated;
+            }
+        }
+        for (j, c) in desc.chars().enumerate() {
+            let idx = (row * plane.width + hx + 14 + j as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg;
+                plane.cells[idx].bg = t.surface_elevated;
+            }
+        }
     }
 }
 
