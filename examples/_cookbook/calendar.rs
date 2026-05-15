@@ -250,7 +250,7 @@ impl Widget for CalendarDemo {
         let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
         let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
         let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
-        let instructions = format!("←/→: navigate months | Enter: confirm | C: clear | {kb_theme}: toggle mode | {kb_help}: help | {kb_quit}: quit");
+        let instructions = format!("</>: navigate months | Enter: confirm | C: clear | {kb_theme}: toggle mode | {kb_help}: help | {kb_quit}: quit");
         for (i, c) in instructions.chars().enumerate() {
             let idx = (inst_y * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -312,7 +312,7 @@ impl Widget for CalendarDemo {
             }
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts: [(&str, &str); 6] = [
-                ("←/→", "Navigate months"),
+                ("</>", "Navigate months"),
                 ("Enter", "Confirm selection"),
                 ("C", "Clear selection"),
                 (kb_theme, "Toggle mode"),

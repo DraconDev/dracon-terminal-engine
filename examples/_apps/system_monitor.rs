@@ -11,7 +11,7 @@
 //! Controls:
 //!   t          — cycle theme (15 themes)
 //!   ?          — toggle help
-//!   ↑/↓        — navigate process list
+//!   ^/v        — navigate process list
 //!   q          — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};

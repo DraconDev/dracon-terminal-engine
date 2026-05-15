@@ -5,7 +5,7 @@
 //!
 //! Controls:
 //!   1/2/3/4      — switch views (Status/Log/Diff/Branches)
-//!   ↑/↓ or j/k   — navigate
+//!   ^/v or j/k   — navigate
 //!   Enter        — stage/unstage (status) or checkout (branches)
 //!   d            — view diff for selected file
 //!   r            — refresh
@@ -331,7 +331,7 @@ impl Widget for GitTui {
 
         // Content
         if !self.is_git_repo() {
-            let icon = " 󰊢 ";
+            let icon = " Git ";
             let msg = "Not a git repository";
             let hint = "Run 'git init' in this directory to get started";
             let icon_x = (area.width as usize - icon.len()) / 2;
@@ -650,7 +650,7 @@ impl Widget for GitTui {
 
 impl GitTui {
     fn render_status(&self, plane: &mut Plane, y: u16, _h: u16, t: &Theme) {
-        let header = " 󰊢 Status";
+        let header = " Git Status";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         let sub_y = y + 2;
@@ -659,7 +659,7 @@ impl GitTui {
                 plane,
                 2,
                 sub_y,
-                " 󰄬 Working tree clean",
+                " OK Working tree clean",
                 t.success,
                 t.bg,
                 false,
@@ -684,7 +684,7 @@ impl GitTui {
                     plane,
                     3,
                     row,
-                    " 󰄬 Staged",
+                    " OK Staged",
                     t.success,
                     t.surface_elevated,
                     true,
@@ -707,7 +707,7 @@ impl GitTui {
                     } else {
                         t.surface_elevated
                     };
-                    let icon = "󰄬";
+                    let icon = "OK";
                     draw_text(
                         plane,
                         4,
@@ -728,7 +728,7 @@ impl GitTui {
                     plane,
                     3,
                     row,
-                    " 󰄱 Modified",
+                    " [ ] Modified",
                     t.warning,
                     t.surface_elevated,
                     true,
@@ -753,7 +753,7 @@ impl GitTui {
                     } else {
                         t.surface_elevated
                     };
-                    let icon = "󰄱";
+                    let icon = "[ ]";
                     draw_text(
                         plane,
                         4,
@@ -774,7 +774,7 @@ impl GitTui {
                     plane,
                     3,
                     row,
-                    " 󰋖 Untracked",
+                    " ?? Untracked",
                     t.fg_muted,
                     t.surface_elevated,
                     true,
@@ -799,7 +799,7 @@ impl GitTui {
                     } else {
                         t.surface_elevated
                     };
-                    let icon = "󰋖";
+                    let icon = "??";
                     draw_text(
                         plane,
                         4,
@@ -816,11 +816,11 @@ impl GitTui {
     }
 
     fn render_log(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
-        let header = " 󰊢 Commit History";
+        let header = " Git Commit History";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         if self.commits.is_empty() {
-            let msg = " 󰋖 No commits found";
+            let msg = " ?? No commits found";
             draw_text(plane, 2, y + 2, msg, t.fg_muted, t.bg, false);
             return;
         }
@@ -871,7 +871,7 @@ impl GitTui {
     }
 
     fn render_diff(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
-        let header = " 󰊢 Diff";
+        let header = " Git Diff";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         let content_y = y + 2;
@@ -934,7 +934,7 @@ impl GitTui {
     }
 
     fn render_branches(&self, plane: &mut Plane, y: u16, h: u16, t: &Theme) {
-        let header = " 󰊢 Branches";
+        let header = " Git Branches";
         draw_text(plane, 2, y, header, t.primary, t.bg, true);
 
         let locals: Vec<_> = self.branches.iter().filter(|b| !b.remote).collect();
@@ -991,7 +991,7 @@ impl GitTui {
             if section_h > 2 && row + section_h < y + h {
                 draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
-            draw_text(plane, 4, row, " 󰒍 Remote", t.secondary, t.surface, true);
+            draw_text(plane, 4, row, " Rem Remote", t.secondary, t.surface, true);
             draw_text(
                 plane,
                 17,
@@ -1020,7 +1020,7 @@ impl GitTui {
                     plane,
                     4,
                     row,
-                    &format!("  󰒍 {}", branch.name),
+                    &format!("  Rem {}", branch.name),
                     fg,
                     bg,
                     is_selected,
@@ -1034,7 +1034,7 @@ impl GitTui {
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, keybindings: &KeybindingSet) {
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
-        ("↑/↓ or j/k", "Navigate"),
+        ("^/v or j/k", "Navigate"),
         (keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
         ("d", "View diff for selected file"),
         ("r", "Refresh"),

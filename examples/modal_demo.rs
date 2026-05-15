@@ -3,7 +3,7 @@
 //!
 //! ## Features Shown
 //!
-//! 1. **ConfirmDialog** — Modal confirmation box with OK/Cancel, ESC→Cancel, Enter→Confirm
+//! 1. **ConfirmDialog** — Modal confirmation box with OK/Cancel, ESC>Cancel, Enter>Confirm
 //! 2. **Help overlay** — Modal toggled via button, listing keyboard shortcuts
 //! 3. **Modal composition** — Help renders above main content, ConfirmDialog above help
 //! 4. **Toast notifications** — Success toast after confirm
@@ -181,9 +181,9 @@ impl<'a> ModalDemoApp<'a> {
              Click buttons below to interact\n\
              \n\
              This demonstrates:\n\
-             • ConfirmDialog (z=110) renders above help (z=100)\n\
-             • Help overlay renders above main content (z=0)\n\
-             • ESC closes modals, Enter confirms",
+             - ConfirmDialog (z=110) renders above help (z=100)\n\
+             - Help overlay renders above main content (z=0)\n\
+             - ESC closes modals, Enter confirms",
         );
 
         let confirm_dialog = ConfirmDialog::new("Confirm Action", "Are you sure?")
@@ -194,8 +194,8 @@ impl<'a> ModalDemoApp<'a> {
         let keybindings = KeybindingSet::from_config(&resolve_keybindings());
         let help_overlay = HelpOverlay::new(keybindings.clone());
 
-        let confirm_btn = Button::new(" 󰔳 Show Confirm Dialog");
-        let help_btn = Button::new(" 󰋖 Show Help (?)");
+        let confirm_btn = Button::new(" Submit Show Confirm Dialog");
+        let help_btn = Button::new(" ?? Show Help (?)");
 
         Self {
             show_confirm: false,

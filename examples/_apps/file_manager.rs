@@ -5,9 +5,9 @@
 //! Supports create, delete, and rename operations.
 //!
 //! Controls:
-//!   ↑/↓           — navigate tree
-//!   Enter or →    — expand directory / open file
-//!   Esc or ←   — go up to parent directory
+//!   ^/v           — navigate tree
+//!   Enter or >    — expand directory / open file
+//!   Esc or <   — go up to parent directory
 //!   n             — new file
 //!   f             — new folder
 //!   d             — delete selected

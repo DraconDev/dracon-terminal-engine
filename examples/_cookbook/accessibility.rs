@@ -242,7 +242,7 @@ impl Widget for AccessibleToggle {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
 
-        let checkbox = if self.checked { "☑" } else { "☐" };
+        let checkbox = if self.checked { "[x]" } else { "[ ]" };
         let text = format!("{} {}", checkbox, self.label);
 
         for (i, c) in text.chars().enumerate() {

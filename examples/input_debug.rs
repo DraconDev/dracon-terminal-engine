@@ -7,7 +7,7 @@
 //!   q        — quit
 //!   ?        — toggle help overlay
 //!   c        — clear history
-//!   ↑/↓      — scroll history
+//!   ^/v      — scroll history
 
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -111,7 +111,7 @@ impl InputDebugger {
         let help_key = kb.display(actions::HELP).unwrap_or("f1");
         let back_key = kb.display(actions::BACK).unwrap_or("esc");
         let header = format!(
-            " 󰌌 Input Debugger │ {} events │ {}s │ {}:quit {}:help {}:dismiss c:clear ",
+            " Debug Input Debugger │ {} events │ {}s │ {}:quit {}:help {}:dismiss c:clear ",
             self.event_count, elapsed, quit_key, help_key, back_key
         );
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w));
@@ -159,7 +159,7 @@ impl InputDebugger {
         } else {
             format!("[{}]", total)
         };
-        let status = format!(" ↑/↓ scroll {} │ Press keys/mouse to see events ", scroll_info);
+        let status = format!(" ^/v scroll {} │ Press keys/mouse to see events ", scroll_info);
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m", status, width = w));
 
         out
@@ -183,7 +183,7 @@ impl InputDebugger {
         out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Toggle this help                            │\r\n", pad(help_key)));
         out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Dismiss help                               │\r\n", pad(back_key)));
         out.push_str("│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n");
-        out.push_str("│  \x1b[1m↑/↓\x1b[0m      — Scroll history                              │\r\n");
+        out.push_str("│  \x1b[1m^/v\x1b[0m      — Scroll history                              │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
         out.push_str("│  Events are color-coded:                                   │\r\n");
         out.push_str("│    \x1b[36mKEY\x1b[0m      — Keyboard input                               │\r\n");

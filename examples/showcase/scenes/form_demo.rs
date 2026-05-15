@@ -119,11 +119,11 @@ impl Scene for FormDemoScene {
         }
 
         let labels = [
-            ("󰀄 Username", FIELD_USERNAME),
-            ("󰇰 Email", FIELD_EMAIL),
-            ("󰌆 Password", FIELD_PASSWORD),
-            ("󰔎 Theme", FIELD_THEME),
-            ("󰂚 Notifications", FIELD_NOTIFICATIONS),
+            ("Usr Username", FIELD_USERNAME),
+            ("@ Email", FIELD_EMAIL),
+            ("Pwd Password", FIELD_PASSWORD),
+            ("Thm Theme", FIELD_THEME),
+            ("Bell Notifications", FIELD_NOTIFICATIONS),
             ("", FIELD_SUBMIT),
         ];
 
@@ -248,7 +248,7 @@ impl Scene for FormDemoScene {
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
-            return false; // Let parent (showcase) handle back → pop scene
+            return false; // Let parent (showcase) handle back > pop scene
         }
 
         match key.code {

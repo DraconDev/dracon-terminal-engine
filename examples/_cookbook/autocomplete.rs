@@ -155,7 +155,7 @@ impl Widget for AutocompleteDemo {
             (actions::HELP, "help"),
             (actions::THEME, "theme"),
         ]);
-        let extra = " | Type to filter | ↑/↓ navigate | Enter select | Tab insert top";
+        let extra = " | Type to filter | ^/v navigate | Enter select | Tab insert top";
         let full_status = format!("{}{}", status, extra);
         let sy = area.height.saturating_sub(1);
         for (i, c) in full_status.chars().enumerate() {
@@ -220,7 +220,7 @@ impl Widget for AutocompleteDemo {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             let theme_key = self.keybindings.display(actions::THEME).unwrap_or("ctrl+t");
             let shortcuts = [
-                ("↑/↓", "Navigate suggestions"),
+                ("^/v", "Navigate suggestions"),
                 ("Enter", "Select suggestion"),
                 ("Tab", "Insert top suggestion"),
                 (quit_key, "Quit"),

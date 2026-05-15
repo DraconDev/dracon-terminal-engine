@@ -6,7 +6,7 @@
 #![allow(dead_code)]  // Tutorial demonstrates patterns not all exercised in skeleton
 //!
 //! ## Architecture demonstrated:
-//! - SceneRouter for multi-screen navigation (List → Detail → Edit)
+//! - SceneRouter for multi-screen navigation (List > Detail > Edit)
 //! - EventBus for decoupled widget communication
 //! - Centralized AppState with reactive updates
 //! - Theme propagation across all screens
@@ -18,7 +18,7 @@
 //!   TaskEdit    — Create or edit tasks
 //!
 //! Controls:
-//!   ↑/↓         — navigate
+//!   ^/v         — navigate
 //!   Enter       — select / save
 //!   n           — new task
 //!   d           — delete task
@@ -180,7 +180,7 @@ impl Scene for TaskListScreen {
         }
 
         // Title
-        let title = "📋 Tasks";
+        let title = "Tasks Tasks";
         for (i, c) in title.chars().enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;
@@ -201,7 +201,7 @@ impl Scene for TaskListScreen {
         }
 
         // Status bar
-        let status = "↑↓: nav | Enter: detail | Ctrl+N: new | t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit";
+        let status = "^v: nav | Enter: detail | Ctrl+N: new | t: theme | F1: help | Esc: dismiss | Ctrl+Q: quit";
         let sy = area.height - 1;
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -315,7 +315,7 @@ impl Scene for TaskDetailScreen {
         }
 
         // Title
-        let title = "📄 Task Detail";
+        let title = "Detail Task Detail";
         for (i, c) in title.chars().enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;
@@ -424,7 +424,7 @@ impl Scene for TaskEditScreen {
         }
 
         // Title
-        let title = if self.task_id.is_some() { "✏️  Edit Task" } else { "➕ New Task" };
+        let title = if self.task_id.is_some() { "Edit️  Edit Task" } else { "[+] New Task" };
         for (i, c) in title.chars().enumerate() {
             if i < plane.cells.len() {
                 plane.cells[i].char = c;
@@ -717,7 +717,7 @@ fn main() -> std::io::Result<()> {
                 help_plane.z_index = 200;
 
                 let shortcuts = [
-                    ("↑/↓", "Navigate"),
+                    ("^/v", "Navigate"),
                     ("Enter", "Select / view detail"),
                     (keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"), "New task"),
                     (keybindings.display(actions::BACK).unwrap_or("Esc"), "Go back"),

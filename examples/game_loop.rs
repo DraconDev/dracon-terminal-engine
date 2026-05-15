@@ -96,7 +96,7 @@ impl GameState {
             Color::Rgb(255, 100, 255),
             Color::Rgb(100, 255, 255),
         ];
-        let chars = ['●', '◆', '★', '•', '·'];
+        let chars = ['*', '#', '*', '-', '.'];
         for i in 0..count {
             let angle = (i as f32 / count as f32) * std::f32::consts::TAU + rand::random::<f32>() * 0.5;
             let speed = 20.0 + rand::random::<f32>() * 40.0;
@@ -133,7 +133,7 @@ impl GameState {
                 life: 0.5 + rand::random::<f32>() * 0.5,
                 max_life: 1.0,
                 color: Color::Rgb(200, 150, 50),
-                char: '·',
+                char: '.',
             });
         }
 
@@ -278,7 +278,7 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
         if sx < w && sy < h {
             let idx = (sy * w + sx) as usize;
             if idx < p.cells.len() {
-                p.cells[idx].char = if brightness > 0.7 { '★' } else { '·' };
+                p.cells[idx].char = if brightness > 0.7 { '*' } else { '.' };
                 p.cells[idx].fg = Color::Rgb(c, c, c.max(200));
                 p.cells[idx].transparent = false;
             }
@@ -313,7 +313,7 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
     if rx < w && ry < h {
         let idx = (ry * w + rx) as usize;
         if idx < p.cells.len() {
-            p.cells[idx].char = '🚀';
+            p.cells[idx].char = '^';
             p.cells[idx].fg = Color::Rgb(255, 200, 50);
             p.cells[idx].style = Styles::BOLD;
             p.cells[idx].transparent = false;
@@ -377,11 +377,11 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
         ("│  Click   — Spawn particle burst                    │", box_bg),
         ("├────────────────────────────────────────────────────┤", box_bg),
         ("│  Features:                                         │", box_bg),
-        ("│    • 60fps animation loop                          │", box_bg),
-        ("│    • Particle physics with gravity                 │", box_bg),
-        ("│    • Starfield with twinkling                      │", box_bg),
-        ("│    • Mouse interaction                             │", box_bg),
-        ("│    • Rocket with trail effect                      │", box_bg),
+        ("│    - 60fps animation loop                          │", box_bg),
+        ("│    - Particle physics with gravity                 │", box_bg),
+        ("│    - Starfield with twinkling                      │", box_bg),
+        ("│    - Mouse interaction                             │", box_bg),
+        ("│    - Rocket with trail effect                      │", box_bg),
         ("╰────────────────────────────────────────────────────╯", box_bg),
     ];
 
@@ -396,7 +396,7 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
                     let idx = y * w as usize + px;
                     let cell_fg = if ch == '│' || ch == '╭' || ch == '╮' || ch == '├' || ch == '┤' || ch == '╰' || ch == '╯' || ch == '─' {
                         dim
-                    } else if ch == '•' {
+                    } else if ch == '-' {
                         accent
                     } else {
                         fg

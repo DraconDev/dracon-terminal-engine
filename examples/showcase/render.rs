@@ -890,7 +890,7 @@ fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
         let (kind, title, msg, color) = &notifications[idx];
         let y = oy + 5 + i * 3;
         if y > oy + 11 || y > max_y { break; }
-        let icon = match kind { NotificationType::Info => "i", NotificationType::Success => "✔", NotificationType::Warning => "!", NotificationType::Error => "✖" };
+        let icon = match kind { NotificationType::Info => "i", NotificationType::Success => "[OK]", NotificationType::Warning => "!", NotificationType::Error => "[X]" };
         set_cell_bounded(plane, notif_x, y, '╭', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
         for cx in 1..notif_w - 1 { set_cell_bounded(plane, notif_x + cx, y, '─', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y); }
         set_cell_bounded(plane, notif_x + notif_w - 1, y, '╮', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
@@ -926,7 +926,7 @@ fn render_accessibility_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: u
         draw_text_bounded(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
         draw_text_bounded(plane, ox + 12, y, value, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
-    draw_text_bounded(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, ox + 1, oy + 11, "* enabled", t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
 fn render_cell_pool_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, card_h: usize) {

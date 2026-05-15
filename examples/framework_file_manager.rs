@@ -24,7 +24,7 @@ struct FileEntry {
 
 impl std::fmt::Display for FileEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let icon = if self.is_dir { "󰉋" } else { "󰈔" };
+        let icon = if self.is_dir { "Dir" } else { "File" };
         write!(f, "{} {} ({})", icon, self.name, self.size)
     }
 }
@@ -439,7 +439,7 @@ impl Widget for FileManagerApp {
             let kb_help = self.kb_config.get(actions::HELP).unwrap_or("?");
             let kb_quit = self.kb_config.get(actions::QUIT).unwrap_or("q");
             let shortcuts = [
-                ("↑/↓", "Navigate"),
+                ("^/v", "Navigate"),
                 ("Enter", "Open directory"),
                 ("Left", "Go up"),
                 (kb_theme, "Cycle theme"),

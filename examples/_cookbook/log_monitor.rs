@@ -343,7 +343,7 @@ impl Widget for LogMonitor {
         }
 
         // ── Header bar with icon and title ──
-        let header = " 󰑊 Log Monitor ";
+        let header = " Log Log Monitor ";
         for (i, c) in header.chars().enumerate().take(w - 4) {
             p.cells[1 + i] = Cell {
                 char: c,
@@ -375,7 +375,7 @@ impl Widget for LogMonitor {
         let filter_x = 3;
         for (i, (lvl, active, color)) in filters.iter().enumerate() {
             let fx = filter_x + i as u16 * 10;
-            let check = if *active { "✓" } else { " " };
+            let check = if *active { "[ok]" } else { " " };
             let label = format!("[{}] {}", check, lvl);
             for (j, c) in label.chars().enumerate() {
                 let idx = 2 * w + fx as usize + j;
@@ -433,7 +433,7 @@ impl Widget for LogMonitor {
         let s = self.last_log.elapsed().as_secs();
         let last_str = if s < 1 { "now" } else { &format!("{}s ago", s) };
         let auto_str = if self.auto_scroll { "auto" } else { "paused" };
-        let status = format!(" 󰔱 {}  |  󰑎 {} lines  |  scroll: {}  |  {}: theme | {}: help | {}: dismiss | {}: clear | {}: resume | {}: quit", last_str, self.total_lines, auto_str,
+        let status = format!(" Status {}  |  Lines {} lines  |  scroll: {}  |  {}: theme | {}: help | {}: dismiss | {}: clear | {}: resume | {}: quit", last_str, self.total_lines, auto_str,
             self.keybindings.display(actions::THEME).unwrap_or("t"),
             self.keybindings.display(actions::HELP).unwrap_or("?"),
             self.keybindings.display(actions::BACK).unwrap_or("esc"),

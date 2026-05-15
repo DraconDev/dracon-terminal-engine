@@ -394,9 +394,9 @@ impl IdeApp {
             self.status_bar = StatusBar::new(WidgetId::new(4))
                 .add_segment(
                     StatusSegment::new(if editor.modified {
-                        "● Modified"
+                        "* Modified"
                     } else {
-                        "✓ Ready"
+                        "[ok] Ready"
                     })
                     .with_fg(if editor.modified {
                         self.theme.warning
@@ -412,7 +412,7 @@ impl IdeApp {
                     ))
                     .with_fg(self.theme.fg_muted),
                 )
-                .add_segment(StatusSegment::new("󱘫 ").with_fg(self.theme.info))
+                .add_segment(StatusSegment::new("Git ").with_fg(self.theme.info))
                 .add_segment(StatusSegment::new(lang).with_fg(self.theme.info))
                 .add_segment(StatusSegment::new("UTF-8").with_fg(self.theme.fg_muted))
                 .add_segment(
@@ -538,31 +538,31 @@ impl IdeApp {
 
 fn file_icon(name: &str) -> &'static str {
     if name.ends_with(".rs") {
-        " "
+        "R "
     } else if name.ends_with(".toml") {
-        " "
+        "T "
     } else if name.ends_with(".md") {
-        " "
+        "M "
     } else if name.ends_with(".json") || name.ends_with(".yaml") || name.ends_with(".yml") {
-        " "
+        "Y "
     } else if name.ends_with(".js") || name.ends_with(".ts") {
-        " "
+        "J "
     } else if name.ends_with(".py") {
-        " "
+        "P "
     } else if name.ends_with(".sh") || name.ends_with(".bash") {
-        " "
+        "S "
     } else if name.ends_with(".html") || name.ends_with(".css") {
-        " "
+        "H "
     } else if name.ends_with(".gitignore") || name.ends_with(".lock") {
-        "﬍ "
+        "L "
     } else {
-        " "
+        "F "
     }
 }
 
 fn build_sample_tree(theme: Theme) -> Tree {
     let root = TreeNode {
-        label: "󰉋 workspace".into(),
+        label: "Dir workspace".into(),
         expanded: true,
         children: vec![
             TreeNode {
@@ -571,7 +571,7 @@ fn build_sample_tree(theme: Theme) -> Tree {
                 children: vec![],
             },
             TreeNode {
-                label: "󰉋 src".into(),
+                label: "Dir src".into(),
                 expanded: true,
                 children: vec![
                     TreeNode {
@@ -585,7 +585,7 @@ fn build_sample_tree(theme: Theme) -> Tree {
                         children: vec![],
                     },
                     TreeNode {
-                        label: "󰉋 widgets".into(),
+                        label: "Dir widgets".into(),
                         expanded: false,
                         children: vec![
                             TreeNode {
@@ -603,7 +603,7 @@ fn build_sample_tree(theme: Theme) -> Tree {
                 ],
             },
             TreeNode {
-                label: "󰉋 examples".into(),
+                label: "Dir examples".into(),
                 expanded: false,
                 children: vec![TreeNode {
                     label: format!("{}demo.rs", file_icon("demo.rs")),
@@ -724,7 +724,7 @@ impl Widget for IdeApp {
                 }
             } else {
                 // Empty state - no tabs open
-                let empty_msg = " 󰈙 No file open ";
+                let empty_msg = " NoFile No file open ";
                 let empty_y = editor_y + editor_content_h / 2;
                 let empty_x =
                     editor_x + 1 + (editor_w.saturating_sub(2) - empty_msg.len() as u16) / 2;
@@ -1280,7 +1280,7 @@ impl IdeApp {
                 "Edit",
                 &[
                     ("Type", "Insert text"),
-                    ("←↑↓→", "Move cursor"),
+                    ("<^v>", "Move cursor"),
                     ("Home/End", "Line start/end"),
                     ("Backspace", "Delete char"),
                 ],

@@ -123,7 +123,7 @@ impl Widget for StatWidget {
             let (ch, color) = match self.trend {
                 Trend::Up => ('▲', self.theme.success),
                 Trend::Down => ('▼', self.theme.error),
-                Trend::Neutral => ('◆', self.theme.fg_muted),
+                Trend::Neutral => ('#', self.theme.fg_muted),
             };
             let idx = (trend_y as usize * plane.width as usize + trend_x as usize)
                 .min(plane.cells.len().saturating_sub(1));
@@ -176,7 +176,7 @@ impl PluginLoader {
                 ("CPU", "67%", Trend::Neutral),
                 ("Memory", "4.2 GB", Trend::Up),
                 ("Disk", "512 GB", Trend::Neutral),
-                ("Network", "↑ 2.4 MB/s", Trend::Up),
+                ("Network", "^ 2.4 MB/s", Trend::Up),
             ];
             let (label, value, trend) = widgets[id.0 % 4];
             Box::new(StatWidget::new(label, value, trend, theme)) as Box<dyn Widget>

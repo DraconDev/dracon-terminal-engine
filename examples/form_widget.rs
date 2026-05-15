@@ -147,7 +147,7 @@ impl FormApp {
 
     fn render_submitted_banner(&self, plane: &mut Plane, area: Rect) {
         let t = self.theme.clone();
-        let msg = " ✓ Form submitted successfully! ";
+        let msg = " [ok] Form submitted successfully! ";
         let w = msg.len() as u16 + 4;
         let h = 3u16;
         let x = (area.width - w) / 2;

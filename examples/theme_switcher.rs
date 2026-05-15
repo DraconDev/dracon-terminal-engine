@@ -419,7 +419,7 @@ impl Widget for ThemePreviewPanel {
         }
 
         let badge_row = 3;
-        let badge_texts = ["󰄬 OK", "󰀦 WARN", "󰅙 ERROR", "󰄬 OK"];
+        let badge_texts = ["OK OK", "WARN WARN", "ERR ERROR", "OK OK"];
         let badge_fgs = [theme.success, theme.warning, theme.error, theme.success];
 
         let mut badge_x = 2u16;
@@ -567,10 +567,10 @@ impl Widget for WidgetDemoPanel {
 
         let row1 = 2;
         let badges = [
-            ("󰄬 OK", theme.success, theme.success_bg),
-            ("󰀦 WARN", theme.warning, theme.warning_bg),
-            ("󰅙 ERROR", theme.error, theme.error_bg),
-            ("󰋽 INFO", theme.info, theme.info_bg),
+            ("OK OK", theme.success, theme.success_bg),
+            ("WARN WARN", theme.warning, theme.warning_bg),
+            ("ERR ERROR", theme.error, theme.error_bg),
+            ("INFO INFO", theme.info, theme.info_bg),
         ];
         let mut badge_x = 2u16;
         for (text, fg, bg) in badges.iter() {
@@ -589,7 +589,7 @@ impl Widget for WidgetDemoPanel {
 
         // Button preview
         let btn_row = 3;
-        let btn_text = " 󰔳 Submit ";
+        let btn_text = " Submit Submit ";
         let btn_x = 2u16;
         for (j, c) in btn_text.chars().enumerate() {
             let idx = btn_row as usize * area.width as usize + btn_x as usize + j;
@@ -610,7 +610,7 @@ impl Widget for WidgetDemoPanel {
             (true, theme.primary),
         ];
         for (checked, color) in checks.iter() {
-            let mark = if *checked { "󰄬" } else { "󰄱" };
+            let mark = if *checked { "OK" } else { "[ ]" };
             let label = if *checked { " On " } else { " Off " };
             let text = format!("{} {}", mark, label);
             for (j, c) in text.chars().enumerate() {
@@ -625,7 +625,7 @@ impl Widget for WidgetDemoPanel {
         }
 
         let gauge_row = 5;
-        let label = "󰍛 CPU: ";
+        let label = "CPU CPU: ";
         for (i, c) in label.chars().enumerate() {
             let idx = gauge_row as usize * area.width as usize + 2 + i;
             if idx < plane.cells.len() {
@@ -683,11 +683,11 @@ impl Widget for WidgetDemoPanel {
 
         let list_row = 7;
         let items = [
-            (false, "󰆍 item-1"),
-            (false, "󰆍 item-2"),
-            (false, "󰆍 item-3"),
-            (true, "󰆌 selected"),
-            (false, "󰆍 item-5"),
+            (false, "- item-1"),
+            (false, "- item-2"),
+            (false, "- item-3"),
+            (true, "* selected"),
+            (false, "- item-5"),
         ];
         for (i, (is_selected, item)) in items.iter().enumerate() {
             let bg = if *is_selected {
@@ -719,7 +719,7 @@ impl Widget for WidgetDemoPanel {
 
         // Input preview
         let input_row = list_row + items.len() as u16 + 1;
-        let input_label = "󰏅 Search: ";
+        let input_label = "Srch Search: ";
         for (i, c) in input_label.chars().enumerate() {
             let idx = input_row as usize * area.width as usize + 2 + i;
             if idx < plane.cells.len() {
@@ -739,7 +739,7 @@ impl Widget for WidgetDemoPanel {
         }
 
         let breadcrumb_row = area.height as usize - 1;
-        let crumbs = [("󰋜 home", false), ("󰉋 projects", false), ("󰆍 demo", true)];
+        let crumbs = [("Home home", false), ("Dir projects", false), ("- demo", true)];
         let total_len: usize =
             crumbs.iter().map(|(s, _)| s.len()).sum::<usize>() + crumbs.len() - 1;
         let start_x = (area.width as usize / 2 - total_len / 2) as u16;
@@ -908,7 +908,7 @@ impl Widget for HelpOverlay {
         // Shortcuts
         let shortcuts = [
             ("t", "Cycle theme"),
-            ("↑/↓", "Navigate (if applicable)"),
+            ("^/v", "Navigate (if applicable)"),
             ("F1", "Toggle help"),
             ("Esc", "Dismiss help"),
             ("Ctrl+Q", "Quit"),

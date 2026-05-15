@@ -5,7 +5,7 @@
 //! Click or use Enter to interact with each widget.
 //!
 //! Controls:
-//!   ↑/↓/←/→  — navigate between widget cards
+//!   ^/v/</>  — navigate between widget cards
 //!   Enter    — activate focused widget
 //!   Tab      — cycle theme
 //!   q        — quit
@@ -26,15 +26,15 @@ use std::sync::Arc;
 
 // Widget slot positions in the grid (row, col, name, icon)
 const WIDGET_SLOTS: &[(usize, usize, &str, &str)] = &[
-    (0, 0, "Checkbox", "󰄵"),
-    (0, 1, "Radio", "󰑃"),
-    (0, 2, "Toggle", "󰔡"),
-    (0, 3, "Spinner", "󰝥"),
-    (1, 0, "Slider", "󰜈"),
-    (1, 1, "Select", "󰑇"),
-    (1, 2, "Search Input", "󰍉"),
-    (2, 0, "Progress Bar", "󰖎"),
-    (2, 1, "Button", "󰔂"),
+    (0, 0, "Checkbox", "[v]"),
+    (0, 1, "Radio", "(o)"),
+    (0, 2, "Toggle", "[=]"),
+    (0, 3, "Spinner", "..."),
+    (1, 0, "Slider", "Slider"),
+    (1, 1, "Select", "v"),
+    (1, 2, "Search Input", ">"),
+    (2, 0, "Progress Bar", "[=]"),
+    (2, 1, "Button", "[X]"),
 ];
 
 struct WidgetGallery {
@@ -308,7 +308,7 @@ impl Widget for WidgetGallery {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav_text = " ↑↓←→ nav | Enter activate | Tab: theme | ?: help | Esc: dismiss | q quit ";
+        let nav_text = " ^v<> nav | Enter activate | Tab: theme | ?: help | Esc: dismiss | q quit ";
         draw_text(&mut plane, 2, footer_y, nav_text, t.fg_muted, t.bg, false);
 
         // Help overlay
@@ -362,7 +362,7 @@ impl Widget for WidgetGallery {
                 true,
             );
             let shortcuts = [
-                ("↑↓←→", "Navigate cards"),
+                ("^v<>", "Navigate cards"),
                 ("Enter", "Activate widget"),
                 (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
                 (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
@@ -559,7 +559,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Widget Gallery — All widgets demo | ↑↓←→ nav | Enter interact | t theme | q quit");
+    println!("Widget Gallery — All widgets demo | ^v<> nav | Enter interact | t theme | q quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let running = Arc::new(AtomicBool::new(true));

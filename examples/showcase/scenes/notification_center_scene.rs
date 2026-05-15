@@ -91,9 +91,9 @@ impl Scene for NotificationCenterScene {
         let legend_y = area.height.saturating_sub(5);
         draw_text(&mut plane, 2, legend_y, "Notification types:", t.fg_muted, t.bg, false);
         draw_text(&mut plane, 2, legend_y + 1, "  i = Info (blue)", t.info, t.bg, false);
-        draw_text(&mut plane, 2, legend_y + 2, "  ✔ = Success (green)", t.success, t.bg, false);
+        draw_text(&mut plane, 2, legend_y + 2, "  [OK] = Success (green)", t.success, t.bg, false);
         draw_text(&mut plane, 2, legend_y + 3, "  ! = Warning (yellow)", t.warning, t.bg, false);
-        draw_text(&mut plane, 22, legend_y + 1, "  ✖ = Error (red)", t.error, t.bg, false);
+        draw_text(&mut plane, 22, legend_y + 1, "  [X] = Error (red)", t.error, t.bg, false);
 
         // Footer
         let footer_y = area.height.saturating_sub(1);

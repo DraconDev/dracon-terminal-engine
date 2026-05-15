@@ -59,10 +59,10 @@ impl MenuApp {
             "videos".to_string(),
         ];
         let menu_bar = vec![
-            MenuLabel("󰈔 File"),
-            MenuLabel("󰏪 Edit"),
-            MenuLabel("󰰈 View"),
-            MenuLabel("󰋽 Help"),
+            MenuLabel("File File"),
+            MenuLabel("Edit Edit"),
+            MenuLabel("View View"),
+            MenuLabel("INFO Help"),
         ];
         let keybindings = KeybindingSet::from_config(&resolve_keybindings());
         let kb_theme = keybindings.display(actions::THEME).unwrap_or("t");
@@ -127,27 +127,27 @@ impl MenuApp {
     fn get_menu_item(&self, menu_idx: usize, item_idx: usize) -> &'static str {
         match menu_idx {
             0 => match item_idx {
-                0 => "󰝊 New (Ctrl+N)",
+                0 => "New New (Ctrl+N)",
                 1 => "�的控制 Open (Ctrl+O)",
-                2 => "󰝎 Save (Ctrl+S)",
-                3 => "󰝮 Exit (Ctrl+Q)",
+                2 => "Save Save (Ctrl+S)",
+                3 => "Exit Exit (Ctrl+Q)",
                 _ => "",
             },
             1 => match item_idx {
-                0 => "󰃖 Copy (Ctrl+C)",
-                1 => "󰆏 Paste (Ctrl+V)",
-                2 => "󰒛 Select All (Ctrl+A)",
+                0 => "Copy Copy (Ctrl+C)",
+                1 => "Paste Paste (Ctrl+V)",
+                2 => "SelAll Select All (Ctrl+A)",
                 _ => "",
             },
             2 => match item_idx {
-                0 => "󰰈 Toggle Sidebar",
-                1 => "󰾔 Zoom In",
-                2 => "󰾕 Zoom Out",
+                0 => "View Toggle Sidebar",
+                1 => "Zoom+ Zoom In",
+                2 => "Zoom- Zoom Out",
                 _ => "",
             },
             3 => match item_idx {
-                0 => "󰋽 About",
-                1 => "󰉥 Documentation",
+                0 => "INFO About",
+                1 => "Docs Documentation",
                 _ => "",
             },
             _ => "",
@@ -422,7 +422,7 @@ impl Widget for MenuApp {
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
             let shortcuts = [
-                ("↑/↓", "Navigate list"),
+                ("^/v", "Navigate list"),
                 ("Ctrl+N", "New file"),
                 ("Ctrl+O", "Open"),
                 ("Ctrl+S", "Save"),

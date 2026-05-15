@@ -13,7 +13,7 @@
 //! - Mouse hover highlighting and click selection
 //!
 //! Controls:
-//!   ↑/↓         — navigate rows
+//!   ^/v         — navigate rows
 //!   Enter       — select row
 //!   /           — search
 //!   Esc         — clear search / dismiss help
@@ -64,11 +64,11 @@ impl UserStatus {
 
     fn icon(self) -> &'static str {
         match self {
-            UserStatus::Active => "󰄬",
-            UserStatus::Away => "󰒲",
-            UserStatus::Offline => "󰤄",
-            UserStatus::Busy => "󰀦",
-            UserStatus::OnLeave => "󰒲",
+            UserStatus::Active => "OK",
+            UserStatus::Away => "Aw",
+            UserStatus::Offline => "Off",
+            UserStatus::Busy => "WARN",
+            UserStatus::OnLeave => "Aw",
         }
     }
 
@@ -352,23 +352,23 @@ impl TableApp {
 
         let columns = vec![
             Column {
-                header: "󰣉 Name".into(),
+                header: "Name Name".into(),
                 width: 18,
             },
             Column {
-                header: "󰠨 Role".into(),
+                header: "Role Role".into(),
                 width: 20,
             },
             Column {
-                header: "󰉋 Dept".into(),
+                header: "Dir Dept".into(),
                 width: 14,
             },
             Column {
-                header: "󰄬 Status".into(),
+                header: "OK Status".into(),
                 width: 12,
             },
             Column {
-                header: "󰃰 Active".into(),
+                header: "Act Active".into(),
                 width: 10,
             },
         ];
@@ -452,23 +452,23 @@ impl TableApp {
 
         let columns = vec![
             Column {
-                header: "󰣉 Name".into(),
+                header: "Name Name".into(),
                 width: 18,
             },
             Column {
-                header: "󰠨 Role".into(),
+                header: "Role Role".into(),
                 width: 20,
             },
             Column {
-                header: "󰉋 Dept".into(),
+                header: "Dir Dept".into(),
                 width: 14,
             },
             Column {
-                header: "󰄬 Status".into(),
+                header: "OK Status".into(),
                 width: 12,
             },
             Column {
-                header: "󰃰 Active".into(),
+                header: "Act Active".into(),
                 width: 10,
             },
         ];
@@ -585,7 +585,7 @@ impl Widget for TableApp {
             .saturating_sub(header_h + search_h + detail_h + margin + 1);
 
         // === HEADER BAR ===
-        let title = " 󰓫 User Directory ";
+        let title = " Dir User Directory ";
         let count = format!("{} users ", self.filtered_users.len());
         let theme_name = format!(" {} ", t.name);
 
@@ -666,7 +666,7 @@ impl Widget for TableApp {
                     plane.cells[idx2].bg = t.surface_elevated;
                 }
             }
-            let search_label = "󰼈 Search: ";
+            let search_label = "Srch Search: ";
             for (i, c) in search_label.chars().enumerate() {
                 let idx = (search_y * area.width + margin + 2 + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -746,7 +746,7 @@ impl Widget for TableApp {
                 }
 
                 // Row 2: Role + Department
-                let row2 = format!("󰠨 {}    󰉋 {}", user.role, user.department);
+                let row2 = format!("Role {}    Dir {}", user.role, user.department);
                 for (i, c) in row2.chars().enumerate() {
                     let idx = ((content_y + 1) * area.width + content_x + i as u16) as usize;
                     if idx < plane.cells.len() {
@@ -757,7 +757,7 @@ impl Widget for TableApp {
                 }
 
                 // Row 3: Email + Join date
-                let row3 = format!("󰇮 {}    󰃰 Joined: {}", user.email, user.join_date);
+                let row3 = format!("@ {}    Act Joined: {}", user.email, user.join_date);
                 for (i, c) in row3.chars().enumerate() {
                     let idx = ((content_y + 2) * area.width + content_x + i as u16) as usize;
                     if idx < plane.cells.len() {
@@ -788,7 +788,7 @@ impl Widget for TableApp {
                 (actions::THEME, "theme"),
                 (actions::HELP, "help"),
                 (actions::BACK, "dismiss"),
-                ("↑↓", "nav"),
+                ("^v", "nav"),
                 ("Enter", "select"),
                 (actions::QUIT, "quit"),
             ]),
@@ -975,7 +975,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     );
 
     let shortcuts = [
-        ("↑/↓", "Navigate rows"),
+        ("^/v", "Navigate rows"),
         ("Enter", "Select row"),
         ("Click col", "Sort column"),
         ("/", "Search/filter"),

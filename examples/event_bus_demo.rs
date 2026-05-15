@@ -4,7 +4,7 @@
 //! Two widgets (counter + logger) share state through the event bus.
 //!
 //! Controls:
-//!   ↑/↓ or +/-  — adjust counter
+//!   ^/v or +/-  — adjust counter
 //!   l            — log a message
 //!   c            — clear log
 //!   t            — cycle theme
@@ -129,7 +129,7 @@ impl EventBusApp {
         self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), &t);
 
         // Status bar
-        let status = format!("↑/↓: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
+        let status = format!("^/v: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
             self.kb_config.get(actions::THEME).unwrap_or("t"),
             self.kb_config.get(actions::HELP).unwrap_or("?"),
             self.kb_config.get(actions::BACK).unwrap_or("esc"),
@@ -295,7 +295,7 @@ impl EventBusApp {
 
         // Shortcuts
         let shortcuts = [
-            ("↑/↓ or +/-", "Adjust counter"),
+            ("^/v or +/-", "Adjust counter"),
             ("l", "Log a message"),
             ("c", "Clear log"),
             (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
@@ -354,7 +354,7 @@ impl Widget for InputRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Event Bus Demo | ↑/↓: counter | l: log | c: clear | t: theme | ?: help | Esc: dismiss | q: quit");
+    println!("Event Bus Demo | ^/v: counter | l: log | c: clear | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

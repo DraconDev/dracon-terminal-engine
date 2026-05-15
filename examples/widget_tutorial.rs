@@ -365,8 +365,8 @@ impl Widget for ColorPicker {
         let color_cell = color.to_compositor_color();
 
         // ---- ROW 0: Color name header ----
-        // Format: "[ ● ] ColorName"
-        let header = format!("[ {} ] {}", "●", color.name);
+        // Format: "[ * ] ColorName"
+        let header = format!("[ {} ] {}", "*", color.name);
 
         for (i, c) in header.chars().take(area.width as usize).enumerate() {
             plane.cells[i] = Cell {
@@ -426,9 +426,9 @@ impl Widget for ColorPicker {
         // Shows how to interact with the widget.
         let instruction_row = 3usize;
         let instruction = if area.width >= 20 {
-            "←/→ or Click to change"
+            "</> or Click to change"
         } else {
-            "←/→"
+            "</>"
         };
         let instr_len = instruction.len().min(area.width as usize);
         let instr_start = (area.width as usize - instr_len) / 2;
@@ -640,7 +640,7 @@ fn main() -> std::io::Result<()> {
     let yellow_picker = ColorPicker::new(current_theme.clone()).initial_color("Yellow");
 
     let mut header = dracon_terminal_engine::framework::widgets::Label::new(
-        "←/→ to change color | Click swatch to cycle | Tab to navigate",
+        "</> to change color | Click swatch to cycle | Tab to navigate",
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
         "Theme: {}",
@@ -730,7 +730,7 @@ fn main() -> std::io::Result<()> {
                 if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
             }
             let shortcuts = [
-                ("←/→", "Change color"),
+                ("</>", "Change color"),
                 ("Enter/Spc", "Cycle color"),
                 ("Tab", "Navigate pickers"),
                 ("Ctrl+T", "Cycle theme"),

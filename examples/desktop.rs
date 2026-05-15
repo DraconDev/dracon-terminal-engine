@@ -112,12 +112,12 @@ fn get_window_content(id: usize, x: u16, y: u16, _width: u16) -> WindowContent {
         }
         3 => {
             // Alert window
-            let lines = ["⚠ Warning", "", "Disk usage", "above 85%"];
+            let lines = ["! Warning", "", "Disk usage", "above 85%"];
             if y < lines.len() as u16 {
                 let line = lines[y as usize];
                 if x < line.len() as u16 {
                     let ch = line.chars().nth(x as usize).unwrap_or(' ');
-                    let fg = if line.starts_with('⚠') { red } else { yellow };
+                    let fg = if line.starts_with('!') { red } else { yellow };
                     return WindowContent { ch, fg, bg: reset };
                 }
             }

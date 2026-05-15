@@ -200,10 +200,10 @@ impl SettingsForm {
 
     fn field_label(field: usize) -> &'static str {
         match field {
-            FIELD_USERNAME => "󰀄 Username",
-            FIELD_EMAIL => "󰇮 Email",
-            FIELD_PASSWORD => "󰌆 Password",
-            FIELD_THEME => "󰔎 Theme",
+            FIELD_USERNAME => "Usr Username",
+            FIELD_EMAIL => "@ Email",
+            FIELD_PASSWORD => "Pwd Password",
+            FIELD_THEME => "Thm Theme",
             FIELD_NOTIFICATIONS => "",
             FIELD_SUBMIT => "",
             _ => "",
@@ -286,7 +286,7 @@ impl Widget for SettingsForm {
         }
 
         // === HEADER ===
-        let title = " 󰒓 Settings ";
+        let title = " Set Settings ";
         let title_x = margin + (card_w - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = (area.width + title_x + i as u16) as usize;
@@ -355,7 +355,7 @@ impl Widget for SettingsForm {
                 let err_x = margin + card_w - 4;
                 let idx = (y * area.width + err_x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = '󰅙';
+                    plane.cells[idx].char = '!';
                     plane.cells[idx].fg = t.error;
                     plane.cells[idx].bg = row_bg;
                 }
@@ -366,7 +366,7 @@ impl Widget for SettingsForm {
             .render(Rect::new(input_col, 4, input_width, 1));
         blit(&mut plane, &username_plane, input_col, 4);
         if let Some(ref err) = self.errors.username {
-            let err_text = format!("  󰅙 {}", err);
+            let err_text = format!("  ERR {}", err);
             for (i, c) in err_text.chars().take(input_width as usize).enumerate() {
                 let idx = (5 * area.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -418,7 +418,7 @@ impl Widget for SettingsForm {
                 let err_x = margin + card_w - 4;
                 let idx = (y * area.width + err_x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = '󰅙';
+                    plane.cells[idx].char = '!';
                     plane.cells[idx].fg = t.error;
                     plane.cells[idx].bg = row_bg;
                 }
@@ -427,7 +427,7 @@ impl Widget for SettingsForm {
         let email_plane = self.email.render(Rect::new(input_col, 6, input_width, 1));
         blit(&mut plane, &email_plane, input_col, 6);
         if let Some(ref err) = self.errors.email {
-            let err_text = format!("  󰅙 {}", err);
+            let err_text = format!("  ERR {}", err);
             for (i, c) in err_text.chars().take(input_width as usize).enumerate() {
                 let idx = (7 * area.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -479,7 +479,7 @@ impl Widget for SettingsForm {
                 let err_x = margin + card_w - 4;
                 let idx = (y * area.width + err_x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].char = '󰅙';
+                    plane.cells[idx].char = '!';
                     plane.cells[idx].fg = t.error;
                     plane.cells[idx].bg = row_bg;
                 }
@@ -490,7 +490,7 @@ impl Widget for SettingsForm {
             .render(Rect::new(input_col, 8, input_width, 1));
         blit(&mut plane, &password_plane, input_col, 8);
         if let Some(ref err) = self.errors.password {
-            let err_text = format!("  󰅙 {}", err);
+            let err_text = format!("  ERR {}", err);
             for (i, c) in err_text.chars().take(input_width as usize).enumerate() {
                 let idx = (9 * area.width + input_col + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -543,7 +543,7 @@ impl Widget for SettingsForm {
         blit(&mut plane, &theme_plane, input_col, 10);
 
         // Notifications
-        let notif_label = "󰂚 Notifications";
+        let notif_label = "Bell Notifications";
         let is_focused = self.focused_field == FIELD_NOTIFICATIONS;
         let row_bg = if is_focused { t.focus_bg } else { t.surface };
         for dx in 1..card_w.saturating_sub(1) {
@@ -644,7 +644,7 @@ impl Widget for SettingsForm {
 
             draw_rounded_border(&mut plane, toast_x, toast_y, toast_w, toast_h, t);
 
-            let toast_text = format!(" 󰄬 {} ", self.toast_message);
+            let toast_text = format!(" OK {} ", self.toast_message);
             let text_x = toast_x + (toast_w - toast_text.len() as u16) / 2;
             for (i, c) in toast_text.chars().enumerate() {
                 let idx = ((toast_y + 1) * area.width + text_x + i as u16) as usize;

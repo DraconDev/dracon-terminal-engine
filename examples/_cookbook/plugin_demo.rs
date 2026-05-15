@@ -125,7 +125,7 @@ impl PluginDemoApp {
             reg.register("stat_mem", |id, theme| Box::new(StatWidget::new(id, theme, "MEM", "1.2 GiB")));
             reg.register("stat_disk", |id, theme| Box::new(StatWidget::new(id, theme, "DISK", "47%")),
             );
-            reg.register("stat_net", |id, theme| Box::new(StatWidget::new(id, theme, "NET", "↓2.1")));
+            reg.register("stat_net", |id, theme| Box::new(StatWidget::new(id, theme, "NET", "v2.1")));
         }
 
         // Create initial instances from registry

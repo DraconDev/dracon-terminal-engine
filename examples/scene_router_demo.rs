@@ -11,7 +11,7 @@
 //!   Profile   — User info display
 //!
 //! Controls:
-//!   ↑/↓       — navigate menu
+//!   ^/v       — navigate menu
 //!   Enter     — select / go forward
 //!   Esc — go back
 //!   t         — cycle theme (global)
@@ -106,7 +106,7 @@ impl Scene for HomeScreen {
         }
 
         // Title
-        let title = "🏠 Home";
+        let title = "[Home] Home";
         let tx = 2u16;
         for (i, c) in title.chars().enumerate() {
             let idx = (tx + i as u16) as usize;
@@ -248,7 +248,7 @@ impl Scene for SettingsScreen {
         }
 
         // Title
-        let title = "⚙️  Settings";
+        let title = "[S]️  Settings";
         for (i, c) in title.chars().enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
@@ -365,7 +365,7 @@ impl Scene for ProfileScreen {
         }
 
         // Title
-        let title = "👤 Profile";
+        let title = "[User] Profile";
         for (i, c) in title.chars().enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
@@ -603,7 +603,7 @@ fn main() -> std::io::Result<()> {
 
                 let kb = &keybindings_for_tick;
                 let shortcuts = [
-                    ("↑/↓", "Navigate menu"),
+                    ("^/v", "Navigate menu"),
                     ("Enter", "Select / go forward"),
                     (kb.display(actions::BACK).unwrap_or("esc"), "Go back"),
                     (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),

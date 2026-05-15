@@ -146,7 +146,7 @@ impl Widget for RichTextApp {
             }
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts: [(&str, &str); 5] = [
-                ("↑/↓/PgUp/PgDn", "Scroll content"),
+                ("^/v/PgUp/PgDn", "Scroll content"),
                 (kb_theme, "Cycle theme"),
                 (kb_help, "Toggle help"),
                 (kb_back, "Dismiss help"),

@@ -105,7 +105,7 @@ impl Scene for AutocompleteScene {
         draw_text(&mut plane, 2, 10, info, t.fg_muted, t.bg, false);
 
         let shortcuts = [
-            "↑↓: navigate",
+            "^v: navigate",
             "Enter: select",
             "Tab: complete",
             "Esc: close",
@@ -123,7 +123,7 @@ impl Scene for AutocompleteScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " Type to search | ↑↓ nav | Enter select | B/Esc: back | ?: help ";
+        let nav = " Type to search | ^v nav | Enter select | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -247,7 +247,7 @@ fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("↑↓", "Navigate suggestions"),
+        ("^v", "Navigate suggestions"),
         ("Enter", "Select item"),
         ("Tab", "Auto-complete"),
         ("B/Esc", "Back to showcase"),

@@ -573,7 +573,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 
     // Shortcuts
     let shortcuts = [
-        ("+/- or ←/→", "Adjust counter"),
+        ("+/- or </>", "Adjust counter"),
         ("Click", "Toggle clock format"),
         ("Click [R]", "Reset counter"),
         (kb.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
@@ -606,7 +606,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 
 fn main() -> io::Result<()> {
     println!("Plugin Demo — Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry");
-    println!("+/- or ←/→ to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
+    println!("+/- or </> to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

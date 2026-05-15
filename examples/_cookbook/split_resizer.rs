@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 //! Split Resizer — Nested SplitPane with mouse drag resize.
-//! Controls: click divider=select, drag=resize, ←/→=A split, ↑/↓:B split, r=reset
+//! Controls: click divider=select, drag=resize, </>=A split, ^/v:B split, r=reset
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -437,7 +437,7 @@ impl SplitResizerApp {
         let sb = format!("B:{}%", ((1.0 - self.ra) * 100.0).round() as i32);
         let sb1 = format!("B1:{}%", (self.rb * 100.0).round() as i32);
         let txt = format!(
-            "{} | {} | {} | ←/→: A | ↑/↓: B | r: reset | {}: theme | {}: help | {}: dismiss | {}: quit",
+            "{} | {} | {} | </>: A | ^/v: B | r: reset | {}: theme | {}: help | {}: dismiss | {}: quit",
             sa, sb, sb1,
             self.keybindings.display(actions::THEME).unwrap_or("t"),
             self.keybindings.display(actions::HELP).unwrap_or("?"),
@@ -588,8 +588,8 @@ impl SplitResizerApp {
         let lines: Vec<String> = vec![
             " Keyboard Shortcuts ".to_string(),
             " ────────────────── ".to_string(),
-            " ←/→   Resize A panel".to_string(),
-            " ↑/↓   Resize B panel".to_string(),
+            " </>   Resize A panel".to_string(),
+            " ^/v   Resize B panel".to_string(),
             format!(" {}      Cycle theme ", theme_key),
             " r      Reset sizes  ".to_string(),
             format!(" {} / {}  Toggle help", help_key, back_key),
@@ -684,7 +684,7 @@ impl Widget for InputRouter {
 }
 
 fn main() -> Result<()> {
-    println!("Split Resizer — drag dividers | ←/→:A | ↑/↓:B | r:reset | q:quit");
+    println!("Split Resizer — drag dividers | </>:A | ^/v:B | r:reset | q:quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

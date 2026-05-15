@@ -14,7 +14,7 @@
 //!   t     — cycle theme
 //!   p     — pause/resume updates
 //!   r     — force refresh
-//!   ↑/↓   — navigate process list
+//!   ^/v   — navigate process list
 //!   q     — quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};

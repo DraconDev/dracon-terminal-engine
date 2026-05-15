@@ -79,7 +79,7 @@ impl Scene for AccessibilityScene {
         }
 
         // Status indicator
-        let status = if self.enabled { "● Enabled" } else { "○ Disabled" };
+        let status = if self.enabled { "* Enabled" } else { "( ) Disabled" };
         let status_color = if self.enabled { t.success } else { t.error };
         draw_text(&mut plane, 2, 2, status, status_color, t.bg, true);
 
@@ -126,7 +126,7 @@ impl Scene for AccessibilityScene {
                 } else {
                     ann.clone()
                 };
-                draw_text(&mut plane, 2, y, &format!("  • {}", truncated), t.fg, t.bg, false);
+                draw_text(&mut plane, 2, y, &format!("  - {}", truncated), t.fg, t.bg, false);
             }
         }
 

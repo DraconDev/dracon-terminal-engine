@@ -19,15 +19,15 @@ use std::cell::RefCell;
 // ── Widget slot positions in the grid (row, col, name, icon) ────────────────
 
 const SLOTS: &[(usize, usize, &str, &str)] = &[
-    (0, 0, "Checkbox", "󰄵"),
-    (0, 1, "Radio", "󰑃"),
-    (0, 2, "Toggle", "󰔡"),
-    (0, 3, "Spinner", "󰝥"),
-    (1, 0, "Slider", "󰜈"),
-    (1, 1, "Select", "󰑇"),
-    (1, 2, "Search Input", "󰍉"),
-    (2, 0, "Progress Bar", "󰖎"),
-    (2, 1, "Button", "󰔂"),
+    (0, 0, "Checkbox", "[v]"),
+    (0, 1, "Radio", "(o)"),
+    (0, 2, "Toggle", "[=]"),
+    (0, 3, "Spinner", "..."),
+    (1, 0, "Slider", "Slider"),
+    (1, 1, "Select", "v"),
+    (1, 2, "Search Input", ">"),
+    (2, 0, "Progress Bar", "[=]"),
+    (2, 1, "Button", "[X]"),
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -195,7 +195,7 @@ impl Scene for WidgetGalleryScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ↑↓←→ nav | Enter: activate | B/Esc: back | ?: help ";
+        let nav = " ^v<> nav | Enter: activate | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         // Help overlay
@@ -372,7 +372,7 @@ fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("↑↓←→", "Navigate cards"),
+        ("^v<>", "Navigate cards"),
         ("Enter", "Activate widget"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),

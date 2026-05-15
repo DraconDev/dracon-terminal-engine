@@ -6,7 +6,7 @@
 //! detail view navigation, and JSON parsing.
 //!
 //! Controls:
-//!   ↑/↓      — navigate posts
+//!   ^/v      — navigate posts
 //!   Enter    — view post details
 //!   r        — refresh data (async)
 //!   t        — cycle theme
@@ -273,7 +273,7 @@ impl NetworkApp {
         let t = self.theme.clone();
 
         // Title bar
-        let title = "🌐 Network Client — JSONPlaceholder API";
+        let title = "[Net] Network Client — JSONPlaceholder API";
         let tx = (area.width as usize).saturating_sub(title.len()) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = tx + i;
@@ -309,7 +309,7 @@ impl NetworkApp {
         }
 
         // Status hint
-        let hint = format!("↑↓:nav | Enter:detail | {}:refresh | {}:theme | {}:help | {}:dismiss | {}:quit",
+        let hint = format!("^v:nav | Enter:detail | {}:refresh | {}:theme | {}:help | {}:dismiss | {}:quit",
             self.kb_config.get(actions::REFRESH).unwrap_or("r"),
             self.kb_config.get(actions::THEME).unwrap_or("t"),
             self.kb_config.get(actions::HELP).unwrap_or("?"),
@@ -362,7 +362,7 @@ impl NetworkApp {
 
         let t = self.theme.clone();
         let shortcuts = [
-            ("↑/↓", "Navigate posts"),
+            ("^/v", "Navigate posts"),
             ("Enter", "View post details"),
             (self.keybindings.display(actions::REFRESH).unwrap_or("r"), "Refresh data"),
             (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),

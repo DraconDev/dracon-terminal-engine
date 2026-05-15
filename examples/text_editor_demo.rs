@@ -18,7 +18,7 @@
 //!   Ctrl+S      — save mock
 //!   F12         — toggle profiler
 //!   Tab         — next tab
-//!   ↑/↓/←/→     — navigate
+//!   ^/v/</>     — navigate
 //!   t           — cycle theme
 //!   ?           — help overlay
 //!   q           — quit
@@ -110,7 +110,7 @@ impl EditorApp {
         let kb_quit = kb_config.get(actions::QUIT).unwrap_or("q");
 
         let status = StatusBar::new(WidgetId::new(30))
-            .add_segment(StatusSegment::new("󰄛 Rust").with_fg(theme.info))
+            .add_segment(StatusSegment::new("Rs Rust").with_fg(theme.info))
             .add_segment(StatusSegment::new("Ln 1, Col 1").with_fg(theme.fg_muted))
             .add_segment(StatusSegment::new("UTF-8").with_fg(theme.fg_muted))
             .add_segment(
@@ -277,7 +277,7 @@ impl EditorApp {
         if let Some(tab) = self.active_tab() {
             let editor = tab.adapter.editor();
             self.status_bar = StatusBar::new(WidgetId::new(30))
-                .add_segment(StatusSegment::new("󰄛 Rust").with_fg(self.theme.info))
+                .add_segment(StatusSegment::new("Rs Rust").with_fg(self.theme.info))
                 .add_segment(
                     StatusSegment::new(&format!(
                         "Ln {}, Col {}",
@@ -354,7 +354,7 @@ impl EditorApp {
 
 fn build_file_tree(theme: Theme) -> Tree {
     let root = TreeNode {
-        label: "󰉋 project".into(),
+        label: "Dir project".into(),
         expanded: true,
         children: vec![
             TreeNode {
@@ -363,7 +363,7 @@ fn build_file_tree(theme: Theme) -> Tree {
                 children: vec![],
             },
             TreeNode {
-                label: "󰉋 src".into(),
+                label: "Dir src".into(),
                 expanded: true,
                 children: vec![
                     TreeNode {
@@ -379,7 +379,7 @@ fn build_file_tree(theme: Theme) -> Tree {
                 ],
             },
             TreeNode {
-                label: "󰉋 examples".into(),
+                label: "Dir examples".into(),
                 expanded: false,
                 children: vec![TreeNode {
                     label: format!("{}demo.rs", file_icon("demo.rs")),
@@ -401,19 +401,19 @@ fn build_file_tree(theme: Theme) -> Tree {
 
 fn file_icon(name: &str) -> &'static str {
     if name.ends_with(".rs") {
-        " "
+        "R "
     } else if name.ends_with(".toml") {
-        " "
+        "T "
     } else if name.ends_with(".md") {
-        " "
+        "M "
     } else if name.ends_with(".json") {
-        " "
+        "Y "
     } else if name.ends_with(".js") || name.ends_with(".ts") {
-        " "
+        "J "
     } else if name.ends_with(".py") {
-        " "
+        "P "
     } else {
-        " "
+        "F "
     }
 }
 
@@ -851,7 +851,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb_config: &Key
         (kb_save, "Save mock"),
         ("F12", "Toggle profiler"),
         (kb_tab_next, "Next tab"),
-        ("↑↓←→", "Navigate"),
+        ("^v<>", "Navigate"),
         (kb_theme, "Cycle theme"),
         (kb_help, "Toggle help"),
         (kb_back, "Dismiss help / search"),

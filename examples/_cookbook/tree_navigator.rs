@@ -268,7 +268,7 @@ impl Widget for TreeNav {
         let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
         let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
         let status_text = format!(
-            "{} items | Total: {} | ↑↓: nav | Enter: expand | Left: up | {}: theme | {}: help | {}: quit",
+            "{} items | Total: {} | ^v: nav | Enter: expand | Left: up | {}: theme | {}: help | {}: quit",
             self.item_count(),
             self.fs.total_items(),
             kb_theme, kb_help, kb_quit
@@ -337,9 +337,9 @@ impl Widget for TreeNav {
             let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts = [
-                ("↑/↓", "Navigate tree"),
-                ("→/Enter", "Expand folder"),
-                ("←", "Go up / Collapse"),
+                ("^/v", "Navigate tree"),
+                (">/Enter", "Expand folder"),
+                ("<", "Go up / Collapse"),
                 (kb_theme, "Cycle theme"),
                 (kb_help, "Toggle help"),
                 (kb_back, "Dismiss help"),

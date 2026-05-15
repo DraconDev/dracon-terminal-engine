@@ -8,14 +8,14 @@
 //! ├────────────────────────────────────────────────────┤
 //! │ Name        │ Age │ City      │ Profession          │
 //! ├─────────────┼─────┼───────────┼────────────────────┤
-//! │ > Alice     │  28 │ New York  │ Software Engineer  │ ← selected
+//! │ > Alice     │  28 │ New York  │ Software Engineer  │ < selected
 //! │   Bob       │  34 │ London    │ Data Scientist     │
 //! ├────────────────────────────────────────────────────┤
 //! │ Selected: Alice | Age: 28 | City: New York | 5 rows │
 //! └────────────────────────────────────────────────────┘
 //! ```
 //!
-//! **Behavior:** Type to filter • Click Sort to cycle none→asc→desc • Up/Down navigate.
+//! **Behavior:** Type to filter - Click Sort to cycle none>asc>desc - Up/Down navigate.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -182,7 +182,7 @@ impl Widget for Table {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
         let (heads, widths, hh, _sh) = (
-            ["󰣉 Name", "󰢮 Age", "󰉋 City", "󰠨 Profession"],
+            ["Name Name", "Age Age", "Dir City", "Role Profession"],
             [10u16, 5, 10, 14], // adjusted for row numbers
             3u16,
             1u16,
@@ -425,7 +425,7 @@ impl Widget for Table {
         let status_y = area.height.saturating_sub(1);
         let count_str = format!("{} rows", self.rows.len());
         let hint = format!(
-            "Filter: [{}] | ↑↓: nav | Enter: sort | {}: theme | {}: help | {}: dismiss | {}: quit | {}",
+            "Filter: [{}] | ^v: nav | Enter: sort | {}: theme | {}: help | {}: dismiss | {}: quit | {}",
             self.search.query(),
             self.keybindings.display(actions::THEME).unwrap_or("t"),
             self.keybindings.display(actions::HELP).unwrap_or("?"),
@@ -535,7 +535,7 @@ impl Widget for Table {
             }
             // Shortcuts
             let shortcuts = [
-                ("↑/↓", "Navigate"),
+                ("^/v", "Navigate"),
                 ("Enter", "Sort column"),
                 ("Type", "Filter"),
                 (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),

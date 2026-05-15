@@ -402,7 +402,7 @@ impl Widget for CommandBindings {
         }
 
         // ── Header bar ──
-        let header = " 󰔟 Command Bindings ";
+        let header = " Cmd Command Bindings ";
         for (i, c) in header.chars().enumerate().take(w - 4) {
             p.cells[w + 1 + i] = Cell {
                 char: c,
@@ -426,7 +426,7 @@ impl Widget for CommandBindings {
 
         // ── Card: CPU Gauge (top-left) ──
         render_card(&mut p, 2, 3, 24, 8, &t);
-        let card_title = " 󰓃 CPU ";
+        let card_title = " CPU CPU ";
         for (i, c) in card_title.chars().enumerate() {
             p.cells[3 * w + 3 + i] = Cell {
                 char: c,
@@ -443,7 +443,7 @@ impl Widget for CommandBindings {
 
         // ── Card: Status (top-right) ──
         render_card(&mut p, 28, 3, 24, 8, &t);
-        let status_title = " 󰀄 Connection ";
+        let status_title = " Usr Connection ";
         for (i, c) in status_title.chars().enumerate() {
             p.cells[3 * w + 29 + i] = Cell {
                 char: c,
@@ -460,7 +460,7 @@ impl Widget for CommandBindings {
 
         // ── Card: Metrics (middle) ──
         render_card(&mut p, 54, 3, 24, 8, &t);
-        let metrics_title = " 󰕙 System Metrics ";
+        let metrics_title = " Metric System Metrics ";
         for (i, c) in metrics_title.chars().enumerate() {
             p.cells[3 * w + 55 + i] = Cell {
                 char: c,
@@ -477,7 +477,7 @@ impl Widget for CommandBindings {
 
         // ── Card: Log (bottom-left) ──
         render_card(&mut p, 2, 12, 38, 10, &t);
-        let log_title = " 󰑊 Activity Log ";
+        let log_title = " Log Activity Log ";
         for (i, c) in log_title.chars().enumerate() {
             p.cells[12 * w + 3 + i] = Cell {
                 char: c,
@@ -494,7 +494,7 @@ impl Widget for CommandBindings {
 
         // ── Card: Streaming (bottom-right) ──
         render_card(&mut p, 42, 12, 36, 10, &t);
-        let stream_title = " 󰅐 Live Stream ";
+        let stream_title = " Stream Live Stream ";
         for (i, c) in stream_title.chars().enumerate() {
             p.cells[12 * w + 43 + i] = Cell {
                 char: c,

@@ -260,7 +260,7 @@ impl TabbedApp {
         let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
         let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
         let shortcuts = [
-            ("←/→", "Switch tabs"),
+            ("</>", "Switch tabs"),
             ("Click tab", "Switch tab"),
             (kb_theme, "Cycle theme"),
             (kb_help, "Toggle help"),

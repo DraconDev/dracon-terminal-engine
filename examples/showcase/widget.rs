@@ -395,9 +395,9 @@ impl Widget for Showcase {
         // Primitives bar - live widget demo
         let prim_y = 5usize;
         let state_0 = if self.primitive_toggle {
-            " ✓ Toggle"
+            " [ok] Toggle"
         } else {
-            " ○ Toggle"
+            " ( ) Toggle"
         };
         let state_1 = {
             let pos = ((self.primitive_slider * 10.0).round() as usize).min(10);
@@ -410,21 +410,21 @@ impl Widget for Showcase {
             slider
         };
         let state_2 = if self.primitive_checkbox {
-            " ☑ Check"
+            " [x] Check"
         } else {
-            " ☐ Check"
+            " [ ] Check"
         };
         let state_3 = {
             let sel = self.primitive_radio;
             let opts = ["①", "②", "③"];
             let mut s = String::new();
             for (j, _o) in opts.iter().enumerate() {
-                s.push_str(if j == sel { "●" } else { "○" });
+                s.push_str(if j == sel { "*" } else { "( )" });
             }
             format!(" Radio {}", s)
         };
         let state_4 = if self.primitive_button || self.primitive_button_time.is_some() {
-            " ✦ Clicked!"
+            " * Clicked!"
         } else {
             " ◇ Button"
         };
@@ -610,7 +610,7 @@ impl Widget for Showcase {
         let total_cards = self.filtered.len();
         let visible_cards = cols * (available_h / (card_h + 1)).max(1);
         if total_cards > visible_cards {
-            let scroll_text = format!("↓ {} more", total_cards - visible_cards);
+            let scroll_text = format!("v {} more", total_cards - visible_cards);
             let sx = (area.width as usize).saturating_sub(scroll_text.len()).saturating_sub(4);
             let sy = (area.height as usize).saturating_sub(3);
             // Draw scroll indicator background
@@ -635,7 +635,7 @@ impl Widget for Showcase {
         }
 
         let hint = format!(
-            "↑↓←→ nav | Enter launch | / search | Tab cat | {}",
+            "^v<> nav | Enter launch | / search | Tab cat | {}",
             self.keybindings.format_hint(&[
                 (actions::THEME, "theme"),
                 (actions::HELP, "help"),
@@ -1041,7 +1041,7 @@ impl Widget for Showcase {
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc").to_string();
             let kb_quit_back = format!("{} / {}", kb_quit, kb_back);
             let lines: Vec<(&str, &str)> = vec![
-                ("↑↓←→", "Navigate cards"),
+                ("^v<>", "Navigate cards"),
                 ("Enter", "Launch selected"),
                 ("Space", "Show details"),
                 ("/", "Focus search"),

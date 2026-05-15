@@ -6,7 +6,7 @@
 //! Reads from a real SQLite database file (or creates a mock one).
 //!
 //! Controls:
-//!   ↑/↓ or j/k     — navigate tables/results
+//!   ^/v or j/k     — navigate tables/results
 //!   Enter          — select table / run query
 //!   Tab            — switch panel (tables/query/results)
 //!   e              — edit query
@@ -357,7 +357,7 @@ impl Widget for SqliteBrowser {
             }
         }
 
-        draw_text(&mut plane, 2, 0, " 󰓫 Tables", t.primary, left_bg, true);
+        draw_text(&mut plane, 2, 0, " Dir Tables", t.primary, left_bg, true);
         for (i, table) in self.tables.iter().enumerate() {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
@@ -423,7 +423,7 @@ impl Widget for SqliteBrowser {
             &mut plane,
             left_rect.width + 3,
             0,
-            " 󰡄 Query",
+            " DB Query",
             t.primary,
             query_bg,
             true,
@@ -473,7 +473,7 @@ impl Widget for SqliteBrowser {
             &mut plane,
             left_rect.width + 3,
             results_y,
-            " 󰠱 Results",
+            " Res Results",
             t.primary,
             results_bg,
             true,
@@ -629,7 +629,7 @@ impl Widget for SqliteBrowser {
             let kb_help = self.keybindings.display(actions::HELP).unwrap_or("?");
             let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("q");
             let shortcuts = [
-                ("↑/↓/j/k", "Navigate"),
+                ("^/v/j/k", "Navigate"),
                 ("Enter", "Select / Run query"),
                 ("Tab", "Switch panel"),
                 (kb_edit, "Edit query"),

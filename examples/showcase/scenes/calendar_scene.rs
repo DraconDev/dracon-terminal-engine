@@ -85,7 +85,7 @@ impl Scene for CalendarScene {
                 plane.cells[idx].fg = t.outline;
             }
         }
-        let nav = " ←→ month | Enter: select | B/Esc: back | ?: help ";
+        let nav = " <> month | Enter: select | B/Esc: back | ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         // Help overlay
@@ -218,7 +218,7 @@ fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("← →", "Navigate months"),
+        ("< >", "Navigate months"),
         ("Enter", "Select date"),
         ("c", "Clear selection"),
         ("B/Esc", "Back to showcase"),

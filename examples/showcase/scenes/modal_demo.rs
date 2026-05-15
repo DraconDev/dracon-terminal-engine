@@ -120,9 +120,9 @@ impl Scene for ModalDemoScene {
         let lines = [
             "This demo shows modal dialogs:",
             "",
-            "  • Help overlay (z=100)",
-            "  • Confirm dialog (z=110)",
-            "  • Toast notifications",
+            "  - Help overlay (z=100)",
+            "  - Confirm dialog (z=110)",
+            "  - Toast notifications",
             "",
             "Press '?' to toggle help overlay.",
             "Press 'c' to show confirm dialog.",

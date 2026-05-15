@@ -3,13 +3,13 @@
 //!
 //! This example demonstrates production-ready Dracon app architecture:
 //! - SQLite database for persistent storage
-//! - SceneRouter for List → Add → Detail navigation
+//! - SceneRouter for List > Add > Detail navigation
 //! - Framework widgets (List, StatusBar, Modal) instead of raw rendering
 //! - EventBus for cross-screen communication
 //! - Full CRUD operations with error handling
 //!
 //! Controls:
-//!   ↑/↓         — navigate tasks
+//!   ^/v         — navigate tasks
 //!   n           — new task
 //!   Enter       — view task detail / confirm
 //!   Space       — toggle complete
@@ -261,7 +261,7 @@ impl TaskListScreen {
 
     fn update_tasks(&mut self, tasks: &[TodoTask]) {
         let items: Vec<String> = tasks.iter().map(|t| {
-            let status = if t.completed { "✓" } else { "○" };
+            let status = if t.completed { "[ok]" } else { "( )" };
             let priority = match t.priority {
                 2 => "▲",
                 0 => "▼",
@@ -520,7 +520,7 @@ impl Scene for AddTaskScreen {
         }
 
         // Hint
-        let hint = "Tab: next field | ←/→: priority | Type: edit | Esc: back";
+        let hint = "Tab: next field | </>: priority | Type: edit | Esc: back";
         let hy = area.height - 1;
         plane.put_str(0, hy, hint);
 
@@ -765,7 +765,7 @@ fn main() -> std::io::Result<()> {
         .unwrap_or_else(|_| "/tmp/dracon_todo.db".to_string());
 
     println!("Todo App — Tasks saved to {}", db_path);
-    println!("Controls: ↑↓ nav | Ctrl+N new | Enter detail | t theme | F1 help | Ctrl+Q quit");
+    println!("Controls: ^v nav | Ctrl+N new | Enter detail | t theme | F1 help | Ctrl+Q quit");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
     let should_quit = Arc::new(AtomicBool::new(false));
@@ -836,7 +836,7 @@ fn main() -> std::io::Result<()> {
                 help_plane.z_index = 200;
 
                 let shortcuts = [
-                    ("↑/↓", "Navigate tasks"),
+                    ("^/v", "Navigate tasks"),
                     (keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"), "New task"),
                     ("Enter", "View task detail / confirm"),
                     (keybindings.display(actions::BACK).unwrap_or("Esc"), "Go back / cancel"),

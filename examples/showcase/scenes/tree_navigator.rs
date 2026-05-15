@@ -149,7 +149,7 @@ impl Scene for TreeNavigatorScene {
             }
         }
         let count = self.fs.total_items();
-        let status_text = format!("{} items total | ↑↓ nav | Enter: expand | B/Esc: back | ?: help", count);
+        let status_text = format!("{} items total | ^v nav | Enter: expand | B/Esc: back | ?: help", count);
         draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.bg, false);
 
         if self.show_help {
@@ -302,9 +302,9 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("↑/↓", "Navigate tree"),
-        ("Enter/→", "Expand folder"),
-        ("←", "Collapse folder"),
+        ("^/v", "Navigate tree"),
+        ("Enter/>", "Expand folder"),
+        ("<", "Collapse folder"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];
