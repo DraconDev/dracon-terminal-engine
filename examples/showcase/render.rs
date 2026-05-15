@@ -325,7 +325,7 @@ pub fn render_card(
     }
 
     let preview_start_y = offset_y + 6;
-    let inner_min_x = offset_x + 1;
+    let _inner_min_x = offset_x + 1;
     let inner_max_x = offset_x + card_w_usize - 2;
     let inner_min_y = offset_y + 1;
     let inner_max_y = offset_y + card_h_usize - 2;
@@ -533,7 +533,7 @@ fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
 fn render_ide_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
     let max_x = ox + card_w - 2;
     let max_y = oy + card_w / 2 + 4;
-    let tabs = if card_w >= 28 { [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)] } else if card_w >= 22 { [(" main.rs ", true), (" lib.rs ", false)] } else { [(" main.rs ", true)] };
+    let tabs: Vec<(&str, bool)> = if card_w >= 28 { vec![(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)] } else if card_w >= 22 { vec![(" main.rs ", true), (" lib.rs ", false)] } else { vec![(" main.rs ", true)] };
     let mut tab_x = ox + 1;
     let mut active_tab_start = 0usize;
     let mut active_tab_len = 0usize;
@@ -616,7 +616,7 @@ fn render_file_manager_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
 fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
     let max_x = ox + card_w - 2;
     let max_y = oy + card_w / 2 + 4;
-    let menus = if card_w >= 40 { ["File", "Edit", "View", "Help"] } else if card_w >= 28 { ["File", "Edit", "View"] } else { ["File", "Edit"] };
+    let menus: Vec<&str> = if card_w >= 40 { vec!["File", "Edit", "View", "Help"] } else if card_w >= 28 { vec!["File", "Edit", "View"] } else { vec!["File", "Edit"] };
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
     let menu_w = (card_w / menus.len().max(1)).min(8).max(4);
     for (i, menu) in menus.iter().enumerate() {
@@ -847,7 +847,7 @@ fn render_calendar_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, 
         draw_text_bounded(plane, ox + 1, y, &truncated, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let sel = (((phase * 0.8).sin() * 0.5 + 0.5) * 30.0).round() as usize % 31 + 1;
-    let sel_text = format!("Sel: {}-{:>2}-{:>2}", month_idx + 1, sel.min(28));
+    let sel_text = format!("Sel: {}-{:>2}", month_idx + 1, sel.min(28));
     draw_text_bounded(plane, ox + 1, oy + 11, &sel_text, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
@@ -886,27 +886,32 @@ fn render_autocomplete_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usi
         draw_text_bounded(plane, x + 2, y, s, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
-fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_notification_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let notifications = [(NotificationType::Info, "Info", "File saved", t.info), (NotificationType::Success, "Success", "Build complete", t.success), (NotificationType::Warning, "Warning", "Low memory", t.warning), (NotificationType::Error, "Error", "Connection failed", t.error)];
     let offset = ((phase * 0.3).floor() as usize) % notifications.len();
+    let notif_w = (card_w - 4).min(10).max(6);
+    let notif_x = ox + card_w - notif_w - 2;
     for i in 0..2.min(notifications.len()) {
         let idx = (offset + i) % notifications.len();
         let (kind, title, msg, color) = &notifications[idx];
         let y = oy + 5 + i * 3;
-        if y > oy + 11 { break; }
+        if y > oy + 11 || y > max_y { break; }
         let icon = match kind { NotificationType::Info => "i", NotificationType::Success => "✔", NotificationType::Warning => "!", NotificationType::Error => "✖" };
-        set_cell(plane, ox + 16, y, '╭', t.outline, t.surface);
-        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y, '─', t.outline, t.surface); }
-        set_cell(plane, ox + 25, y, '╮', t.outline, t.surface);
-        draw_text(plane, ox + 17, y, &format!(" {} {}", icon, title), *color, t.surface, Styles::BOLD);
-        set_cell(plane, ox + 16, y + 1, '│', t.outline, t.surface);
-        let truncated: String = msg.chars().take(8).collect();
-        draw_text(plane, ox + 17, y + 1, &truncated, t.fg, t.surface, Styles::empty());
-        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y + 1, ' ', t.fg, t.surface); }
-        set_cell(plane, ox + 25, y + 1, '│', t.outline, t.surface);
-        set_cell(plane, ox + 16, y + 2, '╰', t.outline, t.surface);
-        for cx in ox + 17..ox + 25 { set_cell(plane, cx, y + 2, '─', t.outline, t.surface); }
-        set_cell(plane, ox + 25, y + 2, '╯', t.outline, t.surface);
+        set_cell_bounded(plane, notif_x, y, '╭', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+        for cx in 1..notif_w - 1 { set_cell_bounded(plane, notif_x + cx, y, '─', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, notif_x + notif_w - 1, y, '╮', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, notif_x + 1, y, &format!(" {} {}", icon, title), *color, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
+        set_cell_bounded(plane, notif_x, y + 1, '│', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+        let max_msg_len = notif_w.saturating_sub(2).max(1);
+        let truncated: String = msg.chars().take(max_msg_len).collect();
+        draw_text_bounded(plane, notif_x + 1, y + 1, &truncated, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        for cx in 1..notif_w - 1 { set_cell_bounded(plane, notif_x + cx, y + 1, ' ', t.fg, t.surface, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, notif_x + notif_w - 1, y + 1, '│', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+        set_cell_bounded(plane, notif_x, y + 2, '╰', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
+        for cx in 1..notif_w - 1 { set_cell_bounded(plane, notif_x + cx, y + 2, '─', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y); }
+        set_cell_bounded(plane, notif_x + notif_w - 1, y + 2, '╯', t.outline, t.surface, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
@@ -918,30 +923,36 @@ enum NotificationType {
     Error,
 }
 
-fn render_accessibility_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, Styles::BOLD);
+fn render_accessibility_preview(plane: &mut Plane, t: &Theme, _phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    draw_text_bounded(plane, ox + 1, oy + 5, "OSC 99 Announcements:", t.primary, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
     let items = [("Role:", "button"), ("Label:", "Submit"), ("Shortcut:", "Ctrl+Enter"), ("Level:", "assertive"), ("Terminal:", "NVDA")];
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
-        if y > oy + 10 { break; }
-        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 12, y, value, t.fg, t.surface, Styles::empty());
+        if y > oy + 10 || y > max_y { break; }
+        draw_text_bounded(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 12, y, value, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
-    draw_text(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, Styles::empty());
+    draw_text_bounded(plane, ox + 1, oy + 11, "● enabled", t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_cell_pool_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    draw_text(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, Styles::BOLD);
+fn render_cell_pool_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    draw_text_bounded(plane, ox + 1, oy + 5, "Cell Pool Stats:", t.primary, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
     let stats = [("Avail:", format!("{:>4}", 1024 - ((phase * 5.0).sin() * 200.0).round() as i32)), ("Used:", format!("{:>4}", ((phase * 5.0).sin() * 200.0).round() as i32)), ("Hit:", format!("{:>3}%", 95 - ((phase * 3.0).sin() * 10.0) as i32))];
     for (i, (label, value)) in stats.iter().enumerate() {
         let y = oy + 6 + i;
-        if y > oy + 10 { break; }
-        draw_text(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 8, y, value, t.success, t.surface, Styles::empty());
+        if y > oy + 10 || y > max_y { break; }
+        draw_text_bounded(plane, ox + 1, y, label, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        draw_text_bounded(plane, ox + 8, y, value, t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let hit_rate = (95.0 - (phase * 3.0).sin() * 10.0).max(0.0) as u32;
-    let bar_str = format!("[{}{}]", "█".repeat((hit_rate / 10) as usize), "░".repeat(10 - (hit_rate / 10) as usize));
-    draw_text(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, Styles::empty());
+    let bar_len = (card_w - 6).min(10).max(4);
+    let filled = (hit_rate / 10) as usize;
+    let bar_str = format!("[{}{}]", "█".repeat(filled.min(bar_len)), "░".repeat(bar_len - filled.min(bar_len)));
+    draw_text_bounded(plane, ox + 1, oy + 10, &bar_str, t.success, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 // ═══════════════════════════════════════════════════════════════════════════════
 // WIDGET IMPL
