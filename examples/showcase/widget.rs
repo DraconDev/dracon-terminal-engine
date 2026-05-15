@@ -485,7 +485,7 @@ impl Widget for Showcase {
                 let y = *my as usize;
                 (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + categories.len() * 2
             })
-            .map(|(_, my)| (*my as usize).saturating_sub(sidebar_start_y) / 2)
+            .map(|(_, my)| (my as usize).saturating_sub(sidebar_start_y) / 2)
             .filter(|idx| *idx < categories.len());
         for (i, cat) in categories.iter().enumerate() {
             let cat_y = sidebar_start_y + i * 2;
