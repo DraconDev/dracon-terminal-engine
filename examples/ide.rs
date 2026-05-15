@@ -1248,8 +1248,9 @@ impl IdeApp {
         draw_rounded_box(plane, x, y, w, h, t);
 
         let title = "Keyboard Shortcuts";
+        let title_x = x + (w - title.len() as u16) / 2;
         for (i, ch) in title.chars().enumerate() {
-            let idx = ((y + 1) * plane.width + x + 2 + i as u16) as usize;
+            let idx = ((y + 1) * plane.width + title_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = t.primary;

@@ -981,7 +981,7 @@ impl Widget for SystemMonitor {
         draw_text(&mut plane, 2, footer_y, &footer, t.fg_muted, t.bg, false);
 
         if self.show_help {
-            render_help(&mut plane, area, t);
+            render_help(&mut plane, area, t, &self.keybindings);
         }
         plane
     }
@@ -1246,7 +1246,7 @@ fn blit_to(dest: &mut Plane, src: &Plane, offset_x: u16, offset_y: u16) {
     }
 }
 
-fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
+fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let hw = 46u16.min(area.width.saturating_sub(4));
     let hh = 13u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
@@ -1304,6 +1304,18 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
         }
     }
 
+    let title = "System Monitor Help";
+    let tx = hx + (hw - title.len() as u16) / 2;
+    for (i, c) in title.chars().enumerate() {
+        let idx = ((hy + 1) * plane.width + tx + i as u16) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = c;
+            plane.cells[idx].fg = t.primary;
+            plane.cells[idx].style = Styles::BOLD;
+            plane.cells[idx].bg = t.surface_elevated;
+        }
+    }
+
     let kb_theme = kb.display(actions::THEME).unwrap_or("t");
     let kb_help = kb.display(actions::HELP).unwrap_or("?");
     let kb_back = kb.display(actions::BACK).unwrap_or("Esc");
@@ -1321,7 +1333,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme) {
         (kb_quit, "Quit"),
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
-        let row = hy + 1 + i as u16;
+        let row = hy + 3 + i as u16;
         for (j, c) in key.chars().enumerate() {
             let idx = (row * plane.width + hx + 2 + j as u16) as usize;
             if idx < plane.cells.len() {
