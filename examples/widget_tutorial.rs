@@ -632,6 +632,9 @@ fn main() -> std::io::Result<()> {
     let current_theme = Theme::from_env_or(Theme::nord());
     app = app.theme(current_theme.clone());
 
+    let kb_config = resolve_keybindings();
+    let keybindings = KeybindingSet::from_config(&kb_config);
+
     let red_picker = ColorPicker::new(current_theme.clone()).initial_color("Red");
     let green_picker = ColorPicker::new(current_theme.clone()).initial_color("Green");
     let blue_picker = ColorPicker::new(current_theme.clone()).initial_color("Blue");
