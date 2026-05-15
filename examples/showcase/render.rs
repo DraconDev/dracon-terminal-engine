@@ -63,6 +63,33 @@ pub fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: 
     }
 }
 
+pub fn set_cell_bounded(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Color, min_x: usize, max_x: usize, min_y: usize, max_y: usize) {
+    if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
+        set_cell(plane, x, y, ch, fg, bg);
+    }
+}
+
+pub fn draw_text_bounded(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, style: Styles, min_x: usize, max_x: usize, min_y: usize, max_y: usize) {
+    if y < min_y || y > max_y { return; }
+    for (i, ch) in text.chars().enumerate() {
+        let cx = x + i;
+        if cx > max_x { break; }
+        if cx >= min_x {
+            let idx = y * plane.width as usize + cx;
+            if idx < plane.cells.len() {
+                plane.cells[idx] = Cell {
+                    char: ch,
+                    fg,
+                    bg,
+                    style,
+                    transparent: false,
+                    skip: false,
+                };
+            }
+        }
+    }
+}
+
 pub fn draw_text(
     plane: &mut Plane,
     x: usize,
@@ -298,44 +325,57 @@ pub fn render_card(
     }
 
     let preview_start_y = offset_y + 6;
+    let inner_min_x = offset_x + 1;
+    let inner_max_x = offset_x + card_w_usize - 2;
+    let inner_min_y = offset_y + 1;
+    let inner_max_y = offset_y + card_h_usize - 2;
 
     match config.ex.name {
-        "system_monitor" => render_live_gauge_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "split_resizer" => render_split_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "command_bindings" => render_command_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "theme_switcher" => render_theme_preview(plane, config.theme, offset_x, offset_y),
-        "widget_gallery" => render_widget_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "ide" => render_ide_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "desktop" => render_desktop_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "git_tui" => render_git_tui_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "file_manager" => render_file_manager_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "menu_system" => render_menu_system_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "modal_demo" => render_modal_demo_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "dashboard_builder" => render_dashboard_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "tabbed_panels" => render_tabbed_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "tree_navigator" => render_tree_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "data_table" => render_table_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "input_debug" => render_input_debug_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "text_editor_demo" => render_text_editor_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "game_loop" => render_game_loop_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "form_demo" | "form_widget" => render_form_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "framework_file_manager" => render_framework_fm_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "calendar" => render_calendar_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "rich_text" => render_rich_text_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "notification_center" => render_notification_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "accessibility" => render_accessibility_preview(plane, config.theme, card_phase, offset_x, offset_y),
-        "cell_pool" => render_cell_pool_preview(plane, config.theme, card_phase, offset_x, offset_y),
+        "system_monitor" => render_live_gauge_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "split_resizer" => render_split_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "command_bindings" => render_command_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "theme_switcher" => render_theme_preview(plane, config.theme, offset_x, offset_y, card_w_usize, card_h_usize),
+        "widget_gallery" => render_widget_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "ide" => render_ide_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "desktop" => render_desktop_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "git_tui" => render_git_tui_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "file_manager" => render_file_manager_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "menu_system" => render_menu_system_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "modal_demo" => render_modal_demo_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "dashboard_builder" => render_dashboard_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "tabbed_panels" => render_tabbed_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "tree_navigator" => render_tree_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "data_table" => render_table_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "input_debug" => render_input_debug_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "text_editor_demo" => render_text_editor_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "game_loop" => render_game_loop_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "form_demo" | "form_widget" => render_form_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "framework_file_manager" => render_framework_fm_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "calendar" => render_calendar_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "rich_text" => render_rich_text_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "autocomplete" => render_autocomplete_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "notification_center" => render_notification_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "accessibility" => render_accessibility_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
+        "cell_pool" => render_cell_pool_preview(plane, config.theme, card_phase, offset_x, offset_y, card_w_usize, card_h_usize),
         _ => {
             for (i, line) in config.ex.preview.iter().enumerate() {
                 let py = preview_start_y + i;
-                if py < offset_y + card_h_usize - 1 {
-                    let preview_line: String = line.chars().take(card_w_usize - 4).collect();
+                if py >= inner_min_y && py <= inner_max_y {
+                    let max_len = inner_max_x - (offset_x + 2) + 1;
+                    let preview_line: String = line.chars().take(max_len).collect();
                     draw_text(plane, offset_x + 2, py, &preview_line, t.fg_subtle, bg, Styles::empty());
                 }
             }
         }
     }
+
+    draw_rounded_border(
+        plane,
+        Rect::new(offset_x as u16, offset_y as u16, config.width, config.height),
+        border_fg,
+        bg,
+        is_selected || is_hovered,
+    );
 
     if is_selected {
         draw_text(plane, offset_x + 1, offset_y + card_h_usize / 2, "►", t.primary, bg, Styles::BOLD);
