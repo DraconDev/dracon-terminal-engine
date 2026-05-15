@@ -282,7 +282,7 @@ pub fn render_card(
     // Embedded badge
     let mut next_badge_x = badge_x + badge.len() + 1;
     if config.is_embedded {
-        let embed_badge = " ⚡ ";
+        let embed_badge = " * ";
         for (i, ch) in embed_badge.chars().enumerate() {
             let px = next_badge_x + i;
             if px < offset_x + card_w_usize - 2 {

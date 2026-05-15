@@ -112,7 +112,7 @@ impl Widget for Showcase {
         self.zones.borrow_mut().clear();
 
         // Title bar with decorative border
-        let title_text = " ★ Dracon Terminal Engine ";
+        let title_text = " * Dracon Terminal Engine ";
         let title_x = 2usize;
         let title_y = 0usize;
 
@@ -227,7 +227,7 @@ impl Widget for Showcase {
             for dx in 0..square_w {
                 if x + dx < area.width as usize {
                     let ch = if dx == 0 && is_active && !is_hovered {
-                        '▶'
+                        '>'
                     } else {
                         ' '
                     };
@@ -499,14 +499,14 @@ impl Widget for Showcase {
                 (t.fg_muted, t.bg)
             };
             let (icon, label) = match *cat {
-                "all" => ("◈", " ALL "),
-                "apps" => ("▣", " APPS "),
-                "input" => ("⌨", " INPUT "),
-                "data" => ("◆", " DATA "),
-                "cookbook" => ("◉", " COOKBOOK "),
-                "tools" => ("◦", " TOOLS "),
-                "accessibility" => ("◊", " A11Y "),
-                _ => ("•", *cat),
+                "all" => ("*", " ALL "),
+                "apps" => ("#", " APPS "),
+                "input" => ("=", " INPUT "),
+                "data" => ("d", " DATA "),
+                "cookbook" => ("o", " COOK "),
+                "tools" => ("-", " TOOLS "),
+                "accessibility" => ("+", " A11Y "),
+                _ => (".", *cat),
             };
             let icon_fg = if is_hovered || is_active {
                 t.primary
