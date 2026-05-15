@@ -1438,7 +1438,7 @@ impl Showcase {
         } else {
             (24usize, 12usize)
         };
-        let cols = self.cols.get().max(1);
+        let cols = (available_w / (card_w + 2)).max(1);
         let c = col as usize;
         let r = row as usize;
         if c < grid_start_x || r < grid_start_y {
