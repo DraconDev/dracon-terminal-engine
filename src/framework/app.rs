@@ -690,13 +690,13 @@ impl App {
         let title = self.title.clone();
         write!(self.terminal, "\x1b]0;{title}\x07").ok();
 
-        let terminal_ptr = &mut self.terminal as *mut Terminal<io::Stdout> as usize;
         let previous_hook = Arc::new(Mutex::new(std::panic::take_hook()));
         let prev_hook_clone = previous_hook.clone();
         std::panic::set_hook(Box::new(move |info| {
-            let t = unsafe { &mut *(terminal_ptr as *mut Terminal<io::Stdout>) };
-            let _ = write!(t, "{}", RESTORE_SEQ);
-            let _ = t.flush();
+            let stdout = io::stdout();
+            let mut handle = stdout.lock();
+            let _ = handle.write_all(RESTORE_SEQ.as_bytes());
+            let _ = handle.flush();
             if let Ok(mut hook) = prev_hook_clone.lock() {
                 let original = std::mem::replace(&mut *hook, Box::new(|_| {}));
                 original(info);
