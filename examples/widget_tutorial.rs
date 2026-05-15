@@ -545,7 +545,7 @@ impl Widget for ColorPicker {
                 true
             }
             // Enter or Space: cycle to next color
-            KeyCode::Enter | KeyCode::Char(' ') => {
+            KeyCode::Enter | KeyCode::Char(' ') if key.modifiers.is_empty() => {
                 self.cycle_next();
                 true
             }
