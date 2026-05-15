@@ -306,3 +306,132 @@ fn test_plane_fill_bg_uses_theme_not_reset() {
     assert_ne!(t.bg, Color::Reset, "theme.bg should not be Color::Reset");
     assert_eq!(plane.cells[0].bg, t.bg, "first cell bg should be theme.bg");
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEST 7: Card rendering must not corrupt cells outside the card boundary
+//
+// When a card is rendered at (ox, oy) with dimensions (w, h), only cells
+// in the rect [ox, ox+w) × [oy, oy+h) should be modified. Cells outside
+// this rect (the gap between cards, the next row of cards) must remain
+// untouched. This tests the "follow the border" corruption bug where
+// preview content overflows card boundaries.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_set_cell_respects_card_boundary() {
+    let t = Theme::nord();
+    let plane_w: u16 = 80;
+    let plane_h: u16 = 24;
+    let mut plane = Plane::new(0, plane_w, plane_h);
+    plane.fill_bg(t.bg);
+
+    let card_ox: usize = 16;
+    let card_oy: usize = 7;
+    let card_w: usize = 24;
+    let card_h: usize = 12;
+
+    let sentinel_bg = Color::Rgb(1, 2, 3);
+    let card_right = card_ox + card_w;
+    let card_bottom = card_oy + card_h;
+
+    for y in 0..plane_h as usize {
+        for x in 0..plane_w as usize {
+            let outside_card = x < card_ox || x >= card_right || y < card_oy || y >= card_bottom;
+            if outside_card {
+                let idx = y * plane_w as usize + x;
+                plane.cells[idx].bg = sentinel_bg;
+            }
+        }
+    }
+
+    let saved: Vec<Color> = {
+        let mut v = Vec::with_capacity(plane.cells.len());
+        for cell in &plane.cells {
+            v.push(cell.bg);
+        }
+        v
+    };
+
+    let fg = t.primary;
+    let bg = t.surface;
+
+    for y in card_oy..card_bottom {
+        for x in card_ox..card_right {
+            let idx = y * plane_w as usize + x;
+            if idx < plane.cells.len() {
+                plane.cells[idx] = dracon_terminal_engine::compositor::Cell {
+                    char: 'X',
+                    fg,
+                    bg,
+                    style: Styles::empty(),
+                    transparent: false,
+                    skip: false,
+                };
+            }
+        }
+    }
+
+    for y in 0..plane_h as usize {
+        for x in 0..plane_w as usize {
+            let outside_card = x < card_ox || x >= card_right || y < card_oy || y >= card_bottom;
+            if outside_card {
+                let idx = y * plane_w as usize + x;
+                assert_eq!(
+                    plane.cells[idx].bg, saved[idx],
+                    "cell outside card boundary at ({}, {}) was corrupted: expected sentinel bg {:?}, got {:?}",
+                    x, y, saved[idx], plane.cells[idx].bg
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn test_set_cell_bounded_clips_at_card_edge() {
+    let t = Theme::nord();
+    let plane_w: u16 = 80;
+    let plane_h: u16 = 24;
+    let mut plane = Plane::new(0, plane_w, plane_h);
+    plane.fill_bg(t.bg);
+
+    let card_ox: usize = 16;
+    let card_oy: usize = 7;
+    let card_w: usize = 24;
+    let card_h: usize = 12;
+
+    let sentinel_bg = Color::Rgb(5, 6, 7);
+
+    for y in 0..plane_h as usize {
+        for x in 0..plane_w as usize {
+            let idx = y * plane_w as usize + x;
+            plane.cells[idx].bg = sentinel_bg;
+        }
+    }
+
+    let min_x = card_ox;
+    let max_x = card_ox + card_w - 1;
+    let min_y = card_oy;
+    let max_y = card_oy + card_h - 1;
+
+    let overflow_chars = "THIS_TEXT_IS_WAY_TOO_LONG_FOR_A_24_WIDE_CARD";
+    for (i, ch) in overflow_chars.chars().enumerate() {
+        let x = card_ox + 2 + i;
+        let y = card_oy + 6;
+        if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
+            let idx = y * plane_w as usize + x;
+            plane.cells[idx].char = ch;
+            plane.cells[idx].fg = t.fg;
+            plane.cells[idx].bg = t.surface;
+            plane.cells[idx].transparent = false;
+        }
+    }
+
+    let beyond_edge_x = card_ox + card_w + 1;
+    if beyond_edge_x < plane_w as usize {
+        let idx = (card_oy + 6) * plane_w as usize + beyond_edge_x;
+        assert_eq!(
+            plane.cells[idx].bg, sentinel_bg,
+            "cell beyond card right edge should remain sentinel"
+        );
+    }
+}
