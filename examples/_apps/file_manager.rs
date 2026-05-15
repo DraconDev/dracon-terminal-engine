@@ -1554,8 +1554,8 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb: &Keybinding
     let kb_delete = kb.display(actions::DELETE).unwrap_or("Ctrl+D");
 
     let shortcuts = [
-        ("↑/↓", "Navigate tree"),
-        ("Enter/→", "Open / select"),
+        ("^/v", "Navigate tree"),
+        ("Enter/>", "Open / select"),
         (kb_back, "Parent directory"),
         ("n", "New file"),
         ("f", "New folder"),

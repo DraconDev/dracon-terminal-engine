@@ -992,7 +992,7 @@ impl ChatState {
 
         // Shortcuts
         let shortcuts = [
-            ("↑/↓", "Scroll messages"),
+            ("^/v", "Scroll messages"),
             ("Enter", "Send message"),
             ("Type", "Compose"),
             (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
