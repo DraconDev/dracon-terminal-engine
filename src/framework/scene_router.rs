@@ -281,6 +281,33 @@ impl SceneRouter {
         true
     }
 
+    /// Pops the current scene even if it's the only one on the stack.
+    ///
+    /// Unlike `pop()`, this does not guard against popping the root scene.
+    /// Use this when the caller wants to return to a non-scene state
+    /// (e.g., the showcase launcher) by clearing the stack entirely.
+    pub fn pop_force(&mut self) -> bool {
+        if self.stack.is_empty() {
+            return false;
+        }
+
+        let from = self.stack.pop().unwrap();
+
+        if let Some(scene) = self.scenes.get_mut(&from) {
+            scene.on_exit();
+        }
+
+        if let Some(to) = self.stack.last() {
+            let to = to.clone();
+            if let Some(scene) = self.scenes.get_mut(&to) {
+                scene.on_resume();
+            }
+        }
+
+        self.dirty.set(true);
+        true
+    }
+
     /// Replaces the current scene with a new one.
     ///
     /// The old scene receives `on_exit`. The new scene receives `on_enter`.
