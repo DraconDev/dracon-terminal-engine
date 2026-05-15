@@ -37,8 +37,10 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 // ============================================================================
 // PART 1: THE PRESET COLORS
@@ -354,10 +356,9 @@ impl Widget for ColorPicker {
     /// - bg: background color
     /// - style: text styling (bold, italic, etc.)
     fn render(&self, area: Rect) -> Plane {
-        // Create a new plane with the widget's ID and dimensions.
-        // Plane is filled with transparent cells by default.
         let mut plane = Plane::new(self.id.0, area.width, area.height);
         plane.z_index = 0;
+        plane.fill_bg(self.theme.bg);
 
         // Get the currently selected color's info.
         let color = self.selected_color();
