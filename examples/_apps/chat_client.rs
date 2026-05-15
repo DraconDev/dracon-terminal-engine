@@ -571,7 +571,7 @@ impl ChatState {
                 "{} Fetching posts from JSONPlaceholder...",
                 SPINNER_FRAMES[self.spinner_frame]
             );
-            let center_x = (area.width.saturating_sub(spinner_text.len() as u16)) / 2;
+            let center_x = (area.width.saturating_sub(spinner_text.chars().count() as u16)) / 2;
             let center_y = header_h + list_h / 2;
             for (i, c) in spinner_text.chars().enumerate() {
                 let idx = (center_y * area.width + center_x + i as u16) as usize;
@@ -582,7 +582,7 @@ impl ChatState {
                 }
             }
             let hint = "Click [R] to refresh";
-            let hint_x = (area.width.saturating_sub(hint.len() as u16)) / 2;
+            let hint_x = (area.width.saturating_sub(hint.chars().count() as u16)) / 2;
             for (i, c) in hint.chars().enumerate() {
                 let idx = ((center_y + 1) * area.width + hint_x + i as u16) as usize;
                 if idx < plane.cells.len() {
@@ -593,7 +593,7 @@ impl ChatState {
         } else if self.messages.is_empty() && self.loading_error.is_some() {
             // Error state
             let err_msg = format!("Error: {}", self.loading_error.as_ref().unwrap());
-            let center_x = (area.width.saturating_sub(err_msg.len() as u16)) / 2;
+            let center_x = (area.width.saturating_sub(err_msg.chars().count() as u16)) / 2;
             let center_y = header_h + list_h / 2;
             for (i, c) in err_msg.chars().enumerate() {
                 let idx = (center_y * area.width + center_x + i as u16) as usize;
@@ -603,7 +603,7 @@ impl ChatState {
                 }
             }
             let hint = "Click [R] to retry";
-            let hint_x = (area.width.saturating_sub(hint.len() as u16)) / 2;
+            let hint_x = (area.width.saturating_sub(hint.chars().count() as u16)) / 2;
             for (i, c) in hint.chars().enumerate() {
                 let idx = ((center_y + 1) * area.width + hint_x + i as u16) as usize;
                 if idx < plane.cells.len() {

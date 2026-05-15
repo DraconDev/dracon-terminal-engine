@@ -119,9 +119,9 @@ impl FsNode {
     fn icon(&self, expanded: bool) -> &'static str {
         if self.is_dir {
             if expanded {
-                "▾ "
+                "v "
             } else {
-                "▸ "
+                "> "
             }
         } else {
             // Use file type icon for files in tree
@@ -131,33 +131,32 @@ impl FsNode {
 
     fn file_symbol(&self) -> &'static str {
         if self.is_dir {
-            return "▸";
+            return ">";
         }
         let name_lower = self.name.to_lowercase();
         if name_lower.ends_with(".rs") {
-            ""
+            "R"
         } else if name_lower.ends_with(".toml") {
-            "�"
+            "T"
         } else if name_lower.ends_with(".md") {
-            ""
+            "M"
         } else if name_lower.ends_with(".json")
             || name_lower.ends_with(".yaml")
             || name_lower.ends_with(".yml")
         {
-            "�"
+            "J"
         } else if name_lower.ends_with(".sh") || name_lower.ends_with(".bash") {
-            ""
+            "!"
         } else if name_lower.ends_with(".py") {
-            ""
+            "P"
         } else if name_lower.ends_with(".js") || name_lower.ends_with(".ts") {
-            ""
+            "J"
         } else if name_lower.ends_with(".html") || name_lower.ends_with(".css") {
-            ""
+            "H"
         } else if name_lower.ends_with(".gitignore") || name_lower.ends_with(".lock") {
-            "﬍"
+            "L"
         } else {
-            ""
-        }
+            "F"
     }
 
     fn to_tree_node(&self, expanded: bool) -> TreeNode {
@@ -299,7 +298,7 @@ impl FileManager {
             breadcrumbs,
             split: SplitPane::new(Orientation::Horizontal)
                 .ratio(0.35)
-                .with_divider('┃'),
+                .with_divider('|'),
             tree_path: Vec::new(),
             selected_path: None,
             context_menu: None,
@@ -931,7 +930,7 @@ impl Widget for FileManager {
                 let msg = "Select a file or folder";
                 let mx = cx.saturating_sub((msg.width() as u16) / 2);
                 draw_text(&mut plane, mx, cy, msg, t.fg_muted, t.bg, false);
-                let sub = "↑/↓ to navigate  •  Enter to select";
+                let sub = "^v to navigate  -  Enter to select";
                 let sx = cx.saturating_sub((sub.width() as u16) / 2);
                 draw_text(&mut plane, sx, cy + 1, sub, t.fg_muted, t.bg, false);
             }
