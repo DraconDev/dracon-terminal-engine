@@ -428,7 +428,10 @@ impl Widget for AccessibilityDemo {
         }
 
         // Status bar
-        let status = "Tab: navigate | Enter/Space: activate | ?: help | Ctrl+Q: quit";
+        let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
+        let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
+        let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+        let status = format!("Tab: navigate | Enter/Space: activate | {kb_help}: help | {kb_back}: dismiss | {kb_quit}: quit");
         for (i, c) in status.chars().enumerate() {
             let idx = ((area.height - 1) * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -436,6 +439,66 @@ impl Widget for AccessibilityDemo {
                 plane.cells[idx].fg = self.theme.fg_muted;
                 plane.cells[idx].bg = self.theme.surface;
                 plane.cells[idx].transparent = false;
+            }
+        }
+
+        if self.show_help {
+            let t = &self.theme;
+            let hw = 40u16.min(area.width.saturating_sub(4));
+            let hh = 10u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * area.width + x) as usize;
+                let bot = ((hy + hh - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * area.width + hx) as usize;
+                let right = (y * area.width + hx + hw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+            let title = "Accessibility Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+            }
+            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
+            let shortcuts = [
+                ("Tab", "Navigate controls"),
+                ("Enter/Spc", "Activate button"),
+                (kb_theme, "Cycle theme"),
+                (kb_help, "Toggle help"),
+                (kb_back, "Dismiss help"),
+                (kb_quit, "Quit app"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
             }
         }
 
