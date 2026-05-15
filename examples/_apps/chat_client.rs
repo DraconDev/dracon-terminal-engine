@@ -1025,7 +1025,7 @@ impl ChatState {
         if self.show_emoji_modal {
             let mut mp = self.emoji_modal.render(Rect::new(0, 0, w, h));
             let emojis = [
-                "😀", "😃", "😄", "😁", "😊", "🙂", "🙃", "😍", "🤔", "🤨", "😅", "😂", "🤣",
+                ":)", ":D", ";)", ":P", ":]", ":3", ":>", "<3", ":?", ":/", ":]", ":D", "xD",
             ];
             let (sx, sy) = (((w as i32 - 30) / 2) as u16, ((h as i32 - 10) / 2) as u16);
             for (i, e) in emojis.iter().enumerate() {
@@ -1169,7 +1169,7 @@ fn chrono_lite_timestamp() -> String {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> io::Result<()> {
-    println!("Chat Client Demo - Enter to send | Click 📎 for emojis | Click ⚙ for settings");
+    println!("Chat Client Demo - Enter to send | Click [+] for emojis | Click [S] for settings");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));
