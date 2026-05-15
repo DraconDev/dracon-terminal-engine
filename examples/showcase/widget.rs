@@ -1456,6 +1456,11 @@ impl Showcase {
         if col_idx >= cols {
             return None;
         }
+        let x = grid_start_x + col_idx * (card_w + 2);
+        let y = grid_start_y + row_idx * (card_h + 1);
+        if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2) {
+            return None;
+        }
         let grid_idx = row_idx * cols + col_idx;
         if grid_idx < self.filtered.len() {
             Some(grid_idx)
