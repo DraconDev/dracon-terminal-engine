@@ -28,6 +28,7 @@ impl CalendarScene {
             calendar: Calendar::new().with_theme(theme),
             selected_date: None,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
 }
@@ -36,6 +37,7 @@ impl Scene for CalendarScene {
     fn scene_id(&self) -> &str { "calendar" }
 
     fn render(&self, area: Rect) -> Plane {
+        self.area.set(area);
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
@@ -122,7 +124,8 @@ impl Scene for CalendarScene {
     }
 
     fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
-        let cal_area = Rect::new(2, 2, 76, 20);
+        let area = self.area.get();
+        let cal_area = Rect::new(area.x + 2, area.y + 2, area.width.saturating_sub(4), area.height.saturating_sub(6));
         let rel_col = col.saturating_sub(cal_area.x);
         let rel_row = row.saturating_sub(cal_area.y);
         if self.calendar.handle_mouse(kind, rel_col, rel_row) {

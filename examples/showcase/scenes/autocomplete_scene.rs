@@ -18,6 +18,7 @@ pub struct AutocompleteScene {
     show_help: bool,
     selected_item: Option<String>,
     keybindings: KeybindingSet,
+    area: std::cell::Cell<Rect>,
 }
 
 const SUGGESTIONS: [&str; 12] = [
@@ -47,6 +48,7 @@ impl AutocompleteScene {
             show_help: false,
             selected_item: None,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
 }
@@ -55,6 +57,7 @@ impl Scene for AutocompleteScene {
     fn scene_id(&self) -> &str { "autocomplete" }
 
     fn render(&self, area: Rect) -> Plane {
+        self.area.set(area);
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
@@ -158,7 +161,8 @@ impl Scene for AutocompleteScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let input_area = Rect::new(2, 3, 30, 1);
+        let area = self.area.get();
+        let input_area = Rect::new(area.x + 2, area.y + 3, 30, 1);
         let rel_col = col.saturating_sub(input_area.x);
         let rel_row = row.saturating_sub(input_area.y);
         self.autocomplete.handle_mouse(kind, rel_col, rel_row)
