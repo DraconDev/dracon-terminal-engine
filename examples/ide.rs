@@ -1337,7 +1337,7 @@ impl IdeApp {
                     let idx = (item_y * plane.width + desc_col + j as u16) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = t.fg_muted;
+                        plane.cells[idx].fg = t.fg;
                     }
                 }
             }
