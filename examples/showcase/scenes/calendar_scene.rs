@@ -17,6 +17,7 @@ pub struct CalendarScene {
     calendar: Calendar,
     selected_date: Option<String>,
     keybindings: KeybindingSet,
+    area: std::cell::Cell<Rect>,
 }
 
 impl CalendarScene {

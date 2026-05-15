@@ -87,8 +87,7 @@ impl Scene for AccessibilityScene {
         draw_text(&mut plane, 15, 2, "(press t to toggle)", t.fg_muted, t.bg, false);
 
         // OSC 99 info panel
-        let info_y = 4;
-        draw_text(&mut plane, 2, info_y, "OSC 99 Announcements:", t.primary, t.bg, true);
+        draw_text(&mut plane, 2, INFO_Y, "OSC 99 Announcements:", t.primary, t.bg, true);
 
         let info_items = [
             ("Role:", "push button"),
@@ -97,13 +96,13 @@ impl Scene for AccessibilityScene {
             ("Level:", "assertive"),
         ];
         for (i, (label, value)) in info_items.iter().enumerate() {
-            let y = info_y + 1 + i as u16;
+            let y = INFO_Y + 1 + i as u16;
             draw_text(&mut plane, 2, y, label, t.fg_muted, t.bg, false);
             draw_text(&mut plane, 12, y, value, t.fg, t.bg, false);
         }
 
         // Sample widgets
-        let widget_y = info_y + 6;
+        let widget_y = INFO_Y + WIDGET_Y_OFFSET;
         draw_text(&mut plane, 2, widget_y, "Sample widgets:", t.fg_muted, t.bg, false);
 
         // Checkbox
@@ -188,8 +187,9 @@ impl Scene for AccessibilityScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let cb_area = Rect::new(2, 14, 20, 1);
-        let btn_area = Rect::new(2, 16, 12, 1);
+        let widget_y = INFO_Y + WIDGET_Y_OFFSET;
+        let cb_area = Rect::new(2, widget_y + 1, 20, 1);
+        let btn_area = Rect::new(2, widget_y + 3, 12, 1);
 
         if col >= cb_area.x && col < cb_area.x + cb_area.width && row == cb_area.y {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
