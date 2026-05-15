@@ -798,7 +798,7 @@ impl Widget for Showcase {
                     let menu_w = 18usize;
                     let menu_h = 6usize;
                     let menu_items: [String; 4] = [
-                        "▶ Launch".to_string(),
+                        "> Launch".to_string(),
                         format!("  Copy: {}", ex.binary_name),
                         format!("  Filter: {}", ex.category),
                         "  Cancel".to_string(),
