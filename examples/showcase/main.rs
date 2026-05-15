@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Dracon Terminal Engine — Example Showcase Launcher
+//! Dracon Terminal Engine  -  Example Showcase Launcher
 //!
 //! Interactive grid-based launcher for all framework examples.
 //! Features: category filtering, real-time search, animated selection,
@@ -7,17 +7,17 @@
 //! and an interactive primitives bar demonstrating engine building blocks.
 //!
 //! Controls:
-//!   arrows  — navigate cards
-//!   Enter   — launch selected example
-//!   /       — focus search bar
-//!   Tab     — cycle categories
-//!   F2      — cycle theme
-//!   d       — toggle debug overlay
-//!   F1      — toggle help
-//!   Space   — preview card (modal)
-//!   1-5     — interact with primitives bar
-//!   right-click — context menu (Launch / Copy name / Filter by category)
-//!   Ctrl+Q  — quit
+//!   arrows   -  navigate cards
+//!   Enter    -  launch selected example
+//!   /        -  focus search bar
+//!   Tab      -  cycle categories
+//!   F2       -  cycle theme
+//!   d        -  toggle debug overlay
+//!   F1       -  toggle help
+//!   Space    -  preview card (modal)
+//!   1-5      -  interact with primitives bar
+//!   right-click  -  context menu (Launch / Copy name / Filter by category)
+//!   Ctrl+Q   -  quit
 //!
 //! When an example is launched, press the quit key in the example to return to the showcase.
 //! A "Returned from [example]" toast will appear when you come back.
@@ -44,7 +44,7 @@ use state::Showcase;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Dracon Terminal Engine — Example Showcase");
+    println!("Dracon Terminal Engine  -  Example Showcase");
     println!("Grid launcher with search, categories, and live previews");
     std::thread::sleep(Duration::from_millis(500));
 

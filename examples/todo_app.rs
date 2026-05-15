@@ -1,4 +1,4 @@
-//! Todo App — A real, functional task manager with SQLite persistence.
+//! Todo App  -  A real, functional task manager with SQLite persistence.
 #![allow(dead_code)] // Tutorial demonstrates architecture; not all features wired in skeleton
 //!
 //! This example demonstrates production-ready Dracon app architecture:
@@ -9,16 +9,16 @@
 //! - Full CRUD operations with error handling
 //!
 //! Controls:
-//!   ^/v         — navigate tasks
-//!   n           — new task
-//!   Enter       — view task detail / confirm
-//!   Space       — toggle complete
-//!   d           — delete task (with confirmation)
-//!   e           — edit task
-//!   Backspace   — delete character (in edit mode)
-//!   t           — cycle theme
-//!   ?           — toggle help
-//!   q           — quit
+//!   ^/v          -  navigate tasks
+//!   n            -  new task
+//!   Enter        -  view task detail / confirm
+//!   Space        -  toggle complete
+//!   d            -  delete task (with confirmation)
+//!   e            -  edit task
+//!   Backspace    -  delete character (in edit mode)
+//!   t            -  cycle theme
+//!   ?            -  toggle help
+//!   q            -  quit
 
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
@@ -263,8 +263,8 @@ impl TaskListScreen {
         let items: Vec<String> = tasks.iter().map(|t| {
             let status = if t.completed { "[ok]" } else { "( )" };
             let priority = match t.priority {
-                2 => "▲",
-                0 => "▼",
+                2 => "^",
+                0 => "v",
                 _ => " ",
             };
             format!("{} {} {}", status, priority, t.title)
@@ -764,7 +764,7 @@ fn main() -> std::io::Result<()> {
         .map(|home| format!("{}/.dracon_todo.db", home))
         .unwrap_or_else(|_| "/tmp/dracon_todo.db".to_string());
 
-    println!("Todo App — Tasks saved to {}", db_path);
+    println!("Todo App  -  Tasks saved to {}", db_path);
     println!("Controls: ^v nav | Ctrl+N new | Enter detail | t theme | F1 help | Ctrl+Q quit");
     std::thread::sleep(std::time::Duration::from_millis(500));
 
@@ -898,7 +898,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                let title = "Todo App — Help";
+                let title = "Todo App  -  Help";
                 let tx = hx + (hw - title.len() as u16) / 2;
                 for (i, c) in title.chars().enumerate() {
                     let idx = ((hy + 1) * w + tx + i as u16) as usize;

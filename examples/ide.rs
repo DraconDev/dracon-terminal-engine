@@ -1,20 +1,20 @@
 #![allow(missing_docs)]
-//! IDE Example — Flagship demo showing ALL framework widgets.
+//! IDE Example  -  Flagship demo showing ALL framework widgets.
 //!
 //! A mini-IDE with file tree, editor tabs, menu bar, search, and more.
 //!
 //! Controls:
-//!   Ctrl+O      — open file
-//!   Ctrl+S      — save file
-//!   Ctrl+F      — toggle search
-//!   Ctrl+T      — new tab
-//!   Ctrl+W      — close tab
-//!   Ctrl+G      — go to line
-//!   F12         — toggle profiler overlay
-//!   Ctrl+P      — command palette
-//!   F1          — toggle help overlay
-//!   t           — cycle theme
-//!   Ctrl+Q      — quit
+//!   Ctrl+O       -  open file
+//!   Ctrl+S       -  save file
+//!   Ctrl+F       -  toggle search
+//!   Ctrl+T       -  new tab
+//!   Ctrl+W       -  close tab
+//!   Ctrl+G       -  go to line
+//!   F12          -  toggle profiler overlay
+//!   Ctrl+P       -  command palette
+//!   F1           -  toggle help overlay
+//!   t            -  cycle theme
+//!   Ctrl+Q       -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -478,7 +478,7 @@ impl IdeApp {
             }
             "about" => {
                 self.toast(
-                    "Dracon IDE v28.125 — A terminal-native IDE demo",
+                    "Dracon IDE v28.125  -  A terminal-native IDE demo",
                     ToastKind::Info,
                 );
             }
@@ -1450,7 +1450,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Dracon IDE — Flagship Example");
+    println!("Dracon IDE  -  Flagship Example");
     println!("Ctrl+O open | Ctrl+S save | Ctrl+F search | F12 profiler | t theme | Ctrl+Q quit");
     std::thread::sleep(Duration::from_millis(500));
 

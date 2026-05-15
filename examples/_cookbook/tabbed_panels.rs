@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Tabbed Panels — demonstrates TabBar with per-tab widget state.
+//! Tabbed Panels  -  demonstrates TabBar with per-tab widget state.
 //!
 //! This example shows:
 //! - Tabbar widget with 4 tabs (Dashboard, Logs, Settings, Stats)

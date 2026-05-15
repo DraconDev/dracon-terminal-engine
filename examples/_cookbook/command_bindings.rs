@@ -1,17 +1,17 @@
 #![allow(missing_docs)]
-//! Command Bindings — Auto-refresh widgets via CLI commands.
+//! Command Bindings  -  Auto-refresh widgets via CLI commands.
 //!
 //! Demonstrates all 5 command-bound widgets with mock commands that update
 //! them on configurable intervals.
 //!
 //! ## Controls
 //!
-//! - `s` — trigger manual refresh of all commands
-//! - `p` — pause/resume auto-refresh
-//! - `t` — cycle theme (Nord, Cyberpunk, Dracula, Monokai)
-//! - `?` — toggle help overlay
-//! - `q` — quit
-//! - `Esc` — close help overlay
+//! - `s`  -  trigger manual refresh of all commands
+//! - `p`  -  pause/resume auto-refresh
+//! - `t`  -  cycle theme (Nord, Cyberpunk, Dracula, Monokai)
+//! - `?`  -  toggle help overlay
+//! - `q`  -  quit
+//! - `Esc`  -  close help overlay
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -513,7 +513,7 @@ impl Widget for CommandBindings {
         let auto_str = if self.paused {
             "⏸ PAUSED"
         } else {
-            "▶ RUNNING"
+            "> RUNNING"
         };
         let status = format!(
             "  {}  |  tick: {}  |  {}: theme | {}: help | {}: dismiss | {}: quit",
@@ -778,7 +778,7 @@ impl Widget for InputRouter {
 }
 
 fn main() -> std::io::Result<()> {
-    println!("Command Bindings — s=refresh all, p=pause, Ctrl+C=quit\nStarting...");
+    println!("Command Bindings  -  s=refresh all, p=pause, Ctrl+C=quit\nStarting...");
     std::thread::sleep(Duration::from_millis(500));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());

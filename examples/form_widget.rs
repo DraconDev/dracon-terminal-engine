@@ -1,16 +1,16 @@
 #![allow(missing_docs)]
-//! Form Widget Example — comprehensive form with validation and theming.
+//! Form Widget Example  -  comprehensive form with validation and theming.
 //!
 //! Demonstrates multi-field forms with various input types, validation,
 //! focus cycling, and theme switching.
 //!
 //! Controls:
-//!   Tab/Shift+Tab  — cycle fields
-//!   Type           — enter values
-//!   Enter          — submit form
-//!   t              — cycle theme
-//!   ?              — toggle help
-//!   q              — quit
+//!   Tab/Shift+Tab   -  cycle fields
+//!   Type            -  enter values
+//!   Enter           -  submit form
+//!   t               -  cycle theme
+//!   ?               -  toggle help
+//!   q               -  quit
 
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};

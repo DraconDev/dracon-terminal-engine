@@ -1,4 +1,4 @@
-//! Plugin system example — demonstrates dynamic widget registration via PluginRegistry.
+//! Plugin system example  -  demonstrates dynamic widget registration via PluginRegistry.
 //!
 //! This example shows how to:
 //! - Define a custom widget implementing the `Widget` trait
@@ -214,7 +214,7 @@ impl Widget for PluginDemoApp {
         // Plugin registry info panel
         let reg = self.registry.read().unwrap();
         let registered: Vec<_> = reg.list();
-        let info = format!("Registered plugins: {} — stat_cpu, stat_mem, stat_disk, stat_net",
+        let info = format!("Registered plugins: {}  -  stat_cpu, stat_mem, stat_disk, stat_net",
                            registered.len());
         for (i, c) in info.chars().enumerate().take(area.width as usize - 2) {
             let idx = (1 * area.width + 1 + i) as usize;
@@ -245,7 +245,7 @@ impl Widget for PluginDemoApp {
                 // Hover highlight
                 let is_hovered = self.hovered_idx == Some(i);
                 if is_hovered {
-                    plane.put_str(*x, *y, "▶");
+                    plane.put_str(*x, *y, ">");
                     plane.cells[(*y * area.width + *x) as usize].fg = t.primary;
                 }
 

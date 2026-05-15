@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Split Resizer — Nested SplitPane with mouse drag resize.
+//! Split Resizer  -  Nested SplitPane with mouse drag resize.
 //! Controls: click divider=select, drag=resize, </>=A split, ^/v:B split, r=reset
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
@@ -204,7 +204,7 @@ impl Widget for SplitResizerApp {
 
 impl SplitResizerApp {
     fn render_header(&self, r: Rect, t: &Theme, p: &mut Plane) {
-        let title = " Nested Split Panes — Drag dividers to resize ";
+        let title = " Nested Split Panes  -  Drag dividers to resize ";
         for (i, c) in title.chars().enumerate().take(r.width as usize) {
             let idx = i;
             if idx < p.cells.len() {
@@ -684,7 +684,7 @@ impl Widget for InputRouter {
 }
 
 fn main() -> Result<()> {
-    println!("Split Resizer — drag dividers | </>:A | ^/v:B | r:reset | q:quit");
+    println!("Split Resizer  -  drag dividers | </>:A | ^/v:B | r:reset | q:quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

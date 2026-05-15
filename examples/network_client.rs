@@ -1,17 +1,17 @@
 #![allow(missing_docs)]
-//! Network Client — HTTP API consumer example.
+//! Network Client  -  HTTP API consumer example.
 //!
 //! Fetches posts from JSONPlaceholder API and displays them in a list.
 //! Demonstrates: async data fetching, loading states, error handling,
 //! detail view navigation, and JSON parsing.
 //!
 //! Controls:
-//!   ^/v      — navigate posts
-//!   Enter    — view post details
-//!   r        — refresh data (async)
-//!   t        — cycle theme
-//!   ?        — toggle help
-//!   q        — quit
+//!   ^/v       -  navigate posts
+//!   Enter     -  view post details
+//!   r         -  refresh data (async)
+//!   t         -  cycle theme
+//!   ?         -  toggle help
+//!   q         -  quit
 //!
 //! When `async` feature is enabled, data fetching uses tokio::process::Command
 //! for non-blocking curl execution.
@@ -273,7 +273,7 @@ impl NetworkApp {
         let t = self.theme.clone();
 
         // Title bar
-        let title = "[Net] Network Client — JSONPlaceholder API";
+        let title = "[Net] Network Client  -  JSONPlaceholder API";
         let tx = (area.width as usize).saturating_sub(title.len()) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = tx + i;
@@ -334,7 +334,7 @@ impl NetworkApp {
             }
 
             let is_selected = i == self.selected;
-            let prefix = if is_selected { "▶ " } else { "  " };
+            let prefix = if is_selected { "> " } else { "  " };
             let line = format!("{}{}. {}", prefix, post.id, &post.title[..post.title.len().min(40)]);
 
             let bg = if is_selected { t.selection_bg } else { t.bg };
@@ -426,7 +426,7 @@ impl NetworkApp {
         }
 
         // Title
-        let title = "Network Client — Help";
+        let title = "Network Client  -  Help";
         let tx = hx + (hw - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
@@ -472,7 +472,7 @@ impl NetworkApp {
         let post = &self.posts[self.selected];
 
         // Header
-        let header = format!("Post #{} — {}", post.id, &post.title[..post.title.len().min(50)]);
+        let header = format!("Post #{}  -  {}", post.id, &post.title[..post.title.len().min(50)]);
         for (i, c) in header.chars().enumerate() {
             if i < area.width as usize {
                 plane.cells[i].char = c;
@@ -602,7 +602,7 @@ impl Widget for NetworkWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Network Client — fetching data from JSONPlaceholder API...");
+    println!("Network Client  -  fetching data from JSONPlaceholder API...");
     println!("Requires: curl, internet connection");
     std::thread::sleep(std::time::Duration::from_millis(500));
 

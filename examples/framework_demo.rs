@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Framework demo — shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
+//! Framework demo  -  shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
 
 use std::cell::RefCell;
 use std::os::fd::AsFd;

@@ -25,12 +25,12 @@ This widget renders **styled text** with *minimal* Markdown support.
 
 ## Features
 
-- **Headers** — like the one above
-- **Bold text** — using double asterisks
-- *Italic text* — using single asterisks or underscores
-- `Inline code` — using backticks
-- [Links](https://github.com) — click-supported (OSC 8)
-- List items — using dashes
+- **Headers**  -  like the one above
+- **Bold text**  -  using double asterisks
+- *Italic text*  -  using single asterisks or underscores
+- `Inline code`  -  using backticks
+- [Links](https://github.com)  -  click-supported (OSC 8)
+- List items  -  using dashes
 
 ## Example Paragraph
 

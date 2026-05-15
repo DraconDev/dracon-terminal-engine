@@ -1,13 +1,13 @@
 #![allow(missing_docs)]
-//! Input Debugger — Raw terminal input event inspector with color coding.
+//! Input Debugger  -  Raw terminal input event inspector with color coding.
 //!
 //! Shows parsed events alongside raw bytes for debugging terminal input.
 //!
 //! Controls:
-//!   q        — quit
-//!   ?        — toggle help overlay
-//!   c        — clear history
-//!   ^/v      — scroll history
+//!   q         -  quit
+//!   ?         -  toggle help overlay
+//!   c         -  clear history
+//!   ^/v       -  scroll history
 
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -179,18 +179,18 @@ impl InputDebugger {
         out.push_str("╭────────────────────────────────────────────────────────────╮\r\n");
         out.push_str("│                Input Debugger Help                         │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Quit                                         │\r\n", pad(quit_key)));
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Toggle this help                            │\r\n", pad(help_key)));
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m — Dismiss help                               │\r\n", pad(back_key)));
-        out.push_str("│  \x1b[1mc\x1b[0m        — Clear event history                         │\r\n");
-        out.push_str("│  \x1b[1m^/v\x1b[0m      — Scroll history                              │\r\n");
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Quit                                         │\r\n", pad(quit_key)));
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Toggle this help                            │\r\n", pad(help_key)));
+        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Dismiss help                               │\r\n", pad(back_key)));
+        out.push_str("│  \x1b[1mc\x1b[0m         -  Clear event history                         │\r\n");
+        out.push_str("│  \x1b[1m^/v\x1b[0m       -  Scroll history                              │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
         out.push_str("│  Events are color-coded:                                   │\r\n");
-        out.push_str("│    \x1b[36mKEY\x1b[0m      — Keyboard input                               │\r\n");
-        out.push_str("│    \x1b[33mMOUSE\x1b[0m    — Mouse clicks, drags, scroll                   │\r\n");
-        out.push_str("│    \x1b[35mFOCUS\x1b[0m    — Window focus in/out                         │\r\n");
-        out.push_str("│    \x1b[32mPASTE\x1b[0m    — Bracketed paste                             │\r\n");
-        out.push_str("│    \x1b[37mRESIZE\x1b[0m   — Terminal resize                              │\r\n");
+        out.push_str("│    \x1b[36mKEY\x1b[0m       -  Keyboard input                               │\r\n");
+        out.push_str("│    \x1b[33mMOUSE\x1b[0m     -  Mouse clicks, drags, scroll                   │\r\n");
+        out.push_str("│    \x1b[35mFOCUS\x1b[0m     -  Window focus in/out                         │\r\n");
+        out.push_str("│    \x1b[32mPASTE\x1b[0m     -  Bracketed paste                             │\r\n");
+        out.push_str("│    \x1b[37mRESIZE\x1b[0m    -  Terminal resize                              │\r\n");
         out.push_str("╰────────────────────────────────────────────────────────────╯\r\n");
         out
     }

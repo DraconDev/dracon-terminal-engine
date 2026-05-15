@@ -1,14 +1,14 @@
 #![allow(missing_docs)]
 #![allow(clippy::manual_is_multiple_of)]
-//! Game Loop — 60fps animation demo with particles and mouse interaction.
+//! Game Loop  -  60fps animation demo with particles and mouse interaction.
 //!
 //! A visual showcase of the compositor's animation capabilities.
 //!
 //! Controls:
-//!   q        — quit
-//!   ?        — toggle help
-//!   Click    — spawn particle burst
-//!   Space    — toggle turbo mode
+//!   q         -  quit
+//!   ?         -  toggle help
+//!   Click     -  spawn particle burst
+//!   Space     -  toggle turbo mode
 
 use dracon_terminal_engine::backend::tty::poll_input;
 use dracon_terminal_engine::compositor::engine::Compositor;
@@ -370,11 +370,11 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
         ("╭────────────────────────────────────────────────────╮", box_bg),
         ("│              Game Loop Help                        │", box_bg),
         ("├────────────────────────────────────────────────────┤", box_bg),
-        (&format!("│  {:<7} — Quit                                    │", quit_key), box_bg),
-        (&format!("│  {:<7} — Toggle this help                        │", help_key), box_bg),
-        (&format!("│  {:<7} — Dismiss help                            │", back_key), box_bg),
-        ("│  Space   — Toggle turbo mode                       │", box_bg),
-        ("│  Click   — Spawn particle burst                    │", box_bg),
+        (&format!("│  {:<7}  -  Quit                                    │", quit_key), box_bg),
+        (&format!("│  {:<7}  -  Toggle this help                        │", help_key), box_bg),
+        (&format!("│  {:<7}  -  Dismiss help                            │", back_key), box_bg),
+        ("│  Space    -  Toggle turbo mode                       │", box_bg),
+        ("│  Click    -  Spawn particle burst                    │", box_bg),
         ("├────────────────────────────────────────────────────┤", box_bg),
         ("│  Features:                                         │", box_bg),
         ("│    - 60fps animation loop                          │", box_bg),

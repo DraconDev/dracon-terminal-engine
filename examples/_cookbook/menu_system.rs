@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Menu System — MenuBar, ContextMenu, and keyboard shortcuts.
+//! Menu System  -  MenuBar, ContextMenu, and keyboard shortcuts.
 //!
 //! Demonstrates:
 //! - Custom MenuBar with File/Edit/View/Help dropdown menus

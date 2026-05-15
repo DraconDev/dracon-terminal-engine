@@ -1,4 +1,4 @@
-//! Accessibility demo — demonstrates screen reader announcements via OSC 99.
+//! Accessibility demo  -  demonstrates screen reader announcements via OSC 99.
 //!
 //! This example shows how widgets can implement the `Accessibility` trait
 //! to expose metadata to screen readers (NVDA, VoiceOver, Orca).

@@ -1,21 +1,21 @@
 #![allow(missing_docs)]
-//! File Manager — real filesystem browser with Tree, SplitPane, and Breadcrumbs.
+//! File Manager  -  real filesystem browser with Tree, SplitPane, and Breadcrumbs.
 //!
 //! Reads actual directory contents from the current working directory.
 //! Supports create, delete, and rename operations.
 //!
 //! Controls:
-//!   ^/v           — navigate tree
-//!   Enter or >    — expand directory / open file
-//!   Esc or <   — go up to parent directory
-//!   n             — new file
-//!   f             — new folder
-//!   d             — delete selected
-//!   m             — rename selected
-//!   r             — refresh directory
-//!   l             — load directory (async)
-//!   ?             — help overlay
-//!   q             — quit
+//!   ^/v            -  navigate tree
+//!   Enter or >     -  expand directory / open file
+//!   Esc or <    -  go up to parent directory
+//!   n              -  new file
+//!   f              -  new folder
+//!   d              -  delete selected
+//!   m              -  rename selected
+//!   r              -  refresh directory
+//!   l              -  load directory (async)
+//!   ?              -  help overlay
+//!   q              -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -1374,7 +1374,7 @@ impl Widget for FileManager {
         let area = self.area.get();
         let ch = area.height.saturating_sub(hh + 1);
 
-        // Breadcrumb clicks — delegate to Breadcrumbs widget
+        // Breadcrumb clicks  -  delegate to Breadcrumbs widget
         if row == 0 {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
                 // Try to find which segment was clicked using Breadcrumbs' zone logic
@@ -1620,7 +1620,7 @@ fn format_permissions(mode: u32) -> String {
 }
 
 fn main() -> std::io::Result<()> {
-    println!("File Manager — Real filesystem browser");
+    println!("File Manager  -  Real filesystem browser");
     println!("n: new file | f: new folder | m: rename | d: delete | r: refresh | l: async load | ?: help | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 

@@ -108,7 +108,7 @@ impl Widget for AutocompleteDemo {
         plane.fill_bg(self.theme.bg);
 
         // Title
-        let title = "Autocomplete Demo — Type to filter fruits";
+        let title = "Autocomplete Demo  -  Type to filter fruits";
         let tx = (area.width - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = (area.width + tx + i as u16) as usize;

@@ -1,4 +1,4 @@
-// Stat Widget Plugin — Displays system CPU and memory statistics.
+// Stat Widget Plugin  -  Displays system CPU and memory statistics.
 //
 // This widget is designed to be loaded dynamically as a plugin.
 // It displays real-time CPU load percentage and memory usage.

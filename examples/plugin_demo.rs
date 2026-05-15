@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Plugin Demo — Demonstrates dynamic widget loading via PluginRegistry.
+//! Plugin Demo  -  Demonstrates dynamic widget loading via PluginRegistry.
 //!
 //! Shows how to:
 //! - Define a custom widget with factory function
@@ -8,9 +8,9 @@
 //! - Use PluginRegistry in an App
 //!
 //! Controls:
-//!   t          — cycle theme
-//!   ?          — toggle help
-//!   q          — quit
+//!   t           -  cycle theme
+//!   ?           -  toggle help
+//!   q           -  quit
 
 use std::cell::RefCell;
 use std::io;
@@ -605,7 +605,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> io::Result<()> {
-    println!("Plugin Demo — Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry");
+    println!("Plugin Demo  -  Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry");
     println!("+/- or </> to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 

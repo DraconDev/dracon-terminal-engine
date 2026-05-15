@@ -273,25 +273,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             let help_key = keybindings.display(actions::HELP).unwrap_or("f1");
                             write!(
                                 term,
-                                "│  {:<10} — Quit                                 │\r\n",
+                                "│  {:<10}  -  Quit                                 │\r\n",
                                 quit_key
                             )?;
                             write!(
                                 term,
-                                "│  {:<10} — Toggle this help                     │\r\n",
+                                "│  {:<10}  -  Toggle this help                     │\r\n",
                                 help_key
                             )?;
                             write!(
                                 term,
-                                "│  Click      — Select/minimize windows              │\r\n"
+                                "│  Click       -  Select/minimize windows              │\r\n"
                             )?;
                             write!(
                                 term,
-                                "│  Drag       — Move windows                          │\r\n"
+                                "│  Drag        -  Move windows                          │\r\n"
                             )?;
                             write!(
                                 term,
-                                "│  Taskbar    — Shows minimized window labels        │\r\n"
+                                "│  Taskbar     -  Shows minimized window labels        │\r\n"
                             )?;
                             write!(
                                 term,

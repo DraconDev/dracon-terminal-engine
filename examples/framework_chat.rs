@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Chat demo — shows Input, Editor, List, theme, and App event loop.
+//! Chat demo  -  shows Input, Editor, List, theme, and App event loop.
 //!
 //! A simple chat interface with message list, input bar, and theme.
 

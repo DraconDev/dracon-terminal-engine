@@ -1,4 +1,4 @@
-//! Scene Router Demo — Multi-screen navigation with EventBus communication.
+//! Scene Router Demo  -  Multi-screen navigation with EventBus communication.
 //!
 //! Demonstrates the Dracon app architecture:
 //! - SceneRouter for push/pop navigation between screens
@@ -6,17 +6,17 @@
 //! - Centralized AppState shared across scenes
 //!
 //! Screens:
-//!   Home      — Main menu with navigation options
-//!   Settings  — Theme toggle (broadcasts via EventBus)
-//!   Profile   — User info display
+//!   Home       -  Main menu with navigation options
+//!   Settings   -  Theme toggle (broadcasts via EventBus)
+//!   Profile    -  User info display
 //!
 //! Controls:
-//!   ^/v       — navigate menu
-//!   Enter     — select / go forward
-//!   Esc — go back
-//!   t         — cycle theme (global)
-//!   ?         — toggle help
-//!   q         — quit
+//!   ^/v        -  navigate menu
+//!   Enter      -  select / go forward
+//!   Esc  -  go back
+//!   t          -  cycle theme (global)
+//!   ?          -  toggle help
+//!   q          -  quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -664,7 +664,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                let title = "Scene Router Demo — Help";
+                let title = "Scene Router Demo  -  Help";
                 let tx = hx + (hw - title.len() as u16) / 2;
                 for (i, c) in title.chars().enumerate() {
                     let idx = ((hy + 1) * w + tx + i as u16) as usize;

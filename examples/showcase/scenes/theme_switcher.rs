@@ -143,7 +143,7 @@ impl Scene for ThemeSwitcherScene {
                 if arrow_y < area.height {
                     let idx = (arrow_y * area.width + arrow_x) as usize;
                     if idx < plane.cells.len() {
-                        plane.cells[idx].char = '▲';
+                        plane.cells[idx].char = '^';
                         plane.cells[idx].fg = t.primary;
                     }
                 }

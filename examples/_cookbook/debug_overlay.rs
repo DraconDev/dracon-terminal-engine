@@ -3,10 +3,10 @@
 //!
 //! ## Features Shown
 //!
-//! 1. **DebugOverlay** — Modal overlay containing all debug tools
-//! 2. **Profiler** — Real-time FPS, frame time, tick count, memory metrics
-//! 3. **WidgetInspector** — Shows focused widget ID, type, position, state
-//! 4. **EventLogger** — Scrollable log of recent keyboard/mouse events
+//! 1. **DebugOverlay**  -  Modal overlay containing all debug tools
+//! 2. **Profiler**  -  Real-time FPS, frame time, tick count, memory metrics
+//! 3. **WidgetInspector**  -  Shows focused widget ID, type, position, state
+//! 4. **EventLogger**  -  Scrollable log of recent keyboard/mouse events
 //!
 //! ## Key Patterns
 //!

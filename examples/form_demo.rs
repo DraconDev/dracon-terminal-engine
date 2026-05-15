@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Rich Form Demo — settings form with validation, icons, and visual polish.
+//! Rich Form Demo  -  settings form with validation, icons, and visual polish.
 //!
 //! Features:
 //! - Rounded border card layout with header bar
@@ -12,12 +12,12 @@
 //! - Mouse support for all fields
 //!
 //! Controls:
-//!   Tab/Shift+Tab  — cycle focus
-//!   Enter          — advance field / submit
-//!   Esc            — clear form / dismiss help
-//!   t              — cycle theme
-//!   ?              — help overlay
-//!   q              — quit
+//!   Tab/Shift+Tab   -  cycle focus
+//!   Enter           -  advance field / submit
+//!   Esc             -  clear form / dismiss help
+//!   t               -  cycle theme
+//!   ?               -  help overlay
+//!   q               -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;

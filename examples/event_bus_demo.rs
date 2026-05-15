@@ -1,15 +1,15 @@
-//! Event Bus Demo — Decoupled widget communication.
+//! Event Bus Demo  -  Decoupled widget communication.
 //!
 //! Shows how widgets communicate via events without direct references.
 //! Two widgets (counter + logger) share state through the event bus.
 //!
 //! Controls:
-//!   ^/v or +/-  — adjust counter
-//!   l            — log a message
-//!   c            — clear log
-//!   t            — cycle theme
-//!   ?            — toggle help
-//!   q            — quit
+//!   ^/v or +/-   -  adjust counter
+//!   l             -  log a message
+//!   c             -  clear log
+//!   t             -  cycle theme
+//!   ?             -  toggle help
+//!   q             -  quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};

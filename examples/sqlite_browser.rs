@@ -1,17 +1,17 @@
 #![allow(missing_docs)]
-//! SQLite Browser — Database browser with table list, query editor, and results.
+//! SQLite Browser  -  Database browser with table list, query editor, and results.
 //!
 //! Demonstrates Table widget, SearchInput, SplitPane, and StatusBar.
 //!
 //! Reads from a real SQLite database file (or creates a mock one).
 //!
 //! Controls:
-//!   ^/v or j/k     — navigate tables/results
-//!   Enter          — select table / run query
-//!   Tab            — switch panel (tables/query/results)
-//!   e              — edit query
-//!   r              — refresh
-//!   q              — quit
+//!   ^/v or j/k      -  navigate tables/results
+//!   Enter           -  select table / run query
+//!   Tab             -  switch panel (tables/query/results)
+//!   e               -  edit query
+//!   r               -  refresh
+//!   q               -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -860,7 +860,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 }
 
 fn main() -> std::io::Result<()> {
-    println!("SQLite Browser — Database explorer");
+    println!("SQLite Browser  -  Database explorer");
     println!("Tab: switch panels | e: edit query | r: refresh | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 

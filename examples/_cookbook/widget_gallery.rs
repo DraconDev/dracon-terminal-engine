@@ -1,14 +1,14 @@
 #![allow(missing_docs)]
-//! Widget Gallery — all interactive widgets shown simultaneously in a polished grid.
+//! Widget Gallery  -  all interactive widgets shown simultaneously in a polished grid.
 //!
 //! Every widget is rendered in its own card with border, title, and live state.
 //! Click or use Enter to interact with each widget.
 //!
 //! Controls:
-//!   ^/v/</>  — navigate between widget cards
-//!   Enter    — activate focused widget
-//!   Tab      — cycle theme
-//!   q        — quit
+//!   ^/v/</>   -  navigate between widget cards
+//!   Enter     -  activate focused widget
+//!   Tab       -  cycle theme
+//!   q         -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
@@ -559,7 +559,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Widget Gallery — All widgets demo | ^v<> nav | Enter interact | t theme | q quit");
+    println!("Widget Gallery  -  All widgets demo | ^v<> nav | Enter interact | t theme | q quit");
     std::thread::sleep(std::time::Duration::from_millis(300));
 
     let running = Arc::new(AtomicBool::new(true));

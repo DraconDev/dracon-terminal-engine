@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Rich Table Widget Demo — user directory with badges, search, and detail panel.
+//! Rich Table Widget Demo  -  user directory with badges, search, and detail panel.
 //!
 //! Features:
 //! - 25 demo users with names, roles, departments, statuses, last active
@@ -13,13 +13,13 @@
 //! - Mouse hover highlighting and click selection
 //!
 //! Controls:
-//!   ^/v         — navigate rows
-//!   Enter       — select row
-//!   /           — search
-//!   Esc         — clear search / dismiss help
-//!   t           — cycle theme
-//!   ?           — help overlay
-//!   q           — quit
+//!   ^/v          -  navigate rows
+//!   Enter        -  select row
+//!   /            -  search
+//!   Esc          -  clear search / dismiss help
+//!   t            -  cycle theme
+//!   ?            -  help overlay
+//!   q            -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;

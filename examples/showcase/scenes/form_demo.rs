@@ -164,7 +164,7 @@ impl Scene for FormDemoScene {
 
             // Drag handle indicator on left
             if !is_dragged {
-                let handle = if is_hover_target { "▶" } else { "≡" };
+                let handle = if is_hover_target { ">" } else { "≡" };
                 draw_text(&mut plane, 0, y, handle, t.fg_muted, row_bg, false);
             }
 

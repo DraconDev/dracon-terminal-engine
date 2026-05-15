@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Log Monitor — Real-time log viewer with severity filtering.
+//! Log Monitor  -  Real-time log viewer with severity filtering.
 //!
 //! Controls: `c` clear, `r` resume auto-scroll, click filter buttons to toggle.
 
@@ -576,7 +576,7 @@ impl Widget for InputRouter {
 }
 
 fn main() -> Result<()> {
-    println!("Log Monitor — c=clear, r=resume, click filters to toggle");
+    println!("Log Monitor  -  c=clear, r=resume, click filters to toggle");
     std::thread::sleep(Duration::from_millis(300));
 
     let (w, h) = dracon_terminal_engine::backend::tty::get_window_size(std::io::stdout().as_fd())

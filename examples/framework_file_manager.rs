@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! File manager demo — shows List + Breadcrumbs + SplitPane.
+//! File manager demo  -  shows List + Breadcrumbs + SplitPane.
 //!
 //! Keyboard: arrows navigate, Enter opens, Left goes up, t=cycle theme, ?=help.
 //! Mouse: click to select, scroll to browse.

@@ -3,10 +3,10 @@
 //!
 //! ## Features Shown
 //!
-//! 1. **ConfirmDialog** — Modal confirmation box with OK/Cancel, ESC>Cancel, Enter>Confirm
-//! 2. **Help overlay** — Modal toggled via button, listing keyboard shortcuts
-//! 3. **Modal composition** — Help renders above main content, ConfirmDialog above help
-//! 4. **Toast notifications** — Success toast after confirm
+//! 1. **ConfirmDialog**  -  Modal confirmation box with OK/Cancel, ESC>Cancel, Enter>Confirm
+//! 2. **Help overlay**  -  Modal toggled via button, listing keyboard shortcuts
+//! 3. **Modal composition**  -  Help renders above main content, ConfirmDialog above help
+//! 4. **Toast notifications**  -  Success toast after confirm
 //!
 //! ## Key Patterns
 //!

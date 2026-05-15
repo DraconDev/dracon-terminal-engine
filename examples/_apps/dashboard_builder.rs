@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Dashboard Builder — Live system dashboard with sparklines and real-time metrics.
+//! Dashboard Builder  -  Live system dashboard with sparklines and real-time metrics.
 //!
 //! A polished system monitoring dashboard featuring:
 //! - Real CPU, memory, disk, and network metrics
@@ -11,11 +11,11 @@
 //! - Process table with selection
 //!
 //! Controls:
-//!   t     — cycle theme
-//!   p     — pause/resume updates
-//!   r     — force refresh
-//!   ^/v   — navigate process list
-//!   q     — quit
+//!   t      -  cycle theme
+//!   p      -  pause/resume updates
+//!   r      -  force refresh
+//!   ^/v    -  navigate process list
+//!   q      -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -902,7 +902,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("Dashboard Builder — Live system metrics | Keys are configurable");
+    println!("Dashboard Builder  -  Live system metrics | Keys are configurable");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

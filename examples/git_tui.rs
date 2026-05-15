@@ -1,15 +1,15 @@
 #![allow(missing_docs)]
-//! Git TUI — Real Git interface with status, log, diff, and branch management.
+//! Git TUI  -  Real Git interface with status, log, diff, and branch management.
 //!
 //! A practical Git TUI that reads actual git repository data.
 //!
 //! Controls:
-//!   1/2/3/4      — switch views (Status/Log/Diff/Branches)
-//!   ^/v or j/k   — navigate
-//!   Enter        — stage/unstage (status) or checkout (branches)
-//!   d            — view diff for selected file
-//!   r            — refresh
-//!   Configurable — theme, help, back, quit (see keybindings)
+//!   1/2/3/4       -  switch views (Status/Log/Diff/Branches)
+//!   ^/v or j/k    -  navigate
+//!   Enter         -  stage/unstage (status) or checkout (branches)
+//!   d             -  view diff for selected file
+//!   r             -  refresh
+//!   Configurable  -  theme, help, back, quit (see keybindings)
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -1086,7 +1086,7 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, keybindings: &K
     }
 
     // Title
-    let title = "Git TUI — Help";
+    let title = "Git TUI  -  Help";
     let tx = help_x + (help_w - title.len() as u16) / 2;
     for (i, c) in title.chars().enumerate() {
         let idx = ((help_y + 1) * plane.width + tx + i as u16) as usize;
@@ -1214,7 +1214,7 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
 
 
 fn main() -> std::io::Result<()> {
-    println!("Git TUI — Real Git interface");
+    println!("Git TUI  -  Real Git interface");
     println!("1-4: views | r: refresh | keys configurable");
     std::thread::sleep(Duration::from_millis(300));
 

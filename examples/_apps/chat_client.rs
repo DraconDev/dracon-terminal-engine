@@ -1,10 +1,10 @@
 #![allow(missing_docs)]
-//! Chat Client — rich chat UI demo using List, TextInput, Toast, Modal, and StatusBar.
+//! Chat Client  -  rich chat UI demo using List, TextInput, Toast, Modal, and StatusBar.
 //!
 //! Features: Custom message rendering, unread highlighting, emoji picker, settings modal,
 //! status bar, auto-scroll, and toast notifications.
 //!
-//! Pattern: InputRouter (Pattern 2) — all rendering in `on_tick`, input via Widget trait.
+//! Pattern: InputRouter (Pattern 2)  -  all rendering in `on_tick`, input via Widget trait.
 
 use std::cell::RefCell;
 use std::io;
@@ -460,7 +460,7 @@ impl ChatState {
             return false;
         }
 
-        // Dispatch via zones — collect result first, then act
+        // Dispatch via zones  -  collect result first, then act
         if let MouseEventKind::Down(MouseButton::Left) = kind {
             let zone = self.zones.borrow().dispatch(col, row);
             match zone {
@@ -565,7 +565,7 @@ impl ChatState {
         let start = self.scroll_offset;
         let end = (start + visible_count).min(self.messages.len());
 
-        // Loading state — show spinner centered in message area
+        // Loading state  -  show spinner centered in message area
         if self.is_loading {
             let spinner_text = format!(
                 "{} Fetching posts from JSONPlaceholder...",

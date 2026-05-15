@@ -1,4 +1,4 @@
-//! Plugin System Demo — StatWidget
+//! Plugin System Demo  -  StatWidget
 //!
 //! Demonstrates the dynamic widget loading system using `PluginRegistry`.
 //! Run with: `cargo run --example stat_widget_plugin`
@@ -11,7 +11,7 @@ use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::widget::WidgetId;
 
 // ============================================================================
-// PLUGIN: StatWidget — dynamically registered and loaded
+// PLUGIN: StatWidget  -  dynamically registered and loaded
 // ============================================================================
 
 /// A simple stat/metric display widget provided by a plugin.
@@ -121,8 +121,8 @@ impl Widget for StatWidget {
         let trend_y = area.y + 1;
         if trend_x > area.x && trend_y < area.y + area.height {
             let (ch, color) = match self.trend {
-                Trend::Up => ('▲', self.theme.success),
-                Trend::Down => ('▼', self.theme.error),
+                Trend::Up => ('^', self.theme.success),
+                Trend::Down => ('v', self.theme.error),
                 Trend::Neutral => ('#', self.theme.fg_muted),
             };
             let idx = (trend_y as usize * plane.width as usize + trend_x as usize)
@@ -155,7 +155,7 @@ fn truncate(s: &str, max: usize) -> String {
 }
 
 // ============================================================================
-// APP: PluginLoader — demonstrates PluginRegistry loading
+// APP: PluginLoader  -  demonstrates PluginRegistry loading
 // ============================================================================
 
 struct PluginLoader {
@@ -213,7 +213,7 @@ impl Widget for PluginLoader {
         plane.fill_bg(self.theme.bg);
 
         // Title
-        let title = "Plugin System Demo — StatWidget";
+        let title = "Plugin System Demo  -  StatWidget";
         let tx = (area.width.saturating_sub(title.len() as u16)) / 2;
         for (i, c) in title.chars().enumerate() {
             let x = area.x + tx + i as u16;

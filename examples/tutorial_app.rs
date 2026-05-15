@@ -13,21 +13,21 @@
 //! - Proper Widget/Scene lifecycle management
 //!
 //! ## Screens:
-//!   TaskList    — View all tasks, add new ones
-//!   TaskDetail  — View single task, mark complete
-//!   TaskEdit    — Create or edit tasks
+//!   TaskList     -  View all tasks, add new ones
+//!   TaskDetail   -  View single task, mark complete
+//!   TaskEdit     -  Create or edit tasks
 //!
 //! Controls:
-//!   ^/v         — navigate
-//!   Enter       — select / save
-//!   n           — new task
-//!   d           — delete task
-//!   e           — edit task
-//!   c           — toggle complete
-//!   Backspace   — delete character (in edit mode)
-//!   t           — cycle theme
-//!   ?           — toggle help
-//!   q           — quit
+//!   ^/v          -  navigate
+//!   Enter        -  select / save
+//!   n            -  new task
+//!   d            -  delete task
+//!   e            -  edit task
+//!   c            -  toggle complete
+//!   Backspace    -  delete character (in edit mode)
+//!   t            -  cycle theme
+//!   ?            -  toggle help
+//!   q            -  quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -232,7 +232,7 @@ impl Scene for TaskListScreen {
                 true
             }
             KeyCode::Enter => {
-                // Handled at router level — focus next scene (detail)
+                // Handled at router level  -  focus next scene (detail)
                 true
             }
             _ => false,
@@ -779,7 +779,7 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                let title = "Task Manager Tutorial — Help";
+                let title = "Task Manager Tutorial  -  Help";
                 let tx = hx + (hw - title.len() as u16) / 2;
                 for (i, c) in title.chars().enumerate() {
                     let idx = ((hy + 1) * w + tx + i as u16) as usize;

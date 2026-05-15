@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! System Monitor — htop-like dashboard with real system data and sparkline history.
+//! System Monitor  -  htop-like dashboard with real system data and sparkline history.
 //!
 //! Reads actual system metrics from /proc filesystem:
 //! - CPU usage from /proc/stat
@@ -9,10 +9,10 @@
 //! - Process list from /proc/<pid>/stat
 //!
 //! Controls:
-//!   t          — cycle theme (15 themes)
-//!   ?          — toggle help
-//!   ^/v        — navigate process list
-//!   q          — quit
+//!   t           -  cycle theme (15 themes)
+//!   ?           -  toggle help
+//!   ^/v         -  navigate process list
+//!   q           -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
@@ -1407,7 +1407,7 @@ impl Widget for InputRouter {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> std::io::Result<()> {
-    println!("System Monitor — Real /proc data | t:theme ?:help q:quit");
+    println!("System Monitor  -  Real /proc data | t:theme ?:help q:quit");
     std::thread::sleep(Duration::from_millis(300));
 
     let should_quit = Arc::new(AtomicBool::new(false));

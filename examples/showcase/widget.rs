@@ -546,7 +546,7 @@ impl Widget for Showcase {
             draw_text(&mut plane, 12, cat_y, &count_str, t.fg_muted, bg_cat, Styles::empty());
         }
 
-        // Grid of cards — responsive sizing
+        // Grid of cards  -  responsive sizing
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
         let available_w = (area.width as usize).saturating_sub(grid_start_x);
@@ -617,7 +617,7 @@ impl Widget for Showcase {
             for i in 0..scroll_text.len() + 4 {
                 set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
             }
-            draw_text(&mut plane, sx + 1, sy, "▼", t.primary, t.surface, Styles::BOLD);
+            draw_text(&mut plane, sx + 1, sy, "v", t.primary, t.surface, Styles::BOLD);
             let rest: String = scroll_text.chars().skip(2).collect();
             draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, Styles::empty());
         }
@@ -655,7 +655,7 @@ impl Widget for Showcase {
         );
 
         // Sort indicator
-        let sort_arrow = if self.sort_ascending { "▲" } else { "▼" };
+        let sort_arrow = if self.sort_ascending { "^" } else { "v" };
         let sort_text = format!(" {} {} ", sort_arrow, self.sort_field.label());
         let sort_x = hint_x + hint.len() + 2;
         draw_text(
@@ -751,7 +751,7 @@ impl Widget for Showcase {
             if let Some((ref name, time)) = *guard {
                 if time.elapsed() < Duration::from_secs(3) {
                     let help_key = self.keybindings.display(actions::HELP).unwrap_or("F1");
-                    let msg = format!("Returned from {} — Press {} for help", name, help_key);
+                    let msg = format!("Returned from {}  -  Press {} for help", name, help_key);
                     let msg_y = (area.height as usize).saturating_sub(3);
                     let msg_x = ((area.width as usize).saturating_sub(msg.len() + 4)) / 2;
                     let msg_w = msg.len() + 4;
@@ -1551,7 +1551,7 @@ impl Showcase {
                     }
                 }
 
-                // Card click — use grid math instead of zones (deterministic, no animation drift)
+                // Card click  -  use grid math instead of zones (deterministic, no animation drift)
                 if let Some(card_idx) = self.card_at_mouse(col, row) {
                     let now = Instant::now();
                     let is_double_click = self
@@ -1582,7 +1582,7 @@ impl Showcase {
                 false
             }
             MouseEventKind::Down(MouseButton::Right) => {
-                // Card right-click — use grid math
+                // Card right-click  -  use grid math
                 if let Some(card_idx) = self.card_at_mouse(col, row) {
                     if card_idx < self.filtered.len() {
                         self.selected = card_idx;
@@ -1609,7 +1609,7 @@ impl Showcase {
                         self.primitive_button_time = None;
                     }
                 }
-                // Card hover — use grid math (no animation drift, no circular dependency)
+                // Card hover  -  use grid math (no animation drift, no circular dependency)
                 if let Some(card_idx) = self.card_at_mouse(col, row) {
                     if self.hovered_card != Some(card_idx) {
                         let anim_id =

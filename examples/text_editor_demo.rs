@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Rich TextEditor Demo — mini-IDE experience with tabs, file tree, and search.
+//! Rich TextEditor Demo  -  mini-IDE experience with tabs, file tree, and search.
 //!
 //! Features:
 //! - Tab bar: switch between open files
@@ -12,16 +12,16 @@
 //! - Help overlay (?)
 //!
 //! Controls:
-//!   Ctrl+T      — new tab
-//!   Ctrl+W      — close tab
-//!   Ctrl+F      — toggle search
-//!   Ctrl+S      — save mock
-//!   F12         — toggle profiler
-//!   Tab         — next tab
-//!   ^/v/</>     — navigate
-//!   t           — cycle theme
-//!   ?           — help overlay
-//!   q           — quit
+//!   Ctrl+T       -  new tab
+//!   Ctrl+W       -  close tab
+//!   Ctrl+F       -  toggle search
+//!   Ctrl+S       -  save mock
+//!   F12          -  toggle profiler
+//!   Tab          -  next tab
+//!   ^/v/</>      -  navigate
+//!   t            -  cycle theme
+//!   ?            -  help overlay
+//!   q            -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};

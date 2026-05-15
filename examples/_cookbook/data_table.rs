@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Data Table Demo — sortable table with SearchInput filter.
+//! Data Table Demo  -  sortable table with SearchInput filter.
 //!
 //! **Layout:**
 //! ```text
@@ -69,8 +69,8 @@ impl Sort {
     fn sym(&self) -> &'static str {
         match self {
             Sort::None => "",
-            Sort::Asc => "▲",
-            Sort::Desc => "▼",
+            Sort::Asc => "^",
+            Sort::Desc => "v",
         }
     }
 }

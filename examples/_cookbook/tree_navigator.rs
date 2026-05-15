@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-//! Tree Navigator — hierarchical file browsing with Tree + Breadcrumbs + SplitPane.
+//! Tree Navigator  -  hierarchical file browsing with Tree + Breadcrumbs + SplitPane.
 //!
 //! Demonstrates:
 //! - Tree widget with expand/collapse navigation
@@ -259,7 +259,7 @@ impl Widget for TreeNav {
         let tree_plane = self.tree.render(tree_rect);
         copy_plane(&mut plane, &tree_plane, tree_rect.x, tree_rect.y);
 
-        // Detail in right pane — FIXED: now uses detail_rect.x as X offset
+        // Detail in right pane  -  FIXED: now uses detail_rect.x as X offset
         let detail_plane = self.render_detail(detail_rect);
         copy_plane(&mut plane, &detail_plane, detail_rect.x, detail_rect.y);
 
