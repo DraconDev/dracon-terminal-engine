@@ -619,7 +619,6 @@ impl Default for ColorPicker {
 /// - Use different themes
 /// - Handle keyboard navigation between widgets
 fn main() -> std::io::Result<()> {
-    let themes: Vec<Theme> = Theme::all().to_vec();
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
     let show_help = Arc::new(AtomicBool::new(false));

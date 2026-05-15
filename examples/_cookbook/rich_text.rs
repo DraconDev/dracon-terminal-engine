@@ -1,11 +1,10 @@
 use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::rc::Rc;
-use std::cell::RefCell;
 
 struct RichTextApp {
     id: WidgetId,
@@ -146,14 +145,6 @@ impl Widget for RichTextApp {
                 if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
             }
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
-            let shortcuts: [(&str, &str); 6] = [
-                ("↑/↓/PgUp/PgDn", "Scroll content"),
-                (kb_theme, "Cycle theme"),
-                (kb_help, "Toggle help"),
-                (kb_back, "Dismiss help"),
-                (kb_quit, "Quit app"),
-                ("", ""),
-            ];
             let shortcuts: [(&str, &str); 5] = [
                 ("↑/↓/PgUp/PgDn", "Scroll content"),
                 (kb_theme, "Cycle theme"),

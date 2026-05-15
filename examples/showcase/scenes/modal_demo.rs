@@ -297,7 +297,12 @@ impl Scene for ModalDemoScene {
                     self.dirty = true;
                     true
                 }
-                KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N') if key.code == KeyCode::Esc || key.modifiers.is_empty() => {
+                KeyCode::Esc => {
+                    self.show_confirm = false;
+                    self.dirty = true;
+                    true
+                }
+                KeyCode::Char('n') | KeyCode::Char('N') if key.modifiers.is_empty() => {
                     self.show_confirm = false;
                     self.dirty = true;
                     true
