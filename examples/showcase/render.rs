@@ -369,14 +369,6 @@ pub fn render_card(
         }
     }
 
-    draw_rounded_border(
-        plane,
-        Rect::new(offset_x as u16, offset_y as u16, config.width, config.height),
-        border_fg,
-        bg,
-        is_selected || is_hovered,
-    );
-
     if is_selected {
         draw_text(plane, offset_x + 1, offset_y + card_h_usize / 2, "►", t.primary, bg, Styles::BOLD);
     }
