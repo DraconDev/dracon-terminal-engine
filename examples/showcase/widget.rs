@@ -571,7 +571,7 @@ impl Widget for Showcase {
                 let x = grid_start_x + col * (card_w + 2);
                 let y = grid_start_y + row * (card_h + 1);
 
-                if x + card_w > area.width as usize || y + card_h > area.height as usize - 2 {
+                if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2) {
                     continue;
                 }
 
@@ -622,8 +622,8 @@ impl Widget for Showcase {
         let visible_cards = cols * (available_h / (card_h + 1)).max(1);
         if total_cards > visible_cards {
             let scroll_text = format!("↓ {} more", total_cards - visible_cards);
-            let sx = area.width as usize - scroll_text.len() - 4;
-            let sy = area.height as usize - 3;
+            let sx = (area.width as usize).saturating_sub(scroll_text.len()).saturating_sub(4);
+            let sy = (area.height as usize).saturating_sub(3);
             // Draw scroll indicator background
             for i in 0..scroll_text.len() + 4 {
                 set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
@@ -634,7 +634,7 @@ impl Widget for Showcase {
         }
 
         // Status bar with gradient effect
-        let status_y = area.height as usize - 1;
+        let status_y = (area.height as usize).saturating_sub(1);
         for x in 0..area.width as usize {
             let _gradient_ratio = x as f32 / area.width as f32;
             let bg = if x < area.width as usize / 2 {
@@ -682,7 +682,7 @@ impl Widget for Showcase {
         // Mouse coordinates (right side)
         if let Some((mx, my)) = self.mouse_pos {
             let coords = format!("{}:{}", mx, my);
-            let coords_x = area.width as usize - coords.len() - 2;
+            let coords_x = (area.width as usize).saturating_sub(coords.len()).saturating_sub(2);
             if coords_x > hint_x {
                 draw_text(
                     &mut plane,
@@ -793,8 +793,8 @@ impl Widget for Showcase {
         if let Some((card_idx, mx, my)) = self.context_menu {
             if let Some(&ex_idx) = self.filtered.get(card_idx) {
                 if let Some(ex) = self.examples.get(ex_idx) {
-                    let menu_x = (mx as usize).min(area.width as usize - 20);
-                    let menu_y = (my as usize).min(area.height as usize - 6);
+                    let menu_x = (mx as usize).min((area.width as usize).saturating_sub(20));
+                    let menu_y = (my as usize).min((area.height as usize).saturating_sub(6));
                     let menu_w = 18usize;
                     let menu_h = 6usize;
                     let menu_items: [String; 4] = [
@@ -912,7 +912,7 @@ impl Widget for Showcase {
         // Tooltip on hover
         if let Some(ref text) = self.tooltip_text {
             if let Some((tx, ty)) = self.tooltip_pos {
-                let tooltip_x = (tx as usize).min(area.width as usize - text.len() - 4);
+                let tooltip_x = (tx as usize).min((area.width as usize).saturating_sub(text.len()).saturating_sub(4));
                 let tooltip_y = (ty as usize).saturating_sub(2);
                 let tooltip_w = text.len() + 4;
                 let tooltip_h = 3usize;
@@ -1074,7 +1074,7 @@ impl Widget for Showcase {
             ];
             for (i, (key_text, desc)) in lines.iter().enumerate() {
                 let y = help_y + 3 + i;
-                if y < area.height as usize - 1 && !key_text.is_empty() {
+                if y < (area.height as usize).saturating_sub(1) && !key_text.is_empty() {
                     draw_text(
                         &mut plane,
                         help_x + 3,
