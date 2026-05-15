@@ -627,13 +627,10 @@ fn main() -> std::io::Result<()> {
 
     let mut app = App::new()?
         .title("Widget Tutorial: ColorPicker")
-        .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()));
+        .fps(30);
 
-    let kb_config = resolve_keybindings();
-    let keybindings = KeybindingSet::from_config(&kb_config);
-
-    let current_theme = app.theme().clone();
+    let current_theme = Theme::from_env_or(Theme::nord());
+    app = app.theme(current_theme.clone());
 
     let red_picker = ColorPicker::new(current_theme.clone()).initial_color("Red");
     let green_picker = ColorPicker::new(current_theme.clone()).initial_color("Green");
