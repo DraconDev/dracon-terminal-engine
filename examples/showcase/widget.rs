@@ -1033,7 +1033,7 @@ impl Widget for Showcase {
             );
 
             // Title
-            let title = " ◊ Keyboard Shortcuts ";
+            let title = " + Keyboard Shortcuts ";
             let title_x = help_x + (help_w - title.len()) / 2;
             draw_text(
                 &mut plane,

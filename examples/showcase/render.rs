@@ -153,7 +153,7 @@ pub fn render_features_bar(
 
         // Separator
         if i > 0 {
-            let sep = " │ ";
+            let sep = " | ";
             draw_text(plane, x, y, sep, theme.outline, theme.bg, Styles::empty());
             x += sep.len();
         }
