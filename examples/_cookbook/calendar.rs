@@ -10,6 +10,7 @@
 
 use chrono::NaiveDate;
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -21,17 +22,14 @@ struct CalendarDemo {
     area: Rect,
     should_quit: Rc<AtomicBool>,
     theme: Theme,
-    /// Single-selection mode calendar
     calendar_single: Calendar,
-    /// Range-selection mode calendar
     calendar_range: Calendar,
-    /// Current mode: true = range, false = single
     range_mode: bool,
-    /// Last selected date (single mode)
     selected_date: RefCell<Option<NaiveDate>>,
-    /// Last selected range
     selected_range: RefCell<Option<(NaiveDate, NaiveDate)>>,
+    show_help: bool,
     dirty: bool,
+    keybindings: KeybindingSet,
 }
 
 impl CalendarDemo {
@@ -68,7 +66,9 @@ impl CalendarDemo {
             range_mode: false,
             selected_date,
             selected_range,
+            show_help: false,
             dirty: true,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
@@ -247,7 +247,10 @@ impl Widget for CalendarDemo {
 
         // Instructions panel
         let inst_y = area.height.saturating_sub(2);
-        let instructions = "←/→: navigate months | Enter: confirm | C: clear | T: toggle mode | Ctrl+Q: quit";
+        let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
+        let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
+        let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
+        let instructions = format!("←/→: navigate months | Enter: confirm | C: clear | {kb_theme}: toggle mode | {kb_help}: help | {kb_quit}: quit");
         for (i, c) in instructions.chars().enumerate() {
             let idx = (inst_y * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -268,25 +271,93 @@ impl Widget for CalendarDemo {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            let t = &self.theme;
+            let hw = 44u16.min(area.width.saturating_sub(4));
+            let hh = 11u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * area.width + x) as usize;
+                let bot = ((hy + hh - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * area.width + hx) as usize;
+                let right = (y * area.width + hx + hw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+            let title = "Calendar Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+            }
+            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
+            let shortcuts: [(&str, &str); 6] = [
+                ("←/→", "Navigate months"),
+                ("Enter", "Confirm selection"),
+                ("C", "Clear selection"),
+                (kb_theme, "Toggle mode"),
+                (kb_help, "Toggle help"),
+                (kb_back, "Dismiss help"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 16 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
+            }
+        }
+
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        use dracon_terminal_engine::input::event::KeyCode;
-
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.show_help {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+                self.show_help = false;
+                self.dirty = true;
+                return true;
+            }
+            return false;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = true;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.toggle_mode();
+            return true;
+        }
         match key.code {
-            KeyCode::Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                self.toggle_mode();
-                true
-            }
-            KeyCode::Char('T') if key.modifiers.is_empty() => {
-                self.toggle_mode();
-                true
-            }
             _ => {
                 let handled = self.active_calendar_mut().handle_key(key);
                 if handled {

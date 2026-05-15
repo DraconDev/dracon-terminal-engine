@@ -1,5 +1,6 @@
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -10,8 +11,10 @@ struct AutocompleteDemo {
     area: Rect,
     should_quit: Rc<AtomicBool>,
     theme: Theme,
+    keybindings: KeybindingSet,
     autocomplete: Autocomplete,
     selected: RefCell<Option<String>>,
+    show_help: bool,
     dirty: bool,
 }
 
@@ -67,10 +70,22 @@ impl AutocompleteDemo {
             area: Rect::default(),
             should_quit,
             theme,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             autocomplete,
             selected,
+            show_help: false,
             dirty: true,
         }
+    }
+    fn cycle_theme(&mut self) {
+        let themes = Theme::all();
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()].clone();
+        self.autocomplete.on_theme_change(&self.theme);
+        self.dirty = true;
     }
 }
 
@@ -135,9 +150,15 @@ impl Widget for AutocompleteDemo {
         }
 
         // Status bar
-        let status = "Ctrl+Q: quit | Type to filter | ↑/↓ navigate | Enter select | Tab insert top";
+        let status = self.keybindings.format_hint(&[
+            (actions::QUIT, "quit"),
+            (actions::HELP, "help"),
+            (actions::THEME, "theme"),
+        ]);
+        let extra = " | Type to filter | ↑/↓ navigate | Enter select | Tab insert top";
+        let full_status = format!("{}{}", status, extra);
         let sy = area.height.saturating_sub(1);
-        for (i, c) in status.chars().enumerate() {
+        for (i, c) in full_status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
@@ -147,24 +168,109 @@ impl Widget for AutocompleteDemo {
             }
         }
 
+        // Help overlay
+        if self.show_help {
+            let t = &self.theme;
+            let hw = 44u16.min(area.width.saturating_sub(4));
+            let hh = 10u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * area.width + x) as usize;
+                let bot = ((hy + hh - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * area.width + hx) as usize;
+                let right = (y * area.width + hx + hw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+
+            let title = "Autocomplete Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
+            }
+
+            let quit_key = self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q");
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            let theme_key = self.keybindings.display(actions::THEME).unwrap_or("ctrl+t");
+            let shortcuts = [
+                ("↑/↓", "Navigate suggestions"),
+                ("Enter", "Select suggestion"),
+                ("Tab", "Insert top suggestion"),
+                (quit_key, "Quit"),
+                (help_key, "Toggle help"),
+                (back_key, "Dismiss help"),
+                (theme_key, "Cycle theme"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
+            }
+        }
+
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        use dracon_terminal_engine::input::event::KeyCode;
-        match key.code {
-            KeyCode::Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                self.should_quit.store(true, Ordering::SeqCst);
-                true
-            }
-            _ => {
-                let handled = self.autocomplete.handle_key(key);
-                if handled && self.autocomplete.selected().is_some() {
-                    self.dirty = true;
-                }
-                handled
-            }
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
         }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if self.show_help && self.keybindings.matches(actions::BACK, &key) {
+            self.show_help = false;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
+        if self.show_help {
+            return true;
+        }
+        let handled = self.autocomplete.handle_key(key);
+        if handled && self.autocomplete.selected().is_some() {
+            self.dirty = true;
+        }
+        handled
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
