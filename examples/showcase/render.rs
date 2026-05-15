@@ -530,27 +530,32 @@ fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
     }
 }
 
-fn render_ide_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
-    let tabs = [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)];
+fn render_ide_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
+    let tabs = if card_w >= 28 { [(" main.rs ", true), (" lib.rs ", false), (" mod.rs ", false)] } else if card_w >= 22 { [(" main.rs ", true), (" lib.rs ", false)] } else { [(" main.rs ", true)] };
     let mut tab_x = ox + 1;
     let mut active_tab_start = 0usize;
     let mut active_tab_len = 0usize;
     for (label, active) in &tabs {
+        if tab_x + label.len() > max_x + 1 { break; }
         let fg = if *active { t.fg_on_accent } else { t.fg_muted };
         let bg = if *active { t.primary_active } else { t.surface };
-        draw_text(plane, tab_x, oy + 5, label, fg, bg, if *active { Styles::BOLD } else { Styles::empty() });
-        if *active { active_tab_start = tab_x; active_tab_len = label.len(); }
+        draw_text_bounded(plane, tab_x, oy + 5, label, fg, bg, if *active { Styles::BOLD } else { Styles::empty() }, ox + 1, max_x, oy + 1, max_y);
+        if *active { active_tab_start = tab_x; active_tab_len = label.len().min(max_x - tab_x + 1); }
         tab_x += label.len() + 1;
     }
-    for dx in 0..active_tab_len { set_cell(plane, active_tab_start + dx, oy + 6, '▔', t.primary_active, t.surface); }
+    for dx in 0..active_tab_len { set_cell_bounded(plane, active_tab_start + dx, oy + 6, '▔', t.primary_active, t.surface, ox + 1, max_x, oy + 1, max_y); }
     let lines = [("1", "fn main() {"), ("2", "    let x = 42;"), ("3", "    println!(\"{}\", x);"), ("4", "}")];
     for (i, (num, code)) in lines.iter().enumerate() {
         let py = oy + 6 + i;
-        if py > oy + 10 { break; }
-        draw_text(plane, ox + 1, py, num, t.fg_muted, t.surface, Styles::empty());
-        draw_text(plane, ox + 3, py, code, t.fg, t.surface, Styles::empty());
+        if py > oy + 10 || py > max_y { break; }
+        draw_text_bounded(plane, ox + 1, py, num, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        let max_code_len = max_x - (ox + 3) + 1;
+        let code_truncated: String = code.chars().take(max_code_len).collect();
+        draw_text_bounded(plane, ox + 3, py, &code_truncated, t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
-    if (phase * 3.0).fract() < 0.6 { set_cell(plane, ox + 4, oy + 6, '▎', t.primary, t.surface); }
+    if (phase * 3.0).fract() < 0.6 { set_cell_bounded(plane, ox + 4, oy + 6, '▎', t.primary, t.surface, ox + 1, max_x, oy + 1, max_y); }
 }
 
 fn render_desktop_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
