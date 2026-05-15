@@ -155,8 +155,8 @@ fn test_help_overlay_background_is_surface_elevated() {
 fn test_help_overlay_has_rounded_corners() {
     let widget = HelpOverlayWidget::new(Theme::nord());
     let plane = widget.render(Rect::new(0, 0, 80, 24));
-    let hw = 46u16.min(76);
-    let hh = 11u16.min(20);
+    let hw = 46u16;
+    let hh = 11u16;
     let hx = (80 - hw) / 2;
     let hy = (24 - hh) / 2;
     let top_left = (hy * 80 + hx) as usize;
@@ -174,8 +174,8 @@ fn test_help_overlay_title_is_centered_and_primary_bold() {
     let widget = HelpOverlayWidget::new(Theme::nord());
     let plane = widget.render(Rect::new(0, 0, 80, 24));
     let t = Theme::nord();
-    let hw = 46u16.min(76);
-    let hh = 11u16.min(20);
+    let hw = 46u16;
+    let hh = 11u16;
     let hx = (80 - hw) / 2;
     let hy = (24 - hh) / 2;
     let title = "App Help";
