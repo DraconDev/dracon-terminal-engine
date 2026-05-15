@@ -472,43 +472,48 @@ fn render_theme_preview(plane: &mut Plane, t: &Theme, ox: usize, oy: usize, card
     draw_text_bounded(plane, ox + 2, oy + 11, &name, t.fg_muted, t.bg, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let checks = ["[x] Alpha", "[ ] Beta", "[x] Gamma"];
     for (i, check) in checks.iter().enumerate() {
         let py = oy + 6 + i;
-        if py > oy + 10 { break; }
-        let text: String = check.chars().take(12).collect();
-        draw_text(plane, ox + 2, py, &text, t.fg_subtle, t.surface, Styles::empty());
+        if py > oy + 10 || py > max_y { break; }
+        let text: String = check.chars().take(max_x - (ox + 2) + 1).collect();
+        draw_text_bounded(plane, ox + 2, py, &text, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let slider_y = oy + 10;
-    let slider_w = 18;
+    let slider_w = (card_w - 6).min(18).max(4);
     let thumb = ((phase * 2.0).sin() * 0.5 + 0.5 * slider_w as f64).round() as usize;
     let thumb = thumb.min(slider_w - 1);
-    draw_text(plane, ox + 2, slider_y, "[", t.fg_muted, t.surface, Styles::empty());
+    draw_text_bounded(plane, ox + 2, slider_y, "[", t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     for i in 0..slider_w {
         let ch = if i == thumb { '#' } else if i < thumb { '=' } else { '-' };
         let fg = if i == thumb { t.primary } else { t.fg_muted };
-        set_cell(plane, ox + 3 + i, slider_y, ch, fg, t.surface);
+        set_cell_bounded(plane, ox + 3 + i, slider_y, ch, fg, t.surface, ox + 1, max_x, oy + 1, max_y);
     }
-    draw_text(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, Styles::empty());
+    draw_text_bounded(plane, ox + 3 + slider_w, slider_y, "]", t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
 #[allow(dead_code)]
-fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let lines = ["  line 0  ▸ active", "  line 1", "  line 2", "  line 3", "  line 4", "  line 5", "  line 6", "  line 7", "  line 8", "  line 9", "  line 10", "  line 11", "  line 12", "  line 13", "  line 14"];
     let view_h = 6usize;
     let offset = ((phase * 2.0).sin() * 4.0).round().max(0.0) as usize;
     let offset = offset.min(lines.len().saturating_sub(view_h));
-    let track_x = 24usize;
+    let track_x = (card_w - 4).min(24);
     let track_h = view_h;
     for (i, line) in lines.iter().enumerate() {
         let view_idx = i.saturating_sub(offset);
         if view_idx < view_h {
             let py = oy + 6 + view_idx;
-            if py < oy + 13 {
-                let text: String = line.chars().take(20).collect();
+            if py < oy + 13 && py <= max_y {
+                let max_len = (track_x - 2).max(1);
+                let text: String = line.chars().take(max_len).collect();
                 let fg = if line.contains("active") { t.primary } else { t.fg_subtle };
-                draw_text(plane, ox + 2, py, &text, fg, t.surface, Styles::empty());
+                draw_text_bounded(plane, ox + 2, py, &text, fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
             }
         }
     }
@@ -518,10 +523,10 @@ fn render_scroll_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
     let thumb_pos = if max_offset == 0 { 0 } else { (offset * (track_h.saturating_sub(thumb_len))).checked_div(max_offset).unwrap_or(0) };
     for y in 0..track_h {
         let cy = oy + 6 + y;
-        if cy >= oy + 13 { break; }
+        if cy >= oy + 13 || cy > max_y { break; }
         let ch = if y >= thumb_pos && y < thumb_pos + thumb_len { '█' } else { '░' };
         let fg = if y >= thumb_pos && y < thumb_pos + thumb_len { t.primary } else { t.fg_muted };
-        set_cell(plane, ox + track_x, cy, ch, fg, t.surface);
+        set_cell_bounded(plane, ox + track_x, cy, ch, fg, t.surface, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
