@@ -969,7 +969,7 @@ impl Widget for SystemMonitor {
             }
         }
         let footer = format!(
-            "{} | ↑/↓: nav | Click: select",
+            "{} | ^v: nav | Click: select",
             self.keybindings.format_hint(&[
                 (actions::THEME, "theme"),
                 (actions::TREE_MODE, "tree"),
@@ -1323,7 +1323,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let kb_tree = kb.display(actions::TREE_MODE).unwrap_or("p");
 
     let shortcuts = [
-        ("↑/↓", "Navigate process list"),
+        ("^/v", "Navigate process list"),
         (kb_tree, "Toggle tree view"),
         (kb_theme, "Cycle theme (15 themes)"),
         (kb_help, "Toggle this help"),

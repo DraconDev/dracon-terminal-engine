@@ -421,9 +421,9 @@ impl Widget for Dashboard {
         let title = " System Dashboard ";
         let theme_label = format!(" {} ", Theme::all()[self.theme_index].name);
         let status = if self.paused {
-            " ⏸ PAUSED "
+            " || PAUSED "
         } else {
-            " ● LIVE "
+            " * LIVE "
         };
         draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
         let sx = area
@@ -460,7 +460,7 @@ impl Widget for Dashboard {
         // Footer
         let footer_y = area.height.saturating_sub(1);
         let footer_text = format!(
-            "{} | ↑↓: nav",
+            "{} | ^v: nav",
             self.keybindings.format_hint(&[
                 (actions::THEME, "theme"),
                 (actions::PAUSE, "pause"),
@@ -595,10 +595,10 @@ impl Dashboard {
         let card_h = area.height / 3;
 
         let cards = [
-            (&self.data.cpu, " CPU ", "󰍛"),
-            (&self.data.mem, " Memory ", "󰘚"),
-            (&self.data.disk_read, " Disk ", "󰋊"),
-            (&self.data.net_rx, " Network ", "󰀂"),
+            (&self.data.cpu, " CPU ", "C"),
+            (&self.data.mem, " Memory ", "M"),
+            (&self.data.disk_read, " Disk ", "D"),
+            (&self.data.net_rx, " Network ", "N"),
         ];
 
         for (i, (metric, label, icon)) in cards.iter().enumerate() {
@@ -668,7 +668,7 @@ impl Dashboard {
             plane,
             area.x + 2,
             area.y + 1,
-            " 󰀽 Processes ",
+            "  Processes ",
             t.primary,
             t.surface,
             true,
@@ -867,7 +867,7 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
     let kb_quit = kb.display(actions::QUIT).unwrap_or("q");
 
     let shortcuts = [
-        ("↑/↓", "Navigate process list"),
+        ("^/v", "Navigate process list"),
         (kb_theme, "Cycle theme"),
         (kb_pause, "Pause/resume updates"),
         (kb_refresh, "Force refresh"),
