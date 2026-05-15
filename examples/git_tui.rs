@@ -144,6 +144,15 @@ impl GitTui {
         self.dirty = true;
     }
 
+    fn propagate_theme(&mut self) {
+        self.tab_bar.on_theme_change(&self.theme);
+        self.status_bar.on_theme_change(&self.theme);
+        for toast in &mut self.toasts {
+            toast.on_theme_change(&self.theme);
+        }
+        self.dirty = true;
+    }
+
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes
@@ -151,13 +160,13 @@ impl GitTui {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
-        self.tab_bar.on_theme_change(&self.theme);
-        self.status_bar.on_theme_change(&self.theme);
-        for toast in &mut self.toasts {
-            toast.on_theme_change(&self.theme);
-        }
-        self.dirty = true;
+        self.propagate_theme();
         self.toast(&format!("Theme: {}", self.theme.name), ToastKind::Info);
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.propagate_theme();
     }
 
     fn toast(&mut self, msg: &str, kind: ToastKind) {
@@ -291,6 +300,10 @@ impl Widget for GitTui {
     }
     fn focusable(&self) -> bool {
         true
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        GitTui::on_theme_change(self, theme);
     }
 
     fn render(&self, area: Rect) -> Plane {

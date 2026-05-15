@@ -163,6 +163,12 @@ impl ChatState {
         self.scroll_offset = self.messages.len().saturating_sub(visible);
     }
 
+    fn propagate_theme(&mut self) {
+        self.emoji_modal.on_theme_change(&self.theme);
+        self.settings_modal.on_theme_change(&self.theme);
+        self.dirty = true;
+    }
+
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
         let idx = themes
@@ -170,9 +176,12 @@ impl ChatState {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
-        self.emoji_modal.on_theme_change(&self.theme);
-        self.settings_modal.on_theme_change(&self.theme);
-        self.dirty = true;
+        self.propagate_theme();
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.propagate_theme();
     }
 
     fn unread_count(&self) -> usize {
@@ -1166,17 +1175,11 @@ fn main() -> io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let kb_config = resolve_keybindings();
-
     let env_theme = Theme::from_env_or(Theme::default());
     let mut app = App::new()?.title("Chat Client").fps(30).theme(env_theme.clone());
     let chat = Rc::new(RefCell::new(ChatState::new(should_quit, env_theme.clone())));
     {
         let mut c = chat.borrow_mut();
-        c.keybindings = keybindings;
-        c.kb_config = kb_config;
-        // Start fetching posts on init
         c.start_fetch();
     }
     let chat_for_tick = Rc::clone(&chat);
@@ -1196,6 +1199,12 @@ fn main() -> io::Result<()> {
         }
 
         let mut chat = chat_for_tick.borrow_mut();
+
+        // Sync theme from framework
+        let app_theme = ctx.theme().clone();
+        if chat.theme.name != app_theme.name {
+            chat.on_theme_change(&app_theme);
+        }
 
         // Poll async fetch and send operations
         chat.poll_fetch_result();
