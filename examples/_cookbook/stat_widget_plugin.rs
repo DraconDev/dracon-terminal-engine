@@ -145,7 +145,7 @@ fn truncate(s: &str, max: usize) -> String {
     for c in s.chars() {
         let cw = 1;
         if taken + cw >= max {
-            r.push('...');
+            r.push_str("...");
             break;
         }
         r.push(c);
