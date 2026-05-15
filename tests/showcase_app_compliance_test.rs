@@ -135,8 +135,8 @@ fn test_help_overlay_background_is_surface_elevated() {
     let widget = HelpOverlayWidget::new(Theme::nord());
     let plane = widget.render(Rect::new(0, 0, 80, 24));
     let t = Theme::nord();
-    let hw = 46u16.min(76);
-    let hh = 11u16.min(20);
+    let hw = 46u16;
+    let hh = 11u16;
     let hx = (80 - hw) / 2;
     let hy = (24 - hh) / 2;
     let center_idx = ((hy + 2) * 80 + hx + 2) as usize;

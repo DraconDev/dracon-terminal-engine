@@ -228,9 +228,9 @@ impl Widget for PoolDemo {
             return true;
         }
         if self.keybindings.matches(actions::THEME, &key) {
-            let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+            let themes = Theme::all();
             let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-            self.theme = themes[(idx + 1) % themes.len()].clone();
+            self.theme = themes[(idx + 1) % themes.len()];
             self.dirty = true;
             return true;
         }
