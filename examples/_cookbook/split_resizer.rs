@@ -90,6 +90,7 @@ impl Widget for SplitResizerApp {
         for c in p.cells.iter_mut() {
             c.bg = t.bg;
             c.fg = t.fg;
+            c.transparent = false;
         }
         let h = 1u16;
         let ch = area.height - 2 * h;
@@ -153,7 +154,7 @@ impl Widget for SplitResizerApp {
             self.dirty = true;
             return true;
         }
-        if kb.matches(actions::DISMISS, &key) && self.show_help {
+        if kb.matches(actions::BACK, &key) && self.show_help {
             self.show_help = false;
             self.dirty = true;
             return true;

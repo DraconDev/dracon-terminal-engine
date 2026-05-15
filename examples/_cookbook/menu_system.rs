@@ -282,6 +282,7 @@ impl Widget for MenuApp {
         plane.z_index = 0;
         for cell in plane.cells.iter_mut() {
             cell.bg = self.theme.bg;
+            cell.transparent = false;
         }
 
         let (hdr, ftr) = (1u16, 1u16);

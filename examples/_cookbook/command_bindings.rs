@@ -69,7 +69,7 @@ impl CommandBindings {
             tick: 0,
             cpu_value: 50.0,
             show_help: false,
-            keybindings: KeybindingSet::default(),
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             should_quit,
         }
     }
@@ -325,6 +325,7 @@ impl Widget for CommandBindings {
         for c in p.cells.iter_mut() {
             c.bg = t.bg;
             c.fg = t.fg;
+            c.transparent = false;
         }
 
         let w = area.width as usize;

@@ -144,10 +144,7 @@ impl GameState {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Inherit theme from showcase launcher via DTRON_THEME env var
-    let theme = std::env::var("DTRON_THEME")
-        .ok()
-        .and_then(|n| Theme::from_name(&n))
-        .unwrap_or_else(Theme::dark);
+    let theme = Theme::from_env_or(Theme::dark());
 
     let mut term = Terminal::new(io::stdout())?;
 
@@ -202,14 +199,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             term,
                             "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h"
                         )?;
-                        term.flush()?;
-                        write_theme_file();
-                        return Ok(());
-                    }
-                    Some(Event::Key(KeyEvent { code: KeyCode::Char('c'), ref modifiers, .. }))
-                        if modifiers.contains(KeyModifiers::CONTROL) =>
-                    {
-                        write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
                         term.flush()?;
                         write_theme_file();
                         return Ok(());
