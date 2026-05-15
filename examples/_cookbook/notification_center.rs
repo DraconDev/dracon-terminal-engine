@@ -135,11 +135,11 @@ impl Widget for NotifierApp {
                 let bot = ((by + btn_h - 1) * area.width + cx) as usize;
                 if top < plane.cells.len() {
                     plane.cells[top].char = '─';
-                    plane.cells[top].fg = color;
+                    plane.cells[top].fg = *color;
                 }
                 if bot < plane.cells.len() {
                     plane.cells[bot].char = '─';
-                    plane.cells[bot].fg = color;
+                    plane.cells[bot].fg = *color;
                 }
             }
             for cy in by..by + btn_h {
@@ -147,11 +147,11 @@ impl Widget for NotifierApp {
                 let right = (cy * area.width + bx + btn_w - 1) as usize;
                 if left < plane.cells.len() {
                     plane.cells[left].char = '│';
-                    plane.cells[left].fg = color;
+                    plane.cells[left].fg = *color;
                 }
                 if right < plane.cells.len() {
                     plane.cells[right].char = '│';
-                    plane.cells[right].fg = color;
+                    plane.cells[right].fg = *color;
                 }
             }
 
@@ -160,7 +160,7 @@ impl Widget for NotifierApp {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = *ch;
-                    plane.cells[idx].fg = color;
+                    plane.cells[idx].fg = *color;
                 }
             }
 
