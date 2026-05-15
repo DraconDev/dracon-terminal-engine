@@ -1693,7 +1693,7 @@ impl Showcase {
             }
             if self.keybindings.matches(actions::BACK, &key) {
                 if !self.scene_router.handle_key(key) {
-                    self.scene_router.pop();
+                    self.scene_router.pop_force();
                 }
                 return true;
             }
