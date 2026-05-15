@@ -63,12 +63,14 @@ pub fn set_cell(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: 
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn set_cell_bounded(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Color, bg: Color, min_x: usize, max_x: usize, min_y: usize, max_y: usize) {
     if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
         set_cell(plane, x, y, ch, fg, bg);
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_text_bounded(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, style: Styles, min_x: usize, max_x: usize, min_y: usize, max_y: usize) {
     if y < min_y || y > max_y { return; }
     for (i, ch) in text.chars().enumerate() {
@@ -391,7 +393,7 @@ fn render_live_gauge_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize
         ("DISK", (phase * 15.0).sin() * 20.0 + 40.0),
         ("NET", (phase * 25.0).sin() * 50.0 + 50.0),
     ];
-    let bar_w = (card_w - 12).min(14).max(4);
+    let bar_w = (card_w - 12).clamp(4, 14);
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
         if y > oy + 11 || y > max_y { break; }
@@ -483,7 +485,7 @@ fn render_widget_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy
         draw_text_bounded(plane, ox + 2, py, &text, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
     let slider_y = oy + 10;
-    let slider_w = (card_w - 6).min(18).max(4);
+    let slider_w = (card_w - 6).clamp(4, 18);
     let thumb = ((phase * 2.0).sin() * 0.5 + 0.5 * slider_w as f64).round() as usize;
     let thumb = thumb.min(slider_w - 1);
     draw_text_bounded(plane, ox + 2, slider_y, "[", t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
@@ -618,7 +620,7 @@ fn render_menu_system_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usiz
     let max_y = oy + card_w / 2 + 4;
     let menus: Vec<&str> = if card_w >= 40 { vec!["File", "Edit", "View", "Help"] } else if card_w >= 28 { vec!["File", "Edit", "View"] } else { vec!["File", "Edit"] };
     let highlight_idx = ((phase * 2.0) as usize) % menus.len();
-    let menu_w = (card_w / menus.len().max(1)).min(8).max(4);
+    let menu_w = (card_w / menus.len().max(1)).clamp(4, 8);
     for (i, menu) in menus.iter().enumerate() {
         let x = ox + 2 + i * (menu_w + 1);
         if x > max_x { break; }
