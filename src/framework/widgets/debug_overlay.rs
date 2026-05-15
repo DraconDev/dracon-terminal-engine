@@ -4,7 +4,7 @@
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A debug overlay displaying key-value diagnostic pairs.
@@ -121,7 +121,7 @@ impl crate::framework::widget::Widget for DebugOverlay {
     }
 }
 
-impl crate::framework::widget::WidgetState for DebugOverlay {
+impl WidgetState for DebugOverlay {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

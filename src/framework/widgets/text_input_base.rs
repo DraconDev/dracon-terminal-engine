@@ -4,7 +4,7 @@
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for text submission.
@@ -205,7 +205,7 @@ impl BaseInput {
     }
 }
 
-impl crate::framework::widget::WidgetState for BaseInput {
+impl WidgetState for BaseInput {
     fn state_id(&self) -> Option<&str> {
         Some("text_input")
     }

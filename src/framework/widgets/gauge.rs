@@ -20,7 +20,7 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::command::BoundCommand;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 pub struct Gauge {
@@ -255,7 +255,7 @@ impl Widget for Gauge {
     }
 }
 
-impl crate::framework::widget::WidgetState for Gauge {
+impl WidgetState for Gauge {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

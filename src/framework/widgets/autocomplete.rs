@@ -7,7 +7,7 @@
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use crate::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -415,7 +415,7 @@ impl Widget for Autocomplete {
     }
 }
 
-impl crate::framework::widget::WidgetState for Autocomplete {
+impl WidgetState for Autocomplete {
     fn state_id(&self) -> Option<&str> {
         Some("autocomplete")
     }

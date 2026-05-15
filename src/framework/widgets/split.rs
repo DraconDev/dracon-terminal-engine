@@ -2,7 +2,7 @@
 
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// The direction in which a split pane divides the screen.
@@ -341,7 +341,7 @@ impl crate::framework::widget::Widget for SplitPane {
     }
 }
 
-impl crate::framework::widget::WidgetState for SplitPane {
+impl WidgetState for SplitPane {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

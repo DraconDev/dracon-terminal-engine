@@ -5,7 +5,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A horizontal tab bar widget with clickable and keyboard-navigable tabs.
@@ -229,7 +229,7 @@ impl crate::framework::widget::Widget for TabBar {
     }
 }
 
-impl crate::framework::widget::WidgetState for TabBar {
+impl WidgetState for TabBar {
     fn state_id(&self) -> Option<&str> {
         Some("tabbar")
     }

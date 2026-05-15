@@ -5,7 +5,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 use std::path::Path;
 
@@ -259,7 +259,7 @@ impl crate::framework::widget::Widget for Breadcrumbs {
     }
 }
 
-impl crate::framework::widget::WidgetState for Breadcrumbs {
+impl WidgetState for Breadcrumbs {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

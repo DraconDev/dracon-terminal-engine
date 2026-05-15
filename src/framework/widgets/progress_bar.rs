@@ -4,7 +4,7 @@
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A progress bar widget.
@@ -135,7 +135,7 @@ impl crate::framework::widget::Widget for ProgressBar {
     }
 }
 
-impl crate::framework::widget::WidgetState for ProgressBar {
+impl WidgetState for ProgressBar {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

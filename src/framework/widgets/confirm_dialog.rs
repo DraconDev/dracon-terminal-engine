@@ -20,7 +20,7 @@
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::command::BoundCommand;
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -472,7 +472,7 @@ impl Widget for ConfirmDialog {
     }
 }
 
-impl crate::framework::widget::WidgetState for ConfirmDialog {
+impl WidgetState for ConfirmDialog {
     fn state_id(&self) -> Option<&str> {
         Some("confirm_dialog")
     }

@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 use unicode_width::UnicodeWidthStr;
 
@@ -682,7 +682,7 @@ impl crate::framework::widget::Widget for Kanban {
     }
 }
 
-impl crate::framework::widget::WidgetState for Kanban {
+impl WidgetState for Kanban {
     fn state_id(&self) -> Option<&str> {
         Some("kanban")
     }

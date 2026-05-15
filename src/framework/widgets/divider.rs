@@ -4,7 +4,7 @@
 
 use crate::compositor::Plane;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Direction of the divider.
@@ -194,7 +194,7 @@ impl crate::framework::widget::Widget for Divider {
     }
 }
 
-impl crate::framework::widget::WidgetState for Divider {
+impl WidgetState for Divider {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

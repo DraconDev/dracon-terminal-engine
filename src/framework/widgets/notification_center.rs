@@ -7,7 +7,7 @@
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::input::event::MouseEventKind;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -328,7 +328,7 @@ impl crate::framework::widget::Widget for NotificationCenter {
     }
 }
 
-impl crate::framework::widget::WidgetState for NotificationCenter {
+impl WidgetState for NotificationCenter {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

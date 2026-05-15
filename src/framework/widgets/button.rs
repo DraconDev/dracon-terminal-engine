@@ -4,7 +4,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A clickable button widget.
@@ -194,7 +194,7 @@ impl crate::framework::widget::Widget for Button {
     }
 }
 
-impl crate::framework::widget::WidgetState for Button {
+impl WidgetState for Button {
     fn state_id(&self) -> Option<&str> {
         Some("button")
     }

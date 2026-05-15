@@ -5,7 +5,7 @@
 
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for point click events.
@@ -441,7 +441,7 @@ impl crate::framework::widget::Widget for Sparkline {
     }
 }
 
-impl crate::framework::widget::WidgetState for Sparkline {
+impl WidgetState for Sparkline {
     fn state_id(&self) -> Option<&str> {
         None
     }

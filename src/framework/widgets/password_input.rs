@@ -1,7 +1,6 @@
 //! Password input widget with character masking.
 
-use crate::framework::widget::Widget;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A password input widget that masks characters as they're typed.
@@ -124,7 +123,7 @@ impl Widget for PasswordInput {
     }
 }
 
-impl crate::framework::widget::WidgetState for PasswordInput {
+impl WidgetState for PasswordInput {
     fn state_id(&self) -> Option<&str> {
         Some("password_input")
     }

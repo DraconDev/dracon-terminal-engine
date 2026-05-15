@@ -7,7 +7,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A validation rule for form field values.
@@ -437,7 +437,7 @@ impl crate::framework::widget::Widget for Form {
     }
 }
 
-impl crate::framework::widget::WidgetState for Form {
+impl WidgetState for Form {
     fn state_id(&self) -> Option<&str> {
         Some("form")
     }

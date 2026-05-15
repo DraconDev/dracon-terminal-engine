@@ -7,7 +7,7 @@ use chrono::{Datelike, Local, NaiveDate};
 use crate::compositor::{Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for single date selection.
@@ -596,7 +596,7 @@ impl crate::framework::widget::Widget for Calendar {
     }
 }
 
-impl crate::framework::widget::WidgetState for Calendar {
+impl WidgetState for Calendar {
     fn state_id(&self) -> Option<&str> {
         Some("calendar")
     }

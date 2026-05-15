@@ -7,7 +7,7 @@
 
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for color change events.
@@ -482,7 +482,7 @@ impl crate::framework::widget::Widget for ColorPicker {
     }
 }
 
-impl crate::framework::widget::WidgetState for ColorPicker {
+impl WidgetState for ColorPicker {
     fn state_id(&self) -> Option<&str> {
         Some("color_picker")
     }

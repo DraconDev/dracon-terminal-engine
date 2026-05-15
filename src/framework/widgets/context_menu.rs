@@ -3,7 +3,7 @@
 use crate::compositor::Plane;
 use crate::framework::hitzone::HitZone;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
@@ -327,7 +327,7 @@ impl crate::framework::widget::Widget for ContextMenu {
     }
 }
 
-impl crate::framework::widget::WidgetState for ContextMenu {
+impl WidgetState for ContextMenu {
     fn state_id(&self) -> Option<&str> {
         Some("context_menu")
     }

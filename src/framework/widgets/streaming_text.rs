@@ -20,7 +20,7 @@ use std::collections::VecDeque;
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::command::{BoundCommand, ParsedOutput};
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 pub struct StreamingText {
@@ -246,7 +246,7 @@ impl Widget for StreamingText {
     }
 }
 
-impl crate::framework::widget::WidgetState for StreamingText {
+impl WidgetState for StreamingText {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

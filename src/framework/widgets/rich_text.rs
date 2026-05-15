@@ -5,7 +5,7 @@
 
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 use unicode_width::UnicodeWidthChar;
 
@@ -428,7 +428,7 @@ impl Widget for RichText {
     }
 }
 
-impl crate::framework::widget::WidgetState for RichText {
+impl WidgetState for RichText {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

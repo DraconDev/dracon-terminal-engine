@@ -2,7 +2,7 @@
 
 use crate::compositor::{Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A widget that displays static text.
@@ -125,7 +125,7 @@ impl crate::framework::widget::Widget for Label {
     }
 }
 
-impl crate::framework::widget::WidgetState for Label {
+impl WidgetState for Label {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

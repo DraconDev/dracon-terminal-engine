@@ -6,7 +6,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A single menu item with a label and optional action.
@@ -229,7 +229,7 @@ impl crate::framework::widget::Widget for MenuBar {
     }
 }
 
-impl crate::framework::widget::WidgetState for MenuBar {
+impl WidgetState for MenuBar {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

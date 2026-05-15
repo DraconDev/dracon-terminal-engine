@@ -4,7 +4,7 @@
 
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for when the value changes.
@@ -373,7 +373,7 @@ impl crate::framework::widget::Widget for ProgressRing {
     }
 }
 
-impl crate::framework::widget::WidgetState for ProgressRing {
+impl WidgetState for ProgressRing {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

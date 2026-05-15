@@ -20,7 +20,7 @@ use std::collections::VecDeque;
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::command::{BoundCommand, ParsedOutput};
 use crate::framework::theme::Theme;
-use crate::framework::widget::{Widget, WidgetId};
+use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone)]
@@ -415,7 +415,7 @@ impl Widget for LogViewer {
     }
 }
 
-impl crate::framework::widget::WidgetState for LogViewer {
+impl WidgetState for LogViewer {
     fn state_id(&self) -> Option<&str> { None }
     fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
     fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }

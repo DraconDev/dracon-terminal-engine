@@ -4,7 +4,7 @@
 
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 use std::time::{Duration, Instant};
 
@@ -162,7 +162,7 @@ impl crate::framework::widget::Widget for Toast {
     }
 }
 
-impl crate::framework::widget::WidgetState for Toast {
+impl WidgetState for Toast {
     fn state_id(&self) -> Option<&str> {
         Some("toast")
     }

@@ -6,7 +6,7 @@
 use crate::compositor::{Color, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -534,7 +534,7 @@ impl crate::framework::widget::Widget for CommandPalette {
     }
 }
 
-impl crate::framework::widget::WidgetState for CommandPalette {
+impl WidgetState for CommandPalette {
     fn state_id(&self) -> Option<&str> {
         Some("command_palette")
     }

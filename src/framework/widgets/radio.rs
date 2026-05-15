@@ -6,7 +6,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// A radio button widget.
@@ -192,7 +192,7 @@ impl crate::framework::widget::Widget for Radio {
     }
 }
 
-impl crate::framework::widget::WidgetState for Radio {
+impl WidgetState for Radio {
     fn state_id(&self) -> Option<&str> {
         Some("radio")
     }

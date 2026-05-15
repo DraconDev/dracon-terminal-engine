@@ -6,7 +6,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Plane, Styles};
 use crate::framework::theme::Theme;
-use crate::framework::widget::WidgetId;
+use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
 /// Callback type for tag add events.
@@ -666,7 +666,7 @@ impl crate::framework::widget::Widget for TagsInput {
     }
 }
 
-impl crate::framework::widget::WidgetState for TagsInput {
+impl WidgetState for TagsInput {
     fn state_id(&self) -> Option<&str> {
         Some("tags_input")
     }
