@@ -1643,6 +1643,17 @@ impl Showcase {
                 // Check non-card zones for hover (palette, sidebar, primitives)
                 let hovered_zone = self.zones.borrow().dispatch(col, row);
                 if hovered_zone.is_some() {
+                    // Clear any active card hover before returning
+                    if let Some(prev_hover) = self.hovered_card {
+                        if prev_hover < self.card_hover_anim.len() {
+                            let anim_id = self.animations.start(1.0, 0.0, Duration::from_millis(150));
+                            self.card_hover_anim[prev_hover] = Some(anim_id);
+                        }
+                    }
+                    self.hovered_card = None;
+                    self.tooltip_text = None;
+                    self.tooltip_timer = None;
+                    self.tooltip_pos = None;
                     return true;
                 }
                 // Clear hover and start exit animations
