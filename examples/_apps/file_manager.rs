@@ -157,6 +157,7 @@ impl FsNode {
             "L"
         } else {
             "F"
+        }
     }
 
     fn to_tree_node(&self, expanded: bool) -> TreeNode {
