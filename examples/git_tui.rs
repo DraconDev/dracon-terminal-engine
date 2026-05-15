@@ -946,7 +946,7 @@ impl GitTui {
             if section_h > 2 && row + section_h < y + h {
                 draw_rounded_border(plane, 2, row, 40, section_h, t);
             }
-            draw_text(plane, 4, row, " 󰘦 Local", t.secondary, t.surface, true);
+            draw_text(plane, 4, row, " * Local", t.secondary, t.surface, true);
             draw_text(
                 plane,
                 16,
@@ -971,7 +971,7 @@ impl GitTui {
                 } else {
                     t.surface
                 };
-                let marker = if branch.current { " 󰘦 " } else { "   " };
+                let marker = if branch.current { " * " } else { "   " };
                 draw_text(
                     plane,
                     4,
