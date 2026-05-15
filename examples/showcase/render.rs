@@ -382,54 +382,60 @@ pub fn render_card(
     }
 }
 
-fn render_live_gauge_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_live_gauge_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let items = [
         ("CPU", (phase * 30.0).sin() * 40.0 + 50.0),
         ("MEM", (phase * 20.0).sin() * 30.0 + 60.0),
         ("DISK", (phase * 15.0).sin() * 20.0 + 40.0),
         ("NET", (phase * 25.0).sin() * 50.0 + 50.0),
     ];
+    let bar_w = (card_w - 12).min(14).max(4);
     for (i, (label, value)) in items.iter().enumerate() {
         let y = oy + 6 + i;
-        if y > oy + 11 { break; }
-        let bar_w = 14;
+        if y > oy + 11 || y > max_y { break; }
         let val = value.clamp(0.0, 100.0);
         let fill = ((val / 100.0) * bar_w as f64).round() as usize;
         let color = if val > 80.0 { t.error } else if val > 60.0 { t.warning } else { t.success };
-        draw_text(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty());
-        set_cell(plane, ox + 6, y, '[', t.fg_muted, t.surface);
+        draw_text_bounded(plane, ox + 2, y, label, t.fg_muted, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+        set_cell_bounded(plane, ox + 6, y, '[', t.fg_muted, t.surface, ox + 1, max_x, oy + 1, max_y);
         for j in 0..bar_w {
             let ch = if j < fill { '█' } else { '░' };
             let fg = if j < fill { color } else { t.fg_muted };
-            set_cell(plane, ox + 7 + j, y, ch, fg, t.surface);
+            set_cell_bounded(plane, ox + 7 + j, y, ch, fg, t.surface, ox + 1, max_x, oy + 1, max_y);
         }
-        set_cell(plane, ox + 7 + bar_w, y, ']', t.fg_muted, t.surface);
+        set_cell_bounded(plane, ox + 7 + bar_w, y, ']', t.fg_muted, t.surface, ox + 1, max_x, oy + 1, max_y);
         let pct = format!("{:>3}%", val.round() as u32);
-        draw_text(plane, ox + 7 + bar_w + 2, y, &pct, color, t.surface, Styles::BOLD);
+        draw_text_bounded(plane, ox + 7 + bar_w + 2, y, &pct, color, t.surface, Styles::BOLD, ox + 1, max_x, oy + 1, max_y);
     }
 }
 
-fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_split_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let split_x = (4.0 + (phase * 0.5).sin() * 3.0).round() as usize;
-    let split_x = split_x.min(25);
-    let w = 26;
-    for y in oy + 6..oy + 12 {
+    let split_x = split_x.min(card_w - 4).max(2);
+    let w = (card_w - 2).min(26);
+    for y in oy + 6..oy + 12.min(oy + card_w / 2 + 6) {
         for x in ox + 1..ox + w {
             let bg = if x - ox <= split_x { t.surface_elevated } else { t.surface };
             let fg = if x - ox <= split_x { t.fg_muted } else { t.fg_subtle };
-            set_cell(plane, x, y, ' ', fg, bg);
+            set_cell_bounded(plane, x, y, ' ', fg, bg, ox + 1, max_x, oy + 1, max_y);
         }
     }
-    for y in oy + 6..oy + 12 {
-        set_cell(plane, ox + split_x, y, '│', t.primary, t.surface_elevated);
+    for y in oy + 6..oy + 12.min(oy + card_w / 2 + 6) {
+        set_cell_bounded(plane, ox + split_x, y, '│', t.primary, t.surface_elevated, ox + 1, max_x, oy + 1, max_y);
     }
-    draw_text(plane, ox + 2, oy + 7, "A", t.fg, t.surface_elevated, Styles::empty());
-    draw_text(plane, ox + split_x + 2, oy + 7, "B", t.fg, t.surface, Styles::empty());
-    let label = format!("{}:{}", split_x, 26 - split_x);
-    draw_text(plane, ox + w / 2 - 3, oy + 11, &label, t.fg_muted, t.bg, Styles::empty());
+    draw_text_bounded(plane, ox + 2, oy + 7, "A", t.fg, t.surface_elevated, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    draw_text_bounded(plane, ox + split_x + 2, oy + 7, "B", t.fg, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
+    let label = format!("{}:{}", split_x, w - split_x);
+    draw_text_bounded(plane, ox + w / 2 - 3, oy + 11, &label, t.fg_muted, t.bg, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
 }
 
-fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize) {
+fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, oy: usize, card_w: usize, _card_h: usize) {
+    let max_x = ox + card_w - 2;
+    let max_y = oy + card_w / 2 + 4;
     let lines = [
         format!("Load: {:.2}", 0.45 + (phase * 0.3).sin() * 0.2),
         format!("CPU:  [{}{}]", "█".repeat(((phase * 4.0).sin() + 1.0) as usize), "░".repeat(6)),
@@ -438,9 +444,10 @@ fn render_command_preview(plane: &mut Plane, t: &Theme, phase: f64, ox: usize, o
     ];
     for (i, line) in lines.iter().enumerate() {
         let py = oy + 6 + i;
-        if py > oy + 11 { break; }
-        let truncated: String = line.chars().take(24).collect();
-        draw_text(plane, ox + 2, py, &truncated, t.fg_subtle, t.surface, Styles::empty());
+        if py > oy + 11 || py > max_y { break; }
+        let max_len = max_x - (ox + 2) + 1;
+        let truncated: String = line.chars().take(max_len).collect();
+        draw_text_bounded(plane, ox + 2, py, &truncated, t.fg_subtle, t.surface, Styles::empty(), ox + 1, max_x, oy + 1, max_y);
     }
 }
 
