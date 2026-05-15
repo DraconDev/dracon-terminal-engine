@@ -10,6 +10,7 @@
 //! and interact with the controls to hear announcements.
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::visuals::accessibility::{Accessibility, Role};
 
 /// A simple accessible button widget.
@@ -283,7 +284,7 @@ struct AccessibilityDemo {
     theme: Theme,
     show_help: bool,
     dirty: bool,
-    // Sub-widgets
+    keybindings: KeybindingSet,
     submit_btn: AccessibleButton,
     cancel_btn: AccessibleButton,
     notifications_toggle: AccessibleToggle,
@@ -298,6 +299,7 @@ impl AccessibilityDemo {
             theme: theme.clone(),
             show_help: false,
             dirty: true,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             submit_btn: AccessibleButton::new(WidgetId::new(2), "Submit", theme.clone()),
             cancel_btn: AccessibleButton::new(WidgetId::new(3), "Cancel", theme.clone()),
             notifications_toggle: AccessibleToggle::new(
@@ -441,11 +443,14 @@ impl Widget for AccessibilityDemo {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.code == KeyCode::Char('?') && key.modifiers.is_empty() {
+        if self.keybindings.matches(actions::QUIT, &key) {
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
             self.dirty = true;
             true
-        } else if key.code == KeyCode::Esc && self.show_help {
+        } else if self.keybindings.matches(actions::BACK, &key) && self.show_help {
             self.show_help = false;
             self.dirty = true;
             true

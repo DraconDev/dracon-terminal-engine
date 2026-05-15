@@ -619,95 +619,141 @@ impl Default for ColorPicker {
 /// - Use different themes
 /// - Handle keyboard navigation between widgets
 fn main() -> std::io::Result<()> {
-    // List of themes to cycle through
     let themes: Vec<Theme> = Theme::all().to_vec();
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+    let show_help = Arc::new(AtomicBool::new(false));
+    let help_check = Arc::clone(&show_help);
 
-    // ---- Create the App with builder pattern ----
     let mut app = App::new()?
         .title("Widget Tutorial: ColorPicker")
         .fps(30)
         .theme(Theme::from_env_or(Theme::nord()));
 
-    // Current theme index (read-only for this tutorial)
-    let current_theme_idx = 0;
-    let current_theme = themes[current_theme_idx].clone();
-
     let kb_config = resolve_keybindings();
-    let _keybindings = KeybindingSet::from_config(&kb_config);
-    let _kb_theme = kb_config.get(actions::THEME).unwrap_or("t");
+    let keybindings = KeybindingSet::from_config(&kb_config);
 
-    // ---- Create multiple ColorPicker instances ----
-    //
-    // We'll create a 2x2 grid of color pickers with different initial colors
-    // to demonstrate that each instance maintains its own state.
+    let current_theme = app.theme().clone();
 
-    // Row 1: Red and Green pickers
-    let red_picker = ColorPicker::new(current_theme.clone())
-        .initial_color("Red");
+    let red_picker = ColorPicker::new(current_theme.clone()).initial_color("Red");
+    let green_picker = ColorPicker::new(current_theme.clone()).initial_color("Green");
+    let blue_picker = ColorPicker::new(current_theme.clone()).initial_color("Blue");
+    let yellow_picker = ColorPicker::new(current_theme.clone()).initial_color("Yellow");
 
-    let green_picker = ColorPicker::new(current_theme.clone())
-        .initial_color("Green");
-
-    // Row 2: Blue and Yellow pickers
-    let blue_picker = ColorPicker::new(current_theme.clone())
-        .initial_color("Blue");
-
-    let yellow_picker = ColorPicker::new(current_theme.clone())
-        .initial_color("Yellow");
-
-    // Header and footer labels
     let mut header = dracon_terminal_engine::framework::widgets::Label::new(
         "←/→ to change color | Click swatch to cycle | Tab to navigate",
     );
     let mut footer = dracon_terminal_engine::framework::widgets::Label::new(&format!(
         "Theme: {}",
-        &themes[current_theme_idx].display_name
+        &current_theme.display_name
     ));
-
-    // Propagate initial theme to all widgets
     header.on_theme_change(&current_theme);
     footer.on_theme_change(&current_theme);
-
-    // ---- Add widgets to the app with their areas ----
-    //
-    // The area is (x, y, width, height) in terminal cells.
-    // We're creating a 2x2 grid layout.
 
     let picker_width = 25u16;
     let picker_height = 6u16;
 
-    // Add each picker to the app - the app assigns IDs and calls on_mount()
-    let _id1 = app.add_widget(
-        Box::new(red_picker),
-        Rect::new(0, 0, picker_width, picker_height),
-    );
-    let _id2 = app.add_widget(
-        Box::new(green_picker),
-        Rect::new(26, 0, picker_width, picker_height),
-    );
-    let _id3 = app.add_widget(
-        Box::new(blue_picker),
-        Rect::new(0, 7, picker_width, picker_height),
-    );
-    let _id4 = app.add_widget(
-        Box::new(yellow_picker),
-        Rect::new(26, 7, picker_width, picker_height),
-    );
+    let _id1 = app.add_widget(Box::new(red_picker), Rect::new(0, 0, picker_width, picker_height));
+    let _id2 = app.add_widget(Box::new(green_picker), Rect::new(26, 0, picker_width, picker_height));
+    let _id3 = app.add_widget(Box::new(blue_picker), Rect::new(0, 7, picker_width, picker_height));
+    let _id4 = app.add_widget(Box::new(yellow_picker), Rect::new(26, 7, picker_width, picker_height));
 
-    // ---- Add header and footer labels ----
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 14, 80, 1));
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
 
-    // ---- Run the app ----
-    //
-    // The run() function starts the event loop:
-    // - Reads keyboard/mouse input
-    // - Routes events to focused widgets
-    // - Calls render() on dirty widgets each frame
-    // - Responds to window resize
-    //
-    // The closure is called each frame (render callback).
-    app.run(|_| {})
+    let kb = keybindings;
+    let q = should_quit;
+    let h = show_help;
+    app.on_input(move |key| {
+        if kb.matches(actions::QUIT, &key) {
+            q.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if kb.matches(actions::HELP, &key) {
+            let new_val = !h.load(Ordering::SeqCst);
+            h.store(new_val, Ordering::SeqCst);
+            return true;
+        }
+        if kb.matches(actions::BACK, &key) && h.load(Ordering::SeqCst) {
+            h.store(false, Ordering::SeqCst);
+            return true;
+        }
+        if kb.matches(actions::THEME, &key) {
+            return true;
+        }
+        false
+    })
+    .on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
+        let (w, h) = ctx.compositor().size();
+        if help_check.load(Ordering::SeqCst) {
+            let t = ctx.theme();
+            let area = Rect::new(0, 0, w, h);
+            let mut plane = Plane::new(0, area.width, area.height);
+            plane.fill_bg(t.bg);
+            let hw = 40u16.min(area.width.saturating_sub(4));
+            let hh = 10u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.surface_elevated;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            }
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * area.width + x) as usize;
+                let bot = ((hy + hh - 1) * area.width + x) as usize;
+                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * area.width + hx) as usize;
+                let right = (y * area.width + hx + hw - 1) as usize;
+                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            }
+            let title = "ColorPicker Help";
+            let tx = hx + (hw - title.len() as u16) / 2;
+            for (i, c) in title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+            }
+            let shortcuts = [
+                ("←/→", "Change color"),
+                ("Enter/Spc", "Cycle color"),
+                ("Tab", "Navigate pickers"),
+                ("Ctrl+T", "Cycle theme"),
+                ("F1", "Toggle help"),
+                ("Ctrl+Q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                }
+            }
+            plane.z_index = 100;
+            ctx.add_plane(plane);
+        }
+    })
+    .run(|_| {})
 }
 
 // ============================================================================
