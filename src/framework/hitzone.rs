@@ -22,7 +22,6 @@ pub enum ClickKind {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DragState {
     /// Drag started at the given coordinates.
-    /// Drag started at the given coordinates.
     Started {
         /// X coordinate.
         x: u16,
@@ -30,14 +29,12 @@ pub enum DragState {
         y: u16,
     },
     /// Drag moved to the given coordinates.
-    /// Drag moved to the given coordinates.
     Moved {
         /// X coordinate.
         x: u16,
         /// Y coordinate.
         y: u16,
     },
-    /// Drag ended at the given coordinates.
     /// Drag ended at the given coordinates.
     Ended {
         /// X coordinate.
@@ -167,7 +164,11 @@ impl<T: Clone + 'static> HitZone<T> {
                     })
                     .unwrap_or(false);
 
-                self.click_count = if is_double { 2 } else { 1 };
+                if is_double {
+                    self.click_count = self.click_count.saturating_add(1).min(3);
+                } else {
+                    self.click_count = 1;
+                }
                 self.last_click_time = Some(now);
                 self.last_click_pos = Some((col, row));
 
