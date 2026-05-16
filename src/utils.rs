@@ -430,12 +430,19 @@ pub fn format_permissions(mode: u32) -> String {
 }
 
 use std::sync::OnceLock;
+
+#[cfg(feature = "syntax-highlighting")]
 use syntect::easy::HighlightLines;
+#[cfg(feature = "syntax-highlighting")]
 use syntect::highlighting::{FontStyle, ThemeSet};
+#[cfg(feature = "syntax-highlighting")]
 use syntect::parsing::SyntaxSet;
+#[cfg(feature = "syntax-highlighting")]
 use syntect::util::LinesWithEndings;
 
+#[cfg(feature = "syntax-highlighting")]
 static SYNTAX_SET: OnceLock<SyntaxSet> = OnceLock::new();
+#[cfg(feature = "syntax-highlighting")]
 static THEME_SET: OnceLock<ThemeSet> = OnceLock::new();
 
 // In-memory clipboard fallback for headless/test environments.
