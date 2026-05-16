@@ -580,6 +580,15 @@ impl App {
         }
     }
 
+    fn focused_cursor_position(&self) -> Option<(u16, u16)> {
+        let focused_id = self.focus_manager.focused()?;
+        let widgets = self.widgets.borrow();
+        widgets
+            .iter()
+            .find(|w| w.id() == focused_id)
+            .and_then(|w| w.cursor_position())
+    }
+
     fn render_dirty_widgets(&mut self) {
         #[cfg(feature = "tracing")]
         let _widget_span = tracing::debug_span!("widget_dispatch").entered();
@@ -767,6 +776,13 @@ impl App {
             if !self.compositor.planes.is_empty() {
                 self.compositor.set_dirty_regions(&self.dirty_tracker);
                 self.compositor.render(&mut self.terminal)?;
+            }
+
+            if let Some((col, row)) = self.focused_cursor_position() {
+                let _ = self.terminal.set_cursor(col, row);
+                let _ = self.terminal.show_cursor();
+            } else {
+                let _ = self.terminal.hide_cursor();
             }
 
             self.animations.tick();
@@ -1719,5 +1735,31 @@ macro_rules! with_ctx {
         let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         app.remove_widget(id);
         assert!(app.command_tracking.borrow().is_empty());
+    }
+
+    #[test]
+    fn test_focused_cursor_position_none_when_no_focus() {
+        let app = App::new().unwrap();
+        assert!(app.focused_cursor_position().is_none());
+    }
+
+    #[test]
+    fn test_focused_cursor_position_none_for_non_cursor_widget() {
+        use crate::framework::widgets::Label;
+        let mut app = App::new().unwrap();
+        let label = Label::new("test");
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        app.focus_manager.set_focus(id);
+        assert!(app.focused_cursor_position().is_none());
+    }
+
+    #[test]
+    fn test_focused_cursor_position_some_for_cursor_widget() {
+        use crate::framework::widgets::SearchInput;
+        let mut app = App::new().unwrap();
+        let search = SearchInput::new("search");
+        let id = app.add_widget(Box::new(search), Rect::new(0, 0, 20, 1));
+        app.focus_manager.set_focus(id);
+        assert!(app.focused_cursor_position().is_some());
     }
 }
