@@ -127,6 +127,10 @@ name = "form_validation"
 path = "examples/_cookbook/form_validation.rs"
 
 [[example]]
+name = "scrollable_content"
+path = "examples/_cookbook/scrollable_content.rs"
+
+[[example]]
 name = "showcase"
 path = "examples/showcase/main.rs"
 
