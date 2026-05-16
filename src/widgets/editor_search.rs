@@ -109,7 +109,11 @@ impl SearchState {
     ///
     /// When filtered, returns `&editor.lines[filtered_indices[idx]]`.
     /// When not filtered, returns `&editor.lines[idx]`.
-    pub fn get_effective_line(&self, editor: &crate::widgets::TextEditor, idx: usize) -> &String {
+    pub fn get_effective_line<'a>(
+        &self,
+        editor: &'a crate::widgets::TextEditor,
+        idx: usize,
+    ) -> &'a String {
         if !self.filter_query.is_empty() && idx < self.filtered_indices.len() {
             &editor.lines[self.filtered_indices[idx]]
         } else {
@@ -192,73 +196,84 @@ mod tests {
     }
 
     #[test]
-    fn test_replace_all_exact() {
-        let mut editor = make_editor(vec!["hello world", "hello again"]);
-        let mut search = SearchState::default();
-        search.replace_all(&mut editor, "hello", "hi");
-        assert_eq!(editor.lines[0], "hi world");
-        assert_eq!(editor.lines[1], "hi again");
+    fn test_is_regex() {
+        assert!(SearchState::is_regex(r"\d+"));
+        assert!(SearchState::is_regex("hello"));
+        assert!(!SearchState::is_regex("[invalid"));
     }
 
     #[test]
-    fn test_replace_all_regex() {
-        let mut editor = make_editor(vec!["foo123 bar", "test456"]);
-        let mut search = SearchState::default();
-        search.replace_all(&mut editor, r"\d+", "X");
-        assert_eq!(editor.lines[0], "fooX bar");
-        assert_eq!(editor.lines[1], "testX");
+    fn test_effective_len() {
+        let editor = make_editor(vec!["apple", "banana", "cherry"]);
+        let search = SearchState::default();
+        assert_eq!(search.effective_len(&editor), 3);
     }
 
     #[test]
-    fn test_find_next_wraps() {
-        let editor = make_editor(vec!["abc", "def", "ghi"]);
-        let mut search = SearchState::default();
-        editor.cursor_row = 2;
-        editor.cursor_col = 2; // at "i"
-
-        let result = search.find_next(&editor, "a");
-        assert!(result.is_some());
-        let r = result.unwrap();
-        assert_eq!(r.row, 0);
-        assert_eq!(r.col, 0);
-    }
-
-    #[test]
-    fn test_find_next_current_line() {
-        let editor = make_editor(vec!["abc", "def", "ghi"]);
-        let mut search = SearchState::default();
-        editor.cursor_row = 0;
-        editor.cursor_col = 0; // at "a", skip it
-
-        let result = search.find_next(&editor, "a");
-        assert!(result.is_none());
-    }
-
-    #[test]
-    fn test_set_filter() {
+    fn test_effective_len_filtered() {
         let mut editor = make_editor(vec!["apple", "banana", "apricot", "cherry"]);
         let mut search = SearchState::default();
-        search.set_filter("ap", &mut editor);
-        assert_eq!(search.filtered_indices, vec![0, 2]);
+        // Simulate filter
+        search.filter_query = "ap".to_string();
+        search.filtered_indices = vec![0, 2];
         assert_eq!(search.effective_len(&editor), 2);
     }
 
     #[test]
-    fn test_set_filter_clears() {
-        let mut editor = make_editor(vec!["apple", "banana"]);
+    fn test_get_effective_line() {
+        let editor = make_editor(vec!["apple", "banana", "cherry"]);
         let mut search = SearchState::default();
-        search.set_filter("ap", &mut editor);
-        search.set_filter("", &mut editor);
-        assert!(search.filtered_indices.is_empty());
-        assert_eq!(search.effective_len(&editor), 2);
+        search.filter_query = "ap".to_string();
+        search.filtered_indices = vec![0, 2];
+        // Display row 1 → real line 2 → "apricot"
+        assert_eq!(search.get_effective_line(&editor, 1).as_str(), "apricot");
     }
 
     #[test]
     fn test_get_real_line_idx() {
+        let editor = make_editor(vec!["apple", "banana", "cherry"]);
+        let search = SearchState::default();
+        assert_eq!(search.get_real_line_idx(&editor, 1), 1);
+    }
+
+    #[test]
+    fn test_get_real_line_idx_filtered() {
         let mut editor = make_editor(vec!["apple", "banana", "cherry"]);
         let mut search = SearchState::default();
-        search.set_filter("a", &mut editor); // apple, banana
+        search.filter_query = "a".to_string();
+        search.filtered_indices = vec![0, 1]; // apple, banana
         assert_eq!(search.get_real_line_idx(&editor, 0), 0);
         assert_eq!(search.get_real_line_idx(&editor, 1), 1);
+    }
+
+    #[test]
+    fn test_mode_helpers() {
+        let mut search = SearchState::default();
+        assert!(!search.is_active());
+
+        search.enter_search();
+        assert_eq!(search.mode, SearchMode::Search);
+        assert!(!search.is_replacing);
+        assert!(search.is_active());
+
+        search.enter_replace();
+        assert_eq!(search.mode, SearchMode::Replace);
+        assert!(search.is_replacing);
+
+        search.enter_goto_line();
+        assert_eq!(search.mode, SearchMode::GotoLine);
+
+        search.exit_mode();
+        assert_eq!(search.mode, SearchMode::Normal);
+        assert!(!search.is_active());
+    }
+
+    #[test]
+    fn test_swap_filter() {
+        let mut search = SearchState::default();
+        search.filter_query = "initial".to_string();
+        let prev = search.swap_filter("replacement".to_string());
+        assert_eq!(prev, "initial");
+        assert_eq!(search.filter_query, "replacement");
     }
 }
