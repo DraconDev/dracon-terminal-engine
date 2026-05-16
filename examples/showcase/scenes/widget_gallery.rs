@@ -16,6 +16,7 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 // ── Widget slot positions in the grid (row, col, name, icon) ────────────────
 
@@ -57,10 +58,14 @@ pub struct WidgetGalleryScene {
     zones: RefCell<ScopedZoneRegistry<usize>>,
     area: std::cell::Cell<Rect>,
     keybindings: KeybindingSet,
+    button_clicks: u32,
+    button_bridge: Rc<RefCell<bool>>,
 }
 
 impl WidgetGalleryScene {
     pub fn new(theme: Theme) -> Self {
+        let button_bridge = Rc::new(RefCell::new(false));
+        let button_bridge_cb = Rc::clone(&button_bridge);
         Self {
             selected: 0,
             checkbox: Checkbox::new(WidgetId::new(10), "Enable Feature"),
@@ -72,7 +77,8 @@ impl WidgetGalleryScene {
                 .with_options(vec!["Red".into(), "Green".into(), "Blue".into()]),
             search: SearchInput::new(WidgetId::new(16)),
             progress: ProgressBar::new(WidgetId::new(17)),
-            button: Button::with_id(WidgetId::new(18), "Click Me!"),
+            button: Button::with_id(WidgetId::new(18), "Click Me!")
+                .on_click(move || { *button_bridge_cb.borrow_mut() = true; }),
             color_picker: ColorPicker::new().with_theme(theme.clone()),
             progress_ring: ProgressRing::new(0.65),
             tags_input: TagsInput::new(vec!["rust".to_string(), "tui".to_string()])
@@ -82,6 +88,15 @@ impl WidgetGalleryScene {
             zones: RefCell::new(ScopedZoneRegistry::new()),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            button_clicks: 0,
+            button_bridge,
+        }
+    }
+
+    fn sync_button_bridge(&mut self) {
+        if *self.button_bridge.borrow() {
+            *self.button_bridge.borrow_mut() = false;
+            self.button_clicks += 1;
         }
     }
 
@@ -195,7 +210,7 @@ impl Scene for WidgetGalleryScene {
                         5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
                         6 => format!("query: '{}'", self.search.query()),
                         7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
-                        8 => String::from("[Click me]"),
+                        8 => format!("clicks: {}", self.button_clicks),
                         9 => format!("hex: {}", self.color_picker.hex()),
                         10 => format!("progress: {:.0}%", self.progress_ring.progress() * 100.0),
                         11 => format!("tags: {}", self.tags_input.tags().len()),
@@ -253,7 +268,9 @@ impl Scene for WidgetGalleryScene {
                 true
             }
             KeyCode::Enter | KeyCode::Char(' ') => {
-                self.widget_mut(self.selected).handle_key(key)
+                let result = self.widget_mut(self.selected).handle_key(key);
+                self.sync_button_bridge();
+                result
             }
             _ => self.widget_mut(self.selected).handle_key(key),
         }
@@ -268,7 +285,9 @@ impl Scene for WidgetGalleryScene {
             let rect = self.slot_rect(slot, self.area.get());
             let rel_col = col.saturating_sub(rect.x + 1);
             let rel_row = row.saturating_sub(rect.y + 2);
-            return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+            let result = self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+            self.sync_button_bridge();
+            return result;
         }
         false
     }

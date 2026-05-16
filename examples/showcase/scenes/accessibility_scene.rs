@@ -179,8 +179,11 @@ impl Scene for AccessibilityScene {
                 if self.checkbox.handle_key(key) {
                     self.announce(&format!("Checkbox: {}", if self.checkbox.is_checked() { "checked" } else { "unchecked" }));
                     true
+                } else if self.submit_btn.handle_key(key) {
+                    self.announce("Form submitted successfully");
+                    true
                 } else {
-                    self.submit_btn.handle_key(key)
+                    false
                 }
             }
         }
