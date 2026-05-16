@@ -2,6 +2,7 @@
 //!
 //! Demonstrates screen reader support via OSC 99 announcements.
 
+use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
@@ -225,35 +226,6 @@ impl Scene for AccessibilityScene {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
-    for (i, ch) in text.chars().enumerate() {
-        let idx = (y * plane.width + x + i as u16) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx] = Cell {
-                char: ch, fg, bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false, skip: false,
-            };
-        }
-    }
-}
-
-fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
-    for i in 0..src.cells.len() {
-        let cell = &src.cells[i];
-        if cell.char == '\0' || cell.transparent { continue; }
-        let row = i / src.width as usize;
-        let col = i % src.width as usize;
-        let dy = offset_y + row;
-        let dx = offset_x + col;
-        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
-        let idx = dy * dest.width as usize + dx;
-        if idx < dest.cells.len() {
-            dest.cells[idx] = *cell;
-        }
-    }
-}
 
 fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 50u16.min(area.width.saturating_sub(4));
