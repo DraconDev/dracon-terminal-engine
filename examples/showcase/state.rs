@@ -281,7 +281,7 @@ impl Showcase {
     }
 
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool")
+        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban")
     }
 
     pub fn launch_selected(&mut self) {
