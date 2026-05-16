@@ -11,6 +11,8 @@ use dracon_terminal_engine::framework::widgets::Autocomplete;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct AutocompleteScene {
     autocomplete: Autocomplete,
@@ -19,6 +21,8 @@ pub struct AutocompleteScene {
     selected_item: Option<String>,
     keybindings: KeybindingSet,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
+    selection_bridge: Rc<RefCell<Option<String>>>,
 }
 
 const SUGGESTIONS: [&str; 12] = [
