@@ -7,6 +7,7 @@ pub mod kanban_scene;
 pub mod modal_demo;
 pub mod notification_center_scene;
 pub mod rich_text_scene;
+pub mod shared_helpers;
 pub mod theme_switcher;
 pub mod tree_navigator;
 pub mod widget_gallery;
