@@ -127,4 +127,4 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 
 ## License
 
-MIT or Apache-2.0, at your option.
+AGPL-3.0 only. See [LICENSE](LICENSE) for the full text.
