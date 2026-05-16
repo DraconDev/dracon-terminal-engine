@@ -28,6 +28,20 @@ impl Widget for Showcase {
         0
     }
     fn needs_render(&self) -> bool {
+        // Check if any timed toasts have expired — mark dirty to clean up state
+        if let Some((_, time)) = &self.status_message {
+            if time.elapsed() >= Duration::from_secs(2) {
+                return true;
+            }
+        }
+        if let Ok(guard) = self.returned_from.lock() {
+            if let Some((_, time)) = &*guard {
+                if time.elapsed() >= Duration::from_secs(3) {
+                    return true;
+                }
+            }
+        }
+
         // Re-render when dirty, or when the clock second changes,
         // or when animations are actively running (not just completed-but-uncleaned)
         if self.dirty {
