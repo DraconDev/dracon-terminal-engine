@@ -241,7 +241,7 @@ fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) 
     }
 }
 
-fn render_detail(plane: &mut Plane, area: Rect, t: &Theme) {
+fn render_detail(plane: &mut Plane, area: Rect, t: &Theme, selected: Option<&str>) {
     for y in area.y..area.y + area.height {
         for x in area.x..area.x + area.width {
             let idx = (y * plane.width + x) as usize;
@@ -254,20 +254,52 @@ fn render_detail(plane: &mut Plane, area: Rect, t: &Theme) {
     let title = "Details";
     draw_text(plane, area.x + 1, area.y + 1, title, t.primary, t.surface, true);
 
-    let lines = [
-        "Name: main.rs",
-        "Type: Source file",
-        "Size: 1.2 KB",
-        "",
-        "Select an item from",
-        "the tree to see its",
-        "details here.",
-    ];
-
-    for (i, line) in lines.iter().enumerate() {
-        let y = area.y + 3 + i as u16;
-        if y < area.y + area.height.saturating_sub(1) {
-            draw_text(plane, area.x + 1, y, line, t.fg_muted, t.surface, false);
+    if let Some(name) = selected {
+        let file_type = if name.ends_with(".rs") {
+            "Rust source file"
+        } else if name.ends_with(".toml") {
+            "TOML config file"
+        } else if name.ends_with(".md") {
+            "Markdown document"
+        } else if name == "src" || name == "tests" || name == "root" {
+            "Directory"
+        } else {
+            "File"
+        };
+        let size = if name == "src" || name == "tests" || name == "root" {
+            "--"
+        } else {
+            match name {
+                "main.rs" => "2.4 KB",
+                "lib.rs" => "1.8 KB",
+                "test_main.rs" => "0.9 KB",
+                "README.md" => "3.1 KB",
+                "Cargo.toml" => "0.5 KB",
+                _ => "1.0 KB",
+            }
+        };
+        let lines = [
+            format!("Name: {}", name),
+            format!("Type: {}", file_type),
+            format!("Size: {}", size),
+        ];
+        for (i, line) in lines.iter().enumerate() {
+            let y = area.y + 3 + i as u16;
+            if y < area.y + area.height.saturating_sub(1) {
+                draw_text(plane, area.x + 1, y, line, t.fg, t.surface, false);
+            }
+        }
+    } else {
+        let hint = [
+            "Select an item from",
+            "the tree to see its",
+            "details here.",
+        ];
+        for (i, line) in hint.iter().enumerate() {
+            let y = area.y + 3 + i as u16;
+            if y < area.y + area.height.saturating_sub(1) {
+                draw_text(plane, area.x + 1, y, line, t.fg_muted, t.surface, false);
+            }
         }
     }
 }
