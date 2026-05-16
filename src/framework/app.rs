@@ -181,13 +181,13 @@ impl App {
         }
     }
 
-    fn dispatch_resize(&mut self, w: u16, h: u16) {
-        self.compositor.resize(w, h);
+    fn dispatch_resize(&mut self, new_w: u16, new_h: u16) {
+        self.compositor.resize(new_w, new_h);
         self.dirty_tracker.mark_all_dirty();
-        let rect = Rect::new(0, 0, w, h);
-        for w in self.widgets.borrow_mut().iter_mut() {
-            w.set_area(rect);
-            w.mark_dirty();
+        let rect = Rect::new(0, 0, new_w, new_h);
+        for widget in self.widgets.borrow_mut().iter_mut() {
+            widget.set_area(rect);
+            widget.mark_dirty();
         }
     }
 
@@ -720,11 +720,11 @@ impl App {
         let mut stdin = io::stdin();
         let frame_duration = Duration::from_secs_f64(1.0 / self.fps as f64);
 
-        let (w, h) = self.compositor.size();
-        let full_rect = Rect::new(0, 0, w, h);
-        for w in self.widgets.borrow_mut().iter_mut() {
-            w.set_area(full_rect);
-            w.mark_dirty();
+        let (term_w, term_h) = self.compositor.size();
+        let full_rect = Rect::new(0, 0, term_w, term_h);
+        for widget in self.widgets.borrow_mut().iter_mut() {
+            widget.set_area(full_rect);
+            widget.mark_dirty();
         }
 
         while running.load(Ordering::SeqCst) {

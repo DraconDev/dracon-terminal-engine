@@ -68,6 +68,42 @@ pub fn invalidate_keybinding_cache() {
     }
 }
 
+/// Standard action names used across all examples.
+///
+/// These are the canonical names for actions. Apps can query
+/// `KeybindingSet::matches(action, key_event)` to check if a key
+/// event triggers a given action.
+pub mod actions {
+    pub const QUIT: &str = "quit";
+    pub const HELP: &str = "help";
+    pub const THEME: &str = "theme";
+    pub const BACK: &str = "back";
+    pub const SUBMIT: &str = "submit";
+    pub const TAB_NEXT: &str = "tab_next";
+    pub const TAB_PREV: &str = "tab_prev";
+    pub const NEW_TAB: &str = "new_tab";
+    pub const CLOSE_TAB: &str = "close_tab";
+    pub const SAVE: &str = "save";
+    pub const DELETE: &str = "delete";
+    pub const NEW_ITEM: &str = "new_item";
+    pub const EDIT: &str = "edit";
+    pub const REFRESH: &str = "refresh";
+    pub const SEARCH: &str = "search";
+    pub const CANCEL: &str = "cancel";
+    pub const DISMISS: &str = "dismiss";
+    pub const TREE_MODE: &str = "tree_mode";
+    pub const PAUSE: &str = "pause";
+    // Navigation
+    pub const UP: &str = "up";
+    pub const DOWN: &str = "down";
+    pub const LEFT: &str = "left";
+    pub const RIGHT: &str = "right";
+    pub const PAGE_UP: &str = "page_up";
+    pub const PAGE_DOWN: &str = "page_down";
+    pub const HOME: &str = "home";
+    pub const END: &str = "end";
+}
+
 /// A mapping from action names to keybinding strings.
 ///
 /// Example TOML:
