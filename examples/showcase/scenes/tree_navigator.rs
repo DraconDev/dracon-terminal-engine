@@ -43,6 +43,7 @@ pub struct TreeNavigatorScene {
     show_help: bool,
     area: std::cell::Cell<Rect>,
     keybindings: KeybindingSet,
+    dirty: bool,
 }
 
 impl TreeNavigatorScene {
@@ -81,6 +82,7 @@ impl TreeNavigatorScene {
             show_help: false,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            dirty: true,
         }
     }
 
@@ -137,7 +139,8 @@ impl Scene for TreeNavigatorScene {
         let detail_x = split_x + 1;
         let detail_w = area.width.saturating_sub(detail_x);
         let detail_area = Rect::new(detail_x, 4, detail_w, area.height.saturating_sub(8));
-        render_detail(&mut plane, detail_area, t);
+        let selected_label = self.tree.selected_label().map(|s| s.to_string());
+        render_detail(&mut plane, detail_area, t, selected_label.as_deref());
 
         // Status bar
         let footer_y = area.height.saturating_sub(1);
@@ -164,17 +167,20 @@ impl Scene for TreeNavigatorScene {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
+            self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
             return false;
         }
         if self.tree.handle_key(key) {
+            self.dirty = true;
             return true;
         }
         false
@@ -186,7 +192,10 @@ impl Scene for TreeNavigatorScene {
            row >= tree_area.y && row < tree_area.y + tree_area.height {
             let rel_col = col - tree_area.x;
             let rel_row = row - tree_area.y;
-            return self.tree.handle_mouse(kind, rel_col, rel_row);
+            if self.tree.handle_mouse(kind, rel_col, rel_row) {
+                self.dirty = true;
+                return true;
+            }
         }
         false
     }
@@ -195,11 +204,12 @@ impl Scene for TreeNavigatorScene {
         self.theme = theme.clone();
         self.tree.on_theme_change(theme);
         self.breadcrumbs.on_theme_change(theme);
+        self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
 fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {

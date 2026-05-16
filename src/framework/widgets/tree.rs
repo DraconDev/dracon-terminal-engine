@@ -122,6 +122,10 @@ impl Tree {
         &self.selected_path
     }
 
+    pub fn selected_label(&self) -> Option<&str> {
+        self.get_selected_node(&self.root, &self.selected_path).map(|(node, _)| node.label.as_str())
+    }
+
     fn get_selected_node<'a>(
         &self,
         nodes: &'a [TreeNode],
