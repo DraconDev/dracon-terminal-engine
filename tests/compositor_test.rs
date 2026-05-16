@@ -706,3 +706,11 @@ fn test_compositor_new_default_clear_color_is_reset() {
     let comp = Compositor::new(80, 24);
     assert_eq!(comp.clear_color(), Color::Reset);
 }
+
+#[test]
+fn test_compositor_set_clear_color_overrides_default() {
+    let mut comp = Compositor::new(80, 24);
+    assert_eq!(comp.clear_color(), Color::Reset);
+    comp.set_clear_color(Color::Rgb(16, 16, 24));
+    assert_eq!(comp.clear_color(), Color::Rgb(16, 16, 24));
+}
