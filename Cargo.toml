@@ -233,6 +233,7 @@ path = "examples/scene_router_demo.rs"
 [[example]]
 name = "todo_app"
 path = "examples/todo_app.rs"
+required-features = ["sqlite"]
 
 [[example]]
 name = "tutorial_app"
