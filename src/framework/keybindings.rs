@@ -523,7 +523,7 @@ mod tests {
     #[test]
     fn test_pause_binding_uses_modifier() {
         let config = KeybindingConfig::defaults();
-        let pause_binding = config.get(actions::PAUSE).expect("PAUSE should have a default binding");
+        let pause_binding = config.get(super::actions::PAUSE).expect("PAUSE should have a default binding");
         assert!(
             pause_binding.contains('+'),
             "PAUSE binding '{}' should use a modifier key to avoid text input conflicts",
@@ -534,7 +534,7 @@ mod tests {
     #[test]
     fn test_dismiss_not_ctrl_c() {
         let config = KeybindingConfig::defaults();
-        let dismiss_binding = config.get(actions::DISMISS).expect("DISMISS should have a default binding");
+        let dismiss_binding = config.get(super::actions::DISMISS).expect("DISMISS should have a default binding");
         assert_ne!(
             dismiss_binding, "ctrl+c",
             "DISMISS should not be ctrl+c (conflicts with Copy/SIGINT)"
