@@ -238,8 +238,8 @@ impl crate::framework::widget::Widget for ProgressRing {
 
         // Draw filled ring
         for &(x, y) in &filled_cells {
-            let px = center_x - ring_width / 2 + x as u16;
-            let py = center_y - ring_height / 2 + y as u16;
+            let px = center_x.saturating_sub(ring_width / 2) + x as u16;
+            let py = center_y.saturating_sub(ring_height / 2) + y as u16;
 
             if px < area.width && py < area.height {
                 let idx = (py * area.width + px) as usize;
