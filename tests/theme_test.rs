@@ -1,6 +1,7 @@
 //! Tests for the Theme system.
 
 use dracon_terminal_engine::compositor::Color;
+use dracon_terminal_engine::framework::scroll::DEFAULT_SCROLLBAR_WIDTH;
 use dracon_terminal_engine::framework::theme::Theme;
 use std::sync::Mutex;
 
@@ -469,11 +470,17 @@ fn test_theme_debug() {
 // === Scrollbar width invariant ===
 
 #[test]
-fn test_all_themes_have_scrollbar_width_1() {
+fn test_default_scrollbar_width_constant() {
+    assert_eq!(DEFAULT_SCROLLBAR_WIDTH, 1, "DEFAULT_SCROLLBAR_WIDTH should be 1");
+}
+
+#[test]
+fn test_all_themes_scrollbar_width_invariant() {
     for theme in Theme::all() {
+        #[allow(deprecated)]
         assert_eq!(
-            theme.scrollbar_width, 1,
-            "scrollbar_width for {} should be 1",
+            theme.scrollbar_width, DEFAULT_SCROLLBAR_WIDTH,
+            "scrollbar_width for {} should equal DEFAULT_SCROLLBAR_WIDTH",
             theme.name
         );
     }

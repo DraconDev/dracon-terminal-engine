@@ -113,6 +113,7 @@ pub struct Theme {
     /// **Deprecated:** Layout dimensions should not live in Theme.
     /// Use [`crate::framework::scroll::DEFAULT_SCROLLBAR_WIDTH`] instead.
     /// This field is kept for backward compatibility and will be removed in a future release.
+    #[deprecated(since = "0.3.0", note = "Use framework::scroll::DEFAULT_SCROLLBAR_WIDTH instead")]
     #[doc(hidden)]
     pub scrollbar_width: u16,
 }
