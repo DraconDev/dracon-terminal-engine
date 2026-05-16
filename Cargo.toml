@@ -19,7 +19,6 @@ exclude = [
     "rust_out/**",
     ".sisyphus/**",
     "plans/**",
-    
 ]
 
 [features]

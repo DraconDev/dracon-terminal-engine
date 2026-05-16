@@ -6,7 +6,7 @@
 //! - Sparkline history graphs for each metric
 //! - Color-coded status indicators
 //! - Draggable panel resize
-//! - Theme cycling (20 themes)
+//! - Theme cycling (21 themes)
 //! - Pause/resume updates
 //! - Process table with selection
 //!

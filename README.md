@@ -106,6 +106,12 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`Tooltip`] | Hover tooltip overlay |
 | [`Tree`] | Expandable/collapsible tree view |
 | [`WidgetInspector`] | Widget tree inspector |
+| [`ColorPicker`] | Color swatch picker with hex input |
+| [`Divider`] | Horizontal/vertical separator line |
+| [`Kanban`] | Kanban board with draggable columns/cards |
+| [`ProgressRing`] | Circular progress indicator |
+| [`Sparkline`] | Mini inline chart for trending data |
+| [`TagsInput`] | Tag input with autocomplete and remove |
 
 ### Utilities
 | Module | What |
@@ -113,7 +119,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`DirtyRegionTracker`] | Efficient partial screen updates |
 | [`AnimationManager`] | Tweening animations with easing curves |
 | [`Layout`] | Constraint-based layout engine (percentage, fixed, min, max, ratio) |
-| [`Theme`] | 20 built-in themes |
+| [`Theme`] | 21 built-in themes |
 
 ### App Architecture (New in v29)
 
