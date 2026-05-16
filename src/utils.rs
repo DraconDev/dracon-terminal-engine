@@ -454,7 +454,6 @@ fn get_clipboard_store() -> &'static std::sync::Mutex<String> {
 
 /// Highlights code content using syntect and returns styled ratatui Lines.
 /// Supports syntax highlighting for 50+ languages with cyberpunk color tweaks.
-#[cfg(feature = "syntax-highlighting")]
 pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
     let ps = SYNTAX_SET.get_or_init(SyntaxSet::load_defaults_newlines);
     let ts = THEME_SET.get_or_init(ThemeSet::load_defaults);
