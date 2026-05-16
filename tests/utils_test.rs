@@ -381,7 +381,7 @@ fn test_file_category_cyber_color() {
     ];
     for (cat, r, g, b) in categories {
         let color = cat.cyber_color();
-        assert_eq!(color, RatatuiColor::Rgb(r, g, b));
+        assert_eq!(color, Color::Rgb(r, g, b));
     }
 }
 
