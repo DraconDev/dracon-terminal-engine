@@ -835,7 +835,6 @@ impl Default for App {
 }
 
 /// Application context, passed to every render and tick callback.
-/// Application context, passed to every render and tick callback.
 ///
 /// Provides access to the compositor, theme, animation manager, focus manager,
 /// and dirty region tracker. Use it to add planes, manage focus, and mark
@@ -853,6 +852,7 @@ impl Default for App {
 pub use crate::framework::ctx::Ctx;
 
 /// Hidden widget that routes keyboard events to a closure.
+/// Created by [`App::on_input`] to enable input for the `on_tick` + `add_plane` pattern.
 struct InputHandler {
     handler: Box<dyn FnMut(KeyEvent) -> bool>,
     id: WidgetId,

@@ -87,8 +87,31 @@ pub fn derive_widget(input: TokenStream) -> TokenStream {
             }
 
             fn render(&self, area: ratatui::layout::Rect) -> dracon_terminal_engine::compositor::Plane {
-                // User must implement render() manually or use widget_state for auto-render
-                unimplemented!("Implement render() for {}", stringify!(#name))
+                // NOTE: `#[derive(Widget)]` does NOT auto-generate render(). You must
+                // implement `fn render(&self, area: Rect) -> Plane` manually in your
+                // struct or via a separate `impl Widget for MyWidget` block.
+                //
+                // If you see this panic at runtime, add:
+                //
+                // ```ignore
+                // impl Widget for MyWidget {
+                //     fn render(&self, area: Rect) -> Plane {
+                //         let mut p = Plane::new(0, area.width, area.height);
+                //         p.fill_bg(self.theme.bg);
+                //         p.put_str(0, 0, "Hello, world!");
+                //         p
+                //     }
+                // }
+                // ```
+                //
+                // The derive generates needs_render, mark_dirty, clear_dirty,
+                // on_theme_change, and the area/id/handle_key/handle_mouse stubs.
+                panic!(
+                    "render() not implemented for `{}`. Add a manual `impl Widget for {}` \
+                     with a `fn render(&self, area: Rect) -> Plane` method.",
+                    stringify!(#name),
+                    stringify!(#name)
+                )
             }
 
             fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {

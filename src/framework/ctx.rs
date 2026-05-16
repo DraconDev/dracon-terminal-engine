@@ -18,7 +18,6 @@ use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::time::Instant;
 
 /// Application context passed to every render and tick callback.
@@ -98,7 +97,7 @@ impl<'a> Ctx<'a> {
 
     /// Returns the animation manager for managing toasts, progress bars, etc.
     pub fn animations(&self) -> &AnimationManager {
-        &self.animations
+        self.animations
     }
 
     /// Returns the number of registered widgets.
@@ -118,7 +117,7 @@ impl<'a> Ctx<'a> {
 
     /// Returns a mutable reference to the animation manager.
     pub fn animations_mut(&mut self) -> &mut AnimationManager {
-        &mut self.animations
+        self.animations
     }
 
     /// Marks a screen region as dirty, so it will be re-rendered on the next frame.
@@ -138,17 +137,17 @@ impl<'a> Ctx<'a> {
 
     /// Returns an immutable reference to the compositor.
     pub fn compositor(&self) -> &Compositor {
-        &self.compositor
+        self.compositor
     }
 
     /// Returns a mutable reference to the compositor.
     pub fn compositor_mut(&mut self) -> &mut Compositor {
-        &mut self.compositor
+        self.compositor
     }
 
     /// Returns a reference to the current theme.
     pub fn theme(&self) -> &Theme {
-        &self.theme
+        self.theme
     }
 
     /// Sets the current theme. Use this in Pattern 2 apps (on_tick closures)
@@ -220,14 +219,14 @@ impl<'a> Ctx<'a> {
 
     /// Returns a reference to the event bus.
     pub fn event_bus(&self) -> &EventBus {
-        &self.event_bus
+        self.event_bus
     }
 
     // ── Scene Router ────────────────────────────────────────────────────────
 
     /// Returns a mutable reference to the scene router.
     pub fn scene_router(&mut self) -> &mut SceneRouter {
-        &mut self.scene_router
+        self.scene_router
     }
 
     /// Pushes a scene onto the navigation stack.
