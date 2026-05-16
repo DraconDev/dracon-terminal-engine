@@ -86,44 +86,66 @@ impl Animation {
     }
 }
 
-/// Manages multiple active animations.
+/// Manages multiple active animations with stable IDs.
+///
+/// IDs remain valid across `cleanup()` calls, unlike index-based IDs
+/// which shift when completed animations are removed.
 pub struct AnimationManager {
-    animations: Vec<Animation>,
+    slots: Vec<Option<Animation>>,
+    next_id: usize,
 }
 
 impl AnimationManager {
     /// Creates a new animation manager.
     pub fn new() -> Self {
         Self {
-            animations: Vec::new(),
+            slots: Vec::new(),
+            next_id: 0,
         }
     }
 
-    /// Starts a new animation and returns its index.
+    /// Starts a new animation and returns a stable ID.
     pub fn start(&mut self, start: f64, end: f64, duration: Duration) -> usize {
-        let id = self.animations.len();
-        self.animations.push(Animation::new(start, end, duration));
+        let id = self.next_id;
+        self.next_id += 1;
+        if id < self.slots.len() {
+            self.slots[id] = Some(Animation::new(start, end, duration));
+        } else {
+            debug_assert_eq!(id, self.slots.len());
+            self.slots.push(Some(Animation::new(start, end, duration)));
+        }
         id
     }
 
-    /// Gets the current value of an animation by index.
+    /// Gets the current value of an animation by stable ID.
     pub fn value(&self, id: usize) -> Option<f64> {
-        self.animations.get(id).map(|a| a.value())
+        self.slots.get(id).and_then(|slot| slot.as_ref().map(|a| a.value()))
     }
 
-    /// Returns true if an animation is done.
+    /// Returns true if an animation is done (or doesn't exist).
     pub fn is_done(&self, id: usize) -> bool {
-        self.animations.get(id).map(|a| a.is_done()).unwrap_or(true)
+        self.slots
+            .get(id)
+            .and_then(|slot| slot.as_ref().map(|a| a.is_done()))
+            .unwrap_or(true)
     }
 
-    /// Removes completed animations.
+    /// Removes completed animations (sets their slots to None).
+    /// IDs remain valid but return `None` from `value()` after cleanup.
     pub fn cleanup(&mut self) {
-        self.animations.retain(|a| !a.is_done());
+        for slot in &mut self.slots {
+            if let Some(ref a) = slot {
+                if a.is_done() {
+                    *slot = None;
+                }
+            }
+        }
     }
 
     /// Clears all animations.
     pub fn clear(&mut self) {
-        self.animations.clear();
+        self.slots.clear();
+        self.next_id = 0;
     }
 
     /// Advances all animations by cleaning up completed ones.
@@ -132,16 +154,15 @@ impl AnimationManager {
         self.cleanup();
     }
 
-    /// Returns the number of active animations.
+    /// Returns the number of active (non-None) animation slots.
     pub fn len(&self) -> usize {
-        self.animations.len()
+        self.slots.iter().filter(|s| s.is_some()).count()
     }
 
-    /// Returns true if there are no animations (including completed ones
-    /// not yet cleaned up). See [`Self::has_active`] for a check that
-    /// excludes completed animations.
+    /// Returns true if there are no active animations.
+    /// See [`Self::has_active`] for a check that excludes completed animations.
     pub fn is_empty(&self) -> bool {
-        self.animations.is_empty()
+        self.slots.iter().all(|s| s.is_none())
     }
 
     /// Returns true if there are any animations that haven't completed yet.
@@ -149,7 +170,7 @@ impl AnimationManager {
     /// remaining have already finished (they'll be cleaned up on the next
     /// [`Self::tick`] call).
     pub fn has_active(&self) -> bool {
-        self.animations.iter().any(|a| !a.is_done())
+        self.slots.iter().any(|s| s.as_ref().map_or(false, |a| !a.is_done()))
     }
 }
 
