@@ -442,6 +442,7 @@ impl App {
             handler: Box::new(handler),
             id: WidgetId::new(self.next_widget_id),
             area: Rect::new(0, 0, w, h),
+            theme: Some(self.theme.clone()),
         };
         self.add_widget(Box::new(input_widget), Rect::new(0, 0, w, h));
         self
@@ -719,6 +720,8 @@ impl App {
 
         let mut stdin = io::stdin();
         let frame_duration = Duration::from_secs_f64(1.0 / self.fps as f64);
+
+        self.last_frame_time = Instant::now();
 
         let (term_w, term_h) = self.compositor.size();
         let full_rect = Rect::new(0, 0, term_w, term_h);
@@ -1102,6 +1105,7 @@ struct InputHandler {
     handler: Box<dyn FnMut(KeyEvent) -> bool>,
     id: WidgetId,
     area: Rect,
+    theme: Option<Theme>,
 }
 
 impl Widget for InputHandler {
@@ -1134,6 +1138,14 @@ impl Widget for InputHandler {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         (self.handler)(key)
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = Some(theme.clone());
+    }
+
+    fn current_theme(&self) -> Option<Theme> {
+        self.theme.clone()
     }
 }
 
