@@ -125,7 +125,7 @@ struct StatsState {
 impl StatsState {
     fn new(base_id: WidgetId) -> Self {
         Self {
-            grid: KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::default()),
+            grid: KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::from_env_or(Theme::default())),
         }
     }
 }

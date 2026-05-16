@@ -13,7 +13,7 @@ fn main() {
     println!("========================");
     println!();
 
-    let _theme = Theme::dark();
+    let _theme = Theme::from_env_or(Theme::dark());
 
     let cb = Checkbox::new(WidgetId::new(1), "Enable feature");
     let plane = cb.render(ratatui::layout::Rect::new(0, 0, 40, 3));
