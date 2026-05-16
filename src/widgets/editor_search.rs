@@ -61,13 +61,12 @@ pub struct SearchResult {
 ///
 /// ```ignore
 /// let mut editor = TextEditor::new();
-/// editor.search.set_filter("TODO");
-/// editor.search.replace_all(&mut editor, "TODO", "DONE");
-//! editor.search.swap_filter("TODO");
-//! ```
-//!
-//! All methods that mutate the editor (`swap_filter`) take `&mut TextEditor` as their first parameter so they
-//! can read and write lines, cursor position, and highlighting cache.
+/// editor.search.filter_query = "TODO".to_string();
+/// ```
+///
+/// All methods that mutate the editor (`swap_filter`) take `&mut TextEditor` as their first parameter so they
+/// can read and write lines, cursor position, and highlighting cache.
+#[derive(Clone, Debug)]
 pub struct SearchState {
     /// Current filter query string (case-insensitive unless it looks like a regex).
     pub filter_query: String,

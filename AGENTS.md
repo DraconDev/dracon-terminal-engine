@@ -54,20 +54,28 @@ TextEditor::open(&path)                 // From file (loads .undo too)
 // File I/O
 editor.save()                           // Save to current path
 editor.save_as(&path)                   // Save to new path
-editor.file_path()                       // Current path if any
+editor.file_path()                      // Current path if any
 
 // View options
 editor.with_show_line_numbers(bool)
 editor.with_word_wrap(bool)
 editor.with_indent_guides(bool)
 editor.with_status_bar(bool)
-editor.with_language("rust")           // For syntax highlighting
+editor.with_language("rust")            // For syntax highlighting
 
 // Navigation & Search
 editor.goto_line(line, area)            // Jump to line
-editor.set_filter("query")               // Filter/highlight mode
+editor.set_filter("query")              // Filter/highlight mode
 editor.replace_all(find, replace)        // Global replace
-editor.replace_next(find, replace)      // Next occurrence
+editor.replace_next(find, replace)       // Next occurrence
+
+// Search state (public struct for direct access)
+editor.search: editor_search::SearchState
+//   .filter_query: String              // Current filter string
+//   .filtered_indices: Vec<usize>     // display-row → real-line mapping
+//   .mode: editor_search::SearchMode  // Normal / Search / Replace / GotoLine
+//   .mode_input: String               // Input buffer for search/replace/goto modes
+//   .is_replacing: bool              // Whether replace mode is active
 
 // Selection & Clipboard
 editor.get_selected_text()               // Get selection
@@ -81,8 +89,8 @@ editor.clear_extra_cursors()
 // Persistence
 editor.load_undo_stack()                 // Load from .file.undo
 editor.save_undo_stack()                 // Save to .file.undo
-editor.load_config()                     // Load from .file.dte.json
-editor.save_config()                     // Save to .file.dte.json
+editor.load_config()                    // Load from .file.dte.json
+editor.save_config()                    // Save to .file.dte.json
 ```
 
 ## Framework Built-in Systems (Available for Examples)
