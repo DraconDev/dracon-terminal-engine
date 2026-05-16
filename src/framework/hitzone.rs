@@ -354,3 +354,47 @@ impl<T: Clone + 'static> Default for HitZoneGroup<T> {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    #[test]
+    fn test_triple_click_detection() {
+        let click_kinds = Rc::new(RefCell::new(Vec::new()));
+        let click_kinds_clone = click_kinds.clone();
+        let mut zone: HitZone<u32> = HitZone::new(1, 0, 0, 100, 100)
+            .on_click(move |kind| click_kinds_clone.borrow_mut().push(kind));
+
+        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        std::thread::sleep(Duration::from_millis(10));
+        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        std::thread::sleep(Duration::from_millis(10));
+        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+
+        let kinds = click_kinds.borrow();
+        assert_eq!(kinds.len(), 3);
+        assert_eq!(kinds[0], ClickKind::Single);
+        assert_eq!(kinds[1], ClickKind::Double);
+        assert_eq!(kinds[2], ClickKind::Triple);
+    }
+
+    #[test]
+    fn test_double_click_detection() {
+        let click_kinds = Rc::new(RefCell::new(Vec::new()));
+        let click_kinds_clone = click_kinds.clone();
+        let mut zone: HitZone<u32> = HitZone::new(1, 0, 0, 100, 100)
+            .on_click(move |kind| click_kinds_clone.borrow_mut().push(kind));
+
+        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        std::thread::sleep(Duration::from_millis(10));
+        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+
+        let kinds = click_kinds.borrow();
+        assert_eq!(kinds.len(), 2);
+        assert_eq!(kinds[0], ClickKind::Single);
+        assert_eq!(kinds[1], ClickKind::Double);
+    }
+}
