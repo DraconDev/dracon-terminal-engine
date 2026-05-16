@@ -719,6 +719,12 @@ impl App {
         }));
 
         let running_for_signal = running.clone();
+        // SAFETY: signal_hook::low_level::register() is unsafe because it installs
+        // a signal handler that must be async-signal-safe. The closures only call
+        // AtomicBool::store(SeqCst), which is async-signal-safe (no allocation,
+        // no locks, no syscalls). The `.ok()` discards registration errors silently
+        // (e.g., if the signal is already handled), which is acceptable — the app
+        // will still terminate on the next Ctrl-C via the default handler.
         unsafe {
             let running_int = running_for_signal.clone();
             signal_hook::low_level::register(SIGINT, move || {
