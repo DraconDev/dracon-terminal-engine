@@ -180,8 +180,7 @@ impl SearchState {
     ///
     /// Used internally to persist/restore filter state across mode transitions.
     pub fn swap_filter(&mut self, query: String) -> String {
-        let prev = mem::replace(&mut self.filter_query, query);
-        prev
+        mem::replace(&mut self.filter_query, query)
     }
 }
 
@@ -222,6 +221,13 @@ mod tests {
     #[test]
     fn test_get_effective_line() {
         let editor = make_editor(vec!["apple", "banana", "cherry"]);
+        let search = SearchState::default();
+        assert_eq!(search.get_effective_line(&editor, 1).as_str(), "banana");
+    }
+
+    #[test]
+    fn test_get_effective_line_filtered() {
+        let mut editor = make_editor(vec!["apple", "banana", "apricot", "cherry"]);
         let mut search = SearchState::default();
         search.filter_query = "ap".to_string();
         search.filtered_indices = vec![0, 2];

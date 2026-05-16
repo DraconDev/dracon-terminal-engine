@@ -725,13 +725,15 @@ impl TextEditor {
                     KeyCode::Enter => {
                         match self.search.mode {
                             SearchMode::Search => {
-                                if !self.search.mode_input.is_empty() {
-                                    self.search.set_filter(&self.search.mode_input, self);
+                                let input = self.search.mode_input.clone();
+                                if !input.is_empty() {
+                                    self.set_filter(&input);
                                 }
                             }
                             SearchMode::Replace => {
-                                if !self.search.mode_input.is_empty() {
-                                    self.search.set_filter(&self.search.mode_input, self);
+                                let input = self.search.mode_input.clone();
+                                if !input.is_empty() {
+                                    self.set_filter(&input);
                                 }
                             }
                             SearchMode::GotoLine => {
