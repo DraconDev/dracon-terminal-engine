@@ -410,3 +410,59 @@ fn test_selection_state_multi_selected_indices() {
     assert!(indices.contains(&1));
     assert!(indices.contains(&2));
 }
+
+// === move_recursive tests ===
+
+#[test]
+fn test_move_recursive_same_path_is_noop() {
+    let tmp = std::env::temp_dir();
+    let file = tmp.join("move_recursive_same_path_test.txt");
+    std::fs::write(&file, "content").unwrap();
+
+    let result = move_recursive(&file, &file);
+    assert!(result.is_ok(), "move to same path should be no-op: {:?}", result);
+    assert!(file.exists(), "file should still exist");
+
+    std::fs::remove_file(&file).ok();
+}
+
+#[test]
+fn test_move_recursive_into_self_returns_error() {
+    let tmp = std::env::temp_dir();
+    let src = tmp.join("move_into_self_src");
+    std::fs::create_dir(&src).unwrap();
+    let dst = src.join("subdir"); // dst starts with src, so it's "into self"
+
+    let result = move_recursive(&src, &dst);
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert_eq!(err.kind(), std::io::ErrorKind::InvalidInput);
+
+    std::fs::remove_dir(&src).ok();
+}
+
+#[test]
+fn test_move_recursive_nonexistent_source_returns_error() {
+    let tmp = std::env::temp_dir();
+    let src = tmp.join("nonexistent_source_12345.txt");
+    let dst = tmp.join("nonexistent_dest_12345.txt");
+
+    let result = move_recursive(&src, &dst);
+    assert!(result.is_err(), "move of non-existent source should return error");
+}
+
+#[test]
+fn test_move_recursive_same_filesystem_rename_works() {
+    let tmp = std::env::temp_dir();
+    let src = tmp.join("move_same_fs_src.txt");
+    let dst = tmp.join("move_same_fs_dst.txt");
+    std::fs::write(&src, "test content").unwrap();
+
+    let result = move_recursive(&src, &dst);
+    assert!(result.is_ok(), "same-fs rename should succeed: {:?}", result);
+    assert!(!src.exists(), "source should not exist after move");
+    assert!(dst.exists(), "destination should exist");
+    assert_eq!(std::fs::read_to_string(&dst).unwrap(), "test content");
+
+    std::fs::remove_file(&dst).ok();
+}

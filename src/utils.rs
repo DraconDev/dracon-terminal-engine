@@ -766,9 +766,9 @@ pub fn move_recursive(src: &std::path::Path, dst: &std::path::Path) -> std::io::
 
     // Attempt atomic rename first
     if let Err(e) = std::fs::rename(src, dst) {
-        // Fallback for cross-device moves (EXDEV = 18)
+        // Cross-device move: fallback to copy+delete
         let err_code = e.raw_os_error();
-        if err_code == Some(18) || e.kind() == std::io::ErrorKind::Other {
+        if err_code == Some(18) {
             // Safety: Ensure source exists
             if !src.exists() {
                 return Err(e);
