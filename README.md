@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/dracon-terminal-engine.svg)](https://crates.io/crates/dracon-terminal-engine)
 [![docs.rs](https://img.shields.io/docsrs/dracon-terminal-engine)](https://docs.rs/dracon-terminal-engine)
 [![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE-MIT)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 
 ```
   _______   ______   .______      .___ ___.      ___
