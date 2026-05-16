@@ -174,7 +174,11 @@ impl crate::framework::widget::Widget for ProgressRing {
         let ring_height = ring_width * 2; // Ring is taller than wide
 
         let center_x = area.width / 2;
-        let center_y = (area.height - ring_height) / 2 + ring_height / 2;
+        let center_y = if area.height > ring_height {
+            (area.height - ring_height) / 2 + ring_height / 2
+        } else {
+            area.height / 2
+        };
 
         // Draw the ring using block characters
         let radius = ring_width as f64 / 2.0;
