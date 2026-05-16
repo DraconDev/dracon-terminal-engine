@@ -18,7 +18,10 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-pub use super::editor_search::{SearchMode, SearchResult, SearchState};
+/// Re-export types from the search module for public API access.
+pub use super::editor_search::SearchMode;
+pub use super::editor_search::SearchResult;
+pub use super::editor_search::SearchState;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct EditorConfig {

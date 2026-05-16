@@ -1,3 +1,4 @@
+//!
 //! Search, filter, and replace functionality for `TextEditor`.
 //!
 //! This module provides the [`SearchState`] struct which encapsulates all
@@ -201,11 +202,7 @@ impl SearchState {
     /// (search starts from `cursor_col + 1` on the current line).
     ///
     /// Returns `None` if no match is found.
-    /// Returns `None` if no match is found.
     pub fn find_next(&self, editor: &crate::widgets::TextEditor, find: &str) -> Option<SearchResult> {
-        editor: &super::TextEditor,
-        find: &str,
-    ) -> Option<SearchResult> {
         if find.is_empty() {
             return None;
         }
@@ -251,7 +248,7 @@ impl SearchState {
     /// Replaces all occurrences of `find` with `replace` across every line.
     ///
     /// Sets `modified = true` and invalidates the highlight cache from line 0.
-    pub fn replace_all(&mut self, editor: &mut super::TextEditor, find: &str, replace: &str) {
+    pub fn replace_all(&mut self, editor: &mut crate::widgets::TextEditor, find: &str, replace: &str) {
         if find.is_empty() {
             return;
         }
@@ -273,7 +270,7 @@ impl SearchState {
     /// Searches forward, wrapping around the end of the file.
     /// Moves the cursor to the end of the replacement.
     /// Returns `true` if a replacement was made.
-    pub fn replace_next(&mut self, editor: &mut super::TextEditor, find: &str, replace: &str) -> bool {
+    pub fn replace_next(&mut self, editor: &mut crate::widgets::TextEditor, find: &str, replace: &str) -> bool {
         if find.is_empty() {
             return false;
         }
@@ -369,8 +366,8 @@ impl SearchState {
 mod tests {
     use super::*;
 
-    fn make_editor(lines: Vec<&str>) -> super::super::TextEditor {
-        let mut editor = super::super::TextEditor::default();
+    fn make_editor(lines: Vec<&str>) -> crate::widgets::TextEditor {
+        let mut editor = crate::widgets::TextEditor::default();
         editor.lines = lines.into_iter().map(String::from).collect();
         editor
     }
