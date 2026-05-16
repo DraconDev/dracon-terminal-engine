@@ -4,14 +4,14 @@
 
 mod common;
 
+use dracon_terminal_engine::compositor::Color;
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::utils::{
     delete_word_backwards, format_datetime_smart, format_permissions, format_size,
     get_file_category, get_open_with_suggestions, get_visual_width, guess_icon_mode,
     highlight_code, is_binary_content, move_recursive, squarify, truncate_to_width, FileCategory,
     HighlightPalette, IconMode, SelectionState,
 };
-use dracon_terminal_engine::compositor::Color as EngineColor;
-use ratatui::style::Color as RatatuiColor;
 use std::time::{Duration, SystemTime};
 
 #[test]
