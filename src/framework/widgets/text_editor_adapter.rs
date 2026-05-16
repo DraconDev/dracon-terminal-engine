@@ -182,7 +182,9 @@ impl crate::framework::widget::Widget for TextEditorAdapter {
         if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
             if menu.is_visible() {
                 let area = self.area.get();
-                if menu.handle_mouse(kind, col - area.x, row - area.y) {
+                let rel_col = col.saturating_sub(area.x);
+                let rel_row = row.saturating_sub(area.y);
+                if menu.handle_mouse(kind, rel_col, rel_row) {
                     return true;
                 }
             }

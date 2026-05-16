@@ -470,9 +470,12 @@ impl Widget for WidgetGallery {
                 self.selected = slot;
             }
             let rect = self.slot_rect(slot, self.area);
-            let rel_col = col - rect.x - 1;
-            let rel_row = row - rect.y - 2;
-            return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+            if col >= rect.x + 1 && row >= rect.y + 2 {
+                let rel_col = col - rect.x - 1;
+                let rel_row = row - rect.y - 2;
+                return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
+            }
+            return self.widget_mut(slot).handle_mouse(kind, 0, 0);
         }
 
         // Check if click is in any card (for selection, not widget interaction)

@@ -471,6 +471,9 @@ impl Plane {
 #[inline]
 unsafe fn next_char_unchecked(bytes: &[u8], offset: usize) -> (char, usize) {
     let s = std::str::from_utf8_unchecked(&bytes[offset..]);
-    let c = s.chars().next().unwrap();
+    let c = match s.chars().next() {
+        Some(c) => c,
+        None => '\0',
+    };
     (c, c.len_utf8())
 }
