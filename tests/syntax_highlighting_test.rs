@@ -10,34 +10,34 @@ use ratatui::layout::Rect;
 #[test]
 fn test_highlight_code_rust() {
     let code = r#"fn main() { println!("Hello"); }"#;
-    let lines = highlight_code(code, "rs");
+    let lines = highlight_code(code, "rs", None);
     assert!(!lines.is_empty());
 }
 
 #[test]
 fn test_highlight_code_python() {
     let code = "def hello():\n    print('world')";
-    let lines = highlight_code(code, "py");
+    let lines = highlight_code(code, "py", None);
     assert!(!lines.is_empty());
 }
 
 #[test]
 fn test_highlight_code_javascript() {
     let code = "function hello() { return 'world'; }";
-    let lines = highlight_code(code, "js");
+    let lines = highlight_code(code, "js", None);
     assert!(!lines.is_empty());
 }
 
 #[test]
 fn test_highlight_code_empty() {
-    let lines = highlight_code("", "rs");
+    let lines = highlight_code("", "rs", None);
     assert!(lines.is_empty());
 }
 
 #[test]
 fn test_highlight_code_unknown_extension() {
     let code = "some text here";
-    let lines = highlight_code(code, "unknown");
+    let lines = highlight_code(code, "unknown", None);
     // Should not panic, may return unhighlighted text
     assert!(!lines.is_empty());
 }
@@ -45,28 +45,28 @@ fn test_highlight_code_unknown_extension() {
 #[test]
 fn test_highlight_code_multiline() {
     let code = "line1\nline2\nline3";
-    let lines = highlight_code(code, "txt");
+    let lines = highlight_code(code, "txt", None);
     assert_eq!(lines.len(), 3);
 }
 
 #[test]
 fn test_highlight_code_comments() {
     let code = "// This is a comment\nfn main() {}";
-    let lines = highlight_code(code, "rs");
+    let lines = highlight_code(code, "rs", None);
     assert_eq!(lines.len(), 2);
 }
 
 #[test]
 fn test_highlight_code_strings() {
     let code = r#"let s = "hello world";"#;
-    let lines = highlight_code(code, "rs");
+    let lines = highlight_code(code, "rs", None);
     assert!(!lines.is_empty());
 }
 
 #[test]
 fn test_highlight_code_keywords() {
     let code = "fn let mut const if else match";
-    let lines = highlight_code(code, "rs");
+    let lines = highlight_code(code, "rs", None);
     assert!(!lines.is_empty());
 }
 
