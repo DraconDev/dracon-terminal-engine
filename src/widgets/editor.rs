@@ -2,6 +2,7 @@ use crate::error::DraconError;
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
+#[cfg(feature = "syntax-highlighting")]
 use crate::utils::highlight_code;
 use crate::utils::{get_clipboard_text, set_clipboard_text};
 use ratatui::buffer::Buffer;
