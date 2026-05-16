@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-pub use self::search::{SearchMode, SearchResult, SearchState};
+pub use super::editor_search::{SearchMode, SearchResult, SearchState};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct EditorConfig {

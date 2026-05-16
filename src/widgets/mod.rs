@@ -4,8 +4,10 @@ pub mod button;
 pub mod component;
 /// Context menu widget module
 pub mod context_menu;
-/// Editor widget module (directory with sub-modules for search/history/etc.)
+/// Editor widget module
 pub mod editor;
+/// Editor search/filter sub-module
+pub mod editor_search;
 /// Hotkey widget module
 pub mod hotkey;
 /// Input widget module

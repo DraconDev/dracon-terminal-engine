@@ -1,13 +1,13 @@
-//! Search, filter, and replace functionality for [`TextEditor`].
+//! Search, filter, and replace functionality for `TextEditor`.
 //!
-//! This module provides the `SearchState` struct which encapsulates all
-//! search-related state and operations for the editor.
+//! This module provides the [`SearchState`] struct which encapsulates all
+//! search-related state and operations for [`TextEditor`](crate::widgets::TextEditor).
 //!
 //! ## Design
 //!
-//! `SearchState` is embedded in [`TextEditor`](super::TextEditor) and exposed
-//! as a public field so external code can query or drive search without
-//! needing access to the full editor. All methods take `&mut TextEditor`
+//! `SearchState` is embedded in `TextEditor` as a public field so external code
+//! can query or drive search without needing access to the full editor.
+//! All methods that mutate the editor take `&mut TextEditor` as their first parameter
 //! so they can read and mutate the editor's lines, cursor, and scroll state.
 //!
 //! ## Search Modes
@@ -24,8 +24,6 @@
 //! for any cursor/content operations when a filter is active.
 
 use regex::Regex;
-use ratatui::layout::Rect;
-use std::cell::RefCell;
 use std::cmp::min;
 use std::mem;
 
@@ -53,7 +51,7 @@ pub struct SearchResult {
     pub len: usize,
 }
 
-/// All search/filter/replace state for [`TextEditor`](super::TextEditor).
+/// All search/filter/replace state for [`TextEditor`](crate::widgets::TextEditor).
 ///
 /// ## Usage
 ///
@@ -105,7 +103,7 @@ impl SearchState {
     ///
     /// If the query parses as a case-insensitive regex (`(?i)...`), uses it.
     /// Falls back to case-insensitive substring match.
-    pub fn set_filter(&mut self, query: &str, editor: &mut super::TextEditor) {
+    pub fn set_filter(&mut self, query: &str, editor: &mut crate::widgets::TextEditor) {
         if self.filter_query == query {
             return;
         }
@@ -154,7 +152,7 @@ impl SearchState {
     }
 
     /// Returns the number of visible lines (filtered or total).
-    pub fn effective_len(&self, editor: &super::TextEditor) -> usize {
+    pub fn effective_len(&self, editor: &crate::widgets::TextEditor) -> usize {
         if !self.filter_query.is_empty() {
             self.filtered_indices.len()
         } else {
@@ -167,7 +165,7 @@ impl SearchState {
     /// When filtered, returns `&editor.lines[filtered_indices[idx]]`.
     /// When not filtered, returns `&editor.lines[idx]`.
     /// Returns a fallback empty line if `idx` is out of range.
-    pub fn get_effective_line(&self, editor: &super::TextEditor, idx: usize) -> &String {
+    pub fn get_effective_line(&self, editor: &crate::widgets::TextEditor, idx: usize) -> &String {
         if idx >= self.effective_len(editor) {
             return &editor.lines[0];
         } // Fallback safety
@@ -182,7 +180,7 @@ impl SearchState {
     ///
     /// When filtered, returns `filtered_indices[idx]`.
     /// When not filtered, returns `idx` unchanged.
-    pub fn get_real_line_idx(&self, editor: &super::TextEditor, idx: usize) -> usize {
+    pub fn get_real_line_idx(&self, editor: &crate::widgets::TextEditor, idx: usize) -> usize {
         if !self.filter_query.is_empty() {
             self.filtered_indices.get(idx).copied().unwrap_or(0)
         } else {
@@ -203,8 +201,8 @@ impl SearchState {
     /// (search starts from `cursor_col + 1` on the current line).
     ///
     /// Returns `None` if no match is found.
-    pub fn find_next(
-        &self,
+    /// Returns `None` if no match is found.
+    pub fn find_next(&self, editor: &crate::widgets::TextEditor, find: &str) -> Option<SearchResult> {
         editor: &super::TextEditor,
         find: &str,
     ) -> Option<SearchResult> {
