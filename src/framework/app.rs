@@ -1757,7 +1757,7 @@ macro_rules! with_ctx {
     fn test_focused_cursor_position_some_for_cursor_widget() {
         use crate::framework::widgets::SearchInput;
         let mut app = App::new().unwrap();
-        let search = SearchInput::new("search");
+        let search = SearchInput::new(WidgetId::next());
         let id = app.add_widget(Box::new(search), Rect::new(0, 0, 20, 1));
         app.focus_manager.set_focus(id);
         assert!(app.focused_cursor_position().is_some());
