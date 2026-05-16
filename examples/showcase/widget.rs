@@ -758,6 +758,8 @@ impl Widget for Showcase {
                 // Message text
                 draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, Styles::BOLD);
             } else {
+                drop(msg);
+                drop(time);
                 self.status_message = None;
             }
         }
