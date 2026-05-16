@@ -343,20 +343,7 @@ impl Default for KeybindingSet {
 // ═══════════════════════════════════════════════════════════════
 // TIERED CONFIG RESOLUTION
 // ═══════════════════════════════════════════════════════════════
-
-static RESOLVED_CONFIG: OnceLock<KeybindingConfig> = OnceLock::new();
-
-/// Resolves the effective keybinding config using tiered resolution.
-///
-/// Resolution order (later overrides earlier):
-/// 1. Engine defaults
-/// 2. User global `~/.config/dracon/dracon.toml`
-/// 3. Project-local `./dracon.toml`
-///
-/// The result is cached after the first call to avoid re-parsing TOML.
-pub fn resolve_keybindings() -> KeybindingConfig {
-    RESOLVED_CONFIG.get_or_init(do_resolve_keybindings).clone()
-}
+// (Implementation in RwLock block above)
 
 fn do_resolve_keybindings() -> KeybindingConfig {
     let mut config = KeybindingConfig::defaults();
