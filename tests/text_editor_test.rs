@@ -323,8 +323,8 @@ fn test_editor_extra_cursors_list() {
 fn test_editor_set_filter() {
     let mut editor = TextEditor::with_content("apple\nbanana\ncherry");
     editor.set_filter("an");
-    assert_eq!(editor.filtered_indices.len(), 1); // "banana" matches
-    assert_eq!(editor.filtered_indices[0], 1);
+    assert_eq!(editor.search.filtered_indices.len(), 1); // "banana" matches
+    assert_eq!(editor.search.filtered_indices[0], 1);
 }
 
 #[test]
@@ -332,8 +332,8 @@ fn test_editor_clear_filter() {
     let mut editor = TextEditor::with_content("apple\nbanana\ncherry");
     editor.set_filter("an");
     editor.set_filter(""); // clear
-    assert!(editor.filtered_indices.is_empty());
-    assert!(editor.filter_query.is_empty());
+    assert!(editor.search.filtered_indices.is_empty());
+    assert!(editor.search.filter_query.is_empty());
 }
 
 #[test]
