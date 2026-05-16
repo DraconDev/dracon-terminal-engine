@@ -69,6 +69,21 @@ impl Widget for Showcase {
     }
     fn clear_dirty(&mut self) {
         self.dirty = false;
+
+        // Clean up expired toasts
+        if let Some((_, time)) = &self.status_message {
+            if time.elapsed() >= Duration::from_secs(2) {
+                self.status_message = None;
+            }
+        }
+        if let Ok(mut guard) = self.returned_from.lock() {
+            if let Some((_, time)) = &*guard {
+                if time.elapsed() >= Duration::from_secs(3) {
+                    *guard = None;
+                }
+            }
+        }
+
         let now = Local::now();
         self.last_render_second = now.num_seconds_from_midnight();
     }
