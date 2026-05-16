@@ -170,7 +170,7 @@ impl AnimationManager {
     /// remaining have already finished (they'll be cleaned up on the next
     /// [`Self::tick`] call).
     pub fn has_active(&self) -> bool {
-        self.slots.iter().any(|s| s.as_ref().map_or(false, |a| !a.is_done()))
+        self.slots.iter().any(|s| s.as_ref().is_some_and(|a| !a.is_done()))
     }
 }
 
