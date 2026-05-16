@@ -153,8 +153,8 @@ fn main() -> std::io::Result<()> {
             if show_help_render.load(Ordering::SeqCst) {
                 let hw = 40u16.min(w.saturating_sub(4));
                 let hh = 10u16.min(h.saturating_sub(4));
-                let hx = (w - hw) / 2;
-                let hy = (h - hh) / 2;
+                let _hx = (w - hw) / 2;
+                let _hy = (h - hh) / 2;
 
                 let mut help_plane = Plane::new(100, hw, hh);
                 help_plane.z_index = 50;
