@@ -169,15 +169,12 @@ impl Scene for AccessibilityScene {
         }
 
         match key.code {
-            KeyCode::Char('t') if key.modifiers.is_empty() => {
-                if self.keybindings.matches(actions::THEME, &key) {
-                    self.enabled = !self.enabled;
-                    if self.enabled {
-                        self.announce("Accessibility announcements enabled");
-                    }
-                    return true;
+            KeyCode::Char('a') if key.modifiers.is_empty() => {
+                self.enabled = !self.enabled;
+                if self.enabled {
+                    self.announce("Accessibility announcements enabled");
                 }
-                false
+                true
             }
             _ => {
                 if self.checkbox.handle_key(key) {
