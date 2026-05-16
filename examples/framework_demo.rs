@@ -7,6 +7,7 @@ use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Hud, List, Orientation, SplitPane};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use dracon_terminal_engine::SystemMonitor;
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -17,10 +18,13 @@ struct FrameworkDemo {
     breadcrumbs: Breadcrumbs,
     sys: RefCell<SystemMonitor>,
     area: Rect,
+    theme: Theme,
+    show_help: bool,
+    dirty: bool,
 }
 
 impl FrameworkDemo {
-    fn new(id: WidgetId) -> Self {
+    fn new(id: WidgetId, theme: Theme) -> Self {
         let breadcrumbs = Breadcrumbs::new(vec![
             "home".to_string(),
             "user".to_string(),
@@ -32,7 +36,17 @@ impl FrameworkDemo {
             breadcrumbs,
             sys: RefCell::new(SystemMonitor::new()),
             area: Rect::new(0, 0, 80, 24),
+            theme,
+            show_help: false,
+            dirty: true,
         }
+    }
+
+    fn cycle_theme(&mut self) {
+        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        self.theme = themes[(idx + 1) % themes.len()];
+        self.dirty = true;
     }
 }
 
@@ -42,13 +56,45 @@ impl Widget for FrameworkDemo {
     fn area(&self) -> Rect { self.area }
     fn set_area(&mut self, area: Rect) { self.area = area; }
     fn z_index(&self) -> u16 { 10 }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
     fn focusable(&self) -> bool { true }
 
+    fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if key.kind != KeyEventKind::Press { return false; }
+        match key.code {
+            KeyCode::F(1) | KeyCode::Char('?') => {
+                self.show_help = !self.show_help;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.cycle_theme();
+                true
+            }
+            KeyCode::Esc => {
+                if self.show_help {
+                    self.show_help = false;
+                    self.dirty = true;
+                    true
+                } else { false }
+            }
+            _ => false,
+        }
+    }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.dirty = true;
+    }
+
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
-        let theme = Theme::from_env_or(Theme::cyberpunk());
+        let t = &self.theme;
         let split = SplitPane::new(Orientation::Horizontal).ratio(0.3);
         let (left_rect, right_rect) = split.split(area);
 
@@ -105,10 +151,7 @@ impl Widget for FrameworkDemo {
 
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;
-        for i in 0..p.cells.len() {
-            p.cells[i].bg = theme.bg;
-            p.cells[i].transparent = false;
-        }
+        p.fill_bg(t.bg);
 
         for y in 0..area.height {
             for x in 0..area.width {
@@ -118,6 +161,70 @@ impl Widget for FrameworkDemo {
                     if dest_idx < p.cells.len() {
                         p.cells[dest_idx] = list_plane.cells[src_idx];
                     }
+                }
+            }
+        }
+
+        if self.show_help {
+            let hw = 40u16.min(area.width.saturating_sub(4));
+            let hh = 10u16.min(area.height.saturating_sub(4));
+            let hx = (area.width - hw) / 2;
+            let hy = (area.height - hh) / 2;
+
+            for y in hy..hy + hh {
+                for x in hx..hx + hw {
+                    let idx = (y * area.width + x) as usize;
+                    if idx < p.cells.len() {
+                        p.cells[idx].bg = t.surface_elevated;
+                        p.cells[idx].transparent = false;
+                    }
+                }
+            }
+
+            for x in hx + 1..hx + hw - 1 {
+                let top = (hy * area.width + x) as usize;
+                let bot = ((hy + hh - 1) * area.width + x) as usize;
+                if top < p.cells.len() { p.cells[top].char = '─'; p.cells[top].fg = t.outline; }
+                if bot < p.cells.len() { p.cells[bot].char = '─'; p.cells[bot].fg = t.outline; }
+            }
+            for y in hy + 1..hy + hh - 1 {
+                let left = (y * area.width + hx) as usize;
+                let right = (y * area.width + hx + hw - 1) as usize;
+                if left < p.cells.len() { p.cells[left].char = '│'; p.cells[left].fg = t.outline; }
+                if right < p.cells.len() { p.cells[right].char = '│'; p.cells[right].fg = t.outline; }
+            }
+            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            for (ch, cx, cy) in corners.iter() {
+                let idx = (cy * area.width + cx) as usize;
+                if idx < p.cells.len() { p.cells[idx].char = *ch; p.cells[idx].fg = t.outline; }
+            }
+
+            let help_title = "Framework Demo Help";
+            let tx = hx + (hw - help_title.len() as u16) / 2;
+            for (i, c) in help_title.chars().enumerate() {
+                let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
+                if idx < p.cells.len() {
+                    p.cells[idx].char = c;
+                    p.cells[idx].fg = t.primary;
+                    p.cells[idx].style = Styles::BOLD;
+                }
+            }
+
+            let shortcuts = [
+                ("Ctrl+T", "Cycle theme"),
+                ("F1 / ?", "Toggle help"),
+                ("Esc", "Dismiss help"),
+                ("Ctrl+Q", "Quit"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let row = hy + 3 + i as u16;
+                for (j, c) in key.chars().enumerate() {
+                    let idx = (row * area.width + hx + 2 + j as u16) as usize;
+                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = t.primary; }
+                }
+                for (j, c) in desc.chars().enumerate() {
+                    let idx = (row * area.width + hx + 14 + j as u16) as usize;
+                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = t.fg; }
                 }
             }
         }
@@ -134,7 +241,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let mut app = App::new()?.title("Framework Demo").fps(30).theme(Theme::from_env_or(Theme::cyberpunk()));
-    app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0))), Rect::new(0, 0, w, h));
+    app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0), Theme::from_env_or(Theme::cyberpunk()))), Rect::new(0, 0, w, h));
     app.on_input(move |key| {
             if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
