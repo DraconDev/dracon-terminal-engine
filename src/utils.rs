@@ -734,7 +734,7 @@ pub fn draw_stat_bar(
 
     let mut spans = vec![Span::styled(
         format!("{} ", label),
-        Style::default().fg(Color::DarkGray),
+        Style::default().fg(Color::Ansi(8)),
     )];
 
     for i in 0..bar_width as usize {
