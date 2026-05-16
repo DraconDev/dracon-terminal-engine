@@ -129,6 +129,7 @@ impl Showcase {
         scene_router.register("notification_center", Box::new(crate::scenes::notification_center_scene::NotificationCenterScene::new(theme.clone())));
         scene_router.register("accessibility", Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(theme.clone())));
         scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme.clone())));
+        scene_router.register("kanban", Box::new(crate::scenes::kanban_scene::KanbanScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 

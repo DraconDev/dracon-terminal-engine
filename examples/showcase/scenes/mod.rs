@@ -3,6 +3,7 @@ pub mod autocomplete_scene;
 pub mod calendar_scene;
 pub mod cell_pool_scene;
 pub mod form_demo;
+pub mod kanban_scene;
 pub mod modal_demo;
 pub mod notification_center_scene;
 pub mod rich_text_scene;
