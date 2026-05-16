@@ -239,6 +239,11 @@ required-features = ["sqlite"]
 name = "tutorial_app"
 path = "examples/tutorial_app.rs"
 
+[[example]]
+name = "framework_demo"
+path = "examples/framework_demo.rs"
+required-features = ["system"]
+
 [[bench]]
 name = "framework_benchmarks"
 harness = false
