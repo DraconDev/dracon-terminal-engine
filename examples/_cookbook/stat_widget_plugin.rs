@@ -278,11 +278,22 @@ impl Widget for PluginLoader {
     fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); self.dirty = true; }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         use KeyCode::*;
+        if key.kind != KeyEventKind::Press { return false; }
         match key.code {
-            Char('1') => { self.load_plugin(); true }
-            Char('2') => { self.load_plugin(); true }
-            Char('3') => { self.load_plugin(); true }
-            Char('4') => { self.load_plugin(); true }
+            Char('1') | Char('2') | Char('3') | Char('4') => { self.load_plugin(); true }
+            Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                let themes = vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                self.theme = themes[(idx + 1) % themes.len()].clone();
+                for w in &mut self.loaded_widgets { w.on_theme_change(&self.theme); }
+                self.dirty = true;
+                true
+            }
+            F(1) | Char('?') => { self.show_help = !self.show_help; self.dirty = true; true }
+            Esc => {
+                if self.show_help { self.show_help = false; self.dirty = true; true }
+                else { false }
+            }
             Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => { true }
             _ => false,
         }
