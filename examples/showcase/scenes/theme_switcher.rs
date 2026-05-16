@@ -4,7 +4,7 @@
 //! Press `t` to cycle, `B`/`Esc` to go back.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::compositor::{Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;

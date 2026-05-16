@@ -280,7 +280,7 @@ pub fn render_card(
     }
 
     // Embedded badge
-    let mut next_badge_x = badge_x + badge.len() + 1;
+        let next_badge_x = badge_x + badge.len() + 1;
     if config.is_embedded {
         let embed_badge = " * ";
         for (i, ch) in embed_badge.chars().enumerate() {
@@ -289,7 +289,6 @@ pub fn render_card(
                 set_cell(plane, px, badge_y, ch, t.bg, t.success);
             }
         }
-        next_badge_x += embed_badge.len() + 1;
     }
 
     let name_y = offset_y + 3;
