@@ -4,7 +4,7 @@ pub mod button;
 pub mod component;
 /// Context menu widget module
 pub mod context_menu;
-/// Editor widget module
+/// Editor widget module (directory with sub-modules for search/history/etc.)
 pub mod editor;
 /// Hotkey widget module
 pub mod hotkey;

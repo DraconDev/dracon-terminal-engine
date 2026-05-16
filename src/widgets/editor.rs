@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use crate::error::DraconError;
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
@@ -17,13 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum EditorMode {
-    Normal,
-    Search,
-    Replace,
-    GotoLine,
-}
+pub use self::search::{SearchMode, SearchResult, SearchState};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct EditorConfig {
@@ -71,10 +66,8 @@ pub struct TextEditor {
     pub history: Vec<Vec<String>>,
     /// Redo stack for undone changes.
     pub redo_stack: Vec<Vec<String>>,
-    /// Current filter query string.
-    pub filter_query: String,
-    /// Line indices that match the current filter.
-    pub filtered_indices: Vec<usize>,
+    /// All search/filter/replace state.
+    pub search: SearchState,
     /// If true, text cannot be edited.
     pub read_only: bool,
     /// Starting position of the current selection `(row, byte_col)`.
@@ -101,12 +94,6 @@ pub struct TextEditor {
     pub show_indent_guides: bool,
     /// Additional cursor positions for multi-cursor editing (row, col).
     extra_cursors: Vec<(usize, usize)>,
-    /// Current editor mode for search/goto UI.
-    mode: EditorMode,
-    /// Input buffer for search/goto dialogs.
-    mode_input: String,
-    /// Whether we are searching (false) or replacing (true).
-    is_replacing: bool,
 }
 
 impl Default for TextEditor {
@@ -126,8 +113,7 @@ impl Default for TextEditor {
             show_line_numbers: true,
             history: Vec::new(),
             redo_stack: Vec::new(),
-            filter_query: String::new(),
-            filtered_indices: Vec::new(),
+            search: SearchState::default(),
             read_only: false,
             selection_start: None,
             selection_end: None,
@@ -141,9 +127,6 @@ impl Default for TextEditor {
             show_status_bar: true,
             show_indent_guides: false,
             extra_cursors: Vec::new(),
-            mode: EditorMode::Normal,
-            mode_input: String::new(),
-            is_replacing: false,
         }
     }
 }
@@ -207,84 +190,20 @@ impl TextEditor {
 
     /// Sets the filter query and updates the visible line indices.
     pub fn set_filter(&mut self, query: &str) {
-        if self.filter_query == query {
-            return;
-        }
-
-        // If clearing filter, restore cursor to real line index
-        if query.is_empty() && !self.filter_query.is_empty() {
-            if self.cursor_row < self.filtered_indices.len() {
-                self.cursor_row = self.filtered_indices[self.cursor_row];
-            } else if let Some(&last) = self.filtered_indices.last() {
-                self.cursor_row = last;
-            } else {
-                self.cursor_row = 0;
-            }
-            self.filtered_indices.clear();
-        }
-
-        self.filter_query = query.to_string();
-
-        if !self.filter_query.is_empty() {
-            let use_regex = Regex::new(&format!("(?i){}", query)).is_ok();
-            self.filtered_indices = self
-                .lines
-                .iter()
-                .enumerate()
-                .filter(|(_, line)| {
-                    if use_regex {
-                        if let Ok(re) = Regex::new(&format!("(?i){}", query)) {
-                            re.is_match(line)
-                        } else {
-                            line.to_lowercase()
-                                .contains(&self.filter_query.to_lowercase())
-                        }
-                    } else {
-                        line.to_lowercase()
-                            .contains(&self.filter_query.to_lowercase())
-                    }
-                })
-                .map(|(i, _)| i)
-                .collect();
-            self.cursor_row = 0;
-            self.scroll_row = 0;
-        }
-        self.scroll_col = 0;
-        self.cursor_col = 0;
-        self.invalidate_from(0);
+        self.search.set_filter(query, self);
     }
 
     fn effective_len(&self) -> usize {
-        if !self.filter_query.is_empty() {
-            self.filtered_indices.len()
-        } else {
-            self.lines.len()
-        }
+        self.search.effective_len(self)
     }
 
     fn get_effective_line(&self, idx: usize) -> &String {
-        if idx >= self.effective_len() {
-            return &self.lines[0];
-        } // Fallback safety
-        if !self.filter_query.is_empty() {
-            &self.lines[self.filtered_indices[idx]]
-        } else {
-            &self.lines[idx]
-        }
+        self.search.get_effective_line(self, idx)
     }
 
     fn get_real_line_idx(&self, idx: usize) -> usize {
-        if !self.filter_query.is_empty() {
-            if idx < self.filtered_indices.len() {
-                self.filtered_indices[idx]
-            } else {
-                0
-            }
-        } else {
-            idx
-        }
+        self.search.get_real_line_idx(self, idx)
     }
-
     /// Converts a byte column index to a visual (display) column position.
     pub fn get_visual_x(&self, row: usize, byte_col: usize) -> usize {
         if row >= self.effective_len() {
@@ -745,52 +664,50 @@ impl TextEditor {
         }
 
         // Handle search/goto/replace mode
-        if self.mode != EditorMode::Normal {
+        if self.search.mode != SearchMode::Normal {
             if let Event::Key(key) = event {
                 if key.kind != KeyEventKind::Press {
                     return false;
                 }
                 match key.code {
                     KeyCode::Esc => {
-                        self.mode = EditorMode::Normal;
-                        self.mode_input.clear();
+                        self.search.mode = SearchMode::Normal;
+                        self.search.mode_input.clear();
                         return true;
                     }
                     KeyCode::Enter => {
-                        match self.mode {
-                            EditorMode::Search => {
-                                let query = self.mode_input.clone();
-                                if !query.is_empty() {
-                                    self.set_filter(&query);
+                        match self.search.mode {
+                            SearchMode::Search => {
+                                if !self.search.mode_input.is_empty() {
+                                    self.search.set_filter(&self.search.mode_input, self);
                                 }
                             }
-                            EditorMode::Replace => {
-                                let query = self.mode_input.clone();
-                                if !query.is_empty() {
-                                    self.set_filter(&query);
+                            SearchMode::Replace => {
+                                if !self.search.mode_input.is_empty() {
+                                    self.search.set_filter(&self.search.mode_input, self);
                                 }
                             }
-                            EditorMode::GotoLine => {
-                                let line_str = self.mode_input.clone();
+                            SearchMode::GotoLine => {
+                                let line_str = self.search.mode_input.clone();
                                 if let Ok(line) = line_str.parse::<usize>() {
                                     self.goto_line(line, area);
                                 }
                             }
-                            EditorMode::Normal => {}
+                            SearchMode::Normal => {}
                         }
-                        self.mode = EditorMode::Normal;
-                        self.mode_input.clear();
+                        self.search.mode = SearchMode::Normal;
+                        self.search.mode_input.clear();
                         return true;
                     }
                     KeyCode::Backspace => {
-                        self.mode_input.pop();
+                        self.search.mode_input.pop();
                         return true;
                     }
                     KeyCode::Char(c)
                         if !key.modifiers.contains(KeyModifiers::CONTROL)
                             && !key.modifiers.contains(KeyModifiers::ALT) =>
                     {
-                        self.mode_input.push(c);
+                        self.search.mode_input.push(c);
                         return true;
                     }
                     _ => {}
@@ -908,20 +825,20 @@ impl TextEditor {
                         return true;
                     }
                     KeyCode::Char('f') if has_control => {
-                        self.mode = EditorMode::Search;
-                        self.mode_input.clear();
-                        self.is_replacing = false;
+                        self.search.mode = SearchMode::Search;
+                        self.search.mode_input.clear();
+                        self.search.is_replacing = false;
                         return true;
                     }
                     KeyCode::Char('h') if has_control => {
-                        self.mode = EditorMode::Replace;
-                        self.mode_input.clear();
-                        self.is_replacing = true;
+                        self.search.mode = SearchMode::Replace;
+                        self.search.mode_input.clear();
+                        self.search.is_replacing = true;
                         return true;
                     }
                     KeyCode::Char('g') if has_control => {
-                        self.mode = EditorMode::GotoLine;
-                        self.mode_input.clear();
+                        self.search.mode = SearchMode::GotoLine;
+                        self.search.mode_input.clear();
                         return true;
                     }
                     KeyCode::Char('d') if has_control => {
@@ -2238,9 +2155,10 @@ impl Widget for &TextEditor {
                 // but for many languages we can restart at line boundaries if we don't care about multiline block comments as much,
                 // or we just re-highlight from the first changed line to the end.
 
-                let content_string = if !self.filter_query.is_empty() {
+                let content_string = if !self.search.filter_query.is_empty() {
                     // Filtered view is harder to do incrementally, just do full for now
-                    self.filtered_indices
+                    self.search
+                        .filtered_indices
                         .iter()
                         .map(|&i| self.lines[i].as_str())
                         .collect::<Vec<_>>()
@@ -2249,7 +2167,7 @@ impl Widget for &TextEditor {
                     self.lines.join("\n")
                 };
 
-                if !self.filter_query.is_empty() || start_line == 0 {
+                if !self.search.filter_query.is_empty() || start_line == 0 {
                     let h_lines = highlight_code(&content_string, &self.language, None);
                     *cache = h_lines
                         .into_iter()
@@ -2594,8 +2512,8 @@ impl Widget for &TextEditor {
 
                 let right_text = format!("{}{}", modified_text, lang_text);
 
-                if self.mode == EditorMode::Search {
-                    let search_text = format!("Search: {}_", self.mode_input);
+                if self.search.mode == SearchMode::Search {
+                    let search_text = format!("Search: {}_", self.search.mode_input);
                     let search_style = Style::default()
                         .bg(Color::Rgb(40, 40, 20))
                         .fg(Color::Rgb(255, 200, 100));
@@ -2606,8 +2524,8 @@ impl Widget for &TextEditor {
                         &pos_text,
                         status_style,
                     );
-                } else if self.mode == EditorMode::Replace {
-                    let replace_text = format!("Replace: {}_", self.mode_input);
+                } else if self.search.mode == SearchMode::Replace {
+                    let replace_text = format!("Replace: {}_", self.search.mode_input);
                     let replace_style = Style::default()
                         .bg(Color::Rgb(40, 20, 20))
                         .fg(Color::Rgb(255, 100, 100));
@@ -2618,8 +2536,8 @@ impl Widget for &TextEditor {
                         &pos_text,
                         status_style,
                     );
-                } else if self.mode == EditorMode::GotoLine {
-                    let goto_text = format!("Goto Line: {}_", self.mode_input);
+                } else if self.search.mode == SearchMode::GotoLine {
+                    let goto_text = format!("Goto Line: {}_", self.search.mode_input);
                     let goto_style = Style::default()
                         .bg(Color::Rgb(20, 40, 40))
                         .fg(Color::Rgb(100, 200, 255));
@@ -2868,8 +2786,8 @@ impl Widget for &TextEditor {
 
             let right_text = format!("{}{}", modified_text, lang_text);
 
-            if self.mode == EditorMode::Search {
-                let search_text = format!("Search: {}_", self.mode_input);
+            if self.search.mode == SearchMode::Search {
+                let search_text = format!("Search: {}_", self.search.mode_input);
                 let search_style = Style::default()
                     .bg(Color::Rgb(40, 40, 20))
                     .fg(Color::Rgb(255, 200, 100));
@@ -2880,8 +2798,8 @@ impl Widget for &TextEditor {
                     &pos_text,
                     status_style,
                 );
-            } else if self.mode == EditorMode::Replace {
-                let replace_text = format!("Replace: {}_", self.mode_input);
+            } else if self.search.mode == SearchMode::Replace {
+                let replace_text = format!("Replace: {}_", self.search.mode_input);
                 let replace_style = Style::default()
                     .bg(Color::Rgb(40, 20, 20))
                     .fg(Color::Rgb(255, 100, 100));
@@ -2892,8 +2810,8 @@ impl Widget for &TextEditor {
                     &pos_text,
                     status_style,
                 );
-            } else if self.mode == EditorMode::GotoLine {
-                let goto_text = format!("Goto Line: {}_", self.mode_input);
+            } else if self.search.mode == SearchMode::GotoLine {
+                let goto_text = format!("Goto Line: {}_", self.search.mode_input);
                 let goto_style = Style::default()
                     .bg(Color::Rgb(20, 40, 40))
                     .fg(Color::Rgb(100, 200, 255));
