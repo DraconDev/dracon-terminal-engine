@@ -52,7 +52,10 @@ pub struct SearchResult {
     pub len: usize,
 }
 
-/// All search/filter/replace state for [`TextEditor`](crate::widgets::TextEditor).
+/// Search, filter, and replace functionality for `TextEditor`.
+///
+/// This module provides the [`SearchState`] struct which encapsulates all
+/// search-related state and operations for [`TextEditor`](crate::widgets::TextEditor).
 ///
 /// ## Usage
 ///
@@ -60,12 +63,11 @@ pub struct SearchResult {
 /// let mut editor = TextEditor::new();
 /// editor.search.set_filter("TODO");
 /// editor.search.replace_all(&mut editor, "TODO", "DONE");
-/// ```
-///
-/// All methods that mutate the editor (`set_filter`, `replace_all`,
-/// `replace_next`) take `&mut TextEditor` as their first parameter so they
-/// can read and write lines, cursor position, and highlighting cache.
-#[derive(Clone, Debug)]
+//! editor.search.swap_filter("TODO");
+//! ```
+//!
+//! All methods that mutate the editor (`swap_filter`) take `&mut TextEditor` as their first parameter so they
+//! can read and write lines, cursor position, and highlighting cache.
 pub struct SearchState {
     /// Current filter query string (case-insensitive unless it looks like a regex).
     pub filter_query: String,
