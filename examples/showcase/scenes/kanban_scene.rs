@@ -4,6 +4,7 @@
 //! keyboard navigation, and theme support.
 //! Press `B`/`Esc` to go back.
 
+use crate::scenes::shared_helpers::draw_text;
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
