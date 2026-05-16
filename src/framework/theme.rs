@@ -118,7 +118,14 @@ pub struct Theme {
     pub scrollbar_width: u16,
 }
 
+#[allow(deprecated)]
 impl Theme {
+    #[allow(deprecated)]
+    #[inline]
+    fn default_scrollbar_width() -> u16 {
+        crate::framework::scroll::DEFAULT_SCROLLBAR_WIDTH
+    }
+
     /// Creates a dark theme with muted colors suitable for low-light environments.
     pub fn dark() -> Self {
         Self {
@@ -162,7 +169,7 @@ impl Theme {
             hover_bg: Color::Rgb(40, 40, 56),
             focus_bg: Color::Rgb(50, 50, 70),
             focus_border: Color::Rgb(0, 200, 120),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -209,7 +216,7 @@ impl Theme {
             hover_bg: Color::Rgb(240, 240, 245),
             focus_bg: Color::Rgb(230, 230, 240),
             focus_border: Color::Rgb(0, 100, 180),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -259,7 +266,7 @@ impl Theme {
             hover_bg: Color::Rgb(60, 60, 60),
             focus_bg: Color::Rgb(0, 60, 120),
             focus_border: Color::Rgb(0, 200, 255),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -306,7 +313,7 @@ impl Theme {
             hover_bg: Color::Rgb(25, 25, 40),
             focus_bg: Color::Rgb(35, 35, 55),
             focus_border: Color::Rgb(255, 0, 100),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -353,7 +360,7 @@ impl Theme {
             hover_bg: Color::Rgb(58, 60, 76),
             focus_bg: Color::Rgb(68, 70, 86),
             focus_border: Color::Rgb(255, 121, 198),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -400,7 +407,7 @@ impl Theme {
             hover_bg: Color::Rgb(56, 62, 78),
             focus_bg: Color::Rgb(66, 72, 88),
             focus_border: Color::Rgb(136, 192, 208),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -447,7 +454,7 @@ impl Theme {
             hover_bg: Color::Rgb(52, 52, 72),
             focus_bg: Color::Rgb(62, 62, 82),
             focus_border: Color::Rgb(137, 180, 250),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -494,7 +501,7 @@ impl Theme {
             hover_bg: Color::Rgb(65, 60, 55),
             focus_bg: Color::Rgb(75, 70, 65),
             focus_border: Color::Rgb(214, 93, 14),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -541,7 +548,7 @@ impl Theme {
             hover_bg: Color::Rgb(42, 44, 58),
             focus_bg: Color::Rgb(52, 54, 68),
             focus_border: Color::Rgb(98, 130, 234),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -588,7 +595,7 @@ impl Theme {
             hover_bg: Color::Rgb(10, 55, 72),
             focus_bg: Color::Rgb(20, 65, 82),
             focus_border: Color::Rgb(38, 139, 210),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -635,7 +642,7 @@ impl Theme {
             hover_bg: Color::Rgb(248, 245, 238),
             focus_bg: Color::Rgb(238, 235, 228),
             focus_border: Color::Rgb(38, 139, 210),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -682,7 +689,7 @@ impl Theme {
             hover_bg: Color::Rgb(52, 56, 68),
             focus_bg: Color::Rgb(62, 66, 78),
             focus_border: Color::Rgb(97, 175, 239),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -729,7 +736,7 @@ impl Theme {
             hover_bg: Color::Rgb(52, 50, 68),
             focus_bg: Color::Rgb(62, 60, 78),
             focus_border: Color::Rgb(210, 160, 160),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -776,7 +783,7 @@ impl Theme {
             hover_bg: Color::Rgb(50, 52, 78),
             focus_bg: Color::Rgb(60, 62, 88),
             focus_border: Color::Rgb(166, 122, 102),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -823,7 +830,7 @@ impl Theme {
             hover_bg: Color::Rgb(55, 62, 52),
             focus_bg: Color::Rgb(65, 72, 62),
             focus_border: Color::Rgb(148, 181, 97),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -870,7 +877,7 @@ impl Theme {
             hover_bg: Color::Rgb(58, 59, 48),
             focus_bg: Color::Rgb(68, 69, 58),
             focus_border: Color::Rgb(166, 226, 50),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -917,7 +924,7 @@ impl Theme {
             hover_bg: Color::Rgb(50, 46, 40),
             focus_bg: Color::Rgb(60, 56, 50),
             focus_border: Color::Rgb(224, 164, 90),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -964,7 +971,7 @@ impl Theme {
             hover_bg: Color::Rgb(44, 46, 58),
             focus_bg: Color::Rgb(54, 56, 68),
             focus_border: Color::Rgb(160, 118, 255),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -1011,7 +1018,7 @@ impl Theme {
             hover_bg: Color::Rgb(40, 50, 42),
             focus_bg: Color::Rgb(50, 60, 52),
             focus_border: Color::Rgb(126, 196, 102),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -1058,7 +1065,7 @@ impl Theme {
             hover_bg: Color::Rgb(50, 40, 42),
             focus_bg: Color::Rgb(60, 50, 52),
             focus_border: Color::Rgb(236, 146, 98),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 
@@ -1105,11 +1112,12 @@ impl Theme {
             hover_bg: Color::Rgb(44, 46, 54),
             focus_bg: Color::Rgb(54, 56, 64),
             focus_border: Color::Rgb(210, 214, 224),
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 }
 
+#[allow(deprecated)]
 impl Theme {
     /// Look up a theme by its `.name` field (case-insensitive).
     ///
@@ -1390,7 +1398,7 @@ impl Theme {
             hover_bg,
             focus_bg,
             focus_border,
-            scrollbar_width: 1,
+            scrollbar_width: Self::default_scrollbar_width(),
         }
     }
 }
