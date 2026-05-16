@@ -262,9 +262,7 @@ impl SceneRouter {
             return false;
         }
 
-        let from = self.stack.pop().unwrap();
-
-        // Exit popped scene
+        let from = self.stack.pop().expect("scene_router: stack non-empty on pop (len > 1)");
         if let Some(scene) = self.scenes.get_mut(&from) {
             scene.on_exit();
         }
