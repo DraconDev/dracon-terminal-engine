@@ -66,7 +66,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 
-### 37 Framework Widgets
+### 41 Framework Widgets
 | Widget | What |
 |---|---|
 | [`Breadcrumbs`] | Hierarchical path display with clickable segments |
