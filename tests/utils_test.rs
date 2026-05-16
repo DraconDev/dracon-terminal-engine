@@ -1,15 +1,17 @@
 //! Tests for utils module: visual_width, truncate, format_size, format_permissions,
 //! SelectionState, FileCategory, get_file_category, and other utilities.
+//! Also tests highlight_code and HighlightPalette.
 
 mod common;
 
+use dracon_terminal_engine::compositor::Color;
+use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::utils::{
     delete_word_backwards, format_datetime_smart, format_permissions, format_size,
     get_file_category, get_open_with_suggestions, get_visual_width, guess_icon_mode,
-    is_binary_content, move_recursive, squarify, truncate_to_width, FileCategory, IconMode,
-    SelectionState,
+    highlight_code, is_binary_content, move_recursive, squarify, truncate_to_width, FileCategory,
+    HighlightPalette, IconMode, SelectionState,
 };
-use ratatui::style::Color as RatatuiColor;
 use std::time::{Duration, SystemTime};
 
 #[test]
@@ -465,4 +467,99 @@ fn test_move_recursive_same_filesystem_rename_works() {
     assert_eq!(std::fs::read_to_string(&dst).unwrap(), "test content");
 
     std::fs::remove_file(&dst).ok();
+}
+
+// === HighlightPalette and highlight_code tests ===
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn test_highlight_palette_from_theme_nord() {
+    let theme = Theme::nord();
+    let palette = HighlightPalette::from_theme(&theme);
+    assert_eq!(palette.comments, Color::Rgb(136, 150, 167));
+    assert_eq!(palette.text, Color::Rgb(216, 222, 233));
+    assert_ne!(palette.keywords, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.strings, Color::Rgb(0, 0, 0));
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn test_highlight_palette_from_theme_dracula() {
+    let theme = Theme::dracula();
+    let palette = HighlightPalette::from_theme(&theme);
+    assert_eq!(palette.comments, Color::Rgb(98, 114, 132));
+    assert_eq!(palette.text, Color::Rgb(248, 248, 242));
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn test_highlight_code_with_palette_produces_colored_output() {
+    let theme = Theme::nord();
+    let palette = HighlightPalette::from_theme(&theme);
+    let code = "fn main() { println!(\"hello\"); }";
+    let lines = highlight_code(code, "rs", Some(&palette));
+    assert!(!lines.is_empty(), "should produce at least one line");
+    // With theme-based palette, output should use theme colors (not cyberpunk defaults)
+    // Check that at least one span has a color that differs from the cyberpunk hardcoded values
+    let all_colors: Vec<Color> = lines
+        .iter()
+        .flat_map(|l| l.spans.iter())
+        .map(|s| s.style.fg)
+        .collect();
+    assert!(
+        !all_colors.iter().all(|c| matches!(c, Color::Rgb(255, 45, 85))),
+        "output should not be all the hardcoded cyberpunk keyword color"
+    );
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn test_highlight_code_with_palette_markdown_headers() {
+    let theme = Theme::nord();
+    let palette = HighlightPalette::from_theme(&theme);
+    let md = "# Heading\n## Subheading";
+    let lines = highlight_code(md, "md", Some(&palette));
+    // Markdown headers should use the palette headers color
+    let header_colors: Vec<Color> = lines
+        .iter()
+        .flat_map(|l| l.spans.iter())
+        .map(|s| s.style.fg)
+        .collect();
+    assert!(!header_colors.is_empty());
+}
+
+#[test]
+fn test_highlight_code_fallback_plain_lines_when_no_feature() {
+    #[cfg(feature = "syntax-highlighting")]
+    {
+        let code = "fn test() { return 42; }";
+        let lines = highlight_code(code, "rs", None);
+        // With feature enabled, should produce styled lines (not just plain)
+        assert!(!lines.is_empty());
+    }
+    #[cfg(not(feature = "syntax-highlighting"))]
+    {
+        let code = "fn test() { return 42; }";
+        let lines = highlight_code(code, "rs", None);
+        assert!(!lines.is_empty());
+        // Without feature, should return plain lines
+        let has_styles = lines.iter().any(|l| l.spans.iter().any(|s| s.style != ratatui::style::Style::default()));
+        assert!(!has_styles, "without syntax-highlighting, lines should be plain");
+    }
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn test_highlight_palette_all_fields_non_zero() {
+    let theme = Theme::nord();
+    let palette = HighlightPalette::from_theme(&theme);
+    assert_ne!(palette.comments, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.text, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.keywords, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.strings, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.functions, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.types, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.variables, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.headers, Color::Rgb(0, 0, 0));
+    assert_ne!(palette.links, Color::Rgb(0, 0, 0));
 }

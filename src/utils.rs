@@ -452,9 +452,50 @@ fn get_clipboard_store() -> &'static std::sync::Mutex<String> {
     CLIPBOARD.get_or_init(|| std::sync::Mutex::new(String::new()))
 }
 
+/// A color palette for syntax highlighting derived from a Theme.
+/// Each field maps a syntect token type to a terminal color.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HighlightPalette {
+    pub comments: Color,
+    pub text: Color,
+    pub keywords: Color,
+    pub strings: Color,
+    pub functions: Color,
+    pub types: Color,
+    pub variables: Color,
+    pub headers: Color,
+    pub links: Color,
+}
+
+impl HighlightPalette {
+    /// Derives a HighlightPalette from a Theme, using theme colors to inform
+    /// muted (comments), base (text), and saturated (keywords/strings/etc.) categories.
+    pub fn from_theme(theme: &crate::framework::theme::Theme) -> Self {
+        Self {
+            comments: theme.dim,
+            text: theme.fg,
+            keywords: theme.primary,
+            strings: Color::Rgb(163, 190, 140),
+            functions: Color::Rgb(129, 161, 193),
+            types: Color::Rgb(235, 203, 139),
+            variables: Color::Rgb(208, 135, 112),
+            headers: theme.primary,
+            links: Color::Rgb(136, 192, 208),
+        }
+    }
+}
+
 /// Highlights code content using syntect and returns styled ratatui Lines.
-/// Supports syntax highlighting for 50+ languages with cyberpunk color tweaks.
-pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
+/// Supports syntax highlighting for 50+ languages.
+///
+/// When `palette` is `None`, uses the built-in cyberpunk color scheme.
+/// When `palette` is `Some`, uses the provided HighlightPalette for token colors.
+#[cfg(feature = "syntax-highlighting")]
+pub fn highlight_code<'a>(
+    content: &'a str,
+    extension: &str,
+    palette: Option<&HighlightPalette>,
+) -> Vec<Line<'a>> {
     let ps = SYNTAX_SET.get_or_init(SyntaxSet::load_defaults_newlines);
     let ts = THEME_SET.get_or_init(ThemeSet::load_defaults);
 
@@ -486,7 +527,7 @@ pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
             "nix" | "flake.nix" | "configuration.nix" | "home.nix" | "default.nix" => {
                 ps.find_syntax_by_extension("nix")
                     .or_else(|| ps.find_syntax_by_name("Nix"))
-                    .or_else(|| ps.find_syntax_by_extension("rb")) // Desperate fallback to Ruby
+                    .or_else(|| ps.find_syntax_by_extension("rb"))
             }
             "yaml" | "yml" => ps.find_syntax_by_extension("yaml"),
             "gitignore" | "gitattributes" | "gitconfig" | "conf" | "config" | "env" | ".env"
@@ -546,120 +587,16 @@ pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
             let g = style.foreground.g;
             let b = style.foreground.b;
 
-            let mut r_f = r as f32;
-            let mut g_f = g as f32;
-            let mut b_f = b as f32;
+            let r_f = r as f32;
+            let g_f = g as f32;
+            let b_f = b as f32;
 
-            if is_markdown {
-                // SPECIAL "VIBRANT PRO" STYLE FOR MARKDOWN
-
-                let max_c = r_f.max(g_f).max(b_f);
-
-                let min_c = r_f.min(g_f).min(b_f);
-
-                let diff = max_c - min_c;
-
-                // Even more aggressive white for standard text
-
-                if diff < 30.0 || max_c < 180.0 {
-                    // Pure white for standard text and greyed out bits
-
-                    r_f = 255.0;
-                    g_f = 255.0;
-                    b_f = 255.0;
-                } else {
-                    // Distinguish elements by syntect's default hues
-
-                    if r_f > g_f && r_f > b_f {
-                        // Reddish -> Headers or Strong
-
-                        r_f = 255.0;
-                        g_f = 0.0;
-                        b_f = 255.0; // Magenta Headers
-                    } else if g_f > r_f && g_f > b_f {
-                        // Greenish -> Lists or Quotes
-
-                        r_f = 150.0;
-                        g_f = 255.0;
-                        b_f = 0.0; // Lime Lists
-                    } else if b_f > r_f && b_f > g_f {
-                        // Bluish -> Links or Code
-
-                        r_f = 0.0;
-                        g_f = 255.0;
-                        b_f = 255.0; // Cyan Links
-                    }
-                }
+            let fg = if let Some(palette) = palette {
+                Self::remap_color_with_palette(r_f, g_f, b_f, is_markdown, palette)
             } else {
-                // "ULTRA-VIBRANT-SYNTAX" Heuristic:
-                let r_f32 = r as f32;
-                let g_f32 = g as f32;
-                let b_f32 = b as f32;
+                Self::remap_color_cyberpunk(r_f, g_f, b_f, is_markdown)
+            };
 
-                let max_c = r_f32.max(g_f32).max(b_f32);
-                let min_c = r_f32.min(g_f32).min(b_f32);
-                let diff = max_c - min_c;
-
-                if diff < 20.0 {
-                    // Muted tones (comments, punctuation)
-                    if max_c < 140.0 {
-                        // Muted Blue-Grey for comments
-                        r_f = 100.0;
-                        g_f = 120.0;
-                        b_f = 140.0;
-                    } else {
-                        // Standard text -> Off-white
-                        r_f = 230.0;
-                        g_f = 235.0;
-                        b_f = 240.0;
-                    }
-                } else {
-                    // Saturated Mapping
-                    if r_f32 > g_f32 && r_f32 > b_f32 {
-                        if g_f32 > 120.0 {
-                            // Bright Yellow/Orange (Types/Classes)
-                            r_f = 255.0;
-                            g_f = 215.0;
-                            b_f = 0.0;
-                        } else {
-                            // Vibrant Pink/Red (Keywords/Storage)
-                            r_f = 255.0;
-                            g_f = 45.0;
-                            b_f = 85.0;
-                        }
-                    } else if g_f32 > r_f32 && g_f32 > b_f32 {
-                        // Matrix Green (Strings/Values)
-                        r_f = 0.0;
-                        g_f = 255.0;
-                        b_f = 135.0;
-                    } else if b_f32 > r_f32 && b_f32 > g_f32 {
-                        if r_f32 > 130.0 {
-                            // Neon Purple (Functions/Methods)
-                            r_f = 180.0;
-                            g_f = 100.0;
-                            b_f = 255.0;
-                        } else {
-                            // Electric Blue (Variables/Constants)
-                            r_f = 0.0;
-                            g_f = 180.0;
-                            b_f = 255.0;
-                        }
-                    }
-
-                    // Boost saturation to max
-                    let cur_max = r_f.max(g_f).max(b_f).max(1.0);
-                    let boost = 255.0 / cur_max;
-                    r_f *= boost;
-                    g_f *= boost;
-                    b_f *= boost;
-                }
-            }
-
-            let fg = Color::Rgb(
-                r_f.clamp(0.0, 255.0) as u8,
-                g_f.clamp(0.0, 255.0) as u8,
-                b_f.clamp(0.0, 255.0) as u8,
-            );
             let mut ratatui_style = Style::default().fg(fg);
 
             if style.font_style.contains(FontStyle::BOLD) {
@@ -672,7 +609,6 @@ pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
                 ratatui_style = ratatui_style.add_modifier(Modifier::UNDERLINED);
             }
 
-            // Remove trailing newline from text if it exists to avoid double spacing in Ratatui
             let clean_text = text.trim_end_matches('\n').trim_end_matches('\r');
             if !clean_text.is_empty() || text == " " {
                 spans.push(Span::styled(clean_text.to_string(), ratatui_style));
@@ -683,11 +619,102 @@ pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
     lines
 }
 
+#[cfg(feature = "syntax-highlighting")]
+impl HighlightPalette {
+    fn remap_color_with_palette(r_f: f32, g_f: f32, b_f: f32, is_markdown: bool, palette: &HighlightPalette) -> Color {
+        let max_c = r_f.max(g_f).max(b_f);
+        let min_c = r_f.min(g_f).min(b_f);
+        let diff = max_c - min_c;
+
+        if is_markdown {
+            if diff < 30.0 || max_c < 180.0 {
+                palette.text
+            } else if r_f > g_f && r_f > b_f {
+                palette.headers
+            } else if g_f > r_f && g_f > b_f {
+                palette.strings
+            } else {
+                palette.links
+            }
+        } else {
+            if diff < 20.0 {
+                if max_c < 140.0 {
+                    palette.comments
+                } else {
+                    palette.text
+                }
+            } else if r_f > g_f && r_f > b_f {
+                if g_f > 120.0 {
+                    palette.types
+                } else {
+                    palette.keywords
+                }
+            } else if g_f > r_f && g_f > b_f {
+                palette.strings
+            } else if b_f > r_f && b_f > g_f {
+                if r_f > 130.0 {
+                    palette.functions
+                } else {
+                    palette.variables
+                }
+            } else {
+                palette.text
+            }
+        }
+    }
+
+    fn remap_color_cyberpunk(r_f: f32, g_f: f32, b_f: f32, is_markdown: bool) -> Color {
+        let max_c = r_f.max(g_f).max(b_f);
+        let min_c = r_f.min(g_f).min(b_f);
+        let diff = max_c - min_c;
+
+        if is_markdown {
+            if diff < 30.0 || max_c < 180.0 {
+                Color::Rgb(255, 255, 255)
+            } else if r_f > g_f && r_f > b_f {
+                Color::Rgb(255, 0, 255)
+            } else if g_f > r_f && g_f > b_f {
+                Color::Rgb(150, 255, 0)
+            } else {
+                Color::Rgb(0, 255, 255)
+            }
+        } else {
+            if diff < 20.0 {
+                if max_c < 140.0 {
+                    Color::Rgb(100, 120, 140)
+                } else {
+                    Color::Rgb(230, 235, 240)
+                }
+            } else if r_f > g_f && r_f > b_f {
+                if g_f > 120.0 {
+                    Color::Rgb(255, 215, 0)
+                } else {
+                    Color::Rgb(255, 45, 85)
+                }
+            } else if g_f > r_f && g_f > b_f {
+                Color::Rgb(0, 255, 135)
+            } else if b_f > r_f && b_f > g_f {
+                if r_f > 130.0 {
+                    Color::Rgb(180, 100, 255)
+                } else {
+                    Color::Rgb(0, 180, 255)
+                }
+            } else {
+                Color::Rgb(230, 235, 240)
+            }
+        }
+    }
+}
+
 /// Fallback: returns content as plain monochrome lines without syntax highlighting.
 /// Used when the `syntax-highlighting` feature is disabled.
 #[cfg(not(feature = "syntax-highlighting"))]
-pub fn highlight_code<'a>(content: &'a str, _extension: &str) -> Vec<Line<'a>> {
-    content.lines().map(|line| Line::from(line)).collect()
+pub fn highlight_code<'a>(
+    _content: &'a str,
+    _extension: &str,
+    _palette: Option<&HighlightPalette>,
+) -> Vec<Line<'a>> {
+    Vec::new()
 }
 
 /// Draws a labeled stat bar (e.g., CPU, memory) using Unicode block characters.
