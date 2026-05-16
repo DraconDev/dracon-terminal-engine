@@ -141,7 +141,12 @@ impl App {
                 .map(|mut w| w.handle_key(*k))
                 .unwrap_or(false);
             if !consumed {
-                running.store(false, Ordering::SeqCst);
+                if self.scene_router.can_go_back() {
+                    self.scene_router.pop();
+                    self.dirty_tracker.mark_all_dirty();
+                } else {
+                    running.store(false, Ordering::SeqCst);
+                }
             }
             return;
         }

@@ -316,3 +316,25 @@ fn test_router_needs_render() {
     router.mark_dirty();
     assert!(router.needs_render());
 }
+
+#[test]
+fn test_can_go_back_single_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+    assert!(!router.can_go_back());
+}
+
+#[test]
+fn test_can_go_back_multiple_scenes() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.register("detail", Box::new(TestScene::new("detail")));
+    router.push("home");
+    router.push("detail");
+    assert!(router.can_go_back());
+    assert_eq!(router.stack_depth(), 2);
+    router.pop();
+    assert_eq!(router.stack_depth(), 1);
+    assert!(!router.can_go_back());
+}
