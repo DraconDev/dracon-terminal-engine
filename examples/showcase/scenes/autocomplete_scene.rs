@@ -43,16 +43,27 @@ const SUGGESTIONS: [&str; 12] = [
 impl AutocompleteScene {
     pub fn new(theme: Theme) -> Self {
         let suggestions: Vec<String> = SUGGESTIONS.iter().map(|s| s.to_string()).collect();
+        let bridge = Rc::new(RefCell::new(None));
+        let bridge_cb = Rc::clone(&bridge);
         Self {
             autocomplete: Autocomplete::new(WidgetId::new(100), suggestions)
                 .with_theme(theme.clone())
                 .with_max_visible(6)
-                .on_select(|_s| { /* selection callback */ }),
+                .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); }),
             theme,
             show_help: false,
             selected_item: None,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
+            selection_bridge: bridge,
+        }
+    }
+
+    fn sync_bridge(&mut self) {
+        if let Some(sel) = self.selection_bridge.borrow_mut().take() {
+            self.selected_item = Some(sel);
+            self.dirty = true;
         }
     }
 }
@@ -143,12 +154,14 @@ impl Scene for AutocompleteScene {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }
 
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
+            self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
@@ -156,9 +169,13 @@ impl Scene for AutocompleteScene {
         }
 
         if self.autocomplete.handle_key(key) {
-            if let Some(selected) = self.autocomplete.selected() {
-                self.selected_item = Some(selected.to_string());
+            self.sync_bridge();
+            if self.selected_item.is_none() {
+                if let Some(selected) = self.autocomplete.selected() {
+                    self.selected_item = Some(selected.to_string());
+                }
             }
+            self.dirty = true;
             return true;
         }
         false
@@ -169,17 +186,29 @@ impl Scene for AutocompleteScene {
         let input_area = Rect::new(area.x + 2, area.y + 3, 30, 1);
         let rel_col = col.saturating_sub(input_area.x);
         let rel_row = row.saturating_sub(input_area.y);
-        self.autocomplete.handle_mouse(kind, rel_col, rel_row)
+        if self.autocomplete.handle_mouse(kind, rel_col, rel_row) {
+            self.sync_bridge();
+            if self.selected_item.is_none() {
+                if let Some(selected) = self.autocomplete.selected() {
+                    self.selected_item = Some(selected.to_string());
+                    self.dirty = true;
+                }
+            }
+            true
+        } else {
+            false
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
         self.autocomplete.on_theme_change(theme);
+        self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
