@@ -208,6 +208,9 @@ impl crate::framework::widget::Widget for ColorPicker {
         // === Color Preview Swatch ===
         let swatch_width = 8u16.min(area.width.saturating_sub(2));
         let swatch_height = 4u16.min(area.height.saturating_sub(2));
+        if swatch_height == 0 || area.width < 2 {
+            return plane;
+        }
 
         for y in 0..swatch_height {
             for x in 0..swatch_width {
