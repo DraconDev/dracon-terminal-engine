@@ -2,7 +2,7 @@
 name = "dracon-terminal-engine"
 version = "0.1.10" # Must match CHANGELOG.md latest; prior auto-incrementing build numbers were replaced by semver
 edition = "2021"
-license = "AGPL-3.0-only"
+license = "MIT OR Apache-2.0"
 authors = ["Dracon <dracon@void>"]
 readme = "README.md"
 description = "A terminal application framework for Rust with composable widgets, z-indexed compositor, themes, and TextEditor"
