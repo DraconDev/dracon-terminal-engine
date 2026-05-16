@@ -162,6 +162,7 @@ struct PluginLoader {
     registry: PluginRegistry,
     loaded_widgets: Vec<Box<dyn Widget>>,
     next_id: usize,
+    show_help: bool,
     dirty: bool,
     theme: Theme,
 }
@@ -186,6 +187,7 @@ impl PluginLoader {
             registry,
             loaded_widgets: Vec::new(),
             next_id: 0,
+            show_help: false,
             dirty: true,
             theme,
         }
