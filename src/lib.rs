@@ -73,6 +73,7 @@ pub mod integration;
 pub mod layout;
 
 #[doc = "System monitoring (CPU, memory, disk, processes)."]
+#[cfg(feature = "system")]
 pub mod system;
 
 #[doc = "General utilities (visual width, truncate, formatting helpers)."]
@@ -107,6 +108,7 @@ pub use core::terminal::{Capabilities, CursorShape, Terminal};
 pub use input::{InputReader, Parser};
 
 // System monitoring
+#[cfg(feature = "system")]
 pub use system::{DiskInfo, ProcessInfo, SystemData, SystemMonitor};
 
 // ─────────────────────────────────────────────────────────────────────────────

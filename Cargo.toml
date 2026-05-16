@@ -29,6 +29,14 @@ debug_events = []
 async = ["dep:tokio"]
 # Enable tracing/structured logging
 tracing = ["dep:tracing", "dep:tracing-subscriber"]
+# Enable system monitoring (CPU, memory, disk, processes) via sysinfo
+system = ["dep:sysinfo"]
+# Enable syntax highlighting via syntect
+syntax-highlighting = ["dep:syntect"]
+# Enable SQLite support via rusqlite
+sqlite = ["dep:rusqlite"]
+# Default features: system + syntax highlighting for backward compatibility
+default = ["system", "syntax-highlighting"]
 
 [dependencies]
 bitflags = { version = "2.4", features = ["serde"] }
@@ -39,11 +47,11 @@ signal-hook = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 toml = "0.8"
-sysinfo = "0.32"
-syntect = "5.2"
+sysinfo = { version = "0.32", optional = true }
+syntect = { version = "5.2", optional = true }
 tokio = { version = "1.38.0", optional = true, features = ["rt-multi-thread", "sync", "time", "macros", "process", "io-util", "fs"] }
 regex = "1.10"
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 tracing = { version = "0.1", optional = true, default-features = false, features = ["std", "attributes"] }
 tracing-subscriber = { version = "0.3", optional = true, default-features = false, features = ["env-filter", "fmt"] }
 unicode-segmentation = "1.10"
