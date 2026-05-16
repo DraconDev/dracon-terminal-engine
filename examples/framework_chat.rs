@@ -56,6 +56,9 @@ fn main() -> std::io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let show_help = Arc::new(AtomicBool::new(false));
+    let show_help_input = Arc::clone(&show_help);
+    let show_help_render = Arc::clone(&show_help);
 
     App::new()?
         .title("Framework Chat")
@@ -64,9 +67,24 @@ fn main() -> std::io::Result<()> {
         .on_input(move |key| {
             if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
                 should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
+                return true;
+            }
+            if key.kind != KeyEventKind::Press { return false; }
+            match key.code {
+                KeyCode::F(1) | KeyCode::Char('?') => {
+                    show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
+                    true
+                }
+                KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                    true
+                }
+                KeyCode::Esc => {
+                    if show_help_input.load(Ordering::SeqCst) {
+                        show_help_input.store(false, Ordering::SeqCst);
+                        true
+                    } else { false }
+                }
+                _ => false,
             }
         })
         .on_tick(move |ctx, _| {
@@ -76,6 +94,7 @@ fn main() -> std::io::Result<()> {
         })
         .run(move |ctx| {
             let (w, h) = ctx.compositor().size();
+            let theme = ctx.theme().clone();
 
             let input_height = 3u16;
             let list_height = h.saturating_sub(input_height);
@@ -104,14 +123,14 @@ fn main() -> std::io::Result<()> {
                 let idx = x as usize;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = ch;
-                    input_plane.cells[idx].fg = Color::Rgb(0, 255, 136);
+                    input_plane.cells[idx].fg = theme.primary;
                 }
                 x += 1;
             }
 
-            let mut text_color = Color::Rgb(200, 200, 200);
+            let mut text_color = theme.fg;
             if input_text.is_empty() {
-                text_color = Color::Rgb(100, 100, 100);
+                text_color = theme.fg_muted;
             }
             for (i, ch) in display_text.chars().take(w as usize - 3).enumerate() {
                 let idx = x as usize + i;
@@ -127,8 +146,71 @@ fn main() -> std::io::Result<()> {
                 let idx = (border_y * w + col) as usize;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = '─';
-                    input_plane.cells[idx].fg = Color::Rgb(60, 60, 80);
+                    input_plane.cells[idx].fg = theme.outline;
                 }
+            }
+
+            if show_help_render.load(Ordering::SeqCst) {
+                let hw = 40u16.min(w.saturating_sub(4));
+                let hh = 10u16.min(h.saturating_sub(4));
+                let hx = (w - hw) / 2;
+                let hy = (h - hh) / 2;
+
+                let mut help_plane = Plane::new(100, hw, hh);
+                help_plane.z_index = 50;
+                for cell in help_plane.cells.iter_mut() {
+                    cell.bg = theme.surface_elevated;
+                    cell.transparent = false;
+                }
+
+                for x in 1..hw - 1 {
+                    let top = x as usize;
+                    let bot = ((hh - 1) * hw + x) as usize;
+                    if top < help_plane.cells.len() { help_plane.cells[top].char = '─'; help_plane.cells[top].fg = theme.outline; }
+                    if bot < help_plane.cells.len() { help_plane.cells[bot].char = '─'; help_plane.cells[bot].fg = theme.outline; }
+                }
+                for y in 1..hh - 1 {
+                    let left = (y * hw) as usize;
+                    let right = (y * hw + hw - 1) as usize;
+                    if left < help_plane.cells.len() { help_plane.cells[left].char = '│'; help_plane.cells[left].fg = theme.outline; }
+                    if right < help_plane.cells.len() { help_plane.cells[right].char = '│'; help_plane.cells[right].fg = theme.outline; }
+                }
+                let corners = [('╭', 0, 0), ('╮', hw - 1, 0), ('╰', 0, hh - 1), ('╯', hw - 1, hh - 1)];
+                for (ch, cx, cy) in corners {
+                    let idx = (cy * hw + cx) as usize;
+                    if idx < help_plane.cells.len() { help_plane.cells[idx].char = ch; help_plane.cells[idx].fg = theme.outline; }
+                }
+
+                let help_title = "Framework Chat Help";
+                let tx = (hw - help_title.len() as u16) / 2;
+                for (i, c) in help_title.chars().enumerate() {
+                    let idx = (1 * hw + tx + i as u16) as usize;
+                    if idx < help_plane.cells.len() {
+                        help_plane.cells[idx].char = c;
+                        help_plane.cells[idx].fg = theme.primary;
+                        help_plane.cells[idx].style = Styles::BOLD;
+                    }
+                }
+
+                let shortcuts = [
+                    ("Ctrl+T", "Cycle theme"),
+                    ("F1 / ?", "Toggle help"),
+                    ("Esc", "Dismiss help"),
+                    ("Ctrl+Q", "Quit"),
+                ];
+                for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                    let row = 3 + i as u16;
+                    for (j, c) in key.chars().enumerate() {
+                        let idx = (row * hw + 2 + j as u16) as usize;
+                        if idx < help_plane.cells.len() { help_plane.cells[idx].char = c; help_plane.cells[idx].fg = theme.primary; }
+                    }
+                    for (j, c) in desc.chars().enumerate() {
+                        let idx = (row * hw + 14 + j as u16) as usize;
+                        if idx < help_plane.cells.len() { help_plane.cells[idx].char = c; help_plane.cells[idx].fg = theme.fg; }
+                    }
+                }
+
+                ctx.add_plane(help_plane);
             }
 
             ctx.add_plane(input_plane);
