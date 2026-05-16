@@ -58,7 +58,7 @@ pub fn init_logger_from_env() {
     let filter = if env.is_empty() {
         EnvFilter::new("info")
     } else {
-        EnvFilter::try_from(env.as_str()).unwrap_or_else(|_| EnvFilter::new("info"))
+        EnvFilter::from(env.as_str())
     };
 
     tracing_subscriber::fmt()
@@ -84,7 +84,7 @@ pub fn init_logger_from_env() {
 /// init_logger_with_level("debug");
 /// ```
 pub fn init_logger_with_level(level: &str) {
-    let filter = EnvFilter::try_from(level).unwrap_or_else(|_| EnvFilter::new("info"));
+    let filter = EnvFilter::from(level);
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
