@@ -175,3 +175,59 @@ fn main() -> std::io::Result<()> {
         // Render loop handled by framework
     })
 }
+
+#[cfg(test)]
+mod scene_construction_tests {
+    use super::scenes::*;
+    use dracon_terminal_engine::framework::scene_router::Scene;
+    use dracon_terminal_engine::framework::theme::Theme;
+    use ratatui::layout::Rect;
+
+    fn test_area() -> Rect {
+        Rect::new(0, 0, 80, 24)
+    }
+
+    fn make_scene_tests() -> Vec<(&'static str, Box<dyn Scene>)> {
+        let t = Theme::nord();
+        vec![
+            ("widget_gallery", Box::new(widget_gallery::WidgetGalleryScene::new(t.clone()))),
+            ("theme_switcher", Box::new(theme_switcher::ThemeSwitcherScene::new(t.clone()))),
+            ("form_demo", Box::new(form_demo::FormDemoScene::new(t.clone()))),
+            ("tree_navigator", Box::new(tree_navigator::TreeNavigatorScene::new(t.clone()))),
+            ("modal_demo", Box::new(modal_demo::ModalDemoScene::new(t.clone()))),
+            ("calendar_scene", Box::new(calendar_scene::CalendarScene::new(t.clone()))),
+            ("autocomplete_scene", Box::new(autocomplete_scene::AutocompleteScene::new(t.clone()))),
+            ("rich_text_scene", Box::new(rich_text_scene::RichTextScene::new(t.clone()))),
+            ("notification_center_scene", Box::new(notification_center_scene::NotificationCenterScene::new(t.clone()))),
+            ("kanban_scene", Box::new(kanban_scene::KanbanScene::new(t.clone()))),
+            ("cell_pool_scene", Box::new(cell_pool_scene::CellPoolScene::new(t.clone()))),
+            ("accessibility_scene", Box::new(accessibility_scene::AccessibilityScene::new(t.clone()))),
+        ]
+    }
+
+    #[test]
+    fn test_all_scenes_construct() {
+        let scenes = make_scene_tests();
+        assert_eq!(scenes.len(), 12);
+    }
+
+    #[test]
+    fn test_all_scenes_render_without_panic() {
+        for (name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            let _plane = scene.render(test_area());
+            drop(scene);
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_theme_change() {
+        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+        for (name, mut scene) in make_scene_tests() {
+            for theme in &themes {
+                scene.on_theme_change(theme);
+                let _plane = scene.render(test_area());
+            }
+        }
+    }
+}
