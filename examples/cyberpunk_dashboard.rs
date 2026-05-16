@@ -139,7 +139,7 @@ impl CyberpunkDashboard {
             let bar_h = (val / 100.0 * (chart_h as f64 - 4.0)).max(1.0) as u16;
             for dy in 0..bar_h {
                 let y = mid_y + chart_h / 2 - 2 - dy;
-                if y >= chart_y + 1 && y < chart_y + chart_h - 1 {
+                if y > chart_y && y < chart_y + chart_h - 1 {
                     let idx = (y as usize) * plane.width as usize + x as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = if dy == bar_h - 1 { '▔' } else { '█' };

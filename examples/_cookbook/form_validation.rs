@@ -285,10 +285,7 @@ impl Widget for FormApp {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        match kind {
-            MouseEventKind::ScrollDown | MouseEventKind::ScrollUp => true,
-            _ => false,
-        }
+        matches!(kind, MouseEventKind::ScrollDown | MouseEventKind::ScrollUp)
     }
 }
 
