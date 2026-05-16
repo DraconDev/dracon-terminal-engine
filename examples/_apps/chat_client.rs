@@ -297,8 +297,19 @@ impl ChatState {
 
     #[cfg(not(feature = "async"))]
     fn start_fetch(&mut self) {
+        let demo = vec![
+            Message::new("Alice", "Hey everyone! Just joined the channel.", "09:01", true),
+            Message::new("Bob", "Welcome Alice! How's the project going?", "09:02", true),
+            Message::new("Alice", "Pretty well — almost done with the refactor.", "09:03", true),
+            Message::new("Charlie", "Nice! Let me know if you need reviews.", "09:05", false),
+            Message::new("Dana", "I pushed the new theme system last night.", "09:10", false),
+            Message::new("Eve", "The compositor changes look great btw.", "09:12", false),
+            Message::new("Bob", "Running the showcase now — looks solid.", "09:15", false),
+            Message::new("Alice", "Found a small rendering glitch, filing an issue.", "09:18", false),
+        ];
+        self.messages = demo;
         self.is_loading = false;
-        self.loading_error = Some("Async feature not enabled".to_string());
+        self.loading_error = None;
         self.dirty = true;
     }
 
