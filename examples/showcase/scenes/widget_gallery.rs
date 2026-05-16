@@ -10,7 +10,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, ProgressBar, Radio, SearchInput, Select, Slider, Spinner, Toggle,
+    Button, Checkbox, ColorPicker, ProgressBar, ProgressRing, Radio, SearchInput, Select, Slider,
+    Spinner, TagsInput, Toggle,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
@@ -28,6 +29,9 @@ const SLOTS: &[(usize, usize, &str, &str)] = &[
     (1, 2, "Search Input", ">"),
     (2, 0, "Progress Bar", "[=]"),
     (2, 1, "Button", "[X]"),
+    (2, 2, "Color Picker", "HSL"),
+    (3, 0, "Progress Ring", "O"),
+    (3, 1, "Tags Input", "#"),
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -45,6 +49,9 @@ pub struct WidgetGalleryScene {
     search: SearchInput,
     progress: ProgressBar,
     button: Button,
+    color_picker: ColorPicker,
+    progress_ring: ProgressRing,
+    tags_input: TagsInput,
     theme: Theme,
     show_help: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
@@ -66,6 +73,10 @@ impl WidgetGalleryScene {
             search: SearchInput::new(WidgetId::new(16)),
             progress: ProgressBar::new(WidgetId::new(17)),
             button: Button::with_id(WidgetId::new(18), "Click Me!"),
+            color_picker: ColorPicker::new().with_theme(theme.clone()),
+            progress_ring: ProgressRing::new(0.65),
+            tags_input: TagsInput::new(vec!["rust".to_string(), "tui".to_string()])
+                .with_theme(theme.clone()),
             theme,
             show_help: false,
             zones: RefCell::new(ScopedZoneRegistry::new()),
@@ -85,14 +96,17 @@ impl WidgetGalleryScene {
             6 => &mut self.search,
             7 => &mut self.progress,
             8 => &mut self.button,
+            9 => &mut self.color_picker,
+            10 => &mut self.progress_ring,
+            11 => &mut self.tags_input,
             _ => &mut self.checkbox,
         }
     }
 
     fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
         let (row, col, ..) = SLOTS[slot];
-        let rows = 3u16;
-        let cols = if row == 0 { 4 } else if row == 1 { 3 } else { 2 };
+        let rows = 4u16;
+        let cols = if row == 0 { 4 } else { 3 };
 
         let card_w = area.width.saturating_sub(2) / cols;
         let card_h = area.height.saturating_sub(4) / rows;
@@ -163,6 +177,9 @@ impl Scene for WidgetGalleryScene {
                     6 => self.search.render(widget_area),
                     7 => self.progress.render(widget_area),
                     8 => self.button.render(widget_area),
+                    9 => self.color_picker.render(widget_area),
+                    10 => self.progress_ring.render(widget_area),
+                    11 => self.tags_input.render(widget_area),
                     _ => Plane::new(0, 0, 0),
                 };
                 blit_to(&mut plane, &mut w_plane, widget_area.x as usize, widget_area.y as usize);
@@ -179,6 +196,9 @@ impl Scene for WidgetGalleryScene {
                         6 => format!("query: '{}'", self.search.query()),
                         7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
                         8 => String::from("[Click me]"),
+                        9 => format!("hex: {}", self.color_picker.hex()),
+                        10 => format!("progress: {:.0}%", self.progress_ring.progress() * 100.0),
+                        11 => format!("tags: {}", self.tags_input.tags().len()),
                         _ => String::new(),
                     };
                     draw_text(&mut plane, rect.x + 1, state_y, &state, t.fg_muted, t.surface, false);
@@ -264,6 +284,9 @@ impl Scene for WidgetGalleryScene {
         self.search.on_theme_change(theme);
         self.progress.on_theme_change(theme);
         self.button.on_theme_change(theme);
+        self.color_picker.on_theme_change(theme);
+        self.progress_ring.on_theme_change(theme);
+        self.tags_input.on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool { true }
