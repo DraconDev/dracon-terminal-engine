@@ -517,3 +517,50 @@ impl WidgetState for Tree {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_tree() -> Tree {
+        let mut root1 = TreeNode::new("src");
+        root1.add_child(TreeNode::new("main.rs"));
+        root1.add_child(TreeNode::new("lib.rs"));
+        let root2 = TreeNode::new("Cargo.toml");
+        Tree::new(WidgetId::new(1)).with_root(vec![root1, root2])
+    }
+
+    #[test]
+    fn selected_label_none_when_no_selection() {
+        let tree = sample_tree();
+        assert!(tree.selected_label().is_none());
+    }
+
+    #[test]
+    fn selected_label_returns_root_node() {
+        let mut tree = sample_tree();
+        tree.set_selected_path(vec![0]);
+        assert_eq!(tree.selected_label(), Some("src"));
+    }
+
+    #[test]
+    fn selected_label_returns_child_node() {
+        let mut tree = sample_tree();
+        tree.set_selected_path(vec![0, 1]);
+        assert_eq!(tree.selected_label(), Some("lib.rs"));
+    }
+
+    #[test]
+    fn selected_label_second_root() {
+        let mut tree = sample_tree();
+        tree.set_selected_path(vec![1]);
+        assert_eq!(tree.selected_label(), Some("Cargo.toml"));
+    }
+
+    #[test]
+    fn selected_label_out_of_bounds() {
+        let mut tree = sample_tree();
+        tree.set_selected_path(vec![5]);
+        assert!(tree.selected_label().is_none());
+    }
+}
