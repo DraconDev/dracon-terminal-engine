@@ -3,6 +3,7 @@
 //! Runs inside the showcase process via SceneRouter instead of launching
 //! an external binary. Press `B` or `Esc` to return to the showcase grid.
 
+use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
@@ -317,19 +318,6 @@ impl Scene for WidgetGalleryScene {
 // RENDERING HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
-    for (i, ch) in text.chars().enumerate() {
-        let idx = (y * plane.width + x + i as u16) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx] = Cell {
-                char: ch, fg, bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false, skip: false,
-            };
-        }
-    }
-}
-
 fn render_card_border(plane: &mut Plane, rect: Rect, t: &Theme, selected: bool) {
     let (x, y, w, h) = (rect.x, rect.y, rect.width, rect.height);
     let border = if selected { t.primary } else { t.outline };
@@ -355,22 +343,6 @@ fn render_card_border(plane: &mut Plane, rect: Rect, t: &Theme, selected: bool) 
                 plane.cells[idx].char = ' ';
                 plane.cells[idx].fg = t.fg;
             }
-        }
-    }
-}
-
-fn blit_to(dest: &mut Plane, src: &mut Plane, offset_x: usize, offset_y: usize) {
-    for i in 0..src.cells.len() {
-        let cell = &src.cells[i];
-        if cell.char == '\0' || cell.transparent { continue; }
-        let row = i / src.width as usize;
-        let col = i % src.width as usize;
-        let dy = offset_y + row;
-        let dx = offset_x + col;
-        if dy >= dest.height as usize || dx >= dest.width as usize { continue; }
-        let idx = dy * dest.width as usize + dx;
-        if idx < dest.cells.len() {
-            dest.cells[idx] = *cell;
         }
     }
 }
