@@ -743,6 +743,8 @@ impl Widget for Showcase {
 
                 // Message text
                 draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, Styles::BOLD);
+            } else {
+                self.status_message = None;
             }
         }
 
@@ -774,6 +776,11 @@ impl Widget for Showcase {
 
                     // Message text
                     draw_text(&mut plane, msg_x + 2, msg_y, &msg, t.bg, t.success, Styles::BOLD);
+                } else {
+                    drop(guard);
+                    if let Ok(mut guard) = self.returned_from.lock() {
+                        *guard = None;
+                    }
                 }
             }
         }
