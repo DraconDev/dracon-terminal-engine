@@ -684,6 +684,13 @@ pub fn highlight_code<'a>(content: &'a str, extension: &str) -> Vec<Line<'a>> {
     lines
 }
 
+/// Fallback: returns content as plain monochrome lines without syntax highlighting.
+/// Used when the `syntax-highlighting` feature is disabled.
+#[cfg(not(feature = "syntax-highlighting"))]
+pub fn highlight_code<'a>(content: &'a str, _extension: &str) -> Vec<Line<'a>> {
+    content.lines().map(|line| Line::from(line)).collect()
+}
+
 /// Draws a labeled stat bar (e.g., CPU, memory) using Unicode block characters.
 pub fn draw_stat_bar(
     label: &str,
