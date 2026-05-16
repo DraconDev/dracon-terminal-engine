@@ -4,7 +4,7 @@
 //! an external binary. Press `B` or `Esc` to return to the showcase grid.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
