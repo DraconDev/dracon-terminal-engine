@@ -24,6 +24,7 @@
 pub mod animation;
 pub mod app;
 pub mod command;
+pub mod ctx;
 pub mod dirty_regions;
 pub mod dragdrop;
 pub mod event_bus;
