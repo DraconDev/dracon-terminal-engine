@@ -246,10 +246,17 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 callback(event.clone());
-                // SAFETY: The `bus` Weak reference is only upgraded if the EventBus
-                // still exists. Unsubscribe removes the callback from the internal
-                // list, which is safe because we are currently inside that callback
-                // (RwLock is released between dispatch and this point).
+                // SAFETY: `bus` is a raw pointer to the `EventBus` captured at subscribe time.
+                // This is safe because:
+                // 1. The EventBus must outlive all subscriptions — dropping the bus drops
+                //    the subscriber list, so callbacks cannot fire after the bus is gone.
+                // 2. `as_ref()` dereferences the pointer, which is valid only while the bus
+                //    is alive. If the bus has been dropped, this is UB — callers must ensure
+                //    the bus outlives all `subscribe_once` callbacks.
+                // 3. `unsubscribe` mutates the subscriber list via RefCell. This is called
+                //    from within the dispatch loop, which holds a borrow on the list.
+                //    The RefCell borrow is released between dispatch and this callback
+                //    invocation (callbacks run after the borrow is dropped).
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
                         bus.unsubscribe::<E>(id_clone);
@@ -306,8 +313,11 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 let event = event.clone();
-                // SAFETY: Same as sync variant — Weak only upgrades if bus is alive,
-                // and we're inside the callback so RwLock is not held.
+                // SAFETY: Same invariants as sync `subscribe_once` — `bus` is a raw
+                // pointer captured at subscribe time. The pointer is valid as long as the
+                // EventBus outlives all subscriptions. Callers must ensure the bus is not
+                // dropped while callbacks are still queued or executing.
+                // RefCell borrow is released before callbacks are invoked.
                 unsafe {
                     if let Some(bus) = bus.as_ref() {
                         bus.unsubscribe::<E>(id_clone);
