@@ -2,6 +2,7 @@
 //!
 //! Demonstrates the Cell allocation recycling pool for performance optimization.
 
+use crate::scenes::shared_helpers::{draw_text, blit_to};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
@@ -202,19 +203,6 @@ impl Scene for CellPoolScene {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
-    for (i, ch) in text.chars().enumerate() {
-        let idx = (y * plane.width + x + i as u16) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx] = Cell {
-                char: ch, fg, bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
-                transparent: false, skip: false,
-            };
-        }
-    }
-}
 
 fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 44u16.min(area.width.saturating_sub(4));

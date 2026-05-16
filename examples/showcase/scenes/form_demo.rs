@@ -3,6 +3,7 @@
 //! Demonstrates form fields with validation and submit.
 //! Press `Tab` to cycle focus, `B`/`Esc` to go back.
 
+use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
