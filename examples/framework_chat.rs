@@ -3,9 +3,11 @@
 //!
 //! A simple chat interface with message list, input bar, and theme.
 
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::List;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -25,6 +27,8 @@ impl std::fmt::Display for Message {
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::cyberpunk());
+    let kb_config = resolve_keybindings();
+    let keybindings = KeybindingSet::from_config(&kb_config);
 
     let now = chrono_lite_timestamp();
     let messages = vec![
@@ -65,19 +69,16 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(theme)
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
+            if keybindings.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
+                return true;
+            }
+            if keybindings.matches(actions::HELP, &key) {
+                show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
                 return true;
             }
             if key.kind != KeyEventKind::Press { return false; }
             match key.code {
-                KeyCode::F(1) | KeyCode::Char('?') => {
-                    show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
-                    true
-                }
-                KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                    true
-                }
                 KeyCode::Esc => {
                     if show_help_input.load(Ordering::SeqCst) {
                         show_help_input.store(false, Ordering::SeqCst);

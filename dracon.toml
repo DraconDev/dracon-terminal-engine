@@ -31,6 +31,8 @@ edit = "ctrl+e"
 # Search
 search = "ctrl+f"        # Not / (conflicts with text input)
 
-# Theme cycling is NOT a hotkey — use UI (Select widget in settings)
+# Theme cycling — f2 (engine default) or via UI (Select widget in settings)
+theme = "f2"
+
 # Refresh is NOT a hotkey — automatic or button
 # View mode toggles are NOT hotkeys — Toggle widget
