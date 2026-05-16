@@ -193,7 +193,51 @@ impl TextEditor {
 
     /// Sets the filter query and updates the visible line indices.
     pub fn set_filter(&mut self, query: &str) {
-        self.search.set_filter(query, self);
+        if self.search.filter_query == query {
+            return;
+        }
+
+        // If clearing filter, restore cursor to real line index
+        if query.is_empty() && !self.search.filter_query.is_empty() {
+            if self.cursor_row < self.search.filtered_indices.len() {
+                self.cursor_row = self.search.filtered_indices[self.cursor_row];
+            } else if let Some(&last) = self.search.filtered_indices.last() {
+                self.cursor_row = last;
+            } else {
+                self.cursor_row = 0;
+            }
+            self.search.filtered_indices.clear();
+        }
+
+        self.search.filter_query = query.to_string();
+
+        if !self.search.filter_query.is_empty() {
+            let use_regex = Regex::new(&format!("(?i){}", query)).is_ok();
+            self.search.filtered_indices = self
+                .lines
+                .iter()
+                .enumerate()
+                .filter(|(_, line)| {
+                    if use_regex {
+                        if let Ok(re) = Regex::new(&format!("(?i){}", query)) {
+                            re.is_match(line)
+                        } else {
+                            line.to_lowercase()
+                                .contains(&self.search.filter_query.to_lowercase())
+                        }
+                    } else {
+                        line.to_lowercase()
+                            .contains(&self.search.filter_query.to_lowercase())
+                    }
+                })
+                .map(|(i, _)| i)
+                .collect();
+            self.cursor_row = 0;
+            self.scroll_row = 0;
+        }
+        self.scroll_col = 0;
+        self.cursor_col = 0;
+        self.invalidate_from(0);
     }
 
     fn effective_len(&self) -> usize {
@@ -590,7 +634,7 @@ impl TextEditor {
     /// Handles a keyboard or mouse event. Returns `true` if the event was consumed.
     pub fn handle_event(&mut self, event: &Event, area: Rect) -> bool {
         // If filtered OR Read-Only, allow only navigation
-        if !self.filter_query.is_empty() || self.read_only {
+        if !self.search.filter_query.is_empty() || self.read_only {
             if let Event::Key(key) = event {
                 if key.kind != KeyEventKind::Press {
                     return false;
