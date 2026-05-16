@@ -2250,7 +2250,7 @@ impl Widget for &TextEditor {
                 };
 
                 if !self.filter_query.is_empty() || start_line == 0 {
-                    let h_lines = highlight_code(&content_string, &self.language);
+                    let h_lines = highlight_code(&content_string, &self.language, None);
                     *cache = h_lines
                         .into_iter()
                         .map(|line| {
@@ -2266,7 +2266,7 @@ impl Widget for &TextEditor {
                     // syntect's HighlightLines maintains state per file;
                     // to truly do incremental we'd need per-line state machine.
                     // Full re-highlight is acceptable for typical usage.
-                    let h_lines = highlight_code(&content_string, &self.language);
+                    let h_lines = highlight_code(&content_string, &self.language, None);
                     *cache = h_lines
                         .into_iter()
                         .map(|line| {

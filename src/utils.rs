@@ -3,8 +3,9 @@
 //! Utility functions for terminal UI rendering, file operations, and system interactions.
 
 use chrono::{DateTime, Local};
+use crate::compositor::Color;
 use ratatui::{
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
 };
 use serde::{Deserialize, Serialize};
@@ -468,19 +469,17 @@ pub struct HighlightPalette {
 }
 
 impl HighlightPalette {
-    /// Derives a HighlightPalette from a Theme, using theme colors to inform
-    /// muted (comments), base (text), and saturated (keywords/strings/etc.) categories.
     pub fn from_theme(theme: &crate::framework::theme::Theme) -> Self {
         Self {
-            comments: theme.dim,
+            comments: theme.fg_muted,
             text: theme.fg,
             keywords: theme.primary,
-            strings: Color::Rgb(163, 190, 140),
-            functions: Color::Rgb(129, 161, 193),
-            types: Color::Rgb(235, 203, 139),
-            variables: Color::Rgb(208, 135, 112),
+            strings: theme.secondary,
+            functions: theme.fg_subtle,
+            types: theme.warning,
+            variables: theme.info,
             headers: theme.primary,
-            links: Color::Rgb(136, 192, 208),
+            links: theme.info,
         }
     }
 }
@@ -592,9 +591,9 @@ pub fn highlight_code<'a>(
             let b_f = b as f32;
 
             let fg = if let Some(palette) = palette {
-                Self::remap_color_with_palette(r_f, g_f, b_f, is_markdown, palette)
+                remap_color_with_palette(r_f, g_f, b_f, is_markdown, palette)
             } else {
-                Self::remap_color_cyberpunk(r_f, g_f, b_f, is_markdown)
+                remap_color_cyberpunk(r_f, g_f, b_f, is_markdown)
             };
 
             let mut ratatui_style = Style::default().fg(fg);
@@ -620,94 +619,98 @@ pub fn highlight_code<'a>(
 }
 
 #[cfg(feature = "syntax-highlighting")]
-impl HighlightPalette {
-    fn remap_color_with_palette(r_f: f32, g_f: f32, b_f: f32, is_markdown: bool, palette: &HighlightPalette) -> Color {
-        let max_c = r_f.max(g_f).max(b_f);
-        let min_c = r_f.min(g_f).min(b_f);
-        let diff = max_c - min_c;
+fn remap_color_with_palette(
+    r_f: f32,
+    g_f: f32,
+    b_f: f32,
+    is_markdown: bool,
+    palette: &HighlightPalette,
+) -> Color {
+    let max_c = r_f.max(g_f).max(b_f);
+    let min_c = r_f.min(g_f).min(b_f);
+    let diff = max_c - min_c;
 
-        if is_markdown {
-            if diff < 30.0 || max_c < 180.0 {
-                palette.text
-            } else if r_f > g_f && r_f > b_f {
-                palette.headers
-            } else if g_f > r_f && g_f > b_f {
-                palette.strings
-            } else {
-                palette.links
-            }
+    if is_markdown {
+        if diff < 30.0 || max_c < 180.0 {
+            palette.text
+        } else if r_f > g_f && r_f > b_f {
+            palette.headers
+        } else if g_f > r_f && g_f > b_f {
+            palette.strings
         } else {
-            if diff < 20.0 {
-                if max_c < 140.0 {
-                    palette.comments
-                } else {
-                    palette.text
-                }
-            } else if r_f > g_f && r_f > b_f {
-                if g_f > 120.0 {
-                    palette.types
-                } else {
-                    palette.keywords
-                }
-            } else if g_f > r_f && g_f > b_f {
-                palette.strings
-            } else if b_f > r_f && b_f > g_f {
-                if r_f > 130.0 {
-                    palette.functions
-                } else {
-                    palette.variables
-                }
-            } else {
-                palette.text
-            }
+            palette.links
         }
-    }
-
-    fn remap_color_cyberpunk(r_f: f32, g_f: f32, b_f: f32, is_markdown: bool) -> Color {
-        let max_c = r_f.max(g_f).max(b_f);
-        let min_c = r_f.min(g_f).min(b_f);
-        let diff = max_c - min_c;
-
-        if is_markdown {
-            if diff < 30.0 || max_c < 180.0 {
-                Color::Rgb(255, 255, 255)
-            } else if r_f > g_f && r_f > b_f {
-                Color::Rgb(255, 0, 255)
-            } else if g_f > r_f && g_f > b_f {
-                Color::Rgb(150, 255, 0)
+    } else {
+        if diff < 20.0 {
+            if max_c < 140.0 {
+                palette.comments
             } else {
-                Color::Rgb(0, 255, 255)
+                palette.text
+            }
+        } else if r_f > g_f && r_f > b_f {
+            if g_f > 120.0 {
+                palette.types
+            } else {
+                palette.keywords
+            }
+        } else if g_f > r_f && g_f > b_f {
+            palette.strings
+        } else if b_f > r_f && b_f > g_f {
+            if r_f > 130.0 {
+                palette.functions
+            } else {
+                palette.variables
             }
         } else {
-            if diff < 20.0 {
-                if max_c < 140.0 {
-                    Color::Rgb(100, 120, 140)
-                } else {
-                    Color::Rgb(230, 235, 240)
-                }
-            } else if r_f > g_f && r_f > b_f {
-                if g_f > 120.0 {
-                    Color::Rgb(255, 215, 0)
-                } else {
-                    Color::Rgb(255, 45, 85)
-                }
-            } else if g_f > r_f && g_f > b_f {
-                Color::Rgb(0, 255, 135)
-            } else if b_f > r_f && b_f > g_f {
-                if r_f > 130.0 {
-                    Color::Rgb(180, 100, 255)
-                } else {
-                    Color::Rgb(0, 180, 255)
-                }
-            } else {
-                Color::Rgb(230, 235, 240)
-            }
+            palette.text
         }
     }
 }
 
-/// Fallback: returns content as plain monochrome lines without syntax highlighting.
-/// Used when the `syntax-highlighting` feature is disabled.
+#[cfg(feature = "syntax-highlighting")]
+fn remap_color_cyberpunk(r_f: f32, g_f: f32, b_f: f32, is_markdown: bool) -> Color {
+    let max_c = r_f.max(g_f).max(b_f);
+    let min_c = r_f.min(g_f).min(b_f);
+    let diff = max_c - min_c;
+
+    if is_markdown {
+        if diff < 30.0 || max_c < 180.0 {
+            Color::Rgb(255, 255, 255)
+        } else if r_f > g_f && r_f > b_f {
+            Color::Rgb(255, 0, 255)
+        } else if g_f > r_f && g_f > b_f {
+            Color::Rgb(150, 255, 0)
+        } else {
+            Color::Rgb(0, 255, 255)
+        }
+    } else {
+        if diff < 20.0 {
+            if max_c < 140.0 {
+                Color::Rgb(100, 120, 140)
+            } else {
+                Color::Rgb(230, 235, 240)
+            }
+        } else if r_f > g_f && r_f > b_f {
+            if g_f > 120.0 {
+                Color::Rgb(255, 215, 0)
+            } else {
+                Color::Rgb(255, 45, 85)
+            }
+        } else if g_f > r_f && g_f > b_f {
+            Color::Rgb(0, 255, 135)
+        } else if b_f > r_f && b_f > g_f {
+            if r_f > 130.0 {
+                Color::Rgb(180, 100, 255)
+            } else {
+                Color::Rgb(0, 180, 255)
+            }
+        } else {
+            Color::Rgb(230, 235, 240)
+        }
+    }
+}
+
+/// Fallback: returns empty lines when the `syntax-highlighting` feature is disabled.
 #[cfg(not(feature = "syntax-highlighting"))]
 pub fn highlight_code<'a>(
     _content: &'a str,
