@@ -27,7 +27,7 @@ impl Compositor {
     pub fn new(width: u16, height: u16) -> Self {
         let size = (width as u32 * height as u32) as usize;
         let default_cell = Cell {
-            bg: Color::Rgb(16, 16, 24),
+            bg: Color::Reset,
             transparent: false,
             ..Cell::default()
         };
@@ -37,7 +37,7 @@ impl Compositor {
             height,
             last_frame: vec![Cell::default(); size],
             final_buffer: vec![default_cell; size],
-            clear_color: Color::Rgb(16, 16, 24),
+            clear_color: Color::Reset,
             last_frame_duration_ms: 0.0,
             widget_count: 0,
             dirty_regions: DirtyRegionTracker::new(),
@@ -62,6 +62,11 @@ impl Compositor {
     /// Sets the last frame duration (called by App after each frame).
     pub fn set_last_frame_duration(&mut self, ms: f64) {
         self.last_frame_duration_ms = ms;
+    }
+
+    /// Returns the current clear color used for uncovered cells.
+    pub fn clear_color(&self) -> Color {
+        self.clear_color
     }
 
     /// Sets the background color for cells not covered by any plane.
