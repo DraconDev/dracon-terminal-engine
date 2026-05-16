@@ -484,6 +484,14 @@ impl HighlightPalette {
     }
 }
 
+fn to_ratatui_color(c: Color) -> ratatui::prelude::Color {
+    match c {
+        Color::Reset => ratatui::prelude::Color::Reset,
+        Color::Ansi(n) => ratatui::prelude::Color::Ansi(n),
+        Color::Rgb(r, g, b) => ratatui::prelude::Color::Rgb(r, g, b),
+    }
+}
+
 /// Highlights code content using syntect and returns styled ratatui Lines.
 /// Supports syntax highlighting for 50+ languages.
 ///
@@ -596,7 +604,7 @@ pub fn highlight_code<'a>(
                 remap_color_cyberpunk(r_f, g_f, b_f, is_markdown)
             };
 
-            let mut ratatui_style = Style::default().fg(fg);
+            let mut ratatui_style = Style::default().fg(to_ratatui_color(fg));
 
             if style.font_style.contains(FontStyle::BOLD) {
                 ratatui_style = ratatui_style.add_modifier(Modifier::BOLD);
@@ -732,9 +740,9 @@ pub fn draw_stat_bar(
     let ratio = (value / max).clamp(0.0, 1.0);
     let filled = (ratio * bar_width as f32).round() as usize;
 
-    let mut spans = vec![Span::styled(
+let mut spans = vec![Span::styled(
         format!("{} ", label),
-        Style::default().fg(Color::Ansi(8)),
+        Style::default().fg(to_ratatui_color(Color::Ansi(8))),
     )];
 
     for i in 0..bar_width as usize {
@@ -748,18 +756,18 @@ pub fn draw_stat_bar(
         };
 
         if i < filled {
-            spans.push(Span::styled(symbol, Style::default().fg(color)));
+            spans.push(Span::styled(symbol, Style::default().fg(to_ratatui_color(color))));
         } else {
             spans.push(Span::styled(
                 symbol,
-                Style::default().fg(Color::Rgb(30, 30, 35)),
+                Style::default().fg(to_ratatui_color(Color::Rgb(30, 30, 35))),
             ));
         }
     }
 
     spans.push(Span::styled(
         format!(" {:>3.0}%", ratio * 100.0),
-        Style::default().fg(text_color).add_modifier(Modifier::BOLD),
+        Style::default().fg(to_ratatui_color(text_color)),
     ));
     Line::from(spans)
 }
