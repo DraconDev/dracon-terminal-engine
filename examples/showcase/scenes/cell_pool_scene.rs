@@ -2,12 +2,11 @@
 //!
 //! Demonstrates the Cell allocation recycling pool for performance optimization.
 
-use crate::scenes::shared_helpers::{draw_text, blit_to};
-use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use crate::scenes::shared_helpers::draw_text;
+use dracon_terminal_engine::compositor::{Plane, pool::CellPool};
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::compositor::pool::CellPool;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::layout::Rect;
 
