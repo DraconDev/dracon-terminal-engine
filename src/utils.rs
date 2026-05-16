@@ -487,7 +487,7 @@ impl HighlightPalette {
 fn to_ratatui_color(c: Color) -> ratatui::prelude::Color {
     match c {
         Color::Reset => ratatui::prelude::Color::Reset,
-        Color::Ansi(n) => ratatui::prelude::Color::Ansi(n),
+        Color::Ansi(n) => ratatui::prelude::Color::Indexed(n),
         Color::Rgb(r, g, b) => ratatui::prelude::Color::Rgb(r, g, b),
     }
 }
