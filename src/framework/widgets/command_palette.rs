@@ -188,12 +188,9 @@ impl crate::framework::widget::Widget for CommandPalette {
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
-
-        // Background
+        plane.fill_bg(t.bg);
         for cell in plane.cells.iter_mut() {
-            cell.bg = t.bg;
             cell.fg = t.fg;
-            cell.transparent = false;
         }
 
         let w = self.width.min(area.width);

@@ -202,10 +202,9 @@ impl crate::framework::widget::Widget for ContextMenu {
         plane.y = y;
         plane.z_index = 200;
 
+        plane.fill_bg(self.theme.bg);
         for cell in &mut plane.cells {
-            cell.bg = self.theme.bg;
             cell.fg = self.theme.fg;
-            cell.transparent = false;
         }
 
         for (i, (label, _action)) in self.items.iter().enumerate() {
