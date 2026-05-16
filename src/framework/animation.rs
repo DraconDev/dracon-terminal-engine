@@ -392,6 +392,28 @@ mod tests {
     }
 
     #[test]
+    fn test_animation_id_stable_after_cleanup() {
+        let mut manager = AnimationManager::new();
+        let id_short = manager.start(0.0, 10.0, Duration::from_millis(1));
+        let id_long = manager.start(0.0, 100.0, Duration::from_secs(10));
+        assert_eq!(manager.len(), 2);
+
+        std::thread::sleep(Duration::from_millis(10));
+        assert!(manager.is_done(id_short));
+        assert!(!manager.is_done(id_long));
+
+        manager.cleanup();
+        assert_eq!(manager.len(), 1);
+
+        let val_long = manager.value(id_long);
+        assert!(val_long.is_some(), "id_long should still be valid after cleanup");
+        assert!(!manager.is_done(id_long), "id_long should still be active");
+
+        let val_short = manager.value(id_short);
+        assert!(val_short.is_none(), "id_short should be invalid after cleanup (completed)");
+    }
+
+    #[test]
     fn test_has_active_vs_is_empty() {
         let mut manager = AnimationManager::new();
         // Empty: both false
