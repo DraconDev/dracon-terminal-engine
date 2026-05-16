@@ -173,6 +173,19 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
+                name: "kanban",
+                category: "data",
+                description: "Drag-drop kanban board",
+                binary_name: "kanban",
+                preview: &[
+                    "To Do  |In Prog|Done  ",
+                    "┌────┐ ┌────┐ ┌────┐",
+                    "│card│ │card│ │card│",
+                    "└────┘ └────┘ └────┘",
+                    "> Drag cards between cols",
+                ],
+            },
+            ExampleMeta {
                 name: "widget_gallery",
                 category: "cookbook",
                 description: "All interactive widgets demo",
