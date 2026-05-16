@@ -18,7 +18,7 @@
 
 ## What It Is
 
-`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 37 built-in widgets, 20 themes, dirty rendering, and focus management.
+`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 41 built-in widgets, 21 themes, dirty rendering, and focus management.
 
 **Command-driven architecture** — every widget binds a CLI command, AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`.
 
