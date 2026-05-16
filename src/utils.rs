@@ -803,18 +803,24 @@ pub fn delete_word_backwards(s: &mut String) {
 
     // Skip trailing whitespace
     while i > 0 {
-        let prev = s[..i].chars().next_back().unwrap();
-        if prev.is_whitespace() {
-            i -= prev.len_utf8();
+        if let Some(prev) = s[..i].chars().next_back() {
+            if prev.is_whitespace() {
+                i -= prev.len_utf8();
+            } else {
+                break;
+            }
         } else {
             break;
         }
     }
     // Skip the word
     while i > 0 {
-        let prev = s[..i].chars().next_back().unwrap();
-        if !prev.is_whitespace() {
-            i -= prev.len_utf8();
+        if let Some(prev) = s[..i].chars().next_back() {
+            if !prev.is_whitespace() {
+                i -= prev.len_utf8();
+            } else {
+                break;
+            }
         } else {
             break;
         }
