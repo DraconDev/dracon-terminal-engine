@@ -292,18 +292,6 @@ pub fn render_card(
         next_badge_x += embed_badge.len() + 1;
     }
 
-    // NEW badge
-    let new_examples = ["calendar", "rich_text", "autocomplete", "notification_center", "accessibility", "cell_pool"];
-    if new_examples.contains(&config.ex.name) {
-        let new_badge = " NEW ";
-        for (i, ch) in new_badge.chars().enumerate() {
-            let px = next_badge_x + i;
-            if px < offset_x + card_w_usize - 2 {
-                set_cell(plane, px, badge_y, ch, t.fg_on_accent, t.warning);
-            }
-        }
-    }
-
     let name_y = offset_y + 3;
     let max_name_len = (card_w_usize - 4).min(24);
     let name_truncated: String = config.ex.name.chars().take(max_name_len).collect();
