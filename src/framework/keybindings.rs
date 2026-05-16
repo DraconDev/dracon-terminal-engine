@@ -30,46 +30,42 @@
 use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::OnceLock;
+use std::sync::RwLock;
 
-// ═══════════════════════════════════════════════════════════════
-// KEYBINDING CONFIG
-// ═══════════════════════════════════════════════════════════════
+static RESOLVED_CONFIG: RwLock<Option<KeybindingConfig>> = RwLock::new(None);
 
-/// Standard action names used across all examples.
+/// Resolves the effective keybinding config using tiered resolution.
 ///
-/// These are the canonical names for actions. Apps can query
-/// `KeybindingSet::matches(action, key_event)` to check if a key
-/// event triggers a given action.
-pub mod actions {
-    pub const QUIT: &str = "quit";
-    pub const HELP: &str = "help";
-    pub const THEME: &str = "theme";
-    pub const BACK: &str = "back";
-    pub const SUBMIT: &str = "submit";
-    pub const TAB_NEXT: &str = "tab_next";
-    pub const TAB_PREV: &str = "tab_prev";
-    pub const NEW_TAB: &str = "new_tab";
-    pub const CLOSE_TAB: &str = "close_tab";
-    pub const SAVE: &str = "save";
-    pub const DELETE: &str = "delete";
-    pub const NEW_ITEM: &str = "new_item";
-    pub const EDIT: &str = "edit";
-    pub const REFRESH: &str = "refresh";
-    pub const SEARCH: &str = "search";
-    pub const CANCEL: &str = "cancel";
-    pub const DISMISS: &str = "dismiss";
-    pub const TREE_MODE: &str = "tree_mode";
-    pub const PAUSE: &str = "pause";
-    // Navigation
-    pub const UP: &str = "up";
-    pub const DOWN: &str = "down";
-    pub const LEFT: &str = "left";
-    pub const RIGHT: &str = "right";
-    pub const PAGE_UP: &str = "page_up";
-    pub const PAGE_DOWN: &str = "page_down";
-    pub const HOME: &str = "home";
-    pub const END: &str = "end";
+/// Resolution order (later overrides earlier):
+/// 1. Engine defaults
+/// 2. User global `~/.config/dracon/dracon.toml`
+/// 3. Project-local `./dracon.toml`
+///
+/// The result is cached after the first call. Call [`invalidate_keybinding_cache`]
+/// to force re-resolution on the next call (e.g., after config file changes).
+pub fn resolve_keybindings() -> KeybindingConfig {
+    {
+        let guard = match RESOLVED_CONFIG.read() {
+            Ok(g) => g,
+            Err(_) => return do_resolve_keybindings(),
+        };
+        if let Some(ref config) = *guard {
+            return config.clone();
+        }
+    }
+    let config = do_resolve_keybindings();
+    if let Ok(mut guard) = RESOLVED_CONFIG.write() {
+        *guard = Some(config.clone());
+    }
+    config
+}
+
+/// Invalidates the cached keybinding config, so the next call to
+/// [`resolve_keybindings`] will re-read config files from disk.
+pub fn invalidate_keybinding_cache() {
+    if let Ok(mut guard) = RESOLVED_CONFIG.write() {
+        *guard = None;
+    }
 }
 
 /// A mapping from action names to keybinding strings.
@@ -113,8 +109,8 @@ impl KeybindingConfig {
         bindings.insert(actions::SEARCH.to_string(), "ctrl+f".to_string());
         bindings.insert(actions::THEME.to_string(), "f2".to_string());
         bindings.insert(actions::REFRESH.to_string(), "f5".to_string());
-        bindings.insert(actions::PAUSE.to_string(), "p".to_string());
-        bindings.insert(actions::DISMISS.to_string(), "ctrl+c".to_string());
+        bindings.insert(actions::PAUSE.to_string(), "ctrl+p".to_string());
+        bindings.insert(actions::DISMISS.to_string(), "escape".to_string());
         Self { bindings }
     }
 
@@ -278,6 +274,7 @@ impl KeybindingSet {
     /// Call this when you want to pick up config changes at runtime
     /// without restarting the application.
     pub fn reload(&mut self) {
+        invalidate_keybinding_cache();
         let config = resolve_keybindings();
         *self = Self::from_config(&config);
     }
@@ -500,5 +497,67 @@ mod tests {
         assert_eq!(base.get("quit"), Some("ctrl+q"));
         base.merge(override_config);
         assert_eq!(base.get("quit"), Some("ctrl+x"));
+    }
+
+    #[test]
+    fn test_defaults_use_modifier_keys() {
+        let config = KeybindingConfig::defaults();
+        let bare_char_actions: Vec<&str> = config
+            .bindings
+            .iter()
+            .filter(|(_, binding)| {
+                let binding_lower = binding.to_lowercase();
+                !binding_lower.contains('+')
+                    && binding_lower.len() == 1
+                    && binding_lower.chars().next().unwrap().is_ascii_lowercase()
+            })
+            .map(|(action, _)| action.as_str())
+            .collect::<Vec<_>>();
+        assert!(
+            bare_char_actions.is_empty(),
+            "These actions use bare char keys (conflict with text input): {:?}",
+            bare_char_actions
+        );
+    }
+
+    #[test]
+    fn test_pause_binding_uses_modifier() {
+        let config = KeybindingConfig::defaults();
+        let pause_binding = config.get(actions::PAUSE).expect("PAUSE should have a default binding");
+        assert!(
+            pause_binding.contains('+'),
+            "PAUSE binding '{}' should use a modifier key to avoid text input conflicts",
+            pause_binding
+        );
+    }
+
+    #[test]
+    fn test_dismiss_not_ctrl_c() {
+        let config = KeybindingConfig::defaults();
+        let dismiss_binding = config.get(actions::DISMISS).expect("DISMISS should have a default binding");
+        assert_ne!(
+            dismiss_binding, "ctrl+c",
+            "DISMISS should not be ctrl+c (conflicts with Copy/SIGINT)"
+        );
+    }
+
+    #[test]
+    fn test_invalidate_cache_allows_reload() {
+        let _ = resolve_keybindings();
+        invalidate_keybinding_cache();
+        let config1 = resolve_keybindings();
+        invalidate_keybinding_cache();
+        let config2 = resolve_keybindings();
+        assert_eq!(config1.bindings.len(), config2.bindings.len());
+    }
+
+    #[test]
+    fn test_keybinding_set_reload_works() {
+        let config = KeybindingConfig::defaults();
+        let mut set = KeybindingSet::from_config(&config);
+        let quit_display_before = set.display("quit").map(|s| s.to_string());
+        set.reload();
+        let quit_display_after = set.display("quit").map(|s| s.to_string());
+        assert_eq!(quit_display_before, quit_display_after);
     }
 }
