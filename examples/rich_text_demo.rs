@@ -1,10 +1,14 @@
 //! RichText demo standalone example.
 
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 fn main() -> std::io::Result<()> {
+    let kb_config = resolve_keybindings();
+    let keybindings = KeybindingSet::from_config(&kb_config);
     let should_quit = Arc::new(AtomicBool::new(false));
     let q = should_quit.clone();
     let show_help = Arc::new(AtomicBool::new(false));
@@ -16,19 +20,19 @@ fn main() -> std::io::Result<()> {
         .fps(30)
         .theme(Theme::from_env_or(Theme::nord()))
         .on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
+            if keybindings.matches(actions::QUIT, &key) {
                 q.store(true, Ordering::SeqCst);
+                return true;
+            }
+            if keybindings.matches(actions::HELP, &key) {
+                show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
+                return true;
+            }
+            if keybindings.matches(actions::THEME, &key) {
                 return true;
             }
             if key.kind != KeyEventKind::Press { return false; }
             match key.code {
-                KeyCode::F(1) | KeyCode::Char('?') => {
-                    show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
-                    true
-                }
-                KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                    true // Theme cycling handled in on_tick
-                }
                 KeyCode::Esc => {
                     if show_help_input.load(Ordering::SeqCst) {
                         show_help_input.store(false, Ordering::SeqCst);

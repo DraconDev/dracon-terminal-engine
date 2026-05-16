@@ -22,6 +22,7 @@ struct FrameworkDemo {
     theme: Theme,
     show_help: bool,
     dirty: bool,
+    keybindings: KeybindingSet,
 }
 
 impl FrameworkDemo {
@@ -32,6 +33,8 @@ impl FrameworkDemo {
             "projects".to_string(),
             "app".to_string(),
         ]);
+        let kb_config = resolve_keybindings();
+        let keybindings = KeybindingSet::from_config(&kb_config);
         Self {
             id,
             breadcrumbs,
@@ -40,6 +43,7 @@ impl FrameworkDemo {
             theme,
             show_help: false,
             dirty: true,
+            keybindings,
         }
     }
 
@@ -63,17 +67,17 @@ impl Widget for FrameworkDemo {
     fn focusable(&self) -> bool { true }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            return true;
+        }
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
-            KeyCode::F(1) | KeyCode::Char('?') => {
-                self.show_help = !self.show_help;
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                self.cycle_theme();
-                true
-            }
             KeyCode::Esc => {
                 if self.show_help {
                     self.show_help = false;
