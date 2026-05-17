@@ -423,8 +423,10 @@ impl ChatState {
                 self.input_text.push(ch);
                 self.cursor_pos = self.input_text.len();
                 self.dirty = true;
+                true
+            } else {
+                false
             }
-            true
         } else if key.code == KeyCode::Left && self.cursor_pos > 0 {
             self.cursor_pos -= 1;
             self.dirty = true;
