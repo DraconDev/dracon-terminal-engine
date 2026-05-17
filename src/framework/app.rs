@@ -275,12 +275,22 @@ impl App {
         let mut compositor = Compositor::new(w, h);
         compositor.set_clear_color(Theme::default().bg);
 
-        Ok(Self {
+        Ok(Self::build(terminal, compositor, String::from("Dracon App"), 30, Vec::new()))
+    }
+
+    fn build(
+        terminal: Terminal<io::Stdout>,
+        compositor: Compositor,
+        title: String,
+        fps: u32,
+        commands: Vec<BoundCommand>,
+    ) -> Self {
+        Self {
             terminal,
             compositor,
             parser: Parser::new(),
-            title: String::from("Dracon App"),
-            fps: 30,
+            title,
+            fps: fps.clamp(1, 120),
             theme: Theme::default(),
             running: Arc::new(AtomicBool::new(true)),
             frame_count: Arc::new(AtomicU64::new(0)),
@@ -296,58 +306,26 @@ impl App {
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
             next_widget_id: 0,
-            commands: RefCell::new(Vec::new()),
+            commands: RefCell::new(commands),
             command_tracking: RefCell::new(HashMap::new()),
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
-        })
+        }
     }
 
-    /// Creates an App from a TOML configuration file.
-    ///
-    /// This is the primary entry point for command-driven apps.
-    /// The TOML file defines the layout, widgets, and their command bindings.
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// App::from_toml("/home/user/.config/dracon/myapp.toml")?
-    ///     .title("My Dashboard")
-    ///     .run(|ctx| { /* render */ });
-    /// ```
     pub fn from_toml(path: &std::path::Path) -> io::Result<Self> {
         let config = AppConfig::from_toml(path)?;
         let terminal = Terminal::new(io::stdout())?;
         let (w, h) = tty::get_window_size(io::stdout().as_fd()).unwrap_or((80, 24));
 
-        let mut app = Self {
+        let mut app = Self::build(
             terminal,
-            compositor: Compositor::new(w, h),
-            parser: Parser::new(),
-            title: config.title.clone(),
-            fps: config.fps.unwrap_or(30),
-            theme: Theme::default(),
-            running: Arc::new(AtomicBool::new(true)),
-            frame_count: Arc::new(AtomicU64::new(0)),
-            last_frame_time: Instant::now(),
-            last_tick_time: Instant::now(),
-            tick_interval: Duration::from_millis(250),
-            tick_count: 0,
-            on_tick: RefCell::new(None),
-            widgets: RefCell::new(Vec::new()),
-            z_order_cache: RefCell::new(Vec::new()),
-            z_order_dirty: RefCell::new(true),
-            focus_manager: FocusManager::new(),
-            dirty_tracker: DirtyRegionTracker::new(),
-            animations: AnimationManager::new(),
-            next_widget_id: 0,
-            commands: RefCell::new(config.commands),
-            command_tracking: RefCell::new(HashMap::new()),
-            event_bus: EventBus::new(),
-            scene_router: SceneRouter::new(),
-            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
-        };
+            Compositor::new(w, h),
+            config.title.clone(),
+            config.fps.unwrap_or(30),
+            config.commands,
+        );
 
         write!(app.terminal, "\x1b]0;{}\x07", app.title).ok();
         Ok(app)

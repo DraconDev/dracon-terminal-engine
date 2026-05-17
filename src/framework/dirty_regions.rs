@@ -89,18 +89,62 @@ impl DirtyRegionTracker {
         self.full_refresh = false;
         let region = DirtyRegion::new(x, y, width, height);
 
+        let mut merged = false;
         for existing in &mut self.regions {
-            if let Some(intersection) = existing.intersection(&region) {
-                existing.expand(intersection.x, intersection.y);
+            if existing.intersects(&region) || self.adjacent(existing, &region) {
+                existing.expand(region.x, region.y);
                 existing.expand(
-                    intersection.x + intersection.width,
-                    intersection.y + intersection.height,
+                    region.x.saturating_add(region.width),
+                    region.y.saturating_add(region.height),
                 );
-                return;
+                merged = true;
+                break;
             }
         }
 
-        self.regions.push(region);
+        if !merged {
+            self.regions.push(region);
+        } else {
+            self.merge_pass();
+        }
+    }
+
+    fn adjacent(&self, a: &DirtyRegion, b: &DirtyRegion) -> bool {
+        let a_right = a.x.saturating_add(a.width);
+        let a_bottom = a.y.saturating_add(a.height);
+        let b_right = b.x.saturating_add(b.width);
+        let b_bottom = b.y.saturating_add(b.height);
+        a.x <= b_right && b.x <= a_right && a.y <= b_bottom && b.y <= a_bottom
+    }
+
+    fn merge_pass(&mut self) {
+        if self.regions.len() <= 1 {
+            return;
+        }
+        let mut changed = true;
+        while changed {
+            changed = false;
+            let mut i = 0;
+            while i < self.regions.len() {
+                let mut j = i + 1;
+                while j < self.regions.len() {
+                    if self.regions[i].intersects(&self.regions[j])
+                        || self.adjacent(&self.regions[i], &self.regions[j])
+                    {
+                        let other = self.regions.swap_remove(j);
+                        self.regions[i].expand(other.x, other.y);
+                        self.regions[i].expand(
+                            other.x.saturating_add(other.width),
+                            other.y.saturating_add(other.height),
+                        );
+                        changed = true;
+                    } else {
+                        j += 1;
+                    }
+                }
+                i += 1;
+            }
+        }
     }
 
     /// Marks a cell as dirty.
