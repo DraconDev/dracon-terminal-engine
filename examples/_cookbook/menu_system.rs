@@ -465,6 +465,8 @@ impl Widget for MenuApp {
             return false;
         }
 
+        self.toasts.retain(|t| !t.is_expired());
+
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key)
                 || self.keybindings.matches(actions::HELP, &key)
