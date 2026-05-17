@@ -339,7 +339,6 @@ impl Widget for AccessibilityDemo {
 
     fn set_area(&mut self, area: Rect) {
         self.area = area;
-        // Position sub-widgets
         let btn_y = area.y + area.height / 2;
         self.submit_btn.set_area(Rect::new(area.x + 5, btn_y, 12, 3));
         self.cancel_btn.set_area(Rect::new(area.x + 20, btn_y, 10, 3));
@@ -348,6 +347,12 @@ impl Widget for AccessibilityDemo {
     }
 
     fn needs_render(&self) -> bool {
+        let expired = self.toast_time.borrow().map_or(false, |t| t.elapsed() >= Duration::from_secs(2));
+        if expired && self.toast_msg.borrow().is_some() {
+            *self.toast_msg.borrow_mut() = None;
+            *self.toast_time.borrow_mut() = None;
+            return true;
+        }
         self.dirty
     }
 
@@ -452,6 +457,38 @@ impl Widget for AccessibilityDemo {
             }
         }
 
+        if let (Some(msg), Some(time)) = (self.toast_msg.borrow().as_ref(), self.toast_time.borrow().as_ref()) {
+            if time.elapsed() < Duration::from_secs(2) {
+                let msg_len = msg.len() as u16;
+                let pad = 2u16;
+                let bar_w = msg_len + pad * 2;
+                let bar_x = (area.width - bar_w) / 2;
+                let bar_y = area.height.saturating_sub(4);
+                let bg = if msg == "Submitted!" {
+                    self.theme.success
+                } else {
+                    self.theme.error
+                };
+                for x in bar_x..bar_x + bar_w {
+                    let idx = (bar_y * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = bg;
+                        plane.cells[idx].fg = self.theme.fg_on_accent;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+                for (i, c) in msg.chars().enumerate() {
+                    let idx = (bar_y * area.width + bar_x + pad + i as u16) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = self.theme.fg_on_accent;
+                        plane.cells[idx].style = Styles::BOLD;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+        }
+
         if self.show_help {
             let t = &self.theme;
             let hw = 40u16.min(area.width.saturating_sub(4));
@@ -540,11 +577,20 @@ impl Widget for AccessibilityDemo {
             self.dirty = true;
             true
         } else {
-            // Delegate to sub-widgets
+            let was_submit = self.submit_btn.pressed;
+            let was_cancel = self.cancel_btn.pressed;
             let handled = self.submit_btn.handle_key(key)
                 || self.cancel_btn.handle_key(key)
                 || self.notifications_toggle.handle_key(key)
                 || self.sound_toggle.handle_key(key);
+            if was_submit && !self.submit_btn.pressed {
+                *self.toast_msg.borrow_mut() = Some("Submitted!".to_string());
+                *self.toast_time.borrow_mut() = Some(Instant::now());
+            }
+            if was_cancel && !self.cancel_btn.pressed {
+                *self.toast_msg.borrow_mut() = Some("Cancelled".to_string());
+                *self.toast_time.borrow_mut() = Some(Instant::now());
+            }
             if handled {
                 self.dirty = true;
             }
@@ -553,11 +599,21 @@ impl Widget for AccessibilityDemo {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let was_submit = self.submit_btn.pressed;
         if self.submit_btn.handle_mouse(kind, col, row) {
+            if was_submit && !self.submit_btn.pressed {
+                *self.toast_msg.borrow_mut() = Some("Submitted!".to_string());
+                *self.toast_time.borrow_mut() = Some(Instant::now());
+            }
             self.dirty = true;
             return true;
         }
+        let was_cancel = self.cancel_btn.pressed;
         if self.cancel_btn.handle_mouse(kind, col, row) {
+            if was_cancel && !self.cancel_btn.pressed {
+                *self.toast_msg.borrow_mut() = Some("Cancelled".to_string());
+                *self.toast_time.borrow_mut() = Some(Instant::now());
+            }
             self.dirty = true;
             return true;
         }
