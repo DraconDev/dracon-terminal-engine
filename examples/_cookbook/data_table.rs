@@ -184,6 +184,8 @@ impl Widget for Table {
 
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
+        p.fill_bg(self.theme.bg);
+        for cell in p.cells.iter_mut() { cell.transparent = false; }
         p.z_index = 10;
         let (heads, widths, hh, _sh) = (
             ["Name Name", "Age Age", "Dir City", "Role Profession"],
@@ -191,18 +193,8 @@ impl Widget for Table {
             3u16,
             1u16,
         );
-        let inner_y = 1u16; // content starts after top border
-        let _inner_h = area.height.saturating_sub(2); // exclude top/bottom borders
-
-        // Background
-        for y in 0..area.height {
-            for x in 0..area.width {
-                let idx = (y * area.width + x) as usize;
-                if idx < p.cells.len() {
-                    p.cells[idx].bg = self.theme.bg;
-                    p.cells[idx].fg = self.theme.fg;
-                }
-            }
+        let inner_y = 1u16;
+        let _inner_h = area.height.saturating_sub(2);
         }
 
         // Rounded border
