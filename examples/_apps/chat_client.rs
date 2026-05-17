@@ -463,15 +463,33 @@ impl ChatState {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        // Modal click dismissal
+        // Modal click dispatch
         if self.show_emoji_modal || self.show_settings_modal {
             if let MouseEventKind::Down(_) = kind {
+                if self.show_emoji_modal {
+                    // Check emoji click
+                    let emojis = [":)", ":D", ";)", ":P", ":]", ":3", ":>", "<3", ":?", ":/", ":]", ":D", "xD"];
+                    let (sx, sy) = ((((self.area.get().width as i32 - 30) / 2) as u16), (((self.area.get().height as i32 - 10) / 2) as u16));
+                    for (i, _) in emojis.iter().enumerate() {
+                        let (zx, zy) = (sx + (i as u16 % 7) * 4, sy + (i as u16 / 7) * 2);
+                        if col >= zx && col < zx + 3 && row >= zy && row < zy + 1 {
+                            if i < emojis.len() {
+                                let emoji = emojis[i];
+                                self.input_text.push_str(emoji);
+                                self.cursor_pos = self.input_text.len();
+                                self.dirty = true;
+                            }
+                            self.show_emoji_modal = false;
+                            return true;
+                        }
+                    }
+                }
                 self.show_emoji_modal = false;
                 self.show_settings_modal = false;
                 self.dirty = true;
                 return true;
             }
-            return false;
+            return true;
         }
 
         // Dispatch via zones  -  collect result first, then act
@@ -1047,6 +1065,7 @@ impl ChatState {
             let (sx, sy) = (((w as i32 - 30) / 2) as u16, ((h as i32 - 10) / 2) as u16);
             for (i, e) in emojis.iter().enumerate() {
                 let (x, y) = (sx + (i as u16 % 7) * 4, sy + (i as u16 / 7) * 2);
+                self.zones.borrow_mut().register(ZONE_EMOJI_BASE + i, x, y, 3, 1);
                 if y < h && x < w {
                     for (j, c) in e.chars().enumerate() {
                         let idx = (y * w + x + j as u16) as usize;
