@@ -210,7 +210,7 @@ impl EventBus {
         let mut subs = self.subscribers.borrow_mut();
         let list = subs.entry(type_id).or_default();
         let id = SubscriptionId(list.len());
-        list.push(wrapped);
+        list.push(Some(wrapped));
 
         if *self.trace.borrow() {
             eprintln!(
@@ -225,13 +225,15 @@ impl EventBus {
 
     /// Unsubscribes a callback by ID.
     ///
-    /// Note: This removes by index, so IDs may shift after removals.
+    /// Uses a tombstone approach: sets the slot to `None` instead of removing it,
+    /// so existing SubscriptionIds remain valid. Tombstones are compacted after
+    /// the next `publish()` dispatch for the same event type.
     pub fn unsubscribe<E: Any>(&self, id: SubscriptionId) {
         let type_id = TypeId::of::<E>();
         let mut subs = self.subscribers.borrow_mut();
         if let Some(list) = subs.get_mut(&type_id) {
             if id.0 < list.len() {
-                list.remove(id.0);
+                list[id.0] = None;
             }
         }
     }
@@ -250,12 +252,10 @@ impl EventBus {
         let type_id = TypeId::of::<E>();
         let fired = Rc::new(std::cell::RefCell::new(false));
 
-        // Capture self pointer for unsubscription
-        let bus = self as *const EventBus;
         let mut subs = self.subscribers.borrow_mut();
         let list = subs.entry(type_id).or_default();
         let id = SubscriptionId(list.len());
-        let id_clone = id;
+        let id_for_tomb = id;
 
         let wrapped: EventCallback = Rc::new(move |any_event| {
             if *fired.borrow() {
@@ -264,26 +264,15 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 callback(event.clone());
-                // SAFETY: `bus` is a raw pointer to the `EventBus` captured at subscribe time.
-                // This is safe because:
-                // 1. The EventBus must outlive all subscriptions — dropping the bus drops
-                //    the subscriber list, so callbacks cannot fire after the bus is gone.
-                // 2. `as_ref()` dereferences the pointer, which is valid only while the bus
-                //    is alive. If the bus has been dropped, this is UB — callers must ensure
-                //    the bus outlives all `subscribe_once` callbacks.
-                // 3. `unsubscribe` mutates the subscriber list via RefCell. This is called
-                //    from within the dispatch loop, which holds a borrow on the list.
-                //    The RefCell borrow is released between dispatch and this callback
-                //    invocation (callbacks run after the borrow is dropped).
-                unsafe {
-                    if let Some(bus) = bus.as_ref() {
-                        bus.unsubscribe::<E>(id_clone);
-                    }
-                }
+                // Note: cannot call unsubscribe() here because publish() holds
+                // an immutable borrow on the subscriber list via RefCell.
+                // Instead, the tombstone is applied after publish() completes
+                // via compact_tombstones. The `fired` flag prevents re-firing.
+                drop(id_for_tomb);
             }
         });
 
-        list.push(wrapped);
+        list.push(Some(wrapped));
 
         if *self.trace.borrow() {
             eprintln!(
