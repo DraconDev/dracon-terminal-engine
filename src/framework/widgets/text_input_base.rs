@@ -60,7 +60,10 @@ impl BaseInput {
 
     pub fn cursor_position(&self) -> Option<(u16, u16)> {
         let area = self.area.get();
-        Some((area.x + self.cursor_pos as u16, area.y))
+        let before_text: String = self.text.chars().take(self.cursor_pos).collect();
+        let visual_col = before_text.width() as u16;
+        let scrolled_col = visual_col.saturating_sub(self.scroll_offset as u16);
+        Some((area.x + scrolled_col, area.y))
     }
 
     pub fn set_area(&mut self, area: Rect) {
@@ -145,6 +148,7 @@ impl BaseInput {
                 if !self.text.is_empty() && self.cursor_pos > 0 {
                     self.cursor_pos -= 1;
                     self.text.remove(self.cursor_pos);
+                    self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
@@ -152,12 +156,14 @@ impl BaseInput {
             KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == crate::input::event::KeyModifiers::SHIFT => {
                 self.text.insert(self.cursor_pos, ch);
                 self.cursor_pos += 1;
+                self.clamp_scroll();
                 self.dirty = true;
                 true
             }
             KeyCode::Left => {
                 if self.cursor_pos > 0 {
                     self.cursor_pos -= 1;
+                    self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
@@ -165,6 +171,7 @@ impl BaseInput {
             KeyCode::Right => {
                 if self.cursor_pos < self.text.len() {
                     self.cursor_pos += 1;
+                    self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
@@ -172,21 +179,36 @@ impl BaseInput {
             KeyCode::Delete => {
                 if self.cursor_pos < self.text.len() {
                     self.text.remove(self.cursor_pos);
+                    self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
             }
             KeyCode::Home => {
                 self.cursor_pos = 0;
+                self.scroll_offset = 0;
                 self.dirty = true;
                 true
             }
             KeyCode::End => {
                 self.cursor_pos = self.text.len();
+                self.clamp_scroll();
                 self.dirty = true;
                 true
             }
             _ => false,
+        }
+    }
+
+    fn clamp_scroll(&mut self) {
+        let area = self.area.get();
+        let visible_width = area.width.saturating_sub(1) as usize;
+        let before_text: String = self.text.chars().take(self.cursor_pos).collect();
+        let cursor_visual = before_text.width();
+        if cursor_visual < self.scroll_offset {
+            self.scroll_offset = cursor_visual;
+        } else if cursor_visual >= self.scroll_offset + visible_width {
+            self.scroll_offset = cursor_visual.saturating_sub(visible_width) + 1;
         }
     }
 
