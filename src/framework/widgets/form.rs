@@ -26,10 +26,13 @@ pub enum ValidationRule {
     Custom(ValidatorFn),
 }
 
-/// Callback for custom validation.
-pub type ValidatorFn = Box<dyn Fn(&str) -> Option<String>>;
-
 impl ValidationRule {
+    /// Creates a `Regex` validation rule from a pattern string.
+    /// Returns `None` if the pattern is invalid.
+    pub fn from_regex_pattern(pattern: &str) -> Option<Self> {
+        Regex::new(pattern).ok().map(ValidationRule::Regex)
+    }
+}
     /// Validates a value against this rule, returning an error message if invalid.
     pub fn validate(&self, value: &str) -> Option<String> {
         match self {

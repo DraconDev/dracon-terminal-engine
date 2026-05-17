@@ -166,9 +166,9 @@ impl<'a> Ctx<'a> {
 
     /// Returns the measured frames per second based on elapsed time and frame count.
     pub fn fps(&self) -> u64 {
-        let elapsed = self.last_frame.elapsed().as_secs_f64();
-        if elapsed > 0.0 {
-            (self.frame_count as f64 / elapsed) as u64
+        let frame_time = self.compositor.last_frame_duration_ms();
+        if frame_time > 0.0 {
+            (1000.0 / frame_time) as u64
         } else {
             0
         }

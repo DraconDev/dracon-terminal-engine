@@ -4,7 +4,7 @@
 //! handles Tab/Shift+Tab cycling, and supports focus trapping (for modals).
 
 use crate::framework::widget::WidgetId;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 /// Callback invoked when focus changes to a new widget.
@@ -19,6 +19,7 @@ pub type FocusChangeCallback = Arc<dyn Fn(Option<WidgetId>, Option<WidgetId>) + 
 /// Manages widget focus ordering, tab navigation, and focus trapping.
 pub struct FocusManager {
     tab_order: Vec<WidgetId>,
+    tab_order_set: HashSet<WidgetId>,
     focused: Option<WidgetId>,
     focusable: HashMap<WidgetId, bool>,
     on_focus_change: Vec<Arc<FocusCallback>>,
@@ -39,6 +40,7 @@ impl FocusManager {
     pub fn new() -> Self {
         Self {
             tab_order: Vec::new(),
+            tab_order_set: HashSet::new(),
             focused: None,
             focusable: HashMap::new(),
             on_focus_change: Vec::new(),
@@ -51,8 +53,9 @@ impl FocusManager {
 
     /// Registers a widget in the focus ring.
     pub fn register(&mut self, id: WidgetId, focusable: bool) {
-        if !self.tab_order.contains(&id) {
+        if !self.tab_order_set.contains(&id) {
             self.tab_order.push(id);
+            self.tab_order_set.insert(id);
         }
         self.focusable.insert(id, focusable);
     }
@@ -60,6 +63,7 @@ impl FocusManager {
     /// Unregisters a widget from the focus ring.
     pub fn unregister(&mut self, id: WidgetId) {
         self.tab_order.retain(|&i| i != id);
+        self.tab_order_set.remove(&id);
         self.focusable.remove(&id);
         if self.focused == Some(id) {
             self.focused = None;
