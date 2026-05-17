@@ -195,7 +195,6 @@ impl Widget for Table {
         );
         let inner_y = 1u16;
         let _inner_h = area.height.saturating_sub(2);
-        }
 
         // Rounded border
         let bw = area.width;

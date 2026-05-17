@@ -266,9 +266,8 @@ impl NetworkApp {
 
     fn render_list(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        for cell in plane.cells.iter_mut() {
-            cell.bg = self.theme.bg;
-        }
+        plane.fill_bg(self.theme.bg);
+        for cell in plane.cells.iter_mut() { cell.transparent = false; }
 
         let t = self.theme.clone();
 
@@ -356,9 +355,8 @@ impl NetworkApp {
 
     fn render_help(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        for cell in plane.cells.iter_mut() {
-            cell.bg = self.theme.bg;
-        }
+        plane.fill_bg(self.theme.bg);
+        for cell in plane.cells.iter_mut() { cell.transparent = false; }
 
         let t = self.theme.clone();
         let shortcuts = [
@@ -464,9 +462,8 @@ impl NetworkApp {
 
     fn render_detail(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
-        for cell in plane.cells.iter_mut() {
-            cell.bg = self.theme.bg;
-        }
+        plane.fill_bg(self.theme.bg);
+        for cell in plane.cells.iter_mut() { cell.transparent = false; }
 
         let t = self.theme.clone();
         let post = &self.posts[self.selected];

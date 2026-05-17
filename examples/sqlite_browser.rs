@@ -325,12 +325,8 @@ impl Widget for SqliteBrowser {
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
-
-        for cell in plane.cells.iter_mut() {
-            cell.bg = t.bg;
-            cell.fg = t.fg;
-            cell.transparent = false;
-        }
+        plane.fill_bg(t.bg);
+        for cell in plane.cells.iter_mut() { cell.transparent = false; }
 
         let status_h = 1u16;
         let content_h = area.height.saturating_sub(status_h);
