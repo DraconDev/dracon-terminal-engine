@@ -91,7 +91,7 @@ impl DirtyRegionTracker {
 
         let mut merged = false;
         for existing in &mut self.regions {
-            if existing.intersects(&region) || self.adjacent(existing, &region) {
+            if existing.intersects(&region) || adjacent(existing, &region) {
                 existing.expand(region.x, region.y);
                 existing.expand(
                     region.x.saturating_add(region.width),
@@ -109,14 +109,6 @@ impl DirtyRegionTracker {
         }
     }
 
-    fn adjacent(&self, a: &DirtyRegion, b: &DirtyRegion) -> bool {
-        let a_right = a.x.saturating_add(a.width);
-        let a_bottom = a.y.saturating_add(a.height);
-        let b_right = b.x.saturating_add(b.width);
-        let b_bottom = b.y.saturating_add(b.height);
-        a.x <= b_right && b.x <= a_right && a.y <= b_bottom && b.y <= a_bottom
-    }
-
     fn merge_pass(&mut self) {
         if self.regions.len() <= 1 {
             return;
@@ -129,7 +121,7 @@ impl DirtyRegionTracker {
                 let mut j = i + 1;
                 while j < self.regions.len() {
                     if self.regions[i].intersects(&self.regions[j])
-                        || self.adjacent(&self.regions[i], &self.regions[j])
+                        || adjacent(&self.regions[i], &self.regions[j])
                     {
                         let other = self.regions.swap_remove(j);
                         self.regions[i].expand(other.x, other.y);
@@ -178,6 +170,14 @@ impl Default for DirtyRegionTracker {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn adjacent(a: &DirtyRegion, b: &DirtyRegion) -> bool {
+    let a_right = a.x.saturating_add(a.width);
+    let a_bottom = a.y.saturating_add(a.height);
+    let b_right = b.x.saturating_add(b.width);
+    let b_bottom = b.y.saturating_add(b.height);
+    a.x <= b_right && b.x <= a_right && a.y <= b_bottom && b.y <= a_bottom
 }
 
 #[cfg(test)]
@@ -236,8 +236,7 @@ mod tests {
         let r1 = DirtyRegion::new(0, 0, 10, 10);
         let r2 = DirtyRegion::new(10, 0, 10, 10);
         assert!(!r1.intersects(&r2));
-        let mut tracker = DirtyRegionTracker::new();
-        assert!(tracker.adjacent(&r1, &r2));
+        assert!(adjacent(&r1, &r2));
     }
 
     #[test]

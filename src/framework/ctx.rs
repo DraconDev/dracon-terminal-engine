@@ -38,7 +38,9 @@ use std::time::Instant;
 pub struct Ctx<'a> {
     pub(crate) compositor: &'a mut Compositor,
     pub(crate) theme: &'a mut Theme,
+    #[allow(dead_code)]
     pub(crate) frame_count: u64,
+    #[allow(dead_code)]
     pub(crate) last_frame: &'a Instant,
     pub(crate) terminal: &'a mut Terminal<io::Stdout>,
     pub(crate) focus_manager: &'a mut FocusManager,

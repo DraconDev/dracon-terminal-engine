@@ -411,7 +411,7 @@ impl Clone for EventBus {
     fn clone(&self) -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
-            pending_tombstones: RefCell::new(HashSet::new()),
+            pending_tombstones: Rc::new(RefCell::new(HashSet::new())),
             trace: RefCell::new(*self.trace.borrow()),
             history: RefCell::new(self.history.borrow().clone()),
             max_history: RefCell::new(*self.max_history.borrow()),
