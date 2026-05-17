@@ -117,6 +117,7 @@ const ZONE_EMOJI_BTN: usize = 1;
 const ZONE_SEND_BTN: usize = 2;
 const ZONE_SETTINGS_BTN: usize = 3;
 const ZONE_REFRESH_BTN: usize = 4;
+const ZONE_EMOJI_BASE: usize = 10; // 14 emoji buttons starting at 10
 
 impl ChatState {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
