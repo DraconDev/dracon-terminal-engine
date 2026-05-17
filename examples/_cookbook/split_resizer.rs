@@ -27,6 +27,7 @@ struct SplitResizerApp {
     dirty: bool,
     pct: f32,
     txt: String,
+    selected_item: usize,
     theme: Theme,
     show_help: bool,
     should_quit: Arc<AtomicBool>,
@@ -44,6 +45,7 @@ impl SplitResizerApp {
             dirty: true,
             pct: 50.0,
             txt: "Ready".into(),
+            selected_item: 0,
             theme,
             show_help: false,
             should_quit,
@@ -310,7 +312,7 @@ impl SplitResizerApp {
             "Item 4: Options",
             "Item 5: Controls",
         ];
-        let sel = rand::thread_rng().gen_range(0..items.len());
+        let sel = self.selected_item;
         for (i, item) in items.iter().enumerate() {
             for (j, c) in format!("{} {}", if i == sel { ">" } else { " " }, item)
                 .chars()
@@ -629,6 +631,9 @@ impl SplitResizerApp {
         if rand::thread_rng().gen_range(0..12) == 0 {
             let items = ["Active", "Processing", "Idle", "Waiting"];
             self.txt = items[rand::thread_rng().gen_range(0..items.len())].to_string();
+        }
+        if rand::thread_rng().gen_range(0..20) == 0 {
+            self.selected_item = rand::thread_rng().gen_range(0..5);
         }
         self.dirty = true;
     }
