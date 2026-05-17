@@ -26,13 +26,16 @@ pub enum ValidationRule {
     Custom(ValidatorFn),
 }
 
+/// Callback for custom validation.
+pub type ValidatorFn = Box<dyn Fn(&str) -> Option<String>>;
+
 impl ValidationRule {
     /// Creates a `Regex` validation rule from a pattern string.
     /// Returns `None` if the pattern is invalid.
     pub fn from_regex_pattern(pattern: &str) -> Option<Self> {
         Regex::new(pattern).ok().map(ValidationRule::Regex)
     }
-}
+
     /// Validates a value against this rule, returning an error message if invalid.
     pub fn validate(&self, value: &str) -> Option<String> {
         match self {
@@ -471,5 +474,37 @@ impl WidgetState for Form {
         }
         self.dirty = true;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_regex_pattern_valid() {
+        let rule = ValidationRule::from_regex_pattern(r"^\d+$").unwrap();
+        assert!(rule.validate("123").is_none());
+        assert!(rule.validate("abc").is_some());
+    }
+
+    #[test]
+    fn test_from_regex_pattern_invalid() {
+        assert!(ValidationRule::from_regex_pattern(r"(").is_none());
+    }
+
+    #[test]
+    fn test_validate_required() {
+        let rule = ValidationRule::Required;
+        assert!(rule.validate("").is_some());
+        assert!(rule.validate("  ").is_some());
+        assert!(rule.validate("hello").is_none());
+    }
+
+    #[test]
+    fn test_validate_email() {
+        let rule = ValidationRule::Email;
+        assert!(rule.validate("user@example.com").is_none());
+        assert!(rule.validate("bad").is_some());
     }
 }

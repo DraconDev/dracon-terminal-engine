@@ -315,4 +315,17 @@ mod tests {
 
         assert_eq!(changes.lock().unwrap().len(), 2);
     }
+
+    #[test]
+    fn test_register_idempotent() {
+        let mut fm = FocusManager::new();
+        let id = WidgetId::new(1);
+        fm.register(id, true);
+        fm.register(id, true);
+        fm.register(id, true);
+        let id2 = WidgetId::new(2);
+        fm.register(id2, true);
+        assert_eq!(fm.tab_next().unwrap(), id2);
+        assert_eq!(fm.tab_next().unwrap(), id);
+    }
 }

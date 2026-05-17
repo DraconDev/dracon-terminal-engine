@@ -230,4 +230,57 @@ mod tests {
         tracker.clear();
         assert!(!tracker.is_dirty());
     }
+
+    #[test]
+    fn test_adjacent_touching_regions() {
+        let r1 = DirtyRegion::new(0, 0, 10, 10);
+        let r2 = DirtyRegion::new(10, 0, 10, 10);
+        assert!(!r1.intersects(&r2));
+        let mut tracker = DirtyRegionTracker::new();
+        assert!(tracker.adjacent(&r1, &r2));
+    }
+
+    #[test]
+    fn test_merge_overlapping_regions() {
+        let mut tracker = DirtyRegionTracker::new();
+        tracker.mark_dirty(0, 0, 10, 10);
+        tracker.mark_dirty(5, 5, 10, 10);
+        assert_eq!(tracker.dirty_regions().len(), 1);
+        let merged = &tracker.dirty_regions()[0];
+        assert_eq!(merged.x, 0);
+        assert_eq!(merged.y, 0);
+        assert_eq!(merged.width, 15);
+        assert_eq!(merged.height, 15);
+    }
+
+    #[test]
+    fn test_merge_adjacent_regions() {
+        let mut tracker = DirtyRegionTracker::new();
+        tracker.mark_dirty(0, 0, 10, 10);
+        tracker.mark_dirty(10, 0, 5, 5);
+        assert_eq!(tracker.dirty_regions().len(), 1);
+    }
+
+    #[test]
+    fn test_non_adjacent_regions_not_merged() {
+        let mut tracker = DirtyRegionTracker::new();
+        tracker.mark_dirty(0, 0, 5, 5);
+        tracker.mark_dirty(20, 20, 5, 5);
+        assert_eq!(tracker.dirty_regions().len(), 2);
+    }
+
+    #[test]
+    fn test_intersection_saturating_sub() {
+        let r1 = DirtyRegion::new(0, 0, 5, 5);
+        let r2 = DirtyRegion::new(10, 10, 5, 5);
+        assert!(r1.intersection(&r2).is_none());
+    }
+
+    #[test]
+    fn test_expand_saturating() {
+        let mut r = DirtyRegion::new(u16::MAX - 1, u16::MAX - 1, 1, 1);
+        r.expand(u16::MAX, u16::MAX);
+        assert_eq!(r.width, 2);
+        assert_eq!(r.height, 2);
+    }
 }
