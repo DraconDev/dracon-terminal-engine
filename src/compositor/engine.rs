@@ -125,21 +125,22 @@ impl Compositor {
 
     /// Draws text at the specified position with the given colors and style.
     pub fn draw_text(&mut self, text: &str, x: u16, y: u16, fg: Color, bg: Color, style: Styles) {
-        let mut plane = Plane::new(0, text.len() as u16, 1);
+        use unicode_width::UnicodeWidthStr;
+        let visual_width = text.width() as u16;
+        if visual_width == 0 {
+            return;
+        }
+        let mut plane = Plane::new(0, visual_width, 1);
         plane.x = x;
         plane.y = y;
         plane.z_index = 10;
 
-        for (i, c) in text.chars().enumerate() {
-            if i < plane.cells.len() {
-                plane.cells[i] = Cell {
-                    char: c,
-                    fg,
-                    bg,
-                    style,
-                    transparent: false,
-                    skip: false,
-                };
+        plane.put_str(0, 0, text);
+        for cell in plane.cells.iter_mut() {
+            if !cell.transparent {
+                cell.fg = fg;
+                cell.bg = bg;
+                cell.style = style;
             }
         }
         self.add_plane(plane);
@@ -256,7 +257,6 @@ impl Compositor {
             ..Cell::default()
         };
         self.final_buffer = vec![default_cell; size];
-        self.widget_count = 0;
     }
 
     /// Sets dirty region info from the given tracker for partial rendering.

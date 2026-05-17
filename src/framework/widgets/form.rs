@@ -20,8 +20,8 @@ pub enum ValidationRule {
     MaxLength(usize),
     /// Basic email format validation.
     Email,
-    /// Regex pattern match.
-    Regex(String),
+    /// Regex pattern match (pre-compiled for efficiency).
+    Regex(Regex),
     /// Custom validator returning an error message if invalid.
     Custom(ValidatorFn),
 }
@@ -67,16 +67,13 @@ impl ValidationRule {
                     Some("Invalid email format".to_string())
                 }
             }
-            ValidationRule::Regex(pattern) => match Regex::new(pattern) {
-                Ok(re) => {
-                    if re.is_match(value) {
-                        None
-                    } else {
-                        Some("Does not match required pattern".to_string())
-                    }
+            ValidationRule::Regex(re) => {
+                if re.is_match(value) {
+                    None
+                } else {
+                    Some("Does not match required pattern".to_string())
                 }
-                Err(_) => Some("Invalid validation pattern".to_string()),
-            },
+            }
             ValidationRule::Custom(validator) => validator(value),
         }
     }
