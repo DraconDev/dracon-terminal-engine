@@ -361,28 +361,53 @@ impl Widget for DebugOverlayPanel {
             for x in 0..area.width {
                 let idx = (y * plane.width + x) as usize;
                 if idx < plane.cells.len() {
-                    let border = y == 0 || y == 9 || y == area.height - 1;
-                    let separator = y == 9 && x == 26;
-                    let bg_color = if border {
+                    let on_top = y == 0;
+                    let on_middle = y == 9;
+                    let on_bottom = y == area.height - 1;
+                    let on_vert_left = x == 0;
+                    let on_vert_mid = x == 25;
+                    let on_vert_right = x == area.width.saturating_sub(1);
+                    let is_corner = (on_top || on_bottom) && (on_vert_left || on_vert_mid || on_vert_right);
+                    let is_junction = on_middle && (on_vert_left || on_vert_mid);
+                    let bg_color = if on_top || on_middle || on_bottom {
                         self.theme.surface_elevated
                     } else {
                         self.theme.bg
                     };
+                    let (ch, fg) = if is_corner {
+                        if on_top && on_vert_left {
+                            ('╭', self.theme.outline)
+                        } else if on_top && on_vert_mid {
+                            ('┬', self.theme.outline)
+                        } else if on_top && on_vert_right {
+                            ('╮', self.theme.outline)
+                        } else if on_bottom && on_vert_left {
+                            ('╰', self.theme.outline)
+                        } else if on_bottom && on_vert_mid {
+                            ('┴', self.theme.outline)
+                        } else if on_bottom && on_vert_right {
+                            ('╯', self.theme.outline)
+                        } else {
+                            (' ', self.theme.outline)
+                        }
+                    } else if is_junction {
+                        if on_vert_left {
+                            ('├', self.theme.outline)
+                        } else {
+                            ('┤', self.theme.outline)
+                        }
+                    } else if on_top || on_middle || on_bottom {
+                        ('─', self.theme.primary)
+                    } else if on_vert_left || on_vert_mid {
+                        ('│', self.theme.primary)
+                    } else {
+                        (' ', self.theme.fg)
+                    };
                     plane.cells[idx] = Cell {
-                        char: if separator {
-                            '+'
-                        } else if border {
-                            '-'
-                        } else {
-                            ' '
-                        },
-                        fg: if border {
-                            self.theme.primary
-                        } else {
-                            self.theme.fg
-                        },
+                        char: ch,
+                        fg,
                         bg: bg_color,
-                        style: if border {
+                        style: if on_top || on_middle || on_bottom {
                             Styles::BOLD
                         } else {
                             Styles::empty()
@@ -394,54 +419,26 @@ impl Widget for DebugOverlayPanel {
             }
         }
 
-        for x in 0..area.width {
-            let idx = x as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '-';
-            }
-            let idx = (9 * plane.width + x) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '-';
-            }
-            let idx = ((area.height - 1) * plane.width + x) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '-';
-            }
-        }
-
-        for y in 0..area.height {
-            for idx in [
-                (y * plane.width) as usize,
-                (y * plane.width + 25) as usize,
-                (y * plane.width + area.width.saturating_sub(1)) as usize,
-            ].clone()
-            .iter()
-            {
-                if *idx < plane.cells.len() {
-                    plane.cells[*idx].char = '|';
-                    plane.cells[*idx].fg = self.theme.primary;
-                }
-            }
-        }
-
         let header = "Debug Overlay";
-        for (i, c) in header
-            .chars()
-            .enumerate()
-            .take((area.width as usize).saturating_sub(10))
-        {
-            let idx = (2 + i as u16) as usize;
+        let header_x = 2;
+        let header_y = 0;
+        for (i, c) in header.chars().enumerate() {
+            let idx = (header_y * plane.width + header_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.primary;
+                plane.cells[idx].bg = self.theme.surface_elevated;
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
 
-        let close = "[x] Close";
-        for (i, c) in close.chars().enumerate() {
-            let idx = (plane.width.saturating_sub(10) + i as u16) as usize;
+        let close_x = plane.width.saturating_sub(10);
+        for (i, c) in "[x] Close".chars().enumerate() {
+            let idx = (close_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.primary;
+                plane.cells[idx].bg = self.theme.surface_elevated;
             }
         }
 
