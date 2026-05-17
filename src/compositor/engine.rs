@@ -522,9 +522,9 @@ fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
         let blend = |c1: Color, c2: Color, a: f32| -> Color {
             match (c1, c2) {
                 (Color::Rgb(r1, g1, b1), Color::Rgb(r2, g2, b2)) => Color::Rgb(
-                    ((r1 as f32 * (1.0 - a)) + (r2 as f32 * a)) as u8,
-                    ((g1 as f32 * (1.0 - a)) + (g2 as f32 * a)) as u8,
-                    ((b1 as f32 * (1.0 - a)) + (b2 as f32 * a)) as u8,
+                    ((r1 as f32 * (1.0 - a)) + (r2 as f32 * a)).clamp(0.0, 255.0) as u8,
+                    ((g1 as f32 * (1.0 - a)) + (g2 as f32 * a)).clamp(0.0, 255.0) as u8,
+                    ((b1 as f32 * (1.0 - a)) + (b2 as f32 * a)).clamp(0.0, 255.0) as u8,
                 ),
                 (_, c) => {
                     if a > 0.5 {

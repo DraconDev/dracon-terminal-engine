@@ -6,6 +6,7 @@ use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use ratatui::layout::Rect;
+use unicode_width::UnicodeWidthStr;
 
 /// Callback type for text submission.
 pub type SubmitCallback = Box<dyn FnMut(&str)>;
@@ -21,6 +22,7 @@ pub struct BaseInput {
     pub mask_char: Option<char>,
     pub dirty: bool,
     pub focused: bool,
+    pub scroll_offset: usize,
 }
 
 impl BaseInput {
@@ -36,6 +38,7 @@ impl BaseInput {
             mask_char: None,
             dirty: true,
             focused: false,
+            scroll_offset: 0,
         }
     }
 
