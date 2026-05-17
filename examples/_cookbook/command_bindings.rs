@@ -6,11 +6,11 @@
 //!
 //! ## Controls
 //!
-//! - `s`  -  trigger manual refresh of all commands
+//! - `F5`  -  trigger manual refresh of all commands
 //! - `p`  -  pause/resume auto-refresh
-//! - `t`  -  cycle theme (Nord, Cyberpunk, Dracula, Monokai)
-//! - `?`  -  toggle help overlay
-//! - `q`  -  quit
+//! - `Ctrl+T`  -  cycle theme (Nord, Cyberpunk, Dracula, Monokai)
+//! - `F1`  -  toggle help overlay
+//! - `Ctrl+Q`  -  quit
 //! - `Esc`  -  close help overlay
 
 use std::cell::RefCell;
@@ -516,12 +516,13 @@ impl Widget for CommandBindings {
             "> RUNNING"
         };
         let status = format!(
-            "  {}  |  tick: {}  |  {}: theme | {}: help | {}: dismiss | {}: quit",
+            "  {}  |  tick: {}  |  {}: refresh | {}: theme | {}: help | {}: dismiss | {}: quit",
             auto_str, self.tick,
-            self.keybindings.display(actions::THEME).unwrap_or("t"),
-            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::REFRESH).unwrap_or("f5"),
+            self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+            self.keybindings.display(actions::HELP).unwrap_or("f1"),
             self.keybindings.display(actions::BACK).unwrap_or("esc"),
-            self.keybindings.display(actions::QUIT).unwrap_or("q"),
+            self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
         );
         for (i, c) in status.chars().enumerate().take(w - 2) {
             let idx = (h - 1) * w + 1 + i;
@@ -657,11 +658,11 @@ impl Widget for CommandBindings {
 
             // shortcuts
             let shortcuts = [
-                ("s", "Refresh all commands"),
+                (self.keybindings.display(actions::REFRESH).unwrap_or("f5"), "Refresh all commands"),
                 ("p", "Pause/Resume auto-refresh"),
-                (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle this help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle this help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let y_off = 3 + i;
@@ -696,7 +697,7 @@ impl Widget for CommandBindings {
 
             // hint
             let hint = format!(" Press {} or {} to close ",
-                self.keybindings.display(actions::HELP).unwrap_or("?"),
+                self.keybindings.display(actions::HELP).unwrap_or("f1"),
                 self.keybindings.display(actions::BACK).unwrap_or("Esc"),
             );
             for (i, c) in hint.chars().enumerate() {
@@ -742,11 +743,11 @@ impl Widget for CommandBindings {
             self.dirty = true;
             return true;
         }
+        if self.keybindings.matches(actions::REFRESH, &key) {
+            self.refresh_all();
+            return true;
+        }
         match key.code {
-            KeyCode::Char('s') if key.modifiers.is_empty() => {
-                self.refresh_all();
-                true
-            }
             KeyCode::Char('p') if key.modifiers.is_empty() => {
                 self.paused = !self.paused;
                 self.dirty = true;
@@ -778,7 +779,7 @@ impl Widget for InputRouter {
 }
 
 fn main() -> std::io::Result<()> {
-    println!("Command Bindings  -  s=refresh all, p=pause, Ctrl+C=quit\nStarting...");
+    println!("Command Bindings  -  F5=refresh all, p=pause, Ctrl+Q=quit\nStarting...");
     std::thread::sleep(Duration::from_millis(500));
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());

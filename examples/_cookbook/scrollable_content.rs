@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 //! Scrollable Content — Demonstrates ScrollContainer/ScrollState with keyboard+mouse scroll.
 //!
-//! A simulated server log viewer with 200 pre-populated entries,
+//! A simulated server log viewer with streaming entries,
 //! proportional scrollbar, search/filter, and keyboard/mouse scroll.
 
 use std::cell::RefCell;
@@ -134,7 +134,7 @@ impl ScrollableContent {
 
     fn tick(&mut self) {
         self.tick_counter += 1;
-        if self.tick_counter % 60 != 0 {
+        if !self.tick_counter.is_multiple_of(60) {
             return;
         }
         self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
