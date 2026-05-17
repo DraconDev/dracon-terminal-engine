@@ -352,25 +352,40 @@ impl Widget for PluginLoader {
     }
 
     fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); self.dirty = true; }
+    fn current_theme(&self) -> Option<Theme> { Some(self.theme.clone()) }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        use KeyCode::*;
         if key.kind != KeyEventKind::Press { return false; }
+
+        if self.show_help {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+                self.show_help = false;
+                self.dirty = true;
+                return true;
+            }
+            return true;
+        }
+
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            let themes = Theme::all();
+            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            self.theme = themes[(idx + 1) % themes.len()].clone();
+            for w in &mut self.loaded_widgets { w.on_theme_change(&self.theme); }
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+
+        use KeyCode::*;
         match key.code {
             Char('1') | Char('2') | Char('3') | Char('4') => { self.load_plugin(); true }
-            Char('t') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                let themes = vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
-                let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
-                self.theme = themes[(idx + 1) % themes.len()].clone();
-                for w in &mut self.loaded_widgets { w.on_theme_change(&self.theme); }
-                self.dirty = true;
-                true
-            }
-            F(1) | Char('?') => { self.show_help = !self.show_help; self.dirty = true; true }
-            Esc => {
-                if self.show_help { self.show_help = false; self.dirty = true; true }
-                else { false }
-            }
-            Char('q') if key.modifiers.contains(KeyModifiers::CONTROL) => { true }
             _ => false,
         }
     }
@@ -428,9 +443,17 @@ fn draw_rect_border(plane: &mut Plane, area: Rect, theme: &Theme) {
 
 fn main() -> std::io::Result<()> {
     let env_theme = Theme::from_env_or(Theme::nord());
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
     let mut app = App::new()?
         .theme(env_theme.clone());
-    let _ = app.add_widget(Box::new(PluginLoader::new(env_theme.clone())), Rect::new(0, 0, 80, 24));
-    app.run(|_| {})?;
+    let _ = app.add_widget(Box::new(PluginLoader::new(env_theme.clone(), should_quit)), Rect::new(0, 0, 80, 24));
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_| {})?;
     Ok(())
 }
