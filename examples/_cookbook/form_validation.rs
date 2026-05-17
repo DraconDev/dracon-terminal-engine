@@ -214,7 +214,7 @@ impl Widget for FormApp {
         }
 
         let indicator_x = area.width.saturating_sub(2);
-        if indicator_x > form_area.x + form_area.width {
+        if indicator_x >= form_area.x + form_area.width {
             let mut field_row: u16 = 0;
             for i in 0..self.form.field_count() {
                 if field_row >= form_area.height { break; }
@@ -311,7 +311,7 @@ impl Widget for FormApp {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         match kind {
             MouseEventKind::ScrollDown | MouseEventKind::ScrollUp => true,
-            MouseEventKind::Down(_) | MouseEventKind::Moved => {
+            MouseEventKind::Down(_) => {
                 let form_x = self.area.x + 2;
                 let form_y = self.area.y + 2;
                 let form_w = self.area.width.saturating_sub(4);
@@ -322,13 +322,10 @@ impl Widget for FormApp {
                     let rel_row = row.saturating_sub(form_y);
                     if self.form.handle_mouse(kind, col, rel_row) {
                         self.dirty = true;
-                        true
-                    } else {
-                        false
+                        return true;
                     }
-                } else {
-                    false
                 }
+                false
             }
             _ => false,
         }
