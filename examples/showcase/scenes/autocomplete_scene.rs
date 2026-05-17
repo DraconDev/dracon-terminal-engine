@@ -1,49 +1,72 @@
 //! Embedded Autocomplete scene for the showcase.
 //!
-//! Demonstrates the Autocomplete widget with search suggestions.
+//! Demonstrates the Autocomplete widget with search suggestions,
+//! rich info panel, match count, and recent selections history.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
-use dracon_terminal_engine::compositor::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::Autocomplete;
 use dracon_terminal_engine::framework::widget::WidgetId;
+use dracon_terminal_engine::framework::widgets::Autocomplete;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+struct PackageInfo {
+    name: &'static str,
+    version: &'static str,
+    downloads: &'static str,
+    category: &'static str,
+    description: &'static str,
+}
+
+const PACKAGES: &[PackageInfo] = &[
+    PackageInfo { name: "rustacean", version: "1.4.0", downloads: "2.1M", category: "tooling", description: "Rust IDE support & analysis" },
+    PackageInfo { name: "rust-analyzer", version: "2026.5", downloads: "8.3M", category: "tooling", description: "Next-gen Rust compiler frontend" },
+    PackageInfo { name: "rustdoc", version: "1.78", downloads: "5.6M", category: "docs", description: "Documentation generator for Rust" },
+    PackageInfo { name: "rustfmt", version: "1.7", downloads: "9.1M", category: "tooling", description: "Rust code formatter" },
+    PackageInfo { name: "rustc", version: "1.78", downloads: "12M", category: "compiler", description: "The Rust compiler" },
+    PackageInfo { name: "cargo", version: "1.78", downloads: "14M", category: "tooling", description: "Rust package manager" },
+    PackageInfo { name: "clippy", version: "0.1.78", downloads: "7.2M", category: "linting", description: "Rust linter & code checker" },
+    PackageInfo { name: "miri", version: "0.1", downloads: "890K", category: "testing", description: "Undefined behavior detector" },
+    PackageInfo { name: "rls", version: "1.42", downloads: "3.4M", category: "tooling", description: "Rust Language Server (legacy)" },
+    PackageInfo { name: "rustlings", version: "5.6", downloads: "1.8M", category: "learning", description: "Interactive Rust exercises" },
+    PackageInfo { name: "rustup", version: "1.27", downloads: "11M", category: "tooling", description: "Rust toolchain installer" },
+    PackageInfo { name: "crates.io", version: "-", downloads: "-", category: "registry", description: "Rust package registry" },
+];
+
+fn category_color(cat: &str, theme: &Theme) -> Color {
+    match cat {
+        "tooling" => theme.primary,
+        "compiler" => theme.error,
+        "docs" => theme.success,
+        "linting" => theme.warning,
+        "testing" => theme.info,
+        "learning" => theme.secondary,
+        "registry" => theme.fg_muted,
+        _ => theme.fg,
+    }
+}
 
 pub struct AutocompleteScene {
     autocomplete: Autocomplete,
     theme: Theme,
     show_help: bool,
     selected_item: Option<String>,
+    recent_selections: Vec<String>,
     keybindings: KeybindingSet,
     area: std::cell::Cell<Rect>,
     dirty: bool,
     selection_bridge: Rc<RefCell<Option<String>>>,
 }
 
-const SUGGESTIONS: [&str; 12] = [
-    "rustacean",
-    "rust-analyzer",
-    "rustdoc",
-    "rustfmt",
-    "rustc",
-    "cargo",
-    "clippy",
-    "miri",
-    "rls",
-    "rustlings",
-    "rustup",
-    "crates.io",
-];
-
 impl AutocompleteScene {
     pub fn new(theme: Theme) -> Self {
-        let suggestions: Vec<String> = SUGGESTIONS.iter().map(|s| s.to_string()).collect();
+        let suggestions: Vec<String> = PACKAGES.iter().map(|p| p.name.to_string()).collect();
         let bridge = Rc::new(RefCell::new(None));
         let bridge_cb = Rc::clone(&bridge);
         Self {
@@ -54,6 +77,7 @@ impl AutocompleteScene {
             theme,
             show_help: false,
             selected_item: None,
+            recent_selections: Vec::new(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
@@ -63,9 +87,117 @@ impl AutocompleteScene {
 
     fn sync_bridge(&mut self) {
         if let Some(sel) = self.selection_bridge.borrow_mut().take() {
-            self.selected_item = Some(sel);
+            self.selected_item = Some(sel.clone());
+            // Add to recent selections (dedup, max 5)
+            self.recent_selections.retain(|s| s != &sel);
+            self.recent_selections.insert(0, sel);
+            self.recent_selections.truncate(5);
             self.dirty = true;
         }
+    }
+
+    fn get_package_info(&self, name: &str) -> Option<&PackageInfo> {
+        PACKAGES.iter().find(|p| p.name == name)
+    }
+
+    fn render_info_panel(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
+        let t = &self.theme;
+
+        if let Some(ref name) = self.selected_item {
+            draw_text(plane, x, y, "Package Details", t.primary, t.bg, true);
+
+            // Divider
+            for dx in 0..w {
+                let idx = ((y + 1) * plane.width + x + dx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '─';
+                    plane.cells[idx].fg = t.outline;
+                }
+            }
+
+            if let Some(pkg) = self.get_package_info(name) {
+                // Category badge
+                let cat_color = category_color(pkg.category, t);
+                let badge = format!(" {} ", pkg.category);
+                draw_text(plane, x, y + 2, &badge, cat_color, t.bg, true);
+
+                // Name (large)
+                draw_text(plane, x, y + 3, pkg.name, t.primary, t.bg, true);
+
+                // Version + downloads
+                let ver = format!("v{}", pkg.version);
+                let dl = format!("{} downloads", pkg.downloads);
+                draw_text(plane, x, y + 4, &ver, t.fg, t.bg, false);
+                draw_text(plane, x + ver.len() as u16 + 2, y + 4, &dl, t.fg_muted, t.bg, false);
+
+                // Description
+                draw_text(plane, x, y + 6, pkg.description, t.fg, t.bg, false);
+
+                // Visual install bar (decorative)
+                draw_text(plane, x, y + 8, "Popularity:", t.fg_muted, t.bg, false);
+                let bar_x = x + 12;
+                let bar_w = (w as usize).saturating_sub(14);
+                let fill = match pkg.downloads {
+                    d if d.contains('M') => d.trim_end_matches('M').parse::<f32>().unwrap_or(0.0) / 15.0,
+                    d if d.contains('K') => d.trim_end_matches('K').parse::<f32>().unwrap_or(0.0) / 15000.0,
+                    _ => 0.1,
+                };
+                let filled = (fill * bar_w as f32) as usize;
+                for bx in 0..bar_w {
+                    let idx = ((y + 8) * plane.width + bar_x + bx as u16) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = if bx < filled { '█' } else { '░' };
+                        plane.cells[idx].fg = if bx < filled { cat_color } else { t.fg_muted };
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            } else {
+                draw_text(plane, x, y + 2, name, t.primary, t.bg, true);
+                draw_text(plane, x, y + 3, "Custom package", t.fg_muted, t.bg, false);
+            }
+        } else {
+            draw_text(plane, x, y, "Package Details", t.primary, t.bg, true);
+            for dx in 0..w {
+                let idx = ((y + 1) * plane.width + x + dx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '─';
+                    plane.cells[idx].fg = t.outline;
+                }
+            }
+            draw_text(plane, x, y + 2, "Select a package", t.fg_muted, t.bg, false);
+            draw_text(plane, x, y + 3, "to see details", t.fg_muted, t.bg, false);
+        }
+    }
+
+    fn render_recent_panel(&self, plane: &mut Plane, x: u16, y: u16) {
+        let t = &self.theme;
+
+        draw_text(plane, x, y, "Recent", t.secondary, t.bg, true);
+
+        if self.recent_selections.is_empty() {
+            draw_text(plane, x, y + 1, "No selections yet", t.fg_muted, t.bg, false);
+        } else {
+            for (i, sel) in self.recent_selections.iter().enumerate() {
+                let ry = y + 1 + i as u16;
+                let num = format!("{}.", i + 1);
+                draw_text(plane, x, ry, &num, t.fg_muted, t.bg, false);
+
+                let cat_color = self.get_package_info(sel)
+                    .map(|p| category_color(p.category, t))
+                    .unwrap_or(t.fg);
+                draw_text(plane, x + 3, ry, sel, cat_color, t.bg, false);
+            }
+        }
+    }
+
+    fn render_stats_bar(&self, plane: &mut Plane, x: u16, y: u16) {
+        let t = &self.theme;
+        let total = PACKAGES.len();
+        let categories: Vec<&str> = PACKAGES.iter().map(|p| p.category).collect();
+        let unique_cats: Vec<&&str> = categories.iter().collect::<std::collections::HashSet<_>>().into_iter().collect();
+
+        let stats = format!("{} packages · {} categories", total, unique_cats.len());
+        draw_text(plane, x, y, &stats, t.fg_muted, t.bg, false);
     }
 }
 
@@ -83,8 +215,8 @@ impl Scene for AutocompleteScene {
         }
 
         // Header
-        let title = " Autocomplete ";
-        draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
+        draw_text(&mut plane, 2, 0, " Autocomplete ", t.primary, t.bg, true);
+        self.render_stats_bar(&mut plane, 18, 0);
 
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
@@ -99,48 +231,54 @@ impl Scene for AutocompleteScene {
             }
         }
 
-        // Label
-        let label = "Search packages:";
-        draw_text(&mut plane, 2, 2, label, t.fg_muted, t.bg, false);
-
-        // Autocomplete widget area
-        let input_area = Rect::new(area.x + 2, area.y + 3, 30, 1);
-        let dropdown_area = Rect::new(area.x + 2, area.y + 4, 30, 10);
-        let ac_area = Rect::new(input_area.x, input_area.y, input_area.width, input_area.height + dropdown_area.height);
+        // Left: Search input + Autocomplete dropdown
+        draw_text(&mut plane, 2, 2, "Search packages:", t.fg_muted, t.bg, false);
+        let ac_area = Rect::new(2, 3, 28, 12);
         let ac_plane = self.autocomplete.render(ac_area);
-        blit_to(&mut plane, &ac_plane, input_area.x as usize, input_area.y as usize);
+        blit_to(&mut plane, &ac_plane, ac_area.x as usize, ac_area.y as usize);
 
-        // Selected item display
-        if let Some(ref item) = self.selected_item {
-            let status = format!(" Selected: {} ", item);
-            draw_text(&mut plane, 2, 8, &status, t.success, t.bg, true);
+        // Category legend under the dropdown
+        let legend_y = 3 + 8;
+        let categories = [("tooling", t.primary), ("compiler", t.error), ("docs", t.success),
+                         ("linting", t.warning), ("testing", t.info), ("learning", t.secondary)];
+        let mut lx = 2u16;
+        for (cat, color) in &categories {
+            let pill = format!(" {} ", cat);
+            draw_text(&mut plane, lx, legend_y, &pill, *color, t.bg, true);
+            lx += pill.len() as u16 + 1;
         }
 
-        // Info panel
-        let info = "Type to filter suggestions";
-        draw_text(&mut plane, 2, 10, info, t.fg_muted, t.bg, false);
-
-        let shortcuts = [
-            "^v: navigate",
-            "Enter: select",
-            "Tab: complete",
-            "Esc: close",
-        ];
-        for (i, shortcut) in shortcuts.iter().enumerate() {
-            draw_text(&mut plane, 2, 12 + i as u16, shortcut, t.fg_muted, t.bg, false);
-        }
-
-        // Footer
-        let footer_y = area.height.saturating_sub(1);
-        for x in 0..area.width {
-            let idx = (footer_y * area.width + x) as usize;
+        // Vertical divider
+        let div_x = 32u16;
+        for y in 2..area.height.saturating_sub(2) {
+            let idx = (y * area.width + div_x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
+                plane.cells[idx].char = '│';
                 plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
             }
         }
-        let nav = " Type to search | ^v nav | Enter select | B/Esc: back | ?: help ";
-        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
+
+        // Right: Info panel + Recent selections
+        let panel_x = div_x + 2;
+        let panel_w = area.width.saturating_sub(panel_x + 2);
+        self.render_info_panel(&mut plane, panel_x, 2, panel_w);
+        self.render_recent_panel(&mut plane, panel_x, 12);
+
+        // Footer
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+        let footer = format!(" Type:search | ↑↓:nav | Enter:select | Tab:complete | {}:help | {}:back ", help_key, back_key);
+        let fy = area.height.saturating_sub(1);
+        for (i, c) in footer.chars().enumerate() {
+            let idx = (fy * area.width + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg_muted;
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
+            }
+        }
 
         if self.show_help {
             draw_help_overlay(&mut plane, area, t);
@@ -183,10 +321,10 @@ impl Scene for AutocompleteScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let area = self.area.get();
-        let input_area = Rect::new(area.x + 2, area.y + 3, 30, 1);
-        let rel_col = col.saturating_sub(input_area.x);
-        let rel_row = row.saturating_sub(input_area.y);
+        let _area = self.area.get();
+        let ac_area = Rect::new(2, 3, 28, 12);
+        let rel_col = col.saturating_sub(ac_area.x);
+        let rel_row = row.saturating_sub(ac_area.y);
         if self.autocomplete.handle_mouse(kind, rel_col, rel_row) {
             self.sync_bridge();
             if self.selected_item.is_none() {
@@ -211,8 +349,6 @@ impl Scene for AutocompleteScene {
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
     let hw = 44u16.min(area.width.saturating_sub(4));

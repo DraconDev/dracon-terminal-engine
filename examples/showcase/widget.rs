@@ -579,7 +579,7 @@ impl Widget for Showcase {
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
         let available_w = (area.width as usize).saturating_sub(grid_start_x);
-        let available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
+        let _available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
 
         // Responsive card sizing
         let (card_w, card_h) = if available_w >= 90 {
@@ -592,13 +592,21 @@ impl Widget for Showcase {
 
         self.cols.set((available_w / (card_w + 2)).max(1));
         let cols = self.cols.get();
+        let scroll_off = self.scroll_offset.get();
+        let visible_rows = self.visible_rows();
 
         for (grid_idx, &ex_idx) in self.filtered.iter().enumerate() {
             if let Some(ex) = self.examples.get(ex_idx) {
                 let col = grid_idx % cols;
                 let row = grid_idx / cols;
+
+                // Skip cards above scroll offset or below visible area
+                if row < scroll_off || row >= scroll_off + visible_rows {
+                    continue;
+                }
+
                 let x = grid_start_x + col * (card_w + 2);
-                let y = grid_start_y + row * (card_h + 1);
+                let y = grid_start_y + (row - scroll_off) * (card_h + 1);
 
                 if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2) {
                     continue;
@@ -635,20 +643,40 @@ impl Widget for Showcase {
             }
         }
 
-        // Scroll indicator with styled container
-        let total_cards = self.filtered.len();
-        let visible_cards = cols * (available_h / (card_h + 1)).max(1);
-        if total_cards > visible_cards {
-            let scroll_text = format!("v {} more", total_cards - visible_cards);
-            let sx = (area.width as usize).saturating_sub(scroll_text.len()).saturating_sub(4);
-            let sy = (area.height as usize).saturating_sub(3);
-            // Draw scroll indicator background
-            for i in 0..scroll_text.len() + 4 {
-                set_cell(&mut plane, sx + i, sy, ' ', t.fg, t.surface);
+        // Scrollbar on the right edge of the grid area
+        let total_rows = self.total_rows();
+        let visible_r = self.visible_rows();
+        if total_rows > visible_r {
+            let sb_x = (area.width as usize).saturating_sub(2);
+            let sb_top = grid_start_y;
+            let sb_h = visible_r * (card_h + 1);
+            let thumb_h = (visible_r as f32 / total_rows as f32 * sb_h as f32).max(1.0) as usize;
+            let max_scroll = total_rows.saturating_sub(visible_r);
+            let scroll_off = self.scroll_offset.get().min(max_scroll);
+            let thumb_y = if max_scroll > 0 {
+                sb_top + (scroll_off as f32 / max_scroll as f32 * (sb_h - thumb_h) as f32) as usize
+            } else {
+                sb_top
+            };
+
+            // Track
+            for y in sb_top..sb_top + sb_h {
+                let idx = y * plane.width as usize + sb_x;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '│';
+                    plane.cells[idx].fg = t.fg_muted;
+                    plane.cells[idx].transparent = false;
+                }
             }
-            draw_text(&mut plane, sx + 1, sy, "v", t.primary, t.surface, Styles::BOLD);
-            let rest: String = scroll_text.chars().skip(2).collect();
-            draw_text(&mut plane, sx + 3, sy, &rest, t.fg_muted, t.surface, Styles::empty());
+            // Thumb
+            for y in thumb_y..(thumb_y + thumb_h).min(sb_top + sb_h) {
+                let idx = y * plane.width as usize + sb_x;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '▐';
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].transparent = false;
+                }
+            }
         }
 
         // Status bar with gradient effect
@@ -1026,7 +1054,7 @@ impl Widget for Showcase {
         // Help overlay
         if self.show_help {
             let help_w = 50usize;
-            let help_h = 16usize;
+            let help_h = 26usize;
             let help_x = ((area.width as usize).saturating_sub(help_w)) / 2;
             let help_y = ((area.height as usize).saturating_sub(help_h)) / 2;
 
@@ -1093,7 +1121,8 @@ impl Widget for Showcase {
                 ("Click", "Select card"),
                 ("Double-click", "Launch example"),
                 ("Right-click", "Context menu"),
-                ("Scroll", "Navigate grid"),
+                ("PgUp/PgDn", "Scroll page up/down"),
+                ("Home/End", "Jump to start/end"),
             ];
             for (i, (key_text, desc)) in lines.iter().enumerate() {
                 let y = help_y + 3 + i;
@@ -1628,12 +1657,30 @@ impl Showcase {
                 self.context_menu = None;
                 false
             }
-            MouseEventKind::ScrollDown if self.selected + 1 < self.filtered.len() => {
-                self.selected += 1;
+            MouseEventKind::ScrollDown => {
+                let max_scroll = self.total_rows().saturating_sub(self.visible_rows());
+                if self.scroll_offset.get() < max_scroll {
+                    self.scroll_offset.set(self.scroll_offset.get() + 1);
+                    // Move selection into view if needed
+                    let cols = self.cols.get().max(1);
+                    let first_visible = self.scroll_offset.get() * cols;
+                    if self.selected < first_visible {
+                        self.selected = first_visible.min(self.filtered.len().saturating_sub(1));
+                    }
+                }
                 true
             }
-            MouseEventKind::ScrollUp if self.selected > 0 => {
-                self.selected -= 1;
+            MouseEventKind::ScrollUp => {
+                if self.scroll_offset.get() > 0 {
+                    self.scroll_offset.set(self.scroll_offset.get() - 1);
+                    // Move selection into view if needed
+                    let cols = self.cols.get().max(1);
+                    let vis = self.visible_rows();
+                    let last_visible = (self.scroll_offset.get() + vis) * cols;
+                    if self.selected >= last_visible {
+                        self.selected = (last_visible.saturating_sub(1)).min(self.filtered.len().saturating_sub(1));
+                    }
+                }
                 true
             }
             MouseEventKind::Moved => {
@@ -1913,6 +1960,7 @@ impl Showcase {
                     } else if !self.filtered.is_empty() {
                         self.selected = 0;
                     }
+                    self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Up => {
@@ -1921,6 +1969,7 @@ impl Showcase {
                     } else if !self.filtered.is_empty() {
                         self.selected = self.filtered.len() - 1;
                     }
+                    self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Right => {
@@ -1928,6 +1977,7 @@ impl Showcase {
                     if !self.filtered.is_empty() {
                         self.selected = (self.selected + cols) % self.filtered.len();
                     }
+                    self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Left => {
@@ -1937,6 +1987,37 @@ impl Showcase {
                             - cols % self.filtered.len())
                             % self.filtered.len();
                     }
+                    self.ensure_selected_visible();
+                    true
+                }
+                KeyCode::PageDown => {
+                    let cols = self.cols.get().max(1);
+                    let vis = self.visible_rows() * cols;
+                    if !self.filtered.is_empty() {
+                        self.selected = (self.selected + vis).min(self.filtered.len() - 1);
+                    }
+                    self.ensure_selected_visible();
+                    true
+                }
+                KeyCode::PageUp => {
+                    let cols = self.cols.get().max(1);
+                    let vis = self.visible_rows() * cols;
+                    if !self.filtered.is_empty() {
+                        self.selected = self.selected.saturating_sub(vis);
+                    }
+                    self.ensure_selected_visible();
+                    true
+                }
+                KeyCode::Home => {
+                    self.selected = 0;
+                    self.scroll_offset.set(0);
+                    true
+                }
+                KeyCode::End => {
+                    if !self.filtered.is_empty() {
+                        self.selected = self.filtered.len() - 1;
+                    }
+                    self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Enter => {

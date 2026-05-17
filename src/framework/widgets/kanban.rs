@@ -231,6 +231,21 @@ impl Kanban {
 
         self.dirty = true;
     }
+
+    /// Removes a card from the specified column and returns it.
+    /// Returns `None` if the column or index is out of bounds.
+    pub fn remove_card(&mut self, col: usize, idx: usize) -> Option<KanbanCard> {
+        if col >= self.columns.len() {
+            return None;
+        }
+        let column = &mut self.columns[col];
+        if idx >= column.cards.len() {
+            return None;
+        }
+        let card = column.cards.remove(idx);
+        self.dirty = true;
+        Some(card)
+    }
 }
 
 impl Default for Kanban {

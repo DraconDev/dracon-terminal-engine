@@ -78,6 +78,7 @@ pub struct Showcase {
     pub(crate) context_menu_selected: usize,
     pub(crate) hovered_card: Option<usize>,
     pub(crate) mouse_pos: Option<(u16, u16)>,
+    pub(crate) scroll_offset: std::cell::Cell<usize>,
     pub(crate) recently_launched: Vec<String>,
     pub(crate) show_input_debug: bool,
     pub(crate) event_log: RefCell<VecDeque<(Instant, String)>>,
@@ -130,6 +131,17 @@ impl Showcase {
         scene_router.register("accessibility", Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(theme.clone())));
         scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme.clone())));
         scene_router.register("kanban", Box::new(crate::scenes::kanban_scene::KanbanScene::new(theme.clone())));
+        scene_router.register("animation", Box::new(crate::scenes::animation_scene::AnimationScene::new(theme.clone())));
+        scene_router.register("color_picker", Box::new(crate::scenes::color_picker_scene::ColorPickerScene::new(theme.clone())));
+        scene_router.register("tags_input", Box::new(crate::scenes::tags_input_scene::TagsInputScene::new(theme.clone())));
+        scene_router.register("tooltip", Box::new(crate::scenes::tooltip_scene::TooltipScene::new(theme.clone())));
+        scene_router.register("progress", Box::new(crate::scenes::progress_scene::ProgressScene::new(theme.clone())));
+        scene_router.register("password_input", Box::new(crate::scenes::password_input_scene::PasswordInputScene::new(theme.clone())));
+        scene_router.register("radio", Box::new(crate::scenes::radio_scene::RadioScene::new(theme.clone())));
+        scene_router.register("debug_overlay", Box::new(crate::scenes::debug_overlay_scene::DebugOverlayScene::new(theme.clone())));
+        scene_router.register("raycaster", Box::new(crate::scenes::raycaster_scene::RaycasterScene::new(theme.clone())));
+        scene_router.register("paint", Box::new(crate::scenes::paint_scene::PaintScene::new(theme.clone())));
+        scene_router.register("workshop", Box::new(crate::scenes::workshop_scene::WorkshopScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 
@@ -154,6 +166,7 @@ impl Showcase {
             fps,
             hovered_card: None,
             mouse_pos: None,
+            scroll_offset: std::cell::Cell::new(0),
             context_menu: None,
             context_menu_selected: 0,
             tooltip_text: None,
@@ -254,6 +267,7 @@ impl Showcase {
         }
 
         self.selected = self.selected.min(self.filtered.len().saturating_sub(1));
+        self.scroll_offset.set(0);
 
         // Recompute cached stats text
         self.cached_stats_text = format!(
@@ -280,8 +294,42 @@ impl Showcase {
             .and_then(|&idx| self.examples.get(idx))
     }
 
+    /// Number of visible card rows based on current area and card size
+    pub fn visible_rows(&self) -> usize {
+        let area = self.area;
+        let sidebar_w = 18;
+        let grid_start_y = 3; // sidebar_start_y + 1
+        let available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
+        let card_h = if (area.width as usize).saturating_sub(sidebar_w + 2) >= 90 { 16 }
+                     else if (area.width as usize).saturating_sub(sidebar_w + 2) >= 60 { 14 }
+                     else { 12 };
+        (available_h / (card_h + 1)).max(1)
+    }
+
+    /// Auto-scroll so that the selected card is visible
+    pub fn ensure_selected_visible(&self) {
+        let cols = self.cols.get().max(1);
+        let selected_row = self.selected / cols;
+        let scroll = self.scroll_offset.get();
+        let visible = self.visible_rows();
+
+        if selected_row < scroll {
+            // Selected is above visible area — scroll up
+            self.scroll_offset.set(selected_row);
+        } else if selected_row >= scroll + visible {
+            // Selected is below visible area — scroll down
+            self.scroll_offset.set(selected_row.saturating_sub(visible - 1));
+        }
+    }
+
+    /// Total rows of cards
+    pub fn total_rows(&self) -> usize {
+        let cols = self.cols.get().max(1);
+        self.filtered.len().div_ceil(cols)
+    }
+
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban")
+        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban" | "animation" | "color_picker" | "tags_input" | "tooltip" | "progress" | "password_input" | "radio" | "debug_overlay" | "raycaster" | "paint" | "workshop")
     }
 
     pub fn launch_selected(&mut self) {

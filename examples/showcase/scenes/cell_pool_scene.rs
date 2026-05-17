@@ -1,13 +1,15 @@
 //! Embedded CellPool scene for the showcase.
 //!
-//! Demonstrates the Cell allocation recycling pool for performance optimization.
+//! Demonstrates the Cell allocation recycling pool with visual gauges,
+//! allocation waves, and real-time stats.
 
 use crate::scenes::shared_helpers::draw_text;
-use dracon_terminal_engine::compositor::{Plane, pool::CellPool};
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use dracon_terminal_engine::compositor::pool::CellPool;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
 pub struct CellPoolScene {
@@ -18,7 +20,10 @@ pub struct CellPoolScene {
     released: usize,
     total_cells: usize,
     tick_count: usize,
+    auto_running: bool,
+    wave_history: Vec<(usize, usize)>, // (acquired, released) per tick
     keybindings: KeybindingSet,
+    dirty: bool,
 }
 
 impl CellPoolScene {
@@ -31,32 +36,122 @@ impl CellPoolScene {
             released: 0,
             total_cells: 0,
             tick_count: 0,
+            auto_running: false,
+            wave_history: Vec::new(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            dirty: true,
         }
     }
 
     fn simulate_allocation(&mut self) {
-        use dracon_terminal_engine::compositor::pool::acquire_plane_cells;
-        use dracon_terminal_engine::compositor::pool::release_plane_cells;
+        use dracon_terminal_engine::compositor::pool::{acquire_plane_cells, release_plane_cells};
 
-        // Simulate allocating cells for various plane sizes
-        let sizes = [(40, 10), (80, 24), (60, 15), (100, 30)];
+        let sizes = [(40, 10), (80, 24), (60, 15), (100, 30), (50, 20), (70, 12)];
         let (w, h) = sizes[self.tick_count % sizes.len()];
 
-        // Acquire cells
         let cells = acquire_plane_cells(&mut self.pool, w, h);
-        self.acquired += cells.len();
+        let acq = cells.len();
+        self.acquired += acq;
 
-        // Release cells after a few ticks
-        if self.tick_count >= 3 {
+        let rel = if self.tick_count >= 3 {
             let prev_idx = (self.tick_count - 3) % sizes.len();
             let (pw, ph) = sizes[prev_idx];
-            self.released += cells.len();
+            let n: usize = (pw as usize) * (ph as usize);
+            self.released += n;
             release_plane_cells(&mut self.pool, pw, ph, cells);
-        }
+            n
+        } else {
+            0
+        };
 
         self.total_cells = self.pool.total_cells();
+        self.wave_history.push((acq, rel as usize));
+        if self.wave_history.len() > 50 {
+            self.wave_history.remove(0);
+        }
         self.tick_count += 1;
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn render_gauge(&self, plane: &mut Plane, x: u16, y: u16, w: u16, pct: f64, label: &str, color: Color, bg: Color) {
+        draw_text(plane, x, y, label, self.theme.fg_muted, bg, false);
+        let bar_x = x + label.len() as u16 + 1;
+        let bar_w = w.saturating_sub(label.len() as u16 + 8);
+        let filled = ((pct / 100.0) * bar_w as f64).min(bar_w as f64) as usize;
+
+        for i in 0..bar_w as usize {
+            let idx = (y * plane.width + bar_x + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = if i < filled { '█' } else { '░' };
+                plane.cells[idx].fg = if i < filled { color } else { self.theme.fg_muted };
+                plane.cells[idx].bg = bg;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        let pct_text = format!("{:5.1}%", pct);
+        draw_text(plane, bar_x + bar_w + 1, y, &pct_text, color, bg, true);
+    }
+
+    fn render_wave_chart(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16) {
+        let t = &self.theme;
+        if self.wave_history.is_empty() || w < 4 || h < 3 { return; }
+
+        // Border
+        for i in 0..w {
+            let top = (y * plane.width + x + i) as usize;
+            let bot = ((y + h - 1) * plane.width + x + i) as usize;
+            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+        }
+        for j in 0..h {
+            let left = ((y + j) * plane.width + x) as usize;
+            let right = ((y + j) * plane.width + x + w - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+        }
+        // Corners
+        for (ch, cx, cy) in [('╭', x, y), ('╮', x + w - 1, y), ('╰', x, y + h - 1), ('╯', x + w - 1, y + h - 1)] {
+            let idx = (cy * plane.width + cx) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+        }
+
+        // Find max for scaling
+        let max_val = self.wave_history.iter().map(|(a, r)| (*a).max(*r)).max().unwrap_or(1).max(1);
+
+        // Draw bars for each tick (acquired = green, released = blue)
+        let chart_w = (w as usize).saturating_sub(2);
+        let chart_h = (h as usize).saturating_sub(2);
+        let data: Vec<(usize, usize)> = self.wave_history.iter().rev().take(chart_w).cloned().collect();
+
+        for (i, (acq, rel)) in data.iter().enumerate() {
+            let bar_x = x + 1 + (chart_w.saturating_sub(data.len()) + i) as u16;
+            let acq_h = (*acq as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
+            let rel_h = (*rel as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
+
+            // Acquired bars (green, from bottom)
+            for j in 0..acq_h {
+                let by = y + h - 2 - j as u16;
+                let idx = (by * plane.width + bar_x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '▓';
+                    plane.cells[idx].fg = t.success;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+            // Released bars (blue, stacked on top if same column — show as dim)
+            for j in 0..rel_h {
+                let by = y + h - 2 - j as u16;
+                let idx = (by * plane.width + bar_x) as usize;
+                if idx < plane.cells.len() && plane.cells[idx].char != '▓' {
+                    plane.cells[idx].char = '▒';
+                    plane.cells[idx].fg = t.info;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        // Labels
+        draw_text(plane, x + 2, y + 1, "Allocation Waves", t.fg_muted, t.bg, false);
     }
 }
 
@@ -73,9 +168,7 @@ impl Scene for CellPoolScene {
         }
 
         // Header
-        let title = " CellPool ";
-        draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
-
+        draw_text(&mut plane, 2, 0, " CellPool ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
@@ -90,64 +183,77 @@ impl Scene for CellPoolScene {
         }
 
         // Description
-        let desc = "Object pool for Cell allocation. Reduces allocation pressure";
-        let desc2 = "by recycling cell vectors across frames.";
-        draw_text(&mut plane, 2, 2, desc, t.fg_muted, t.bg, false);
-        draw_text(&mut plane, 2, 3, desc2, t.fg_muted, t.bg, false);
+        draw_text(&mut plane, 2, 2, "Object pool for Cell recycling across frames", t.fg_muted, t.bg, false);
 
-        // Stats
-        let stats_y = 5;
-        draw_text(&mut plane, 2, stats_y, "Pool Statistics:", t.primary, t.bg, true);
+        // ── Visual Gauges ──────────────────────────────────────────────────
+        let active = self.acquired.saturating_sub(self.released);
+        let reuse_rate = if self.acquired > 0 { (self.released as f64 / self.acquired as f64 * 100.0).min(100.0) } else { 0.0 };
+        let active_pct = if self.acquired > 0 { (active as f64 / self.acquired as f64 * 100.0).min(100.0) } else { 0.0 };
 
+        let gauge_w = area.width.saturating_sub(4);
+        self.render_gauge(&mut plane, 2, 4, gauge_w, reuse_rate, "Reuse:", t.success, t.bg);
+        self.render_gauge(&mut plane, 2, 5, gauge_w, active_pct, "Active:", t.info, t.bg);
+
+        // Pool utilization (how much pooled memory is sitting idle = good)
+        let pool_pct = if self.total_cells > 0 && self.acquired > 0 {
+            (self.total_cells as f64 / self.acquired.max(1) as f64 * 100.0).min(100.0)
+        } else { 0.0 };
+        self.render_gauge(&mut plane, 2, 6, gauge_w, pool_pct, "Pooled:", t.secondary, t.bg);
+
+        // ── Numeric Stats ─────────────────────────────────────────────────
+        let stats_y = 8;
+        draw_text(&mut plane, 2, stats_y, "Stats:", t.primary, t.bg, true);
         let stats = [
-            ("Total acquired:", format!("{}", self.acquired)),
-            ("Total released:", format!("{}", self.released)),
-            ("Active cells:", format!("{}", self.acquired.saturating_sub(self.released))),
-            ("Pooled cells:", format!("{}", self.total_cells)),
+            format!("Acquired: {}", self.acquired),
+            format!("Released: {}", self.released),
+            format!("Active: {}", active),
+            format!("Pooled: {}", self.total_cells),
+            format!("Ticks: {}", self.tick_count),
         ];
-
-        for (i, (label, value)) in stats.iter().enumerate() {
-            let y = stats_y + 1 + i as u16;
-            draw_text(&mut plane, 2, y, label, t.fg_muted, t.bg, false);
-            draw_text(&mut plane, 20, y, value, t.fg, t.bg, true);
+        for (i, s) in stats.iter().enumerate() {
+            let col = 2 + (i / 3) * 25;
+            let row = stats_y + 1 + (i % 3) as u16;
+            draw_text(&mut plane, col as u16, row, s, t.fg, t.bg, false);
         }
 
-        // Reuse rate
-        let reuse_rate = if self.acquired > 0 {
-            (self.released as f64 / self.acquired as f64 * 100.0).min(100.0)
-        } else {
-            0.0
-        };
-        let rate_str = format!("Reuse rate: {:.1}%", reuse_rate);
-        draw_text(&mut plane, 2, stats_y + 6, &rate_str, t.success, t.bg, true);
+        // ── Allocation Wave Chart ──────────────────────────────────────────
+        let chart_y = stats_y + 5;
+        let chart_h = area.height.saturating_sub(chart_y + 3);
+        if chart_h > 6 {
+            self.render_wave_chart(&mut plane, 2, chart_y, area.width.saturating_sub(4), chart_h);
+        }
 
-        // Visual bar
-        let bar_y = stats_y + 7;
-        let bar_width = 40;
-        let filled = ((reuse_rate / 100.0) * bar_width as f64) as usize;
-        let bar = format!("[{}{}]", "█".repeat(filled), "░".repeat(bar_width - filled));
-        draw_text(&mut plane, 2, bar_y, &bar, t.info, t.bg, false);
+        // Legend for chart
+        if chart_h > 6 {
+            let legend_y = chart_y + chart_h;
+            draw_text(&mut plane, 2, legend_y, "▓ Acquired  ▒ Released", t.fg_muted, t.bg, false);
+        }
 
-        // Controls hint
-        let controls_y = stats_y + 10;
-        draw_text(&mut plane, 2, controls_y, "Controls:", t.primary, t.bg, true);
-        draw_text(&mut plane, 2, controls_y + 1, "  SPACE: simulate allocation", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, 2, controls_y + 2, "  r: reset pool", t.fg_muted, t.bg, false);
+        // ── Auto indicator ────────────────────────────────────────────────
+        if self.auto_running {
+            draw_text(&mut plane, area.width.saturating_sub(12), 2, "▶ AUTO", t.primary, t.bg, true);
+        }
 
-        // Footer
-        let footer_y = area.height.saturating_sub(1);
-        for x in 0..area.width {
-            let idx = (footer_y * area.width + x) as usize;
+        // ── Footer ────────────────────────────────────────────────────────
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+        let footer = format!(
+            " SPACE:alloc | a:auto | r:reset | {}:help | {}:back ",
+            help_key, back_key,
+        );
+        let fy = area.height.saturating_sub(1);
+        for (i, c) in footer.chars().enumerate() {
+            let idx = (fy * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = t.fg_muted;
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
             }
         }
-        let nav = " SPACE: alloc | r: reset | B/Esc: back | ?: help ";
-        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
 
         if self.show_help {
-            draw_help_overlay(&mut plane, area, t);
+            self.render_help(&mut plane, area);
         }
 
         plane
@@ -159,12 +265,14 @@ impl Scene for CellPoolScene {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }
 
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
+            self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
@@ -174,6 +282,12 @@ impl Scene for CellPoolScene {
         match key.code {
             KeyCode::Char(' ') if key.modifiers.is_empty() => {
                 self.simulate_allocation();
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('a') if key.modifiers.is_empty() => {
+                self.auto_running = !self.auto_running;
+                self.dirty = true;
                 true
             }
             KeyCode::Char('r') if key.modifiers.is_empty() => {
@@ -182,13 +296,16 @@ impl Scene for CellPoolScene {
                 self.released = 0;
                 self.total_cells = 0;
                 self.tick_count = 0;
+                self.auto_running = false;
+                self.wave_history.clear();
+                self.dirty = true;
                 true
             }
             _ => false,
         }
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
         false
     }
 
@@ -196,58 +313,62 @@ impl Scene for CellPoolScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn needs_render(&self) -> bool { true } // always re-render for auto mode
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+impl CellPoolScene {
+    fn render_help(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+        let hw = 40u16.min(area.width.saturating_sub(4));
+        let hh = 10u16.min(area.height.saturating_sub(4));
+        let hx = (area.width - hw) / 2;
+        let hy = (area.height - hh) / 2;
 
-fn draw_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 44u16.min(area.width.saturating_sub(4));
-    let hh = 10u16.min(area.height.saturating_sub(4));
-    let hx = (area.width - hw) / 2;
-    let hy = (area.height - hh) / 2;
-
-    for y in hy..hy + hh {
-        for x in hx..hx + hw {
-            let idx = (y * area.width + x) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].bg = t.surface_elevated;
-                plane.cells[idx].transparent = false;
+        for y in hy..hy + hh {
+            for x in hx..hx + hw {
+                let idx = (y * area.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface_elevated;
+                    plane.cells[idx].transparent = false;
+                }
             }
         }
-    }
-    for x in hx + 1..hx + hw - 1 {
-        let top = (hy * area.width + x) as usize;
-        let bot = ((hy + hh - 1) * area.width + x) as usize;
-        if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-        if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
-    }
-    for y in hy + 1..hy + hh - 1 {
-        let left = (y * area.width + hx) as usize;
-        let right = (y * area.width + hx + hw - 1) as usize;
-        if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-        if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
-    }
-    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
-    for (ch, cx, cy) in corners {
-        let idx = (cy * area.width + cx) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
-    }
+        for x in hx + 1..hx + hw - 1 {
+            let top = (hy * plane.width + x) as usize;
+            let bot = ((hy + hh - 1) * plane.width + x) as usize;
+            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+        }
+        for y in hy + 1..hy + hh - 1 {
+            let left = (y * plane.width + hx) as usize;
+            let right = (y * plane.width + hx + hw - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+        }
+        for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
+            let idx = (cy * plane.width + cx) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+        }
 
-    let title = "CellPool Help";
-    let tx = hx + (hw - title.len() as u16) / 2;
-    draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+        let title = "CellPool Help";
+        let tx = hx + (hw - title.len() as u16) / 2;
+        draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
-    let shortcuts = [
-        ("SPACE", "Simulate allocation"),
-        ("r", "Reset pool"),
-        ("B/Esc", "Back to showcase"),
-    ];
-    for (i, (key, desc)) in shortcuts.iter().enumerate() {
-        let row = hy + 3 + i as u16;
-        draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
-        draw_text(plane, hx + 14, row, desc, t.fg, t.surface_elevated, false);
+        let shortcuts = [
+            ("SPACE", "Simulate allocation"),
+            ("a", "Toggle auto-simulation"),
+            ("r", "Reset pool & stats"),
+            (back_key, "Back to showcase"),
+            (help_key, "Toggle this help"),
+        ];
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = hy + 3 + i as u16;
+            draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
+            draw_text(plane, hx + 12, row, desc, t.fg, t.surface_elevated, false);
+        }
     }
 }

@@ -21,6 +21,7 @@ pub struct KanbanScene {
     area: std::cell::Cell<Rect>,
     status_bar: StatusBar,
     keybindings: KeybindingSet,
+    next_card_id: usize,
 }
 
 impl KanbanScene {
@@ -85,7 +86,7 @@ impl KanbanScene {
 
         let status_bar = StatusBar::new(WidgetId::new(60))
             .add_segment(dracon_terminal_engine::framework::widgets::StatusSegment::new(
-                "Tab/shift+tab: nav | ←→: col | ↑↓: card | B/Esc: back | ?: help",
+                "N:new | D:delete | Tab:nav | B/Esc:back | ?:help",
             ))
             .with_theme(theme.clone());
 
@@ -97,6 +98,7 @@ impl KanbanScene {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             status_bar,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            next_card_id: 100,
         }
     }
 
@@ -154,7 +156,8 @@ impl KanbanScene {
             ("Shift+Tab", "Focus previous column"),
             ("← →", "Navigate columns"),
             ("↑ ↓", "Navigate cards"),
-            ("Enter", "Select card"),
+            ("N", "Add new card to first column"),
+            ("D", "Delete selected card"),
             ("B/Esc", "Back to showcase"),
             ("?", "Toggle help"),
         ];
@@ -246,6 +249,30 @@ impl Scene for KanbanScene {
         }
         if self.keybindings.matches(actions::BACK, &key) {
             return false; // Let scene router handle back navigation
+        }
+
+        // Card creation (n)
+        if key.code == KeyCode::Char('n') && key.modifiers.is_empty() {
+            let id = format!("new_{}", self.next_card_id);
+            self.next_card_id += 1;
+            let titles = ["New task", "Feature request", "Bug fix", "Research", "Refactor"];
+            let descs = ["Needs description", "From user feedback", "Priority fix", "Investigate options", "Clean up code"];
+            let idx = self.next_card_id % titles.len();
+            let mut card = KanbanCard::new(id, titles[idx]);
+            card = card.with_description(descs[idx]);
+            card = card.with_color(Color::Rgb(100, 149, 237));
+            self.kanban.add_card(0, card);
+            self.dirty = true;
+            return true;
+        }
+
+        // Card deletion (d)
+        if key.code == KeyCode::Char('d') && key.modifiers.is_empty() {
+            if let Some((col, idx)) = self.kanban.selected_card() {
+                self.kanban.remove_card(col, idx);
+                self.dirty = true;
+            }
+            return true;
         }
 
         self.kanban.handle_key(key)

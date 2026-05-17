@@ -72,7 +72,6 @@ impl Vec2 {
         let dy = self.y - other.y;
         dx * dx + dy * dy
     }
-    fn dist(self, other: Vec2) -> f32 { self.dist_sq(other).sqrt() }
 }
 
 impl std::ops::Add for Vec2 {
@@ -535,11 +534,10 @@ impl GameState {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) {
         self.mouse_pos = Vec2::new(col as f32, row as f32);
-        if self.phase == GamePhase::Playing {
-            if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+        if self.phase == GamePhase::Playing
+            && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
                 self.shoot(col as f32, row as f32);
             }
-        }
     }
 }
 
@@ -844,7 +842,7 @@ fn render_pause(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let ty = h as usize / 2 - 2;
     p.put_str(tx as u16, ty as u16, title);
     for i in 0..title.len() {
-        let idx = (ty * w as usize + tx + i) as usize;
+        let idx = ty * w as usize + tx + i;
         if idx < p.cells.len() {
             p.cells[idx].fg = Color::Rgb(255, 220, 100);
             p.cells[idx].style = Styles::BOLD;
@@ -855,7 +853,7 @@ fn render_pause(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let help_key = kb.display(actions::HELP).unwrap_or("?");
     let back_key = kb.display(actions::BACK).unwrap_or("esc");
     let lines = [
-        format!("Space — Resume"),
+        "Space — Resume".to_string(),
         format!("{} — Help", help_key),
         format!("{} — Dismiss", back_key),
     ];
@@ -864,7 +862,7 @@ fn render_pause(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
         let ly = ty + 2 + i;
         p.put_str(lx as u16, ly as u16, line);
         for j in 0..line.len() {
-            let idx = (ly * w as usize + lx + j) as usize;
+            let idx = ly * w as usize + lx + j;
             if idx < p.cells.len() {
                 p.cells[idx].fg = Color::Rgb(180, 180, 190);
                 p.cells[idx].bg = overlay_bg;
@@ -890,7 +888,7 @@ fn render_game_over(p: &mut Plane, state: &GameState, w: u16, h: u16) {
     let ty = h as usize / 2 - 4;
     p.put_str(tx as u16, ty as u16, title);
     for i in 0..title.len() {
-        let idx = (ty * w as usize + tx + i) as usize;
+        let idx = ty * w as usize + tx + i;
         if idx < p.cells.len() {
             p.cells[idx].fg = Color::Rgb(255, 80, 80);
             p.cells[idx].style = Styles::BOLD;
@@ -910,7 +908,7 @@ fn render_game_over(p: &mut Plane, state: &GameState, w: u16, h: u16) {
         let ly = ty + 1 + i;
         p.put_str(lx as u16, ly as u16, line);
         for j in 0..line.len() {
-            let idx = (ly * w as usize + lx + j) as usize;
+            let idx = ly * w as usize + lx + j;
             if idx < p.cells.len() {
                 p.cells[idx].fg = Color::Rgb(200, 200, 210);
                 p.cells[idx].bg = overlay_bg;

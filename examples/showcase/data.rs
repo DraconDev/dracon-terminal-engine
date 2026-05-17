@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// DATA
+// DATA — Showcase example entries, ordered by impressiveness
 // ═══════════════════════════════════════════════════════════════════════════════
 
 #[derive(Clone)]
@@ -14,17 +14,65 @@ pub struct ExampleMeta {
 impl ExampleMeta {
     pub fn all() -> Vec<Self> {
         vec![
-            // Apps
+            // ── Showcase Stars (most impressive, first) ────────────────────
             ExampleMeta {
-                name: "system_monitor",
+                name: "raycaster",
                 category: "apps",
-                description: "Live system gauges with auto-refresh",
-                binary_name: "system_monitor",
+                description: "Wolfenstein-style 3D raycaster engine",
+                binary_name: "raycaster",
                 preview: &[
-                    "CPU [████████░░] 80%",
-                    "MEM [██████░░░░] 60%",
-                    "DISK [████░░░░░░] 40%",
-                    "NET  [██████████] 100%",
+                    "████████▓▓▒▒░░    ░░▒▒▓▓████",
+                    "████▓▓▒▒░░          ░░▒▒▓▓██",
+                    "██▓▒░                  ░▒▓██",
+                    "░                 @        ░",
+                ],
+            },
+            ExampleMeta {
+                name: "arena",
+                category: "apps",
+                description: "Real-time arena survival game with mouse combat",
+                binary_name: "arena",
+                preview: &[
+                    "  HP[████████░░] Score: 420  ",
+                    "     ·  g        T          ",
+                    "  ●     s              s    ",
+                    "  Wave: 5  Kills: 42  Lv: 3 ",
+                ],
+            },
+            ExampleMeta {
+                name: "paint",
+                category: "apps",
+                description: "Mouse-driven pixel art canvas with brushes",
+                binary_name: "paint",
+                preview: &[
+                    "  B Brush  E Erase   F Fill",
+                    "  1 Red  2 Orange  3 Yellow",
+                    "  ┌─────────────────────────┐",
+                    "  │████  ████  ░░░░  ░░░░  │",
+                ],
+            },
+            ExampleMeta {
+                name: "workshop",
+                category: "apps",
+                description: "Interactive widget playground (Storybook)",
+                binary_name: "workshop",
+                preview: &[
+                    "  ► Button    | Label: Click Me  ",
+                    "    Checkbox  | Pressed: false    ",
+                    "    Toggle    | ┌──Preview──┐    ",
+                    "    Slider    │ [Click Me] │    ",
+                ],
+            },
+            ExampleMeta {
+                name: "animation",
+                category: "data",
+                description: "Animation & easing curves",
+                binary_name: "animation",
+                preview: &[
+                    "  ●        ●",
+                    "    ●    ●  ",
+                    "  Linear EaseIn",
+                    "  EaseOut EaseInOut",
                 ],
             },
             ExampleMeta {
@@ -39,6 +87,20 @@ impl ExampleMeta {
                     "| lib  |{      |",
                 ],
             },
+
+            // ── Apps ─────────────────────────────────────────────────────────
+            ExampleMeta {
+                name: "system_monitor",
+                category: "apps",
+                description: "Live system gauges with auto-refresh",
+                binary_name: "system_monitor",
+                preview: &[
+                    "CPU [████████░░] 80%",
+                    "MEM [██████░░░░] 60%",
+                    "DISK [████░░░░░░] 40%",
+                    "NET  [██████████] 100%",
+                ],
+            },
             ExampleMeta {
                 name: "file_manager",
                 category: "apps",
@@ -49,7 +111,7 @@ impl ExampleMeta {
             ExampleMeta {
                 name: "chat_client",
                 category: "apps",
-                description: "Rich chat UI with panels",
+                description: "Rich chat UI with contacts & panels",
                 binary_name: "chat_client",
                 preview: &[
                     "[10:42] Alice: Hey!",
@@ -82,8 +144,19 @@ impl ExampleMeta {
                     "+-----------+--------+",
                 ],
             },
-            // Cookbook
-            // Primitives
+
+            // ── Input ────────────────────────────────────────────────────────
+            ExampleMeta {
+                name: "form_demo",
+                category: "input",
+                description: "Form layout with validation",
+                binary_name: "form_demo",
+                preview: &[
+                    " Name: [___________]",
+                    " Email: [__________]",
+                    " [Submit] [Cancel]",
+                ],
+            },
             ExampleMeta {
                 name: "calendar",
                 category: "input",
@@ -92,27 +165,8 @@ impl ExampleMeta {
                 preview: &[
                     "  May 2026    ",
                     "Mo Tu We Th Fr Sa Su",
-                    "              1  2",
-                    " 3  4  5  6  7  8  9",
                     "10 11 12 13 14 15 16",
-                    "17 18 19 20 21 22 23",
-                    "24 25 26 27 28 29 30",
-                    "31               ",
                     "Selected: 2026-05-12",
-                ],
-            },
-            ExampleMeta {
-                name: "rich_text",
-                category: "data",
-                description: "Markdown rendering with styling",
-                binary_name: "rich_text_demo",
-                preview: &[
-                    "# RichText Widget",
-                    "**Bold** and *italic*",
-                    "`inline code`",
-                    "- List item",
-                    "[link](https://)",
-                    "Plain paragraph text",
                 ],
             },
             ExampleMeta {
@@ -125,48 +179,98 @@ impl ExampleMeta {
                     "  rustacean    ",
                     "> rust        ",
                     "  rust-analyzer",
-                    "  rustdoc      ",
+                ],
+            },
+            ExampleMeta {
+                name: "tags_input",
+                category: "input",
+                description: "Tag composition with autocomplete",
+                binary_name: "tags_input",
+                preview: &[
+                    "[rust] [terminal] [___]",
+                    "> rust-analyzer   ",
+                    "  Tags: 2/8       ",
+                ],
+            },
+            ExampleMeta {
+                name: "tooltip",
+                category: "input",
+                description: "Hover tooltips on buttons",
+                binary_name: "tooltip",
+                preview: &[
+                    "┌──────────┐",
+                    "│ 📁 Files  │",
+                    "└──────────┘",
+                    "  ┌──────────────────────────┐",
+                ],
+            },
+            ExampleMeta {
+                name: "password_input",
+                category: "input",
+                description: "Login form with masked password input",
+                binary_name: "password_input",
+                preview: &[
+                    "  Username: [admin____]",
+                    "  Password: [••••••____]",
+                    "  Strength: Strong",
+                ],
+            },
+            ExampleMeta {
+                name: "radio",
+                category: "input",
+                description: "Settings panel with radio button groups",
+                binary_name: "radio",
+                preview: &[
+                    "  ◉ Dark    ○ Light   ○ HC",
+                    "  ○ Small  ◉ Medium   ○ Large",
+                    "  Preview │ Dark 14pt Comfort",
+                ],
+            },
+            ExampleMeta {
+                name: "color_picker",
+                category: "input",
+                description: "Interactive color picker with preview",
+                binary_name: "color_picker",
+                preview: &[
+                    "  ████████████",
+                    "  Hex: #58a6ff",
+                    "  RGB: 88, 166, 255",
+                    "  Palette: ██ ██ ██ ██",
+                ],
+            },
+
+            // ── Data ─────────────────────────────────────────────────────────
+            ExampleMeta {
+                name: "rich_text",
+                category: "data",
+                description: "Markdown rendering with tabbed docs",
+                binary_name: "rich_text",
+                preview: &[
+                    "# RichText Widget",
+                    "**Bold** and *italic*",
+                    "`inline code`",
+                    "- List item",
                 ],
             },
             ExampleMeta {
                 name: "notification_center",
-                category: "input",
-                description: "Toast notification queue",
+                category: "data",
+                description: "Toast notification queue with filters",
                 binary_name: "notification_center",
                 preview: &[
-                    "        ╭───────╮",
-                    "        │ i Info│",
-                    "        │ Done! │",
-                    "        ╰───────╯",
-                    "     ╭───────╮",
-                    "     │ ! Warn│",
-                    "     │ Slow!│",
-                    "     ╰───────╯",
-                ],
-            },
-            ExampleMeta {
-                name: "accessibility",
-                category: "accessibility",
-                description: "Screen reader support (OSC 99)",
-                binary_name: "accessibility",
-                preview: &[
-                    "OSC 99 Announcements:",
-                    "  Role: button",
-                    "  Label: Submit",
-                    "  Shortcut: Ctrl+Enter",
-                    "  Status: enabled",
-                    "  Screen reader: NVDA",
+                    "  ╭───────╮",
+                    "  │ i Info│",
+                    "  │ Done! │",
+                    "  ╰───────╯",
                 ],
             },
             ExampleMeta {
                 name: "cell_pool",
                 category: "data",
-                description: "Cell allocation recycling",
+                description: "Cell allocation recycling with gauges",
                 binary_name: "cell_pool",
                 preview: &[
                     "Cell Pool Stats:",
-                    "  Acquired: 1920",
-                    "  Released: 1872",
                     "  Active: 48",
                     "  Reuse rate: 97.5%",
                     "  Memory saved: 15KB",
@@ -182,9 +286,32 @@ impl ExampleMeta {
                     "┌────┐ ┌────┐ ┌────┐",
                     "│card│ │card│ │card│",
                     "└────┘ └────┘ └────┘",
-                    "> Drag cards between cols",
                 ],
             },
+            ExampleMeta {
+                name: "progress",
+                category: "data",
+                description: "Progress indicators & loading simulation",
+                binary_name: "progress",
+                preview: &[
+                    "  ◜ ProgressRing  65%",
+                    "  [████████████░░░░░]",
+                    "  ◠ Loading...",
+                ],
+            },
+            ExampleMeta {
+                name: "debug_overlay",
+                category: "data",
+                description: "Performance metrics, FPS, frame time, profiler",
+                binary_name: "debug_overlay",
+                preview: &[
+                    "  60 FPS  16.7ms",
+                    "  CPU [████░░░░░] 12%",
+                    "  render  13.3ms  1x",
+                ],
+            },
+
+            // ── Cookbook ──────────────────────────────────────────────────────
             ExampleMeta {
                 name: "widget_gallery",
                 category: "cookbook",
@@ -198,52 +325,14 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "command_bindings",
+                name: "theme_switcher",
                 category: "cookbook",
-                description: "Live CLI-bound widgets",
-                binary_name: "command_bindings",
+                description: "Live theme cycling (21 themes)",
+                binary_name: "theme_switcher",
                 preview: &[
-                    "Load: 0.45 0.32",
-                    "CPU:  [####--]",
-                    "Mem:  [######]",
-                    "Net:  [------]",
-                ],
-            },
-            ExampleMeta {
-                name: "split_resizer",
-                category: "cookbook",
-                description: "Drag-to-resize SplitPane",
-                binary_name: "split_resizer",
-                preview: &[
-                    "+-----+-----+",
-                    "|  A  |  B  |",
-                    "+--+--+-----+",
-                    "|  C  |  D  |",
-                ],
-            },
-            ExampleMeta {
-                name: "menu_system",
-                category: "cookbook",
-                description: "MenuBar + ContextMenu",
-                binary_name: "menu_system",
-                preview: &[
-                    "[File][Edit][View]",
-                    "+-----------+",
-                    "| New        |",
-                    "| Open       |",
-                ],
-            },
-            ExampleMeta {
-                name: "tabbed_panels",
-                category: "cookbook",
-                description: "Tab bar with panel switching",
-                binary_name: "tabbed_panels",
-                preview: &[
-                    "[Tab1][Tab2][Tab3]+",
-                    "+---------------+",
-                    "|   Panel       |",
-                    "|   Content     |",
-                    "+---------------+",
+                    "Theme: Nord",
+                    "+----------+",
+                    "| # # # #   |",
                 ],
             },
             ExampleMeta {
@@ -256,63 +345,11 @@ impl ExampleMeta {
                     "| v src/",
                     "| | > main.rs",
                     "| | > lib.rs",
-                    "| v target/",
-                ],
-            },
-            ExampleMeta {
-                name: "data_table",
-                category: "cookbook",
-                description: "Sortable table with selection",
-                binary_name: "data_table",
-                preview: &[
-                    " Name     | Age | City ",
-                    "----------|-----|------",
-                    " Alice    |  28 | NYC  ",
-                    " Bob      |  34 | LA   ",
-                    "> Carol   |  22 | SEA  ",
-                ],
-            },
-            ExampleMeta {
-                name: "log_monitor",
-                category: "cookbook",
-                description: "Live log viewer with filters",
-                binary_name: "log_monitor",
-                preview: &[
-                    "[ERROR][WARN][INFO]",
-                    "10:42 ERROR connection",
-                    "10:41 WARN retry...",
-                    "10:40 INFO ready",
-                    "10:39 INFO listening",
-                ],
-            },
-            ExampleMeta {
-                name: "debug_overlay",
-                category: "cookbook",
-                description: "FPS/performance overlay",
-                binary_name: "debug_overlay",
-                preview: &[
-                    "FPS: 60 | CPU: 12%",
-                    "Widgets: 24 | Z: 5",
-                    "Mouse: (80, 24)",
-                    "Frame: 12340",
-                ],
-            },
-            // Tools
-            ExampleMeta {
-                name: "theme_switcher",
-                category: "tools",
-                description: "Live theme cycling (21 themes)",
-                binary_name: "theme_switcher",
-                preview: &[
-                    "Theme: Nord",
-                    "+----------+",
-                    "| # # # #   |",
-                    "| # # # #   |",
                 ],
             },
             ExampleMeta {
                 name: "modal_demo",
-                category: "tools",
+                category: "cookbook",
                 description: "Modal dialogs + focus trapping",
                 binary_name: "modal_demo",
                 preview: &[
@@ -323,6 +360,74 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
+                name: "command_bindings",
+                category: "cookbook",
+                description: "Live CLI-bound widgets",
+                binary_name: "command_bindings",
+                preview: &[
+                    "Load: 0.45 0.32",
+                    "CPU:  [####--]",
+                    "Mem:  [######]",
+                ],
+            },
+            ExampleMeta {
+                name: "split_resizer",
+                category: "cookbook",
+                description: "Drag-to-resize SplitPane",
+                binary_name: "split_resizer",
+                preview: &[
+                    "+-----+-----+",
+                    "|  A  |  B  |",
+                    "+--+--+-----+",
+                ],
+            },
+            ExampleMeta {
+                name: "menu_system",
+                category: "cookbook",
+                description: "MenuBar + ContextMenu",
+                binary_name: "menu_system",
+                preview: &[
+                    "[File][Edit][View]",
+                    "+-----------+",
+                    "| New        |",
+                ],
+            },
+            ExampleMeta {
+                name: "tabbed_panels",
+                category: "cookbook",
+                description: "Tab bar with panel switching",
+                binary_name: "tabbed_panels",
+                preview: &[
+                    "[Tab1][Tab2][Tab3]+",
+                    "+---------------+",
+                    "|   Panel       |",
+                ],
+            },
+            ExampleMeta {
+                name: "data_table",
+                category: "cookbook",
+                description: "Sortable table with selection",
+                binary_name: "data_table",
+                preview: &[
+                    " Name     | Age | City ",
+                    "----------|-----|------",
+                    "> Carol   |  22 | SEA  ",
+                ],
+            },
+
+            // ── Tools ─────────────────────────────────────────────────────────
+            ExampleMeta {
+                name: "log_monitor",
+                category: "tools",
+                description: "Live log viewer with filters",
+                binary_name: "log_monitor",
+                preview: &[
+                    "[ERROR][WARN][INFO]",
+                    "10:42 ERROR connection",
+                    "10:40 INFO ready",
+                ],
+            },
+            ExampleMeta {
                 name: "desktop",
                 category: "tools",
                 description: "Draggable windows + taskbar",
@@ -330,7 +435,6 @@ impl ExampleMeta {
                 preview: &[
                     "+------++------+",
                     "| Win1 || Win2  |",
-                    "|      ||      |",
                     "+------++------+",
                 ],
             },
@@ -343,7 +447,6 @@ impl ExampleMeta {
                     "Key: ArrowUp  0x2191",
                     "Mod: Ctrl+Shift",
                     "Mouse: 45, 12 [L-down]",
-                    "Wheel: +1",
                 ],
             },
             ExampleMeta {
@@ -355,7 +458,6 @@ impl ExampleMeta {
                     "1 | fn main() {",
                     "2 | >  println!();",
                     "3 | }",
-                    "   [rust] UTF-8",
                 ],
             },
             ExampleMeta {
@@ -367,19 +469,6 @@ impl ExampleMeta {
                     "ID | Name    | Score",
                     "---|---------|------",
                     " 1 | Alpha   |  98",
-                    " 2 | Beta    |  85",
-                    " 3 | Gamma   |  92",
-                ],
-            },
-            ExampleMeta {
-                name: "form_demo",
-                category: "tools",
-                description: "Form layout with validation",
-                binary_name: "form_demo",
-                preview: &[
-                    " Name: [___________]",
-                    " Email: [__________]",
-                    " [Submit] [Cancel]",
                 ],
             },
             ExampleMeta {
@@ -389,62 +478,22 @@ impl ExampleMeta {
                 binary_name: "sqlite_browser",
                 preview: &[
                     "Tables: [users]",
-                    "[schema] [data] [query]",
-                    "+---------------+",
                     "| id | name     |",
                     "| 1  | Alice    |",
-                    "+---------------+",
                 ],
             },
+
+            // ── Accessibility ────────────────────────────────────────────────
             ExampleMeta {
-                name: "widget_tutorial",
-                category: "tools",
-                description: "Step-by-step widget guide",
-                binary_name: "widget_tutorial",
+                name: "accessibility",
+                category: "accessibility",
+                description: "Screen reader support (OSC 99)",
+                binary_name: "accessibility",
                 preview: &[
-                    "Step 1: Create widget",
-                    "  let btn = Button::new()",
-                    "Step 2: Add to app",
-                    "  app.add_widget(btn)",
-                ],
-            },
-            ExampleMeta {
-                name: "game_loop",
-                category: "tools",
-                description: "Snake game with tick loop",
-                binary_name: "game_loop",
-                preview: &[
-                    "    ████    ",
-                    "    █  █    ",
-                    "  ███  ███  ",
-                    "    ████    ",
-                    "  Score: 42 ",
-                ],
-            },
-            ExampleMeta {
-                name: "form_widget",
-                category: "tools",
-                description: "Form field components",
-                binary_name: "form_widget",
-                preview: &[
-                    "Field: [________]",
-                    "Select: (opt1|[v])",
-                    "Check: [x] enabled",
-                    "[Apply] [Reset]",
-                ],
-            },
-            ExampleMeta {
-                name: "framework_file_manager",
-                category: "tools",
-                description: "Framework-based file browser",
-                binary_name: "framework_file_manager",
-                preview: &[
-                    "/ home/ user/",
-                    "+--------+-------+",
-                    "| Name   | Size  |",
-                    "| src/   |  -    |",
-                    "| main.rs| 1.2KB |",
-                    "+--------+-------+",
+                    "OSC 99 Announcements:",
+                    "  Role: button",
+                    "  Label: Submit",
+                    "  Screen reader: NVDA",
                 ],
             },
         ].clone()
