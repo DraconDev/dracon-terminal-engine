@@ -38,6 +38,7 @@ use std::os::fd::AsFd;
 
 struct DebugOverlayPanel {
     id: WidgetId,
+    area: StdCell<Rect>,
     profiler: RefCell<Profiler>,
     inspector: RefCell<WidgetInspector>,
     event_logger: RefCell<EventLogger>,
@@ -48,6 +49,7 @@ struct DebugOverlayPanel {
     keybindings: KeybindingSet,
     frame_count: StdCell<u64>,
     start_time: Instant,
+    dirty: StdCell<bool>,
 }
 
 impl DebugOverlayPanel {
@@ -80,6 +82,7 @@ impl DebugOverlayPanel {
 
         Self {
             id,
+            area: StdCell::new(Rect::new(0, 0, 80, 24)),
             profiler: RefCell::new(Profiler::new(WidgetId::new(160))),
             inspector: RefCell::new(inspector),
             event_logger: RefCell::new(EventLogger::new(WidgetId::new(170))),
@@ -90,6 +93,7 @@ impl DebugOverlayPanel {
             keybindings: KeybindingSet::default(),
             frame_count: StdCell::new(0),
             start_time: Instant::now(),
+            dirty: StdCell::new(true),
         }
     }
 
@@ -111,59 +115,99 @@ impl DebugOverlayPanel {
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
-        let w = 40.min(area.width);
-        let h = 15.min(plane.height);
-        let x = (area.width.saturating_sub(w)) / 2;
-        let y = (area.height.saturating_sub(h)) / 2;
+        let hw = 44u16.min(area.width.saturating_sub(4));
+        let hh = 12u16.min(area.height.saturating_sub(4));
+        let hx = (area.width.saturating_sub(hw)) / 2;
+        let hy = (area.height.saturating_sub(hh)) / 2;
 
-        // Draw semi-transparent backdrop
-        for ry in 0..h {
-            for rx in 0..w {
-                let idx = ((y + ry) * plane.width + x + rx) as usize;
+        for ry in hy..hy + hh {
+            for rx in hx..hx + hw {
+                let idx = (ry * plane.width + rx) as usize;
                 if idx < plane.cells.len() {
-                    let on_border = ry == 0 || ry == h - 1 || rx == 0 || rx == w - 1;
-                    let corner = (rx == 0 || rx == w - 1) && (ry == 0 || ry == h - 1);
-                    plane.cells[idx] = Cell {
-                        char: if corner {
-                            '+'
-                        } else if on_border {
-                            '#'
-                        } else {
-                            ' '
-                        },
-                        fg: self.theme.primary,
-                        bg: self.theme.surface_elevated,
-                        style: Styles::empty(),
-                        transparent: false,
-                        skip: false,
-                    };
+                    plane.cells[idx].bg = self.theme.surface_elevated;
+                    plane.cells[idx].transparent = false;
                 }
             }
         }
 
-        // Draw help text
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
+        for (ch, cx, cy) in corners.iter() {
+            let idx = (cy * plane.width + cx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = self.theme.outline;
+                plane.cells[idx].bg = self.theme.surface_elevated;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        for x in hx + 1..hx + hw - 1 {
+            let top = (hy * plane.width + x) as usize;
+            let bot = ((hy + hh - 1) * plane.width + x) as usize;
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = self.theme.outline;
+                plane.cells[top].bg = self.theme.surface_elevated;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = self.theme.outline;
+                plane.cells[bot].bg = self.theme.surface_elevated;
+            }
+        }
+        for y in hy + 1..hy + hh - 1 {
+            let left = (y * plane.width + hx) as usize;
+            let right = (y * plane.width + hx + hw - 1) as usize;
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = self.theme.outline;
+                plane.cells[left].bg = self.theme.surface_elevated;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = self.theme.outline;
+                plane.cells[right].bg = self.theme.surface_elevated;
+            }
+        }
+
+        let title = "Debug Overlay Help";
+        let tx = hx + (hw.saturating_sub(title.len() as u16)) / 2;
+        for (i, c) in title.chars().enumerate() {
+            let idx = ((hy + 1) * plane.width + tx + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.primary;
+                plane.cells[idx].style = Styles::BOLD;
+            }
+        }
+
         let shortcuts = [
             ("F12", "Toggle overlay"),
             (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Close overlay"),
-            (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+            (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
+            (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
+            (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
-            let row = y + 2 + i as u16;
-            let col = x + 2;
+            let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
-                let idx = (row * plane.width + col + j as u16) as usize;
+                let idx = (row * plane.width + hx + 2 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = self.theme.primary;
-                    plane.cells[idx].style = Styles::BOLD;
+                    plane.cells[idx].bg = self.theme.surface_elevated;
                 }
             }
             for (j, c) in desc.chars().enumerate() {
-                let idx = (row * plane.width + col + 6 + j as u16) as usize;
+                let idx = (row * plane.width + hx + 14 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = self.theme.fg;
+                    plane.cells[idx].bg = self.theme.surface_elevated;
                 }
             }
         }
@@ -178,9 +222,10 @@ impl Widget for DebugOverlayPanel {
         self.id = id;
     }
     fn area(&self) -> Rect {
-        Rect::new(0, 0, 80, 24)
+        self.area.get()
     }
     fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
         self.profiler.borrow_mut().set_area(Rect::new(0, 1, 25, 8));
         self.inspector.borrow_mut().set_area(Rect::new(26, 1, 25, 8));
         self.event_logger
@@ -191,11 +236,14 @@ impl Widget for DebugOverlayPanel {
         200
     }
     fn needs_render(&self) -> bool {
-        // Always re-render when visible so profiler metrics animate
-        true
+        self.dirty.get() || self.visible
     }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn mark_dirty(&mut self) {
+        self.dirty.set(true);
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty.set(false);
+    }
     fn focusable(&self) -> bool {
         true
     }
@@ -208,7 +256,50 @@ impl Widget for DebugOverlayPanel {
 
     fn render(&self, area: Rect) -> Plane {
         if !self.visible {
-            return Plane::new(0, area.width, area.height);
+            let mut plane = Plane::new(0, area.width, area.height);
+            plane.fill_bg(self.theme.bg);
+            for cell in plane.cells.iter_mut() {
+                cell.transparent = false;
+            }
+
+            let lines = [
+                "Debug Overlay Demo",
+                "",
+                "Press F12 to toggle the debug overlay panel.",
+                "",
+                &format!(
+                    "{}: cycle theme  |  {}: help  |  {}: quit",
+                    self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                    self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                    self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                ),
+            ];
+            let start_y = area.height.saturating_sub(lines.len() as u16) / 2;
+            for (i, line) in lines.iter().enumerate() {
+                let y = start_y + i as u16;
+                let x = (area.width.saturating_sub(line.len() as u16)) / 2;
+                for (j, c) in line.chars().enumerate() {
+                    let idx = (y * plane.width + x + j as u16) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = if i == 0 {
+                            self.theme.primary
+                        } else {
+                            self.theme.fg
+                        };
+                        plane.cells[idx].style = if i == 0 {
+                            Styles::BOLD
+                        } else {
+                            Styles::empty()
+                        };
+                    }
+                }
+            }
+
+            if self.show_help {
+                self.render_help_overlay(&mut plane, area);
+            }
+            return plane;
         }
 
         // Update profiler with mock metrics each frame
@@ -257,6 +348,10 @@ impl Widget for DebugOverlayPanel {
 
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 200;
+        plane.fill_bg(self.theme.bg);
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         for y in 0..area.height {
             for x in 0..area.width {
@@ -438,6 +533,7 @@ impl Widget for DebugOverlayPanel {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
+                self.dirty.set(true);
             }
             return true;
         }
@@ -445,6 +541,7 @@ impl Widget for DebugOverlayPanel {
         match key.code {
             KeyCode::F(12) => {
                 self.toggle();
+                self.dirty.set(true);
                 true
             }
             _ if self.keybindings.matches(actions::QUIT, &key) => {
@@ -453,14 +550,17 @@ impl Widget for DebugOverlayPanel {
             }
             _ if self.visible && self.keybindings.matches(actions::BACK, &key) => {
                 self.toggle();
+                self.dirty.set(true);
                 true
             }
             _ if self.keybindings.matches(actions::THEME, &key) => {
                 self.cycle_theme();
+                self.dirty.set(true);
                 true
             }
             _ if self.keybindings.matches(actions::HELP, &key) => {
                 self.show_help = true;
+                self.dirty.set(true);
                 true
             }
             _ => false,
@@ -474,6 +574,7 @@ impl Widget for DebugOverlayPanel {
 
         if self.visible && row == 0 && col >= self.area().width.saturating_sub(9) {
             self.toggle();
+            self.dirty.set(true);
             return true;
         }
         false
