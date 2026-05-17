@@ -202,6 +202,10 @@ impl Widget for RichTextApp {
         self.rich_text.on_theme_change(theme);
         self.dirty = true;
     }
+
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
 }
 
 fn main() -> std::io::Result<()> {

@@ -178,6 +178,10 @@ impl Widget for Table {
         self.search.on_theme_change(theme);
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.z_index = 10;

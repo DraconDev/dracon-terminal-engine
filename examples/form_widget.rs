@@ -190,6 +190,10 @@ impl Widget for FormApp {
         self.form.borrow_mut().on_theme_change(theme);
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let mut plane = self.form.borrow().render(area);
         for cell in plane.cells.iter_mut() {

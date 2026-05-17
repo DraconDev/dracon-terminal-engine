@@ -383,6 +383,10 @@ impl Widget for NotifierApp {
         self.notification_center.on_theme_change(theme);
         self.dirty = true;
     }
+
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
 }
 
 fn main() -> std::io::Result<()> {
