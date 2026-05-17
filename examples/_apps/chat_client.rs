@@ -1009,9 +1009,9 @@ impl ChatState {
             ("^/v", "Scroll messages"),
             ("Enter", "Send message"),
             ("Type", "Compose"),
-            (self.kb_config.get(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.kb_config.get(actions::HELP).unwrap_or("?"), "Toggle help"),
-            (self.kb_config.get(actions::QUIT).unwrap_or("q"), "Quit"),
+            (self.keybindings.display(actions::THEME).unwrap_or("?"), "Cycle theme"),
+            (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
+            (self.keybindings.display(actions::QUIT).unwrap_or("?"), "Quit"),
             ("Click", "Emoji / Send / Settings"),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
@@ -1021,6 +1021,7 @@ impl ChatState {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].bg = t.surface_elevated;
                 }
             }
             for (j, c) in desc.chars().enumerate() {
@@ -1028,6 +1029,7 @@ impl ChatState {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = t.fg;
+                    plane.cells[idx].bg = t.surface_elevated;
                 }
             }
         }
