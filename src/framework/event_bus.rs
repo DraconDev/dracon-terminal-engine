@@ -86,7 +86,7 @@ impl EventBus {
     pub fn new() -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
-            pending_tombstones: RefCell::new(HashSet::new()),
+            pending_tombstones: Rc::new(RefCell::new(HashSet::new())),
             trace: RefCell::new(false),
             history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
@@ -97,7 +97,7 @@ impl EventBus {
     pub fn with_trace() -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
-            pending_tombstones: RefCell::new(HashSet::new()),
+            pending_tombstones: Rc::new(RefCell::new(HashSet::new())),
             trace: RefCell::new(true),
             history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
