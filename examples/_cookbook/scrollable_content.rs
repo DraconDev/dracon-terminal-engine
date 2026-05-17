@@ -574,7 +574,9 @@ impl Widget for ScrollableContent {
                     true
                 }
                 MouseEventKind::ScrollDown | MouseEventKind::ScrollUp => {
-                    self.scroll.handle_mouse(kind, col, row)
+                    let handled = self.scroll.handle_mouse(kind, col, row);
+                    self.update_auto_scroll();
+                    handled
                 }
                 _ => true,
             }
@@ -583,7 +585,9 @@ impl Widget for ScrollableContent {
                 self.hovered_line = None;
                 self.dirty = true;
             }
-            self.scroll.handle_mouse(kind, col, row)
+            let handled = self.scroll.handle_mouse(kind, col, row);
+            self.update_auto_scroll();
+            handled
         }
     }
 }
@@ -710,6 +714,7 @@ fn main() -> Result<()> {
             if c.area.width != w || c.area.height != h {
                 c.set_area(Rect::new(0, 0, w, h));
             }
+            c.tick();
             if c.needs_render() {
                 ctx.add_plane(c.render(c.area));
                 c.clear_dirty();

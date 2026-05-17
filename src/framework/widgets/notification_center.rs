@@ -143,6 +143,12 @@ impl NotificationCenter {
         self.dirty = true;
     }
 
+    /// Removes all notifications.
+    pub fn clear_all(&mut self) {
+        self.notifications.borrow_mut().clear();
+        self.dirty = true;
+    }
+
     /// Returns the number of active notifications.
     pub fn len(&self) -> usize {
         self.notifications.borrow().len()
