@@ -254,6 +254,10 @@ impl Widget for DebugOverlayPanel {
         self.event_logger.borrow_mut().on_theme_change(theme);
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
         if !self.visible {
             let mut plane = Plane::new(0, area.width, area.height);
@@ -494,10 +498,10 @@ impl Widget for DebugOverlayPanel {
         // Status bar
         let status_y = plane.height.saturating_sub(1);
         let hint = format!("F12: toggle | {}: theme | {}: help | {}: dismiss | {}: quit",
-            self.keybindings.display(actions::THEME).unwrap_or("t"),
-            self.keybindings.display(actions::HELP).unwrap_or("?"),
+            self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+            self.keybindings.display(actions::HELP).unwrap_or("f1"),
             self.keybindings.display(actions::BACK).unwrap_or("esc"),
-            self.keybindings.display(actions::QUIT).unwrap_or("q"),
+            self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
         );
         for (i, c) in hint
             .chars()
