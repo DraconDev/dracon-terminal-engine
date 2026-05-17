@@ -2,18 +2,24 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use ratatui::layout::Rect;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::{Duration, Instant};
+
+const AUTO_INTERVAL: Duration = Duration::from_secs(3);
 
 struct NotifierApp {
     id: WidgetId,
     area: Rect,
     should_quit: Rc<AtomicBool>,
     theme: Theme,
-    notification_center: NotificationCenter,
+    notification_center: RefCell<NotificationCenter>,
     dirty: bool,
     keybindings: KeybindingSet,
     show_help: bool,
+    last_auto: RefCell<Instant>,
+    auto_kind_idx: Cell<usize>,
 }
 
 impl NotifierApp {
@@ -26,21 +32,45 @@ impl NotifierApp {
             area: Rect::default(),
             should_quit,
             theme,
-            notification_center: nc,
+            notification_center: RefCell::new(nc),
             dirty: true,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             show_help: false,
+            last_auto: RefCell::new(Instant::now()),
+            auto_kind_idx: Cell::new(0),
         }
     }
 
     fn trigger(&mut self, kind: NotificationKind) {
         match kind {
-            NotificationKind::Info => self.notification_center.info("Info", "This is an informational message."),
-            NotificationKind::Success => self.notification_center.success("Success", "Operation completed successfully!"),
-            NotificationKind::Warning => self.notification_center.warn("Warning", "Something might need your attention."),
-            NotificationKind::Error => self.notification_center.error("Error", "Something went wrong!"),
+            NotificationKind::Info => self.notification_center.borrow_mut().info("Info", "This is an informational message."),
+            NotificationKind::Success => self.notification_center.borrow_mut().success("Success", "Operation completed successfully!"),
+            NotificationKind::Warning => self.notification_center.borrow_mut().warn("Warning", "Something might need your attention."),
+            NotificationKind::Error => self.notification_center.borrow_mut().error("Error", "Something went wrong!"),
         }
         self.dirty = true;
+    }
+
+    fn clear_all(&mut self) {
+        self.notification_center.borrow_mut().clear_all();
+        self.dirty = true;
+    }
+
+    fn auto_notify(&self) {
+        let messages: [(&str, &str, NotificationKind); 8] = [
+            ("New email", "You have a new message from Alice.", NotificationKind::Info),
+            ("Build passed", "CI build #42 completed.", NotificationKind::Success),
+            ("Disk space", "Storage usage is at 85%.", NotificationKind::Warning),
+            ("Timeout", "Connection to server lost.", NotificationKind::Error),
+            ("Reminder", "Team standup in 5 minutes.", NotificationKind::Info),
+            ("Deployed", "v2.3.1 deployed to production.", NotificationKind::Success),
+            ("Memory", "Memory usage exceeds 90%.", NotificationKind::Warning),
+            ("Auth failed", "Invalid API key detected.", NotificationKind::Error),
+        ];
+        let idx = self.auto_kind_idx.get() % messages.len();
+        let (title, msg, kind) = messages[idx];
+        self.notification_center.borrow_mut().notify(title, msg, kind);
+        self.auto_kind_idx.set(idx + 1);
     }
 
     fn cycle_theme(&mut self) {
@@ -50,7 +80,7 @@ impl NotifierApp {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
-        self.notification_center.on_theme_change(&self.theme);
+        self.notification_center.borrow_mut().on_theme_change(&self.theme);
         self.dirty = true;
     }
 }
@@ -62,11 +92,24 @@ impl Widget for NotifierApp {
 
     fn set_area(&mut self, area: Rect) {
         self.area = area;
-        self.notification_center.set_area(Rect::new(0, 4, area.width, area.height.saturating_sub(4)));
+        self.notification_center.borrow_mut().set_area(Rect::new(0, 4, area.width, area.height.saturating_sub(4)));
     }
 
     fn needs_render(&self) -> bool {
-        self.dirty || self.notification_center.needs_render()
+        let now = Instant::now();
+        if now.duration_since(*self.last_auto.borrow()) >= AUTO_INTERVAL {
+            self.auto_notify();
+            *self.last_auto.borrow_mut() = now;
+        }
+        self.dirty || self.notification_center.borrow().needs_render()
+    }
+
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -75,8 +118,13 @@ impl Widget for NotifierApp {
 
         let t = &self.theme;
 
-        // Title
-        let title = "Notification Center Demo";
+        // Title + unread badge
+        let count = self.notification_center.borrow().len();
+        let title = if count > 0 {
+            format!("Notification Center [{}]", count)
+        } else {
+            "Notification Center".to_string()
+        };
         let tx = (area.width - title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = (2 * area.width + tx + i as u16) as usize;
@@ -89,7 +137,7 @@ impl Widget for NotifierApp {
 
         // Render the notification center widget
         let nc_area = Rect::new(0, 4, area.width, area.height.saturating_sub(4));
-        let nc_plane = self.notification_center.render(nc_area);
+        let nc_plane = self.notification_center.borrow().render(nc_area);
         for y in 0..nc_plane.height {
             for x in 0..nc_plane.width {
                 let src_idx = (y * nc_plane.width + x) as usize;
@@ -176,8 +224,8 @@ impl Widget for NotifierApp {
         }
 
         // Help text
-        let help = "Click a button or press the key to trigger a notification. Click a notification to dismiss it.";
-        let hx = (area.width - help.len() as u16) / 2;
+        let help = "Press i/s/w/e or click to trigger. Auto-generates every 3s. c to clear all.";
+        let hx = (area.width.saturating_sub(help.len() as u16)) / 2;
         let hy = btn_y + btn_h + 2;
         for (i, c) in help.chars().enumerate() {
             let idx = (hy * area.width + hx + i as u16) as usize;
@@ -192,7 +240,7 @@ impl Widget for NotifierApp {
         let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
         let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
         let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
-        let status = format!("{}: quit | {}: theme | {}: help | {}: back", kb_quit, kb_theme, kb_help, kb_back);
+        let status = format!("{}: quit | {}: theme | c: clear | {}: help | {}: back", kb_quit, kb_theme, kb_help, kb_back);
         let sy = area.height.saturating_sub(1);
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -207,7 +255,7 @@ impl Widget for NotifierApp {
         // Help overlay
         if self.show_help {
             let hw = 44u16.min(area.width.saturating_sub(4));
-            let hh = 12u16.min(area.height.saturating_sub(4));
+            let hh = 13u16.min(area.height.saturating_sub(4));
             let hx = (area.width - hw) / 2;
             let hy = (area.height - hh) / 2;
 
@@ -270,6 +318,7 @@ impl Widget for NotifierApp {
                 ("s", "Success notification"),
                 ("w", "Warning notification"),
                 ("e", "Error notification"),
+                ("c", "Clear all notifications"),
                 (self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T"), "Cycle theme"),
                 (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle help"),
                 (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
@@ -344,12 +393,16 @@ impl Widget for NotifierApp {
                 self.trigger(NotificationKind::Error);
                 true
             }
+            KeyCode::Char('c') if key.modifiers.is_empty() => {
+                self.clear_all();
+                true
+            }
             _ => false,
         }
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.notification_center.handle_mouse(kind, col, row) {
+        if self.notification_center.borrow_mut().handle_mouse(kind, col, row) {
             self.dirty = true;
             return true;
         }
@@ -380,7 +433,7 @@ impl Widget for NotifierApp {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.notification_center.on_theme_change(theme);
+        self.notification_center.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
