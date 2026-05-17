@@ -42,19 +42,24 @@ impl DirtyRegion {
         }
         let x = self.x.max(other.x);
         let y = self.y.max(other.y);
-        let width = (self.x + self.width).min(other.x + other.width) - x;
-        let height = (self.y + self.height).min(other.y + other.height) - y;
+        let right = (self.x + self.width).min(other.x + other.width);
+        let bottom = (self.y + self.height).min(other.y + other.height);
+        let width = right.saturating_sub(x);
+        let height = bottom.saturating_sub(y);
+        if width == 0 || height == 0 {
+            return None;
+        }
         Some(DirtyRegion::new(x, y, width, height))
     }
 
     /// Expands this region to include a point.
     pub fn expand(&mut self, x: u16, y: u16) {
-        let x2 = x.max(self.x + self.width);
-        let y2 = y.max(self.y + self.height);
+        let x2 = x.max(self.x.saturating_add(self.width));
+        let y2 = y.max(self.y.saturating_add(self.height));
         self.x = self.x.min(x);
         self.y = self.y.min(y);
-        self.width = x2 - self.x;
-        self.height = y2 - self.y;
+        self.width = x2.saturating_sub(self.x);
+        self.height = y2.saturating_sub(self.y);
     }
 }
 

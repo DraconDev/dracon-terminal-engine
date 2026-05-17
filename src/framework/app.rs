@@ -117,6 +117,8 @@ pub struct App {
     tick_count: u64,
     on_tick: RefCell<Option<TickCallback>>,
     widgets: RefCell<Vec<Box<dyn Widget>>>,
+    z_order_cache: RefCell<Vec<WidgetId>>,
+    z_order_dirty: RefCell<bool>,
     focus_manager: FocusManager,
     dirty_tracker: DirtyRegionTracker,
     animations: AnimationManager,
@@ -129,6 +131,21 @@ pub struct App {
 }
 
 impl App {
+    fn rebuild_z_order_cache(&self) {
+        if !*self.z_order_dirty.borrow() {
+            return;
+        }
+        let widgets = self.widgets.borrow();
+        let mut ids: Vec<(WidgetId, u16)> = widgets.iter().map(|w| (w.id(), w.z_index())).collect();
+        ids.sort_by_key(|(_, z)| *z);
+        *self.z_order_cache.borrow_mut() = ids.into_iter().map(|(id, _)| id).collect();
+        *self.z_order_dirty.borrow_mut() = false;
+    }
+
+    fn invalidate_z_order_cache(&self) {
+        *self.z_order_dirty.borrow_mut() = true;
+    }
+
     fn dispatch_key(&mut self, k: &crate::input::event::KeyEvent, running: &std::sync::atomic::AtomicBool) {
         if self.keybindings.matches(actions::QUIT, k) {
             running.store(false, Ordering::SeqCst);
@@ -197,17 +214,21 @@ impl App {
     }
 
     fn dispatch_mouse(&mut self, col: u16, row: u16, mouse_event: &crate::input::event::MouseEvent) {
+        self.rebuild_z_order_cache();
         let target_id = {
             let widgets = self.widgets.borrow();
-            let mut sorted: Vec<_> = widgets.iter().collect();
-            sorted.sort_by_key(|w| w.z_index());
-            sorted
-                .into_iter()
-                .find(|w| {
-                    let a = w.area();
-                    col >= a.x && col < a.x + a.width && row >= a.y && row < a.y + a.height
+            let cache = self.z_order_cache.borrow();
+            cache
+                .iter()
+                .find(|id| {
+                    if let Some(w) = widgets.iter().find(|w| w.id() == **id) {
+                        let a = w.area();
+                        col >= a.x && col < a.x + a.width && row >= a.y && row < a.y + a.height
+                    } else {
+                        false
+                    }
                 })
-                .map(|w| w.id())
+                .copied()
         };
         if let Some(id) = target_id {
             let old = self.focus_manager.focused();
@@ -269,6 +290,8 @@ impl App {
             tick_count: 0,
             on_tick: RefCell::new(None),
             widgets: RefCell::new(Vec::new()),
+            z_order_cache: RefCell::new(Vec::new()),
+            z_order_dirty: RefCell::new(true),
             focus_manager: FocusManager::new(),
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
@@ -313,6 +336,8 @@ impl App {
             tick_count: 0,
             on_tick: RefCell::new(None),
             widgets: RefCell::new(Vec::new()),
+            z_order_cache: RefCell::new(Vec::new()),
+            z_order_dirty: RefCell::new(true),
             focus_manager: FocusManager::new(),
             dirty_tracker: DirtyRegionTracker::new(),
             animations: AnimationManager::new(),
@@ -466,6 +491,7 @@ impl App {
         self.widgets.borrow_mut().push(widget);
         self.compositor.set_widget_count(self.widgets.borrow().len());
         self.focus_manager.register(id, focusable);
+        self.invalidate_z_order_cache();
 
         // Auto-focus first widget if nothing is focused yet
         if self.focus_manager.focused().is_none() && focusable {
@@ -497,6 +523,7 @@ impl App {
         self.compositor.set_widget_count(self.widgets.borrow().len());
         self.focus_manager.unregister(id);
         self.command_tracking.borrow_mut().remove(&id);
+        self.invalidate_z_order_cache();
     }
 
     /// Returns an immutable reference to a widget by ID.
@@ -597,10 +624,14 @@ impl App {
     fn render_dirty_widgets(&mut self) {
         #[cfg(feature = "tracing")]
         let _widget_span = tracing::debug_span!("widget_dispatch").entered();
+        self.rebuild_z_order_cache();
+        let cache = self.z_order_cache.borrow().clone();
         let mut widgets = self.widgets.borrow_mut();
-        let mut sorted: Vec<_> = widgets.iter_mut().collect();
-        sorted.sort_by_key(|w| w.z_index());
-        for w in sorted {
+        for id in cache {
+            let w = match widgets.iter_mut().find(|w| w.id() == id) {
+                Some(w) => w,
+                None => continue,
+            };
             if !w.needs_render() {
                 continue;
             }

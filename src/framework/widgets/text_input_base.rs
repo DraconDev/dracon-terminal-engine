@@ -106,10 +106,18 @@ impl BaseInput {
             Styles::empty()
         };
 
-        for (i, c) in display.chars().take(width.saturating_sub(2)).enumerate() {
+        let visible_start = self.scroll_offset;
+        let visible_chars: String = display.chars().skip(visible_start).take(width.saturating_sub(1)).collect();
+        let cursor_visual = {
+            let before: String = self.text.chars().take(self.cursor_pos).collect();
+            before.width()
+        };
+        let cursor_display_pos = cursor_visual.saturating_sub(visible_start);
+
+        for (i, c) in visible_chars.chars().enumerate() {
             let idx = i;
             if idx < plane.cells.len() {
-                let is_cursor = i == self.cursor_pos && !self.text.is_empty();
+                let is_cursor = i == cursor_display_pos && !self.text.is_empty();
                 plane.cells[idx] = Cell {
                     char: c,
                     fg: if is_cursor {
