@@ -124,9 +124,16 @@ struct StatsState {
 
 impl StatsState {
     fn new(base_id: WidgetId) -> Self {
-        Self {
-            grid: KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::from_env_or(Theme::default())),
-        }
+        let mut grid = KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::from_env_or(Theme::default()));
+        let mut pairs = std::collections::BTreeMap::new();
+        pairs.insert("Uptime".to_string(), "42h 17m".to_string());
+        pairs.insert("Requests".to_string(), "1.2M".to_string());
+        pairs.insert("Errors".to_string(), "23".to_string());
+        pairs.insert("Avg Latency".to_string(), "12ms".to_string());
+        pairs.insert("P99 Latency".to_string(), "89ms".to_string());
+        pairs.insert("Active Users".to_string(), "347".to_string());
+        grid.set_pairs(pairs);
+        Self { grid }
     }
 }
 
