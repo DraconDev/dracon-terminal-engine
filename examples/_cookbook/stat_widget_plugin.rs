@@ -7,8 +7,13 @@
 //! with a value and color-coded border.
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::widget::WidgetId;
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
+use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 // ============================================================================
 // PLUGIN: StatWidget  -  dynamically registered and loaded
@@ -165,10 +170,12 @@ struct PluginLoader {
     show_help: bool,
     dirty: bool,
     theme: Theme,
+    should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
 }
 
 impl PluginLoader {
-    fn new(theme: Theme) -> Self {
+    fn new(theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         let mut registry = PluginRegistry::new();
 
         // Register the StatWidget plugin factory
@@ -190,6 +197,8 @@ impl PluginLoader {
             show_help: false,
             dirty: true,
             theme,
+            should_quit,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
