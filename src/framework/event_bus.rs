@@ -37,7 +37,7 @@
 
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -69,7 +69,10 @@ type EventCallback = Rc<dyn Fn(&dyn Any) + 'static>;
 #[derive(Default)]
 pub struct EventBus {
     /// Map from TypeId to list of callbacks for that event type.
+    /// `None` entries are tombstones from subscribe_once removals.
     subscribers: RefCell<HashMap<TypeId, Vec<Option<EventCallback>>>>,
+    /// Indices of subscribe_once callbacks that have fired and need tombstoning.
+    pending_tombstones: RefCell<HashSet<(TypeId, usize)>>,
     /// Optional trace logging for debugging.
     trace: RefCell<bool>,
     /// Recent event history for debugging.
@@ -83,6 +86,7 @@ impl EventBus {
     pub fn new() -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
+            pending_tombstones: RefCell::new(HashSet::new()),
             trace: RefCell::new(false),
             history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
@@ -93,6 +97,7 @@ impl EventBus {
     pub fn with_trace() -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
+            pending_tombstones: RefCell::new(HashSet::new()),
             trace: RefCell::new(true),
             history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
@@ -148,6 +153,9 @@ impl EventBus {
 
         self.record_event(&event);
 
+        // Apply any pending tombstones from previous subscribe_once firings
+        self.apply_pending_tombstones(type_id);
+
         if *self.trace.borrow() {
             let count = self
                 .subscribers
@@ -174,13 +182,35 @@ impl EventBus {
             callback(&event);
         }
 
-        self.compact_tombstones::<E>();
+        // Apply tombstones that were queued during dispatch and compact
+        self.apply_pending_tombstones(type_id);
+        self.compact_tombstones(type_id);
     }
 
-    /// Removes tombstoned (None) entries from the subscriber list for type E.
-    /// Called after publish dispatch to clean up subscribe_once removals.
-    fn compact_tombstones<E: Any>(&self) {
-        let type_id = TypeId::of::<E>();
+    /// Applies pending tombstones for a given type_id.
+    fn apply_pending_tombstones(&self, type_id: TypeId) {
+        let mut pending = self.pending_tombstones.borrow_mut();
+        if pending.is_empty() {
+            return;
+        }
+        let mut subs = self.subscribers.borrow_mut();
+        let to_remove: Vec<usize> = pending
+            .iter()
+            .filter(|(tid, _)| *tid == type_id)
+            .map(|(_, idx)| *idx)
+            .collect();
+        for idx in to_remove {
+            pending.remove(&(type_id, idx));
+            if let Some(list) = subs.get_mut(&type_id) {
+                if idx < list.len() {
+                    list[idx] = None;
+                }
+            }
+        }
+    }
+
+    /// Removes tombstoned (None) entries from the subscriber list.
+    fn compact_tombstones(&self, type_id: TypeId) {
         let mut subs = self.subscribers.borrow_mut();
         if let Some(list) = subs.get_mut(&type_id) {
             let has_tombstones = list.iter().any(|c| c.is_none());
@@ -251,11 +281,12 @@ impl EventBus {
     {
         let type_id = TypeId::of::<E>();
         let fired = Rc::new(std::cell::RefCell::new(false));
+        let pending = Rc::clone(&self.pending_tombstones);
 
         let mut subs = self.subscribers.borrow_mut();
         let list = subs.entry(type_id).or_default();
         let id = SubscriptionId(list.len());
-        let id_for_tomb = id;
+        let idx = id.0;
 
         let wrapped: EventCallback = Rc::new(move |any_event| {
             if *fired.borrow() {
@@ -264,11 +295,9 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 callback(event.clone());
-                // Note: cannot call unsubscribe() here because publish() holds
-                // an immutable borrow on the subscriber list via RefCell.
-                // Instead, the tombstone is applied after publish() completes
-                // via compact_tombstones. The `fired` flag prevents re-firing.
-                drop(id_for_tomb);
+                // Queue tombstone instead of calling unsubscribe — avoids
+                // RefCell borrow conflict during publish dispatch.
+                pending.borrow_mut().insert((type_id, idx));
             }
         });
 
@@ -305,13 +334,12 @@ impl EventBus {
     {
         let type_id = TypeId::of::<E>();
         let fired = Rc::new(std::cell::RefCell::new(false));
+        let pending = Rc::clone(&self.pending_tombstones);
 
-        // Capture self pointer for unsubscription
-        let bus = self as *const EventBus;
         let mut subs = self.subscribers.borrow_mut();
         let list = subs.entry(type_id).or_default();
         let id = SubscriptionId(list.len());
-        let id_clone = id;
+        let idx = id.0;
 
         let wrapped: EventCallback = Rc::new(move |any_event| {
             if *fired.borrow() {
@@ -320,16 +348,9 @@ impl EventBus {
             if let Some(event) = any_event.downcast_ref::<E>() {
                 *fired.borrow_mut() = true;
                 let event = event.clone();
-                // SAFETY: Same invariants as sync `subscribe_once` — `bus` is a raw
-                // pointer captured at subscribe time. The pointer is valid as long as the
-                // EventBus outlives all subscriptions. Callers must ensure the bus is not
-                // dropped while callbacks are still queued or executing.
-                // RefCell borrow is released before callbacks are invoked.
-                unsafe {
-                    if let Some(bus) = bus.as_ref() {
-                        bus.unsubscribe::<E>(id_clone);
-                    }
-                }
+                // Queue tombstone instead of calling unsubscribe — avoids
+                // RefCell borrow conflict during publish dispatch.
+                pending.borrow_mut().insert((type_id, idx));
                 // Spawn the async callback
                 let cb = callback.clone();
                 std::thread::spawn(move || {
@@ -338,7 +359,7 @@ impl EventBus {
             }
         });
 
-        list.push(wrapped);
+        list.push(Some(wrapped));
 
         if *self.trace.borrow() {
             eprintln!(
@@ -357,7 +378,7 @@ impl EventBus {
         self.subscribers
             .borrow()
             .get(&type_id)
-            .map(|v| v.len())
+            .map(|v| v.iter().filter(|c| c.is_some()).count())
             .unwrap_or(0)
     }
 
