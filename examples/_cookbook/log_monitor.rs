@@ -476,7 +476,7 @@ impl Widget for LogMonitor {
                 self.clear();
                 true
             }
-            KeyCode::Char('r') => {
+            _ if self.keybindings.matches(actions::REFRESH, &key) => {
                 self.auto_scroll = true;
                 self.log_viewer.auto_scroll = true;
                 self.dirty = true;

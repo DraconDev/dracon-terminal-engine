@@ -331,19 +331,26 @@ impl Widget for MenuApp {
             }
         }
 
+        let mut toast_y = 1u16;
         for toast in &self.toasts {
-            if !toast.is_expired() {
-                let tp = toast.render(Rect::new(0, 0, area.width, 1));
-                for (y, row) in tp.cells.chunks(tp.width as usize).enumerate() {
-                    for (x, c) in row.iter().enumerate() {
+            if toast.is_expired() {
+                continue;
+            }
+            let tp = toast.render(Rect::new(0, 0, area.width, 1));
+            for x in 0..tp.width as usize {
+                if x < plane.cells.len() && x < area.width as usize {
+                    let src_idx = x;
+                    let dst_idx = (toast_y as usize * area.width as usize + x) as usize;
+                    if src_idx < tp.cells.len() && dst_idx < plane.cells.len() {
+                        let c = &tp.cells[src_idx];
                         if !c.transparent {
-                            let idx = (y as u16 * area.width + x as u16) as usize;
-                            if idx < plane.cells.len() {
-                                plane.cells[idx] = *c;
-                            }
+                            plane.cells[dst_idx] = *c;
                         }
                     }
                 }
+            }
+            toast_y = toast_y.saturating_add(1);
+            if toast_y >= area.height.saturating_sub(2) {
                 break;
             }
         }
