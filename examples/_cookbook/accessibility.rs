@@ -12,8 +12,10 @@
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::visuals::accessibility::{Accessibility, Role};
+use std::cell::RefCell;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 /// A simple accessible button widget.
 struct AccessibleButton {
@@ -292,6 +294,8 @@ struct AccessibilityDemo {
     cancel_btn: AccessibleButton,
     notifications_toggle: AccessibleToggle,
     sound_toggle: AccessibleToggle,
+    toast_msg: RefCell<Option<String>>,
+    toast_time: RefCell<Option<Instant>>,
 }
 
 impl AccessibilityDemo {
@@ -318,6 +322,8 @@ impl AccessibilityDemo {
                 false,
                 theme,
             ),
+            toast_msg: RefCell::new(None),
+            toast_time: RefCell::new(None),
         }
     }
 }

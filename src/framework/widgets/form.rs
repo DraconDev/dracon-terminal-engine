@@ -526,4 +526,59 @@ mod tests {
         assert!(rule.validate("user@example.com").is_none());
         assert!(rule.validate("bad").is_some());
     }
+
+    #[test]
+    fn test_field_count() {
+        let form = Form::new(WidgetId::new(1))
+            .add_field("A")
+            .add_field("B")
+            .add_field("C");
+        assert_eq!(form.field_count(), 3);
+    }
+
+    #[test]
+    fn test_is_field_valid_no_rules() {
+        let form = Form::new(WidgetId::new(1))
+            .add_field("Name");
+        assert!(form.is_field_valid(0));
+    }
+
+    #[test]
+    fn test_is_field_valid_required_empty() {
+        let form = Form::new(WidgetId::new(1))
+            .add_field("Name")
+            .with_validation(0, vec![ValidationRule::Required]);
+        assert!(!form.is_field_valid(0));
+    }
+
+    #[test]
+    fn test_is_field_valid_required_filled() {
+        let mut form = Form::new(WidgetId::new(1))
+            .add_field("Name")
+            .with_validation(0, vec![ValidationRule::Required]);
+        form.set_field_value(0, "Alice");
+        assert!(form.is_field_valid(0));
+    }
+
+    #[test]
+    fn test_is_field_valid_out_of_bounds() {
+        let form = Form::new(WidgetId::new(1)).add_field("A");
+        assert!(!form.is_field_valid(99));
+    }
+
+    #[test]
+    fn test_has_field_error() {
+        let mut form = Form::new(WidgetId::new(1))
+            .add_field("Name")
+            .with_validation(0, vec![ValidationRule::Required]);
+        assert!(!form.has_field_error(0));
+        form.validate_field(0);
+        assert!(form.has_field_error(0));
+    }
+
+    #[test]
+    fn test_has_field_error_out_of_bounds() {
+        let form = Form::new(WidgetId::new(1)).add_field("A");
+        assert!(!form.has_field_error(99));
+    }
 }
