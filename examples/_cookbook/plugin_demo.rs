@@ -200,7 +200,11 @@ impl Widget for PluginDemoApp {
         }
 
         // Status bar
-        let status = "Ctrl+T: theme | 1-4: refresh stat | Esc: quit | Click: spawn plugin";
+        let status = format!("{}: theme | 1-4: refresh stat | {}: help | {}: quit | Click: spawn plugin",
+            self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+            self.keybindings.display(actions::HELP).unwrap_or("f1"),
+            self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+        );
         for x in 0..area.width {
             let idx = ((area.height - 1) * area.width + x) as usize;
             if idx < plane.cells.len() {
@@ -332,10 +336,10 @@ impl Widget for PluginDemoApp {
 
             let shortcuts = [
                 ("1-4", "Refresh stat widget"),
-                ("Ctrl+T", "Cycle theme"),
-                ("F1 / ?", "Toggle help"),
-                ("Esc", "Dismiss help"),
-                ("Ctrl+Q", "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
+                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
@@ -358,68 +362,69 @@ impl Widget for PluginDemoApp {
     }
 
     fn handle_key(&mut self, key: &KeyEvent) -> bool {
-        use KeyCode::*;
         if key.kind != KeyEventKind::Press {
             return false;
         }
 
-        if let F(1) | Char('?') = key.code {
-            self.show_help = !self.show_help;
-            self.dirty = true;
-            return true;
-        }
-        if let Esc = key.code {
-            if self.show_help {
+        if self.show_help {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
             }
+            return true;
         }
 
-        if let Char('t') = key.code {
-            if key.modifiers.contains(KeyModifiers::CONTROL) {
-                self.cycle_theme();
-                for w in &mut self.stat_widgets {
-                    w.on_theme_change(&self.theme);
-                }
-                return true;
+        if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            self.cycle_theme();
+            for w in &mut self.stat_widgets {
+                w.on_theme_change(&self.theme);
             }
+            return true;
+        }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
         }
 
         // Refresh individual stats (simulates plugin refresh)
-        if let Char('1') = key.code {
-            self.stat_widgets[0] = self.registry.read().unwrap()
-                .create("stat_cpu", WidgetId::new(1), self.theme)
-                .unwrap();
-            self.dirty = true;
-            return true;
+        use KeyCode::*;
+        match key.code {
+            Char('1') => {
+                self.stat_widgets[0] = self.registry.read().unwrap()
+                    .create("stat_cpu", WidgetId::new(1), self.theme)
+                    .unwrap();
+                self.dirty = true;
+                true
+            }
+            Char('2') => {
+                self.stat_widgets[1] = self.registry.read().unwrap()
+                    .create("stat_mem", WidgetId::new(2), self.theme)
+                    .unwrap();
+                self.dirty = true;
+                true
+            }
+            Char('3') => {
+                self.stat_widgets[2] = self.registry.read().unwrap()
+                    .create("stat_disk", WidgetId::new(3), self.theme)
+                    .unwrap();
+                self.dirty = true;
+                true
+            }
+            Char('4') => {
+                self.stat_widgets[3] = self.registry.read().unwrap()
+                    .create("stat_net", WidgetId::new(4), self.theme)
+                    .unwrap();
+                self.dirty = true;
+                true
+            }
+            _ => false,
         }
-        if let Char('2') = key.code {
-            self.stat_widgets[1] = self.registry.read().unwrap()
-                .create("stat_mem", WidgetId::new(2), self.theme)
-                .unwrap();
-            self.dirty = true;
-            return true;
-        }
-        if let Char('3') = key.code {
-            self.stat_widgets[2] = self.registry.read().unwrap()
-                .create("stat_disk", WidgetId::new(3), self.theme)
-                .unwrap();
-            self.dirty = true;
-            return true;
-        }
-        if let Char('4') = key.code {
-            self.stat_widgets[3] = self.registry.read().unwrap()
-                .create("stat_net", WidgetId::new(4), self.theme)
-                .unwrap();
-            self.dirty = true;
-            return true;
-        }
-
-        if key.code == Esc {
-            return true; // Handled by main loop
-        }
-        false
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
@@ -482,11 +487,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env_theme = Theme::from_env_or(Theme::nord());
     let theme = env_theme.clone();
 
-    let app = PluginDemoApp::new(theme);
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+
+    let app = PluginDemoApp::new(theme, should_quit);
 
     App::new()?
         .title("Plugin Demo")
+        .theme(env_theme)
         .add_widget(Box::new(app), Rect::new(0, 0, 80, 24))
+        .on_tick(move |ctx, _| {
+            if quit_check.load(Ordering::SeqCst) {
+                ctx.stop();
+            }
+        })
         .run();
 
     Ok(())

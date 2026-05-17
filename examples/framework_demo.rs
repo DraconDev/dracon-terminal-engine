@@ -244,11 +244,12 @@ fn main() -> std::io::Result<()> {
 
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
     let mut app = App::new()?.title("Framework Demo").fps(30).theme(Theme::from_env_or(Theme::cyberpunk()));
     app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0), Theme::from_env_or(Theme::cyberpunk()))), Rect::new(0, 0, w, h));
     app.on_input(move |key| {
-            if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) && key.kind == KeyEventKind::Press {
+            if key.kind == KeyEventKind::Press && keybindings.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
                 true
             } else {
