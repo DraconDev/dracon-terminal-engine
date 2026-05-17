@@ -6,6 +6,7 @@
 use unicode_width::UnicodeWidthStr;
 
 use crate::compositor::{Color, Plane};
+use crate::framework::theme::Theme;
 
 /// The current phase of a drag operation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -60,13 +61,19 @@ impl DragGhost {
     }
 
     /// Renders the ghost into a `Plane` positioned at `(x, y)` with z-index 9000.
+    /// Uses the provided theme for colors, falling back to ANSI defaults if no theme given.
     pub fn render(&self, x: u16, y: u16) -> Plane {
+        self.render_with_theme(x, y, None)
+    }
+
+    /// Renders the ghost into a `Plane` using the provided theme colors.
+    pub fn render_with_theme(&self, x: u16, y: u16, theme: Option<&Theme>) -> Plane {
         let mut plane = Plane::new(9999, self.width, self.height);
         plane.set_z_index(9000);
         plane.set_absolute_position(x, y);
 
-        let bg = Color::Ansi(236);
-        let fg = Color::Ansi(250);
+        let bg = theme.map(|t| t.surface_elevated).unwrap_or(Color::Ansi(236));
+        let fg = theme.map(|t| t.fg).unwrap_or(Color::Ansi(250));
 
         for i in 0..(self.width * self.height) as usize {
             if i < plane.cells.len() {
