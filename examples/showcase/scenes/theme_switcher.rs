@@ -166,17 +166,17 @@ impl Scene for ThemeSwitcherScene {
         let px = 2u16;
 
         // Render preview widgets
-        let mut cb_plane = self.checkbox.render(Rect::new(px, preview_y + 2, preview_w, 1));
-        blit_to(&mut plane, &mut cb_plane, px as usize, (preview_y + 2) as usize);
+        let cb_plane = self.checkbox.render(Rect::new(px, preview_y + 2, preview_w, 1));
+        blit_to(&mut plane, &cb_plane, px as usize, (preview_y + 2) as usize);
 
-        let mut btn_plane = self.button.render(Rect::new(px + preview_w + 1, preview_y + 2, preview_w, 1));
-        blit_to(&mut plane, &mut btn_plane, (px + preview_w + 1) as usize, (preview_y + 2) as usize);
+        let btn_plane = self.button.render(Rect::new(px + preview_w + 1, preview_y + 2, preview_w, 1));
+        blit_to(&mut plane, &btn_plane, (px + preview_w + 1) as usize, (preview_y + 2) as usize);
 
-        let mut gauge_plane = self.gauge.render(Rect::new(px, preview_y + 4, preview_w * 2, 2));
-        blit_to(&mut plane, &mut gauge_plane, px as usize, (preview_y + 4) as usize);
+        let gauge_plane = self.gauge.render(Rect::new(px, preview_y + 4, preview_w * 2, 2));
+        blit_to(&mut plane, &gauge_plane, px as usize, (preview_y + 4) as usize);
 
-        let mut badge_plane = self.badge.render(Rect::new(px + preview_w * 2 + 2, preview_y + 2, preview_w, 1));
-        blit_to(&mut plane, &mut badge_plane, (px + preview_w * 2 + 2) as usize, (preview_y + 2) as usize);
+        let badge_plane = self.badge.render(Rect::new(px + preview_w * 2 + 2, preview_y + 2, preview_w, 1));
+        blit_to(&mut plane, &badge_plane, (px + preview_w * 2 + 2) as usize, (preview_y + 2) as usize);
 
         // Footer
         let footer_y = area.height.saturating_sub(1);

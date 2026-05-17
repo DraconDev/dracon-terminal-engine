@@ -66,7 +66,7 @@ impl PoolDemo {
     }
 
     fn auto_tick(&mut self) {
-        if self.tick_count % 5 != 0 {
+        if !self.tick_count.is_multiple_of(5) {
             return;
         }
         if self.held_cells.is_empty() {
@@ -200,7 +200,7 @@ impl Widget for PoolDemo {
                 plane.cells[idx].transparent = false;
             }
             for i in 0..bar_width {
-                let idx = (bar_y * area.width + bar_x + 1 + i as u16) as usize;
+                let idx = (bar_y * area.width + bar_x + 1 + i) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].transparent = false;
                     if usize::from(i) < usize::from(filled_len) {

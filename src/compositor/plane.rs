@@ -434,7 +434,9 @@ impl Plane {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```no_run
+    /// use dracon_terminal_engine::compositor::Plane;
+    /// use ratatui::layout::Rect;
     /// let full_plane = Plane::new(0, 80, 24);
     /// // ... fill full_plane with content ...
     /// let sub = full_plane.crop(Rect::new(10, 5, 20, 10));

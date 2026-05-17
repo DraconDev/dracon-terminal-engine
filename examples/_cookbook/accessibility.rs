@@ -347,7 +347,7 @@ impl Widget for AccessibilityDemo {
     }
 
     fn needs_render(&self) -> bool {
-        let expired = self.toast_time.borrow().map_or(false, |t| t.elapsed() >= Duration::from_secs(2));
+        let expired = self.toast_time.borrow().is_some_and(|t| t.elapsed() >= Duration::from_secs(2));
         if expired && self.toast_msg.borrow().is_some() {
             *self.toast_msg.borrow_mut() = None;
             *self.toast_time.borrow_mut() = None;

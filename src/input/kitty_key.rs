@@ -108,11 +108,11 @@ fn map_kitty_pua(code: u32) -> KeyCode {
         57347 => KeyCode::Home,
         57348 => KeyCode::End,
         _ => {
-            // TODO: Map unknown PUA codepoints to KeyCode::Unsupported once that variant exists.
+            // Unknown PUA codepoint — no meaningful key mapping.
             // KeyCode::Null should only be used for the actual null key (code 0).
-            // Unknown PUA codes have no meaningful mapping and should not produce Null events
-            // which may be interpreted as valid input by widgets.
-            KeyCode::Null
+            // Using Unsupported preserves the raw codepoint for debugging without
+            // producing Null events that widgets may interpret as valid input.
+            KeyCode::Unsupported(code)
         }
     }
 }

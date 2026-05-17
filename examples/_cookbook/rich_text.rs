@@ -257,7 +257,7 @@ impl Widget for RichTextApp {
                 let cell = &rt_plane.cells[src_idx];
                 if cell.transparent { continue; }
                 let abs_x = 2 + col as u16;
-                let abs_y = content_y + row as u16;
+                let abs_y = content_y + row;
                 let dest_idx = (abs_y * area.width + abs_x) as usize;
                 if dest_idx < plane.cells.len() {
                     plane.cells[dest_idx] = *cell;

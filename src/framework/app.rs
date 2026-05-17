@@ -102,6 +102,27 @@ impl<'a> DerefMut for WidgetRefMut<'a> {
     }
 }
 
+/// The main application struct.
+///
+/// Owns the terminal, compositor, input parser, and all registered widgets.
+/// Runs the event loop and manages rendering, focus, and theme propagation.
+///
+/// ## Borrow Safety
+///
+/// The `widgets` field uses `RefCell<Vec<Box<dyn Widget>>>` to allow
+/// immutable iteration during render (which takes `&self`) and mutable
+/// iteration during event dispatch (which also takes `&self` via RefCell).
+///
+/// **The framework guarantees borrow safety** by never nesting mutable borrows:
+/// - `borrow()` (immutable) is used during render, z-order queries, and widget lookups
+/// - `borrow_mut()` (mutable) is used during event dispatch, tick callbacks, and add/remove
+/// - The event loop processes one phase at a time: input → tick → render
+/// - `on_tick` and `on_input` callbacks receive a `Ctx` that does NOT expose widgets directly
+///
+/// **Panic scenario** (currently impossible but worth documenting): if a user's
+/// `on_tick` or `on_input` closure somehow obtained a `WidgetRef`/`WidgetRefMut`
+/// and held it across a framework borrow, the RefCell would panic. The wrapper
+/// types prevent this by tying borrows to the call scope.
 pub struct App {
     terminal: Terminal<io::Stdout>,
     compositor: Compositor,

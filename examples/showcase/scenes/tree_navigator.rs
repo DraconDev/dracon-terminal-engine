@@ -118,14 +118,14 @@ impl Scene for TreeNavigatorScene {
         // Breadcrumbs
         let bc_height = 2u16;
         let bc_area = Rect::new(0, 1, area.width, bc_height);
-        let mut bc_plane = self.breadcrumbs.render(bc_area);
-        blit_to(&mut plane, &mut bc_plane, 0, 1);
+        let bc_plane = self.breadcrumbs.render(bc_area);
+        blit_to(&mut plane, &bc_plane, 0, 1);
 
         // Tree (left half)
         let split_x = area.width / 2;
         let tree_area = Rect::new(0, 4, split_x, area.height.saturating_sub(8));
-        let mut tree_plane = self.tree.render(tree_area);
-        blit_to(&mut plane, &mut tree_plane, 0, 4);
+        let tree_plane = self.tree.render(tree_area);
+        blit_to(&mut plane, &tree_plane, 0, 4);
 
         // Divider
         for y in 4..area.height.saturating_sub(4) {

@@ -28,6 +28,9 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
 /// Skips transparent cells and cells with '\0' character.
 /// Bounds-checks to prevent out-of-range writes.
 pub fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) {
+    if dest.cells.is_empty() || src.cells.is_empty() {
+        return;
+    }
     for i in 0..src.cells.len() {
         let cell = &src.cells[i];
         if cell.char == '\0' || cell.transparent {

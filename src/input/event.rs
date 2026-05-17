@@ -125,6 +125,12 @@ pub enum KeyCode {
     Media(MediaKeyCode),
     /// A modifier key.
     Modifier(ModifierKeyCode),
+    /// An unknown or unsupported key code.
+    ///
+    /// Used for PUA (Private Use Area) codepoints that don't map to any
+    /// known key. The raw codepoint value is preserved for debugging.
+    /// Widgets should ignore this variant — it does not represent valid input.
+    Unsupported(u32),
 }
 
 /// A media key code.
@@ -327,6 +333,7 @@ fn format_key(key: &KeyEvent) -> String {
         KeyCode::F(n) => return format!("{out}f{n}"),
         KeyCode::Media(media) => return format!("{out}media::{media:?}"),
         KeyCode::Modifier(modifier) => return format!("{out}modifier::{modifier:?}"),
+        KeyCode::Unsupported(_) => return format!("{out}unsupported"),
     });
 
     match key.kind {

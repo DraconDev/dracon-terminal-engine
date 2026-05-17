@@ -33,11 +33,9 @@ fn main() -> std::io::Result<()> {
             }
             if key.kind != KeyEventKind::Press { return false; }
             match key.code {
-                KeyCode::Esc => {
-                    if show_help_input.load(Ordering::SeqCst) {
-                        show_help_input.store(false, Ordering::SeqCst);
-                        true
-                    } else { false }
+                KeyCode::Esc if show_help_input.load(Ordering::SeqCst) => {
+                    show_help_input.store(false, Ordering::SeqCst);
+                    true
                 }
                 _ => false,
             }

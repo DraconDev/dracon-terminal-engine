@@ -142,7 +142,7 @@ impl Calendar {
     /// Returns the first day of the displayed month.
     fn first_day_of_month(&self) -> NaiveDate {
         NaiveDate::from_ymd_opt(self.year, self.month as u32, 1)
-            .unwrap_or_else(|| NaiveDate::from_ymd_opt(2024, 1, 1).unwrap())
+            .unwrap_or_else(|| NaiveDate::from_ymd_opt(2024, 1, 1).expect("hardcoded date 2024-01-01 is always valid"))
     }
 
     /// Returns the days in the current month.

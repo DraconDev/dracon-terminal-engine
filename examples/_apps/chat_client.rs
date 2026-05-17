@@ -22,7 +22,7 @@ const API_BASE: &str = "https://jsonplaceholder.typicode.com";
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Modal, Toast, ToastKind};
@@ -98,7 +98,6 @@ struct ChatState {
     dirty: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
     keybindings: KeybindingSet,
-    kb_config: KeybindingConfig,
     // Async state for loading posts
     is_loading: bool,
     loading_error: Option<String>,
@@ -144,7 +143,6 @@ impl ChatState {
             dirty: true,
             zones: RefCell::new(ScopedZoneRegistry::new()),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
-            kb_config: resolve_keybindings(),
             // Async state for loading
             is_loading: true, // Start loading immediately
             loading_error: None,

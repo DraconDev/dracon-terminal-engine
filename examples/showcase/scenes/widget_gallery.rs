@@ -183,7 +183,7 @@ impl Scene for WidgetGalleryScene {
                     slot, widget_area.x, widget_area.y, widget_area.width, widget_area.height,
                 );
 
-                let mut w_plane = match slot {
+                let w_plane = match slot {
                     0 => self.checkbox.render(widget_area),
                     1 => self.radio.render(widget_area),
                     2 => self.toggle.render(widget_area),
@@ -198,7 +198,7 @@ impl Scene for WidgetGalleryScene {
                     11 => self.tags_input.render(widget_area),
                     _ => Plane::new(0, 0, 0),
                 };
-                blit_to(&mut plane, &mut w_plane, widget_area.x as usize, widget_area.y as usize);
+                blit_to(&mut plane, &w_plane, widget_area.x as usize, widget_area.y as usize);
 
                 let state_y = widget_area.y + widget_area.height + 1;
                 if state_y < rect.y + rect.height - 1 {

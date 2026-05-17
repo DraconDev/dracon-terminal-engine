@@ -27,7 +27,7 @@
 //! save = "ctrl+s"
 //! ```
 
-use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MediaKeyCode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::RwLock;
@@ -240,12 +240,12 @@ impl KeybindingConfig {
             "kp7" => KeyCode::Char('7'),
             "kp8" => KeyCode::Char('8'),
             "kp9" => KeyCode::Char('9'),
-            // Media keys — placeholder Char mappings until dedicated KeyCode variants are added
-            "media_play" => KeyCode::Char('\u{10A5F}'),  // TODO: replace with KeyCode::MediaPlay
-            "media_pause" => KeyCode::Char('\u{23F8}'),  // TODO: replace with KeyCode::MediaPause
-            "media_stop" => KeyCode::Char('\u{23F9}'),   // TODO: replace with KeyCode::MediaStop
-            "media_next" => KeyCode::Char('\u{23ED}'),   // TODO: replace with KeyCode::MediaNext
-            "media_prev" => KeyCode::Char('\u{23EE}'),   // TODO: replace with KeyCode::MediaPrev
+            // Media keys — proper KeyCode::Media variants
+            "media_play" => KeyCode::Media(MediaKeyCode::Play),
+            "media_pause" => KeyCode::Media(MediaKeyCode::Pause),
+            "media_stop" => KeyCode::Media(MediaKeyCode::Stop),
+            "media_next" => KeyCode::Media(MediaKeyCode::TrackNext),
+            "media_prev" => KeyCode::Media(MediaKeyCode::TrackPrevious),
             s if s.len() == 1 => {
                 let ch = s.chars().next()?;
                 KeyCode::Char(ch)

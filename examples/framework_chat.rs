@@ -79,11 +79,9 @@ fn main() -> std::io::Result<()> {
             }
             if key.kind != KeyEventKind::Press { return false; }
             match key.code {
-                KeyCode::Esc => {
-                    if show_help_input.load(Ordering::SeqCst) {
-                        show_help_input.store(false, Ordering::SeqCst);
-                        true
-                    } else { false }
+                KeyCode::Esc if show_help_input.load(Ordering::SeqCst) => {
+                    show_help_input.store(false, Ordering::SeqCst);
+                    true
                 }
                 _ => false,
             }
@@ -185,7 +183,7 @@ fn main() -> std::io::Result<()> {
                 let help_title = "Framework Chat Help";
                 let tx = (hw - help_title.len() as u16) / 2;
                 for (i, c) in help_title.chars().enumerate() {
-                    let idx = (1 * hw + tx + i as u16) as usize;
+                    let idx = (hw + tx + i as u16) as usize;
                     if idx < help_plane.cells.len() {
                         help_plane.cells[idx].char = c;
                         help_plane.cells[idx].fg = theme.primary;

@@ -179,7 +179,7 @@ impl Scene for FormDemoScene {
             let widget_area = Rect::new(widget_x, y, widget_w, 1);
 
             if widget_area.width > 0 {
-                let mut w_plane = match field_id {
+                let w_plane = match field_id {
                     FIELD_USERNAME => self.username.render(widget_area),
                     FIELD_EMAIL => self.email.render(widget_area),
                     FIELD_PASSWORD => self.password.render(widget_area),
@@ -188,7 +188,7 @@ impl Scene for FormDemoScene {
                     FIELD_SUBMIT => self.submit.render(widget_area),
                     _ => Plane::new(0, 0, 0),
                 };
-                blit_to(&mut plane, &mut w_plane, widget_x as usize, y as usize);
+                blit_to(&mut plane, &w_plane, widget_x as usize, y as usize);
             }
         }
 

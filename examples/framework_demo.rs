@@ -48,7 +48,7 @@ impl FrameworkDemo {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = vec![Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
+        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
         let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.dirty = true;
@@ -78,12 +78,10 @@ impl Widget for FrameworkDemo {
         }
         if key.kind != KeyEventKind::Press { return false; }
         match key.code {
-            KeyCode::Esc => {
-                if self.show_help {
-                    self.show_help = false;
-                    self.dirty = true;
-                    true
-                } else { false }
+            KeyCode::Esc if self.show_help => {
+                self.show_help = false;
+                self.dirty = true;
+                true
             }
             _ => false,
         }

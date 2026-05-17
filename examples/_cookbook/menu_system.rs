@@ -356,7 +356,7 @@ impl Widget for MenuApp {
             for x in 0..tp.width as usize {
                 if x < plane.cells.len() && x < area.width as usize {
                     let src_idx = x;
-                    let dst_idx = (toast_y as usize * area.width as usize + x) as usize;
+                    let dst_idx = toast_y as usize * area.width as usize + x;
                     if src_idx < tp.cells.len() && dst_idx < plane.cells.len() {
                         let c = &tp.cells[src_idx];
                         if !c.transparent {

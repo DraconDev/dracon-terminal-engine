@@ -222,7 +222,7 @@ impl Form {
     }
 
     pub fn has_field_error(&self, index: usize) -> bool {
-        self.fields.get(index).map_or(false, |f| f.error.is_some())
+        self.fields.get(index).is_some_and(|f| f.error.is_some())
     }
 }
 

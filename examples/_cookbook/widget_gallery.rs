@@ -152,12 +152,6 @@ impl WidgetGallery {
 
         Rect::new(x, y, card_w.saturating_sub(1), card_h.saturating_sub(1))
     }
-
-    fn update_bg(&self, cell: &mut Cell) {
-        cell.bg = self.theme.bg;
-        cell.fg = self.theme.fg;
-        cell.transparent = false;
-    }
 }
 
 impl Widget for WidgetGallery {
@@ -473,7 +467,7 @@ impl Widget for WidgetGallery {
                 self.selected = slot;
             }
             let rect = self.slot_rect(slot, self.area);
-            if col >= rect.x + 1 && row >= rect.y + 2 {
+            if col > rect.x && row >= rect.y + 2 {
                 let rel_col = col - rect.x - 1;
                 let rel_row = row - rect.y - 2;
                 return self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
