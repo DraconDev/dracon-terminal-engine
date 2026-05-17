@@ -37,7 +37,7 @@
 
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -69,11 +69,11 @@ type EventCallback = Rc<dyn Fn(&dyn Any) + 'static>;
 #[derive(Default)]
 pub struct EventBus {
     /// Map from TypeId to list of callbacks for that event type.
-    subscribers: RefCell<HashMap<TypeId, Vec<EventCallback>>>,
+    subscribers: RefCell<HashMap<TypeId, Vec<Option<EventCallback>>>>,
     /// Optional trace logging for debugging.
     trace: RefCell<bool>,
     /// Recent event history for debugging.
-    history: RefCell<Vec<EventRecord>>,
+    history: RefCell<VecDeque<EventRecord>>,
     /// Maximum history size (0 = unlimited).
     max_history: RefCell<usize>,
 }
@@ -84,7 +84,7 @@ impl EventBus {
         Self {
             subscribers: RefCell::new(HashMap::new()),
             trace: RefCell::new(false),
-            history: RefCell::new(Vec::new()),
+            history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
         }
     }
@@ -94,7 +94,7 @@ impl EventBus {
         Self {
             subscribers: RefCell::new(HashMap::new()),
             trace: RefCell::new(true),
-            history: RefCell::new(Vec::new()),
+            history: RefCell::new(VecDeque::new()),
             max_history: RefCell::new(100),
         }
     }
@@ -120,7 +120,7 @@ impl EventBus {
         if max > 0 {
             let mut history = self.history.borrow_mut();
             while history.len() > max {
-                history.remove(0);
+                history.pop_front();
             }
         }
     }
@@ -135,7 +135,7 @@ impl EventBus {
             type_name: std::any::type_name::<E>().to_string(),
             payload: Rc::new(event.clone()),
         };
-        self.history.borrow_mut().push(record);
+        self.history.borrow_mut().push_back(record);
         self.trim_history();
     }
 
@@ -146,7 +146,6 @@ impl EventBus {
     pub fn publish<E: Any + Clone>(&self, event: E) {
         let type_id = TypeId::of::<E>();
 
-        // Record in history
         self.record_event(&event);
 
         if *self.trace.borrow() {
@@ -154,21 +153,40 @@ impl EventBus {
                 .subscribers
                 .borrow()
                 .get(&type_id)
-                .map(|v| v.len())
+                .map(|v| v.iter().filter(|c| c.is_some()).count())
                 .unwrap_or(0);
             eprintln!("[EventBus] publish<{}> → {} subscribers", std::any::type_name::<E>(), count);
         }
 
-        // Clone subscribers to avoid borrow issues during callback
-        let callbacks: Vec<EventCallback> = self
+        let callbacks: Vec<(usize, EventCallback)> = self
             .subscribers
             .borrow()
             .get(&type_id)
-            .cloned()
+            .map(|list| {
+                list.iter()
+                    .enumerate()
+                    .filter_map(|(i, c)| c.clone().map(|cb| (i, cb)))
+                    .collect()
+            })
             .unwrap_or_default();
 
-        for callback in callbacks {
+        for (_, callback) in callbacks {
             callback(&event);
+        }
+
+        self.compact_tombstones::<E>();
+    }
+
+    /// Removes tombstoned (None) entries from the subscriber list for type E.
+    /// Called after publish dispatch to clean up subscribe_once removals.
+    fn compact_tombstones<E: Any>(&self) {
+        let type_id = TypeId::of::<E>();
+        let mut subs = self.subscribers.borrow_mut();
+        if let Some(list) = subs.get_mut(&type_id) {
+            let has_tombstones = list.iter().any(|c| c.is_none());
+            if has_tombstones {
+                list.retain(|c| c.is_some());
+            }
         }
     }
 
