@@ -118,7 +118,7 @@ struct PluginDemoApp {
 }
 
 impl PluginDemoApp {
-    fn new(theme: Theme) -> Self {
+    fn new(theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         let registry = Arc::new(RwLock::new(PluginRegistry::new()));
 
         // Register built-in plugins
@@ -126,8 +126,7 @@ impl PluginDemoApp {
             let mut reg = registry.write().unwrap();
             reg.register("stat_cpu", |id, theme| Box::new(StatWidget::new(id, theme, "CPU", "12.4%")));
             reg.register("stat_mem", |id, theme| Box::new(StatWidget::new(id, theme, "MEM", "1.2 GiB")));
-            reg.register("stat_disk", |id, theme| Box::new(StatWidget::new(id, theme, "DISK", "47%")),
-            );
+            reg.register("stat_disk", |id, theme| Box::new(StatWidget::new(id, theme, "DISK", "47%")));
             reg.register("stat_net", |id, theme| Box::new(StatWidget::new(id, theme, "NET", "v2.1")));
         }
 
@@ -150,6 +149,8 @@ impl PluginDemoApp {
             hovered_idx: None,
             show_help: false,
             dirty: true,
+            should_quit,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
         }
     }
 
