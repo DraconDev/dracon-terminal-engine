@@ -42,6 +42,27 @@ const LOG_MESSAGES: &[&str] = &[
     "Thread panic recovered in handler",
 ];
 
+const STREAM_MESSAGES: &[&str] = &[
+    "Incoming request: GET /api/v2/users",
+    "Incoming request: POST /api/v2/orders",
+    "Incoming request: DELETE /api/v2/cache/stale",
+    "Response sent: 200 OK (12ms)",
+    "Response sent: 404 Not Found (3ms)",
+    "Connection pool: 24/50 active",
+    "GC pause: 2.3ms (young gen)",
+    "Cache hit ratio: 94.2%",
+    "Queue depth: 7 pending jobs",
+    "Heartbeat received from node-3",
+    "Replication lag: 0.3s behind primary",
+    "TLS handshake completed with 10.0.1.22",
+    "Scheduled task fired: cleanup-stale-sessions",
+    "Websocket ping/pong: latency 4ms",
+    "Load balancer: routing to shard-2",
+    "Rate limiter: 98/100 tokens available",
+    "Compaction completed: reclaimed 340MB",
+    "Rolling deployment: pod api-7f8d starting",
+];
+
 struct ScrollableContent {
     id: WidgetId,
     area: Rect,
@@ -54,6 +75,10 @@ struct ScrollableContent {
     hovered_line: Option<usize>,
     search_query: String,
     search_active: bool,
+    rng_state: u64,
+    line_counter: u32,
+    tick_counter: u64,
+    auto_scroll: bool,
 }
 
 impl ScrollableContent {
@@ -86,6 +111,10 @@ impl ScrollableContent {
             hovered_line: None,
             search_query: String::new(),
             search_active: false,
+            rng_state,
+            line_counter: 200,
+            tick_counter: 0,
+            auto_scroll: true,
         }
     }
 
@@ -101,6 +130,40 @@ impl ScrollableContent {
             *color = level_color(lvl, &self.theme);
         }
         self.dirty = true;
+    }
+
+    fn tick(&mut self) {
+        self.tick_counter += 1;
+        if self.tick_counter % 60 != 0 {
+            return;
+        }
+        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        let lvl_idx = (self.rng_state >> 32) as usize % LOG_LEVELS.len();
+        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        let use_stream = (self.rng_state >> 63) & 1 == 1;
+        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        let msg_idx = (self.rng_state >> 16) as usize;
+        let msg = if use_stream {
+            STREAM_MESSAGES[msg_idx % STREAM_MESSAGES.len()]
+        } else {
+            LOG_MESSAGES[msg_idx % LOG_MESSAGES.len()]
+        };
+        let lvl = LOG_LEVELS[lvl_idx];
+        let ts = format_time(self.line_counter);
+        self.line_counter += 1;
+        let line = format!("[{}] {:>5} ┃ {}", ts, lvl, msg);
+        let color = level_color(lvl, &self.theme);
+        self.lines.push((line, color));
+        self.scroll.state_mut().content_height = self.lines.len();
+        if self.auto_scroll {
+            self.scroll.state_mut().scroll_to_bottom();
+        }
+        self.dirty = true;
+    }
+
+    fn update_auto_scroll(&mut self) {
+        let state = self.scroll.state();
+        self.auto_scroll = state.offset >= state.max_offset();
     }
 
     fn render_help_overlay(&self, plane: &mut Plane, area: Rect) {
@@ -243,6 +306,9 @@ impl Widget for ScrollableContent {
         let content_h = area.height.saturating_sub(4) as usize;
         self.scroll.state_mut().viewport_height = content_h;
         self.scroll.state_mut().content_height = self.lines.len();
+        if self.auto_scroll {
+            self.scroll.state_mut().scroll_to_bottom();
+        }
         self.dirty = true;
     }
     fn needs_render(&self) -> bool {
@@ -482,7 +548,12 @@ impl Widget for ScrollableContent {
             return false;
         }
 
-        self.scroll.handle_key(key)
+        if self.scroll.handle_key(key) {
+            self.update_auto_scroll();
+            true
+        } else {
+            false
+        }
     }
 
     fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
