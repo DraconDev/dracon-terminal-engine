@@ -202,12 +202,9 @@ impl ChatState {
 
         #[cfg(feature = "async")]
         {
-            let text_clone = text.clone();
             let handle = tokio::spawn(async move {
                 // Simulate network delay for message send
                 tokio::time::sleep(Duration::from_millis(800)).await;
-                // In a real app, this would send to a server
-                ()
             });
             *self.pending_send.borrow_mut() = Some(handle);
         }
@@ -482,6 +479,24 @@ impl ChatState {
                             self.show_emoji_modal = false;
                             return true;
                         }
+                    }
+                }
+                if self.show_settings_modal {
+                    let (sx, sy) = ((((self.area.get().width as i32 - 35) / 2) as u16), (((self.area.get().height as i32 - 10) / 2) as u16));
+                    // Notifications toggle: row sy+2, cols sx+2..sx+16
+                    if row == sy + 2 && col >= sx + 2 && col < sx + 16 {
+                        self.notifications_enabled = !self.notifications_enabled;
+                        self.dirty = true;
+                        self.show_settings_modal = false;
+                        return true;
+                    }
+                    // Clear chat: row sy+5, cols sx+8..sx+22
+                    if row == sy + 5 && col >= sx + 8 && col < sx + 22 {
+                        self.messages.clear();
+                        self.scroll_offset = 0;
+                        self.dirty = true;
+                        self.show_settings_modal = false;
+                        return true;
                     }
                 }
                 self.show_emoji_modal = false;
