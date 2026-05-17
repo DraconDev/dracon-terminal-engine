@@ -72,7 +72,7 @@ pub struct EventBus {
     /// `None` entries are tombstones from subscribe_once removals.
     subscribers: RefCell<HashMap<TypeId, Vec<Option<EventCallback>>>>,
     /// Indices of subscribe_once callbacks that have fired and need tombstoning.
-    pending_tombstones: RefCell<HashSet<(TypeId, usize)>>,
+    pending_tombstones: Rc<RefCell<HashSet<(TypeId, usize)>>>,
     /// Optional trace logging for debugging.
     trace: RefCell<bool>,
     /// Recent event history for debugging.
@@ -112,7 +112,7 @@ impl EventBus {
 
     /// Returns a copy of the event history.
     pub fn history(&self) -> Vec<EventRecord> {
-        self.history.borrow().clone()
+        self.history.borrow().clone().into()
     }
 
     /// Clears the event history.
