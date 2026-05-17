@@ -12,6 +12,8 @@
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::visuals::accessibility::{Accessibility, Role};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// A simple accessible button widget.
 struct AccessibleButton {
@@ -284,6 +286,7 @@ struct AccessibilityDemo {
     theme: Theme,
     show_help: bool,
     dirty: bool,
+    should_quit: Arc<AtomicBool>,
     keybindings: KeybindingSet,
     submit_btn: AccessibleButton,
     cancel_btn: AccessibleButton,
@@ -292,13 +295,14 @@ struct AccessibilityDemo {
 }
 
 impl AccessibilityDemo {
-    fn new(theme: Theme) -> Self {
+    fn new(theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         Self {
             id: WidgetId::new(1),
             area: Rect::default(),
             theme: theme.clone(),
             show_help: false,
             dirty: true,
+            should_quit,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             submit_btn: AccessibleButton::new(WidgetId::new(2), "Submit", theme.clone()),
             cancel_btn: AccessibleButton::new(WidgetId::new(3), "Cancel", theme.clone()),
@@ -507,6 +511,18 @@ impl Widget for AccessibilityDemo {
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if self.keybindings.matches(actions::QUIT, &key) {
+            self.should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if self.keybindings.matches(actions::THEME, &key) {
+            let themes = Theme::all();
+            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            self.theme = themes[(idx + 1) % themes.len()].clone();
+            self.submit_btn.on_theme_change(&self.theme);
+            self.cancel_btn.on_theme_change(&self.theme);
+            self.notifications_toggle.on_theme_change(&self.theme);
+            self.sound_toggle.on_theme_change(&self.theme);
+            self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::HELP, &key) {
@@ -558,16 +574,27 @@ impl Widget for AccessibilityDemo {
         self.sound_toggle.on_theme_change(theme);
         self.dirty = true;
     }
+
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
 }
 
 fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
-    let demo = AccessibilityDemo::new(theme.clone());
+    let should_quit = Arc::new(AtomicBool::new(false));
+    let quit_check = Arc::clone(&should_quit);
+    let demo = AccessibilityDemo::new(theme.clone(), should_quit);
 
     let mut app = App::new()?
         .title("Accessibility Demo")
         .fps(30)
         .theme(theme);
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
-    app.run(|_| {})
+    app.on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_| {})
 }
