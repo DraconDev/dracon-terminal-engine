@@ -216,10 +216,10 @@ impl Widget for FrameworkDemo {
             }
 
             let shortcuts = [
-                ("Ctrl+T", "Cycle theme"),
-                ("F1 / ?", "Toggle help"),
-                ("Esc", "Dismiss help"),
-                ("Ctrl+Q", "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
+                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
