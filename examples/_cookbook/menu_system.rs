@@ -227,10 +227,23 @@ impl MenuApp {
 
         for i in 0..self.menu_item_count(menu_idx) {
             let item_label = self.get_menu_item(menu_idx, i);
+            let is_selected = self.selected_idx == Some(i);
             for (j, ch) in item_label.chars().take(w as usize - 2).enumerate() {
                 let idx = (i as u16 * w + 2 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
+                    if is_selected {
+                        plane.cells[idx].bg = self.theme.selection_bg;
+                        plane.cells[idx].fg = self.theme.fg;
+                    }
+                }
+            }
+            if is_selected {
+                for col in 0..w {
+                    let idx = (i as u16 * w + col) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = self.theme.selection_bg;
+                    }
                 }
             }
         }
