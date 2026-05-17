@@ -3,8 +3,8 @@
 Work through the ENRICHMENT.md plan systematically, upgrading spartan showcase scenes.
 
 ## Tier 1 — Most Spartan (50%+ empty)
-1. [ ] Enrich `modal_demo` — Add rich settings base screen, dimmed backdrop, toast stack, modal stacking
-2. [ ] Enrich `tooltip` — Add hoverable toolbar row, tooltip history sidebar, fill gaps
+1. [x] Enrich `modal_demo` — Add rich settings base screen, dimmed backdrop, toast stack, modal stacking
+2. [x] Enrich `tooltip` — Add hoverable toolbar row, tooltip history sidebar, fill gaps
 3. [ ] Enrich `tags_input` — Add colored tag pills, shortcut legend, tag stats visualization
 4. [ ] Enrich `password_input` — Add requirements checklist with checkmarks, show/hide toggle, side panel
 5. [ ] Enrich `tree_navigator` — Add file type icons, size bars, content preview, search
