@@ -213,6 +213,30 @@ impl Widget for FormApp {
             }
         }
 
+        let indicator_x = area.width.saturating_sub(2);
+        if indicator_x > form_area.x + form_area.width {
+            let mut field_row: u16 = 0;
+            for i in 0..self.form.field_count() {
+                if field_row >= form_area.height { break; }
+                let abs_y = form_area.y + field_row;
+                if abs_y < area.height {
+                    let idx = (abs_y as usize) * area.width as usize + indicator_x as usize;
+                    if idx < plane.cells.len() {
+                        let valid = self.form.is_field_valid(i);
+                        plane.cells[idx] = Cell {
+                            char: if valid { '✓' } else { '✗' },
+                            fg: if valid { t.success } else { t.error },
+                            bg: t.bg,
+                            style: Styles::BOLD,
+                            transparent: false,
+                            skip: false,
+                        };
+                    }
+                }
+                field_row += if self.form.has_field_error(i) { 2 } else { 1 };
+            }
+        }
+
         if let Some(ref msg) = self.submit_message {
             let msg_y = area.height.saturating_sub(3);
             for (i, c) in msg.chars().enumerate().take(area.width as usize - 4) {
