@@ -10,9 +10,12 @@
 //!   cargo run --example plugin_demo
 
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::plugin::{PluginRegistry, WidgetFactory};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,6 +113,8 @@ struct PluginDemoApp {
     hovered_idx: Option<usize>,
     show_help: bool,
     dirty: bool,
+    should_quit: Arc<AtomicBool>,
+    keybindings: KeybindingSet,
 }
 
 impl PluginDemoApp {

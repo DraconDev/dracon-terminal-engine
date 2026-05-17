@@ -269,7 +269,11 @@ impl Widget for PluginLoader {
         }
 
         // Footer
-        let footer = "  1: CPU  2: Memory  3: Disk  4: Network  |  F1: help  |  Ctrl+Q: quit  ";
+        let footer = format!("  1: CPU  2: Memory  3: Disk  4: Network  |  {}: theme  |  {}: help  |  {}: quit  ",
+            self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+            self.keybindings.display(actions::HELP).unwrap_or("f1"),
+            self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+        );
         for (i, c) in footer.chars().enumerate() {
             let x = area.x + i as u16;
             let idx = ((area.y + area.height - 1) as usize * plane.width as usize + x as usize)
@@ -330,10 +334,10 @@ impl Widget for PluginLoader {
 
             let shortcuts = [
                 ("1-4", "Load stat plugin"),
-                ("Ctrl+T", "Cycle theme"),
-                ("F1 / ?", "Toggle help"),
-                ("Esc", "Dismiss help"),
-                ("Ctrl+Q", "Quit"),
+                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
+                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
+                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
+                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
