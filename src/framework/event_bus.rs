@@ -182,9 +182,11 @@ impl EventBus {
             callback(&event);
         }
 
-        // Apply tombstones that were queued during dispatch and compact
+        // Apply tombstones that were queued during dispatch.
+        // We intentionally do NOT compact — removing None entries would shift
+        // indices and invalidate existing SubscriptionIds, defeating the
+        // tombstone design goal of index stability.
         self.apply_pending_tombstones(type_id);
-        self.compact_tombstones(type_id);
     }
 
     /// Applies pending tombstones for a given type_id.
@@ -205,17 +207,6 @@ impl EventBus {
                 if idx < list.len() {
                     list[idx] = None;
                 }
-            }
-        }
-    }
-
-    /// Removes tombstoned (None) entries from the subscriber list.
-    fn compact_tombstones(&self, type_id: TypeId) {
-        let mut subs = self.subscribers.borrow_mut();
-        if let Some(list) = subs.get_mut(&type_id) {
-            let has_tombstones = list.iter().any(|c| c.is_none());
-            if has_tombstones {
-                list.retain(|c| c.is_some());
             }
         }
     }

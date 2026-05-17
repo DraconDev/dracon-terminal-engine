@@ -55,6 +55,7 @@ impl BaseInput {
     pub fn clear(&mut self) {
         self.text.clear();
         self.cursor_pos = 0;
+        self.scroll_offset = 0;
         self.dirty = true;
     }
 
@@ -226,15 +227,11 @@ impl BaseInput {
         col: u16,
         _row: u16,
     ) -> bool {
-        if (col as usize) <= self.text.len() {
-            self.cursor_pos = col as usize;
-            self.dirty = true;
-            true
-        } else {
-            self.cursor_pos = self.text.len();
-            self.dirty = true;
-            true
-        }
+        let text_pos = (col as usize + self.scroll_offset).min(self.text.len());
+        self.cursor_pos = text_pos;
+        self.clamp_scroll();
+        self.dirty = true;
+        true
     }
 }
 

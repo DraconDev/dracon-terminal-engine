@@ -314,6 +314,18 @@ impl App {
         }
     }
 
+    /// Creates an App from a TOML configuration file.
+    ///
+    /// This is the primary entry point for command-driven apps.
+    /// The TOML file defines the layout, widgets, and their command bindings.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// App::from_toml("/home/user/.config/dracon/myapp.toml")?
+    ///     .title("My Dashboard")
+    ///     .run(|ctx| { /* render */ });
+    /// ```
     pub fn from_toml(path: &std::path::Path) -> io::Result<Self> {
         let config = AppConfig::from_toml(path)?;
         let terminal = Terminal::new(io::stdout())?;
