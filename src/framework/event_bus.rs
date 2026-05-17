@@ -402,10 +402,12 @@ impl EventBus {
     pub fn replay_last(&self, n: usize) {
         let history = self.history.borrow();
         let start = history.len().saturating_sub(n);
-        for record in &history[start..] {
-            // Re-dispatch to current subscribers by type
+        for record in history.range(start..) {
             if let Some(callbacks) = self.subscribers.borrow().get(&record.payload.type_id()) {
-                let callbacks: Vec<EventCallback> = callbacks.clone();
+                let callbacks: Vec<EventCallback> = callbacks
+                    .iter()
+                    .filter_map(|c| c.clone())
+                    .collect();
                 for cb in callbacks {
                     cb(&*record.payload);
                 }
@@ -418,6 +420,7 @@ impl Clone for EventBus {
     fn clone(&self) -> Self {
         Self {
             subscribers: RefCell::new(HashMap::new()),
+            pending_tombstones: RefCell::new(HashSet::new()),
             trace: RefCell::new(*self.trace.borrow()),
             history: RefCell::new(self.history.borrow().clone()),
             max_history: RefCell::new(*self.max_history.borrow()),
