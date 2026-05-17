@@ -200,6 +200,10 @@ impl Widget for WidgetGallery {
         self.tags_input.on_theme_change(theme);
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);

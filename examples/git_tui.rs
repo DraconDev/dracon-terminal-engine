@@ -306,6 +306,10 @@ impl Widget for GitTui {
         GitTui::on_theme_change(self, theme);
     }
 
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
