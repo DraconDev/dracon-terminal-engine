@@ -273,6 +273,11 @@ impl Widget for MenuApp {
             toast.on_theme_change(theme);
         }
     }
+
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
+
     fn focusable(&self) -> bool {
         true
     }
