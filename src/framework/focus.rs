@@ -325,6 +325,7 @@ mod tests {
         fm.register(id, true);
         let id2 = WidgetId::new(2);
         fm.register(id2, true);
+        fm.set_focus(id);
         assert_eq!(fm.tab_next().unwrap(), id2);
         assert_eq!(fm.tab_next().unwrap(), id);
     }

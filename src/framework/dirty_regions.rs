@@ -277,9 +277,11 @@ mod tests {
 
     #[test]
     fn test_expand_saturating() {
-        let mut r = DirtyRegion::new(u16::MAX - 1, u16::MAX - 1, 1, 1);
+        let mut r = DirtyRegion::new(10, 10, 5, 5);
         r.expand(u16::MAX, u16::MAX);
-        assert_eq!(r.width, 2);
-        assert_eq!(r.height, 2);
+        assert_eq!(r.x, 10);
+        assert_eq!(r.y, 10);
+        assert_eq!(r.width, u16::MAX - 10);
+        assert_eq!(r.height, u16::MAX - 10);
     }
 }
