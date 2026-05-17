@@ -421,9 +421,11 @@ impl ChatState {
             self.dirty = true;
             true
         } else if let KeyCode::Char(ch) = key.code {
-            self.input_text.push(ch);
-            self.cursor_pos = self.input_text.len();
-            self.dirty = true;
+            if key.modifiers.is_empty() {
+                self.input_text.push(ch);
+                self.cursor_pos = self.input_text.len();
+                self.dirty = true;
+            }
             true
         } else if key.code == KeyCode::Left && self.cursor_pos > 0 {
             self.cursor_pos -= 1;
@@ -506,6 +508,7 @@ impl ChatState {
         let t = self.theme.clone();
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(t.bg);
+        self.zones.borrow_mut().clear();
 
         let (input_h, status_h, header_h) = (3u16, 1u16, 1u16);
         let list_h = area.height.saturating_sub(input_h + status_h + header_h);
@@ -1157,6 +1160,9 @@ impl Widget for ChatInputRouter {
     }
     fn current_theme(&self) -> Option<Theme> {
         Some(self.target.borrow().theme.clone())
+    }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.target.borrow_mut().on_theme_change(theme);
     }
 }
 
