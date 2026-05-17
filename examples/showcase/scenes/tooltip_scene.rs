@@ -517,7 +517,7 @@ impl Scene for TooltipScene {
                 let items = self.toolbar_items();
                 if idx < items.len() {
                     let mut x = 2u16;
-                    for j in 0..idx { x += items[j].label.len() as u16 + 4; }
+                    for item in items.iter().take(idx) { x += item.label.len() as u16 + 4; }
                     self.render_tooltip_popup(&mut plane, x, 1, items[idx].tooltip, items[idx].color);
                 }
             } else if let Some(idx) = key.strip_prefix("sidebar:").and_then(|s| s.parse::<usize>().ok()) {
