@@ -284,8 +284,30 @@ impl Widget for FormApp {
         self.form.handle_key(key)
     }
 
-    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        matches!(kind, MouseEventKind::ScrollDown | MouseEventKind::ScrollUp)
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        match kind {
+            MouseEventKind::ScrollDown | MouseEventKind::ScrollUp => true,
+            MouseEventKind::Down(_) | MouseEventKind::Moved => {
+                let form_x = self.area.x + 2;
+                let form_y = self.area.y + 2;
+                let form_w = self.area.width.saturating_sub(4);
+                let form_h = self.area.height.saturating_sub(5);
+                if col >= form_x && col < form_x + form_w
+                    && row >= form_y && row < form_y + form_h
+                {
+                    let rel_row = row.saturating_sub(form_y);
+                    if self.form.handle_mouse(kind, col, rel_row) {
+                        self.dirty = true;
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
     }
 }
 

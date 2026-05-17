@@ -205,6 +205,25 @@ impl Form {
             self.dirty = true;
         }
     }
+
+    pub fn field_count(&self) -> usize {
+        self.fields.len()
+    }
+
+    pub fn is_field_valid(&self, index: usize) -> bool {
+        if let Some(field) = self.fields.get(index) {
+            if field.rules.is_empty() {
+                return true;
+            }
+            field.rules.iter().all(|rule| rule.validate(&field.value).is_none())
+        } else {
+            false
+        }
+    }
+
+    pub fn has_field_error(&self, index: usize) -> bool {
+        self.fields.get(index).map_or(false, |f| f.error.is_some())
+    }
 }
 
 impl crate::framework::widget::Widget for Form {
