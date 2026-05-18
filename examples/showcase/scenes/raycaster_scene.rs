@@ -96,11 +96,17 @@ impl RaycasterScene {
         let check_x = (nx + dx.signum() * margin) as usize;
         let check_y = (ny + dy.signum() * margin) as usize;
 
-        if check_x < MAP_W && MAP[self.py.get() as usize][check_x] == 0 {
-            self.px.set(nx.clamp(1.0, (MAP_W - 1) as f64));
+        if check_x < MAP_W {
+            let py = self.py.get().clamp(0.0, (MAP_H - 1) as f64) as usize;
+            if MAP[py][check_x] == 0 {
+                self.px.set(nx.clamp(1.0, (MAP_W - 1) as f64));
+            }
         }
-        if check_y < MAP_H && MAP[check_y][self.px.get() as usize] == 0 {
-            self.py.set(ny.clamp(1.0, (MAP_H - 1) as f64));
+        if check_y < MAP_H {
+            let px = self.px.get().clamp(0.0, (MAP_W - 1) as f64) as usize;
+            if MAP[check_y][px] == 0 {
+                self.py.set(ny.clamp(1.0, (MAP_H - 1) as f64));
+            }
         }
     }
 

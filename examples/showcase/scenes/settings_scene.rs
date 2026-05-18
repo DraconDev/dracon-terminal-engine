@@ -40,13 +40,13 @@ impl SettingsScene {
             .add_field("API Key")
             .add_field("Server URL")
             .with_validation(0, vec![
-                ValidationRule::from_regex_pattern(".+").unwrap(),
+                ValidationRule::from_regex_pattern(".+").expect("hardcoded regex .+ is always valid"),
             ])
             .with_validation(1, vec![
-                ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$").unwrap(),
+                ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$").expect("hardcoded email regex is always valid"),
             ])
             .with_validation(2, vec![
-                ValidationRule::from_regex_pattern(".{8,}").unwrap(),
+                ValidationRule::from_regex_pattern(".{8,}").expect("hardcoded regex .{8,} is always valid"),
             ]);
 
         let mut grid = KeyValueGrid::with_id(WidgetId::new(401))
