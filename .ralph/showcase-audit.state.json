@@ -1,14 +1,13 @@
 {
   "name": "showcase-audit",
   "taskFile": ".ralph/showcase-audit.md",
-  "iteration": 9,
-  "maxIterations": 200,
-  "itemsPerIteration": 2,
-  "reflectEvery": 0,
+  "iteration": 1,
+  "maxIterations": 30,
+  "itemsPerIteration": 3,
+  "reflectEvery": 5,
   "reflectInstructions": "REFLECTION CHECKPOINT\n\nPause and reflect on your progress:\n1. What has been accomplished so far?\n2. What's working well?\n3. What's not working or blocking progress?\n4. Should the approach be adjusted?\n5. What are the next priorities?\n\nUpdate the task file with your reflection, then continue working.",
-  "active": false,
-  "status": "completed",
-  "startedAt": "2026-05-18T12:13:41.057Z",
-  "lastReflectionAt": 0,
-  "completedAt": "2026-05-18T13:45:38.968Z"
+  "active": true,
+  "status": "active",
+  "startedAt": "2026-05-18T23:02:37.292Z",
+  "lastReflectionAt": 0
 }
