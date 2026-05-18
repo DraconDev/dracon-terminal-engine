@@ -427,8 +427,92 @@ impl Scene for WorkshopScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let area = self.area.get();
+
+        match kind {
+            MouseEventKind::Down(_) => {
+                // Widget list: rows 4..4+8 (y=2 start, +2 header)
+                let list_y = 4u16;
+                if (2..16).contains(&col) && (list_y..list_y + WIDGET_NAMES.len() as u16).contains(&row) {
+                    let idx = (row - list_y) as usize;
+                    if idx < WIDGET_NAMES.len() && idx != self.selected_widget.get() {
+                        self.selected_widget.set(idx);
+                        self.reset_props();
+                        self.dirty = true;
+                    }
+                    return true;
+                }
+
+                // Properties panel slider bar (only for Slider widget)
+                if self.current_widget_type() == WidgetType::Slider {
+                    let props_x = 18u16; // div_x(16) + 2
+                    let bar_y = 6u16; // y=2 + py+2 = 2+2+2 = 6
+                    if col >= props_x && col < props_x + 24 && row == bar_y {
+                        let rel = (col - props_x) as i32;
+                        let bar_w = 22i32; // w-2
+                        let val = (rel as f32 / bar_w as f32 * 100.0) as i32;
+                        self.prop_int.set(val.clamp(0, 100));
+                        self.dirty = true;
+                        return true;
+                    }
+                }
+
+                // Preview panel: click to interact with widget
+                let div2_x = 18u16 + 24u16 + 2u16; // props_x + props_w + 2 = 44
+                let preview_x = div2_x + 2; // 46
+                if col >= preview_x && row >= 4 && row < area.height.saturating_sub(2) {
+                    let wt = self.current_widget_type();
+                    match wt {
+                        WidgetType::Button | WidgetType::Checkbox | WidgetType::Toggle | WidgetType::Radio => {
+                            self.prop_bool.set(!self.prop_bool.get());
+                            self.dirty = true;
+                        }
+                        WidgetType::Slider => {
+                            let rel = (col.saturating_sub(preview_x)) as i32;
+                            let bar_w = (area.width.saturating_sub(preview_x + 2)) as i32;
+                            if bar_w > 0 {
+                                let val = (rel as f32 / bar_w as f32 * 100.0) as i32;
+                                self.prop_int.set(val.clamp(0, 100));
+                                self.dirty = true;
+                            }
+                        }
+                        WidgetType::ProgressBar | WidgetType::ProgressRing => {
+                            let rel = (col.saturating_sub(preview_x)) as i32;
+                            let bar_w = (area.width.saturating_sub(preview_x + 2)) as i32;
+                            if bar_w > 0 {
+                                let val = (rel as f32 / bar_w as f32 * 100.0) as i32;
+                                self.prop_int.set(val.clamp(0, 100));
+                                self.dirty = true;
+                            }
+                        }
+                        WidgetType::Spinner => {} // display only
+                    }
+                    return true;
+                }
+
+                false
+            }
+            MouseEventKind::ScrollUp => {
+                let cur = self.selected_widget.get();
+                if cur > 0 {
+                    self.selected_widget.set(cur - 1);
+                    self.reset_props();
+                    self.dirty = true;
+                }
+                true
+            }
+            MouseEventKind::ScrollDown => {
+                let cur = self.selected_widget.get();
+                if cur + 1 < WIDGET_NAMES.len() {
+                    self.selected_widget.set(cur + 1);
+                    self.reset_props();
+                    self.dirty = true;
+                }
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

@@ -323,8 +323,8 @@ impl Scene for TagsInputScene {
         if key.kind != KeyEventKind::Press { return false; }
 
         if self.keybindings.matches(actions::BACK, &key) {
-            if self.show_help { self.show_help = false; }
-            return true;
+            if self.show_help { self.show_help = false; return true; }
+            return false;
         }
         if self.keybindings.matches(actions::HELP, &key) || key.code == dracon_terminal_engine::input::event::KeyCode::Char('?') {
             self.show_help = !self.show_help;
@@ -354,6 +354,7 @@ impl Scene for TagsInputScene {
         let input_y = 4;
         let input_area = Rect::new(2, input_y, area.width.saturating_sub(4), 3);
 
+        // TagsInput widget area
         if col >= input_area.x && col < input_area.x + input_area.width
             && row >= input_area.y && row < input_area.y + input_area.height
         {
@@ -362,6 +363,53 @@ impl Scene for TagsInputScene {
             if self.tags_input.handle_mouse(kind, local_col, local_row) {
                 self.dirty = true;
                 return true;
+            }
+        }
+
+        // Scene-level click targets
+        if let MouseEventKind::Down(_) = kind {
+            let left_w = area.width / 2;
+
+            // Tag pills (left panel, rows pill_y+2 = 10 onward)
+            if col >= 4 && col < left_w && row >= 10 {
+                let tags: Vec<String> = self.tags_input.tags().to_vec();
+                if !tags.is_empty() {
+                    let mut px = 4u16;
+                    let mut py = 10u16;
+                    for (i, tag) in tags.iter().enumerate() {
+                        let pill_len = tag.len() as u16 + 2;
+                        if px + pill_len > left_w {
+                            px = 4;
+                            py += 1;
+                        }
+                        if row == py && col >= px && col < px + pill_len {
+                            // Click on a tag pill → remove it by index
+                            self.tags_input.remove_tag(i);
+                            self.tag_log.push(format!("Removed: {}", tag));
+                            self.dirty = true;
+                            return true;
+                        }
+                        px += pill_len + 1;
+                    }
+                }
+            }
+
+            // Category items (right panel, rows cat_y+2 = 17 onward)
+            let right_x = left_w + 2;
+            if col >= right_x && row >= 17 {
+                let cats = tag_categories();
+                let idx = (row - 17) as usize;
+                if idx < cats.len() {
+                    let cat = &cats[idx];
+                    // Add the first item from this category that isn't already a tag
+                    let current_tags = self.tags_input.tags();
+                    if let Some(item) = cat.items.iter().find(|it| !current_tags.contains(&it.to_string())) {
+                        self.tags_input.add_tag(item.to_string());
+                        self.tag_log.push(format!("Added: {}", item));
+                        self.dirty = true;
+                        return true;
+                    }
+                }
             }
         }
 

@@ -125,6 +125,16 @@ impl AccessibilityScene {
         self.dirty = true;
     }
 
+    fn set_focus(&mut self, target: FocusTarget) {
+        let targets = FocusTarget::all();
+        if let Some(idx) = targets.iter().position(|t| *t == target) {
+            self.focus_idx = idx;
+            self.focused = target;
+            self.add_announcement("focus", self.focused.name(), "focused".to_string());
+            self.dirty = true;
+        }
+    }
+
     fn activate(&mut self) {
         match self.focused {
             FocusTarget::LoginButton => {
@@ -498,7 +508,65 @@ impl Scene for AccessibilityScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        if let MouseEventKind::Down(_) = kind {
+            let area = self.area.get();
+            // Form is at (2, 2)
+            let fx = 2u16;
+            let fy = 2u16;
+
+            // Username field: rows fy+2..fy+4, cols fx..fx+18
+            if col >= fx && col < fx + 18 && row >= fy + 2 && row <= fy + 4 {
+                self.set_focus(FocusTarget::UsernameField);
+                self.dirty = true;
+                return true;
+            }
+
+            // Password field: rows fy+6..fy+8, cols fx..fx+18
+            if col >= fx && col < fx + 18 && row >= fy + 6 && row <= fy + 8 {
+                self.set_focus(FocusTarget::PasswordField);
+                self.dirty = true;
+                return true;
+            }
+
+            // Remember checkbox: row fy+9, cols fx..fx+14
+            if col >= fx && col < fx + 14 && row == fy + 9 {
+                self.set_focus(FocusTarget::RememberCheck);
+                self.activate();
+                self.dirty = true;
+                return true;
+            }
+
+            // Login button: row fy+11, cols fx..fx+12
+            if col >= fx && col < fx + 12 && row == fy + 11 {
+                self.set_focus(FocusTarget::LoginButton);
+                self.activate();
+                self.dirty = true;
+                return true;
+            }
+
+            // Help link: row fy+13, cols fx..fx+10
+            if col >= fx && col < fx + 10 && row == fy + 13 {
+                self.set_focus(FocusTarget::HelpLink);
+                self.activate();
+                self.dirty = true;
+                return true;
+            }
+
+            // A11y tree items: right panel rows 12..17
+            let panel_x = (area.width as usize * 45 / 100).max(30) as u16;
+            if col >= panel_x && row >= 12 && row < 12 + FocusTarget::all().len() as u16 {
+                let idx = (row - 12) as usize;
+                let targets = FocusTarget::all();
+                if idx < targets.len() {
+                    self.set_focus(targets[idx]);
+                    self.dirty = true;
+                    return true;
+                }
+            }
+
+            // Announcements: right panel, scrollable area — display only
+        }
         false
     }
 

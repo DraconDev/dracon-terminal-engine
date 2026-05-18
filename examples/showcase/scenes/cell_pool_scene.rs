@@ -398,8 +398,16 @@ impl Scene for CellPoolScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        match kind {
+            MouseEventKind::Down(_) => {
+                // Any click: simulate allocation (same as Space key)
+                self.simulate_allocation();
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

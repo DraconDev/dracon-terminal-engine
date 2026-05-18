@@ -367,8 +367,9 @@ impl Scene for AnimationScene {
         if self.keybindings.matches(actions::BACK, &key) {
             if self.show_help {
                 self.show_help = false;
+                return true;
             }
-            return true;
+            return false;
         }
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
@@ -391,8 +392,31 @@ impl Scene for AnimationScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let area = self.area.get();
+        match kind {
+            MouseEventKind::Down(_) => {
+                if col < area.width / 2 {
+                    self.restart_animations();
+                    self.dirty = true;
+                    return true;
+                }
+                // Click on sliding panel area (right half, rows 3-8) → toggle panel
+                if col >= area.width / 2 && (3..10).contains(&row) {
+                    self.toggle_panel();
+                    self.dirty = true;
+                    return true;
+                }
+                // Click on easing curve labels (bottom rows) → restart
+                if row >= area.height.saturating_sub(8) {
+                    self.restart_animations();
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

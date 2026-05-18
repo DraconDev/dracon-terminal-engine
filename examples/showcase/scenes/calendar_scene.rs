@@ -335,6 +335,21 @@ impl Scene for CalendarScene {
             }
             return true;
         }
+
+        // Sidebar events: click on event list to select its date
+        if let MouseEventKind::Down(_) = kind {
+            let sidebar_x = cal_w + 5;
+            if col >= sidebar_x && row >= 6 {
+                let event_idx = (row - 6) as usize;
+                if event_idx < EVENTS.len() {
+                    let event = &EVENTS[event_idx];
+                    self.selected_date = Some(event.date.to_string());
+                    self.mark_dirty();
+                    return true;
+                }
+            }
+        }
+
         false
     }
 

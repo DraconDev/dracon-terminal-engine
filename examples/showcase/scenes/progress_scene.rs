@@ -363,8 +363,58 @@ impl Scene for ProgressScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        let area = self.area.get();
+        match kind {
+            MouseEventKind::Down(_) => {
+                // Step dots area (row 3): click a dot to jump progress to that stage
+                if row == 3 {
+                    let _right_x = area.width * 40 / 100;
+                    let step_w = 14u16;
+                    for i in 0..5 {
+                        let sx = 2 + i * step_w;
+                        if (sx..sx + step_w).contains(&col) {
+                            let stage_pcts = [0.0, 15.0, 35.0, 60.0, 85.0];
+                            let pct = stage_pcts[i as usize];
+                            self.progress.set(pct);
+                            self.loading.set(false);
+                            self.ring.borrow_mut().set_progress(pct / 100.0);
+                            self.bar.borrow_mut().set_progress((pct / 100.0) as f32);
+                            self.dirty = true;
+                            return true;
+                        }
+                    }
+                }
+
+                // ProgressRing (rows 6-9, cols 2-14): toggle loading
+                if (6..10).contains(&row) && (2..14).contains(&col) {
+                    if self.loading.get() { self.stop_loading(); } else { self.start_loading(); }
+                    self.dirty = true;
+                    return true;
+                }
+
+                // ProgressBar / gauge area (rows 6-12, cols right_x+): click to set value
+                let right_x = area.width * 40 / 100;
+                if (6..13).contains(&row) && col >= right_x && col < area.width.saturating_sub(2) {
+                    let bar_w = area.width.saturating_sub(right_x + 2);
+                    if bar_w > 0 {
+                        let pct = (col.saturating_sub(right_x) as f64 / bar_w as f64 * 100.0).clamp(0.0, 100.0);
+                        self.progress.set(pct);
+                        self.loading.set(false);
+                        self.ring.borrow_mut().set_progress(pct / 100.0);
+                        self.bar.borrow_mut().set_progress((pct / 100.0) as f32);
+                        self.dirty = true;
+                    }
+                    return true;
+                }
+
+                // Any other click: toggle loading
+                if self.loading.get() { self.stop_loading(); } else { self.start_loading(); }
+                self.dirty = true;
+                true
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

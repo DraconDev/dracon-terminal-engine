@@ -318,7 +318,10 @@ impl Scene for TreeNavigatorScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let tree_area = Rect::new(0, 4, self.area.get().width * 45 / 100, self.area.get().height.saturating_sub(8));
+        let area = self.area.get();
+        let tree_area = Rect::new(0, 4, area.width * 45 / 100, area.height.saturating_sub(8));
+
+        // Tree widget area
         if col >= tree_area.x && col < tree_area.x + tree_area.width &&
            row >= tree_area.y && row < tree_area.y + tree_area.height {
             let rel_col = col - tree_area.x;
@@ -328,6 +331,21 @@ impl Scene for TreeNavigatorScene {
                 return true;
             }
         }
+
+        // Breadcrumb clicks (row 1)
+        if let MouseEventKind::Down(_) = kind {
+            if row == 1 {
+                // Clicking breadcrumb navigates up to parent
+                let path = self.tree.get_selected_path();
+                if path.len() > 1 {
+                    let parent_path = path[..path.len() - 1].to_vec();
+                    self.tree.set_selected_path(parent_path);
+                    self.dirty = true;
+                    return true;
+                }
+            }
+        }
+
         false
     }
 

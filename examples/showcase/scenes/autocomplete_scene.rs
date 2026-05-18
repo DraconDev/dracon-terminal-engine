@@ -11,7 +11,7 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::Autocomplete;
-use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -321,11 +321,14 @@ impl Scene for AutocompleteScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let _area = self.area.get();
+        let area = self.area.get();
         let ac_area = Rect::new(2, 3, 28, 12);
         let rel_col = col.saturating_sub(ac_area.x);
         let rel_row = row.saturating_sub(ac_area.y);
-        if self.autocomplete.handle_mouse(kind, rel_col, rel_row) {
+        if (ac_area.x..ac_area.x + ac_area.width).contains(&col) &&
+           (ac_area.y..ac_area.y + ac_area.height).contains(&row) &&
+           self.autocomplete.handle_mouse(kind, rel_col, rel_row)
+        {
             self.sync_bridge();
             if self.selected_item.is_none() {
                 if let Some(selected) = self.autocomplete.selected() {
@@ -333,10 +336,49 @@ impl Scene for AutocompleteScene {
                     self.dirty = true;
                 }
             }
-            true
-        } else {
-            false
+            return true;
         }
+
+        // Category pills (row 11): click to filter
+        if let MouseEventKind::Down(_) = kind {
+            if row == 11 && col >= 2 {
+                let categories = ["tooling", "compiler", "docs", "linting", "testing", "learning"];
+                let mut pill_x = 2usize;
+                for cat in &categories {
+                    let pill_w = cat.len() + 2; // " cat "
+                    if (pill_x..pill_x + pill_w).contains(&(col as usize)) {
+                        // Clear and type the category name
+                        self.autocomplete.clear();
+                        for c in cat.chars() {
+                            self.autocomplete.handle_key(KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press });
+                        }
+                        self.sync_bridge();
+                        self.dirty = true;
+                        return true;
+                    }
+                    pill_x += pill_w + 1;
+                }
+            }
+
+            // Recent selections list (right panel, col 34+, rows 12+)
+            let info_x = area.width * 40 / 100;
+            if col >= info_x && row >= 12 {
+                let idx = (row - 12) as usize;
+                if idx < self.recent_selections.len() {
+                    let name = self.recent_selections[idx].clone();
+                    self.autocomplete.clear();
+                    for c in name.chars() {
+                        self.autocomplete.handle_key(KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press });
+                    }
+                    self.sync_bridge();
+                    self.selected_item = Some(name);
+                    self.dirty = true;
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

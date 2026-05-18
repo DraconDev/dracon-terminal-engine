@@ -380,8 +380,37 @@ impl Scene for DebugOverlayScene {
         }
     }
 
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
-        false
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        match kind {
+            MouseEventKind::Down(_) => {
+                // [PAUSED] indicator: row 2, col ~48-58
+                if row == 2 && (48..60).contains(&col) {
+                    self.paused.set(!self.paused.get());
+                    self.dirty = true;
+                    return true;
+                }
+                // Gauge bars area (rows 7-12): click to toggle gauges
+                if (7..12).contains(&row) {
+                    self.show_gauges.set(!self.show_gauges.get());
+                    self.dirty = true;
+                    return true;
+                }
+                // DebugOverlay area (rows 13-21, cols 2-29): toggle overlay
+                if (13..22).contains(&row) && (2..30).contains(&col) {
+                    self.show_overlay.set(!self.show_overlay.get());
+                    self.dirty = true;
+                    return true;
+                }
+                // Profiler area (rows 13-21, cols 32+): toggle profiler
+                if (13..22).contains(&row) && col >= 32 {
+                    self.show_profiler.set(!self.show_profiler.get());
+                    self.dirty = true;
+                    return true;
+                }
+                false
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {

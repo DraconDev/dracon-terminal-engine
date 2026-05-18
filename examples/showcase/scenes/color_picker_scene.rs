@@ -238,8 +238,9 @@ impl Scene for ColorPickerScene {
         if self.keybindings.matches(actions::BACK, &key) {
             if self.show_help {
                 self.show_help = false;
+                return true;
             }
-            return true;
+            return false;
         }
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
