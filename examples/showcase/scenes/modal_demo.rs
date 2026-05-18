@@ -208,8 +208,11 @@ impl ModalDemoScene {
                 plane.cells[icon_idx].bg = bg;
             }
 
-            // Toast text
-            draw_text(plane, tx + 2, ty, &toast.message, fg, bg, true);
+            // Toast text with age indicator
+            let age = self.tick.saturating_sub(toast.created);
+            let age_str = if age == 0 { "now".to_string() } else { format!("{}t", age) };
+            let label = format!("{} {}", toast.message, age_str);
+            draw_text(plane, tx + 2, ty, &label, fg, bg, true);
         }
     }
 
