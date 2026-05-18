@@ -128,6 +128,43 @@ impl Scene for ColorPickerScene {
         draw_text(&mut plane, right_x, 4 + swatch_h as u16 + 4, "Click picker or use ↑↓←→", t.fg_muted, t.bg, false);
         draw_text(&mut plane, right_x, 4 + swatch_h as u16 + 5, "to change color", t.fg_muted, t.bg, false);
 
+        // Contrast ratio with theme bg
+        let contrast_y = 4 + swatch_h as u16 + 7;
+        draw_text(&mut plane, right_x, contrast_y, "Contrast", t.secondary, t.bg, true);
+        if let Color::Rgb(r, g, b) = self.selected_color {
+            // Simple relative luminance
+            let lum_fg = 0.299 * r as f64 + 0.587 * g as f64 + 0.114 * b as f64;
+            let lum_bg = match t.bg {
+                Color::Rgb(br, bg_, bb) => 0.299 * br as f64 + 0.587 * bg_ as f64 + 0.114 * bb as f64,
+                _ => 0.0,
+            };
+            let (lighter, darker) = if lum_fg > lum_bg { (lum_fg, lum_bg) } else { (lum_bg, lum_fg) };
+            let contrast = (lighter + 0.05) / (darker + 0.05);
+            let (rating, color) = if contrast >= 7.0 { ("AAA", t.success) } else if contrast >= 4.5 { ("AA", t.info) } else if contrast >= 3.0 { ("AA Large", t.warning) } else { ("Fail", t.error) };
+            let contrast_text = format!("{:.1}:1 ({})", contrast, rating);
+            draw_text(&mut plane, right_x, contrast_y + 1, &contrast_text, color, t.bg, true);
+        }
+
+        // Recent colors row
+        let recent_y = contrast_y + 3;
+        draw_text(&mut plane, right_x, recent_y, "Recent", t.secondary, t.bg, true);
+        // Show some recently-picked colors (simulated)
+        let recent = [
+            Color::Rgb(136, 192, 208), Color::Rgb(208, 135, 112),
+            Color::Rgb(163, 190, 140), Color::Rgb(235, 203, 139),
+            Color::Rgb(180, 142, 173),
+        ];
+        for (i, color) in recent.iter().enumerate() {
+            let rx = right_x + i as u16 * 4;
+            let idx = ((recent_y + 1) * plane.width + rx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = *color;
+                plane.cells[idx].fg = *color;
+                plane.cells[idx].char = ' ';
+                plane.cells[idx].transparent = false;
+            }
+        }
+
         // ── Palette Strip ──────────────────────────────────────────────────
         let palette_y = 4 + swatch_h as u16 + 8;
         draw_text(&mut plane, 2, palette_y, "Quick Palette:", t.fg, t.bg, true);

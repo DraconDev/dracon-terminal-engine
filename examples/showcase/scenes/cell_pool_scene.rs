@@ -153,6 +153,81 @@ impl CellPoolScene {
         // Labels
         draw_text(plane, x + 2, y + 1, "Allocation Waves", t.fg_muted, t.bg, false);
     }
+
+    fn render_pool_grid(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16) {
+        let t = &self.theme;
+
+        draw_text(plane, x, y, "Pool Grid", t.secondary, t.bg, true);
+        for dx in 0..w {
+            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Visual grid showing pool state: each cell is a tiny block
+        // Active = green, Pooled = blue, Free = dim
+        let grid_x = x + 1;
+        let grid_y = y + 2;
+        let grid_w = w.saturating_sub(2);
+        let grid_h = h.saturating_sub(3);
+
+        let total_slots = grid_w as usize * grid_h as usize;
+        let active = self.acquired.saturating_sub(self.released);
+        let pooled = self.total_cells;
+
+        // Compute proportions
+        let active_slots = if self.acquired > 0 {
+            (active as f64 / self.acquired.max(1) as f64 * total_slots as f64).min(total_slots as f64) as usize
+        } else { 0 };
+        let pooled_slots = if self.acquired > 0 {
+            (pooled as f64 / self.acquired.max(1) as f64 * total_slots as f64).min((total_slots - active_slots) as f64) as usize
+        } else { 0 };
+
+        let mut drawn = 0;
+        for gy in 0..grid_h {
+            for gx in 0..grid_w {
+                let idx = ((grid_y + gy) * plane.width + grid_x + gx) as usize;
+                if idx < plane.cells.len() {
+                    let (ch, fg) = if drawn < active_slots {
+                        ('█', t.success)
+                    } else if drawn < active_slots + pooled_slots {
+                        ('▓', t.info)
+                    } else if drawn < total_slots / 3 {
+                        ('░', t.fg_muted)
+                    } else {
+                        (' ', t.fg_muted)
+                    };
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = fg;
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].transparent = false;
+                }
+                drawn += 1;
+            }
+        }
+
+        // Legend
+        let legend_y = grid_y + grid_h + 1;
+        if legend_y < y + h {
+            let legends = [
+                ('█', t.success, "Active"),
+                ('▓', t.info, "Pooled"),
+                ('░', t.fg_muted, "Free"),
+            ];
+            let mut lx = x;
+            for (ch, color, label) in legends {
+                let idx = (legend_y * plane.width + lx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = color;
+                }
+                draw_text(plane, lx + 1, legend_y, label, t.fg_muted, t.bg, false);
+                lx += label.len() as u16 + 4;
+            }
+        }
+    }
 }
 
 impl Scene for CellPoolScene {
@@ -216,11 +291,29 @@ impl Scene for CellPoolScene {
             draw_text(&mut plane, col as u16, row, s, t.fg, t.bg, false);
         }
 
-        // ── Allocation Wave Chart ──────────────────────────────────────────
+        // ── Allocation Wave Chart (left) ────────────────────────────────────
+        let chart_w = (area.width * 60 / 100).saturating_sub(4);
         let chart_y = stats_y + 5;
         let chart_h = area.height.saturating_sub(chart_y + 3);
         if chart_h > 6 {
-            self.render_wave_chart(&mut plane, 2, chart_y, area.width.saturating_sub(4), chart_h);
+            self.render_wave_chart(&mut plane, 2, chart_y, chart_w, chart_h);
+        }
+
+        // ── Pool Grid (right) ────────────────────────────────────────────────
+        let grid_x = chart_w + 4;
+        let grid_w = area.width.saturating_sub(grid_x + 2);
+        if chart_h > 8 && grid_w > 10 {
+            self.render_pool_grid(&mut plane, grid_x, chart_y, grid_w, chart_h);
+        }
+
+        // Vertical divider
+        for y in chart_y..area.height.saturating_sub(2) {
+            let idx = (y * plane.width + chart_w + 2) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
         }
 
         // Legend for chart

@@ -1,7 +1,8 @@
 //! Embedded Progress/Loading scene for the showcase.
 //!
 //! Demonstrates ProgressRing, ProgressBar, and Spinner widgets
-//! in a simulated loading scenario.
+//! in a simulated multi-stage loading scenario with step dots,
+//! elapsed time, and stage labels.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::plane::Plane;
@@ -16,16 +17,31 @@ use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, Mous
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
 
+struct Stage {
+    name: &'static str,
+    icon: char,
+    weight: f64, // relative duration weight
+}
+
+const STAGES: &[Stage] = &[
+    Stage { name: "Initializing", icon: '◈', weight: 10.0 },
+    Stage { name: "Loading Config", icon: '▤', weight: 15.0 },
+    Stage { name: "Compiling", icon: '⚙', weight: 40.0 },
+    Stage { name: "Linking", icon: '◆', weight: 15.0 },
+    Stage { name: "Optimizing", icon: '◇', weight: 20.0 },
+];
 
 pub struct ProgressScene {
     theme: Theme,
     show_help: bool,
     keybindings: KeybindingSet,
-    ring: std::cell::RefCell<ProgressRing>,
-    bar: std::cell::RefCell<ProgressBar>,
-    spinner: std::cell::RefCell<Spinner>,
+    ring: RefCell<ProgressRing>,
+    bar: RefCell<ProgressBar>,
+    spinner: RefCell<Spinner>,
     loading: Cell<bool>,
     progress: Cell<f64>,
+    tick_count: Cell<u64>,
+    start_tick: Cell<u64>,
     dirty: bool,
     area: Cell<Rect>,
 }
@@ -51,6 +67,8 @@ impl ProgressScene {
             spinner,
             loading: Cell::new(false),
             progress: Cell::new(0.0),
+            tick_count: Cell::new(0),
+            start_tick: Cell::new(0),
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
         }
@@ -59,6 +77,7 @@ impl ProgressScene {
     fn start_loading(&self) {
         self.loading.set(true);
         self.progress.set(0.0);
+        self.start_tick.set(self.tick_count.get());
     }
 
     fn stop_loading(&self) {
@@ -66,6 +85,8 @@ impl ProgressScene {
     }
 
     fn update_progress(&self) {
+        self.tick_count.set(self.tick_count.get() + 1);
+
         if self.loading.get() {
             let current = self.progress.get();
             let speed = match current {
@@ -81,6 +102,23 @@ impl ProgressScene {
             }
         }
     }
+
+    fn current_stage_index(&self) -> usize {
+        let progress = self.progress.get();
+        let total_weight: f64 = STAGES.iter().map(|s| s.weight).sum();
+        let mut cumulative = 0.0;
+        for (i, stage) in STAGES.iter().enumerate() {
+            cumulative += stage.weight;
+            if progress <= cumulative / total_weight * 100.0 {
+                return i;
+            }
+        }
+        STAGES.len() - 1
+    }
+
+    fn elapsed_ticks(&self) -> u64 {
+        self.tick_count.get().saturating_sub(self.start_tick.get())
+    }
 }
 
 impl Scene for ProgressScene {
@@ -92,8 +130,8 @@ impl Scene for ProgressScene {
 
         let progress = self.progress.get();
         let is_loading = self.loading.get();
+        let stage_idx = self.current_stage_index();
 
-        // Update widget states
         self.ring.borrow_mut().set_progress(progress / 100.0);
         self.bar.borrow_mut().set_progress(progress as f32 / 100.0);
 
@@ -111,6 +149,11 @@ impl Scene for ProgressScene {
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
 
+        // Auto-run indicator
+        if is_loading {
+            draw_text(&mut plane, area.width.saturating_sub(8), 0, "▶ AUTO", t.primary, t.bg, true);
+        }
+
         // Divider
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
@@ -121,15 +164,49 @@ impl Scene for ProgressScene {
         }
 
         // Description
-        draw_text(&mut plane, 2, 2, "Simulated loading with progress indicators", t.fg, t.bg, false);
+        draw_text(&mut plane, 2, 2, "Multi-stage build simulation with progress indicators", t.fg, t.bg, false);
 
-        // ── ProgressRing ──────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 4, "ProgressRing", t.fg, t.bg, true);
-        let ring_area = Rect::new(2, 5, 12, 4);
+        // ── Step dots (y=3) ──────────────────────────────────────────────
+        let dots_x = 2u16;
+        for (i, stage) in STAGES.iter().enumerate() {
+            let dx = dots_x + i as u16 * 14;
+            let is_current = i == stage_idx && is_loading;
+            let is_done = i < stage_idx || (!is_loading && progress >= 100.0);
+            let _is_pending = i > stage_idx || (!is_loading && progress < 100.0 && i > 0);
+
+            // Dot
+            let _dot_char = if is_done { '●' } else if is_current { '◐' } else { '○' };
+            let dot_color = if is_done { t.success } else if is_current { t.primary } else { t.fg_muted };
+            let dot_idx = (3 * plane.width + dx) as usize;
+            if dot_idx < plane.cells.len() {
+                plane.cells[dot_idx].char = stage.icon;
+                plane.cells[dot_idx].fg = dot_color;
+            }
+
+            // Stage name
+            draw_text(&mut plane, dx + 2, 3, stage.name, dot_color, t.bg, is_current);
+
+            // Connector line
+            if i < STAGES.len() - 1 {
+                let connector_len = 14u16.saturating_sub(stage.name.len() as u16 + 3);
+                for cx in 0..connector_len {
+                    let cidx = (3 * plane.width + dx + stage.name.len() as u16 + 3 + cx) as usize;
+                    if cidx < plane.cells.len() {
+                        plane.cells[cidx].char = '─';
+                        plane.cells[cidx].fg = if is_done { t.success } else { t.fg_muted };
+                    }
+                }
+            }
+        }
+
+        // ── Left column: ProgressRing + Spinner ───────────────────────────
+        let col_x = 2u16;
+
+        draw_text(&mut plane, col_x, 5, "ProgressRing", t.fg, t.bg, true);
+        let ring_area = Rect::new(col_x, 6, 12, 4);
         let ring_plane = self.ring.borrow().render(ring_area);
         blit_to(&mut plane, &ring_plane, ring_area.x as usize, ring_area.y as usize);
 
-        // Status text next to ring
         let (status_text, status_color) = if progress >= 100.0 {
             ("Complete!", t.success)
         } else if is_loading {
@@ -137,60 +214,96 @@ impl Scene for ProgressScene {
         } else {
             ("Ready", t.fg_muted)
         };
-        draw_text(&mut plane, 16, 6, status_text, status_color, t.bg, true);
+        draw_text(&mut plane, 16, 7, status_text, status_color, t.bg, true);
 
-        // ── ProgressBar ───────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 10, "ProgressBar", t.fg, t.bg, true);
-        let bar_area = Rect::new(2, 11, area.width.saturating_sub(4), 3);
-        let bar_plane = self.bar.borrow().render(bar_area);
-        blit_to(&mut plane, &bar_plane, bar_area.x as usize, bar_area.y as usize);
+        // Current stage label
+        if is_loading || progress >= 100.0 {
+            let current = &STAGES[stage_idx];
+            let stage_label = if progress >= 100.0 { "All stages complete" } else { current.name };
+            draw_text(&mut plane, 16, 8, stage_label, t.secondary, t.bg, false);
+        }
 
-        // ── Spinner ──────────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 15, "Spinner", t.fg, t.bg, true);
+        // Spinner
+        draw_text(&mut plane, col_x, 11, "Spinner", t.fg, t.bg, true);
         if is_loading {
-            let spinner_area = Rect::new(12, 15, 8, 1);
+            let spinner_area = Rect::new(12, 11, 8, 1);
             let spinner_plane = self.spinner.borrow().render(spinner_area);
             blit_to(&mut plane, &spinner_plane, spinner_area.x as usize, spinner_area.y as usize);
         } else {
-            draw_text(&mut plane, 12, 15, "(idle)", t.fg_muted, t.bg, false);
+            draw_text(&mut plane, 12, 11, "(idle)", t.fg_muted, t.bg, false);
         }
 
-        // ── Progress Stats ───────────────────────────────────────────────
-        let stats_y = 17;
-        draw_text(&mut plane, 2, stats_y, "Stats:", t.primary, t.bg, true);
-        let progress_str = format!("Progress: {:.1}%", progress);
-        let status_str = format!("Status: {}", if progress >= 100.0 { "Complete" } else if is_loading { "Loading" } else { "Ready" });
-        draw_text(&mut plane, 2, stats_y + 1, &progress_str, t.fg, t.bg, false);
-        draw_text(&mut plane, 2, stats_y + 2, &status_str, t.fg, t.bg, false);
+        // ── Right column: ProgressBar + Stats ─────────────────────────────
+        let right_x = area.width * 40 / 100;
 
-        // ── Visual Gauge ────────────────────────────────────────────────
-        let gauge_y = stats_y + 4;
-        let gauge_w = area.width.saturating_sub(4) as usize;
+        draw_text(&mut plane, right_x, 5, "ProgressBar", t.fg, t.bg, true);
+        let bar_area = Rect::new(right_x, 6, area.width.saturating_sub(right_x + 2), 3);
+        let bar_plane = self.bar.borrow().render(bar_area);
+        blit_to(&mut plane, &bar_plane, bar_area.x as usize, bar_area.y as usize);
+
+        // Visual gauge
+        draw_text(&mut plane, right_x, 10, "Visual Gauge", t.fg, t.bg, true);
+        let gauge_y = 11;
+        let gauge_w = area.width.saturating_sub(right_x + 2) as usize;
         let filled = (progress / 100.0 * gauge_w as f64) as usize;
-        for x in 0..gauge_w {
-            let idx = (gauge_y * area.width + 2 + x as u16) as usize;
+        for dx in 0..gauge_w {
+            let idx = (gauge_y * plane.width + right_x + dx as u16) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = if x < filled { '█' } else { '░' };
+                plane.cells[idx].char = if dx < filled { '█' } else { '░' };
                 plane.cells[idx].fg = if progress >= 100.0 { t.success } else { t.primary };
                 plane.cells[idx].transparent = false;
             }
         }
 
-        // Auto-run indicator
-        if is_loading {
-            draw_text(&mut plane, area.width.saturating_sub(8), 2, "▶ AUTO", t.primary, t.bg, true);
+        // Stats panel
+        draw_text(&mut plane, right_x, 13, "Statistics", t.secondary, t.bg, true);
+        for dx in 0..area.width.saturating_sub(right_x + 2) {
+            let idx = (14 * plane.width + right_x + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        let stats: Vec<(&str, String)> = vec![
+            ("Progress", format!("{:.1}%", progress)),
+            ("Stage", format!("{}/{}", stage_idx + 1, STAGES.len())),
+            ("Elapsed", format!("{} ticks", self.elapsed_ticks())),
+            ("Speed", if progress < 30.0 { "Fast".into() } else if progress < 70.0 { "Normal".into() } else { "Slow".into() }),
+            ("Status", if progress >= 100.0 { "Complete".into() } else if is_loading { "Running".into() } else { "Idle".into() }),
+        ];
+        for (i, (label, value)) in stats.iter().enumerate() {
+            let sy = 15 + i as u16;
+            if sy >= area.height.saturating_sub(2) { break; }
+            draw_text(&mut plane, right_x, sy, label, t.fg_muted, t.bg, false);
+            let val_color = match *label {
+                "Progress" if progress >= 100.0 => t.success,
+                "Status" if *value == "Running" => t.primary,
+                _ => t.fg,
+            };
+            draw_text(&mut plane, right_x + 12, sy, value, val_color, t.bg, false);
+        }
+
+        // Vertical divider
+        for y in 5..area.height.saturating_sub(2) {
+            let idx = (y * plane.width + right_x - 1) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
         }
 
         // Footer
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let footer = format!(
-            " SPACE:toggle loading | r:reset | {}:help | {}:back ",
+            " SPACE:toggle | r:reset | {}:help | {}:back ",
             help_key, back_key,
         );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
+            let idx = (fy * plane.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg_muted;
@@ -239,6 +352,8 @@ impl Scene for ProgressScene {
             KeyCode::Char('r') if key.modifiers.is_empty() => {
                 self.progress.set(0.0);
                 self.loading.set(false);
+                self.tick_count.set(0);
+                self.start_tick.set(0);
                 self.ring.borrow_mut().set_progress(0.0);
                 self.bar.borrow_mut().set_progress(0.0);
                 self.dirty = true;
@@ -259,7 +374,7 @@ impl Scene for ProgressScene {
         self.spinner.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true } // always re-render for auto progress
+    fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
@@ -267,8 +382,8 @@ impl Scene for ProgressScene {
 impl ProgressScene {
     fn render_help(&self, plane: &mut Plane, area: Rect) {
         let t = &self.theme;
-        let hw = 42u16.min(area.width.saturating_sub(4));
-        let hh = 10u16.min(area.height.saturating_sub(4));
+        let hw = 44u16.min(area.width.saturating_sub(4));
+        let hh = 12u16.min(area.height.saturating_sub(4));
         let hx = (area.width - hw) / 2;
         let hy = (area.height - hh) / 2;
 
@@ -281,32 +396,37 @@ impl ProgressScene {
                 }
             }
         }
+        for x in hx + 1..hx + hw - 1 {
+            let top = (hy * plane.width + x) as usize;
+            let bot = ((hy + hh - 1) * plane.width + x) as usize;
+            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
+            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+        }
+        for y in hy + 1..hy + hh - 1 {
+            let left = (y * plane.width + hx) as usize;
+            let right = (y * plane.width + hx + hw - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+        }
+        for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
+            let idx = (cy * plane.width + cx) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+        }
 
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let lines = [
-            ("╭────────────────────────────────────╮", true),
-            ("│     Progress & Loading Help        │", true),
-            ("├────────────────────────────────────┤", true),
-            ("│  SPACE    Toggle loading simulation│", false),
-            ("│  r        Reset progress           │", false),
-            (&format!("│  {:<10} Back to showcase          │", back_key), false),
-            ("╰────────────────────────────────────╯", true),
+        let title = "Progress & Loading Help";
+        let tx = hx + (hw - title.len() as u16) / 2;
+        draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
+
+        let shortcuts = [
+            ("SPACE", "Toggle loading simulation"),
+            ("r", "Reset progress"),
+            ("?", "Toggle help"),
+            ("B/Esc", "Back to showcase"),
         ];
-        for (i, (line, is_border)) in lines.iter().enumerate() {
-            let ly = hy + i as u16;
-            let lx = (area.width - line.len() as u16) / 2;
-            for (j, ch) in line.chars().enumerate() {
-                let px = lx + j as u16;
-                if px < area.width && ly < area.height {
-                    let idx = (ly * area.width + px) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = if *is_border || "│╭╮├┤╰╯─".contains(ch) { t.outline } else { t.fg };
-                        plane.cells[idx].bg = t.surface_elevated;
-                        plane.cells[idx].transparent = false;
-                    }
-                }
-            }
+        for (i, (key, desc)) in shortcuts.iter().enumerate() {
+            let row = hy + 3 + i as u16;
+            draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
+            draw_text(plane, hx + 16, row, desc, t.fg, t.surface_elevated, false);
         }
     }
 }

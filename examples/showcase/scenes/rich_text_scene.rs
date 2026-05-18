@@ -218,6 +218,25 @@ impl Scene for RichTextScene {
         let tab_info = format!("Document {} of {}", self.selected_tab + 1, self.tabs.len());
         draw_text(&mut plane, area.width.saturating_sub(tab_info.len() as u16 + 2), 2, &tab_info, t.fg_muted, t.bg, false);
 
+        // Document info bar (word count, line count)
+        let doc = match self.selected_tab {
+            0 => DOC_README,
+            1 => DOC_CHANGELOG,
+            _ => DOC_GUIDE,
+        };
+        let word_count = doc.split_whitespace().count();
+        let line_count = doc.lines().count();
+        let char_count = doc.len();
+        let info = format!("{} lines | {} words | {} chars", line_count, word_count, char_count);
+        draw_text(&mut plane, 2, 3, &info, t.fg_muted, t.bg, false);
+
+        // Selected tab indicator on right
+        let tab_names = ["README", "Changelog", "Guide"];
+        if self.selected_tab < tab_names.len() {
+            draw_text(&mut plane, area.width.saturating_sub(tab_names[self.selected_tab].len() as u16 + 2), 3,
+                      tab_names[self.selected_tab], t.primary, t.bg, true);
+        }
+
         // RichText content area
         let content_area = Rect::new(area.x + 2, area.y + 4, area.width.saturating_sub(4), area.height.saturating_sub(7));
         let content_plane = self.rich_text.render(content_area);

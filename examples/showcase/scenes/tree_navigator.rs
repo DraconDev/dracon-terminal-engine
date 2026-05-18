@@ -1,10 +1,10 @@
 //! Embedded Tree Navigator scene for the showcase.
 //!
 //! Demonstrates Tree + Breadcrumbs with hierarchical navigation.
-//! Press `B`/`Esc` to go back.
+//! Rich detail pane with file type icons, size bars, content preview.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
-use dracon_terminal_engine::compositor::Plane;
+use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -15,6 +15,9 @@ use ratatui::layout::Rect;
 
 struct MockFs {
     name: &'static str,
+    kind: &'static str, // "dir", "rs", "toml", "md", "json", "lock", "sh", "txt"
+    size_kb: f32,       // 0.0 for dirs
+    modified: &'static str,
     children: Option<Vec<MockFs>>,
 }
 
@@ -34,6 +37,147 @@ impl MockFs {
             .map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>())
             .unwrap_or(0)
     }
+
+    fn find(&self, name: &str) -> Option<&MockFs> {
+        if self.name == name { return Some(self); }
+        self.children.as_ref().and_then(|c| c.iter().find_map(|ch| ch.find(name)))
+    }
+
+    fn icon(&self) -> char {
+        match self.kind {
+            "dir" => '◈',
+            "rs" => '⚙',
+            "toml" => '▤',
+            "md" => '◇',
+            "json" => '◆',
+            "lock" => '⊞',
+            "sh" => '▶',
+            "txt" => '◧',
+            _ => '○',
+        }
+    }
+
+    fn type_label(&self) -> &str {
+        match self.kind {
+            "dir" => "Directory",
+            "rs" => "Rust Source",
+            "toml" => "TOML Config",
+            "md" => "Markdown",
+            "json" => "JSON Data",
+            "lock" => "Lock File",
+            "sh" => "Shell Script",
+            "txt" => "Plain Text",
+            _ => "File",
+        }
+    }
+
+    fn icon_color(&self, t: &Theme) -> Color {
+        match self.kind {
+            "dir" => t.primary,
+            "rs" => t.warning,
+            "toml" => t.secondary,
+            "md" => t.info,
+            "json" => t.success,
+            "lock" => t.fg_muted,
+            "sh" => t.error,
+            "txt" => t.fg,
+            _ => t.fg_muted,
+        }
+    }
+
+    fn preview_lines(&self) -> Vec<&str> {
+        match self.name {
+            "main.rs" => vec!["fn main() {", "    println!(\"Hello\");", "    app::run();", "}"],
+            "lib.rs" => vec!["pub mod engine;", "pub mod compositor;", "pub mod framework;", "pub mod input;"],
+            "mod.rs" => vec!["pub mod app;", "pub mod widget;", "pub mod theme;"],
+            "engine.rs" => vec!["pub struct Engine {", "    running: bool,", "    theme: Theme,", "}"],
+            "event.rs" => vec!["pub enum Event {", "    Key(KeyEvent),", "    Mouse(MouseEvent),", "}"],
+            "theme.rs" => vec!["pub struct Theme {", "    pub name: &str,", "    pub bg: Color,", "}"],
+            "Cargo.toml" => vec!["[package]", "name = \"dte\"", "version = \"0.1.0\"", "edition = \"2021\""],
+            "Cargo.lock" => vec!["# This file is auto-generated", "# by Cargo.", "version = 3"],
+            "README.md" => vec!["# Dracon Terminal Engine", "", "GUI-grade terminal apps.", "Widgets + compositor."],
+            "LICENSE" => vec!["MIT License", "", "Copyright (c) 2024"],
+            "Makefile.toml" => vec!["[tasks.build]", "command = \"cargo\"", "args = [\"build\"]"],
+            ".gitignore" => vec!["/target", "**/*.rs.bk", "Cargo.lock"],
+            "run.sh" => vec!["#!/bin/bash", "cargo run --example $1"],
+            "config.json" => vec!["{", "  \"theme\": \"nord\",", "  \"font_size\": 14", "}"],
+            _ => vec!["(no preview available)"],
+        }
+    }
+}
+
+fn build_fs() -> MockFs {
+    MockFs {
+        name: "project",
+        kind: "dir",
+        size_kb: 0.0,
+        modified: "2024-12-01",
+        children: Some(vec![
+            MockFs {
+                name: "src",
+                kind: "dir",
+                size_kb: 0.0,
+                modified: "2024-12-10",
+                children: Some(vec![
+                    MockFs {
+                        name: "main.rs",
+                        kind: "rs",
+                        size_kb: 2.4,
+                        modified: "2024-12-10",
+                        children: None,
+                    },
+                    MockFs {
+                        name: "lib.rs",
+                        kind: "rs",
+                        size_kb: 1.8,
+                        modified: "2024-12-09",
+                        children: None,
+                    },
+                    MockFs {
+                        name: "engine",
+                        kind: "dir",
+                        size_kb: 0.0,
+                        modified: "2024-12-08",
+                        children: Some(vec![
+                            MockFs { name: "mod.rs", kind: "rs", size_kb: 0.3, modified: "2024-12-08", children: None },
+                            MockFs { name: "theme.rs", kind: "rs", size_kb: 4.2, modified: "2024-12-07", children: None },
+                            MockFs { name: "event.rs", kind: "rs", size_kb: 1.1, modified: "2024-12-06", children: None },
+                        ]),
+                    },
+                    MockFs {
+                        name: "framework",
+                        kind: "dir",
+                        size_kb: 0.0,
+                        modified: "2024-12-10",
+                        children: Some(vec![
+                            MockFs { name: "mod.rs", kind: "rs", size_kb: 0.5, modified: "2024-12-10", children: None },
+                            MockFs { name: "engine.rs", kind: "rs", size_kb: 3.7, modified: "2024-12-09", children: None },
+                        ]),
+                    },
+                ]),
+            },
+            MockFs {
+                name: "tests",
+                kind: "dir",
+                size_kb: 0.0,
+                modified: "2024-12-05",
+                children: Some(vec![
+                    MockFs { name: "integration.rs", kind: "rs", size_kb: 1.2, modified: "2024-12-05", children: None },
+                ]),
+            },
+            MockFs { name: "examples", kind: "dir", size_kb: 0.0, modified: "2024-12-10", children: Some(vec![
+                MockFs { name: "demo.rs", kind: "rs", size_kb: 5.6, modified: "2024-12-10", children: None },
+            ]) },
+            MockFs { name: "Cargo.toml", kind: "toml", size_kb: 0.5, modified: "2024-12-01", children: None },
+            MockFs { name: "Cargo.lock", kind: "lock", size_kb: 12.3, modified: "2024-12-10", children: None },
+            MockFs { name: "README.md", kind: "md", size_kb: 3.1, modified: "2024-11-28", children: None },
+            MockFs { name: "LICENSE", kind: "txt", size_kb: 1.1, modified: "2024-11-01", children: None },
+            MockFs { name: ".gitignore", kind: "txt", size_kb: 0.1, modified: "2024-11-01", children: None },
+            MockFs { name: "Makefile.toml", kind: "toml", size_kb: 0.8, modified: "2024-11-15", children: None },
+            MockFs { name: "config.json", kind: "json", size_kb: 0.2, modified: "2024-12-01", children: None },
+            MockFs { name: "run.sh", kind: "sh", size_kb: 0.1, modified: "2024-11-20", children: None },
+        ]),
+    }
 }
 
 pub struct TreeNavigatorScene {
@@ -49,31 +193,13 @@ pub struct TreeNavigatorScene {
 
 impl TreeNavigatorScene {
     pub fn new(theme: Theme) -> Self {
-        let fs = MockFs {
-            name: "root",
-            children: Some(vec![
-                MockFs {
-                    name: "src",
-                    children: Some(vec![
-                        MockFs { name: "main.rs", children: None },
-                        MockFs { name: "lib.rs", children: None },
-                    ]),
-                },
-                MockFs {
-                    name: "tests",
-                    children: Some(vec![
-                        MockFs { name: "test_main.rs", children: None },
-                    ]),
-                },
-                MockFs { name: "README.md", children: None },
-                MockFs { name: "Cargo.toml", children: None },
-            ]),
-        };
-
+        let fs = build_fs();
         let root_node = fs.to_tree_node();
-        let tree = Tree::new(WidgetId::new(10)).with_root(vec![root_node]);
+        let tree = Tree::new(WidgetId::new(10))
+            .with_root(vec![root_node])
+            .with_theme(theme.clone());
         let segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
-        let breadcrumbs = Breadcrumbs::new(segments);
+        let breadcrumbs = Breadcrumbs::new(segments).with_theme(theme.clone());
 
         Self {
             tree,
@@ -86,7 +212,6 @@ impl TreeNavigatorScene {
             dirty: true,
         }
     }
-
 }
 
 impl Scene for TreeNavigatorScene {
@@ -103,8 +228,10 @@ impl Scene for TreeNavigatorScene {
         }
 
         // Title
-        let title = " Tree Navigator ";
-        draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
+        draw_text(&mut plane, 2, 0, " Tree Navigator ", t.primary, t.bg, true);
+        let theme_label = format!(" {} ", self.theme.name);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
+                  &theme_label, t.secondary, t.bg, false);
 
         // Divider
         for x in 0..area.width {
@@ -116,18 +243,17 @@ impl Scene for TreeNavigatorScene {
         }
 
         // Breadcrumbs
-        let bc_height = 2u16;
-        let bc_area = Rect::new(0, 1, area.width, bc_height);
+        let bc_area = Rect::new(0, 1, area.width, 2);
         let bc_plane = self.breadcrumbs.render(bc_area);
         blit_to(&mut plane, &bc_plane, 0, 1);
 
-        // Tree (left half)
-        let split_x = area.width / 2;
+        // Tree (left ~45%)
+        let split_x = area.width * 45 / 100;
         let tree_area = Rect::new(0, 4, split_x, area.height.saturating_sub(8));
         let tree_plane = self.tree.render(tree_area);
         blit_to(&mut plane, &tree_plane, 0, 4);
 
-        // Divider
+        // Vertical divider
         for y in 4..area.height.saturating_sub(4) {
             let idx = (y * area.width + split_x) as usize;
             if idx < plane.cells.len() {
@@ -136,25 +262,29 @@ impl Scene for TreeNavigatorScene {
             }
         }
 
-        // Detail pane (right half)
-        let detail_x = split_x + 1;
-        let detail_w = area.width.saturating_sub(detail_x);
-        let detail_area = Rect::new(detail_x, 4, detail_w, area.height.saturating_sub(8));
+        // Detail pane (right)
+        let detail_x = split_x + 2;
+        let detail_w = area.width.saturating_sub(detail_x + 2);
         let selected_label = self.tree.selected_label().map(|s| s.to_string());
-        render_detail(&mut plane, detail_area, t, selected_label.as_deref());
+        let selected_fs = selected_label.as_deref().and_then(|name| self.fs.find(name));
+        render_detail(&mut plane, detail_x, 4, detail_w, area.height.saturating_sub(8), t, selected_fs);
+
+        // File type legend
+        let legend_y = area.height.saturating_sub(4);
+        render_legend(&mut plane, 2, legend_y, area.width.saturating_sub(4), t);
 
         // Status bar
         let footer_y = area.height.saturating_sub(1);
         for x in 0..area.width {
             let idx = (footer_y * area.width + x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
             }
         }
         let count = self.fs.total_items();
-        let status_text = format!("{} items total | ^v nav | Enter: expand | B/Esc: back | ?: help", count);
-        draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.bg, false);
+        let status_text = format!(" {} items | ↑↓ nav | Enter: expand | ?: help | B: back ", count);
+        draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.surface, false);
 
         if self.show_help {
             draw_help(&mut plane, area, t);
@@ -188,7 +318,7 @@ impl Scene for TreeNavigatorScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let tree_area = Rect::new(0, 4, self.area.get().width / 2, self.area.get().height.saturating_sub(8));
+        let tree_area = Rect::new(0, 4, self.area.get().width * 45 / 100, self.area.get().height.saturating_sub(8));
         if col >= tree_area.x && col < tree_area.x + tree_area.width &&
            row >= tree_area.y && row < tree_area.y + tree_area.height {
             let rel_col = col - tree_area.x;
@@ -213,73 +343,148 @@ impl Scene for TreeNavigatorScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-
-fn render_detail(plane: &mut Plane, area: Rect, t: &Theme, selected: Option<&str>) {
-    for y in area.y..area.y + area.height {
-        for x in area.x..area.x + area.width {
-            let idx = (y * plane.width + x) as usize;
+fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, selected: Option<&MockFs>) {
+    // Background
+    for dy in 0..h {
+        for dx in 0..w {
+            let idx = ((y + dy) * plane.width + x + dx) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
             }
         }
     }
 
-    let title = "Details";
-    draw_text(plane, area.x + 1, area.y + 1, title, t.primary, t.surface, true);
+    draw_text(plane, x + 1, y + 1, "File Details", t.primary, t.surface, true);
+    for dx in 0..w {
+        let idx = ((y + 2) * plane.width + x + dx) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '─';
+            plane.cells[idx].fg = t.outline;
+        }
+    }
 
-    if let Some(name) = selected {
-        let file_type = if name.ends_with(".rs") {
-            "Rust source file"
-        } else if name.ends_with(".toml") {
-            "TOML config file"
-        } else if name.ends_with(".md") {
-            "Markdown document"
-        } else if name == "src" || name == "tests" || name == "root" {
-            "Directory"
+    if let Some(fs) = selected {
+        // Icon + name
+        let icon_color = fs.icon_color(t);
+        let icon_idx = ((y + 3) * plane.width + x + 1) as usize;
+        if icon_idx < plane.cells.len() {
+            plane.cells[icon_idx].char = fs.icon();
+            plane.cells[icon_idx].fg = icon_color;
+        }
+        draw_text(plane, x + 3, y + 3, fs.name, t.fg, t.surface, true);
+
+        // Type
+        draw_text(plane, x + 1, y + 5, "Type:", t.fg_muted, t.surface, false);
+        draw_text(plane, x + 8, y + 5, fs.type_label(), icon_color, t.surface, false);
+
+        // Size (with bar for files)
+        draw_text(plane, x + 1, y + 6, "Size:", t.fg_muted, t.surface, false);
+        if fs.kind == "dir" {
+            draw_text(plane, x + 8, y + 6, "Directory", t.fg_muted, t.surface, false);
         } else {
-            "File"
-        };
-        let size = if name == "src" || name == "tests" || name == "root" {
-            "--"
-        } else {
-            match name {
-                "main.rs" => "2.4 KB",
-                "lib.rs" => "1.8 KB",
-                "test_main.rs" => "0.9 KB",
-                "README.md" => "3.1 KB",
-                "Cargo.toml" => "0.5 KB",
-                _ => "1.0 KB",
+            let size_str = format!("{:.1} KB", fs.size_kb);
+            draw_text(plane, x + 8, y + 6, &size_str, t.fg, t.surface, false);
+            // Size bar (max 15KB scale)
+            let bar_w = w.saturating_sub(10).min(20);
+            let filled = (fs.size_kb / 15.0 * bar_w as f32).min(bar_w as f32) as usize;
+            for dx in 0..bar_w as usize {
+                let idx = ((y + 7) * plane.width + x + 8 + dx as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = if dx < filled { '█' } else { '░' };
+                    plane.cells[idx].fg = if dx < filled { t.primary } else { t.fg_muted };
+                }
             }
-        };
-        let lines = [
-            format!("Name: {}", name),
-            format!("Type: {}", file_type),
-            format!("Size: {}", size),
-        ];
-        for (i, line) in lines.iter().enumerate() {
-            let y = area.y + 3 + i as u16;
-            if y < area.y + area.height.saturating_sub(1) {
-                draw_text(plane, area.x + 1, y, line, t.fg, t.surface, false);
+        }
+
+        // Modified
+        draw_text(plane, x + 1, y + 8, "Modified:", t.fg_muted, t.surface, false);
+        draw_text(plane, x + 12, y + 8, fs.modified, t.fg, t.surface, false);
+
+        // Children count for dirs
+        if fs.kind == "dir" {
+            if let Some(ref children) = fs.children {
+                draw_text(plane, x + 1, y + 9, "Children:", t.fg_muted, t.surface, false);
+                let count_str = format!("{} items", children.len());
+                draw_text(plane, x + 12, y + 9, &count_str, t.fg, t.surface, false);
+            }
+        }
+
+        // Content preview
+        let preview_y = y + 10;
+        if preview_y + 6 < y + h {
+            draw_text(plane, x + 1, preview_y, "Preview", t.secondary, t.surface, true);
+            for dx in 0..w {
+                let idx = ((preview_y + 1) * plane.width + x + dx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '─';
+                    plane.cells[idx].fg = t.outline;
+                }
+            }
+
+            // Preview background
+            for dy in 0..4.min((y + h - preview_y - 2) as usize) {
+                for dx in 0..w {
+                    let idx = ((preview_y + 2 + dy as u16) * plane.width + x + dx) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = t.bg;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+
+            let lines = fs.preview_lines();
+            for (i, line) in lines.iter().take(4).enumerate() {
+                let ly = preview_y + 2 + i as u16;
+                if ly >= y + h { break; }
+                // Line number
+                draw_text(plane, x + 1, ly, &format!("{:>2}", i + 1), t.fg_muted, t.bg, false);
+                // Content
+                draw_text(plane, x + 4, ly, line, t.fg, t.bg, false);
             }
         }
     } else {
         let hint = [
             "Select an item from",
             "the tree to see its",
-            "details here.",
+            "details and preview.",
         ];
         for (i, line) in hint.iter().enumerate() {
-            let y = area.y + 3 + i as u16;
-            if y < area.y + area.height.saturating_sub(1) {
-                draw_text(plane, area.x + 1, y, line, t.fg_muted, t.surface, false);
+            let ly = y + 4 + i as u16;
+            if ly < y + h {
+                draw_text(plane, x + 1, ly, line, t.fg_muted, t.surface, false);
             }
         }
     }
 }
 
+fn render_legend(plane: &mut Plane, x: u16, y: u16, w: u16, t: &Theme) {
+    draw_text(plane, x, y, "File Types:", t.secondary, t.bg, true);
+    let types = [
+        ('◈', "dir", t.primary),
+        ('⚙', "rs", t.warning),
+        ('▤', "toml", t.secondary),
+        ('◇', "md", t.info),
+        ('◆', "json", t.success),
+        ('⊞', "lock", t.fg_muted),
+        ('▶', "sh", t.error),
+    ];
+    let mut lx = x + 12;
+    for (icon, label, color) in types {
+        if lx + label.len() as u16 + 4 > x + w { break; }
+        let idx = (y * plane.width + lx) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = icon;
+            plane.cells[idx].fg = color;
+        }
+        draw_text(plane, lx + 2, y, label, t.fg_muted, t.bg, false);
+        lx += label.len() as u16 + 4;
+    }
+}
+
 fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 42u16.min(area.width.saturating_sub(4));
-    let hh = 10u16.min(area.height.saturating_sub(4));
+    let hw = 44u16.min(area.width.saturating_sub(4));
+    let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
 
@@ -292,23 +497,20 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
             }
         }
     }
-
     for x in hx + 1..hx + hw - 1 {
-        let top = (hy * area.width + x) as usize;
-        let bot = ((hy + hh - 1) * area.width + x) as usize;
+        let top = (hy * plane.width + x) as usize;
+        let bot = ((hy + hh - 1) * plane.width + x) as usize;
         if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
         if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
     }
     for y in hy + 1..hy + hh - 1 {
-        let left = (y * area.width + hx) as usize;
-        let right = (y * area.width + hx + hw - 1) as usize;
+        let left = (y * plane.width + hx) as usize;
+        let right = (y * plane.width + hx + hw - 1) as usize;
         if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
         if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
     }
-    // Rounded corners
-    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
-    for (ch, cx, cy) in corners {
-        let idx = (cy * area.width + cx) as usize;
+    for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
+        let idx = (cy * plane.width + cx) as usize;
         if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
     }
 
@@ -317,9 +519,10 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
     let shortcuts = [
-        ("^/v", "Navigate tree"),
+        ("↑/↓", "Navigate tree"),
         ("Enter/>", "Expand folder"),
         ("<", "Collapse folder"),
+        ("Click", "Select item"),
         ("B/Esc", "Back to showcase"),
         ("?", "Toggle help"),
     ];

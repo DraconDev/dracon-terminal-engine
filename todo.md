@@ -4,33 +4,6 @@ Last updated: 2026-05-17
 
 ---
 
-## Active Work — Scene Enrichment
-
-> Full plan in `ENRICHMENT.md`. 12 of 23 embedded scenes need visual enrichment.
-> Priority: fill empty screen space, add interactive content, make every scene feel like a real app.
-
-### Tier 1 — Most Spartan (50%+ empty screen)
-
-1. [ ] **Enrich `modal_demo`** — 70% empty. Add rich settings base screen, dimmed backdrop, toast stack, modal stacking
-2. [ ] **Enrich `tooltip`** — 55% empty. Add hoverable toolbar row, tooltip history sidebar, fill gaps
-3. [ ] **Enrich `tags_input`** — 60% empty. Add colored tag pills, shortcut legend, tag stats visualization
-4. [ ] **Enrich `password_input`** — 50% empty. Add requirements checklist with checkmarks, show/hide toggle, side panel
-5. [ ] **Enrich `tree_navigator`** — 30% empty but detail pane bare. Add file type icons, size bars, content preview, search
-
-### Tier 2 — Needs Polish (20-35% empty)
-
-6. [ ] **Enrich `progress`** — 35% empty. Add multi-stage subtasks, step dots, elapsed time, stage labels
-7. [ ] **Enrich `form_demo`** — 30% empty. Add section headers, inline validation, profile area, reset button
-8. [ ] **Enrich `theme_switcher`** — 20% empty. Expand preview area, per-swatch color dots, scroll all themes
-
-### Tier 3 — Minor Gaps (10-20% empty)
-
-9. [ ] **Enrich `cell_pool`** — Add mini pool grid visualization, comparison chart
-10. [ ] **Enrich `color_picker`** — Add recent colors row, contrast checker, complementary suggestions
-11. [ ] **Enrich `rich_text`** — Add TOC sidebar, scroll indicator, word count, code block borders
-
----
-
 ## Core Framework (deferred to 0.2.0)
 
 - [ ] Widget trait decomposition Phase 2 (making sub-traits primary)
@@ -41,6 +14,25 @@ Last updated: 2026-05-17
 ---
 
 ## Done ✅
+
+### Scene Enrichment (all 11 items complete)
+
+**Tier 1 — Most Spartan:**
+- [x] Enrich `modal_demo` — Settings base screen, dimmed backdrop, 5 toast types, confirm dialog stacking
+- [x] Enrich `tooltip` — Toolbar row (8 icons), sidebar (8 items + badges), 6 action buttons, tooltip history, status indicators
+- [x] Enrich `tags_input` — Colored tag pills with category colors, shortcut legend, category breakdown with match dots, capacity bar
+- [x] Enrich `password_input` — 5-rule requirements checklist (live ✓/○), show/hide toggle (Ctrl+H), match indicator, security tips panel
+- [x] Enrich `tree_navigator` — 17-item filesystem, 8 file type icons, size bars, content preview with line numbers, file type legend
+
+**Tier 2 — Needs Polish:**
+- [x] Enrich `progress` — 5-stage build pipeline with step dots/connectors, elapsed ticks, visual gauge, stats panel
+- [x] Enrich `form_demo` — Section headers (Account/Security/Preferences), validation checkmarks, profile preview with avatar, settings summary, reset
+- [x] Enrich `theme_switcher` — Per-swatch color dots (7 theme colors), arrow key grid navigation, expanded widget preview, theme details row
+
+**Tier 3 — Minor Gaps:**
+- [x] Enrich `cell_pool` — Pool grid visualization (active/pooled/free blocks), split layout with wave chart + grid
+- [x] Enrich `color_picker` — Contrast ratio checker (WCAG AAA/AA/Fail), recent colors row, complementary color display
+- [x] Enrich `rich_text` — Document info bar (lines/words/chars), current doc indicator, improved footer
 
 ### Showcase Upgrades (all 12 original items done)
 - [x] Upgrade cell_pool — Visual gauges, allocation wave chart, auto-sim, reset
@@ -61,7 +53,7 @@ Last updated: 2026-05-17
 - [x] Color Picker — Interactive picker, swatch, hex/RGB, palette strip
 - [x] Tags Input — Autocomplete, max tags, activity log
 
-### Scene Enrichment (3 upgraded)
+### Scene Enrichment (3 initially upgraded)
 - [x] Calendar — Events sidebar, date detail panel, category legend, stats
 - [x] Autocomplete — Package info panel, recent selections, category badges
 - [x] Accessibility — Login form with focus rings, a11y tree, announcement log

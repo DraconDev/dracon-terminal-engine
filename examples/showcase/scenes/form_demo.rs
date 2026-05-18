@@ -1,7 +1,8 @@
 //! Embedded Form Demo scene for the showcase.
 //!
-//! Demonstrates form fields with validation and submit.
-//! Press `Tab` to cycle focus, `B`/`Esc` to go back.
+//! Demonstrates form fields with validation, submit, and drag reorder.
+//! Left panel: form fields with section headers.
+//! Right panel: profile preview with live summary.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::Plane;
@@ -43,20 +44,21 @@ pub struct FormDemoScene {
 impl FormDemoScene {
     pub fn new(theme: Theme) -> Self {
         Self {
-            theme,
+            theme: theme.clone(),
             show_help: false,
             dirty: true,
             focused_field: 0,
             field_order: [FIELD_USERNAME, FIELD_EMAIL, FIELD_PASSWORD, FIELD_THEME, FIELD_NOTIFICATIONS, FIELD_SUBMIT],
             dragging: None,
             drag_hover: None,
-            username: SearchInput::new(WidgetId::new(10)),
-            email: SearchInput::new(WidgetId::new(11)),
-            password: PasswordInput::new(WidgetId::new(12)),
+            username: SearchInput::new(WidgetId::new(10)).with_theme(theme.clone()),
+            email: SearchInput::new(WidgetId::new(11)).with_theme(theme.clone()),
+            password: PasswordInput::new(WidgetId::new(12)).with_theme(theme.clone()),
             theme_select: Select::new(WidgetId::new(13))
+                .with_theme(theme.clone())
                 .with_options(vec!["Dark".into(), "Light".into(), "Cyberpunk".into()]),
-            notifications: Toggle::new(WidgetId::new(14), "Enabled"),
-            submit: Button::with_id(WidgetId::new(15), "Submit"),
+            notifications: Toggle::new(WidgetId::new(14), "Enabled").with_theme(theme.clone()),
+            submit: Button::with_id(WidgetId::new(15), "Submit").with_theme(theme.clone()),
             toast: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -92,6 +94,48 @@ impl FormDemoScene {
         }
     }
 
+    fn reset(&mut self) {
+        self.username.clear();
+        self.email.clear();
+        self.password.clear();
+        self.toast = None;
+        self.focused_field = 0;
+        self.dirty = true;
+    }
+
+    fn field_section(field_id: usize) -> &'static str {
+        match field_id {
+            FIELD_USERNAME | FIELD_EMAIL => "Account",
+            FIELD_PASSWORD => "Security",
+            FIELD_THEME | FIELD_NOTIFICATIONS => "Preferences",
+            FIELD_SUBMIT => "Actions",
+            _ => "",
+        }
+    }
+
+    fn field_label(field_id: usize) -> &'static str {
+        match field_id {
+            FIELD_USERNAME => "Username",
+            FIELD_EMAIL => "Email",
+            FIELD_PASSWORD => "Password",
+            FIELD_THEME => "Theme",
+            FIELD_NOTIFICATIONS => "Notifications",
+            FIELD_SUBMIT => "",
+            _ => "",
+        }
+    }
+
+    fn field_icon(field_id: usize) -> char {
+        match field_id {
+            FIELD_USERNAME => '👤',
+            FIELD_EMAIL => '@',
+            FIELD_PASSWORD => '🔒',
+            FIELD_THEME => '◈',
+            FIELD_NOTIFICATIONS => '◉',
+            FIELD_SUBMIT => '▶',
+            _ => '○',
+        }
+    }
 }
 
 impl Scene for FormDemoScene {
@@ -109,6 +153,9 @@ impl Scene for FormDemoScene {
 
         // Title
         draw_text(&mut plane, 2, 0, " Settings Form ", t.primary, t.bg, true);
+        let theme_label = format!(" {} ", self.theme.name);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
+                  &theme_label, t.secondary, t.bg, false);
 
         // Divider
         for x in 0..area.width {
@@ -119,26 +166,40 @@ impl Scene for FormDemoScene {
             }
         }
 
-        let labels = [
-            ("Usr Username", FIELD_USERNAME),
-            ("@ Email", FIELD_EMAIL),
-            ("Pwd Password", FIELD_PASSWORD),
-            ("Thm Theme", FIELD_THEME),
-            ("Bell Notifications", FIELD_NOTIFICATIONS),
-            ("", FIELD_SUBMIT),
-        ];
-
+        // ── Left panel: Form fields ──────────────────────────────────────
+        let form_w = (area.width * 55 / 100).max(30);
         let start_y = 2u16;
         let field_h = 2u16;
 
-        // Build position map: field_id -> visual row index
+        // Build position map
         let mut field_to_row = [0usize; FIELD_COUNT];
         for (row_idx, &field_id) in self.field_order.iter().enumerate() {
             field_to_row[field_id] = row_idx;
         }
 
+        // Track current section for headers
+        let mut last_section = "";
+        let mut y_offset = 0u16;
+
         for (row_idx, &field_id) in self.field_order.iter().enumerate() {
-            let y = start_y + row_idx as u16 * field_h;
+            let section = Self::field_section(field_id);
+
+            // Section header
+            if section != last_section && !section.is_empty() {
+                let sy = start_y + y_offset;
+                draw_text(&mut plane, 2, sy, section, t.secondary, t.bg, true);
+                for dx in 0..form_w.saturating_sub(4) {
+                    let idx = ((sy + 1) * plane.width + 2 + dx) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = '─';
+                        plane.cells[idx].fg = t.outline;
+                    }
+                }
+                y_offset += 2;
+                last_section = section;
+            }
+
+            let y = start_y + y_offset;
             let is_focused = self.focused_field == field_id;
             let is_dragged = self.dragging == Some(row_idx);
             let is_hover_target = self.drag_hover == Some(row_idx) && self.dragging.is_some();
@@ -155,29 +216,48 @@ impl Scene for FormDemoScene {
 
             // Row background
             for row in y..y + field_h {
-                for col in 0..area.width {
-                    let idx = (row * area.width + col) as usize;
+                for col in 0..form_w {
+                    let idx = (row * plane.width + col) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].bg = row_bg;
+                        plane.cells[idx].transparent = false;
                     }
                 }
             }
 
-            // Drag handle indicator on left
+            // Drag handle
             if !is_dragged {
                 let handle = if is_hover_target { ">" } else { "=" };
                 draw_text(&mut plane, 0, y, handle, t.fg_muted, row_bg, false);
             }
 
-            let label = labels[field_id].0;
+            // Icon + label
+            let icon = Self::field_icon(field_id);
+            let label = Self::field_label(field_id);
+            let icon_idx = (y * plane.width + 2) as usize;
+            if icon_idx < plane.cells.len() {
+                plane.cells[icon_idx].char = icon;
+                plane.cells[icon_idx].fg = if is_focused { t.primary } else { t.fg_muted };
+            }
             if !label.is_empty() {
-                draw_text(&mut plane, 2, y, label, t.primary, row_bg, false);
+                draw_text(&mut plane, 4, y, label, if is_focused { t.primary } else { t.fg }, row_bg, is_focused);
             }
 
-            let widget_x = 20u16;
-            let widget_w = area.width.saturating_sub(widget_x + 2);
-            let widget_area = Rect::new(widget_x, y, widget_w, 1);
+            // Validation indicator
+            let valid = match field_id {
+                FIELD_USERNAME => !self.username.query().is_empty(),
+                FIELD_EMAIL => self.email.query().contains('@'),
+                FIELD_PASSWORD => self.password.password().len() >= 6,
+                _ => false,
+            };
+            if valid {
+                draw_text(&mut plane, form_w.saturating_sub(2), y, "✓", t.success, row_bg, false);
+            }
 
+            // Widget
+            let widget_x = 16u16;
+            let widget_w = form_w.saturating_sub(widget_x + 4);
+            let widget_area = Rect::new(widget_x, y, widget_w, 1);
             if widget_area.width > 0 {
                 let w_plane = match field_id {
                     FIELD_USERNAME => self.username.render(widget_area),
@@ -190,6 +270,124 @@ impl Scene for FormDemoScene {
                 };
                 blit_to(&mut plane, &w_plane, widget_x as usize, y as usize);
             }
+
+            y_offset += field_h;
+        }
+
+        // Reset button (below form)
+        let reset_y = start_y + y_offset + 1;
+        if reset_y < area.height.saturating_sub(2) {
+            draw_text(&mut plane, 2, reset_y, "r: reset form", t.fg_muted, t.bg, false);
+        }
+
+        // ── Vertical divider ──────────────────────────────────────────────
+        for y in 1..area.height.saturating_sub(1) {
+            let idx = (y * plane.width + form_w) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
+        }
+
+        // ── Right panel: Profile Preview ──────────────────────────────────
+        let panel_x = form_w + 2;
+        let panel_w = area.width.saturating_sub(panel_x + 2);
+
+        draw_text(&mut plane, panel_x, 2, "Profile Preview", t.primary, t.bg, true);
+        for dx in 0..panel_w {
+            let idx = (3 * plane.width + panel_x + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Avatar placeholder
+        let avatar_y = 4;
+        for dy in 0..3 {
+            for dx in 0..5 {
+                let idx = ((avatar_y + dy) * plane.width + panel_x + 2 + dx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+        let avatar_ch = if self.username.query().is_empty() { '?' } else { self.username.query().chars().next().unwrap_or('?') };
+        let av_idx = ((avatar_y + 1) * plane.width + panel_x + 3) as usize;
+        if av_idx < plane.cells.len() {
+            plane.cells[av_idx].char = avatar_ch;
+            plane.cells[av_idx].fg = t.primary;
+            plane.cells[av_idx].style = dracon_terminal_engine::compositor::plane::Styles::BOLD;
+        }
+
+        // Profile info
+        let username = self.username.query();
+        let display_name: &str = if username.is_empty() { "Not set" } else { username };
+        draw_text(&mut plane, panel_x + 9, avatar_y, display_name, if username.is_empty() { t.fg_muted } else { t.fg }, t.bg, true);
+
+        let email = self.email.query();
+        let display_email: &str = if email.is_empty() { "Not set" } else { email };
+        draw_text(&mut plane, panel_x + 9, avatar_y + 1, display_email, if email.is_empty() { t.fg_muted } else { t.secondary }, t.bg, false);
+
+        // Status badge
+        let validation = self.validate();
+        let (badge_text, badge_color) = if validation.is_none() { ("✓ Valid", t.success) } else { ("✗ Incomplete", t.error) };
+        draw_text(&mut plane, panel_x + 9, avatar_y + 2, badge_text, badge_color, t.bg, true);
+
+        // Settings summary
+        let summary_y = avatar_y + 4;
+        draw_text(&mut plane, panel_x, summary_y, "Settings", t.secondary, t.bg, true);
+        for dx in 0..panel_w {
+            let idx = ((summary_y + 1) * plane.width + panel_x + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        let settings = [
+            ("Theme", self.theme_select.selected_label().unwrap_or("Dark")),
+            ("Notifications", if self.notifications.is_on() { "On" } else { "Off" }),
+            ("Password", if self.password.password().len() >= 6 { "Set" } else if self.password.password().is_empty() { "Not set" } else { "Too short" }),
+            ("Email", if self.email.query().contains('@') { "Valid" } else if self.email.query().is_empty() { "Not set" } else { "Invalid" }),
+        ];
+        for (i, (label, value)) in settings.iter().enumerate() {
+            let sy = summary_y + 2 + i as u16;
+            if sy >= area.height.saturating_sub(2) { break; }
+            draw_text(&mut plane, panel_x, sy, label, t.fg_muted, t.bg, false);
+            let val_color = match *value {
+                "Valid" | "Set" | "On" => t.success,
+                "Invalid" | "Too short" | "Off" => t.warning,
+                _ => t.fg,
+            };
+            draw_text(&mut plane, panel_x + 14, sy, value, val_color, t.bg, false);
+        }
+
+        // Keyboard shortcuts
+        let shortcuts_y = summary_y + 7;
+        if shortcuts_y + 5 < area.height.saturating_sub(2) {
+            draw_text(&mut plane, panel_x, shortcuts_y, "Keyboard", t.secondary, t.bg, true);
+            for dx in 0..panel_w {
+                let idx = ((shortcuts_y + 1) * plane.width + panel_x + dx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '─';
+                    plane.cells[idx].fg = t.outline;
+                }
+            }
+            let shortcuts = [
+                ("Tab", "Next field"),
+                ("Enter", "Submit"),
+                ("r", "Reset form"),
+                ("Drag =", "Reorder"),
+            ];
+            for (i, (key, desc)) in shortcuts.iter().enumerate() {
+                let ky = shortcuts_y + 2 + i as u16;
+                if ky >= area.height.saturating_sub(2) { break; }
+                draw_text(&mut plane, panel_x, ky, key, t.primary, t.bg, false);
+                draw_text(&mut plane, panel_x + 8, ky, desc, t.fg_muted, t.bg, false);
+            }
         }
 
         // Toast
@@ -197,26 +395,26 @@ impl Scene for FormDemoScene {
             let toast_y = area.height.saturating_sub(3);
             let toast_x = (area.width.saturating_sub(msg.len() as u16 + 4)) / 2;
             for x in toast_x..toast_x + msg.len() as u16 + 4 {
-                let idx = (toast_y * area.width + x) as usize;
+                let idx = (toast_y * plane.width + x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.success_bg;
-                    plane.cells[idx].fg = t.success;
+                    plane.cells[idx].bg = if msg.starts_with("Error") { t.error_bg } else { t.success_bg };
+                    plane.cells[idx].fg = if msg.starts_with("Error") { t.error } else { t.success };
                 }
             }
-            draw_text(&mut plane, toast_x + 2, toast_y, msg, t.success, t.success_bg, true);
+            draw_text(&mut plane, toast_x + 2, toast_y, msg, if msg.starts_with("Error") { t.error } else { t.success }, if msg.starts_with("Error") { t.error_bg } else { t.success_bg }, true);
         }
 
         // Footer
         let footer_y = area.height.saturating_sub(1);
         for x in 0..area.width {
-            let idx = (footer_y * area.width + x) as usize;
+            let idx = (footer_y * plane.width + x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
             }
         }
-        let nav = " Tab: next | Enter: submit | Drag =: reorder | B/Esc: back | ?: help ";
-        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
+        let nav = " Tab:next | Enter:submit | Drag=:reorder | r:reset | ?:help | B:back ";
+        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
             draw_help(&mut plane, area, t);
@@ -236,7 +434,6 @@ impl Scene for FormDemoScene {
             return true;
         }
 
-        // If toast is showing, any key dismisses it
         if self.toast.is_some() {
             self.toast = None;
             self.dirty = true;
@@ -249,7 +446,7 @@ impl Scene for FormDemoScene {
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
-            return false; // Let parent (showcase) handle back > pop scene
+            return false;
         }
 
         match key.code {
@@ -262,8 +459,11 @@ impl Scene for FormDemoScene {
                 self.dirty = true;
                 true
             }
+            KeyCode::Char('r') if key.modifiers.is_empty() => {
+                self.reset();
+                true
+            }
             _ => {
-                // Delegate to focused field
                 let handled = match self.focused_field {
                     FIELD_USERNAME => self.username.handle_key(key),
                     FIELD_EMAIL => self.email.handle_key(key),
@@ -280,16 +480,16 @@ impl Scene for FormDemoScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.show_help {
-            return true;
-        }
+        if self.show_help { return true; }
 
+        let area = self.area.get();
+        let form_w = (area.width * 55 / 100).max(30);
         let start_y = 2u16;
         let field_h = 2u16;
 
-        // Calculate which row the mouse is over (if any)
-        let row_idx = if row >= start_y && row < start_y + FIELD_COUNT as u16 * field_h {
-            Some(((row - start_y) / field_h) as usize)
+        // Calculate approximate row index (section headers shift positions)
+        let row_idx = if row >= start_y && col < form_w {
+            Some(((row - start_y) / field_h).min((FIELD_COUNT - 1) as u16) as usize)
         } else {
             None
         };
@@ -298,18 +498,15 @@ impl Scene for FormDemoScene {
             MouseEventKind::Down(MouseButton::Left) => {
                 if let Some(idx) = row_idx {
                     if col < 2 && self.dragging.is_none() {
-                        // Start drag on handle
                         self.dragging = Some(idx);
                         self.drag_hover = Some(idx);
                         self.dirty = true;
                         return true;
                     }
                     if self.dragging.is_some() {
-                        // Complete drag
                         if let Some(drag_idx) = self.dragging {
                             if let Some(hover_idx) = self.drag_hover {
                                 if drag_idx != hover_idx {
-                                    // Swap fields in field_order
                                     self.field_order.swap(drag_idx, hover_idx);
                                 }
                             }
@@ -319,8 +516,7 @@ impl Scene for FormDemoScene {
                         self.dirty = true;
                         return true;
                     }
-                    // Normal click: focus field or submit
-                    let field_id = self.field_order[idx];
+                    let field_id = self.field_order[idx.min(FIELD_COUNT - 1)];
                     if field_id == FIELD_SUBMIT {
                         self.submit();
                     } else {
@@ -368,7 +564,7 @@ impl Scene for FormDemoScene {
 }
 
 fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 42u16.min(area.width.saturating_sub(4));
+    let hw = 44u16.min(area.width.saturating_sub(4));
     let hh = 12u16.min(area.height.saturating_sub(4));
     let hx = (area.width - hw) / 2;
     let hy = (area.height - hh) / 2;
@@ -382,27 +578,24 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
             }
         }
     }
-
     for x in hx + 1..hx + hw - 1 {
-        let top = (hy * area.width + x) as usize;
-        let bot = ((hy + hh - 1) * area.width + x) as usize;
+        let top = (hy * plane.width + x) as usize;
+        let bot = ((hy + hh - 1) * plane.width + x) as usize;
         if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
         if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
     }
     for y in hy + 1..hy + hh - 1 {
-        let left = (y * area.width + hx) as usize;
-        let right = (y * area.width + hx + hw - 1) as usize;
+        let left = (y * plane.width + hx) as usize;
+        let right = (y * plane.width + hx + hw - 1) as usize;
         if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
         if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
     }
-    // Rounded corners
-    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
-    for (ch, cx, cy) in corners {
-        let idx = (cy * area.width + cx) as usize;
+    for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
+        let idx = (cy * plane.width + cx) as usize;
         if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
     }
 
-    let title = "Form Help";
+    let title = "Form Demo Help";
     let tx = hx + (hw - title.len() as u16) / 2;
     draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
 
@@ -410,9 +603,9 @@ fn draw_help(plane: &mut Plane, area: Rect, t: &Theme) {
         ("Tab", "Next field"),
         ("Shift+Tab", "Previous field"),
         ("Enter", "Submit form"),
+        ("r", "Reset form"),
         ("Drag =", "Reorder fields"),
         ("B/Esc", "Back to showcase"),
-        ("?", "Toggle help"),
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
         let row = hy + 3 + i as u16;
