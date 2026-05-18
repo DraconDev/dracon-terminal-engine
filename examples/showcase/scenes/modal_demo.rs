@@ -33,7 +33,6 @@ const SETTINGS: &[SettingItem] = &[
 struct ToastEntry {
     message: String,
     kind: &'static str, // "success", "warning", "error", "info"
-    #[allow(dead_code)]
     created: u64,
 }
 
