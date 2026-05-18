@@ -523,21 +523,27 @@ impl Scene for AccessibilityScene {
                 self.activate();
                 true
             }
-            KeyCode::Char(c) if key.modifiers.is_empty() => {
-                match self.focused {
-                    FocusTarget::UsernameField => {
-                        self.username.push(c);
-                        self.dirty = true;
+            KeyCode::Char(c) => {
+                // Allow typing with no modifiers or just SHIFT (uppercase)
+                let mods = key.modifiers;
+                if mods.is_empty()
+                    || mods == dracon_terminal_engine::input::event::KeyModifiers::SHIFT
+                {
+                    match self.focused {
+                        FocusTarget::UsernameField => {
+                            self.username.push(c);
+                            self.dirty = true;
+                        }
+                        FocusTarget::PasswordField => {
+                            self.password.push(c);
+                            self.dirty = true;
+                        }
+                        _ => {}
                     }
-                    FocusTarget::PasswordField => {
-                        self.password.push(c);
-                        self.dirty = true;
-                    }
-                    _ => {}
                 }
                 true
             }
-            KeyCode::Backspace => {
+            KeyCode::Backspace if key.modifiers.is_empty() => {
                 match self.focused {
                     FocusTarget::UsernameField => {
                         self.username.pop();

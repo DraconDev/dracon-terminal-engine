@@ -1,40 +1,47 @@
-# Port from Tiles — What Actually Makes Sense
+# Bug Fix TODO
 
-## DONE ✅
+## Critical (Scenes broken/unusable)
 
-### 1. Context Menu Widget Upgrade
-**What:** Upgraded existing `ContextMenu` widget with Tiles-pattern features:
-- `ContextMenuItem` struct (id, label, icon, is_separator) — replaces old `(String, ContextAction)` pairs
-- Separator rendering (─ line, skipped during keyboard nav)
-- Hover highlighting (`hover_bg`)
-- Click-outside dismiss (returns `false` → caller hides)
-- Rounded border (╭╮╰╯) with `theme.outline` + `surface_elevated` bg
-- `on_select` callback
-- Auto-width calculation from item labels
-- Screen bounds clamping
-- `from_actions()` / `from_actions_with_id()` for backward compat
-- 17 internal unit tests
+- [ ] **Accessibility scene — can't type in text fields**
+  - `handle_key` has `KeyCode::Char(c) if key.modifiers.is_empty()` — uppercase letters fail when SHIFT modifier is set
+  - Need to also accept `key.modifiers == KeyModifiers::SHIFT` for uppercase typing
+  - Also check: Backspace guard should be `key.modifiers.is_empty()` too (currently unguarded — Ctrl+Backspace triggers it)
+  - File: `examples/showcase/scenes/accessibility_scene.rs:529-550`
 
-### 2. Middle-Click Paste in BaseInput
-**What:** `MouseButton::Middle` Down in `BaseInput::handle_mouse()` calls
-`get_primary_selection_text()` and inserts at cursor. SearchInput and PasswordInput
-inherit it via `self.base.handle_mouse()` delegation.
-**Caveat:** X11 works via xclip, Wayland spotty (wl-paste --primary).
+- [ ] **Action Center scene — fails to start (shows "launching" then nothing)**
+  - Builds fine, API usage looks correct (ContextMenu, Toast, ConfirmDialog)
+  - Likely runtime panic in `render()` — need to test
+  - Check: `blit_to` calls with stale area, RefCell borrow issues at runtime
+  - File: `examples/showcase/scenes/action_center_scene.rs`
 
-### 3. Input Shield on App (from previous iteration)
-**What:** `app.shield_input(Duration)` and `app.is_input_shielded()`.
-Already added — scene router integration is just calling it after push/pop.
+- [ ] **Autocomplete scene — UI broken**
+  - Need to check: Autocomplete widget API, scene integration, render blitting
+  - File: `examples/showcase/scenes/autocomplete_scene.rs`
 
-## NOT PORTING (app-level, not framework)
-- ❌ Stale file list clearing — Tiles-specific async pattern
-- ❌ Undo close tab — app-level tab management
-- ❌ Sub-struct decomposition — app architecture
-- ❌ AppMode enum — documented as pattern in AGENTS.md
-- ❌ DragState pending_click_idx — already in MarqueeState
-- ❌ BulkRename/SignalSelect/OpenWith — Tiles features
-- ❌ History navigation (push_history) — app-level
+- [ ] **Color Picker scene — doesn't work**
+  - Scene forwards keys/mouse to `picker.handle_key/handle_mouse` — may need `set_area()` call
+  - Check: ColorPicker widget API, render blitting
+  - File: `examples/showcase/scenes/color_picker_scene.rs`
 
-## MAYBE LATER
-- `previous_mode` for stacked overlays
-- Persistent render-bounds vs per-frame ScopedZoneRegistry
-- Double-click detection utility
+## High (Usability issues)
+
+- [ ] **Chat Client — seemingly crashes at runtime**
+  - Builds fine (no clippy errors), likely runtime panic
+  - Need to test and find crash source
+  - File: `examples/_apps/chat_client.rs`
+
+- [ ] **Control Panel — "admin selection is a bit off"**
+  - Select dropdowns may have positioning/rendering issues
+  - File: `examples/showcase/scenes/control_panel_scene.rs`
+
+## Medium (Visual/UX improvements)
+
+- [ ] **Data showcase — could use a UI update**
+  - Main showcase launcher (card grid, scrolling, layout)
+  - Files: `examples/showcase/state.rs`, `examples/showcase/render.rs`, `examples/showcase/widget.rs`
+
+## Investigation Needed
+
+- [ ] Run `cargo clippy --lib --examples` to check current build status
+- [ ] Run `cargo test` to verify test suite
+- [ ] Build and test each broken scene individually if possible
