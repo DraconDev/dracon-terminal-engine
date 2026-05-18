@@ -136,9 +136,9 @@ impl PluginDemoApp {
             let wid = WidgetId::new(1);
             vec![
                 reg.create("stat_cpu", wid, theme).expect("plugin creation failed"),
-                reg.create("stat_mem", WidgetId::new(2), theme).unwrap(),
-                reg.create("stat_disk", WidgetId::new(3), theme).unwrap(),
-                reg.create("stat_net", WidgetId::new(4), theme).unwrap(),
+                reg.create("stat_mem", WidgetId::new(2), theme).expect("plugin creation failed"),
+                reg.create("stat_disk", WidgetId::new(3), theme).expect("plugin creation failed"),
+                reg.create("stat_net", WidgetId::new(4), theme).expect("plugin creation failed"),
             ].clone()
         };
 
