@@ -1,7 +1,7 @@
 {
   "name": "showcase-audit",
   "taskFile": ".ralph/showcase-audit.md",
-  "iteration": 1,
+  "iteration": 4,
   "maxIterations": 200,
   "itemsPerIteration": 2,
   "reflectEvery": 0,

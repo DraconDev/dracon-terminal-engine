@@ -299,6 +299,12 @@ impl Scene for RichTextScene {
             KeyCode::Char('1') if key.modifiers.is_empty() => { self.switch_tab(0); true }
             KeyCode::Char('2') if key.modifiers.is_empty() => { self.switch_tab(1); true }
             KeyCode::Char('3') if key.modifiers.is_empty() => { self.switch_tab(2); true }
+            // Scroll keys forwarded to RichText widget
+            KeyCode::Up | KeyCode::Down | KeyCode::PageUp | KeyCode::PageDown | KeyCode::Home | KeyCode::End => {
+                self.rich_text.handle_key(key);
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }

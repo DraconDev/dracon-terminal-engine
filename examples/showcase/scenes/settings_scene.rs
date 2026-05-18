@@ -49,6 +49,9 @@ impl SettingsScene {
                 ValidationRule::from_regex_pattern(".{8,}").unwrap(),
             ]);
 
+        let mut grid = KeyValueGrid::with_id(WidgetId::new(401))
+            .with_theme(theme.clone())
+            .separator(" : ");
         let mut pairs = BTreeMap::new();
         pairs.insert("app.name".into(), "Dracon Settings".into());
         pairs.insert("app.version".into(), "0.1.10".into());
@@ -59,12 +62,7 @@ impl SettingsScene {
         pairs.insert("log.max_size".into(), "10MB".into());
         pairs.insert("cache.enabled".into(), "true".into());
         pairs.insert("cache.ttl".into(), "3600s".into());
-
-        let grid = KeyValueGrid::new()
-            .with_id(WidgetId::new(401))
-            .with_theme(theme.clone())
-            .separator(" : ");
-        grid.borrow_mut().set_pairs(pairs);
+        grid.set_pairs(pairs);
 
         let status_bar = StatusBar::new(WidgetId::new(402))
             .add_segment(StatusSegment::new("Tab: fields | Enter: validate | S: save | F1: help | Esc: back"))
@@ -211,8 +209,6 @@ impl Scene for SettingsScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if row >= 1 {
-            let form_w = (self.theme.bg as u16).leading_ones(); // placeholder
-            let _ = (col, kind); // Form handles mouse internally
             return self.form.borrow_mut().handle_mouse(kind, col, row.saturating_sub(1));
         }
         false

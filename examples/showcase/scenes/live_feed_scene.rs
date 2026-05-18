@@ -9,7 +9,7 @@
 use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
-use dracon_terminal_engine::framework::layout::Orientation;
+use dracon_terminal_engine::framework::widgets::split::Orientation;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -41,14 +41,12 @@ pub struct LiveFeedScene {
 impl LiveFeedScene {
     pub fn new(theme: Theme) -> Self {
         let split = SplitPane::new_with_id(WidgetId::new(500), Orientation::Horizontal)
-            .ratio(0.6)
-            .with_theme(theme.clone());
+            .ratio(0.6);
 
         let tab_bar = TabBar::new_with_id(WidgetId::new(501), vec!["Logs", "CPU", "Memory"])
             .with_theme(theme.clone());
 
-        let stream = StreamingText::new()
-            .with_id(WidgetId::new(502))
+        let stream = StreamingText::with_id(WidgetId::new(502))
             .max_lines(500)
             .auto_scroll(true)
             .word_wrap(true)
@@ -260,13 +258,15 @@ impl Scene for LiveFeedScene {
             }
             KeyCode::Left => {
                 let ratio = self.split.borrow().get_ratio();
-                self.split.borrow_mut().set_ratio((ratio - 0.05).max(0.2));
+                let new_ratio = (ratio - 0.05).max(0.2);
+                *self.split.borrow_mut() = SplitPane::new_with_id(WidgetId::new(500), Orientation::Horizontal).ratio(new_ratio);
                 self.dirty = true;
                 true
             }
             KeyCode::Right => {
                 let ratio = self.split.borrow().get_ratio();
-                self.split.borrow_mut().set_ratio((ratio + 0.05).min(0.8));
+                let new_ratio = (ratio + 0.05).min(0.8);
+                *self.split.borrow_mut() = SplitPane::new_with_id(WidgetId::new(500), Orientation::Horizontal).ratio(new_ratio);
                 self.dirty = true;
                 true
             }

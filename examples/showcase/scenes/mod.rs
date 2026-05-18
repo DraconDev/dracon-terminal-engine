@@ -1,4 +1,5 @@
 pub mod accessibility_scene;
+pub mod action_center_scene;
 pub mod animation_scene;
 pub mod autocomplete_scene;
 pub mod calendar_scene;
@@ -6,9 +7,11 @@ pub mod cell_pool_scene;
 pub mod color_picker_scene;
 pub mod command_palette_scene;
 pub mod debug_overlay_scene;
+pub mod dev_console_scene;
 pub mod form_demo;
 pub mod kanban_scene;
 pub mod live_feed_scene;
+pub mod metrics_hub_scene;
 pub mod modal_demo;
 pub mod notification_center_scene;
 pub mod paint_scene;

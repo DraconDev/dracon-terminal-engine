@@ -112,6 +112,41 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
+                name: "action_center",
+                category: "apps",
+                description: "ContextMenu + ConfirmDialog + Toast",
+                binary_name: "action_center",
+                preview: &[
+                    "  src        dir   —       Interaction Patterns",
+                    "  Cargo.toml  file  1.2K    ContextMenu  ConfirmDialog",
+                    "  README.md  file  4.5K    Toast notifications",
+                    "  Right-click for menu → Delete → Confirm",
+                ],
+            },
+            ExampleMeta {
+                name: "metrics_hub",
+                category: "tools",
+                description: "Metrics Hub: Slider + Gauge + ProgressRing + Spinner + StatusBadge",
+                binary_name: "metrics_hub",
+                preview: &[
+                    "  ▸ CPU  ▓▓▓▓▓▓▓▓░░░  75%  CPU ████████░░ 75%",
+                    "    MEM  ▓▓▓▓▓░░░░░  48%  MEM ████░░░░░░ 48%",
+                    "    DSK  ▓▓▓▓▓▓▓▓▓░  92%  DSK █████████░ 92%",
+                ],
+            },
+            ExampleMeta {
+                name: "dev_console",
+                category: "tools",
+                description: "Dev Console: LogViewer + EventLogger + Label + Divider + Inspector",
+                binary_name: "dev_console",
+                preview: &[
+                    "  [ALL] [DEBUG] [INFO] [WARN] [ERROR]",
+                    "  ── Logs ──────────────────────────",
+                    "  [INFO] Request processed: GET /api",
+                    "  [WARN] Slow query detected: 450ms",
+                ],
+            },
+            ExampleMeta {
                 name: "animation",
                 category: "data",
                 description: "Animation & easing curves",
