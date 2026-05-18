@@ -123,7 +123,7 @@ impl PluginDemoApp {
 
         // Register built-in plugins
         {
-            let mut reg = registry.write().unwrap();
+            let mut reg = registry.write().expect("plugin registry lock poisoned");
             reg.register("stat_cpu", |id, theme| Box::new(StatWidget::new(id, theme, "CPU", "12.4%")));
             reg.register("stat_mem", |id, theme| Box::new(StatWidget::new(id, theme, "MEM", "1.2 GiB")));
             reg.register("stat_disk", |id, theme| Box::new(StatWidget::new(id, theme, "DISK", "47%")));
@@ -132,10 +132,10 @@ impl PluginDemoApp {
 
         // Create initial instances from registry
         let stat_widgets = {
-            let reg = registry.read().unwrap();
+            let reg = registry.read().expect("plugin registry lock poisoned");
             let wid = WidgetId::new(1);
             vec![
-                reg.create("stat_cpu", wid, theme).unwrap(),
+                reg.create("stat_cpu", wid, theme).expect("plugin creation failed"),
                 reg.create("stat_mem", WidgetId::new(2), theme).unwrap(),
                 reg.create("stat_disk", WidgetId::new(3), theme).unwrap(),
                 reg.create("stat_net", WidgetId::new(4), theme).unwrap(),
@@ -221,7 +221,7 @@ impl Widget for PluginDemoApp {
         }
 
         // Plugin registry info panel
-        let reg = self.registry.read().unwrap();
+        let reg = self.registry.read().expect("plugin registry lock poisoned");
         let registered: Vec<_> = reg.list();
         let info = format!("Registered plugins: {}  -  stat_cpu, stat_mem, stat_disk, stat_net",
                            registered.len());
@@ -396,28 +396,28 @@ impl Widget for PluginDemoApp {
         use KeyCode::*;
         match key.code {
             Char('1') => {
-                self.stat_widgets[0] = self.registry.read().unwrap()
+                self.stat_widgets[0] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_cpu", WidgetId::new(1), self.theme)
                     .unwrap();
                 self.dirty = true;
                 true
             }
             Char('2') => {
-                self.stat_widgets[1] = self.registry.read().unwrap()
+                self.stat_widgets[1] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_mem", WidgetId::new(2), self.theme)
                     .unwrap();
                 self.dirty = true;
                 true
             }
             Char('3') => {
-                self.stat_widgets[2] = self.registry.read().unwrap()
+                self.stat_widgets[2] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_disk", WidgetId::new(3), self.theme)
                     .unwrap();
                 self.dirty = true;
                 true
             }
             Char('4') => {
-                self.stat_widgets[3] = self.registry.read().unwrap()
+                self.stat_widgets[3] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_net", WidgetId::new(4), self.theme)
                     .unwrap();
                 self.dirty = true;
@@ -455,7 +455,7 @@ impl Widget for PluginDemoApp {
             }
             MouseEventKind::Down(MouseButton::Left) => {
                 // Spawn a new stat widget instance on click
-                let reg = self.registry.read().unwrap();
+                let reg = self.registry.read().expect("plugin registry lock poisoned");
                 let next_id = WidgetId::new((self.stat_widgets.len() + 1) as u32);
                 if let Some(w) = reg.create("stat_cpu", next_id, self.theme) {
                     if self.stat_widgets.len() < 8 {

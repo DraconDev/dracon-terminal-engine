@@ -369,7 +369,10 @@ impl FileManager {
 
         if finished {
             // Take the handle and await it
-            let handle = self.pending_operation.borrow_mut().take().unwrap();
+            let handle = match self.pending_operation.borrow_mut().take() {
+                Some(h) => h,
+                None => return,
+            };
             let result = tokio::runtime::Handle::current().block_on(handle);
 
             match result {
