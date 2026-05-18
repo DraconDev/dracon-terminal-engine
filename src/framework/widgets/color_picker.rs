@@ -54,7 +54,7 @@ impl ColorPicker {
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 12)),
             dirty: true,
             hovered_slider: None,
-            selected_slider: None,
+            selected_slider: Some(SliderKind::Hue),
             on_color_change: None,
             input_focused: false,
         }
@@ -74,7 +74,7 @@ impl ColorPicker {
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 12)),
             dirty: true,
             hovered_slider: None,
-            selected_slider: None,
+            selected_slider: Some(SliderKind::Hue),
             on_color_change: None,
             input_focused: false,
         }
@@ -94,7 +94,7 @@ impl ColorPicker {
             area: std::cell::Cell::new(Rect::new(0, 0, 40, 12)),
             dirty: true,
             hovered_slider: None,
-            selected_slider: None,
+            selected_slider: Some(SliderKind::Hue),
             on_color_change: None,
             input_focused: false,
         }
