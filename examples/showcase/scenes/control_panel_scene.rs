@@ -41,10 +41,12 @@ impl SelectState {
     fn next(&self) {
         let mut idx = self.index.borrow_mut();
         *idx = (*idx + 1) % self.options.len();
+        self.widget.borrow_mut().set_selected(*idx);
     }
     fn prev(&self) {
         let mut idx = self.index.borrow_mut();
         if *idx == 0 { *idx = self.options.len() - 1; } else { *idx -= 1; }
+        self.widget.borrow_mut().set_selected(*idx);
     }
 }
 
@@ -152,8 +154,7 @@ impl Scene for ControlPanelScene {
         let div_plane = div.render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &div_plane, 0, 1);
 
-        // Select fields (rows 2-4): render label + current value manually
-        // since Select renders as a dropdown we can't easily embed inline
+        // Select fields (rows 2-4): render label + current value
         let select_data: [(&SelectState, &str); 3] = [
             (&self.theme_select, "Theme"),
             (&self.font_select, "Font"),
@@ -166,17 +167,11 @@ impl Scene for ControlPanelScene {
             let lbl_text = if is_focused { format!("▸ {:<10}", label) } else { format!("  {:<10}", label) };
             draw_text(&mut plane, 2, y, &lbl_text, lbl_color, t.bg, is_focused);
 
-            // Current value as a "button"
-            let val = sel.current_label();
-            let val_bg = if is_focused { t.selection_bg } else { t.surface_elevated };
-            let val_fg = if is_focused { t.selection_fg } else { t.fg };
-            let val_text = format!(" {} ", val);
-            draw_text(&mut plane, 14, y, &val_text, val_fg, val_bg, false);
-
-            // Arrow indicators
-            if is_focused {
-                draw_text(&mut plane, 14 + val_text.len() as u16 + 1, y, "▲▼", t.primary, t.bg, false);
-            }
+            // Render actual Select widget (collapsed, shows current value + ▼)
+            let sel_area = Rect::new(14, y, 20, 1);
+            sel.widget.borrow_mut().set_area(sel_area);
+            let sel_plane = sel.widget.borrow().render(sel_area);
+            blit_to(&mut plane, &sel_plane, 14, y as usize);
         }
 
         // Divider: Toggles

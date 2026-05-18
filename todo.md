@@ -2,46 +2,57 @@
 
 ## Critical (Scenes broken/unusable)
 
-- [ ] **Accessibility scene — can't type in text fields**
-  - `handle_key` has `KeyCode::Char(c) if key.modifiers.is_empty()` — uppercase letters fail when SHIFT modifier is set
-  - Need to also accept `key.modifiers == KeyModifiers::SHIFT` for uppercase typing
-  - Also check: Backspace guard should be `key.modifiers.is_empty()` too (currently unguarded — Ctrl+Backspace triggers it)
-  - File: `examples/showcase/scenes/accessibility_scene.rs:529-550`
+- [x] **Accessibility scene — can't type in text fields**
+  - Fixed: `KeyCode::Char(c)` now accepts SHIFT modifier for uppercase; Backspace guarded with `key.modifiers.is_empty()`
+  - File: `examples/showcase/scenes/accessibility_scene.rs`
 
-- [ ] **Action Center scene — fails to start (shows "launching" then nothing)**
-  - Builds fine, API usage looks correct (ContextMenu, Toast, ConfirmDialog)
-  - Likely runtime panic in `render()` — need to test
-  - Check: `blit_to` calls with stale area, RefCell borrow issues at runtime
+- [x] **Action Center — context menu mouse clicks didn't execute actions**
+  - Fixed: Added `on_select` callback with Rc<RefCell<Option<String>>> bridge pattern
+  - Added `sync_action_bridge()` method called after mouse/key events
+  - Fixed borrow issues with block-scoped extraction of selected_id
   - File: `examples/showcase/scenes/action_center_scene.rs`
 
-- [ ] **Autocomplete scene — UI broken**
-  - Need to check: Autocomplete widget API, scene integration, render blitting
-  - File: `examples/showcase/scenes/autocomplete_scene.rs`
+- [x] **Color Picker — arrow keys did nothing on first use**
+  - Fixed: `selected_slider` defaults to `Some(SliderKind::Hue)` instead of `None`
+  - Previously required pressing Tab first to select a slider before arrow keys worked
+  - File: `src/framework/widgets/color_picker.rs`
 
-- [ ] **Color Picker scene — doesn't work**
-  - Scene forwards keys/mouse to `picker.handle_key/handle_mouse` — may need `set_area()` call
-  - Check: ColorPicker widget API, render blitting
-  - File: `examples/showcase/scenes/color_picker_scene.rs`
+## Needs Runtime Testing
 
-## High (Usability issues)
+- [ ] **Action Center — "failed to start" (shows "launching" then nothing)**
+  - Code looks correct, no obvious panics, builds clean
+  - May be a runtime issue (RefCell borrow at render, ContextMenu render, etc.)
+  - Needs actual terminal testing to reproduce
+  - File: `examples/showcase/scenes/action_center_scene.rs`
 
-- [ ] **Chat Client — seemingly crashes at runtime**
-  - Builds fine (no clippy errors), likely runtime panic
-  - Need to test and find crash source
+- [ ] **Chat Client — "seemingly crashed"**
+  - Code looks correct, no obvious panics, builds clean
+  - No unwrap/expect calls, all index access guarded
+  - Emoji characters may cause rendering misalignment (multi-column chars in single-column cells)
+  - Needs actual terminal testing to reproduce
   - File: `examples/_apps/chat_client.rs`
 
+- [ ] **Autocomplete — "UI is a bit broken"**
+  - Scene code looks structurally correct
+  - Autocomplete widget properly handles typing → filter → dropdown
+  - May be visual alignment issue with blit positions
+  - Needs actual terminal testing to see the issue
+  - File: `examples/showcase/scenes/autocomplete_scene.rs`
+
 - [ ] **Control Panel — "admin selection is a bit off"**
-  - Select dropdowns may have positioning/rendering issues
+  - Scene uses custom SelectState instead of real Select dropdown
+  - Dropdown never opens — just cycles values with Space/Up/Down
+  - May need to render actual Select widget instead of manual value display
   - File: `examples/showcase/scenes/control_panel_scene.rs`
 
 ## Medium (Visual/UX improvements)
 
-- [ ] **Data showcase — could use a UI update**
+- [ ] **Data showcase — "could use a UI update"**
   - Main showcase launcher (card grid, scrolling, layout)
-  - Files: `examples/showcase/state.rs`, `examples/showcase/render.rs`, `examples/showcase/widget.rs`
+  - Already has: smooth scrolling, proportional scrollbar, impressive-first ordering, categories
+  - Could improve: card visual design, category section headers, better preview content
+  - Files: `examples/showcase/render.rs`, `examples/showcase/widget.rs`
 
-## Investigation Needed
-
-- [ ] Run `cargo clippy --lib --examples` to check current build status
-- [ ] Run `cargo test` to verify test suite
-- [ ] Build and test each broken scene individually if possible
+## Build Status
+- ✅ `cargo clippy --lib --examples` — 0 errors, 0 warnings
+- ✅ `cargo test` — all pass

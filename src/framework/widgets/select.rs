@@ -52,6 +52,12 @@ impl Select {
         self
     }
 
+    /// Sets the selected index programmatically.
+    pub fn set_selected(&mut self, index: usize) {
+        self.selected = index.min(self.options.len().saturating_sub(1));
+        self.dirty = true;
+    }
+
     /// Registers a callback when the selection changes.
     pub fn on_change(mut self, f: impl FnMut(&str) + 'static) -> Self {
         self.on_change = Some(Box::new(f));
