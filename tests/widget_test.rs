@@ -145,7 +145,7 @@ fn test_modal_new() {
 
 #[test]
 fn test_context_menu_new() {
-    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]);
     let area = Rect::new(0, 0, 20, 10);
     let plane = menu.render(area);
     assert!(plane.width > 0);

@@ -142,6 +142,10 @@ impl Showcase {
         scene_router.register("raycaster", Box::new(crate::scenes::raycaster_scene::RaycasterScene::new(theme.clone())));
         scene_router.register("paint", Box::new(crate::scenes::paint_scene::PaintScene::new(theme.clone())));
         scene_router.register("workshop", Box::new(crate::scenes::workshop_scene::WorkshopScene::new(theme.clone())));
+        scene_router.register("command_palette", Box::new(crate::scenes::command_palette_scene::CommandPaletteScene::new(theme.clone())));
+        scene_router.register("table_list", Box::new(crate::scenes::table_list_scene::TableListScene::new(theme.clone())));
+        scene_router.register("settings_panel", Box::new(crate::scenes::settings_scene::SettingsScene::new(theme.clone())));
+        scene_router.register("live_feed", Box::new(crate::scenes::live_feed_scene::LiveFeedScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 

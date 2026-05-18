@@ -1225,21 +1225,21 @@ fn test_hud_render_gauge() {
 
 #[test]
 fn test_context_menu_new() {
-    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]);
     let area = Rect::new(0, 0, 20, 10);
     let _plane = menu.render(area);
 }
 
 #[test]
 fn test_context_menu_with_theme() {
-    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]).with_theme(Theme::cyberpunk());
+    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]).with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 20, 10);
     let _plane = menu.render(area);
 }
 
 #[test]
 fn test_context_menu_render() {
-    let menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]);
     let area = Rect::new(0, 0, 20, 10);
     let plane = menu.render(area);
     assert!(plane.width > 0);
@@ -1247,7 +1247,7 @@ fn test_context_menu_render() {
 
 #[test]
 fn test_context_menu_clear_dirty() {
-    let mut menu = ContextMenu::new(vec![("Open", ContextAction::Open)]);
+    let mut menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]);
     assert!(menu.needs_render());
     menu.clear_dirty();
     assert!(!menu.needs_render());

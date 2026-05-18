@@ -2925,3 +2925,89 @@ impl Widget for &TextEditor {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn insert_newline_basic() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["hello world".to_string()];
+        ed.cursor_row = 0;
+        ed.cursor_col = 5;
+        ed.insert_newline();
+        assert_eq!(ed.lines.len(), 2);
+        assert_eq!(ed.lines[0], "hello");
+        assert_eq!(ed.lines[1], " world");
+        assert_eq!(ed.cursor_row, 1);
+        assert_eq!(ed.cursor_col, 0);
+    }
+
+    #[test]
+    fn insert_newline_with_indentation() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["    if true {".to_string()];
+        ed.cursor_row = 0;
+        ed.cursor_col = 12;
+        ed.insert_newline();
+        assert_eq!(ed.lines[0], "    if true ");
+        assert_eq!(ed.lines[1], "    {");
+        assert_eq!(ed.cursor_row, 1);
+        assert_eq!(ed.cursor_col, 4);
+    }
+
+    #[test]
+    fn insert_newline_after_empty_lines() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["".to_string(), "".to_string(), "abc".to_string()];
+        ed.cursor_row = 2;
+        ed.cursor_col = 1;
+        ed.insert_newline();
+        assert_eq!(ed.lines.len(), 4);
+        assert_eq!(ed.lines[2], "a");
+        assert_eq!(ed.lines[3], "bc");
+        assert_eq!(ed.cursor_row, 3);
+        assert_eq!(ed.cursor_col, 0);
+    }
+
+    #[test]
+    fn insert_newline_at_line_start() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["hello".to_string()];
+        ed.cursor_row = 0;
+        ed.cursor_col = 0;
+        ed.insert_newline();
+        assert_eq!(ed.lines[0], "");
+        assert_eq!(ed.lines[1], "hello");
+        assert_eq!(ed.cursor_row, 1);
+        assert_eq!(ed.cursor_col, 0);
+    }
+
+    #[test]
+    fn insert_newline_at_line_end() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["hello".to_string()];
+        ed.cursor_row = 0;
+        ed.cursor_col = 5;
+        ed.insert_newline();
+        assert_eq!(ed.lines[0], "hello");
+        assert_eq!(ed.lines[1], "");
+        assert_eq!(ed.cursor_row, 1);
+        assert_eq!(ed.cursor_col, 0);
+    }
+
+    #[test]
+    fn insert_newline_multiple_empty_lines() {
+        let mut ed = TextEditor::default();
+        ed.lines = vec!["".to_string(), "".to_string(), "".to_string(), "xyz".to_string()];
+        ed.cursor_row = 3;
+        ed.cursor_col = 1;
+        ed.insert_newline();
+        assert_eq!(ed.lines.len(), 5);
+        assert_eq!(ed.lines[3], "x");
+        assert_eq!(ed.lines[4], "yz");
+        assert_eq!(ed.cursor_row, 4);
+        assert_eq!(ed.cursor_col, 0);
+    }
+}

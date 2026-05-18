@@ -36,6 +36,7 @@ pub mod keybindings;
 pub mod layout;
 #[cfg(feature = "tracing")]
 pub mod logging;
+pub mod marquee;
 pub mod plugin;
 pub mod scroll;
 pub mod scene_router;
@@ -68,6 +69,7 @@ pub mod prelude {
         i18n::{tr, I18n, I18nError},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
         layout::{Constraint, Direction, Layout},
+        marquee::{MarqueeRect, MarqueeState, render_marquee},
         plugin::{PluginRegistry, WidgetFactory},
         scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},

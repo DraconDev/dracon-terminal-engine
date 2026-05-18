@@ -621,7 +621,7 @@ impl Widget for MenuApp {
                 && row < list_rect.y + list_rect.height
             {
                 self.context_menu = Some(
-                    ContextMenu::new_with_id(
+                    ContextMenu::from_actions_with_id(
                         WidgetId::new(50),
                         vec![
                             ("Copy Item", ContextAction::Copy),

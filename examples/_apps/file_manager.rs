@@ -600,7 +600,7 @@ impl FileManager {
     }
 
     fn make_context_menu(&self, anchor_x: u16, anchor_y: u16) -> ContextMenu {
-        ContextMenu::new_with_id(WidgetId::new(50), Self::context_menu_items())
+        ContextMenu::from_actions_with_id(WidgetId::new(50), Self::context_menu_items())
             .with_anchor(anchor_x, anchor_y)
             .with_theme(self.theme.clone())
     }

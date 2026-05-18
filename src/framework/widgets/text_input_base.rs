@@ -223,15 +223,35 @@ impl BaseInput {
 
     pub fn handle_mouse(
         &mut self,
-        _kind: crate::input::event::MouseEventKind,
+        kind: crate::input::event::MouseEventKind,
         col: u16,
         _row: u16,
     ) -> bool {
+        // Middle-click paste from X11 primary selection (best-effort: X11 works, Wayland spotty)
+        if let crate::input::event::MouseEventKind::Down(
+            crate::input::event::MouseButton::Middle,
+        ) = kind
+        {
+            if let Some(text) = crate::utils::get_primary_selection_text() {
+                self.insert_text(&text);
+                self.dirty = true;
+                return true;
+            }
+            return true; // Consume middle-click even if no selection available
+        }
+
         let text_pos = (col as usize + self.scroll_offset).min(self.text.len());
         self.cursor_pos = text_pos;
         self.clamp_scroll();
         self.dirty = true;
         true
+    }
+
+    /// Insert text at the current cursor position.
+    fn insert_text(&mut self, text: &str) {
+        self.text.insert_str(self.cursor_pos, text);
+        self.cursor_pos += text.len();
+        self.clamp_scroll();
     }
 }
 

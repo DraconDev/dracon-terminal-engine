@@ -1051,6 +1051,209 @@ The showcase launcher is the **single source of truth** for theme cycling:
 - Individual scenes must NOT implement their own `cycle_theme()` — they receive theme changes via `on_theme_change()`
 - All scenes must check `actions::BACK` **before** delegating to widgets to ensure `Esc` always works to go back
 
+## Marquee Drag Selection (`src/framework/marquee.rs`)
+
+A rectangle-based drag selection system for widgets with selectable rows (List, Table, Tree, Kanban).
+Click+drag draws a selection rectangle; on mouse release, all items within are selected.
+
+### MarqueeState Lifecycle
+
+```text
+Idle → Tracking (MouseDown)
+Tracking → Active (Drag exceeds threshold)
+Tracking → Idle (MouseUp without exceeding threshold → resolve pending_click)
+Active → Idle (MouseUp → commit selection)
+Active → Idle (Escape / MouseMove → cancel)
+```
+
+### Usage Pattern
+
+```rust
+use dracon_terminal_engine::framework::prelude::{MarqueeState, MarqueeRect, render_marquee};
+
+// In your widget struct:
+marquee: MarqueeState,
+
+// On MouseDown (left click on any selectable area):
+self.marquee.start_tracking(col, row);
+// For plain clicks, defer selection change:
+self.marquee.defer_click(item_index);
+// Ctrl/Shift clicks fire immediately (NOT deferred)
+
+// On MouseDrag:
+let just_activated = self.marquee.update(col, row);
+if just_activated {
+    // Cancel any file drag — marquee takes priority
+    self.drag_manager.cancel();
+}
+if self.marquee.is_active {
+    return true; // consume event — no drag-drop while marquee-ing
+}
+
+// On MouseUp:
+if self.marquee.is_active {
+    if let Some(rect) = self.marquee.rect() {
+        // Select all items whose rows fall within rect
+        for (idx, row) in visible_rows.enumerate() {
+            if row >= rect.min_row && row <= rect.max_row {
+                selection.add(idx);
+            }
+        }
+    }
+    self.marquee.clear();
+} else if let Some(idx) = self.marquee.take_pending_click() {
+    // Resolve deferred click (no drag occurred)
+    selection.handle_click(idx, false, false, false);
+}
+self.marquee.reset();
+
+// On Escape or MouseMove (without drag):
+self.marquee.clear();
+
+// In render():
+if self.marquee.is_active {
+    render_marquee(&mut plane, &self.marquee, &self.theme);
+}
+```
+
+### Key Design Decisions
+
+1. **Deferred click pattern**: Plain clicks set `pending_click_idx` instead of
+   immediately changing selection. This prevents the initial click from breaking
+   marquee intent ("marquee broken when row already selected" bug from Tiles).
+
+2. **Staggered thresholds**: Marquee activates at 2px (dist_sq ≥ 4.0), file drag at
+   3px (dist_sq ≥ 9.0). Short drags select, longer drags move.
+
+3. **Marquee and drag-drop are mutually exclusive**: When marquee activates,
+   it cancels any in-progress drag. The Drag handler checks `is_active` first.
+
+4. **Ctrl+drag toggles**: Items within the marquee rect are toggled into the
+   existing selection instead of replacing it.
+
+5. **Border-only rendering**: The marquee rect is drawn as a rounded border
+   (╭╮╰╯─│) with `theme.primary` + BOLD. No background fill — content
+   underneath remains visible.
+
+### MarqueeRect
+
+Normalized bounding rectangle: `min_col ≤ max_col`, `min_row ≤ max_row`,
+regardless of drag direction.
+
+```rust
+let rect = self.marquee.rect().unwrap();
+assert!(rect.min_col <= rect.max_col);
+assert!(rect.min_row <= rect.max_row);
+```
+
+## Input Shield (`src/framework/app.rs`)
+
+After mode transitions (modal open/close, view switch), stale keypresses can
+leak into the new state. The input shield prevents this by swallowing all
+key and mouse events for a configurable cooldown period.
+
+### Usage
+
+```rust
+// After closing a modal with Esc, shield for 100ms:
+app.shield_input(std::time::Duration::from_millis(100));
+
+// Query shield state:
+if app.is_input_shielded() {
+    // Input events are being swallowed
+}
+```
+
+### How It Works
+
+- `App` stores `input_shield_until: Cell<Option<Instant>>`
+- At the top of `handle_event()`, if `Instant::now() < shield_until`, the event is silently dropped
+- When the shield expires, it auto-clears
+- Resize events are NOT shielded (they must always be processed)
+
+### When to Use
+
+- After modal/overlay dismiss (Esc leaked into underlying widget)
+- After view transitions (Ctrl+E editor → file view)
+- After command palette close (Enter leaked into editor)
+
+## Render-Bounds Registration Pattern
+
+Instead of computing positions twice (once in render, once in handle_mouse),
+register bounding rectangles during render and dispatch mouse events against them.
+
+### Two Approaches
+
+**Framework approach: ScopedZoneRegistry** (per-frame, cleared each render):
+```rust
+// In widget struct:
+zones: RefCell<ScopedZoneRegistry<usize>>,
+
+// In render (cleared each frame):
+self.zones.borrow_mut().clear();
+self.zones.borrow_mut().register(ZONE_ID, x, y, width, height);
+
+// In handle_mouse:
+if let Some(id) = self.zones.borrow().dispatch(col, row) {
+    match id { ZONE_ID => { /* handle click */ } _ => {} }
+}
+```
+
+**Tiles approach: Persistent bounds** (survive across frames until explicitly refreshed):
+```rust
+// In view state (computed during render, read in handle_mouse):
+pub column_bounds: Vec<(Rect, FileColumn)>,       // Column header positions
+pub breadcrumb_bounds: Vec<(Rect, PathBuf)>,      // Clickable breadcrumb segments
+pub file_row_bounds: Vec<FileRowBounds>,          // File row positions
+
+// In render:
+fs.view.column_bounds.clear();
+for (rect, col) in rendered_columns {
+    fs.view.column_bounds.push((rect, col));
+}
+
+// In handle_mouse:
+for (rect, col) in &fs.view.column_bounds {
+    if col >= rect.x && col < rect.x + rect.width {
+        // Click on this column header → sort by col
+    }
+}
+```
+
+**When to use which:**
+- Use `ScopedZoneRegistry` for widgets with hit zones that change every frame
+- Use persistent bounds for scrollable lists where row positions survive across frames
+  (avoids re-registering all rows every render)
+
+## SceneMode Enum Pattern (from Tiles' AppMode)
+
+For showcase scenes with multiple overlays (help, confirm, search, etc.),
+use a single enum instead of scattered `bool` flags:
+
+```rust
+#[derive(Clone, Debug, Default)]
+enum SceneMode {
+    #[default]
+    Normal,
+    Help,
+    Search,
+    Confirm { message: String },
+    ContextMenu { x: u16, y: u16, selected_index: Option<usize> },
+}
+
+// Instead of:
+// show_help: bool,
+// show_search: bool,
+// show_confirm: bool,
+// confirm_message: String,
+```
+
+**Benefits:**
+- Exhaustive `match` forces handling every mode
+- Variants carry payload (position, data)
+- Impossible to have conflicting modes active simultaneously
+- `previous_mode` for stacked modals: `self.previous_mode = self.mode.clone(); self.mode = SceneMode::Help;`
+
 ## Deferred / Out of Scope
 
 These are interesting but NOT priorities for an engine:

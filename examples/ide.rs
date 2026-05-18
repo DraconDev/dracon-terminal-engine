@@ -1113,7 +1113,7 @@ impl Widget for IdeApp {
         // Context menu on right-click
         if kind == MouseEventKind::Down(MouseButton::Right) {
             self.context_menu = Some(
-                ContextMenu::new_with_id(
+                ContextMenu::from_actions_with_id(
                     WidgetId::new(50),
                     vec![
                         ("New Tab", ContextAction::Open),

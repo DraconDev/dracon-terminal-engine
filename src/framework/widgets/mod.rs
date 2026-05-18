@@ -58,7 +58,7 @@ pub use checkbox::Checkbox;
 pub use color_picker::ColorPicker;
 pub use command_palette::{CommandItem, CommandPalette};
 pub use confirm_dialog::{ConfirmDialog, ConfirmResult};
-pub use context_menu::{ContextAction, ContextMenu};
+pub use context_menu::{ContextAction, ContextMenu, ContextMenuItem};
 pub use debug_overlay::DebugOverlay;
 pub use divider::Divider;
 pub use event_logger::{EventLogger, LoggedEvent};

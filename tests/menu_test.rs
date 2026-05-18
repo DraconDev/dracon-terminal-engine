@@ -72,15 +72,15 @@ fn test_context_menu_new() {
         ("Copy", ContextAction::Open),
         ("Paste", ContextAction::Open),
     ];
-    let menu = ContextMenu::new(items);
+    let menu = ContextMenu::from_actions(items);
     let plane = menu.render(Rect::new(0, 0, 20, 5));
-    assert_eq!(plane.height, 3); // height matches item count
+    assert_eq!(plane.height, 5); // 3 items + 2 border rows
 }
 
 #[test]
 fn test_context_menu_with_theme() {
     let items = vec![("Cut", ContextAction::Open), ("Copy", ContextAction::Open)];
-    let menu = ContextMenu::new(items).with_theme(Theme::nord());
+    let menu = ContextMenu::from_actions(items).with_theme(Theme::nord());
     let plane = menu.render(Rect::new(0, 0, 20, 3));
     assert!(!plane.cells.is_empty());
 }
@@ -92,7 +92,7 @@ fn test_context_menu_navigation_down() {
         ("Copy", ContextAction::Open),
         ("Paste", ContextAction::Open),
     ];
-    let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
+    let mut menu = ContextMenu::from_actions_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 5));
 
     menu.handle_key(key_press(KeyCode::Down));
@@ -105,7 +105,7 @@ fn test_context_menu_navigation_down() {
 #[test]
 fn test_context_menu_enter_selects() {
     let items = vec![("Cut", ContextAction::Open), ("Copy", ContextAction::Open)];
-    let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
+    let mut menu = ContextMenu::from_actions_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 3));
 
     let result = menu.handle_key(key_press(KeyCode::Enter));
@@ -115,7 +115,7 @@ fn test_context_menu_enter_selects() {
 #[test]
 fn test_context_menu_esc_closes() {
     let items = vec![("Cut", ContextAction::Open)];
-    let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
+    let mut menu = ContextMenu::from_actions_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 2));
 
     let result = menu.handle_key(key_press(KeyCode::Esc));
@@ -129,7 +129,7 @@ fn test_context_menu_mouse_click() {
         ("Copy", ContextAction::Open),
         ("Paste", ContextAction::Open),
     ];
-    let mut menu = ContextMenu::new_with_id(WidgetId::new(1), items);
+    let mut menu = ContextMenu::from_actions_with_id(WidgetId::new(1), items);
     menu.set_area(Rect::new(0, 0, 20, 5));
 
     let result = menu.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 1);

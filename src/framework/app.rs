@@ -36,6 +36,7 @@ use crate::Terminal;
 use crate::core::terminal::RESTORE_SEQ;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
+use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -149,6 +150,11 @@ pub struct App {
     event_bus: EventBus,
     scene_router: crate::framework::scene_router::SceneRouter,
     keybindings: KeybindingSet,
+    /// Input shield: swallows all key/mouse input until this instant.
+    /// Used after mode transitions (modal open/close, view switch) to prevent
+    /// stale keypresses from leaking into the new state.
+    /// Set via `app.shield_input(duration)`.
+    input_shield_until: Cell<Option<Instant>>,
 }
 
 impl App {
@@ -274,6 +280,14 @@ impl App {
     }
 
     fn handle_event(&mut self, event: &Event, running: &std::sync::atomic::AtomicBool) {
+        // Input shield: swallow all key/mouse input during cooldown period
+        if let Some(until) = self.input_shield_until.get() {
+            if Instant::now() < until {
+                return; // Swallow event during shield
+            }
+            self.input_shield_until.set(None);
+        }
+
         match event {
             Event::Resize(w, h) => self.dispatch_resize(*w, *h),
             Event::Key(k) => self.dispatch_key(k, running),
@@ -332,6 +346,7 @@ impl App {
             event_bus: EventBus::new(),
             scene_router: SceneRouter::new(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            input_shield_until: Cell::new(None),
         }
     }
 
@@ -416,6 +431,28 @@ impl App {
             widget.mark_dirty();
         }
         self
+    }
+
+    /// Activate the input shield for the given duration.
+    ///
+    /// During the shield period, all key and mouse events are silently
+    /// swallowed. This prevents stale keypresses from mode transitions
+    /// (e.g., closing a modal with Esc) from leaking into the new state.
+    ///
+    /// # Example
+    /// ```ignore
+    /// // After closing a modal, shield for 100ms to prevent Esc leak
+    /// app.shield_input(Duration::from_millis(100));
+    /// ```
+    pub fn shield_input(&self, duration: Duration) {
+        self.input_shield_until.set(Some(Instant::now() + duration));
+    }
+
+    /// Check if the input shield is currently active.
+    pub fn is_input_shielded(&self) -> bool {
+        self.input_shield_until
+            .get()
+            .is_some_and(|until| Instant::now() < until)
     }
 
     /// Dispatches a bracketed-paste text string as synthetic key events to the focused widget.
