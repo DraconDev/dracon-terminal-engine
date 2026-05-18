@@ -75,6 +75,7 @@ impl AutocompleteScene {
             .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); });
         autocomplete.set_area(Rect::new(2, 3, 28, 12));
         autocomplete.on_focus();
+        autocomplete.open_dropdown();
         Self {
             autocomplete,
             theme,

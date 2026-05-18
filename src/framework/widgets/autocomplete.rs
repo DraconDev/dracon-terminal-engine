@@ -88,6 +88,11 @@ impl Autocomplete {
         self.update_filter();
     }
 
+    /// Opens the dropdown with the current filter. Shows all suggestions if query is empty.
+    pub fn open_dropdown(&mut self) {
+        self.update_filter();
+    }
+
     fn update_filter(&mut self) {
         let query = self.base.text.to_lowercase();
         self.filtered = self
