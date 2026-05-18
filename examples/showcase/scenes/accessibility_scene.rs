@@ -87,6 +87,8 @@ pub struct AccessibilityScene {
     focus_idx: usize,
     focused: FocusTarget,
     checked: bool,
+    username: String,
+    password: String,
     announcements: Vec<Announcement>,
     tick: u64,
     dirty: bool,
@@ -102,6 +104,8 @@ impl AccessibilityScene {
             focus_idx: 0,
             focused: FocusTarget::UsernameField,
             checked: false,
+            username: String::new(),
+            password: String::new(),
             announcements: Vec::new(),
             tick: 0,
             dirty: true,
@@ -208,7 +212,11 @@ impl AccessibilityScene {
                 if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.primary; }
             }
         }
-        draw_text(plane, x + 1, y + 3, "admin", t.fg, field_bg, false);
+        if self.username.is_empty() {
+            draw_text(plane, x + 1, y + 3, "type here…", t.fg_muted, field_bg, false);
+        } else {
+            draw_text(plane, x + 1, y + 3, &self.username, t.fg, field_bg, false);
+        }
 
         // Password field
         let is_focused = self.focused == FocusTarget::PasswordField;
@@ -230,7 +238,12 @@ impl AccessibilityScene {
                 if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.primary; }
             }
         }
-        draw_text(plane, x + 1, y + 7, "••••••", t.fg_muted, field_bg, false);
+        if self.password.is_empty() {
+            draw_text(plane, x + 1, y + 7, "type here…", t.fg_muted, field_bg, false);
+        } else {
+            let masked: String = "•".repeat(self.password.len());
+            draw_text(plane, x + 1, y + 7, &masked, t.fg, field_bg, false);
+        }
 
         // Remember me checkbox
         let is_focused = self.focused == FocusTarget::RememberCheck;
@@ -508,6 +521,34 @@ impl Scene for AccessibilityScene {
             }
             KeyCode::Char(' ') => {
                 self.activate();
+                true
+            }
+            KeyCode::Char(c) if key.modifiers.is_empty() => {
+                match self.focused {
+                    FocusTarget::UsernameField => {
+                        self.username.push(c);
+                        self.dirty = true;
+                    }
+                    FocusTarget::PasswordField => {
+                        self.password.push(c);
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
+                true
+            }
+            KeyCode::Backspace => {
+                match self.focused {
+                    FocusTarget::UsernameField => {
+                        self.username.pop();
+                        self.dirty = true;
+                    }
+                    FocusTarget::PasswordField => {
+                        self.password.pop();
+                        self.dirty = true;
+                    }
+                    _ => {}
+                }
                 true
             }
             _ => false,

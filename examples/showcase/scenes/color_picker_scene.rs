@@ -6,8 +6,9 @@
 //!   - Hex code display
 //!   - Mouse and keyboard interaction
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use std::cell::RefCell;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -19,7 +20,7 @@ pub struct ColorPickerScene {
     theme: Theme,
     show_help: bool,
     keybindings: KeybindingSet,
-    picker: ColorPicker,
+    picker: RefCell<ColorPicker>,
     selected_color: Color,
     selected_hex: String,
     dirty: bool,
@@ -36,7 +37,7 @@ impl ColorPickerScene {
             theme: theme.clone(),
             show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
-            picker,
+            picker: RefCell::new(picker),
             selected_color: initial_color,
             selected_hex: "#58a6ff".into(),
             dirty: true,
@@ -75,21 +76,12 @@ impl Scene for ColorPickerScene {
         }
 
         // ── Color Picker Widget (left side) ────────────────────────────────
-        let picker_area = Rect::new(area.x + 2, area.y + 2, area.width / 2 - 2, area.height.saturating_sub(6));
-        let picker_plane = self.picker.render(picker_area);
-        // Blit picker plane
-        for y in 0..picker_plane.height.min(picker_area.height) {
-            for x in 0..picker_plane.width.min(picker_area.width) {
-                let src_idx = (y * picker_plane.width + x) as usize;
-                let dst_idx = ((picker_area.y + y) * area.width + picker_area.x + x) as usize;
-                if src_idx < picker_plane.cells.len() && dst_idx < plane.cells.len() {
-                    let src = &picker_plane.cells[src_idx];
-                    if !src.transparent {
-                        plane.cells[dst_idx] = *src;
-                    }
-                }
-            }
-        }
+        let picker_w = area.width / 2 - 2;
+        let picker_h = area.height.saturating_sub(6);
+        let picker_area = Rect::new(2, 2, picker_w, picker_h);
+        self.picker.borrow_mut().set_area(picker_area);
+        let picker_plane = self.picker.borrow().render(picker_area);
+        blit_to(&mut plane, &picker_plane, 2, 2);
 
         // ── Preview Panel (right side) ─────────────────────────────────────
         let right_x = area.width / 2 + 2;
@@ -259,11 +251,17 @@ impl Scene for ColorPickerScene {
         }
 
         // Forward to picker
-        if self.picker.handle_key(key) {
-            self.selected_color = self.picker.color();
-            self.selected_hex = self.picker.hex().to_string();
-            self.dirty = true;
-            return true;
+        let scene_area = self.area.get();
+        let picker_area = Rect::new(scene_area.x + 2, scene_area.y + 2, scene_area.width / 2 - 2, scene_area.height.saturating_sub(6));
+        {
+            let mut picker = self.picker.borrow_mut();
+            picker.set_area(picker_area);
+            if picker.handle_key(key) {
+                self.selected_color = picker.color();
+                self.selected_hex = picker.hex().to_string();
+                self.dirty = true;
+                return true;
+            }
         }
 
         false
@@ -271,17 +269,17 @@ impl Scene for ColorPickerScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        let picker_area = Rect::new(area.x + 2, area.y + 2, area.width / 2 - 2, area.height.saturating_sub(6));
+        let abs_picker_area = Rect::new(area.x + 2, area.y + 2, area.width / 2 - 2, area.height.saturating_sub(6));
 
-        // Forward to picker if within its bounds
-        if col >= picker_area.x && col < picker_area.x + picker_area.width
-            && row >= picker_area.y && row < picker_area.y + picker_area.height
+        // Forward to picker if within its bounds (pass absolute coordinates)
+        if col >= abs_picker_area.x && col < abs_picker_area.x + abs_picker_area.width
+            && row >= abs_picker_area.y && row < abs_picker_area.y + abs_picker_area.height
         {
-            let local_col = col - picker_area.x;
-            let local_row = row - picker_area.y;
-            if self.picker.handle_mouse(kind, local_col, local_row) {
-                self.selected_color = self.picker.color();
-                self.selected_hex = self.picker.hex().to_string();
+            let mut picker = self.picker.borrow_mut();
+            picker.set_area(abs_picker_area);
+            if picker.handle_mouse(kind, col, row) {
+                self.selected_color = picker.color();
+                self.selected_hex = picker.hex().to_string();
                 self.dirty = true;
                 return true;
             }
@@ -304,7 +302,7 @@ impl Scene for ColorPickerScene {
                 for (i, (hex, color)) in palette.iter().enumerate() {
                     let px = 2 + i as u16 * 9;
                     if col >= px && col < px + 7 {
-                        self.picker.set_hex(hex);
+                        self.picker.borrow_mut().set_hex(hex);
                         self.selected_color = *color;
                         self.selected_hex = hex.to_string();
                         self.dirty = true;
@@ -319,7 +317,7 @@ impl Scene for ColorPickerScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.picker.on_theme_change(theme);
+        self.picker.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool { self.dirty }

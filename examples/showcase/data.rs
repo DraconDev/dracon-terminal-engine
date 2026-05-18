@@ -181,6 +181,18 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
+                name: "note_editor",
+                category: "apps",
+                description: "Note Editor: TextEditorAdapter + ContextMenu + Breadcrumbs",
+                binary_name: "note_editor",
+                preview: &[
+                    "  home > user > notes > hello.rs",
+                    "  ── Editor ──────────────────────",
+                    "  // Welcome to Dracon Note Editor",
+                    "  fn main() {",
+                ],
+            },
+            ExampleMeta {
                 name: "animation",
                 category: "data",
                 description: "Animation & easing curves",

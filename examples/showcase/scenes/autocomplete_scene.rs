@@ -69,11 +69,14 @@ impl AutocompleteScene {
         let suggestions: Vec<String> = PACKAGES.iter().map(|p| p.name.to_string()).collect();
         let bridge = Rc::new(RefCell::new(None));
         let bridge_cb = Rc::clone(&bridge);
+        let mut autocomplete = Autocomplete::new(WidgetId::new(100), suggestions)
+            .with_theme(theme.clone())
+            .with_max_visible(6)
+            .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); });
+        autocomplete.set_area(Rect::new(2, 3, 28, 12));
+        autocomplete.on_focus();
         Self {
-            autocomplete: Autocomplete::new(WidgetId::new(100), suggestions)
-                .with_theme(theme.clone())
-                .with_max_visible(6)
-                .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); }),
+            autocomplete,
             theme,
             show_help: false,
             selected_item: None,
@@ -309,6 +312,9 @@ impl Scene for AutocompleteScene {
 
         if self.autocomplete.handle_key(key) {
             self.sync_bridge();
+            // Refresh set_area after key handling
+            let ac_area = Rect::new(2, 3, 28, 12);
+            self.autocomplete.set_area(ac_area);
             if self.selected_item.is_none() {
                 if let Some(selected) = self.autocomplete.selected() {
                     self.selected_item = Some(selected.to_string());
@@ -322,7 +328,8 @@ impl Scene for AutocompleteScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        let ac_area = Rect::new(2, 3, 28, 12);
+        let ac_area = Rect::new(area.x + 2, area.y + 3, 28, 12);
+        self.autocomplete.set_area(ac_area);
         let rel_col = col.saturating_sub(ac_area.x);
         let rel_row = row.saturating_sub(ac_area.y);
         if (ac_area.x..ac_area.x + ac_area.width).contains(&col) &&

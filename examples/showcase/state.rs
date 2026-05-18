@@ -152,6 +152,7 @@ impl Showcase {
         scene_router.register("navigator", Box::new(crate::scenes::navigator_scene::NavigatorScene::new(theme.clone())));
         scene_router.register("control_panel", Box::new(crate::scenes::control_panel_scene::ControlPanelScene::new(theme.clone())));
         scene_router.register("hud_demo", Box::new(crate::scenes::hud_demo_scene::HudDemoScene::new(theme.clone())));
+        scene_router.register("note_editor", Box::new(crate::scenes::note_editor_scene::NoteEditorScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 

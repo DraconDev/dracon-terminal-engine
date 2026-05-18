@@ -1,7 +1,7 @@
-//! Note Editor scene — TextEditorAdapter + ContextMenu + StatusBar + Breadcrumbs.
+//! Note Editor scene — TextEditorAdapter + StatusBar + Breadcrumbs.
 //!
 //! A note editor demonstrating the TextEditorAdapter widget with full
-//! editing, context menu (right-click), and breadcrumb navigation.
+//! editing, built-in context menu (right-click), and breadcrumb navigation.
 
 #![allow(dead_code)]
 
@@ -15,7 +15,7 @@ use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, ContextMenu, ContextMenuItem, Divider, Label, StatusBar, StatusSegment,
     TextEditorAdapter,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use dracon_terminal_engine::widgets::editor::TextEditor;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -48,16 +48,20 @@ impl NoteEditorScene {
             "//   - Tab inserts spaces".into(),
         ];
 
-        let ctx_menu = ContextMenu::new_with_id(WidgetId::new(1201))
-            .add_item(ContextMenuItem::new("copy", "Copy").shortcut("Ctrl+C"))
-            .add_item(ContextMenuItem::new("cut", "Cut").shortcut("Ctrl+X"))
-            .add_item(ContextMenuItem::new("paste", "Paste").shortcut("Ctrl+V"))
-            .add_separator()
-            .add_item(ContextMenuItem::new("select_all", "Select All").shortcut("Ctrl+A"))
-            .add_separator()
-            .add_item(ContextMenuItem::new("undo", "Undo").shortcut("Ctrl+Z"))
-            .add_item(ContextMenuItem::new("redo", "Redo").shortcut("Ctrl+Y"))
-            .with_theme(theme.clone());
+        let ctx_menu = ContextMenu::new_with_id(
+            WidgetId::new(1201),
+            vec![
+                ContextMenuItem::new("copy", "Copy"),
+                ContextMenuItem::new("cut", "Cut"),
+                ContextMenuItem::new("paste", "Paste"),
+                ContextMenuItem::separator(),
+                ContextMenuItem::new("select_all", "Select All"),
+                ContextMenuItem::separator(),
+                ContextMenuItem::new("undo", "Undo"),
+                ContextMenuItem::new("redo", "Redo"),
+            ],
+        )
+        .with_theme(theme.clone());
 
         let adapter = TextEditorAdapter::new(WidgetId::new(1200), editor)
             .with_context_menu(ctx_menu);
@@ -134,31 +138,21 @@ impl Scene for NoteEditorScene {
         let ed_plane = self.editor.borrow().render(ed_area);
         blit_to(&mut plane, &ed_plane, 0, ed_y as usize);
 
-        // Context menu overlay (if visible)
-        let cm = self.editor.borrow().context_menu.borrow();
-        if let Some(ref menu) = *cm {
-            if menu.is_visible() {
-                let cm_plane = menu.render(Rect::new(0, 0, 20, 10));
-                if let Some((ax, ay)) = menu.anchor() {
-                    blit_to(&mut plane, &cm_plane, ax as usize, ay as usize);
-                }
-            }
-        }
-
         // Status bar
         let sb_y = area.height.saturating_sub(1);
         let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
-        // Cursor info
+        // Cursor info on status bar
         let ed = self.editor.borrow();
         let (crow, ccol) = (ed.editor().cursor_row, ed.editor().cursor_col);
         drop(ed);
+        let cursor_info = format!("Ln {}, Col {}  ", crow + 1, ccol + 1);
         draw_text(
             &mut plane,
-            area.width.saturating_sub(18),
+            area.width.saturating_sub(cursor_info.len() as u16 + 2),
             sb_y,
-            &format!("Ln {}, Col {}  ", crow + 1, ccol + 1),
+            &cursor_info,
             t.fg_muted,
             t.bg,
             false,
@@ -239,7 +233,6 @@ impl Scene for NoteEditorScene {
         // Breadcrumb clicks (row 1)
         if row == 1 {
             if let MouseEventKind::Down(_) = kind {
-                // Click breadcrumb to navigate (demo: just trigger dirty)
                 self.dirty = true;
                 return true;
             }
