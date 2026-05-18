@@ -9,7 +9,7 @@
 //!
 //! Press Ctrl+P to open the command palette, use menus, or click items.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
@@ -135,22 +135,22 @@ impl CommandPaletteScene {
 
         // Build command palette items
         let commands = vec![
-            CommandItem { id: "new_file".into(), name: "New File".into(), category: "file".into() },
-            CommandItem { id: "open_file".into(), name: "Open File".into(), category: "file".into() },
-            CommandItem { id: "save_file".into(), name: "Save File".into(), category: "file".into() },
-            CommandItem { id: "close_tab".into(), name: "Close Tab".into(), category: "file".into() },
-            CommandItem { id: "undo".into(), name: "Undo".into(), category: "edit".into() },
-            CommandItem { id: "redo".into(), name: "Redo".into(), category: "edit".into() },
-            CommandItem { id: "cut".into(), name: "Cut".into(), category: "edit".into() },
-            CommandItem { id: "copy".into(), name: "Copy".into(), category: "edit".into() },
-            CommandItem { id: "paste".into(), name: "Paste".into(), category: "edit".into() },
-            CommandItem { id: "find".into(), name: "Find in File".into(), category: "edit".into() },
-            CommandItem { id: "toggle_sidebar".into(), name: "Toggle Sidebar".into(), category: "view".into() },
-            CommandItem { id: "toggle_minimap".into(), name: "Toggle Minimap".into(), category: "view".into() },
-            CommandItem { id: "zoom_in".into(), name: "Zoom In".into(), category: "view".into() },
-            CommandItem { id: "zoom_out".into(), name: "Zoom Out".into(), category: "view".into() },
-            CommandItem { id: "shortcuts".into(), name: "Keyboard Shortcuts".into(), category: "help".into() },
-            CommandItem { id: "about".into(), name: "About Dracon IDE".into(), category: "help".into() },
+            CommandItem { id: "new_file", name: "New File", category: "file" },
+            CommandItem { id: "open_file", name: "Open File", category: "file" },
+            CommandItem { id: "save_file", name: "Save File", category: "file" },
+            CommandItem { id: "close_tab", name: "Close Tab", category: "file" },
+            CommandItem { id: "undo", name: "Undo", category: "edit" },
+            CommandItem { id: "redo", name: "Redo", category: "edit" },
+            CommandItem { id: "cut", name: "Cut", category: "edit" },
+            CommandItem { id: "copy", name: "Copy", category: "edit" },
+            CommandItem { id: "paste", name: "Paste", category: "edit" },
+            CommandItem { id: "find", name: "Find in File", category: "edit" },
+            CommandItem { id: "toggle_sidebar", name: "Toggle Sidebar", category: "view" },
+            CommandItem { id: "toggle_minimap", name: "Toggle Minimap", category: "view" },
+            CommandItem { id: "zoom_in", name: "Zoom In", category: "view" },
+            CommandItem { id: "zoom_out", name: "Zoom Out", category: "view" },
+            CommandItem { id: "shortcuts", name: "Keyboard Shortcuts", category: "help" },
+            CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
         ];
 
         let command_palette = CommandPalette::new(commands)
@@ -476,7 +476,7 @@ impl Scene for CommandPaletteScene {
 
         // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, &self.theme);
+            render_help_overlay(&mut plane, area, &self.theme, "IDE Lite — Help", &[("Ctrl+P", "Open command palette"), ("Ctrl+B", "Toggle sidebar"), ("Up/Dn", "Scroll action log"), ("Click menu", "Execute menu action"), ("Click sidebar", "Open file (demo)"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
         }
 
         plane
@@ -604,71 +604,3 @@ impl Scene for CommandPaletteScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-// ── Help overlay ────────────────────────────────────────────────────────────
-
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 44u16.min(area.width.saturating_sub(4));
-    let hh = 16u16.min(area.height.saturating_sub(4));
-    let hx = (area.width.saturating_sub(hw)) / 2;
-    let hy = (area.height.saturating_sub(hh)) / 2;
-
-    // Background
-    for y in hy..hy + hh {
-        for x in hx..hx + hw {
-            let idx = (y as usize) * area.width as usize + x as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].bg = t.surface_elevated;
-                plane.cells[idx].transparent = false;
-            }
-        }
-    }
-
-    // Rounded border
-    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
-    for (ch, cx, cy) in corners {
-        let idx = (cy as usize) * area.width as usize + cx as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
-    }
-    for x in hx + 1..hx + hw - 1 {
-        let ti = (hy as usize) * area.width as usize + x as usize;
-        let bi = ((hy + hh - 1) as usize) * area.width as usize + x as usize;
-        if ti < plane.cells.len() { plane.cells[ti].char = '─'; plane.cells[ti].fg = t.outline; }
-        if bi < plane.cells.len() { plane.cells[bi].char = '─'; plane.cells[bi].fg = t.outline; }
-    }
-    for y in hy + 1..hy + hh - 1 {
-        let li = (y as usize) * area.width as usize + hx as usize;
-        let ri = (y as usize) * area.width as usize + (hx + hw - 1) as usize;
-        if li < plane.cells.len() { plane.cells[li].char = '│'; plane.cells[li].fg = t.outline; }
-        if ri < plane.cells.len() { plane.cells[ri].char = '│'; plane.cells[ri].fg = t.outline; }
-    }
-
-    // Title
-    let title = "IDE Lite — Help";
-    let tx = hx + (hw - title.len() as u16) / 2;
-    for (i, c) in title.chars().enumerate() {
-        let idx = ((hy + 1) as usize) * area.width as usize + (tx + i as u16) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
-    }
-
-    // Shortcuts
-    let shortcuts = [
-        ("Ctrl+P", "Open command palette"),
-        ("Ctrl+B", "Toggle sidebar"),
-        ("↑/↓", "Scroll action log"),
-        ("Click menu", "Execute menu action"),
-        ("Click sidebar", "Open file (demo)"),
-        ("F1", "Toggle this help"),
-        ("Esc", "Back to showcase"),
-    ];
-    for (i, (key, desc)) in shortcuts.iter().enumerate() {
-        let y = hy + 3 + i as u16;
-        for (j, c) in key.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 2 + j as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
-        }
-        for (j, c) in desc.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 14 + j as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
-        }
-    }
-}

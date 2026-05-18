@@ -5,7 +5,7 @@
 
 #![allow(dead_code)]
 
-use crate::scenes::shared_helpers::{blit_to, draw_text};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::prelude::*;
@@ -180,7 +180,7 @@ impl Scene for DevConsoleScene {
             let bg = if is_active { t.selection_bg } else { t.bg };
             let label = format!("[{}]", name);
             for (j, ch) in label.chars().enumerate() {
-                let idx = (1 * area.width as usize) + (fx + j as u16) as usize;
+                let idx = area.width as usize + (fx + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = fg;
@@ -255,7 +255,7 @@ impl Scene for DevConsoleScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t);
+            render_help_overlay(&mut plane, area, t, "Dev Console — Help", &[("Space", "Add log entry"), ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"), ("I", "Toggle widget inspector"), ("C", "Clear logs + events"), ("Up/Dn", "Scroll log viewer"), ("PgUp/Dn", "Page scroll"), ("Click filter", "Set filter level"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
         }
 
         plane
@@ -392,94 +392,3 @@ impl Scene for DevConsoleScene {
     }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 46u16.min(area.width.saturating_sub(4));
-    let hh = 16u16.min(area.height.saturating_sub(4));
-    let hx = (area.width.saturating_sub(hw)) / 2;
-    let hy = (area.height.saturating_sub(hh)) / 2;
-
-    for y in hy..hy + hh {
-        for x in hx..hx + hw {
-            let idx = (y as usize) * area.width as usize + x as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].bg = t.surface_elevated;
-                plane.cells[idx].transparent = false;
-            }
-        }
-    }
-    let corners = [
-        ('╭', hx, hy),
-        ('╮', hx + hw - 1, hy),
-        ('╰', hx, hy + hh - 1),
-        ('╯', hx + hw - 1, hy + hh - 1),
-    ];
-    for (ch, cx, cy) in corners {
-        let idx = (cy as usize) * area.width as usize + cx as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx].char = ch;
-            plane.cells[idx].fg = t.outline;
-        }
-    }
-    for x in hx + 1..hx + hw - 1 {
-        let ti = (hy as usize) * area.width as usize + x as usize;
-        let bi = ((hy + hh - 1) as usize) * area.width as usize + x as usize;
-        if ti < plane.cells.len() {
-            plane.cells[ti].char = '─';
-            plane.cells[ti].fg = t.outline;
-        }
-        if bi < plane.cells.len() {
-            plane.cells[bi].char = '─';
-            plane.cells[bi].fg = t.outline;
-        }
-    }
-    for y in hy + 1..hy + hh - 1 {
-        let li = (y as usize) * area.width as usize + hx as usize;
-        let ri = (y as usize) * area.width as usize + (hx + hw - 1) as usize;
-        if li < plane.cells.len() {
-            plane.cells[li].char = '│';
-            plane.cells[li].fg = t.outline;
-        }
-        if ri < plane.cells.len() {
-            plane.cells[ri].char = '│';
-            plane.cells[ri].fg = t.outline;
-        }
-    }
-    let title = "Dev Console — Help";
-    let tx = hx + (hw - title.len() as u16) / 2;
-    for (i, c) in title.chars().enumerate() {
-        let idx = ((hy + 1) as usize) * area.width as usize + (tx + i as u16) as usize;
-        if idx < plane.cells.len() {
-            plane.cells[idx].char = c;
-            plane.cells[idx].fg = t.primary;
-            plane.cells[idx].style = Styles::BOLD;
-        }
-    }
-    let shortcuts = [
-        ("Space", "Add log entry"),
-        ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"),
-        ("I", "Toggle widget inspector"),
-        ("C", "Clear logs + events"),
-        ("Up/Dn", "Scroll log viewer"),
-        ("PgUp/Dn", "Page scroll"),
-        ("Click filter", "Set filter level"),
-        ("F1", "Toggle this help"),
-        ("Esc", "Back to showcase"),
-    ];
-    for (i, (key, desc)) in shortcuts.iter().enumerate() {
-        let y = hy + 3 + i as u16;
-        for (j, c) in key.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 2 + j as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.primary;
-            }
-        }
-        for (j, c) in desc.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 14 + j as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.fg;
-            }
-        }
-    }
-}

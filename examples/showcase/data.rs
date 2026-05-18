@@ -147,6 +147,40 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
+                name: "navigator",
+                category: "apps",
+                description: "Navigator: Breadcrumbs + MenuBar + Divider + Label",
+                binary_name: "navigator",
+                preview: &[
+                    "  File  Edit  View  Help",
+                    "  home > user > Documents",
+                    "  📁 work                        —",
+                    "  📄 resume.pdf                 245K",
+                ],
+            },
+            ExampleMeta {
+                name: "control_panel",
+                category: "input",
+                description: "Control Panel: Select + Toggle + Checkbox + Profiler + StatusBar",
+                binary_name: "control_panel",
+                preview: &[
+                    "  ▸ Theme      [Nord]      ▲▼",
+                    "  ▸ Font       [Fira Code] ▲▼",
+                    "    Dark Mode  [●━━━]     ◀",
+                ],
+            },
+            ExampleMeta {
+                name: "hud_demo",
+                category: "cookbook",
+                description: "HUD Demo: HUD overlay + Gauge + Spinner (game HUD)",
+                binary_name: "hud_demo",
+                preview: &[
+                    "  SCORE: 000500  LVL:2  WAVE:3",
+                    "  HP ████████░░░░  SH ██████░░░░░",
+                    "  AMMO: 27/30",
+                ],
+            },
+            ExampleMeta {
                 name: "animation",
                 category: "data",
                 description: "Animation & easing curves",

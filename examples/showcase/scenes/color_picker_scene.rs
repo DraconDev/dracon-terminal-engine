@@ -6,7 +6,7 @@
 //!   - Hex code display
 //!   - Mouse and keyboard interaction
 
-use crate::scenes::shared_helpers::draw_text;
+use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -224,7 +224,15 @@ impl Scene for ColorPickerScene {
 
         // Help overlay
         if self.show_help {
-            self.render_help(&mut plane, area);
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            render_help_overlay(&mut plane, area, &self.theme, "Color Picker — Help", &[
+                ("↑/↓/←/→", "Adjust HSL values"),
+                ("Click", "Pick color directly"),
+                ("Palette", "Click preset colors"),
+                (help_key, "Toggle this help"),
+                (back_key, "Dismiss / go back"),
+            ]);
         }
 
         plane
@@ -321,54 +329,4 @@ impl Scene for ColorPickerScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-impl ColorPickerScene {
-    fn render_help(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
-        let hw = 38u16.min(area.width.saturating_sub(4));
-        let hh = 9u16.min(area.height.saturating_sub(4));
-        let hx = (area.width - hw) / 2;
-        let hy = (area.height - hh) / 2;
 
-        for y in hy..hy + hh {
-            for x in hx..hx + hw {
-                let idx = (y * area.width + x) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-        }
-
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-
-        let lines = [
-            ("╭──────────────────────────────────╮", true),
-            ("│     Color Picker Help            │", true),
-            ("├──────────────────────────────────┤", true),
-            ("│  ↑/↓/←/→   Adjust HSL values    │", false),
-            ("│  Click      Pick color directly  │", false),
-            ("│  Palette    Click preset colors  │", false),
-            (&format!("│  {:<10} Toggle this help       │", help_key), false),
-            (&format!("│  {:<10} Dismiss / go back     │", back_key), false),
-            ("╰──────────────────────────────────╯", true),
-        ];
-
-        for (i, (line, is_border)) in lines.iter().enumerate() {
-            let ly = hy + i as u16;
-            let lx = (area.width - line.len() as u16) / 2;
-            for (j, ch) in line.chars().enumerate() {
-                let px = lx + j as u16;
-                if px < area.width && ly < area.height {
-                    let idx = (ly * area.width + px) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = if *is_border || "│╭╮├┤╰╯─".contains(ch) { t.outline } else { t.fg };
-                        plane.cells[idx].bg = t.surface_elevated;
-                        plane.cells[idx].transparent = false;
-                    }
-                }
-            }
-        }
-    }
-}

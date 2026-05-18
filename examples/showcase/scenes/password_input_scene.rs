@@ -6,7 +6,7 @@
 //!   - Show/hide password toggle
 //!   - Side panel with security tips
 
-use crate::scenes::shared_helpers::draw_text;
+use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -370,7 +370,15 @@ impl Scene for PasswordInputScene {
         }
 
         if self.show_help {
-            self.render_help(&mut plane, area);
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            render_help_overlay(&mut plane, area, &self.theme, "Password Input — Help", &[
+                ("Tab", "Cycle through fields"),
+                ("Enter", "Submit (or next field)"),
+                ("Ctrl+H", "Toggle password visibility"),
+                ("Click", "Focus a field"),
+                ("R", "Reset after submit"),
+                (back_key, "Back to showcase"),
+            ]);
         }
 
         plane
@@ -484,56 +492,4 @@ impl Scene for PasswordInputScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-impl PasswordInputScene {
-    fn render_help(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
-        let hw = 44u16.min(area.width.saturating_sub(4));
-        let hh = 12u16.min(area.height.saturating_sub(4));
-        let hx = (area.width - hw) / 2;
-        let hy = (area.height - hh) / 2;
 
-        for y in hy..hy + hh {
-            for x in hx..hx + hw {
-                let idx = (y * area.width + x) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-        }
-        for x in hx + 1..hx + hw - 1 {
-            let top = (hy * plane.width + x) as usize;
-            let bot = ((hy + hh - 1) * plane.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
-        }
-        for y in hy + 1..hy + hh - 1 {
-            let left = (y * plane.width + hx) as usize;
-            let right = (y * plane.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
-        }
-        for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
-            let idx = (cy * plane.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
-        }
-
-        let title = "Password Input Help";
-        let tx = hx + (hw - title.len() as u16) / 2;
-        draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
-
-        let shortcuts = [
-            ("Tab", "Cycle through fields"),
-            ("Enter", "Submit (or next field)"),
-            ("Ctrl+H", "Toggle password visibility"),
-            ("Click", "Focus a field"),
-            ("R", "Reset after submit"),
-            ("B/Esc", "Back to showcase"),
-        ];
-        for (i, (key, desc)) in shortcuts.iter().enumerate() {
-            let row = hy + 3 + i as u16;
-            draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
-            draw_text(plane, hx + 16, row, desc, t.fg, t.surface_elevated, false);
-        }
-    }
-}

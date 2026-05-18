@@ -149,6 +149,9 @@ impl Showcase {
         scene_router.register("action_center", Box::new(crate::scenes::action_center_scene::ActionCenterScene::new(theme.clone())));
         scene_router.register("dev_console", Box::new(crate::scenes::dev_console_scene::DevConsoleScene::new(theme.clone())));
         scene_router.register("metrics_hub", Box::new(crate::scenes::metrics_hub_scene::MetricsHubScene::new(theme.clone())));
+        scene_router.register("navigator", Box::new(crate::scenes::navigator_scene::NavigatorScene::new(theme.clone())));
+        scene_router.register("control_panel", Box::new(crate::scenes::control_panel_scene::ControlPanelScene::new(theme.clone())));
+        scene_router.register("hud_demo", Box::new(crate::scenes::hud_demo_scene::HudDemoScene::new(theme.clone())));
 
         let run_counts = vec![0u32; examples.len()];
 

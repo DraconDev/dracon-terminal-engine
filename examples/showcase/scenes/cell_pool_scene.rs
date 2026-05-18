@@ -3,7 +3,7 @@
 //! Demonstrates the Cell allocation recycling pool with visual gauges,
 //! allocation waves, and real-time stats.
 
-use crate::scenes::shared_helpers::draw_text;
+use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::compositor::pool::CellPool;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -346,7 +346,15 @@ impl Scene for CellPoolScene {
         }
 
         if self.show_help {
-            self.render_help(&mut plane, area);
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            render_help_overlay(&mut plane, area, &self.theme, "CellPool — Help", &[
+                ("SPACE", "Simulate allocation"),
+                ("a", "Toggle auto-simulation"),
+                ("r", "Reset pool & stats"),
+                (back_key, "Back to showcase"),
+                (help_key, "Toggle this help"),
+            ]);
         }
 
         plane
@@ -419,57 +427,4 @@ impl Scene for CellPoolScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-impl CellPoolScene {
-    fn render_help(&self, plane: &mut Plane, area: Rect) {
-        let t = &self.theme;
-        let hw = 40u16.min(area.width.saturating_sub(4));
-        let hh = 10u16.min(area.height.saturating_sub(4));
-        let hx = (area.width - hw) / 2;
-        let hy = (area.height - hh) / 2;
 
-        for y in hy..hy + hh {
-            for x in hx..hx + hw {
-                let idx = (y * area.width + x) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].bg = t.surface_elevated;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-        }
-        for x in hx + 1..hx + hw - 1 {
-            let top = (hy * plane.width + x) as usize;
-            let bot = ((hy + hh - 1) * plane.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
-        }
-        for y in hy + 1..hy + hh - 1 {
-            let left = (y * plane.width + hx) as usize;
-            let right = (y * plane.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
-        }
-        for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
-            let idx = (cy * plane.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
-        }
-
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let title = "CellPool Help";
-        let tx = hx + (hw - title.len() as u16) / 2;
-        draw_text(plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
-
-        let shortcuts = [
-            ("SPACE", "Simulate allocation"),
-            ("a", "Toggle auto-simulation"),
-            ("r", "Reset pool & stats"),
-            (back_key, "Back to showcase"),
-            (help_key, "Toggle this help"),
-        ];
-        for (i, (key, desc)) in shortcuts.iter().enumerate() {
-            let row = hy + 3 + i as u16;
-            draw_text(plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
-            draw_text(plane, hx + 12, row, desc, t.fg, t.surface_elevated, false);
-        }
-    }
-}

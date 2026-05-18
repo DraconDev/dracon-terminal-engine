@@ -6,7 +6,7 @@
 
 #![allow(dead_code)]
 
-use crate::scenes::shared_helpers::{blit_to, draw_text};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widgets::split::Orientation;
@@ -214,7 +214,7 @@ impl Scene for LiveFeedScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t);
+            render_help_overlay(&mut plane, area, t, "Live Feed — Help", &[("1/2/3", "Switch tab (Logs/CPU/Memory)"), ("Tab", "Cycle tabs"), ("Space", "Add log entry + update metrics"), ("Left/Right", "Resize split pane"), ("Click tab", "Switch tab"), ("Drag divider", "Resize split pane"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
         }
 
         plane
@@ -317,63 +317,3 @@ impl Scene for LiveFeedScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
-fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme) {
-    let hw = 46u16.min(area.width.saturating_sub(4));
-    let hh = 16u16.min(area.height.saturating_sub(4));
-    let hx = (area.width.saturating_sub(hw)) / 2;
-    let hy = (area.height.saturating_sub(hh)) / 2;
-
-    for y in hy..hy + hh {
-        for x in hx..hx + hw {
-            let idx = (y as usize) * area.width as usize + x as usize;
-            if idx < plane.cells.len() { plane.cells[idx].bg = t.surface_elevated; plane.cells[idx].transparent = false; }
-        }
-    }
-
-    let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
-    for (ch, cx, cy) in corners {
-        let idx = (cy as usize) * area.width as usize + cx as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
-    }
-    for x in hx + 1..hx + hw - 1 {
-        let ti = (hy as usize) * area.width as usize + x as usize;
-        let bi = ((hy + hh - 1) as usize) * area.width as usize + x as usize;
-        if ti < plane.cells.len() { plane.cells[ti].char = '─'; plane.cells[ti].fg = t.outline; }
-        if bi < plane.cells.len() { plane.cells[bi].char = '─'; plane.cells[bi].fg = t.outline; }
-    }
-    for y in hy + 1..hy + hh - 1 {
-        let li = (y as usize) * area.width as usize + hx as usize;
-        let ri = (y as usize) * area.width as usize + (hx + hw - 1) as usize;
-        if li < plane.cells.len() { plane.cells[li].char = '│'; plane.cells[li].fg = t.outline; }
-        if ri < plane.cells.len() { plane.cells[ri].char = '│'; plane.cells[ri].fg = t.outline; }
-    }
-
-    let title = "Live Feed — Help";
-    let tx = hx + (hw - title.len() as u16) / 2;
-    for (i, c) in title.chars().enumerate() {
-        let idx = ((hy + 1) as usize) * area.width as usize + (tx + i as u16) as usize;
-        if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
-    }
-
-    let shortcuts = [
-        ("1/2/3", "Switch tab (Logs/CPU/Memory)"),
-        ("Tab", "Cycle tabs"),
-        ("Space", "Add log entry + update metrics"),
-        ("Left/Right", "Resize split pane"),
-        ("Click tab", "Switch tab"),
-        ("Drag divider", "Resize split pane"),
-        ("F1", "Toggle this help"),
-        ("Esc", "Back to showcase"),
-    ];
-    for (i, (key, desc)) in shortcuts.iter().enumerate() {
-        let y = hy + 3 + i as u16;
-        for (j, c) in key.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 2 + j as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
-        }
-        for (j, c) in desc.chars().enumerate() {
-            let idx = (y as usize) * area.width as usize + (hx + 14 + j as u16) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
-        }
-    }
-}
