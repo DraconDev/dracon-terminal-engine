@@ -18,6 +18,7 @@ use dracon_terminal_engine::framework::widgets::{
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
+use std::rc::Rc;
 use std::time::Duration;
 
 #[derive(Clone, Debug)]
@@ -37,6 +38,7 @@ pub struct ActionCenterScene {
     confirm_dialog: RefCell<Option<ConfirmDialog>>,
     toasts: Vec<Toast>,
     status_bar: RefCell<StatusBar>,
+    action_bridge: Rc<RefCell<Option<String>>>,
     show_help: bool,
     dirty: bool,
 }
@@ -56,6 +58,10 @@ impl ActionCenterScene {
             FileItem { name: "deno.json".into(), kind: "file".into(), size: "0.5K".into() },
         ];
 
+        // Bridge for context menu on_select callback
+        let action_bridge = Rc::new(RefCell::new(None::<String>));
+        let action_bridge_cb = Rc::clone(&action_bridge);
+
         let context_menu = ContextMenu::new(vec![
             ContextMenuItem::new("open", "Open"),
             ContextMenuItem::new("copy", "Copy Path"),
@@ -64,7 +70,8 @@ impl ActionCenterScene {
             ContextMenuItem::new("delete", "Delete"),
         ])
         .with_theme(theme.clone())
-        .with_width(22);
+        .with_width(22)
+        .on_select(Box::new(move |id: &str| { *action_bridge_cb.borrow_mut() = Some(id.to_string()); }));
 
         let status_bar = StatusBar::new(WidgetId::new(603))
             .add_segment(StatusSegment::new("Right-click: menu | Del: delete | F1: help | Esc: back"))
@@ -80,6 +87,7 @@ impl ActionCenterScene {
             confirm_dialog: RefCell::new(None),
             toasts: Vec::new(),
             status_bar: RefCell::new(status_bar),
+            action_bridge,
             show_help: false,
             dirty: true,
         }
@@ -94,6 +102,15 @@ impl ActionCenterScene {
     fn hide_context_menu(&mut self) {
         self.context_menu.borrow_mut().hide();
         self.dirty = true;
+    }
+
+    /// Check if context menu on_select fired via bridge, and execute
+    fn sync_action_bridge(&mut self) {
+        let action = self.action_bridge.borrow_mut().take();
+        if let Some(id) = action {
+            self.hide_context_menu();
+            self.execute_context_action(&id);
+        }
     }
 
     fn execute_context_action(&mut self, id: &str) {
@@ -308,11 +325,11 @@ impl Scene for ActionCenterScene {
         // Context menu takes priority
         if self.context_menu.borrow().is_visible() {
             let _handled = self.context_menu.borrow_mut().handle_key(key);
-            // Check if item was selected via Enter
-            let selected_id = self.context_menu.borrow().selected_id().map(|s| s.to_string());
-            if let Some(id) = selected_id {
-                // Only execute on Enter (check if key was Enter)
-                if key.code == KeyCode::Enter {
+            self.sync_action_bridge();
+            // Also handle Enter key for context menu actions
+            if key.code == KeyCode::Enter {
+                let id = self.context_menu.borrow().selected_id().map(|s| s.to_string());
+                if let Some(id) = id {
                     self.execute_context_action(&id);
                 }
             }
@@ -390,8 +407,7 @@ impl Scene for ActionCenterScene {
                 // Click outside — dismiss
                 self.hide_context_menu();
             }
-            // Check if an item was clicked (mouse Down on item fires on_select)
-            // The ContextMenu widget calls on_select internally on click
+            self.sync_action_bridge();
             self.dirty = true;
             return true;
         }
