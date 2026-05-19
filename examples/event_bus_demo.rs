@@ -27,7 +27,6 @@ use std::sync::Arc;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // App events that widgets can publish/subscribe to via EventBus
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 enum AppEvent {
     CounterChanged(i32),

@@ -36,24 +36,21 @@ use std::sync::Arc;
 
 // AppEvent and AppState are part of the architecture pattern demonstrated
 // by this example, showing how a real app would structure state.
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
-enum AppEvent {
+pub(crate) enum AppEvent {
     ThemeChanged(String),
     NavigationRequested(String),
     UserLoggedIn(String),
 }
 
-#[allow(dead_code)]
-struct AppState {
-    username: String,
-    login_count: u32,
-    theme_index: usize,
+pub(crate) struct AppState {
+    pub username: String,
+    pub login_count: u32,
+    pub theme_index: usize,
 }
 
-#[allow(dead_code)]
 impl AppState {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             username: "Guest".into(),
             login_count: 1,
