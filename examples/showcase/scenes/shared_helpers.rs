@@ -6,20 +6,56 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 
 /// Draws a line of text at (x, y) with foreground, background, and optional bold styling.
-/// Writes directly into `plane.cells` using flat indexing, which matches the
-/// internal representation used by all embedded scenes.
+/// Clips at the plane's right boundary — text that would overflow the row is truncated.
+/// This prevents text from wrapping into the next row, which was a common bug with
+/// the old flat-indexing approach.
 pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color, bold: bool) {
+    if y >= plane.height {
+        return;
+    }
+    let max_x = plane.width;
+    let style = if bold { Styles::BOLD } else { Styles::empty() };
     for (i, ch) in text.chars().enumerate() {
-        let idx = (y * plane.width + x + i as u16) as usize;
+        let cx = x + i as u16;
+        if cx >= max_x {
+            break; // clip at right boundary
+        }
+        let idx = (y * plane.width + cx) as usize;
         if idx < plane.cells.len() {
             plane.cells[idx] = Cell {
                 char: ch,
                 fg,
                 bg,
-                style: if bold { Styles::BOLD } else { Styles::empty() },
+                style,
                 transparent: false,
                 skip: false,
             };
+        }
+    }
+}
+
+/// Draws text clipped to a column boundary (max_x). Text beyond max_x is replaced with "…".
+/// Use this when rendering inside a panel/column to prevent text from bleeding into
+/// adjacent panels.
+pub fn draw_text_clipped(plane: &mut Plane, x: u16, y: u16, text: &str, max_x: u16, fg: Color, bg: Color, bold: bool) {
+    if y >= plane.height || x >= max_x {
+        return;
+    }
+    let available = (max_x - x) as usize;
+    if available == 0 {
+        return;
+    }
+    let style = if bold { Styles::BOLD } else { Styles::empty() };
+    let char_count = text.chars().count();
+    if char_count <= available {
+        draw_text(plane, x, y, text, fg, bg, bold);
+    } else {
+        // Truncate and add ellipsis
+        let truncated: String = text.chars().take(available.saturating_sub(1)).collect();
+        draw_text(plane, x, y, &truncated, fg, bg, bold);
+        let ellipsis_x = x + truncated.len() as u16;
+        if ellipsis_x < max_x {
+            draw_text(plane, ellipsis_x, y, "…", fg, bg, bold);
         }
     }
 }

@@ -3,7 +3,7 @@
 //! Demonstrates the Autocomplete widget with search suggestions,
 //! rich info panel, match count, and recent selections history.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
