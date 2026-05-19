@@ -340,7 +340,7 @@ impl Showcase {
     }
 
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban" | "animation" | "color_picker" | "tags_input" | "tooltip" | "progress" | "password_input" | "radio" | "debug_overlay" | "raycaster" | "paint" | "workshop")
+        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban" | "animation" | "color_picker" | "tags_input" | "tooltip" | "progress" | "password_input" | "radio" | "debug_overlay" | "raycaster" | "paint" | "workshop" | "action_center" | "command_palette" | "control_panel" | "dev_console" | "hud_demo" | "live_feed" | "metrics_hub" | "navigator" | "note_editor" | "settings_panel" | "table_list")
     }
 
     pub fn launch_selected(&mut self) {
