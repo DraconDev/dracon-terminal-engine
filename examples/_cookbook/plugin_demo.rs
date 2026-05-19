@@ -398,7 +398,7 @@ impl Widget for PluginDemoApp {
             Char('1') => {
                 self.stat_widgets[0] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_cpu", WidgetId::new(1), self.theme)
-                    .unwrap();
+                    .expect("plugin creation failed");
                 self.dirty = true;
                 true
             }
