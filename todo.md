@@ -1,29 +1,41 @@
-# Bug Fix TODO — All Items Complete
+# Bug Fix TODO
 
-## Fixed ✅ (15 items)
+## CRITICAL FIX ✅
 
-1. **Accessibility typing** — Accept SHIFT modifier for uppercase, guard Backspace
-2. **Action Center mouse clicks** — on_select callback with bridge pattern
-3. **Color Picker initial state** — Default slider selected (Hue)
-4. **Control Panel Selects** — `Select::set_selected()`, sync index, render actual widget
-5. **Autocomplete dropdown** — `open_dropdown()` on init
-6. **Notification Center area** — Added `area.set()` in render
-7. **Settings scene unwraps** — `.expect()` for hardcoded regexes
-8. **Raycaster MAP safety** — `.clamp()` before MAP index access
-9. **File manager unwrap** — `match` instead of `.unwrap()` on take()
-10. **Plugin demo unwraps** — 11× `.expect()` for RwLock poisoning
-11. **Cell pool unwraps** — 6× `.expect()` for Mutex poisoning
-12. **Modal demo dead code** — Use `created` field for toast age display
-13. **Stat widget dead code** — Remove `#[allow(dead_code)]`, add doc
-14. **File manager dead code** — Prefix unused function with `_`
-15. **Control Panel Select render** — Use actual Select widget instead of manual value display
+**11 embedded scenes couldn't launch** — `is_embedded()` in `state.rs` was missing them, so the showcase tried to launch them as external binaries (which don't exist).
 
-## Full Audit Results
+**Root cause**: When 11 new embedded scenes were created, they were registered in `scene_router` but never added to the `is_embedded()` match list. The showcase's `launch_selected()` method checks `is_embedded()` to decide whether to push a scene to the router or spawn an external binary. Missing names → silent launch failure.
 
-- **35 embedded scenes**: All pass all 12 audit criteria
-- **23 external binaries**: 0 production unwraps
-- **Build**: 0 clippy errors, 0 warnings, all tests pass
+**Affected scenes** (ALL 11 were broken — showed "Launching..." then nothing):
+- `action_center` ← **the one the user reported**
+- `command_palette`
+- `control_panel`
+- `dev_console`
+- `hud_demo`
+- `live_feed`
+- `metrics_hub`
+- `navigator`
+- `note_editor`
+- `settings_panel`
+- `table_list`
 
-## Needs Runtime Testing
-- Chat client "crash" — no code-level panic source found
-- Action center "failed to start" — code compiles clean, needs terminal test
+**Fix**: Added all 11 missing names to `is_embedded()` in `examples/showcase/state.rs`.
+
+## Previously Fixed (from audit)
+
+1. Accessibility typing (SHIFT modifier, Backspace guard)
+2. Action Center context menu on_select bridge
+3. Color Picker default slider selection
+4. Control Panel Select::set_selected() + index sync
+5. Autocomplete open_dropdown() on init
+6. Notification Center area.set() in render
+7. Raycaster footer + MAP bounds safety
+8. Settings scene .unwrap() → .expect()
+9. File manager Option::take() unwrap → match
+10. Plugin demo / cell pool unwraps → .expect()
+11. All #[allow(dead_code)] removed
+
+## Build Status
+- ✅ `cargo clippy --lib --examples` — 0 errors, 0 warnings
+- ✅ `cargo test` — all pass
+- ✅ 0 production `.unwrap()` calls
