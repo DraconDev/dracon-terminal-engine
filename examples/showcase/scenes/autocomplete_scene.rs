@@ -73,7 +73,7 @@ impl AutocompleteScene {
             .with_theme(theme.clone())
             .with_max_visible(6)
             .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); });
-        autocomplete.set_area(Rect::new(3, 4, 26, 8));
+        autocomplete.set_area(Rect::new(2, 3, 28, 9));
         autocomplete.on_focus();
         autocomplete.open_dropdown();
         Self {
@@ -124,24 +124,24 @@ impl AutocompleteScene {
                 // Category badge
                 let cat_color = category_color(pkg.category, t);
                 let badge = format!(" {} ", pkg.category);
-                draw_text(plane, x, y + 2, &badge, cat_color, t.bg, true);
+                draw_text_clipped(plane, x, y + 2, &badge, max_x, cat_color, t.bg, true);
 
                 // Name (large)
-                draw_text(plane, x, y + 3, pkg.name, t.primary, t.bg, true);
+                draw_text_clipped(plane, x, y + 3, pkg.name, max_x, t.primary, t.bg, true);
 
                 // Version + downloads
                 let ver = format!("v{}", pkg.version);
                 let dl = format!("{} downloads", pkg.downloads);
-                draw_text(plane, x, y + 4, &ver, t.fg, t.bg, false);
-                draw_text(plane, x + ver.len() as u16 + 2, y + 4, &dl, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, y + 4, &ver, max_x, t.fg, t.bg, false);
+                draw_text_clipped(plane, x + ver.len() as u16 + 2, y + 4, &dl, max_x, t.fg_muted, t.bg, false);
 
                 // Description
-                draw_text(plane, x, y + 6, pkg.description, t.fg, t.bg, false);
+                draw_text_clipped(plane, x, y + 6, pkg.description, max_x, t.fg, t.bg, false);
 
                 // Visual install bar (decorative)
-                draw_text(plane, x, y + 8, "Popularity:", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, y + 8, "Popularity:", max_x, t.fg_muted, t.bg, false);
                 let bar_x = x + 12;
-                let bar_w = (w as usize).saturating_sub(14);
+                let bar_w = (max_x as usize).saturating_sub(bar_x as usize).saturating_sub(2);
                 let fill = match pkg.downloads {
                     d if d.contains('M') => d.trim_end_matches('M').parse::<f32>().unwrap_or(0.0) / 15.0,
                     d if d.contains('K') => d.trim_end_matches('K').parse::<f32>().unwrap_or(0.0) / 15000.0,
@@ -149,7 +149,9 @@ impl AutocompleteScene {
                 };
                 let filled = (fill * bar_w as f32) as usize;
                 for bx in 0..bar_w {
-                    let idx = ((y + 8) * plane.width + bar_x + bx as u16) as usize;
+                    let bx_pos = bar_x + bx as u16;
+                    if bx_pos >= max_x { break; }
+                    let idx = ((y + 8) * plane.width + bx_pos) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = if bx < filled { '█' } else { '░' };
                         plane.cells[idx].fg = if bx < filled { cat_color } else { t.fg_muted };
@@ -157,40 +159,42 @@ impl AutocompleteScene {
                     }
                 }
             } else {
-                draw_text(plane, x, y + 2, name, t.primary, t.bg, true);
-                draw_text(plane, x, y + 3, "Custom package", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, y + 2, name, max_x, t.primary, t.bg, true);
+                draw_text_clipped(plane, x, y + 3, "Custom package", max_x, t.fg_muted, t.bg, false);
             }
         } else {
-            draw_text(plane, x, y, "Package Details", t.primary, t.bg, true);
+            draw_text_clipped(plane, x, y, "Package Details", max_x, t.primary, t.bg, true);
             for dx in 0..w {
-                let idx = ((y + 1) * plane.width + x + dx) as usize;
+                let dx_pos = x + dx;
+                if dx_pos >= max_x { break; }
+                let idx = ((y + 1) * plane.width + dx_pos) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '─';
                     plane.cells[idx].fg = t.outline;
                 }
             }
-            draw_text(plane, x, y + 2, "Select a package", t.fg_muted, t.bg, false);
-            draw_text(plane, x, y + 3, "to see details", t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x, y + 2, "Select a package", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x, y + 3, "to see details", max_x, t.fg_muted, t.bg, false);
         }
     }
 
-    fn render_recent_panel(&self, plane: &mut Plane, x: u16, y: u16) {
+    fn render_recent_panel(&self, plane: &mut Plane, x: u16, y: u16, max_x: u16) {
         let t = &self.theme;
 
-        draw_text(plane, x, y, "Recent", t.secondary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Recent", max_x, t.secondary, t.bg, true);
 
         if self.recent_selections.is_empty() {
-            draw_text(plane, x, y + 1, "No selections yet", t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x, y + 1, "No selections yet", max_x, t.fg_muted, t.bg, false);
         } else {
             for (i, sel) in self.recent_selections.iter().enumerate() {
                 let ry = y + 1 + i as u16;
                 let num = format!("{}.", i + 1);
-                draw_text(plane, x, ry, &num, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, ry, &num, max_x, t.fg_muted, t.bg, false);
 
                 let cat_color = self.get_package_info(sel)
                     .map(|p| category_color(p.category, t))
                     .unwrap_or(t.fg);
-                draw_text(plane, x + 3, ry, sel, cat_color, t.bg, false);
+                draw_text_clipped(plane, x + 3, ry, sel, max_x, cat_color, t.bg, false);
             }
         }
     }
@@ -276,7 +280,7 @@ impl Scene for AutocompleteScene {
         let panel_x = div_x + 2;
         let panel_w = area.width.saturating_sub(panel_x + 2);
         self.render_info_panel(&mut plane, panel_x, 2, panel_w);
-        self.render_recent_panel(&mut plane, panel_x, 12);
+        self.render_recent_panel(&mut plane, panel_x, 12, panel_x + panel_w);
 
         // Footer
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
@@ -330,7 +334,7 @@ impl Scene for AutocompleteScene {
         if self.autocomplete.handle_key(key) {
             self.sync_bridge();
             // Refresh set_area after key handling
-            let ac_area = Rect::new(3, 4, 26, 8);
+            let ac_area = Rect::new(2, 3, 28, 9);
             self.autocomplete.set_area(ac_area);
             if self.selected_item.is_none() {
                 if let Some(selected) = self.autocomplete.selected() {
@@ -345,7 +349,7 @@ impl Scene for AutocompleteScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        let ac_area = Rect::new(area.x + 3, area.y + 4, 26, 8);
+        let ac_area = Rect::new(area.x + 2, area.y + 3, 28, 9);
         self.autocomplete.set_area(ac_area);
         let rel_col = col.saturating_sub(ac_area.x);
         let rel_row = row.saturating_sub(ac_area.y);
