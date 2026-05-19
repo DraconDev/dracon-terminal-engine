@@ -406,6 +406,21 @@ impl Scene for RaycasterScene {
             ]);
         }
 
+        // Footer with key hints
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+        let fy = area.height.saturating_sub(1);
+        let footer = format!(" WASD:move | ←→:turn | M:minimap | {}:help | {}:back ", help_key, back_key);
+        for (i, c) in footer.chars().enumerate() {
+            let idx = (fy * area.width + i as u16) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = c;
+                plane.cells[idx].fg = self.theme.fg_muted;
+                plane.cells[idx].bg = self.theme.surface;
+                plane.cells[idx].transparent = false;
+            }
+        }
+
         plane
     }
 
