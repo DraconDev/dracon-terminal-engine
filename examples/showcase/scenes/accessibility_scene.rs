@@ -4,7 +4,7 @@
 //! accessibility tree, live announcements, and real input widgets.
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
-use dracon_terminal_engine::compositor::plane::{Cell, Plane, Styles};
+use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -13,6 +13,7 @@ use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{PasswordInput, SearchInput};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 
 #[derive(Clone, Copy, PartialEq)]
 enum FocusTarget {
