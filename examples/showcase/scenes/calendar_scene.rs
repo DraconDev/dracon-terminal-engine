@@ -256,9 +256,7 @@ impl Scene for CalendarScene {
             .unwrap_or(0) * 2 + 2).min(6) as u16;
         self.render_sidebar(&mut plane, sidebar_x, events_y, sidebar_w, area);
 
-        // Event dots on calendar — mark dates that have events
-        // (We can't modify the Calendar widget's rendering, but we can show indicators)
-        // Show legend at bottom of calendar area
+        // Event legend at bottom of calendar area (clipped to left panel)
         let legend_y = cal_area.y + cal_area.height + 1;
         if legend_y < area.height.saturating_sub(3) {
             let legends = [
@@ -269,8 +267,10 @@ impl Scene for CalendarScene {
             ];
             let mut lx = 2u16;
             for (label, color) in legends {
+                let next_x = lx + label.len() as u16 + 2;
+                if next_x > div_x { break; } // clip at vertical divider
                 draw_text(&mut plane, lx, legend_y, label, color, t.bg, false);
-                lx += label.len() as u16 + 2;
+                lx = next_x;
             }
         }
 
