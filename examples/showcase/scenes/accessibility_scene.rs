@@ -151,23 +151,14 @@ pub struct AccessibilityScene {
     tick: u64,
     dirty: bool,
     area: std::cell::Cell<Rect>,
-    // Real input widgets
-    username_input: SearchInput,
-    password_input: PasswordInput,
+    // Real input widgets (wrapped in RefCell for render(&self) mutability)
+    username_input: RefCell<SearchInput>,
+    password_input: RefCell<PasswordInput>,
 }
 
-// Layout constants — form elements positioned absolutely within the scene
+// Layout constants — form element vertical positions computed in render_form
 const FORM_X: u16 = 2;
 const FORM_Y: u16 = 2;
-const USERNAME_LABEL_Y: u16 = FORM_Y;
-const USERNAME_INPUT_Y: u16 = FORM_Y + 1;
-const USERNAME_RING: (u16, u16, u16, u16) = (FORM_X, USERNAME_INPUT_Y, 24, 3); // x, y, w, h
-const PASSWORD_LABEL_Y: u16 = USERNAME_INPUT_Y + 3 + 1; // 1 row gap after username ring
-const PASSWORD_INPUT_Y: u16 = PASSWORD_LABEL_Y + 1;
-const PASSWORD_RING: (u16, u16, u16, u16) = (FORM_X, PASSWORD_INPUT_Y, 24, 3);
-const CHECK_Y: u16 = PASSWORD_INPUT_Y + 3 + 1;
-const BUTTON_Y: u16 = CHECK_Y + 2;
-const LINK_Y: u16 = BUTTON_Y + 2;
 
 impl AccessibilityScene {
     pub fn new(theme: Theme) -> Self {
@@ -189,8 +180,8 @@ impl AccessibilityScene {
             tick: 0,
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
-            username_input,
-            password_input,
+            username_input: RefCell::new(username_input),
+            password_input: RefCell::new(password_input),
         }
     }
 
@@ -227,16 +218,16 @@ impl AccessibilityScene {
         // Focus/blur the real input widgets based on current focus target
         match self.focused {
             FocusTarget::UsernameField => {
-                self.username_input.on_focus();
-                self.password_input.on_blur();
+                self.username_input.borrow_mut().on_focus();
+                self.password_input.borrow_mut().on_blur();
             }
             FocusTarget::PasswordField => {
-                self.username_input.on_blur();
-                self.password_input.on_focus();
+                self.username_input.borrow_mut().on_blur();
+                self.password_input.borrow_mut().on_focus();
             }
             _ => {
-                self.username_input.on_blur();
-                self.password_input.on_blur();
+                self.username_input.borrow_mut().on_blur();
+                self.password_input.borrow_mut().on_blur();
             }
         }
     }
@@ -299,8 +290,8 @@ impl AccessibilityScene {
 
         // Render real SearchInput widget
         let u_area = Rect::new(x + 1, u_input_y, 22, 1);
-        self.username_input.set_area(u_area);
-        let u_plane = self.username_input.render(u_area);
+        self.username_input.borrow_mut().set_area(u_area);
+        let u_plane = self.username_input.borrow().render(u_area);
         blit_to(plane, &u_plane, (x + 1) as usize, u_input_y as usize);
 
         // Focus ring around input (1 row above, 1 row below, 1 col on each side)
@@ -317,8 +308,8 @@ impl AccessibilityScene {
 
         // Render real PasswordInput widget
         let p_area = Rect::new(x + 1, p_input_y, 22, 1);
-        self.password_input.set_area(p_area);
-        let p_plane = self.password_input.render(p_area);
+        self.password_input.borrow_mut().set_area(p_area);
+        let p_plane = self.password_input.borrow().render(p_area);
         blit_to(plane, &p_plane, (x + 1) as usize, p_input_y as usize);
 
         // Focus ring
@@ -642,7 +633,7 @@ impl Scene for AccessibilityScene {
                 }
                 true
             }
-            KeyCode::Char(c) => {
+            KeyCode::Char(_) => {
                 // Allow typing with no modifiers or just SHIFT (uppercase)
                 let mods = key.modifiers;
                 if mods.is_empty() || mods == KeyModifiers::SHIFT {
@@ -667,14 +658,14 @@ impl Scene for AccessibilityScene {
 
         // Username input: row FORM_Y+3, cols FORM_X+1..FORM_X+23
         let u_input_y = FORM_Y + 3;
-        if col >= FORM_X + 1 && col < FORM_X + 23 && row == u_input_y {
+        if col > FORM_X && col < FORM_X + 23 && row == u_input_y {
             if let MouseEventKind::Down(_) = kind {
                 self.set_focus(FocusTarget::UsernameField);
             }
             // Forward mouse to input widget
             let rel_col = col.saturating_sub(FORM_X + 1);
             let rel_row = 0u16;
-            self.username_input.handle_mouse(kind, rel_col, rel_row);
+            self.username_input.borrow_mut().handle_mouse(kind, rel_col, rel_row);
             self.dirty = true;
             return true;
         }
@@ -682,13 +673,13 @@ impl Scene for AccessibilityScene {
         // Password input: row FORM_Y+5, cols FORM_X+1..FORM_X+23
         let p_label_y = u_input_y + 3;
         let p_input_y = p_label_y + 1;
-        if col >= FORM_X + 1 && col < FORM_X + 23 && row == p_input_y {
+        if col > FORM_X && col < FORM_X + 23 && row == p_input_y {
             if let MouseEventKind::Down(_) = kind {
                 self.set_focus(FocusTarget::PasswordField);
             }
             let rel_col = col.saturating_sub(FORM_X + 1);
             let rel_row = 0u16;
-            self.password_input.handle_mouse(kind, rel_col, rel_row);
+            self.password_input.borrow_mut().handle_mouse(kind, rel_col, rel_row);
             self.dirty = true;
             return true;
         }
@@ -696,7 +687,7 @@ impl Scene for AccessibilityScene {
         if let MouseEventKind::Down(_) = kind {
             // Remember checkbox
             let check_y = p_input_y + 2;
-            if col >= FORM_X && col < FORM_X + 14 && row == check_y {
+            if (FORM_X..FORM_X + 14).contains(&col) && row == check_y {
                 self.set_focus(FocusTarget::RememberCheck);
                 self.activate();
                 return true;
@@ -704,7 +695,7 @@ impl Scene for AccessibilityScene {
 
             // Login button
             let btn_y = check_y + 2;
-            if col >= FORM_X && col < FORM_X + 12 && row == btn_y {
+            if (FORM_X..FORM_X + 12).contains(&col) && row == btn_y {
                 self.set_focus(FocusTarget::LoginButton);
                 self.activate();
                 return true;
@@ -712,7 +703,7 @@ impl Scene for AccessibilityScene {
 
             // Help link
             let link_y = btn_y + 2;
-            if col >= FORM_X && col < FORM_X + 10 && row == link_y {
+            if (FORM_X..FORM_X + 10).contains(&col) && row == link_y {
                 self.set_focus(FocusTarget::HelpLink);
                 self.activate();
                 return true;
@@ -734,8 +725,8 @@ impl Scene for AccessibilityScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.username_input.on_theme_change(theme);
-        self.password_input.on_theme_change(theme);
+        self.username_input.borrow_mut().on_theme_change(theme);
+        self.password_input.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
@@ -748,11 +739,11 @@ impl AccessibilityScene {
     fn forward_key_to_input(&mut self, key: KeyEvent) {
         match self.focused {
             FocusTarget::UsernameField => {
-                self.username_input.handle_key(key);
+                self.username_input.borrow_mut().handle_key(key);
                 self.dirty = true;
             }
             FocusTarget::PasswordField => {
-                self.password_input.handle_key(key);
+                self.password_input.borrow_mut().handle_key(key);
                 self.dirty = true;
             }
             _ => {}
