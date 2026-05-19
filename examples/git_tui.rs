@@ -41,7 +41,7 @@ struct GitFile {
 
 struct GitCommit {
     hash: String,
-    author: String,
+    _author: String,
     date: String,
     message: String,
 }
@@ -210,7 +210,7 @@ impl GitTui {
                 let parts: Vec<&str> = l.splitn(4, '|').collect();
                 GitCommit {
                     hash: parts.first().unwrap_or(&"").to_string(),
-                    author: parts.get(1).unwrap_or(&"").to_string(),
+                    _author: parts.get(1).unwrap_or(&"").to_string(),
                     date: parts.get(2).unwrap_or(&"").to_string(),
                     message: parts.get(3).unwrap_or(&"").to_string(),
                 }
