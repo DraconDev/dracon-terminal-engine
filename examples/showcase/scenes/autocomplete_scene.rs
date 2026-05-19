@@ -73,7 +73,7 @@ impl AutocompleteScene {
             .with_theme(theme.clone())
             .with_max_visible(6)
             .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); });
-        autocomplete.set_area(Rect::new(2, 3, 28, 12));
+        autocomplete.set_area(Rect::new(3, 4, 26, 8));
         autocomplete.on_focus();
         autocomplete.open_dropdown();
         Self {
@@ -237,12 +237,45 @@ impl Scene for AutocompleteScene {
 
         // Left: Search input + Autocomplete dropdown
         draw_text(&mut plane, 2, 2, "Search packages:", t.fg_muted, t.bg, false);
-        let ac_area = Rect::new(2, 3, 28, 12);
+
+        // Draw a border around the autocomplete area
+        let ac_x = 2u16;
+        let ac_y = 3u16;
+        let ac_w = 28u16;
+        let ac_h = 9u16.min(area.height.saturating_sub(ac_y + 2));
+        // Top border
+        for x in 0..ac_w {
+            let idx = ((ac_y) * area.width + ac_x + x) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; plane.cells[idx].transparent = false; }
+        }
+        // Side borders and content area fill
+        for y in 1..ac_h {
+            let left = ((ac_y + y) * area.width + ac_x) as usize;
+            let right = ((ac_y + y) * area.width + ac_x + ac_w - 1) as usize;
+            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; plane.cells[left].transparent = false; }
+            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; plane.cells[right].transparent = false; }
+        }
+        // Bottom border
+        for x in 0..ac_w {
+            let idx = ((ac_y + ac_h) * area.width + ac_x + x) as usize;
+            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; plane.cells[idx].transparent = false; }
+        }
+        // Corners
+        let tl = (ac_y * area.width + ac_x) as usize;
+        let tr = (ac_y * area.width + ac_x + ac_w - 1) as usize;
+        let bl = ((ac_y + ac_h) * area.width + ac_x) as usize;
+        let br = ((ac_y + ac_h) * area.width + ac_x + ac_w - 1) as usize;
+        if tl < plane.cells.len() { plane.cells[tl].char = '╭'; plane.cells[tl].fg = t.outline; }
+        if tr < plane.cells.len() { plane.cells[tr].char = '╮'; plane.cells[tr].fg = t.outline; }
+        if bl < plane.cells.len() { plane.cells[bl].char = '╰'; plane.cells[bl].fg = t.outline; }
+        if br < plane.cells.len() { plane.cells[br].char = '╯'; plane.cells[br].fg = t.outline; }
+
+        let ac_area = Rect::new(ac_x + 1, ac_y + 1, ac_w.saturating_sub(2), ac_h.saturating_sub(1));
         let ac_plane = self.autocomplete.render(ac_area);
-        blit_to(&mut plane, &ac_plane, ac_area.x as usize, ac_area.y as usize);
+        blit_to(&mut plane, &ac_plane, (ac_x + 1) as usize, (ac_y + 1) as usize);
 
         // Category legend under the dropdown
-        let legend_y = 3 + 8;
+        let legend_y = ac_y + ac_h + 1;
         let categories = [("tooling", t.primary), ("compiler", t.error), ("docs", t.success),
                          ("linting", t.warning), ("testing", t.info), ("learning", t.secondary)];
         let mut lx = 2u16;
@@ -321,7 +354,7 @@ impl Scene for AutocompleteScene {
         if self.autocomplete.handle_key(key) {
             self.sync_bridge();
             // Refresh set_area after key handling
-            let ac_area = Rect::new(2, 3, 28, 12);
+            let ac_area = Rect::new(3, 4, 26, 8);
             self.autocomplete.set_area(ac_area);
             if self.selected_item.is_none() {
                 if let Some(selected) = self.autocomplete.selected() {
@@ -336,7 +369,7 @@ impl Scene for AutocompleteScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        let ac_area = Rect::new(area.x + 2, area.y + 3, 28, 12);
+        let ac_area = Rect::new(area.x + 3, area.y + 4, 26, 8);
         self.autocomplete.set_area(ac_area);
         let rel_col = col.saturating_sub(ac_area.x);
         let rel_row = row.saturating_sub(ac_area.y);
