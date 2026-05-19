@@ -216,12 +216,18 @@ impl App {
                 }
             }
         } else if let Some(focused) = self.focus_manager.focused() {
+            let pre_scene_depth = self.scene_router.stack_depth();
             let new_theme = if let Some(mut widget) = self.widget_mut(focused) {
                 let _ = widget.handle_key(*k);
                 widget.current_theme()
             } else {
                 None
             };
+            // If a scene was popped, the compositor's final_buffer still has
+            // the old scene content. Mark all dirty to force a full clear.
+            if self.scene_router.stack_depth() != pre_scene_depth {
+                self.dirty_tracker.mark_all_dirty();
+            }
             if let Some(theme) = new_theme {
                 if theme.name != self.theme.name {
                     self.set_theme(theme);
@@ -270,11 +276,15 @@ impl App {
                     w.on_focus();
                 }
             }
+            let pre_scene_depth = self.scene_router.stack_depth();
             if let Some(mut widget) = self.widget_mut(id) {
                 let a = widget.area();
                 let local_col = col.saturating_sub(a.x);
                 let local_row = row.saturating_sub(a.y);
                 let _ = widget.handle_mouse(mouse_event.kind, local_col, local_row);
+            }
+            if self.scene_router.stack_depth() != pre_scene_depth {
+                self.dirty_tracker.mark_all_dirty();
             }
         }
     }
