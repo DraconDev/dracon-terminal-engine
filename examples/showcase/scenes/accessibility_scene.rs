@@ -3,7 +3,7 @@
 //! Demonstrates screen reader support (OSC 99) with visual focus rings,
 //! accessibility tree, live announcements, and real input widgets.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -88,56 +88,6 @@ struct Announcement {
     label: String,
     action: String,
     _timestamp: u64,
-}
-
-/// Draw a rounded focus ring around a rectangular area.
-/// Used to visually indicate the accessible focus target.
-fn draw_focus_ring(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, color: Color) {
-    // Corners
-    let corners = [
-        ('╭', x, y),
-        ('╮', x + w.saturating_sub(1), y),
-        ('╰', x, y + h.saturating_sub(1)),
-        ('╯', x + w.saturating_sub(1), y + h.saturating_sub(1)),
-    ];
-    for (ch, cx, cy) in corners {
-        if cy < plane.height && cx < plane.width {
-            let idx = (cy * plane.width + cx) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = ch;
-                plane.cells[idx].fg = color;
-                plane.cells[idx].transparent = false;
-            }
-        }
-    }
-    // Top and bottom borders
-    for dx in 1..w.saturating_sub(1) {
-        let cx = x + dx;
-        if cx >= plane.width { break; }
-        if y < plane.height {
-            let top = (y * plane.width + cx) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = color; plane.cells[top].transparent = false; }
-        }
-        let by = y + h.saturating_sub(1);
-        if by < plane.height {
-            let bot = (by * plane.width + cx) as usize;
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = color; plane.cells[bot].transparent = false; }
-        }
-    }
-    // Left and right borders
-    for dy in 1..h.saturating_sub(1) {
-        let cy = y + dy;
-        if cy >= plane.height { break; }
-        if x < plane.width {
-            let left = (cy * plane.width + x) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = color; plane.cells[left].transparent = false; }
-        }
-        let rx = x + w.saturating_sub(1);
-        if rx < plane.width {
-            let right = (cy * plane.width + rx) as usize;
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = color; plane.cells[right].transparent = false; }
-        }
-    }
 }
 
 pub struct AccessibilityScene {
