@@ -14,7 +14,7 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
         return;
     }
     let max_x = plane.width;
-    let _style = if bold { Styles::BOLD } else { Styles::empty() };
+    let style = if bold { Styles::BOLD } else { Styles::empty() };
     for (i, ch) in text.chars().enumerate() {
         let cx = x + i as u16;
         if cx >= max_x {
@@ -26,7 +26,7 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
                 char: ch,
                 fg,
                 bg,
-                style: _style,
+                style,
                 transparent: false,
                 skip: false,
             };
@@ -37,6 +37,7 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
 /// Draws text clipped to a column boundary (max_x). Text beyond max_x is replaced with "…".
 /// Use this when rendering inside a panel/column to prevent text from bleeding into
 /// adjacent panels.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_text_clipped(plane: &mut Plane, x: u16, y: u16, text: &str, max_x: u16, fg: Color, bg: Color, bold: bool) {
     if y >= plane.height || x >= max_x {
         return;
