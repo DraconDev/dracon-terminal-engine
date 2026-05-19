@@ -117,58 +117,61 @@ impl WorkshopScene {
 
     fn render_props(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
-        draw_text(plane, x, y, "Properties", t.primary, t.bg, true);
+        let max_x = x + w;
+        draw_text_clipped(plane, x, y, "Properties", max_x, t.primary, t.bg, true);
 
         let wt = self.current_widget_type();
         let py = y + 2;
 
         // Common: label
-        draw_text(plane, x, py, &format!("Label: {}", self.prop_label.get()), t.fg, t.bg, false);
+        draw_text_clipped(plane, x, py, &format!("Label: {}", self.prop_label.get()), max_x, t.fg, t.bg, false);
 
         // Widget-specific props
         match wt {
             WidgetType::Button => {
-                draw_text(plane, x, py + 1, &format!("Pressed: {}", self.prop_bool.get()), t.fg, t.bg, false);
-                draw_text(plane, x, py + 2, "↑/↓: change label | Enter: press", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("Pressed: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
+                draw_text_clipped(plane, x, py + 2, "↑/↓: change label | Enter: press", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::Checkbox => {
-                draw_text(plane, x, py + 1, &format!("Checked: {}", self.prop_bool.get()), t.fg, t.bg, false);
-                draw_text(plane, x, py + 2, "Space: toggle | ↑/↓: change label", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("Checked: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
+                draw_text_clipped(plane, x, py + 2, "Space: toggle | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::Toggle => {
-                draw_text(plane, x, py + 1, &format!("On: {}", self.prop_bool.get()), t.fg, t.bg, false);
-                draw_text(plane, x, py + 2, "Space: toggle | ↑/↓: change label", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("On: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
+                draw_text_clipped(plane, x, py + 2, "Space: toggle | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::Radio => {
-                draw_text(plane, x, py + 1, &format!("Selected: {}", self.prop_bool.get()), t.fg, t.bg, false);
-                draw_text(plane, x, py + 2, "Space: select | ↑/↓: change label", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("Selected: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
+                draw_text_clipped(plane, x, py + 2, "Space: select | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::Slider => {
-                draw_text(plane, x, py + 1, &format!("Value: {}", self.prop_int.get()), t.primary, t.bg, true);
+                draw_text_clipped(plane, x, py + 1, &format!("Value: {}", self.prop_int.get()), max_x, t.primary, t.bg, true);
                 // Visual slider
                 let bar_w = (w as usize).saturating_sub(2);
                 let filled = (self.prop_int.get() as f32 / 100.0 * bar_w as f32) as usize;
                 for bx in 0..bar_w {
-                    let idx = (py + 2) as usize * plane.width as usize + x as usize + bx;
+                    let bx_pos = x as usize + bx;
+                    if bx_pos >= max_x as usize { break; }
+                    let idx = (py + 2) as usize * plane.width as usize + bx_pos;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = if bx < filled { '█' } else { '░' };
                         plane.cells[idx].fg = if bx < filled { t.primary } else { t.fg_muted };
                         plane.cells[idx].transparent = false;
                     }
                 }
-                draw_text(plane, x, py + 3, "←/→: adjust value", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 3, "←/→: adjust value", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::ProgressBar => {
-                draw_text(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), t.primary, t.bg, true);
-                draw_text(plane, x, py + 2, "←/→: adjust progress", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), max_x, t.primary, t.bg, true);
+                draw_text_clipped(plane, x, py + 2, "←/→: adjust progress", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::ProgressRing => {
-                draw_text(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), t.primary, t.bg, true);
-                draw_text(plane, x, py + 2, "←/→: adjust progress", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), max_x, t.primary, t.bg, true);
+                draw_text_clipped(plane, x, py + 2, "←/→: adjust progress", max_x, t.fg_muted, t.bg, false);
             }
             WidgetType::Spinner => {
-                draw_text(plane, x, py + 1, "Spinning...", t.primary, t.bg, false);
-                draw_text(plane, x, py + 2, "Always animating", t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x, py + 1, "Spinning...", max_x, t.primary, t.bg, false);
+                draw_text_clipped(plane, x, py + 2, "Always animating", max_x, t.fg_muted, t.bg, false);
             }
         }
     }
@@ -301,10 +304,10 @@ impl Scene for WorkshopScene {
         }
 
         // Left panel: widget list
-        self.render_widget_list(&mut plane, 2, 2);
+        let div_x = 16u16;
+        self.render_widget_list(&mut plane, 2, 2, div_x);
 
         // Vertical divider
-        let div_x = 16u16;
         for y in 2..area.height.saturating_sub(1) {
             let idx = (y * area.width + div_x) as usize;
             if idx < plane.cells.len() {
