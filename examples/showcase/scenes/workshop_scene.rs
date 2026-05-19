@@ -102,16 +102,16 @@ impl WorkshopScene {
         WIDGET_NAMES[self.selected_widget.get()].1
     }
 
-    fn render_widget_list(&self, plane: &mut Plane, x: u16, y: u16) {
+    fn render_widget_list(&self, plane: &mut Plane, x: u16, y: u16, max_x: u16) {
         let t = &self.theme;
-        draw_text(plane, x, y, "Widgets", t.primary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Widgets", max_x, t.primary, t.bg, true);
 
         for (i, (name, _)) in WIDGET_NAMES.iter().enumerate() {
             let wy = y + 2 + i as u16;
             let is_selected = i == self.selected_widget.get();
             let fg = if is_selected { t.primary } else { t.fg_muted };
             let prefix = if is_selected { "► " } else { "  " };
-            draw_text(plane, x, wy, &format!("{}{}", prefix, name), fg, t.bg, is_selected);
+            draw_text_clipped(plane, x, wy, &format!("{}{}", prefix, name), max_x, fg, t.bg, is_selected);
         }
     }
 
