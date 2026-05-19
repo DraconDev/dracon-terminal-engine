@@ -3,7 +3,7 @@
 //! Demonstrates the Radio widget with grouped radio options
 //! and a live preview panel showing current settings.
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -149,12 +149,14 @@ impl RadioScene {
 
     fn render_preview(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
+        let max_x = x + w;
 
         // Preview box title
-        draw_text(plane, x, y, "Preview", t.primary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Preview", max_x, t.primary, t.bg, true);
 
         // Border
         for bx in x..x + w {
+            if bx >= max_x { break; }
             let top = ((y + 1) * plane.width + bx) as usize;
             if top < plane.cells.len() {
                 plane.cells[top].char = '─';
@@ -190,13 +192,13 @@ impl RadioScene {
 
         for (i, (key, val)) in settings.iter().enumerate() {
             let sy = y + 2 + i as u16;
-            draw_text(plane, x, sy, key, t.fg_muted, t.bg, false);
-            draw_text(plane, x + 8, sy, val, t.primary, t.bg, true);
+            draw_text_clipped(plane, x, sy, key, max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x + 8, sy, val, max_x, t.primary, t.bg, true);
         }
 
         // Simulated preview panel
         let preview_y = y + 6;
-        draw_text(plane, x, preview_y, "Simulated UI:", t.fg_muted, t.bg, false);
+        draw_text_clipped(plane, x, preview_y, "Simulated UI:", max_x, t.fg_muted, t.bg, false);
 
         let preview_bg = match self.theme_selected {
             1 => Color::Rgb(240, 240, 240),
