@@ -27,8 +27,9 @@ use std::sync::Arc;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // App events that widgets can publish/subscribe to via EventBus
+// (Architecture pattern demo — used to show how events would be defined)
 #[derive(Clone, Debug)]
-enum AppEvent {
+pub enum AppEvent {
     CounterChanged(i32),
     MessageLogged(String),
     LogCleared,
