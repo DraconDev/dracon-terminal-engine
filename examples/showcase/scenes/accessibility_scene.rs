@@ -244,9 +244,9 @@ impl AccessibilityScene {
         let u_plane = self.username_input.borrow().render(u_area);
         blit_to(plane, &u_plane, (x + 1) as usize, u_input_y as usize);
 
-        // Focus ring around input (1 row above, 1 row below, 1 col on each side)
+        // Focus indicator for inputs: a ► marker in primary color
         if is_u_focused {
-            draw_focus_ring(plane, x, u_input_y.saturating_sub(1), 24, 3, t.primary);
+            draw_text(plane, x, u_label_y, "►", t.primary, t.bg, true);
         }
 
         // --- Password field ---
@@ -262,9 +262,9 @@ impl AccessibilityScene {
         let p_plane = self.password_input.borrow().render(p_area);
         blit_to(plane, &p_plane, (x + 1) as usize, p_input_y as usize);
 
-        // Focus ring
+        // Focus indicator
         if is_p_focused {
-            draw_focus_ring(plane, x, p_input_y.saturating_sub(1), 24, 3, t.primary);
+            draw_text(plane, x, p_label_y, "►", t.primary, t.bg, true);
         }
 
         // --- Remember me checkbox ---
