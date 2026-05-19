@@ -288,10 +288,13 @@ impl AccessibilityScene {
 
     fn render_a11y_tree(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
+        let max_x = x + w;
 
-        draw_text(plane, x, y, "Accessibility Tree", t.primary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Accessibility Tree", max_x, t.primary, t.bg, true);
         for dx in 0..w {
-            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            let dx_pos = x + dx;
+            if dx_pos >= max_x { break; }
+            let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -307,32 +310,35 @@ impl AccessibilityScene {
             let connector = if i + 1 < targets.len() { "├─ " } else { "└─ " };
             let indent = "│  ";
             if i + 1 < targets.len() {
-                draw_text(plane, x, ty, indent, t.outline, t.bg, false);
+                draw_text_clipped(plane, x, ty, indent, max_x, t.outline, t.bg, false);
             }
-            draw_text(plane, x + 2, ty, connector, t.outline, t.bg, false);
+            draw_text_clipped(plane, x + 2, ty, connector, max_x, t.outline, t.bg, false);
 
             // Role badge
             let role_color = if is_focused { t.primary } else { t.fg_muted };
             let role_badge = format!("[{}]", target.role());
-            draw_text(plane, x + 5, ty, &role_badge, role_color, t.bg, is_focused);
+            draw_text_clipped(plane, x + 5, ty, &role_badge, max_x, role_color, t.bg, is_focused);
 
             // Label
             let label_color = if is_focused { t.primary } else { t.fg };
-            draw_text(plane, x + 5 + role_badge.len() as u16, ty, target.name(), label_color, t.bg, is_focused);
+            draw_text_clipped(plane, x + 5 + role_badge.len() as u16, ty, target.name(), max_x, label_color, t.bg, is_focused);
 
             // Focus indicator
-            if is_focused {
-                draw_text(plane, x + w.saturating_sub(3), ty, " ◄", t.primary, t.bg, true);
+            if is_focused && x + w.saturating_sub(3) < max_x {
+                draw_text_clipped(plane, x + w.saturating_sub(3), ty, " ◄", max_x, t.primary, t.bg, true);
             }
         }
     }
 
     fn render_announcement_log(&self, plane: &mut Plane, x: u16, y: u16, w: u16, area: Rect) {
         let t = &self.theme;
+        let max_x = x + w;
 
-        draw_text(plane, x, y, "Announcements", t.secondary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Announcements", max_x, t.secondary, t.bg, true);
         for dx in 0..w {
-            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            let dx_pos = x + dx;
+            if dx_pos >= max_x { break; }
+            let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -360,7 +366,7 @@ impl AccessibilityScene {
 
             // Announcement text
             let text = format!("{}: {}", ann.label, ann.action);
-            draw_text(plane, x + 2, ay, &text, t.fg, t.bg, false);
+            draw_text_clipped(plane, x + 2, ay, &text, max_x, t.fg, t.bg, false);
         }
     }
 

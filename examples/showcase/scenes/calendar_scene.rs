@@ -3,7 +3,7 @@
 //! Demonstrates the Calendar widget with event markers, upcoming events,
 //! date detail panel, and month navigation.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -88,14 +88,17 @@ impl CalendarScene {
 
     fn render_sidebar(&self, plane: &mut Plane, x: u16, y: u16, w: u16, area: Rect) {
         let t = &self.theme;
+        let max_x = x + w;
 
         // Upcoming Events panel
-        draw_text(plane, x, y, "Upcoming", t.primary, t.bg, true);
-        draw_text(plane, x + 10, y, &format!("({} events)", EVENTS.len()), t.fg_muted, t.bg, false);
+        draw_text_clipped(plane, x, y, "Upcoming", max_x, t.primary, t.bg, true);
+        draw_text_clipped(plane, x + 10, y, &format!("({} events)", EVENTS.len()), max_x, t.fg_muted, t.bg, false);
 
         // Divider
         for dx in 0..w {
-            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            let dx_pos = x + dx;
+            if dx_pos >= max_x { break; }
+            let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -119,16 +122,17 @@ impl CalendarScene {
             }
 
             // Event title
-            draw_text(plane, x + 2, ey, event.title, category_color(event.category, t), t.bg, false);
+            draw_text_clipped(plane, x + 2, ey, event.title, max_x, category_color(event.category, t), t.bg, false);
 
             // Date + time
             let meta = format!("{} {}", event.date.strip_prefix("2026-").unwrap_or(event.date), event.time);
-            draw_text(plane, x + 2, ey + 1, &meta, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x + 2, ey + 1, &meta, max_x, t.fg_muted, t.bg, false);
         }
     }
 
     fn render_detail_panel(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
+        let max_x = x + w;
 
         let date_str = self.selected_date.as_deref().unwrap_or("No date selected");
         let events = self.selected_date.as_deref()
@@ -136,11 +140,13 @@ impl CalendarScene {
             .unwrap_or_default();
 
         // Panel border
-        draw_text(plane, x, y, "Selected Date", t.primary, t.bg, true);
-        draw_text(plane, x + 14, y, date_str, t.fg, t.bg, false);
+        draw_text_clipped(plane, x, y, "Selected Date", max_x, t.primary, t.bg, true);
+        draw_text_clipped(plane, x + 14, y, date_str, max_x, t.fg, t.bg, false);
 
         for dx in 0..w {
-            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            let dx_pos = x + dx;
+            if dx_pos >= max_x { break; }
+            let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -148,10 +154,10 @@ impl CalendarScene {
         }
 
         if events.is_empty() {
-            draw_text(plane, x, y + 2, "No events", t.fg_muted, t.bg, false);
-            draw_text(plane, x, y + 3, "Free day!", t.success, t.bg, true);
+            draw_text_clipped(plane, x, y + 2, "No events", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x, y + 3, "Free day!", max_x, t.success, t.bg, true);
         } else {
-            draw_text(plane, x, y + 2, &format!("{} event(s):", events.len()), t.fg, t.bg, true);
+            draw_text_clipped(plane, x, y + 2, &format!("{} event(s):", events.len()), max_x, t.fg, t.bg, true);
 
             for (i, event) in events.iter().enumerate() {
                 let ey = y + 4 + i as u16 * 2;
@@ -161,8 +167,8 @@ impl CalendarScene {
                     plane.cells[dot_idx].fg = category_color(event.category, t);
                     plane.cells[dot_idx].transparent = false;
                 }
-                draw_text(plane, x + 2, ey, event.title, category_color(event.category, t), t.bg, false);
-                draw_text(plane, x + 2, ey + 1, event.time, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, x + 2, ey, event.title, max_x, category_color(event.category, t), t.bg, false);
+                draw_text_clipped(plane, x + 2, ey + 1, event.time, max_x, t.fg_muted, t.bg, false);
             }
         }
     }
