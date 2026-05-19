@@ -533,8 +533,11 @@ Text that exceeds `max_x` is truncated with a `…` ellipsis character.
 **Available helpers in `shared_helpers.rs`:**
 - `draw_text(plane, x, y, text, fg, bg, bold)` — clips at plane width
 - `draw_text_clipped(plane, x, y, text, max_x, fg, bg, bold)` — clips at column boundary
+- `draw_focus_ring(plane, x, y, w, h, color)` — rounded focus ring (╭╮╰╯─│) for accessibility
 - `blit_to(dest, src, offset_x, offset_y)` — blits with bounds checking
 - `render_help_overlay(plane, area, theme, title, shortcuts)` — shared help overlay
+
+**Coordinate bug pattern:** When drawing borders/focus rings with loop variables like `dy`, always use `(y + dy) * plane.width`, never `dy * plane.width` alone. The latter treats the loop variable as an absolute row coordinate rather than an offset, causing the border to render at the wrong position (typically 2+ rows too high when the form starts below row 0).
 
 ### u16 Arithmetic Safety in Mouse Handlers
 
