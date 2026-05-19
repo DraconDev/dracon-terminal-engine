@@ -405,21 +405,21 @@ impl Widget for PluginDemoApp {
             Char('2') => {
                 self.stat_widgets[1] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_mem", WidgetId::new(2), self.theme)
-                    .unwrap();
+                    .expect("plugin creation failed");
                 self.dirty = true;
                 true
             }
             Char('3') => {
                 self.stat_widgets[2] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_disk", WidgetId::new(3), self.theme)
-                    .unwrap();
+                    .expect("plugin creation failed");
                 self.dirty = true;
                 true
             }
             Char('4') => {
                 self.stat_widgets[3] = self.registry.read().expect("plugin registry lock poisoned")
                     .create("stat_net", WidgetId::new(4), self.theme)
-                    .unwrap();
+                    .expect("plugin creation failed");
                 self.dirty = true;
                 true
             }
