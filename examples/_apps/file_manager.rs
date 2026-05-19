@@ -1595,8 +1595,7 @@ fn format_unix_timestamp(secs: u64) -> String {
     format!("{}d {:02}:{:02}", days, hours, mins)
 }
 
-#[allow(dead_code)]
-fn format_system_time(time: std::time::SystemTime) -> String {
+fn _format_system_time(time: std::time::SystemTime) -> String {
     let dur = time
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default();

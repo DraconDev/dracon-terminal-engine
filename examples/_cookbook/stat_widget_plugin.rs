@@ -32,8 +32,7 @@ pub struct StatWidget {
 #[derive(Clone, Copy)]
 pub enum Trend {
     Up,
-    #[allow(dead_code)]
-    Down,
+    Down,  // Used by downstream consumers
     Neutral,
 }
 

@@ -481,7 +481,7 @@ fn main() -> std::io::Result<()> {
             if quit_clone.load(Ordering::SeqCst) {
                 ctx.stop();
             }
-            let mut d = demo_tick.lock().unwrap();
+            let mut d = demo_tick.lock().expect("cell_pool mutex poisoned");
             d.tick_count = tick;
             d.auto_tick();
         })
@@ -497,18 +497,18 @@ impl Widget for PoolDemoWrapper {
     fn area(&self) -> Rect { Rect::default() }
     fn set_area(&mut self, _area: Rect) {}
     fn needs_render(&self) -> bool {
-        self.demo.lock().unwrap().dirty
+        self.demo.lock().expect("cell_pool mutex poisoned").dirty
     }
     fn render(&self, area: Rect) -> Plane {
-        self.demo.lock().unwrap().render(area)
+        self.demo.lock().expect("cell_pool mutex poisoned").render(area)
     }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        self.demo.lock().unwrap().handle_key(key)
+        self.demo.lock().expect("cell_pool mutex poisoned").handle_key(key)
     }
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        self.demo.lock().unwrap().handle_mouse(kind, col, row)
+        self.demo.lock().expect("cell_pool mutex poisoned").handle_mouse(kind, col, row)
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.demo.lock().unwrap().on_theme_change(theme)
+        self.demo.lock().expect("cell_pool mutex poisoned").on_theme_change(theme)
     }
 }
