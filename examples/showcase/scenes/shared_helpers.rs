@@ -14,7 +14,7 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
         return;
     }
     let max_x = plane.width;
-    let style = if bold { Styles::BOLD } else { Styles::empty() };
+    let _style = if bold { Styles::BOLD } else { Styles::empty() };
     for (i, ch) in text.chars().enumerate() {
         let cx = x + i as u16;
         if cx >= max_x {
@@ -26,7 +26,7 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
                 char: ch,
                 fg,
                 bg,
-                style,
+                style: _style,
                 transparent: false,
                 skip: false,
             };
@@ -45,7 +45,6 @@ pub fn draw_text_clipped(plane: &mut Plane, x: u16, y: u16, text: &str, max_x: u
     if available == 0 {
         return;
     }
-    let style = if bold { Styles::BOLD } else { Styles::empty() };
     let char_count = text.chars().count();
     if char_count <= available {
         draw_text(plane, x, y, text, fg, bg, bold);
