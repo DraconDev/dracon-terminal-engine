@@ -93,6 +93,11 @@ impl Autocomplete {
         self.update_filter();
     }
 
+    /// Returns whether the dropdown is currently open.
+    pub fn is_dropdown_open(&self) -> bool {
+        self.dropdown_open
+    }
+
     fn update_filter(&mut self) {
         let query = self.base.text.to_lowercase();
         self.filtered = self

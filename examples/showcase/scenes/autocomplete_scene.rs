@@ -308,6 +308,13 @@ impl Scene for AutocompleteScene {
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
+            // If autocomplete dropdown is open, close it first instead of exiting
+            if self.autocomplete.is_dropdown_open() {
+                // Send Esc to autocomplete to close dropdown
+                self.autocomplete.handle_key(key);
+                self.dirty = true;
+                return true;
+            }
             return false;
         }
 
