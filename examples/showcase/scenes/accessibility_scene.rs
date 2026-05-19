@@ -3,7 +3,7 @@
 //! Demonstrates screen reader support (OSC 99) with visual focus rings,
 //! accessibility tree, live announcements, and contrast checker.
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -366,10 +366,13 @@ impl AccessibilityScene {
 
     fn render_focus_info(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
+        let max_x = x + w;
 
-        draw_text(plane, x, y, "Focus Info", t.primary, t.bg, true);
+        draw_text_clipped(plane, x, y, "Focus Info", max_x, t.primary, t.bg, true);
         for dx in 0..w {
-            let idx = ((y + 1) * plane.width + x + dx) as usize;
+            let dx_pos = x + dx;
+            if dx_pos >= max_x { break; }
+            let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -385,15 +388,15 @@ impl AccessibilityScene {
         ];
         for (i, (key, val)) in info.iter().enumerate() {
             let iy = y + 2 + i as u16;
-            draw_text(plane, x, iy, key, t.fg_muted, t.bg, false);
-            draw_text(plane, x + 13, iy, val, t.fg, t.bg, false);
+            draw_text_clipped(plane, x, iy, key, max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x + 13, iy, val, max_x, t.fg, t.bg, false);
         }
 
         // State (for checkbox)
         let state = self.focused.state(self.checked);
         if !state.is_empty() {
-            draw_text(plane, x, y + 6, "State:", t.fg_muted, t.bg, false);
-            draw_text(plane, x + 13, y + 6, state, t.primary, t.bg, true);
+            draw_text_clipped(plane, x, y + 6, "State:", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, x + 13, y + 6, state, max_x, t.primary, t.bg, true);
         }
     }
 }
