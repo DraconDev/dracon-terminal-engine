@@ -106,9 +106,10 @@ impl AutocompleteScene {
 
     fn render_info_panel(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
         let t = &self.theme;
+        let max_x = x + w; // right boundary for clipping
 
         if let Some(ref name) = self.selected_item {
-            draw_text(plane, x, y, "Package Details", t.primary, t.bg, true);
+            draw_text_clipped(plane, x, y, "Package Details", max_x, t.primary, t.bg, true);
 
             // Divider
             for dx in 0..w {
@@ -236,51 +237,26 @@ impl Scene for AutocompleteScene {
         }
 
         // Left: Search input + Autocomplete dropdown
-        draw_text(&mut plane, 2, 2, "Search packages:", t.fg_muted, t.bg, false);
+        let left_max_x = 31u16; // vertical divider at 32, text must stop before it
+        draw_text_clipped(&mut plane, 2, 2, "Search packages:", left_max_x, t.fg_muted, t.bg, false);
 
-        // Draw a border around the autocomplete area
+        // Render autocomplete directly at position
         let ac_x = 2u16;
         let ac_y = 3u16;
-        let ac_w = 28u16;
+        let ac_w = 28u16.min(left_max_x.saturating_sub(ac_x));
         let ac_h = 9u16.min(area.height.saturating_sub(ac_y + 2));
-        // Top border
-        for x in 0..ac_w {
-            let idx = ((ac_y) * area.width + ac_x + x) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; plane.cells[idx].transparent = false; }
-        }
-        // Side borders and content area fill
-        for y in 1..ac_h {
-            let left = ((ac_y + y) * area.width + ac_x) as usize;
-            let right = ((ac_y + y) * area.width + ac_x + ac_w - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; plane.cells[left].transparent = false; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; plane.cells[right].transparent = false; }
-        }
-        // Bottom border
-        for x in 0..ac_w {
-            let idx = ((ac_y + ac_h) * area.width + ac_x + x) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = '─'; plane.cells[idx].fg = t.outline; plane.cells[idx].transparent = false; }
-        }
-        // Corners
-        let tl = (ac_y * area.width + ac_x) as usize;
-        let tr = (ac_y * area.width + ac_x + ac_w - 1) as usize;
-        let bl = ((ac_y + ac_h) * area.width + ac_x) as usize;
-        let br = ((ac_y + ac_h) * area.width + ac_x + ac_w - 1) as usize;
-        if tl < plane.cells.len() { plane.cells[tl].char = '╭'; plane.cells[tl].fg = t.outline; }
-        if tr < plane.cells.len() { plane.cells[tr].char = '╮'; plane.cells[tr].fg = t.outline; }
-        if bl < plane.cells.len() { plane.cells[bl].char = '╰'; plane.cells[bl].fg = t.outline; }
-        if br < plane.cells.len() { plane.cells[br].char = '╯'; plane.cells[br].fg = t.outline; }
-
-        let ac_area = Rect::new(ac_x + 1, ac_y + 1, ac_w.saturating_sub(2), ac_h.saturating_sub(1));
+        let ac_area = Rect::new(ac_x, ac_y, ac_w, ac_h);
         let ac_plane = self.autocomplete.render(ac_area);
-        blit_to(&mut plane, &ac_plane, (ac_x + 1) as usize, (ac_y + 1) as usize);
+        blit_to(&mut plane, &ac_plane, ac_x as usize, ac_y as usize);
 
         // Category legend under the dropdown
-        let legend_y = ac_y + ac_h + 1;
+        let legend_y = ac_y + ac_h;
         let categories = [("tooling", t.primary), ("compiler", t.error), ("docs", t.success),
                          ("linting", t.warning), ("testing", t.info), ("learning", t.secondary)];
         let mut lx = 2u16;
         for (cat, color) in &categories {
             let pill = format!(" {} ", cat);
+            if lx + pill.len() as u16 > left_max_x { break; } // clip at divider
             draw_text(&mut plane, lx, legend_y, &pill, *color, t.bg, true);
             lx += pill.len() as u16 + 1;
         }
