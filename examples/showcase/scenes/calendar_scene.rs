@@ -314,16 +314,16 @@ impl Scene for CalendarScene {
             return false;
         }
 
-        // Clear selection
+        // Clear selection — delegate to Calendar so both states stay in sync
         if key.code == KeyCode::Char('c') && key.modifiers.is_empty() {
+            self.calendar.handle_key(key);
             self.selected_date = None;
             return true;
         }
 
         if self.calendar.handle_key(key) {
-            if let Some(date) = self.calendar.selected() {
-                self.selected_date = Some(date.to_string());
-            }
+            // Sync scene's selected_date with Calendar's internal selection
+            self.selected_date = self.calendar.selected().map(|d| d.to_string());
             return true;
         }
         false
