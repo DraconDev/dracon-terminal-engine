@@ -497,6 +497,45 @@ fn render(&self, area: Rect) -> Plane {
 
 **Exception — Standalone Editor/Hotkey/Input widgets** (`src/widgets/`): These widgets use hardcoded `Color::Black` for cursor and highlight contrast (e.g., cursor: blue bg + black fg, bracket matching: yellow bg + black fg). These are intentional contrast choices for specific UI features, not theme-aware. They live in `src/widgets/` rather than `src/framework/widgets/` and are not part of the framework theme system.
 
+### Text Boundary Clipping Pattern
+
+When rendering text inside a panel or column, text MUST be clipped at the panel boundary to prevent bleeding into adjacent panels. The shared `draw_text` clips at `plane.width` (preventing row-wrapping), but does NOT clip at column boundaries.
+
+**Use `draw_text_clipped` for all text in bounded panels:**
+
+```rust
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
+
+// In panel render methods:
+fn render_info_panel(&self, plane: &mut Plane, x: u16, y: u16, w: u16) {
+    let max_x = x + w;  // Right boundary
+    draw_text_clipped(plane, x, y, "Title", max_x, t.primary, t.bg, true);
+    draw_text_clipped(plane, x, y + 1, &long_text, max_x, t.fg, t.bg, false);
+}
+```
+
+**`draw_text_clipped` signature:**
+```rust
+pub fn draw_text_clipped(
+    plane: &mut Plane, x: u16, y: u16, text: &str, max_x: u16,
+    fg: Color, bg: Color, bold: bool
+)
+```
+
+Text that exceeds `max_x` is truncated with a `…` ellipsis character.
+
+**When to use which:**
+- `draw_text`: Full-width rows, headers, footers — no column boundary concern
+- `draw_text_clipped`: Any text inside a panel with a vertical divider, sidebar, or bounded area
+
+**Critical:** The old `draw_text` used flat indexing `(y * plane.width + x + i)` which allowed text to overflow into the next row. The fixed version clips at `plane.width`. But text in the same row can still bleed into adjacent columns if not clipped.
+
+**Available helpers in `shared_helpers.rs`:**
+- `draw_text(plane, x, y, text, fg, bg, bold)` — clips at plane width
+- `draw_text_clipped(plane, x, y, text, max_x, fg, bg, bold)` — clips at column boundary
+- `blit_to(dest, src, offset_x, offset_y)` — blits with bounds checking
+- `render_help_overlay(plane, area, theme, title, shortcuts)` — shared help overlay
+
 ### u16 Arithmetic Safety in Mouse Handlers
 
 **Always bounds-check before subtracting from `u16` mouse coordinates.** `u16` underflow panics in debug mode and wraps in release — both are bugs.
