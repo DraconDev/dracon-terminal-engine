@@ -476,7 +476,7 @@ impl Scene for CommandPaletteScene {
 
         // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, &self.theme, "IDE Lite — Help", &[("Ctrl+P", "Open command palette"), ("Ctrl+B", "Toggle sidebar"), ("Up/Dn", "Scroll action log"), ("Click menu", "Execute menu action"), ("Click sidebar", "Open file (demo)"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, &self.theme, "IDE Lite — Help", &[("Ctrl+P", "Open command palette"), ("Ctrl+B", "Toggle sidebar"), ("Up/Dn", "Scroll action log"), ("Click menu", "Execute menu action"), ("Click sidebar", "Open file (demo)"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

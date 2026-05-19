@@ -230,7 +230,7 @@ impl Scene for NotificationCenterScene {
                 ("F", "Cycle filter priority"),
                 ("Click tab", "Filter by priority"),
                 ("Click notif", "Dismiss notification"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

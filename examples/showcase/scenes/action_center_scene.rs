@@ -280,7 +280,7 @@ impl Scene for ActionCenterScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Action Center — Help", &[("Up/Dn", "Navigate file list"), ("Right-click", "Open context menu"), ("Del", "Delete selected file"), ("N", "New file (placeholder)"), ("Click file", "Select file"), ("Click menu", "Execute action"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Action Center — Help", &[("Up/Dn", "Navigate file list"), ("Right-click", "Open context menu"), ("Del", "Delete selected file"), ("N", "New file (placeholder)"), ("Click file", "Select file"), ("Click menu", "Execute action"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

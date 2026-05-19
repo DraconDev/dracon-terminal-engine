@@ -335,7 +335,7 @@ impl Scene for DebugOverlayScene {
                 ("1", "Toggle debug overlay widget"),
                 ("2", "Toggle profiler widget"),
                 ("3", "Toggle gauge bars"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

@@ -319,7 +319,7 @@ impl Scene for ProgressScene {
                 ("SPACE", "Toggle loading simulation"),
                 ("r", "Reset progress"),
                 (help_key, "Toggle this help"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

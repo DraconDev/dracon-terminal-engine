@@ -260,7 +260,7 @@ impl Scene for ControlPanelScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Control Panel — Help", &[("Tab", "Cycle focus through fields"), ("Space", "Toggle / cycle select"), ("Up/Dn", "Change select option"), ("P", "Toggle profiler overlay"), ("Click", "Any field to interact"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Control Panel — Help", &[("Tab", "Cycle focus through fields"), ("Space", "Toggle / cycle select"), ("Up/Dn", "Change select option"), ("P", "Toggle profiler overlay"), ("Click", "Any field to interact"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

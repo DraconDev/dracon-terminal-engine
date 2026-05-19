@@ -161,7 +161,7 @@ impl Scene for SettingsScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Settings Panel — Help", &[("Tab", "Next form field"), ("Shift+Tab", "Previous form field"), ("Enter", "Validate form"), ("S", "Save settings"), ("Type", "Fill in form fields"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Settings Panel — Help", &[("Tab", "Next form field"), ("Shift+Tab", "Previous form field"), ("Enter", "Validate form"), ("S", "Save settings"), ("Type", "Fill in form fields"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

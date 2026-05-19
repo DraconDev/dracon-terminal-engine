@@ -295,7 +295,7 @@ impl Scene for TreeNavigatorScene {
                     ("Enter/>", "Expand folder"),
                     ("<", "Collapse folder"),
                     ("Click", "Select item"),
-                    ("B/Esc", "Back to showcase"),
+                    ("Esc", "Back"),
                     ("?", "Toggle help"),
                 ],
             );

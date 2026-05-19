@@ -352,7 +352,7 @@ impl Scene for CellPoolScene {
                 ("SPACE", "Simulate allocation"),
                 ("a", "Toggle auto-simulation"),
                 ("r", "Reset pool & stats"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
                 (help_key, "Toggle this help"),
             ]);
         }

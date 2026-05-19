@@ -362,7 +362,7 @@ impl Scene for WorkshopScene {
                 ("←/→", "Adjust numeric properties"),
                 ("Space", "Toggle boolean properties"),
                 ("Enter", "Activate/press widget"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

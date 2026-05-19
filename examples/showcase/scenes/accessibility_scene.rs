@@ -479,7 +479,7 @@ impl Scene for AccessibilityScene {
                 ("Tab", "Next focus target"),
                 ("Shift+Tab", "Previous focus target"),
                 ("Enter/Space", "Activate focused element"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

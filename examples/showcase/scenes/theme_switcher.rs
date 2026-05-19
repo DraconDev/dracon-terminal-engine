@@ -251,7 +251,7 @@ impl Scene for ThemeSwitcherScene {
                     ("Enter", "Apply theme"),
                     ("Click", "Select swatch"),
                     ("?", "Toggle help"),
-                    ("B/Esc", "Back to showcase"),
+                    ("Esc", "Back"),
                 ],
             );
         }

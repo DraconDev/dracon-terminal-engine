@@ -236,7 +236,7 @@ impl Scene for WidgetGalleryScene {
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Widget Gallery Help", &[("Up/Dn/Lt/Rt", "Navigate cards"), ("Enter", "Activate widget"), ("B/Esc", "Back to showcase"), ("?", "Toggle help")]);
+            render_help_overlay(&mut plane, area, t, "Widget Gallery Help", &[("Up/Dn/Lt/Rt", "Navigate cards"), ("Enter", "Activate widget"), ("Esc", "Back"), ("?", "Toggle help")]);
         }
 
         plane

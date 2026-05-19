@@ -400,7 +400,7 @@ impl Scene for RadioScene {
                 ("Tab", "Switch between groups"),
                 ("1/2/3", "Quick-select option in group"),
                 ("Click", "Select option directly"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

@@ -356,7 +356,7 @@ impl Scene for AnimationScene {
                 ("P", "Toggle sliding panel"),
                 ("R", "Restart animations"),
                 (help_key, "Toggle this help"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

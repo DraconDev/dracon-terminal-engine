@@ -426,7 +426,7 @@ impl Scene for FormDemoScene {
                     ("Enter", "Submit form"),
                     ("r", "Reset form"),
                     ("Drag =", "Reorder fields"),
-                    ("B/Esc", "Back to showcase"),
+                    ("Esc", "Back"),
                 ],
             );
         }

@@ -191,7 +191,7 @@ impl Scene for HudDemoScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "HUD Demo — Help", &[("H", "Take damage (-10 HP)"), ("D", "Heal (+10 HP)"), ("S", "Deplete shield (-15)"), ("A", "Fire weapon (-1 ammo)"), ("Space", "Tick + score"), ("R", "Reset all stats"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "HUD Demo — Help", &[("H", "Take damage (-10 HP)"), ("D", "Heal (+10 HP)"), ("S", "Deplete shield (-15)"), ("A", "Fire weapon (-1 ammo)"), ("Space", "Tick + score"), ("R", "Reset all stats"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

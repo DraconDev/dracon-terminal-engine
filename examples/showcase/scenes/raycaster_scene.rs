@@ -402,7 +402,7 @@ impl Scene for RaycasterScene {
                 ("←/→", "Turn left/right"),
                 ("M", "Toggle minimap"),
                 ("Scroll", "Turn with mouse wheel"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

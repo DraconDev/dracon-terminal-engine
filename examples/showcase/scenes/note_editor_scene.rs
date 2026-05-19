@@ -172,7 +172,7 @@ impl Scene for NoteEditorScene {
                     ("Ctrl+A", "Select all"),
                     ("Tab", "Insert spaces"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back to showcase"),
+                    ("Esc", "Back"),
                 ],
             );
         }

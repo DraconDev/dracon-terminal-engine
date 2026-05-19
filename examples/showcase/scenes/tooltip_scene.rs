@@ -509,7 +509,7 @@ impl Scene for TooltipScene {
             render_help_overlay(&mut plane, area, &self.theme, "Tooltip Demo — Help", &[
                 ("Mouse", "Hover any element for tooltip"),
                 (help_key, "Toggle this help"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

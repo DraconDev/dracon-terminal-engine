@@ -214,7 +214,7 @@ impl Scene for LiveFeedScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Live Feed — Help", &[("1/2/3", "Switch tab (Logs/CPU/Memory)"), ("Tab", "Cycle tabs"), ("Space", "Add log entry + update metrics"), ("Left/Right", "Resize split pane"), ("Click tab", "Switch tab"), ("Drag divider", "Resize split pane"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Live Feed — Help", &[("1/2/3", "Switch tab (Logs/CPU/Memory)"), ("Tab", "Cycle tabs"), ("Space", "Add log entry + update metrics"), ("Left/Right", "Resize split pane"), ("Click tab", "Switch tab"), ("Drag divider", "Resize split pane"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

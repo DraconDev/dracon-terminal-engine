@@ -377,7 +377,7 @@ impl Scene for PasswordInputScene {
                 ("Ctrl+H", "Toggle password visibility"),
                 ("Click", "Focus a field"),
                 ("R", "Reset after submit"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

@@ -306,7 +306,7 @@ impl Scene for TableListScene {
 
         // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Server Dashboard — Help", &[("Up/Dn", "Navigate process table"), ("Enter", "Sort by column / toggle direction"), ("1-5", "Sort by PID/Name/CPU/Mem/Status"), ("Tab", "Cycle category filter"), ("Click header", "Sort that column"), ("Click category", "Filter by category"), ("Click row", "Select process"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Server Dashboard — Help", &[("Up/Dn", "Navigate process table"), ("Enter", "Sort by column / toggle direction"), ("1-5", "Sort by PID/Name/CPU/Mem/Status"), ("Tab", "Cycle category filter"), ("Click header", "Sort that column"), ("Click category", "Filter by category"), ("Click row", "Select process"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

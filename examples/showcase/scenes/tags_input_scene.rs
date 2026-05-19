@@ -321,7 +321,7 @@ impl Scene for TagsInputScene {
                 ("↑/↓", "Select suggestion"),
                 ("Type", "Filter suggestions"),
                 (help_key, "Toggle this help"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

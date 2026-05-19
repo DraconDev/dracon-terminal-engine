@@ -267,7 +267,7 @@ impl Scene for RichTextScene {
                 ("Shift+Tab", "Previous document"),
                 ("1/2/3", "Jump to document"),
                 ("Click tab", "Select document"),
-                (back_key, "Back to showcase"),
+                (back_key, "Back"),
             ]);
         }
 

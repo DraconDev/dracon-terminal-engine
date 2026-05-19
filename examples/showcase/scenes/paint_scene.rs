@@ -364,7 +364,7 @@ impl Scene for PaintScene {
                 ("C", "Clear canvas"),
                 ("Click", "Paint / pick tool or color"),
                 ("Drag", "Continuous brush strokes"),
-                (back_key, "Dismiss / go back"),
+                (back_key, "Back"),
             ]);
         }
 

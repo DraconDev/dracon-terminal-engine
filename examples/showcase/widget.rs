@@ -696,7 +696,7 @@ impl Widget for Showcase {
             self.keybindings.format_hint(&[
                 (actions::THEME, "theme"),
                 (actions::HELP, "help"),
-                (actions::BACK, "dismiss"),
+                (actions::BACK, "back"),
                 (actions::QUIT, "quit"),
             ])
         );

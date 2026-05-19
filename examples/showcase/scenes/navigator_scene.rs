@@ -256,7 +256,7 @@ impl Scene for NavigatorScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Navigator — Help", &[("Up/Dn", "Navigate file list"), ("Enter", "Open directory"), ("Backspace", "Go to parent"), ("F", "Open File menu"), ("Click row", "Select file"), ("Scroll", "Scroll file list"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Navigator — Help", &[("Up/Dn", "Navigate file list"), ("Enter", "Open directory"), ("Backspace", "Go to parent"), ("F", "Open File menu"), ("Click row", "Select file"), ("Scroll", "Scroll file list"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

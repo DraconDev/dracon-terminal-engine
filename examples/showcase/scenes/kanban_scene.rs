@@ -155,7 +155,7 @@ impl Scene for KanbanScene {
         }
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, &self.theme, "Kanban Board Help", &[("Tab", "Focus next column"), ("Shift+Tab", "Focus previous column"), ("← →", "Navigate columns"), ("↑ ↓", "Navigate cards"), ("N", "Add new card to first column"), ("D", "Delete selected card"), ("B/Esc", "Back to showcase"), ("?", "Toggle help")]);
+            render_help_overlay(&mut plane, area, &self.theme, "Kanban Board Help", &[("Tab", "Focus next column"), ("Shift+Tab", "Focus previous column"), ("← →", "Navigate columns"), ("↑ ↓", "Navigate cards"), ("N", "Add new card to first column"), ("D", "Delete selected card"), ("Esc", "Back"), ("?", "Toggle help")]);
         }
 
         plane

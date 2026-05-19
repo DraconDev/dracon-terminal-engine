@@ -395,7 +395,7 @@ impl Scene for ModalDemoScene {
                 ("t/w/e/s", "Toast variants"),
                 ("↑/↓", "Navigate settings"),
                 ("Enter", "Toggle setting value"),
-                ("B/Esc", "Back to showcase"),
+                ("Esc", "Back"),
                 ("", "Click outside to dismiss"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {

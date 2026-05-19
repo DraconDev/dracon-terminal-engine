@@ -255,7 +255,7 @@ impl Scene for DevConsoleScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Dev Console — Help", &[("Space", "Add log entry"), ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"), ("I", "Toggle widget inspector"), ("C", "Clear logs + events"), ("Up/Dn", "Scroll log viewer"), ("PgUp/Dn", "Page scroll"), ("Click filter", "Set filter level"), ("F1", "Toggle this help"), ("Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Dev Console — Help", &[("Space", "Add log entry"), ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"), ("I", "Toggle widget inspector"), ("C", "Clear logs + events"), ("Up/Dn", "Scroll log viewer"), ("PgUp/Dn", "Page scroll"), ("Click filter", "Set filter level"), ("F1", "Toggle this help"), ("Esc", "Back")]);
         }
 
         plane

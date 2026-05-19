@@ -318,7 +318,7 @@ impl Scene for AutocompleteScene {
         }
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Autocomplete Help", &[("Up/Dn", "Navigate suggestions"), ("Enter", "Select item"), ("Tab", "Auto-complete"), ("B/Esc", "Back to showcase")]);
+            render_help_overlay(&mut plane, area, t, "Autocomplete Help", &[("Up/Dn", "Navigate suggestions"), ("Enter", "Select item"), ("Tab", "Auto-complete"), ("Esc", "Back")]);
         }
 
         plane
