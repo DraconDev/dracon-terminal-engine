@@ -1,27 +1,29 @@
 //! Embedded Kanban Board scene for the showcase.
 //!
 //! Displays a 3-column Kanban board with drag-and-drop cards,
-//! keyboard navigation, and theme support.
-//! Press `B`/`Esc` to go back.
+//! keyboard navigation, and a stats sidebar.
 
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
-use crate::scenes::shared_helpers::render_help_overlay;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Kanban, KanbanCard, StatusBar};
-use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::{Kanban, KanbanCard, StatusBar, StatusSegment};
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+
+const SIDEBAR_W: u16 = 18;
+const DIV_X: u16 = SIDEBAR_W + 2;
 
 pub struct KanbanScene {
-    kanban: Kanban,
+    kanban: RefCell<Kanban>,
     theme: Theme,
+    keybindings: KeybindingSet,
     show_help: bool,
     dirty: bool,
-    area: std::cell::Cell<Rect>,
-    status_bar: StatusBar,
-    keybindings: KeybindingSet,
+    status_bar: RefCell<StatusBar>,
     next_card_id: usize,
 }
 
@@ -85,52 +87,69 @@ impl KanbanScene {
             kanban.add_card(2, card);
         }
 
-        let status_bar = StatusBar::new(WidgetId::new(60))
-            .add_segment(dracon_terminal_engine::framework::widgets::StatusSegment::new(
-                "N:new | D:delete | Tab:nav | B/Esc:back | ?:help",
-            ))
-            .with_theme(theme.clone());
+        let status_bar = RefCell::new(
+            StatusBar::new(WidgetId::new(60))
+                .add_segment(StatusSegment::new(
+                    "Tab: nav | N: new | D: del | F1: help | Esc: back",
+                ))
+                .with_theme(theme.clone())
+        );
 
         Self {
-            kanban,
+            kanban: RefCell::new(kanban),
             theme,
+            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             show_help: false,
             dirty: true,
-            area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             status_bar,
-            keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             next_card_id: 100,
         }
     }
-
 }
 
 impl Scene for KanbanScene {
     fn scene_id(&self) -> &str { "kanban" }
 
     fn render(&self, area: Rect) -> Plane {
-        self.area.set(area);
-        let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
-        plane.fill_bg(t.bg);
+        plane.fill_bg(self.theme.bg);
+        let t = &self.theme;
 
-        let header = " Kanban Board ";
-        for (i, c) in header.chars().enumerate() {
-            let idx = 1 + i;
+        // Header
+        draw_text(&mut plane, 2, 0, " Kanban Board ", t.primary, t.bg, true);
+        let theme_label = format!(" {} ", self.theme.name);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
+                  &theme_label, t.secondary, t.bg, false);
+
+        // Divider
+        for x in 0..area.width {
+            let idx = (area.width + x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx] = Cell {
-                    char: c, fg: t.fg_on_accent, bg: t.primary,
-                    style: Styles::BOLD, transparent: false, skip: false,
-                };
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
             }
         }
 
-        let kanban_area = Rect::new(
-            0, 1,
-            area.width,
-            area.height.saturating_sub(3),
-        );
-        let k_plane = self.kanban.render(kanban_area);
+        // Left sidebar
+        self.render_sidebar(&mut plane, area, t);
+
+        // Vertical divider
+        for y in 1..area.height.saturating_sub(1) {
+            let idx = (y * plane.width + DIV_X) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
+        }
+
+        // Kanban board
+        let board_x = DIV_X + 1;
+        let board_w = area.width.saturating_sub(board_x);
+        let board_h = area.height.saturating_sub(3);
+        let kanban_area = Rect::new(board_x, 2, board_w, board_h);
+        self.kanban.borrow_mut().set_area(kanban_area);
+        let k_plane = self.kanban.borrow().render(kanban_area);
         for (ci, c) in k_plane.cells.iter().enumerate() {
             if c.transparent || c.char == '\0' { continue; }
             let row = ci / k_plane.width as usize;
@@ -143,19 +162,30 @@ impl Scene for KanbanScene {
             }
         }
 
-        let bar_area = Rect::new(0, area.height.saturating_sub(1), area.width, 1);
-        let bar_plane = self.status_bar.render(bar_area);
-        for (ci, c) in bar_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
-            let col = ci % bar_plane.width as usize;
-            if col < area.width as usize {
-                let idx = (area.height as usize - 1) * area.width as usize + col;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
-            }
+        // Selected card indicator
+        if self.kanban.borrow().selected_card().is_some() {
+            let info_y = area.height.saturating_sub(3);
+            draw_text(&mut plane, board_x + 1, info_y, "Card selected — use ↑↓ to navigate", t.fg_muted, t.bg, false);
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         if self.show_help {
-            render_help_overlay(&mut plane, area, &self.theme, "Kanban Board Help", &[("Tab", "Focus next column"), ("Shift+Tab", "Focus previous column"), ("← →", "Navigate columns"), ("↑ ↓", "Navigate cards"), ("N", "Add new card to first column"), ("D", "Delete selected card"), ("Esc", "Back"), ("?", "Toggle help")]);
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            render_help_overlay(&mut plane, area, t, "Kanban Board — Help", &[
+                ("Tab/Shift+Tab", "Focus next/prev column"),
+                ("←/→", "Navigate columns"),
+                ("↑/↓", "Navigate cards"),
+                ("N", "Add new card to To Do"),
+                ("D", "Delete selected card"),
+                ("Click", "Select card"),
+                (help_key, "Toggle this help"),
+                (back_key, "Back"),
+            ]);
         }
 
         plane
@@ -171,56 +201,130 @@ impl Scene for KanbanScene {
             }
             return true;
         }
-
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
             self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
-            return false; // Let scene router handle back navigation
+            return false;
         }
 
-        // Card creation (n)
-        if key.code == KeyCode::Char('n') && key.modifiers.is_empty() {
-            let id = format!("new_{}", self.next_card_id);
-            self.next_card_id += 1;
-            let titles = ["New task", "Feature request", "Bug fix", "Research", "Refactor"];
-            let descs = ["Needs description", "From user feedback", "Priority fix", "Investigate options", "Clean up code"];
-            let idx = self.next_card_id % titles.len();
-            let mut card = KanbanCard::new(id, titles[idx]);
-            card = card.with_description(descs[idx]);
-            card = card.with_color(Color::Rgb(100, 149, 237));
-            self.kanban.add_card(0, card);
-            self.dirty = true;
-            return true;
-        }
-
-        // Card deletion (d)
-        if key.code == KeyCode::Char('d') && key.modifiers.is_empty() {
-            if let Some((col, idx)) = self.kanban.selected_card() {
-                self.kanban.remove_card(col, idx);
+        match key.code {
+            KeyCode::Char('n') if key.modifiers.is_empty() => {
+                let id = format!("new_{}", self.next_card_id);
+                self.next_card_id += 1;
+                let titles = ["New task", "Feature request", "Bug fix", "Research", "Refactor"];
+                let descs = ["Needs description", "From user feedback", "Priority fix", "Investigate options", "Clean up code"];
+                let idx = self.next_card_id % titles.len();
+                let mut card = KanbanCard::new(id, titles[idx]);
+                card = card.with_description(descs[idx]);
+                card = card.with_color(Color::Rgb(100, 149, 237));
+                self.kanban.borrow_mut().add_card(0, card);
                 self.dirty = true;
+                true
             }
-            return true;
+            KeyCode::Char('d') if key.modifiers.is_empty() => {
+                if let Some((col, idx)) = self.kanban.borrow().selected_card() {
+                    self.kanban.borrow_mut().remove_card(col, idx);
+                    self.dirty = true;
+                }
+                true
+            }
+            _ => {
+                let handled = self.kanban.borrow_mut().handle_key(key);
+                if handled { self.dirty = true; }
+                handled
+            }
         }
-
-        self.kanban.handle_key(key)
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let adjusted_row = row.saturating_sub(1); // offset by header
-        self.kanban.handle_mouse(kind, col, adjusted_row)
+        let adjusted_row = row.saturating_sub(2);
+        let adjusted_col = col.saturating_sub(DIV_X + 1);
+        self.kanban.borrow_mut().handle_mouse(kind, adjusted_col, adjusted_row)
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.kanban.on_theme_change(theme);
-        self.status_bar.on_theme_change(theme);
+        self.kanban.borrow_mut().on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty || self.kanban.needs_render() }
+    fn needs_render(&self) -> bool { self.dirty || self.kanban.borrow().needs_render() }
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
+}
+
+impl KanbanScene {
+    fn render_sidebar(&self, plane: &mut Plane, area: Rect, t: &Theme) {
+        let sx = 2u16;
+
+        // Title
+        draw_text(plane, sx, 2, "Board Stats", t.primary, t.bg, true);
+
+        // Card counts per column
+        let k = self.kanban.borrow();
+        let column_count = k.column_count();
+        let total_cards: usize = (0..column_count).filter_map(|c| k.card_count(c)).sum();
+
+        let col_labels = ["To Do", "In Progress", "Done"];
+        for i in 0..column_count.min(3) {
+            let count = k.card_count(i).unwrap_or(0);
+            let label = col_labels.get(i).unwrap_or(&"Col");
+            let is_focused = k.selected_card().map(|(c,_)| c).unwrap_or(99) == i;
+            let fg = if is_focused { t.primary } else { t.fg };
+            draw_text(plane, sx, 3 + i as u16, label, t.fg_muted, t.bg, false);
+            draw_text(plane, sx + 12, 3 + i as u16, &format!("{}", count), fg, t.bg, is_focused);
+        }
+
+        // Divider
+        let div_y = 7;
+        for dx in 0..SIDEBAR_W {
+            let idx = (div_y * plane.width + sx + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Total
+        draw_text(plane, sx, 9, "Total Cards", t.fg_muted, t.bg, false);
+        draw_text(plane, sx + 12, 9, &format!("{}", total_cards), t.info, t.bg, true);
+
+        // Summary
+        let sum_y = 11;
+        let done_pct = if total_cards > 0 {
+            let done = k.card_count(2).unwrap_or(0);
+            done * 100 / total_cards
+        } else { 0 };
+        draw_text(plane, sx, sum_y, "Progress", t.secondary, t.bg, true);
+        draw_text(plane, sx, sum_y + 1, &format!("{}% done", done_pct), t.success, t.bg, false);
+
+        // Progress bar
+        let bar_w = SIDEBAR_W.saturating_sub(4);
+        let bar_y = sum_y + 2;
+        let filled = if total_cards > 0 {
+            (done_pct as u16 * bar_w) / 100
+        } else { 0 };
+        for dx in 0..bar_w {
+            let idx = (bar_y * plane.width + sx + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '█';
+                plane.cells[idx].fg = if dx < filled { t.success } else { t.surface };
+                plane.cells[idx].bg = t.bg;
+                plane.cells[idx].transparent = false;
+            }
+        }
+
+        // Legend
+        let leg_y = area.height.saturating_sub(6);
+        if leg_y > bar_y + 3 {
+            draw_text(plane, sx, leg_y, "Legend", t.secondary, t.bg, true);
+            draw_text(plane, sx, leg_y + 1, "● Design", Color::Rgb(100, 149, 237), t.bg, false);
+            draw_text(plane, sx, leg_y + 2, "● Active", Color::Rgb(255, 165, 0), t.bg, false);
+            draw_text(plane, sx, leg_y + 3, "● Done", Color::Rgb(50, 205, 50), t.bg, false);
+        }
+    }
 }
