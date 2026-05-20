@@ -7,7 +7,7 @@
 //!   - Auto-generation timer
 //!   - Action buttons (clear all, start/stop auto)
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -54,6 +54,7 @@ struct NotifEntry {
 
 const SIDEBAR_WIDTH: u16 = 38;
 
+#[allow(dead_code)]
 pub struct NotificationCenterScene {
     theme: Theme,
     show_help: bool,
@@ -221,7 +222,6 @@ impl NotificationCenterScene {
         let panel_x = SIDEBAR_WIDTH + 1;
 
         // Detail header
-        let header_bg = if self.focused_side == 1 { t.surface_elevated } else { t.surface };
         draw_text_clipped(plane, panel_x + 1, 0, " Detail ", area.width, t.fg_on_accent, t.primary, true);
 
         // Divider
@@ -257,9 +257,9 @@ impl NotificationCenterScene {
 
                 // Message
                 draw_text_clipped(plane, panel_x + 2, 6, "Message:", area.width, t.secondary, t.surface, true);
-                let msg_lines = entry.message.as_str();
-                for (i, line) in msg_lines.chars().collect::<Vec<_>>().chunks(40).take(8) {
-                    let line_str: String = line.iter().collect();
+                let msg_chars: Vec<char> = entry.message.chars().collect();
+                for (i, chunk) in msg_chars.chunks(40).take(8).enumerate() {
+                    let line_str: String = chunk.iter().collect();
                     draw_text_clipped(plane, panel_x + 2, 7 + i as u16, &line_str, area.width, t.fg, t.surface, false);
                 }
 
@@ -303,7 +303,7 @@ impl NotificationCenterScene {
 
             let pill = format!(" {} ", label);
             for (j, ch) in pill.chars().enumerate() {
-                let idx = (1 * plane.width + cx + j as u16) as usize;
+                let idx = (plane.width + cx + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = fg;
