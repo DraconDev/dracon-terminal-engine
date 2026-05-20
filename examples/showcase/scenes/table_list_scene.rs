@@ -1,15 +1,14 @@
-//! Server Dashboard scene — Table + List + sortable columns demonstration.
+//! Embedded Table List scene for the showcase.
 //!
-//! Shows a process table with sortable columns, a filterable category list,
-//! and a detail panel. Demonstrates the Table and List framework widgets
-//! working together in a realistic app layout.
+//! Demonstrates the Table and List framework widgets with sortable columns,
+//! filterable category list, and a process detail panel.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{
     Column, List, StatusBar, StatusSegment, Table,
 };
@@ -17,7 +16,8 @@ use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, Mous
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 
-// ── Process data ───────────────────────────────────────────────────────────
+const SIDEBAR_W: u16 = 20;
+const DIV_X: u16 = SIDEBAR_W + 2;
 
 #[derive(Clone, Debug)]
 struct Process {
@@ -54,8 +54,6 @@ impl Process {
     }
 }
 
-// ── Scene ───────────────────────────────────────────────────────────────────
-
 pub struct TableListScene {
     theme: Theme,
     keybindings: KeybindingSet,
@@ -69,7 +67,7 @@ pub struct TableListScene {
     selected_category: Option<String>,
     selected_process: Option<usize>,
     show_help: bool,
-    status_bar: StatusBar,
+    status_bar: RefCell<StatusBar>,
     dirty: bool,
 }
 
@@ -78,7 +76,6 @@ impl TableListScene {
         let processes = Process::all_processes();
         let filtered: Vec<usize> = (0..processes.len()).collect();
 
-        // Categories
         let mut cat_set: Vec<String> = processes.iter().map(|p| p.category.clone()).collect();
         cat_set.sort();
         cat_set.dedup();
@@ -95,25 +92,23 @@ impl TableListScene {
             ])
             .with_theme(t.clone())
             .with_rows(filtered.clone())
-            .with_cell_text_fn(|idx: &usize, col: usize| -> String {
-                // Placeholder — will be replaced in rebuild_table
-                let _ = (idx, col);
-                String::new()
-            })
+            .with_cell_text_fn(|_idx: &usize, _col: usize| -> String { String::new() })
         );
 
         let category_list = RefCell::new(
             List::new(cat_set.clone())
                 .with_theme(t.clone())
-                .with_width(14)
+                .with_width(SIDEBAR_W.saturating_sub(2))
         );
 
-        let status_bar = StatusBar::new(WidgetId::new(62))
-            .add_segment(StatusSegment::new("Up/Dn: nav | Enter: sort | Tab: categories | F1: help | Esc: back"))
-            .with_theme(t.clone());
+        let status_bar = RefCell::new(
+            StatusBar::new(WidgetId::new(62))
+                .add_segment(StatusSegment::new("Up/Dn: nav | Enter: sort | 1-5: sort col | Tab: filter | F1: help | Esc: back"))
+                .with_theme(t.clone())
+        );
 
         let mut scene = Self {
-            theme,
+            theme: theme.clone(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             processes,
             filtered,
@@ -133,27 +128,23 @@ impl TableListScene {
     }
 
     fn rebuild_table(&mut self) {
-        let processes = &self.processes;
-        let filtered = &self.filtered;
+        let procs = self.processes.clone();
+        let filt = self.filtered.clone();
+        let sort_col = self.sort_column;
+        let sort_asc = self.sort_ascending;
 
-        let cell_fn = {
-            let procs = processes.clone();
-            let filt = filtered.clone();
-            let _sort_col = self.sort_column;
-            let _sort_asc = self.sort_ascending;
-            move |idx: &usize, col: usize| -> String {
-                if *idx >= filt.len() { return String::new(); }
-                let pidx = filt[*idx];
-                if pidx >= procs.len() { return String::new(); }
-                let p = &procs[pidx];
-                match col {
-                    0 => format!("{}", p.pid),
-                    1 => p.name.clone(),
-                    2 => format!("{:.1}", p.cpu),
-                    3 => format!("{:.1}", p.memory),
-                    4 => p.status.clone(),
-                    _ => String::new(),
-                }
+        let cell_fn = move |idx: &usize, col: usize| -> String {
+            if *idx >= filt.len() { return String::new(); }
+            let pidx = filt[*idx];
+            if pidx >= procs.len() { return String::new(); }
+            let p = &procs[pidx];
+            match col {
+                0 => format!("{}", p.pid),
+                1 => p.name.clone(),
+                2 => format!("{:.1}", p.cpu),
+                3 => format!("{:.1}", p.memory),
+                4 => p.status.clone(),
+                _ => String::new(),
             }
         };
 
@@ -168,8 +159,8 @@ impl TableListScene {
         .with_rows((0..self.filtered.len()).collect::<Vec<usize>>())
         .with_cell_text_fn(cell_fn);
 
-        if let Some(col) = self.sort_column {
-            table.set_sort(Some(col), self.sort_ascending);
+        if let Some(col) = sort_col {
+            table.set_sort(Some(col), sort_asc);
         }
 
         *self.table.borrow_mut() = table;
@@ -223,7 +214,6 @@ impl TableListScene {
         if idx < self.categories.len() {
             self.selected_category = Some(self.categories[idx].clone());
             self.apply_filter();
-            self.dirty = true;
         }
     }
 
@@ -234,32 +224,45 @@ impl TableListScene {
     fn total_memory(&self) -> f64 {
         self.processes.iter().map(|p| p.memory).sum()
     }
+
+    fn filtered_cpu(&self) -> f32 {
+        self.filtered.iter().filter_map(|&i| self.processes.get(i)).map(|p| p.cpu).sum()
+    }
+
+    fn filtered_memory(&self) -> f64 {
+        self.filtered.iter().filter_map(|&i| self.processes.get(i)).map(|p| p.memory).sum()
+    }
 }
 
 impl Scene for TableListScene {
-    fn on_enter(&mut self) {}
-    fn on_exit(&mut self) {}
+    fn scene_id(&self) -> &str { "table_list" }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
         let t = &self.theme;
 
-        // ── Title bar (row 0) ────────────────────────────────────────
-        draw_text(&mut plane, 1, 0, "Server Dashboard", t.primary, t.bg, false);
-        let stats = format!("CPU: {:.1}%  Mem: {:.0}MB  Procs: {}", self.total_cpu(), self.total_memory(), self.processes.len());
-        draw_text(&mut plane, area.width.saturating_sub(stats.len() as u16 + 1), 0, &stats, t.fg_muted, t.bg, false);
+        // Header
+        draw_text(&mut plane, 2, 0, " Data Explorer ", t.primary, t.bg, true);
+        let theme_label = format!(" {} ", self.theme.name);
+        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
+                  &theme_label, t.secondary, t.bg, false);
 
-        // ── Category list (left 14 columns, rows 1..height-2) ────────
-        let cat_w: u16 = 14;
-        let cat_h = area.height.saturating_sub(2);
-        self.category_list.borrow_mut().set_area(Rect::new(0, 1, cat_w, cat_h));
-        let cat_plane = self.category_list.borrow().render(Rect::new(0, 0, cat_w, cat_h));
-        blit_to(&mut plane, &cat_plane, 0, 1);
+        // Divider
+        for x in 0..area.width {
+            let idx = (area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
 
-        // ── Divider ──────────────────────────────────────────────────
+        // Left sidebar
+        self.render_sidebar(&mut plane, area, t);
+
+        // Vertical divider
         for y in 1..area.height.saturating_sub(1) {
-            let idx = (y as usize) * area.width as usize + cat_w as usize;
+            let idx = (y * plane.width + DIV_X) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '│';
                 plane.cells[idx].fg = t.outline;
@@ -267,46 +270,75 @@ impl Scene for TableListScene {
             }
         }
 
-        // ── Process table (right area) ────────────────────────────────
-        let table_x = cat_w + 1;
-        let table_w = area.width.saturating_sub(cat_w + 1);
-        let table_h = area.height.saturating_sub(2);
-        self.table.borrow_mut().set_area(Rect::new(table_x, 1, table_w, table_h));
-        let table_plane = self.table.borrow().render(Rect::new(0, 0, table_w, table_h));
-        blit_to(&mut plane, &table_plane, table_x as usize, 1);
+        // Main area - Table + Detail
+        let main_x = DIV_X + 2;
+        let main_w = area.width.saturating_sub(main_x + 2);
 
-        // ── Detail panel (bottom-right, 3 rows) ─────────────────────
+        // Table header row
+        let table_y = 2;
+        let col_widths = [7u16, 16, 7, 9, 9];
+        let mut cx = main_x;
+        let headers = ["PID", "Name", "CPU%", "Mem MB", "Status"];
+        for (i, (w, h)) in col_widths.iter().zip(headers.iter()).enumerate() {
+            let is_sorted = self.sort_column == Some(i);
+            let fg = if is_sorted { t.primary } else { t.fg };
+            let style = if is_sorted { true } else { false };
+            draw_text(&mut plane, cx, table_y, h, fg, t.bg, style);
+            cx += w;
+        }
+
+        // Table content
+        let table_h = area.height.saturating_sub(8);
+        let table_area = Rect::new(main_x, table_y + 1, main_w, table_h);
+        self.table.borrow_mut().set_area(table_area);
+        let table_plane = self.table.borrow().render(Rect::new(0, 0, main_w, table_h));
+        blit_to(&mut plane, &table_plane, main_x as usize, (table_y + 1) as usize);
+
+        // Detail panel
+        let detail_y = area.height.saturating_sub(5);
         if let Some(idx) = self.selected_process {
             if idx < self.filtered.len() {
                 let pidx = self.filtered[idx];
                 if pidx < self.processes.len() {
                     let p = &self.processes[pidx];
-                    let dy = area.height.saturating_sub(4);
-                    draw_text(&mut plane, table_x + 1, dy, &format!("Selected: {} (PID {})", p.name, p.pid), t.primary, t.bg, false);
-                    draw_text(&mut plane, table_x + 1, dy + 1, &format!("CPU: {:.1}%  Memory: {:.1} MB  Status: {}", p.cpu, p.memory, p.status), t.fg, t.bg, false);
-                    draw_text(&mut plane, table_x + 1, dy + 2, &format!("Category: {}", p.category), t.fg_muted, t.bg, false);
+                    let detail_text = format!("Selected: {} (PID {})", p.name, p.pid);
+                    draw_text(&mut plane, main_x, detail_y, &detail_text, t.primary, t.bg, true);
+                    let stats_text = format!("CPU: {:.1}%  Memory: {:.1} MB  Status: {}", p.cpu, p.memory, p.status);
+                    draw_text_clipped(&mut plane, main_x, detail_y + 1, &stats_text, main_x + main_w, t.fg, t.bg, false);
+                    let cat_text = format!("Category: {}", p.category);
+                    draw_text(&mut plane, main_x, detail_y + 2, &cat_text, t.fg_muted, t.bg, false);
                 }
             }
         }
 
-        // ── Sort indicator ───────────────────────────────────────────
+        // Sort indicator
         if let Some(col) = self.sort_column {
             let arrow = if self.sort_ascending { "▲" } else { "▼" };
             let col_names = ["PID", "Name", "CPU%", "Mem", "Status"];
             if col < col_names.len() {
                 let label = format!("Sort: {} {}", col_names[col], arrow);
-                draw_text(&mut plane, area.width.saturating_sub(label.len() as u16 + 2), 0, &label, t.warning, t.bg, false);
+                draw_text(&mut plane, main_x + main_w.saturating_sub(label.len() as u16 + 2), table_y, &label, t.warning, t.bg, false);
             }
         }
 
-        // ── Status bar ───────────────────────────────────────────────
+        // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
-        // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Server Dashboard — Help", &[("Up/Dn", "Navigate process table"), ("Enter", "Sort by column / toggle direction"), ("1-5", "Sort by PID/Name/CPU/Mem/Status"), ("Tab", "Cycle category filter"), ("Click header", "Sort that column"), ("Click category", "Filter by category"), ("Click row", "Select process"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
+            render_help_overlay(&mut plane, area, t, "Data Explorer — Help", &[
+                ("↑/↓", "Navigate table"),
+                ("Enter", "Toggle sort direction"),
+                ("1-5", "Sort by column"),
+                ("Tab", "Cycle category filter"),
+                ("Click header", "Sort that column"),
+                ("Click row", "Select process"),
+                (help_key, "Toggle this help"),
+                (back_key, "Back"),
+            ]);
         }
 
         plane
@@ -316,16 +348,14 @@ impl Scene for TableListScene {
         if key.kind != KeyEventKind::Press { return false; }
 
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
-                return true;
             }
             return true;
         }
-
         if self.keybindings.matches(actions::HELP, &key) {
-            self.show_help = !self.show_help;
+            self.show_help = true;
             self.dirty = true;
             return true;
         }
@@ -335,19 +365,17 @@ impl Scene for TableListScene {
 
         match key.code {
             KeyCode::Tab => {
-                // Toggle focus between category list and table
-                // For simplicity, cycle category
                 let cur = self.category_list.borrow().selected_index();
                 let next = (cur + 1) % self.categories.len();
                 self.select_category(next);
+                self.dirty = true;
                 true
             }
             KeyCode::Enter => {
-                // Sort by first column or re-sort current
                 if let Some(col) = self.sort_column {
                     self.toggle_sort(col);
                 } else {
-                    self.toggle_sort(2); // Default: sort by CPU
+                    self.toggle_sort(2);
                 }
                 true
             }
@@ -355,7 +383,7 @@ impl Scene for TableListScene {
                 self.table.borrow_mut().handle_key(KeyEvent {
                     code: KeyCode::Up, modifiers: key.modifiers, kind: KeyEventKind::Press,
                 });
-                self.selected_process = Some(self.table.borrow().selected_indices().iter().next().copied().unwrap_or(0));
+                self.selected_process = self.table.borrow().selected_indices().iter().next().copied();
                 self.dirty = true;
                 true
             }
@@ -363,7 +391,7 @@ impl Scene for TableListScene {
                 self.table.borrow_mut().handle_key(KeyEvent {
                     code: KeyCode::Down, modifiers: key.modifiers, kind: KeyEventKind::Press,
                 });
-                self.selected_process = Some(self.table.borrow().selected_indices().iter().next().copied().unwrap_or(0));
+                self.selected_process = self.table.borrow().selected_indices().iter().next().copied();
                 self.dirty = true;
                 true
             }
@@ -377,27 +405,28 @@ impl Scene for TableListScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let cat_w: u16 = 14;
+        let cat_w: u16 = SIDEBAR_W;
 
         // Category list clicks
-        if col < cat_w && row >= 1 {
-            let rel_row = (row - 1) as usize;
+        if col < cat_w && row >= 3 {
+            let rel_row = (row - 3) as usize;
             if rel_row < self.categories.len() {
                 if let MouseEventKind::Down(_) = kind {
                     self.select_category(rel_row);
+                    self.dirty = true;
                     return true;
                 }
             }
         }
 
-        // Table area clicks — forward to table
-        if col > cat_w && row >= 1 {
-            let rel_col = col.saturating_sub(cat_w + 1);
-            let rel_row = row.saturating_sub(1);
+        // Table area clicks
+        let main_x = DIV_X + 2;
+        if col > cat_w && row >= 3 {
+            let rel_col = col.saturating_sub(main_x);
+            let rel_row = row.saturating_sub(3);
             if let MouseEventKind::Down(_) = kind {
                 // Header click → sort
                 if rel_row == 0 {
-                    // Approximate column detection
                     let col_widths = [7u16, 16, 7, 9, 9];
                     let mut cum: u16 = 0;
                     for (i, w) in col_widths.iter().enumerate() {
@@ -409,9 +438,8 @@ impl Scene for TableListScene {
                     }
                 } else {
                     // Row click → select
-                    let table = &mut self.table.borrow_mut();
-                    table.handle_mouse(kind, rel_col, rel_row);
-                    self.selected_process = table.selected_indices().iter().next().copied();
+                    self.table.borrow_mut().handle_mouse(kind, rel_col, rel_row);
+                    self.selected_process = self.table.borrow().selected_indices().iter().next().copied();
                     self.dirty = true;
                     return true;
                 }
@@ -425,13 +453,70 @@ impl Scene for TableListScene {
         self.theme = theme.clone();
         self.table.borrow_mut().on_theme_change(theme);
         self.category_list.borrow_mut().on_theme_change(theme);
-        self.status_bar.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "table_list" }
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
+impl TableListScene {
+    fn render_sidebar(&self, plane: &mut Plane, area: Rect, t: &Theme) {
+        let sx = 2u16;
+
+        // Title
+        draw_text(plane, sx, 2, "Categories", t.primary, t.bg, true);
+
+        // Category list
+        let cat_area = Rect::new(0, 3, SIDEBAR_W, area.height.saturating_sub(8));
+        self.category_list.borrow_mut().set_area(cat_area);
+        let cat_plane = self.category_list.borrow().render(Rect::new(0, 0, SIDEBAR_W, area.height.saturating_sub(8)));
+        blit_to(plane, &cat_plane, 0, 3);
+
+        // Divider
+        let div_y = area.height.saturating_sub(6);
+        for dx in 0..SIDEBAR_W {
+            let idx = (div_y * plane.width + sx + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Stats section
+        let stats_y = div_y + 2;
+        draw_text(plane, sx, stats_y, "Stats", t.secondary, t.bg, true);
+
+        let total_cpu = self.total_cpu();
+        let total_mem = self.total_memory();
+        let filtered_cpu = self.filtered_cpu();
+        let filtered_mem = self.filtered_memory();
+        let cat_count = self.categories.len().saturating_sub(1);
+        let proc_count = self.filtered.len();
+
+        let stats = [
+            ("Total CPU", format!("{:.1}%", total_cpu)),
+            ("Total Mem", format!("{:.0}MB", total_mem)),
+            ("Visible", format!("{} proc", proc_count)),
+            ("Categories", format!("{}", cat_count)),
+        ];
+
+        for (i, (label, value)) in stats.iter().enumerate() {
+            let sy = stats_y + 1 + i as u16;
+            if sy >= area.height.saturating_sub(4) { break; }
+            draw_text(plane, sx, sy, label, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, sx + 10, sy, value, sx + SIDEBAR_W, t.fg, t.bg, false);
+        }
+
+        // Filter indicator
+        let filter_y = area.height.saturating_sub(4);
+        if filter_y > stats_y + 6 {
+            draw_text(plane, sx, filter_y, "Filter", t.secondary, t.bg, true);
+            let filter_text = self.selected_category.clone().unwrap_or_else(|| "all".into());
+            let filter_color = if filter_text == "all" { t.fg_muted } else { t.primary };
+            draw_text_clipped(plane, sx, filter_y + 1, &filter_text, sx + SIDEBAR_W, filter_color, t.bg, false);
+        }
+    }
+}
