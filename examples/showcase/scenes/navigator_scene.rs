@@ -193,11 +193,10 @@ impl NavigatorScene {
 
     fn update_breadcrumbs(&self) {
         let segments = self.nav.borrow().path.clone();
-        self.breadcrumbs = RefCell::new(
-            Breadcrumbs::new_with_id(WidgetId::new(900), segments)
-                .clickable(true)
-                .with_theme(self.theme.clone()),
-        );
+        let bc = Breadcrumbs::new_with_id(WidgetId::new(900), segments)
+            .clickable(true)
+            .with_theme(self.theme.clone());
+        *self.breadcrumbs.borrow_mut() = bc;
     }
 }
 
@@ -386,12 +385,14 @@ impl Scene for NavigatorScene {
             }
             KeyCode::Enter => {
                 self.nav.borrow_mut().enter_selected();
+                drop(self.nav.borrow());
                 self.update_breadcrumbs();
                 self.dirty = true;
                 true
             }
             KeyCode::Backspace => {
                 self.nav.borrow_mut().go_up();
+                drop(self.nav.borrow());
                 self.update_breadcrumbs();
                 self.dirty = true;
                 true
@@ -443,6 +444,7 @@ impl Scene for NavigatorScene {
                     drop(nav);
                     self.nav.borrow_mut().path.push(entry.name.to_string());
                     self.nav.borrow_mut().refresh();
+                    drop(self.nav.borrow());
                     self.update_breadcrumbs();
                     self.dirty = true;
                     return true;
