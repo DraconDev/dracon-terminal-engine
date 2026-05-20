@@ -263,7 +263,7 @@ impl Scene for NavigatorScene {
         // File list
         let list_y = 5;
         let list_h = area.height.saturating_sub(8);
-        let max_scroll = nav.filtered.len().saturating_sub(list_y + list_y);
+        let max_scroll = nav.filtered.len().saturating_sub((list_y + list_y) as usize);
         let scroll = nav.scroll.min(max_scroll);
 
         for vi in 0u16..list_h {
@@ -428,7 +428,7 @@ impl Scene for NavigatorScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let list_y = 5u16;
-        let list_h = self.nav.borrow().visible_count(area.height);
+        let list_h: usize = 20; // Approximate visible list height
         let cat_w: u16 = SIDEBAR_W;
         let main_x = DIV_X + 2;
 
