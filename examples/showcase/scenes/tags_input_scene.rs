@@ -103,6 +103,13 @@ impl TagsInputScene {
             hover_y: Cell::new(0),
         }
     }
+
+    fn brighten(&self, color: Color) -> Color {
+        match color {
+            Color::Rgb(r, g, b) => Color::Rgb(r.saturating_add(30), g.saturating_add(30), b.saturating_add(30)),
+            _ => color,
+        }
+    }
 }
 
 impl Scene for TagsInputScene {
@@ -248,7 +255,7 @@ impl Scene for TagsInputScene {
                     let idx = (bar_y * area.width + main_x + dx) as usize;
                     if idx < plane.cells.len() {
                         let bar_color = if count >= max_tags { t.warning } else { t.primary };
-                        plane.cells[idx].char = if dx < filled { '█' } else { '░' };
+                        plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
                         plane.cells[idx].fg = bar_color;
                         plane.cells[idx].transparent = false;
                     }
