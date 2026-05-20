@@ -66,10 +66,6 @@ impl MetricsHubScene {
 
             .with_theme(theme.clone());
             .max(100.0)
-            .warn_threshold(70.0)
-            .crit_threshold(90.0)
-            .with_theme(theme.clone());
-        let mem_gauge = Gauge::with_id(WidgetId::new(811), "MEM")
             .max(100.0)
             .warn_threshold(80.0)
             .crit_threshold(95.0)
