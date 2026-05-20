@@ -77,8 +77,8 @@ impl WidgetGalleryScene {
             toggle: Toggle::new(WidgetId::new(14), "Dark Mode"),
             select: Select::new(WidgetId::new(15))
                 .with_options(vec!["Red".into(), "Green".into(), "Blue".into()]),
-            search: SearchInput::new(WidgetId::new(16)).with_placeholder("Type and press Enter…"),
-            progress: ProgressBar::new(WidgetId::new(17)).with_progress(0.65),
+            search: SearchInput::new(WidgetId::new(16)),
+            progress: ProgressBar::new(WidgetId::new(17)),
             button: Button::with_id(WidgetId::new(18), "  Click Me!  ")
                 .on_click(move || { *button_bridge_cb.borrow_mut() = true; }),
             color_picker: ColorPicker::new().with_theme(theme.clone()),
