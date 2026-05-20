@@ -212,10 +212,12 @@ mod tests {
     #[test]
     fn test_effective_len_filtered() {
         let editor = make_editor(vec!["apple", "banana", "apricot", "cherry"]);
-        let mut search = SearchState::default();
+        let mut search = SearchState {
+            filter_query: "ap".to_string(),
+            filtered_indices: vec![0, 2],
+            ..Default::default()
+        };
         // Simulate filter
-        search.filter_query = "ap".to_string();
-        search.filtered_indices = vec![0, 2];
         assert_eq!(search.effective_len(&editor), 2);
     }
 
@@ -246,9 +248,11 @@ mod tests {
     #[test]
     fn test_get_real_line_idx_filtered() {
         let editor = make_editor(vec!["apple", "banana", "cherry"]);
-        let mut search = SearchState::default();
-        search.filter_query = "a".to_string();
-        search.filtered_indices = vec![0, 1]; // apple, banana
+        let mut search = SearchState {
+            filter_query: "a".to_string(),
+            filtered_indices: vec![0, 1], // apple, banana
+            ..Default::default()
+        };
         assert_eq!(search.get_real_line_idx(&editor, 0), 0);
         assert_eq!(search.get_real_line_idx(&editor, 1), 1);
     }
@@ -277,8 +281,10 @@ mod tests {
 
     #[test]
     fn test_swap_filter() {
-        let mut search = SearchState::default();
-        search.filter_query = "initial".to_string();
+        let mut search = SearchState {
+            filter_query: "initial".to_string(),
+            ..Default::default()
+        };
         let prev = search.swap_filter("replacement".to_string());
         assert_eq!(prev, "initial");
         assert_eq!(search.filter_query, "replacement");
