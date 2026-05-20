@@ -8,7 +8,7 @@
 //!   - Contrast ratio calculator
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
-use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
+use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -311,7 +311,7 @@ impl ColorPickerScene {
             ("#9b59b6", Color::Rgb(155, 89, 182)),
         ];
 
-        for (i, (hex, color)) in palette.iter().enumerate() {
+        for (i, (_hex, color)) in palette.iter().enumerate() {
             let px = panel_x + 1 + i as u16 * 8;
             let py = palette_y + 1;
             if px + 6 < panel_x + panel_w && py < area.height.saturating_sub(2) {
