@@ -231,9 +231,11 @@ mod tests {
     #[test]
     fn test_get_effective_line_filtered() {
         let editor = make_editor(vec!["apple", "banana", "apricot", "cherry"]);
-        let mut search = SearchState::default();
-        search.filter_query = "ap".to_string();
-        search.filtered_indices = vec![0, 2];
+        let search = SearchState {
+            filter_query: "ap".to_string(),
+            filtered_indices: vec![0, 2],
+            ..Default::default()
+        };
         // Display row 1 → real line 2 → "apricot"
         assert_eq!(search.get_effective_line(&editor, 1).as_str(), "apricot");
     }
@@ -248,7 +250,7 @@ mod tests {
     #[test]
     fn test_get_real_line_idx_filtered() {
         let editor = make_editor(vec!["apple", "banana", "cherry"]);
-        let mut search = SearchState {
+        let search = SearchState {
             filter_query: "a".to_string(),
             filtered_indices: vec![0, 1], // apple, banana
             ..Default::default()
