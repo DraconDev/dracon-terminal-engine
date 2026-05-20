@@ -465,7 +465,7 @@ impl Scene for ColorPickerScene {
         // Right panel: Quick palette clicks
         let panel_x = SIDEBAR_WIDTH + 1;
         let palette_y = area.height.saturating_sub(5);
-        if row >= palette_y + 1 && row < palette_y + 2 && col >= panel_x && col < area.width - 2 {
+        if row > palette_y && row < palette_y + 2 && col >= panel_x && col < area.width - 2 {
             let palette = [
                 ("#ff6b6b", Color::Rgb(255, 107, 107)),
                 ("#ffd93d", Color::Rgb(255, 217, 61)),
