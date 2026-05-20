@@ -446,8 +446,8 @@ impl DebugOverlayScene {
 
         for (i, (label, enabled)) in toggles.iter().enumerate() {
             let ty = toggle_y + 1 + i as u16;
-            let icon = if enabled { "●" } else { "○" };
-            let icon_color = if enabled { t.success } else { t.fg_muted };
+            let icon = if *enabled { "●" } else { "○" };
+            let icon_color = if *enabled { t.success } else { t.fg_muted };
 
             let icon_idx = (ty * plane.width + sx) as usize;
             if icon_idx < plane.cells.len() {
@@ -483,7 +483,7 @@ impl DebugOverlayScene {
                 let my = metrics_y + 1 + i as u16;
                 if my >= area.height.saturating_sub(4) { break; }
                 draw_text(plane, sx, my, label, t.fg_muted, t.bg, false);
-                draw_text_clipped(plane, sx + 10, my, value, sx + SIDEBAR_W, color, t.bg, false);
+                draw_text_clipped(plane, sx + 10, my, value, sx + SIDEBAR_W, *color, t.bg, false);
             }
         }
 
@@ -523,7 +523,7 @@ impl DebugOverlayScene {
         // Draw sparkline
         for i in 0..chart_w {
             // Get FPS value at this position (ring buffer order)
-            let pos = (idx + i) % 20;
+            let pos = (idx + i as usize) % 20;
             let fps = history[pos];
 
             // Scale to chart height
