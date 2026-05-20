@@ -432,10 +432,8 @@ impl Scene for WidgetGalleryScene {
         }
 
         // Clear hover if mouse is outside sidebar
-        if col < SIDEBAR_WIDTH {
-            if self.hovered.is_some() {
-                self.hovered = None;
-            }
+        if col < SIDEBAR_WIDTH && self.hovered.is_some() {
+            self.hovered = None;
         }
 
         // Handle widget interaction in demo area
