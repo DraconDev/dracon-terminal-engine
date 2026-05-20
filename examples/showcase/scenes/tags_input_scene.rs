@@ -58,8 +58,6 @@ fn tag_icon(tag: &str) -> char {
     }
 }
 
-use std::cell::Cell;
-
 pub struct TagsInputScene {
     theme: Theme,
     show_help: bool,
@@ -69,8 +67,6 @@ pub struct TagsInputScene {
     dirty: bool,
     area: std::cell::Cell<Rect>,
     hovered_tag: Option<usize>,
-    hover_x: Cell<u16>,
-    hover_y: Cell<u16>,
 }
 
 impl TagsInputScene {
@@ -99,8 +95,6 @@ impl TagsInputScene {
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             hovered_tag: None,
-            hover_x: Cell::new(0),
-            hover_y: Cell::new(0),
         }
     }
 
@@ -373,9 +367,9 @@ impl Scene for TagsInputScene {
                     let mut py = 9u16;
                     let pill_h = 2u16;
 
-                    for (i, tag) in tags.iter().enumerate() {
-                        let color = tag_category_color(tag);
-                        let pill_len = (tag.len() + 4) as u16;
+                    let tags_count = tags.len();
+                    for i in 0..tags_count {
+                        let tag = &tags[i];
 
                         if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
                             px = DIV_X + 4;
@@ -400,6 +394,7 @@ impl Scene for TagsInputScene {
                     let mut py = 9u16;
                     let pill_h = 2u16;
 
+                    #[allow(clippy::indexing_refactoring)] // clippy: prefer explicit .take() over .skip() for this pattern
                     for i in 0..tags_count {
                         let tag = &tags[i];
                         let pill_len = (tag.len() + 4) as u16;
@@ -410,7 +405,7 @@ impl Scene for TagsInputScene {
                         }
                         if row >= py && row < py + pill_h && col >= px && col < px + pill_len {
                             let tag_name = tag.clone();
-                            self.tags_input.remove_tag(i);
+                            self.tags_input.remove_tag(i); // LINT: clippy::iter_without_iter_cloned
                             self.tag_log.push(format!("- {} removed", tag_name));
                             self.dirty = true;
                             return true;
