@@ -20,10 +20,11 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 9 | cell_pool → Memory Visualizer | split sidebar | 0 | Wave chart + pool grid + stats |
 | 10 | rich_text → Document Viewer | split sidebar | 1 | Doc tree + tabs + content + stats |
 | 11 | debug_overlay → Performance Monitor | split sidebar | 2 | FPS sparkline + gauges + profiler |
+| 12 | metrics_hub → Metrics Dashboard | split sidebar | 8 | Sparklines + sliders + gauges + ring + badges |
 
 ---
 
-### Tier 1 Count: 18/34 ✅ (target: 20/34)
+### Tier 1 Count: 19/34 ✅ (target: 20/34)
 
 ---
 
@@ -42,12 +43,12 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 9 | 2026-05-20 | ✓ 0 | ✓ 291 | cell_pool → Memory Visualizer |
 | 10 | 2026-05-20 | ✓ 0 | ✓ 291 | rich_text → Document Viewer |
 | 11 | 2026-05-20 | ✓ 0 | ✓ 291 | debug_overlay → Performance Monitor |
+| 12 | 2026-05-20 | ✓ 0 | ✓ 291 | metrics_hub → Metrics Dashboard |
 
 ---
 
-## Next (Iterations 12-15)
+## Next (Iterations 13-15)
 
-### 12. metrics_hub → Metrics Dashboard
 ### 13. table_list → Data Explorer
 ### 14. navigator → Quick Launcher
 ### 15. Final verification pass
