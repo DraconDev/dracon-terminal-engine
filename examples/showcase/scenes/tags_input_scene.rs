@@ -6,7 +6,7 @@
 //!   - Tag add/remove with keyboard and mouse
 //!   - Tag cloud grouped by category with interactive highlighting
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -58,6 +58,8 @@ fn tag_icon(tag: &str) -> char {
     }
 }
 
+use std::cell::Cell;
+
 pub struct TagsInputScene {
     theme: Theme,
     show_help: bool,
@@ -67,6 +69,8 @@ pub struct TagsInputScene {
     dirty: bool,
     area: std::cell::Cell<Rect>,
     hovered_tag: Option<usize>,
+    hover_x: Cell<u16>,
+    hover_y: Cell<u16>,
 }
 
 impl TagsInputScene {
@@ -95,6 +99,8 @@ impl TagsInputScene {
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             hovered_tag: None,
+            hover_x: Cell::new(0),
+            hover_y: Cell::new(0),
         }
     }
 }
@@ -196,19 +202,12 @@ impl Scene for TagsInputScene {
                 let is_hovered = self.hovered_tag == Some(i);
 
                 // Pill background
+                let pill_bg = if is_hovered { self.brighten(color) } else { color };
                 for dy in 0..pill_h {
                     for dx in 0..pill_len {
                         let idx = ((py + dy) * area.width + px + dx) as usize;
                         if idx < plane.cells.len() {
-                            plane.cells[idx].bg = if is_hovered {
-                                Color::Rgb(
-                                    (color.0.saturating_add(30)).min(255),
-                                    (color.1.saturating_add(30)).min(255),
-                                    (color.2.saturating_add(30)).min(255),
-                                )
-                            } else {
-                                color
-                            };
+                            plane.cells[idx].bg = pill_bg;
                             plane.cells[idx].transparent = false;
                         }
                     }
@@ -389,11 +388,13 @@ impl Scene for TagsInputScene {
                 // Click on active tag pill → remove it
                 if col > DIV_X + 2 && row > 8 {
                     let tags = self.tags_input.tags();
+                    let tags_count = tags.len();
                     let mut px = DIV_X + 4;
                     let mut py = 9u16;
                     let pill_h = 2u16;
 
-                    for (i, tag) in tags.iter().enumerate() {
+                    for i in 0..tags_count {
+                        let tag = &tags[i];
                         let pill_len = (tag.len() + 4) as u16;
 
                         if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
@@ -401,8 +402,9 @@ impl Scene for TagsInputScene {
                             py += pill_h;
                         }
                         if row >= py && row < py + pill_h && col >= px && col < px + pill_len {
+                            let tag_name = tag.clone();
                             self.tags_input.remove_tag(i);
-                            self.tag_log.push(format!("- {} removed", tag));
+                            self.tag_log.push(format!("- {} removed", tag_name));
                             self.dirty = true;
                             return true;
                         }
@@ -482,9 +484,9 @@ impl TagsInputScene {
                 }
 
                 // Status indicator
-                let ind_char = if is_active { "●" } else { "○" };
+                let ind_char = if is_active { '●' } else { '○' };
                 let ind_color = if is_active { t.success } else { t.fg_muted };
-                draw_text_clipped(plane, sx + 1, ty, ind_char, sx + SIDEBAR_W, ind_color, bg, false);
+                draw_text_clipped(plane, sx + 1, ty, &ind_char.to_string(), sx + SIDEBAR_W, ind_color, bg, false);
                 draw_text_clipped(plane, sx + 3, ty, tag, sx + SIDEBAR_W, fg, bg, false);
             }
 
