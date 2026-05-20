@@ -3,8 +3,8 @@
 //! Displays a 3-column Kanban board with drag-and-drop cards,
 //! keyboard navigation, and a stats sidebar.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
-use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -297,7 +297,7 @@ impl KanbanScene {
         let sum_y = 11;
         let done_pct = if total_cards > 0 {
             let done = k.card_count(2).unwrap_or(0);
-            done * 100 / total_cards
+            (done * 100).checked_div(total_cards).unwrap_or(0)
         } else { 0 };
         draw_text(plane, sx, sum_y, "Progress", t.secondary, t.bg, true);
         draw_text(plane, sx, sum_y + 1, &format!("{}% done", done_pct), t.success, t.bg, false);
