@@ -22,16 +22,15 @@ const DIV_X: u16 = SIDEBAR_W + 2;
 
 struct Stage {
     name: &'static str,
-    icon: char,
     weight: f64,
 }
 
 const STAGES: &[Stage] = &[
-    Stage { name: "Initializing", icon: '◈', weight: 10.0 },
-    Stage { name: "Loading Config", icon: '▤', weight: 15.0 },
-    Stage { name: "Compiling", icon: '⚙', weight: 40.0 },
-    Stage { name: "Linking", icon: '◆', weight: 15.0 },
-    Stage { name: "Optimizing", icon: '◇', weight: 20.0 },
+    Stage { name: "Initializing", weight: 10.0 },
+    Stage { name: "Loading Config", weight: 15.0 },
+    Stage { name: "Compiling", weight: 40.0 },
+    Stage { name: "Linking", weight: 15.0 },
+    Stage { name: "Optimizing", weight: 20.0 },
 ];
 
 pub struct ProgressScene {
@@ -453,7 +452,7 @@ impl Scene for ProgressScene {
                 // Progress bar area click (rows bar_y+1 to bar_y+4)
                 let ring_y = 6;
                 let bar_y = ring_y + ring_size + 2;
-                if row >= bar_y + 1 && row < bar_y + 4 && col >= main_x {
+                if row > bar_y && row < bar_y + 4 && col >= main_x {
                     let bar_w = area.width.saturating_sub(main_x + 2);
                     if bar_w > 0 {
                         let pct = (col.saturating_sub(main_x) as f64 / bar_w as f64 * 100.0).clamp(0.0, 100.0);
