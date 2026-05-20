@@ -64,7 +64,7 @@ impl MetricsHubScene {
             .with_range(0.0, 100.0)
             .with_theme(theme.clone());
 
-        let cpu_gauge = Gauge::with_id(WidgetId::new(810), "CPU")
+            .with_theme(theme.clone());
             .max(100.0)
             .warn_threshold(70.0)
             .crit_threshold(90.0)
