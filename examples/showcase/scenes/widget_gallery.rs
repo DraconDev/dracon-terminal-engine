@@ -1,9 +1,10 @@
-//! Embedded Widget Gallery scene for the showcase.
+//! Embedded Widget Workshop scene for the showcase.
 //!
-//! Runs inside the showcase process via SceneRouter instead of launching
-//! an external binary. Press `B` or `Esc` to return to the showcase grid.
+//! Interactive playground: select a widget from the sidebar, interact with it
+//! in the main panel, and see live state updates in the properties inspector.
+//! Like Storybook for TUI widgets.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
 use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
@@ -19,29 +20,28 @@ use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-// ── Widget slot positions in the grid (row, col, name, icon) ────────────────
+// ── Widget catalog (icon, name, description) ────────────────────────────────
 
-const SLOTS: &[(usize, usize, &str, &str)] = &[
-    (0, 0, "Checkbox", "[v]"),
-    (0, 1, "Radio", "(o)"),
-    (0, 2, "Toggle", "[=]"),
-    (0, 3, "Spinner", "..."),
-    (1, 0, "Slider", "Slider"),
-    (1, 1, "Select", "v"),
-    (1, 2, "Search Input", ">"),
-    (2, 0, "Progress Bar", "[=]"),
-    (2, 1, "Button", "[X]"),
-    (2, 2, "Color Picker", "HSL"),
-    (3, 0, "Progress Ring", "O"),
-    (3, 1, "Tags Input", "#"),
+const WIDGETS: &[(&str, &str, &str)] = &[
+    ("☑", "Checkbox", "Toggleable on/off state"),
+    ("◎", "Radio", "Single selection from options"),
+    ("◑", "Toggle", "Boolean switch with label"),
+    ("◌", "Spinner", "Animated loading indicator"),
+    ("━━", "Slider", "Continuous range control"),
+    ("▼", "Select", "Dropdown selection list"),
+    ("⌕", "SearchInput", "Text input with submit"),
+    ("▓", "ProgressBar", "Linear progress indicator"),
+    ("▣", "Button", "Clickable action button"),
+    ("◐", "ColorPicker", "Interactive color selection"),
+    ("◉", "ProgressRing", "Circular progress indicator"),
+    ("#️⃣", "TagsInput", "Multi-tag composition"),
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// WIDGET GALLERY SCENE
-// ═══════════════════════════════════════════════════════════════════════════════
+const SIDEBAR_WIDTH: u16 = 20;
 
 pub struct WidgetGalleryScene {
     selected: usize,
+    hovered: Option<usize>,
     checkbox: Checkbox,
     radio: Radio,
     slider: Slider,
@@ -69,16 +69,17 @@ impl WidgetGalleryScene {
         let button_bridge_cb = Rc::clone(&button_bridge);
         Self {
             selected: 0,
+            hovered: None,
             checkbox: Checkbox::new(WidgetId::new(10), "Enable Feature"),
-            radio: Radio::new(WidgetId::new(11), "Selected"),
+            radio: Radio::new(WidgetId::new(11), "Option A"),
             slider: Slider::new(WidgetId::new(12)).with_range(0.0, 100.0),
             spinner: Spinner::new(WidgetId::new(13)),
             toggle: Toggle::new(WidgetId::new(14), "Dark Mode"),
             select: Select::new(WidgetId::new(15))
                 .with_options(vec!["Red".into(), "Green".into(), "Blue".into()]),
-            search: SearchInput::new(WidgetId::new(16)),
-            progress: ProgressBar::new(WidgetId::new(17)),
-            button: Button::with_id(WidgetId::new(18), "Click Me!")
+            search: SearchInput::new(WidgetId::new(16)).with_placeholder("Type and press Enter…"),
+            progress: ProgressBar::new(WidgetId::new(17)).with_progress(0.65),
+            button: Button::with_id(WidgetId::new(18), "  Click Me!  ")
                 .on_click(move || { *button_bridge_cb.borrow_mut() = true; }),
             color_picker: ColorPicker::new().with_theme(theme.clone()),
             progress_ring: ProgressRing::new(0.65),
@@ -101,7 +102,7 @@ impl WidgetGalleryScene {
         }
     }
 
-    fn widget_mut(&mut self, slot: usize) -> &mut dyn dracon_terminal_engine::framework::widget::Widget {
+    fn widget_mut(&mut self, slot: usize) -> &mut dyn Widget {
         match slot {
             0 => &mut self.checkbox,
             1 => &mut self.radio,
@@ -119,20 +120,184 @@ impl WidgetGalleryScene {
         }
     }
 
-    fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
-        let (row, col, ..) = SLOTS[slot];
-        let rows = 4u16;
-        let cols = if row == 0 { 4 } else { 3 };
-
-        let card_w = area.width.saturating_sub(2) / cols;
-        let card_h = area.height.saturating_sub(4) / rows;
-
-        let x = area.x + 1 + col as u16 * card_w;
-        let y = area.y + 2 + row as u16 * card_h;
-
-        Rect::new(x, y, card_w.saturating_sub(1), card_h.saturating_sub(1))
+    fn widget_state(&self) -> String {
+        match self.selected {
+            0 => format!("checked: {}", self.checkbox.is_checked()),
+            1 => format!("selected: {}", self.radio.is_selected()),
+            2 => format!("on: {}", self.toggle.is_on()),
+            3 => format!("frame: '{}'", self.spinner.current_frame()),
+            4 => format!("value: {:.0}", self.slider.value()),
+            5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
+            6 => format!("query: '{}'", self.search.query()),
+            7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
+            8 => format!("clicks: {}", self.button_clicks),
+            9 => format!("hex: {}", self.color_picker.hex()),
+            10 => format!("progress: {:.0}%", self.progress_ring.progress() * 100.0),
+            11 => format!("tags: {}", self.tags_input.tags().len()),
+            _ => String::new(),
+        }
     }
 
+    fn render_sidebar(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+        let max_x = SIDEBAR_WIDTH;
+
+        // Sidebar header
+        draw_text_clipped(plane, 1, 0, " Widgets ", max_x, t.fg_on_accent, t.primary, true);
+
+        // Widget list
+        for (i, (icon, name, _desc)) in WIDGETS.iter().enumerate() {
+            let row = i as u16 + 1;
+            if row >= area.height.saturating_sub(1) { break; }
+
+            let is_selected = i == self.selected;
+            let is_hovered = self.hovered == Some(i);
+
+            // Background
+            let bg = if is_selected {
+                t.primary
+            } else if is_hovered {
+                t.hover_bg
+            } else {
+                t.surface
+            };
+            let fg = if is_selected { t.fg_on_accent } else { t.fg };
+            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+
+            // Fill row background
+            for x in 0..SIDEBAR_WIDTH {
+                let idx = (row * plane.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ' ';
+                    plane.cells[idx].fg = fg;
+                    plane.cells[idx].bg = bg;
+                    plane.cells[idx].style = style;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+
+            // Hit zone
+            self.zones.borrow_mut().register(i, 0, row, SIDEBAR_WIDTH, 1);
+
+            // Icon + name
+            let entry = format!(" {} {}", icon, name);
+            draw_text(plane, 1, row, &entry, fg, bg, is_selected);
+
+            // Selected indicator
+            if is_selected {
+                let idx = (row * plane.width) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = '▸';
+                    plane.cells[idx].fg = t.fg_on_accent;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+    }
+
+    fn render_demo(&self, plane: &mut Plane, area: Rect, div_x: u16) {
+        let t = &self.theme;
+        let panel_x = div_x + 1;
+        let panel_w = area.width.saturating_sub(panel_x + 1);
+        let max_x = panel_x + panel_w;
+
+        let (icon, name, desc) = WIDGETS[self.selected];
+
+        // Title: icon + name + description
+        let title = format!("{} {} ", icon, name);
+        draw_text_clipped(plane, panel_x, 0, &title, max_x, t.primary, t.bg, true);
+        draw_text_clipped(plane, panel_x + title.len() as u16, 0, desc, max_x, t.fg_muted, t.bg, false);
+
+        // Divider
+        for x in panel_x..max_x.min(area.width) {
+            let idx = (area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // ── Interactive Widget Area ────────────────────────────
+        let demo_y = 2;
+        let demo_h = area.height.saturating_sub(8);
+
+        // Demo card background
+        let card_x = panel_x;
+        let card_w = panel_w;
+        for y in demo_y..demo_y + demo_h {
+            for x in card_x..card_x + card_w {
+                if x >= area.width { break; }
+                let idx = (y * area.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        // Card border
+        draw_focus_ring(plane, card_x, demo_y, card_w, demo_h, t.outline);
+
+        // Render the actual widget
+        let widget_area = Rect::new(
+            card_x + 2,
+            demo_y + 1,
+            card_w.saturating_sub(4),
+            demo_h.saturating_sub(2),
+        );
+
+        if widget_area.width >= 4 && widget_area.height >= 1 {
+            let w_plane = match self.selected {
+                0 => self.checkbox.render(widget_area),
+                1 => self.radio.render(widget_area),
+                2 => self.toggle.render(widget_area),
+                3 => self.spinner.render(widget_area),
+                4 => self.slider.render(widget_area),
+                5 => self.select.render(widget_area),
+                6 => self.search.render(widget_area),
+                7 => self.progress.render(widget_area),
+                8 => self.button.render(widget_area),
+                9 => self.color_picker.render(widget_area),
+                10 => self.progress_ring.render(widget_area),
+                11 => self.tags_input.render(widget_area),
+                _ => Plane::new(0, 0, 0),
+            };
+            blit_to(plane, &w_plane, widget_area.x as usize, widget_area.y as usize);
+        }
+
+        // ── Properties Inspector ───────────────────────────────
+        let props_y = demo_y + demo_h + 1;
+        if props_y < area.height.saturating_sub(2) {
+            draw_text_clipped(plane, panel_x, props_y, "State: ", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(plane, panel_x + 7, props_y, &self.widget_state(), max_x, t.primary, t.bg, true);
+
+            // Keyboard hints
+            let hints = self.keyboard_hints();
+            let hint_y = props_y + 1;
+            if hint_y < area.height.saturating_sub(2) {
+                draw_text_clipped(plane, panel_x, hint_y, "Interact: ", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, panel_x + 10, hint_y, hints, max_x, t.fg, t.bg, false);
+            }
+        }
+    }
+
+    fn keyboard_hints(&self) -> &'static str {
+        match self.selected {
+            0 => "Space: toggle",
+            1 => "Space: select",
+            2 => "Space: toggle",
+            3 => "Animating automatically",
+            4 => "←/→: adjust  |  PgUp/Dn: step 10",
+            5 => "←/→: change selection",
+            6 => "Type: input  |  Enter: submit",
+            7 => "Progress demo (static)",
+            8 => "Enter/Click: activate",
+            9 => "Tab: cycle slider  |  ←/→: adjust",
+            10 => "Progress demo (static)",
+            11 => "Type: tag  |  Enter: add  |  Backspace: remove",
+            _ => "",
+        }
+    }
 }
 
 impl Scene for WidgetGalleryScene {
@@ -149,13 +314,12 @@ impl Scene for WidgetGalleryScene {
         }
 
         // Header
-        let title = " Widget Gallery ";
+        draw_text(&mut plane, 2, 0, " Widget Workshop ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, 2, 0, title, t.primary, t.bg, true);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
 
-        // Divider
+        // Header divider
         for x in 0..area.width {
             let idx = (area.width + x) as usize;
             if idx < plane.cells.len() {
@@ -164,79 +328,48 @@ impl Scene for WidgetGalleryScene {
             }
         }
 
-        // Widget cards
+        // ── Left Sidebar ──────────────────────────────────────
         self.zones.borrow_mut().clear();
-        for (slot, &(_row, _col, name, icon)) in SLOTS.iter().enumerate() {
-            let rect = self.slot_rect(slot, area);
-            let is_selected = slot == self.selected;
-            render_card_border(&mut plane, rect, t, is_selected);
+        self.render_sidebar(&mut plane, area);
 
-            let title = format!("{} {}", icon, name);
-            draw_text(&mut plane, rect.x + 1, rect.y + 1, &title, t.primary, t.surface, true);
-
-            let widget_area = Rect::new(
-                rect.x + 1, rect.y + 2,
-                rect.width.saturating_sub(2), rect.height.saturating_sub(3),
-            );
-            if widget_area.width >= 4 && widget_area.height >= 1 {
-                self.zones.borrow_mut().register(
-                    slot, widget_area.x, widget_area.y, widget_area.width, widget_area.height,
-                );
-
-                let w_plane = match slot {
-                    0 => self.checkbox.render(widget_area),
-                    1 => self.radio.render(widget_area),
-                    2 => self.toggle.render(widget_area),
-                    3 => self.spinner.render(widget_area),
-                    4 => self.slider.render(widget_area),
-                    5 => self.select.render(widget_area),
-                    6 => self.search.render(widget_area),
-                    7 => self.progress.render(widget_area),
-                    8 => self.button.render(widget_area),
-                    9 => self.color_picker.render(widget_area),
-                    10 => self.progress_ring.render(widget_area),
-                    11 => self.tags_input.render(widget_area),
-                    _ => Plane::new(0, 0, 0),
-                };
-                blit_to(&mut plane, &w_plane, widget_area.x as usize, widget_area.y as usize);
-
-                let state_y = widget_area.y + widget_area.height + 1;
-                if state_y < rect.y + rect.height - 1 {
-                    let state = match slot {
-                        0 => format!("checked: {}", self.checkbox.is_checked()),
-                        1 => format!("selected: {}", self.radio.is_selected()),
-                        2 => format!("on: {}", self.toggle.is_on()),
-                        3 => format!("frame: '{}'", self.spinner.current_frame()),
-                        4 => format!("value: {:.0}", self.slider.value()),
-                        5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
-                        6 => format!("query: '{}'", self.search.query()),
-                        7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
-                        8 => format!("clicks: {}", self.button_clicks),
-                        9 => format!("hex: {}", self.color_picker.hex()),
-                        10 => format!("progress: {:.0}%", self.progress_ring.progress() * 100.0),
-                        11 => format!("tags: {}", self.tags_input.tags().len()),
-                        _ => String::new(),
-                    };
-                    draw_text(&mut plane, rect.x + 1, state_y, &state, t.fg_muted, t.surface, false);
-                }
+        // Sidebar divider
+        let div_x = SIDEBAR_WIDTH;
+        for y in 1..area.height.saturating_sub(1) {
+            let idx = (y * area.width + div_x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
             }
         }
 
-        // Footer
+        // ── Right Panel ───────────────────────────────────────
+        self.render_demo(&mut plane, area, div_x);
+
+        // ── Footer ────────────────────────────────────────────
         let footer_y = area.height.saturating_sub(1);
         for x in 0..area.width {
             let idx = (footer_y * area.width + x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
             }
         }
-        let nav = " ^v<> nav | Enter: activate | B/Esc: back | ?: help ";
-        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.bg, false);
+        let nav = " ↑/↓: navigate  |  Enter: interact  |  B/Esc: back  |  ?: help ";
+        draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
+        let count = format!(" {} widgets ", WIDGETS.len());
+        draw_text(&mut plane, area.width.saturating_sub(count.len() as u16 + 2), footer_y,
+                  &count, t.fg_muted, t.surface, false);
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Widget Gallery Help", &[("Up/Dn/Lt/Rt", "Navigate cards"), ("Enter", "Activate widget"), ("Esc", "Back"), ("?", "Toggle help")]);
+            render_help_overlay(&mut plane, area, t, "Widget Workshop Help", &[
+                ("↑/↓", "Navigate widget list"),
+                ("Enter", "Interact with selected widget"),
+                ("Type", "Input into text widgets"),
+                ("Esc", "Back to showcase"),
+                ("?", "Toggle this help"),
+            ]);
         }
 
         plane
@@ -248,6 +381,7 @@ impl Scene for WidgetGalleryScene {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
+                return true;
             }
             return true;
         }
@@ -259,13 +393,16 @@ impl Scene for WidgetGalleryScene {
         if self.keybindings.matches(actions::BACK, &key) {
             return false;
         }
+
         match key.code {
-            KeyCode::Right | KeyCode::Down => {
-                self.selected = (self.selected + 1) % SLOTS.len();
+            KeyCode::Up if key.modifiers.is_empty() => {
+                self.selected = if self.selected == 0 { WIDGETS.len() - 1 } else { self.selected - 1 };
+                self.hovered = None;
                 true
             }
-            KeyCode::Left | KeyCode::Up => {
-                self.selected = if self.selected == 0 { SLOTS.len() - 1 } else { self.selected - 1 };
+            KeyCode::Down if key.modifiers.is_empty() => {
+                self.selected = (self.selected + 1) % WIDGETS.len();
+                self.hovered = None;
                 true
             }
             KeyCode::Enter | KeyCode::Char(' ') => {
@@ -273,23 +410,55 @@ impl Scene for WidgetGalleryScene {
                 self.sync_button_bridge();
                 result
             }
-            _ => self.widget_mut(self.selected).handle_key(key),
+            _ => {
+                let result = self.widget_mut(self.selected).handle_key(key);
+                self.sync_button_bridge();
+                result
+            }
         }
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
+        // Check sidebar zones first
         let zone_slot = self.zones.borrow().dispatch(col, row);
         if let Some(slot) = zone_slot {
             if let MouseEventKind::Down(MouseButton::Left) = kind {
                 self.selected = slot;
             }
-            let rect = self.slot_rect(slot, self.area.get());
-            let rel_col = col.saturating_sub(rect.x + 1);
-            let rel_row = row.saturating_sub(rect.y + 2);
-            let result = self.widget_mut(slot).handle_mouse(kind, rel_col, rel_row);
-            self.sync_button_bridge();
-            return result;
+            if let MouseEventKind::Moved = kind {
+                self.hovered = Some(slot);
+            }
+            return true;
         }
+
+        // Clear hover if mouse is outside sidebar
+        if col < SIDEBAR_WIDTH {
+            if self.hovered.is_some() {
+                self.hovered = None;
+            }
+        }
+
+        // Handle widget interaction in demo area
+        let area = self.area.get();
+        let demo_x = SIDEBAR_WIDTH + 1;
+        if col >= demo_x && row >= 2 {
+            let demo_w = area.width.saturating_sub(demo_x + 1);
+            let card_x = demo_x;
+            let card_w = demo_w;
+            let demo_h = area.height.saturating_sub(8);
+            let card_y = 2;
+
+            if col >= card_x + 2 && col < card_x + card_w - 2
+                && row >= card_y + 1 && row < card_y + demo_h - 1
+            {
+                let rel_col = col.saturating_sub(card_x + 2);
+                let rel_row = row.saturating_sub(card_y + 1);
+                let result = self.widget_mut(self.selected).handle_mouse(kind, rel_col, rel_row);
+                self.sync_button_bridge();
+                return result;
+            }
+        }
+
         false
     }
 
@@ -313,37 +482,3 @@ impl Scene for WidgetGalleryScene {
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// RENDERING HELPERS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-fn render_card_border(plane: &mut Plane, rect: Rect, t: &Theme, selected: bool) {
-    let (x, y, w, h) = (rect.x, rect.y, rect.width, rect.height);
-    let border = if selected { t.primary } else { t.outline };
-    let bg = if selected { t.surface_elevated } else { t.surface };
-    if w < 3 || h < 3 { return; }
-    for row in y..y + h {
-        for col in x..x + w {
-            let idx = (row * plane.width + col) as usize;
-            if idx >= plane.cells.len() { continue; }
-            plane.cells[idx].bg = bg;
-            let is_border = row == y || row == y + h - 1 || col == x || col == x + w - 1;
-            if is_border {
-                plane.cells[idx].fg = border;
-                plane.cells[idx].char = match (row == y, row == y + h - 1, col == x, col == x + w - 1) {
-                    (true, _, true, _) => '╭',
-                    (true, _, _, true) => '╮',
-                    (_, true, true, _) => '╰',
-                    (_, true, _, true) => '╯',
-                    (true, true, _, _) | (_, _, true, true) => '─',
-                    _ => '│',
-                };
-            } else {
-                plane.cells[idx].char = ' ';
-                plane.cells[idx].fg = t.fg;
-            }
-        }
-    }
-}
-
