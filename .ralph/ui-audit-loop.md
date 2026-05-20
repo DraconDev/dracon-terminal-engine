@@ -21,10 +21,11 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 10 | rich_text → Document Viewer | split sidebar | 1 | Doc tree + tabs + content + stats |
 | 11 | debug_overlay → Performance Monitor | split sidebar | 2 | FPS sparkline + gauges + profiler |
 | 12 | metrics_hub → Metrics Dashboard | split sidebar | 8 | Sparklines + sliders + gauges + ring + badges |
+| 13 | table_list → Data Explorer | split sidebar | 2 | Categories + stats + table + detail |
 
 ---
 
-### Tier 1 Count: 19/34 ✅ (target: 20/34)
+### Tier 1 Count: 20/34 ✅ (target: 20/34)
 
 ---
 
@@ -44,11 +45,11 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 10 | 2026-05-20 | ✓ 0 | ✓ 291 | rich_text → Document Viewer |
 | 11 | 2026-05-20 | ✓ 0 | ✓ 291 | debug_overlay → Performance Monitor |
 | 12 | 2026-05-20 | ✓ 0 | ✓ 291 | metrics_hub → Metrics Dashboard |
+| 13 | 2026-05-20 | ✓ 0 | ✓ 291 | table_list → Data Explorer |
 
 ---
 
-## Next (Iterations 13-15)
+## Next (Iterations 14-15)
 
-### 13. table_list → Data Explorer
 ### 14. navigator → Quick Launcher
 ### 15. Final verification pass

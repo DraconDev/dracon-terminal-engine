@@ -282,7 +282,7 @@ impl Scene for TableListScene {
         for (i, (w, h)) in col_widths.iter().zip(headers.iter()).enumerate() {
             let is_sorted = self.sort_column == Some(i);
             let fg = if is_sorted { t.primary } else { t.fg };
-            let style = if is_sorted { true } else { false };
+        let style = is_sorted;
             draw_text(&mut plane, cx, table_y, h, fg, t.bg, style);
             cx += w;
         }
@@ -491,8 +491,8 @@ impl TableListScene {
 
         let total_cpu = self.total_cpu();
         let total_mem = self.total_memory();
-        let filtered_cpu = self.filtered_cpu();
-        let filtered_mem = self.filtered_memory();
+        let _ = self.filtered_cpu();
+        let _ = self.filtered_memory();
         let cat_count = self.categories.len().saturating_sub(1);
         let proc_count = self.filtered.len();
 
