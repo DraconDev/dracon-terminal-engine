@@ -222,7 +222,7 @@ impl NotificationCenterScene {
 
         // Detail header
         let header_bg = if self.focused_side == 1 { t.surface_elevated } else { t.surface };
-        draw_text_clipped(plane, panel_x + 1, 0, " Detail ", t.fg_on_accent, t.primary, true);
+        draw_text_clipped(plane, panel_x + 1, 0, " Detail ", area.width, t.fg_on_accent, t.primary, true);
 
         // Divider
         for x in panel_x..area.width {
@@ -242,9 +242,9 @@ impl NotificationCenterScene {
                 // Kind + timestamp row
                 let icon = Self::kind_icon(entry.kind);
                 draw_text(plane, panel_x + 2, 2, icon, kind_color, t.surface, true);
-                draw_text_clipped(plane, panel_x + 5, 2, entry.title.as_str(), area.width.saturating_sub(panel_x + 5), kind_color, t.surface, true);
-                draw_text_clipped(plane, panel_x + 2, 3, &format!("Kind: {:?}", entry.kind), t.fg_muted, t.surface, false);
-                draw_text_clipped(plane, panel_x + 2, 4, &format!("Time: {}", entry.timestamp), t.fg_muted, t.surface, false);
+                draw_text_clipped(plane, panel_x + 5, 2, entry.title.as_str(), area.width, kind_color, t.surface, true);
+                draw_text_clipped(plane, panel_x + 2, 3, &format!("Kind: {:?}", entry.kind), area.width, t.fg_muted, t.surface, false);
+                draw_text_clipped(plane, panel_x + 2, 4, &format!("Time: {}", entry.timestamp), area.width, t.fg_muted, t.surface, false);
 
                 // Divider
                 for x in panel_x + 2..area.width.saturating_sub(2) {
@@ -256,17 +256,17 @@ impl NotificationCenterScene {
                 }
 
                 // Message
-                draw_text_clipped(plane, panel_x + 2, 6, "Message:", t.secondary, t.surface, true);
+                draw_text_clipped(plane, panel_x + 2, 6, "Message:", area.width, t.secondary, t.surface, true);
                 let msg_lines = entry.message.as_str();
                 for (i, line) in msg_lines.chars().collect::<Vec<_>>().chunks(40).take(8) {
                     let line_str: String = line.iter().collect();
-                    draw_text_clipped(plane, panel_x + 2, 7 + i as u16, &line_str, area.width.saturating_sub(panel_x + 4), t.fg, t.surface, false);
+                    draw_text_clipped(plane, panel_x + 2, 7 + i as u16, &line_str, area.width, t.fg, t.surface, false);
                 }
 
                 // Actions
                 let action_y = area.height.saturating_sub(4);
-                draw_text_clipped(plane, panel_x + 2, action_y, "[D] Dismiss", t.error, t.surface, false);
-                draw_text_clipped(plane, panel_x + 2, action_y + 1, "[C] Clear all", t.warning, t.surface, false);
+                draw_text_clipped(plane, panel_x + 2, action_y, "[D] Dismiss", area.width, t.error, t.surface, false);
+                draw_text_clipped(plane, panel_x + 2, action_y + 1, "[C] Clear all", area.width, t.warning, t.surface, false);
 
                 return;
             }
@@ -274,9 +274,9 @@ impl NotificationCenterScene {
 
         // No selection state
         let empty_y = 4;
-        draw_text_clipped(plane, panel_x + 2, empty_y, "No notification selected", t.fg_muted, t.surface, false);
-        draw_text_clipped(plane, panel_x + 2, empty_y + 1, "Click one from the feed", t.fg_muted, t.surface, false);
-        draw_text_clipped(plane, panel_x + 2, empty_y + 2, "or press SPACE to add", t.fg_muted, t.surface, false);
+        draw_text_clipped(plane, panel_x + 2, empty_y, "No notification selected", area.width, t.fg_muted, t.surface, false);
+        draw_text_clipped(plane, panel_x + 2, empty_y + 1, "Click one from the feed", area.width, t.fg_muted, t.surface, false);
+        draw_text_clipped(plane, panel_x + 2, empty_y + 2, "or press SPACE to add", area.width, t.fg_muted, t.surface, false);
     }
 
     fn render_top_bar(&self, plane: &mut Plane, area: Rect) {
