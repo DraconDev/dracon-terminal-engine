@@ -4,9 +4,9 @@
 //!   - Email-style tag composition with colored pills
 //!   - Autocomplete suggestions from a preset list
 //!   - Tag add/remove with keyboard and mouse
-//!   - Shortcut legend panel, category breakdown, tag stats
+//!   - Tag cloud grouped by category with interactive highlighting
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -15,28 +15,47 @@ use dracon_terminal_engine::framework::widgets::tags_input::TagsInput;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
+const SIDEBAR_W: u16 = 22;
+const DIV_X: u16 = SIDEBAR_W + 2;
+
 struct TagCategory {
     name: &'static str,
+    icon: char,
     items: &'static [&'static str],
     color: Color,
 }
 
 fn tag_categories() -> Vec<TagCategory> {
-    // These are static — colors will be filled in render with theme
     vec![
-        TagCategory { name: "Systems", items: &["rust", "go", "zig", "c"], color: Color::Rgb(136, 192, 208) },
-        TagCategory { name: "Scripting", items: &["python", "ruby", "perl", "lua"], color: Color::Rgb(208, 135, 112) },
-        TagCategory { name: "Web", items: &["javascript", "typescript", "dart"], color: Color::Rgb(163, 190, 140) },
-        TagCategory { name: "JVM", items: &["java", "kotlin", "scala", "clojure"], color: Color::Rgb(235, 203, 139) },
-        TagCategory { name: "Functional", items: &["haskell", "elixir", "swift"], color: Color::Rgb(180, 142, 173) },
+        TagCategory { name: "Systems", icon: '⚙', items: &["rust", "go", "zig", "c"], color: Color::Rgb(136, 192, 208) },
+        TagCategory { name: "Scripting", icon: '⌨', items: &["python", "ruby", "perl", "lua"], color: Color::Rgb(208, 135, 112) },
+        TagCategory { name: "Web", icon: '◇', items: &["javascript", "typescript", "dart"], color: Color::Rgb(163, 190, 140) },
+        TagCategory { name: "JVM", icon: '☕', items: &["java", "kotlin", "scala", "clojure"], color: Color::Rgb(235, 203, 139) },
+        TagCategory { name: "Functional", icon: 'λ', items: &["haskell", "elixir", "swift"], color: Color::Rgb(180, 142, 173) },
     ]
 }
 
-fn tag_color(tag: &str, t: &Theme) -> Color {
+fn tag_category_color(tag: &str) -> Color {
     for cat in tag_categories() {
         if cat.items.contains(&tag) { return cat.color; }
     }
-    t.fg_muted
+    Color::Rgb(128, 128, 128)
+}
+
+fn tag_icon(tag: &str) -> char {
+    match tag {
+        "rust" => '⚙',
+        "go" => '▶',
+        "python" => '🐍',
+        "javascript" => 'JS',
+        "typescript" => 'TS',
+        "java" => '☕',
+        "haskell" => 'λ',
+        "swift" => '◆',
+        "zig" => '⚡',
+        "dart" => '◉',
+        _ => '●',
+    }
 }
 
 pub struct TagsInputScene {
@@ -47,6 +66,7 @@ pub struct TagsInputScene {
     tag_log: Vec<String>,
     dirty: bool,
     area: std::cell::Cell<Rect>,
+    hovered_tag: Option<usize>,
 }
 
 impl TagsInputScene {
@@ -63,7 +83,7 @@ impl TagsInputScene {
             .with_width(50)
             .with_max_tags(8)
             .with_suggestions(suggestions)
-            .on_tag_add(|tag| { let _ = tag; })
+            .on_tag_add(|_tag| {})
             .on_tag_remove(|_idx| {});
 
         Self {
@@ -74,6 +94,7 @@ impl TagsInputScene {
             tag_log: vec!["rust added".into(), "terminal added".into()],
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            hovered_tag: None,
         }
     }
 }
@@ -92,7 +113,7 @@ impl Scene for TagsInputScene {
         }
 
         // Header
-        draw_text(&mut plane, 2, 0, " Tags Input ", t.primary, t.bg, true);
+        draw_text(&mut plane, 2, 0, " Tag Manager ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
@@ -106,12 +127,27 @@ impl Scene for TagsInputScene {
             }
         }
 
-        // Description
-        draw_text(&mut plane, 2, 2, "Email-style tag input with autocomplete.", t.fg, t.bg, false);
+        // ── Left sidebar: categories ─────────────────────────────────────
+        self.render_sidebar(&mut plane, area, t);
 
-        // ── Tags Input Widget ──────────────────────────────────────────────
-        let input_y = 4;
-        let input_area = Rect::new(2, input_y, area.width.saturating_sub(4), 3);
+        // Vertical divider
+        for y in 1..area.height.saturating_sub(1) {
+            let idx = (y * area.width + DIV_X) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
+        }
+
+        // ── Main area ───────────────────────────────────────────────────
+        let main_x = DIV_X + 2;
+        let main_w = area.width.saturating_sub(main_x + 2);
+        let tags = self.tags_input.tags();
+
+        // TagsInput widget at top
+        let input_y = 2;
+        let input_area = Rect::new(main_x, input_y, main_w, 3);
         let input_plane = self.tags_input.render(input_area);
         for y in 0..input_plane.height.min(input_area.height) {
             for x in 0..input_plane.width.min(input_area.width) {
@@ -126,15 +162,12 @@ impl Scene for TagsInputScene {
             }
         }
 
-        // ── Left panel: Tag pills + stats ─────────────────────────────────
-        let left_w = area.width / 2;
-        let tags = self.tags_input.tags();
-
-        // Colored tag pills
-        let pill_y = 8;
-        draw_text(&mut plane, 2, pill_y, "Current Tags", t.primary, t.bg, true);
-        for dx in 0..left_w.saturating_sub(4) {
-            let idx = ((pill_y + 1) * plane.width + 2 + dx) as usize;
+        // ── Active Tags Panel ─────────────────────────────────────────────
+        let tags_y = 6;
+        draw_text(&mut plane, main_x, tags_y, "Active Tags", t.primary, t.bg, true);
+        let tags_hr_y = tags_y + 1;
+        for dx in 0..main_w {
+            let idx = (tags_hr_y * area.width + main_x + dx) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -142,164 +175,111 @@ impl Scene for TagsInputScene {
         }
 
         if tags.is_empty() {
-            draw_text(&mut plane, 4, pill_y + 2, "No tags yet", t.fg_muted, t.bg, false);
+            draw_text(&mut plane, main_x + 2, tags_y + 3, "(no tags — type above or click a category)", t.fg_muted, t.bg, false);
         } else {
-            let mut px = 4u16;
-            let mut py = pill_y + 2;
-            for tag in tags.iter() {
-                let color = tag_color(tag, t);
-                let pill_len = tag.len() as u16 + 2; // " tag "
+            // Colored tag pills
+            let mut px = main_x + 2;
+            let mut py = tags_y + 3;
+            let pill_h = 2u16;
 
-                // Check if we need to wrap
-                if px + pill_len > left_w {
-                    px = 4;
-                    py += 1;
-                    if py >= area.height.saturating_sub(2) { break; }
+            for (i, tag) in tags.iter().enumerate() {
+                let color = tag_category_color(tag);
+                let tag_icon = tag_icon(tag);
+                let pill_len = (tag.len() + 4) as u16; // " ● tag "
+
+                if px + pill_len > main_x + main_w {
+                    px = main_x + 2;
+                    py += pill_h;
                 }
+                if py + pill_h > area.height.saturating_sub(4) { break; }
+
+                let is_hovered = self.hovered_tag == Some(i);
 
                 // Pill background
-                for dx in 0..pill_len {
-                    let idx = (py * plane.width + px + dx) as usize;
-                    if idx < plane.cells.len() {
-                        plane.cells[idx].bg = color;
-                        plane.cells[idx].transparent = false;
+                for dy in 0..pill_h {
+                    for dx in 0..pill_len {
+                        let idx = ((py + dy) * area.width + px + dx) as usize;
+                        if idx < plane.cells.len() {
+                            plane.cells[idx].bg = if is_hovered {
+                                Color::Rgb(
+                                    (color.0.saturating_add(30)).min(255),
+                                    (color.1.saturating_add(30)).min(255),
+                                    (color.2.saturating_add(30)).min(255),
+                                )
+                            } else {
+                                color
+                            };
+                            plane.cells[idx].transparent = false;
+                        }
                     }
                 }
 
-                // Pill text (dark fg on colored bg)
-                draw_text(&mut plane, px + 1, py, tag, Color::Rgb(30, 30, 30), color, true);
+                // Pill text
+                let text_color = Color::Rgb(20, 20, 20);
+                let icon_idx = (py * area.width + px + 1) as usize;
+                if icon_idx < plane.cells.len() {
+                    plane.cells[icon_idx].char = tag_icon;
+                    plane.cells[icon_idx].fg = text_color;
+                }
+                draw_text(&mut plane, px + 3, py, tag, text_color, color, true);
+
+                // × button on right
+                let close_x = px + pill_len - 2;
+                let close_idx = (py * area.width + close_x) as usize;
+                if close_idx < plane.cells.len() {
+                    plane.cells[close_idx].char = '×';
+                    plane.cells[close_idx].fg = text_color;
+                }
+
                 px += pill_len + 1;
             }
-        }
 
-        // Tag stats
-        let stats_y = pill_y + 5;
-        if stats_y + 4 < area.height.saturating_sub(2) {
-            draw_text(&mut plane, 2, stats_y, "Statistics", t.secondary, t.bg, true);
-            for dx in 0..left_w.saturating_sub(4) {
-                let idx = ((stats_y + 1) * plane.width + 2 + dx) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = '─';
-                    plane.cells[idx].fg = t.outline;
-                }
-            }
+            // ── Capacity indicator ───────────────────────────────────────
+            let cap_y = py + pill_h + 1;
+            if cap_y < area.height.saturating_sub(4) {
+                let max_tags = 8;
+                let count = tags.len();
+                let cap_text = format!("{}/{} tags used", count, max_tags);
+                draw_text(&mut plane, main_x, cap_y, &cap_text, t.fg_muted, t.bg, false);
 
-            let max_tags = 8;
-            let count = tags.len();
-            let count_text = format!("Count: {}/{}", count, max_tags);
-            draw_text(&mut plane, 4, stats_y + 2, &count_text, t.fg, t.bg, false);
-
-            // Capacity bar
-            let bar_y = stats_y + 3;
-            let bar_w = left_w.saturating_sub(8);
-            let filled = bar_w as usize * count / max_tags.max(1);
-            for dx in 0..bar_w {
-                let idx = (bar_y * plane.width + 4 + dx) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
-                    plane.cells[idx].fg = if (dx as usize) < filled { t.primary } else { t.fg_muted };
-                    plane.cells[idx].transparent = false;
-                }
-            }
-
-            if count >= max_tags {
-                draw_text(&mut plane, 4, bar_y + 1, "Maximum capacity reached", t.warning, t.bg, false);
-            }
-        }
-
-        // ── Right panel: Shortcuts + categories + log ─────────────────────
-        let right_x = left_w + 2;
-        let right_w = area.width.saturating_sub(left_w + 2);
-
-        // Shortcuts
-        draw_text(&mut plane, right_x, 8, "Shortcuts", t.primary, t.bg, true);
-        for dx in 0..right_w.saturating_sub(2) {
-            let idx = (9 * plane.width + right_x + dx) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '─';
-                plane.cells[idx].fg = t.outline;
-            }
-        }
-        let shortcuts = [
-            ("Enter/Tab", "Add tag"),
-            ("Backspace", "Remove last"),
-            ("↑/↓", "Pick suggestion"),
-            ("Type", "Filter list"),
-        ];
-        for (i, (key, desc)) in shortcuts.iter().enumerate() {
-            let sy = 10 + i as u16;
-            draw_text(&mut plane, right_x, sy, key, t.primary, t.bg, false);
-            draw_text(&mut plane, right_x + 14, sy, desc, t.fg_muted, t.bg, false);
-        }
-
-        // Categories
-        let cat_y = 15;
-        if cat_y + 5 < area.height.saturating_sub(2) {
-            draw_text(&mut plane, right_x, cat_y, "Categories", t.secondary, t.bg, true);
-            for dx in 0..right_w.saturating_sub(2) {
-                let idx = ((cat_y + 1) * plane.width + right_x + dx) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = '─';
-                    plane.cells[idx].fg = t.outline;
-                }
-            }
-            let cats = tag_categories();
-            for (i, cat) in cats.iter().enumerate() {
-                let cy = cat_y + 2 + i as u16;
-                if cy >= area.height.saturating_sub(2) { break; }
-
-                // Color swatch
-                let swatch_idx = (cy * plane.width + right_x) as usize;
-                if swatch_idx < plane.cells.len() {
-                    plane.cells[swatch_idx].char = '■';
-                    plane.cells[swatch_idx].fg = cat.color;
-                    plane.cells[swatch_idx].transparent = false;
-                }
-
-                // Category name + items count
-                let label = format!("{} ({} tags)", cat.name, cat.items.len());
-                draw_text(&mut plane, right_x + 2, cy, &label, t.fg, t.bg, false);
-
-                // Highlight if any current tag belongs
-                let has_match = tags.iter().any(|t| cat.items.contains(&t.as_str()));
-                if has_match {
-                    draw_text(&mut plane, right_x + right_w.saturating_sub(2), cy, "●", t.success, t.bg, false);
+                let bar_y = cap_y + 1;
+                let bar_w = main_w / 2;
+                let filled = (bar_w as usize * count / max_tags).min(bar_w as usize);
+                for dx in 0..bar_w {
+                    let idx = (bar_y * area.width + main_x + dx) as usize;
+                    if idx < plane.cells.len() {
+                        let bar_color = if count >= max_tags { t.warning } else { t.primary };
+                        plane.cells[idx].char = if dx < filled { '█' } else { '░' };
+                        plane.cells[idx].fg = bar_color;
+                        plane.cells[idx].transparent = false;
+                    }
                 }
             }
         }
 
-        // Activity log (bottom)
-        let log_y = area.height.saturating_sub(5);
-        if log_y > cat_y + 8 {
-            draw_text(&mut plane, 2, log_y, "Activity Log", t.secondary, t.bg, true);
-            for dx in 0..area.width.saturating_sub(4) {
-                let idx = ((log_y + 1) * plane.width + 2 + dx) as usize;
+        // ── Activity Log ────────────────────────────────────────────────
+        let log_y = area.height.saturating_sub(8);
+        if log_y > tags_y + 12 {
+            draw_text(&mut plane, main_x, log_y, "Activity Log", t.secondary, t.bg, true);
+            for dx in 0..main_w {
+                let idx = ((log_y + 1) * area.width + main_x + dx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '─';
                     plane.cells[idx].fg = t.outline;
                 }
             }
             for (i, entry) in self.tag_log.iter().rev().take(3).enumerate() {
-                draw_text(&mut plane, 4, log_y + 2 + i as u16, &format!("• {}", entry), t.fg_muted, t.bg, false);
+                let color = if entry.contains("removed") { t.warning } else { t.success };
+                draw_text(&mut plane, main_x, log_y + 2 + i as u16, &format!("• {}", entry), color, t.bg, false);
             }
         }
 
-        // Vertical divider
-        for y in 8..area.height.saturating_sub(2) {
-            let idx = (y * plane.width + left_w) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = '│';
-                plane.cells[idx].fg = t.outline;
-                plane.cells[idx].transparent = false;
-            }
-        }
-
-        // Footer
+        // ── Footer ─────────────────────────────────────────────────────
+        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let footer = format!(
-            " Enter/Tab:add | Bksp:remove | {}:help | {}:back ",
-            self.keybindings.display(actions::HELP).unwrap_or("f1"),
-            back_key,
+            " Enter/Tab:add | Bksp:remove | Click tag:remove | Click cat:add | {}:help | {}:back ",
+            help_key, back_key,
         );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
@@ -315,11 +295,13 @@ impl Scene for TagsInputScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Tags Input — Help", &[
+            render_help_overlay(&mut plane, area, &self.theme, "Tag Manager — Help", &[
                 ("Enter/Tab", "Add typed tag"),
                 ("Backspace", "Remove last tag"),
                 ("↑/↓", "Select suggestion"),
                 ("Type", "Filter suggestions"),
+                ("Click tag", "Remove that tag"),
+                ("Click cat", "Add first available"),
                 (help_key, "Toggle this help"),
                 (back_key, "Back"),
             ]);
@@ -332,11 +314,12 @@ impl Scene for TagsInputScene {
         if key.kind != KeyEventKind::Press { return false; }
 
         if self.keybindings.matches(actions::BACK, &key) {
-            if self.show_help { self.show_help = false; return true; }
+            if self.show_help { self.show_help = false; self.dirty = true; return true; }
             return false;
         }
         if self.keybindings.matches(actions::HELP, &key) || key.code == dracon_terminal_engine::input::event::KeyCode::Char('?') {
             self.show_help = !self.show_help;
+            self.dirty = true;
             return true;
         }
         if self.show_help { return true; }
@@ -346,10 +329,10 @@ impl Scene for TagsInputScene {
             let new_count = self.tags_input.tags().len();
             if new_count > prev_count {
                 if let Some(tag) = self.tags_input.tags().last() {
-                    self.tag_log.push(format!("{} added", tag));
+                    self.tag_log.push(format!("+ {} added", tag));
                 }
             } else if new_count < prev_count {
-                self.tag_log.push("tag removed".into());
+                self.tag_log.push("- tag removed".into());
             }
             self.dirty = true;
             return true;
@@ -360,10 +343,9 @@ impl Scene for TagsInputScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
-        let input_y = 4;
-        let input_area = Rect::new(2, input_y, area.width.saturating_sub(4), 3);
 
         // TagsInput widget area
+        let input_area = Rect::new(DIV_X + 2, 2, area.width.saturating_sub(DIV_X + 4), 3);
         if col >= input_area.x && col < input_area.x + input_area.width
             && row >= input_area.y && row < input_area.y + input_area.height
         {
@@ -375,54 +357,79 @@ impl Scene for TagsInputScene {
             }
         }
 
-        // Scene-level click targets
-        if let MouseEventKind::Down(_) = kind {
-            let left_w = area.width / 2;
+        match kind {
+            MouseEventKind::Moved => {
+                // Track hovered tag pill
+                self.hovered_tag = None;
+                if col > DIV_X + 2 && row > 8 {
+                    let tags = self.tags_input.tags();
+                    let mut px = DIV_X + 4;
+                    let mut py = 9u16;
+                    let pill_h = 2u16;
 
-            // Tag pills (left panel, rows pill_y+2 = 10 onward)
-            if col >= 4 && col < left_w && row >= 10 {
-                let tags: Vec<String> = self.tags_input.tags().to_vec();
-                if !tags.is_empty() {
-                    let mut px = 4u16;
-                    let mut py = 10u16;
                     for (i, tag) in tags.iter().enumerate() {
-                        let pill_len = tag.len() as u16 + 2;
-                        if px + pill_len > left_w {
-                            px = 4;
-                            py += 1;
+                        let color = tag_category_color(tag);
+                        let pill_len = (tag.len() + 4) as u16;
+
+                        if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
+                            px = DIV_X + 4;
+                            py += pill_h;
                         }
-                        if row == py && col >= px && col < px + pill_len {
-                            // Click on a tag pill → remove it by index
-                            self.tags_input.remove_tag(i);
-                            self.tag_log.push(format!("Removed: {}", tag));
+                        if row >= py && row < py + pill_h && col >= px && col < px + pill_len {
+                            self.hovered_tag = Some(i);
                             self.dirty = true;
                             return true;
                         }
                         px += pill_len + 1;
                     }
                 }
+                false
             }
+            MouseEventKind::Down(_) => {
+                // Click on active tag pill → remove it
+                if col > DIV_X + 2 && row > 8 {
+                    let tags = self.tags_input.tags();
+                    let mut px = DIV_X + 4;
+                    let mut py = 9u16;
+                    let pill_h = 2u16;
 
-            // Category items (right panel, rows cat_y+2 = 17 onward)
-            let right_x = left_w + 2;
-            if col >= right_x && row >= 17 {
-                let cats = tag_categories();
-                let idx = (row - 17) as usize;
-                if idx < cats.len() {
-                    let cat = &cats[idx];
-                    // Add the first item from this category that isn't already a tag
-                    let current_tags = self.tags_input.tags();
-                    if let Some(item) = cat.items.iter().find(|it| !current_tags.contains(&it.to_string())) {
-                        self.tags_input.add_tag(item.to_string());
-                        self.tag_log.push(format!("Added: {}", item));
-                        self.dirty = true;
-                        return true;
+                    for (i, tag) in tags.iter().enumerate() {
+                        let pill_len = (tag.len() + 4) as u16;
+
+                        if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
+                            px = DIV_X + 4;
+                            py += pill_h;
+                        }
+                        if row >= py && row < py + pill_h && col >= px && col < px + pill_len {
+                            self.tags_input.remove_tag(i);
+                            self.tag_log.push(format!("- {} removed", tag));
+                            self.dirty = true;
+                            return true;
+                        }
+                        px += pill_len + 1;
                     }
                 }
-            }
-        }
 
-        false
+                // Click on sidebar category → add first available tag
+                if col < DIV_X && row > 3 {
+                    let cats = tag_categories();
+                    let idx = ((row - 4) as usize) / 5;
+                    if idx < cats.len() {
+                        let cat = &cats[idx];
+                        let current_tags = self.tags_input.tags();
+                        if let Some(item) = cat.items.iter().find(|it| !current_tags.contains(&it.to_string())) {
+                            self.tags_input.add_tag(item.to_string());
+                            self.tag_log.push(format!("+ {} added ({})", item, cat.name));
+                            self.dirty = true;
+                            return true;
+                        }
+                    }
+                }
+
+                false
+            }
+            _ => false,
+        }
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
@@ -435,4 +442,93 @@ impl Scene for TagsInputScene {
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
+impl TagsInputScene {
+    fn render_sidebar(&self, plane: &mut Plane, area: Rect, t: &Theme) {
+        let sx = 2u16;
 
+        // Title
+        draw_text(plane, sx, 2, "Categories", t.primary, t.bg, true);
+
+        let cats = tag_categories();
+        let current_tags: Vec<String> = self.tags_input.tags().to_vec();
+
+        for (i, cat) in cats.iter().enumerate() {
+            let y = 4 + i as u16 * 5;
+
+            // Category header
+            let icon_idx = (y * plane.width + sx) as usize;
+            if icon_idx < plane.cells.len() {
+                plane.cells[icon_idx].char = cat.icon;
+                plane.cells[icon_idx].fg = cat.color;
+            }
+            draw_text(plane, sx + 2, y, cat.name, cat.color, t.bg, true);
+
+            // Tags in this category
+            for (j, tag) in cat.items.iter().enumerate() {
+                let ty = y + 1 + j as u16;
+                if ty >= area.height.saturating_sub(2) { break; }
+
+                let is_active = current_tags.contains(&tag.to_string());
+                let bg = if is_active { cat.color } else { t.surface };
+                let fg = if is_active { Color::Rgb(20, 20, 20) } else { t.fg };
+
+                // Fill row
+                for cx in 0..SIDEBAR_W {
+                    let idx = (ty * plane.width + sx + cx) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].bg = bg;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+
+                // Status indicator
+                let ind_char = if is_active { "●" } else { "○" };
+                let ind_color = if is_active { t.success } else { t.fg_muted };
+                draw_text_clipped(plane, sx + 1, ty, ind_char, sx + SIDEBAR_W, ind_color, bg, false);
+                draw_text_clipped(plane, sx + 3, ty, tag, sx + SIDEBAR_W, fg, bg, false);
+            }
+
+            // Divider between categories
+            let div_y = y + 5;
+            if div_y < area.height.saturating_sub(4) {
+                for dx in 0..SIDEBAR_W {
+                    let idx = (div_y * plane.width + sx + dx) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = '─';
+                        plane.cells[idx].fg = t.outline;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+            }
+        }
+
+        // Stats at bottom of sidebar
+        let stats_y = area.height.saturating_sub(5);
+        if stats_y > 4 + cats.len() as u16 * 5 + 2 {
+            draw_text(plane, sx, stats_y, "Summary", t.secondary, t.bg, true);
+
+            // Count tags per category
+            let mut cat_counts = Vec::new();
+            for cat in &cats {
+                let count = cat.items.iter().filter(|t| current_tags.contains(&t.to_string())).count();
+                if count > 0 {
+                    cat_counts.push((cat.name, count, cat.color));
+                }
+            }
+
+            if cat_counts.is_empty() {
+                draw_text(plane, sx, stats_y + 2, "No categories used", t.fg_muted, t.bg, false);
+            } else {
+                for (i, (name, count, color)) in cat_counts.iter().enumerate() {
+                    let sy = stats_y + 2 + i as u16;
+                    let swatch_idx = (sy * plane.width + sx) as usize;
+                    if swatch_idx < plane.cells.len() {
+                        plane.cells[swatch_idx].char = '■';
+                        plane.cells[swatch_idx].fg = *color;
+                    }
+                    draw_text_clipped(plane, sx + 2, sy, &format!("{}:{}", name, count), sx + SIDEBAR_W, t.fg, t.bg, false);
+                }
+            }
+        }
+    }
+}
