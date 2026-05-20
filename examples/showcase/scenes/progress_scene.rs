@@ -423,7 +423,7 @@ impl Scene for ProgressScene {
                 // Timeline stage click (rows 3-5, cols main_x+)
                 let main_x = DIV_X + 2;
                 let main_w = area.width.saturating_sub(DIV_X + 4);
-                if row >= 3 && row <= 5 && col >= main_x {
+                if (3..=5).contains(&row) && col >= main_x {
                     let stage_w = main_w / STAGES.len() as u16;
                     let stage_idx = ((col - main_x) / stage_w) as usize;
                     if stage_idx < STAGES.len() {

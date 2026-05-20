@@ -5,19 +5,6 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 
 ---
 
-## REFLECTION (Iteration 7/15)
-
-### Progress: 7/15 iterations complete
-- 7/7 iterations with 0 clippy warnings
-- 291 tests always passing
-- Key lesson: `.enumerate().take(n)` pattern triggers `clippy::iter_without_iter_cloned`
-- Solution: use `.enumerate().take(n)` directly, don't use index-based iteration
-
-### Tier 1 Count: 14/34 ✅ (target: 20/34)
-New this iteration: tags_input → Tag Manager
-
----
-
 ## Done ✓
 
 | Iter | Scene | Layout | Widgets | Notes |
@@ -29,6 +16,11 @@ New this iteration: tags_input → Tag Manager
 | 5 | color_picker → Color Studio | split picker | 2 | Picker + shades + contrast + CSS |
 | 6 | animation → Animation Playground | split sidebar | 5 | Balls + panel + bar + ring + spinner |
 | 7 | tags_input → Tag Manager | split sidebar | 1 | Categories + tag cloud + hover |
+| 8 | progress → Loading Dashboard | split sidebar | 3 | Timeline + ring + bar + ops log |
+
+---
+
+### Tier 1 Count: 15/34 ✅ (target: 20/34)
 
 ---
 
@@ -43,20 +35,12 @@ New this iteration: tags_input → Tag Manager
 | 5 | 2026-05-20 | ✓ 0 | ✓ 291 | color_picker → Color Studio |
 | 6 | 2026-05-20 | ✓ 0 | ✓ 291 | animation → Animation Playground |
 | 7 | 2026-05-20 | ✓ 0 | ✓ 291 | tags_input → Tag Manager |
+| 8 | 2026-05-20 | ✓ 0 | ✓ 291 | progress → Loading Dashboard |
 
 ---
 
-## Next (Iterations 8-9)
-
-### 8. progress → Loading Dashboard
-- Split: left (ProgressRing + Spinner), right (ProgressBar + gauge + stats)
-- Multi-stage timeline at top
-- Real operations log with timing
+## Next (Iterations 9-15)
 
 ### 9. cell_pool → Memory Visualizer
-- Split: left (wave chart), right (pool grid)
-- Real-time allocation animation
-- Stats + legend
-
-### Remaining candidates:
-- cell_pool, rich_text, debug_overlay, metrics_hub, table_list, navigator, control_panel
+### 10. rich_text → Document Viewer
+### 11-15. debug_overlay, metrics_hub, table_list, navigator, control_panel + verification
