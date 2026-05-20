@@ -40,6 +40,9 @@ pub struct PasswordInputScene {
     password_input: PasswordInput,
     confirm_input: PasswordInput,
     focused: usize,
+    submitted: bool,
+    error_msg: Option<&'static str>,
+    show_password: bool,
     dirty: bool,
     area: std::cell::Cell<Rect>,
 }
