@@ -5,6 +5,31 @@
 
 ---
 
+## Bug Fixes
+
+### White Horizontal Lines in Showcase (2026-05-20)
+
+**Root Cause:** `blit_to()` in `shared_helpers.rs` copied cells with `Color::Reset` background from input widgets (SearchInput, PasswordInput) into the showcase plane. Cells with `Color::Reset` rendered as the terminal's default background (white), causing horizontal lines.
+
+**Trigger:** Typing in any text input field in a showcase scene (Login Screen, Theme Studio, etc.)
+
+**Fix:** `blit_to()` now skips cells with `Color::Reset` bg:
+```rust
+if cell.bg == Color::Reset {
+    continue;
+}
+```
+
+**Why it works:**
+- SearchInput/PasswordInput render text content with `fill_bg(theme.input_bg)` — all bg is a real color
+- Empty cells outside the text content retain `Cell::default()` with `bg: Color::Reset`
+- These unfilled cells should be transparent (show destination bg), not overwrite with terminal default
+- `Color::Reset` semantically means "use terminal default" — which is wrong for nested widgets
+
+**File changed:** `examples/showcase/scenes/shared_helpers.rs`
+
+---
+
 ## Build Status
 
 | Check | Status |

@@ -72,6 +72,12 @@ pub fn blit_to(dest: &mut Plane, src: &Plane, offset_x: usize, offset_y: usize) 
         if cell.char == '\0' || cell.transparent {
             continue;
         }
+        // Skip cells with Color::Reset bg — these are unfilled/default cells
+        // that would override the destination's themed background with the
+        // terminal's default (usually white), causing visible white lines.
+        if cell.bg == Color::Reset {
+            continue;
+        }
         let row = i / src.width as usize;
         let col = i % src.width as usize;
         let dy = offset_y + row;
