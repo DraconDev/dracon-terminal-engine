@@ -17,10 +17,12 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 6 | animation → Animation Playground | split sidebar | 5 | Balls + panel + bar + ring + spinner |
 | 7 | tags_input → Tag Manager | split sidebar | 1 | Categories + tag cloud + hover |
 | 8 | progress → Loading Dashboard | split sidebar | 3 | Timeline + ring + bar + ops log |
+| 9 | cell_pool → Memory Visualizer | split sidebar | 0 | Wave chart + pool grid + stats |
+| 10 | rich_text → Document Viewer | split sidebar | 1 | Doc tree + tabs + content + stats |
 
 ---
 
-### Tier 1 Count: 15/34 ✅ (target: 20/34)
+### Tier 1 Count: 17/34 ✅ (target: 20/34)
 
 ---
 
@@ -36,11 +38,15 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 6 | 2026-05-20 | ✓ 0 | ✓ 291 | animation → Animation Playground |
 | 7 | 2026-05-20 | ✓ 0 | ✓ 291 | tags_input → Tag Manager |
 | 8 | 2026-05-20 | ✓ 0 | ✓ 291 | progress → Loading Dashboard |
+| 9 | 2026-05-20 | ✓ 0 | ✓ 291 | cell_pool → Memory Visualizer |
+| 10 | 2026-05-20 | ✓ 0 | ✓ 291 | rich_text → Document Viewer |
 
 ---
 
-## Next (Iterations 9-15)
+## Next (Iterations 11-15)
 
-### 9. cell_pool → Memory Visualizer
-### 10. rich_text → Document Viewer
-### 11-15. debug_overlay, metrics_hub, table_list, navigator, control_panel + verification
+### 11. debug_overlay → Performance Monitor
+### 12. metrics_hub → Metrics Dashboard
+### 13. table_list → Data Explorer
+### 14. navigator → Quick Launcher
+### 15. Final verification pass

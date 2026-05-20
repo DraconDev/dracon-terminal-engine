@@ -271,14 +271,9 @@ impl CellPoolScene {
         }
         draw_text_clipped(plane, sx + 1, btn_y, btn_text, sx + SIDEBAR_W, t.bg, btn_bg, false);
 
-        // Speed control
-        let speed_y = 5;
-        let interval = self.auto_interval.get();
-        let speed_text = format!("Speed: 1/{} ", interval);
-        draw_text_clipped(plane, sx, speed_y, &speed_text, sx + SIDEBAR_W, t.fg, t.bg, false);
 
         // Reset button
-        let reset_y = 7;
+        let reset_y = 5;
         let reset_text = "↺ Reset All";
         for cx in 0..SIDEBAR_W {
             let idx = (reset_y * plane.width + sx + cx) as usize;
@@ -290,7 +285,7 @@ impl CellPoolScene {
         draw_text(plane, sx, reset_y, reset_text, t.fg, t.surface, false);
 
         // Divider
-        let div1_y = 9;
+        let div1_y = 7;
         for dx in 0..SIDEBAR_W {
             let idx = (div1_y * plane.width + sx + dx) as usize;
             if idx < plane.cells.len() {
@@ -300,7 +295,7 @@ impl CellPoolScene {
         }
 
         // Stats section
-        let stats_y = 11;
+        let stats_y = 9;
         draw_text(plane, sx, stats_y, "Statistics", t.secondary, t.bg, true);
 
         let active = self.acquired.saturating_sub(self.released);

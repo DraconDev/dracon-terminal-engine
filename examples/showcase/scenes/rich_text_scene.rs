@@ -1,8 +1,9 @@
 //! Embedded RichText scene for the showcase.
 //!
-//! Demonstrates the RichText widget with tabbed markdown documents.
+//! Demonstrates the RichText widget with tabbed markdown documents,
+//! a document tree sidebar, and live preview.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -10,6 +11,10 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::RichText;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+
+const SIDEBAR_W: u16 = 22;
+const DIV_X: u16 = SIDEBAR_W + 2;
 
 const DOC_README: &str = r#"# RichText Widget
 
@@ -108,79 +113,100 @@ help = "f1"
 theme = "ctrl+t"
 ```"#;
 
-struct TabInfo {
+const DOC_API: &str = r#"# API Reference
+
+## Theme API
+
+```rust
+pub struct Theme {
+    pub name: String,
+    pub fg: Color,
+    pub bg: Color,
+    pub primary: Color,
+    pub secondary: Color,
+    pub success: Color,
+    pub warning: Color,
+    pub error: Color,
+}
+```
+
+## Widget API
+
+```rust
+pub trait Widget {
+    fn render(&self, area: Rect) -> Plane;
+    fn handle_key(&mut self, key: KeyEvent) -> bool;
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool;
+}
+```
+
+## Color API
+
+```rust
+pub enum Color {
+    Reset,
+    Black, Red, Green, Yellow, Blue, Magenta, Cyan, White,
+    BrightBlack, BrightRed, BrightGreen, BrightYellow,
+    BrightBlue, BrightMagenta, BrightCyan, BrightWhite,
+    Indexed(u8),
+    Rgb(u8, u8, u8),
+}
+```"#;
+
+struct DocInfo {
     label: &'static str,
     content: &'static str,
+    icon: char,
+    category: &'static str,
 }
 
+const DOCUMENTS: &[DocInfo] = &[
+    DocInfo { label: "README", content: DOC_README, icon: '📄', category: "Overview" },
+    DocInfo { label: "Changelog", content: DOC_CHANGELOG, icon: '📋', category: "Overview" },
+    DocInfo { label: "Guide", content: DOC_GUIDE, icon: '📖', category: "Learning" },
+    DocInfo { label: "API", content: DOC_API, icon: '⚙', category: "Reference" },
+];
+
 pub struct RichTextScene {
-    tabs: Vec<TabInfo>,
-    selected_tab: usize,
-    rich_text: RichText,
     theme: Theme,
     show_help: bool,
+    selected_doc: usize,
+    rich_text: RefCell<RichText>,
     keybindings: KeybindingSet,
     dirty: bool,
 }
 
 impl RichTextScene {
     pub fn new(theme: Theme) -> Self {
-        let tabs = vec![
-            TabInfo { label: "README", content: DOC_README },
-            TabInfo { label: "Changelog", content: DOC_CHANGELOG },
-            TabInfo { label: "Guide", content: DOC_GUIDE },
-        ];
-        let rich_text = RichText::new(DOC_README).with_theme(theme.clone());
+        let rich_text = RefCell::new(RichText::new(DOC_README).with_theme(theme.clone()));
 
         Self {
-            tabs,
-            selected_tab: 0,
-            rich_text,
             theme,
             show_help: false,
+            selected_doc: 0,
+            rich_text,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             dirty: true,
         }
     }
 
-    fn switch_tab(&mut self, idx: usize) {
-        if idx < self.tabs.len() && idx != self.selected_tab {
-            self.selected_tab = idx;
-            self.rich_text = RichText::new(self.tabs[idx].content).with_theme(self.theme.clone());
+    fn switch_doc(&mut self, idx: usize) {
+        if idx < DOCUMENTS.len() && idx != self.selected_doc {
+            self.selected_doc = idx;
+            self.rich_text.borrow_mut().set_content(DOCUMENTS[idx].content);
             self.dirty = true;
         }
     }
 
-    fn render_tab_bar(&self, plane: &mut Plane, y: u16, area: Rect) {
-        let t = &self.theme;
-        let mut x = 2u16;
-        for (i, tab) in self.tabs.iter().enumerate() {
-            let is_selected = i == self.selected_tab;
-            let label = format!(" {} ", tab.label);
-            let bg = if is_selected { t.primary } else { t.surface };
-            let fg = if is_selected { t.fg_on_accent } else { t.fg_muted };
-            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+    fn current_doc(&self) -> &DocInfo {
+        &DOCUMENTS[self.selected_doc]
+    }
 
-            for (j, ch) in label.chars().enumerate() {
-                let idx = (y * area.width + x + j as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = fg;
-                    plane.cells[idx].bg = bg;
-                    plane.cells[idx].style = style;
-                    plane.cells[idx].transparent = false;
-                }
-            }
-            x += label.len() as u16;
-        }
-        // Fill remaining tab bar area
-        for cx in x..area.width {
-            let idx = (y * area.width + cx) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].bg = t.surface;
-                plane.cells[idx].transparent = false;
-            }
-        }
+    fn doc_stats(&self, doc: &str) -> (usize, usize, usize) {
+        let words = doc.split_whitespace().count();
+        let lines = doc.lines().count();
+        let chars = doc.len();
+        (lines, words, chars)
     }
 }
 
@@ -196,8 +222,8 @@ impl Scene for RichTextScene {
             cell.transparent = false;
         }
 
-        // Header
-        draw_text(&mut plane, 2, 0, " RichText ", t.primary, t.bg, true);
+        // ── Header ──────────────────────────────────────────────────────
+        draw_text(&mut plane, 2, 0, " Document Viewer ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
@@ -211,47 +237,48 @@ impl Scene for RichTextScene {
             }
         }
 
-        // Tab bar
-        self.render_tab_bar(&mut plane, 2, area);
+        // ── Left sidebar ───────────────────────────────────────────────
+        self.render_sidebar(&mut plane, area, t);
 
-        // Tab content indicator
-        let tab_info = format!("Document {} of {}", self.selected_tab + 1, self.tabs.len());
-        draw_text(&mut plane, area.width.saturating_sub(tab_info.len() as u16 + 2), 2, &tab_info, t.fg_muted, t.bg, false);
-
-        // Document info bar (word count, line count)
-        let doc = match self.selected_tab {
-            0 => DOC_README,
-            1 => DOC_CHANGELOG,
-            _ => DOC_GUIDE,
-        };
-        let word_count = doc.split_whitespace().count();
-        let line_count = doc.lines().count();
-        let char_count = doc.len();
-        let info = format!("{} lines | {} words | {} chars", line_count, word_count, char_count);
-        draw_text(&mut plane, 2, 3, &info, t.fg_muted, t.bg, false);
-
-        // Selected tab indicator on right
-        let tab_names = ["README", "Changelog", "Guide"];
-        if self.selected_tab < tab_names.len() {
-            draw_text(&mut plane, area.width.saturating_sub(tab_names[self.selected_tab].len() as u16 + 2), 3,
-                      tab_names[self.selected_tab], t.primary, t.bg, true);
+        // Vertical divider
+        for y in 1..area.height.saturating_sub(1) {
+            let idx = (y * plane.width + DIV_X) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
+                plane.cells[idx].transparent = false;
+            }
         }
 
-        // RichText content area
-        let content_area = Rect::new(area.x + 2, area.y + 4, area.width.saturating_sub(4), area.height.saturating_sub(7));
-        let content_plane = self.rich_text.render(content_area);
-        blit_to(&mut plane, &content_plane, content_area.x as usize, content_area.y as usize);
+        // ── Main area ───────────────────────────────────────────────────
+        let main_x = DIV_X + 2;
+        let main_w = area.width.saturating_sub(main_x + 2);
 
-        // Footer
+        // Tab bar row
+        let tab_y = 2;
+        self.render_tab_bar(&mut plane, main_x, tab_y, main_w, t);
+
+        // Document info bar
+        let doc = self.current_doc().content;
+        let (lines, words, chars) = self.doc_stats(doc);
+        let info = format!("{} lines  {} words  {} chars", lines, words, chars);
+        draw_text_clipped(&mut plane, main_x, tab_y + 2, &info, main_x + main_w, t.fg_muted, t.bg, false);
+
+        // RichText content area
+        let content_area = Rect::new(main_x, tab_y + 4, main_w, area.height.saturating_sub(tab_y + 6));
+        let content_plane = self.rich_text.borrow().render(content_area);
+        blit_to(&mut plane, &content_plane, main_x as usize, (tab_y + 4) as usize);
+
+        // ── Footer ─────────────────────────────────────────────────────
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let footer = format!(
-            " Tab:switch docs | {}:help | {}:back ",
+            " Tab:switch | 1-4:jump | ↑↓:scroll | {}:help | {}:back ",
             help_key, back_key,
         );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
+            let idx = (fy * plane.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg_muted;
@@ -261,12 +288,15 @@ impl Scene for RichTextScene {
         }
 
         if self.show_help {
+            let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "RichText — Help", &[
+            render_help_overlay(&mut plane, area, &self.theme, "Document Viewer — Help", &[
                 ("Tab", "Next document"),
                 ("Shift+Tab", "Previous document"),
-                ("1/2/3", "Jump to document"),
+                ("1/2/3/4", "Jump to document"),
+                ("↑/↓/PgUp/PgDn", "Scroll content"),
                 ("Click tab", "Select document"),
+                (help_key, "Toggle this help"),
                 (back_key, "Back"),
             ]);
         }
@@ -284,7 +314,6 @@ impl Scene for RichTextScene {
             }
             return true;
         }
-
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
             self.dirty = true;
@@ -296,19 +325,19 @@ impl Scene for RichTextScene {
 
         match key.code {
             KeyCode::Tab => {
-                self.switch_tab((self.selected_tab + 1) % self.tabs.len());
+                self.switch_doc((self.selected_doc + 1) % DOCUMENTS.len());
                 true
             }
             KeyCode::BackTab => {
-                self.switch_tab(if self.selected_tab == 0 { self.tabs.len() - 1 } else { self.selected_tab - 1 });
+                self.switch_doc(if self.selected_doc == 0 { DOCUMENTS.len() - 1 } else { self.selected_doc - 1 });
                 true
             }
-            KeyCode::Char('1') if key.modifiers.is_empty() => { self.switch_tab(0); true }
-            KeyCode::Char('2') if key.modifiers.is_empty() => { self.switch_tab(1); true }
-            KeyCode::Char('3') if key.modifiers.is_empty() => { self.switch_tab(2); true }
-            // Scroll keys forwarded to RichText widget
+            KeyCode::Char('1') if key.modifiers.is_empty() => { self.switch_doc(0); true }
+            KeyCode::Char('2') if key.modifiers.is_empty() => { self.switch_doc(1); true }
+            KeyCode::Char('3') if key.modifiers.is_empty() => { self.switch_doc(2); true }
+            KeyCode::Char('4') if key.modifiers.is_empty() => { self.switch_doc(3); true }
             KeyCode::Up | KeyCode::Down | KeyCode::PageUp | KeyCode::PageDown | KeyCode::Home | KeyCode::End => {
-                self.rich_text.handle_key(key);
+                self.rich_text.borrow_mut().handle_key(key);
                 self.dirty = true;
                 true
             }
@@ -317,30 +346,204 @@ impl Scene for RichTextScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        // Tab bar clicks (row 2)
-        if row == 2
-            && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
-                let mut x = 2u16;
-                for (i, tab) in self.tabs.iter().enumerate() {
-                    let tab_w = tab.label.len() as u16 + 2;
-                    if col >= x && col < x + tab_w {
-                        self.switch_tab(i);
-                        return true;
-                    }
-                    x += tab_w;
+        // Sidebar clicks
+        let sidebar_click = col < DIV_X && row >= 3;
+        if sidebar_click && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+            let mut y = 3u16;
+            for (i, doc) in DOCUMENTS.iter().enumerate() {
+                let prev_category = if i > 0 { DOCUMENTS[i - 1].category } else { "" };
+                let row_h = if doc.category != prev_category { 3 } else { 1 };
+                if row >= y && row < y + row_h {
+                    self.switch_doc(i);
+                    return true;
                 }
+                y += row_h;
             }
+        }
+
+        // Tab bar clicks (main area, row 2)
+        if row == 2 && col >= DIV_X + 2 {
+            let main_x = DIV_X + 2;
+            let main_w = 80; // approximate
+            let tab_w = main_w / DOCUMENTS.len() as u16;
+            let tab_idx = (col.saturating_sub(main_x) / tab_w) as usize;
+            if tab_idx < DOCUMENTS.len() {
+                self.switch_doc(tab_idx);
+                return true;
+            }
+        }
+
+        // Content scroll
+        if row > 4 && col > DIV_X {
+            let scrolled = self.rich_text.borrow_mut().handle_mouse(kind, col, row);
+            if scrolled { self.dirty = true; }
+            return scrolled;
+        }
+
         false
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.rich_text.on_theme_change(theme);
+        self.rich_text.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
+    fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
 
+impl RichTextScene {
+    fn render_sidebar(&self, plane: &mut Plane, area: Rect, t: &Theme) {
+        let sx = 2u16;
 
+        // Title
+        draw_text(plane, sx, 2, "Documents", t.primary, t.bg, true);
+
+        // Document list
+        let mut y = 3u16;
+        let mut current_category = "";
+
+        for (i, doc) in DOCUMENTS.iter().enumerate() {
+            // New category header
+            if doc.category != current_category {
+                current_category = doc.category;
+                let header_text = format!(" {}", current_category);
+                let idx = (y * plane.width + sx) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].transparent = false;
+                }
+                for (j, c) in header_text.chars().enumerate() {
+                    let idx = (y * plane.width + sx + j as u16) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.secondary;
+                        plane.cells[idx].bg = t.surface;
+                        plane.cells[idx].transparent = false;
+                    }
+                }
+                y += 1;
+            }
+
+            // Document row
+            let is_selected = i == self.selected_doc;
+            let bg = if is_selected { t.primary } else { t.bg };
+            let fg = if is_selected { t.fg_on_accent } else { t.fg };
+            let row_text = format!(" {} {}", doc.icon, doc.label);
+
+            // Background
+            for (j, _) in row_text.chars().enumerate() {
+                let idx = (y * plane.width + sx + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].bg = bg;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+
+            // Text
+            for (j, c) in row_text.chars().enumerate() {
+                let idx = (y * plane.width + sx + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = fg;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+
+            y += 1;
+            if y >= area.height.saturating_sub(8) { break; }
+        }
+
+        // Divider
+        let div_y = y + 1;
+        for dx in 0..SIDEBAR_W {
+            let idx = (div_y * plane.width + sx + dx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Current document details
+        let details_y = div_y + 2;
+        if details_y < area.height.saturating_sub(4) {
+            draw_text(plane, sx, details_y, "Current Doc", t.secondary, t.bg, true);
+
+            let current = self.current_doc();
+            let (lines, words, chars) = self.doc_stats(current.content);
+
+            let stats = [
+                ("Name", current.label),
+                ("Category", current.category),
+                ("Lines", &lines.to_string()),
+                ("Words", &words.to_string()),
+                ("Chars", &chars.to_string()),
+            ];
+
+            for (i, (label, value)) in stats.iter().enumerate() {
+                let sy = details_y + 1 + i as u16;
+                if sy >= area.height.saturating_sub(4) { break; }
+                draw_text_clipped(plane, sx, sy, label, sx + 8, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, sx + 9, sy, value, sx + SIDEBAR_W, t.fg, t.bg, false);
+            }
+        }
+
+        // Quick stats at bottom
+        let stats_y = area.height.saturating_sub(6);
+        if stats_y > details_y + 7 {
+            draw_text(plane, sx, stats_y, "Quick Stats", t.secondary, t.bg, true);
+
+            let total_docs = DOCUMENTS.len();
+            let total_lines: usize = DOCUMENTS.iter().map(|d| d.content.lines().count()).sum();
+            let total_words: usize = DOCUMENTS.iter().map(|d| d.content.split_whitespace().count()).sum();
+
+            let quick_stats = [
+                ("Docs", &total_docs.to_string()),
+                ("Total Lines", &total_lines.to_string()),
+                ("Total Words", &total_words.to_string()),
+            ];
+
+            for (i, (label, value)) in quick_stats.iter().enumerate() {
+                let sy = stats_y + 1 + i as u16;
+                draw_text(plane, sx, sy, label, t.fg_muted, t.bg, false);
+                draw_text_clipped(plane, sx + 12, sy, value, sx + SIDEBAR_W, t.fg, t.bg, false);
+            }
+        }
+    }
+
+    fn render_tab_bar(&self, plane: &mut Plane, x: u16, y: u16, w: u16, t: &Theme) {
+        let tab_w = w / DOCUMENTS.len() as u16;
+
+        for (i, doc) in DOCUMENTS.iter().enumerate() {
+            let is_selected = i == self.selected_doc;
+            let bg = if is_selected { t.primary } else { t.surface };
+            let fg = if is_selected { t.fg_on_accent } else { t.fg_muted };
+            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+
+            let tab_x = x + (i as u16) * tab_w;
+            let label = format!(" {} ", doc.label);
+
+            for (j, ch) in label.chars().enumerate() {
+                let idx = (y * plane.width + tab_x + j as u16) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = fg;
+                    plane.cells[idx].bg = bg;
+                    plane.cells[idx].style = style;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+        }
+
+        // Fill remaining area
+        let end_x = x + (DOCUMENTS.len() as u16) * tab_w;
+        for cx in end_x..x + w {
+            let idx = (y * plane.width + cx) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
+            }
+        }
+    }
+}
