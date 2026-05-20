@@ -43,6 +43,15 @@ pub struct DebugOverlayScene {
     area: Cell<Rect>,
 }
 
+struct GaugeBarConfig<'a> {
+    x: u16,
+    y: u16,
+    w: u16,
+    label: &'a str,
+    value: f32,
+    color: Color,
+}
+
 impl DebugOverlayScene {
     pub fn new(theme: Theme) -> Self {
         let debug_overlay = std::cell::RefCell::new(DebugOverlay::new(WidgetId::new(1))
@@ -234,9 +243,15 @@ impl Scene for DebugOverlayScene {
             if gauge_y + 6 < area.height.saturating_sub(6) {
                 draw_text(&mut plane, main_x, gauge_y, "Resource Usage", t.primary, t.bg, true);
                 let gauge_w = main_w.min(50);
-                self.render_gauge_bar(&mut plane, main_x, gauge_y + 1, gauge_w, "CPU", self.cpu_usage.get(), t);
-                self.render_gauge_bar(&mut plane, main_x, gauge_y + 3, gauge_w, "MEM", self.mem_usage.get(), t);
-                self.render_gauge_bar(&mut plane, main_x, gauge_y + 5, gauge_w, "GPU", (self.draw_calls.get() as f32 / 50.0 * 100.0).min(100.0), t);
+                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
+                    x: main_x, y: gauge_y + 1, w: gauge_w, label: "CPU", value: self.cpu_usage.get(), color: if self.cpu_usage.get() > 80.0 { t.error } else if self.cpu_usage.get() > 50.0 { t.warning } else { t.success },
+                });
+                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
+                    x: main_x, y: gauge_y + 3, w: gauge_w, label: "MEM", value: self.mem_usage.get(), color: if self.mem_usage.get() > 80.0 { t.error } else if self.mem_usage.get() > 60.0 { t.warning } else { t.info },
+                });
+                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
+                    x: main_x, y: gauge_y + 5, w: gauge_w, label: "GPU", value: (self.draw_calls.get() as f32 / 50.0 * 100.0).min(100.0), color: t.secondary,
+                });
             }
         }
 
@@ -547,28 +562,30 @@ impl DebugOverlayScene {
         draw_text(plane, x + chart_w - 3, y + chart_h - 1, "70", t.fg_muted, t.bg, false);
     }
 
-    fn render_gauge_bar(&self, plane: &mut Plane, x: u16, y: u16, w: u16, label: &str, value: f32, t: &Theme) {
-        let color = if value > 80.0 { t.error } else if value > 50.0 { t.warning } else { t.success };
+    fn render_gauge_bar(&self, plane: &mut Plane, cfg: &GaugeBarConfig) {
+        let t = &self.theme;
+        let x = cfg.x;
+        let y = cfg.y;
 
         // Label
-        draw_text(plane, x, y, label, t.fg, t.bg, false);
+        draw_text(plane, x, y, cfg.label, t.fg, t.bg, false);
 
         // Bar
         let bar_x = x + 5;
-        let bar_w = w.saturating_sub(8);
-        let filled = ((value / 100.0) * bar_w as f32).min(bar_w as f32) as usize;
+        let bar_w = cfg.w.saturating_sub(8);
+        let filled = ((cfg.value / 100.0) * bar_w as f32).min(bar_w as f32) as usize;
 
         for bx in 0..bar_w {
-            let idx = (y * plane.width + bar_x + bx as u16) as usize;
+            let idx = (y * plane.width + bar_x + bx) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = if bx < filled { '█' } else { '░' };
-                plane.cells[idx].fg = if bx < filled { color } else { t.fg_muted };
+                plane.cells[idx].char = if (bx as usize) < filled { '█' } else { '░' };
+                plane.cells[idx].fg = if (bx as usize) < filled { cfg.color } else { t.fg_muted };
                 plane.cells[idx].transparent = false;
             }
         }
 
         // Percentage
-        let pct = format!("{:.0}%", value);
-        draw_text(plane, bar_x + bar_w + 1, y, &pct, color, t.bg, true);
+        let pct = format!("{:.0}%", cfg.value);
+        draw_text(plane, bar_x + bar_w + 1, y, &pct, cfg.color, t.bg, true);
     }
 }
