@@ -368,8 +368,7 @@ impl Scene for TagsInputScene {
                     let pill_h = 2u16;
 
                     let tags_count = tags.len();
-                    for i in 0..tags_count {
-                        let tag = &tags[i];
+                    for (i, tag) in tags.iter().enumerate().take(tags_count) {
                         let pill_len = (tag.len() + 4) as u16;
 
                         if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
@@ -395,9 +394,7 @@ impl Scene for TagsInputScene {
                     let mut py = 9u16;
                     let pill_h = 2u16;
 
-                    #[allow(clippy::indexing_refactoring)] // clippy: prefer explicit .take() over .skip() for this pattern
-                    for i in 0..tags_count {
-                        let tag = &tags[i];
+                    for (i, tag) in tags.iter().enumerate().take(tags_count) {
                         let pill_len = (tag.len() + 4) as u16;
 
                         if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
@@ -405,8 +402,8 @@ impl Scene for TagsInputScene {
                             py += pill_h;
                         }
                         if row >= py && row < py + pill_h && col >= px && col < px + pill_len {
-                            let tag_name = tag.clone();
-                            self.tags_input.remove_tag(i); // LINT: clippy::iter_without_iter_cloned
+                            let tag_name = tag.to_string();
+                            self.tags_input.remove_tag(i);
                             self.tag_log.push(format!("- {} removed", tag_name));
                             self.dirty = true;
                             return true;

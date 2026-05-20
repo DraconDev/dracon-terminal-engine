@@ -1,7 +1,7 @@
 {
   "name": "ui-audit-loop",
   "taskFile": ".ralph/ui-audit-loop.md",
-  "iteration": 6,
+  "iteration": 7,
   "maxIterations": 15,
   "itemsPerIteration": 0,
   "reflectEvery": 5,
