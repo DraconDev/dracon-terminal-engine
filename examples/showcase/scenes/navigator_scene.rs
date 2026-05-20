@@ -403,15 +403,21 @@ impl Scene for NavigatorScene {
                 true
             }
             KeyCode::Char(c) if c.is_alphanumeric() || c == '.' || c == '-' || c == '_' => {
-                let mut nav = self.nav.borrow_mut();
-                nav.set_search(nav.search_query.clone() + &c.to_string());
+                let query = {
+                    let nav = self.nav.borrow();
+                    nav.search_query.clone() + &c.to_string()
+                };
+                self.nav.borrow_mut().set_search(query);
                 self.dirty = true;
                 true
             }
             KeyCode::Esc => {
-                let mut nav = self.nav.borrow_mut();
-                if !nav.search_query.is_empty() {
-                    nav.set_search(String::new());
+                let has_query = {
+                    let nav = self.nav.borrow();
+                    !nav.search_query.is_empty()
+                };
+                if has_query {
+                    self.nav.borrow_mut().set_search(String::new());
                     self.dirty = true;
                     true
                 } else {
@@ -431,18 +437,20 @@ impl Scene for NavigatorScene {
         let list_y = 5u16;
         let list_h: usize = 20; // Approximate visible list height
         let cat_w: u16 = SIDEBAR_W;
-        let main_x = DIV_X + 2;
 
         // Sidebar clicks
         if col < cat_w && row >= 3 {
             let rel_row = (row - 3) as usize;
-            let nav = self.nav.borrow();
-            let dirs: Vec<_> = nav.entries.iter().filter(|e| e.is_dir).collect();
-            if rel_row < dirs.len() {
+            let entry_name: Option<String> = {
+                let nav = self.nav.borrow();
+                nav.entries.iter()
+                    .filter(|e| e.is_dir)
+                    .nth(rel_row)
+                    .map(|e| e.name.to_string())
+            };
+            if let Some(name) = entry_name {
                 if let MouseEventKind::Down(_) = kind {
-                    let entry = dirs[rel_row];
-                    drop(nav);
-                    self.nav.borrow_mut().path.push(entry.name.to_string());
+                    self.nav.borrow_mut().path.push(name);
                     self.nav.borrow_mut().refresh();
                     drop(self.nav.borrow());
                     self.update_breadcrumbs();
@@ -478,7 +486,7 @@ impl Scene for NavigatorScene {
         if let MouseEventKind::ScrollDown = kind {
             let mut nav = self.nav.borrow_mut();
             let max_scroll = nav.filtered.len().saturating_sub(list_h);
-            if nav.scroll < max_scroll as usize {
+            if nav.scroll < max_scroll {
                 nav.scroll += 1;
                 self.dirty = true;
             }

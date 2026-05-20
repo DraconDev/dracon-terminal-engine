@@ -22,10 +22,11 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 11 | debug_overlay → Performance Monitor | split sidebar | 2 | FPS sparkline + gauges + profiler |
 | 12 | metrics_hub → Metrics Dashboard | split sidebar | 8 | Sparklines + sliders + gauges + ring + badges |
 | 13 | table_list → Data Explorer | split sidebar | 2 | Categories + stats + table + detail |
+| 14 | navigator → Quick Launcher | split sidebar | 3 | Quick access + file list + search |
 
 ---
 
-### Tier 1 Count: 20/34 ✅ (target: 20/34)
+### Tier 1 Count: 21/34 ✅ (exceeded target: 20/34)
 
 ---
 
@@ -46,10 +47,10 @@ Systematically upgrade all showcase scenes to impressive, feature-rich demos.
 | 11 | 2026-05-20 | ✓ 0 | ✓ 291 | debug_overlay → Performance Monitor |
 | 12 | 2026-05-20 | ✓ 0 | ✓ 291 | metrics_hub → Metrics Dashboard |
 | 13 | 2026-05-20 | ✓ 0 | ✓ 291 | table_list → Data Explorer |
+| 14 | 2026-05-20 | ✓ 0 | ✓ 291 | navigator → Quick Launcher |
 
 ---
 
-## Next (Iterations 14-15)
+## Next (Iteration 15)
 
-### 14. navigator → Quick Launcher
-### 15. Final verification pass
+### 15. Final verification pass — build + clippy + test all targets
