@@ -370,6 +370,7 @@ impl Scene for TagsInputScene {
                     let tags_count = tags.len();
                     for i in 0..tags_count {
                         let tag = &tags[i];
+                        let pill_len = (tag.len() + 4) as u16;
 
                         if px + pill_len > area.width.saturating_sub(DIV_X + 4) {
                             px = DIV_X + 4;
