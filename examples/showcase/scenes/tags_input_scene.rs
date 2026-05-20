@@ -46,9 +46,9 @@ fn tag_icon(tag: &str) -> char {
     match tag {
         "rust" => '⚙',
         "go" => '▶',
-        "python" => '🐍',
-        "javascript" => 'JS',
-        "typescript" => 'TS',
+        "python" => '*',
+        "javascript" => '*',
+        "typescript" => '*',
         "java" => '☕',
         "haskell" => 'λ',
         "swift" => '◆',
