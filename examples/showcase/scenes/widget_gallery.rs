@@ -449,7 +449,7 @@ impl Scene for WidgetGalleryScene {
             let card_y = 2;
 
             if col >= card_x + 2 && col < card_x + card_w - 2
-                && row >= card_y + 1 && row < card_y + demo_h - 1
+                && row > card_y && row < card_y + demo_h - 1
             {
                 let rel_col = col.saturating_sub(card_x + 2);
                 let rel_row = row.saturating_sub(card_y + 1);
