@@ -238,7 +238,7 @@ impl Scene for AnimationScene {
         }
 
         // ── Left sidebar: controls ─────────────────────────────────────────
-        self.render_sidebar(&mut plane, area, t);
+        self.render_sidebar(&mut plane, t);
 
         // Vertical divider
         for y in 1..area.height.saturating_sub(1) {
@@ -585,7 +585,7 @@ impl Scene for AnimationScene {
 }
 
 impl AnimationScene {
-    fn render_sidebar(&self, plane: &mut Plane, _area: Rect, t: &Theme) {
+    fn render_sidebar(&self, plane: &mut Plane, t: &Theme) {
         let sx = 2u16;
 
         // Demo mode selector
