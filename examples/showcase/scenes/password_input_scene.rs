@@ -32,6 +32,7 @@ const REQUIREMENTS: &[Requirement] = &[
     Requirement { label: "Contains special (!@#$)", check: |p| p.chars().any(|c| "!@#$%^&*()_+-=[]{}|;:',.<>?/`~".contains(c)) },
 ];
 
+#[allow(dead_code)]
 pub struct PasswordInputScene {
     theme: Theme,
     show_help: bool,
@@ -287,11 +288,9 @@ impl Scene for PasswordInputScene {
         for y in 1..area.height.saturating_sub(1) {
             for x in panel_x..panel_x + panel_w {
                 let idx = (y * area.width + x) as usize;
-                if idx < plane.cells.len() {
-                    if plane.cells[idx].transparent {
-                        plane.cells[idx].bg = t.surface;
-                        plane.cells[idx].transparent = false;
-                    }
+                if idx < plane.cells.len() && plane.cells[idx].transparent {
+                    plane.cells[idx].bg = t.surface;
+                    plane.cells[idx].transparent = false;
                 }
             }
         }
