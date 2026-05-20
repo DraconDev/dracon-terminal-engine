@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn test_effective_len_filtered() {
         let editor = make_editor(vec!["apple", "banana", "apricot", "cherry"]);
-        let mut search = SearchState {
+        let search = SearchState {
             filter_query: "ap".to_string(),
             filtered_indices: vec![0, 2],
             ..Default::default()
