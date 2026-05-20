@@ -9,7 +9,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
-use dracon_terminal_engine::framework::animation::{AnimationManager, Easing};
+use dracon_terminal_engine::framework::animation::AnimationManager;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
@@ -25,30 +25,8 @@ use std::time::Duration;
 const SIDEBAR_W: u16 = 22;
 const DIV_X: u16 = SIDEBAR_W + 2;
 
-fn apply_easing(easing: &Easing, t: f64) -> f64 {
-    match easing {
-        Easing::Linear => t,
-        Easing::EaseIn => t * t,
-        Easing::EaseOut => t * (2.0 - t),
-        Easing::EaseInOut => {
-            if t < 0.5 {
-                2.0 * t * t
-            } else {
-                -1.0 + (4.0 - 2.0 * t) * t
-            }
-        }
-    }
-}
+type ZoneRect = (u16, u16, u16, u16, usize);
 
-fn easing_from_name(name: &str) -> Easing {
-    match name {
-        "Linear" => Easing::Linear,
-        "EaseIn" => Easing::EaseIn,
-        "EaseOut" => Easing::EaseOut,
-        "EaseInOut" => Easing::EaseInOut,
-        _ => Easing::Linear,
-    }
-}
 
 struct BouncingBall {
     x_anim_id: usize,
@@ -77,7 +55,7 @@ pub struct AnimationScene {
     demo_mode: Cell<usize>, // 0=balls, 1=widgets, 2=all
     dirty: bool,
     area: Cell<Rect>,
-    zones: RefCell<Vec<(u16, u16, u16, u16, usize)>>,
+    zones: RefCell<Vec<ZoneRect>>,
 }
 
 impl AnimationScene {
@@ -161,14 +139,12 @@ impl AnimationScene {
         }
 
         // Sliding panel
-        if demo == 0 || demo == 2 {
-            if mgr.is_done(*self.panel_anim_id.borrow()) {
-                // Restart panel animation
-                let visible = *self.panel_visible.borrow();
-                let (from, to) = if visible { (0.0, 18.0) } else { (18.0, 0.0) };
-                *self.panel_anim_id.borrow_mut() = mgr.start(from, to, Duration::from_millis(400));
-                *self.panel_visible.borrow_mut() = !visible;
-            }
+        if (demo == 0 || demo == 2) && mgr.is_done(*self.panel_anim_id.borrow()) {
+            // Restart panel animation
+            let visible = *self.panel_visible.borrow();
+            let (from, to) = if visible { (0.0, 18.0) } else { (18.0, 0.0) };
+            *self.panel_anim_id.borrow_mut() = mgr.start(from, to, Duration::from_millis(400));
+            *self.panel_visible.borrow_mut() = !visible;
         }
 
         // Pulse
@@ -238,7 +214,7 @@ impl Scene for AnimationScene {
         }
 
         // ── Left sidebar: controls ─────────────────────────────────────────
-        self.render_sidebar(&mut plane, t);
+        self.render_sidebar(&mut plane, t, area.height);
 
         // Vertical divider
         for y in 1..area.height.saturating_sub(1) {
@@ -418,8 +394,6 @@ impl Scene for AnimationScene {
         // ── Footer ────────────────────────────────────────────────────────
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let demo_names = ["Balls", "Widgets", "All"];
-        let demo_name = demo_names[self.demo_mode.get().min(2)];
         let footer = format!(
             " 1-3:demo | SPACE:auto | r:reset | {}:help | {}:back ",
             help_key, back_key,
@@ -520,7 +494,7 @@ impl Scene for AnimationScene {
         match kind {
             MouseEventKind::Down(_) => {
                 // Demo mode buttons (sidebar rows 2-4)
-                if col < DIV_X && row >= 2 && row <= 4 {
+                if col < DIV_X && (2..=4).contains(&row) {
                     let demo = (row - 2) as usize;
                     self.demo_mode.set(demo.min(2));
                     self.dirty = true;
@@ -562,8 +536,6 @@ impl Scene for AnimationScene {
                 }
             }
             MouseEventKind::Moved => {
-                // Track hover for zones
-                let hovered = if col < DIV_X && row >= 2 && row <= 8 { Some(row as usize) } else { None };
                 self.dirty = true;
                 return true;
             }
@@ -585,11 +557,10 @@ impl Scene for AnimationScene {
 }
 
 impl AnimationScene {
-    fn render_sidebar(&self, plane: &mut Plane, t: &Theme) {
+    fn render_sidebar(&self, plane: &mut Plane, t: &Theme, area_h: u16) {
         let sx = 2u16;
 
         // Demo mode selector
-        let demo_names = ["Bouncing Balls", "Widgets Only", "All Animations"];
         let demo_labels = ["1: Balls", "2: Widgets", "3: All"];
         let current_demo = self.demo_mode.get();
 
@@ -638,7 +609,7 @@ impl AnimationScene {
 
         // Easing reference
         let ref_y = 13;
-        if ref_y < area.height.saturating_sub(4) {
+        if ref_y < area_h.saturating_sub(4) {
             draw_text(plane, sx, ref_y, "Easing", t.secondary, t.bg, true);
             let easings = [("Linear", Color::Rgb(255, 107, 107)), ("EaseIn", Color::Rgb(107, 203, 119)),
                            ("EaseOut", Color::Rgb(77, 150, 255)), ("EaseInOut", Color::Rgb(255, 217, 61))];
@@ -654,7 +625,7 @@ impl AnimationScene {
         }
 
         // Click hint
-        let hint_y = area.height.saturating_sub(4);
+        let hint_y = area_h.saturating_sub(4);
         if hint_y > ref_y + 6 {
             draw_text(plane, sx, hint_y, "Click main area", t.fg_muted, t.bg, false);
             draw_text(plane, sx, hint_y + 1, "to toggle auto", t.fg_muted, t.bg, false);
