@@ -1,27 +1,26 @@
-//! Embedded NotificationCenter scene for the showcase.
+//! Embedded Notification Hub scene for the showcase.
 //!
-//! Demonstrates the NotificationCenter widget with:
+//! Full notification management interface with:
+//!   - Split layout: notification feed left, detail panel right
+//!   - Filter pills for priority filtering
+//!   - Click to select and view notification details
 //!   - Auto-generation timer
-//!   - Clear-all button
-//!   - Priority filtering
-//!   - Unread badge counter
+//!   - Action buttons (clear all, start/stop auto)
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
-use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
+use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widgets::{NotificationCenter, NotificationKind};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
+use dracon_terminal_engine::framework::widgets::NotificationKind;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Clone, Copy, PartialEq)]
 enum FilterMode {
-    All,
-    Info,
-    Success,
-    Warning,
-    Error,
+    All, Info, Success, Warning, Error,
 }
 
 impl FilterMode {
@@ -45,8 +44,17 @@ impl FilterMode {
     }
 }
 
+// Notification data for tracking
+struct NotifEntry {
+    title: String,
+    message: String,
+    kind: NotificationKind,
+    timestamp: String,
+}
+
+const SIDEBAR_WIDTH: u16 = 38;
+
 pub struct NotificationCenterScene {
-    notifications: NotificationCenter,
     theme: Theme,
     show_help: bool,
     tick_count: usize,
@@ -57,15 +65,19 @@ pub struct NotificationCenterScene {
     keybindings: KeybindingSet,
     dirty: bool,
     area: std::cell::Cell<Rect>,
+
+    // Notification tracking for feed
+    notifications: RefCell<Vec<NotifEntry>>,
+    selected_idx: Option<usize>,
+    focused_side: usize, // 0 = feed, 1 = detail
+
+    // Add notification bridge
+    add_bridge: Rc<RefCell<Option<(String, String, NotificationKind)>>>,
 }
 
 impl NotificationCenterScene {
     pub fn new(theme: Theme) -> Self {
-        let mut nc = NotificationCenter::new(theme.clone());
-        nc.info("Welcome", "NotificationCenter demo");
-        nc.success("Ready", "All systems operational");
         Self {
-            notifications: nc,
             theme,
             show_help: false,
             tick_count: 0,
@@ -76,6 +88,13 @@ impl NotificationCenterScene {
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            notifications: RefCell::new(vec![
+                NotifEntry { title: "Welcome".into(), message: "NotificationCenter demo".into(), kind: NotificationKind::Info, timestamp: "now".into() },
+                NotifEntry { title: "Ready".into(), message: "All systems operational".into(), kind: NotificationKind::Success, timestamp: "now".into() },
+            ]),
+            selected_idx: None,
+            focused_side: 0,
+            add_bridge: Rc::new(RefCell::new(None)),
         }
     }
 
@@ -89,7 +108,6 @@ impl NotificationCenterScene {
 
         let (kind, title_prefix, msgs) = &kinds[self.tick_count % kinds.len()];
 
-        // Respect filter
         match self.filter {
             FilterMode::All => {},
             FilterMode::Info if *kind != NotificationKind::Info => { self.tick_count += 1; return; },
@@ -100,26 +118,192 @@ impl NotificationCenterScene {
         }
 
         let msg = msgs[self.tick_count / kinds.len() % msgs.len()];
-        self.notifications.notify(title_prefix, msg, *kind);
+        let title = title_prefix.to_string();
+        let message = msg.to_string();
+
+        // Track for feed
+        self.notifications.borrow_mut().push(NotifEntry {
+            title,
+            message,
+            kind: *kind,
+            timestamp: "just now".into(),
+        });
+
         self.total_added += 1;
         self.tick_count += 1;
     }
 
-    fn render_filter_tabs(&self, plane: &mut Plane, x: u16, y: u16) {
+    fn kind_icon(kind: NotificationKind) -> &'static str {
+        match kind {
+            NotificationKind::Info => "ℹ",
+            NotificationKind::Success => "✓",
+            NotificationKind::Warning => "⚠",
+            NotificationKind::Error => "✗",
+        }
+    }
+
+    fn kind_color(kind: NotificationKind, t: &Theme) -> Color {
+        match kind {
+            NotificationKind::Info => t.info,
+            NotificationKind::Success => t.success,
+            NotificationKind::Warning => t.warning,
+            NotificationKind::Error => t.error,
+        }
+    }
+
+    fn render_feed(&self, plane: &mut Plane, area: Rect) {
         let t = &self.theme;
+
+        // Feed header
+        draw_text_clipped(plane, 1, 0, " Notifications ", SIDEBAR_WIDTH, t.fg_on_accent, t.primary, true);
+
+        // Divider
+        for x in 0..area.width {
+            let idx = (area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Notification entries
+        let entries = self.notifications.borrow();
+        let notif_h = area.height.saturating_sub(1);
+        for (i, entry) in entries.iter().enumerate() {
+            let row = i as u16 + 1;
+            if row >= notif_h { break; }
+
+            let is_selected = self.selected_idx == Some(i);
+            let is_hovered = !is_selected && i == 0; // simple hover for first
+
+            let bg = if is_selected { t.primary } else if is_hovered { t.hover_bg } else { t.surface };
+            let fg = if is_selected { t.fg_on_accent } else { t.fg };
+            let icon_color = Self::kind_color(entry.kind, t);
+
+            // Row background
+            for x in 0..area.width {
+                let idx = (row * plane.width + x) as usize;
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ' ';
+                    plane.cells[idx].bg = bg;
+                    plane.cells[idx].transparent = false;
+                }
+            }
+
+            // Icon
+            let icon = Self::kind_icon(entry.kind);
+            let idx = (row * plane.width + 1) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = icon.chars().next().unwrap_or(' ');
+                plane.cells[idx].fg = icon_color;
+                plane.cells[idx].bg = bg;
+            }
+
+            // Title
+            let title_x = 4u16;
+            draw_text_clipped(plane, title_x, row, &entry.title, SIDEBAR_WIDTH.saturating_sub(4), fg, bg, is_selected);
+
+            // Timestamp
+            let ts_x = SIDEBAR_WIDTH.saturating_sub(entry.timestamp.len() as u16 + 1);
+            draw_text_clipped(plane, ts_x, row, &entry.timestamp, SIDEBAR_WIDTH, t.fg_muted, bg, false);
+        }
+
+        // Empty state
+        if entries.is_empty() {
+            let empty_y = 3;
+            draw_text_clipped(plane, 1, empty_y, "(no notifications)", SIDEBAR_WIDTH, t.fg_muted, t.surface, false);
+            draw_text_clipped(plane, 1, empty_y + 1, "Press SPACE to add one", SIDEBAR_WIDTH, t.fg_muted, t.surface, false);
+        }
+    }
+
+    fn render_detail(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+        let panel_x = SIDEBAR_WIDTH + 1;
+
+        // Detail header
+        let header_bg = if self.focused_side == 1 { t.surface_elevated } else { t.surface };
+        draw_text_clipped(plane, panel_x + 1, 0, " Detail ", t.fg_on_accent, t.primary, true);
+
+        // Divider
+        for x in panel_x..area.width {
+            let idx = (area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = t.outline;
+            }
+        }
+
+        // Selected notification
+        if let Some(idx) = self.selected_idx {
+            let entries = self.notifications.borrow();
+            if let Some(entry) = entries.get(idx) {
+                let kind_color = Self::kind_color(entry.kind, t);
+
+                // Kind + timestamp row
+                let icon = Self::kind_icon(entry.kind);
+                draw_text(plane, panel_x + 2, 2, icon, kind_color, t.surface, true);
+                draw_text_clipped(plane, panel_x + 5, 2, entry.title.as_str(), area.width.saturating_sub(panel_x + 5), kind_color, t.surface, true);
+                draw_text_clipped(plane, panel_x + 2, 3, &format!("Kind: {:?}", entry.kind), t.fg_muted, t.surface, false);
+                draw_text_clipped(plane, panel_x + 2, 4, &format!("Time: {}", entry.timestamp), t.fg_muted, t.surface, false);
+
+                // Divider
+                for x in panel_x + 2..area.width.saturating_sub(2) {
+                    let idx = (5 * area.width + x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = '─';
+                        plane.cells[idx].fg = t.outline;
+                    }
+                }
+
+                // Message
+                draw_text_clipped(plane, panel_x + 2, 6, "Message:", t.secondary, t.surface, true);
+                let msg_lines = entry.message.as_str();
+                for (i, line) in msg_lines.chars().collect::<Vec<_>>().chunks(40).take(8) {
+                    let line_str: String = line.iter().collect();
+                    draw_text_clipped(plane, panel_x + 2, 7 + i as u16, &line_str, area.width.saturating_sub(panel_x + 4), t.fg, t.surface, false);
+                }
+
+                // Actions
+                let action_y = area.height.saturating_sub(4);
+                draw_text_clipped(plane, panel_x + 2, action_y, "[D] Dismiss", t.error, t.surface, false);
+                draw_text_clipped(plane, panel_x + 2, action_y + 1, "[C] Clear all", t.warning, t.surface, false);
+
+                return;
+            }
+        }
+
+        // No selection state
+        let empty_y = 4;
+        draw_text_clipped(plane, panel_x + 2, empty_y, "No notification selected", t.fg_muted, t.surface, false);
+        draw_text_clipped(plane, panel_x + 2, empty_y + 1, "Click one from the feed", t.fg_muted, t.surface, false);
+        draw_text_clipped(plane, panel_x + 2, empty_y + 2, "or press SPACE to add", t.fg_muted, t.surface, false);
+    }
+
+    fn render_top_bar(&self, plane: &mut Plane, area: Rect) {
+        let t = &self.theme;
+
+        // Stats
+        let active = self.notifications.borrow().len();
+        let stats = format!(
+            "Active: {} | Added: {} | Dismissed: {} | {}",
+            active, self.total_added, self.total_dismissed,
+            if self.auto_running { "▶ AUTO" } else { "○ STOPPED" },
+        );
+        draw_text_clipped(plane, 1, 1, &stats, area.width, t.fg_muted, t.bg, false);
+
+        // Filter pills
         let modes = [FilterMode::All, FilterMode::Info, FilterMode::Success, FilterMode::Warning, FilterMode::Error];
         let colors = [t.fg, t.info, t.success, t.warning, t.error];
-        let mut cx = x;
+        let mut cx = area.width.saturating_sub(50);
         for (i, mode) in modes.iter().enumerate() {
             let label = mode.label();
             let is_active = *mode == self.filter;
             let bg = if is_active { colors[i] } else { t.surface };
             let fg = if is_active { Color::Rgb(255, 255, 255) } else { t.fg_muted };
 
-            // Draw tab
-            let tab = format!(" {} ", label);
-            for (j, ch) in tab.chars().enumerate() {
-                let idx = (y * plane.width + cx + j as u16) as usize;
+            let pill = format!(" {} ", label);
+            for (j, ch) in pill.chars().enumerate() {
+                let idx = (1 * plane.width + cx + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = fg;
@@ -128,7 +312,7 @@ impl NotificationCenterScene {
                     plane.cells[idx].transparent = false;
                 }
             }
-            cx += tab.len() as u16;
+            cx += pill.len() as u16 + 1;
         }
     }
 }
@@ -147,7 +331,7 @@ impl Scene for NotificationCenterScene {
         }
 
         // Header
-        draw_text(&mut plane, 2, 0, " NotificationCenter ", t.primary, t.bg, true);
+        draw_text(&mut plane, 2, 0, " Notification Hub ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
         draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
                   &theme_label, t.secondary, t.bg, false);
@@ -161,76 +345,66 @@ impl Scene for NotificationCenterScene {
             }
         }
 
-        // ── Filter Tabs ───────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 2, "Filter:", t.fg_muted, t.bg, false);
-        self.render_filter_tabs(&mut plane, 10, 2);
+        // Top bar (stats + filters)
+        self.render_top_bar(&mut plane, area);
 
-        // ── Stats Bar ─────────────────────────────────────────────────────
-        let stats_y = 3;
-        let active_count = self.notifications.len();
-        let stats = format!(
-            "Active:{} Added:{} Dismissed:{} {}",
-            active_count, self.total_added, self.total_dismissed,
-            if self.auto_running { "▶AUTO" } else { "" },
-        );
-        draw_text(&mut plane, 2, stats_y, &stats, t.fg_muted, t.bg, false);
-
-        // ── Action Buttons ────────────────────────────────────────────────
-        let btn_y = stats_y + 1;
-        // Clear-all button
-        let clear_label = " [C] Clear All ";
-        for (j, ch) in clear_label.chars().enumerate() {
-            let idx = (btn_y * plane.width + 2 + j as u16) as usize;
+        // Sidebar divider
+        for y in 2..area.height.saturating_sub(1) {
+            let idx = (y * plane.width + SIDEBAR_WIDTH) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = ch;
-                plane.cells[idx].fg = t.error;
-                plane.cells[idx].transparent = false;
-            }
-        }
-        // Auto toggle button
-        let auto_label = if self.auto_running { " [A] Stop Auto " } else { " [A] Start Auto " };
-        for (j, ch) in auto_label.chars().enumerate() {
-            let idx = (btn_y * plane.width + 18 + j as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = ch;
-                plane.cells[idx].fg = if self.auto_running { t.warning } else { t.primary };
+                plane.cells[idx].char = '│';
+                plane.cells[idx].fg = t.outline;
                 plane.cells[idx].transparent = false;
             }
         }
 
-        // ── Notification Area ────────────────────────────────────────────
-        let notif_area = Rect::new(area.x, area.y + 6, area.width, area.height.saturating_sub(8));
-        let notif_plane = self.notifications.render(notif_area);
-        blit_to(&mut plane, &notif_plane, notif_area.x as usize, notif_area.y as usize);
+        // Left: Notification feed
+        let feed_area = Rect::new(0, 2, SIDEBAR_WIDTH, area.height.saturating_sub(3));
+        self.render_feed(&mut plane, feed_area);
 
-        // ── Footer ────────────────────────────────────────────────────────
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("?");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let footer = format!(
-            " SPACE:add | A:auto | C:clear | F:filter | {}:help | {}:back ",
-            help_key, back_key,
-        );
-        let fy = area.height.saturating_sub(1);
-        for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
+        // Right: Detail panel
+        let detail_area = Rect::new(SIDEBAR_WIDTH + 1, 2, area.width.saturating_sub(SIDEBAR_WIDTH + 2), area.height.saturating_sub(3));
+        self.render_detail(&mut plane, detail_area);
+
+        // Bottom: Action buttons
+        let btn_y = area.height.saturating_sub(3);
+        for x in 1..area.width.saturating_sub(1) {
+            let idx = (btn_y * plane.width + x) as usize;
             if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.fg_muted;
                 plane.cells[idx].bg = t.surface;
                 plane.cells[idx].transparent = false;
             }
         }
 
+        let clear_label = "[C] Clear All";
+        let auto_label = if self.auto_running { "[A] Stop Auto" } else { "[A] Start Auto" };
+        let add_label = "[SPACE] Add";
+        draw_text(&mut plane, 2, btn_y, clear_label, t.error, t.surface, false);
+        draw_text(&mut plane, 20, btn_y, auto_label, if self.auto_running { t.warning } else { t.primary }, t.surface, false);
+        draw_text(&mut plane, 40, btn_y, add_label, t.fg, t.surface, false);
+
+        // Footer
+        let fy = area.height.saturating_sub(1);
+        for x in 0..area.width {
+            let idx = (fy * plane.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].bg = t.surface;
+                plane.cells[idx].transparent = false;
+            }
+        }
+        let nav = " SPACE:add | A:auto | C:clear | F:filter | D:dismiss | ?:help | Esc:back ";
+        draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
+
         if self.show_help {
-            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Notification Center — Help", &[
+            render_help_overlay(&mut plane, area, t, "Notification Hub — Help", &[
                 ("SPACE", "Add notification"),
                 ("A", "Toggle auto-generation"),
                 ("C", "Clear all notifications"),
                 ("F", "Cycle filter priority"),
-                ("Click tab", "Filter by priority"),
-                ("Click notif", "Dismiss notification"),
-                (back_key, "Back"),
+                ("D", "Dismiss selected"),
+                ("↑/↓", "Navigate feed"),
+                ("Click", "Select notification"),
+                ("Esc", "Back to showcase"),
             ]);
         }
 
@@ -243,14 +417,12 @@ impl Scene for NotificationCenterScene {
         if self.show_help {
             if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
-                self.dirty = true;
             }
             return true;
         }
 
         if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = true;
-            self.dirty = true;
             return true;
         }
         if self.keybindings.matches(actions::BACK, &key) {
@@ -260,24 +432,54 @@ impl Scene for NotificationCenterScene {
         match key.code {
             KeyCode::Char(' ') if key.modifiers.is_empty() => {
                 self.add_filtered_notification();
-                self.dirty = true;
                 true
             }
             KeyCode::Char('a') if key.modifiers.is_empty() => {
                 self.auto_running = !self.auto_running;
-                self.dirty = true;
                 true
             }
             KeyCode::Char('c') if key.modifiers.is_empty() => {
-                let cleared = self.notifications.len();
-                self.notifications.clear_all();
+                let cleared = self.notifications.borrow().len();
+                self.notifications.borrow_mut().clear();
+                self.selected_idx = None;
                 self.total_dismissed += cleared;
-                self.dirty = true;
                 true
             }
             KeyCode::Char('f') if key.modifiers.is_empty() => {
                 self.filter = self.filter.next();
-                self.dirty = true;
+                true
+            }
+            KeyCode::Char('d') if key.modifiers.is_empty() => {
+                if let Some(idx) = self.selected_idx {
+                    self.notifications.borrow_mut().remove(idx);
+                    self.total_dismissed += 1;
+                    self.selected_idx = if self.notifications.borrow().is_empty() {
+                        None
+                    } else {
+                        Some(idx.min(self.notifications.borrow().len().saturating_sub(1)))
+                    };
+                }
+                true
+            }
+            KeyCode::Up if key.modifiers.is_empty() => {
+                if self.selected_idx.is_none() && !self.notifications.borrow().is_empty() {
+                    self.selected_idx = Some(0);
+                } else if let Some(idx) = self.selected_idx {
+                    if idx > 0 {
+                        self.selected_idx = Some(idx - 1);
+                    }
+                }
+                true
+            }
+            KeyCode::Down if key.modifiers.is_empty() => {
+                let len = self.notifications.borrow().len();
+                if let Some(idx) = self.selected_idx {
+                    if idx + 1 < len {
+                        self.selected_idx = Some(idx + 1);
+                    }
+                } else if len > 0 {
+                    self.selected_idx = Some(0);
+                }
                 true
             }
             _ => false,
@@ -285,61 +487,64 @@ impl Scene for NotificationCenterScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        let _area = self.area.get();
-
-        // Clear-all button click
-        if row == 4 && (2..16).contains(&col)
-            && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
-                let cleared = self.notifications.len();
-                self.notifications.clear_all();
-                self.total_dismissed += cleared;
-                self.dirty = true;
-                return true;
-            }
-
-        // Auto toggle button click
-        if row == 4 && (18..32).contains(&col)
-            && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
-                self.auto_running = !self.auto_running;
-                self.dirty = true;
-                return true;
-            }
-
-        // Filter tab clicks
-        if row == 2 {
+        let area = self.area.get();
+        // Filter pills
+        if row == 1 {
             let modes = [FilterMode::All, FilterMode::Info, FilterMode::Success, FilterMode::Warning, FilterMode::Error];
-            let mut cx = 10u16;
+            let mut cx = area.width.saturating_sub(50);
             for mode in &modes {
                 let label = mode.label();
-                let tab_w = label.len() as u16 + 2;
-                if col >= cx && col < cx + tab_w
-                    && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+                let pill_len = label.len() as u16 + 3;
+                if col >= cx && col < cx + pill_len
+                    && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
                         self.filter = *mode;
-                        self.dirty = true;
                         return true;
                     }
-                cx += tab_w;
+                cx += pill_len + 1;
             }
         }
 
-        // Notification area clicks
-        if row >= 6
-            && self.notifications.handle_mouse(kind, col, row) {
-                self.dirty = true;
+        // Feed clicks (left side)
+        if col < SIDEBAR_WIDTH && row >= 2 && row < area.height.saturating_sub(3) {
+            let idx = (row - 2) as usize;
+            let entries = self.notifications.borrow();
+            if idx < entries.len() && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+                self.selected_idx = Some(idx);
+                self.focused_side = 0;
+            }
+            return true;
+        }
+
+        // Action buttons
+        if row == area.height.saturating_sub(3) && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+            if (2..15).contains(&col) {
+                // Clear all
+                let cleared = self.notifications.borrow().len();
+                self.notifications.borrow_mut().clear();
+                self.selected_idx = None;
+                self.total_dismissed += cleared;
                 return true;
             }
+            if (20..33).contains(&col) {
+                // Toggle auto
+                self.auto_running = !self.auto_running;
+                return true;
+            }
+            if (40..52).contains(&col) {
+                // Add
+                self.add_filtered_notification();
+                return true;
+            }
+        }
 
         false
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.notifications.on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool { true }
     fn mark_dirty(&mut self) { self.dirty = true; }
     fn clear_dirty(&mut self) { self.dirty = false; }
 }
-
-
