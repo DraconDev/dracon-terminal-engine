@@ -25,7 +25,6 @@ pub struct CellPoolScene {
     total_cells: usize,
     tick_count: usize,
     auto_running: Cell<bool>,
-    auto_interval: Cell<usize>, // ticks per allocation
     wave_history: Vec<(usize, usize)>, // (acquired, released) per tick
     alloc_history: Vec<usize>, // size history
     keybindings: KeybindingSet,
@@ -43,7 +42,6 @@ impl CellPoolScene {
             total_cells: 0,
             tick_count: 0,
             auto_running: Cell::new(false),
-            auto_interval: Cell::new(1),
             wave_history: Vec::new(),
             alloc_history: Vec::new(),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -82,17 +80,6 @@ impl CellPoolScene {
             self.alloc_history.remove(0);
         }
         self.tick_count += 1;
-    }
-
-    fn tick(&mut self) {
-        self.tick_count += 1;
-        if self.auto_running.get() {
-            let interval = self.auto_interval.get();
-            if self.tick_count % interval == 0 {
-                self.simulate_allocation();
-            }
-        }
-        self.dirty = true;
     }
 
     fn reset(&mut self) {
@@ -189,8 +176,7 @@ impl Scene for CellPoolScene {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(&mut plane, area, &self.theme, "Memory Visualizer — Help", &[
                 ("SPACE", "Single allocation"),
-                ("a", "Toggle auto-mode"),
-                ("+/-", "Adjust auto speed"),
+                ("a", "Toggle auto indicator"),
                 ("r", "Reset all stats"),
                 ("Click", "Allocate"),
                 (help_key, "Toggle this help"),
@@ -231,15 +217,8 @@ impl Scene for CellPoolScene {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char('+') | KeyCode::Char('=') if key.modifiers.is_empty() => {
-                let current = self.auto_interval.get();
-                self.auto_interval.set((current + 1).min(10));
-                self.dirty = true;
-                true
-            }
-            KeyCode::Char('-') | KeyCode::Char('_') if key.modifiers.is_empty() => {
-                let current = self.auto_interval.get();
-                self.auto_interval.set(current.saturating_sub(1).max(1));
+        KeyCode::Char('a') if key.modifiers.is_empty() => {
+                self.auto_running.set(!self.auto_running.get());
                 self.dirty = true;
                 true
             }
