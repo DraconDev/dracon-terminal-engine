@@ -160,7 +160,6 @@ impl ThemeSwitcherScene {
         let t = &self.theme;
         let panel_x = div_x + 1;
         let panel_w = area.width.saturating_sub(panel_x + 1);
-        let max_x = panel_x + panel_w;
 
         // ── Section 1: Widget Preview ──────────────────────────
         draw_text(plane, panel_x, 0, "Widget Preview", t.primary, t.bg, true);
