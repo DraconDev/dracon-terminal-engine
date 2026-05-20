@@ -3,8 +3,8 @@
 //! Demonstrates the Cell allocation recycling pool with a visual
 //! memory map, allocation wave chart, and real-time stats.
 
-use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
-use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use crate::scenes::shared_helpers::{draw_text, draw_text_clipped, render_help_overlay};
+use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::compositor::pool::CellPool;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -333,7 +333,7 @@ impl CellPoolScene {
             ("Ticks", self.tick_count.to_string()),
         ];
 
-        for (i, (label, value)) in stats.iter().enumerate() {
+        for (i, (label, _value)) in stats.iter().enumerate() {
             let sy = stats_y + 1 + i as u16;
             if sy >= area.height.saturating_sub(4) { break; }
             draw_text(plane, sx, sy, label, t.fg_muted, t.bg, false);
@@ -351,7 +351,7 @@ impl CellPoolScene {
             let bar_w = SIDEBAR_W - 2;
             let filled = ((reuse_rate / 100.0) * bar_w as f64) as usize;
             for dx in 0..bar_w {
-                let idx = (bar_y * plane.width + sx + 1 + dx as u16) as usize;
+                let idx = (bar_y * plane.width + sx + 1 + dx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
                     plane.cells[idx].fg = if (dx as usize) < filled { t.success } else { t.fg_muted };
@@ -374,7 +374,7 @@ impl CellPoolScene {
             let bar_w = SIDEBAR_W - 2;
             let filled = ((pool_pct / 100.0) * bar_w as f64) as usize;
             for dx in 0..bar_w {
-                let idx = (bar_y * plane.width + sx + 1 + dx as u16) as usize;
+                let idx = (bar_y * plane.width + sx + 1 + dx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
                     plane.cells[idx].fg = if (dx as usize) < filled { t.primary } else { t.fg_muted };
@@ -400,7 +400,7 @@ impl CellPoolScene {
                 if icon_idx < plane.cells.len() {
                     plane.cells[icon_idx].char = ' ';
                 }
-                draw_text_clipped(plane, sx + 1, ly, ch, sx + 4, color, t.bg, false);
+                draw_text(plane, sx + 1, ly, ch, *color, t.bg, false);
                 draw_text_clipped(plane, sx + 4, ly, label, sx + SIDEBAR_W, t.fg, t.bg, false);
             }
         }
