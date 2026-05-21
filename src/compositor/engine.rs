@@ -599,7 +599,7 @@ impl Compositor {
                 let c = cell.char as u32;
                 if (0x20..128).contains(&c) {
                     buf.push(c as u8);
-                } else if c >= 128 || c < 0x20 {
+                } else {
                     // Multi-byte UTF-8 for non-ASCII, or replace control chars with space
                     if c < 0x20 {
                         buf.push(b' '); // Replace control chars with space
