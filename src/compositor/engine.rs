@@ -620,7 +620,10 @@ impl Compositor {
                     }
                     current_bg = cell.bg;
                 }
-                buf.push(cell.char as u8);
+                // Write char as UTF-8 bytes
+                let mut buf_str = [0u8; 4];
+                let char_bytes = cell.char.encode_utf8(&mut buf_str).as_bytes();
+                buf.extend_from_slice(char_bytes);
             }
         }
 
