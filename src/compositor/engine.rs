@@ -620,10 +620,15 @@ impl Compositor {
                     }
                     current_bg = cell.bg;
                 }
-                // Write char as UTF-8 bytes
-                let mut buf_str = [0u8; 4];
-                let char_bytes = cell.char.encode_utf8(&mut buf_str).as_bytes();
-                buf.extend_from_slice(char_bytes);
+                // Write char - fast path for ASCII (common case)
+                if cell.char as u32 <= 127 {
+                    buf.push(cell.char as u8);
+                } else {
+                    // Multi-byte UTF-8 for non-ASCII
+                    let mut buf_str = [0u8; 4];
+                    let char_bytes = cell.char.encode_utf8(&mut buf_str).as_bytes();
+                    buf.extend_from_slice(char_bytes);
+                }
             }
         }
 
