@@ -10,30 +10,24 @@ echo "Running showcase frame benchmark (release mode, 5 iterations)..."
 # Warm-up run first
 cargo test --release --test performance_benchmarks benchmark_large_terminal_200x100 -- --nocapture 2>/dev/null
 
-# Run multiple iterations and collect times
-declare -a times
+# Run multiple iterations and collect times (in microseconds)
+total_us=0
 for i in {1..5}; do
     output=$(cargo test --release --test performance_benchmarks benchmark_large_terminal_200x100 -- --nocapture 2>&1)
-    time=$(echo "$output" | grep "200x100 terminal render" | grep -oP '[\d.]+')
-    times+=("$time")
+    time_us=$(echo "$output" | grep "200x100 terminal render" | grep -oP '[\d.]+' | awk '{print $1 * 1000}')
+    total_us=$(python3 -c "print($total_us + $time_us)")
 done
 
-# Calculate average
-total=0
-for t in "${times[@]}"; do
-    total=$(python3 -c "print($total + $t)")
-done
-avg=$(python3 -c "print(round($total / ${#times[@]}, 3))")
+# Calculate average in microseconds
+avg_us=$(python3 -c "print(round($total_us / 5, 0))")
 
 # Also get compositor metrics
 output=$(cargo test --release --test performance_benchmarks -- --nocapture 2>&1)
 comp_50=$(echo "$output" | grep "Compositor with 50 planes" | grep -oP '[\d.]+' | head -1)
 comp_200=$(echo "$output" | grep "Compositor with 200 planes" | grep -oP '[\d.]+' | head -1)
-
-# Convert to ms and calculate frame_us
-frame_us=$(python3 -c "print(int($avg * 1000))")
+large_ms=$(python3 -c "print(round($avg_us / 1000, 3))")
 
 echo "METRIC compositor_50_ms=$comp_50"
 echo "METRIC compositor_200_ms=$comp_200"
-echo "METRIC large_terminal_ms=$avg"
-echo "METRIC frame_us=$frame_us"
+echo "METRIC large_terminal_ms=$large_ms"
+echo "METRIC frame_us=$avg_us"
