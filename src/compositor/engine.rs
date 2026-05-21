@@ -553,8 +553,7 @@ fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
         return;
     }
 
-    #[inline]
-    fn apply_opaque(dest: &mut Cell, src: &Cell) {
+    if alpha >= 1.0 {
         if src.bg != Color::Reset {
             dest.bg = src.bg;
         }
@@ -572,12 +571,7 @@ fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
             dest.style = src.style;
             dest.skip = false;
         }
-    }
-
-    if alpha >= 1.0 {
-        apply_opaque(dest, src);
     } else {
-        // Alpha blending path
         let blend = |c1: Color, c2: Color, a: f32| -> Color {
             match (c1, c2) {
                 (Color::Rgb(r1, g1, b1), Color::Rgb(r2, g2, b2)) => Color::Rgb(
