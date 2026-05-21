@@ -463,25 +463,37 @@ impl Compositor {
 
         for y in 0..self.height {
             let mut line_cursor_moved = false;
+            let row_base = y as usize * self.width as usize;
+            let last_row_base = y as usize * self.width as usize;
+            
             for x in 0..self.width {
-                let idx = (y * self.width + x) as usize;
+                let idx = row_base + x as usize;
                 let cell = &self.final_buffer[idx];
-                let last_cell = &self.last_frame[idx];
+                let last_cell = &self.last_frame[last_row_base + x as usize];
 
                 if cell.skip {
                     continue;
                 }
 
-                if !check_cell(x, y, &regions) {
+                if full_refresh || regions.is_empty() {
                     if cell == last_cell {
                         line_cursor_moved = false;
                         continue;
                     }
-                    // Cell outside dirty regions but changed — still output it
-                    // (can happen if a plane partially overlaps a dirty region)
-                } else if cell == last_cell {
-                    line_cursor_moved = false;
-                    continue;
+                } else {
+                    // Inline dirty check
+                    let mut in_dirty = false;
+                    for region in &regions {
+                        if x >= region.x && x < region.x + region.width &&
+                           y >= region.y && y < region.y + region.height {
+                            in_dirty = true;
+                            break;
+                        }
+                    }
+                    if !in_dirty && cell == last_cell {
+                        line_cursor_moved = false;
+                        continue;
+                    }
                 }
 
                 if !line_cursor_moved {
