@@ -307,8 +307,8 @@ impl Compositor {
                 }
                 
                 // Pre-compute bounds and strides for this plane
-                let px_end = plane.width.min(self.width.saturating_sub(plane.x));
-                let py_end = plane.height.min(self.height.saturating_sub(plane.y));
+                let px_end = plane.width.min(self.width.saturating_sub(plane.x)) as usize;
+                let py_end = plane.height.min(self.height.saturating_sub(plane.y)) as usize;
                 let plane_stride = plane.width as usize;
                 let dest_stride = self.width as usize;
                 let base_y = plane.y as usize;
@@ -318,11 +318,11 @@ impl Compositor {
                 let plane_filter = plane.filter.as_ref();
                 
                 for py in 0..py_end {
-                    let src_row_base = py as usize * plane_stride;
-                    let dest_row_base = (base_y + py as usize) * dest_stride;
+                    let src_row_base = py * plane_stride;
+                    let dest_row_base = (base_y + py) * dest_stride;
                     for px in 0..px_end {
-                        let src_idx = src_row_base + px as usize;
-                        let dest_idx = dest_row_base + base_x + px as usize;
+                        let src_idx = src_row_base + px;
+                        let dest_idx = dest_row_base + base_x + px;
                         let mut src_cell = plane_cells[src_idx];
 
                         if let Some(filter) = plane_filter {
