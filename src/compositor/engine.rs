@@ -453,13 +453,14 @@ impl Compositor {
         // Buffer all output into a Vec<u8> and issue a single write_all() call.
         let mut buf: Vec<u8> = Vec::with_capacity(self.width as usize * self.height as usize * 20);
 
-        write!(buf, "\x1b[?2026h")?;
+        // Terminal setup sequences (inline for consistency)
+        buf.extend_from_slice(b"\x1b[?2026h");
 
         let mut current_fg = Color::Reset;
         let mut current_bg = Color::Reset;
         let mut current_style = Styles::empty();
 
-        write!(buf, "\x1b[?7l")?;
+        buf.extend_from_slice(b"\x1b[?7l");
 
         let check_cell = |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
             if full_refresh || regions.is_empty() {

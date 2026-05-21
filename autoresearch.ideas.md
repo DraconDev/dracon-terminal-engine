@@ -75,6 +75,8 @@
 
 ## Notes
 
-- The benchmark is now saturated at ~150µs for the 200x100 terminal case
-- Further improvements will require architectural changes (SIMD, bit-packed cells)
-- All performance tests pass, zero clippy warnings
+- The benchmark is now saturated at ~150-250µs for the 200x100 terminal case
+- Terminal I/O variance dominates results (250µs spikes are common)
+- All performance tests pass (8/8), zero clippy warnings
+- Further improvements require architectural changes (SIMD, bit-packed cells)
+- Core compositor optimizations are complete
