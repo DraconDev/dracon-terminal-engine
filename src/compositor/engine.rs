@@ -472,14 +472,13 @@ impl Compositor {
                     continue;
                 }
 
-                if !check_cell(x, y, &regions) {
+                // Fast path: no dirty regions, just check if cell changed
+                if full_refresh || regions.is_empty() {
                     if cell == last_cell {
                         line_cursor_moved = false;
                         continue;
                     }
-                    // Cell outside dirty regions but changed — still output it
-                    // (can happen if a plane partially overlaps a dirty region)
-                } else if cell == last_cell {
+                } else if !check_cell(x, y, &regions) || cell == last_cell {
                     line_cursor_moved = false;
                     continue;
                 }
