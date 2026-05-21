@@ -74,26 +74,33 @@
 
 ## In Progress
 
-### 8. Color::Reset skip in blit_to
-**Status:** Implemented
-**Hypothesis:** blit_to() copying Color::Reset bg cells caused visual bugs
-**Result:** Fixed white lines bug, no measurable performance impact
+### 4. Hot path function inlining
+**Status:** COMPLETED
+**Result:** ~30% improvement (522µs → 367µs). Added #[inline] to render(), sort_planes(), blend_cells(), is_braille(). Pre-computed bounds in render loop.
 
 ---
 
-## Rejected Ideas
+## Deferred Ideas
 
-### 9. Custom allocator for Cell pool
-**Reason:** Overkill for typical terminal sizes (< 100KB total)
-**Rejected:** Complexity without measurable benefit
+### 6. Bit-packed Cell representation
+**Hypothesis:** Memory bandwidth is the bottleneck.
 
-### 10. GPU rendering
-**Reason:** Terminal limitation — no GPU access
-**Rejected:** Framework cannot control terminal display
+**Current:** Cell has `char` (4 bytes) + `Color` (enum + data) + `Styles` (bitflags)
+**Idea:** Pack Cell into 16 bytes using bitfields
 
-### 11. Multi-threaded widget rendering
-**Reason:** Terminal is single-threaded by nature, contention would outweigh benefits
-**Rejected:** Single-threaded event loop is the correct model
+**Expected improvement:** 20-30% faster memcpy due to smaller data size
+
+**Note:** Struct size currently ~40 bytes. Can reduce but need careful handling of Color enum.
+
+---
+
+### 7. Terminal output optimization
+**Hypothesis:** Escape sequence generation dominates output time.
+
+**Current:** write!() calls for each cell's style/color/position
+**Idea:** Batch SGR sequences, optimize cursor positioning, cache style diffs
+
+**Expected improvement:** 10-20% reduction in terminal I/O time
 
 ---
 
