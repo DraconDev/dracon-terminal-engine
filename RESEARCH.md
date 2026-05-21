@@ -560,27 +560,29 @@ Macro: insta::assert_snapshot!()
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
-| `frame_render_us` | 3,903µs | ~400µs | **-89.8%** |
-| `compositor_50_ms` | 0.80ms | 0.11ms | -86.2% |
-| `compositor_200_ms` | 0.82ms | 0.11ms | -86.6% |
-| `large_terminal_ms` | 3.90ms | 0.45ms | -88.5% |
+| `frame_render_us` | 3,903µs | ~315µs | **-91.9%** |
+| `compositor_50_ms` | 0.80ms | 0.08ms | -90% |
+| `compositor_200_ms` | 0.82ms | 0.07ms | -91.5% |
+| `large_terminal_ms` | 3.90ms | 0.32ms | -92% |
 
 ### Optimizations Applied
 
-1. **`#[inline]` on hot path functions** — `fill_bg`, `clear`, `blit_from`, `blit_from_fast` (plane.rs)
-2. **`#[inline]` on render/merge functions** — `render()`, `sort_planes()`, `blend_cells()`, `is_braille()` (engine.rs)
-3. **Render loop optimization** — Pre-compute bounds, remove per-iteration bounds checks in full refresh path
+1. **`#[inline]` on hot path functions** — `fill_bg`, `clear`, `blit_from`, `blit_from_fast`, `render()`, `sort_planes()`, `blend_cells()`, `is_braille()`
+2. **Render loop optimization** — Pre-compute bounds, remove per-iteration bounds checks
+3. **Opaque plane fast-path** — Direct cell copy bypasses blend_cells function for fully opaque planes
 
 ### Rejected Optimizations
 
 - `#[inline(always)]` on `blend_cells`/`is_braille` caused regression (debug build code bloat)
-- Partial dirty-region optimization regressed performance (bounds pre-computation doesn't help when most cells are skipped)
+- Partial dirty-region optimization regressed performance
+- Filter check hoisting had no measurable impact
+- `Vec::fill()` vs for-loop had no measurable impact
 
 ### Remaining Opportunities
 
+- Row-by-row memcpy for contiguous regions
 - Terminal output optimization (escape sequence batching)
 - SIMD for bulk Cell copy
-- Bit-packed Cell representation
 
 ---
 
