@@ -1,7 +1,7 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use ratatui::layout::Rect;
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_width::UnicodeWidthChar;
 
 use crate::data::ExampleMeta;
 
@@ -106,7 +106,9 @@ pub fn draw_text_bounded(
                 };
             }
         }
-        col += ch.width().max(1);
+        if let Some(w) = ch.width() {
+            col += w;
+        }
     }
 }
 
@@ -132,7 +134,9 @@ pub fn draw_text(
                 skip: false,
             };
         }
-        col += ch.width().max(1);
+        if let Some(w) = ch.width() {
+            col += w;
+        }
     }
 }
 
