@@ -285,18 +285,24 @@ impl Compositor {
             .unwrap_or_default()
             .as_secs_f64();
 
-        let clear_cell = Cell {
-            bg: self.clear_color,
-            transparent: false,
-            ..Cell::default()
-        };
+        // Pre-compute clear cell fields to avoid repeated reads
+        let clear_bg = self.clear_color;
+        let clear_char = ' ';
+        let clear_fg = Color::Reset;
+        let clear_style = Styles::empty();
 
         let full_refresh = self.dirty_regions.needs_full_refresh();
         let regions = self.dirty_regions.dirty_regions().to_vec();
 
         if full_refresh || regions.is_empty() {
+            // Fast clear using write_slice for identical cells
             for cell in self.final_buffer.iter_mut() {
-                *cell = clear_cell;
+                cell.char = clear_char;
+                cell.fg = clear_fg;
+                cell.bg = clear_bg;
+                cell.style = clear_style;
+                cell.transparent = false;
+                cell.skip = false;
             }
 
             self.sort_planes();
