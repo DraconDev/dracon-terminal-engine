@@ -496,15 +496,12 @@ impl Compositor {
                 }
 
                 // Check if cell needs to be updated (skip if unchanged)
-                // Don't reset line_cursor_moved - we didn't move cursor this iteration
                 if cell == last_cell {
-                    // Cell unchanged - cursor position stays the same
-                    // line_cursor_moved should remain as-is (we didn't write anything)
+                    line_cursor_moved = false;
                     continue;
                 }
                 if !full_refresh && !regions.is_empty() && !check_cell(x, y, &regions) {
-                    // Cell not in dirty region - cursor position stays the same
-                    // line_cursor_moved should remain as-is (we didn't write anything)
+                    line_cursor_moved = false;
                     continue;
                 }
 
