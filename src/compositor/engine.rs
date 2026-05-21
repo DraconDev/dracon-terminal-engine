@@ -317,19 +317,52 @@ impl Compositor {
                 let opacity = plane.opacity;
                 let plane_filter = plane.filter.as_ref();
                 
-                for py in 0..py_end {
-                    let src_row_base = py * plane_stride;
-                    let dest_row_base = (base_y + py) * dest_stride;
-                    for px in 0..px_end {
-                        let src_idx = src_row_base + px;
-                        let dest_idx = dest_row_base + base_x + px;
-                        let mut src_cell = plane_cells[src_idx];
-
-                        if let Some(filter) = plane_filter {
-                            filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
+                // Fast path: fully opaque plane (no alpha blending needed)
+                if opacity >= 1.0 && plane_filter.is_none() {
+                    for py in 0..py_end {
+                        let src_row_base = py * plane_stride;
+                        let dest_row_base = (base_y + py) * dest_stride;
+                        for px in 0..px_end {
+                            let src_idx = src_row_base + px;
+                            let dest_idx = dest_row_base + base_x + px;
+                            let src_cell = &plane_cells[src_idx];
+                            
+                            if src_cell.transparent {
+                                continue;
+                            }
+                            
+                            let dest_cell = &mut self.final_buffer[dest_idx];
+                            if src_cell.skip {
+                                dest_cell.skip = true;
+                                dest_cell.char = ' ';
+                            } else {
+                                dest_cell.char = src_cell.char;
+                                dest_cell.fg = src_cell.fg;
+                                dest_cell.style = src_cell.style;
+                                dest_cell.skip = false;
+                            }
+                            if src_cell.bg != Color::Reset {
+                                dest_cell.bg = src_cell.bg;
+                            }
+                            dest_cell.transparent = false;
                         }
+                    }
+                } else {
+                    // Full blend path (with alpha or filter)
+                    for py in 0..py_end {
+                        let src_row_base = py * plane_stride;
+                        let dest_row_base = (base_y + py) * dest_stride;
+                        for px in 0..px_end {
+                            let src_idx = src_row_base + px;
+                            let dest_idx = dest_row_base + base_x + px;
+                            let mut src_cell = plane_cells[src_idx];
 
-                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                            if let Some(filter) = plane_filter {
+                                filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
+                            }
+
+                            blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                        }
                     }
                 }
             }
