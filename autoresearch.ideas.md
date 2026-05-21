@@ -75,8 +75,8 @@
 
 ## Notes
 
-- The benchmark is now saturated at ~150-250µs for the 200x100 terminal case
-- Terminal I/O variance dominates results (250µs spikes are common)
+- The benchmark varies significantly (~150-300µs) due to terminal I/O
+- Terminal warm-up and system load affect results
 - All performance tests pass (8/8), zero clippy warnings
+- Optimizations are complete: escape sequence inlining, ASCII fast-path, cell skip logic
 - Further improvements require architectural changes (SIMD, bit-packed cells)
-- Core compositor optimizations are complete
