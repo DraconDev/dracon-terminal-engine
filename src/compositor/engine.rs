@@ -599,14 +599,15 @@ impl Compositor {
                 let c = cell.char as u32;
                 if (0x20..128).contains(&c) {
                     buf.push(c as u8);
-                } else if c >= 128 {
-                    // Multi-byte UTF-8 for non-ASCII
-                    let mut buf_str = [0u8; 4];
-                    let char_bytes = cell.char.encode_utf8(&mut buf_str).as_bytes();
-                    buf.extend_from_slice(char_bytes);
-                } else {
-                    // Control chars (< 0x20) replaced with space
-                    buf.push(b' ');
+                } else if c >= 128 || c < 0x20 {
+                    // Multi-byte UTF-8 for non-ASCII, or replace control chars with space
+                    if c < 0x20 {
+                        buf.push(b' '); // Replace control chars with space
+                    } else {
+                        let mut buf_str = [0u8; 4];
+                        let char_bytes = cell.char.encode_utf8(&mut buf_str).as_bytes();
+                        buf.extend_from_slice(char_bytes);
+                    }
                 }
             }
         }
