@@ -620,7 +620,7 @@ impl Compositor {
                     }
                     current_bg = cell.bg;
                 }
-                buf.push(cell.char as u8);;
+                buf.push(cell.char as u8);
             }
         }
 
