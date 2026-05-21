@@ -97,10 +97,10 @@
 ### 7. Terminal output optimization
 **Hypothesis:** Escape sequence generation dominates output time.
 
-**Current:** write!() calls for each cell's style/color/position
-**Idea:** Batch SGR sequences, optimize cursor positioning, cache style diffs
+**Status:** COMPLETED
+**Result:** ~39% improvement (273µs → 166µs). Replaced write!() macros with direct byte buffer writes for cursor positioning, SGR color codes, and character output.
 
-**Expected improvement:** 10-20% reduction in terminal I/O time
+**Note:** Also removed all write!() calls from the hot path render loop. Consider batching SGR sequences for further improvement.
 
 ---
 
