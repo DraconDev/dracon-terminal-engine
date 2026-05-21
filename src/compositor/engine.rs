@@ -295,11 +295,21 @@ impl Compositor {
         let regions = self.dirty_regions.dirty_regions().to_vec();
 
         if full_refresh || regions.is_empty() {
-            for cell in self.final_buffer.iter_mut() {
-                *cell = clear_cell;
-            }
-
             self.sort_planes();
+            
+            // Check if single opaque plane covers entire terminal - skip clear
+            let single_full_opaque = self.planes.len() == 1 
+                && self.planes[0].x == 0 
+                && self.planes[0].y == 0
+                && self.planes[0].width == self.width 
+                && self.planes[0].height == self.height
+                && self.planes[0].opacity >= 1.0;
+            
+            if !single_full_opaque {
+                for cell in self.final_buffer.iter_mut() {
+                    *cell = clear_cell;
+                }
+            }
 
             for plane in &self.planes {
                 if !plane.visible {
