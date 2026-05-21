@@ -313,6 +313,7 @@ impl Plane {
     }
 
     /// Fills the background color of all cells.
+    #[inline]
     pub fn fill_bg(&mut self, bg: Color) {
         for cell in &mut self.cells {
             cell.bg = bg;
@@ -321,6 +322,7 @@ impl Plane {
     }
 
     /// Resets all cells to their default state.
+    #[inline]
     pub fn clear(&mut self) {
         for cell in &mut self.cells {
             *cell = Cell::default();
@@ -333,6 +335,7 @@ impl Plane {
     ///
     /// Only cells where `source.cells[src].transparent == false && skip == false` are copied.
     /// Cells outside the destination plane's bounds are silently clipped.
+    #[inline]
     pub fn blit_from(&mut self, source: &Plane, dest_x: u16, dest_y: u16) {
         let src_w = source.width as usize;
         let src_h = source.height as usize;
@@ -374,6 +377,7 @@ impl Plane {
     /// - **Fully opaque source, exact dimensions**: Single `copy_from_slice` for O(n) bulk copy
     /// - **Fully opaque source, smaller than dest**: Per-row `copy_from_slice` on the overlapping region
     /// - **Contains transparent cells**: Falls back to `blit_from` behavior
+    #[inline]
     pub fn blit_from_fast(&mut self, source: &Plane) {
         if source.cells.iter().all(|c| !c.transparent) {
             if source.width == self.width && source.height == self.height {
