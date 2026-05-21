@@ -272,11 +272,13 @@ impl Compositor {
         }
     }
 
+    #[inline]
     fn sort_planes(&mut self) {
         self.planes.sort_by_key(|a| a.z_index);
     }
 
     /// Renders the compositor state to the given writer, outputting terminal escape codes.
+    #[inline]
     pub fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()> {
         let render_time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -495,6 +497,7 @@ impl Compositor {
     }
 }
 
+#[inline]
 fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
     if src.transparent || alpha <= 0.0 {
         return;
@@ -559,6 +562,7 @@ fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32) {
     dest.transparent = false;
 }
 
+#[inline]
 fn is_braille(c: char) -> bool {
     let u = c as u32;
     (0x2800..=0x28FF).contains(&u)
