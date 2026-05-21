@@ -297,7 +297,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         plane.fill_bg(self.theme.bg);
 
         let total_items = self.items.len();
-        for (i, &idx) in (self.nav.offset..total_items).take(self.nav.visible_count).enumerate() {
+        for i in 0..self.nav.visible_count {
+            let idx = self.nav.offset + i;
+            if idx >= total_items { break; }
             let row = i as u16;
             let is_selected = idx == self.nav.selected;
             let is_hovered = self.nav.hovered == Some(idx);
@@ -320,9 +322,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
             };
 
             for col in 0..area.width {
-                let idx = (row * area.width + col) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx] = Cell {
+                let cell_idx = (row * area.width + col) as usize;
+                if cell_idx < plane.cells.len() {
+                    plane.cells[cell_idx] = Cell {
                         char: ' ',
                         fg,
                         bg,
@@ -333,20 +335,21 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
                 }
             }
 
+            let item = &self.items[idx];
             let text = item.to_string();
             let label_len = text.width().min((area.width as usize).saturating_sub(2));
             for (j, ch) in text.chars().take(label_len).enumerate() {
-                let idx = (row * area.width + 1 + j as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = fg;
-                    plane.cells[idx].style = style;
+                let cell_idx = (row * area.width + 1 + j as u16) as usize;
+                if cell_idx < plane.cells.len() {
+                    plane.cells[cell_idx].char = ch;
+                    plane.cells[cell_idx].fg = fg;
+                    plane.cells[cell_idx].style = style;
                 }
             }
         }
 
         let total = self.items.len();
-        let visible = visible_items.len();
+        let visible = self.nav.visible_count;
         render_scroll_indicator(&mut plane, area, self.nav.offset, total, visible, &self.theme);
 
         plane
