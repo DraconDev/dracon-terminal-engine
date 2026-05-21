@@ -2,26 +2,6 @@ use crate::compositor::plane::{Cell, Color, Plane, Styles};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use std::io::{self, Write};
 
-/// Fast inline conversion of u16 to decimal string (max 5 digits for u16).
-/// About 3-5x faster than u16::to_string() for this use case.
-#[inline]
-fn write_u16_fast(mut val: u16, buf: &mut Vec<u8>) {
-    if val == 0 {
-        buf.push(b'0');
-        return;
-    }
-    let mut digits = [0u8; 5];
-    let mut len = 0;
-    while val > 0 {
-        digits[len] = (val % 10) as u8 + b'0';
-        val /= 10;
-        len += 1;
-    }
-    for i in (0..len).rev() {
-        buf.push(digits[i]);
-    }
-}
-
 /// Composites multiple planes into a single render target.
 pub struct Compositor {
     /// The planes to composite, ordered by z-index.
@@ -587,20 +567,60 @@ impl Compositor {
                 if cell.fg != current_fg {
                     match cell.fg {
                         Color::Reset => buf.extend_from_slice(b"\x1b[39m"),
-                        Color::Ansi(c) => write!(buf, "\x1b[38;5;{}m", c)?,
-                        Color::Rgb(r, g, b) => write!(buf, "\x1b[38;2;{};{};{}m", r, g, b)?,
+                        Color::Ansi(c) => {
+                            buf.extend_from_slice(b"\x1b[38;5;");
+                            buf.push(b'0' + c / 100);
+                            buf.push(b'0' + (c / 10) % 10);
+                            buf.push(b'0' + c % 10);
+                            buf.push(b'm');
+                        }
+                        Color::Rgb(r, g, b) => {
+                            buf.extend_from_slice(b"\x1b[38;2;");
+                            buf.push(b'0' + r / 100);
+                            buf.push(b'0' + (r / 10) % 10);
+                            buf.push(b'0' + r % 10);
+                            buf.push(b';');
+                            buf.push(b'0' + g / 100);
+                            buf.push(b'0' + (g / 10) % 10);
+                            buf.push(b'0' + g % 10);
+                            buf.push(b';');
+                            buf.push(b'0' + b / 100);
+                            buf.push(b'0' + (b / 10) % 10);
+                            buf.push(b'0' + b % 10);
+                            buf.push(b'm');
+                        }
                     }
                     current_fg = cell.fg;
                 }
                 if cell.bg != current_bg {
                     match cell.bg {
                         Color::Reset => buf.extend_from_slice(b"\x1b[49m"),
-                        Color::Ansi(c) => write!(buf, "\x1b[48;5;{}m", c)?,
-                        Color::Rgb(r, g, b) => write!(buf, "\x1b[48;2;{};{};{}m", r, g, b)?,
+                        Color::Ansi(c) => {
+                            buf.extend_from_slice(b"\x1b[48;5;");
+                            buf.push(b'0' + c / 100);
+                            buf.push(b'0' + (c / 10) % 10);
+                            buf.push(b'0' + c % 10);
+                            buf.push(b'm');
+                        }
+                        Color::Rgb(r, g, b) => {
+                            buf.extend_from_slice(b"\x1b[48;2;");
+                            buf.push(b'0' + r / 100);
+                            buf.push(b'0' + (r / 10) % 10);
+                            buf.push(b'0' + r % 10);
+                            buf.push(b';');
+                            buf.push(b'0' + g / 100);
+                            buf.push(b'0' + (g / 10) % 10);
+                            buf.push(b'0' + g % 10);
+                            buf.push(b';');
+                            buf.push(b'0' + b / 100);
+                            buf.push(b'0' + (b / 10) % 10);
+                            buf.push(b'0' + b % 10);
+                            buf.push(b'm');
+                        }
                     }
                     current_bg = cell.bg;
                 }
-                write!(buf, "{}", cell.char)?;
+                buf.push(cell.char as u8);;
             }
         }
 
