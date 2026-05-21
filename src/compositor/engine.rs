@@ -354,8 +354,8 @@ impl Compositor {
                             for px in 0..px_end {
                                 let src_idx = src_row_base + px;
                                 let dest_idx = dest_row_base + base_x + px;
-                                let mut src_cell = plane_cells[src_idx];
-                                blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                                let src_cell = &plane_cells[src_idx];
+                                blend_cells(&mut self.final_buffer[dest_idx], src_cell, opacity);
                             }
                         }
                     } else {
