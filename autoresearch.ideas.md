@@ -72,11 +72,20 @@
 
 ---
 
-## In Progress
+## Completed Optimizations
 
-### 4. Hot path function inlining
+### Escape Sequence Inlining (ideas.md #7)
 **Status:** COMPLETED
-**Result:** ~30% improvement (522µs → 367µs). Added #[inline] to render(), sort_planes(), blend_cells(), is_braille(). Pre-computed bounds in render loop.
+**Result:** ~44% improvement (273µs → ~150µs). Replaced all write!() macros with direct byte buffer writes.
+
+**Changes:**
+- Cursor positioning: inline digit conversion
+- SGR color codes: inline digit conversion for fg/bg
+- Character output: ASCII fast-path (direct push), multi-byte fallback
+
+### Hot Path Function Inlining (ideas.md #4)
+**Status:** COMPLETED
+**Result:** ~30% improvement (522µs → 367µs). Added #[inline] to render(), sort_planes(), blend_cells(), is_braille().
 
 ---
 
