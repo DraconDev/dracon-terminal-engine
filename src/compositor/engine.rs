@@ -605,8 +605,9 @@ impl Compositor {
             }
         }
 
-        write!(buf, "\x1b[?7h")?;
-        write!(buf, "\x1b[?2026l")?;
+        // Terminal restore sequences
+        buf.extend_from_slice(b"\x1b[?7h");
+        buf.extend_from_slice(b"\x1b[?2026l");
 
         writer.write_all(&buf)?;
 
