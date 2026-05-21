@@ -445,6 +445,11 @@ impl Compositor {
 
         write!(buf, "\x1b[?7l")?;
 
+        // Pre-compute cursor position prefix/suffix
+        const CURSOR_PREFIX: &[u8] = b"\x1b[";
+        const CURSOR_MID: &[u8] = b";";
+        const CURSOR_SUFFIX: &[u8] = b"H";
+
         let check_cell = |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
             if full_refresh || regions.is_empty() {
                 return true;
@@ -484,7 +489,12 @@ impl Compositor {
                 }
 
                 if !line_cursor_moved {
-                    write!(buf, "\x1b[{};{}H", y + 1, x + 1)?;
+                    // Inline cursor position: \x1b[Y;XH
+                    buf.extend_from_slice(b"\x1b[");
+                    buf.extend_from_slice((y + 1).to_string().as_bytes());
+                    buf.push(b';');
+                    buf.extend_from_slice((x + 1).to_string().as_bytes());
+                    buf.extend_from_slice(b"H");
                     line_cursor_moved = true;
                 }
 
