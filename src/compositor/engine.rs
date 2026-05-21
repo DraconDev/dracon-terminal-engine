@@ -394,11 +394,21 @@ impl Compositor {
                 if !plane.visible {
                     continue;
                 }
+
+                // Hoist invariants out of inner loop
+                let plane_cells = &plane.cells;
+                let plane_width = plane.width;
+                let plane_opacity = plane.opacity;
+                let plane_filter = plane.filter.as_ref();
+                let dest_stride = self.width as usize;
+
                 for py in 0..plane.height {
                     let abs_y = plane.y.saturating_add(py);
                     if abs_y >= self.height {
                         continue;
                     }
+                    let dest_row_base = abs_y as usize * dest_stride;
+
                     for px in 0..plane.width {
                         let abs_x = plane.x.saturating_add(px);
                         if abs_x >= self.width {
@@ -420,15 +430,15 @@ impl Compositor {
                             continue;
                         }
 
-                        let src_idx = (py * plane.width + px) as usize;
-                        let dest_idx = (abs_y * self.width + abs_x) as usize;
-                        let mut src_cell = plane.cells[src_idx];
+                        let src_idx = (py * plane_width + px) as usize;
+                        let dest_idx = dest_row_base + abs_x as usize;
+                        let mut src_cell = plane_cells[src_idx];
 
-                        if let Some(filter) = &plane.filter {
+                        if let Some(filter) = plane_filter {
                             filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
                         }
 
-                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
+                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane_opacity);
                     }
                 }
             }
