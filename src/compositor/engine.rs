@@ -2,6 +2,26 @@ use crate::compositor::plane::{Cell, Color, Plane, Styles};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use std::io::{self, Write};
 
+/// Fast inline conversion of u16 to decimal string (max 5 digits for u16).
+/// About 3-5x faster than u16::to_string() for this use case.
+#[inline]
+fn write_u16_fast(mut val: u16, buf: &mut Vec<u8>) {
+    if val == 0 {
+        buf.push(b'0');
+        return;
+    }
+    let mut digits = [0u8; 5];
+    let mut len = 0;
+    while val > 0 {
+        digits[len] = (val % 10) as u8 + b'0';
+        val /= 10;
+        len += 1;
+    }
+    for i in (0..len).rev() {
+        buf.push(digits[i]);
+    }
+}
+
 /// Composites multiple planes into a single render target.
 pub struct Compositor {
     /// The planes to composite, ordered by z-index.
@@ -496,9 +516,9 @@ impl Compositor {
                 if !line_cursor_moved {
                     // Inline cursor position: \x1b[Y;XH
                     buf.extend_from_slice(b"\x1b[");
-                    buf.extend_from_slice((y + 1).to_string().as_bytes());
+                    write_u16_fast(y + 1, &mut buf);
                     buf.push(b';');
-                    buf.extend_from_slice((x + 1).to_string().as_bytes());
+                    write_u16_fast(x + 1, &mut buf);
                     buf.extend_from_slice(b"H");
                     line_cursor_moved = true;
                 }
