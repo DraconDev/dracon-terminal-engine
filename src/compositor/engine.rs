@@ -445,11 +445,6 @@ impl Compositor {
 
         write!(buf, "\x1b[?7l")?;
 
-        // Pre-compute cursor position prefix/suffix
-        const CURSOR_PREFIX: &[u8] = b"\x1b[";
-        const CURSOR_MID: &[u8] = b";";
-        const CURSOR_SUFFIX: &[u8] = b"H";
-
         let check_cell = |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
             if full_refresh || regions.is_empty() {
                 return true;
