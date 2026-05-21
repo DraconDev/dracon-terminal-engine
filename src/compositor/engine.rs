@@ -491,18 +491,12 @@ impl Compositor {
                     continue;
                 }
 
-                // Check if cell needs to be updated
-                if full_refresh {
-                    if cell == last_cell {
-                        line_cursor_moved = false;
-                        continue;
-                    }
-                } else if regions.is_empty() {
-                    if cell == last_cell {
-                        line_cursor_moved = false;
-                        continue;
-                    }
-                } else if !check_cell(x, y, &regions) || cell == last_cell {
+                // Check if cell needs to be updated (skip if unchanged)
+                if cell == last_cell {
+                    line_cursor_moved = false;
+                    continue;
+                }
+                if !full_refresh && !regions.is_empty() && !check_cell(x, y, &regions) {
                     line_cursor_moved = false;
                     continue;
                 }
