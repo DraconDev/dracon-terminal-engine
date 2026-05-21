@@ -296,16 +296,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
         plane.z_index = 10;
         plane.fill_bg(self.theme.bg);
 
-        let visible_items: Vec<_> = self
-            .items
-            .iter()
-            .skip(self.nav.offset)
-            .take(self.nav.visible_count)
-            .collect();
-
-        for (i, item) in visible_items.iter().enumerate() {
+        let total_items = self.items.len();
+        for (i, &idx) in (self.nav.offset..total_items).take(self.nav.visible_count).enumerate() {
             let row = i as u16;
-            let idx = self.nav.offset + i;
             let is_selected = idx == self.nav.selected;
             let is_hovered = self.nav.hovered == Some(idx);
             let bg = if is_selected {
