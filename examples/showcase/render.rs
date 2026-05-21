@@ -1,6 +1,7 @@
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::prelude::*;
 use ratatui::layout::Rect;
+use unicode_width::UnicodeWidthStr;
 
 use crate::data::ExampleMeta;
 
@@ -71,13 +72,29 @@ pub fn set_cell_bounded(plane: &mut Plane, x: usize, y: usize, ch: char, fg: Col
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn draw_text_bounded(plane: &mut Plane, x: usize, y: usize, text: &str, fg: Color, bg: Color, style: Styles, min_x: usize, max_x: usize, min_y: usize, max_y: usize) {
-    if y < min_y || y > max_y { return; }
-    for (i, ch) in text.chars().enumerate() {
-        let cx = x + i;
-        if cx > max_x { break; }
-        if cx >= min_x {
-            let idx = y * plane.width as usize + cx;
+pub fn draw_text_bounded(
+    plane: &mut Plane,
+    x: usize,
+    y: usize,
+    text: &str,
+    fg: Color,
+    bg: Color,
+    style: Styles,
+    min_x: usize,
+    max_x: usize,
+    min_y: usize,
+    max_y: usize,
+) {
+    if y < min_y || y > max_y {
+        return;
+    }
+    let mut col = x;
+    for ch in text.chars() {
+        if col > max_x {
+            break;
+        }
+        if col >= min_x {
+            let idx = y * plane.width as usize + col;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
                     char: ch,
@@ -89,6 +106,7 @@ pub fn draw_text_bounded(plane: &mut Plane, x: usize, y: usize, text: &str, fg: 
                 };
             }
         }
+        col += ch.width().max(1);
     }
 }
 
@@ -101,8 +119,9 @@ pub fn draw_text(
     bg: Color,
     style: Styles,
 ) {
-    for (i, ch) in text.chars().enumerate() {
-        let idx = y * plane.width as usize + x + i;
+    let mut col = x;
+    for ch in text.chars() {
+        let idx = y * plane.width as usize + col;
         if idx < plane.cells.len() {
             plane.cells[idx] = Cell {
                 char: ch,
@@ -113,6 +132,7 @@ pub fn draw_text(
                 skip: false,
             };
         }
+        col += ch.width().max(1);
     }
 }
 

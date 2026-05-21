@@ -1445,13 +1445,14 @@ impl Widget for Showcase {
             return false;
         }
 
-        // Any key press should trigger a re-render
-        self.dirty = true;
-
         // Log input event for debug
         let key_desc = format!("{:?}", key.code);
         let mods = format!("{:?}", key.modifiers);
         let consumed = self.dispatch_key(key);
+        // Only re-render when a state change actually occurred
+        if consumed {
+            self.dirty = true;
+        }
         let status = if consumed { "CONSUMED" } else { "ignored" };
         let log_entry = format!("{} {} {}", key_desc, mods, status);
         self.event_log
