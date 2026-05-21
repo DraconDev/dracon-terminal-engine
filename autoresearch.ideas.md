@@ -81,3 +81,4 @@
 - **Zero clippy warnings** ✓
 - **Completed optimizations**: Escape sequence inlining, ASCII fast-path, cell skip logic
 - **Deferred**: SIMD, bit-packed cells (require architectural changes)
+- **Last run**: #101 stable ~257µs
