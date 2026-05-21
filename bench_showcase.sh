@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# bench_showcase.sh - Measure showcase frame render time
+# bench_showcase.sh - Measure showcase frame render time (release mode)
 
 set -e
 
 cd /home/dracon/Dev/dracon-terminal-engine
 
-echo "Running showcase frame benchmark..."
+echo "Running showcase frame benchmark (release mode)..."
 
-# Run the performance benchmarks and extract metrics
-output=$(cargo test --test performance_benchmarks -- --nocapture 2>&1)
+# Run the performance benchmarks in release mode and extract metrics
+output=$(cargo test --release --test performance_benchmarks -- --nocapture 2>&1)
 
 # Extract timing metrics - handle both µs and ms formats
 # Format examples: "854.796µs", "10.364329ms"
