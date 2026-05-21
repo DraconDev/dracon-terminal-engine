@@ -154,6 +154,16 @@ All widgets demonstrated in showcase scenes:
 
 ---
 
+## Research Tasks
+
+7 tasks identified from full code research (see `TASKS.md`):
+
+| Priority | Tasks |
+|----------|-------|
+| High | 2 (input parser panics, widget trait impls) |
+| Medium | 2 (structured logging, snapshot tests) |
+| Low | 3 (dep updates, metrics, doc examples) |
+
 ## Remaining Work
 
 ### Runtime Verification Needed
@@ -161,7 +171,14 @@ All widgets demonstrated in showcase scenes:
 - [ ] Manual UI sweep — check each scene renders correctly in terminal
 
 ### Deferred to 0.2.0
-- [ ] Widget trait decomposition Phase 2 (breaking changes)
+- [ ] Widget trait decomposition Phase 2 — blanket implementations (FN-083)
+
+### Optional Improvements
+- [ ] Structured logging with tracing (FN-084)
+- [ ] UI snapshot tests with insta (FN-085)
+- [ ] Dependency updates check (FN-086)
+- [ ] Runtime metrics collection (FN-087)
+- [ ] Missing widget doc examples (FN-088)
 
 ---
 
