@@ -295,9 +295,8 @@ impl Compositor {
         let regions = self.dirty_regions.dirty_regions().to_vec();
 
         if full_refresh || regions.is_empty() {
-            for cell in self.final_buffer.iter_mut() {
-                *cell = clear_cell;
-            }
+            // Use fill for faster clear - this may use SIMD internally
+            self.final_buffer.fill(clear_cell);
 
             self.sort_planes();
 
