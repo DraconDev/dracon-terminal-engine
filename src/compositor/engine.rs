@@ -515,11 +515,46 @@ impl Compositor {
 
                 if !line_cursor_moved {
                     // Inline cursor position: \x1b[Y;XH
-                    buf.extend_from_slice(b"\x1b[");
-                    write_u16_fast(y + 1, &mut buf);
+                    buf.push(0x1B);
+                    buf.push(b'[');
+                    // Write y+1 inline
+                    {
+                        let mut val = y + 1;
+                        if val == 0 {
+                            buf.push(b'0');
+                        } else {
+                            let mut digits = [0u8; 5];
+                            let mut len = 0;
+                            while val > 0 {
+                                digits[len] = (val % 10) as u8 + b'0';
+                                val /= 10;
+                                len += 1;
+                            }
+                            for i in (0..len).rev() {
+                                buf.push(digits[i]);
+                            }
+                        }
+                    }
                     buf.push(b';');
-                    write_u16_fast(x + 1, &mut buf);
-                    buf.extend_from_slice(b"H");
+                    // Write x+1 inline
+                    {
+                        let mut val = x + 1;
+                        if val == 0 {
+                            buf.push(b'0');
+                        } else {
+                            let mut digits = [0u8; 5];
+                            let mut len = 0;
+                            while val > 0 {
+                                digits[len] = (val % 10) as u8 + b'0';
+                                val /= 10;
+                                len += 1;
+                            }
+                            for i in (0..len).rev() {
+                                buf.push(digits[i]);
+                            }
+                        }
+                    }
+                    buf.push(b'H');
                     line_cursor_moved = true;
                 }
 
