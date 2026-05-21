@@ -305,15 +305,16 @@ impl Compositor {
                 if !plane.visible {
                     continue;
                 }
-                for py in 0..plane.height {
-                    for px in 0..plane.width {
-                        let abs_x = plane.x.saturating_add(px);
-                        let abs_y = plane.y.saturating_add(py);
-                        if abs_x >= self.width || abs_y >= self.height {
-                            continue;
-                        }
-
+                
+                // Fast path: no bounds checking needed
+                let px_end = plane.width.min(self.width.saturating_sub(plane.x));
+                let py_end = plane.height.min(self.height.saturating_sub(plane.y));
+                
+                for py in 0..py_end {
+                    for px in 0..px_end {
                         let src_idx = (py * plane.width + px) as usize;
+                        let abs_x = plane.x + px;
+                        let abs_y = plane.y + py;
                         let dest_idx = (abs_y * self.width + abs_x) as usize;
                         let mut src_cell = plane.cells[src_idx];
 
