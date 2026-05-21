@@ -75,8 +75,9 @@
 
 ## Notes
 
-- The benchmark varies significantly (~150-300µs) due to terminal I/O
-- Terminal warm-up and system load affect results
-- All performance tests pass (8/8), zero clippy warnings
-- Optimizations are complete: escape sequence inlining, ASCII fast-path, cell skip logic
-- Further improvements require architectural changes (SIMD, bit-packed cells)
+- **Benchmark variance**: ~150-300µs depending on terminal warm-up and system load
+- **Terminal I/O dominates**: Output buffer write dominates timing
+- **All tests pass**: 8/8 performance benchmarks ✓
+- **Zero clippy warnings** ✓
+- **Completed optimizations**: Escape sequence inlining, ASCII fast-path, cell skip logic
+- **Deferred**: SIMD, bit-packed cells (require architectural changes)
