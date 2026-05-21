@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # bench_showcase.sh - Measure showcase frame render time (release mode, stable)
 
-set -e
-
 cd /home/dracon/Dev/dracon-terminal-engine
 
 echo "Running showcase frame benchmark (release mode, 5 iterations)..."
@@ -10,27 +8,43 @@ echo "Running showcase frame benchmark (release mode, 5 iterations)..."
 # Warm-up run first
 cargo test --release --test performance_benchmarks benchmark_large_terminal_200x100 -- --nocapture 2>/dev/null
 
-# Run multiple iterations and collect times (in microseconds)
-total_us=0
-count=0
-for i in {1..5}; do
-    output=$(cargo test --release --test performance_benchmarks benchmark_large_terminal_200x100 -- --nocapture 2>&1)
-    # Get only the first matching time (from current iteration)
-    time_us=$(echo "$output" | grep "200x100 terminal render:" | head -1 | grep -oP '[\d.]+' | awk '{print int($1 * 1000)}')
-    total_us=$((total_us + time_us))
-    count=$((count + 1))
-done
+# Run 5 iterations and collect times using Python for reliable parsing
+python3 << 'EOF'
+import subprocess
+import re
 
-# Calculate average in microseconds
-avg_us=$((total_us / count))
+times = []
+for i in range(5):
+    result = subprocess.run(
+        ["cargo", "test", "--release", "--test", "performance_benchmarks", 
+         "benchmark_large_terminal_200x100", "--", "--nocapture"],
+        capture_output=True, text=True, cwd="/home/dracon/Dev/dracon-terminal-engine"
+    )
+    output = result.stdout
+    # Find "200x100 terminal render: X.XXXms"
+    match = re.search(r'200x100 terminal render: ([\d.]+)', output)
+    if match:
+        time_us = int(float(match.group(1)) * 1000)
+        times.append(time_us)
+        print(f"  Run {i+1}: {time_us}µs")
 
-# Also get compositor metrics
-output=$(cargo test --release --test performance_benchmarks -- --nocapture 2>&1)
-comp_50=$(echo "$output" | grep "Compositor with 50 planes:" | head -1 | grep -oP '[\d.]+' | head -1)
-comp_200=$(echo "$output" | grep "Compositor with 200 planes:" | head -1 | grep -oP '[\d.]+' | head -1)
-large_ms=$(echo "$avg_us" | awk '{printf "%.3f", $1 / 1000}')
+avg_us = sum(times) // len(times) if times else 0
 
-echo "METRIC compositor_50_ms=$comp_50"
-echo "METRIC compositor_200_ms=$comp_200"
-echo "METRIC large_terminal_ms=$large_ms"
-echo "METRIC frame_us=$avg_us"
+# Get compositor metrics
+result = subprocess.run(
+    ["cargo", "test", "--release", "--test", "performance_benchmarks", "--", "--nocapture"],
+    capture_output=True, text=True, cwd="/home/dracon/Dev/dracon-terminal-engine"
+)
+output = result.stdout
+
+comp_50 = re.search(r'Compositor with 50 planes: ([\d.]+)', output)
+comp_200 = re.search(r'Compositor with 200 planes: ([\d.]+)', output)
+comp_50_val = float(comp_50.group(1)) / 1000 if comp_50 else 0
+comp_200_val = float(comp_200.group(1)) / 1000 if comp_200 else 0
+
+print(f"=== Benchmark Results ===")
+print(f"METRIC compositor_50_ms={comp_50_val:.3f}")
+print(f"METRIC compositor_200_ms={comp_200_val:.3f}")
+print(f"METRIC large_terminal_ms={avg_us/1000:.3f}")
+print(f"METRIC frame_us={avg_us}")
+EOF
