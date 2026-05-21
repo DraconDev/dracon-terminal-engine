@@ -486,8 +486,12 @@ impl Compositor {
                 let last_cell = &self.last_frame[idx];
 
                 // Fast path: skip padding cells
+                // Don't reset line_cursor_moved - the cursor is still at the right position
+                // for the next cell (or at the start of the line if we just rendered one)
                 if cell.skip {
-                    line_cursor_moved = false;
+                    // Still need to track cursor position for accurate movement
+                    // Skip cells are padding for wide chars - we should be at position x+1
+                    line_cursor_moved = true; // Cursor is at x+1 now
                     continue;
                 }
 
