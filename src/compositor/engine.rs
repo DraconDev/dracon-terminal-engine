@@ -483,9 +483,26 @@ impl Compositor {
             for x in 0..self.width {
                 let idx = (y * self.width + x) as usize;
                 let cell = &self.final_buffer[idx];
+                let last_cell = &self.last_frame[idx];
 
-                // Fast path: skip unchanged or padding cells
-                if cell.skip || (full_refresh && cell == &self.last_frame[idx]) {
+                // Fast path: skip padding cells
+                if cell.skip {
+                    line_cursor_moved = false;
+                    continue;
+                }
+
+                // Check if cell needs to be updated
+                if full_refresh {
+                    if cell == last_cell {
+                        line_cursor_moved = false;
+                        continue;
+                    }
+                } else if regions.is_empty() {
+                    if cell == last_cell {
+                        line_cursor_moved = false;
+                        continue;
+                    }
+                } else if !check_cell(x, y, &regions) || cell == last_cell {
                     line_cursor_moved = false;
                     continue;
                 }
