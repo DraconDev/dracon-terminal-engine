@@ -295,8 +295,9 @@ impl Compositor {
         let regions = self.dirty_regions.dirty_regions().to_vec();
 
         if full_refresh || regions.is_empty() {
-            // Use fill for faster clear - this may use SIMD internally
-            self.final_buffer.fill(clear_cell);
+            for cell in self.final_buffer.iter_mut() {
+                *cell = clear_cell;
+            }
 
             self.sort_planes();
 
@@ -305,23 +306,30 @@ impl Compositor {
                     continue;
                 }
                 
-                // Fast path: no bounds checking needed
+                // Pre-compute bounds and strides for this plane
                 let px_end = plane.width.min(self.width.saturating_sub(plane.x));
                 let py_end = plane.height.min(self.height.saturating_sub(plane.y));
+                let plane_stride = plane.width as usize;
+                let dest_stride = self.width as usize;
+                let base_y = plane.y as usize;
+                let base_x = plane.x as usize;
+                let plane_cells = &plane.cells;
+                let opacity = plane.opacity;
+                let plane_filter = plane.filter.as_ref();
                 
                 for py in 0..py_end {
+                    let src_row_base = py as usize * plane_stride;
+                    let dest_row_base = (base_y + py as usize) * dest_stride;
                     for px in 0..px_end {
-                        let src_idx = (py * plane.width + px) as usize;
-                        let abs_x = plane.x + px;
-                        let abs_y = plane.y + py;
-                        let dest_idx = (abs_y * self.width + abs_x) as usize;
-                        let mut src_cell = plane.cells[src_idx];
+                        let src_idx = src_row_base + px as usize;
+                        let dest_idx = dest_row_base + base_x + px as usize;
+                        let mut src_cell = plane_cells[src_idx];
 
-                        if let Some(filter) = &plane.filter {
-                            filter.apply(&mut src_cell, abs_x, abs_y, render_time as f32);
+                        if let Some(filter) = plane_filter {
+                            filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
                         }
 
-                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, plane.opacity);
+                        blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
                     }
                 }
             }
