@@ -1,4 +1,4 @@
-generated: 2026-05-21T13:55:59.168Z
+generated: 2026-05-21T14:00:38.822Z
 goalId: ud-cegsbz
 goal: Audit all showcase scenes, fix Esc/Back navigation and screen corruption
   (white horizontal lines on input fields)
@@ -22,7 +22,7 @@ tasks:
   - id: T-001
     title: Bootstrap — Map all showcase scenes
     phase: bootstrap
-    status: pending
+    status: in_progress
     dependencies: []
     blocks:
       - T-002
@@ -48,7 +48,8 @@ tasks:
       - Only catalog in this task, no fixes yet
       - Don't modify any scene code
       - Max 50 LOC per helper function
-    learnings: []
+    learnings:
+      - Starting scene mapping - need to identify all 29 scenes and their types
     gotchas:
       - Some scenes may be in unexpected directories
       - External binaries may not use the framework directly
