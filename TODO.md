@@ -28,5 +28,5 @@ The `else if` condition `c >= 128 || c < 0x20` in `src/compositor/engine.rs` was
 
 ## 🧹 General Code Quality
 
-- [ ] **`examples/showcase/render.rs`**: `draw_text` and `draw_text_bounded` use character index, not display width, and lack plane-width bounds checks. Refactor to use `put_str` with clipping, or add width checks before setting cells.
-- [ ] **`examples/showcase/widget.rs`**: `dispatch_key` sets `self.dirty = true` for EVERY keypress, even unhandled ones. This causes full re-renders on keys that do nothing — wasteful for performance.
+- [x] **`examples/showcase/render.rs`**: `draw_text` and `draw_text_bounded` now use `UnicodeWidthChar` for proper column tracking. Wide characters (CJK, emoji) advance by their actual display width instead of character index. Fixed in this commit.
+- [x] **`examples/showcase/widget.rs`**: `handle_key` now only sets `dirty = true` when key was actually consumed. Unhandled keys no longer trigger wasteful re-renders. Fixed in this commit.

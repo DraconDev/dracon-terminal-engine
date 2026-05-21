@@ -213,7 +213,7 @@ mod scene_construction_tests {
 
     #[test]
     fn test_all_scenes_render_without_panic() {
-        for (name, mut scene) in make_scene_tests() {
+        for (_name, mut scene) in make_scene_tests() {
             scene.on_enter();
             let _plane = scene.render(test_area());
             drop(scene);
@@ -223,7 +223,7 @@ mod scene_construction_tests {
     #[test]
     fn test_all_scenes_theme_change() {
         let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
-        for (name, mut scene) in make_scene_tests() {
+        for (_name, mut scene) in make_scene_tests() {
             for theme in &themes {
                 scene.on_theme_change(theme);
                 let _plane = scene.render(test_area());
