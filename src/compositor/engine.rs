@@ -329,19 +329,10 @@ impl Compositor {
                             
                             // Direct copy for fully opaque, non-transparent cells
                             if !src_cell.transparent {
-                                if src_cell.skip {
-                                    dest_cell.skip = true;
-                                    dest_cell.char = ' ';
-                                } else {
-                                    dest_cell.char = src_cell.char;
-                                    dest_cell.fg = src_cell.fg;
-                                    dest_cell.style = src_cell.style;
-                                    dest_cell.skip = false;
-                                }
-                                if src_cell.bg != Color::Reset {
-                                    dest_cell.bg = src_cell.bg;
-                                }
-                                dest_cell.transparent = false;
+                                // Use pointer copy for contiguous memory operation
+                                *dest_cell = *src_cell;
+                                // Reset skip state for non-transparent cells
+                                dest_cell.skip = false;
                             }
                         }
                     }
