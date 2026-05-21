@@ -316,31 +316,62 @@ impl Compositor {
                 let plane_cells = &plane.cells;
                 let opacity = plane.opacity;
                 
-                // Hot path: no filter, cache filter lookup outside loop
-                if plane.filter.is_none() {
+                // Ultra-fast path: fully opaque plane, no filter, no blending needed
+                if opacity >= 1.0 && plane.filter.is_none() {
                     for py in 0..py_end {
                         let src_row_base = py * plane_stride;
                         let dest_row_base = (base_y + py) * dest_stride;
                         for px in 0..px_end {
                             let src_idx = src_row_base + px;
                             let dest_idx = dest_row_base + base_x + px;
-                            let mut src_cell = plane_cells[src_idx];
-                            blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                            let src_cell = &plane_cells[src_idx];
+                            let dest_cell = &mut self.final_buffer[dest_idx];
+                            
+                            // Direct copy for fully opaque, non-transparent cells
+                            if !src_cell.transparent {
+                                if src_cell.skip {
+                                    dest_cell.skip = true;
+                                    dest_cell.char = ' ';
+                                } else {
+                                    dest_cell.char = src_cell.char;
+                                    dest_cell.fg = src_cell.fg;
+                                    dest_cell.style = src_cell.style;
+                                    dest_cell.skip = false;
+                                }
+                                if src_cell.bg != Color::Reset {
+                                    dest_cell.bg = src_cell.bg;
+                                }
+                                dest_cell.transparent = false;
+                            }
                         }
                     }
                 } else {
-                    let plane_filter = plane.filter.as_ref();
-                    for py in 0..py_end {
-                        let src_row_base = py * plane_stride;
-                        let dest_row_base = (base_y + py) * dest_stride;
-                        for px in 0..px_end {
-                            let src_idx = src_row_base + px;
-                            let dest_idx = dest_row_base + base_x + px;
-                            let mut src_cell = plane_cells[src_idx];
-                            if let Some(filter) = plane_filter {
-                                filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
+                    // Full blend path
+                    if plane.filter.is_none() {
+                        for py in 0..py_end {
+                            let src_row_base = py * plane_stride;
+                            let dest_row_base = (base_y + py) * dest_stride;
+                            for px in 0..px_end {
+                                let src_idx = src_row_base + px;
+                                let dest_idx = dest_row_base + base_x + px;
+                                let mut src_cell = plane_cells[src_idx];
+                                blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
                             }
-                            blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                        }
+                    } else {
+                        let plane_filter = plane.filter.as_ref();
+                        for py in 0..py_end {
+                            let src_row_base = py * plane_stride;
+                            let dest_row_base = (base_y + py) * dest_stride;
+                            for px in 0..px_end {
+                                let src_idx = src_row_base + px;
+                                let dest_idx = dest_row_base + base_x + px;
+                                let mut src_cell = plane_cells[src_idx];
+                                if let Some(filter) = plane_filter {
+                                    filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
+                                }
+                                blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
+                            }
                         }
                     }
                 }
