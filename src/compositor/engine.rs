@@ -503,43 +503,9 @@ impl Compositor {
                     // Inline cursor position: \x1b[Y;XH
                     buf.push(0x1B);
                     buf.push(b'[');
-                    // Write y+1 inline
-                    {
-                        let mut val = y + 1;
-                        if val == 0 {
-                            buf.push(b'0');
-                        } else {
-                            let mut digits = [0u8; 5];
-                            let mut len = 0;
-                            while val > 0 {
-                                digits[len] = (val % 10) as u8 + b'0';
-                                val /= 10;
-                                len += 1;
-                            }
-                            for i in (0..len).rev() {
-                                buf.push(digits[i]);
-                            }
-                        }
-                    }
+                    write_u16_decimal(&mut buf, y + 1);
                     buf.push(b';');
-                    // Write x+1 inline
-                    {
-                        let mut val = x + 1;
-                        if val == 0 {
-                            buf.push(b'0');
-                        } else {
-                            let mut digits = [0u8; 5];
-                            let mut len = 0;
-                            while val > 0 {
-                                digits[len] = (val % 10) as u8 + b'0';
-                                val /= 10;
-                                len += 1;
-                            }
-                            for i in (0..len).rev() {
-                                buf.push(digits[i]);
-                            }
-                        }
-                    }
+                    write_u16_decimal(&mut buf, x + 1);
                     buf.push(b'H');
                     line_cursor_moved = true;
                 }
@@ -648,6 +614,26 @@ impl Compositor {
         self.dirty_regions.clear();
         writer.flush()?;
         Ok(())
+    }
+}
+
+/// Writes a u16 value as decimal digits to a buffer.
+/// Inline helper to avoid code duplication in escape sequence generation.
+#[inline]
+fn write_u16_decimal(buf: &mut Vec<u8>, mut val: u16) {
+    if val == 0 {
+        buf.push(b'0');
+    } else {
+        let mut digits = [0u8; 5];
+        let mut len = 0;
+        while val > 0 {
+            digits[len] = (val % 10) as u8 + b'0';
+            val /= 10;
+            len += 1;
+        }
+        for i in (0..len).rev() {
+            buf.push(digits[i]);
+        }
     }
 }
 
