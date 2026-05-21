@@ -398,17 +398,14 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             let _ = i;
         }
 
-        let visible_rows: Vec<_> = self
-            .rows
-            .iter()
-            .skip(self.nav.offset)
-            .take(self.nav.visible_count)
-            .collect();
-
-        for (i, row) in visible_rows.iter().enumerate() {
+        let total_rows = self.rows.len();
+        for i in 0..self.nav.visible_count {
+            let row_idx = self.nav.offset + i;
+            if row_idx >= total_rows { break; }
+            let row = &self.rows[row_idx];
             let y = 1 + i;
-            let is_selected = self.nav.offset + i == self.nav.selected;
-            let is_hovered = self.nav.hovered == Some(self.nav.offset + i);
+            let is_selected = row_idx == self.nav.selected;
+            let is_hovered = self.nav.hovered == Some(row_idx);
             let bg = if is_selected {
                 self.theme.selection_bg
             } else if is_hovered {
@@ -455,7 +452,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         }
 
         let total = self.rows.len();
-        let visible = visible_rows.len();
+        let visible = self.nav.visible_count;
         render_scroll_indicator(&mut plane, area, self.nav.offset, total, visible, &self.theme);
 
         plane
