@@ -1,0 +1,272 @@
+generated: 2026-05-21T13:55:59.168Z
+goalId: ud-cegsbz
+goal: Audit all showcase scenes, fix Esc/Back navigation and screen corruption
+  (white horizontal lines on input fields)
+doneCriteria: 1. All embedded showcase scenes handle actions::BACK correctly
+  (Esc dismisses/goes back) 2. Screen corruption (white horizontal lines) when
+  using input fields is fixed 3. cargo test --release passes 4. cargo clippy
+  --lib --examples --tests has zero warnings 5. All scenes verified manually for
+  Esc behavior and no visual glitches
+verifyCommand: mise exec -- cargo test --release && cargo clippy --lib --examples --tests
+phase: bootstrap
+askBefore:
+  - git push to main branch
+  - changing core framework code
+decisionStyle: Fix scene-level issues first; only touch framework code if root
+  cause is there. Prefer minimal surgical fixes over refactors.
+budget:
+  used: 0
+  max: 20
+currentTaskId: T-001
+tasks:
+  - id: T-001
+    title: Bootstrap — Map all showcase scenes
+    phase: bootstrap
+    status: pending
+    dependencies: []
+    blocks:
+      - T-002
+      - T-003
+      - T-004
+      - T-005
+    prerequisites:
+      - description: Project builds successfully
+        cleared: true
+      - description: AGENTS.md conventions understood
+        cleared: true
+    validationSteps:
+      - Scene list exists with all 29 scenes
+      - Each scene categorized as embedded or external
+      - Esc/Back handling status documented per scene
+      - Input field usage documented per scene
+    ciCommands:
+      - cargo build --examples
+    styleguideRules:
+      - Follow existing code patterns in AGENTS.md
+      - Use keybindings.matches() not hardcoded keys
+    guardrails:
+      - Only catalog in this task, no fixes yet
+      - Don't modify any scene code
+      - Max 50 LOC per helper function
+    learnings: []
+    gotchas:
+      - Some scenes may be in unexpected directories
+      - External binaries may not use the framework directly
+    context:
+      - path: examples/showcase/
+        why: Showcase launcher with embedded scenes
+      - path: examples/
+        why: External binary examples
+      - path: AGENTS.md
+        why: Project conventions and patterns
+  - id: T-002
+    title: RED — Audit Esc/Back handling
+    phase: red
+    status: pending
+    dependencies:
+      - T-001
+    blocks:
+      - T-003
+    prerequisites:
+      - description: Scene map from T-001 is complete
+        cleared: false
+      - description: AGENTS.md keybinding conventions reviewed
+        cleared: false
+    validationSteps:
+      - Audit report exists with pass/fail per scene
+      - Each failing scene has specific violation noted
+      - Scenes using hardcoded Esc instead of actions::BACK identified
+    ciCommands: []
+    styleguideRules:
+      - All global actions must use keybindings.matches()
+      - Esc should map to actions::BACK
+      - Help overlay must mention dismiss key
+    guardrails:
+      - No code changes in RED phase
+      - Only add audit documentation/tests
+      - Be specific about what's wrong, not vague
+    learnings: []
+    gotchas:
+      - Some scenes may use Pattern 1 (Widget trait) vs Pattern 2 (InputRouter)
+        - check accordingly
+      - Modal overlays may have their own dismiss logic
+      - Raw terminal examples may not use keybindings at all
+    context:
+      - path: src/framework/keybindings.rs
+        why: KeybindingSet and actions::BACK definition
+      - path: AGENTS.md
+        why: Keybinding conventions section
+  - id: T-003
+    title: GREEN — Fix Esc/Back in failing scenes
+    phase: green
+    status: pending
+    dependencies:
+      - T-002
+    blocks:
+      - T-004
+    prerequisites:
+      - description: Audit report identifies all failing scenes
+        cleared: false
+    validationSteps:
+      - All failing scenes from T-002 now handle actions::BACK
+      - "Manual verification: Esc works in each fixed scene"
+      - No regressions in other functionality
+    ciCommands:
+      - cargo test --release
+      - cargo clippy --lib --examples --tests
+    styleguideRules:
+      - Use keybindings.matches(actions::BACK, &key) not hardcoded Esc
+      - Clear show_help or modal state when Back is pressed
+      - Set dirty = true after state change
+    guardrails:
+      - Minimal surgical fixes only
+      - Don't refactor unrelated code
+      - One fix per scene, commit separately
+    learnings: []
+    gotchas:
+      - Pattern 2 apps (InputRouter) need current_theme() sync after handle_key
+      - Don't break existing widget keyboard handling
+      - Test both Esc and the configured back key
+    context:
+      - path: AGENTS.md
+        why: Pattern 1 vs Pattern 2 app patterns
+      - path: src/framework/keybindings.rs
+        why: actions::BACK constant
+  - id: T-004
+    title: RED — Investigate screen corruption
+    phase: red
+    status: pending
+    dependencies:
+      - T-001
+    blocks:
+      - T-005
+    prerequisites:
+      - description: Can build and run showcase
+        cleared: true
+      - description: Know which scenes use input fields
+        cleared: false
+    validationSteps:
+      - White horizontal line corruption reproduced
+      - Root cause identified (rendering, cell clearing, dirty tracking, etc.)
+      - Minimal reproduction case documented
+    ciCommands:
+      - cargo build --example showcase
+    styleguideRules:
+      - Document exact reproduction steps
+      - Note terminal emulator used
+      - Check both embedded and external scenes
+    guardrails:
+      - No code changes in RED phase
+      - Focus on understanding, not fixing
+      - Check framework code if root cause is there
+    learnings: []
+    gotchas:
+      - Corruption may be terminal-specific
+      - May be related to partial redraw/dirty regions
+      - Could be from input cursor rendering or cell skip flags
+    context:
+      - path: src/framework/app.rs
+        why: Render loop and output generation
+      - path: src/compositor/engine.rs
+        why: Cell rendering and dirty tracking
+      - path: src/widgets/text_input_base.rs
+        why: Input field rendering if root cause is there
+  - id: T-005
+    title: GREEN — Fix screen corruption
+    phase: green
+    status: pending
+    dependencies:
+      - T-004
+    blocks:
+      - T-006
+    prerequisites:
+      - description: Root cause identified in T-004
+        cleared: false
+    validationSteps:
+      - Corruption no longer reproduces after fix
+      - All scenes with input fields verified clean
+      - No regressions in other rendering
+    ciCommands:
+      - cargo test --release
+      - cargo clippy --lib --examples --tests
+    styleguideRules:
+      - Minimal fix targeting root cause
+      - Don't change unrelated rendering code
+      - Preserve existing performance optimizations
+    guardrails:
+      - Only touch code related to root cause
+      - Test fix on multiple scenes
+      - Verify no new clippy warnings
+    learnings: []
+    gotchas:
+      - Fix in framework may affect all scenes
+      - Test both Widget trait and InputRouter patterns
+      - Check for off-by-one in cell indices
+    context:
+      - path: src/compositor/engine.rs
+        why: Main rendering engine
+      - path: src/framework/app.rs
+        why: Output generation and terminal sync
+  - id: T-006
+    title: REFACTOR — Clean up any mess
+    phase: refactor
+    status: pending
+    dependencies:
+      - T-003
+      - T-005
+    blocks:
+      - T-007
+    prerequisites:
+      - description: Esc/Back fixes applied
+        cleared: false
+      - description: Screen corruption fixed
+        cleared: false
+    validationSteps:
+      - No debug prints or commented-out code
+      - Consistent patterns across all fixed scenes
+      - Code review passes
+    ciCommands:
+      - cargo clippy --lib --examples --tests
+    styleguideRules:
+      - Remove any TODOs added during debugging
+      - Ensure theme propagation works in fixed scenes
+      - Verify help overlays are complete
+    guardrails:
+      - No functional changes, only cleanup
+      - Don't break fixes from T-003 or T-005
+      - Keep diffs minimal
+    learnings: []
+    gotchas:
+      - Cleanups can accidentally break working code
+      - Don't remove intentional comments or docs
+    context: []
+  - id: T-007
+    title: CLEANUP — Final verification
+    phase: cleanup
+    status: pending
+    dependencies:
+      - T-006
+    blocks: []
+    prerequisites:
+      - description: All fixes applied and cleaned up
+        cleared: false
+      - description: verifyCommand can run
+        cleared: true
+    validationSteps:
+      - cargo test --release passes
+      - cargo clippy --lib --examples --tests has zero warnings
+      - Manual spot-check of affected scenes for Esc and no corruption
+    ciCommands:
+      - cargo test --release
+      - cargo clippy --lib --examples --tests
+    styleguideRules:
+      - Quote full command output as evidence
+      - Verify each affected scene manually
+    guardrails:
+      - Don't make new code changes in cleanup
+      - Only run verification and report results
+    learnings: []
+    gotchas:
+      - Some clippy warnings may pre-exist; only check for new ones
+      - Terminal I/O variance doesn't affect test correctness
+    context: []
