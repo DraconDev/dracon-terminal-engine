@@ -126,7 +126,7 @@ fn test_list_navigation_scroll_down() {
 
 #[test]
 fn test_list_navigation_scroll_down_at_end() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.offset = 15;
 
     nav.scroll_down(20);
@@ -135,7 +135,7 @@ fn test_list_navigation_scroll_down_at_end() {
 
 #[test]
 fn test_list_navigation_scroll_up() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.offset = 5;
 
     nav.scroll_up();
@@ -147,7 +147,7 @@ fn test_list_navigation_scroll_up() {
 
 #[test]
 fn test_list_navigation_scroll_up_at_start() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.offset = 0;
 
     nav.scroll_up();
