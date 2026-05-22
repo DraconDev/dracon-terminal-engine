@@ -251,12 +251,14 @@ fn test_sparkline_handle_mouse_down() {
 
 #[test]
 fn test_sparkline_on_point_click_callback() {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    let called = Rc::new(RefCell::new(false));
+    let called_clone = Rc::clone(&called);
     let mut sp = Sparkline::new(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
     sp.set_area(Rect::new(0, 0, 40, 5));
-    let called = std::cell::RefCell::new(false);
-    let called_ref = &called;
     sp = sp.on_point_click(move |_idx, _val| {
-        *called_ref.borrow_mut() = true;
+        *called_clone.borrow_mut() = true;
     });
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
     let handled = sp.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 2);
