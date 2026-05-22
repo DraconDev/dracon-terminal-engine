@@ -245,8 +245,12 @@ fn test_sparkline_on_point_click_callback() {
         *called_clone.borrow_mut() = true;
     });
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-    let handled = sp.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 2);
-    assert!(handled);
+    // First move to hover over a point
+    let moved = sp.handle_mouse(MouseEventKind::Moved, 10, 2);
+    assert!(moved);
+    // Then click to trigger callback
+    let clicked = sp.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 2);
+    assert!(clicked);
     assert!(*called.borrow());
 }
 

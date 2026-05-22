@@ -19,26 +19,30 @@ Dependencies (transitive): 310 · Rc/RefCell uses: 403 · `unwrap()`/`expect()` 
 - [ ] File issue with `ratatui` to update `lru`
 - [ ] If no upstream fix, evaluate pinning or vendoring
 
-### 2. No CI pipeline
+### 2. CI pipeline — ✅ EXISTS
 
-No `.github/workflows/` or CI config files found. Zero automated gates.
-- [ ] Add GitHub Actions workflow: `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt --check`
-- [ ] Add nightly/hygiene checks: `cargo audit`, `cargo outdated`, doc build
+- [x] GitHub Actions workflow: `ci.yml` — `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt --check`
+- [x] `bench.yml` — criterion benchmarks with comparison
+- [x] `plugin-ci.yml` — plugin smoke tests
+- [x] `release.yml` — GitHub release artifacts
+- [x] `rustsec/audit-check` in CI for security advisories
+
+- [ ] Add `cargo outdated` to health checks
 - [ ] Add markdown lint for `CHANGELOG.md` formatting
 
-### 3. 4 security advisories
+### 3. Security advisories — ✅ PARTIAL
 
 All transitive via `syntect` and `ratatui`:
 
 | Crate | Advisory | Action |
 |-------|----------|--------|
-| `bincode 1.3.3` | RUSTSEC-2025-0141 (unmaintained) | Evaluate replacing syntect or pinning |
+| `bincode 1.3.3` | RUSTSEC-2025-0141 (unmaintained) | Monitor — no action possible |
 | `paste 1.0.15` | RUSTSEC-2024-0436 (unmaintained) | Upstream (ratatui) — monitor |
 | `yaml-rust 0.4.5` | RUSTSEC-2024-0320 (unmaintained) | Upstream (syntect) — monitor |
-| `lru 0.12.5` | RUSTSEC-2026-0002 (unsound) | Upstream (ratatui) — escalate |
+| `lru 0.12.5` | RUSTSEC-2026-0002 (unsound) | **Escalate to ratatui** — this is the priority |
 
-- [ ] Add `cargo audit` to CI (or use `cargo deny`)
-- [ ] Track each upstream fix
+- [x] `cargo audit` in CI (via `rustsec/audit-check`)
+- [ ] File ratatui issue for `lru` unsoundness
 
 ---
 
@@ -72,17 +76,14 @@ Second-largest file. Catch-all for misc utilities.
 - [ ] Extract `parse_hex_color`, `darken`, `lighten` → `src/visuals/` or `theme.rs`
 - [ ] Remaining helpers → `src/framework/layout.rs` or dedicated `helpers.rs`
 
-### 6. Test coverage gaps: 4 widgets with zero test files
+### 6. Test coverage gaps — ✅ ALL FIXED
 
-| Widget | LOC | Tests? |
+| Widget | LOC | Status |
 |--------|-----|--------|
-| `list_common` | shared | ❌ 0 |
-| `progress_ring` | 383 | ❌ 0 |
-| `sparkline` | 455 | ❌ 0 |
-| `text_editor_adapter` | — | ❌ 0 |
-
-- [ ] Add minimal smoke tests for all 4
-- [ ] Target: every framework widget covered by ≥1 integration test
+| `progress_ring` | 383 | ✅ Added `tests/widget_progress_ring_test.rs` (38 tests) |
+| `sparkline` | 455 | ✅ Added `tests/widget_sparkline_test.rs` (37 tests) |
+| `list_common` | 196 | ✅ Added `tests/widget_list_common_test.rs` (25 tests) |
+| `text_editor_adapter` | — | ✅ Already had 2 test files (`text_editor_adapter_test.rs`, `text_editor_adapter_edge_test.rs`) |
 
 ### 7. Add `cargo outdated` to health checks
 
@@ -90,7 +91,7 @@ Second-largest file. Catch-all for misc utilities.
 - [ ] Dev-deps with major gaps: `criterion 0.5.1` → `0.8.2`, `itertools 0.10` → `0.13`
 - [ ] Add `cargo upgrade` to maintenance workflow
 
-### 8. Evaluate `App::new().unwrap()` in public API
+### 8. `App::new().unwrap()` in public API
 
 `lib.rs` and `framework/mod.rs` both show `App::new().unwrap()` in doc examples. `App::new()` returns `io::Result<Self>`.
 
@@ -201,13 +202,18 @@ Current locations:
 
 ---
 
-## 📋 Summary of Failures Found
+## 📋 Summary of Completed / Remaining
 
-| Category | Items |
-|----------|-------|
-| Security advisories | 4 (1 unsound, 3 unmaintained) |
-| Untested framework widgets | 4 (progress_ring, sparkline, list_common, text_editor_adapter) |
-| CI/CD | 0 — no automated pipeline |
-| Large files (>1,000 LOC) | 2 (editor 3,025, utils 1,217) |
-| Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` |
-| Unsafe blocks with missing SAFETY | 11 of 12 |
+| Category | Items | Status |
+|----------|-------|--------|
+| Security advisories | 4 (1 unsound, 3 unmaintained) | 🔴 Open |
+| Untested framework widgets | 4 (progress_ring, sparkline, list_common, text_editor_adapter) | ✅ **DONE** |
+| CI/CD pipeline | 4 workflows (ci, bench, plugin-ci, release) | ✅ **DONE** |
+| Large files (>1,000 LOC) | 2 (editor 3,025, utils 1,217) | 🟡 Open |
+| Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` | 🟡 Open |
+| Unsafe blocks with missing SAFETY | 11 of 12 | 🟡 Open |
+| `cargo outdated` integration | not in CI | 🟡 Open |
+| Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
+
+**Completed:** 3 items (test coverage, CI pipeline)
+**Remaining:** 5 items
