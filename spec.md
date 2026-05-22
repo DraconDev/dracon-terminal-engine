@@ -3509,7 +3509,22 @@ pub type SubmitCallback = Box<dyn FnMut(&str)>;
 - Placeholder: shown when empty and unfocused, `fg_subtle`
 - Keys: Char (insert), Backspace (delete left), Delete (delete right), Left/Right (move cursor), Home/End, Ctrl+A (select all), Enter (submit)
 
-### 5.3 Common Widget Patterns
+### 5.3 Standalone Widgets (`src/widgets/`)
+
+| Widget | File | LOC | Description | Dependencies |
+|--------|------|-----|-------------|-------------|
+| `TextEditor` | editor.rs | 3,025 | Full-featured code editor with syntax highlighting, undo/redo, search/filter, multi-cursor, clipboard | syntect (feature-gated) |
+| `TextInput` | input.rs | — | Single-line text input with cursor, selection, IME; supports char insertion, backspace/delete, cursor movement, Home/End, selection with Shift+arrows | none |
+| `Button` | button.rs | — | Standalone clickable button with press state (not framework Button); used in raw-terminal contexts | none |
+| `Panel` | panel.rs | — | Bordered panel container with optional title bar; renders rounded corners (╭╮╰╯) with configurable border style and colors | none |
+| `Component` | component.rs | — | Base component trait for composing complex widgets from sub-widgets; provides lifecycle hooks similar to Widget trait | none |
+| `HotkeyHint` | hotkey.rs | — | Keyboard shortcut hint display; renders keybinding labels like "Ctrl+S" or "F1" with styled key caps | none |
+| `ContextMenuAction` | context_menu.rs | — | Context menu action type alias used by the standalone context menu system | none |
+| `EditorSearch` | editor_search.rs | — | TextEditor inline search/filter UI; manages SearchState (filter_query, filtered_indices, SearchMode, mode_input, is_replacing) | syntect (feature-gated) |
+
+**Key difference:** These widgets are NOT part of the framework widget system (`framework::widgets`). They live in `src/widgets/` and do not implement the framework `Widget` trait. They are standalone components used by the TextEditor and raw-terminal examples. The `TextEditorAdapter` in framework widgets bridges this gap.
+
+### 5.4 Common Widget Patterns
 
 #### Common Widget State Fields
 
@@ -4176,7 +4191,66 @@ impl<T: Clone + 'static> Reactive<T> {
 
 ## 11. Scene Router
 
-### 11.1 SceneRouter Internal State
+### 11.1 Scene Trait
+
+```rust
+/// A screen in the application.
+///
+/// Scenes are like Widgets but with navigation lifecycle hooks.
+pub trait Scene: Any {
+    /// Unique identifier for this scene type.
+    fn scene_id(&self) -> &str;
+
+    /// Called when this scene becomes the active screen.
+    fn on_enter(&mut self) {}
+
+    /// Called when this scene is no longer active (pushed to stack).
+    fn on_exit(&mut self) {}
+
+    /// Called when returning to this scene from the stack.
+    fn on_resume(&mut self) {}
+
+    /// Called when this scene is covered by a new scene.
+    fn on_pause(&mut self) {}
+
+    /// Render the scene into a Plane at the given area.
+    fn render(&self, area: Rect) -> Plane;
+
+    /// Handle keyboard input. Return true if consumed.
+    fn handle_key(&mut self, key: KeyEvent) -> bool;
+
+    /// Handle mouse input. Return true if consumed.
+    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool;
+
+    /// Called when the app theme changes.
+    fn on_theme_change(&mut self, _theme: &Theme) {}
+
+    /// Whether this scene needs a re-render.
+    fn needs_render(&self) -> bool;
+
+    /// Mark this scene as requiring a re-render.
+    fn mark_dirty(&mut self);
+
+    /// Clear the dirty flag after rendering.
+    fn clear_dirty(&mut self);
+}
+```
+
+**Scene lifecycle callbacks:**
+- `on_enter()` — called when scene becomes active (after push/new scene)
+- `on_exit()` — called when scene is no longer active (pop removes)
+- `on_pause()` — called when another scene covers this one (push on top)
+- `on_resume()` — called when returning from a covered scene (pop returns)
+
+**SceneTransition enum:**
+- `Fade` — cross-fade between scenes
+- `SlideLeft` — new scene slides in from right
+- `SlideRight` — new scene slides in from left
+- `SlideUp` — new scene slides in from bottom
+- `SlideDown` — new scene slides in from top
+- `None` — instant switch (no animation)
+
+### 11.2 SceneRouter Internal State
 
 ```rust
 pub struct SceneRouter {
@@ -4186,6 +4260,26 @@ pub struct SceneRouter {
     transition_duration: Duration,
     current_transition: Option<(SceneTransition, Instant, String, String)>,  // (animation, start_time, from_scene, to_scene)
 }
+```
+
+**Complete SceneRouter API:**
+```rust
+impl SceneRouter {
+    pub fn new() -> Self;
+    pub fn register(&mut self, id: &str, scene: Box<dyn Scene>);
+    pub fn push(&mut self, id: &str);          // Push scene onto stack
+    pub fn pop(&mut self) -> bool;              // Pop current scene; returns success
+    pub fn replace(&mut self, id: &str);        // Replace current scene without history
+    pub fn go(&mut self, id: &str);             // Clear stack and set scene
+    pub fn active(&self) -> Option<&str>;        // Current scene ID
+    pub fn can_go_back(&self) -> bool;           // Is there history to pop to?
+    pub fn stack_depth(&self) -> usize;          // How many scenes on stack
+    pub fn with_default_transition(mut self, t: SceneTransition) -> Self;
+    pub fn is_transitioning(&self) -> bool;      // Is a transition animation active?
+}
+```
+
+### 11.3 Scene Lifecycle
 ```
 
 ### 11.2 Scene Lifecycle
@@ -4506,7 +4600,54 @@ enum SceneMode {
 // Benefits: exhaustive match, variant payload, impossible to have conflicting modes
 ```
 
-### 14.6 Scrollbar Rendering Pattern
+### 14.6 Render-Bounds Registration Pattern
+
+Instead of computing positions twice (once in render, once in handle_mouse), register bounding rectangles during render and dispatch mouse events against them. There are two approaches:
+
+**Approach 1: Framework ScopedZoneRegistry (per-frame, cleared each render):**
+```rust
+// In widget struct:
+zones: RefCell<ScopedZoneRegistry<usize>>,
+
+// In render (cleared each frame):
+self.zones.borrow_mut().clear();
+self.zones.borrow_mut().register(ZONE_ID, x, y, width, height);
+
+// In handle_mouse:
+if let Some(id) = self.zones.borrow().dispatch(col, row) {
+    match id {
+        ZONE_ID => { /* handle click */ }
+        _ => {}
+    }
+}
+```
+
+**Approach 2: Persistent bounds (survive across frames until explicitly refreshed):**
+```rust
+// In view state (computed during render, read in handle_mouse):
+pub column_bounds: Vec<(Rect, FileColumn)>,       // Column header positions
+pub breadcrumb_bounds: Vec<(Rect, PathBuf)>,      // Clickable breadcrumb segments
+pub file_row_bounds: Vec<FileRowBounds>,          // File row positions
+
+// In render:
+fs.view.column_bounds.clear();
+for (rect, col) in rendered_columns {
+    fs.view.column_bounds.push((rect, col));
+}
+
+// In handle_mouse:
+for (rect, col) in &fs.view.column_bounds {
+    if col >= rect.x && col < rect.x + rect.width {
+        // Click on this column header → sort by col
+    }
+}
+```
+
+**When to use which:**
+- Use `ScopedZoneRegistry` for widgets with hit zones that change every frame
+- Use persistent bounds for scrollable lists where row positions survive across frames (avoids re-registering all rows every render)
+
+### 14.7 Scrollbar Rendering Pattern
 
 ```rust
 fn render_scrollbar(plane: &mut Plane, area: Rect, state: &ScrollState, theme: &Theme) {
