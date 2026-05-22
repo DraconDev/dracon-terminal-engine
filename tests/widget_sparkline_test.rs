@@ -25,7 +25,7 @@ fn test_sparkline_with_theme() {
 
 #[test]
 fn test_sparkline_with_color() {
-    let sp = Sparkline::new(vec![1.0, 2.0, 3.0]).with_color(Color::Green);
+    let sp = Sparkline::new(vec![1.0, 2.0, 3.0]).with_color(Color::Ansi(10));
     let area = Rect::new(0, 0, 40, 5);
     let _plane = sp.render(area);
 }

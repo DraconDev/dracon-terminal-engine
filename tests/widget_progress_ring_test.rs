@@ -57,7 +57,7 @@ fn test_progress_ring_with_size() {
 
 #[test]
 fn test_progress_ring_with_color() {
-    let pr = ProgressRing::new(0.5).with_color(Color::Red);
+    let pr = ProgressRing::new(0.5).with_color(Color::Ansi(9));
     let area = Rect::new(0, 0, 20, 10);
     let _plane = pr.render(area);
 }
@@ -268,9 +268,6 @@ fn test_progress_ring_on_change_callback() {
     });
     pr.increment(0.1);
     assert!(*changed.borrow());
-}
-    pr.increment(0.1);
-    assert!(changed);
 }
 
 #[test]
