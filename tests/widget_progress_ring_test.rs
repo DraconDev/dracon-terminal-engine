@@ -259,11 +259,16 @@ fn test_progress_ring_on_theme_change() {
 
 #[test]
 fn test_progress_ring_on_change_callback() {
-    let mut pr = ProgressRing::new(0.5);
-    let mut changed = false;
-    pr.on_change(|_| {
-        changed = true;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    let changed = Rc::new(RefCell::new(false));
+    let changed_clone = Rc::clone(&changed);
+    let mut pr = ProgressRing::new(0.5).on_change(move |_| {
+        *changed_clone.borrow_mut() = true;
     });
+    pr.increment(0.1);
+    assert!(*changed.borrow());
+}
     pr.increment(0.1);
     assert!(changed);
 }

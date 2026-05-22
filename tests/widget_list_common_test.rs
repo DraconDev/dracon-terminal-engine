@@ -23,7 +23,7 @@ fn test_list_navigation_new() {
 
 #[test]
 fn test_list_navigation_move_down() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     // With 5 items
     let moved = nav.move_down(5);
     assert!(moved);
@@ -46,7 +46,7 @@ fn test_list_navigation_move_down() {
 
 #[test]
 fn test_list_navigation_move_up() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.selected = 3;
 
     let moved = nav.move_up();
@@ -62,7 +62,7 @@ fn test_list_navigation_move_up() {
 
 #[test]
 fn test_list_navigation_move_home() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.selected = 10;
     nav.offset = 5;
 
@@ -74,7 +74,7 @@ fn test_list_navigation_move_home() {
 
 #[test]
 fn test_list_navigation_move_end() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     let moved = nav.move_end(20);
     assert!(moved);
     assert_eq!(nav.selected, 19);
@@ -82,7 +82,7 @@ fn test_list_navigation_move_end() {
 
 #[test]
 fn test_list_navigation_page_down() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.visible_count = 5;
 
     let moved = nav.page_down(20);
@@ -92,7 +92,7 @@ fn test_list_navigation_page_down() {
 
 #[test]
 fn test_list_navigation_page_up() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.selected = 10;
 
     let moved = nav.page_up();
@@ -102,7 +102,7 @@ fn test_list_navigation_page_up() {
 
 #[test]
 fn test_list_navigation_scroll_offset_adjustment() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.offset = 0;
     nav.visible_count = 5;
 
@@ -114,7 +114,7 @@ fn test_list_navigation_scroll_offset_adjustment() {
 
 #[test]
 fn test_list_navigation_scroll_down() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.offset = 0;
 
     nav.scroll_down(20);
@@ -156,7 +156,7 @@ fn test_list_navigation_scroll_up_at_start() {
 
 #[test]
 fn test_list_navigation_multi_select() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.allow_multi_select = true;
 
     nav.select_all(10);
@@ -174,7 +174,7 @@ fn test_list_navigation_multi_select() {
 
 #[test]
 fn test_list_navigation_undo_stack_disabled() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = false;
 
     nav.push_undo("snapshot".to_string());
@@ -185,7 +185,7 @@ fn test_list_navigation_undo_stack_disabled() {
 
 #[test]
 fn test_list_navigation_undo_stack_enabled() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = true;
 
     nav.push_undo("state1".to_string());
@@ -203,7 +203,7 @@ fn test_list_navigation_undo_stack_enabled() {
 
 #[test]
 fn test_list_navigation_undo_empty_stack() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = true;
 
     let result = nav.undo("current".to_string());
@@ -212,7 +212,7 @@ fn test_list_navigation_undo_empty_stack() {
 
 #[test]
 fn test_list_navigation_redo_empty_stack() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = true;
 
     let result = nav.redo("current".to_string());
@@ -221,7 +221,7 @@ fn test_list_navigation_redo_empty_stack() {
 
 #[test]
 fn test_list_navigation_undo_stack_max_size() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = true;
 
     // Push more than MAX_UNDO_STACK (50)
@@ -235,7 +235,7 @@ fn test_list_navigation_undo_stack_max_size() {
 
 #[test]
 fn test_list_navigation_redo_clears_on_push() {
-    let mut nav = ListNavigation::new();
+    let mut nav: ListNavigation<String> = ListNavigation::new();
     nav.enable_undo = true;
 
     nav.push_undo("state1".to_string());
@@ -250,7 +250,7 @@ fn test_list_navigation_redo_clears_on_push() {
 
 #[test]
 fn test_list_navigation_default() {
-    let nav = ListNavigation::<String>::default();
+    let nav: ListNavigation<String> = ListNavigation::default();
     assert_eq!(nav.selected, 0);
 }
 
