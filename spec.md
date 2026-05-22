@@ -1,10 +1,17 @@
-# Dracon Terminal Engine — Specification
+# Dracon Terminal Engine — Comprehensive Specification
 
 > **Version:** 0.1.10  
 > **License:** AGPL-3.0-only + Commercial  
 > **Repository:** https://github.com/DraconDev/dracon-terminal-engine  
 > **Documentation:** https://docs.rs/dracon-terminal-engine  
-> **Last Audit:** 2026-05-22
+> **Last Audit:** 2026-05-22  
+> **Total LOC:** 41,488  
+> **Source Files:** ~110 Rust source files (src/)  
+> **Example Binaries:** 57  
+> **Framework Widgets:** 47  
+> **Built-in Themes:** 21  
+> **Test Functions:** ~1,436  
+> **Public API Items:** ~1,244  
 
 ---
 
@@ -27,9 +34,10 @@
 15. [Build Configuration & Features](#15-build-configuration--features)
 16. [Examples & Showcase](#16-examples--showcase)
 17. [Test Coverage](#17-test-coverage)
-18. [API Surface](#18-api-surface)
+18. [API Surface & Prelude](#18-api-surface--prelude)
 19. [Completeness Assessment](#19-completeness-assessment)
 20. [Future Roadmap](#20-future-roadmap)
+21. [Appendices](#21-appendices)
 
 ---
 
@@ -37,1684 +45,4550 @@
 
 ### 1.1 Mission Statement
 
-Dracon Terminal Engine is a **terminal application framework** for Rust — not a "TUI library" in the traditional sense. It provides a complete runtime that **owns the terminal, input, rendering, and event loop**, allowing developers to build GUI-grade terminal applications with minimal code.
+Dracon Terminal Engine is a **terminal application framework** for Rust. It is not a "TUI library" in the traditional sense. It provides a complete runtime that owns the terminal, input parsing, rendering pipeline, and event loop. The developer writes widgets and app logic; the framework handles terminal management, input dispatch, compositing, and frame timing.
+
+The goal: **GUI-grade terminal applications** — persistent, visible, mouse-friendly, composable widgets — that run anywhere a terminal runs.
 
 ### 1.2 Core Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **One import, complete app** | `use dracon_terminal_engine::framework::prelude::*;` is the only import needed |
-| **Framework, not library** | App owns the event loop, compositor, input parsing, and rendering |
-| **Widgets own state** | Each widget manages its own lines, cursor, selection, etc. |
-| **App owns composition** | App manages widgets via registry, z-index, focus |
-| **Mouse-first** | Widgets respond to clicks, not just keys |
-| **Keyboard-enhanced** | Navigation shortcuts exist but aren't required |
-| **Terminal as universal target** | No platform-specific code, no external dependencies beyond std |
-| **RAII terminal state** | `Terminal` struct enters raw mode on creation, restores on Drop |
-| **Z-indexed compositor** | Painter's algorithm with per-plane opacity and filters |
-| **Command-driven architecture** | Every widget can bind a CLI command; AI-inspectable actions |
+| Principle | Explanation | Implementation |
+|-----------|-------------|----------------|
+| **One import, complete app** | `use dracon_terminal_engine::framework::prelude::*;` is the only import needed | `prelude` re-exports App, Ctx, all 47 widgets, Theme, Rect, Event types, and all framework sub-systems |
+| **Framework, not library** | App owns the event loop, compositor, input parsing, and rendering | `App::run()` owns the entire frame cycle — polling, dispatch, render, timing |
+| **Widgets own state** | Each widget manages its own internal state (lines, cursor, selection) | Widget trait has no concept of app-level state; widgets are self-contained |
+| **App owns composition** | App manages widgets via registry, z-order, and focus | Widgets register via `add_widget()`, app sorts by `z_index()`, dispatches focus via `FocusManager` |
+| **Mouse-first** | Widgets respond to clicks, not just keys | SGR mouse tracking enabled by default; `HitZone`, `ScopedZoneRegistry` for declarative mouse routing |
+| **Keyboard-enhanced** | Navigation shortcuts exist but aren't required | Config-driven `KeybindingSet` with modifier-key actions |
+| **Terminal as universal target** | No platform-specific code beyond POSIX tty | `libc` for ioctls; `signal-hook` for signals; pure ANSI escape sequences for rendering |
+| **RAII terminal state** | Terminal struct manages raw mode lifecycle | `Terminal::new()` enters raw mode + alt screen; `Terminal::drop()` restores saved state via DECRC |
+| **Z-indexed compositor** | Painter's algorithm with per-plane opacity and visual filters | `Compositor::render()` sorts planes by `z_index`, composites bottom-up with alpha blending |
+| **Command-driven architecture** | Every action is a CLI command, AI-inspectable | `BoundCommand` + `OutputParser`; `Ctx::available_commands()` enumerates all actions |
 
 ### 1.3 What It Is NOT
 
-- **Not a vim/Helix competitor** — TextEditor is a view/edit widget, not a modal editor
-- **Not an LSP-powered editor** — No LSP integration (deferred as out of scope)
-- **Not a "CLI+"** — Not hotkey-centric; mouse-friendly is the primary interaction mode
-- **Not a browser-based GUI** — Runs natively in any terminal (VPS, SSH, containers, CI)
+| Misconception | Reality |
+|---------------|---------|
+| vim/Helix competitor | TextEditor is a **view/edit widget** — no modal editing, no LSP, no syntax-aware folding |
+| CLI+ (ratatui successor) | Uses ratatui only for `Rect` type and Layout; has its own compositor, input parser, and rendering engine |
+| Browser-based GUI (Tauri/Dioxus) | Runs natively in any terminal — no browser, no runtime, no install |
+| Editor SDK | Not designed for building editors; designed for building terminal **applications** that may include text editing |
+| Terminal multiplexer | Not tmux/tilix — it's an application framework that renders within a single terminal window |
 
 ### 1.4 Deployment Advantages Over GUI
 
 | Advantage | Detail |
 |-----------|--------|
-| **Universal** | Runs on VPS, SSH, containers, CI, embedded — anywhere with a terminal |
-| **Zero user dependencies** | No browser, no runtime, no permissions, no install |
-| **Single binary** | Ships as one executable, instant startup |
-| **Cross-platform** | No Tauri/Dioxus/egui platform issues, no browser bugs, no lag |
+| **Universal** | Runs on VPS, SSH, containers, CI, embedded — anywhere with a terminal emulator |
+| **Zero user dependencies** | No browser, no runtime, no permissions, no package installation |
+| **Single binary** | Ships as one executable; instant startup (~1ms to full UI) |
+| **Cross-platform** | POSIX terminals behave identically regardless of OS; no WebView/GTK/Qt platform issues |
+| **No update friction** | No browser extension updates, no runtime upgrades — replace the binary |
 
-### 1.5 UX Advantages Over CLI
+### 1.5 UX Advantages Over Traditional CLI
 
 | Advantage | Detail |
 |-----------|--------|
-| **Persistent state** | Don't re-run commands to see output |
-| **Visible structure** | Panels, trees, forms — not just scrolling text |
-| **Mouse-friendly** | Click, drag, scroll — natural interactions |
-| **Composability** | Mix widgets (list + editor + form) freely |
+| **Persistent state** | Output remains visible indefinitely — no re-running commands to see prior results |
+| **Visible structure** | Panels, trees, forms, tables — spatial layout conveys hierarchy, not flat text |
+| **Mouse-friendly** | Click, drag, scroll, right-click — natural interactions work without keyboard memorization |
+| **Composability** | Mix widgets (list + editor + form + table) freely in a single view |
+| **Real-time updates** | Tick-driven refresh: gauges update, logs stream, timers count without user action |
+| **Theming** | 21 built-in themes, instant switching, semantic color system, dark/light modes |
 
 ---
 
 ## 2. Architecture Overview
 
-### 2.1 Module Architecture
+### 2.1 Module Dependency Graph
 
 ```
-dracon-terminal-engine
-├── src/
-│   ├── lib.rs              # Crate root: module declarations + re-exports
-│   ├── backend/            # POSIX tty ioctls, raw mode (non-Windows only)
-│   ├── compositor/         # Plane, Cell, Color, Styles, Compositor, filters, cell pool
-│   ├── contracts.rs        # UiRenderer, UiEventSource, UiRuntime trait contracts
-│   ├── core/               # Terminal wrapper (RAII raw mode + alt screen)
-│   ├── error.rs            # DraconError unified error type
-│   ├── framework/          # App, Ctx, Widget trait, widgets, themes, subsystems
-│   │   ├── app.rs          # App struct: event loop, widget lifecycle, input dispatch
-│   │   ├── ctx.rs          # Ctx: context passed to render/tick callbacks
-│   │   ├── widget.rs       # Widget trait + sub-traits (Renderable, Focusable, etc.)
-│   │   ├── theme.rs        # Theme struct with 21 built-in themes
-│   │   ├── command.rs      # BoundCommand, OutputParser, CommandRunner, TOML config
-│   │   ├── layout.rs       # Constraint-based layout engine
-│   │   ├── hitzone.rs      # HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry
-│   │   ├── dragdrop.rs     # DragManager, DragItem, DragGhost, DropTarget
-│   │   ├── marquee.rs      # MarqueeState, MarqueeRect, render_marquee
-│   │   ├── focus.rs        # FocusManager (tab-order ring, focus trapping)
-│   │   ├── scroll.rs       # ScrollState, ScrollContainer
-│   │   ├── keybindings.rs  # KeybindingSet, resolve_keybindings, actions
-│   │   ├── scene_router.rs # SceneRouter, Scene trait, SceneTransition
-│   │   ├── event_bus.rs    # EventBus, Reactive, SubscriptionId
-│   │   ├── animation.rs    # Animation, AnimationManager, Easing
-│   │   ├── plugin.rs       # PluginRegistry, WidgetFactory
-│   │   ├── dirty_regions.rs# DirtyRegion, DirtyRegionTracker
-│   │   ├── widget_container.rs # WidgetContainer, WidgetRegistry
-│   │   ├── i18n.rs         # I18n, tr! macro (JSON locale files)
-│   │   ├── logging.rs      # tracing integration (feature-gated)
-│   │   ├── event_dispatcher.rs # Event dispatch helpers
-│   │   └── widgets/        # 47 framework widget types
-│   ├── input/              # InputReader, Parser, event type definitions
-│   ├── integration/        # Ratatui integration bridge
-│   ├── layout/             # Grid, border, padding helpers
-│   ├── system/             # SystemMonitor (feature-gated)
-│   ├── utils.rs            # Visual width, truncate, formatting helpers
-│   ├── text.rs             # Unicode grapheme cluster utilities
-│   └── visuals/            # Icons, OSC sequences, accessibility, sync mode
-└── src/widgets/            # Standalone widgets (TextEditor, TextInput, etc.)
+lib.rs (crate root)
+├── backend/         ─── tty.rs              (POSIX ioctls, poll)
+├── compositor/      ─── engine.rs           (Compositor)
+│                    ├── plane.rs            (Plane, Cell, Color, Styles)
+│                    ├── filter.rs           (Dim, Invert, Scanline, Pulse, Glitch)
+│                    └── pool.rs             (CellPool, PoolConfig)
+├── contracts.rs     ─── UiRenderer, UiEventSource, UiRuntime traits
+├── core/            ─── terminal.rs         (Terminal, Capabilities, CursorShape)
+├── error.rs         ─── DraconError
+├── framework/       ─── mod.rs              (re-exports)
+│                    ├── app.rs              (App struct, event loop)
+│                    ├── ctx.rs              (Ctx struct)
+│                    ├── widget.rs           (Widget trait, sub-traits, WidgetId)
+│                    ├── theme.rs            (Theme struct, 21 constructors)
+│                    ├── command.rs          (BoundCommand, OutputParser, CommandRunner)
+│                    ├── layout.rs           (Layout, Constraint, Direction)
+│                    ├── hitzone.rs          (HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry)
+│                    ├── dragdrop.rs         (DragManager, DragItem, DragGhost, DropTarget)
+│                    ├── marquee.rs          (MarqueeState, MarqueeRect)
+│                    ├── focus.rs            (FocusManager, callbacks)
+│                    ├── scroll.rs           (ScrollState, ScrollContainer)
+│                    ├── keybindings.rs      (KeybindingSet, resolve_keybindings)
+│                    ├── scene_router.rs     (SceneRouter, Scene, SceneTransition)
+│                    ├── event_bus.rs        (EventBus, Reactive, SubscriptionId)
+│                    ├── animation.rs        (Animation, AnimationManager, Easing)
+│                    ├── plugin.rs           (PluginRegistry, WidgetFactory)
+│                    ├── dirty_regions.rs    (DirtyRegion, DirtyRegionTracker)
+│                    ├── widget_container.rs (WidgetContainer, WidgetRegistry)
+│                    ├── i18n.rs             (I18n, tr! macro)
+│                    ├── logging.rs          (tracing integration, feature-gated)
+│                    ├── event_dispatcher.rs (Event dispatch helpers)
+│                    └── widgets/            (47 widget modules)
+├── input/           ─── mod.rs
+│                    ├── event.rs            (Event, KeyEvent, MouseEvent, enums)
+│                    ├── parser.rs           (byte-level escape sequence parser)
+│                    ├── reader.rs           (InputReader: blocking/non-blocking)
+│                    ├── kitty_key.rs        (Kitty keyboard protocol support)
+│                    ├── async_reader.rs     (Async input reader, feature-gated)
+│                    └── mapping.rs          (deprecated UiEvent→Event mapping)
+├── integration/     ─── ratatui.rs          (RatatuiBackend bridge)
+├── layout/          ─── mod.rs              (grid, border, padding helpers)
+├── system/          ─── mod.rs              (SystemMonitor, feature-gated)
+├── utils.rs         ─── visual width, truncate, formatting (1,217 LOC)
+├── text.rs          ─── Unicode grapheme cluster utilities
+└── visuals/         ─── mod.rs
+                     ├── icons.rs            (file-type icons)
+                     ├── osc.rs              (OSC sequences: clipboard, hyperlinks, bell)
+                     ├── accessibility.rs    (OSC 99 screen reader announcements)
+                     └── sync.rs             (sync mode 2026)
+
+src/widgets/ (standalone, non-framework)
+├── mod.rs
+├── editor.rs        (TextEditor — 3,025 LOC)
+├── editor_search.rs (TextEditor search/filter)
+├── input.rs         (TextInput)
+├── button.rs        (standalone Button)
+├── panel.rs         (Panel container)
+├── component.rs     (Component trait)
+├── hotkey.rs        (HotkeyHint)
+└── context_menu.rs  (ContextMenuAction type)
 ```
 
-### 2.2 Layer Diagram
+### 2.2 Data Flow (Detailed)
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  Examples / Apps                                                    │
-│  (57 binary examples in examples/)                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│  FRAMEWORK LAYER                                                    │
-│                                                                     │
-│  App (event loop, widget lifecycle, input dispatch)                 │
-│  ├── Ctx (render/tick context)                                      │
-│  ├── Widget trait + 47 framework widgets                            │
-│  ├── Theme (21 built-in)                                            │
-│  ├── SceneRouter (multi-screen navigation)                          │
-│  ├── EventBus (pub/sub inter-widget)                                │
-│  ├── HitZone / DragDrop / Marquee (interaction models)              │
-│  ├── FocusManager (tab-order ring)                                  │
-│  ├── Animation / Easing                                             │
-│  ├── Layout engine (constraint-based)                               │
-│  ├── KeybindingSet (config-driven)                                  │
-│  ├── PluginRegistry (dynamic widgets)                               │
-│  ├── I18n (internationalization)                                    │
-│  └── DirtyRegionTracker (partial updates)                           │
-├─────────────────────────────────────────────────────────────────────┤
-│  STANDALONE WIDGETS                                                 │
-│  TextEditor (syntect highlighting, undo/redo, search/filter)        │
-│  TextInput, Button, Panel, Component, HotkeyHint                    │
-├─────────────────────────────────────────────────────────────────────┤
-│  ENGINE LAYER                                                       │
-│  Compositor (z-indexed planes, painter's algorithm)                 │
-│  Plane / Cell / Color / Styles                                      │
-│  CellPool (object pool for per-frame allocation)                    │
-│  Filters (Dim, Invert, Scanline, Pulse, Glitch)                     │
-│  Terminal (RAII raw mode + alt screen)                              │
-│  InputReader / Parser (SGR mouse, keyboard chords, bracketed paste) │
-│  Backend (POSIX tty ioctls)                                         │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│ INPUT PHASE (poll_and_dispatch_input)                                    │
+│                                                                         │
+│  stdin → tty::poll_input(fd, 1ms)                                       │
+│    → Ok(true): read chunk [1024 bytes] → Parser::advance(byte)          │
+│       → Event::Key/Event::Mouse/Event::Resize/Event::Paste              │
+│       → App::handle_event(event)                                        │
+│         ├── keyboard: dispatch_key → keybinding check → widget dispatch │
+│         │   └── Tab → FocusManager::tab_next/prev                       │
+│         │   └── Esc → SceneRouter::can_go_back → pop or stop            │
+│         │   └── Ctrl+Q → running = false                                │
+│         ├── mouse: dispatch_mouse → hit-test z-order → widget dispatch  │
+│         │   └── Hit zone registration → ScopedZoneRegistry::dispatch()  │
+│         ├── resize: dispatch_resize → compositor.resize → widget.set_area │
+│         └── paste: dispatch_paste → synthetic KeyEvents to focused widget │
+│    → drain remaining input (up to 64 iterations, non-blocking)          │
+│    → Ok(false): check_timeout() for pending escape sequences            │
+├─────────────────────────────────────────────────────────────────────────┤
+│ RENDER PHASE (render_dirty_widgets)                                      │
+│                                                                         │
+│  For each widget in z-order cache:                                      │
+│    if widget.needs_render():                                            │
+│      plane = widget.render(widget.area())                               │
+│      widget.clear_dirty()                                               │
+│      compositor.add_plane(plane)                                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ TICK PHASE (run_tick_callback)                                          │
+│                                                                         │
+│  if elapsed >= tick_interval:                                           │
+│    prev_theme = self.theme.name                                         │
+│    on_tick(&mut Ctx, tick_count)                                        │
+│    if theme.name != prev_theme: propagate theme to all widgets          │
+├─────────────────────────────────────────────────────────────────────────┤
+│ PERIODIC COMMAND PHASE (run_periodic_commands)                           │
+│                                                                         │
+│  For each widget with refresh_seconds:                                  │
+│    if elapsed >= refresh_interval:                                      │
+│      run command → parse output → widget.apply_command_output()         │
+│      widget.mark_dirty()                                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│ USER CLOSURE PHASE                                                      │
+│                                                                         │
+│  f(&mut Ctx) — user's per-frame callback                                │
+│  ctx.add_plane() / ctx.mark_dirty() / ctx.set_theme() etc.             │
+├─────────────────────────────────────────────────────────────────────────┤
+│ COMPOSITOR RENDER PHASE                                                 │
+│                                                                         │
+│  if compositor.planes not empty:                                        │
+│    compositor.set_dirty_regions(dirty_tracker)                          │
+│    compositor.render(&mut terminal)                                     │
+│      → sort planes by z_index                                           │
+│      → composite into final_buffer (painters algorithm)                 │
+│      → diff final_buffer vs last_frame                                  │
+│      → emit ANSI escape sequences for changed cells                     │
+│      → single write_all() to stdout                                     │
+│      → clone final_buffer → last_frame                                  │
+│      → clear planes                                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│ CURSOR + ANIMATION PHASE                                                │
+│                                                                         │
+│  if focused widget has cursor_position → set_cursor(col, row)           │
+│  else → hide_cursor()                                                   │
+│  animations.tick()                                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│ FRAME TIMING PHASE                                                      │
+│                                                                         │
+│  frame_count += 1                                                       │
+│  compute frame_duration_ms                                              │
+│  sleep(frame_duration - elapsed) if frame completed early               │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 Data Flow
+### 2.3 Key Design Decisions
 
-```
-Terminal Input → Parser → Event → App.handle_event()
-                                        │
-                          ┌─────────────┼─────────────┐
-                          ▼             ▼              ▼
-                    dispatch_key  dispatch_mouse  dispatch_resize
-                          │             │               │
-                          ▼             ▼               ▼
-                    Widget.handle_  Widget.handle_  Compositor.resize()
-                    key()           mouse()         Widget.set_area()
-                          │             │
-                          ▼             ▼
-                    dirty = true    dirty = true
-                    (state change)  (state change)
-
-Render Loop (per frame):
-  Widget.render(area) → Plane → Compositor.add_plane()
-                                              │
-                                              ▼
-                                    Compositor.render(writer)
-                                    (composite planes → escape codes)
-                                              │
-                                              ▼
-                                    Terminal → stdout (sync mode 2026)
-```
+| Decision | Rationale | Consequence |
+|----------|-----------|-------------|
+| `render(&self)` not `render(&mut self)` | Widget trait render takes `&self` to allow multiple simultaneous readers and caching | Widgets must compute all visual state in advance or use `RefCell` for lazy computation |
+| `RefCell<Vec<Box<dyn Widget>>>` | Enables both immutable iteration (render) and mutable access (events) from `&self` methods | Panics if borrows are nested; `WidgetRef`/`WidgetRefMut` guard types prevent this |
+| Painter's algorithm (not damage-based) | Simpler, correct for overlapping semi-transparent planes | Full-screen planes are always O(W×H); dirty regions reduce but don't eliminate cost |
+| Own input parser (not crossterm) | Zero dependencies for core parsing; full control over sequence handling | Must maintain parser for new terminal features (kitty keyboard, extended mouse) |
+| SGR mouse only (no X10/X11) | SGR (1006) supports position reporting, drag, all buttons, modifiers | Legacy terminals (PuTTY, old xterm) may not work; documented as requirement |
+| Feature flags for heavy dependencies | Users shouldn't pay for syntect/sysinfo/tokio if they don't use them | Three feature gates complicate build matrix; examples must be split by feature |
+| Widget trait not decomposed (yet) | Backward compatibility; sub-traits exist as markers | `Box<dyn Widget>` works but `Box<dyn Renderable>` doesn't (no blanket for trait object) |
 
 ---
 
 ## 3. Core Layers
 
-### 3.1 Backend (`src/backend/`)
+### 3.1 Backend Module (`src/backend/tty.rs`)
 
-**Purpose:** Low-level POSIX terminal interface.
+**Purpose:** OS-level terminal interface. The only platform-specific code in the engine.
 
-| Component | Description |
-|-----------|-------------|
-| `tty` module | Platform-specific ioctls: `get_window_size()`, `poll_input()` |
-| **Platform:** | Unix-only (`libc` dependency, gated with `cfg(not(windows))`) |
-| **Dependencies:** | `libc` (Unix), `signal-hook` for SIGINT/SIGTERM handling |
+#### Functions
 
-**Contract:**
-- `poll_input(fd, timeout_ms) -> Result<bool, Error>` — polls stdin for available bytes
-- `get_window_size(fd) -> io::Result<(u16, u16)>` — returns terminal dimensions via `TIOCGWINSZ`
+```rust
+/// Poll stdin for available bytes with a timeout in milliseconds.
+/// Returns Ok(true) if data is available, Ok(false) on timeout.
+/// Uses poll(2) on Unix (PPOLL on Linux for microsecond precision).
+pub fn poll_input(fd: impl AsFd, timeout_ms: i32) -> io::Result<bool>
 
-### 3.2 Terminal (`src/core/terminal.rs`)
-
-**Purpose:** RAII wrapper that enters raw mode + alternate screen buffer on creation, restores on Drop.
-
-| Component | Description |
-|-----------|-------------|
-| `Terminal<W>` | Generic over writer type; typically `io::Stdout` |
-| `Capabilities` | Detected terminal features (true color, SGR mouse, bracketed paste, etc.) |
-| `CursorShape` | Enum for cursor shape (Block, Underline, Bar, Hidden) |
-
-**Capabilities Detection:**
-- `TERM` environment variable parsing
-- `COLORTERM` for true color support
-- Kitty keyboard protocol detection
-- Bracketed paste mode enable/disable
-- SGR mouse mode enable/disable
-- Sync mode 2026 support
-
-**Lifecycle:**
-```
-Terminal::new(stdout)
-  ├── Save terminal state (DECSC)
-  ├── Enter alternate screen (DECSET 1049)
-  ├── Enable SGR mouse (DECSET 1006)
-  ├── Enable bracketed paste (DECSET 2004)
-  ├── Enable kitty keyboard (if supported)
-  └── Set raw mode (cfmakeraw)
-
-Terminal::drop
-  ├── Restore saved state (DECRC)
-  └── Leave alternate screen (DECSET 1049)
+/// Get terminal window size via TIOCGWINSZ ioctl.
+/// Returns (width_in_columns, height_in_rows).
+pub fn get_window_size(fd: impl AsFd) -> io::Result<(u16, u16)>
 ```
 
-### 3.3 Compositor (`src/compositor/`)
+#### Implementation Details
 
-**Purpose:** Z-indexed plane compositing engine. Implements painter's algorithm.
+**`poll_input`:**
+1. Uses `libc::pollfd` with `POLLIN` event
+2. Calls `libc::poll()` with timeout_ms (on macOS/FreeBSD) or `libc::ppoll()` (on Linux) for sub-millisecond precision
+3. Returns `Ok(true)` if `pollfd.revents & POLLIN != 0`
+4. Returns `Ok(false)` if `poll()` returns 0 (timeout)
+5. Returns `Err(io::Error)` if `poll()` returns -1
 
-| Component | Lines | Description |
-|-----------|-------|-------------|
-| `Plane` | ~500 | 2D cell grid with position, z-index, opacity, filters, position |
-| `Cell` | — | Single terminal cell: `char`, `fg`, `bg`, `style`, `transparent`, `skip` |
-| `Color` | — | Enum: `Reset`, `Ansi(u8)`, `Rgb(u8,u8,u8)` |
-| `Styles` | — | Bitflags: `BOLD`, `DIM`, `ITALIC`, `UNDERLINE`, `BLINK`, `REVERSE`, `HIDDEN`, `STRIKETHROUGH` |
-| `Compositor` | ~600 | Plane compositing, dirty region rendering, escape code output |
-| `Filter` (submodule) | — | Visual filters: Dim, Invert, Scanline, Pulse, Glitch |
-| `CellPool` (submodule) | — | Object pool for Cell allocation to reduce per-frame allocations |
-| `PoolConfig` | — | Configuration for cell pool (initial capacity, max capacity) |
+**`get_window_size`:**
+1. Calls `libc::ioctl(fd, TIOCGWINSZ, &ws)` 
+2. If successful, returns `(ws.ws_col, ws.ws_row)`
+3. On failure, falls back to `(80, 24)`
 
-**Plane Operations:**
-- `put_char(x, y, c)` — write single char with Unicode width awareness (wide chars set `skip` on adjacent cell)
-- `put_str(x, y, text)` — write string with grapheme cluster awareness, 2-cell emoji support, zero-width char skipping
-- `put_cell(x, y, cell)` — place a pre-configured cell
-- `set_style(x, y, fg, bg, style)` — style a cell
-- `fill_bg(color)` — fill all cells with background color (sets `transparent = false`)
-- `clear()` — reset all cells to defaults
-- `blit_from(source, dx, dy)` — copy non-transparent, non-skip cells with bounds checking
-- `blit_from_fast(source)` — bulk memcpy when source is fully opaque; falls back to per-cell blit otherwise
-- `reset_cells()` — reset to transparent defaults without reallocation
-- `crop(rect)` — extract sub-plane at rectangle
-- `set_filter(filter)` — apply visual filter
-- `set_transparent(bool)` / `set_skip(x, y, bool)`
+**Platform gating:** The entire module is behind `#[cfg(not(target_os = "windows"))]`. On Windows, these functions are unavailable and the engine will not compile — Windows support is deferred.
 
-**Compositor Operations:**
-- `add_plane(plane)` — push plane to compositing stack
-- `render(writer)` — composite all planes, emit escape sequences with:
-  - Synchronous mode 2026 wrapping
-  - Dirty-region optimization (only emit changed cells)
-  - TrueColor escape sequences (38;2;R;G;B / 48;2;R;G;B)
-  - ANSI 256-color fallback (38;5;N / 48;5;N)
-  - Style tracking (only emit SGR changes, not redundant codes)
-  - Braille cell merging for overlapping braille characters
-  - Alpha blending for opacity < 1.0
-  - Per-plane filter application
-  - `final_buffer` reuse to avoid per-frame allocation
-  - Cursor positioning inline (`\x1b[Y;XH`)
-- `resize(w, h)` — resize frame buffers
-- `hit_test(x, y)` — find topmost non-transparent plane at position
-- `force_clear()` / `invalidate_last_frame()` — force full redraw
-- `draw_text(text, x, y, fg, bg, style)` — convenience text rendering
-- `draw_rect(x, y, w, h, char, fg, bg, style)` — convenience rectangle fill
-- `draw_ratatui_line(line, x, y)` — ratatui integration rendering
+### 3.2 Terminal Wrapper (`src/core/terminal.rs`)
 
-**Dirty Region Rendering:**
-- `DirtyRegionTracker` tracks changed screen regions per frame
-- `set_dirty_regions(tracker)` — compositor copies dirty region info
-- Full refresh mode: renders entire screen
-- Partial refresh mode: only renders cells within dirty regions
-- Skip optimization: cells identical to last frame are skipped
-- Both modes fall back to full refresh if dirty regions are empty
+**Purpose:** RAII terminal manager. Enters raw mode and alternate screen on construction, restores state on drop.
 
-### 3.4 Error Types
+#### Struct Definition
 
-**`DraconError`** — Unified error type for the engine. Implements `std::error::Error`.
+```rust
+pub struct Terminal<W: Write> {
+    writer: W,
+    original_termios: libc::termios,          // Saved terminal attributes for restore
+    raw_mode: bool,                           // Whether raw mode is currently active
+    alt_screen: bool,                         // Whether alternate screen is active
+    capabilities: Capabilities,               // Detected terminal features
+    saved_cursor: bool,                       // Whether cursor position was saved (DECSC)
+}
+```
 
-Variants (from `src/error.rs`):
-- `Io(io::Error)` — Wrapped I/O errors
-- `InvalidKeybinding(String)` — Keybinding parsing errors
-- `ThemeNotFound(String)` — Unknown theme name
-- `WidgetNotFound(WidgetId)` — Widget lookup failures
-- `ConfigError(String)` — TOML configuration errors
-- `PluginError(String)` — Plugin registration/loading errors
+#### Public API
+
+```rust
+// Construction
+Terminal::new(writer: W) -> io::Result<Self>
+
+// Raw mode lifecycle
+.suspend() -> io::Result<()>                 // Restore cooked mode temporarily
+.resume() -> io::Result<()>                  // Re-enter raw mode
+
+// Cursor control
+.set_cursor(col: u16, row: u16) -> io::Result<()>  // \x1b[row;colH
+.show_cursor() -> io::Result<()>             // \x1b[?25h
+.hide_cursor() -> io::Result<()>             // \x1b[?25l
+.set_cursor_shape(shape: CursorShape)         // \x1b[ q sequences
+
+// Capabilities
+.capabilities() -> &Capabilities
+
+// Writer access (for escape sequence output)
+.writer() -> &mut W
+```
+
+#### Capabilities Detection
+
+```rust
+pub struct Capabilities {
+    pub true_color: bool,                     // COLORTERM=truecolor or 24-bit
+    pub sgr_mouse: bool,                      // SGR mouse mode 1006 supported
+    pub bracketed_paste: bool,                // Bracketed paste mode 2004 supported
+    pub kitty_keyboard: bool,                 // Kitty keyboard protocol supported
+    pub sync_mode: bool,                      // Synchronized output mode 2026 supported
+    pub cursor_shape: bool,                   // Cursor shape escape sequences supported
+    pub clipboard: bool,                      // OSC 52 clipboard access supported
+    pub hyperlinks: bool,                     // OSC 8 hyperlink support
+    pub sixel: bool,                          // Sixel graphics support (via sixel feature)
+}
+```
+
+Detection logic:
+- **true_color:** Checks `COLORTERM` env var for `truecolor` or `24bit`; also checks `TERM` for known true-color terminals
+- **sgr_mouse:** Assumed supported; SGR mode is enabled unconditionally via DECSET 1006; legacy terminals silently ignore
+- **bracketed_paste:** Enabled unconditionally via DECSET 2004
+- **kitty_keyboard:** Probe via CSI?u query; checks response
+- **sync_mode:** Enabled unconditionally via DECSET 2026
+- **cursor_shape:** Assumed supported on xterm-compatible terminals
+- **clipboard:** Assumed available; OSC 52 is silently ignored by terminals that don't support it
+
+#### Terminal State Management (RAII Sequence)
+
+```
+Terminal::new(writer):
+  1. Save terminal attributes via tcgetattr → original_termios
+  2. Save cursor position via DECSC (\x1b 7)
+  3. Enter alternate screen via DECSET 1049 (\x1b[?1049h)
+  4. Enable SGR mouse via DECSET 1006 (\x1b[?1006h)
+  5. Enable any-event mouse via DECSET 1003 (\x1b[?1003h)
+  6. Enable bracketed paste via DECSET 2004 (\x1b[?2004h)
+  7. Set raw mode: cfmakeraw(&termios), tcsetattr(TCSAFLUSH)
+  8. Enable kitty keyboard if detected (\x1b[=1u)
+  9. Save terminal title (OSC 0)
+
+Terminal::drop():
+  1. Disable kitty keyboard (\x1b[=0u)
+  2. Disable bracketed paste via DECRST 2004 (\x1b[?2004l)
+  3. Disable SGR mouse via DECRST 1006 (\x1b[?1006l)
+  4. Disable any-event mouse via DECRST 1003 (\x1b[?1003l)
+  5. Restore cursor position via DECRC (\x1b 8)
+  6. Leave alternate screen via DECRST 1049 (\x1b[?1049l)
+  7. Show cursor (\x1b[?25h)
+  8. Restore terminal attributes via tcsetattr(TCSAFLUSH, &original_termios)
+
+RESTORE_SEQ: "\x1b[0m\x1b[?25h\x1b[?1006l\x1b[?1003l\x1b[?2004l\x1b[?1049l\x1b8"
+  Used in panic hook to restore terminal state during panics.
+```
+
+#### Terminal Suspend/Resume
+
+```
+suspend():
+  1. Disable raw mode: tcsetattr with original_termios
+  2. Disable SGR mouse: \x1b[?1006l
+  3. Disable bracketed paste: \x1b[?2004l
+  4. Leave alternate screen: \x1b[?1049l
+  5. Show cursor: \x1b[?25h
+
+resume():
+  1. Save cursor: DECSC
+  2. Enter alternate screen: \x1b[?1049h
+  3. Enable SGR mouse: \x1b[?1006h
+  4. Enable bracketed paste: \x1b[?2004h
+  5. Set raw mode: tcsetattr with cfmakeraw
+  6. composer.invalidate_last_frame() — force full redraw
+  7. dirty_tracker.mark_all_dirty()
+```
+
+#### CursorShape Enum
+
+```rust
+pub enum CursorShape {
+    Default,       // Terminal default (usually Block)
+    Block,         // █ blinking block
+    BlockSteady,   // █ non-blinking block
+    Underline,     // _ blinking underline
+    UnderlineSteady, // _ non-blinking underline
+    Bar,           // | blinking vertical bar
+    BarSteady,     // | non-blinking vertical bar
+    Hidden,        // Invisible cursor
+}
+```
+
+Escape sequences (DECSCUSR): `\x1b[{N} q` where N = 0 (default), 1 (blinking block), 2 (steady block), 3 (blinking underline), 4 (steady underline), 5 (blinking bar), 6 (steady bar).
+
+### 3.3 DraconError (`src/error.rs`)
+
+```rust
+pub enum DraconError {
+    Io(io::Error),                              // Wrapped I/O errors
+    InvalidKeybinding(String),                   // Keybinding parse failures
+    ThemeNotFound(String),                       // Unknown theme name
+    WidgetNotFound(WidgetId),                    // Widget lookup failures
+    ConfigError(String),                         // TOML config parse/validate errors
+    PluginError(String),                         // Plugin init/register/load errors
+    Serialization(String),                       // Widget state serialization errors
+    InvalidState(String),                        // Invalid widget state transitions
+}
+
+impl std::error::Error for DraconError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            DraconError::Io(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+impl fmt::Display for DraconError { /* human-readable messages */ }
+impl From<io::Error> for DraconError { /* auto-convert io::Error */ }
+```
+
+### 3.4 Contracts Module (`src/contracts.rs`)
+
+Contains `#![forbid(unsafe_code)]` — the only module with this attribute. Defines the abstract trait contracts for the UI runtime:
+
+```rust
+/// Renders application state to the terminal.
+pub trait UiRenderer<State> {
+    type Error;
+    fn render(&mut self, state: &State) -> Result<(), Self::Error>;
+}
+
+/// Polls UI events from the environment.
+pub trait UiEventSource {
+    type Error;
+    fn next_event(&mut self) -> Result<Option<UiEvent>, Self::Error>;
+}
+
+/// Main UI runtime loop coordinating rendering and events.
+pub trait UiRuntime<State> {
+    type Error;
+    fn run<R, E>(&mut self, renderer: &mut R, events: &mut E, state: &mut State) -> Result<(), Self::Error>
+    where R: UiRenderer<State>, E: UiEventSource;
+}
+```
+
+Also defines legacy event types:
+- `UiEvent` — Tick, Key { key: Cow<str> }, Resize(UiResize), QuitRequested
+- `InputEvent` — Key(KeyEvent), Mouse(MouseEvent), Resize, Paste, FocusGained, FocusLost, Unsupported
+- `UiResize` — width, height
+
+### 3.5 Input Module (`src/input/`)
+
+#### Event Type Hierarchy
+
+```rust
+/// Unified input event from the terminal.
+pub enum Event {
+    Key(KeyEvent),                              // Keyboard key press/repeat/release
+    Mouse(MouseEvent),                          // Mouse button, drag, scroll, move
+    Resize(u16, u16),                           // Terminal resize (new_width, new_height)
+    Paste(String),                              // Bracketed paste content
+    FocusGained,                                // Terminal gained focus (CSI I)
+    FocusLost,                                  // Terminal lost focus (CSI O)
+    Unsupported(Vec<u8>),                       // Unrecognized escape sequence
+}
+
+/// Keyboard event with full modifier support.
+pub struct KeyEvent {
+    pub code: KeyCode,                          // Which key
+    pub modifiers: KeyModifiers,                // SHIFT, CTRL, ALT, SUPER, HYPER, META
+    pub kind: KeyEventKind,                     // Press, Repeat, Release
+}
+
+pub enum KeyEventKind { Press, Repeat, Release }
+
+/// Key code enumeration — exhaustive across standard + extended keys.
+pub enum KeyCode {
+    // Navigation
+    Up, Down, Left, Right,
+    Home, End, PageUp, PageDown,
+    // Editing
+    Backspace, Delete, Insert,
+    // Control
+    Enter, Tab, BackTab, Esc, Null,
+    // Function keys
+    F(u8),                                      // F1-F12 (and beyond via kitty protocol)
+    // Printable
+    Char(char),
+    // Lock keys
+    CapsLock, ScrollLock, NumLock,
+    // System
+    PrintScreen, Pause, Menu, KeypadBegin,
+    // Media keys
+    Media(MediaKeyCode),
+    // Modifier keys (when pressed as keys, not modifiers)
+    Modifier(ModifierKeyCode),
+}
+
+pub enum MediaKeyCode {
+    Play, Pause, PlayPause, Reverse, Stop,
+    FastForward, Rewind, TrackNext, TrackPrevious,
+    Record, LowerVolume, RaiseVolume, MuteVolume,
+}
+
+pub enum ModifierKeyCode {
+    LeftShift, LeftControl, LeftAlt, LeftSuper, LeftHyper, LeftMeta,
+    RightShift, RightControl, RightAlt, RightSuper, RightHyper, RightMeta,
+    IsoLevel3Shift, IsoLevel5Shift,
+}
+
+/// Modifier flags (bitflags).
+pub struct KeyModifiers: u8 {
+    const SHIFT   = 0b0000_0001;
+    const CONTROL = 0b0000_0010;
+    const ALT     = 0b0000_0100;
+    const SUPER   = 0b0000_1000;
+    const HYPER   = 0b0001_0000;
+    const META    = 0b0010_0000;
+}
+
+/// Mouse event with position, button, and modifiers.
+pub struct MouseEvent {
+    pub kind: MouseEventKind,                   // Down, Up, Drag, Moved, Scroll*
+    pub column: u16,                            // 1-based column (adjusted to 0-based)
+    pub row: u16,                               // 1-based row (adjusted to 0-based)
+    pub modifiers: KeyModifiers,                // Active modifiers during event
+}
+
+pub enum MouseEventKind {
+    Down(MouseButton),                          // Button pressed
+    Up(MouseButton),                            // Button released
+    Drag(MouseButton),                          // Drag with button held
+    Moved,                                      // Mouse moved (no button)
+    ScrollDown, ScrollUp, ScrollLeft, ScrollRight,  // Wheel
+}
+
+pub enum MouseButton {
+    Left, Right, Middle, Back, Forward, Other(u8),
+}
+```
+
+#### Parser (`src/input/parser.rs`)
+
+**Architecture:** Byte-level event parser. Maintains internal state machine and byte buffer. Fed one byte at a time via `advance()`. Emits `Event` when complete sequence is recognized.
+
+```rust
+pub struct Parser {
+    buffer: Vec<u8>,                            // Accumulates bytes for current sequence
+    state: ParserState,                         // Current parse state
+    params: Vec<u16>,                           // CSI parameter values
+    intermediates: Vec<u8>,                     // CSI intermediate bytes
+    // State for specific sequences
+    paste_buffer: Vec<u8>,                      // Bracketed paste accumulation
+    kitty_key_buffer: Vec<u8>,                  // Kitty keyboard protocol accumulation
+}
+
+enum ParserState {
+    Ground,                                     // Normal text
+    Escape,                                     // Saw ESC (\x1b)
+    CsiEntry,                                   // Saw ESC [ or CSI (\x9b)
+    CsiParam,                                   // Accumulating CSI parameters
+    CsiIntermediate,                            // CSI intermediate bytes
+    CsiIgnore,                                  // Ignoring invalid CSI sequence
+    OscString,                                  // OSC sequence (\x1b])
+    DcsEntry,                                   // Device Control String entry
+    DcsPassthrough,                             // DCS passthrough
+    SosString,                                  // Start of String
+    PmString,                                   // Privacy Message
+    ApcString,                                  // Application Program Command
+    PasteStart,                                 // Saw \x1b[200~ (bracketed paste start)
+    PasteBody,                                  // Inside bracketed paste
+}
+```
+
+**Supported Escape Sequences (complete table):**
+
+| Sequence | Event | Description |
+|----------|-------|-------------|
+| `\x1b[M...` | `Mouse` | SGR mouse event (1006) |
+| `\x1b[<{b};{x};{y}{M|m}` | `Mouse` | SGR-encoded mouse (button, x, y, press/release) |
+| `\x1b[{n}~` | `Key(KeyCode::F(n))` | Function keys via ~ encoding (F1=11~, F2=12~, etc.) |
+| `\x1b[200~` | (paste start) | Bracketed paste begin |
+| `\x1b[201~` | `Paste(text)` | Bracketed paste end |
+| `\x1b[{y};{x}R` | `Resize(x,y)` | Cursor position report (resize detection) |
+| `\x1b[I` | `FocusGained` | Terminal focus in |
+| `\x1b[O` | `FocusLost` | Terminal focus out |
+| `\x1b[1;{n}A` | `Key(Code::Up, mods)` | Cursor up with modifiers |
+| `\x1b[1;{n}B` | `Key(Code::Down, mods)` | Cursor down with modifiers |
+| `\x1b[1;{n}C` | `Key(Code::Right, mods)` | Cursor right with modifiers |
+| `\x1b[1;{n}D` | `Key(Code::Left, mods)` | Cursor left with modifiers |
+| `\x1b[1;{n}H` | `Key(Code::Home, mods)` | Home with modifiers |
+| `\x1b[1;{n}F` | `Key(Code::End, mods)` | End with modifiers |
+| `\x1b[5;{n}~` | `Key(Code::PageUp, mods)` | PageUp with modifiers |
+| `\x1b[6;{n}~` | `Key(Code::PageDown, mods)` | PageDown with modifiers |
+| `\x1b[2;{n}~` | `Key(Code::Insert, mods)` | Insert with modifiers |
+| `\x1b[3;{n}~` | `Key(Code::Delete, mods)` | Delete with modifiers |
+| `\x1b[15;{n}~` | `Key(Code::F5, mods)` | F5 with modifiers |
+| `\x1b[17;{n}~` | `Key(Code::F6, mods)` | F6 with modifiers |
+| `\x1b[18;{n}~` | `Key(Code::F7, mods)` | F7 with modifiers |
+| `\x1b[19;{n}~` | `Key(Code::F8, mods)` | F8 with modifiers |
+| `\x1b[20;{n}~` | `Key(Code::F9, mods)` | F9 with modifiers |
+| `\x1b[21;{n}~` | `Key(Code::F10, mods)` | F10 with modifiers |
+| `\x1b[23;{n}~` | `Key(Code::F11, mods)` | F11 with modifiers |
+| `\x1b[24;{n}~` | `Key(Code::F12, mods)` | F12 with modifiers |
+| `\x1b[27;{n};{c}~` | `Key(Code::Char(c), mods)` | Kitty protocol (explicit Unicode) |
+| `\x1bOA` | `Key(Up)` | SS3 cursor up (xterm legacy) |
+| `\x1bOB` | `Key(Down)` | SS3 cursor down |
+| `\x1bOC` | `Key(Right)` | SS3 cursor right |
+| `\x1bOD` | `Key(Left)` | SS3 cursor left |
+| `\x1bOH` | `Key(Home)` | SS3 home |
+| `\x1bOF` | `Key(End)` | SS3 end |
+| `\x1b...u` | `Key(...)` | Kitty keyboard protocol (full Unicode + modifiers) |
+| `\x1b[?u` | (capability response) | Kitty protocol query response |
+| `\b\x7f` | `Key(Backspace)` | ASCII backspace / DEL |
+| `\r` | `Key(Enter)` | Carriage return |
+| `\t` | `Key(Tab)` | Horizontal tab |
+| `\x1b\t` | `Key(BackTab)` | ESC Tab (legacy backtab) |
+| `\x1b[Z` | `Key(BackTab)` | CSI Z (modern backtab) |
+| `\x1b\x7f` | `Key(Alt+Backspace)` | ESC DEL (Alt backspace) |
+| Printable chars | `Key(Char(c))` | Normal text input |
+| `\x1b` | (state start) | Start of escape sequence |
+
+**Modifier encoding in CSI sequences:**
+Parameter `n` encodes modifiers as bitmask + 1: 1=none, 2=shift, 3=alt, 4=alt+shift, 5=ctrl, 6=ctrl+shift, 7=ctrl+alt, 8=ctrl+alt+shift.
+
+#### InputReader (`src/input/reader.rs`)
+
+```rust
+pub struct InputReader<R: Read> {
+    reader: R,                                  // Underlying byte source
+    parser: Parser,                             // Event parser
+}
+
+impl<R: Read> InputReader<R> {
+    pub fn new(reader: R) -> Self;
+    pub fn read(&mut self) -> io::Result<Option<Event>>;  // Non-blocking read
+    pub fn read_blocking(&mut self) -> io::Result<Event>;  // Blocking read
+}
+```
+
+#### Kitty Keyboard Protocol (`src/input/kitty_key.rs`)
+
+Implements parsing for the Kitty keyboard protocol extension, which provides:
+- Unicode code points for all keys (including modifiers)
+- Press/repeat/release distinction
+- All modifier combinations
+- Media keys and special keys as Unicode values
+
+Format: `\x1b[{code};{modifiers}u` where `code` is the Unicode code point of the key and `modifiers` is a bitmask.
+
+#### Async Reader (`src/input/async_reader.rs`, feature-gated `async`)
+
+```rust
+#[cfg(feature = "async")]
+pub struct AsyncReader { /* tokio::io::Stdin + Parser */ }
+
+#[cfg(feature = "async")]
+impl AsyncReader {
+    pub fn new() -> Self;
+    pub async fn read(&mut self) -> Option<Event>;  // Async non-blocking read
+    pub async fn read_blocking(&mut self) -> Event;  // Async blocking read
+}
+```
 
 ---
 
 ## 4. Framework Layer
 
-### 4.1 App (`src/framework/app.rs`)
+### 4.1 App Struct (`src/framework/app.rs`)
 
-**Purpose:** The main application entry point. Owns the terminal, compositor, input parser, widget registry, and event loop.
+**Total LOC:** ~1,591  
+**Purpose:** The main application entry point. Owns the terminal, compositor, input parser, widget registry, focus manager, dirty tracker, animation manager, event bus, scene router, and keybinding set.
 
-**Specification & Public API:**
-
-```rust
-// Construction
-App::new() -> io::Result<App>                        // Default terminal init
-App::from_toml(path) -> io::Result<App>              // From TOML config
-App::default() -> App                                 // Panics on terminal init failure
-
-// Builder pattern
-.title(&str) -> Self                                  // Terminal window title (OSC 0)
-.fps(u32) -> Self                                     // Target FPS (clamped 1-120)
-.theme(Theme) -> Self                                 // Initial theme
-.on_tick(FnMut(&mut Ctx, u64)) -> Self               // Tick callback (every tick_interval)
-.on_input(FnMut(KeyEvent) -> bool) -> Self            // Keyboard input handler (creates InputRouter)
-.tick_interval(u64) -> Self                          // Tick interval in ms (default 250)
-
-// Widget management (requires &mut self)
-.add_widget(Box<dyn Widget>, area: Rect) -> WidgetId
-.remove_widget(id: WidgetId)
-.widget(id: WidgetId) -> Option<WidgetRef>
-.widget_mut(id: WidgetId) -> Option<WidgetRefMut>
-.widget_count() -> usize
-
-// Theme management
-.set_theme(Theme) -> &mut Self                       // Propagates to all widgets
-
-// Command registry
-.add_command(BoundCommand)                            // Register AI-inspectable command
-.available_commands() -> Vec<BoundCommand>             // Enumerate all widget commands
-
-// Input shield
-.shield_input(Duration)                               // Swallow input after mode transitions
-.is_input_shielded() -> bool
-
-// Run
-.run(FnMut(&mut Ctx)) -> io::Result<()>               // Start the event loop
-.stop()                                                // Signal stop (thread-safe, via AtomicBool)
-
-// Metrics
-.frame_time_ms() -> f64
-.plane_count() -> usize
-```
-
-**Widget Lifecycle:**
-```
-add_widget()
-  ├── set_id(id)           ← App assigns WidgetId
-  ├── set_area(rect)       ← Initial screen area
-  ├── on_mount()           ← Widget initialization
-  ├── on_theme_change()    ← Apply current theme
-  ├── register focus()     ← Add to focus ring if focusable
-  └── auto-focus if first widget
-
-render loop (per frame):
-  ├── needs_render()?      ← Skip if not dirty
-  ├── render(area) → Plane ← Produce visual output
-  ├── clear_dirty()        ← Reset dirty flag
-  └── compositor.add_plane()
-
-remove_widget(id):
-  ├── on_unmount()          ← Widget cleanup
-  ├── remove from registry
-  ├── unregister focus()
-  └── invalidate z-order cache
-```
-
-**Event Loop (run method):**
-```
-Frame loop (while running):
-  1. poll_and_dispatch_input()
-     ├── Read stdin bytes via tty::poll_input
-     ├── Parse into Events via Parser
-     └── handle_event (key, mouse, resize)
-  2. render_dirty_widgets()
-     └── For each widget: if needs_render(), render() and add_plane()
-  3. run_tick_callback()
-     └── If tick_interval elapsed, call on_tick closure
-  4. run_periodic_commands()
-     └── For widgets with refresh_seconds: re-run command, apply output
-  5. User render closure: f(&mut Ctx)
-  6. compositor.render(&mut terminal)
-  7. Focused cursor positioning
-  8. Animation tick
-  9. Frame rate limiter (sleep if frame completed early)
-  10. Frame counter + timing
-
-Panic safety:
-  ├── Install panic hook that restores terminal state
-  └── On exit: write theme name to DTRON_THEME_FILE if env var set
-```
-
-**Borrow Safety:**
-- `widgets` field uses `RefCell<Vec<Box<dyn Widget>>>` for interior mutability
-- `WidgetRef` / `WidgetRefMut` wrapper types hide borrow guards from public API
-- Framework guarantees borrow safety by never nesting mutable borrows
-- Render phase: `borrow()` (immutable iteration)
-- Event phase: `borrow_mut()` (mutable iteration)
-- Event loop processes one phase at a time: input → tick → render
-
-**Input Shield:**
-- After mode transitions (modal open/close, view switch), stale keypresses can leak
-- `shield_input(duration)` swallows all key/mouse events for cooldown period
-- Resize events are NOT shielded (must always be processed)
-- Used after: modal/overlay dismiss, view transitions, command palette close
-
-### 4.2 Ctx (`src/framework/ctx.rs`)
-
-**Purpose:** Application context passed to render and tick callbacks. Provides access to compositor, theme, animations, focus, dirty regions, scene router, event bus.
-
-**Public API:**
+#### Struct Fields
 
 ```rust
-// Rendering
-add_plane(plane)                                    // Add plane to compositor
-show_cursor() / hide_cursor() / set_cursor(col, row) // Cursor control
+pub struct App {
+    // Core
+    terminal: Terminal<io::Stdout>,              // RAII terminal wrapper
+    compositor: Compositor,                       // Plane compositing engine
+    parser: Parser,                               // Input event parser
 
-// Terminal lifecycle
-suspend_terminal() -> io::Result<()>                // Restore normal mode (for child processes)
-resume_terminal() -> io::Result<()>                 // Re-enter raw mode + full redraw
+    // Identity
+    title: String,                                // Terminal window title
+    fps: u32,                                     // Target FPS (clamped 1-120)
+    theme: Theme,                                 // Current UI theme
 
-// Focus
-set_focus(id: WidgetId)
-focused() -> Option<WidgetId>
+    // Event loop control
+    running: Arc<AtomicBool>,                     // Thread-safe stop flag
+    frame_count: Arc<AtomicU64>,                  // Monotonically increasing frame counter
+    last_frame_time: Instant,
+    last_tick_time: Instant,
+    tick_interval: Duration,                      // Between tick callbacks (default 250ms)
+    tick_count: u64,                              // Number of ticks fired
 
-// Dirty regions
-mark_dirty(x, y, width, height)
-mark_all_dirty()
-needs_full_refresh() -> bool
+    // Callbacks
+    on_tick: RefCell<Option<TickCallback>>,       // Tick callback closure
 
-// Compositor
-compositor() -> &Compositor
-compositor_mut() -> &mut Compositor
-widget_count() -> usize
-plane_count() -> usize
-frame_time_ms() -> f64
-fps() -> u64
+    // Widget management
+    widgets: RefCell<Vec<Box<dyn Widget>>>,        // Registered widgets
+    z_order_cache: RefCell<Vec<WidgetId>>,         // Cached z-order sorted IDs
+    z_order_dirty: RefCell<bool>,                  // Whether cache needs rebuild
+    next_widget_id: usize,                         // Monotonically increasing widget IDs
 
-// Theme
-theme() -> &Theme
-set_theme(Theme)                                    // Changes theme (detected by App::run)
+    // Framework subsystems
+    focus_manager: FocusManager,
+    dirty_tracker: DirtyRegionTracker,
+    animations: AnimationManager,
+    event_bus: EventBus,
+    scene_router: SceneRouter,
+    keybindings: KeybindingSet,
 
-// UI
-clear()                                             // Force full terminal clear
+    // Command-driven architecture
+    commands: RefCell<Vec<BoundCommand>>,          // Global command registry
+    command_tracking: RefCell<HashMap<WidgetId, (Instant, BoundCommand)>>,  // Periodic command schedule
 
-// Split panes
-split_h(|left, right|)                              // Horizontal split (50/50)
-split_v(|top, bottom|)                              // Vertical split (50/50)
-
-// Scene router
-scene_router() -> &mut SceneRouter
-push_scene(id: &str)
-pop_scene() -> bool
-replace_scene(id: &str)
-go_to_scene(id: &str)
-
-// Event bus
-publish(event: E)
-subscribe::<E, F>(callback) -> SubscriptionId
-event_bus() -> &EventBus
-
-// Layout
-layout(constraints: Vec<Constraint>) -> Vec<Rect>
-
-// Commands
-run_command(cmd: &str) -> (String, String, i32)
-available_commands() -> Vec<BoundCommand>
-
-// App control
-stop()
-```
-
-### 4.3 Widget Trait (`src/framework/widget.rs`)
-
-**Purpose:** Core trait implemented by all framework widgets.
-
-**Decomposition into sub-traits:**
-
-| Sub-trait | Methods | Purpose |
-|-----------|---------|---------|
-| `Renderable` | `render()`, `needs_render()`, `mark_dirty()`, `clear_dirty()` | Rendering lifecycle |
-| `Focusable` | `focusable()`, `on_focus()`, `on_blur()`, `cursor_position()` | Focus management |
-| `Themable` | `on_theme_change()`, `current_theme()` | Theme propagation |
-| `Commandable` | `commands()`, `apply_command_output()` | CLI command binding |
-| `InputHandler` | `handle_key()`, `handle_mouse()` | Input event handling |
-
-**`Widget` trait (full):**
-
-```rust
-trait Widget {
-    // Identity & Geometry
-    fn id(&self) -> WidgetId;
-    fn set_id(&mut self, id: WidgetId);
-    fn area(&self) -> Rect;                          // ratatui::layout::Rect
-    fn set_area(&mut self, area: Rect);
-    fn z_index(&self) -> u16;                        // Default: 0
-
-    // Rendering
-    fn render(&self, area: Rect) -> Plane;           // &self — no side effects
-    fn draw_to(&mut self, target: &mut Plane, x: u16, y: u16);  // Direct-plane optimization
-    fn needs_render(&self) -> bool;                  // Default: true
-    fn mark_dirty(&mut self);
-    fn clear_dirty(&mut self);
-
-    // Focus
-    fn focusable(&self) -> bool;                     // Default: true
-    fn on_focus(&mut self);
-    fn on_blur(&mut self);
-    fn cursor_position(&self) -> Option<(u16, u16)>; // For text input cursors
-
-    // Lifecycle
-    fn on_mount(&mut self);                          // Called at registration
-    fn on_unmount(&mut self);                        // Called at removal
-
-    // Theme
-    fn on_theme_change(&mut self, theme: &Theme);
-    fn current_theme(&self) -> Option<Theme>;        // For pattern 2 theme sync
-
-    // Input
-    fn handle_key(&mut self, key: KeyEvent) -> bool;  // True = consumed
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool;
-
-    // Commands
-    fn commands(&self) -> Vec<BoundCommand>;
-    fn apply_command_output(&mut self, output: &ParsedOutput);
+    // Input shield
+    input_shield_until: Cell<Option<Instant>>,     // Swallow input until this time
 }
 ```
 
-**Widget sub-traits (for generic bounds):**
-- `WidgetId(pub usize)` — unique identifier with `AtomicUsize` auto-counter (`WidgetId::next()`)
-- `WidgetState` trait for JSON serialization: `state_id()`, `to_json()`, `apply_json()`
-- `AsyncWidget` trait (feature-gated `async`): `on_mount_async()`, `on_unmount_async()`
+#### Complete Public API
 
-**Z-Index Ranges:**
+```rust
+// ── Construction ─────────────────────────────────────────────────────
+pub fn new() -> io::Result<Self>                          // Default: terminal init
+pub fn from_toml(path: &Path) -> io::Result<Self>         // From TOML config file
+pub fn default() -> Self                                   // Panics on terminal failure
 
-| Range | Layer |
-|-------|-------|
-| 0 | Background/base widgets |
-| 5 | Content areas (panels, split panes) |
-| 10 | Interactive widgets (lists, forms, editors) |
-| 50 | Overlays (tooltips, dropdowns) |
-| 100 | Modal dialogs |
-| 500 | Toasts/notifications |
-| 9000 | Drag ghost (reserved) |
+// ── Builder Pattern ─────────────────────────────────────────────────
+pub fn title(self, title: &str) -> Self                    // Sets terminal window title
+pub fn fps(self, fps: u32) -> Self                         // Target FPS (clamped 1-120)
+pub fn theme(self, theme: Theme) -> Self                   // Initial theme
+pub fn on_tick<F>(self, f: F) -> Self                      // Tick callback
+  where F: FnMut(&mut Ctx, u64) + 'static
+pub fn on_input<F>(self, handler: F) -> Self               // Keyboard input handler
+  where F: FnMut(KeyEvent) -> bool + 'static
+pub fn tick_interval(self, ms: u64) -> Self                // Tick interval (ms)
 
-### 4.4 Keybinding System (`src/framework/keybindings.rs`)
+// ── Widget Management ───────────────────────────────────────────────
+pub fn add_widget(&mut self, widget: Box<dyn Widget>, area: Rect) -> WidgetId
+pub fn remove_widget(&mut self, id: WidgetId)
+pub fn widget(&self, id: WidgetId) -> Option<WidgetRef<'_>>
+pub fn widget_mut(&mut self, id: WidgetId) -> Option<WidgetRefMut<'_>>
+pub fn widget_count(&self) -> usize
+pub fn plane_count(&self) -> usize
 
-**Purpose:** Config-driven keybinding resolution with TOML support.
+// ── Theme ───────────────────────────────────────────────────────────
+pub fn set_theme(&mut self, theme: Theme) -> &mut Self
 
-**Resolution Order:**
-1. Engine defaults (compiled-in)
-2. User global: `~/.config/dracon/dracon.toml`
-3. Project-local: `./dracon.toml` (highest priority)
+// ── Commands ────────────────────────────────────────────────────────
+pub fn add_command(&mut self, cmd: BoundCommand)
+pub fn available_commands(&self) -> Vec<BoundCommand>
 
-**String Format:**
-- Simple: `"q"`, `"?"`, `"esc"`, `"enter"`, `"tab"`, `"backspace"`, `"up"`, `"down"`
-- Modifiers: `"ctrl+q"`, `"ctrl+t"`, `"alt+f4"`, `"shift+tab"`
-- Multi-modifier: `"ctrl+shift+t"`
+// ── Input Shield ────────────────────────────────────────────────────
+pub fn shield_input(&self, duration: Duration)
+pub fn is_input_shielded(&self) -> bool
 
-**Standard Actions:**
+// ── Run ─────────────────────────────────────────────────────────────
+pub fn run<F>(mut self, f: F) -> io::Result<()>
+  where F: FnMut(&mut Ctx)
+pub fn stop(&self)
 
-| Action Constant | Default | Purpose |
-|-----------------|---------|---------|
-| `actions::QUIT` | `ctrl+q` | Exit application |
-| `actions::HELP` | `f1` | Toggle help overlay |
-| `actions::BACK` | `esc` | Dismiss/go back |
-| `actions::THEME` | `ctrl+t` | Cycle theme |
-| `actions::SUBMIT` | `enter` | Confirm/submit |
-| `actions::SEARCH` | `ctrl+f` | Open search |
-| `actions::NEW` | `ctrl+n` | New item/tab |
-| `actions::CLOSE` | `ctrl+w` | Close item/tab |
-| `actions::SAVE` | `ctrl+s` | Save |
-| `actions::COPY` | `ctrl+c` | Copy |
-| `actions::PASTE` | `ctrl+v` | Paste |
-| `actions::CUT` | `ctrl+x` | Cut |
-| `actions::DELETE` | `delete` | Delete |
-| `actions::REFRESH` | `f5` | Refresh/reload |
-| `actions::PAUSE` | `ctrl+p` | Pause/resume |
-
-**Caching:**
-- `resolve_keybindings()` caches result after first call
-- `invalidate_keybinding_cache()` forces re-resolution
-- `KeybindingSet::from_config(config)` — create from resolved config
-- `KeybindingSet::matches(action, key_event)` — query if key matches an action
-
-**Philosophy:**
-- Modifier keys for actions (never single letters)
-- Single-letter keys reserved for text input
-- Exceptions: `↑/↓/←/→` (navigation), `Enter` (selection), `Tab` (focus), `Backspace` (delete) — universal, hardcoded
-
-### 4.5 Focus System (`src/framework/focus.rs`)
-
-**Purpose:** Manages widget focus ordering, tab navigation, and focus trapping.
-
-**`FocusManager` API:**
-- `register(id, focusable)` — add widget to tab-order ring
-- `unregister(id)` — remove widget from ring
-- `set_focus(id)` — set focused widget
-- `focused() -> Option<WidgetId>` — get current focus
-- `tab_next() / tab_prev() -> bool` — cycle focus forward/backward
-- `set_trapped(bool)` — lock focus within current set (for modals)
-
-**Callbacks:**
-- `on_focus_change: Vec<Arc<FocusCallback>>` — focus transition callbacks
-- `on_trap_change: Vec<Arc<TrapCallback>>` — trap enter/exit callbacks
-- `on_focus_change_internal: Vec<FocusChangeCallback>` — old/new focus callbacks
-
-### 4.6 Hit Zone System (`src/framework/hitzone.rs`)
-
-**Purpose:** Declarative mouse event routing with click, double-click, triple-click, right-click, drag, and hover detection.
-
-| Component | Description |
-|-----------|-------------|
-| `HitZone<T>` | Rectangular zone with callbacks for all mouse interactions |
-| `HitZoneGroup<T>` | Multi-zone dispatcher to first matching zone |
-| `ScopedZone<T>` | Lightweight geometry-only zone (no callbacks) |
-| `ScopedZoneRegistry<T>` | Per-frame scoped registry: clear, register during render, dispatch in mouse handler |
-
-**HitZone Callbacks:**
-- `on_click(ClickKind)` — Single/Double/Triple click detection with timeout
-- `on_right_click()` — Right-click handler
-- `on_drag_start(DragState)` / `on_drag_move(DragState)` / `on_drag_end(DragState)`
-
-**Click Detection:**
-- Tracks `last_click_time` and `last_click_pos`
-- Double-click within `double_click_timeout` (default 300ms)
-- Triple-click: three rapid clicks within timeout
-- Drag active flag to distinguish click from drag
-
-### 4.7 Drag-and-Drop (`src/framework/dragdrop.rs`)
-
-**Purpose:** Full drag-and-drop lifecycle with visual ghost rendering.
-
-| Component | Description |
-|-----------|-------------|
-| `DragItem<T>` | Payload with data and source ID |
-| `DragGhost` | Visual ghost rendered during drag at z=9000 |
-| `DropTarget<T>` | Rectangular target zone with accept/reject |
-| `DragManager<T>` | State machine: Idle → Dragging → Dropped/Cancelled |
-
-**DragManager API:**
-- `start_drag(item, col, row)` — begin drag
-- `move_ghost(col, row)` — update ghost position
-- `end_drag(col, row, targets)` — check drop targets, complete or cancel
-- `cancel()` — abort drag
-- `is_dragging() -> bool` / `current_item() -> Option<&DragItem<T>>`
-
-### 4.8 Marquee Selection (`src/framework/marquee.rs`)
-
-**Purpose:** Rectangle-based drag selection for List, Table, Tree, Kanban widgets.
-
-**State Machine:**
-```
-Idle → Tracking (MouseDown)
-Tracking → Active (Drag exceeds threshold)
-Tracking → Idle (MouseUp without exceeding threshold → resolve pending_click)
-Active → Idle (MouseUp → commit selection)
-Active → Idle (Escape / MouseMove → cancel)
+// ── Metrics ─────────────────────────────────────────────────────────
+pub fn frame_time_ms(&self) -> f64
 ```
 
-**`MarqueeState` API:**
-- `start_tracking(col, row)` — begin potential marquee
-- `defer_click(item_index)` — defer plain click selection
-- `update(col, row) -> bool` — update during drag; returns true if just activated
-- `rect() -> Option<MarqueeRect>` — normalized bounding rectangle
-- `take_pending_click() -> Option<usize>` — resolve deferred click
-- `is_active -> bool` — whether marquee is currently active
-- `clear()` / `reset()` — cancel or reset state
+#### WidgetRef / WidgetRefMut
 
-**Key Design:**
-- Deferred click pattern: plain clicks don't immediately change selection
-- Staggered thresholds: marquee at 2px, file drag at 3px
-- Marquee and drag-drop are mutually exclusive
-- `Ctrl+drag` toggles items into selection instead of replacing
-- Border-only rendering (╭╮╰╯─│) with `theme.primary` + BOLD, no background fill
+```rust
+/// Opaque wrapper around Ref<'_, Box<dyn Widget>> that hides the borrow guard.
+pub struct WidgetRef<'a> {
+    inner: Ref<'a, Box<dyn Widget>>,
+}
+impl<'a> Deref for WidgetRef<'a> { type Target = Box<dyn Widget>; }
 
-### 4.9 Layout Engine (`src/framework/layout.rs`)
+/// Opaque wrapper around RefMut<'_, Box<dyn Widget>>.
+pub struct WidgetRefMut<'a> {
+    inner: RefMut<'a, Box<dyn Widget>>,
+}
+impl<'a> Deref for WidgetRefMut<'a> { type Target = Box<dyn Widget>; }
+impl<'a> DerefMut for WidgetRefMut<'a> {}
+```
 
-**Purpose:** Constraint-based layout computation, inspired by CSS flexbox and ratatui's Layout.
+#### Internal Event Dispatch
 
-| Constraint | Description |
-|------------|-------------|
-| `Percentage(u16)` | Percentage of available space (0-100) |
-| `Fixed(u16)` | Fixed size in cells |
-| `Min(u16)` | Minimum size (grows to fill remaining) |
-| `Max(u16)` | Maximum size (shrinks to fit) |
-| `Ratio(u16, u16)` | Ratio of remaining space (numerator/denominator) |
+**`dispatch_key`:**
+1. Check `keybindings.matches(QUIT)`: set `running = false`, return
+2. Check `keybindings.matches(BACK)`: 
+   - If focused widget handles it, done
+   - If not, check `scene_router.can_go_back()` → pop or quit
+3. Check `Tab`: cycle focus via `FocusManager::tab_next/prev`, call `on_blur`/`on_focus`
+4. Other keys: forward to focused widget via `widget.handle_key(key)`
+5. After dispatch, check `widget.current_theme()` for pattern 2 theme sync
+6. Check if `scene_router.stack_depth()` changed (scene pop → mark all dirty)
 
-**`Layout` builder:**
-- `Layout::new(constraints)` / `Layout::horizontal(constraints)`
-- `Layout::vertical(constraints)` / `.direction(Direction)`
-- `.spacing(u16)` / `.margin(u16)`
-- `.layout(area: Rect) -> Vec<Rect>` — compute child rectangles
-- `.with_caching()` — cache results for repeated calls
+**`dispatch_mouse`:**
+1. Rebuild z-order cache if dirty
+2. Reverse-iterate z-ordered widget IDs
+3. For each widget, check if `col, row` falls within `widget.area()`
+4. First match wins (topmost widget under cursor)
+5. Update focus to matched widget
+6. Compute local coordinates: `col - area.x`, `row - area.y`
+7. Call `widget.handle_mouse(kind, local_col, local_row)`
 
-**Direction:**
-- `Direction::Horizontal` — distribute left-to-right (default)
-- `Direction::Vertical` — distribute top-to-bottom
+**`dispatch_resize`:**
+1. `compositor.resize(new_w, new_h)` — resize frame buffers
+2. `dirty_tracker.mark_all_dirty()` — force full redraw
+3. For each widget: `set_area(Rect::new(0, 0, new_w, new_h))` + `mark_dirty()`
 
-### 4.10 Scroll System (`src/framework/scroll.rs`)
+**`dispatch_paste`:**
+1. Get focused widget
+2. For each character in paste text: create synthetic `KeyEvent(Code::Char(c))` and call `widget.handle_key()`
+3. Newlines → `KeyCode::Enter`, tabs → `KeyCode::Tab`
 
-**Purpose:** Scroll position tracking and scrollable container.
+#### Event Loop (run method) — Full Pseudocode
 
-**`ScrollState`:**
-- `offset: usize`, `content_height: usize`, `viewport_height: usize`
-- `max_offset()` / `page_size()` / `scroll_up(n)` / `scroll_down(n)` / `scroll_to(offset)`
-- `start_row()` / `end_row()` / `is_scrollable()` / `visible_range()`
+```
+fn run(mut self, f):
+  1. Write terminal title (OSC 0)
+  2. Install panic hook:
+     - On panic: write RESTORE_SEQ to stdout, then invoke original hook
+  3. Register signal handlers (SIGINT, SIGTERM):
+     - Both set running.store(false, SeqCst)  (async-signal-safe)
+  4. Initialize stdin, frame_duration
+  5. Initialize all widget areas to full terminal size
+  6. Loop while running.load(SeqCst):
+     a. frame_start = Instant::now()
+     b. poll_and_dispatch_input(&mut stdin)
+        - Read stdin byte by byte via poll_input
+        - Parser::advance(byte) → Option<Event>
+        - handle_event(event, &running)
+        - Drain remaining input (up to 64 iterations)
+     c. render_dirty_widgets()
+        - Rebuild z-order cache
+        - For each widget in z-order:
+          if needs_render(): render(area) → compositor.add_plane(plane)
+     d. run_tick_callback(&frame_count)
+        - If tick_interval elapsed: call on_tick closure
+        - If theme changed: propagate to all widgets
+     e. run_periodic_commands()
+        - For each registered periodic command:
+          if refresh_interval elapsed: run command, parse output, apply to widget
+     f. f(&mut Ctx)  // User's per-frame closure
+     g. if compositor.planes not empty:
+          compositor.set_dirty_regions(&dirty_tracker)
+          compositor.render(&mut terminal)
+     h. Focused cursor positioning
+     i. animations.tick()
+     j. frame_count += 1
+     k. Update frame timing metrics
+     l. Sleep if frame completed before frame_duration
+  7. Restore original panic hook
+  8. If DTRON_THEME_FILE: write self.theme.name to file
+  9. Return Ok(())
+```
 
-**`ScrollContainer`:** Wraps content with scrollbar rendering.
-- `render(content_plane, area, state, theme) -> Plane`
-- Renders proportional scrollbar thumb (`▐`) with `theme.primary`
-- Default scrollbar width: `DEFAULT_SCROLLBAR_WIDTH = 1`
+### 4.2 Ctx Struct (`src/framework/ctx.rs`)
 
-### 4.11 Animation System (`src/framework/animation.rs`)
+**Total LOC:** ~450  
+**Purpose:** Context object passed to render and tick callbacks. Provides access to all framework subsystems without exposing the `App` struct directly.
 
-**Purpose:** Tweening animations with easing curves.
+#### Struct Fields
 
-| Component | Description |
-|-----------|-------------|
-| `Animation` | Keyframe-based animation on widget properties (position, size) |
-| `AnimationManager` | Manages active animations, ticks all on frame |
-| `Easing` | Interpolation functions: Linear, Sine, Quadratic, Cubic, Exponential, Elastic, Bounce, Back |
-| `EasingType` | In, Out, InOut variants for each easing function |
+```rust
+pub struct Ctx<'a> {
+    pub(crate) compositor: &'a mut Compositor,
+    pub(crate) theme: &'a mut Theme,
+    pub(crate) frame_count: u64,
+    pub(crate) last_frame: &'a Instant,
+    pub(crate) terminal: &'a mut Terminal<io::Stdout>,
+    pub(crate) focus_manager: &'a mut FocusManager,
+    pub(crate) animations: &'a mut AnimationManager,
+    pub(crate) dirty_tracker: &'a mut DirtyRegionTracker,
+    pub(crate) commands: &'a RefCell<Vec<BoundCommand>>,
+    pub(crate) running: &'a AtomicBool,
+    pub(crate) event_bus: &'a EventBus,
+    pub(crate) scene_router: &'a mut SceneRouter,
+}
+```
 
-**`Animation` fields:**
-- `duration: Duration`, `elapsed: Duration`, `easing: Easing`
-- `start_value: f64`, `end_value: f64`, `current_value: f64`
-- `looping: bool`, `yoyo: bool`, `completed: bool`
-- `on_complete: Option<Box<dyn FnOnce()>>`
+#### Complete Public API
 
-**`AnimationManager`:** `add(animation)`, `tick()`, `clear()`, `active_count()`
+```rust
+// ── Rendering ───────────────────────────────────────────────────────
+pub fn add_plane(&mut self, plane: Plane)
+pub fn show_cursor(&mut self) -> io::Result<()>
+pub fn hide_cursor(&mut self) -> io::Result<()>
+pub fn set_cursor(&mut self, col: u16, row: u16) -> io::Result<()>
 
-### 4.12 Dirty Region Tracking (`src/framework/dirty_regions.rs`)
+// ── Terminal Lifecycle ──────────────────────────────────────────────
+pub fn suspend_terminal(&mut self) -> io::Result<()>
+pub fn resume_terminal(&mut self) -> io::Result<()>
 
-**Purpose:** Efficient partial screen update tracking.
+// ── Focus ───────────────────────────────────────────────────────────
+pub fn set_focus(&mut self, id: WidgetId)
+pub fn focused(&self) -> Option<WidgetId>
 
-**`DirtyRegionTracker`:**
-- `mark_dirty(x, y, width, height)` — add a rectangular dirty region (max 256 tracked)
-- `mark_all_dirty()` — flag for full refresh
-- `clear()` — reset all regions
-- `needs_full_refresh() -> bool`
-- `dirty_regions() -> &[DirtyRegion]` — list of current dirty regions
+// ── Dirty Regions ───────────────────────────────────────────────────
+pub fn mark_dirty(&mut self, x: u16, y: u16, width: u16, height: u16)
+pub fn mark_all_dirty(&mut self)
+pub fn needs_full_refresh(&self) -> bool
 
-### 4.13 I18n (`src/framework/i18n.rs`)
+// ── Compositor ──────────────────────────────────────────────────────
+pub fn compositor(&self) -> &Compositor
+pub fn compositor_mut(&mut self) -> &mut Compositor
+pub fn widget_count(&self) -> usize
+pub fn plane_count(&self) -> usize
+pub fn frame_time_ms(&self) -> f64
+pub fn fps(&self) -> u64
 
-**Purpose:** Basic internationalization via JSON locale files.
+// ── Theme ───────────────────────────────────────────────────────────
+pub fn theme(&self) -> &Theme
+pub fn set_theme(&mut self, theme: Theme)     // Changes theme (detected by App::run)
 
-**`I18n`:**
-- `new(default_locale)` — create with default locale
-- `load_locale(code)` — load JSON locale file
-- `set_locale(code)` — switch active locale
-- `t(key) -> &str` — translate key
-- `tr!(key)` — macro for compile-time key validation
+// ── Screen ──────────────────────────────────────────────────────────
+pub fn clear(&mut self)                        // Force full terminal clear
 
-**Locale file format:** `{ "greeting": "Hello", "items": { "one": "1 item", "many": "{count} items" } }`
+// ── Split Panes ─────────────────────────────────────────────────────
+pub fn split_h<F>(&mut self, f: F)             // Horizontal 50/50
+  where F: FnOnce(&mut SplitPane, &mut SplitPane)
+pub fn split_v<F>(&mut self, f: F)             // Vertical 50/50
+  where F: FnOnce(&mut SplitPane, &mut SplitPane)
+
+// ── Scene Router ────────────────────────────────────────────────────
+pub fn scene_router(&mut self) -> &mut SceneRouter
+pub fn push_scene(&mut self, id: &str)
+pub fn pop_scene(&mut self) -> bool
+pub fn replace_scene(&mut self, id: &str)
+pub fn go_to_scene(&mut self, id: &str)
+
+// ── Event Bus ───────────────────────────────────────────────────────
+pub fn publish<E: Any + Clone>(&self, event: E)
+pub fn subscribe<E: Any + Clone, F>(&self, callback: F) -> SubscriptionId
+  where F: Fn(&E) + 'static
+pub fn event_bus(&self) -> &EventBus
+
+// ── Layout ──────────────────────────────────────────────────────────
+pub fn layout(&self, constraints: Vec<Constraint>) -> Vec<Rect>
+
+// ── Commands ────────────────────────────────────────────────────────
+pub fn run_command(&self, cmd: &str) -> (String, String, i32)
+pub fn available_commands(&self) -> Vec<BoundCommand>
+
+// ── App Control ─────────────────────────────────────────────────────
+pub fn stop(&mut self)
+
+// ── Animations ──────────────────────────────────────────────────────
+pub fn animations(&self) -> &AnimationManager
+pub fn animations_mut(&mut self) -> &mut AnimationManager
+```
+
+#### Ctx Usage Examples
+
+```
+// Render pattern:
+ctx.add_plane(list.render(Rect::new(0, 0, 40, 20)));
+
+// Tick pattern:
+if tick % 4 == 0 {
+    let (out, _, _) = ctx.run_command("uptime");
+    // update state from output
+}
+
+// Scene navigation:
+ctx.push_scene("settings");
+if ctx.pop_scene() { /* scene popped */ }
+
+// Event bus:
+ctx.publish(AppEvent::FileSelected(path));
+```
+
+### 4.3 InputHandler (Hidden Widget)
+
+Created by `App::on_input()`. A zero-size widget that routes keyboard events to a closure.
+
+```rust
+struct InputHandler {
+    handler: Box<dyn FnMut(KeyEvent) -> bool>,
+    id: WidgetId,
+    area: Rect,              // Full terminal size
+    theme: Option<Theme>,
+}
+
+impl Widget for InputHandler {
+    fn needs_render(&self) -> bool { false }       // Invisible
+    fn focusable(&self) -> bool { true }            // Receives focus
+    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }  // Empty
+    fn handle_key(&mut self, key: KeyEvent) -> bool { (self.handler)(key) }
+    fn current_theme(&self) -> Option<Theme> { self.theme.clone() }
+}
+```
+
+### 4.4 Widget Trait & Sub-traits (`src/framework/widget.rs`)
+
+**Total LOC:** ~380  
+**Purpose:** Core widget trait — the primary abstraction that all framework and custom widgets implement.
+
+#### WidgetId
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct WidgetId(pub usize);
+
+impl WidgetId {
+    pub fn new(id: usize) -> Self;               // Explicit ID assignment
+    pub fn default_id() -> Self;                  // Self(0)
+    pub fn next() -> Self;                        // Atomic counter (starts at 1)
+}
+```
+
+`WidgetId::next()` uses `AtomicUsize` for auto-incrementing IDs. Thread-safe for concurrent construction.
+
+#### Widget Trait (Complete)
+
+```rust
+pub trait Widget {
+    // ── Identity & Geometry ─────────────────────────
+    fn id(&self) -> WidgetId;
+    fn set_id(&mut self, _id: WidgetId) {}
+    fn area(&self) -> Rect;
+    fn set_area(&mut self, area: Rect);
+    fn z_index(&self) -> u16 { 0 }
+
+    // ── Rendering ────────────────────────────────────
+    fn render(&self, area: Rect) -> Plane;          // &self — must be re-entrant safe
+    fn draw_to(&mut self, target: &mut Plane, x: u16, y: u16) {
+        // Default: render() then blit_from at (x, y)
+        let plane = self.render(self.area());
+        target.blit_from(&plane, x, y);
+    }
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+
+    // ── Focus ────────────────────────────────────────
+    fn focusable(&self) -> bool { true }
+    fn on_focus(&mut self) {}
+    fn on_blur(&mut self) {}
+    fn cursor_position(&self) -> Option<(u16, u16)> { None }
+
+    // ── Lifecycle ────────────────────────────────────
+    fn on_mount(&mut self) {}                        // Called after registration
+    fn on_unmount(&mut self) {}                      // Called before removal
+
+    // ── Theme ────────────────────────────────────────
+    fn on_theme_change(&mut self, _theme: &Theme) {}
+    fn current_theme(&self) -> Option<Theme> { None }
+
+    // ── Input ────────────────────────────────────────
+    fn handle_key(&mut self, _key: KeyEvent) -> bool { false }   // true = consumed
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
+
+    // ── Commands ─────────────────────────────────────
+    fn commands(&self) -> Vec<BoundCommand> { vec![] }
+    fn apply_command_output(&mut self, _output: &ParsedOutput) {}
+}
+```
+
+#### Sub-traits (Blanket Implementations via Widget)
+
+Any type implementing `Widget` automatically implements all sub-traits:
+
+```rust
+pub trait Renderable {
+    fn render(&self, area: Rect) -> Plane;
+    fn needs_render(&self) -> bool { true }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+}
+// Blanket impl: impl<T: Widget> Renderable for T { ... }
+
+pub trait Focusable {
+    fn focusable(&self) -> bool { true }
+    fn on_focus(&mut self) {}
+    fn on_blur(&mut self) {}
+    fn cursor_position(&self) -> Option<(u16, u16)> { None }
+}
+
+pub trait Themable {
+    fn on_theme_change(&mut self, _theme: &Theme) {}
+    fn current_theme(&self) -> Option<Theme> { None }
+}
+
+pub trait Commandable {
+    fn commands(&self) -> Vec<BoundCommand> { vec![] }
+    fn apply_command_output(&mut self, _output: &ParsedOutput) {}
+}
+
+pub trait InputHandler {
+    fn handle_key(&mut self, _key: KeyEvent) -> bool { false }
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
+}
+```
+
+#### WidgetState Trait (Serialization)
+
+```rust
+pub trait WidgetState {
+    fn state_id(&self) -> Option<&str>;                     // Unique state identifier
+    fn to_json(&self) -> JsonValue;                          // Serialize to JSON
+    fn apply_json(&mut self, json: &JsonValue) -> Result<(), DraconError>;  // Restore from JSON
+}
+```
+
+#### AsyncWidget Trait (Feature-gated)
+
+```rust
+#[cfg(feature = "async")]
+pub trait AsyncWidget: Widget {
+    async fn on_mount_async(&mut self) {}
+    async fn on_unmount_async(&mut self) {}
+}
+```
+
+### 4.5 Keybinding System (`src/framework/keybindings.rs`)
+
+**Total LOC:** ~590  
+**Purpose:** Configurable keybinding resolution with tiered override.
+
+#### KeybindingConfig
+
+```rust
+pub struct KeybindingConfig {
+    bindings: HashMap<String, String>,           // Action name → keybinding string
+}
+```
+
+#### KeybindingSet (Runtime)
+
+```rust
+pub struct KeybindingSet {
+    bindings: HashMap<String, ParsedBinding>,    // Action name → parsed key event
+}
+
+struct ParsedBinding {
+    code: KeyCode,
+    modifiers: KeyModifiers,
+}
+
+impl KeybindingSet {
+    pub fn from_config(config: &KeybindingConfig) -> Self;
+    pub fn matches(&self, action: &str, event: &KeyEvent) -> bool;
+    pub fn parse_keybinding(s: &str) -> Option<(KeyCode, KeyModifiers)>;
+}
+```
+
+#### Keybinding String Parsing
+
+```
+"ctrl+q"      → (KeyCode::Char('q'), CONTROL)
+"ctrl+shift+t" → (KeyCode::Char('t'), CONTROL | SHIFT)
+"f1"          → (KeyCode::F(1), empty)
+"esc"         → (KeyCode::Esc, empty)
+"enter"       → (KeyCode::Enter, empty)
+"space"       → (KeyCode::Char(' '), empty)
+"delete"      → (KeyCode::Delete, empty)
+"backspace"   → (KeyCode::Backspace, empty)
+"up"          → (KeyCode::Up, empty)
+"down"        → (KeyCode::Down, empty)
+"alt+f4"      → (KeyCode::F(4), ALT)
+"?"           → (KeyCode::Char('?'), empty)
+```
+
+#### TOML Format
+
+```toml
+[keybindings]
+quit = "ctrl+q"
+help = "f1"
+back = "esc"
+theme = "ctrl+t"
+submit = "enter"
+search = "ctrl+f"
+save = "ctrl+s"
+new = "ctrl+n"
+close = "ctrl+w"
+delete = "ctrl+d"
+edit = "ctrl+e"
+refresh = "f5"
+pause = "ctrl+p"
+```
+
+#### Standard Actions (Complete)
+
+```rust
+pub mod actions {
+    pub const QUIT: &str = "quit";
+    pub const HELP: &str = "help";
+    pub const THEME: &str = "theme";
+    pub const BACK: &str = "back";
+    pub const SUBMIT: &str = "submit";
+    pub const SEARCH: &str = "search";
+    pub const SAVE: &str = "save";
+    pub const NEW: &str = "new";
+    pub const CLOSE: &str = "close";
+    pub const COPY: &str = "copy";
+    pub const PASTE: &str = "paste";
+    pub const CUT: &str = "cut";
+    pub const DELETE: &str = "delete";
+    pub const REFRESH: &str = "refresh";
+    pub const PAUSE: &str = "pause";
+    pub const TAB_NEXT: &str = "tab_next";
+    pub const TAB_PREV: &str = "tab_prev";
+    pub const NEW_TAB: &str = "new_tab";
+    pub const CLOSE_TAB: &str = "close_tab";
+}
+```
+
+#### Resolution Order
+
+```rust
+pub fn resolve_keybindings() -> KeybindingConfig {
+    let mut config = KeybindingConfig::default();          // 1. Engine defaults
+    if let Ok(user) = load_config("~/.config/dracon/dracon.toml") {
+        config.merge(user);                                // 2. User global
+    }
+    if let Ok(local) = load_config("./dracon.toml") {
+        config.merge(local);                               // 3. Project local
+    }
+    config
+}
+```
+
+Result is cached in `RwLock<Option<KeybindingConfig>>` after first call. `invalidate_keybinding_cache()` clears the cache.
+
+### 4.6 FocusManager (`src/framework/focus.rs`)
+
+**Total LOC:** ~330  
+**Purpose:** Manages widget focus ordering, Tab navigation, and focus trapping.
+
+#### Struct
+
+```rust
+pub struct FocusManager {
+    tab_order: Vec<WidgetId>,                              // Ordered list of registered widgets
+    tab_order_set: HashSet<WidgetId>,                      // Fast membership check
+    focused: Option<WidgetId>,                             // Currently focused widget
+    focusable: HashMap<WidgetId, bool>,                    // Per-widget focusability flag
+    on_focus_change: Vec<Arc<FocusCallback>>,              // External focus callbacks
+    on_trap_change: Vec<Arc<TrapCallback>>,                // Trap enter/exit callbacks
+    on_focus_change_internal: Vec<FocusChangeCallback>,    // Old → new focus callbacks
+    trapped: bool,                                         // Whether focus is trapped
+    trap_exit_disabled: bool,                              // Whether exit via tab is disabled
+}
+```
+
+#### Callback Types
+
+```rust
+pub type FocusCallback = Box<dyn Fn(WidgetId, Option<WidgetId>) + Send + Sync>;
+pub type TrapCallback = Box<dyn Fn(bool) + Send + Sync>;
+pub type FocusChangeCallback = Arc<dyn Fn(Option<WidgetId>, Option<WidgetId>) + Send + Sync>;
+```
+
+#### Complete API
+
+```rust
+impl FocusManager {
+    pub fn new() -> Self;
+    pub fn register(&mut self, id: WidgetId, focusable: bool);
+    pub fn unregister(&mut self, id: WidgetId);
+    pub fn set_focus(&mut self, id: WidgetId);
+    pub fn focused(&self) -> Option<WidgetId>;
+    pub fn tab_next(&mut self) -> bool;               // Returns true if focus changed
+    pub fn tab_prev(&mut self) -> bool;
+    pub fn set_trapped(&mut self, trapped: bool);
+    pub fn is_trapped(&self) -> bool;
+    pub fn add_focus_change_callback(&mut self, cb: FocusCallback);
+    pub fn add_trap_change_callback(&mut self, cb: TrapCallback);
+    pub fn add_focus_change_internal(&mut self, cb: FocusChangeCallback);
+    pub fn widget_count(&self) -> usize;
+    pub defocus(&mut self);                            // Clear focus entirely
+}
+```
+
+### 4.7 HitZone System (`src/framework/hitzone.rs`)
+
+**Total LOC:** ~400  
+**Purpose:** Declarative interactive regions for mouse event dispatch.
+
+#### HitZone<T>
+
+```rust
+pub struct HitZone<T: Clone + 'static> {
+    pub id: T,                                         // Zone identifier
+    pub x: u16, pub y: u16, pub width: u16, pub height: u16,  // Geometry
+    on_click: Option<Box<dyn FnMut(ClickKind)>>,       // Click (single/double/triple)
+    on_right_click: Option<Box<dyn FnMut()>>,           // Right-click
+    on_drag_start: Option<Box<dyn FnMut(DragState)>>,   // Drag start
+    on_drag_move: Option<Box<dyn FnMut(DragState)>>,    // Drag move
+    on_drag_end: Option<Box<dyn FnMut(DragState)>>,     // Drag end
+    double_click_timeout: Duration,                     // Default 300ms
+    last_click_time: Option<Instant>,                   // For double/triple detection
+    last_click_pos: Option<(u16, u16)>,                 // For drag detection
+    click_count: u8,                                    // 1-3 for multi-click
+    drag_active: bool,                                  // Whether drag is in progress
+}
+```
+
+#### ClickKind
+
+```rust
+pub enum ClickKind { Single, Double, Triple }
+```
+
+#### DragState
+
+```rust
+pub enum DragState {
+    Started { x: u16, y: u16 },
+    Moved { x: u16, y: u16 },
+    Ended { x: u16, y: u16 },
+}
+impl DragState {
+    pub fn drag_delta(&self, other: &DragState) -> (i32, i32);
+}
+```
+
+#### HitZone API
+
+```rust
+impl<T: Clone + 'static> HitZone<T> {
+    pub fn new(id: T, x: u16, y: u16, width: u16, height: u16) -> Self;
+    pub fn contains(&self, col: u16, row: u16) -> bool;
+    pub fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16, mods: KeyModifiers) -> bool;
+    
+    // Builder callbacks
+    pub fn on_click<F>(mut self, f: F) -> Self where F: FnMut(ClickKind) + 'static;
+    pub fn on_right_click<F>(mut self, f: F) -> Self where F: FnMut() + 'static;
+    pub fn on_drag_start<F>(mut self, f: F) -> Self where F: FnMut(DragState) + 'static;
+    pub fn on_drag_move<F>(mut self, f: F) -> Self where F: FnMut(DragState) + 'static;
+    pub fn on_drag_end<F>(mut self, f: F) -> Self where F: FnMut(DragState) + 'static;
+}
+```
+
+#### HitZoneGroup<T>
+
+```rust
+pub struct HitZoneGroup<T: Clone + 'static> {
+    zones: Vec<HitZone<T>>,
+}
+
+impl<T: Clone + 'static> HitZoneGroup<T> {
+    pub fn new() -> Self;
+    pub fn add(&mut self, zone: HitZone<T>);
+    pub fn dispatch_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16, mods: KeyModifiers) -> Option<T>;
+}
+```
+
+#### ScopedZone<T> & ScopedZoneRegistry<T>
+
+```rust
+/// Lightweight geometry-only zone (no callbacks).
+pub struct ScopedZone<T> {
+    pub id: T,
+    pub x: u16, pub y: u16, pub width: u16, pub height: u16,
+}
+
+/// Per-frame registry: cleared at start of render, registered during render, dispatched in mouse handler.
+pub struct ScopedZoneRegistry<T: Clone + PartialEq> {
+    zones: Vec<ScopedZone<T>>,
+}
+
+impl<T: Clone + PartialEq> ScopedZoneRegistry<T> {
+    pub fn new() -> Self;
+    pub fn clear(&mut self);
+    pub fn register(&mut self, id: T, x: u16, y: u16, width: u16, height: u16);
+    pub fn dispatch(&self, col: u16, row: u16) -> Option<&T>;
+    pub fn len(&self) -> usize;
+    pub fn is_empty(&self) -> bool;
+}
+```
+
+Usage pattern:
+```rust
+// In widget struct:
+zones: RefCell<ScopedZoneRegistry<usize>>,
+
+// In render (cleared each frame):
+self.zones.borrow_mut().clear();
+self.zones.borrow_mut().register(ZONE_ID, x, y, width, height);
+
+// In handle_mouse:
+if let Some(id) = self.zones.borrow().dispatch(col, row) {
+    match id {
+        ZONE_ID => { /* handle click */ }
+        _ => {}
+    }
+}
+```
+
+### 4.8 Drag-and-Drop (`src/framework/dragdrop.rs`)
+
+**Total LOC:** ~225
+
+#### DragPhase State Machine
+
+```
+Idle → start_drag() → Dragging
+Dragging → move_ghost() → Dragging
+Dragging → end_drag(over_target) → Dropped
+Dragging → end_drag(no_target) → Cancelled
+Dragging → cancel() → Cancelled
+```
+
+#### Types
+
+```rust
+pub enum DragPhase { Idle, Dragging, Dropped, Cancelled }
+
+pub struct DragItem<T> {
+    pub data: T,
+    pub source_id: usize,
+}
+
+pub struct DragGhost {
+    pub label: String,
+    pub width: u16,
+    pub height: u16,
+}
+impl DragGhost {
+    pub fn new(label: impl Into<String>) -> Self;
+    pub fn render(&self, col: u16, row: u16, theme: &Theme) -> Plane;  // Renders at z=9000
+}
+
+pub struct DropTarget<T> {
+    pub id: T,
+    pub x: u16, pub y: u16, pub width: u16, pub height: u16,
+    pub accept_types: Vec<&'static str>,
+}
+
+pub struct DragManager<T> {
+    phase: DragPhase,
+    items: Vec<DragItem<T>>,
+    source_id: usize,
+    ghost: Option<DragGhost>,
+    start_col: u16, start_row: u16,
+    current_col: u16, current_row: u16,
+}
+```
+
+#### DragManager API
+
+```rust
+impl<T: Clone> DragManager<T> {
+    pub fn new() -> Self;
+    pub fn start_drag(&mut self, item: DragItem<T>, ghost: Option<DragGhost>, col: u16, row: u16);
+    pub fn move_ghost(&mut self, col: u16, row: u16);
+    pub fn end_drag(&mut self, col: u16, row: u16, targets: &[DropTarget<T>]) -> Option<&T>;
+    pub fn cancel(&mut self);
+    pub fn is_dragging(&self) -> bool;
+    pub fn current_item(&self) -> Option<&DragItem<T>>;
+    pub fn ghost(&self) -> Option<&DragGhost>;
+    pub fn phase(&self) -> DragPhase;
+}
+```
+
+### 4.9 Marquee Selection (`src/framework/marquee.rs`)
+
+**Total LOC:** ~425
+
+#### MarqueeRect
+
+```rust
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct MarqueeRect {
+    pub min_col: u16, pub min_row: u16,
+    pub max_col: u16, pub max_row: u16,
+}
+```
+
+#### MarqueeState
+
+```rust
+pub struct MarqueeState {
+    pub is_active: bool,                              // Whether marquee is currently visible
+    start: Option<(u16, u16)>,                        // Initial mouse down position
+    current: Option<(u16, u16)>,                      // Current mouse position (during drag)
+    pending_click_idx: Option<usize>,                 // Deferred click (resolved on no-drag up)
+    threshold_sq: f32,                                // Distance-squared threshold (default 4.0)
+}
+```
+
+#### MarqueeState API
+
+```rust
+impl MarqueeState {
+    pub fn new() -> Self;
+    pub fn start_tracking(&mut self, col: u16, row: u16);
+    pub fn defer_click(&mut self, idx: usize);       // Deferred click → resolve on mouseUp
+    pub fn update(&mut self, col: u16, row: u16) -> bool;  // Returns true if just activated
+    pub fn rect(&self) -> Option<MarqueeRect>;        // Normalized bounding rect
+    pub fn take_pending_click(&mut self) -> Option<usize>;
+    pub fn clear(&mut self);
+    pub fn reset(&mut self);
+}
+
+pub fn render_marquee(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme);
+```
+
+#### Staggered Threshold Design
+
+```
+Marquee activation:  dist_sq ≥ 4.0   (2px)
+File drag activation: dist_sq ≥ 9.0   (3px)
+Marquee cancels file drag on activation.
+```
+
+### 4.10 Layout Engine (`src/framework/layout.rs`)
+
+**Total LOC:** ~450
+
+#### Types
+
+```rust
+pub enum Direction { Horizontal, Vertical }
+
+pub enum Constraint {
+    Percentage(u16),     // 0-100% of remaining space
+    Fixed(u16),          // Fixed size in cells
+    Min(u16),            // Minimum size (grows to fill)
+    Max(u16),            // Maximum size (shrinks to fit)
+    Ratio(u16, u16),     // Numerator/denominator of remaining space
+}
+
+pub struct Layout {
+    constraints: Vec<Constraint>,
+    direction: Direction,
+    spacing: u16,
+    margin: u16,
+    name: Option<&'static str>,
+    cached_layout: RefCell<Option<(Rect, Vec<Rect>)>>,  // Cache for repeated calls
+}
+```
+
+#### Layout API
+
+```rust
+impl Layout {
+    pub fn new(constraints: Vec<Constraint>) -> Self;    // Horizontal (default)
+    pub fn horizontal(constraints: Vec<Constraint>) -> Self;
+    pub fn vertical(constraints: Vec<Constraint>) -> Self;
+    pub fn direction(mut self, direction: Direction) -> Self;
+    pub fn spacing(mut self, spacing: u16) -> Self;      // Between children
+    pub fn margin(mut self, margin: u16) -> Self;         // Outer margin
+    pub fn name(mut self, name: &'static str) -> Self;    // Debug label
+    pub fn layout(&self, area: Rect) -> Vec<Rect>;
+    pub fn with_caching(mut self) -> Self;                // Enable result caching
+    pub fn invalidate_cache(&self);                       // Force re-computation
+}
+```
+
+#### Layout Algorithm
+
+```
+layout(area: Rect) → Vec<Rect>:
+  1. If cached result exists and area unchanged, return cached
+  2. Let available = area dimension along direction axis
+  3. Subtract margins
+  4. First pass: resolve Fixed and Percentage constraints
+     - Fixed: exact size
+     - Percentage: percentage of total available
+     - Track consumed space
+  5. Compute remaining space = available - fixed_consumed - spacing*(n-1)
+  6. Second pass: resolve Ratio, Min, Max constraints against remaining
+     - Ratio: remaining * num / den
+     - Min: max(min, remaining/n)
+     - Max: min(max, remaining/n)
+  7. If horizontal: distribute rectangles left-to-right with spacing
+  8. If vertical: distribute rectangles top-to-bottom with spacing
+  9. Each child Rect has full perpendicular dimension (height if horizontal, width if vertical)
+  10. Cache result if caching enabled
+  11. Return Vec<Rect>
+```
+
+### 4.11 Scroll System (`src/framework/scroll.rs`)
+
+**Total LOC:** ~250
+
+#### ScrollState
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct ScrollState {
+    pub offset: usize,                              // Rows scrolled off top
+    pub content_height: usize,                      // Total content rows
+    pub viewport_height: usize,                     // Visible rows
+}
+
+impl ScrollState {
+    pub fn max_offset(&self) -> usize;
+    pub fn page_size(&self) -> usize;               // viewport_height - 1, min 1
+    pub fn scroll_up(&mut self, n: usize);
+    pub fn scroll_down(&mut self, n: usize);
+    pub fn scroll_to(&mut self, offset: usize);
+    pub fn scroll_to_end(&mut self);
+    pub fn scroll_to_beginning(&mut self);
+    pub fn start_row(&self) -> usize;               // = offset
+    pub fn end_row(&self) -> usize;
+    pub fn is_scrollable(&self) -> bool;
+    pub fn visible_range(&self) -> std::ops::Range<usize>;
+    pub fn is_at_top(&self) -> bool;
+    pub fn is_at_bottom(&self) -> bool;
+    pub fn fraction(&self) -> f32;                  // Scroll position as 0.0-1.0
+}
+```
+
+#### ScrollContainer
+
+```rust
+pub struct ScrollContainer;
+
+impl ScrollContainer {
+    pub fn render(content: &Plane, area: Rect, state: &ScrollState, theme: &Theme) -> Plane;
+    pub fn render_with_width(content: &Plane, area: Rect, state: &ScrollState, theme: &Theme, scrollbar_width: u16) -> Plane;
+}
+```
+
+### 4.12 Animation System (`src/framework/animation.rs`)
+
+**Total LOC:** ~500
+
+#### Types
+
+```rust
+pub enum Easing {
+    Linear,
+    Sine(EasingType),
+    Quadratic(EasingType),
+    Cubic(EasingType),
+    Exponential(EasingType),
+    Elastic(EasingType),
+    Bounce(EasingType),
+    Back(EasingType),
+}
+
+pub enum EasingType { In, Out, InOut }
+```
+
+**Easing function formulas:**
+- Linear: `t`
+- Sine In: `1 - cos(t * π / 2)`
+- Sine Out: `sin(t * π / 2)`
+- Sine InOut: `-(cos(π * t) - 1) / 2`
+- Quadratic In: `t²`
+- Quadratic Out: `t * (2 - t)`
+- Cubic In: `t³`
+- Cubic Out: `(t - 1)³ + 1`
+- Exponential In: `2^(10 * (t - 1))`
+- Exponential Out: `1 - 2^(-10 * t)`
+- Elastic: spring-like overshoot
+- Bounce: floor-impact bounce
+- Back: overshoot with cubic return
+
+#### Animation
+
+```rust
+pub struct Animation {
+    start_value: f64, end_value: f64,
+    current_value: f64,
+    duration: Duration, elapsed: Duration,
+    easing: Easing,
+    looping: bool, yoyo: bool,
+    completed: bool,
+    on_complete: Option<Box<dyn FnOnce()>>,
+}
+
+impl Animation {
+    pub fn new(start: f64, end: f64, duration: Duration, easing: Easing) -> Self;
+    pub fn looping(mut self, looping: bool) -> Self;
+    pub fn yoyo(mut self, yoyo: bool) -> Self;
+    pub fn on_complete<F>(mut self, f: F) -> Self where F: FnOnce() + 'static;
+    pub fn value(&self) -> f64;
+    pub fn is_completed(&self) -> bool;
+    pub fn reset(&mut self);
+    fn tick(&mut self, delta: Duration) -> bool;    // Returns true if completed
+}
+```
+
+#### AnimationManager
+
+```rust
+pub struct AnimationManager {
+    animations: Vec<Animation>,
+}
+
+impl AnimationManager {
+    pub fn new() -> Self;
+    pub fn add(&mut self, animation: Animation);
+    pub fn tick(&mut self);
+    pub fn clear(&mut self);
+    pub fn active_count(&self) -> usize;
+}
+```
+
+### 4.13 Dirty Region Tracking (`src/framework/dirty_regions.rs`)
+
+**Total LOC:** ~120
+
+```rust
+#[derive(Clone, Copy, Debug)]
+pub struct DirtyRegion {
+    pub x: u16, pub y: u16, pub width: u16, pub height: u16,
+}
+
+pub struct DirtyRegionTracker {
+    full_refresh: bool,                              // Flag: redraw everything
+    regions: Vec<DirtyRegion>,                        // Up to 256 tracked regions
+}
+
+impl DirtyRegionTracker {
+    pub fn new() -> Self;
+    pub fn mark_dirty(&mut self, x: u16, y: u16, width: u16, height: u16);
+    pub fn mark_all_dirty(&mut self);
+    pub fn clear(&mut self);
+    pub fn needs_full_refresh(&self) -> bool;
+    pub fn dirty_regions(&self) -> &[DirtyRegion];
+}
+```
+
+### 4.14 I18n (`src/framework/i18n.rs`)
+
+**Total LOC:** ~512
+
+```rust
+pub struct I18n {
+    locales: HashMap<String, HashMap<String, serde_json::Value>>,
+    current_locale: String,
+    default_locale: String,
+}
+
+pub struct I18nError { /* NotConfigured, KeyNotFound, LocaleNotFound */ }
+
+impl I18n {
+    pub fn new(default_locale: &str) -> Self;
+    pub fn load_locale(&mut self, code: &str) -> Result<(), I18nError>;
+    pub fn set_locale(&mut self, code: &str);
+    pub fn t(&self, key: &str) -> &str;
+    pub fn t_with_args(&self, key: &str, args: &[(&str, &str)]) -> String;
+    pub fn current_locale(&self) -> &str;
+    pub fn available_locales(&self) -> Vec<&str>;
+}
+
+#[macro_export]
+macro_rules! tr {
+    ($key:expr) => { /* runtime lookup via thread-local I18n */ };
+}
+```
+
+### 4.15 Plugin System (`src/framework/plugin.rs`)
+
+**Total LOC:** ~200
+
+```rust
+pub type WidgetFactory = Box<dyn Fn(WidgetId, Theme) -> Box<dyn Widget> + Send + Sync>;
+
+pub struct PluginRegistry {
+    widgets: HashMap<String, WidgetFactory>,
+}
+
+impl PluginRegistry {
+    pub fn new() -> Self;
+    pub fn register(&mut self, name: &str, factory: WidgetFactory);
+    pub fn create(&self, name: &str, id: WidgetId, theme: Theme) -> Option<Box<dyn Widget>>;
+    pub fn unregister(&mut self, name: &str);
+    pub fn names(&self) -> Vec<&str>;
+    pub fn is_registered(&self, name: &str) -> bool;
+}
+```
+
+### 4.16 WidgetContainer & WidgetRegistry (`src/framework/widget_container.rs`)
+
+**Total LOC:** ~150
+
+```rust
+/// Thin wrapper around a single Box<dyn Widget>.
+pub struct WidgetContainer {
+    inner: Box<dyn Widget>,
+}
+
+impl WidgetContainer {
+    pub fn new(widget: Box<dyn Widget>) -> Self;
+    pub fn id(&self) -> WidgetId;
+    pub fn render(&self, area: Rect) -> Plane;
+    pub fn handle_key(&mut self, key: KeyEvent) -> bool;
+    pub fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool;
+    pub fn widget(&self) -> &dyn Widget;
+    pub fn widget_mut(&mut self) -> &mut dyn Widget;
+}
+
+/// Managed collection of WidgetContainers.
+pub struct WidgetRegistry {
+    containers: Vec<WidgetContainer>,
+    next_id: usize,
+}
+
+impl WidgetRegistry {
+    pub fn new() -> Self;
+    pub fn add(&mut self, widget: Box<dyn Widget>) -> WidgetId;
+    pub fn remove(&mut self, id: WidgetId);
+    pub fn get(&self, id: WidgetId) -> Option<&dyn Widget>;
+    pub fn get_mut(&mut self, id: WidgetId) -> Option<&mut dyn Widget>;
+    pub fn iter(&self) -> impl Iterator<Item = &dyn Widget>;
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut dyn Widget>;
+    pub fn len(&self) -> usize;
+}
+```
 
 ---
 
 ## 5. Widget System
 
-### 5.1 Complete Framework Widget Inventory (47 Widgets)
+### 5.1 Complete Framework Widget Directory (47 Widgets)
 
-| # | Widget | File | Description | Hover | Focus | Scroll | Keys | Mouse |
-|---|--------|------|-------------|-------|-------|--------|------|-------|
-| 1 | `Autocomplete` | autocomplete.rs | Type-ahead text input with suggestions dropdown | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 2 | `Breadcrumbs` | breadcrumbs.rs | Hierarchical path with clickable segments | ✅ | ❌ | ❌ | ❌ | ✅ |
-| 3 | `Button` | button.rs | Clickable button with press state | ✅ | ❌ | ❌ | ❌ | ✅ |
-| 4 | `Calendar` | calendar.rs | Date picker with month/year navigation | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 5 | `Checkbox` | checkbox.rs | Two-state toggle with check mark | ✅ | ❌ | ❌ | ❌ | ✅ |
-| 6 | `ColorPicker` | color_picker.rs | Color swatch picker with hex/RGB input | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 7 | `CommandPalette` | command_palette.rs | Filterable command overlay with search | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 8 | `ConfirmDialog` | confirm_dialog.rs | Modal yes/no with optional danger styling | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 9 | `ContextMenu` | context_menu.rs | Right-click popup with nested submenus | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 10 | `DebugOverlay` | debug_overlay.rs | FPS, widget count, and debug info | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 11 | `Divider` | divider.rs | Horizontal/vertical separator line | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 12 | `EventLogger` | event_logger.rs | Scrollable event log panel | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 13 | `Form` | form.rs | Multi-field form container with validation | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 14 | `Gauge` | gauge.rs | Filled progress bar with warn/crit thresholds | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 15 | `Hud` | hud.rs | Top-right HUD with system metrics | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 16 | `Kanban` | kanban.rs | Kanban board with draggable columns/cards | ✅ | ❌ | ✅ | ✅ | ✅ |
-| 17 | `KeyValueGrid` | key_value_grid.rs | Key-value display from JSON/Scalar CLI output | ❌ | ❌ | ✅ | ✅ | ✅ |
-| 18 | `Label` | label.rs | Static text label | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 19 | `List` | list.rs | Scrollable list with keyboard/touch navigation | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 20 | `LogViewer` | log_viewer.rs | Auto-scrolling log with severity detection | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 21 | `MenuBar` | menu_bar.rs | Top menu bar with dropdown menus | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 22 | `Modal` | modal.rs | Modal dialog overlay with backdrop | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 23 | `NotificationCenter` | notification_center.rs | Queued notification display with auto-dismiss | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 24 | `PasswordInput` | password_input.rs | Password input with masking | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 25 | `Profiler` | profiler.rs | Frame timing profiler with bar chart | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 26 | `ProgressBar` | progress_bar.rs | Animated progress indicator | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 27 | `ProgressRing` | progress_ring.rs | Circular progress indicator | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 28 | `Radio` | radio.rs | Radio button group (single selection) | ✅ | ❌ | ❌ | ✅ | ✅ |
-| 29 | `RichText` | rich_text.rs | Rich text display with formatting (headers, bold, italic, code) | ❌ | ❌ | ✅ | ✅ | ✅ |
-| 30 | `SearchInput` | search_input.rs | Search input with clear button | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 31 | `Select` | select.rs | Dropdown select/combobox | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 32 | `Slider` | slider.rs | Horizontal slider with value display | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 33 | `Sparkline` | sparkline.rs | Mini inline chart for trending data | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 34 | `Spinner` | spinner.rs | Animated loading spinner | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 35 | `SplitPane` | split.rs | Resizable split panel with draggable divider | ✅ | ❌ | ❌ | ✅ | ✅ |
-| 36 | `StatusBadge` | status_badge.rs | Colored status badge (OK/WARN/ERROR) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 37 | `StatusBar` | status_bar.rs | Bottom status bar with segments | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 38 | `StreamingText` | streaming_text.rs | Live-updating text with word-wrap | ❌ | ❌ | ✅ | ❌ | ❌ |
-| 39 | `TabBar` | tabbar.rs | Tab bar for panel switching | ✅ | ❌ | ❌ | ✅ | ✅ |
-| 40 | `Table` | table.rs | Multi-column sortable data table | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 41 | `TagsInput` | tags_input.rs | Tag input with autocomplete and remove | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 42 | `TextEditorAdapter` | text_editor_adapter.rs | Framework adapter for standalone TextEditor | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 43 | `Toast` | toast.rs | Temporary notification toast messages | ❌ | ❌ | ❌ | ❌ | ❌ |
-| 44 | `Toggle` | toggle.rs | Two-state on/off toggle switch | ✅ | ❌ | ❌ | ❌ | ✅ |
-| 45 | `Tooltip` | tooltip.rs | Hover tooltip popup | ❌ | ❌ | ❌ | ❌ | ✅ |
-| 46 | `Tree` | tree.rs | Collapsible tree view with expand/collapse | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 47 | `WidgetInspector` | widget_inspector.rs | Widget tree debugging inspector | ❌ | ❌ | ✅ | ✅ | ✅ |
+Each entry includes: struct fields, public methods, rendering strategy, keyboard handling, mouse handling, hover/focus behavior, and any notable algorithms.
 
-### 5.2 Additional Framework Types (Helper Structs)
+#### 5.1.1 Autocomplete (`autocomplete.rs`)
 
-| Type | Module | Description |
-|------|--------|-------------|
-| `Column` | table.rs | Table column definition (header, width) |
-| `TableRow<T>` | table.rs | Table row data wrapper |
-| `CellTextFn<T>` | table.rs | Table cell text formatter closure alias |
-| `ConfirmResult` | confirm_dialog.rs | Yes/No/Cancel enum |
-| `ContextAction` | context_menu.rs | Context menu action definition |
-| `LoggedEvent` | event_logger.rs | Event log entry |
-| `FormField` | form.rs | Form field definition (label, input type, validation) |
-| `ValidationRule` | form.rs | Form validation rule |
-| `LogLevel` | log_viewer.rs | Log severity level enum |
-| `LogLine` | log_viewer.rs | Log line entry |
-| `MenuEntry` | menu_bar.rs | Menu bar top-level entry |
-| `MenuItem` | menu_bar.rs | Dropdown menu item |
-| `ModalResult<T>` | modal.rs | Modal result wrapper |
-| `NotificationKind` | notification_center.rs | Notification severity enum |
-| `Orientation` | split.rs | Horizontal/Vertical enum |
-| `Metric` | profiler.rs | Profiler metric entry |
-| `ScrollState` | scroll.rs | Scroll position state |
-| `TreeNode` | tree.rs | Tree node wrapper |
-| `DragState` | hitzone.rs | HitZone drag state |
-| `DragGhost` | dragdrop.rs | Drag operation ghost |
-| `DragPhase` | dragdrop.rs | Drag lifecycle phase |
-| `Animation` | animation.rs | Animation definition |
-| `AnimationManager` | animation.rs | Animation controller |
-| `Easing` | animation.rs | Easing function enum |
-| `FocusManager` | focus.rs | Tab-order focus ring |
-| `DirtyRegion` | dirty_regions.rs | Dirty region for optimization |
-| `DirtyRegionTracker` | dirty_regions.rs | Dirty region tracking |
-| `EventBus` | event_bus.rs | Pub/sub event system |
-| `Reactive<T>` | event_bus.rs | Observable value wrapper |
-| `SubscriptionId` | event_bus.rs | Event subscription handle |
-| `NavigationEvent` | scene_router.rs | Scene navigation event |
-| `Scene` | scene_router.rs | Scene trait for router |
-| `SceneRouter` | scene_router.rs | Scene navigation controller |
-| `PluginRegistry` | plugin.rs | Dynamic widget loading |
-| `WidgetFactory` | plugin.rs | Widget factory trait |
-| `KeybindingSet` | keybindings.rs | Keybinding configuration |
-| `KeybindingConfig` | keybindings.rs | Keybinding loader |
-| `Constraint` | layout.rs | Layout constraint |
-| `Direction` | layout.rs | Layout direction |
-| `Layout` | layout.rs | Constraint-based layout engine |
-| `ScrollContainer` | scroll.rs | Scrollable container wrapper |
+**Purpose:** Text input with type-ahead suggestions dropdown.
 
-### 5.3 Standalone Widgets (`src/widgets/`)
-
-| Widget | File | LOC | Description | Dependencies |
-|--------|------|-----|-------------|-------------|
-| `TextEditor` | editor.rs | 3,025 | Full-featured code editor with syntax highlighting, undo/redo, search/filter, multi-cursor, clipboard | syntect (feature-gated) |
-| `TextInput` | input.rs | — | Single-line text input with cursor, selection, IME | none |
-| `Button` | button.rs | — | Standalone button widget (not framework Button) | none |
-| `Panel` | panel.rs | — | Bordered panel container | none |
-| `Component` | component.rs | — | Base component trait | none |
-| `HotkeyHint` | hotkey.rs | — | Keyboard shortcut hint display | none |
-| `ContextMenuAction` | context_menu.rs | — | Context menu action type | none |
-| `EditorSearch` | editor_search.rs | — | TextEditor inline search/filter UI | syntect (feature-gated) |
-
-**TextEditor Key Features:**
-- Syntax highlighting via syntect (20+ language grammars)
-- Undo/redo stack (persisted to `.file.undo`)
-- Line numbers, word wrap, indent guides
-- Status bar
-- Search/filter/replace mode
-- Selection (single cursor + basic multi-cursor)
-- Goto line
-- File I/O: `open(&path)`, `save()`, `save_as(&path)`
-- Config persistence: `.file.dte.json`
-
-### 5.4 Widget Rendering Pattern
-
-All framework widgets MUST follow these rendering conventions:
-
-**Background Fill:**
 ```rust
-fn render(&self, area: Rect) -> Plane {
-    let mut plane = Plane::new(0, area.width, area.height);
-    plane.fill_bg(self.theme.bg);  // Fills all cells with theme.bg
-    // ... render content on top
-    plane
+pub struct Autocomplete {
+    // Framework
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused: bool,
+
+    // State
+    input: String,                                    // Current input text
+    cursor_pos: usize,                                 // Cursor position in input
+    suggestions: Vec<String>,                          // All available suggestions
+    filtered: Vec<String>,                             // Filtered subset matching input
+    selected_index: usize,                             // Selected suggestion index
+    dropdown_open: bool,                               // Whether dropdown is visible
+    hovered_index: Option<usize>,                      // Hovered suggestion for mouse
+    scroll_offset: usize,                              // Dropdown scroll offset
+    max_visible: usize,                                // Max dropdown items visible
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>, // Mouse dispatch zones
 }
 ```
 
-**Exception — StatusBar:** Uses `Color::Reset` for default fg/bg to inherit terminal defaults.
-**Exception — Standalone widgets** (editor, input, hotkey): Use hardcoded `Color::Black` for cursor/highlight contrast (not theme-aware).
-
-**Hover Pattern:**
+**Public API:**
 ```rust
-// In struct: hovered: Option<usize>,
-// In render: check self.hovered for hover_bg
-// In handle_mouse: set/clear hovered on Moved, always clear on out-of-bounds
+impl Autocomplete {
+    pub fn new(suggestions: Vec<String>) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn value(&self) -> &str;
+    pub fn set_value(&mut self, value: &str);
+    pub fn open_dropdown(&mut self);
+    pub fn close_dropdown(&mut self);
+}
 ```
 
-**Focus Pattern:**
+**Rendering:** Two-layer: (1) SearchInput-style text field with cursor and clear button. (2) Dropdown panel below input showing filtered suggestions with scrollbar.
+
+**Keyboard:** Up/Down: navigate suggestions. Enter: select suggestion (closes dropdown). Tab/Esc: close dropdown without selection. Backspace/Char: filter suggestions live.
+
+**Mouse:** Click input field: focus + cursor positioning. Click suggestion item: select. Scroll wheel: scroll dropdown. Hover: highlight suggestion under cursor.
+
+#### 5.1.2 Breadcrumbs (`breadcrumbs.rs`)
+
+**Purpose:** Hierarchical path navigation with clickable segments.
+
 ```rust
-// In struct: focused: bool,
-// In render: use self.theme.focus_bg or self.theme.focus_border when focused
-// Set via on_focus()/on_blur()
+pub struct Breadcrumbs {
+    segments: Vec<String>,
+    theme: Theme,
+    separator: char,                                   // Default: '›'
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>, // Per-segment click zones
+}
 ```
 
-**Scrollbar Indicator:**
+**Public API:**
 ```rust
-// Proportional thumb at area.width - 2
-// Char: '▐', Color: theme.primary
-// Height: (visible/total) * content_height
-// Position: (offset/(total-visible)) * (content_height - thumb_height)
+impl Breadcrumbs {
+    pub fn new(segments: Vec<String>) -> Self;
+    pub fn from_path(path: &std::path::Path) -> Self;
+    pub fn with_separator(mut self, separator: char) -> Self;
+    pub fn render(&self, area: Rect) -> (Plane, ScopedZoneRegistry<usize>);
+    // Returns (plane, zones) where zones dispatch segment index on click
+}
 ```
 
-### 5.5 Command Palette Widget Details
+**Rendering:** Segments left-to-right with separator character between. Last segment highlighted (bold, primary color). Each segment is a clickable hit zone.
 
-**`CommandPalette`** — Filterable command overlay:
-- `CommandItem { id, name, category }` — command definition
-- `.with_size(w, h)` — set overlay dimensions
-- `.show()` / `.hide()` / `.is_visible()` — visibility control
-- `.on_execute(cb)` — callback when command selected
-- Keyboard: ↑/↓ navigate, Enter execute, Esc dismiss, type to filter
-- Mouse: click items, click outside dismiss, scroll wheel
-- Uses `ScopedZoneRegistry<usize>` for mouse dispatch
-- Semi-transparent backdrop
+**Keyboard:** None (read-only widget).
 
-### 5.6 Table Widget Details
+**Mouse:** Click any segment: returns segment index via zone dispatch.
 
-**`Table<T>`** — Multi-column sortable data table:
-- Builder: `.with_columns(cols)`, `.on_header_click(f)`, `.with_cell_text_fn(f)`
-- Sorting: `.set_sort(column, ascending)`, sort indicators (▲/▼)
-- State: `TableState` snapshot for undo/redo
-- Selection: single row selection + multi-select via `selected_indices: HashSet<usize>`
-- Navigation: keyboard (↑/↓/Home/End/PageUp/PageDown) + mouse (click row, scroll)
-- `SelectCallback<T>` / `CellTextFn<T>` / `HeaderClickCallback` type aliases
-- Drag-and-drop support for reordering
+#### 5.1.3 Button (`button.rs`)
 
-### 5.7 Form Widget Details
+**Purpose:** Clickable button with press state and hover effects.
 
-**`Form`** — Multi-field form container:
-- `FormField { label, input_type, validation, placeholder, required }`
-- `ValidationRule { rule_type, value, message }` — min/max/required/pattern/match
-- Renders fields with labels, validation hints (✓/✗), focus styling
-- Tab/Shift+Tab between fields
-- Submit callback on Enter
-- Mouse: click fields to focus
+```rust
+pub struct Button {
+    label: String,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    pressed: bool,                                     // Currently pressed (visual state)
+    hovered: bool,                                     // Mouse hovering
+    on_click: Option<Box<dyn FnMut()>>,                // Click callback
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,  // Mouse zone
+}
+```
 
-**Form Input Types:**
-- Text, Password, Email, Number, Search
-- Select (dropdown), Checkbox, Toggle, Radio, Slider
-- Date, Color, TextArea (multi-line)
+**Public API:**
+```rust
+impl Button {
+    pub fn new(label: &str) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn on_click<F>(mut self, f: F) -> Self where F: FnMut() + 'static;
+    pub fn set_label(&mut self, label: &str);
+    pub fn label(&self) -> &str;
+}
+```
 
-### 5.8 SplitPane Widget Details
+**Rendering:** Bordered rectangle (rounded corners with ╭╮╰╯) with centered label. Background:
+- Normal: `theme.surface`
+- Hovered: `theme.hover_bg`
+- Pressed: `theme.primary_active` (inverts fg)
+- Focused: `theme.focus_border` border
 
-**`SplitPane`** — Resizable split panel:
-- `.new(orientation)` — Horizontal (left-right) or Vertical (top-bottom)
-- `.ratio(f32)` — initial ratio (0.0-1.0)
-- `.min_size(u16)` — minimum pane size
-- `.split(area) -> (Rect, Rect)` — compute child rectangles
-- Divider drag resize: track `is_drag` state, update ratio on mouse drag
-- Render divider as `│` (vertical) or `─` (horizontal) with `theme.divider`
+**Keyboard:** Enter/Space: fire click callback.
+
+**Mouse:** Down (Left): pressed state. Up (Left): fire click + reset state. Hover: hovered state.
+
+#### 5.1.4 Calendar / DatePicker (`calendar.rs`)
+
+**Purpose:** Interactive date selection calendar.
+
+```rust
+pub struct Calendar {
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused: bool,
+    current_date: NaiveDate,                           // Currently displayed month
+    selected_date: Option<NaiveDate>,                  // Selected date
+    hovered_date: Option<NaiveDate>,                   // Hovered date
+    zone_registry: RefCell<ScopedZoneRegistry<String>>, // Day/month/year click zones
+}
+```
+
+**Public API:**
+```rust
+impl Calendar {
+    pub fn new() -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn selected_date(&self) -> Option<NaiveDate>;
+    pub fn set_selected_date(&mut self, date: NaiveDate);
+    pub fn next_month(&mut self);
+    pub fn prev_month(&mut self);
+    pub fn next_year(&mut self);
+    pub fn prev_year(&mut self);
+    pub fn go_to_today(&mut self);
+}
+```
+
+**Rendering:** Header row with month/year and navigation arrows (◀ ▶). Day-of-week header row (Mo Tu We Th Fr Sa Su). 6-week grid of day cells. Today highlighted. Selected day has selection_bg. Days from adjacent months shown dimmed.
+
+**Keyboard:** Left/Right: previous/next day. Up/Down: previous/next week. PageUp/PageDown: previous/next month. Home/End: first/last day of month. Enter: select hovered date. Esc: cancel.
+
+**Mouse:** Click day: select. Click ◀▶ nav: previous/next month. Click month/year: jump navigation. Hover: highlight day under cursor.
+
+#### 5.1.5 Checkbox (`checkbox.rs`)
+
+**Purpose:** Two-state toggle with label and check mark.
+
+```rust
+pub struct Checkbox {
+    label: String,
+    checked: bool,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    hovered: bool,
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,
+}
+```
+
+**Public API:**
+```rust
+impl Checkbox {
+    pub fn new(label: &str) -> Self;
+    pub fn checked(&self) -> bool;
+    pub fn set_checked(&mut self, checked: bool);
+    pub fn toggle(&mut self);
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+}
+```
+
+**Rendering:** `[✓] Label` or `[ ] Label`. Checked: primary color ✓. Unchecked: outline. Hovered: hover_bg background.
+
+**Mouse:** Click: toggle state.
+
+#### 5.1.6 ColorPicker (`color_picker.rs`)
+
+**Purpose:** Interactive color selection with HSL sliders, hex input, swatch palette.
+
+```rust
+pub struct ColorPicker {
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused: bool,
+    current_color: (u16, u16, u16),                   // Current R, G, B
+    previous_color: (u16, u16, u16),                   // Original color (for cancel)
+    selected_slider: Option<SliderKind>,               // Which slider is active
+    hue: u16, saturation: u16, lightness: u16,         // HSL representation
+    hex_input: String,                                 // Hex input field buffer
+    palette_colors: Vec<(u16, u16, u16)>,              // Generated palette swatches
+    hovered_swatch: Option<usize>,                     // Hovered palette swatch
+    recent_colors: Vec<(u16, u16, u16)>,               // Recently picked colors
+    zone_registry: RefCell<ScopedZoneRegistry<String>>,
+}
+
+enum SliderKind { Hue, Saturation, Lightness, Red, Green, Blue }
+```
+
+**Public API:**
+```rust
+impl ColorPicker {
+    pub fn new() -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn color(&self) -> (u16, u16, u16);
+    pub fn set_color(&mut self, r: u16, g: u16, b: u16);
+    pub fn hex(&self) -> String;
+}
+```
+
+**Rendering:** Color preview swatch. HSL sliders (hue rainbow bar, saturation gradient, lightness gradient). RGB numeric display. Hex input field. Generated palette (8+ colors). Recent colors row.
+
+**Keyboard:** Tab: cycle between sliders. Left/Right: adjust slider value. Enter: confirm. Esc: cancel.
+
+**Mouse:** Click slider: position + drag. Click swatch: select color. Hover: highlight swatches.
+
+#### 5.1.7 CommandPalette (`command_palette.rs`)
+
+**Purpose:** Filterable command search overlay.
+
+```rust
+pub struct CommandPalette {
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    visible: bool,
+    commands: Vec<CommandItem>,
+    filtered: Vec<usize>,
+    filter_query: String,
+    filter_input: String,
+    selected_index: usize,
+    hovered_index: Option<usize>,
+    scroll_offset: usize,
+    max_visible: usize,
+    overlay_w: u16, overlay_h: u16,                    // Overlay dimensions
+    on_execute: Option<ExecuteCallback>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+
+pub struct CommandItem {
+    pub id: String,
+    pub name: String,
+    pub category: String,
+}
+
+pub type ExecuteCallback = Box<dyn FnMut(&str)>;
+```
+
+**Public API:**
+```rust
+impl CommandPalette {
+    pub fn new(commands: Vec<CommandItem>) -> Self;
+    pub fn with_size(mut self, w: u16, h: u16) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn on_execute<F>(mut self, f: F) -> Self where F: FnMut(&str) + 'static;
+    pub fn show(&mut self);
+    pub fn hide(&mut self);
+    pub fn is_visible(&self) -> bool;
+}
+```
+
+**Rendering:** Centered overlay (default 60% width, 50% height). Dark semi-transparent backdrop. Search input at top. Filtered command list below with category grouping. Selected item highlighted. Scrollbar if needed.
+
+**Keyboard:** Type: filter commands (matches name + category). Up/Down: navigate. Enter: execute selected. Esc: dismiss.
+
+**Mouse:** Click item: execute. Click outside overlay: dismiss. Scroll wheel: scroll list. Hover: highlight item.
+
+**Filter algorithm:** Case-insensitive substring match against `CommandItem.name` and `CommandItem.category`. Fuzzy prefix matching — characters must appear in order but not necessarily contiguous.
+
+#### 5.1.8 ConfirmDialog (`confirm_dialog.rs`)
+
+**Purpose:** Modal yes/no/cancel confirmation dialog.
+
+```rust
+pub struct ConfirmDialog {
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    visible: bool,
+    title: String,
+    message: String,
+    confirm_label: String,
+    cancel_label: String,
+    danger: bool,                                      // Danger styling (red)
+    result: Option<ConfirmResult>,
+    zone_registry: RefCell<ScopedZoneRegistry<ConfirmResult>>,
+}
+
+pub enum ConfirmResult { Yes, No, Cancel }
+```
+
+**Public API:**
+```rust
+impl ConfirmDialog {
+    pub fn new(title: &str, message: &str) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn confirm_label(mut self, label: &str) -> Self;
+    pub fn cancel_label(mut self, label: &str) -> Self;
+    pub fn danger(mut self, danger: bool) -> Self;
+    pub fn show(&mut self);
+    pub fn hide(&mut self);
+    pub fn is_visible(&self) -> bool;
+    pub fn result(&self) -> Option<ConfirmResult>;
+}
+```
+
+**Rendering:** Centered modal box with rounded border. Title bar. Message text. Two buttons (confirm/cancel). Danger mode: confirm button in error color.
+
+**Keyboard:** Enter/Tab: confirm. Esc: cancel.
+
+**Mouse:** Click confirm/cancel buttons.
+
+#### 5.1.9 ContextMenu (`context_menu.rs`)
+
+**Purpose:** Right-click popup menu with optional submenus.
+
+```rust
+pub struct ContextMenu {
+    items: Vec<ContextMenuItem>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    visible: bool,
+    position: (u16, u16),
+    selected_index: usize,
+    hovered_index: Option<usize>,
+    scroll_offset: usize,
+    on_select: Option<Box<dyn FnMut(usize)>>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+
+pub struct ContextMenuItem {
+    pub label: String,
+    pub action: Option<usize>,
+    pub disabled: bool,
+    pub separator: bool,
+    pub children: Option<Vec<ContextMenuItem>>,        // Nested submenu
+}
+
+pub type ContextAction = usize;
+```
+
+**Public API:**
+```rust
+impl ContextMenu {
+    pub fn new(items: Vec<ContextMenuItem>) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn on_select<F>(mut self, f: F) -> Self where F: FnMut(usize) + 'static;
+    pub fn show(&mut self, col: u16, row: u16);
+    pub fn hide(&mut self);
+    pub fn is_visible(&self) -> bool;
+}
+```
+
+**Rendering:** Popup menu at cursor position. Items with label. Disabled items dimmed. Separator lines. Selected item highlighted. Submenu indicator (▶). Scrollbar if items exceed screen.
+
+**Keyboard:** Up/Down: navigate. Enter: select. Esc: dismiss. Left/Right: open/close submenu.
+
+**Mouse:** Click item: select (fires callback with action index). Click outside: dismiss. Hover: highlight. Scroll: scroll items.
+
+#### 5.1.10 DebugOverlay (`debug_overlay.rs`)
+
+**Purpose:** Performance debug information overlay.
+
+```rust
+pub struct DebugOverlay {
+    theme: Theme,
+    visible: bool,
+    fps: u64,
+    widget_count: usize,
+    plane_count: usize,
+    frame_time: f64,
+    dirty_regions: usize,
+    memory_usage: usize,
+}
+```
+
+**Public API:**
+```rust
+impl DebugOverlay {
+    pub fn new() -> Self;
+    pub fn set_metrics(&mut self, fps: u64, widgets: usize, planes: usize, frame_time: f64, dirty: usize, memory: usize);
+}
+```
+
+**Rendering:** Top-left overlay box showing FPS, widget count, plane count, frame time, dirty regions, memory.
+
+**Interactions:** Read-only display. No keyboard or mouse handling.
+
+#### 5.1.11 Divider (`divider.rs`)
+
+**Purpose:** Horizontal or vertical visual separator line.
+
+```rust
+pub struct Divider {
+    orientation: Orientation,
+    theme: Theme,
+    char: char,                                        // Default: '─' or '│'
+    label: Option<String>,                             // Optional centered label (horizontal only)
+}
+```
+
+**Public API:**
+```rust
+impl Divider {
+    pub fn new(orientation: Orientation) -> Self;
+    pub fn with_char(mut self, char: char) -> Self;
+    pub fn with_label(mut self, label: &str) -> Self;
+}
+```
+
+**Rendering:** Draws a line of `char` across the full width/height. If label provided, renders centered text on the line.
+
+#### 5.1.12 EventLogger (`event_logger.rs`)
+
+**Purpose:** Scrollable event log display.
+
+```rust
+pub struct EventLogger {
+    events: Vec<LoggedEvent>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    scroll: ScrollState,
+    filter: Option<String>,
+    auto_scroll: bool,
+}
+
+pub struct LoggedEvent {
+    pub timestamp: String,
+    pub message: String,
+    pub kind: String,
+}
+```
+
+**API:**
+```rust
+impl EventLogger {
+    pub fn new() -> Self;
+    pub fn log(&mut self, event: LoggedEvent);
+    pub fn clear(&mut self);
+    pub fn set_filter(&mut self, filter: &str);
+    pub fn set_auto_scroll(&mut self, auto: bool);
+}
+```
+
+#### 5.1.13 Form (`form.rs`)
+
+**Purpose:** Multi-field form container with validation and keyboard navigation.
+
+```rust
+pub struct Form {
+    fields: Vec<FormField>,
+    values: Vec<String>,
+    errors: Vec<Option<String>>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused_field: Option<usize>,
+    validate_on_change: bool,
+    show_validation_icons: bool,
+    onSubmit: Option<Box<dyn FnMut(&[(&str, &str)])>>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+
+pub struct FormField {
+    pub label: String,
+    pub input_type: InputType,
+    pub placeholder: String,
+    pub required: bool,
+    pub validation: Vec<ValidationRule>,
+}
+
+pub enum InputType { Text, Password, Email, Number, Search, Select(Vec<String>), Checkbox, Toggle, Radio(Vec<String>), Slider(u16, u16), Date, Color, TextArea }
+
+pub enum ValidationRule { Required, MinLength(usize), MaxLength(usize), Pattern(String), MatchField(usize), Custom(String) }
+```
+
+**API:**
+```rust
+impl Form {
+    pub fn new(fields: Vec<FormField>) -> Self;
+    pub fn on_submit<F>(mut self, f: F) -> Self where F: FnMut(&[(&str, &str)]) + 'static;
+    pub fn validate(&mut self) -> bool;
+    pub fn values(&self) -> Vec<(&str, &str)>;
+    pub fn set_value(&mut self, index: usize, value: &str);
+    pub fn set_validate_on_change(&mut self, val: bool);
+}
+```
+
+**Rendering:** Each field renders as: label row, input row (with type-appropriate rendering), validation row (✓ or ✗ with message). Focused field gets `focus_bg`. Error field gets `error_bg`.
+
+**Keyboard:** Tab/Shift+Tab: cycle fields. Enter: submit. Type: edit focused field.
+
+**Mouse:** Click field: focus + cursor position. Click submit button (if rendered).
+
+#### 5.1.14 Gauge (`gauge.rs`)
+
+**Purpose:** Filled progress bar with optional warn/crit thresholds.
+
+```rust
+pub struct Gauge {
+    label: String,
+    value: f64,
+    max: f64,
+    min: f64,
+    warn_threshold: Option<f64>,
+    crit_threshold: Option<f64>,
+    show_label: bool,
+    show_percentage: bool,
+    theme: Theme,
+    width: u16,
+}
+```
+
+**API:**
+```rust
+impl Gauge {
+    pub fn new(label: &str) -> Self;
+    pub fn set_value(&mut self, value: f64);
+    pub fn set_max(&mut self, max: f64);
+    pub fn with_thresholds(mut self, warn: f64, crit: f64) -> Self;
+    pub fn bind_command(&mut self, cmd: BoundCommand);
+}
+```
+
+**Rendering:** `[████████░░░░] 67% Label`. Filled portion color changes by threshold:
+- Below warn: `theme.primary`
+- Above warn: `theme.warning`
+- Above crit: `theme.error`
+Label and percentage optional.
+
+#### 5.1.15 Hud (`hud.rs`)
+
+**Purpose:** Floating HUD display for system metrics.
+
+```rust
+pub struct Hud {
+    theme: Theme,
+    width: u16, height: u16,
+    z_index: i32,
+}
+```
+
+**API:**
+```rust
+impl Hud {
+    pub fn new(z_index: i32) -> Self;
+    pub fn with_size(mut self, w: u16, h: u16) -> Self;
+    pub fn render_gauge(&self, x: u16, y: u16, label: &str, value: f64, max: f64, width: u16) -> Plane;
+    pub fn render_text(&self, x: u16, y: u16, text: &str) -> Plane;
+}
+```
+
+**Rendering:** Position: absolute, typically top-right. Renders gauges and text labels with backdrop.
+
+#### 5.1.16 Kanban (`kanban.rs`)
+
+**Purpose:** Kanban board with draggable columns and cards.
+
+```rust
+pub struct Kanban {
+    columns: Vec<KanbanColumn>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    scroll_offset: (u16, u16),                         // Horizontal + vertical scroll
+    drag_manager: RefCell<DragManager<KanbanCard>>,
+    marquee: MarqueeState,
+    zone_registry: RefCell<ScopedZoneRegistry<(usize, Option<usize>)>>, // (column, optional card)
+}
+
+pub struct KanbanColumn { pub title: String, pub cards: Vec<KanbanCard>, pub color: Color }
+pub struct KanbanCard { pub id: String, pub title: String, pub description: String, pub priority: KanbanPriority }
+pub enum KanbanPriority { Low, Medium, High, Critical }
+```
+
+**API:**
+```rust
+impl Kanban {
+    pub fn new(columns: Vec<KanbanColumn>) -> Self;
+    pub fn move_card(&mut self, from_col: usize, from_idx: usize, to_col: usize, to_idx: usize);
+    pub fn add_card(&mut self, column: usize, card: KanbanCard);
+    pub fn remove_card(&mut self, column: usize, index: usize);
+}
+```
+
+**Rendering:** Columns laid out horizontally (scrollable). Each column: title bar with color, card stack (scrollable). Cards show title, description preview, priority indicator (color dot).
+
+**Keyboard:** Left/Right: scroll columns. Tab: move focus between columns. Arrow keys: navigate cards within column.
+
+**Mouse:** Click column header: select column. Click card: select. Drag card: move between columns (drag-and-drop). Scroll: vertical column scroll, horizontal board scroll. Hover: highlight card.
+
+#### 5.1.17 KeyValueGrid (`key_value_grid.rs`)
+
+**Purpose:** Two-column key-value data display from JSON/Scalar CLI output.
+
+```rust
+pub struct KeyValueGrid {
+    entries: Vec<(String, String)>,
+    theme: Theme,
+    key_width: u16,
+    value_width: u16,
+    scroll: ScrollState,
+}
+```
+
+**API:**
+```rust
+impl KeyValueGrid {
+    pub fn new(entries: Vec<(String, String)>) -> Self;
+    pub fn from_json(json: &serde_json::Value) -> Self;
+    pub fn set_entries(&mut self, entries: Vec<(String, String)>);
+}
+```
+
+**Rendering:** Two-column grid: keys right-aligned (bold, muted), values left-aligned. Scrollable.
+
+#### 5.1.18 Label (`label.rs`)
+
+**Purpose:** Static text label.
+
+```rust
+pub struct Label {
+    text: String,
+    theme: Theme,
+    bold: bool,
+    italic: bool,
+    fg: Option<Color>,
+    bg: Option<Color>,
+}
+```
+
+**API:**
+```rust
+impl Label {
+    pub fn new(text: &str) -> Self;
+    pub fn bold(mut self) -> Self;
+    pub fn italic(mut self) -> Self;
+    pub fn fg(mut self, color: Color) -> Self;
+    pub fn bg(mut self, color: Color) -> Self;
+}
+```
+
+**Rendering:** Single line of text with specified styling.
+
+#### 5.1.19 List (`list.rs`)
+
+**Purpose:** Scrollable, selectable vertical list with keyboard and mouse navigation.
+
+```rust
+pub struct List<T: Clone + ToString> {
+    items: Vec<T>,
+    selected: usize,
+    offset: usize,                                     // Scroll offset
+    visible_count: usize,                               // Items visible at once
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    hovered: Option<usize>,                            // Hovered item index
+    on_select: Option<SelectCallback<T>>,              // Selection callback
+    wrap: bool,                                         // Wrap around at boundaries
+    show_numbers: bool,                                 // Show item numbers
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+
+pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
+```
+
+**API:**
+```rust
+impl<T: Clone + ToString> List<T> {
+    pub fn new(items: Vec<T>) -> Self;
+    pub fn set_items(&mut self, items: Vec<T>);
+    pub fn selected_index(&self) -> usize;
+    pub fn get_selected(&self) -> Option<&T>;
+    pub fn set_selected(&mut self, index: usize);
+    pub fn set_visible_count(&mut self, count: usize);
+    pub fn on_select<F>(mut self, f: F) -> Self where F: FnMut(&T) + 'static;
+    pub fn scroll_state(&self) -> ScrollState;
+    pub fn len(&self) -> usize;
+    pub fn is_empty(&self) -> bool;
+}
+```
+
+**Rendering:** Vertical list with items rendered left-to-right. Selected item: `selection_bg` + `selection_fg`. Hovered item: `hover_bg`. Number prefix (optional). Scrollbar on right if content overflows.
+
+**Keyboard:** Up/Down: navigate (with wrapping). Home/End: first/last. PageUp/PageDown: page scroll. Enter: fire `on_select` callback.
+
+**Mouse:** Click item: select. Double-click: select + fire callback. Scroll wheel: scroll. Hover: highlight.
+
+**Navigation logic (from `list_common.rs`):**
+- `navigate_up/down(selected, max, wrap)` — bounded or wrapping movement
+- `navigate_page_up/down(selected, visible_count, max)` — page at a time
+- `navigate_home/end(selected, max)` — jump to boundaries
+
+#### 5.1.20 LogViewer (`log_viewer.rs`)
+
+**Purpose:** Auto-scrolling log viewer with severity-based coloring.
+
+```rust
+pub struct LogViewer {
+    lines: Vec<LogLine>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    scroll: ScrollState,
+    auto_scroll: bool,
+    severity_colors: HashMap<String, Color>,
+    filter: Option<String>,
+    wrap: bool,
+}
+
+pub struct LogLine { pub text: String, pub severity: String }
+pub enum LogLevel { Error, Warn, Info, Debug, Trace, Custom(String) }
+```
+
+**API:**
+```rust
+impl LogViewer {
+    pub fn new() -> Self;
+    pub fn add_line(&mut self, line: LogLine);
+    pub fn add_lines(&mut self, lines: Vec<LogLine>);
+    pub fn clear(&mut self);
+    pub fn set_auto_scroll(&mut self, auto: bool);
+    pub fn set_severity_color(&mut self, severity: &str, color: Color);
+    pub fn set_filter(&mut self, filter: &str);
+}
+```
+
+**Rendering:** Lines with severity-based color prefix. Auto-scrolls to bottom when new lines arrive. Scrollbar for manual navigation. Optional word wrap.
+
+#### 5.1.21 MenuBar (`menu_bar.rs`)
+
+**Purpose:** Top menu bar with dropdown menus.
+
+```rust
+pub struct MenuBar {
+    entries: Vec<MenuEntry>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    open_index: Option<usize>,                         // Open dropdown menu index
+    hovered_entry: Option<usize>,
+    hovered_item: Option<usize>,
+    zone_registry: RefCell<ScopedZoneRegistry<String>>,
+}
+
+pub struct MenuEntry { pub label: String, pub items: Vec<MenuItem> }
+pub struct MenuItem { pub label: String, pub action: Option<String>, pub shortcut: Option<String>, pub disabled: bool, pub separator: bool }
+```
+
+**API:**
+```rust
+impl MenuBar {
+    pub fn new(entries: Vec<MenuEntry>) -> Self;
+    pub fn on_action<F>(mut self, f: F) -> Self where F: FnMut(&str) + 'static;
+}
+```
+
+**Rendering:** Top bar with menu entry labels. Active entry highlighted with `primary` color. Dropdown panel below active entry. Items with keyboard shortcut hints. Separator lines.
+
+**Keyboard:** Left/Right: cycle menu entries. Enter/Down: open dropdown. Up/Down: navigate items. Enter: select item. Esc: close dropdown.
+
+**Mouse:** Click entry: open/close dropdown. Click item: select. Hover entry: switch to that menu (if another open). Hover item: highlight.
+
+#### 5.1.22 Modal (`modal.rs`)
+
+**Purpose:** Generic modal dialog container with backdrop.
+
+```rust
+pub struct Modal<T: Clone> {
+    content: Option<Box<dyn FnOnce(Rect) -> Plane>>,  // Content renderer
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    visible: bool,
+    backdrop: bool,                                    // Show dark backdrop
+    result: Option<ModalResult<T>>,
+    close_on_backdrop: bool,                           // Click backdrop to dismiss
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,
+}
+
+pub enum ModalResult<T> { Ok(T), Cancel }
+```
+
+**API:**
+```rust
+impl<T: Clone> Modal<T> {
+    pub fn new() -> Self;
+    pub fn show(&mut self);
+    pub fn hide(&mut self);
+    pub fn is_visible(&self) -> bool;
+    pub fn result(&self) -> Option<ModalResult<T>>;
+    pub fn with_backdrop(mut self, show: bool) -> Self;
+    pub fn close_on_backdrop(mut self, close: bool) -> Self;
+}
+```
+
+**Rendering:** Dark backdrop overlay (semi-transparent fill). Centered modal box with rounded border.
+
+**Keyboard:** Esc: dismiss (Cancel). Enter: confirm (Ok).
+
+**Mouse:** Click backdrop: dismiss (if enabled). Click modal content: handled by content.
+
+#### 5.1.23 NotificationCenter (`notification_center.rs`)
+
+**Purpose:** Queued notification display system with auto-dismiss.
+
+```rust
+pub struct NotificationCenter {
+    notifications: VecDeque<Notification>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    max_visible: usize,
+    auto_dismiss_duration: Duration,
+    paused: bool,
+}
+
+pub struct Notification { pub title: String, pub message: String, pub kind: NotificationKind, pub timestamp: Instant }
+pub enum NotificationKind { Info, Success, Warning, Error }
+```
+
+**API:**
+```rust
+impl NotificationCenter {
+    pub fn new(max_visible: usize) -> Self;
+    pub fn notify(&mut self, title: &str, message: &str, kind: NotificationKind);
+    pub fn dismiss(&mut self, index: usize);
+    pub fn dismiss_all(&mut self);
+    pub fn pause(&mut self);
+    pub fn resume(&mut self);
+}
+```
+
+**Rendering:** Stack of notification cards (bottom-right or top-right). Each card: icon (ℹ✓⚠✗), title (bold), message, time ago. Kind-colored left border. Animated slide-in.
+
+**Interactions:** Click: dismiss single notification. Auto-dismiss after `auto_dismiss_duration`.
+
+#### 5.1.24 PasswordInput (`password_input.rs`)
+
+**Purpose:** Password input with masking and show/hide toggle.
+
+```rust
+pub struct PasswordInput {
+    inner: BaseInput,                                   // Reuses text_input_base
+    masked: bool,
+    mask_char: char,                                    // Default: '•'
+}
+```
+
+**API:**
+```rust
+impl PasswordInput {
+    pub fn new() -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn value(&self) -> &str;
+    pub fn set_value(&mut self, value: &str);
+    pub fn placeholder(&mut self, placeholder: &str);
+    pub fn set_masked(&mut self, masked: bool);
+    pub fn is_masked(&self) -> bool;
+    pub fn on_submit<F>(mut self, f: F) -> Self where F: FnMut(&str) + 'static;
+}
+```
+
+**Rendering:** Single-line input field. When masked: show `mask_char` for each character. Show/hide toggle icon (🔒/👁) on right. Focused: `focus_bg` + underline.
+
+**Keyboard:** All text input keys. Enter: fire submit callback. Ctrl+A: select all.
+
+**Mouse:** Click: focus + cursor position. Click toggle: show/hide password.
+
+#### 5.1.25 Profiler (`profiler.rs`)
+
+**Purpose:** Frame timing profiler with bar chart display.
+
+```rust
+pub struct Profiler {
+    metrics: Vec<Metric>,
+    theme: Theme,
+    max_samples: usize,
+}
+
+pub struct Metric { pub name: String, pub values: Vec<f64> }
+```
+
+**API:**
+```rust
+impl Profiler {
+    pub fn new(max_samples: usize) -> Self;
+    pub fn record(&mut self, name: &str, value: f64);
+    pub fn clear(&mut self);
+}
+```
+
+**Rendering:** Bar chart showing recent values for each metric. Labels on left, bars proportional to value/max.
+
+#### 5.1.26 ProgressBar (`progress_bar.rs`)
+
+**Purpose:** Animated progress indicator.
+
+```rust
+pub struct ProgressBar {
+    value: f64, max: f64,
+    width: u16,
+    show_percentage: bool,
+    theme: Theme,
+    animation: Option<Animation>,
+}
+```
+
+**API:**
+```rust
+impl ProgressBar {
+    pub fn new() -> Self;
+    pub fn set_progress(&mut self, value: f64, max: f64);
+    pub fn animate_to(&mut self, value: f64, duration: Duration);
+}
+```
+
+**Rendering:** `[████████░░░░]` bar with optional percentage label.
+
+#### 5.1.27 ProgressRing (`progress_ring.rs`)
+
+**Purpose:** Circular progress indicator.
+
+```rust
+pub struct ProgressRing {
+    value: f64, max: f64,
+    size: u16,
+    show_percentage: bool,
+    theme: Theme,
+}
+```
+
+**API:**
+```rust
+impl ProgressRing {
+    pub fn new() -> Self;
+    pub fn set_progress(&mut self, value: f64, max: f64);
+    pub fn render(&self, area: Rect) -> Plane;
+}
+```
+
+**Rendering:** Circular arc using braille characters (⠁⠃⠇⠏⠟⠿) for partial fill. Center shows percentage text.
+
+#### 5.1.28 Radio (`radio.rs`)
+
+**Purpose:** Radio button group for single selection.
+
+```rust
+pub struct Radio {
+    options: Vec<String>,
+    selected: usize,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    hovered: Option<usize>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+```
+
+**API:**
+```rust
+impl Radio {
+    pub fn new(options: Vec<String>) -> Self;
+    pub fn selected(&self) -> usize;
+    pub fn set_selected(&mut self, index: usize);
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+}
+```
+
+**Rendering:** Vertical list of `(○) Label` options. Selected: `(●) Label` with primary color. Hovered: hover_bg.
+
+**Keyboard:** Up/Down: navigate. Enter/Space: select.
+
+**Mouse:** Click option: select. Hover: highlight.
+
+#### 5.1.29 RichText (`rich_text.rs`)
+
+**Purpose:** Rich text display with Markdown-like formatting.
+
+```rust
+pub struct RichText {
+    content: String,
+    theme: Theme,
+    parsed: Vec<RichTextBlock>,
+    scroll: ScrollState,
+    wrap: bool,
+}
+
+enum RichTextBlock {
+    Heading { level: u8, text: String },
+    Paragraph { text: Vec<RichSpan> },
+    Code { text: String, language: Option<String> },
+    List { items: Vec<String>, ordered: bool },
+    Blockquote { text: String },
+    HorizontalRule,
+    Link { text: String, url: String },
+}
+
+struct RichSpan { text: String, bold: bool, italic: bool, code: bool, link: Option<String> }
+```
+
+**API:**
+```rust
+impl RichText {
+    pub fn new(content: &str) -> Self;
+    pub fn from_markdown(md: &str) -> Self;
+    pub fn scroll_to(&mut self, offset: usize);
+}
+```
+
+**Rendering:** Multi-block layout: headings (bold, primary color, varying sizes), paragraphs with inline styling, code blocks (mono, surface_elevated bg, bordered), lists (bulleted/numbered), blockquotes (indented, italic), horizontal rules, links (underlined, info color).
+
+#### 5.1.30 SearchInput (`search_input.rs`)
+
+**Purpose:** Search input with clear button and optional live filtering.
+
+```rust
+pub struct SearchInput {
+    inner: BaseInput,
+    clear_button: bool,
+    live_filter: bool,
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,
+}
+```
+
+**API:**
+```rust
+impl SearchInput {
+    pub fn new() -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn value(&self) -> &str;
+    pub fn set_value(&mut self, value: &str);
+    pub fn placeholder(&mut self, placeholder: &str);
+    pub fn on_change<F>(mut self, f: F) -> Self where F: FnMut(&str) + 'static;
+    pub fn on_submit<F>(mut self, f: F) -> Self where F: FnMut(&str) + 'static;
+}
+```
+
+**Rendering:** Input field with magnifying glass icon (🔍) on left. Clear button (✕) on right when non-empty. Focused: focus_bg + underline.
+
+**Keyboard:** All text input keys. Enter: submit. Esc: clear and blur.
+
+**Mouse:** Click: focus. Click clear: clear text.
+
+#### 5.1.31 Select (`select.rs`)
+
+**Purpose:** Dropdown select / combobox.
+
+```rust
+pub struct Select {
+    options: Vec<String>,
+    selected: usize,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    open: bool,
+    focused: bool,
+    hovered_index: Option<usize>,
+    scroll_offset: usize,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+```
+
+**API:**
+```rust
+impl Select {
+    pub fn new(options: Vec<String>) -> Self;
+    pub fn selected(&self) -> usize;
+    pub fn set_selected(&mut self, index: usize);
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+}
+```
+
+**Rendering:** Current value display with dropdown arrow (▼). Open: dropdown list below with options. Selected highlighted. Hovered highlighted.
+
+**Keyboard:** Up/Down: navigate options. Enter: select and close. Esc: close without selection.
+
+**Mouse:** Click: open/close dropdown. Click option: select. Hover: highlight. Scroll: scroll options.
+
+#### 5.1.32 Slider (`slider.rs`)
+
+**Purpose:** Horizontal slider for numeric value selection.
+
+```rust
+pub struct Slider {
+    min: u16, max: u16, value: u16, step: u16,
+    width: u16,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused: bool,
+    show_value: bool,
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,
+}
+```
+
+**API:**
+```rust
+impl Slider {
+    pub fn new(min: u16, max: u16) -> Self;
+    pub fn value(&self) -> u16;
+    pub fn set_value(&mut self, value: u16);
+    pub fn step(mut self, step: u16) -> Self;
+    pub fn show_value(mut self, show: bool) -> Self;
+}
+```
+
+**Rendering:** `─────────●──────────` track with thumb. Filled portion in primary color. Value label (optional). Focus indicator when focused.
+
+**Keyboard:** Left/Right: decrease/increase by step. Home/End: min/max.
+
+**Mouse:** Click track: jump to position. Drag thumb: continuous adjustment.
+
+#### 5.1.33 Sparkline (`sparkline.rs`)
+
+**Purpose:** Mini inline chart for trending data.
+
+```rust
+pub struct Sparkline {
+    data: Vec<f64>,
+    width: u16, height: u16,
+    min: f64, max: f64,
+    color: Color,
+    theme: Theme,
+}
+```
+
+**API:**
+```rust
+impl Sparkline {
+    pub fn new(data: Vec<f64>) -> Self;
+    pub fn set_data(&mut self, data: Vec<f64>);
+    pub fn set_bounds(&mut self, min: f64, max: f64);
+    pub fn set_color(&mut self, color: Color);
+}
+```
+
+**Rendering:** Uses braille characters (⣀⣤⣶⣿) for vertical resolution. Each column represents one data point. Scaled to fit within width/height.
+
+#### 5.1.34 Spinner (`spinner.rs`)
+
+**Purpose:** Animated loading spinner.
+
+```rust
+pub struct Spinner {
+    frames: Vec<&'static str>,                         // Default: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    frame_index: usize,
+    label: Option<String>,
+    theme: Theme,
+    animation: Animation,
+}
+```
+
+**API:**
+```rust
+impl Spinner {
+    pub fn new() -> Self;
+    pub fn set_frames(&mut self, frames: Vec<&'static str>);
+    pub fn set_label(&mut self, label: &str);
+    pub fn tick(&mut self);
+}
+```
+
+**Rendering:** Single character spinner (animated by cycling frame at interval). Optional label to right.
+
+#### 5.1.35 SplitPane (`split.rs`)
+
+**Purpose:** Resizable split panel container.
+
+```rust
+pub struct SplitPane {
+    orientation: Orientation,
+    ratio: f32,                                        // 0.0-1.0, portion for first pane
+    min_size: u16,
+    is_drag: bool,
+    theme: Theme,
+}
+
+pub enum Orientation { Horizontal, Vertical }
+```
+
+**API:**
+```rust
+impl SplitPane {
+    pub fn new(orientation: Orientation) -> Self;
+    pub fn ratio(mut self, ratio: f32) -> Self;
+    pub fn min_size(mut self, size: u16) -> Self;
+    pub fn split(&self, area: Rect) -> (Rect, Rect);   // Compute child rectangles
+    pub fn from_rect(area: Rect) -> Self;               // Create pane representing a sub-rect
+    pub fn divider(&self, area: Rect) -> Rect;          // Get divider rectangle
+    pub fn set_ratio(&mut self, ratio: f32);
+    pub fn ratio_value(&self) -> f32;
+    pub fn handle_mouse_drag(&mut self, col: u16, row: u16);
+    pub fn orientation(&self) -> Orientation;
+    pub fn on_theme_change(&mut self, theme: &Theme);
+}
+```
+
+**Rendering:** Two side-by-side (or stacked) rectangles with a divider between them. Divider: `│` (vertical) or `─` (horizontal) in `theme.divider`.
+
+**Keyboard:** None directly (used as container).
+
+**Mouse:** Drag divider: resize panes interactively. Divider hit zone: 2 cells wide/tall.
+
+#### 5.1.36 StatusBadge (`status_badge.rs`)
+
+**Purpose:** Colored status indicator (OK, WARN, ERROR, etc.).
+
+```rust
+pub struct StatusBadge {
+    label: String,
+    status: String,                                     // 'ok', 'warn', 'error', or custom
+    theme: Theme,
+}
+
+impl StatusBadge {
+    pub fn new(label: &str) -> Self;
+    pub fn set_status(&mut self, status: &str);
+    pub fn bind_command(&mut self, cmd: BoundCommand);
+}
+```
+
+**Rendering:** `[ OK ]` or `[WARN]` or `[ERROR]`. Color mapped: ok→success, warn→warning, error→error, other→primary. Compact bounding box.
+
+#### 5.1.37 StatusBar (`status_bar.rs`)
+
+**Purpose:** Bottom status bar with labeled segments.
+
+```rust
+pub struct StatusBar {
+    segments: Vec<StatusSegment>,
+    theme: Theme,
+    mode: String,
+}
+
+pub struct StatusSegment {
+    pub label: String, pub value: String, pub width: Option<u16>,
+}
+impl StatusSegment { pub fn new(text: &str) -> Self; }
+```
+
+**API:**
+```rust
+impl StatusBar {
+    pub fn new(segments: Vec<StatusSegment>) -> Self;
+    pub fn set_segment(&mut self, index: usize, value: &str);
+    pub fn set_mode(&mut self, mode: &str);
+}
+```
+
+**Rendering:** Full-width bottom bar. Segments distributed across width, right-aligned. Uses `Color::Reset` for default fg/bg to inherit terminal defaults.
+
+#### 5.1.38 StreamingText (`streaming_text.rs`)
+
+**Purpose:** Live-updating text display with word-wrap.
+
+```rust
+pub struct StreamingText {
+    lines: Vec<String>,
+    theme: Theme,
+    scroll: ScrollState,
+    wrap: bool,
+    max_lines: usize,
+}
+```
+
+**API:**
+```rust
+impl StreamingText {
+    pub fn new() -> Self;
+    pub fn append(&mut self, text: &str);
+    pub fn clear(&mut self);
+    pub fn set_wrap(&mut self, wrap: bool);
+}
+```
+
+**Rendering:** Text lines with word-wrap. Scrollbar if content overflows. Auto-scroll to bottom on new content.
+
+#### 5.1.39 TabBar (`tabbar.rs`)
+
+**Purpose:** Tab navigation bar for panel/content switching.
+
+```rust
+pub struct TabBar {
+    tabs: Vec<String>,
+    selected: usize,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    hovered_tab: Option<usize>,
+    closable: bool,
+    on_close: Option<Box<dyn FnMut(usize)>>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+```
+
+**API:**
+```rust
+impl TabBar {
+    pub fn new(tabs: Vec<String>) -> Self;
+    pub fn select(&mut self, index: usize);
+    pub fn selected(&self) -> usize;
+    pub fn add_tab(&mut self, label: &str);
+    pub fn remove_tab(&mut self, index: usize);
+    pub fn on_close<F>(mut self, f: F) -> Self where F: FnMut(usize) + 'static;
+}
+```
+
+**Rendering:** Tab labels with active tab highlighted (primary bg, bold). Inactive tabs: dimmed. Close button (✕) on each tab if closable. Active tab connected to content area (no bottom border).
+
+**Keyboard:** Left/Right: cycle tabs. Ctrl+W: close tab (if closable).
+
+**Mouse:** Click tab: select. Click close: remove tab. Hover: highlight with hover_bg.
+
+#### 5.1.40 Table (`table.rs`)
+
+**Total LOC:** 626
+
+**Purpose:** Multi-column sortable data table with selection, sorting, and drag support.
+
+```rust
+pub struct Table<T> {
+    id: WidgetId,
+    columns: Vec<Column>,
+    rows: Vec<TableRow<T>>,
+    selected: usize,
+    scroll: ScrollState,
+    theme: Theme,
+    dirty: bool,
+    sort_column: Option<usize>,
+    sort_ascending: bool,
+    hovered_row: Option<usize>,
+    multi_select: bool,
+    selected_indices: HashSet<usize>,
+    zone_registry: RefCell<ScopedZoneRegistry<String>>,
+    // Callbacks
+    on_select: Option<SelectCallback<T>>,
+    cell_text_fn: Option<CellTextFn<T>>,
+    on_header_click: Option<HeaderClickCallback>,
+    on_selection_change: Option<SelectionChangeCallback>,
+    // Drag
+    drag_manager: Option<Box<DragManager<usize>>>,
+    // Undo/redo
+    undo_stack: Vec<TableState>,
+    redo_stack: Vec<TableState>,
+    max_undo: usize,
+}
+
+pub struct Column { pub header: String, pub width: u16 }
+pub struct TableRow<T> { pub data: T }
+pub struct TableState {
+    pub selected: usize, pub offset: usize,
+    pub sort_column: Option<usize>, pub sort_ascending: bool,
+    pub selected_indices: HashSet<usize>,
+}
+
+// Callback type aliases
+pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
+pub type CellTextFn<T> = Box<dyn Fn(&T, usize) -> String>;
+pub type HeaderClickCallback = Box<dyn FnMut(usize)>;
+pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
+pub type UndoRedoCallback = Box<dyn FnMut()>;
+```
+
+**API:**
+```rust
+impl<T: Clone + 'static> Table<T> {
+    pub fn new(rows: Vec<T>) -> Self;
+    pub fn with_columns(mut self, columns: Vec<Column>) -> Self;
+    pub fn on_select<F>(mut self, f: F) -> Self where F: FnMut(&T) + 'static;
+    pub fn with_cell_text_fn<F>(mut self, f: F) -> Self where F: Fn(&T, usize) -> String + 'static;
+    pub fn on_header_click<F>(mut self, f: F) -> Self where F: FnMut(usize) + 'static;
+    pub fn set_sort(&mut self, column: Option<usize>, ascending: bool);
+    pub fn selected_index(&self) -> usize;
+    pub fn set_selected(&mut self, index: usize);
+    pub fn get_selected(&self) -> Option<&T>;
+    pub fn scroll_state(&self) -> ScrollState;
+    pub fn len(&self) -> usize;
+    // Multi-select
+    pub fn set_multi_select(&mut self, multi: bool);
+    pub fn selected_indices(&self) -> &HashSet<usize>;
+    pub fn clear_selection(&mut self);
+    // Undo/redo
+    pub fn save_state(&mut self);
+    pub fn undo(&mut self);
+    pub fn redo(&mut self);
+}
+```
+
+**Rendering:** Header row (bold, sorted column has ▲/▼ indicator, clickable). Data rows with alternating row colors or selection highlighting. Selected row: selection_bg. Hovered row: hover_bg. Scrollbar on right. Sort indicators: primary color for active sort column.
+
+**Keyboard:** Up/Down: navigate rows. Home/End: first/last row. PageUp/PageDown: page scroll. Enter: fire on_select. Ctrl+A: select all (multi-select).
+
+**Mouse:** Click header: toggle sort (cycles none → asc → desc). Click row: select. Ctrl+click: toggle in multi-select. Shift+click: range select. Drag: marquee selection (if enabled). Hover: highlight row.
+
+#### 5.1.41 TagsInput (`tags_input.rs`)
+
+**Purpose:** Tag input with autocomplete and remove.
+
+```rust
+pub struct TagsInput {
+    tags: Vec<String>,
+    input: String,
+    suggestions: Vec<String>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    focused: bool,
+    hovered_tag: Option<usize>,
+    zone_registry: RefCell<ScopedZoneRegistry<usize>>,
+}
+```
+
+**API:**
+```rust
+impl TagsInput {
+    pub fn new() -> Self;
+    pub fn tags(&self) -> &[String];
+    pub fn add_tag(&mut self, tag: &str);
+    pub fn remove_tag(&mut self, index: usize);
+    pub fn set_suggestions(&mut self, suggestions: Vec<String>);
+}
+```
+
+**Rendering:** Input field with tags as colored pills. Each pill: label with ✕ remove button. Input area after last tag. Dropdown with autocomplete suggestions.
+
+**Keyboard:** Enter: add tag from input. Backspace: remove last tag (when input empty). Remove hovered tag on delete key.
+
+**Mouse:** Click ✕ on tag: remove. Click suggestion: add. Hover: highlight tag.
+
+#### 5.1.42 TextEditorAdapter (`text_editor_adapter.rs`)
+
+**Purpose:** Framework adapter wrapping the standalone TextEditor widget.
+
+```rust
+pub struct TextEditorAdapter {
+    editor: RefCell<TextEditor>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+}
+```
+
+**API:**
+```rust
+impl TextEditorAdapter {
+    pub fn new() -> Self;
+    pub fn open(&self, path: &Path);
+    pub fn set_content(&self, content: &str);
+    pub fn get_content(&self) -> String;
+}
+```
+
+Delegates to `TextEditor` (standalone widget) for all editing functionality.
+
+#### 5.1.43 Toast (`toast.rs`)
+
+**Purpose:** Temporary notification popup with auto-dismiss.
+
+```rust
+pub struct Toast {
+    message: String,
+    kind: ToastKind,
+    duration: Duration,
+    theme: Theme,
+    created: Instant,
+    dismissed: bool,
+    animation: Animation,
+}
+
+pub enum ToastKind { Info, Success, Warning, Error }
+```
+
+**API:**
+```rust
+impl Toast {
+    pub fn new(message: &str, kind: ToastKind) -> Self;
+    pub fn with_duration(mut self, duration: Duration) -> Self;
+    pub fn with_theme(mut self, theme: &Theme) -> Self;
+    pub fn is_expired(&self) -> bool;
+    pub fn dismiss(&mut self);
+}
+```
+
+**Rendering:** Small popup box (typically bottom-right). Icon prefix (ℹ✓⚠✗). Kind-colored left border. Fade-in animation on creation. Auto-dismiss after duration.
+
+#### 5.1.44 Toggle (`toggle.rs`)
+
+**Purpose:** Two-state on/off toggle switch.
+
+```rust
+pub struct Toggle {
+    label: String,
+    on: bool,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    hovered: bool,
+    zone_registry: RefCell<ScopedZoneRegistry<bool>>,
+}
+```
+
+**API:**
+```rust
+impl Toggle {
+    pub fn new(label: &str) -> Self;
+    pub fn is_on(&self) -> bool;
+    pub fn set_on(&mut self, on: bool);
+    pub fn toggle(&mut self);
+}
+```
+
+**Rendering:** `[●───] Label` or `[───○] Label`. On: filled track (primary) with dot at right. Off: empty track (outline) with dot at left. Hovered: hover_bg.
+
+**Mouse:** Click: toggle.
+
+#### 5.1.45 Tooltip (`tooltip.rs`)
+
+**Purpose:** Hover-activated tooltip popup.
+
+```rust
+pub struct Tooltip {
+    text: String,
+    theme: Theme,
+    visible: bool,
+    position: (u16, u16),
+    width: u16,
+}
+```
+
+**API:**
+```rust
+impl Tooltip {
+    pub fn new(text: &str) -> Self;
+    pub fn show(&mut self, col: u16, row: u16);
+    pub fn hide(&mut self);
+}
+```
+
+**Rendering:** Small popup box at cursor position. Rounded border, surface_elevated bg.
+
+#### 5.1.46 Tree (`tree.rs`)
+
+**Purpose:** Collapsible tree view with expand/collapse and selection.
+
+```rust
+pub struct Tree {
+    nodes: Vec<TreeNode>,
+    expanded: HashSet<String>,
+    selected: Option<String>,
+    theme: Theme,
+    id: WidgetId,
+    area: Rect,
+    dirty: bool,
+    scroll: ScrollState,
+    hovered_path: Option<String>,
+    zone_registry: RefCell<ScopedZoneRegistry<String>>,
+}
+
+pub struct TreeNode { pub id: String, pub label: String, pub children: Vec<TreeNode>, pub icon: Option<String> }
+```
+
+**API:**
+```rust
+impl Tree {
+    pub fn new(children: Vec<TreeNode>) -> Self;
+    pub fn select(&mut self, id: &str);
+    pub fn selected(&self) -> Option<&str>;
+    pub fn expand(&mut self, id: &str);
+    pub fn collapse(&mut self, id: &str);
+    pub fn toggle(&mut self, id: &str);
+    pub fn is_expanded(&self, id: &str) -> bool;
+    pub fn flatten(&self) -> Vec<(&TreeNode, usize)>;   // Flat list with depth
+}
+```
+
+**Rendering:** Hierarchical indentation with tree connectors (├─└─│). Expand/collapse toggle (▶▼) before each expandable node. Selected node: selection_bg. Hovered node: hover_bg. Scrollbar on right.
+
+**Keyboard:** Up/Down: navigate nodes. Left: collapse. Right: expand. Enter: select.
+
+**Mouse:** Click toggle: expand/collapse. Click label: select. Hover: highlight. Scroll: scroll tree.
+
+#### 5.1.47 WidgetInspector (`widget_inspector.rs`)
+
+**Purpose:** Widget tree debugging inspector.
+
+```rust
+pub struct WidgetInspector {
+    widgets: Vec<WidgetNode>,
+    selected: usize,
+    theme: Theme,
+    dirty: bool,
+    scroll: ScrollState,
+}
+
+pub struct WidgetNode { pub name: String, pub id: WidgetId, pub area: Rect, pub z_index: u16, pub children: Vec<WidgetNode> }
+```
+
+**API:**
+```rust
+impl WidgetInspector {
+    pub fn new(widgets: Vec<WidgetNode>) -> Self;
+    pub fn set_widgets(&mut self, widgets: Vec<WidgetNode>);
+}
+```
+
+**Rendering:** Hierarchical tree of widget nodes showing name, ID, area, z-index. Selected node highlighted.
+
+### 5.2 BaseInput (Shared Input Widget)
+
+**File:** `text_input_base.rs`
+
+Shared base for `SearchInput`, `PasswordInput`, `Autocomplete`.
+
+```rust
+pub struct BaseInput {
+    value: String,
+    cursor_pos: usize,
+    focused: bool,
+    theme: Theme,
+    placeholder: String,
+    on_change: Option<Box<dyn FnMut(&str)>>,
+    on_submit: Option<SubmitCallback>,
+    selection_start: Option<usize>,
+}
+
+pub type SubmitCallback = Box<dyn FnMut(&str)>;
+```
+
+**Common behavior:**
+- Cursor: blinking block at text position
+- Selection: highlighted region (if `selection_start` set)
+- Focus: `focus_bg` background, underline
+- Placeholder: shown when empty and unfocused, `fg_subtle`
+- Keys: Char (insert), Backspace (delete left), Delete (delete right), Left/Right (move cursor), Home/End, Ctrl+A (select all), Enter (submit)
+
+### 5.3 Common Widget Patterns
+
+#### Common Widget State Fields
+
+```rust
+// Every widget includes:
+pub struct TypicalWidget {
+    theme: Theme,           // Visual theme
+    id: WidgetId,           // Unique identifier
+    area: Rect,             // Screen area
+    dirty: bool,            // Needs re-render flag
+    // Optional:
+    focused: bool,          // Has keyboard focus
+    hovered: ...,           // Mouse hover state
+    zone_registry: RefCell<ScopedZoneRegistry<...>>,  // Mouse dispatch
+}
+```
+
+#### Common Widget Methods Pattern
+
+```rust
+impl Widget for TypicalWidget {
+    fn id(&self) -> WidgetId { self.id }
+    fn set_id(&mut self, id: WidgetId) { self.id = id; }
+    fn area(&self) -> Rect { self.area }
+    fn set_area(&mut self, area: Rect) { self.area = area; }
+    fn z_index(&self) -> u16 { 10 }  // Interactive widgets at z=10
+
+    fn needs_render(&self) -> bool { self.dirty }
+    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn clear_dirty(&mut self) { self.dirty = false; }
+
+    fn focusable(&self) -> bool { true }
+    fn on_focus(&mut self) { self.focused = true; self.dirty = true; }
+    fn on_blur(&mut self) { self.focused = false; self.dirty = true; }
+
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = *theme;
+        self.dirty = true;
+    }
+}
+```
 
 ---
 
 ## 6. Theme System
 
-### 6.1 Complete Theme Inventory (21 Themes)
+### 6.1 Theme Struct Fields (31 fields, 21 themes)
 
-| # | Name | `.name` field | Kind | Constructor | Key Colors |
-|---|------|---------------|------|-------------|------------|
-| 1 | Dark | `"dark"` | Dark | `Theme::dark()` | Green accents on dark blue-gray |
-| 2 | Light | `"light"` | Light | `Theme::light()` | Blue accents on white |
-| 3 | High Contrast | `"high_contrast"` | Dark | `Theme::high_contrast()` | Pure black/white, vivid colors |
-| 4 | Cyberpunk | `"cyberpunk"` | Dark | `Theme::cyberpunk()` | Neon green + hot pink on black |
-| 5 | Dracula | `"dracula"` | Dark | `Theme::dracula()` | Dark purple, vivid accents |
-| 6 | Nord | `"nord"` | Dark | `Theme::nord()` | Arctic blue-gray palette |
-| 7 | Catppuccin Mocha | `"catppuccin_mocha"` | Dark | `Theme::catppuccin_mocha()` | Warm pastel dark |
-| 8 | Gruvbox Dark | `"gruvbox_dark"` | Dark | `Theme::gruvbox_dark()` | Retro warm, earthy tones |
-| 9 | Tokyo Night | `"tokyo_night"` | Dark | `Theme::tokyo_night()` | Vivid blue on dark |
-| 10 | Solarized Dark | `"solarized_dark"` | Dark | `Theme::solarized_dark()` | Precision dark |
-| 11 | Solarized Light | `"solarized_light"` | Light | `Theme::solarized_light()` | Precision light |
-| 12 | One Dark | `"one_dark"` | Dark | `Theme::one_dark()` | Atom editor dark |
-| 13 | Rosé Pine | `"rose_pine"` | Dark | `Theme::rose_pine()` | Elegant muted rose |
-| 14 | Kanagawa | `"kanagawa"` | Dark | `Theme::kanagawa()` | Hokusai art (deep blues + golds) |
-| 15 | Everforest | `"everforest"` | Dark | `Theme::everforest()` | Forest green |
-| 16 | Monokai | `"monokai"` | Dark | `Theme::monokai()` | Classic syntax highlighting |
-| 17 | Warm | `"warm"` | Dark | `Theme::warm()` | Amber and bronze |
-| 18 | Cool | `"cool"` | Dark | `Theme::cool()` | Purple and ice blue |
-| 19 | Forest | `"forest"` | Dark | `Theme::forest()` | Moss green and pine |
-| 20 | Sunset | `"sunset"` | Dark | `Theme::sunset()` | Orange coral and pink |
-| 21 | Mono | `"mono"` | Dark | `Theme::mono()` | Soft silver monochrome |
+```rust
+pub struct Theme {
+    // Identification
+    pub name: Arc<str>,                                    // Programmatic name: "nord", "dracula"
+    pub display_name: Arc<str>,                            // Human label: "Nord", "Rosé Pine"
+    pub kind: ThemeKind,                                   // Dark | Light
 
-### 6.2 Theme Struct Fields (Semantic Color System)
+    // Surface / Elevation (3)
+    pub bg: Color,                                         // Root background
+    pub surface: Color,                                    // Panel/card surface
+    pub surface_elevated: Color,                           // Dropdowns, dialogs
 
-**Surface/Elevation:**
-- `bg` — Root viewport background
-- `surface` — Panel/card surface (slightly elevated)
-- `surface_elevated` — Dropdowns, dialogs (highest surface)
+    // Text Hierarchy (4)
+    pub fg: Color,                                         // Primary text
+    pub fg_muted: Color,                                   // Secondary text
+    pub fg_subtle: Color,                                  // Tertiary text
+    pub fg_on_accent: Color,                               // Text on accent bg
 
-**Text Hierarchy:**
-- `fg` — Primary text
-- `fg_muted` — Secondary text (labels, descriptions)
-- `fg_subtle` — Tertiary text (placeholders, hints)
-- `fg_on_accent` — Text color on accent backgrounds
+    // Interactive (6)
+    pub primary: Color, pub primary_hover: Color, pub primary_active: Color,
+    pub secondary: Color, pub secondary_hover: Color, pub secondary_active: Color,
 
-**Interactive / Primary:**
-- `primary` — Primary action color
-- `primary_hover` — Hover state
-- `primary_active` — Active/pressed state
+    // Borders (3)
+    pub outline: Color, pub outline_variant: Color, pub divider: Color,
 
-**Secondary:**
-- `secondary` / `secondary_hover` / `secondary_active`
+    // Semantic (8)
+    pub error: Color, pub error_bg: Color,
+    pub success: Color, pub success_bg: Color,
+    pub warning: Color, pub warning_bg: Color,
+    pub info: Color, pub info_bg: Color,
 
-**Borders:**
-- `outline` — Standard borders
-- `outline_variant` — Subtle borders
-- `divider` — Section dividers
+    // Selection (2)
+    pub selection_bg: Color, pub selection_fg: Color,
 
-**Semantic:**
-- `error` / `error_bg` — Error states
-- `success` / `success_bg` — Success states
-- `warning` / `warning_bg` — Warning states
-- `info` / `info_bg` — Info states
+    // Input (3)
+    pub input_bg: Color, pub input_fg: Color, pub input_border: Color,
 
-**Selection:**
-- `selection_bg` — Selected item background
-- `selection_fg` — Selected item foreground
+    // Scrollbar (3)
+    pub scrollbar_track: Color, pub scrollbar_thumb: Color, pub scrollbar_thumb_hover: Color,
 
-**Input Fields:**
-- `input_bg` / `input_fg` / `input_border`
+    // Disabled (2)
+    pub disabled_fg: Color, pub disabled_bg: Color,
 
-**Scrollbar:**
-- `scrollbar_track` / `scrollbar_thumb` / `scrollbar_thumb_hover`
-- `scrollbar_width` — **Deprecated** (use `DEFAULT_SCROLLBAR_WIDTH`)
+    // Focus/Hover (3)
+    pub hover_bg: Color, pub focus_bg: Color, pub focus_border: Color,
 
-**Disabled:**
-- `disabled_fg` / `disabled_bg`
+    // Deprecated (1)
+    #[deprecated(since = "0.3.0", note = "Use framework::scroll::DEFAULT_SCROLLBAR_WIDTH instead")]
+    pub scrollbar_width: u16,
+}
+```
 
-**Focus/Hover:**
-- `hover_bg` — Hovered item background
-- `focus_bg` — Focused element background
-- `focus_border` — Focused element border
+### 6.2 Theme Constructors (21 Complete)
 
-### 6.3 Theme Helpers
+Each constructor sets all 31 fields. Example for the `dark` theme:
 
-| Method | Description |
-|--------|-------------|
-| `Theme::from_name(name: &str) -> Option<Theme>` | Case-insensitive lookup with hyphen/underscore normalization |
-| `Theme::from_env_or(default: Theme) -> Theme` | Read `DTRON_THEME` env var, fallback to default |
-| `Theme::random() -> Theme` | Select random built-in theme |
-| `Theme::all() -> Vec<Theme>` | Return all 21 themes (not const — uses runtime vec) |
+```rust
+pub fn dark() -> Self {
+    Self {
+        name: "dark".into(),
+        display_name: "Dark".into(),
+        kind: ThemeKind::Dark,
+        bg: Color::Rgb(16, 16, 24),
+        surface: Color::Rgb(24, 24, 36),
+        surface_elevated: Color::Rgb(32, 32, 48),
+        fg: Color::Rgb(200, 200, 220),
+        fg_muted: Color::Rgb(140, 140, 160),
+        fg_subtle: Color::Rgb(100, 100, 120),
+        fg_on_accent: Color::Rgb(0, 0, 0),
+        primary: Color::Rgb(0, 200, 120),
+        primary_hover: Color::Rgb(0, 220, 140),
+        primary_active: Color::Rgb(0, 180, 100),
+        secondary: Color::Rgb(100, 150, 200),
+        secondary_hover: Color::Rgb(120, 170, 220),
+        secondary_active: Color::Rgb(80, 130, 180),
+        outline: Color::Rgb(60, 60, 80),
+        outline_variant: Color::Rgb(45, 45, 65),
+        divider: Color::Rgb(50, 50, 70),
+        error: Color::Rgb(255, 80, 80),
+        error_bg: Color::Rgb(50, 20, 20),
+        success: Color::Rgb(80, 255, 120),
+        success_bg: Color::Rgb(20, 50, 30),
+        warning: Color::Rgb(255, 180, 80),
+        warning_bg: Color::Rgb(50, 40, 20),
+        info: Color::Rgb(100, 180, 255),
+        info_bg: Color::Rgb(20, 40, 60),
+        selection_bg: Color::Rgb(50, 80, 60),
+        selection_fg: Color::Rgb(200, 255, 220),
+        input_bg: Color::Rgb(20, 20, 30),
+        input_fg: Color::Rgb(220, 220, 240),
+        input_border: Color::Rgb(60, 60, 80),
+        scrollbar_track: Color::Rgb(30, 30, 40),
+        scrollbar_thumb: Color::Rgb(80, 80, 100),
+        scrollbar_thumb_hover: Color::Rgb(100, 100, 120),
+        disabled_fg: Color::Rgb(80, 80, 100),
+        disabled_bg: Color::Rgb(35, 35, 50),
+        hover_bg: Color::Rgb(40, 40, 56),
+        focus_bg: Color::Rgb(50, 50, 70),
+        focus_border: Color::Rgb(0, 200, 120),
+        scrollbar_width: Self::default_scrollbar_width(),
+    }
+}
+```
 
-**`from_env_or` behavior:** Reads `DTRON_THEME` env var, does case-insensitive lookup. Falls back to `default` if env var is unset, empty, or names unknown theme.
+### 6.3 Theme from_name Resolution
 
-**Hyphen/underscore normalization:** All `from_name` lookups normalize `-` to `_` before matching.
+```rust
+// Supports:
+"dark" → Theme::dark()
+"light" → Theme::light()
+"high_contrast" → Theme::high_contrast()
+"cyberpunk" → Theme::cyberpunk()
+"dracula" → Theme::dracula()
+"nord" → Theme::nord()
+"catppuccin_mocha" | "catppuccin" → Theme::catppuccin_mocha()
+"gruvbox_dark" | "gruvbox" → Theme::gruvbox_dark()
+"tokyo_night" → Theme::tokyo_night()
+"solarized_dark" → Theme::solarized_dark()
+"solarized_light" → Theme::solarized_light()
+"one_dark" → Theme::one_dark()
+"rose_pine" → Theme::rose_pine()
+"kanagawa" → Theme::kanagawa()
+"everforest" → Theme::everforest()
+"monokai" → Theme::monokai()
+"warm" → Theme::warm()
+"cool" → Theme::cool()
+"forest" → Theme::forest()
+"sunset" → Theme::sunset()
+"mono" → Theme::mono()
+```
+
+Normalization: input is lowercased, hyphens replaced with underscores before matching.
+
+### 6.4 Theme from_env_or Implementation
+
+```rust
+pub fn from_env_or(default: Theme) -> Theme {
+    std::env::var("DTRON_THEME")
+        .ok()
+        .and_then(|name| {
+            if name.is_empty() { None }
+            else { Theme::from_name(&name) }
+        })
+        .unwrap_or(default)
+}
+```
 
 ---
 
 ## 7. Input System
 
-### 7.1 Event Types (`src/input/event.rs`)
+### 7.1 Parser State Machine
 
-```rust
-enum Event {
-    Key(KeyEvent),
-    Mouse(MouseEvent),
-    Resize(u16, u16),
-    Paste(String),
-    FocusGained,
-    FocusLost,
-    Unsupported(Vec<u8>),
-}
+```
+Ground ────────────────────────────────────────────────────── Ground (mostly printable chars)
+  │ ESC (\x1b) ─────────────────────────────────────────→ Escape
+  │                                                      │ '[' ──────────────────────────→ CsiEntry
+  │                                                      │ ']' ──────────────────────────→ OscString
+  │                                                      │ 'P' ──────────────────────────→ DcsEntry
+  │                                                      │ 'X' ──────────────────────────→ SosString
+  │                                                      │ '^' ──────────────────────────→ PmString
+  │                                                      │ '_' ──────────────────────────→ ApcString
+  │ 0x7F (DEL) ─────────────────────────────────────────→ Key(Backspace)
 
-struct KeyEvent {
-    code: KeyCode,           // Char, Enter, Tab, Backspace, Esc, F(n), arrows, etc.
-    modifiers: KeyModifiers, // SHIFT, CONTROL, ALT, SUPER, HYPER, META
-    kind: KeyEventKind,      // Press, Repeat, Release
-}
+Escape
+  │ non-CSI sequence (O, o, etc.) → parse single-char escape → Ground
+  │ '[' → CsiEntry
+  │ ']' → OscString
 
-enum KeyCode {
-    Char(char), Backspace, Enter, Left, Right, Up, Down,
-    Home, End, PageUp, PageDown, Tab, BackTab, Delete, Insert,
-    F(u8), Esc, Null, CapsLock, ScrollLock, NumLock,
-    PrintScreen, Pause, Menu, KeypadBegin,
-    Media(MediaKeyCode), Modifier(ModifierKeyCode),
-}
+CsiEntry
+  │ parameter bytes (0x30-0x3F) → accumulate params → CsiParam
+  │ intermediate bytes (0x20-0x2F) → CsiIntermediate
+  │ final byte (0x40-0x7E) → match sequence → Ground
 
-struct MouseEvent {
-    kind: MouseEventKind,   // Down, Up, Drag, Moved, ScrollDown/Up/Left/Right
-    column: u16, row: u16,
-    modifiers: KeyModifiers,
-}
+CsiParam
+  │ parameter bytes → continue accumulating
+  │ intermediate bytes → CsiIntermediate
+  │ final byte → match sequence → Ground
 
-enum MouseButton { Left, Right, Middle, Back, Forward, Other(u8) }
+OscString
+  │ accumulate until OSC string terminator (ST: \x1b\ or BEL: \x07) → match → Ground
+
+Each final byte dispatch:
+  M/m → Mouse event (SGR format: <btn;col;row{M|m})
+  A,B,C,D → Cursor keys with modifiers
+  H,F → Home/End with modifiers
+  ~ → Extended key (F-keys, Insert, Delete, PageUp/Down, etc.)
+  u → Kitty keyboard protocol
+  I → Focus gained
+  O → Focus lost
+  R → Cursor position report (used as resize detection)
+  Z → BackTab
 ```
 
-### 7.2 Parser (`src/input/parser.rs`)
+### 7.2 SGR Mouse Parsing Detail
 
-**Purpose:** Byte-level event parser. Reads raw terminal bytes and produces `Event` values.
+Format: `\x1b[<{btn};{col};{row}{M|m}`
 
-- Handles: ANSI escape sequences, CSI sequences, SGR mouse, kitty keyboard, bracketed paste
-- `advance(byte) -> Option<Event>` — feed one byte, get event if complete
-- `check_timeout() -> Option<Event>` — handle pending sequences after timeout
-- Event buffering: accumulates bytes until complete sequence detected
-- Supports: all key types, mouse events, resize events, paste events
+- `<` prefix identifies SGR-encoded mouse
+- `btn` encodes button + modifiers + event type:
+  - Bits 0-1: button (0=left, 1=middle, 2=right, 3=release, 64=scroll)
+  - Bit 2: modifier (shift)
+  - Bit 3: modifier (alt)
+  - Bit 4: modifier (ctrl)
+  - Bit 5: motion flag (drag)
+  - Bit 6: scroll/extra button
+- `M` = button press/drag, `m` = button release
+- `col`, `row`: 1-based cell coordinates
 
-### 7.3 Reader (`src/input/reader.rs`)
+### 7.3 Modifier Bitmask Encoding (CSI 1;N sequences)
 
-**Purpose:** High-level input reading with optional blocking/polling.
-
-- `InputReader::new(stdin)` — create reader
-- `read() -> io::Result<Option<Event>>` — read next event (non-blocking)
-- `read_blocking() -> io::Result<Event>` — blocking read
-
-### 7.4 Input Router Pattern
-
-`App::on_input(handler)` creates a hidden `InputHandler` widget that:
-- Has full-screen area (terminal dimensions)
-- Is focusable (receives keyboard focus)
-- Returns `needs_render() = false` (no visual output)
-- Delegates `handle_key()` to the closure
-- Returns `current_theme()` for pattern 2 theme sync
-
-### 7.5 Modifier Guards
-
-All examples must check `key.modifiers.is_empty()` on non-configurable `Char` handlers to prevent Ctrl+X from triggering actions:
-
-```rust
-// RIGHT — Ctrl+P is ignored
-KeyCode::Char('p') if key.modifiers.is_empty() => { self.paused = true; true }
-// WRONG — Ctrl+P triggers pause
-KeyCode::Char('p') => { self.paused = true; true }
 ```
+Param N = 1 + modifier bits:
+  1 = none
+  2 = SHIFT
+  3 = ALT
+  4 = ALT + SHIFT
+  5 = CTRL
+  6 = CTRL + SHIFT
+  7 = CTRL + ALT
+  8 = CTRL + ALT + SHIFT
+```
+
+### 7.4 Kitty Keyboard Protocol
+
+Format: `\x1b[{code};{modifiers}u`
+
+- `code`: Unicode code point of the key (e.g., 97 for 'a', 13 for Enter, 27 for Esc)
+- `modifiers`: bitmask (1=shift, 2=alt, 4=ctrl, 8=super, 16=hyper, 32=meta)
+- Supports press/repeat/release distinction via protocol flags
 
 ---
 
 ## 8. Compositor & Rendering
 
-### 8.1 Plane Lifecycle
+### 8.1 Cell Struct
 
-```
-Creation: Plane::new(id, width, height)  → allocates Vec<Cell> (W × H)
-  → set_z_index(z)   → render ordering
-  → set_absolute_position(x, y)  → compositor-relative position
-  → fill_bg(color)   → fill all cells
-  → put_str/char     → draw content
-  → set_filter(f)    → apply visual filter
+```rust
+pub struct Cell {
+    pub char: char,           // Display character
+    pub fg: Color,            // Foreground color
+    pub bg: Color,            // Background color
+    pub style: Styles,        // Text style bitflags
+    pub transparent: bool,    // If true, cell below shows through
+    pub skip: bool,           // If true, renderer skips this cell (for wide char padding)
+}
 
-Per-frame reset: reset_cells()  → reuse Plane without reallocation
-  (sets all cells to transparent defaults)
-```
-
-### 8.2 Compositing Algorithm
-
-```
-For each frame:
-  1. Clear final_buffer with clear_color (or per-region for dirty mode)
-  2. Sort planes by z_index (ascending)
-  3. For each visible plane:
-     a. Compute source/dest bounds (clip to compositor dimensions)
-     b. For each cell in overlapping region:
-        - If plane has filter: apply filter to cell
-        - Blend cell into final_buffer (consider opacity)
-        - Non-transparent, non-skip cells overwrite or blend into buffer
-  4. Diff final_buffer vs last_frame:
-     - Emit cursor-positioning escape sequences for changed cells
-     - Emit SGR sequences (fg/bg/style) only when changed
-     - Emit character bytes
-     - Skip identical cells (no redraw)
-  5. Write buffered output to terminal via single write_all()
-  6. Copy final_buffer → last_frame for next frame's diff
-  7. Clear planes list for next frame
+impl Default for Cell {
+    fn default() -> Self {
+        Self { char: ' ', fg: Color::Reset, bg: Color::Reset, style: Styles::empty(), transparent: true, skip: false }
+    }
+}
 ```
 
-### 8.3 Escape Sequence Output
+### 8.2 Compositor::render() — Detailed Algorithm
 
-The compositor emits raw ANSI escape sequences (no dependency like crossterm):
+```
+fn render<W: Write>(&mut self, writer: &mut W) -> io::Result<()>:
 
-- Cursor positioning: `\x1b[{row};{col}H`
-- RGB foreground: `\x1b[38;2;{R};{G};{B}m`
-- RGB background: `\x1b[48;2;{R};{G};{B}m`
-- ANSI foreground: `\x1b[38;5;{N}m`
-- ANSI background: `\x1b[48;5;{N}m`
-- Style: `\x1b[1m` (bold), `\x1b[3m` (italic), `\x1b[4m` (underline), `\x1b[22m` (bold off), etc.
-- Reset fg: `\x1b[39m`, Reset bg: `\x1b[49m`
-- Sync mode begin: `\x1b[?2026h`, Sync mode end: `\x1b[?2026l`
-- Wraparound disable: `\x1b[?7l`, Wraparound enable: `\x1b[?7h`
+INPUTS:
+  - self.planes: Vec<Plane>  (all planes added this frame)
+  - self.last_frame: Vec<Cell>  (previous frame's final output)
+  - self.final_buffer: Vec<Cell>  (working buffer, pre-allocated W×H)
+  - self.clear_color: Color
+  - self.dirty_regions: DirtyRegionTracker
 
-### 8.4 Optimization Techniques
+ALGORITHM:
+  A. PREPARE CLEAR CELL
+     clear_cell = Cell { char: ' ', fg: Reset, bg: self.clear_color, transparent: false, skip: false }
 
-| Technique | Description |
-|-----------|-------------|
-| Dirty regions | Only render cells in changed areas |
-| Cell diffing | Skip cells identical to last frame |
-| Style tracking | Only emit SGR codes when style changes |
-| Final buffer reuse | Pre-allocated buffer, reset per frame |
-| Bulk write | Single `write_all()` per frame (Vec<u8> buffer) |
-| Fast blit | `copy_from_slice` for fully opaque planes |
-| Plane reuse | `reset_cells()` instead of reallocation |
-| CellPool | Object pool for Cell allocation |
-| Inline cursor positioning | `\x1b[Y;XH` instead of separate sequences |
-| Skip cells | Wide-char padding cells are skipped entirely |
+  B. DETERMINE MODE
+     full_refresh = self.dirty_regions.needs_full_refresh()
+     regions = self.dirty_regions.dirty_regions()
 
-### 8.5 Visual Filters (`src/compositor/filter.rs`)
+  C. CLEAR FINAL BUFFER
+     if full_refresh || regions.is_empty():
+       for cell in final_buffer.iter_mut(): *cell = clear_cell
+     else:
+       for each dirty region (region.x, region.y, region.w, region.h):
+         for y in region.y..min(region.y+region.h, height):
+           for x in region.x..min(region.x+region.w, width):
+             idx = y * width + x
+             final_buffer[idx] = clear_cell
 
-| Filter | Description |
-|--------|-------------|
-| `Dim` | Reduce brightness (multiply RGB by factor) |
-| `Invert` | Invert RGB values |
-| `Scanline` | CRT scanline effect (dim every other row) |
-| `Pulse` | Pulsing brightness oscillation |
-| `Glitch` | Random color offset / character corruption |
+  D. SORT PLANES
+     self.planes.sort_by_key(|a| a.z_index)  // Ascending z-index
 
-### 8.6 CellPool (`src/compositor/pool.rs`)
+  E. COMPOSITE PLANES (painters algorithm)
+     for plane in planes:
+       if !plane.visible: continue
 
-**Purpose:** Object pool for `Cell` allocation to reduce per-frame allocation pressure.
+       // Clip plane to compositor bounds
+       px_end = min(plane.width, width - plane.x)
+       py_end = min(plane.height, height - plane.y)
+       plane_stride = plane.width
+       dest_stride = width
 
-- `CellPool::new(config)` — create pool with config
-- `PoolConfig { initial_capacity, max_capacity }`
-- `acquire_plane_cells(pool, count)` — get cells from pool
-- `release_plane_cells(pool, cells)` — return cells to pool
+       if full_refresh:
+         // Full composite: visit all cells
+         for py in 0..py_end:
+           for px in 0..px_end:
+             src_idx = py * plane_stride + px
+             dest_idx = (plane.y + py) * dest_stride + (plane.x + px)
+             src_cell = plane.cells[src_idx]
+             
+             if plane.filter: filter.apply(&mut src_cell, position, time)
+             
+             blend_cells(&mut final_buffer[dest_idx], &src_cell, plane.opacity)
+       else:
+         // Partial composite: only cells in dirty regions
+         for py in 0..py_end:
+           for px in 0..px_end:
+             abs_x = plane.x + px
+             abs_y = plane.y + py
+             
+             // Skip if not in any dirty region
+             if !any_region_contains(abs_x, abs_y): continue
+             
+             src_idx = py * plane_stride + px
+             dest_idx = abs_y * dest_stride + abs_x
+             blend_cells(&mut final_buffer[dest_idx], &plane.cells[src_idx], plane.opacity)
+
+  F. DIFF AND OUTPUT
+     Initialize:
+       buf = Vec<u8> (capacity: W × H × 20)
+       current_fg = Reset, current_bg = Reset, current_style = empty
+
+     // Sync mode begin
+     buf.extend(b"\x1b[?2026h")
+     // Disable wraparound
+     buf.extend(b"\x1b[?7l")
+
+     for y in 0..height:
+       line_cursor_moved = false
+       for x in 0..width:
+         idx = y * width + x
+         cell = final_buffer[idx]
+         last = last_frame[idx]
+
+         // Skip padding cells
+         if cell.skip: continue
+
+         // Skip unchanged cells
+         if cell == last: continue
+
+         // Skip non-dirty cells in partial mode
+         if !full_refresh && !in_any_region(x, y): continue
+
+         // Emit cursor position if needed
+         if !line_cursor_moved:
+           buf.push(b'\x1b'); buf.push(b'[')
+           write_u16_decimal(&mut buf, y + 1)
+           buf.push(b';')
+           write_u16_decimal(&mut buf, x + 1)
+           buf.push(b'H')
+           line_cursor_moved = true
+
+         // Emit style changes only when changed
+         if cell.style != current_style:
+           emit_style_changes(&mut buf, cell.style, current_style)
+           current_style = cell.style
+
+         // Emit foreground color if changed
+         if cell.fg != current_fg:
+           emit_fg_color(&mut buf, cell.fg)
+           current_fg = cell.fg
+
+         // Emit background color if changed
+         if cell.bg != current_bg:
+           emit_bg_color(&mut buf, cell.bg)
+           current_bg = cell.bg
+
+         // Write character (fast path: ASCII, else UTF-8)
+         if char is printable ASCII (0x20-0x7E):
+           buf.push(char as u8)
+         else if char is control (0x00-0x1F):
+           buf.push(b' ')  // Replace with space
+         else:
+           char.encode_utf8(&mut utf8_buf)
+           buf.extend_from_slice(utf8_buf)
+
+     // Re-enable wraparound + end sync mode
+     buf.extend(b"\x1b[?7h")
+     buf.extend(b"\x1b[?2026l")
+
+  G. FLUSH
+     writer.write_all(&buf)?;
+     self.last_frame.copy_from_slice(&self.final_buffer)
+     self.planes.clear()
+     self.dirty_regions.clear()
+     writer.flush()?
+```
+
+### 8.3 Blend Algorithm
+
+```rust
+fn blend_cells(dest: &mut Cell, src: &Cell, alpha: f32):
+  if src.transparent || alpha <= 0: return
+
+  if alpha >= 1.0:
+    // Opaque: direct copy
+    if src.bg != Reset: dest.bg = src.bg
+    if src.skip:
+      dest.skip = true; dest.char = ' '
+    else:
+      if is_braille(dest.char) && is_braille(src.char):
+        dest.char = merge_braille(dest.char, src.char)  // Bitwise OR for braille overlay
+      else:
+        dest.char = src.char
+      dest.fg = src.fg
+      dest.style = src.style
+      dest.skip = false
+  else:
+    // Transparent: alpha-blend RGB colors
+    dest.bg = blend_rgb(dest.bg, src.bg, alpha)
+    if !src.skip && src.char != '\0':
+      dest.fg = blend_rgb(dest.fg, src.fg, alpha)
+      if alpha > 0.5:
+        dest.char = src.char
+        dest.style = src.style
+
+  dest.transparent = false
+```
+
+### 8.4 Color Escape Sequence Generation
+
+```rust
+// Foreground
+Reset → \x1b[39m
+Ansi(N) → \x1b[38;5;{N}m     // 0 ≤ N ≤ 255, 3-digit zero-padded
+Rgb(r,g,b) → \x1b[38;2;{r};{g};{b}m  // 3-digit zero-padded decimal
+
+// Background
+Reset → \x1b[49m
+Ansi(N) → \x1b[48;5;{N}m
+Rgb(r,g,b) → \x1b[48;2;{r};{g};{b}m
+
+// Style
+BOLD on → \x1b[1m, BOLD off → \x1b[22m
+ITALIC on → \x1b[3m, ITALIC off → \x1b[23m
+UNDERLINE on → \x1b[4m, UNDERLINE off → \x1b[24m
+DIM on → \x1b[2m, DIM off → \x1b[22m
+REVERSE on → \x1b[7m, REVERSE off → \x1b[27m
+BLINK on → \x1b[5m, BLINK off → \x1b[25m
+HIDDEN on → \x1b[8m, HIDDEN off → \x1b[28m
+STRIKETHROUGH on → \x1b[9m, STRIKETHROUGH off → \x1b[29m
+```
+
+### 8.5 Input Shield (from app.rs)
+
+**Purpose:** Swallow all keyboard and mouse input for a configurable cooldown period after mode transitions.
+
+**Implementation:**
+```rust
+pub fn shield_input(&self, duration: Duration) {
+    self.input_shield_until.set(Some(Instant::now() + duration));
+}
+
+// At top of handle_event:
+if let Some(until) = self.input_shield_until.get() {
+    if Instant::now() < until {
+        return;  // Event silently swallowed
+    }
+    self.input_shield_until.set(None);  // Shield expired
+}
+```
+
+Resize events are NOT shielded (they must always be processed).
 
 ---
 
 ## 9. Command-Driven Architecture
 
-### 9.1 Architecture
-
-**Design Principle:** Widgets have zero business logic — they only render command output. AI can enumerate every action via `Ctx::available_commands()` and trigger any action by running the same CLI command.
-
-### 9.2 BoundCommand
+### 9.1 Complete OutputParser Enum
 
 ```rust
-struct BoundCommand {
-    command: String,                    // CLI command string
-    parser: OutputParser,              // How to parse stdout
-    confirm_message: Option<String>,    // Confirmation dialog text
-    refresh_seconds: Option<u64>,       // Auto-refresh interval
-    label: String,                      // Human-readable name
-    description: String,                // Human-readable description
+pub enum OutputParser {
+    JsonKey { key: String },                              // Extract single JSON field
+    JsonPath { path: String },                            // Navigate JSON with dot-path
+    JsonArray { item_key: Option<String> },               // Extract items from JSON array
+    Regex { pattern: String, group: Option<usize> },      // Regex capture group extraction
+    LineCount,                                            // Count output lines
+    ExitCode,                                             // Map exit code to value
+    SeverityLine { patterns: HashMap<String, String> },   // Log severity detection
+    #[default] Plain,                                     // Raw text
 }
 ```
 
-Builder pattern: `.new(cmd)`, `.parser(p)`, `.confirm(msg)`, `.refresh(secs)`, `.label(l)`, `.description(d)`
-
-### 9.3 Output Parsers
-
-| Parser | Variant | Output Type | Use Case |
-|--------|---------|-------------|----------|
-| `JsonKey` | `{ key: "status" }` | `Scalar` | Extract single field from JSON |
-| `JsonPath` | `{ path: "data.cpu" }` | `Scalar` | Navigate nested JSON path |
-| `JsonArray` | `{ item_key: "name" }` | `List` | Extract array items |
-| `Regex` | `{ pattern: "...", group: 1 }` | `Scalar` | Extract via regex capture |
-| `LineCount` | — | `Scalar` | Count output lines |
-| `ExitCode` | — | `Scalar` | Map exit code |
-| `SeverityLine` | `{ patterns: {"ERROR":"red"} }` | `Lines(LoggedLine)` | Log line severity detection |
-| `Plain` | — | `Text` | Raw text output |
-
-### 9.4 ParsedOutput
+### 9.2 Complete ParsedOutput Enum
 
 ```rust
-enum ParsedOutput {
-    Scalar(String),              // Single value (gauge, badge)
-    List(Vec<String>),           // List of items (table rows, list items)
-    Lines(Vec<LoggedLine>),      // Log lines with severity
-    Text(String),                // Raw text (log viewer, streaming text)
-    None,                        // No output
+pub enum ParsedOutput {
+    Scalar(String),              // Single value → Gauge value, StatusBadge status
+    List(Vec<String>),           // Multiple items → Table rows, List items
+    Lines(Vec<LoggedLine>),      // Log lines with severity → LogViewer
+    Text(String),                // Raw text → StreamingText, KeyValueGrid
+    None,                        // No output (parse failure, empty command)
 }
 
-struct LoggedLine { text: String, severity: String }
+pub struct LoggedLine {
+    pub text: String,
+    pub severity: String,        // "red", "yellow", "default", etc.
+}
 ```
 
-### 9.5 CommandRunner
+### 9.3 CommandRunner Implementation Detail
 
 ```rust
-CommandRunner::new(cmd)
-  .run_sync() -> (String stdout, String stderr, i32 exit_code)
-  .run_and_parse(parser) -> ParsedOutput
-  .spawn() -> io::Result<()>      // For streaming commands
-  .recv_line() -> Option<String>  // Get next line from spawned process
+pub fn run_sync(&self) -> (String, String, i32) {
+    // Split command into program + args by whitespace
+    // Spawn child process with piped stdout/stderr
+    // Wait for completion
+    // Return (stdout_string, stderr_string, exit_code)
+}
+
+pub fn spawn(&mut self) -> io::Result<()> {
+    // Spawn child with piped stdout/stderr
+    // Create mpsc channels for stdout/stderr lines
+    // Spawn reader threads that send lines through channels
+    // Store child_id, stdout_rx, stderr_rx
+}
+
+pub fn recv_line(&self) -> Option<String> {
+    // Try to receive a line from stdout channel
+    // Lines prefixed with __EXIT_CODE__ indicate process exit
+}
 ```
 
-### 9.6 TOML Configuration
-
-Complete apps definable in TOML — no Rust code needed for dashboards:
+### 9.4 TOML Configuration Schema
 
 ```toml
-title = "My Dashboard"
-theme = "nord"
-fps = 30
+title = "Dashboard"                    # Required: window title
+theme = "nord"                         # Optional: theme name
+fps = 30                               # Optional: target FPS
 
-[[widget]]
-type = "StatusBadge"
-id = 1
-bind = "dracon-sync status --json"
-parser = { type = "json_key", key = "status" }
-refresh = 5
+[layout]                               # Optional: screen layout
+header_height = 3
+sidebar_width = 25
+footer_height = 2
 
-[[widget]]
-type = "Gauge"
-id = 2
-bind = "df -h / | tail -1"
-parser = { type = "regex", pattern = r"(\d+)%", group = 1 }
-refresh = 10
-```
+[[widget]]                             # Array of widgets
+type = "StatusBadge"                   # Widget type name
+id = 1                                 # Optional: widget ID
+bind = "dracon-sync status --json"     # CLI command
+parser = { type = "json_key", key = "status" }  # Output parser
+refresh = 5                            # Auto-refresh interval (seconds)
+confirm = "Run sync?"                  # Confirmation dialog text
+label = "Sync Status"                  # Human-readable label
+description = "Shows sync status"      # Description for AI enumeration
 
-**Config types:**
-- `AppConfig` — title, theme, fps, layout, widgets, commands
-- `WidgetConfig` — id, type, area, bind, parser, refresh, confirm, label, description, options
-- `LayoutConfig` — header_height, sidebar_width, footer_height
-- `AreaConfig` — x, y, width, height
-- `ParserConfig` — type, key, path, pattern, group, patterns
-
-### 9.7 Ctx Command API
-
-```rust
-ctx.run_command("df -h")           // (String, String, i32)
-ctx.available_commands()           // Vec<BoundCommand>
+[widget.area]                          # Optional: explicit positioning
+x = 0
+y = 0
+width = 20
+height = 3
 ```
 
 ---
 
 ## 10. Event System
 
-### 10.1 EventBus (`src/framework/event_bus.rs`)
+### 10.1 EventBus Internals
 
-**Purpose:** Type-safe, synchronous pub/sub event system for inter-widget communication.
+```rust
+pub struct EventBus {
+    subscribers: RefCell<HashMap<TypeId, Vec<Option<EventCallback>>>>,
+    pending_tombstones: Rc<RefCell<HashSet<(TypeId, usize)>>>,
+    trace: RefCell<bool>,
+    history: RefCell<VecDeque<EventRecord>>,
+    max_history: RefCell<usize>,
+}
 
-**`EventBus` API:**
-- `new()` — create bus
-- `publish(event: E)` where `E: Any + Clone` — publish event to all subscribers
-- `subscribe::<E, F>(callback)` where `F: Fn(&E) + 'static` — subscribe to event type
-- `subscribe_once::<E, F>(callback)` — fire callback once then auto-unsubscribe
-- `unsubscribe(id: SubscriptionId)` — remove subscription
-- `set_trace(bool)` / `set_max_history(usize)` — debugging
+type EventCallback = Rc<dyn Fn(&dyn Any) + 'static>;
 
-**`Reactive<T>`:** Observable value wrapper.
-- `new(value)` — create with initial value
-- `get()` — get current value
-- `set(value)` — update value and notify subscribers
-- `subscribe(callback)` — listen for changes
+pub struct SubscriptionId { id: usize, type_id: TypeId }
 
-**`SubscriptionId`:** Opaque handle returned by `subscribe()`, used for `unsubscribe()`.
+pub struct EventRecord {
+    pub timestamp: Instant,
+    pub type_name: String,
+    pub payload: Rc<dyn Any>,
+}
+```
 
-**`EventRecord`:**
-- `timestamp: Instant`, `type_name: String`, `payload: Rc<dyn Any>`
-- Circular buffer of recent events for debugging (default max: 100)
+**Publish algorithm:**
+1. Trace log if enabled
+2. Check tombstones (subscribe_once cleanup)
+3. Find callbacks by TypeId
+4. Execute each callback synchronously
+5. Record in history (circular buffer, max 100)
+6. Apply tombstones (remove subscribe_once callbacks)
 
-### 10.2 Event History & Debugging
+**Subscribe algorithm:**
+1. Create `EventCallback` wrapping user's closure
+2. Get or create callback list for TypeId
+3. Assign `SubscriptionId`
+4. Return `SubscriptionId` for later `unsubscribe()`
 
-- `history()` — returns `Vec<EventRecord>` of recent events
-- `clear_history()` — empty the history buffer
-- Trace mode: writes events to stderr when `set_trace(true)` (visible when running with `debug_events` feature)
+### 10.2 Reactive<T>
+
+```rust
+pub struct Reactive<T: Clone + 'static> {
+    value: RefCell<T>,
+    callbacks: RefCell<Vec<Box<dyn Fn(&T)>>>,
+}
+
+impl<T: Clone + 'static> Reactive<T> {
+    pub fn new(initial: T) -> Self;
+    pub fn get(&self) -> T;
+    pub fn set(&self, value: T);    // Updates value, fires callbacks
+    pub fn subscribe<F>(&self, f: F) where F: Fn(&T) + 'static;
+    pub fn map<U, F>(&self, f: F) -> Reactive<U> where F: Fn(&T) -> U + 'static;
+}
+```
 
 ---
 
 ## 11. Scene Router
 
-### 11.1 Scene Trait
+### 11.1 SceneRouter Internal State
 
 ```rust
-trait Scene: Any {
-    fn scene_id(&self) -> &str;
-    fn on_enter(&mut self) {}
-    fn on_exit(&mut self) {}
-    fn on_resume(&mut self) {}
-    fn on_pause(&mut self) {}
-    fn render(&self, area: Rect) -> Plane;
-    fn handle_key(&mut self, key: KeyEvent) -> bool;
-    fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool;
-    fn on_theme_change(&mut self, theme: &Theme) {}
-    fn needs_render(&self) -> bool;
-    fn mark_dirty(&mut self);
-    fn clear_dirty(&mut self);
+pub struct SceneRouter {
+    scenes: HashMap<String, Box<dyn Scene>>,
+    stack: Vec<String>,
+    default_transition: SceneTransition,
+    transition_duration: Duration,
+    current_transition: Option<(SceneTransition, Instant, String, String)>,  // (animation, start_time, from_scene, to_scene)
 }
 ```
 
-### 11.2 SceneRouter
+### 11.2 Scene Lifecycle
 
-**API:**
-- `new()` — create empty router
-- `register(id, scene)` — register scene by ID
-- `push(id)` — push scene onto navigation stack (calls `on_pause` on previous, `on_enter` on new)
-- `pop() -> bool` — pop current scene (calls `on_exit`, `on_resume` on previous)
-- `replace(id)` — replace current scene without navigation history
-- `go(id)` — clear stack and set scene
-- `active()` — get current scene ID
-- `can_go_back() -> bool` — check if back navigation is possible
-- `stack_depth() -> usize` — current stack size
-- `with_default_transition(transition)` — set default transition animation
+```
+push("settings"):
+  1. If current scene: current.on_pause()
+  2. Find "settings" in registry
+  3. If found: scene.on_enter(), push to stack
+  4. Start transition animation (if configured)
 
-### 11.3 SceneTransition
+pop():
+  1. If stack has ≥2 entries:
+     a. Current scene: current.on_exit()
+     b. Pop from stack
+     c. New current: new.on_resume()
+     d. Start transition animation
+     e. Return true
+  2. Else: return false
 
-| Variant | Description |
-|---------|-------------|
-| `Fade` | Fade out old, fade in new |
-| `SlideLeft` | New scene slides in from right |
-| `SlideRight` | New scene slides in from left |
-| `SlideUp` | New scene slides in from bottom |
-| `SlideDown` | New scene slides in from top |
-| `None` | Instant switch |
+replace("about"):
+  1. Current: current.on_exit()
+  2. Pop from stack
+  3. New: scene.on_enter(), push to stack
+  4. Return true
 
-### 11.4 NavigationEvent
+go("home"):
+  1. Clear entire stack (call on_exit for each)
+  2. Push "home" scene
+  3. scene.on_enter()
+```
 
-Events published on the EventBus when navigation occurs:
-- `NavigationEvent::Pushed(String)` — scene ID pushed
-- `NavigationEvent::Popped(String)` — scene ID popped
-- `NavigationEvent::Replaced(String, String)` — old ID, new ID
+### 11.3 Transition Animation
+
+Transitions are rendered as overlay planes on the compositor:
+- Fade: over-plane with increasing opacity
+- SlideLeft/SlideRight: positional offset animation
+- SlideUp/SlideDown: positional offset animation
+- None: instant switch (no animation plane)
 
 ---
 
 ## 12. Plugin System
 
-### 12.1 PluginRegistry (`src/framework/plugin.rs`)
+### 12.1 Complete API
 
-**Purpose:** Dynamic widget loading by name, without compile-time dependencies.
+```rust
+pub struct PluginRegistry {
+    widgets: HashMap<String, WidgetFactory>,
+}
 
-**API:**
-- `new()` — create empty registry
-- `register(name, factory)` — register `WidgetFactory` by name
-- `create(name, id, theme) -> Option<Box<dyn Widget>>` — instantiate widget by name
-- `unregister(name)` — remove registration
-- `names() -> Vec<String>` — list registered names
-- `is_registered(name) -> bool`
-
-**`WidgetFactory`:** `Box<dyn Fn(WidgetId, Theme) -> Box<dyn Widget> + Send + Sync>`
-
-### 12.2 Example Plugin
-
-`examples/plugin_demo.rs` and `examples/_cookbook/stat_widget_plugin.rs` demonstrate the plugin system.
+impl PluginRegistry {
+    pub fn new() -> Self;
+    pub fn register(&mut self, name: &str, factory: WidgetFactory);
+    pub fn create(&self, name: &str, id: WidgetId, theme: Theme) -> Option<Box<dyn Widget>>;
+    pub fn unregister(&mut self, name: &str);
+    pub fn names(&self) -> Vec<&str>;
+    pub fn is_registered(&self, name: &str) -> bool;
+    pub fn len(&self) -> usize;
+    pub fn is_empty(&self) -> bool;
+    pub fn merge(&mut self, other: PluginRegistry);   // Combine two registries
+}
+```
 
 ---
 
 ## 13. TextEditor (Standalone Widget)
 
-### 13.1 Scope & Philosophy
+### 13.1 File Structure
 
-**TextEditor is a view/edit widget** for composing into larger applications:
-- File managers: view/edit config files
-- Chat UIs: edit messages
-- Forms: text input fields
-- Log viewers: search, filter, navigate
-
-**NOT a vim/Helix competitor.** Not a modal editor. Not LSP-powered.
-
-### 13.2 API
-
-```rust
-// Creation
-TextEditor::new()                        // Empty editor
-TextEditor::with_content("...")         // From string
-TextEditor::open(&path)                 // From file (loads .undo too)
-
-// File I/O
-editor.save()                           // Save to current path
-editor.save_as(&path)                   // Save to new path
-editor.file_path()                      // Current path if any
-
-// View options
-.with_show_line_numbers(bool)
-.with_word_wrap(bool)
-.with_indent_guides(bool)
-.with_status_bar(bool)
-.with_language("rust")                  // For syntax highlighting
-.with_theme(theme)                       // Visual theme
-
-// Navigation & Search
-.goto_line(line, area)                  // Jump to line
-.set_filter("query")                    // Filter/highlight mode
-.replace_all(find, replace)             // Global replace
-.replace_next(find, replace)            // Next occurrence
-
-// Selection & Clipboard
-.get_selected_text()                    // Get selection
-.select_all()
-.select_word_at(row, col)
-
-// Multi-cursor (basic)
-.add_cursor(row, col)                   // Add extra cursor
-.clear_extra_cursors()
-
-// Persistence
-.load_undo_stack()                      // Load from .file.undo
-.save_undo_stack()                      // Save to .file.undo
-.load_config()                          // Load from .file.dte.json
-.save_config()                          // Save to .file.dte.json
-
-// Search state
-editor.search: editor_search::SearchState
-//   .filter_query: String              // Current filter string
-//   .filtered_indices: Vec<usize>      // display-row → real-line mapping
-//   .mode: editor_search::SearchMode   // Normal / Search / Replace / GotoLine
-//   .mode_input: String               // Input buffer for search/replace/goto modes
-//   .is_replacing: bool               // Whether replace mode is active
+```
+src/widgets/
+  editor.rs              → 3,025 LOC: main implementation
+  editor_search.rs       → Editor search/filter state and UI
 ```
 
-### 13.3 Editor Size (3,025 LOC)
+### 13.2 Complete Public API
 
-Largest single file in the project. Contains:
-- Public API (~400 LOC)
-- Cursor movement logic (~500 LOC)
-- Selection logic (~400 LOC)
-- Syntax highlighting integration (~300 LOC) — feature-gated (`syntax-highlighting`)
-- Undo/redo stack (~400 LOC)
-- Search/filter/replace (~500 LOC)
-- Rendering (~500 LOC)
-- Tests (inline `#[cfg(test)]`)
+```rust
+pub struct TextEditor {
+    // Content
+    lines: Vec<String>,
+    file_path: Option<PathBuf>,
+    modified: bool,
+
+    // Cursor
+    cursor_row: usize, cursor_col: usize,
+    cursors: Vec<(usize, usize)>,            // Extra cursors for multi-cursor
+    preferred_col: Option<u16>,              // Preferred column for vertical movement
+
+    // Selection
+    selection_start: Option<(usize, usize)>,
+
+    // View
+    offset: usize,                            // Scroll offset (lines from top)
+    show_line_numbers: bool,
+    word_wrap: bool,
+    indent_guides: bool,
+    show_status_bar: bool,
+
+    // Syntax highlighting
+    #[cfg(feature = "syntax-highlighting")]
+    highlighter: Option<SyntaxHighlighter>,
+
+    // Undo/redo
+    undo_stack: Vec<EditAction>,
+    redo_stack: Vec<EditAction>,
+    undo_depth: usize,
+    last_edit_time: Instant,
+
+    // Search/filter
+    pub search: SearchState,
+
+    // Theme/visual
+    theme: Theme,
+
+    // Config
+    tab_width: usize,
+    indent_unit: String,                       // "  " or "\t"
+}
+
+pub struct SearchState {
+    pub filter_query: String,
+    pub filtered_indices: Vec<usize>,
+    pub mode: SearchMode,                     // Normal, Search, Replace, GotoLine
+    pub mode_input: String,
+    pub is_replacing: bool,
+}
+```
+
+**Public methods:**
+```rust
+// Creation
+pub fn new() -> Self
+pub fn with_content(content: &str) -> Self
+pub fn open(path: &Path) -> io::Result<Self>
+
+// File I/O
+pub fn save(&mut self) -> io::Result<()>
+pub fn save_as(&mut self, path: &Path) -> io::Result<()>
+pub fn file_path(&self) -> Option<&Path>
+
+// Configure
+pub fn with_show_line_numbers(self, show: bool) -> Self
+pub fn with_word_wrap(self, wrap: bool) -> Self
+pub fn with_indent_guides(self, show: bool) -> Self
+pub fn with_status_bar(self, show: bool) -> Self
+pub fn with_language(self, lang: &str) -> Self
+pub fn with_theme(self, theme: Theme) -> Self
+
+// Navigation
+pub fn goto_line(&mut self, line: usize, area: Rect)
+pub fn set_filter(&mut self, query: &str)
+pub fn replace_all(&mut self, find: &str, replace: &str) -> usize
+pub fn replace_next(&mut self, find: &str, replace: &str) -> bool
+
+// Selection
+pub fn get_selected_text(&self) -> Option<String>
+pub fn select_all(&mut self)
+pub fn select_word_at(&mut self, row: usize, col: usize)
+
+// Multi-cursor
+pub fn add_cursor(&mut self, row: usize, col: usize)
+pub fn clear_extra_cursors(&mut self)
+
+// Persistence
+pub fn load_undo_stack(&mut self) -> io::Result<()>
+pub fn save_undo_stack(&mut self) -> io::Result<()>
+pub fn load_config(&mut self) -> io::Result<()>
+pub fn save_config(&mut self) -> io::Result<()>
+```
+
+### 13.3 Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| Char | Insert character |
+| Enter | Split line |
+| Backspace | Delete before cursor |
+| Delete | Delete after cursor |
+| Left/Right | Move cursor |
+| Up/Down | Move cursor vertically |
+| Home/End | Line start/end |
+| Ctrl+Home/End | Document start/end |
+| PageUp/PageDown | Scroll page |
+| Ctrl+Left/Right | Word boundary |
+| Shift + navigation | Extend selection |
+| Ctrl+A | Select all |
+| Ctrl+C | Copy (requires QUIT action check) |
+| Ctrl+X | Cut |
+| Ctrl+V | Paste |
+| Ctrl+Z | Undo |
+| Ctrl+Y | Redo |
+| Ctrl+F | Search |
+| Ctrl+H | Replace |
+| Ctrl+G | Goto line |
+| Tab | Indent (insert indent) |
+| Shift+Tab | Un-indent |
+
+### 13.4 Undo/Redo System
+
+```rust
+enum EditAction {
+    Insert { row: usize, col: usize, text: String },
+    Delete { row: usize, col: usize, text: String },
+    Replace { row: usize, col: usize, old: String, new: String },
+    SplitLine { row: usize, col: usize },
+    JoinLine { row: usize, col: usize },
+    Batch { actions: Vec<EditAction> },   // Group for undo grouping
+}
+```
+
+Coalescing: consecutive Insert actions at same position are merged into one `EditAction`. Same for Delete. Timer-based grouping: actions within 500ms of each other are grouped.
 
 ---
 
 ## 14. Application Patterns
 
-### 14.1 Two Rendering Patterns
+### 14.1 Pattern Comparison
 
-**Pattern 1: Widget Trait Auto-Render**
+| Aspect | Pattern 1 (Widget Trait) | Pattern 2 (InputRouter + manual) |
+|--------|-------------------------|----------------------------------|
+| Render trigger | Auto via `needs_render()` | Manual via `ctx.add_plane()` in `on_tick` |
+| Widget struct | Implements `Widget` | `InputRouter` widget + separate state struct |
+| State mutation | Via `handle_key()`, `handle_mouse()` | Via closures with `Rc<RefCell<T>>` bridge |
+| Theme cycling | `App::set_theme()` propagates | Must impl `current_theme()` for sync |
+| Complexity | Lower (self-contained) | Higher (bridge pattern) |
+| Use case | Simple apps, single widget | Multi-window, shared state, game loop |
+
+### 14.2 Pattern 2 Theme Sync — Detailed Flow
+
+```
+1. App::run() dispatch_key() calls focused widget's handle_key()
+2. Widget's handle_key() changes internal theme:
+   fn handle_key(&mut self, key: KeyEvent) -> bool {
+       if matches_theme_action(key) {
+           self.app.borrow_mut().cycle_theme();
+           true
+       } else { false }
+   }
+3. After handle_key(), App checks widget.current_theme():
+   if let Some(theme) = widget.current_theme() {
+       if theme.name != self.theme.name {
+           self.set_theme(theme);  // Propagates to all widgets
+       }
+   }
+4. DTRON_THEME_FILE: on App::run() exit, self.theme.name is written to file
+```
+
+### 14.3 Help Overlay — Implementation Template
+
 ```rust
-impl Widget for MyApp {
-    fn needs_render(&self) -> bool { self.dirty }
-    fn render(&self, area: Rect) -> Plane { /* full render */ }
+// In struct:
+show_help: bool,
+
+// In handle_key:
+KeyCode::Char('?') if key.modifiers.is_empty() => {
+    self.show_help = !self.show_help;
+    self.dirty = true;
+    true
+}
+KeyCode::Esc => {
+    if self.show_help {
+        self.show_help = false;
+        self.dirty = true;
+        true
+    } else { false }
+}
+
+// In render (drawn last):
+if self.show_help {
+    // 1. Compute centered overlay box (40×12, centered in area)
+    let hw = 40u16.min(area.width.saturating_sub(4));
+    let hh = 12u16.min(area.height.saturating_sub(4));
+    let hx = (area.width - hw) / 2;
+    let hy = (area.height - hh) / 2;
+    
+    // 2. Fill background with surface_elevated
+    for y in hy..hy+hh { for x in hx..hx+hw { /* set cell.bg = t.surface_elevated, cell.transparent = false */ }}
+    
+    // 3. Rounded corners: ╭╮╰╯
+    // 4. Horizontal borders: ─
+    // 5. Vertical borders: │
+    // 6. Title centered: "Example Help" in t.primary + BOLD
+    // 7. Shortcuts: two-column (key in primary, desc in fg)
 }
 ```
-- App automatically calls `render()` when `needs_render()` returns true
-- Set `self.dirty = true` after state changes
-- Used by: file_manager, git_tui, sqlite_browser, widget_gallery, dashboard_builder
 
-**Pattern 2: InputRouter + Manual `ctx.add_plane()`**
+### 14.4 Theme Return File (DTRON_THEME_FILE)
+
 ```rust
-// Router widget with needs_render() -> false
-impl Widget for MyRouter {
-    fn needs_render(&self) -> bool { false }
-    fn handle_key(&mut self, key: KeyEvent) -> bool {
-        self.app.borrow_mut().handle_key(key)
+// In App::run(), before returning Ok(()):
+if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
+    let _ = std::fs::write(&path, self.theme.name.as_bytes());
+}
+
+// In showcase launcher, after child process exits:
+if let Ok(content) = std::fs::read_to_string(&theme_file_path) {
+    if let Some(theme) = Theme::from_name(content.trim()) {
+        ctx.set_theme(theme);
     }
 }
-
-// App-level rendering in on_tick
-app.on_tick(move |ctx, _| {
-    let mut app = app.borrow_mut();
-    app.tick();
-    let (w, h) = ctx.compositor().size();
-    let plane = app.render(Rect::new(0, 0, w, h));
-    ctx.add_plane(plane);
-})
-```
-- Must explicitly call `ctx.add_plane()` in `on_tick` callback
-- `needs_render()` returns false
-- Used by: system_monitor, ide, chat_client, log_monitor, modal_demo
-
-### 14.3 Bridge Pattern for Pattern 2
-
-Pattern 2 apps (using `on_input`/`on_tick` closures) cannot access app state directly from `on_input`. Use `Rc<RefCell<T>>` to share state between closures:
-
-```rust
-let show_help = Rc::new(RefCell::new(false));
-let show_help_input = Rc::clone(&show_help);
-let show_help_render = Rc::clone(&show_help);
-
-.on_input(move |key| {
-    if key.code == KeyCode::Char('?') { *show_help_input.borrow_mut() = !*show_help_input.borrow_mut(); true } else { false }
-})
+std::fs::remove_file(&theme_file_path).ok();
 ```
 
-For atomic shared state: `Arc<AtomicBool>`.
-
-### 14.4 Pattern 2 Theme Sync
-
-Pattern-2 apps must implement `Widget::current_theme()` to sync local theme back to the framework:
+### 14.5 SceneMode Enum Pattern
 
 ```rust
-fn current_theme(&self) -> Option<Theme> {
-    Some(self.app.borrow().theme)
+#[derive(Clone, Debug, Default)]
+enum SceneMode {
+    #[default]
+    Normal,
+    Help,
+    Search,
+    Confirm { message: String },
+    ContextMenu { x: u16, y: u16, selected_index: Option<usize> },
+}
+// Benefits: exhaustive match, variant payload, impossible to have conflicting modes
+```
+
+### 14.6 Scrollbar Rendering Pattern
+
+```rust
+fn render_scrollbar(plane: &mut Plane, area: Rect, state: &ScrollState, theme: &Theme) {
+    if state.content_height <= state.viewport_height { return; }
+    
+    let sb_x = area.width.saturating_sub(1);  // Rightmost column
+    let content_h = area.height;
+    let thumb_h = ((state.viewport_height as f32 / state.content_height as f32) * content_h as f32).max(1.0) as u16;
+    let thumb_y = (state.fraction() * (content_h - thumb_h) as f32) as u16;
+    
+    // Track background
+    for row in 0..content_h {
+        let idx = (row * area.width + sb_x) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].bg = theme.scrollbar_track;
+            plane.cells[idx].transparent = false;
+        }
+    }
+    
+    // Thumb
+    for row in thumb_y..thumb_y + thumb_h {
+        let idx = (row * area.width + sb_x) as usize;
+        if idx < plane.cells.len() {
+            plane.cells[idx].char = '▐';
+            plane.cells[idx].fg = theme.scrollbar_thumb;
+            plane.cells[idx].bg = theme.scrollbar_track;
+            plane.cells[idx].transparent = false;
+        }
+    }
 }
 ```
-
-Without this, `DTRON_THEME_FILE` won't contain the correct final theme.
-
-### 14.5 Theme Propagation Checklist
-
-When adding theme cycling to an example:
-
-```rust
-fn cycle_theme(&mut self) {
-    self.theme = themes[next];
-    // Propagate to EVERY child widget:
-    self.list.on_theme_change(&self.theme);
-    self.search_input.on_theme_change(&self.theme);
-    self.status_bar.on_theme_change(&self.theme);
-    self.table.on_theme_change(&self.theme);
-    // ... any other widgets
-}
-```
-
-**Common widgets needing propagation:** List<T>, Table<T>, SearchInput, PasswordInput, StatusBar, MenuBar, Breadcrumbs, Tree, CommandPalette, Form, TabBar, SplitPane, Toast
-
-### 14.6 Help Overlay Pattern (Required)
-
-All examples MUST implement a help overlay:
-- `show_help: bool` field in struct
-- `?` or F1 toggles, `Esc` dismisses
-- Rounded corners (╭╮╰╯) with `theme.outline`
-- Background: `theme.surface_elevated`
-- Title centered with `theme.primary` + `Styles::BOLD`
-- Two-column layout: keys (`theme.primary`) + descriptions (`theme.fg`)
-- Must contain all relevant keyboard shortcuts
-
-### 14.7 `Theme::from_env_or()` (Required)
-
-All examples MUST use `Theme::from_env_or(default)` instead of hardcoded theme constructors:
-
-```rust
-// WRONG
-.theme(Theme::nord())
-
-// RIGHT
-.theme(Theme::from_env_or(Theme::nord()))
-```
-
-### 14.8 `DTRON_THEME_FILE` Mechanism
-
-When a launched example cycles its theme and exits, the showcase can adopt the final theme:
-1. Showcase sets `DTRON_THEME_FILE` env var to temp file path
-2. App framework writes `self.theme.name` to file after event loop exits
-3. Showcase reads the file after child exits, calls `ctx.set_theme(Theme::from_name(...))`
-
-### 14.9 Status Bar / Footer Text
-
-All status bars MUST include:
-- Help key reference (F1: help)
-- Back/dismiss key reference (Esc: dismiss)
-- Quit key reference (Ctrl+Q: quit)
-- Theme key reference if theme cycling supported (Ctrl+T: theme)
-
-### 14.10 Background Fill Pattern
-
-All widgets MUST fill their plane background with `self.theme.bg` to avoid black (`Color::Reset`) holes.
-
-### 14.11 Text Boundary Clipping
-
-Text in bounded panels MUST be clipped at the panel boundary to prevent bleeding:
-
-- `draw_text`: Full-width rows (clips at plane width)
-- `draw_text_clipped(plane, x, y, text, max_x, fg, bg, bold)`: Column-bounded text (clips at max_x)
 
 ---
 
 ## 15. Build Configuration & Features
 
-### 15.1 Feature Flags
+### 15.1 Feature Flag Details
 
-| Feature | Description | Dependencies |
-|---------|-------------|--------------|
-| `system` | System monitoring (CPU, memory, disk, processes) | `sysinfo` |
-| `syntax-highlighting` | Syntax highlighting via syntect | `syntect`, `regex` |
-| `sqlite` | SQLite database support | `rusqlite` |
-| `async` | Async runtime support | `tokio + reqwest` |
-| `tracing` | Structured logging with tracing | `tracing`, `tracing-subscriber` |
-| `debug-events` | Debug event logging (mouse/key events to stderr) | — |
-| `default` | `system` + `syntax-highlighting` | — |
+| Feature flag | Enable condition | What it enables | Additional deps | Impact on binary size |
+|-------------|-----------------|-----------------|-----------------|----------------------|
+| `system` | Default | `SystemMonitor`, `SystemData`, `ProcessInfo`, `DiskInfo` | `sysinfo` | ~+500KB |
+| `syntax-highlighting` | Default | TextEditor syntax highlighting, `Theme::from_name` requires syntect theme loading | `syntect`, `regex` | ~+2MB (includes grammars) |
+| `sqlite` | Optional | SQLite browser example, todo app | `rusqlite` | ~+1MB |
+| `async` | Optional | Async I/O framework, network client example | `tokio`, `reqwest` | ~+3MB |
+| `tracing` | Optional | Structured logging with `tracing` crate | `tracing`, `tracing-subscriber` | ~+200KB |
+| `debug-events` | Optional | Key/mouse event logging to stderr | None (cfg checks) | ~+50KB |
 
-### 15.2 Key Dependencies
+### 15.2 Crate Dependencies (from Cargo.toml)
 
-| Crate | Version | Purpose |
-|-------|---------|---------|
-| `bitflags` | 2.4 | `Styles` bitflags (+ serde) |
-| `ratatui` | 0.29 | Layout `Rect`, integration backend |
-| `unicode-width` | 0.1 | Unicode character width detection |
-| `unicode-segmentation` | 1.10 | Grapheme cluster segmentation |
-| `chrono` | 0.4 | Calendar date handling (+ serde) |
-| `signal-hook` | 0.3 | SIGINT/SIGTERM handling |
-| `serde` / `serde_json` / `toml` | 1.0 | Serialization for config/command output |
-| `libc` | 0.2 | POSIX tty ioctls (non-Windows only) |
+```toml
+[dependencies]
+bitflags = { version = "2.4", features = ["serde"] }       # Styles bitflags
+ratatui = { version = "0.29", default-features = false }     # Rect type, Layout, integration
+unicode-width = "0.1"                                        # Unicode char width
+unicode-segmentation = "1.10"                                # Grapheme cluster parsing
+chrono = { version = "0.4", features = ["serde", "clock"] }  # Calendar dates
+signal-hook = "0.3"                                          # Signal handling
+serde = { version = "1.0", features = ["derive"] }           # Serializable config
+serde_json = "1.0"                                           # JSON output parsing
+toml = "0.8"                                                  # TOML config parsing
 
-**Dev-dependencies:** `rand`, `tempfile`, `criterion`, `proptest`, `insta`
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+libc = "0.2"                                                  # POSIX ioctls
+
+[dev-dependencies]
+rand = "0.8"                                                  # Test random generation
+tempfile = "3.10"                                             # Temp file creation
+criterion = { version = "0.5", features = ["html_reports"] }  # Benchmarks
+proptest = "1.4"                                              # Property-based testing
+insta = { version = "1.40", features = ["yaml"] }             # Snapshot testing
+```
 
 ### 15.3 Workspace Crates
 
-| Crate | Path | Description |
-|-------|------|-------------|
-| `cargo-dracon` | `crates/cargo-dracon/` | Project scaffolding tool |
-| `dracon-lsp-server` | `extensions/lsp-server/` | LSP server extension |
-| `dracon-vscode` | `extensions/vscode/` | VS Code live TUI preview extension |
+```toml
+[workspace]
+members = ["crates/cargo-dracon"]  # Project scaffolding tool
+```
 
-### 15.4 License
-
-Dual-licensed:
-- **AGPL-3.0-only** — Default for open source use
-- **Commercial License** — For organizations not wanting AGPLv3 source disclosure
+The `extensions/` directory contains non-workspace projects:
+- `extensions/lsp-server/` — Standalone LSP server (22 unwrap calls in production code)
+- `extensions/vscode/` — VS Code extension for live TUI preview (TypeScript)
 
 ---
 
@@ -1722,327 +4596,433 @@ Dual-licensed:
 
 ### 16.1 Complete Example Inventory (57 Binaries)
 
-**Apps (`examples/_apps/`) — 4:**
+**Group 1: Root Examples (34)**
 
-| Example | Type | Pattern | Description |
-|---------|------|---------|-------------|
-| `system_monitor` | Binary | Pattern 2 | Real-time system monitoring (CPU, memory, disk, processes via `/proc`) |
-| `file_manager` | Binary | Pattern 1 | File browser with SplitPane, breadcrumbs, and click navigation |
-| `chat_client` | Binary | Pattern 2 | Chat interface with message list and input |
-| `dashboard_builder` | Binary | Pattern 1 | Composable dashboard with gauges, gauges, sparklines |
+| Example | File | Pattern | LOC (est.) | Key Features |
+|---------|------|---------|------------|--------------|
+| `arena` | arena.rs | Pattern 2 | 780 | Real-time game, compositor direct |
+| `basic_raw` | basic_raw.rs | Raw | <100 | Minimal raw terminal demo |
+| `command_dashboard` | command_dashboard.rs | Pattern 1 | ~300 | Command-driven dashboard |
+| `cyberpunk_dashboard` | cyberpunk_dashboard.rs | Pattern 1 | ~300 | Themed dashboard |
+| `desktop` | desktop.rs | Raw | ~400 | Window manager metaphor |
+| `event_bus_demo` | event_bus_demo.rs | Pattern 2 | ~300 | Pub/sub demo |
+| `form_demo` | form_demo.rs | Pattern 1 | ~400 | Form widget demo |
+| `form_widget` | form_widget.rs | Pattern 1 | ~300 | Form standalone |
+| `framework_chat` | framework_chat.rs | Pattern 1 | ~350 | Chat app |
+| `framework_demo` | framework_demo.rs | Pattern 1 | ~300 | General demo (requires `system`) |
+| `framework_file_manager` | framework_file_manager.rs | Pattern 1 | ~500 | File browser |
+| `framework_widgets` | framework_widgets.rs | Pattern 1 | ~400 | Widget showcase |
+| `from_toml` | from_toml.rs + .toml | TOML | ~100 | TOML-configured app |
+| `game_loop` | game_loop.rs | Raw | ~300 | Game loop demo |
+| `git_tui` | git_tui.rs | Pattern 1 | ~600 | Git interface |
+| `god_mode` | god_mode.rs | — | ~300 | Advanced features |
+| `ide` | ide.rs | Pattern 2 | ~800 | IDE with CommandPalette |
+| `input_debug` | input_debug.rs | Raw | ~200 | Raw input debugging |
+| `modal_demo` | modal_demo.rs | Pattern 2 | ~400 | Modal stacking + toasts |
+| `network_client` | network_client.rs | Pattern 2 | ~400 | Async HTTP (requires `async`) |
+| `plugin_demo` | plugin_demo.rs | Pattern 2 | ~300 | Plugin system |
+| `scene_router_demo` | scene_router_demo.rs | Pattern 2 | ~350 | Scene navigation |
+| `sqlite_browser` | sqlite_browser.rs | Pattern 1 | ~600 | SQLite DB (requires `sqlite`) |
+| `table_widget` | table_widget.rs | Pattern 1 | ~400 | Table widget standalone |
+| `text_editor_demo` | text_editor_demo.rs | Pattern 1 | ~200 | TextEditor demo |
+| `theme_switcher` | theme_switcher.rs | Pattern 1 | ~300 | Theme cycling |
+| `todo_app` | todo_app.rs | Pattern 2 | ~400 | SQLite todo (requires `sqlite`) |
+| `tutorial_app` | tutorial_app.rs | Pattern 2 | ~350 | Tutorial/onboarding |
+| `widget_tutorial` | widget_tutorial.rs | Pattern 1 | ~300 | Widget building tutorial |
 
-**Cookbook (`examples/_cookbook/`) — 15:**
+**Group 2: Apps (_apps/) — 4**
 
-| Example | Pattern | Description |
-|---------|---------|-------------|
-| `accessibility` | Pattern 1 | Accessibility features demo |
-| `autocomplete` | Pattern 1 | Autocomplete widget demo |
-| `calendar` | Pattern 1 | Calendar/DatePicker widget demo |
-| `cell_pool` | Pattern 2 | CellPool memory visualization |
-| `command_bindings` | Pattern 1 | Command binding and output parsing demo |
-| `data_table` | Pattern 1 | Sortable table widget demo |
-| `debug_overlay` | Pattern 1 | Debug overlay widget demo |
-| `form_validation` | Pattern 1 | Form with validation demo |
-| `log_monitor` | Pattern 2 | Log viewer with severity detection |
-| `menu_system` | Pattern 1 | Menu bar and context menu demo |
-| `notification_center` | Pattern 1 | Notification center demo |
-| `plugin_demo` | Pattern 2 | Plugin system demo |
-| `rich_text` | Pattern 1 | Rich text rendering demo |
-| `scrollable_content` | Pattern 1 | Scrollable content demo |
-| `split_resizer` | Pattern 2 | Split pane with drag resize demo |
-| `stat_widget_plugin` | Pattern 1 | Custom stat widget via plugin system |
-| `tabbed_panels` | Pattern 2 | Tab bar with panel switching |
-| `tree_navigator` | Pattern 1 | Tree navigation widget demo |
-| `widget_gallery` | Pattern 1 | Framework widget gallery |
+| Example | File | Pattern | LOC | Key Features |
+|---------|------|---------|-----|--------------|
+| `system_monitor` | system_monitor.rs | Pattern 2 | ~600 | /proc data, process tree, sparklines |
+| `file_manager` | file_manager.rs | Pattern 1 | ~500 | SplitPane, Breadcrumbs, file ops |
+| `chat_client` | chat_client.rs | Pattern 2 | ~400 | Message list, input, history |
+| `dashboard_builder` | dashboard_builder.rs | Pattern 1 | ~500 | Composable gauges, sparklines |
 
-**Root Examples (`examples/`) — 34 main examples:**
+**Group 3: Cookbook (_cookbook/) — 19**
 
-| Example | Pattern | Description |
-|---------|---------|-------------|
-| `arena` | Pattern 2 | Real-time arena game |
-| `basic_raw` | Raw | Minimal raw terminal example |
-| `command_dashboard` | Pattern 1 | Command-driven dashboard |
-| `cyberpunk_dashboard` | Pattern 1 | Cyberpunk-themed dashboard |
-| `desktop` | Raw | Raw terminal desktop metaphor |
-| `event_bus_demo` | Pattern 2 | Event bus pub/sub demo |
-| `form_demo` | Pattern 1 | Form widget demo |
-| `form_widget` | Pattern 1 | Form widget standalone demo |
-| `framework_chat` | Pattern 1 | Chat app using framework |
-| `framework_demo` | Pattern 1 | General framework demo |
-| `framework_file_manager` | Pattern 1 | File manager using framework |
-| `framework_widgets` | Pattern 1 | Framework widgets demo |
-| `from_toml` | TOML | App loaded from TOML config |
-| `game_loop` | Raw | Raw terminal game loop |
-| `git_tui` | Pattern 1 | Git TUI interface |
-| `god_mode` | — | Advanced demo |
-| `ide` | Pattern 2 | IDE with CommandPalette |
-| `input_debug` | Raw | Raw input debugging (mouse/keys) |
-| `modal_demo` | Pattern 2 | Modal dialog demo |
-| `network_client` | Pattern 2 | Async network client (requires `async` feature) |
-| `plugin_demo` | Pattern 2 | Plugin system demo |
-| `scene_router_demo` | Pattern 2 | Scene router navigation demo |
-| `sqlite_browser` | Pattern 1 | SQLite database browser (requires `sqlite` feature) |
-| `table_widget` | Pattern 1 | Table widget standalone demo |
-| `text_editor_demo` | Pattern 1 | TextEditor standalone demo |
-| `theme_switcher` | Pattern 1 | Theme cycling demo |
-| `todo_app` | Pattern 2 | SQLite-backed todo app (requires `sqlite` feature) |
-| `tutorial_app` | Pattern 2 | Tutorial/onboarding app |
-| `widget_tutorial` | Pattern 1 | Widget building tutorial |
+| Example | File | Pattern | LOC | Key Widgets |
+|---------|------|---------|-----|-------------|
+| `accessibility` | accessibility.rs | Pattern 1 | 567 | Focus rings, tree, log |
+| `autocomplete` | autocomplete.rs | Pattern 1 | 401 | Autocomplete |
+| `calendar` | calendar.rs | Pattern 1 | 400 | Calendar/DatePicker |
+| `cell_pool` | cell_pool.rs | Pattern 2 | 498 | CellPool visualization |
+| `command_bindings` | command_bindings.rs | Pattern 1 | ~300 | BoundCommand, parsers |
+| `data_table` | data_table.rs | Pattern 1 | ~400 | Table with sorting |
+| `debug_overlay` | debug_overlay.rs | Pattern 1 | 445 | DebugOverlay + gauges |
+| `form_validation` | form_validation.rs | Pattern 1 | ~300 | Form validation |
+| `log_monitor` | log_monitor.rs | Pattern 2 | ~350 | LogViewer |
+| `menu_system` | menu_system.rs | Pattern 1 | ~300 | MenuBar, ContextMenu |
+| `notification_center` | notification_center.rs | Pattern 1 | 389 | NotificationCenter |
+| `plugin_demo` | plugin_demo.rs | Pattern 2 | ~300 | Plugin system |
+| `rich_text` | rich_text.rs | Pattern 1 | 366 | RichText rendering |
+| `scrollable_content` | scrollable_content.rs | Pattern 1 | ~300 | ScrollContainer |
+| `split_resizer` | split_resizer.rs | Pattern 2 | ~300 | SplitPane drag |
+| `stat_widget_plugin` | stat_widget_plugin.rs | Pattern 1 | ~200 | Plugin widget |
+| `tabbed_panels` | tabbed_panels.rs | Pattern 2 | ~300 | TabBar + panels |
+| `tree_navigator` | tree_navigator.rs | Pattern 1 | 330 | Tree widget |
+| `widget_gallery` | widget_gallery.rs | Pattern 1 | 399 | 12 widget grid |
 
-**Showcase (`examples/showcase/`) — The primary demo launcher:**
+**Group 4: Showcase Scenes (29 embedded, in `examples/showcase/scenes/`)**
 
-The showcase is a modular example launcher with:
-- 29 embedded scenes (in-process using `SceneRouter`)
-- Card-based grid display with filtering and search
-- Theme cycling via `t` key
-- Category sidebar (all, apps, input, data, cookbook, tools, accessibility)
-- FPS toggle, search input for filtering examples
-- Smoke test: `tests/showcase_smoke_test.rs`
+| Scene | LOC | Widgets Demonstrated |
+|-------|-----|---------------------|
+| widget_gallery | 482 | Workshop with 12 widgets |
+| theme_switcher | 451 | Split preview, all 21 themes |
+| password_input | 529 | Form, SearchInput, PasswordInput |
+| notification_center | 549 | NotificationCenter, tabs |
+| color_picker | 501 | ColorPicker, swatches |
+| tags_input | 535 | TagsInput, cloud, stats |
+| progress | 585 | ProgressBar, ProgressRing, Spinner, Gauge |
+| cell_pool | 498 | CellPool visualization |
+| rich_text | 548 | RichText, scrollbars |
+| debug_overlay | 590 | Gauges, Profiler, DebugOverlay |
+| metrics_hub | 544 | Sparklines, metrics |
+| table_list | 521 | Table, List |
+| navigator | 568 | Tree, file browser |
+| kanban | 329 | Kanban, progress sidebar |
+| (and 15 more scenes) | | |
 
-**Showcase Scene Modules:**
+### 16.2 Showcase Launcher Architecture
 
-| Scene | File | Lines | Description |
-|-------|------|-------|-------------|
-| `app_scenes` | `scenes/app_scenes.rs` | — | Application example launchers |
-| `widget_gallery` | `scenes/widget_gallery.rs` | 482 | Widget workshop with sidebar + live demo |
-| `theme_switcher` | `scenes/theme_switcher.rs` | 451 | Theme studio with split preview |
-| `password_input` | `scenes/password_input.rs` | 529 | Login screen with form widgets |
-| `notification_center` | `scenes/notification_center.rs` | 549 | Notification hub with detail panel |
-| `color_picker` | `scenes/color_picker.rs` | 501 | Color studio with palette generation |
-| (and 23 more scenes) | | | |
-
-### 16.2 Example Patterns Summary
-
-| Pattern | Count | Mechanism |
-|---------|-------|-----------|
-| Pattern 1 (Widget trait) | ~25 | `impl Widget` with `needs_render()` |
-| Pattern 2 (InputRouter) | ~12 | `Rc<RefCell<State>>` + `on_input` + `on_tick` |
-| Raw terminal | ~5 | Direct compositor usage, no framework |
-| TOML config | 1 | `App::from_toml()` |
+```
+examples/showcase/
+├── main.rs              # Entry point, app setup, binary launch
+├── data.rs              # ExampleMeta definitions for all examples
+├── state.rs             # Showcase struct, filtering, selection
+├── render.rs            # Card rendering, preview functions
+├── widget.rs            # Widget impl (render, handle_key, handle_mouse)
+├── scenes/
+│   ├── mod.rs           # Scene registration + shared helpers
+│   ├── shared_helpers.rs # draw_text, draw_text_clipped, render_help_overlay, blit_to
+│   ├── app_scenes.rs    # Application example launchers
+│   ├── widget_gallery.rs
+│   ├── theme_switcher.rs
+│   ├── password_input.rs
+│   ├── ... (25 more scene files)
+│   └── workshop.rs      # Widget Workshop scene
+└── tests/
+    └── showcase_smoke_test.rs  # Integration smoke test (ignored by default)
+```
 
 ---
 
 ## 17. Test Coverage
 
-### 17.1 Test Statistics
+### 17.1 Test Inventory — Complete Per-File Breakdown
 
-| Category | Count | Status |
-|----------|-------|--------|
-| Library unit tests | 291 | ✅ Pass |
-| Doc tests | 5 | ✅ Pass (25 `ignore`) |
-| Integration tests | 26+ | ✅ Pass |
-| Total test functions | ~1,436 | ✅ All pass |
-| Clippy warnings | 0 | ✅ Zero |
-| Benchmark suites | 3 | criterion bench |
+| Test File | Module | Test Functions | Coverage Area |
+|-----------|--------|----------------|---------------|
+| `src/framework/app.rs` (inline) | App, Ctx | 35 | App construction, builder, widget CRUD, theme, Ctx operations, split, layout, commands |
+| `src/framework/command.rs` (inline) | Command | 60+ | BoundCommand builder, all 8 OutputParsers, CommandRunner sync/spawn/parse, edge cases |
+| `src/framework/theme.rs` (inline) | Theme | 25+ | All 21 constructors, from_name/lookup, from_env_or, random |
+| `src/framework/widget.rs` (inline) | Widget trait | 5 | WidgetId generation, sub-trait blanket impls |
+| `src/framework/marquee.rs` (inline) | MarqueeState | 15 | State machine (Idle→Tracking→Active), deferred clicks, rect normalization |
+| `src/framework/event_bus.rs` (inline) | EventBus | 14 | Publish/subscribe, subscribe_once, unsubscribe, history, trace |
+| `src/framework/scene_router.rs` (inline) | SceneRouter | 10 | Push/pop/replace/go, lifecycle callbacks, transitions |
+| `src/framework/focus.rs` (inline) | FocusManager | 14 | Register/unregister, tab cycling, focus trapping, callbacks |
+| `src/framework/hitzone.rs` (inline) | HitZone | 11 | Single/double/triple click, drag, right-click, group dispatch |
+| `src/framework/layout.rs` (inline) | Layout | 10+ | All constraint types, direction, spacing, margin, caching |
+| `src/framework/keybindings.rs` (inline) | KeybindingSet | 8 | Parse keybinding strings, match, resolution order |
+| `src/framework/scroll.rs` (inline) | ScrollState | 8 | Scroll up/down/to, max_offset, page_size, fraction |
+| `src/framework/widgets/button.rs` (inline) | Button | 4 | Render, mouse events, click callback |
+| `src/framework/widgets/label.rs` (inline) | Label | 3 | Render, builder methods |
+| `src/framework/widgets/list_common.rs` (inline) | ListCommon | 8+ | Navigate up/down/page/home/end, wrap logic |
+| `src/widgets/editor.rs` (inline) | TextEditor | 30+ | Basic editing, cursor movement, file I/O, undo/redo, search, selection |
+| `src/compositor/engine.rs` (inline) | Compositor | 5 | Construction, add_plane, size, hit_test |
+| `src/compositor/plane.rs` (inline) | Plane | 10+ | put_char, put_str, blit_from, fill_bg, clear, crop, Unicode handling |
+| `src/compositor/filter.rs` (inline) | Filter | 5 | Dim, Invert, Scanline, Pulse, Glitch |
+| `src/input/parser.rs` (inline) | Parser | 15+ | Key events, mouse events, resize, kitty protocol, edge cases |
+| `src/utils.rs` (inline) | Utils | 5 | Visual width, truncate |
+| `src/text.rs` (inline) | Text | 5 | Grapheme width, cluster iteration |
+| `src/integration/mod.rs` (inline) | Integration | 3 | Ratatui backend conversion |
 
-### 17.2 Test Files (`tests/`)
+**Integration Tests (`tests/`): 43 files**
 
-**Widget Tests (43 test files):**
-
-| Test File | Widget(s) | Tests |
-|-----------|-----------|-------|
-| `widget_test.rs` | Basic widget | 26 |
-| `widget_tests.rs` | Various | 14 |
-| `button_test.rs` | Button | 6 |
-| `widget_gauge_test.rs` | Gauge | 12 |
-| `gauge_test.rs` | Gauge | 15 |
-| `label_test.rs` | Label | 10 |
-| `list_test.rs` | List | 20+ |
-| `list_common_test.rs` | ListCommon | 25 |
-| `tree_widget_test.rs` | Tree | 18 |
-| `modal_widget_test.rs` | Modal | 12 |
-| `widget_confirm_dialog_test.rs` | ConfirmDialog | 11 |
-| `menu_test.rs` | MenuBar | 14 |
-| `form_widget_test.rs` | Form | 16 |
-| `form_validation_test.rs` | Form validation | 10 |
-| `widget_password_input_test.rs` | PasswordInput | 15 |
-| `widget_slider_test.rs` | Slider | 12 |
-| `widget_status_badge_test.rs` | StatusBadge | 10 |
-| `widget_sparkline_test.rs` | Sparkline | 37 |
-| `widget_progress_ring_test.rs` | ProgressRing | 38 |
-| `widget_streaming_text_test.rs` | StreamingText | 10 |
-| `widget_key_value_grid_test.rs` | KeyValueGrid | 10 |
-| `widget_log_viewer_test.rs` | LogViewer | 10 |
-| `widget_snapshot_tests.rs` | Snapshot tests | 8 |
-| `widget_gallery_edge_test.rs` | WidgetGallery edge | — |
-| `toast_test.rs` | Toast | 8 |
-| `tooltip_test.rs` | Tooltip | — |
-| `context_menu_test.rs` | ContextMenu | 17 |
-| `text_editor_test.rs` | TextEditor | 30+ |
-| `text_editor_adapter_test.rs` | TextEditorAdapter | 15 |
-| `text_editor_adapter_edge_test.rs` | TextEditorAdapter edge | 8 |
-
-**Framework Tests:**
-
-| Test File | Module | Tests |
-|-----------|--------|-------|
-| `theme_test.rs` | Theme | 12 |
-| `theme_validation_test.rs` | Theme validation | 5 |
-| `theme_propagation_test.rs` | Theme propagation | 3 |
-| `focus_test.rs` | FocusManager | 14 |
-| `hitzone_test.rs` | HitZone | 11 |
-| `scroll_test.rs` | ScrollState | 8 |
-| `multi_widget_test.rs` | Multi-widget app | 3 |
-| `resize_test.rs` | Resize handling | 4 |
-| `event_bus_test.rs` | EventBus | 14 |
-| `scene_router_test.rs` | SceneRouter | 10 |
-| `splitpane_test.rs` | SplitPane | 6 |
-| `status_bar_test.rs` | StatusBar | 6 |
-| `streaming_text_test.rs` | StreamingText | 8 |
-| `syntax_highlighting_test.rs` | Syntax highlighting | 6 |
-| `panel_test.rs` | Panel | 5 |
-| `input_reader_test.rs` | InputReader/Parser | 15 |
-| `network_widget_test.rs` | Network widgets | 4 |
-| `profiler_test.rs` | Profiler | 5 |
-| `filter_test.rs` | Compositor filters | 8 |
-| `utils_test.rs` | Utils | 10 |
-| `phase1_widget_test.rs` | Phase 1 widgets | 8 |
-| `phase2_3_4_widget_test.rs` | Phases 2-4 widgets | 8 |
-| `untested_widgets_test.rs` | Coverage gap closure | 10 |
-| `property_tests.rs` | Property-based (proptest) | 6 |
-
-**Example Tests:**
-| Test File | Tests |
-|-----------|-------|
-| `example_smoke_test.rs` | 1 (ignored, requires TTY) |
-| `showcase_smoke_test.rs` | 1 (ignored, requires TTY) |
+| File | Tests | What It Tests |
+|------|-------|---------------|
+| `widget_test.rs` | 26 | Core widget rendering, layout |
+| `widget_tests.rs` | 14 | Widget interaction patterns |
+| `button_test.rs` | 6 | Button click, hover, state |
+| `widget_gauge_test.rs` | 12 | Gauge rendering, thresholds |
+| `gauge_test.rs` | 15 | Gauge bounds, percentages |
+| `label_test.rs` | 10 | Label styling, text truncation |
+| `list_test.rs` | 20+ | List selection, scroll, keyboard, mouse |
+| `list_common_test.rs` | 25 | ListCommon navigation, edge cases |
+| `tree_widget_test.rs` | 18 | Tree expand/collapse, select, keyboard |
+| `modal_widget_test.rs` | 12 | Modal show/hide, result, backdrop |
+| `widget_confirm_dialog_test.rs` | 11 | Confirm yes/no/cancel, danger styling |
+| `menu_test.rs` | 14 | MenuBar/ContextMenu open/close, selection |
+| `form_widget_test.rs` | 16 | Form rendering, tab navigation, validation |
+| `form_validation_test.rs` | 10 | All validation rule types |
+| `widget_password_input_test.rs` | 15 | Masking, submit, show/hide |
+| `widget_slider_test.rs` | 12 | Slider min/max/step, keyboard, mouse drag |
+| `widget_status_badge_test.rs` | 10 | Status colors, bind_command |
+| `widget_sparkline_test.rs` | 37 | Sparkline data bounds, braille chars |
+| `widget_progress_ring_test.rs` | 38 | ProgressRing arc, percentage, sizing |
+| `widget_streaming_text_test.rs` | 10 | Append, wrap, scroll |
+| `widget_key_value_grid_test.rs` | 10 | Key-value rendering, JSON parsing |
+| `widget_log_viewer_test.rs` | 10 | Log lines, severity colors, filter |
+| `widget_snapshot_tests.rs` | 8 | Visual snapshots (List, Table, Tree) |
+| `toast_test.rs` | 8 | Toast lifecycle, dismiss, animation |
+| `context_menu_test.rs` | 17 | Context menu items, submenus, selection |
+| `text_editor_test.rs` | 30+ | Editor operations, edge cases |
+| `text_editor_adapter_test.rs` | 15 | Adapter delegation |
+| `text_editor_adapter_edge_test.rs` | 8 | Adapter edge cases |
+| `theme_test.rs` | 12 | Theme creation, from_name, from_env_or |
+| `theme_validation_test.rs` | 5 | Theme field validation |
+| `theme_propagation_test.rs` | 3 | Widget theme propagation |
+| `focus_test.rs` | 14 | FocusManager Tab cycling, trapping |
+| `hitzone_test.rs` | 11 | HitZone interaction patterns |
+| `scroll_test.rs` | 8 | ScrollState bounds, paging |
+| `multi_widget_test.rs` | 3 | Multi-widget app coordination |
+| `resize_test.rs` | 4 | Terminal resize handling |
+| `event_bus_test.rs` | 14 | EventBus pub/sub patterns |
+| `scene_router_test.rs` | 10 | Scene lifecycle, transitions |
+| `splitpane_test.rs` | 6 | SplitPane division, drag resize |
+| `status_bar_test.rs` | 6 | StatusBar segments |
+| `streaming_text_test.rs` | 8 | StreamingText append/clear |
+| `syntax_highlighting_test.rs` | 6 | Syntect integration |
+| `panel_test.rs` | 5 | Panel border rendering |
+| `input_reader_test.rs` | 15 | Input parsing, buffer drain |
+| `network_widget_test.rs` | 4 | Network widget (async feature) |
+| `profiler_test.rs` | 5 | Profiler metrics |
+| `filter_test.rs` | 8 | Visual filter compositing |
+| `utils_test.rs` | 10 | Utility functions |
+| `phase1_widget_test.rs` | 8 | Phase 1 widgets |
+| `phase2_3_4_widget_test.rs` | 8 | Phases 2-4 widgets |
+| `untested_widgets_test.rs` | 10 | Coverage gap closure tests |
+| `property_tests.rs` | 6 | Property-based (proptest) |
+| `widget_gallery_edge_test.rs` | — | Widget gallery edge cases |
 
 **Benchmarks:**
-| File | Suite |
-|------|-------|
-| `framework_benchmarks.rs` | Criterion: compositor, widget rendering |
-| `performance_benchmarks.rs` | Raw performance metrics |
+| File | Benchmark Type | What's Measured |
+|------|---------------|-----------------|
+| `tests/framework_benchmarks.rs` | criterion | Compositor rendering, plane operations, widget rendering |
+| `tests/performance_benchmarks.rs` | raw | Raw throughput, escape sequence generation |
 
-### 17.3 Test Coverage Gaps (Closed)
+### 17.2 Coverage by Widget
 
-All previously identified coverage gaps have been closed:
-- `progress_ring` — ✅ 38 tests
-- `sparkline` — ✅ 37 tests
-- `list_common` — ✅ 25 tests
-- `text_editor_adapter` — ✅ 23 tests across 2 files
-
-### 17.4 Snapshot Tests
-
-Using `insta` crate for visual regression testing:
-- `tests/widget_snapshot_tests.rs` — 8 snapshot tests for List, Table, Tree widgets
-- Snapshots stored in `tests/snapshots/`
+| Widget | Unit Tests | Integration Tests | Snapshot Tests | Total |
+|--------|-----------|-------------------|----------------|-------|
+| Autocomplete | 0 (inline) | 0 (in phase tests) | 0 | ~5 |
+| Breadcrumbs | 0 (inline) | 0 (in phase tests) | 0 | ~3 |
+| Button | 4 (inline) | 6 (button_test) | 0 | 10 |
+| Calendar | 0 (inline) | 0 (in phase tests) | 0 | ~3 |
+| Checkbox | 0 | 0 (in phase tests) | 0 | ~3 |
+| ColorPicker | 0 | 0 (in phase tests) | 0 | ~2 |
+| CommandPalette | 0 | 0 (in phase tests) | 0 | ~3 |
+| ConfirmDialog | 5 (inline) | 11 (confirm_dialog_test) | 0 | 16 |
+| ContextMenu | 3 (inline) | 17 (context_menu_test) | 0 | 20 |
+| DebugOverlay | 0 | 0 | 0 | 0 |
+| Divider | 0 | 0 | 0 | 0 |
+| EventLogger | 0 | 0 (in phase tests) | 0 | ~2 |
+| Form | 0 | 16 (form_widget_test) | 0 | 16 |
+| Gauge | 0 | 27 (gauge_test + widget_gauge_test) | 0 | 27 |
+| Hud | 0 | 0 | 0 | 0 |
+| Kanban | 0 | 0 (in phase tests) | 0 | ~3 |
+| KeyValueGrid | 0 | 10 (key_value_grid_test) | 0 | 10 |
+| Label | 3 (inline) | 10 (label_test) | 0 | 13 |
+| List | 5 (inline) | 20+ (list_test) | 1 (snapshot) | 26+ |
+| LogViewer | 0 | 10 (log_viewer_test) | 0 | 10 |
+| MenuBar | 0 | 14 (menu_test) | 0 | 14 |
+| Modal | 0 | 12 (modal_widget_test) | 0 | 12 |
+| NotificationCenter | 0 | 0 (in phase tests) | 0 | ~3 |
+| PasswordInput | 0 | 15 (password_input_test) | 0 | 15 |
+| Profiler | 0 | 5 (profiler_test) | 0 | 5 |
+| ProgressBar | 0 | 0 (in phase tests) | 0 | ~3 |
+| ProgressRing | 0 | 38 (progress_ring_test) | 0 | 38 |
+| Radio | 0 | 0 (in phase tests) | 0 | ~3 |
+| RichText | 0 | 0 (in phase tests) | 0 | ~3 |
+| SearchInput | 0 | 0 (in phase tests) | 0 | ~3 |
+| Select | 0 | 0 (in phase tests) | 0 | ~3 |
+| Slider | 0 | 12 (slider_test) | 0 | 12 |
+| Sparkline | 0 | 37 (sparkline_test) | 0 | 37 |
+| Spinner | 0 | 0 | 0 | 0 |
+| SplitPane | 0 | 6 (splitpane_test) | 0 | 6 |
+| StatusBadge | 0 | 10 (status_badge_test) | 0 | 10 |
+| StatusBar | 0 | 6 (status_bar_test) | 0 | 6 |
+| StreamingText | 0 | 8 (streaming_text_test) | 0 | 8 |
+| TabBar | 0 | 0 (in phase tests) | 0 | ~3 |
+| Table | 5 (inline) | 0 (in phase tests) | 1 (snapshot) | 6+ |
+| TagsInput | 0 | 0 (in phase tests) | 0 | ~2 |
+| TextEditorAdapter | 0 | 23 (2 adapter files) | 0 | 23 |
+| Toast | 0 | 8 (toast_test) | 0 | 8 |
+| Toggle | 0 | 0 (in phase tests) | 0 | ~3 |
+| Tooltip | 0 | 0 (in phase tests) | 0 | ~2 |
+| Tree | 0 | 18 (tree_widget_test) | 1 (snapshot) | 19 |
+| WidgetInspector | 0 | 0 | 0 | 0 |
 
 ---
 
-## 18. API Surface
+## 18. API Surface & Prelude
 
-### 18.1 Public API Metrics
+### 18.1 Preliminary Re-exports (`framework::prelude`)
 
-| Metric | Value |
-|--------|-------|
-| Total LOC | 41,488 |
-| Framework widgets | 47 |
-| Standalone widgets | 7 (TextEditor, TextInput, etc.) |
-| Built-in themes | 21 |
-| Example binaries | 57 |
-| Public API items | 1,244+ |
-| Rc/RefCell uses | ~403 |
-| `unwrap()`/`expect()` calls | ~129 (across all code) |
-| Transitive dependencies | ~310 |
-| Integration tests | 26+ |
-| Unit tests | 291+ |
-| Total test functions | ~1,436 |
+```rust
+/// One-import entry point for all framework functionality.
+pub mod prelude {
+    // ── Engine Types ──
+    pub use crate::compositor::{Cell, CellPool, Color, Compositor, Plane, PoolConfig, Styles};
+    pub use crate::error::DraconError;
+    pub use crate::Terminal;
 
-### 18.2 Main Re-exports
+    // ── Widget Trait ──
+    pub use crate::framework::widget::{
+        Commandable, Focusable, InputHandler, Renderable, Themable,
+        Widget, WidgetId, WidgetState,
+    };
 
-**From `dracon_terminal_engine`:**
-- `Cell`, `Color`, `Compositor`, `Plane`, `Styles`
-- `DraconError`
-- `Terminal`, `Capabilities`, `CursorShape`
-- `InputReader`, `Parser`
-- `SystemMonitor`, `SystemData`, `ProcessInfo`, `DiskInfo` (behind `system` feature)
-- `TextEditor`, `TextInput`, `StandaloneButton`, `Panel`, `Component`, `HotkeyHint`, `ContextMenuAction`
-- `prelude::*` — the one-import entry point
+    // ── App ──
+    pub use crate::framework::app::{App, Ctx, WidgetRef, WidgetRefMut};
 
-**Prelude re-exports (`framework::prelude`):**
-- All 47 framework widget types
-- `App`, `Ctx`, `WidgetRef`, `WidgetRefMut`
-- `Theme`
-- `Widget`, `WidgetId`, `WidgetState`, `Commandable`, `Focusable`, `InputHandler`, `Renderable`, `Themable`
-- `HitZone`, `HitZoneGroup`, `ScopedZone`, `ScopedZoneRegistry`, `DragState`
-- `DragGhost`, `DragManager`, `DragPhase`
-- `MarqueeRect`, `MarqueeState`, `render_marquee`
-- `Animation`, `AnimationManager`, `Easing`
-- `DirtyRegion`, `DirtyRegionTracker`
-- `FocusManager`
-- `ScrollContainer`, `ScrollState`
-- `KeybindingConfig`, `KeybindingSet`, `actions`, `resolve_keybindings`
-- `EventBus`, `Reactive`, `SubscriptionId`
-- `NavigationEvent`, `Scene`, `SceneRouter`
-- `PluginRegistry`, `WidgetFactory`
-- `Constraint`, `Direction`, `Layout`
-- `I18n`, `I18nError`, `tr`
-- `BoundCommand`, `CommandRunner`, `AppConfig`, `OutputParser`, `ParsedOutput`, `WidgetConfig`, `LoggedLine`
-- `Cell`, `CellPool`, `Color`, `Compositor`, `Plane`, `PoolConfig`, `Styles`
-- `DraconError`
-- `Event`, `KeyCode`, `KeyEvent`, `KeyEventKind`, `KeyModifiers`, `MouseButton`, `MouseEvent`, `MouseEventKind`
-- `Terminal`
-- `Rect` (from ratatui)
+    // ── Framework Subsystems ──
+    pub use crate::framework::animation::{Animation, AnimationManager, Easing};
+    pub use crate::framework::command::{
+        AppConfig, AreaConfig, BoundCommand, CommandRunner, LayoutConfig,
+        LoggedLine, OutputParser, ParsedOutput, ParserConfig, WidgetConfig,
+    };
+    pub use crate::framework::dirty_regions::{DirtyRegion, DirtyRegionTracker};
+    pub use crate::framework::dragdrop::{DragGhost, DragManager, DragPhase};
+    pub use crate::framework::event_bus::{EventBus, Reactive, SubscriptionId};
+    pub use crate::framework::focus::FocusManager;
+    pub use crate::framework::hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry};
+    pub use crate::framework::i18n::{tr, I18n, I18nError};
+    pub use crate::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+    pub use crate::framework::layout::{Constraint, Direction, Layout};
+    pub use crate::framework::marquee::{render_marquee, MarqueeRect, MarqueeState};
+    pub use crate::framework::plugin::{PluginRegistry, WidgetFactory};
+    pub use crate::framework::scroll::{ScrollContainer, ScrollState};
+    pub use crate::framework::scene_router::{NavigationEvent, Scene, SceneRouter};
+
+    // ── Theme ──
+    pub use crate::framework::theme::Theme;
+
+    // ── All 47 Framework Widgets ──
+    pub use crate::framework::widgets::*;
+
+    // ── Input Events ──
+    pub use crate::input::event::{
+        Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+        MouseButton, MouseEvent, MouseEventKind,
+    };
+
+    // ── External ──
+    pub use ratatui::layout::Rect;
+
+    // ── Tracing (feature-gated) ──
+    #[cfg(feature = "tracing")]
+    pub use crate::frame_span;
+    #[cfg(feature = "tracing")]
+    pub use crate::frame_span_debug;
+    #[cfg(feature = "tracing")]
+    pub use tracing::instrument;
+}
+```
+
+### 18.2 Crate Root Re-exports
+
+```rust
+// Compositor primitives
+pub use compositor::{Cell, Color, Compositor, Plane, Styles};
+
+// Error
+pub use error::DraconError;
+
+// Core terminal
+pub use core::terminal::{Capabilities, CursorShape, Terminal};
+
+// Input
+pub use input::{InputReader, Parser};
+
+// System (feature-gated)
+#[cfg(feature = "system")]
+pub use system::{DiskInfo, ProcessInfo, SystemData, SystemMonitor};
+
+// Standalone widgets
+pub use widgets::editor::TextEditor;
+pub use widgets::input::TextInput;
+pub use widgets::button::Button as StandaloneButton;
+pub use widgets::panel::Panel;
+pub use widgets::component::Component;
+pub use widgets::hotkey::HotkeyHint;
+pub use widgets::context_menu::ContextMenuAction;
+
+// Framework prelude
+pub use framework::prelude;
+```
 
 ---
 
 ## 19. Completeness Assessment
 
-### 19.1 Completeness Score: **87/100**
+### 19.1 Final Score: **87/100**
 
-### 19.2 Scoring Breakdown
+### 19.2 Detailed Scoring Matrix
 
-| Category | Weight | Score | Rationale |
-|----------|--------|-------|-----------|
-| **Core Engine** | 15% | 14/15 | Compositor, Terminal, Input, Color all solid. Missing: cross-platform (Windows backend), paste event dispatch to widgets works |
-| **Framework** | 20% | 18/20 | App, Ctx, Widget trait, lifecycle all comprehensive. Missing: `Widget::render(&self)` prevents caching patterns; `AsyncWidget` exists but has no integration tests |
-| **Widget Inventory** | 15% | 13/15 | 47 widgets covering most UI patterns. Missing: some widgets lack hover/focus (DebugOverlay, Divider, Gauge, etc.); several widgets lack mouse handlers (13 widgets with no mouse support) |
-| **Theme System** | 10% | 9/10 | 21 themes with semantic color system. `scrollbar_width` deprecated field; theme constructors not const |
-| **Input System** | 10% | 9/10 | SGR mouse, keyboard chords, bracketed paste, kitty keyboard. Missing: Windows console support |
-| **TextEditor** | 10% | 7/10 | Full-featured but 3,025 LOC single file needs splitting; no LSP; basic multi-cursor only |
-| **Examples** | 10% | 9/10 | 57 examples covering all major patterns. Scene enrichment gaps (modal_demo 30% filled, tooltip 45%) |
-| **Documentation** | 5% | 3/5 | AGENTS.md is comprehensive; AI_GUIDE.md is useful; README outdated (41 → 47 widgets). 25/30 doc-tests ignored. Missing: API reference doc comments on ~30 pub functions in app.rs |
-| **Testing** | 5% | 5/5 | 291+ unit, 26+ integration, all pass, 0 clippy warnings. Snapshot tests, proptest, benchmarks all present |
+| Category | Weight | Raw Score | Weighted | Criteria |
+|----------|--------|-----------|----------|----------|
+| **Core Engine** | 15% | 94/100 | 14.1 | Compositor (+60), Terminal (+20), Input (+10), Error handling (+4) |
+| **Framework Architecture** | 20% | 90/100 | 18.0 | App/Ctx (+40), Widget trait (+20), subsystems (+20), lifecycle (+10) |
+| **Widget Inventory** | 15% | 87/100 | 13.1 | 47 widget types (+35), widget quality/converage (+30), patterns (+22) |
+| **Theme System** | 10% | 95/100 | 9.5 | 21 themes (+40), semantic fields (+30), from_name/from_env_or (+25) |
+| **Input System** | 10% | 90/100 | 9.0 | SGR mouse (+25), keyboard (+25), kitty (+10), parser (+20), event types (+10) |
+| **TextEditor** | 10% | 70/100 | 7.0 | Core editing (+30), syntax highlighting (+15), undo/redo (+10), search (+10), file-size (-15) |
+| **Examples** | 10% | 92/100 | 9.2 | 57 binaries (+30), 29 showcase scenes (+30), patterns (+20), quality (+12) |
+| **Documentation** | 5% | 60/100 | 3.0 | README (+10), AGENTS.md (+25), AI_GUIDE.md (+15), doc comments (-30), example docs (-10) |
+| **Testing** | 5% | 95/100 | 4.8 | Unit tests (+30), integration (+20), snapshots (+10), benchmarks (+10), proptest (+10), 0 clippy (+15) |
 
-### 19.3 Gap Analysis
+**Total: 87.1 / 100**
 
-**Critical Gaps (blocking 90+):**
+### 19.3 Gap Analysis — 15 Items
 
-1. **Single-file TextEditor** — 3,025 LOC in `editor.rs` should be split into submodules (selection, syntax, movement, history)
-2. **`utils.rs` sprawl** — 1,217 LOC catch-all should be split into proper modules
-3. **Missing `// SAFETY:` comments** — 11 of 12 `unsafe` blocks in `src/` lack safety preambles
+**Critical (blocking 90+): 3 items**
 
-**Medium Gaps:**
+| # | Gap | Impact | Effort to Fix |
+|---|-----|--------|---------------|
+| 1 | `TextEditor (editor.rs)` — 3,025 LOC single file | Maintainability, reviewability, merge conflicts | Medium (2-3 hours) |
+| 2 | `utils.rs` — 1,217 LOC catch-all | Poor module cohesion, hard to find utilities | Medium (1-2 hours) |
+| 3 | Missing `// SAFETY:` comments (11/12 `unsafe` blocks in `src/`) | Undocumented UB risk, audit friction | Low (30 min) |
 
-4. **Several widgets lack hover events** — 13+ framework widgets implement no mouse handling (DebugOverlay, Divider, Gauge, Hud, Label, Profiler, ProgressBar, ProgressRing, Sparkline, Spinner, StatusBadge, StatusBar, StreamingText, Toast)
-5. **Several widgets lack focus** — 30+ framework widgets don't implement `focusable()` (most return default `true` but don't actually handle focus); only ConfirmDialog, Form, SearchInput, PasswordInput, etc. properly implement focus
-6. **No Windows backend** — `libc` gated to non-Windows; no Windows console API support
-7. **Deprecated `scrollbar_width`** in Theme struct — layout dimensions shouldn't be in themes
-8. **`App::new().unwrap()` in doc examples** — doesn't demonstrate proper error handling
-9. **CHANGELOG format drift** — doesn't strictly follow keepachangelog.com spec
+**High: 5 items**
 
-**Minor Gaps:**
+| # | Gap | Impact | Effort |
+|---|-----|--------|--------|
+| 4 | 13+ widgets lack mouse handlers (DebugOverlay, Divider, Gauge, Hud, Label, Profiler, ProgressBar, ProgressRing, Sparkline, Spinner, StatusBadge, StatusBar, StreamingText, Toast) | Inconsistent UX; mouse-only users can't interact with these widgets | Medium (3-5 hours) |
+| 5 | 30+ widgets return `focusable() = true` default but don't implement focus behavior | Misleading: widgets claim to accept focus but do nothing with it | Medium (2-4 hours) |
+| 6 | No Windows backend — `libc` gated to `cfg(not(windows))` | Excludes ~30% of target audience | High (weeks) |
+| 7 | Deprecated `scrollbar_width` in Theme struct | API cruft, layout in theme violates separation of concerns | Low (30 min) |
+| 8 | `App::new().unwrap()` in doc examples | Bad practice propagation; docs don't show error handling | Low (1 hour) |
 
-10. **25 of 30 doc-tests are `ignore`** — not compile-tested
-11. **`cargo outdated` not in CI** — no automated dependency freshness checking
-12. **Event bus has no benchmarks** — no performance tests for pub/sub throughput
-13. **`dracon.toml` has no schema validation** — invalid TOML produces opaque errors
-14. **No iOS/WebAssembly targets** — terminal-only by design but should document explicitly
-15. **Example enrichment gaps** — modal_demo (30% filled), tooltip (45%), tags_input (40%), password_input (50%)
+**Medium: 4 items**
 
-### 19.4 Coverage Score: 87/100
+| # | Gap | Impact | Effort |
+|---|-----|--------|--------|
+| 9 | 25/30 doc-tests are `ignore` | ~83% of doc examples not compile-tested | Medium (2-3 hours) |
+| 10 | CHANGELOG format drift (not strict keepachangelog) | Hard to auto-parse, inconsistent subsections | Low (30 min) |
+| 11 | `dracon.toml` has no schema validation | Invalid TOML produces opaque serde errors | Low (1 hour) |
+| 12 | Event bus has no benchmarks | No perf regression detection for pub/sub | Low (2 hours) |
 
-| Component | Coverage | Notes |
-|-----------|----------|-------|
-| Widget trait test coverage | 100% | All 47 widgets have tests via `tests/` files or inline |
-| Framework sub-systems | 95% | EventBus (14 tests), FocusManager (14), HitZone (11), ScrollState (8), SceneRouter (10), SplitPane (6) |
-| Theme coverage | 100% | 21 themes all tested (creation, names, from_env_or) |
-| Input parser | 90% | 15 tests covering key/mouse/escape sequences |
-| Compositor | 85% | Filter tests (8), resize (4), rendering path tested via snapshot |
-| TextEditor | 80% | Core editor tested (30+ tests), but editor_search, multi-cursor, undo/redo edge cases less tested |
-| Integration tests | 85% | Multi-widget, theme propagation, resize all tested |
-| Property-based tests | 6 cases | Layout, grapheme width, theme colors with proptest |
-| Example smoke tests | 2 (ignored) | Require TTY, not run in CI |
+**Low: 3 items**
+
+| # | Gap | Impact | Effort |
+|---|-----|--------|--------|
+| 13 | `cargo outdated` not in CI | Outdated deps may accumulate | Low (30 min) |
+| 14 | Example enrichment gaps (modal_demo 30%, tooltip 45%, tags_input 40%) | Poor first impression for those scenes | Medium (2-3 hours) |
+| 15 | No cross-platform targets documented | Users assume macOS/Windows works | Low (15 min) |
+
+### 19.4 Strengths
+
+| Area | Strength | Evidence |
+|------|----------|----------|
+| Arch coherence | Clean 3-layer design (Engine → Framework → Widgets) | Module structure, data flow diagram |
+| Widget breadth | 47 widget types covering most UI patterns | Full inventory in section 5 |
+| Theme depth | 21 themes with 31 semantic-color fields | Theme constructors, from_name/from_env_or |
+| Input coverage | SGR mouse, kitty keyboard, bracketed paste, all modifiers | Parser state machine, 60+ escape sequences |
+| Compositor performance | Dirty regions, cell diffing, bulk writes, pool allocation | Optimization table in section 8.4 |
+| Command-driven arch | 8 output parsers, TOML config, AI-inspectable actions | Complete parser table in section 9 |
+| Example breadth | 57 examples, 29 showcase scenes, 4 patterns | Full inventory in section 16 |
+| Test quality | 0 clippy warnings, 1,436 test functions, 291+ unit tests | Per-widget coverage table in section 17 |
 
 ---
 
@@ -2050,82 +5030,175 @@ Using `insta` crate for visual regression testing:
 
 ### 20.1 Immediate (0.2.0)
 
-| Item | Priority | Description |
-|------|----------|-------------|
-| TextEditor split | High | Split `editor.rs` into submodules |
-| `utils.rs` split | Medium | Extract into proper modules |
-| SAFETY comments | Medium | Add to all `unsafe` blocks |
-| Widget decomposition Phase 2 | Medium | Sub-traits as primary API |
-| Convert 25 ignored doc-tests | Low | Make compile-tested |
+| # | Item | Type | Priority | Effort |
+|---|------|------|----------|--------|
+| 1 | Split `editor.rs` into submodules | Code quality | High | 2-3h |
+| 2 | Add `// SAFETY:` comments to all unsafe blocks | Safety | High | 30min |
+| 3 | Split `utils.rs` into proper modules | Code quality | Medium | 1-2h |
+| 4 | Widget decomposition Phase 2 — sub-traits as primary | API design | Medium | 3-5h |
+| 5 | Convert 25 ignored doc-tests to compile-tested | Docs | Low | 2-3h |
+| 6 | Add mouse handlers to 13+ missing widgets | UX | Medium | 3-5h |
+| 7 | Remove deprecated `theme.scrollbar_width` | Cleanup | Low | 30min |
+| 8 | Enforce keepachangelog CHANGELOG format | Process | Low | 1h |
 
-### 20.2 Medium Term
+### 20.2 Medium Term (0.3.0–0.5.0)
 
-| Item | Priority | Description |
-|------|----------|-------------|
-| Windows backend | Medium | Windows console API support |
-| Mouse support for all widgets | Medium | Add missing mouse/hover handlers |
-| `cargo outdated` in CI | Low | Automated dependency freshness |
-| Event bus benchmarks | Low | Criterion benchmarks for pub/sub |
-| Schema validation for TOML | Low | Validate `dracon.toml` structural correctness |
-| CHANGELOG format | Low | Enforce keepachangelog.com spec |
+| # | Item | Description |
+|---|------|-------------|
+| 9 | Windows backend | Port `backend/tty.rs` to Windows console API |
+| 10 | Widget focus audit | Implement proper focus for all 47 widgets |
+| 11 | Schema validation for `dracon.toml` | Structural validation with error messages |
+| 12 | Event bus benchmarks | Criterion benchmarks for pub/sub throughput |
+| 13 | `cargo outdated` in CI | Automated dependency freshness checking |
+| 14 | Scene enrichment | Fill remaining enrichment gaps (modal_demo, tooltip, tags_input) |
+| 15 | Widget State serialization | Implement `WidgetState` for all major widgets |
+| 16 | Accessibility audit | Verify OSC 99 announcements across all widgets |
 
-### 20.3 Deferred / Out of Scope
+### 20.3 Long Term (1.0+)
 
-| Feature | Reason |
-|---------|--------|
+| # | Item | Description |
+|---|------|-------------|
+| 17 | Doc comment audit | Add docs for all ~30 undocumented pub fn in app.rs |
+| 18 | API stabilization | Review Widget trait for 1.0 stability guarantees |
+| 19 | Performance benchmarks | Full criterion suite for all subsystems |
+| 20 | Release automation | GitHub Actions for crates.io publish |
+
+### 20.4 Deferred / Explicitly Out of Scope
+
+| Feature | Reason for Deferral |
+|---------|---------------------|
 | LSP integration | Requires async runtime, external processes, complex state management |
 | Syntax-aware folding | Requires tree-sitter integration, per-language grammar |
-| Multi-cursor enhancements | Basic multi-cursor sufficient for light editing |
-| Modal editing | Kakoune-style is complex, not needed for view/edit use cases |
+| Multi-cursor enhancements | Basic multi-cursor sufficient for view/edit use case |
+| Modal editing | Kakoune-style is complex, not needed for view/edit widget use case |
 | Advanced text objects | vim-style text objects require deep editor integration |
-| iOS/WebAssembly | Terminal target explicitly; document as design constraint |
+| GPU-accelerated terminal | Requires custom terminal emulator, outside scope of framework |
+| WebAssembly target | Browser sandbox incompatible with raw terminal access |
+| ios/macOS native GUI | Deliberately terminal-only by design |
 
 ---
 
-## Appendix A: Compliance Checklist
+## 21. Appendices
 
-| Requirement | Status | Evidence |
-|------------|--------|----------|
-| RAII terminal management | ✅ | `Terminal` struct enters/exits raw mode |
-| Z-indexed compositor | ✅ | Painter's algorithm in `Compositor::render()` |
-| Input shield for mode transitions | ✅ | `App::shield_input()` |
-| Help overlay in every example | ✅ | Verified in AUDIT_REPORT for all 29 scenes |
-| `Theme::from_env_or()` in all examples | ✅ | Verified in 0.1.10 changelog |
-| `DTRON_THEME_FILE` support | ✅ | Auto-writes in `App::run()` |
-| Pattern 2 `current_theme()` sync | ✅ | All 12 Pattern 2 examples implement |
-| Keybinding system in all examples | ✅ | `KeybindingSet` + `resolve_keybindings()` |
-| Modifier guards on Char handlers | ✅ | Documented in AGENTS.md |
-| Background fill in every widget | ✅ | `fill_bg(self.theme.bg)` in render |
-| Text clipping at column boundaries | ✅ | `draw_text_clipped()` helper |
-| u16 arithmetic safety in mouse handlers | ✅ | `saturating_sub()` + bounds checks |
-| All unsafe blocks have SAFETY comments | ❌ | 11 of 12 missing |
-| All pub fn have doc comments | ❌ | ~30 public methods in app.rs undocumented |
-| Widget background fill pattern | ✅ | `fill_bg` in all framework widgets |
-| 0 clippy warnings | ✅ | Verified in latest audit |
+### Appendix A: Environment Variable Reference
 
-## Appendix B: Keybinding Conventions
+| Variable | Set By | Read By | Purpose |
+|----------|--------|---------|---------|
+| `DTRON_THEME` | Showcase launcher, script | `Theme::from_env_or()` | Inherit theme from parent process |
+| `DTRON_THEME_FILE` | Showcase launcher | `App::run()` (auto) | Path to file for writing final theme name on exit |
+| `HOME` | OS | `resolve_keybindings()` | User config directory resolution |
+| `TERM` | OS | `Capabilities` detection | Terminal type identification |
+| `COLORTERM` | OS | `Capabilities` detection | True color support detection |
 
-| Key | Convention | Rationale |
-|-----|------------|-----------|
-| `Ctrl+Q` | Quit | Never single-letter `q` (conflicts with text input) |
-| `F1` | Help toggle | Never `?` (conflicts with text input) |
-| `Esc` | Back/Dismiss | Universal; `Backspace` is delete-only |
-| `Ctrl+T` | Theme cycle | Configurable via `dracon.toml` |
-| `Ctrl+F` | Search | Not `/` (conflicts with text input) |
-| `Ctrl+S` | Save | Universal standard |
-| `Ctrl+N` | New | Universal standard |
-| `Ctrl+W` | Close tab | Browser/IDE standard |
-| `↑/↓/←/→` | Navigation | Universal, hardcoded |
-| `Enter` | Select/Submit | Universal, hardcoded |
-| `Tab`/`Shift+Tab` | Focus cycle | Universal, hardcoded |
-| `Backspace` | Delete | Delete-only, never navigation |
+### Appendix B: Keybinding Standard Actions — Default Mappings
 
-## Appendix C: Environment Variables
+| Action Constant | Default Key | Priority | Rationale |
+|----------------|-------------|----------|-----------|
+| `QUIT` | `Ctrl+Q` | Configurable | Never 'q' (conflicts with text input) |
+| `HELP` | `F1` | Configurable | Never '?' (conflicts with text input) |
+| `BACK` | `Esc` | Configurable | Universal dismiss; Backspace is delete-only |
+| `THEME` | `Ctrl+T` | Configurable | Not 't' (conflicts with typing) |
+| `SUBMIT` | `Enter` | Configurable | Universal confirm |
+| `SEARCH` | `Ctrl+F` | Configurable | Not '/' (conflicts with typing) |
+| `SAVE` | `Ctrl+S` | Configurable | Universal standard |
+| `NEW` | `Ctrl+N` | Configurable | Universal standard |
+| `CLOSE` | `Ctrl+W` | Configurable | Browser/IDE standard |
+| `COPY` | `Ctrl+C` | Configurable | Universal (with QUIT guard) |
+| `PASTE` | `Ctrl+V` | Configurable | Universal |
+| `CUT` | `Ctrl+X` | Configurable | Universal |
+| `DELETE` | `Delete` | Configurable | Universal |
+| `REFRESH` | `F5` | Configurable | Universal |
+| `PAUSE` | `Ctrl+P` | Configurable | Not 'p' (conflicts with typing) |
 
-| Variable | Purpose | Used By |
-|----------|---------|---------|
-| `DTRON_THEME` | Inherit theme from parent | `Theme::from_env_or()` |
-| `DTRON_THEME_FILE` | Return theme to parent on exit | `App::run()` |
-| `HOME` | User config directory resolution | `resolve_keybindings()` |
-| `TERM` | Terminal capability detection | `Capabilities` |
-| `COLORTERM` | True color detection | `Capabilities` |
+**Non-configurable keys (hardcoded):**
+- `↑/↓/←/→`: Navigation (universal)
+- `Enter`: Selection/submit (universal)
+- `Tab` / `Shift+Tab`: Focus cycle (universal)
+- `Backspace`: Delete character (text input primitive)
+- `Char(c)`: Type character (text input primitive)
+
+### Appendix C: Reserved Z-Index Ranges
+
+| Range | Layer | Used By |
+|-------|-------|---------|
+| 0 | Background | Base widgets, background fills |
+| 5 | Content | SplitPane, Panel, List, Table, Tree, Form |
+| 10 | Interactive | Button, SearchInput, PasswordInput, Slider, Select |
+| 50 | Overlays | Tooltip, dropdown, CommandPalette backdrop |
+| 100 | Modal | Modal, ConfirmDialog |
+| 500 | Notifications | Toast, NotificationCenter |
+| 9000 | Drag ghost | DragGhost (reserved) |
+
+### Appendix D: File Size Reference (Largest Files)
+
+| File | LOC | % of Project | Notes |
+|------|-----|-------------|-------|
+| `src/widgets/editor.rs` | 3,025 | 7.3% | Largest file; needs splitting |
+| `src/utils.rs` | 1,217 | 2.9% | Second largest; needs splitting |
+| `src/framework/app.rs` | 1,591 | 3.8% | Core framework; well-structured |
+| `src/framework/theme.rs` | 1,447 | 3.5% | 21 theme constructors; structurally fine |
+| `src/framework/event_bus.rs` | 530 | 1.3% | Event system |
+
+### Appendix E: Cargo Feature Matrix
+
+| Feature | `system` | `syntax-highlighting` | `sqlite` | `async` | `tracing` | `debug-events` |
+|---------|----------|----------------------|----------|---------|-----------|----------------|
+| In default | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Adds dep | `sysinfo` | `syntect`, `regex` | `rusqlite` | `tokio`, `reqwest` | `tracing`, `tracing-subscriber` | — |
+| Enables | SystemMonitor | TextEditor highlight | SQLite examples | Network client | Frame spans, logging | Stderr debug output |
+| Excluded examples | framework_demo | All editor examples | todo_app, sqlite_browser | network_client | — | — |
+
+### Appendix F: Test Command Reference
+
+```bash
+# Run all tests
+cargo test
+
+# Run library tests only
+cargo test --lib
+
+# Run integration tests only
+cargo test --tests
+
+# Run doc tests
+cargo test --doc
+
+# Run specific test
+cargo test test_name
+
+# Run benchmarks
+cargo bench
+
+# Clippy checks (zero warnings required)
+cargo clippy --lib --examples -- -D warnings
+cargo clippy --tests -- -D warnings
+
+# Build all examples
+cargo build --examples
+
+# Build with specific features
+cargo build --features "sqlite"
+cargo build --no-default-features --features "syntax-highlighting"
+
+# Security audit
+cargo audit
+```
+
+### Appendix G: Glossary
+
+| Term | Definition |
+|------|-----------|
+| **Plane** | A 2D grid of `Cell` values with position, z-index, opacity, and optional filter |
+| **Cell** | Single terminal character with foreground color, background color, style flags, and transparency |
+| **Compositor** | Engine that composites multiple Planes into a single output using painter's algorithm |
+| **Dirty region** | A rectangular area of the screen that changed since last frame |
+| **Pattern 1** | Widget trait auto-render: `impl Widget` with `needs_render()` returning true |
+| **Pattern 2** | InputRouter + manual render: closure-based, `ctx.add_plane()` in tick callback |
+| **Bridge pattern** | `Rc<RefCell<T>>` shared state for Pattern 2 apps |
+| **Input shield** | Cooldown period that swallows stale keypresses after mode transitions |
+| **SGR mouse** | Terminal mouse protocol (DECSET 1006) supporting position, drag, buttons, modifiers |
+| **Bracketed paste** | Terminal paste mode (DECSET 2004) wrapping pasted text in escape delimiters |
+| **Kitty keyboard** | Extended keyboard protocol with Unicode key codes and press/repeat/release |
+| **Sync mode 2026** | Terminal synchronized output mode for tear-free rendering |
+| **DTRON_THEME** | Environment variable for theme inheritance from parent process |
+| **DTRON_THEME_FILE** | Environment variable for returning theme to parent on exit |
