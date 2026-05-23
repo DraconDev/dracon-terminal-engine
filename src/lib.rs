@@ -5,7 +5,7 @@
 //!
 //! ## Quick Start
 //!
-//! ```ignore
+//! ```no_run
 //! // Pattern 1 — Widget trait (auto-render)
 //! use dracon_terminal_engine::prelude::*;
 //!
@@ -31,7 +31,7 @@
 //!         .on_tick(|ctx, _tick| {
 //!             ctx.add_plane(Plane::new(0, 80, 24)); // render here
 //!         })
-//!         .run()?;  // run() already returns Result<()>
+//!     .run(|_| {});  // render handled in on_tick above
 //!     Ok(())
 //! }
 //! ```
