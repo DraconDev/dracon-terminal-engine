@@ -439,18 +439,7 @@ impl App {
         self
     }
 
-    /// Sets the UI theme.
-    pub fn theme(mut self, theme: Theme) -> Self {
-        self.compositor.set_clear_color(theme.bg);
-        self.theme = theme;
-        for widget in self.widgets.borrow_mut().iter_mut() {
-            widget.on_theme_change(&self.theme);
-        }
-        self
-    }
-
     /// Sets the UI theme and propagates it to all registered widgets.
-    /// Sets the active theme and propagates it to all registered widgets.
     ///
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual

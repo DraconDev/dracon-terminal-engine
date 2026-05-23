@@ -163,9 +163,20 @@ impl I18n {
     ///
     /// Replaces `{placeholder}` in the translation string with provided values.
     ///
-    /// ```ignore
-    /// let text = i18n.t_interpolate("items_count", &[("count", "5")]);
-    /// // If "items_count" is "{count} items", returns "5 items"
+    /// ```no_run
+    /// use dracon_terminal_engine::framework::i18n::I18n;
+    ///
+    /// let mut i18n = I18n::new("en");
+    /// i18n.add("greeting", "Hello, {name}!");
+    /// i18n.add("items_count", "{count} items");
+    ///
+    /// // Simple translation
+    /// let greeting = i18n.t("greeting");
+    /// // -> "Hello, {name}!"
+    ///
+    /// // Interpolate variables
+    /// let msg = i18n.t_interpolate("items_count", &[("count", "5")]);
+    /// // -> "5 items"
     /// ```
     pub fn t_interpolate(&self, key: &str, vars: &[(&str, &str)]) -> String {
         let template = self.t(key).into_owned();
