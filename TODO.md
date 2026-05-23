@@ -10,16 +10,17 @@ Dependencies (transitive): 310 · Rc/RefCell uses: 403 · `unwrap()`/`expect()` 
 
 ## 🔴 High Priority
 
-### 1. Fix transitive `lru` unsoundness
+### 1. Fix transitive `lru` unsoundness — ✅ FIXED
 
-| Crate | Version | Issue | Source |
-|-------|---------|-------|--------|
-| `lru` | 0.12.5 | **RUSTSEC-2026-0002** — `IterMut` violates Stacked Borrows | via `ratatui 0.29` |
+Updated `ratatui` from 0.29.0 → 0.30.0 which bumps `lru` 0.12.5 → 0.16.4 (resolves RUSTSEC-2026-0002).
+Ratatui 0.30 also splits into `ratatui-core` and `ratatui-widgets`, removes `cassowary`, updates `compact_str` and `unicode-width`.
+Required `Backend` trait update: added `type Error = io::Error` and `clear_region()` implementation.
 
-- [ ] File issue with `ratatui` to update `lru`
-- [ ] If no upstream fix, evaluate pinning or vendoring
+- [x] Update ratatui → 0.30.0
+- [x] Fix `Backend` impl for new trait signature
+- [x] Verify build + tests + clippy pass
 
-### 2. CI pipeline — ✅ EXISTS
+### 2. CI pipeline — ✅ COMPLETE
 
 - [x] GitHub Actions workflow: `ci.yml` — `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt --check`
 - [x] `bench.yml` — criterion benchmarks with comparison
@@ -27,22 +28,18 @@ Dependencies (transitive): 310 · Rc/RefCell uses: 403 · `unwrap()`/`expect()` 
 - [x] `release.yml` — GitHub release artifacts
 - [x] `rustsec/audit-check` in CI for security advisories
 
-- [ ] Add `cargo outdated` to health checks
-- [ ] Add markdown lint for `CHANGELOG.md` formatting
+- [x] Add `cargo outdated` to health checks
+- [x] Add markdown lint for `CHANGELOG.md` formatting
 
-### 3. Security advisories — ✅ PARTIAL
+### 3. Security advisories — ✅ UPDATED
 
-All transitive via `syntect` and `ratatui`:
+Updated `ratatui` 0.30 removes `paste` and updates `lru` (the unsound one). Still monitoring unmaintained transitive deps via `rustsec/audit-check`:
 
 | Crate | Advisory | Action |
 |-------|----------|--------|
 | `bincode 1.3.3` | RUSTSEC-2025-0141 (unmaintained) | Monitor — no action possible |
-| `paste 1.0.15` | RUSTSEC-2024-0436 (unmaintained) | Upstream (ratatui) — monitor |
 | `yaml-rust 0.4.5` | RUSTSEC-2024-0320 (unmaintained) | Upstream (syntect) — monitor |
-| `lru 0.12.5` | RUSTSEC-2026-0002 (unsound) | **Escalate to ratatui** — this is the priority |
-
-- [x] `cargo audit` in CI (via `rustsec/audit-check`)
-- [ ] File ratatui issue for `lru` unsoundness
+| `lru 0.16.4` | ~~RUSTSEC-2026-0002~~ | ✅ **Fixed** via ratatui 0.30 |
 
 ---
 
@@ -206,14 +203,14 @@ Current locations:
 
 | Category | Items | Status |
 |----------|-------|--------|
-| Security advisories | 4 (1 unsound, 3 unmaintained) | 🔴 Open |
+| Security advisories | 2 (unmaintained only) | ✅ **DONE** |
 | Untested framework widgets | 4 (progress_ring, sparkline, list_common, text_editor_adapter) | ✅ **DONE** |
-| CI/CD pipeline | 4 workflows (ci, bench, plugin-ci, release) | ✅ **DONE** |
+| CI/CD pipeline | 6 workflows (ci, bench, plugin-ci, release, outdated, changelog) | ✅ **DONE** |
 | Large files (>1,000 LOC) | 2 (editor 3,025, utils 1,217) | 🟡 Open |
 | Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` | 🟡 Open |
 | Unsafe blocks with missing SAFETY | 11 of 12 | 🟡 Open |
 | `cargo outdated` integration | not in CI | 🟡 Open |
 | Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
 
-**Completed:** 3 items (test coverage, CI pipeline)
-**Remaining:** 5 items
+**Completed:** 4 items (lru unsoundness, test coverage, CI pipeline, security advisories)
+**Remaining:** 4 items

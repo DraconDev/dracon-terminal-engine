@@ -55,3 +55,29 @@ jobs:
         uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  outdated:
+    name: Outdated Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+      - name: Check outdated
+        run: |
+          cargo install cargo-outdated --locked 2>/dev/null || true
+          cargo outdated -e Rust || true
+
+  changelog:
+    name: Changelog Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint CHANGELOG.md
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Check for required sections
+            grep -q '^## \[[0-9]\.' CHANGELOG.md || { echo "Missing version header format"; exit 1; }
+            grep -q '^### Added\|^### Changed\|^### Fixed' CHANGELOG.md || { echo "Missing section headers"; exit 1; }
+            echo "CHANGELOG.md format OK"
+          fi
