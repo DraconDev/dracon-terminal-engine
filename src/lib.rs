@@ -6,10 +6,12 @@
 //! ## Quick Start
 //!
 //! ```no_run
-//! // Pattern 1 — Widget trait (auto-render)
 //! use dracon_terminal_engine::prelude::*;
+//! use ratatui::layout::Rect;
 //!
+//! // Pattern 1 — Widget trait (auto-render)
 //! struct MyApp { theme: Theme }
+//!
 //! impl Widget for MyApp {
 //!     fn id(&self) -> WidgetId { WidgetId::new(0) }
 //!     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
@@ -24,15 +26,14 @@
 //! }
 //!
 //! // Pattern 2 — Closure-based (manual render)
-//! // App::new() can fail if the terminal cannot be initialized.
 //! fn main() -> std::io::Result<()> {
+//!     // App::new() can fail if the terminal cannot be initialized.
 //!     let mut app = App::new()?;
 //!     app.title("My App")
 //!         .on_tick(|ctx, _tick| {
 //!             ctx.add_plane(Plane::new(0, 80, 24)); // render here
 //!         })
-//!         .run(|_| {});  // render handled in on_tick
-//!     Ok(())
+//!         .run(|_| {})
 //! }
 //! ```
 //!

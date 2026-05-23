@@ -10,16 +10,34 @@
 //! use dracon_terminal_engine::framework::widget::Widget;
 //! use ratatui::layout::Rect;
 //!
-//! // App::new() can fail if the terminal cannot be initialized.
-//! let mut app = App::new()?;
-//! app.title("My App")
-//!     .fps(30)
-//!     .run(|ctx| {
-//!         let (w, h) = ctx.compositor().size();
-//!         let area = Rect::new(0, 0, w, h);
-//!         let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
-//!         ctx.add_plane(list.render(area));
-//!     });
+//! struct MyWidget { theme: Theme }
+//!
+//! impl Widget for MyWidget {
+//!     fn id(&self) -> WidgetId { WidgetId::new(0) }
+//!     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+//!     fn set_area(&mut self, _: Rect) {}
+//!     fn needs_render(&self) -> bool { true }
+//!     fn render(&self, area: Rect) -> Plane {
+//!         let mut p = Plane::new(0, area.width, area.height);
+//!         p.fill_bg(self.theme.bg);
+//!         p
+//!     }
+//! }
+//!
+//! fn main() -> std::io::Result<()> {
+//!     // App::new() can fail if the terminal cannot be initialized.
+//!     let mut app = App::new()?;
+//!     app.title("My App")
+//!         .fps(30)
+//!         .on_tick(|ctx, _tick| {
+//!             let (w, h) = ctx.compositor().size();
+//!             let area = Rect::new(0, 0, w, h);
+//!             let list = List::new(vec!["Item 1", "Item 2", "Item 3"]);
+//!             ctx.add_plane(list.render(area));
+//!         })
+//!         .run(|_| {});
+//!     Ok(())
+//! }
 //! ```
 
 pub mod animation;
