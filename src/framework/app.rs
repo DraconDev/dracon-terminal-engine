@@ -549,13 +549,41 @@ impl App {
     ///
     /// # Example
     ///
-    /// ```ignore
-    /// let app = Rc::new(RefCell::new(MyApp::new()));
-    /// let app_clone = app.clone();
-    /// App::new()?
-    ///     .on_input(move |key| app_clone.borrow_mut().handle_key(key))
-    ///     .on_tick(move |ctx, tick| { /* render via ctx.add_plane() */ })
-    ///     .run(|_| {});
+    /// ```no_run
+    /// use dracon_terminal_engine::prelude::*;
+    /// use ratatui::layout::Rect;
+    ///
+    /// struct Counter { count: u64 }
+    ///
+    /// impl Widget for Counter {
+    ///     fn id(&self) -> WidgetId { WidgetId::new(0) }
+    ///     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    ///     fn set_area(&mut self, _: Rect) {}
+    ///     fn needs_render(&self) -> bool { true }
+    ///     fn render(&self, area: Rect) -> Plane {
+    ///         let mut p = Plane::new(0, area.width, area.height);
+    ///         p.fill_bg(Theme::default().bg);
+    ///         p.put_str(0, 0, &format!("Count: {}", self.count));
+    ///         p
+    ///     }
+    /// }
+    ///
+    /// fn main() -> std::io::Result<()> {
+    ///     let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
+    ///     let app_clone = app.clone();
+    ///     App::new()?
+    ///         .on_input(move |key| {
+    ///             // Handle key events here
+    ///             app_clone.borrow_mut().count += 1;
+    ///             true  // event handled
+    ///         })
+    ///         .on_tick(move |ctx, _tick| {
+    ///             let (w, h) = ctx.compositor().size();
+    ///             ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
+    ///         })
+    ///         .run(|_| {});
+    ///     Ok(())
+    /// }
     /// ```
     pub fn on_input<F>(mut self, handler: F) -> Self
     where
