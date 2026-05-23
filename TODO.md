@@ -129,7 +129,7 @@ The `BaseInput` widget has decent coverage (26 tests) but no integration tests i
 
 ### 13. Code organization
 
-- [ ] Move `src/compositor/size_test.rs` into `tests/` — it's a standalone size check, not a module
+- [x] Move `src/compositor/size_test.rs` into `tests/` — standalone size check moved to `tests/compositor_size_test.rs`
 - [ ] Remove `src/input/mapping.rs` — contains a deprecated identity function (`UiEvent` → `Event`)
 - [ ] Consider extracting `src/framework/prelude` into a standalone `prelude.rs` file
 
@@ -211,5 +211,5 @@ Current locations:
 | `cargo outdated` integration | now in CI | ✅ **DONE** |
 | Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
 
-**Completed:** 6 items (lru fix, test coverage, CI pipeline, security advisories, editor split documented, App::new() docs)
-**Remaining:** 2 items (utils split, low priority)
+**Completed:** 7 items (lru fix, test coverage, CI pipeline, security advisories, editor split documented, App::new() docs, size_test moved)
+**Remaining:** 1 item (utils split) + 11 low priority items

@@ -1,49 +1,30 @@
 # Ralph Loop State — todo-fix
 
 **Started:** 2026-05-23
-**Last updated:** 2026-05-23
+**Last updated:** 2026-05-23 (iteration 5)
 
-## Iteration 5 Reflection — PIVOTING
+## Completed items this session:
+- ✅ App::new().unwrap() doc examples fixed (lib.rs + framework/mod.rs)
+- ✅ Moved size_test.rs → tests/compositor_size_test.rs
 
-### What was accomplished:
-1. ✅ High priority items 1-3 complete
-2. ✅ editor.rs split documented as impractical (same problem as before)
-3. ✅ App::new().unwrap() docs fixed
-4. ⏸️ utils.rs split — same coupling problem detected
+## Total Completed:
+1. lru unsoundness fix ✅
+2. CI pipeline ✅
+3. Security advisories ✅
+4. editor.rs split documented as impractical ✅
+5. App::new().unwrap() docs ✅
+6. Test coverage gaps ✅
+7. size_test.rs moved to tests/ ✅
 
-### What's not working:
-- Trying to split files that are monoliths by architecture, not just by size
-- Both editor.rs AND utils.rs have the same pattern: many small functions that all call each other
-- The "extractable subset" approach doesn't work when everything is cross-referenced
+## What was learned:
+- Both editor.rs AND utils.rs are tightly coupled monoliths by architecture
+- The "extractable subset" approach fails when everything calls everything
+- Best strategy: focus on standalone improvements (docs, moving files, small additions)
 
-### PIVOT APPROACH:
-Stop fighting the monolith. Focus on achievable items that don't require restructuring.
+## Remaining:
+- utils.rs split — SKIP (same tight coupling)
+- Low priority items — pick 1-2 quick wins
 
-## Revised Priority List:
-
-### ✅ COMPLETED (6 items):
-1. lru unsoundness fix (ratatui 0.30, lru 0.16.4)
-2. CI pipeline (outdated + changelog jobs)
-3. Security advisories table updated
-4. editor.rs split documented as impractical
-5. App::new().unwrap() doc examples fixed
-6. Test coverage gaps (done in prior session)
-
-### 🟢 Achievable quick wins remaining:
-- [ ] "Add compile-tested doc-examples" for App::on_input, App::on_tick, App::run
-- [ ] "Add example for MarqueeState usage" 
-- [ ] "Move src/compositor/size_test.rs into tests/"
-- [ ] "Remove src/input/mapping.rs" (deprecated)
-
-### ❌ Skip (architecture issues):
-- editor.rs split — tightly coupled monolith
-- utils.rs split — tightly coupled catch-all
-- lsp-server unwrap cleanup (22 unwraps, needs context)
-
-## Success Criteria
-- [x] lru issue documented ✅
-- [x] cargo outdated runs in CI ✅
-- [x] Markdown lint added to CI workflow ✅
-- [x] All changes made ✅
-- [x] App::new().unwrap() doc fix ✅
-- [ ] Quick win: pick ONE low-priority item to complete
+## Reflection: PRAGMATISM WINS
+Stop trying to split monoliths. Document the architectural reality and move on.
+Small wins (doc fixes, moving files) are still progress.
