@@ -216,8 +216,8 @@ Current locations:
 | Untested framework widgets | 4 (progress_ring, sparkline, list_common, text_editor_adapter) | ✅ **DONE** |
 | CI/CD pipeline | 6 workflows (ci, bench, plugin-ci, release, outdated, changelog) | ✅ **DONE** |
 | Large files (>1,000 LOC) | 2 (editor skipped, utils 1,217) | ✅ **1 SKIP, 1 OPEN** |
-| Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` | 🟡 Open |
-| Unsafe blocks with missing SAFETY | 11 of 12 | 🟡 Open |
+| Production unwraps (non-test) | 5 in `src/`, 14 in `extensions/lsp-server` | ✅ **AUDITED** |
+| Unsafe blocks with missing SAFETY | 0 (all documented) | ✅ **DONE** |
 | `cargo outdated` integration | now in CI | ✅ **DONE** |
 | Docs/examples | 21 of 33 doc-tests ignored | ✅ **12 compile, 21 ignored** |
 

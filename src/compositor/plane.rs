@@ -193,11 +193,17 @@ impl Plane {
                 break;
             }
 
+            // SAFETY: `byte_offset` is guaranteed to be on a valid UTF-8 char boundary
+            // because it starts at 0 and is advanced only by `char_len` from previous
+            // `next_char_unchecked` calls.
             let (c, char_len) = unsafe { next_char_unchecked(bytes, byte_offset) };
 
             if matches!(c, '\u{1F1E6}'..='\u{1F1FF}') {
                 let next_offset = byte_offset + char_len;
                 if next_offset < bytes.len() {
+                    // SAFETY: `next_offset` is guaranteed to be on a valid UTF-8 char boundary
+                    // because it equals `byte_offset + char_len` where `char_len` is the byte
+                    // length of the preceding character.
                     let (next_c, next_len) = unsafe { next_char_unchecked(bytes, next_offset) };
                     if matches!(next_c, '\u{1F1E6}'..='\u{1F1FF}') {
                         if x + 1 >= self.width {
@@ -273,6 +279,9 @@ impl Plane {
         pos += char_len;
 
         while pos < bytes.len() {
+            // SAFETY: `pos` is guaranteed to be on a valid UTF-8 char boundary because
+            // it starts at `byte_offset + char_len` and is advanced only by `next_len`
+            // from previous `next_char_unchecked` calls.
             let (next_c, next_len) = unsafe { next_char_unchecked(bytes, pos) };
 
             if next_c == '\u{200D}' {

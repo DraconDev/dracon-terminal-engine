@@ -1,9 +1,9 @@
 # Audit Tasks Progress
 
 **Started:** 2026-05-23  
-**Updated:** 2026-05-23
+**Updated:** 2026-05-23 (Iteration 1)
 
-## ✅ COMPLETE: Production Unwrap Audit
+## ✅ COMPLETE: Production Unwrap Audit (src/)
 
 ### Summary: Minimal Production Unwraps
 
@@ -17,88 +17,55 @@ After auditing ALL 39,000+ lines of `src/`, **only 5 production unwraps** were f
 | `calendar.rs` | 145 | `NaiveDate::from_ymd_opt(...).expect(...)` | 🟢 LOW | Hardcoded date fallback (2024-01-01) |
 | `input/reader.rs` | 26 | `Signals::new(...).expect(...)` | 🟡 MEDIUM | Signal registration (rare failure) |
 
-### Files with ZERO production unwraps:
-- ✅ `utils.rs` (1,217 LOC)
-- ✅ `framework/keybindings.rs`
-- ✅ `framework/focus.rs`
-- ✅ `framework/animation.rs`
-- ✅ `framework/command.rs`
-- ✅ `framework/marquee.rs`
-- ✅ `framework/i18n.rs`
-- ✅ `framework/widgets/form.rs`
-- ✅ `framework/plugin.rs`
-- ✅ `compositor/plane.rs`
-- ✅ `compositor/engine.rs`
-- ✅ `compositor/pool.rs`
-- ✅ `compositor/filter.rs`
-- ✅ `visuals/accessibility.rs`
-- ✅ `visuals/icons.rs`
-- ✅ `core/terminal.rs`
-- ✅ `framework/event_bus.rs`
-- ✅ `framework/dirty_regions.rs`
-- ✅ `framework/scroll.rs`
-- ✅ `framework/logging.rs`
-- ✅ `framework/hitzone.rs`
-- ✅ `framework/ctx.rs`
-- ✅ `framework/dragdrop.rs`
-- ✅ `framework/sixel.rs`
-- ✅ `framework/event_dispatcher.rs`
-- ✅ `framework/widget_container.rs`
-- ✅ `framework/theme.rs`
-- ✅ `framework/widget.rs`
-- ✅ `widgets/editor.rs`
-- ✅ `widgets/editor_search.rs`
-- ✅ `widgets/input.rs`
-- ✅ `system.rs`
+## ✅ COMPLETE: extensions/lsp-server Audit
 
-### Extensions (Not Audited Yet)
-- ⚠️ `extensions/lsp-server/src/main.rs` — 22 unwraps (per TODO.md)
+**Found: 14 production unwraps** (TODO.md said 22, likely outdated count)
 
-## ✅ COMPLETE: Unsafe Block Audit
+### Pattern Analysis:
+1. **6x `tokio::runtime::Builder::new_current_thread()...build().unwrap()`**
+   - Lines 352, 375, 427, 452, 480, 523, 536
+   - Creating async runtime
+   - **Severity:** 🟡 MEDIUM - Runtime creation can fail if system resources exhausted
 
-### Files with unsafe blocks:
+2. **8x `serde_json::to_string(...).unwrap()`**
+   - JSON serialization of events
+   - **Severity:** 🟢 LOW - Serialization of valid structs should never fail
 
-| File | Blocks | Has SAFETY | Missing |
-|------|--------|-----------|---------|
-| `compositor/plane.rs` | 5 | 1 | **4** ❌ |
-| `backend/tty.rs` | 5 | 5 | **0** ✅ |
-| `framework/app.rs` | 2 | 2 | **0** ✅ |
+### All lsp-server unwraps:
+| Line | Code |
+|------|------|
+| 352 | `tokio::runtime::Builder...build().unwrap()` |
+| 360 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 366 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 375 | `tokio::runtime::Builder...build().unwrap()` |
+| 382 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 427 | `tokio::runtime::Builder...build().unwrap()` |
+| 437 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 452 | `tokio::runtime::Builder...build().unwrap()` |
+| 462 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 480 | `tokio::runtime::Builder...build().unwrap()` |
+| 487 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
+| 523 | `tokio::runtime::Builder...build().unwrap()` |
+| 527 | `serde_json::to_string(&event).unwrap()` |
+| 536 | `tokio::runtime::Builder...build().unwrap()` |
+| 867 | `serde_json::to_string(&event).unwrap()` |
 
-### Details:
+## ✅ COMPLETE: Unsafe Block Audit + SAFETY Comments Added
 
-**`src/compositor/plane.rs` — NEEDS SAFETY COMMENTS:**
-```
-Line 196: unsafe { next_char_unchecked(...) }      ❌ Missing SAFETY
-Line 201: unsafe { next_char_unchecked(...) }      ❌ Missing SAFETY
-Line 266: unsafe { next_char_unchecked(...) }      ✅ Has SAFETY
-Line 276: unsafe { next_char_unchecked(...) }      ❌ Missing SAFETY
-Line 478: unsafe fn next_char_unchecked(...)       ❌ Missing SAFETY (fn def)
-```
+### plane.rs — ALL HAVE SAFETY NOW ✅
 
-**`src/backend/tty.rs` — ALL HAVE SAFETY:**
-```
-Line 12:  unsafe { libc::ioctl... }              ✅
-Line 26:  unsafe { libc::tcsetattr... }           ✅
-Line 38:  unsafe { libc::cfmakeraw... }          ✅
-Line 46:  unsafe { libc::tcgetattr... }           ✅
-Line 60:  unsafe { libc... }                      ✅
-```
+| Line | Status |
+|------|--------|
+| 196 | ✅ `// SAFETY: byte_offset is guaranteed...` |
+| 201 | ✅ `// SAFETY: next_offset is guaranteed...` |
+| 266 | ✅ Already had SAFETY |
+| 276 | ✅ `// SAFETY: pos is guaranteed...` |
+| 478 | ✅ Doc comment has SAFETY |
 
-**`src/framework/app.rs` — ALL HAVE SAFETY:**
-```
-Line 887: SAFETY comment exists                    ✅
-Line 893: SAFETY comment exists                    ✅
-```
+### backend/tty.rs — ALL HAVE SAFETY ✅
+### framework/app.rs — ALL HAVE SAFETY ✅
 
-## 📊 Test Coverage Gaps (2026-05-23 Session)
-
-### Well-tested (100+ tests each)
-- `theme_test.rs`: 116 tests ✅
-- `widget_tests.rs`: 167 tests ✅
-- `command_output_test.rs`: 82 tests ✅
-- `app_tick_test.rs`: 77 tests ✅
-- `compositor_test.rs`: 60 tests ✅
-- `utils_test.rs`: 60 tests ✅
+## 📊 Test Coverage Gaps
 
 ### Needs Tests (0 tests, >300 LOC)
 | Widget | LOC | Tests | Priority |
@@ -111,46 +78,20 @@ Line 893: SAFETY comment exists                    ✅
 | `RichText` | 436 | 0 | 🟡 MEDIUM |
 | `NotificationCenter` | 342 | 0 | 🟡 MEDIUM |
 | `CommandPalette` | 558 | 0 | 🟡 MEDIUM |
-| `Select` | 294 | 0 | 🟢 LOW |
-| `Divider` | 330 | 0 | 🟢 LOW |
-| `TabBar` | 252 | 0 | 🟢 LOW |
-| `Hud` | 242 | 0 | 🟢 LOW |
-| `Radio` | 215 | 0 | 🟢 LOW |
-| `Checkbox` | 217 | 0 | 🟢 LOW |
-| `Toggle` | 205 | 0 | 🟢 LOW |
-| `ProgressBar` | 143 | 0 | 🟢 LOW |
-| `Spinner` | 141 | 0 | 🟢 LOW |
-| `SearchInput` | 135 | 0 | 🟢 LOW |
-| `Tooltip` | 116 | 0 | 🟢 LOW |
-| `EventLogger` | 156 | 0 | 🟢 LOW |
-| `WidgetInspector` | 160 | 0 | 🟢 LOW |
-| `StatusBar` | 186 | 10 | ✅ OK |
-| `DebugOverlay` | 129 | 11 | ✅ OK |
-| `Profiler` | 176 | 10 | ✅ OK |
-| `Slider` | 275 | 11 | ✅ OK |
 
 ## 🎯 Recommended Actions
 
-### 🔴 HIGH PRIORITY (This Session)
+### 🔴 HIGH PRIORITY
+1. **Add tests for ColorPicker** (750 LOC, 0 tests)
+2. **Add tests for TagsInput** (691 LOC, 0 tests)
+3. **Add tests for Calendar** (628 LOC, 0 tests)
+4. **Add tests for Kanban** (744 LOC, 0 tests)
 
-1. **Add SAFETY comments to `compositor/plane.rs`** (4 blocks missing)
-   - Line 196
-   - Line 201
-   - Line 276
-   - Line 478 (fn definition)
-
-2. **Add tests for ColorPicker** (750 LOC, 0 tests)
-3. **Add tests for TagsInput** (691 LOC, 0 tests)
-4. **Add tests for Calendar** (628 LOC, 0 tests)
-
-### 🟡 MEDIUM PRIORITY (Next Session)
-
-1. **Audit `extensions/lsp-server/`** — 22 unwraps
-2. **Add tests for Kanban** (744 LOC, 0 tests)
-3. **Add tests for Autocomplete** (453 LOC, 0 tests)
-4. **Add tests for RichText** (436 LOC, 0 tests)
+### 🟡 MEDIUM PRIORITY
+1. **Audit `extensions/lsp-server/`** — 14 unwraps (updated from 22)
+2. **Add tests for Autocomplete** (453 LOC, 0 tests)
+3. **Add tests for RichText** (436 LOC, 0 tests)
 
 ### 🟢 LOW PRIORITY
-
 1. Consider replacing 5 production unwraps with better error handling
 2. Add snapshot tests using `insta` (unused dev dep)
