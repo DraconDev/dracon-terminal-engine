@@ -31,7 +31,7 @@
 //!         .on_tick(|ctx, _tick| {
 //!             ctx.add_plane(Plane::new(0, 80, 24)); // render here
 //!         })
-//!         .run()?;
+//!         .run()?;  // run() already returns Result<()>
 //!     Ok(())
 //! }
 //! ```
