@@ -217,7 +217,7 @@ Current locations:
 | Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` | 🟡 Open |
 | Unsafe blocks with missing SAFETY | 11 of 12 | 🟡 Open |
 | `cargo outdated` integration | now in CI | ✅ **DONE** |
-| Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
+| Docs/examples | 21 of 33 doc-tests ignored | ✅ **12 compile, 21 ignored** |
 
-**Completed:** 7 items (lru fix, test coverage, CI pipeline, security advisories, editor split documented, App::new() docs, size_test moved)
-**Remaining:** 1 item (utils split) + 11 low priority items
+**Completed:** 8 items (lru fix, test coverage, CI pipeline, security advisories, editor split documented, App::new() docs, size_test moved, doc examples)
+**Remaining:** 1 item (utils split) + 10 low priority items
