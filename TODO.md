@@ -85,12 +85,14 @@ Second-largest file. Catch-all for misc utilities.
 - [ ] Dev-deps with major gaps: `criterion 0.5.1` → `0.8.2`, `itertools 0.10` → `0.13`
 - [ ] Add `cargo upgrade` to maintenance workflow
 
-### 8. `App::new().unwrap()` in public API
+### 8. `App::new().unwrap()` in public API — ✅ FIXED
 
-`lib.rs` and `framework/mod.rs` both show `App::new().unwrap()` in doc examples. `App::new()` returns `io::Result<Self>`.
+Updated doc examples in `src/lib.rs` and `src/framework/mod.rs` to use
+`let mut app = App::new()?;` instead of `App::new().unwrap()`. Added comment
+documenting that `App::new()` can fail if the terminal cannot be initialized.
 
-- [ ] Add `io::Result`-returning run variants: `App::try_run()` or propagate error in docs
-- [ ] Document when `new()` can fail (terminal init, capabilities detection)
+- [x] ~~Add `io::Result`-returning run variants~~ — `run()` already returns `io::Result<()>`
+- [x] Document when `new()` can fail (terminal init, capabilities detection)
 
 ---
 
@@ -209,5 +211,5 @@ Current locations:
 | `cargo outdated` integration | now in CI | ✅ **DONE** |
 | Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
 
-**Completed:** 5 items (lru fix, test coverage, CI pipeline, security advisories, editor split skipped)
-**Remaining:** 3 items (utils split, App::new() docs, low priority)
+**Completed:** 6 items (lru fix, test coverage, CI pipeline, security advisories, editor split documented, App::new() docs)
+**Remaining:** 2 items (utils split, low priority)
