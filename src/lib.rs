@@ -11,8 +11,9 @@
 //!
 //! struct MyApp { theme: Theme }
 //! impl Widget for MyApp {
-//!     fn id(&self) -> WidgetId { WidgetId::new() }
+//!     fn id(&self) -> WidgetId { WidgetId::new(0) }
 //!     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+//!     fn set_area(&mut self, _: Rect) {}
 //!     fn needs_render(&self) -> bool { true }
 //!     fn render(&self, area: Rect) -> Plane {
 //!         let mut p = Plane::new(0, area.width, area.height);
@@ -24,12 +25,15 @@
 //!
 //! // Pattern 2 — Closure-based (manual render)
 //! // App::new() can fail if the terminal cannot be initialized.
-//! let mut app = App::new()?;
-//! app.title("My App")
-//!     .on_tick(|ctx, _tick| {
-//!         ctx.add_plane(Plane::new(0, 80, 24)); // render here
-//!     })
-//!     .run();
+//! fn main() -> std::io::Result<()> {
+//!     let mut app = App::new()?;
+//!     app.title("My App")
+//!         .on_tick(|ctx, _tick| {
+//!             ctx.add_plane(Plane::new(0, 80, 24)); // render here
+//!         })
+//!         .run()?;
+//!     Ok(())
+//! }
 //! ```
 //!
 //! ## Architecture
