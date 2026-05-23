@@ -1,1 +1,0 @@
-add cargo io as a release target with its pat ? not sure what else could fall into this category, like npm is close but there is no not expiring key there unless you have an idea

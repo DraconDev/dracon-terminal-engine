@@ -2,8 +2,7 @@
 # Dracon Terminal Engine — Documentation Cleanup Script
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="/home/dracon/Dev/dracon-terminal-engine"
 
 echo "=== Dracon Terminal Engine — Doc Cleanup ==="
 
@@ -18,17 +17,20 @@ for f in \
     "$PROJECT_DIR/RESEARCH.md" \
     "$PROJECT_DIR/MANUAL_TESTING_REPORT.md" \
     "$PROJECT_DIR/MIGRATION.md" \
-    "$PROJECT_DIR/plans/" \
-    "$PROJECT_DIR/.ralph/" \
-
 ; do
-    if [ -e "$f" ]; then
+    if [ -f "$f" ]; then
         echo "  Moving $f → .archive/"
         mv "$f" "$PROJECT_DIR/.archive/"
     fi
 done
 
-# Phase 2: Delete truly temporary/garbage files
+# Move plans directory
+if [ -d "$PROJECT_DIR/plans" ]; then
+    echo "  Moving plans/ → .archive/"
+    mv "$PROJECT_DIR/plans" "$PROJECT_DIR/.archive/"
+fi
+
+# Phase 2: Delete truly temporary files
 echo ""
 echo "Phase 2: Deleting temporary/obsolete files..."
 for f in \
