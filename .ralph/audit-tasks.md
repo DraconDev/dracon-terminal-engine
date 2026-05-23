@@ -1,7 +1,32 @@
 # Audit Tasks Progress
 
 **Started:** 2026-05-23  
-**Updated:** 2026-05-23 (Iteration 4)
+**Updated:** 2026-05-23 (Iteration 5 - Reflection)
+
+## 🪞 REFLECTION
+
+### Progress Summary (Iterations 1-4)
+- ColorPicker: ✅ 54 tests added
+- TagsInput: ✅ 52 tests added
+- Calendar: ✅ 56 tests added
+- **Total: 162 tests across 3 widgets**
+
+### What's Working Well
+1. **Test-first approach**: Write test, compile, fix, run cycle is fast
+2. **Real APIs**: Using `dracon_terminal_engine::input::event::*` works
+3. **Coverage breadth**: Builder patterns, widget traits, callbacks, rendering
+4. **Pragmatic testing**: Some internal APIs are private - test via public interface
+
+### What's Not Working / Challenges
+1. **Private APIs**: Many internal methods are private, limiting deep testing
+2. **Callback invocation**: Some callbacks not triggered by public methods
+3. **Mouse/key hit detection**: Hard to test precisely without full integration
+4. **Widget complexity**: Kanban (744 LOC) is the largest remaining widget
+
+### Approach Adjustment
+- Continue with pragmatic approach: test public APIs, verify no crashes
+- Don't try to test private internals - use public methods where possible
+- Focus on: construction, builder patterns, widget trait, rendering
 
 ## ✅ COMPLETE: Production Unwrap Audit (src/)
 **Only 5 production unwraps** in 39,000+ lines
@@ -19,18 +44,6 @@
 
 ## ✅ COMPLETE: Calendar Tests (Iteration 4)
 **Added: `tests/widget_calendar_test.rs`** — 56 tests
-
-### Test Categories (Calendar):
-- Construction: 5 tests
-- Builder Pattern: 8 tests
-- Month Navigation: 6 tests
-- Widget Trait: 13 tests
-- Theme: 1 test
-- Internal Logic: 3 tests
-- Handle Key: 8 tests
-- Handle Mouse: 6 tests
-- Edge Cases: 2 tests
-- Rendering: 4 tests
 
 ## 📊 Test Coverage Gaps
 
@@ -50,6 +63,11 @@
 2. ~~Add tests for TagsInput~~ — ✅ 52 tests
 3. ~~Add tests for Calendar~~ — ✅ 56 tests
 
-### 🔴 HIGH PRIORITY (Next Sessions)
+### 🔴 HIGH PRIORITY
 1. **Add tests for Kanban** (744 LOC, 0 tests) — NEXT
 2. **Restore App::theme() builder method** — ✅ DONE
+
+### 🟡 MEDIUM PRIORITY (Next Sessions)
+1. **Add tests for Autocomplete** (453 LOC, 0 tests)
+2. **Add tests for RichText** (436 LOC, 0 tests)
+3. **Add tests for CommandPalette** (558 LOC, 0 tests)
