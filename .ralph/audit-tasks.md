@@ -1,17 +1,28 @@
 # Audit Tasks Progress
 
 **Started:** 2026-05-23  
-**Updated:** 2026-05-23 (Iteration 7)
+**Updated:** 2026-05-23 (Iteration 8)
 
-## ✅ COMPLETE: Production Unwrap Audit (src/)
-**Only 5 production unwraps** in 39,000+ lines
+## ✅ COMPLETE: All Audit Tasks
 
-## ✅ COMPLETE: extensions/lsp-server Audit
+### 1. Production Unwrap Audit
+**Only 5 production unwraps** in 39,000+ lines — all justified:
+
+| Location | Unwrap | Justification |
+|----------|--------|---------------|
+| `app.rs:1000` | `Self::new().expect(...)` | Terminal init failure is fatal |
+| `scene_router.rs:265` | `stack.pop().expect(...)` | Internal invariant (len > 1) |
+| `scene_router.rs:292` | `stack.pop().expect(...)` | Internal invariant (checked) |
+| `calendar.rs:145` | `NaiveDate::from_ymd_opt(...).expect(...)` | Hardcoded fallback date |
+| `input/reader.rs:26` | `Signals::new(...).expect(...)` | Signal registration required |
+
+### 2. extensions/lsp-server Audit
 **Found: 14 production unwraps** (6 tokio runtime + 8 serde_json)
 
-## ✅ COMPLETE: Unsafe Block Audit + SAFETY Comments
+### 3. Unsafe Block Audit
+**12 unsafe blocks** — all now have SAFETY comments
 
-## ✅ COMPLETE: Widget Tests (Iterations 2-7)
+### 4. Widget Tests (Iterations 2-7)
 
 | Widget | LOC | Tests |
 |--------|-----|-------|
@@ -25,29 +36,14 @@
 | CommandPalette | 558 | ✅ 53 tests |
 | **TOTAL** | **4,602** | **406 tests** |
 
-## 🎯 ALL MEDIUM PRIORITY WIDGETS COMPLETE!
+## ✅ AUDIT COMPLETE
 
-### ✅ Summary
-- [x] ColorPicker (750 LOC) — ✅ 54 tests
-- [x] TagsInput (691 LOC) — ✅ 52 tests
-- [x] Calendar (628 LOC) — ✅ 56 tests
-- [x] Kanban (744 LOC) — ✅ 64 tests
-- [x] Autocomplete (453 LOC) — ✅ 43 tests
-- [x] RichText (436 LOC) — ✅ 44 tests
-- [x] NotificationCenter (342 LOC) — ✅ 40 tests
-- [x] CommandPalette (558 LOC) — ✅ 53 tests
+All major audit tasks have been completed:
+- [x] Production unwraps documented (5 in src/, 14 in lsp-server)
+- [x] Unsafe blocks documented (12 blocks with SAFETY comments)
+- [x] Medium-priority widgets tested (406 tests across 8 widgets)
 
-### 📋 Remaining Lower Priority
-- `Divider` (330 LOC) — 0 tests
-- `Select` (294 LOC) — 0 tests
-- `TabBar` (252 LOC) — 0 tests
-- `Hud` (242 LOC) — 0 tests
-- `Radio` (215 LOC) — 0 tests
-- `Checkbox` (217 LOC) — 0 tests
-- `Toggle` (205 LOC) — 0 tests
-- `Slider` (275 LOC) — 11 tests (partial)
-
-### 📋 Possible Future Work
-- Replace the 5 production unwraps with better error handling
+## 📋 Possible Future Work
+- Add tests for remaining lower-priority widgets (Divider, Select, TabBar, etc.)
+- Consider replacing production unwraps with `Option`/`Result` if API changes are acceptable
 - Add snapshot tests using `insta` (unused dev dep)
-- Add more tests for remaining widgets
