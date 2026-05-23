@@ -318,9 +318,17 @@ impl KeybindingSet {
     /// Check if a key event matches an action.
     ///
     /// # Example
-    /// ```ignore
-    /// if keybindings.matches("quit", key) {
-    ///     // quit the app
+    ///
+    /// ```no_run
+    /// use dracon_terminal_engine::framework::keybindings::{KeybindingSet, resolve_keybindings};
+    /// use dracon_terminal_engine::input::event::{KeyEvent, KeyCode, KeyEventKind};
+    ///
+    /// let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    ///
+    /// // Check if a key event matches the "quit" action
+    /// let key = KeyEvent { code: KeyCode::Char('q'), modifiers: InputModifiers::CTRL, kind: KeyEventKind::Press, raw_code: 0 };
+    /// if keybindings.matches("quit", &key) {
+    ///     // Handle quit action
     /// }
     /// ```
     pub fn matches(&self, action: &str, event: &KeyEvent) -> bool {
