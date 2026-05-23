@@ -5,10 +5,6 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::tabbar::TabBar;
 use ratatui::layout::Rect;
 
-fn make_tabbar(tabs: Vec<String>) -> TabBar {
-    TabBar::new(tabs.iter().map(|s| s.as_str()).collect()).with_theme(Theme::default())
-}
-
 #[test]
 fn test_tabbar_new() {
     let tabs = vec!["Home", "Settings", "Profile"];
@@ -229,7 +225,7 @@ fn test_tabbar_unicode_tabs() {
 #[test]
 fn test_tabbar_long_tabs() {
     let long_text = "A".repeat(100);
-    let tabs = vec!["Tab1", long_text];
+    let tabs = vec!["Tab1".to_string(), long_text.to_string()];
     let tabbar = TabBar::new(tabs);
     let area = Rect::new(0, 0, 80, 3);
     let _plane = tabbar.render(area);
