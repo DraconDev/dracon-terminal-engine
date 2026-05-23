@@ -427,6 +427,7 @@ impl App {
     }
 
     /// Sets the UI theme and propagates it to all registered widgets.
+    /// Sets the active theme and propagates it to all registered widgets.
     ///
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual
@@ -489,6 +490,38 @@ impl App {
 
     /// Registers a callback that fires every `tick_interval` milliseconds.
     /// The callback receives the context and the tick count.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use dracon_terminal_engine::prelude::*;
+    /// use ratatui::layout::Rect;
+    ///
+    /// struct Counter { count: u64 }
+    ///
+    /// impl Widget for Counter {
+    ///     fn id(&self) -> WidgetId { WidgetId::new() }
+    ///     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    ///     fn needs_render(&self) -> bool { true }
+    ///     fn render(&self, area: Rect) -> Plane {
+    ///         let mut p = Plane::new(0, area.width, area.height);
+    ///         p.fill_bg(Theme::default().bg);
+    ///         p.put_str(0, 0, &format!("Count: {}", self.count));
+    ///         p
+    ///     }
+    /// }
+    ///
+    /// // Using on_tick with a RefCell-wrapped app:
+    /// let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
+    /// let app_clone = app.clone();
+    /// App::new()?  // Can fail if terminal init fails
+    ///     .on_tick(move |ctx, tick| {
+    ///         app_clone.borrow_mut().count = tick;
+    ///         let (w, h) = ctx.compositor().size();
+    ///         ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
+    ///     })
+    ///     .run(|_| {});
+    /// ```
     pub fn on_tick<F>(self, f: F) -> Self
     where
         F: FnMut(&mut Ctx, u64) + 'static,
