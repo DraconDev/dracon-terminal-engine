@@ -480,7 +480,7 @@
 - [x] `Calendar` widget — add tests (628 LOC, ✅ **56 tests**)
 - [x] `ColorPicker` widget — add tests (750 LOC, ✅ **54 tests**)
 - [x] `Autocomplete` widget — add tests (453 LOC, ✅ **43 tests**)
-- [ ] `RichText` widget — add tests (436 LOC, 0 tests)
+- [x] `RichText` widget — add tests (436 LOC, ✅ **44 tests**)
 
 **Benchmark Tests**
 
@@ -728,7 +728,8 @@
 3. ~~Add `Calendar` tests~~ — ✅ DONE (56 tests)
 4. ~~Add `Kanban` tests~~ — ✅ DONE (64 tests)
 5. ~~Add `Autocomplete` tests~~ — ✅ DONE (43 tests)
-6. Add `RichText` tests
+6. ~~Add `RichText` tests~~ — ✅ DONE (44 tests)
+7. Add `NotificationCenter` tests
 4. Add `Autocomplete` tests
 5. Add `RichText` tests
 6. Add widget integration tests
