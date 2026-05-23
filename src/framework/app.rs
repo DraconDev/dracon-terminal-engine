@@ -570,9 +570,6 @@ impl App {
     ///
     /// fn main() -> std::io::Result<()> {
     ///     let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
-    ///     let app_clone = app.clone();
-    /// fn main() -> std::io::Result<()> {
-    ///     let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
     ///     let app_for_input = app.clone();
     ///     let app_for_tick = app.clone();
     ///     App::new()?
@@ -585,8 +582,6 @@ impl App {
     ///             true  // event handled
     ///         })
     ///         .run(|_| {});
-    ///     Ok(())
-    /// }
     ///     Ok(())
     /// }
     /// ```
