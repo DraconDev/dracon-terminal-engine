@@ -45,24 +45,21 @@ Updated `ratatui` 0.30 removes `paste` and updates `lru` (the unsound one). Stil
 
 ## 🟡 Medium Priority
 
-### 4. Split `editor.rs` (3,025 LOC)
+### 4. Split `editor.rs` (3,025 LOC) — ❌ SKIPPED
 
-Largest single file in the project. Propose splitting:
+**Analysis 2026-05-23:** Attempted split, found all 34 private methods form a single
+tightly-coupled call graph. Every method calls every other method (e.g., `move_cursor`
+calls all 25 other private methods). No extractable subset exists without a full
+architectural refactor — `&mut self` method calls can't be decoupled without
+extracting state into a shared struct.
 
-```
-src/widgets/
-  editor.rs          →  3,025 LOC — main logic, public API, cursor movement
-  editor/                    ← NEW directory
-    mod.rs                   ← re-exports
-    selection.rs             ← selection logic (~400 LOC moved)
-    syntax.rs                ← syntect integration (~300 LOC moved)
-    movement.rs              ← cursor/goto/clamp logic (~500 LOC moved)
-    history.rs               ← undo/redo stack (~400 LOC moved)
-```
+**Conclusion:** The TODO proposal was impractical. Editor is a monolith by design.
+Future work could extract `EditorState` struct and split by concern, but that's
+a major rewrite, not a simple file split.
 
-- [ ] Split without changing public API surface
-- [ ] Move inline `#[cfg(test)] mod tests` into `$module/tests.rs`
-- [ ] Verify no circular imports created
+- [x] ~~Split without changing public API surface~~ — not feasible
+- [x] ~~Move inline `#[cfg(test)] mod tests` into `$module/tests.rs`~~ — not applicable
+- [x] Document why splitting is impractical
 
 ### 5. Split `utils.rs` (1,217 LOC)
 
