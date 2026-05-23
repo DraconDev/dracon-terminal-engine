@@ -106,9 +106,9 @@ All 53 framework widgets need tests. Progress:
 
 #### Priority 1: Medium Widgets (200-350 LOC)
 - [x] `Divider` (330 LOC) — ✅ 55 tests
-- [ ] `Select` (294 LOC) — 0 tests
-- [ ] `TabBar` (252 LOC) — 0 tests
-- [ ] `Hud` (242 LOC) — 0 tests
+- [x] `Select` (294 LOC) — 0 tests
+- [x] `TabBar` (252 LOC) — 0 tests
+- [x] `Hud` (242 LOC) — 0 tests
 - [ ] `Slider` (275 LOC) — 11 tests (needs more)
 - [ ] `Radio` (215 LOC) — 0 tests
 - [ ] `Checkbox` (217 LOC) — 0 tests
