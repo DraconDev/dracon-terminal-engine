@@ -42,6 +42,8 @@ impl<W: io::Write + std::os::fd::AsFd> RatatuiBackend<W> {
 }
 
 impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
+    type Error = io::Error;
+
     fn draw<'a, I>(&mut self, content: I) -> io::Result<()>
     where
         I: Iterator<Item = (u16, u16, &'a ratatui::buffer::Cell)>,
@@ -142,5 +144,15 @@ impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
             self.compositor.render(self.inner.inner())?;
         }
         self.inner.flush()
+    }
+
+    fn clear_region(&mut self, ty: ratatui::buffer::ClearType) -> io::Result<()> {
+        match ty {
+            ratatui::buffer::ClearType::All => write!(self.inner, "\x1b[2J"),
+            ratatui::buffer::ClearType::FromCursorDown => write!(self.inner, "\x1b[J"),
+            ratatui::buffer::ClearType::FromCursorUp => write!(self.inner, "\x1b[1J"),
+            ratatui::buffer::ClearType::CurrentLine => write!(self.inner, "\x1b[2K"),
+            ratatui::buffer::ClearType::UntilNewLine => write!(self.inner, "\x1b[K"),
+        }
     }
 }
