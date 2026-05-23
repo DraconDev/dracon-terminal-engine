@@ -7,6 +7,7 @@ use crate::compositor::engine::{map_color, Compositor};
 use crate::compositor::plane::Plane;
 use crate::core::terminal::Terminal;
 use ratatui::backend::Backend;
+use ratatui::backend::ClearType;
 use ratatui::layout::{Position, Size};
 use std::io::{self, Write};
 use std::os::fd::AsFd;
@@ -146,13 +147,13 @@ impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
         self.inner.flush()
     }
 
-    fn clear_region(&mut self, ty: ratatui::buffer::ClearType) -> io::Result<()> {
+    fn clear_region(&mut self, ty: ClearType) -> io::Result<()> {
         match ty {
-            ratatui::buffer::ClearType::All => write!(self.inner, "\x1b[2J"),
-            ratatui::buffer::ClearType::FromCursorDown => write!(self.inner, "\x1b[J"),
-            ratatui::buffer::ClearType::FromCursorUp => write!(self.inner, "\x1b[1J"),
-            ratatui::buffer::ClearType::CurrentLine => write!(self.inner, "\x1b[2K"),
-            ratatui::buffer::ClearType::UntilNewLine => write!(self.inner, "\x1b[K"),
+            ClearType::All => write!(self.inner, "\x1b[2J"),
+            ClearType::AfterCursor => write!(self.inner, "\x1b[J"),
+            ClearType::BeforeCursor => write!(self.inner, "\x1b[1J"),
+            ClearType::CurrentLine => write!(self.inner, "\x1b[2K"),
+            ClearType::UntilNewLine => write!(self.inner, "\x1b[K"),
         }
     }
 }
