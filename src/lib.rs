@@ -23,8 +23,9 @@
 //! }
 //!
 //! // Pattern 2 — Closure-based (manual render)
-//! App::new().unwrap()
-//!     .title("My App")
+//! // App::new() can fail if the terminal cannot be initialized.
+//! let mut app = App::new()?;
+//! app.title("My App")
 //!     .on_tick(|ctx, _tick| {
 //!         ctx.add_plane(Plane::new(0, 80, 24)); // render here
 //!     })
