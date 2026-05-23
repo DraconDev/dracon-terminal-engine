@@ -730,7 +730,7 @@
 5. ~~Add `Autocomplete` tests~~ — ✅ DONE (43 tests)
 6. ~~Add `RichText` tests~~ — ✅ DONE (44 tests)
 7. ~~Add `NotificationCenter` tests~~ — ✅ DONE (40 tests)
-8. Add `CommandPalette` tests
+8. ~~Add `CommandPalette` tests~~ — ✅ DONE (53 tests)
 4. Add `Autocomplete` tests
 5. Add `RichText` tests
 6. Add widget integration tests
