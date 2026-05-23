@@ -10,8 +10,9 @@
 //! use dracon_terminal_engine::framework::widget::Widget;
 //! use ratatui::layout::Rect;
 //!
-//! App::new().unwrap()
-//!     .title("My App")
+//! // App::new() can fail if the terminal cannot be initialized.
+//! let mut app = App::new()?;
+//! app.title("My App")
 //!     .fps(30)
 //!     .run(|ctx| {
 //!         let (w, h) = ctx.compositor().size();
