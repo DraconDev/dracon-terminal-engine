@@ -1,7 +1,7 @@
 {
   "name": "todo-fix",
   "taskFile": ".ralph/todo-fix.md",
-  "iteration": 8,
+  "iteration": 9,
   "maxIterations": 12,
   "itemsPerIteration": 0,
   "reflectEvery": 4,
@@ -9,5 +9,5 @@
   "active": true,
   "status": "active",
   "startedAt": "2026-05-23T14:46:44.575Z",
-  "lastReflectionAt": 5
+  "lastReflectionAt": 9
 }
