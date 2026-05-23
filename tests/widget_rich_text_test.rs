@@ -11,7 +11,7 @@ use ratatui::layout::Rect;
 
 #[test]
 fn test_rich_text_new() {
-    let rt = RichText::new();
+    let rt = RichText::new("");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -19,7 +19,7 @@ fn test_rich_text_new() {
 
 #[test]
 fn test_rich_text_with_content() {
-    let rt = RichText::new().with_content("# Hello World\n\nThis is plain text.");
+    let rt = RichText::new("# Hello World\n\nThis is plain text.");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -27,7 +27,7 @@ fn test_rich_text_with_content() {
 
 #[test]
 fn test_rich_text_with_empty_content() {
-    let rt = RichText::new().with_content("");
+    let rt = RichText::new("");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -39,7 +39,7 @@ fn test_rich_text_with_empty_content() {
 
 #[test]
 fn test_rich_text_with_theme() {
-    let rt = RichText::new().with_theme(Theme::nord());
+    let rt = RichText::new("").with_theme(Theme::nord());
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert_eq!(plane.width, 80);
@@ -47,9 +47,8 @@ fn test_rich_text_with_theme() {
 
 #[test]
 fn test_rich_text_chained_builders() {
-    let rt = RichText::new()
-        .with_theme(Theme::cyberpunk())
-        .with_content("# Title\n\nParagraph.");
+    let rt = RichText::new("# Title\n\nParagraph.")
+        .with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 80, 24);
     let _plane = rt.render(area);
 }
@@ -60,7 +59,7 @@ fn test_rich_text_chained_builders() {
 
 #[test]
 fn test_rich_text_header_h1() {
-    let rt = RichText::new().with_content("# Header 1");
+    let rt = RichText::new("# Header 1");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     
@@ -70,7 +69,7 @@ fn test_rich_text_header_h1() {
 
 #[test]
 fn test_rich_text_header_h2() {
-    let rt = RichText::new().with_content("## Header 2");
+    let rt = RichText::new("## Header 2");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -78,7 +77,7 @@ fn test_rich_text_header_h2() {
 
 #[test]
 fn test_rich_text_header_h3() {
-    let rt = RichText::new().with_content("### Header 3");
+    let rt = RichText::new("### Header 3");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -86,7 +85,7 @@ fn test_rich_text_header_h3() {
 
 #[test]
 fn test_rich_text_header_h4_h6() {
-    let rt = RichText::new().with_content("#### Header 4\n##### Header 5\n###### Header 6");
+    let rt = RichText::new("#### Header 4\n##### Header 5\n###### Header 6");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -98,7 +97,7 @@ fn test_rich_text_header_h4_h6() {
 
 #[test]
 fn test_rich_text_bold() {
-    let rt = RichText::new().with_content("This is **bold** text.");
+    let rt = RichText::new("This is **bold** text.");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -106,7 +105,7 @@ fn test_rich_text_bold() {
 
 #[test]
 fn test_rich_text_italic() {
-    let rt = RichText::new().with_content("This is *italic* text.");
+    let rt = RichText::new("This is *italic* text.");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -114,7 +113,7 @@ fn test_rich_text_italic() {
 
 #[test]
 fn test_rich_text_code() {
-    let rt = RichText::new().with_content("Use `printf` for output.");
+    let rt = RichText::new("Use `printf` for output.");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -122,7 +121,7 @@ fn test_rich_text_code() {
 
 #[test]
 fn test_rich_text_code_multiline() {
-    let rt = RichText::new().with_content("```\ncode block\n```");
+    let rt = RichText::new("```\ncode block\n```");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -130,7 +129,7 @@ fn test_rich_text_code_multiline() {
 
 #[test]
 fn test_rich_text_link() {
-    let rt = RichText::new().with_content("Click [here](https://example.com) to visit.");
+    let rt = RichText::new("Click [here](https://example.com) to visit.");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
