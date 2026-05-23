@@ -57,6 +57,39 @@ pub struct MarqueeRect {
 /// Active → Idle (MouseUp → commit selection)
 /// Active → Idle (Escape / MouseMove → cancel)
 /// ```
+///
+/// # Example
+///
+/// ```no_run
+/// use dracon_terminal_engine::framework::marquee::MarqueeState;
+///
+/// // Create with default 2px activation threshold
+/// let mut marquee = MarqueeState::new();
+///
+/// // Or customize the threshold (in distance-squared)
+/// let mut marquee = MarqueeState::new().with_activation_threshold(16.0); // 4px
+///
+/// // On MouseDown (left click):
+/// marquee.start_tracking(col, row);
+/// marquee.defer_click(item_index); // Plain click only
+///
+/// // On MouseDrag:
+/// let just_activated = marquee.update(col, row);
+/// if just_activated {
+///     // Marquee now active — cancel any file drag here
+/// }
+///
+/// // On MouseUp:
+/// if marquee.is_active {
+///     if let Some(rect) = marquee.rect() {
+///         // Select all items within rect.min_row..=rect.max_row
+///     }
+///     marquee.clear();
+/// } else if let Some(idx) = marquee.take_pending_click() {
+///     // Resolve deferred click — no drag occurred
+/// }
+/// marquee.reset();
+/// ```
 #[derive(Clone, Debug)]
 pub struct MarqueeState {
     /// Whether the marquee rectangle is actively being drawn.
@@ -216,6 +249,25 @@ impl MarqueeState {
 /// The background is transparent — content underneath remains visible.
 ///
 /// Returns `true` if the marquee was rendered, `false` if not active.
+///
+/// # Example
+///
+/// ```no_run
+/// use dracon_terminal_engine::framework::marquee::{MarqueeState, render_marquee};
+/// use dracon_terminal_engine::prelude::*;
+///
+/// fn draw_selection(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme) {
+///     if marquee.is_active {
+///         // Draw the rubber-band selection rectangle
+///         let _ = render_marquee(plane, marquee, theme);
+///     }
+/// }
+///
+/// // Typical usage in a tick callback:
+/// fn on_render(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme) {
+///     render_marquee(plane, marquee, theme);
+/// }
+/// ```
 pub fn render_marquee(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme) -> bool {
     let Some(rect) = marquee.rect() else {
         return false;
