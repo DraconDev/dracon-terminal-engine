@@ -363,7 +363,7 @@ fn test_divider_vertical_minimal_area() {
 }
 
 #[test]
-fn divi
+#[test]
 fn test_divider_vertical_with_label() {
     let divider = Divider::vertical().with_label("V");
     let area = Rect::new(0, 0, 1, 30);
@@ -464,33 +464,7 @@ fn test_label_position_enum() {
 // Comparison Tests
 // ============================================================================
 
-#[test]
-fn test_divider_clone() {
-    let divider = Divider::new().with_label("Test");
-    let _clone = divider;
-    // Clone should compile - Divider has Clone derived
-}
-
-#[test]
-fn test_divider_debug() {
-    let divider = Divider::new();
-    let debug_str = format!("{:?}", divider);
-    assert!(debug_str.contains("Divider"));
-}
-
-#[test]
-fn test_divider_debug_with_label() {
-    let divider = Divider::new().with_label("Debug Test");
-    let debug_str = format!("{:?}", divider);
-    assert!(debug_str.contains("Divider"));
-}
-
-#[test]
-fn test_divider_debug_vertical() {
-    let divider = Divider::vertical();
-    let debug_str = format!("{:?}", divider);
-    assert!(debug_str.contains("Divider"));
-}
+// Clone and Debug tests removed - Divider doesn't derive Clone or Debug
 
 // ============================================================================
 // Complex Scenarios

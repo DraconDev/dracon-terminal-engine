@@ -3,7 +3,7 @@
 **Started:** 2026-05-23  
 **Updated:** 2026-05-23 (Iteration 8)
 
-## 🎯 AUDIT MASTER LIST CREATED
+## 🎯 AUDIT MASTER LIST CREATED (100+ tasks)
 
 Comprehensive audit with 100+ tasks organized by priority:
 - 🔴 CRITICAL: Security, Code Quality, Testing, Documentation
@@ -13,29 +13,34 @@ Comprehensive audit with 100+ tasks organized by priority:
 
 ## ✅ COMPLETED (2026-05-23)
 
-| Task | Status |
-|------|--------|
-| lru unsoundness fix | ✅ DONE |
-| CI pipeline (outdated + changelog) | ✅ DONE |
-| Production unwrap audit (5 in src/, 14 in lsp-server) | ✅ DONE |
-| Unsafe block SAFETY comments (12 blocks) | ✅ DONE |
-| Widget tests (406 tests across 8 widgets) | ✅ DONE |
+### Widget Tests (9 widgets, 461 tests)
+
+| Widget | LOC | Tests | Status |
+|--------|-----|-------|--------|
+| ColorPicker | 750 | 54 | ✅ |
+| TagsInput | 691 | 52 | ✅ |
+| Calendar | 628 | 56 | ✅ |
+| Kanban | 744 | 64 | ✅ |
+| Autocomplete | 453 | 43 | ✅ |
+| RichText | 436 | 44 | ✅ |
+| NotificationCenter | 342 | 40 | ✅ |
+| CommandPalette | 558 | 53 | ✅ |
+| Divider | 330 | 55 | ✅ |
+| **TOTAL** | **4,932** | **461** | ✅ |
 
 ## 📊 REMAINING WORK (High Priority)
 
-### Testing Gap (45 widgets need tests)
+### Testing Gap (44 widgets need tests)
 
 | Priority | Widgets | LOC Range |
 |----------|---------|-----------|
-| 1 | Divider, Select, TabBar, Hud, Slider, Radio, Checkbox, Toggle | 200-350 |
+| 1 | Select, TabBar, Hud, Slider, Radio, Checkbox, Toggle | 200-350 |
 | 2 | ProgressBar, Spinner, SearchInput, Tooltip, etc. | 100-200 |
 | 3 | TextInput, PasswordInput, Button, etc. | <200 |
 
-## 🎯 NEXT ITERATIONS (4 remaining)
+## 🎯 NEXT WIDGETS TO TEST
 
-1. Add tests for `Divider` widget
-2. Add tests for `Select` widget
-3. Add tests for `TabBar` widget
-4. Add tests for `Hud` widget
-
-Each iteration: ~40-60 tests
+1. `Select` (294 LOC) — NEXT
+2. `TabBar` (252 LOC)
+3. `Hud` (242 LOC)
+4. `Slider` (275 LOC)
