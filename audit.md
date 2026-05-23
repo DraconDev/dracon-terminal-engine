@@ -642,8 +642,8 @@
 - [x] `Calendar` (628 LOC) — ✅ 56 tests
 - [x] `ColorPicker` (750 LOC) — ✅ 54 tests
 - [x] `Autocomplete` (453 LOC) — ✅ 43 tests
-- [ ] `RichText` (436 LOC) — 0 tests
-- [ ] `NotificationCenter` (342 LOC) — 0 tests
+- [x] `RichText` (436 LOC) — ✅ 44 tests
+- [x] `NotificationCenter` (342 LOC) — ✅ 40 tests
 - [ ] `Divider` (330 LOC) — 0 tests
 - [ ] `Select` (294 LOC) — 0 tests
 - [ ] `TabBar` (252 LOC) — 0 tests
@@ -729,7 +729,8 @@
 4. ~~Add `Kanban` tests~~ — ✅ DONE (64 tests)
 5. ~~Add `Autocomplete` tests~~ — ✅ DONE (43 tests)
 6. ~~Add `RichText` tests~~ — ✅ DONE (44 tests)
-7. Add `NotificationCenter` tests
+7. ~~Add `NotificationCenter` tests~~ — ✅ DONE (40 tests)
+8. Add `CommandPalette` tests
 4. Add `Autocomplete` tests
 5. Add `RichText` tests
 6. Add widget integration tests

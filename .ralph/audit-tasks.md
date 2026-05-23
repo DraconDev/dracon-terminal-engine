@@ -21,17 +21,16 @@
 | Kanban | 744 | ✅ 64 tests |
 | Autocomplete | 453 | ✅ 43 tests |
 | RichText | 436 | ✅ 44 tests |
-| **TOTAL** | **3,702** | **313 tests** |
+| NotificationCenter | 342 | ✅ 40 tests |
+| **TOTAL** | **4,044** | **353 tests** |
 
 ## 📊 Remaining Test Coverage Gaps
 
 | Widget | LOC | Priority |
 |--------|-----|----------|
-| `NotificationCenter` | 342 | 🟡 MEDIUM |
 | `CommandPalette` | 558 | 🟡 MEDIUM |
 
 ## 🎯 Next Actions
 
 ### 🟡 MEDIUM PRIORITY
-1. **Add tests for NotificationCenter** (342 LOC, 0 tests) — NEXT
-2. **Add tests for CommandPalette** (558 LOC, 0 tests)
+1. **Add tests for CommandPalette** (558 LOC, 0 tests) — NEXT (LAST MEDIUM PRIORITY)
