@@ -112,7 +112,7 @@ documenting that `App::new()` can fail if the terminal cannot be initialized.
   - ✅ `render_marquee` fn — compile-tested usage example
 - [ ] Add example for `MarqueeState` usage
 - [ ] Add example for `SceneRouter` + embedded scenes pattern
-- [ ] Currently 23 of 33 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 10 compile, 23 ignored)
+- [ ] Currently 22 of 33 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 11 compile, 22 ignored)
 
 ### 10. `text_input_base_test.rs` — 26 unit tests only
 

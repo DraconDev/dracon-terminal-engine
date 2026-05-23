@@ -57,12 +57,35 @@ use std::time::{Duration, Instant};
 ///
 /// # Example
 ///
-/// ```ignore
-/// App::new()?
-///     .title("My App")
-///     .fps(60)
-///     .on_tick(|ctx, tick, app| { /* update every 250ms */ })
-///     .run(|ctx, app| { /* render per frame */ });
+/// ```no_run
+/// use dracon_terminal_engine::prelude::*;
+/// use ratatui::layout::Rect;
+///
+/// struct MyApp { theme: Theme }
+///
+/// impl Widget for MyApp {
+///     fn id(&self) -> WidgetId { WidgetId::new(0) }
+///     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+///     fn set_area(&mut self, _: Rect) {}
+///     fn needs_render(&self) -> bool { true }
+///     fn render(&self, area: Rect) -> Plane {
+///         let mut p = Plane::new(0, area.width, area.height);
+///         p.fill_bg(self.theme.bg);
+///         p
+///     }
+/// }
+///
+/// fn main() -> std::io::Result<()> {
+///     App::new()?
+///         .title("My App")
+///         .fps(60)
+///         .on_tick(|ctx, _tick| {
+///             let (w, h) = ctx.compositor().size();
+///             let app = MyApp { theme: Theme::default() };
+///             ctx.add_plane(app.render(Rect::new(0, 0, w, h)));
+///         })
+///         .run(|_ctx| {})
+/// }
 /// ```
 /// Tick callback type alias for cleaner signatures.
 pub(crate) type TickCallback = Box<dyn FnMut(&mut Ctx, u64) + 'static>;
