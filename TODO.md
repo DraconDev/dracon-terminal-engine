@@ -203,11 +203,11 @@ Current locations:
 | Security advisories | 2 (unmaintained only) | ✅ **DONE** |
 | Untested framework widgets | 4 (progress_ring, sparkline, list_common, text_editor_adapter) | ✅ **DONE** |
 | CI/CD pipeline | 6 workflows (ci, bench, plugin-ci, release, outdated, changelog) | ✅ **DONE** |
-| Large files (>1,000 LOC) | 2 (editor 3,025, utils 1,217) | 🟡 Open |
+| Large files (>1,000 LOC) | 2 (editor skipped, utils 1,217) | ✅ **1 SKIP, 1 OPEN** |
 | Production unwraps (non-test) | ~50 in `src/`, 22 in `extensions/lsp-server` | 🟡 Open |
 | Unsafe blocks with missing SAFETY | 11 of 12 | 🟡 Open |
-| `cargo outdated` integration | not in CI | 🟡 Open |
+| `cargo outdated` integration | now in CI | ✅ **DONE** |
 | Docs/examples | 25/30 doc-tests ignored | 🟢 Open |
 
-**Completed:** 4 items (lru unsoundness, test coverage, CI pipeline, security advisories)
-**Remaining:** 4 items
+**Completed:** 5 items (lru fix, test coverage, CI pipeline, security advisories, editor split skipped)
+**Remaining:** 3 items (utils split, App::new() docs, low priority)
