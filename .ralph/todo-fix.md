@@ -1,21 +1,13 @@
 # Ralph Loop State — todo-fix
 
 **Started:** 2026-05-23
-**Last updated:** 2026-05-23 (iteration 6)
+**Last updated:** 2026-05-23 (iteration 7)
 
 ## Completed this iteration:
-1. ✅ Fixed lib.rs doc example (compile-tested, proper Widget impl, correct formatting)
-2. ✅ Fixed framework/mod.rs doc example (compile-tested, proper Widget impl, use on_tick)
-3. ✅ All doc tests now pass (7 compile-tested, 24 ignored)
+1. ✅ on_input compile-tested doc example added (app.rs line 552)
+2. ✅ All doc tests pass: 8 compile-tested, 23 ignored
 
-## Pattern discovered:
-Doc examples need:
-1. `fn main() -> std::io::Result<()>` for `?` operator
-2. Proper Widget trait impl (id, area, set_area, needs_render, render)
-3. All on one line: `app.on_tick(...).run(|_| {})` — NOT chained with `?`
-4. ````no_run` not ````ignore`
-
-## Total completed items: 9
+## Total completed items: 10
 1. lru unsoundness fix ✅
 2. CI pipeline ✅
 3. Security advisories updated ✅
@@ -24,14 +16,25 @@ Doc examples need:
 6. Test coverage gaps ✅
 7. size_test.rs moved to tests/ ✅
 8. set_theme doc comment added ✅
-9. on_tick compile-tested example + fixed lib.rs + framework/mod.rs ✅
+9. on_tick compile-tested example ✅
+10. on_input compile-tested example ✅
+11. lib.rs doc example fixed ✅
+12. framework/mod.rs doc example fixed ✅
+
+## Doc test progress:
+- Iteration 1: 0 compile-tested, 31 ignored
+- Iteration 6: 7 compile-tested, 24 ignored  
+- Iteration 7: 8 compile-tested, 23 ignored
+
+## Pattern for multiple closures (on_input + on_tick):
+Need separate clones: `app_for_input.clone()` and `app_for_tick.clone()`
+because closures capture env by move.
 
 ## Remaining:
-- on_input doc example
 - MarqueeState example
 - SceneRouter example
 - 11 low priority items
 
 ## Strategy:
-Continue with compile-tested doc examples — each replaces an ignored one.
-Track progress: 7 compile-tested (up from 0), 24 ignored (down from 31)
+Continue with compile-tested doc examples.
+Each iteration: +1 compile-tested, -1 ignored.
