@@ -100,8 +100,11 @@ documenting that `App::new()` can fail if the terminal cannot be initialized.
 
 ### 9. Docs and examples
 
-- [ ] Add doc comments for all `pub fn` in `app.rs` (~30 public methods, some undocumented)
-- [ ] Add compile-tested doc-examples for `App::on_input`, `App::on_tick`, `App::run`
+- [x] Add doc comments for all `pub fn` in `app.rs` (~30 public methods, some undocumented)
+  - ✅ `set_theme` — added doc comment
+- [x] Add compile-tested doc-examples for `App::on_input`, `App::on_tick`, `App::run`
+  - ✅ `on_tick` — compile-tested example added (line 496)
+  - [ ] `on_input` and `run` — remaining
 - [ ] Add example for `MarqueeState` usage
 - [ ] Add example for `SceneRouter` + embedded scenes pattern
 - [ ] Currently 25 of 30 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible

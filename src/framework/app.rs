@@ -500,8 +500,9 @@ impl App {
     /// struct Counter { count: u64 }
     ///
     /// impl Widget for Counter {
-    ///     fn id(&self) -> WidgetId { WidgetId::new() }
+    ///     fn id(&self) -> WidgetId { WidgetId::new(0) }
     ///     fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    ///     fn set_area(&mut self, _: Rect) {}
     ///     fn needs_render(&self) -> bool { true }
     ///     fn render(&self, area: Rect) -> Plane {
     ///         let mut p = Plane::new(0, area.width, area.height);
@@ -511,16 +512,18 @@ impl App {
     ///     }
     /// }
     ///
-    /// // Using on_tick with a RefCell-wrapped app:
-    /// let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
-    /// let app_clone = app.clone();
-    /// App::new()?  // Can fail if terminal init fails
-    ///     .on_tick(move |ctx, tick| {
-    ///         app_clone.borrow_mut().count = tick;
-    ///         let (w, h) = ctx.compositor().size();
-    ///         ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
-    ///     })
-    ///     .run(|_| {});
+    /// fn main() -> std::io::Result<()> {
+    ///     let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
+    ///     let app_clone = app.clone();
+    ///     App::new()?
+    ///         .on_tick(move |ctx, tick| {
+    ///             app_clone.borrow_mut().count = tick;
+    ///             let (w, h) = ctx.compositor().size();
+    ///             ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
+    ///         })
+    ///         .run(|_| {});
+    ///     Ok(())
+    /// }
     /// ```
     pub fn on_tick<F>(self, f: F) -> Self
     where
