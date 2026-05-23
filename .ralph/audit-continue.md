@@ -4,13 +4,23 @@
 Continue adding tests for remaining widgets to achieve 100% widget test coverage.
 
 ## Current Progress
-- **9 widgets tested**: 461 tests total
-- **44 widgets remaining**
+- **10 widgets tested**: 461 + 39 = **500 tests total**
+- **43 widgets remaining**
+
+### Completed This Session
+- ✅ **Select** (294 LOC) — 39 tests added
+  - Construction, builder pattern
+  - Selection methods (set_selected, selected_index, selected_label)
+  - Widget trait (render, area, needs_render, etc.)
+  - Theme support (different themes, on_theme_change)
+  - Rendering (fill bg, has content, various areas)
+  - Edge cases (empty strings, long options, many options)
+  - Bounds clamping
 
 ## Next Priority Widgets (200-350 LOC)
 
-1. **Select** (294 LOC) — 0 tests — NEXT
-2. **TabBar** (252 LOC) — 0 tests
+1. ~~**Select** (294 LOC) — ✅ 39 tests~~ — DONE
+2. **TabBar** (252 LOC) — 0 tests — NEXT
 3. **Hud** (242 LOC) — 0 tests
 4. **Slider** (275 LOC) — 11 tests (needs more)
 5. **Radio** (215 LOC) — 0 tests
