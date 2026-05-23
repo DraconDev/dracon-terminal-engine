@@ -1,7 +1,7 @@
 # Audit Tasks Progress
 
 **Started:** 2026-05-23  
-**Updated:** 2026-05-23 (Iteration 1)
+**Updated:** 2026-05-23 (Iteration 2)
 
 ## ✅ COMPLETE: Production Unwrap Audit (src/)
 
@@ -19,58 +19,40 @@ After auditing ALL 39,000+ lines of `src/`, **only 5 production unwraps** were f
 
 ## ✅ COMPLETE: extensions/lsp-server Audit
 
-**Found: 14 production unwraps** (TODO.md said 22, likely outdated count)
+**Found: 14 production unwraps**
 
 ### Pattern Analysis:
-1. **6x `tokio::runtime::Builder::new_current_thread()...build().unwrap()`**
-   - Lines 352, 375, 427, 452, 480, 523, 536
-   - Creating async runtime
-   - **Severity:** 🟡 MEDIUM - Runtime creation can fail if system resources exhausted
-
-2. **8x `serde_json::to_string(...).unwrap()`**
-   - JSON serialization of events
-   - **Severity:** 🟢 LOW - Serialization of valid structs should never fail
-
-### All lsp-server unwraps:
-| Line | Code |
-|------|------|
-| 352 | `tokio::runtime::Builder...build().unwrap()` |
-| 360 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 366 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 375 | `tokio::runtime::Builder...build().unwrap()` |
-| 382 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 427 | `tokio::runtime::Builder...build().unwrap()` |
-| 437 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 452 | `tokio::runtime::Builder...build().unwrap()` |
-| 462 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 480 | `tokio::runtime::Builder...build().unwrap()` |
-| 487 | `serde_json::to_string(&PreviewEvent...).unwrap()` |
-| 523 | `tokio::runtime::Builder...build().unwrap()` |
-| 527 | `serde_json::to_string(&event).unwrap()` |
-| 536 | `tokio::runtime::Builder...build().unwrap()` |
-| 867 | `serde_json::to_string(&event).unwrap()` |
+1. **6x `tokio::runtime::Builder...build().unwrap()`** — Runtime creation
+2. **8x `serde_json::to_string(...).unwrap()`** — JSON serialization
 
 ## ✅ COMPLETE: Unsafe Block Audit + SAFETY Comments Added
 
 ### plane.rs — ALL HAVE SAFETY NOW ✅
-
-| Line | Status |
-|------|--------|
-| 196 | ✅ `// SAFETY: byte_offset is guaranteed...` |
-| 201 | ✅ `// SAFETY: next_offset is guaranteed...` |
-| 266 | ✅ Already had SAFETY |
-| 276 | ✅ `// SAFETY: pos is guaranteed...` |
-| 478 | ✅ Doc comment has SAFETY |
-
 ### backend/tty.rs — ALL HAVE SAFETY ✅
 ### framework/app.rs — ALL HAVE SAFETY ✅
+
+## ✅ COMPLETE: ColorPicker Tests Added (Iteration 2)
+
+**Added: `tests/widget_color_picker_test.rs`** — 54 tests
+
+### Test Categories:
+- Construction: 6 tests
+- Theme: 2 tests
+- Color Conversion: 9 tests
+- HSL Setting: 7 tests
+- Hex Setting: 6 tests
+- Widget Trait: 12 tests
+- Rendering: 3 tests
+- Callbacks: 2 tests
+- Edge Cases: 3 tests
+- Theme Interaction: 1 test
+- Color Round-trip: 2 tests
 
 ## 📊 Test Coverage Gaps
 
 ### Needs Tests (0 tests, >300 LOC)
 | Widget | LOC | Tests | Priority |
 |--------|-----|-------|----------|
-| `ColorPicker` | 750 | 0 | 🔴 HIGH |
 | `TagsInput` | 691 | 0 | 🔴 HIGH |
 | `Calendar` | 628 | 0 | 🔴 HIGH |
 | `Kanban` | 744 | 0 | 🔴 HIGH |
@@ -81,17 +63,17 @@ After auditing ALL 39,000+ lines of `src/`, **only 5 production unwraps** were f
 
 ## 🎯 Recommended Actions
 
-### 🔴 HIGH PRIORITY
-1. **Add tests for ColorPicker** (750 LOC, 0 tests)
-2. **Add tests for TagsInput** (691 LOC, 0 tests)
-3. **Add tests for Calendar** (628 LOC, 0 tests)
-4. **Add tests for Kanban** (744 LOC, 0 tests)
+### ✅ COMPLETE THIS SESSION
+1. **Add SAFETY comments to `compositor/plane.rs`** — DONE
+2. **Audit all src/ unwraps** — DONE
+3. **Add tests for ColorPicker** — DONE (54 tests)
 
-### 🟡 MEDIUM PRIORITY
-1. **Audit `extensions/lsp-server/`** — 14 unwraps (updated from 22)
-2. **Add tests for Autocomplete** (453 LOC, 0 tests)
-3. **Add tests for RichText** (436 LOC, 0 tests)
+### 🔴 HIGH PRIORITY (Next Sessions)
+1. **Add tests for TagsInput** (691 LOC, 0 tests)
+2. **Add tests for Calendar** (628 LOC, 0 tests)
+3. **Add tests for Kanban** (744 LOC, 0 tests)
 
-### 🟢 LOW PRIORITY
-1. Consider replacing 5 production unwraps with better error handling
-2. Add snapshot tests using `insta` (unused dev dep)
+### 🟡 MEDIUM PRIORITY (Next Sessions)
+1. **Add tests for Autocomplete** (453 LOC, 0 tests)
+2. **Add tests for RichText** (436 LOC, 0 tests)
+3. **Add tests for CommandPalette** (558 LOC, 0 tests)

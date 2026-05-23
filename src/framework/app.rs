@@ -456,6 +456,18 @@ impl App {
         self
     }
 
+    /// Sets the UI theme (builder-style, equivalent to `set_theme`).
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.compositor.set_clear_color(theme.bg);
+        self.theme = theme;
+        self.dirty_tracker.mark_all_dirty();
+        for widget in self.widgets.borrow_mut().iter_mut() {
+            widget.on_theme_change(&self.theme);
+            widget.mark_dirty();
+        }
+        self
+    }
+
     /// Activate the input shield for the given duration.
     ///
     /// During the shield period, all key and mouse events are silently
