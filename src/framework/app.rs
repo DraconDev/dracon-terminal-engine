@@ -572,14 +572,14 @@ impl App {
     ///     let app = std::rc::Rc::new(std::cell::RefCell::new(Counter { count: 0 }));
     ///     let app_clone = app.clone();
     ///     App::new()?
+    ///         .on_tick(move |ctx, _tick| {
+    ///             let (w, h) = ctx.compositor().size();
+    ///             ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
+    ///         })
     ///         .on_input(move |key| {
     ///             // Handle key events here
     ///             app_clone.borrow_mut().count += 1;
     ///             true  // event handled
-    ///         })
-    ///         .on_tick(move |ctx, _tick| {
-    ///             let (w, h) = ctx.compositor().size();
-    ///             ctx.add_plane(app_clone.borrow().render(Rect::new(0, 0, w, h)));
     ///         })
     ///         .run(|_| {});
     ///     Ok(())
