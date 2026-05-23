@@ -28,12 +28,20 @@ use std::time::Instant;
 ///
 /// ## Example
 ///
-/// ```ignore
-/// app.run(|ctx| {
-///     ctx.mark_dirty(0, 0, 80, 24); // mark entire screen dirty
-///     let plane = my_widget.render(ctx.compositor().size().into());
-///     ctx.add_plane(plane);
-/// });
+/// ```no_run
+/// use dracon_terminal_engine::prelude::*;
+///
+/// fn setup_app() -> std::io::Result<()> {
+///     App::new()?
+///         .on_tick(|ctx, _tick| {
+///             // Access the theme
+///             let _theme = ctx.theme();
+///             // Add a plane to the compositor
+///             ctx.add_plane(Plane::new(0, 80, 24));
+///         })
+///         .run(|_ctx| {});
+///     Ok(())
+/// }
 /// ```
 pub struct Ctx<'a> {
     pub(crate) compositor: &'a mut Compositor,
