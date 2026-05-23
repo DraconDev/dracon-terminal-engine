@@ -321,12 +321,16 @@ impl KeybindingSet {
     ///
     /// ```no_run
     /// use dracon_terminal_engine::framework::keybindings::{KeybindingSet, resolve_keybindings};
-    /// use dracon_terminal_engine::input::event::{KeyEvent, KeyCode, KeyEventKind};
+    /// use dracon_terminal_engine::input::event::{KeyEvent, KeyCode, KeyEventKind, KeyModifiers};
     ///
     /// let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     ///
     /// // Check if a key event matches the "quit" action
-    /// let key = KeyEvent { code: KeyCode::Char('q'), modifiers: InputModifiers::CTRL, kind: KeyEventKind::Press, raw_code: 0 };
+    /// let key = KeyEvent {
+    ///     code: KeyCode::Char('q'),
+    ///     modifiers: KeyModifiers::CONTROL,
+    ///     kind: KeyEventKind::Press,
+    /// };
     /// if keybindings.matches("quit", &key) {
     ///     // Handle quit action
     /// }

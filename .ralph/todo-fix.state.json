@@ -1,13 +1,14 @@
 {
   "name": "todo-fix",
   "taskFile": ".ralph/todo-fix.md",
-  "iteration": 11,
+  "iteration": 12,
   "maxIterations": 12,
   "itemsPerIteration": 0,
   "reflectEvery": 4,
   "reflectInstructions": "REFLECTION CHECKPOINT\n\nPause and reflect on your progress:\n1. What has been accomplished so far?\n2. What's working well?\n3. What's not working or blocking progress?\n4. Should the approach be adjusted?\n5. What are the next priorities?\n\nUpdate the task file with your reflection, then continue working.",
-  "active": true,
-  "status": "active",
+  "active": false,
+  "status": "completed",
   "startedAt": "2026-05-23T14:46:44.575Z",
-  "lastReflectionAt": 9
+  "lastReflectionAt": 9,
+  "completedAt": "2026-05-23T15:32:53.331Z"
 }

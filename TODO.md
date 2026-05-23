@@ -103,16 +103,18 @@ documenting that `App::new()` can fail if the terminal cannot be initialized.
 - [x] Add doc comments for all `pub fn` in `app.rs` (~30 public methods, some undocumented)
   - ✅ `set_theme` — added doc comment
 - [x] Add compile-tested doc-examples for `App::on_input`, `App::on_tick`, `App::run`
-  - ✅ `on_tick` — compile-tested example (app.rs line 496)
-  - ✅ `on_input` — compile-tested example (app.rs line 552)
-  - ✅ lib.rs example — compile-tested example with Widget impl
-  - ✅ framework/mod.rs example — compile-tested example with List widget
-- [x] Add example for `MarqueeState` usage
-  - ✅ `MarqueeState` struct — compile-tested lifecycle example
+  - ✅ `App` struct — compile-tested example with Widget impl (app.rs line 55)
+  - ✅ `on_tick` — compile-tested example (app.rs line 508)
+  - ✅ `on_input` — compile-tested example (app.rs line 564)
+  - ✅ `Ctx` — compile-tested example (ctx.rs line 31)
+  - ✅ `lib.rs` example — compile-tested example with Widget impl
+  - ✅ `framework/mod.rs` example — compile-tested example with List widget
+  - ✅ `MarqueeState` — compile-tested lifecycle example
   - ✅ `render_marquee` fn — compile-tested usage example
-- [ ] Add example for `MarqueeState` usage
+  - ✅ `t_interpolate` — compile-tested example (i18n.rs)
+  - ✅ `matches` — compile-tested example (keybindings.rs)
 - [ ] Add example for `SceneRouter` + embedded scenes pattern
-- [ ] Currently 20 of 33 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 13 compile, 20 ignored)
+- [ ] Currently 19 of 33 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 14 compile, 19 ignored)
 
 ### 10. `text_input_base_test.rs` — 26 unit tests only
 
