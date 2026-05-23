@@ -476,7 +476,7 @@
   - [ ] Focus styling verification
   - [ ] Scroll behavior
   - [ ] PasswordInput mask/unmask toggle
-- [ ] `TagsInput` widget — add tests (690 LOC, 0 tests)
+- [x] `TagsInput` widget — add tests (690 LOC, ✅ **52 tests**)
 - [ ] `Calendar` widget — add tests (628 LOC, 0 tests)
 - [x] `ColorPicker` widget — add tests (750 LOC, ✅ **54 tests**)
 - [ ] `Autocomplete` widget — add tests (453 LOC, 0 tests)
@@ -638,7 +638,7 @@
 
 **Under-tested Widgets**
 
-- [ ] `TagsInput` (691 LOC) — 0 tests
+- [x] `TagsInput` (691 LOC) — ✅ 52 tests
 - [ ] `Calendar` (628 LOC) — 0 tests
 - [x] `ColorPicker` (750 LOC) — ✅ 54 tests
 - [ ] `Autocomplete` (453 LOC) — 0 tests
@@ -723,7 +723,7 @@
 8. Add error context/messages
 
 ### Loop 2: Test Coverage (6-8 iterations)
-1. Add `TagsInput` tests
+1. ~~Add `TagsInput` tests~~ — ✅ DONE (52 tests)
 2. Add `Calendar` tests
 3. ~~Add `ColorPicker` tests~~ — ✅ DONE (54 tests)
 4. **Restore App::theme() builder method** — ✅ DONE
