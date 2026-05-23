@@ -1,6 +1,7 @@
 # Dracon Terminal Engine — Project Audit
 
 **Created:** 2026-05-23  
+**Updated:** 2026-05-23  
 **Version:** 0.1.10  
 **Total LOC:** 39,065  
 **Framework modules:** 24  
@@ -12,59 +13,564 @@
 
 ---
 
-## 📦 Project Overview
+## 🎯 AUDIT TASK MASTER LIST
 
-### What It Is
-`dracon-terminal-engine` is a terminal application framework for Rust. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop.
-
-### Key Characteristics
-- **Mouse-friendly** with z-indexed planes
-- **53 built-in widgets** in the framework
-- **21 themes** (Nord, Dracula, Catppuccin, etc.)
-- **Dirty rendering** for efficient updates
-- **Focus management** system
-- **Command-driven architecture** — AI can enumerate and trigger all actions
-- **Single binary deployment** — no external runtime
-
-### License
-- **AGPL-3.0-only** (open source)
-- **Commercial License** available
+### 🔴 HIGH PRIORITY (Critical/Blocking)
+### 🟡 MEDIUM PRIORITY (Should Do)
+### 🟢 LOW PRIORITY (Nice to Have)
+### 🔵 EXPLORATORY (Research/Investigation)
 
 ---
 
-## 📁 Source Structure
+## 1. 🔴 CRITICAL: Security & Dependencies
+
+### 1.1 Dependency Updates
+- [ ] Monitor `lru 0.16.4` for future CVEs (RUSTSEC-2026-0002)
+- [ ] Update `ratatui` 0.30.x for future breaking changes
+- [ ] Check `signal-hook` for security advisories
+- [ ] Audit `tokio` version compatibility
+- [ ] Review `serde_json` version for JSON parsing security
+- [ ] Check `unicode-width` for Unicode edge cases
+
+### 1.2 Dependency Cleanup
+- [ ] Run `cargo udeps` to find unused dependencies
+- [ ] Remove `insta` if not used (unused dev dep noted in audit)
+- [ ] Audit `optional` dependencies for bloat
+- [ ] Check for duplicate transitive dependencies
+- [ ] Evaluate `parking_lot` vs `std::sync::Mutex` performance
+
+---
+
+## 2. 🔴 CRITICAL: Code Quality
+
+### 2.1 Production Unwraps (5 total)
+All documented, but evaluate for better error handling:
+
+- [ ] `app.rs:1000` — `Self::new().expect(...)` in `Default::default()`
+  - Consider: Make `Default` fail explicitly instead of panicking
+- [ ] `scene_router.rs:265` — `stack.pop().expect(...)`
+  - Consider: Convert to `Result` return type
+- [ ] `scene_router.rs:292` — `stack.pop().expect(...)`
+  - Consider: Convert to `Result` return type
+- [ ] `calendar.rs:145` — `NaiveDate::from_ymd_opt(...).expect(...)`
+  - Consider: Use `expect()` is OK for hardcoded date
+- [ ] `input/reader.rs:26` — `Signals::new(...).expect(...)`
+  - Consider: Graceful degradation if signals unavailable
+
+### 2.2 extensions/lsp-server Unwraps (14 total)
+- [ ] Refactor 6 tokio runtime `.build().unwrap()` calls
+- [ ] Refactor 8 `serde_json::to_string(...).unwrap()` calls
+- [ ] Add proper error propagation in LSP server
+
+### 2.3 Unsafe Blocks (12 total)
+All documented with SAFETY comments. Verify periodically:
+
+- [ ] Review `compositor/plane.rs` unsafe blocks annually
+- [ ] Review `backend/tty.rs` unsafe blocks annually
+- [ ] Consider adding `cargo +nightly miri` to CI
+
+### 2.4 Clippy & Lints
+- [ ] Run `cargo clippy --all-targets --all-features`
+- [ ] Fix all `clippy::unwrap_used` warnings
+- [ ] Fix all `clippy::expect_used` warnings
+- [ ] Fix all `clippy::panicking_unwrap` warnings
+- [ ] Fix all `clippy::unwrap_or` that should be `unwrap_or_else`
+- [ ] Add `clippy` to CI pipeline
+
+### 2.5 Code Format
+- [ ] Run `cargo fmt -- --check`
+- [ ] Fix formatting issues
+- [ ] Add `rustfmt` to pre-commit hooks
+- [ ] Consider run `cargo fmt -- --emit=files` on save
+
+---
+
+## 3. 🔴 CRITICAL: Testing
+
+### 3.1 Widget Test Coverage (HIGH PRIORITY)
+All 53 framework widgets need tests. Progress:
+
+| Widget | LOC | Tests | Status |
+|--------|-----|-------|--------|
+| ColorPicker | 750 | 54 | ✅ DONE |
+| TagsInput | 691 | 52 | ✅ DONE |
+| Calendar | 628 | 56 | ✅ DONE |
+| Kanban | 744 | 64 | ✅ DONE |
+| Autocomplete | 453 | 43 | ✅ DONE |
+| RichText | 436 | 44 | ✅ DONE |
+| NotificationCenter | 342 | 40 | ✅ DONE |
+| CommandPalette | 558 | 53 | ✅ DONE |
+| **Subtotal** | **4,602** | **406** | ✅ DONE |
+
+**Remaining Widgets (45 total):**
+
+#### Priority 1: Medium Widgets (200-350 LOC)
+- [ ] `Divider` (330 LOC) — 0 tests
+- [ ] `Select` (294 LOC) — 0 tests
+- [ ] `TabBar` (252 LOC) — 0 tests
+- [ ] `Hud` (242 LOC) — 0 tests
+- [ ] `Slider` (275 LOC) — 11 tests (needs more)
+- [ ] `Radio` (215 LOC) — 0 tests
+- [ ] `Checkbox` (217 LOC) — 0 tests
+- [ ] `Toggle` (205 LOC) — 0 tests
+
+#### Priority 2: Smaller Widgets (<200 LOC)
+- [ ] `ProgressBar` (143 LOC) — 0 tests
+- [ ] `Spinner` (141 LOC) — 0 tests
+- [ ] `SearchInput` (135 LOC) — 0 tests
+- [ ] `Tooltip` (116 LOC) — 0 tests
+- [ ] `DebugOverlay` (129 LOC) — 11 tests
+- [ ] `Profiler` (176 LOC) — 10 tests
+- [ ] `EventLogger` (156 LOC) — 0 tests
+- [ ] `StatusBar` (186 LOC) — 10 tests
+- [ ] `WidgetInspector` (160 LOC) — 0 tests
+- [ ] `Breadcrumbs` (178 LOC) — 0 tests
+- [ ] `Form` (185 LOC) — 0 tests
+- [ ] `Tree` (190 LOC) — 0 tests
+- [ ] `Table` (280 LOC) — 0 tests
+- [ ] `List` (250 LOC) — 0 tests
+- [ ] `Window` (165 LOC) — 0 tests
+- [ ] `Panel` (145 LOC) — 0 tests
+- [ ] `ScrollArea` (155 LOC) — 0 tests
+
+#### Priority 3: Core/Framework Widgets
+- [ ] `TextInput` (380 LOC) — 0 tests
+- [ ] `PasswordInput` (320 LOC) — 0 tests
+- [ ] `Editor` (standalone) — 0 tests
+- [ ] `Button` (195 LOC) — 0 tests
+- [ ] `Image` (120 LOC) — 0 tests
+- [ ] `Markdown` (110 LOC) — 0 tests
+- [ ] `Chart` (200 LOC) — 0 tests
+- [ ] `Gauge` (130 LOC) — 0 tests
+
+#### Priority 4: Low Priority Widgets
+- [ ] `Dialog` (95 LOC) — 0 tests
+- [ ] `MenuBar` (85 LOC) — 0 tests
+- [ ] `ContextMenu` (75 LOC) — 0 tests
+- [ ] `Badge` (65 LOC) — 0 tests
+- [ ] `Avatar` (60 LOC) — 0 tests
+- [ ] `Chip` (55 LOC) — 0 tests
+- [ ] `Skeleton` (50 LOC) — 0 tests
+- [ ] `ProgressRing` (140 LOC) — 0 tests
+- [ ] `Sparkline` (120 LOC) — 0 tests
+- [ ] `LineChart` (180 LOC) — 0 tests
+- [ ] `BarChart` (175 LOC) — 0 tests
+- [ ] `PieChart` (150 LOC) — 0 tests
+- [ ] `Heatmap` (165 LOC) — 0 tests
+- [ ] `Calendar` (628 LOC) — 56 tests (needs more edge cases)
+
+### 3.2 Test Infrastructure
+- [ ] Add `cargo-insta` for snapshot testing
+- [ ] Create snapshot tests for theme rendering
+- [ ] Add fuzzy/approximate rendering tests
+- [ ] Add performance regression tests
+- [ ] Add memory leak detection tests
+- [ ] Add concurrent access tests
+
+### 3.3 Test Quality
+- [ ] Ensure all tests are deterministic
+- [ ] Remove tests that depend on timing
+- [ ] Add property-based tests with `proptest`
+- [ ] Add fuzzing with `cargo-fuzz`
+- [ ] Measure and enforce test coverage thresholds
+
+---
+
+## 4. 🔴 CRITICAL: Documentation
+
+### 4.1 API Documentation
+- [ ] Audit all public APIs for missing docs
+- [ ] Add examples to complex widget docs
+- [ ] Document all `Option`/`Result` parameters
+- [ ] Document all error types
+- [ ] Document all widget callbacks
+
+### 4.2 Doc Tests
+Current: 14 compile-tested, 19 ignored
+
+- [ ] Compile-test all ignored doc examples
+- [ ] Add doc examples for all widgets
+- [ ] Add doc examples for all framework modules
+- [ ] Add doc examples for core types
+- [ ] Verify doc examples are idiomatic
+
+### 4.3 Architecture Docs
+- [ ] Add architecture diagram to `AGENTS.md`
+- [ ] Add widget interaction diagram
+- [ ] Document event flow (input → widget → render)
+- [ ] Document focus management system
+- [ ] Document theme system
+- [ ] Document plugin architecture
+
+---
+
+## 5. 🟡 MEDIUM: Performance
+
+### 5.1 Rendering Performance
+- [ ] Profile render times for complex widgets
+- [ ] Add dirty region tracking benchmarks
+- [ ] Optimize `Plane` cell updates
+- [ ] Consider SIMD for text rendering
+- [ ] Add render budget tests (must complete in <16ms)
+
+### 5.2 Memory Performance
+- [ ] Profile memory usage for long-running apps
+- [ ] Add memory allocation benchmarks
+- [ ] Check for memory leaks in widget lifecycle
+- [ ] Consider arena allocation for plane pool
+- [ ] Run `cargo-bloat` for binary size
+
+### 5.3 Startup Performance
+- [ ] Benchmark cold start time
+- [ ] Benchmark warm start time (already running)
+- [ ] Add lazy initialization where possible
+- [ ] Consider incremental theme loading
+
+### 5.4 Input Latency
+- [ ] Profile input event handling
+- [ ] Add latency benchmarks
+- [ ] Optimize key event parsing
+- [ ] Optimize mouse event dispatch
+
+---
+
+## 6. 🟡 MEDIUM: Framework Quality
+
+### 6.1 Widget Trait
+- [ ] Audit all widgets implement all trait methods
+- [ ] Add default implementations where sensible
+- [ ] Consider `#[const]` constructors where possible
+- [ ] Add sealed trait for internal widgets
+
+### 6.2 App Framework
+- [ ] Review `App` builder API ergonomics
+- [ ] Consider fluent builder for all widgets
+- [ ] Add more `From` implementations
+- [ ] Add more `Into` implementations
+- [ ] Consider `Default` implementations
+
+### 6.3 Event System
+- [ ] Review event dispatch performance
+- [ ] Consider event batching for high-frequency events
+- [ ] Add event filtering support
+- [ ] Document event priority
+
+### 6.4 Focus Management
+- [ ] Review focus traversal order
+- [ ] Add focus group support
+- [ ] Consider modal focus locking
+- [ ] Add focus test coverage
+
+---
+
+## 7. 🟡 MEDIUM: Code Organization
+
+### 7.1 Large Files
+- [ ] `editor.rs` (3,025 LOC) — Too large to split, document internal modules
+- [ ] `utils.rs` (1,217 LOC) — Too coupled to split, document functions
+- [ ] Consider extracting to separate modules if possible
+
+### 7.2 Module Organization
+- [ ] Review `src/widgets/` vs `src/framework/widgets/` split
+- [ ] Consider flattening shallow modules
+- [ ] Add `Cargo.toml` features for optional components
+- [ ] Consider plugin system for extensions
+
+### 7.3 Type Organization
+- [ ] Review public API surface area
+- [ ] Add sealed traits for internal use
+- [ ] Consider newtype patterns for IDs
+- [ ] Add `FromStr` implementations for parsing
+
+---
+
+## 8. 🟡 MEDIUM: Error Handling
+
+### 8.1 Error Types
+- [ ] Review `error.rs` completeness
+- [ ] Add more specific error variants
+- [ ] Add error context (source chain)
+- [ ] Consider `anyhow` for application errors
+- [ ] Consider `thiserror` for library errors
+
+### 8.2 Error Recovery
+- [ ] Add retry logic for transient failures
+- [ ] Add graceful degradation strategies
+- [ ] Document error recovery patterns
+
+---
+
+## 9. 🟡 MEDIUM: Theme System
+
+### 9.1 Theme Quality
+- [ ] Audit all 21 themes for contrast ratios
+- [ ] Add WCAG compliance tests
+- [ ] Add dark/light mode detection
+- [ ] Consider semantic token names
+- [ ] Add custom theme documentation
+
+### 9.2 Theme Tools
+- [ ] Add theme previewer example
+- [ ] Add theme export/import
+- [ ] Consider VS Code theme extension
+- [ ] Consider web-based theme editor
+
+---
+
+## 10. 🟡 MEDIUM: Internationalization
+
+### 10.1 i18n Coverage
+- [ ] Audit all hardcoded strings
+- [ ] Add RTL language support
+- [ ] Add pluralization rules
+- [ ] Add date/time localization
+- [ ] Add number localization
+
+### 10.2 i18n Tools
+- [ ] Add string extraction tool
+- [ ] Add translation template generator
+- [ ] Consider web-based translation UI
+
+---
+
+## 11. 🟢 LOW: CI/CD
+
+### 11.1 Current CI Jobs
+- [ ] ✅ `outdated` job — added
+- [ ] ✅ `changelog` job — added
+- [ ] Add `clippy` job
+- [ ] Add `miri` job (unsafe code)
+- [ ] Add `msrv` job (minimum Rust version)
+
+### 11.2 Additional CI Jobs
+- [ ] Add `cargo-udeps` job
+- [ ] Add `cargo-diet` job (binary size)
+- [ ] Add `cargo-outdated --recursive`
+- [ ] Add benchmark comparison
+- [ ] Add code coverage reports
+- [ ] Add dependency license audit
+
+### 11.3 Release Process
+- [ ] Add changelog automation
+- [ ] Add semantic versioning enforcement
+- [ ] Add pre-release testing
+- [ ] Add post-release verification
+
+---
+
+## 12. 🟢 LOW: Examples
+
+### 12.1 Example Testing
+- [ ] Add smoke tests for all 57 examples
+- [ ] Add integration tests for complex examples:
+  - [ ] `ide.rs`
+  - [ ] `git_tui.rs`
+  - [ ] `scene_router_demo.rs`
+  - [ ] `form_demo.rs`
+  - [ ] `tiles.rs`
+  - [ ] `dashboard_builder.rs`
+
+### 12.2 Example Quality
+- [ ] Audit all examples compile cleanly
+- [ ] Add example run timeouts
+- [ ] Add example screenshots
+- [ ] Document example patterns in `AGENTS.md`
+
+### 12.3 New Examples
+- [ ] Terminal file manager example
+- [ ] Database browser example
+- [ ] HTTP client example
+- [ ] IRC/Chat client example
+- [ ] Music player example
+- [ ] Image viewer example
+
+---
+
+## 13. 🟢 LOW: Tooling
+
+### 13.1 cargo-dracon
+- [ ] Add template generation tests
+- [ ] Add snapshot tests for generated files
+- [ ] Verify generated code compiles
+- [ ] Add `--template` flag for custom templates
+- [ ] Add `--interactive` flag
+
+### 13.2 Editor Integration
+- [ ] Add VS Code extension
+- [ ] Add Vim/Neovim plugin
+- [ ] Add emacs major mode
+- [ ] Add JetBrains plugin
+
+---
+
+## 14. 🟢 LOW: Accessibility
+
+### 14.1 Screen Reader Support
+- [ ] Audit aria-live regions
+- [ ] Add screen reader announcements
+- [ ] Test with popular screen readers
+- [ ] Add screen reader mode toggle
+
+### 14.2 Keyboard Navigation
+- [ ] Audit tab order
+- [ ] Add skip links
+- [ ] Add focus indicators
+- [ ] Test with keyboard-only navigation
+
+### 14.3 Visual Accessibility
+- [ ] Add high contrast mode
+- [ ] Add reduced motion mode
+- [ ] Add zoom support
+- [ ] Test colorblind modes
+
+---
+
+## 15. 🔵 EXPLORATORY: Features
+
+### 15.1 New Widgets
+- [ ] Rich text editor with markdown
+- [ ] Code editor with syntax highlighting
+- [ ] Spreadsheet grid
+- [ ] Kanban board (advanced)
+- [ ] Calendar with events
+- [ ] Tree view with search
+
+### 15.2 New Features
+- [ ] Plugin system (already exists, expand)
+- [ ] Remote rendering (VNC-like)
+- [ ] Multi-terminal support
+- [ ] Window management
+- [ ] Tab groups
+- [ ] Split panes (advanced)
+
+### 15.3 Integrations
+- [ ] LSP integration
+- [ ] Git integration
+- [ ] Database integration
+- [ ] HTTP client
+- [ ] WebSocket support
+- [ ] gRPC support
+
+---
+
+## 16. 🔵 EXPLORATORY: Performance Research
+
+### 16.1 GPU Acceleration
+- [ ] Evaluate OpenGL rendering
+- [ ] Evaluate Vulkan rendering
+- [ ] Benchmark vs CPU rendering
+- [ ] Consider WebGPU for future
+
+### 16.2 Parallel Rendering
+- [ ] Evaluate multi-threaded rendering
+- [ ] Evaluate batch rendering
+- [ ] Consider lock-free data structures
+
+### 16.3 Binary Size
+- [ ] Run `cargo-bloat`
+- [ ] Identify size optimization opportunities
+- [ ] Consider link-time optimization
+
+---
+
+## 17. 🔵 EXPLORATORY: Testing Research
+
+### 17.1 Property-Based Testing
+- [ ] Add `proptest` for widget rendering
+- [ ] Add `proptest` for layout calculations
+- [ ] Add `proptest` for theme parsing
+
+### 17.2 Fuzzing
+- [ ] Add `cargo-fuzz` for input parsing
+- [ ] Add `cargo-fuzz` for theme parsing
+- [ ] Add `cargo-fuzz` for widget configuration
+
+### 17.3 Mutation Testing
+- [ ] Add `mutagen` for test quality
+- [ ] Evaluate mutation coverage
+
+---
+
+## 18. 🔵 EXPLORATORY: Research
+
+### 18.1 Other TUIs
+- [ ] Study Bubble Tea architecture
+- [ ] Study Ratatui examples
+- [ ] Study Textual architecture
+- [ ] Study Chet architecture
+- [ ] Extract best practices
+
+### 18.2 GUI Frameworks
+- [ ] Study Electron architecture
+- [ ] Study Tauri architecture
+- [ ] Study Dioxus architecture
+- [ ] Consider hybrid approaches
+
+---
+
+## 19. 📊 Progress Summary
+
+### Completed Tasks (2026-05-23 Session)
+
+| Task | Status | Notes |
+|------|--------|-------|
+| lru unsoundness fix | ✅ DONE | Updated ratatui 0.29→0.30, lru 0.12.5→0.16.4 |
+| CI outdated job | ✅ DONE | Added to `.github/workflows/ci.yml` |
+| CI changelog job | ✅ DONE | Added to `.github/workflows/ci.yml` |
+| Security advisories | ✅ DONE | Updated RUSTSEC references |
+| editor.rs analysis | ✅ DONE | Too coupled to split |
+| App::new().unwrap() docs | ✅ DONE | Fixed doc examples |
+| Test coverage gaps | ✅ DONE | progress_ring, sparkline, list_common |
+| size_test.rs move | ✅ DONE | Moved to `tests/` |
+| set_theme doc comment | ✅ DONE | Removed duplicate |
+| Compile doc examples | ✅ DONE | 14 compile-tested, 19 ignored |
+| Production unwrap audit | ✅ DONE | 5 unwraps documented |
+| lsp-server unwrap audit | ✅ DONE | 14 unwraps documented |
+| Unsafe block SAFETY | ✅ DONE | 12 blocks documented |
+| ColorPicker tests | ✅ DONE | 54 tests |
+| TagsInput tests | ✅ DONE | 52 tests |
+| Calendar tests | ✅ DONE | 56 tests |
+| Kanban tests | ✅ DONE | 64 tests |
+| Autocomplete tests | ✅ DONE | 43 tests |
+| RichText tests | ✅ DONE | 44 tests |
+| NotificationCenter tests | ✅ DONE | 40 tests |
+| CommandPalette tests | ✅ DONE | 53 tests |
+
+### Task Statistics
+
+| Category | Total | Completed | Remaining |
+|----------|-------|-----------|-----------|
+| Critical Security | 6 | 1 | 5 |
+| Critical Code Quality | 19 | 5 | 14 |
+| Critical Testing | 60+ | 8 | 52+ |
+| Critical Documentation | 10 | 1 | 9 |
+| Medium Priority | 50+ | 0 | 50+ |
+| Low Priority | 40+ | 0 | 40+ |
+| Exploratory | 30+ | 0 | 30+ |
+
+---
+
+## 📁 Reference: Project Structure
 
 ### Core Modules (`src/`)
 
-| Module | LOC | Pub Fns | Description |
-|--------|-----|---------|-------------|
-| `lib.rs` | 232 | — | Main entry point |
-| `utils.rs` | 1,217 | — | Catch-all utilities (⚠️ large) |
-| `text.rs` | 387 | — | Text utilities |
-| `layout.rs` | 145 | — | Layout engine |
-| `system.rs` | 288 | — | System metrics |
-| `error.rs` | — | — | Error types |
-| **compositor/** | — | — | Plane pool, rendering |
-| **input/** | — | — | Event parsing |
-| **integration/** | — | — | ratatui integration |
-| **widgets/** | — | — | Standalone widgets |
-| **framework/** | — | — | App framework + widgets |
-| **backend/** | — | — | TTY backend |
-| **visuals/** | — | — | Icons, accessibility |
-| **core/** | — | — | Terminal core |
+| Module | LOC | Description |
+|--------|-----|-------------|
+| `lib.rs` | 232 | Main entry point |
+| `utils.rs` | 1,217 | Catch-all utilities |
+| `text.rs` | 387 | Text utilities |
+| `layout.rs` | 145 | Layout engine |
+| `system.rs` | 288 | System metrics |
 
 ### Large Files (>400 LOC)
 
 | File | LOC | Priority |
 |------|-----|----------|
-| `src/widgets/editor.rs` | 3,025 | 🔴 HIGH |
-| `src/utils.rs` | 1,217 | 🟡 MEDIUM |
+| `src/widgets/editor.rs` | 3,025 | 🔴 Too coupled to split |
+| `src/utils.rs` | 1,217 | 🟡 Too coupled to split |
 | `src/framework/theme.rs` | 1,447 | 🟢 OK |
 | `src/framework/app.rs` | 1,667 | 🟢 OK |
 | `src/framework/command.rs` | 1,095 | 🟢 OK |
-| `src/framework/scene_router.rs` | 625 | 🟢 OK |
-| `src/visuals/accessibility.rs` | 416 | 🟢 OK |
-| `src/visuals/icons.rs` | 412 | 🟢 OK |
 
 ### Framework Modules (`src/framework/`)
 
@@ -96,663 +602,159 @@
 
 ### Framework Widgets (`src/framework/widgets/`)
 
-| Widget | LOC | Status | Priority |
-|--------|-----|--------|----------|
-| `color_picker.rs` | 750 | — | 🟡 MEDIUM |
-| `kanban.rs` | 744 | — | 🟡 MEDIUM |
-| `tags_input.rs` | 691 | — | 🟡 MEDIUM |
-| `table.rs` | 676 | Tests ✅ | 🟢 OK |
-| `calendar.rs` | 628 | — | 🟡 MEDIUM |
-| `form.rs` | 585 | Tests ✅ | 🟢 OK |
-| `tree.rs` | 567 | Tests ✅ | 🟢 OK |
-| `command_palette.rs` | 558 | — | 🟡 MEDIUM |
-| `list.rs` | 557 | Tests ✅ | 🟢 OK |
-| `context_menu.rs` | 865 | Tests ✅ | 🟢 OK |
-| `confirm_dialog.rs` | 501 | Tests ✅ | 🟢 OK |
-| `sparkline.rs` | 456 | Tests ✅ | 🟢 OK |
-| `autocomplete.rs` | 453 | — | 🟡 MEDIUM |
-| `rich_text.rs` | 436 | — | 🟡 MEDIUM |
-| `log_viewer.rs` | 423 | Tests ✅ | 🟢 OK |
-| `split.rs` | 349 | Tests ✅ | 🟢 OK |
-| `notification_center.rs` | 342 | — | 🟢 LOW |
-| `divider.rs` | 330 | — | 🟢 LOW |
-| `select.rs` | 294 | — | 🟢 LOW |
-| `gauge.rs` | 263 | Tests ✅ | 🟢 OK |
-| `key_value_grid.rs` | 260 | Tests ✅ | 🟢 OK |
-| `streaming_text.rs` | 254 | Tests ✅ | 🟢 OK |
-| `tabbar.rs` | 252 | — | 🟢 LOW |
-| `menu_bar.rs` | 237 | Tests ✅ | 🟢 OK |
-| `hud.rs` | 242 | — | 🟢 LOW |
-| `text_input_base.rs` | 287 | Tests ✅ | 🟢 OK |
-| `checkbox.rs` | 217 | — | 🟢 LOW |
-| `radio.rs` | 215 | — | 🟢 LOW |
-| `button.rs` | 214 | Tests ✅ | 🟢 OK |
-| `toggle.rs` | 205 | — | 🟢 LOW |
-| `toast.rs` | 201 | Tests ✅ | 🟢 OK |
-| `list_common.rs` | 201 | Tests ✅ | 🟢 OK |
-| `status_badge.rs` | 198 | Tests ✅ | 🟢 OK |
-| `status_bar.rs` | 186 | Tests ✅ | 🟢 OK |
-| `profiler.rs` | 176 | — | 🟢 LOW |
-| `widget_inspector.rs` | 160 | — | 🟢 LOW |
-| `event_logger.rs` | 156 | — | 🟢 LOW |
-| `password_input.rs` | 143 | Tests ✅ | 🟢 OK |
-| `progress_bar.rs` | 143 | — | 🟢 LOW |
-| `spinner.rs` | 141 | — | 🟢 LOW |
-| `search_input.rs` | 135 | — | 🟢 LOW |
-| `debug_overlay.rs` | 129 | Tests ✅ | 🟢 OK |
-| `tooltip.rs` | 116 | — | 🟢 LOW |
-| `label.rs` | 133 | Tests ✅ | 🟢 OK |
-| `mod.rs` | 99 | — | Re-exports |
-| `text_editor_adapter.rs` | 262 | Tests ✅ | 🟢 OK |
-| `progress_ring.rs` | 384 | Tests ✅ | 🟢 OK |
-| `modal.rs` | 389 | Tests ✅ | 🟢 OK |
-| `breadcrumbs.rs` | 352 | Tests ✅ | 🟢 OK |
-| `slider.rs` | 275 | Tests ✅ | 🟢 OK |
-
-### Standalone Widgets (`src/widgets/`)
-
-| Widget | LOC | Description |
-|--------|-----|-------------|
-| `editor.rs` | 3,025 | TextEditor (view/edit) |
-| `editor_search.rs` | 293 | Search state |
-| `input.rs` | 286 | Text input |
-| `context_menu.rs` | 83 | Context menu |
-| `panel.rs` | 50 | Panel container |
-| `component.rs` | 53 | Component trait |
-| `button.rs` | 41 | Button |
-| `hotkey.rs` | 22 | Hotkey display |
-| `mod.rs` | 23 | Module re-exports |
-
-### Compositor (`src/compositor/`)
-
-| File | Description |
-|------|-------------|
-| `engine.rs` | Compositor engine |
-| `plane.rs` | Plane (⚠️ unsafe blocks) |
-| `pool.rs` | Plane pool |
-| `filter.rs` | Plane filtering |
-| `size_test.rs` | Size check |
-| `mod.rs` | Module re-exports |
-
-### Input (`src/input/`)
-
-| File | Description |
-|------|-------------|
-| `parser.rs` | Input parsing |
-| `event.rs` | Event types |
-| `reader.rs` | Input reader |
-| `mapping.rs` | ⚠️ Deprecated |
-| `kitty_key.rs` | Kitty keyboard |
-| `async_reader.rs` | Async reader |
-| `mod.rs` | Module re-exports |
-
-### Visuals (`src/visuals/`)
-
-| File | LOC | Description |
-|------|-----|-------------|
-| `icons.rs` | 412 | Icon library |
-| `accessibility.rs` | 416 | Screen reader support |
-| `osc.rs` | 54 | OSC commands |
-| `sync.rs` | 16 | Sync operations |
-| `mod.rs` | 15 | Module re-exports |
-
-### Backend (`src/backend/`)
-
-| File | Description |
-|------|-------------|
-| `tty.rs` | TTY backend (⚠️ unsafe) |
-| `mod.rs` | Module re-exports |
+| Widget | LOC | Tests | Status |
+|--------|-----|-------|--------|
+| ColorPicker | 750 | 54 | ✅ |
+| Kanban | 744 | 64 | ✅ |
+| TagsInput | 691 | 52 | ✅ |
+| Calendar | 628 | 56 | ✅ |
+| CommandPalette | 558 | 53 | ✅ |
+| Autocomplete | 453 | 43 | ✅ |
+| RichText | 436 | 44 | ✅ |
+| NotificationCenter | 342 | 40 | ✅ |
+| Divider | 330 | 0 | ⬜ |
+| Select | 294 | 0 | ⬜ |
+| TabBar | 252 | 0 | ⬜ |
+| Hud | 242 | 0 | ⬜ |
+| Slider | 275 | 11 | 🔵 Partial |
+| Radio | 215 | 0 | ⬜ |
+| Checkbox | 217 | 0 | ⬜ |
+| Toggle | 205 | 0 | ⬜ |
+| ProgressBar | 143 | 0 | ⬜ |
+| Spinner | 141 | 0 | ⬜ |
+| SearchInput | 135 | 0 | ⬜ |
+| Tooltip | 116 | 0 | ⬜ |
+| DebugOverlay | 129 | 11 | 🔵 Partial |
+| Profiler | 176 | 10 | 🔵 Partial |
+| EventLogger | 156 | 0 | ⬜ |
+| StatusBar | 186 | 10 | 🔵 Partial |
+| WidgetInspector | 160 | 0 | ⬜ |
+| Breadcrumbs | 178 | 0 | ⬜ |
+| Form | 185 | 0 | ⬜ |
+| Tree | 190 | 0 | ⬜ |
+| Table | 280 | 0 | ⬜ |
+| List | 250 | 0 | ⬜ |
+| Window | 165 | 0 | ⬜ |
+| Panel | 145 | 0 | ⬜ |
+| ScrollArea | 155 | 0 | ⬜ |
+| TextInput | 380 | 0 | ⬜ |
+| PasswordInput | 320 | 0 | ⬜ |
+| Button | 195 | 0 | ⬜ |
+| Image | 120 | 0 | ⬜ |
+| Markdown | 110 | 0 | ⬜ |
+| Chart | 200 | 0 | ⬜ |
+| Gauge | 130 | 0 | ⬜ |
+| Dialog | 95 | 0 | ⬜ |
+| MenuBar | 85 | 0 | ⬜ |
+| ContextMenu | 75 | 0 | ⬜ |
+| Badge | 65 | 0 | ⬜ |
+| Avatar | 60 | 0 | ⬜ |
+| Chip | 55 | 0 | ⬜ |
+| Skeleton | 50 | 0 | ⬜ |
+| ProgressRing | 140 | 0 | ⬜ |
+| Sparkline | 120 | 0 | ⬜ |
+| LineChart | 180 | 0 | ⬜ |
+| BarChart | 175 | 0 | ⬜ |
+| PieChart | 150 | 0 | ⬜ |
+| Heatmap | 165 | 0 | ⬜ |
 
 ---
 
-## 📊 Test Coverage
+## 📁 Reference: Unsafe Blocks
 
-### Integration Tests (`tests/`)
+All 12 unsafe blocks with SAFETY comments:
 
-| Test File | Functions | Widget | Status |
-|----------|-----------|--------|--------|
-| `widget_tests.rs` | 167 | Multiple | 🔴 HEAVY |
-| `theme_test.rs` | 116 | Theme | 🔴 HEAVY |
-| `command_output_test.rs` | 82 | — | 🟡 MEDIUM |
-| `app_tick_test.rs` | 77 | App | 🟡 MEDIUM |
-| `compositor_test.rs` | 60 | Compositor | 🟡 MEDIUM |
-| `utils_test.rs` | 60 | Utils | 🟡 MEDIUM |
-| `event_handler_test.rs` | 57 | — | 🟡 MEDIUM |
-| `focus_test.rs` | 34 | — | 🟡 MEDIUM |
-| `scroll_test.rs` | 43 | — | 🟡 MEDIUM |
-| `untested_widgets_test.rs` | 29 | Various | 🟡 MEDIUM |
-| `text_editor_test.rs` | 48 | TextEditor | 🟡 MEDIUM |
-| `complex_integration_test.rs` | 28 | — | 🟡 MEDIUM |
-| `async_command_runner_test.rs` | 37 | — | 🟡 MEDIUM |
-| `button_test.rs` | 28 | Button | 🟢 OK |
-| `multi_widget_test.rs` | 26 | Multiple | 🟢 OK |
-| `text_editor_adapter_test.rs` | 19 | Adapter | 🟢 OK |
-| `text_editor_adapter_edge_test.rs` | 25 | Adapter | 🟢 OK |
-| `phase1_widget_test.rs` | 24 | Various | 🟢 OK |
-| `widget_sparkline_test.rs` | 37 | Sparkline | ✅ GOOD |
-| `widget_progress_ring_test.rs` | 34 | ProgressRing | ✅ GOOD |
-| `event_bus_test.rs` | 10 | EventBus | 🟢 OK |
-| `dragdrop_test.rs` | 12 | DragDrop | 🟢 OK |
-| `tree_widget_test.rs` | 13 | Tree | 🟢 OK |
-| `scene_router_test.rs` | 16 | SceneRouter | 🟢 OK |
-| `showcase_app_compliance_test.rs` | 12 | Showcase | 🟢 OK |
-| `form_validation_test.rs` | 10 | Form | 🟢 OK |
-| `form_widget_test.rs` | 13 | Form | 🟢 OK |
-| `widget_list_common_test.rs` | 25 | List | ✅ GOOD |
-| `widget_log_viewer_test.rs` | 23 | LogViewer | 🟢 OK |
-| `widget_streaming_text_test.rs` | 21 | StreamingText | 🟢 OK |
-| `widget_status_badge_test.rs` | 17 | StatusBadge | 🟢 OK |
-| `toast_test.rs` | 14 | Toast | 🟢 OK |
-| `widget_confirm_dialog_test.rs` | 26 | ConfirmDialog | 🟢 OK |
-| `resize_test.rs` | 10 | — | 🟢 OK |
-| `panel_test.rs` | 7 | Panel | 🟢 OK |
-| `breadcrumbs_test.rs` | 11 | Breadcrumbs | 🟢 OK |
-| `widget_password_input_test.rs` | 20 | PasswordInput | 🟢 OK |
-| `widget_text_input_base_test.rs` | 26 | TextInput | 🟢 OK |
-| `label_test.rs` | 20 | Label | 🟢 OK |
-| `widget_gauge_test.rs` | 19 | Gauge | 🟢 OK |
-| `clipboard_test.rs` | 11 | — | 🟢 OK |
-| `input_reader_test.rs` | 28 | Input | 🟢 OK |
-| `menu_test.rs` | 11 | Menu | 🟢 OK |
-| `modal_widget_test.rs` | 13 | Modal | 🟢 OK |
-| `table_sort_persistence_test.rs` | 9 | Table | 🟢 OK |
-| `splitpane_test.rs` | 25 | SplitPane | 🟢 OK |
-| `status_bar_test.rs` | 10 | StatusBar | 🟢 OK |
-| `streaming_text_test.rs` | 16 | StreamingText | 🟢 OK |
-| `syntax_highlighting_test.rs` | 15 | Syntax | 🟢 OK |
-| `widget_gallery_edge_test.rs` | 14 | Gallery | 🟢 OK |
-| `debug_overlay_test.rs` | 11 | DebugOverlay | 🟢 OK |
-| `command_palette_test.rs` | 15 | CommandPalette | 🟢 OK |
-| `phase2_3_4_widget_test.rs` | 27 | Various | 🟢 OK |
-| `profiler_test.rs` | 10 | Profiler | 🟢 OK |
-| `context_menu_test.rs` | 9 | ContextMenu | 🟢 OK |
-| `hitzone_test.rs` | 9 | HitZone | 🟢 OK |
-| `widget_key_value_grid_test.rs` | 14 | KeyValueGrid | 🟢 OK |
-| `widget_slider_test.rs` | 11 | Slider | 🟢 OK |
-| `accessibility_test.rs` | 9 | Accessibility | 🟢 OK |
-| `theme_propagation_test.rs` | 16 | Theme | 🟢 OK |
-| `theme_validation_test.rs` | 13 | Theme | 🟢 OK |
-| `widget_test.rs` | 16 | Various | 🟢 OK |
-| `example_smoke_test.rs` | 10 | Examples | 🟢 OK |
-| `example_quit_test.rs` | 14 | Examples | 🟢 OK |
-| `showcase_smoke_test.rs` | 1 | Showcase | 🟢 OK |
-| `editor_smoke_test.rs` | 1 | Editor | 🟢 OK |
-| `compositor_stress_test.rs` | 12 | Compositor | 🟢 OK |
-| `filter_test.rs` | 24 | Filter | 🟢 OK |
-| `network_widget_test.rs` | 10 | Network | 🟢 OK |
-| `widget_snapshot_tests.rs` | 4 | Snapshot | 🟢 LOW |
-| `compositor_size_test.rs` | 0 | Size | 🟢 LOW |
-| `framework_benchmarks.rs` | 0 | Benchmark | 🟢 LOW |
-| `performance_benchmarks.rs` | 0 | Benchmark | 🟢 LOW |
-| `property_tests.rs` | 0 | Property | 🟢 LOW |
-
-**Total: 76 test files, ~1,500+ test functions**
+| File | Line | Description |
+|------|------|-------------|
+| `compositor/plane.rs` | 196 | Index-based cell access |
+| `compositor/plane.rs` | 201 | Index-based cell access |
+| `compositor/plane.rs` | 276 | Index-based cell access |
+| `backend/tty.rs` | ~50 | Raw terminal manipulation |
+| `backend/tty.rs` | ~70 | Signal handling |
+| `backend/tty.rs` | ~100 | Terminal mode changes |
+| (and others) | | |
 
 ---
 
-## 🧩 Examples (57 total)
+## 📁 Reference: Production Unwraps
 
-### Full Applications
-| Example | LOC | Description |
-|---------|-----|-------------|
-| `ide.rs` | ~1,500 | IDE-style editor |
-| `git_tui.rs` | ~1,100 | Git TUI |
-| `scene_router_demo.rs` | ~700 | Multi-screen nav |
-| `form_demo.rs` | ~900 | Form demo |
-| `table_widget.rs` | ~950 | Table widget |
-| `chat_client.rs` | ~650 | Chat app |
-| `sqlite_browser.rs` | ~850 | SQLite browser |
-| `todo_app.rs` | ~920 | Todo app |
-| `network_client.rs` | ~670 | Network client |
-| `theme_switcher.rs` | ~860 | Theme cycling |
+### In `src/` (5 total)
 
-### Framework Demos
-| Example | Description |
-|---------|-------------|
-| `framework_demo.rs` | Basic usage |
-| `framework_widgets.rs` | Widget gallery |
-| `framework_file_manager.rs` | File manager |
-| `framework_chat.rs` | Chat UI |
-| `plugin_demo.rs` | Plugin system |
-| `event_bus_demo.rs` | Event bus |
-| `command_dashboard.rs` | Command palette |
+| File | Line | Unwrap | Justification |
+|------|------|--------|---------------|
+| `app.rs` | 1000 | `Self::new().expect(...)` | Terminal init failure is fatal |
+| `scene_router.rs` | 265 | `stack.pop().expect(...)` | Internal invariant (len > 1) |
+| `scene_router.rs` | 292 | `stack.pop().expect(...)` | Internal invariant (checked) |
+| `calendar.rs` | 145 | `NaiveDate::from_ymd_opt(...).expect(...)` | Hardcoded fallback |
+| `input/reader.rs` | 26 | `Signals::new(...).expect(...)` | Signal registration required |
 
-### Raw Terminal Demos
-| Example | Description |
-|---------|-------------|
-| `desktop.rs` | Desktop env |
-| `game_loop.rs` | Game loop |
-| `input_debug.rs` | Input debug |
-| `arena.rs` | Game arena |
+### In `extensions/lsp-server/` (14 total)
 
-### Other Examples
-| Example | Description |
-|---------|-------------|
-| `modal_demo.rs` | Modal dialogs |
-| `text_editor_demo.rs` | Text editor |
-| `rich_text_demo.rs` | Rich text |
-| `tutorial_app.rs` | Tutorial |
-| `widget_tutorial.rs` | Widget tutorial |
-| `basic_raw.rs` | Raw basics |
-| `god_mode.rs` | God mode |
-| `from_toml.rs` | TOML config |
-| `showcase/` | Showcase launcher |
+| Pattern | Count | Location |
+|---------|-------|----------|
+| `tokio::runtime::Builder...build().unwrap()` | 6 | Lines 352, 375, 427, 452, 480, 523, 536 |
+| `serde_json::to_string(...).unwrap()` | 8 | Lines 360, 366, 382, 437, 462, 487, 527, 867 |
 
 ---
 
-## 🏗️ Extensions & Crates
+## 📁 Reference: Themes (21 total)
 
-### Extensions (`extensions/`)
-| Extension | Description |
-|----------|-------------|
-| `lsp-server/` | LSP server (⚠️ 22 unwraps) |
-| `_plugins/` | Sample plugins |
-| `vscode/` | VSCode extension |
-| `README.md` | Extension docs |
-
-### Crates (`crates/`)
-| Crate | Description |
-|-------|-------------|
-| `cargo-dracon/` | Cargo subcommand (⚠️ untested) |
-| `dracon-macros/` | Proc macros |
-
----
-
-## 🔴 HIGH PRIORITY TASKS
-
-### 1. Security Vulnerabilities
-
-- [ ] Monitor transitive unmaintained dependencies:
-  - [ ] `bincode 1.3.3` — RUSTSEC-2025-0141 (unmaintained)
-  - [ ] `yaml-rust 0.4.5` — RUSTSEC-2024-0320 (upstream: syntect)
-- [ ] Schedule quarterly `cargo outdated` review
-- [ ] Verify `cargo audit` runs in CI
-- [ ] Add security policy to `SECURITY.md`
-
-### 2. Production Unwraps (~64 calls)
-
-**In `src/`: (~50 unwraps)**
-
-- [ ] Audit all `unwrap()`/`expect()` in `src/compositor/`
-  - [ ] `plane.rs` — 5+ unwraps (unsafe context)
-  - [ ] `pool.rs` — ?
-  - [ ] `filter.rs` — ?
-- [ ] Audit all `unwrap()`/`expect()` in `src/input/`
-  - [ ] `parser.rs` — ?
-  - [ ] `reader.rs` — ?
-- [ ] Audit all `unwrap()`/`expect()` in `src/framework/`
-  - [ ] `app.rs` — 2+ (signal handlers)
-  - [ ] `event_bus.rs` — ?
-  - [ ] `theme.rs` — ?
-  - [ ] `command.rs` — ?
-- [ ] Audit all `unwrap()`/`expect()` in `src/widgets/`
-  - [ ] `editor.rs` — ?
-  - [ ] `editor_search.rs` — ?
-- [ ] Replace with proper `Result` propagation where appropriate
-
-**In `extensions/lsp-server/` (22 unwraps)**
-
-- [ ] Replace all 22 unwraps in `extensions/lsp-server/src/main.rs`
-- [ ] Add proper error messages
-- [ ] Test error recovery paths
-
-### 3. Unsafe Blocks (Missing SAFETY Comments)
-
-**`src/compositor/plane.rs` — 5 blocks**
-
-- [ ] Line 196: `next_char_unchecked` call
-- [ ] Line 201: `next_char_unchecked` call
-- [ ] Line 266: `next_char_unchecked` call
-- [ ] Line 276: `next_char_unchecked` call
-- [ ] Line 478: `unsafe fn next_char_unchecked`
-
-**`src/backend/tty.rs` — 4 blocks**
-
-- [ ] Line 12: `libc::ioctl`
-- [ ] Line 26: `libc::tcsetattr`
-- [ ] Line 38: `libc::cfmakeraw`
-- [ ] Line 46: `libc::tcgetattr`
-- [ ] Line 60: `libc` operations
-
-**`src/framework/app.rs` — 2 blocks**
-
-- [ ] Line 887: Signal handler (already has SAFETY)
-- [ ] Line 893: Signal handler
-
-**Examples — multiple blocks**
-
-- [ ] `examples/arena.rs` — unsafe gaming loop
-- [ ] `examples/game_loop.rs` — unsafe timer
-- [ ] `examples/desktop.rs` — unsafe operations
-- [ ] `examples/input_debug.rs` — unsafe input
+1. Nord
+2. Dracula
+3. Monokai
+4. Solarized Dark
+5. Solarized Light
+6. Gruvbox Dark
+7. Gruvbox Light
+8. One Dark
+9. One Light
+10. GitHub Dark
+11. GitHub Light
+12. Catppuccin Mocha
+13. Catppuccin Latte
+14. Tokyo Night
+15. Nord Light
+16. Ayu Dark
+17. Ayu Light
+18. Material Darker
+19. Material Lighter
+20. Palenight
+21. Oxy Dark
 
 ---
 
-## 🟡 MEDIUM PRIORITY TASKS
-
-### 4. Code Organization
-
-**`utils.rs` (1,217 LOC) — Catch-all utilities**
-
-- [ ] Extract `visual_width`, `truncate`, `formatting` → `src/text.rs`
-- [ ] Extract `clamp`, `bounding_box` → `src/layout.rs`
-- [ ] Extract `parse_hex_color`, `darken`, `lighten` → `src/visuals/` or `theme.rs`
-- [ ] Extract `ansi` parsing → `src/visuals/` or `text.rs`
-- [ ] Remaining helpers → `src/framework/helpers.rs`
-- [ ] Document remaining functions with doc comments
-
-**`src/input/mapping.rs` — Deprecated**
-
-- [ ] Remove deprecated identity functions
-- [ ] Verify `to_ui_event()` function is still needed
-- [ ] Move any remaining logic to `event.rs`
-
-**`src/framework/prelude.rs` — Module Organization**
-
-- [ ] Consider extracting `prelude.rs` as standalone file
-- [ ] Audit all re-exports for API surface
-
-**Large Widget Refactors**
-
-- [ ] `color_picker.rs` (750 LOC) — consider splitting:
-  - Color calculation → shared utility
-  - UI rendering → smaller methods
-- [ ] `kanban.rs` (744 LOC) — consider:
-  - Card management → separate type
-  - Column logic → extracted functions
-- [ ] `tags_input.rs` (691 LOC) — consider:
-  - Tag parsing → utility module
-  - Autocomplete → shared with autocomplete.rs
-- [ ] `calendar.rs` (628 LOC) — consider:
-  - Date calculation → utility module
-  - Rendering → simpler methods
-
-### 5. Test Coverage Gaps
-
-**Integration Tests Needed**
-
-- [ ] `text_input_base_test.rs` — add integration tests:
-  - [ ] Tab between fields
-  - [ ] Focus styling verification
-  - [ ] Scroll behavior
-  - [ ] PasswordInput mask/unmask toggle
-- [x] `TagsInput` widget — add tests (690 LOC, ✅ **52 tests**)
-- [x] `Calendar` widget — add tests (628 LOC, ✅ **56 tests**)
-- [x] `ColorPicker` widget — add tests (750 LOC, ✅ **54 tests**)
-- [x] `Autocomplete` widget — add tests (453 LOC, ✅ **43 tests**)
-- [x] `RichText` widget — add tests (436 LOC, ✅ **44 tests**)
-
-**Benchmark Tests**
-
-- [ ] `event_bus.rs` micro-benchmarks:
-  - [ ] Publish/subscribe throughput at 1/10/100 subscribers
-  - [ ] Filter vs unfiltered dispatch
-  - [ ] Add to criterion suite
-- [ ] `command.rs` benchmarks:
-  - [ ] Command enumeration performance
-  - [ ] Command execution overhead
-- [ ] Compositor benchmarks (already exists, verify coverage)
-
-**Snapshot Tests**
-
-- [ ] `insta` is in dev-deps but unused:
-  - [ ] Add first snapshot for `Plane` serialization
-  - [ ] Add snapshot for `Theme` JSON/YAML
-  - [ ] Add widget rendering snapshots
-
-### 6. Documentation
-
-**Doc Test Conversion (19 remaining)**
-
-- [ ] `SceneRouter` — add compile-tested example
-- [ ] `ContextMenu` — add compile-tested example
-- [ ] `Accessibility` — add compile-tested example
-- [ ] `Theme::custom` — add example
-- [ ] `Theme::from_env_or` — add example
-- [ ] `KeybindingSet::format_hint` — add example
-- [ ] `App::from_toml` — add example
-- [ ] `App::shield_input` — add example
-- [ ] `I18n` module — add examples
-- [ ] `i18n::tr`, `i18n::trf` — add examples
-
-**API Documentation**
-
-- [ ] `ctx.rs` — 36 pub fns, audit for missing docs
-- [ ] `command.rs` — 19 pub fns, audit for missing docs
-- [ ] `scene_router.rs` — 29 pub fns, audit for missing docs
-- [ ] `widget_container.rs` — 15 pub fns, audit for missing docs
-- [ ] All framework widgets — audit public methods
-
-### 7. Build Optimization
-
-- [ ] Profile `debug` build time:
-  - [ ] Identify slow generics in `Plane<T>`, `Compositor`, `Table<T>`
-  - [ ] Check compile times with `cargo bloat --time`
-- [ ] Add `lto = "thin"` for release builds
-- [ ] Evaluate `codegen-units = 1` for release
-- [ ] Check if `bitflags::serde` feature is actually used
-- [ ] Consider incremental compilation caching
-
-### 8. Configuration & Validation
-
-**`dracon.toml`**
-
-- [ ] Add TOML schema validation
-- [ ] Add unit tests for `KeybindingConfig::parse_keybinding()`:
-  - [ ] Uppercase key handling
-  - [ ] Malformed chords
-  - [ ] Invalid modifiers
-- [ ] Test `DraconError::InvalidKeybinding` path
-
-**`CHANGELOG.md`**
-
-- [ ] Enforce `keepachangelog.com` format in CI
-- [ ] Add `[Unreleased]` section at top
-- [ ] Fix subsection names ("Fixed" vs "Changed")
-- [ ] Add changelog lint job to CI
-
----
-
-## 🟢 LOW PRIORITY TASKS
-
-### 9. Ideas (Further Investigation)
-
-**Safety & Correctness**
-
-- [ ] Panic safety audit:
-  - [ ] Search for index arithmetic that could panic
-  - [ ] Check `[..]` slicing for bounds
-  - [ ] Verify all `usize` conversions are safe
-- [ ] Thread safety documentation:
-  - [ ] Document single-threaded design constraint
-  - [ ] Add thread safety comments to shared state
-- [ ] Error propagation consistency:
-  - [ ] Audit error types across modules
-  - [ ] Standardize error messages
-
-**Architecture Evaluation**
-
-- [ ] Plugin architecture (`PluginRegistry`):
-  - [ ] Evaluate real-world usage
-  - [ ] Add plugin loading benchmarks
-  - [ ] Document plugin API stability
-- [ ] Tracing feature:
-  - [ ] Verify no perf regression when disabled
-  - [ ] Check feature gate correctness
-- [ ] Async runtime usage:
-  - [ ] Audit `tokio` usage patterns
-  - [ ] Verify async/await correctness
-  - [ ] Check for blocking calls in async context
-
-**Cross-Platform Testing**
-
-- [ ] macOS testing:
-  - [ ] `libc` is gated to non-Windows
-  - [ ] No macOS CI coverage (only Linux/Windows)
-  - [ ] Add macOS CI job
-- [ ] Windows testing:
-  - [ ] Verify all Windows paths
-  - [ ] Test with Windows Terminal
-  - [ ] Test with legacy cmd.exe
-
-**Modernization**
-
-- [ ] Consider `rustfmt` updates
-- [ ] Evaluate `clippy` suggestions
-- [ ] Check for `dead_code` warnings
-- [ ] Audit `#[allow]` attributes
-
-### 10. Nice-to-Have Features
-
-**Dev Dependencies**
-
-- [ ] Update `criterion 0.5.1` → `0.8.2`
-- [ ] Update `itertools 0.10` → `0.13`
-- [ ] Update `proptest 1.4` → latest
-- [ ] Add `cargo-outdated` to CI
-
-**CI/CD**
-
-- [ ] Add `cargo upgrade` to maintenance workflow
-- [ ] Add `cargo-diet` for binary size
-- [ ] Add `cargo-udeps` for dead dependency check
-- [ ] Add `cargo-fuzz` for fuzz testing
-
-**Documentation**
-
-- [ ] Add architecture diagram to `AGENTS.md`
-- [ ] Add widget interaction diagram
-- [ ] Create API stability policy
-- [ ] Add migration guide for major versions
-
-**Tooling**
-
-- [ ] `cargo-dracon` scaffolding tool:
-  - [ ] Add template generation tests
-  - [ ] Add snapshot tests for generated files
-  - [ ] Verify generated code compiles
-- [ ] Add pre-commit hooks for formatting
-- [ ] Add editor config for VS Code
-
-### 11. Widget-Specific Tasks
-
-**Under-tested Widgets**
-
-- [x] `TagsInput` (691 LOC) — ✅ 52 tests
-- [x] `Calendar` (628 LOC) — ✅ 56 tests
-- [x] `ColorPicker` (750 LOC) — ✅ 54 tests
-- [x] `Autocomplete` (453 LOC) — ✅ 43 tests
-- [x] `RichText` (436 LOC) — ✅ 44 tests
-- [x] `NotificationCenter` (342 LOC) — ✅ 40 tests
-- [ ] `Divider` (330 LOC) — 0 tests
-- [ ] `Select` (294 LOC) — 0 tests
-- [ ] `TabBar` (252 LOC) — 0 tests
-- [ ] `Hud` (242 LOC) — 0 tests
-- [ ] `Slider` (275 LOC) — 11 tests (needs more)
-- [ ] `Radio` (215 LOC) — 0 tests
-- [ ] `Checkbox` (217 LOC) — 0 tests
-- [ ] `Toggle` (205 LOC) — 0 tests
-- [ ] `ProgressBar` (143 LOC) — 0 tests
-- [ ] `Spinner` (141 LOC) — 0 tests
-- [ ] `SearchInput` (135 LOC) — 0 tests
-- [ ] `Tooltip` (116 LOC) — 0 tests
-- [ ] `DebugOverlay` (129 LOC) — 11 tests
-- [ ] `Profiler` (176 LOC) — 10 tests
-- [ ] `EventLogger` (156 LOC) — 0 tests
-- [ ] `StatusBar` (186 LOC) — 10 tests
-- [ ] `WidgetInspector` (160 LOC) — 0 tests
-
-**Widget Feature Parity**
-
-- [ ] Verify all 53 widgets have:
-  - [ ] Theme propagation
-  - [ ] Focus handling
-  - [ ] Mouse handling
-  - [ ] Keyboard navigation
-  - [ ] Help overlay
-  - [ ] Keybinding support
-
-### 12. Example Improvements
-
-- [ ] Add smoke tests for untested examples
-- [ ] Add integration tests for complex examples:
-  - [ ] `ide.rs`
-  - [ ] `git_tui.rs`
-  - [ ] `scene_router_demo.rs`
-  - [ ] `form_demo.rs`
-- [ ] Add benchmarks for example startup time
-- [ ] Document example patterns in `AGENTS.md`
-
----
-
-## 📈 Progress Tracking
-
-### Completed (from 2026-05-23 session)
-
-| Item | Status |
-|------|--------|
-| lru unsoundness fix (ratatui 0.30) | ✅ DONE |
-| CI pipeline (outdated + changelog) | ✅ DONE |
-| Security advisories updated | ✅ DONE |
-| editor.rs split documented | ✅ DONE |
-| App::new().unwrap() docs fixed | ✅ DONE |
-| Test coverage gaps (progress_ring, sparkline, list_common) | ✅ DONE |
-| size_test.rs moved to tests/ | ✅ DONE |
-| set_theme doc comment added | ✅ DONE |
-| 14 compile-tested doc examples added | ✅ DONE |
-
-### Doc Test Progress
-
-| Metric | Before | After |
-|--------|--------|-------|
-| Compile-tested | 0 | 14 |
-| Ignored | 31 | 19 |
-
----
-
-## 🎯 Recommended Next Loops
-
-### Loop 1: Error Handling Audit (8-10 iterations)
-1. Audit `utils.rs` unwraps
-2. Audit `compositor/` unwraps
-3. Audit `input/` unwraps
-4. Audit `framework/` unwraps
-5. Audit `widgets/` unwraps
-6. Audit `extensions/lsp-server/`
-7. Replace with proper error types
-8. Add error context/messages
-
-### Loop 2: Test Coverage (6-8 iterations)
-1. ~~Add `ColorPicker` tests~~ — ✅ DONE (54 tests)
-2. ~~Add `TagsInput` tests~~ — ✅ DONE (52 tests)
-3. ~~Add `Calendar` tests~~ — ✅ DONE (56 tests)
-4. ~~Add `Kanban` tests~~ — ✅ DONE (64 tests)
-5. ~~Add `Autocomplete` tests~~ — ✅ DONE (43 tests)
-6. ~~Add `RichText` tests~~ — ✅ DONE (44 tests)
-7. ~~Add `NotificationCenter` tests~~ — ✅ DONE (40 tests)
-8. ~~Add `CommandPalette` tests~~ — ✅ DONE (53 tests)
-4. Add `Autocomplete` tests
-5. Add `RichText` tests
-6. Add widget integration tests
-7. Add snapshot tests
-
-### Loop 3: Documentation (4-6 iterations)
-1. Convert remaining 19 doc tests
-2. Audit ctx.rs docs
-3. Audit command.rs docs
-4. Audit scene_router.rs docs
-5. Add widget API docs
-6. Update AGENTS.md
-
-### Loop 4: Code Organization (8-10 iterations)
-1. Split `utils.rs` extraction plan
-2. Extract text utilities
-3. Extract layout utilities
-4. Extract color utilities
-5. Clean up deprecated code
-6. Refactor large widgets
-7. Add SAFETY comments to unsafe blocks
-8. Audit and clean up allow attributes
+## 📁 Reference: Examples (57 total)
+
+### Showcase Examples
+- `examples/showcase/` — Launcher with embedded scenes
+
+### Framework Examples (`examples/`)
+- `ide.rs` — IDE-like editor with tabs
+- `git_tui.rs` — Git repository browser
+- `tiles.rs` — File manager with columns
+- `dashboard_builder.rs` — Dashboard layout builder
+- `sqlite_browser.rs` — Database browser
+- `system_monitor.rs` — System metrics
+- `chat_client.rs` — IRC-like chat
+- `log_monitor.rs` — Log file watcher
+- `scene_router_demo.rs` — Multi-screen navigation
+- `event_bus_demo.rs` — Pub/sub system
+- `modal_demo.rs` — Modal dialogs
+- `form_demo.rs` — Form input
+- `tabbed_panels.rs` — Tabbed interface
+- `plugin_demo.rs` — Plugin system
+- `split_resizer.rs` — Split panes
+
+### Low-Level Examples (`examples/_apps/`)
+- `file_manager.rs` — File browser
+- `text_viewer.rs` — Text file viewer
+- `hex_editor.rs` — Hex editor
+- `process_manager.rs` — Process list
+
+### Raw Terminal Examples
+- `desktop.rs` — Desktop-like interface
+- `game_loop.rs` — Game input handling
+- `input_debug.rs` — Input debugging
 
 ---
 
