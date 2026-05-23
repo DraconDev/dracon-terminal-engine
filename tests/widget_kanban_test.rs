@@ -1,6 +1,6 @@
 //! Tests for the Kanban board widget.
 
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::kanban::{Kanban, KanbanCard};
@@ -35,16 +35,16 @@ fn test_kanban_card_with_description() {
 
 #[test]
 fn test_kanban_card_with_color() {
-    let card = KanbanCard::new("id1", "Test").with_color(Color::Red);
+    let card = KanbanCard::new("id1", "Test").with_color(Color::Rgb(255, 0, 0));
     
-    assert_eq!(card.color, Some(Color::Red));
+    assert_eq!(card.color, Some(Color::Rgb(255, 0, 0)));
 }
 
 #[test]
 fn test_kanban_card_chained_builders() {
     let card = KanbanCard::new("id1", "Test")
         .with_description("Desc")
-        .with_color(Color::Blue);
+        .with_color(Color::Rgb(0, 0, 255));
     
     assert_eq!(card.title, "Test");
     assert!(card.description.is_some());
@@ -599,7 +599,7 @@ fn test_kanban_many_columns() {
     let mut board = Kanban::new();
     
     for i in 0..10 {
-        board.add_column(format!("Column {}", i));
+        board.add_column(&format!("Column {}", i));
     }
     
     assert_eq!(board.column_count(), 10);

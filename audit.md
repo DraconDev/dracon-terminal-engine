@@ -725,9 +725,9 @@
 ### Loop 2: Test Coverage (6-8 iterations)
 1. ~~Add `TagsInput` tests~~ — ✅ DONE (52 tests)
 2. ~~Add `Calendar` tests~~ — ✅ DONE (56 tests)
-3. Add `Kanban` tests
+3. ~~Add `Kanban` tests~~ — ✅ DONE (64 tests)
 3. ~~Add `ColorPicker` tests~~ — ✅ DONE (54 tests)
-4. **Restore App::theme() builder method** — ✅ DONE
+4. ~~**Restore App::theme() builder method**~~ — ✅ DONE
 4. Add `Autocomplete` tests
 5. Add `RichText` tests
 6. Add widget integration tests
