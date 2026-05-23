@@ -477,7 +477,7 @@
   - [ ] Scroll behavior
   - [ ] PasswordInput mask/unmask toggle
 - [x] `TagsInput` widget — add tests (690 LOC, ✅ **52 tests**)
-- [ ] `Calendar` widget — add tests (628 LOC, 0 tests)
+- [x] `Calendar` widget — add tests (628 LOC, ✅ **56 tests**)
 - [x] `ColorPicker` widget — add tests (750 LOC, ✅ **54 tests**)
 - [ ] `Autocomplete` widget — add tests (453 LOC, 0 tests)
 - [ ] `RichText` widget — add tests (436 LOC, 0 tests)
@@ -639,7 +639,7 @@
 **Under-tested Widgets**
 
 - [x] `TagsInput` (691 LOC) — ✅ 52 tests
-- [ ] `Calendar` (628 LOC) — 0 tests
+- [x] `Calendar` (628 LOC) — ✅ 56 tests
 - [x] `ColorPicker` (750 LOC) — ✅ 54 tests
 - [ ] `Autocomplete` (453 LOC) — 0 tests
 - [ ] `RichText` (436 LOC) — 0 tests
@@ -724,7 +724,8 @@
 
 ### Loop 2: Test Coverage (6-8 iterations)
 1. ~~Add `TagsInput` tests~~ — ✅ DONE (52 tests)
-2. Add `Calendar` tests
+2. ~~Add `Calendar` tests~~ — ✅ DONE (56 tests)
+3. Add `Kanban` tests
 3. ~~Add `ColorPicker` tests~~ — ✅ DONE (54 tests)
 4. **Restore App::theme() builder method** — ✅ DONE
 4. Add `Autocomplete` tests
