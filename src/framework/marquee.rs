@@ -70,11 +70,14 @@ pub struct MarqueeRect {
 /// let mut marquee = MarqueeState::new().with_activation_threshold(16.0); // 4px
 ///
 /// // On MouseDown (left click):
+/// let col: u16 = 10;
+/// let row: u16 = 5;
+/// let item_index: usize = 3;
 /// marquee.start_tracking(col, row);
 /// marquee.defer_click(item_index); // Plain click only
 ///
-/// // On MouseDrag:
-/// let just_activated = marquee.update(col, row);
+/// // On MouseDrag (e.g., moved 3px):
+/// let just_activated = marquee.update(col + 3, row);
 /// if just_activated {
 ///     // Marquee now active — cancel any file drag here
 /// }
@@ -82,11 +85,13 @@ pub struct MarqueeRect {
 /// // On MouseUp:
 /// if marquee.is_active {
 ///     if let Some(rect) = marquee.rect() {
-///         // Select all items within rect.min_row..=rect.max_row
+///         // rect.min_row..=rect.max_row contains all rows in selection
+///         let _ = rect;
 ///     }
 ///     marquee.clear();
 /// } else if let Some(idx) = marquee.take_pending_click() {
 ///     // Resolve deferred click — no drag occurred
+///     let _ = idx;
 /// }
 /// marquee.reset();
 /// ```

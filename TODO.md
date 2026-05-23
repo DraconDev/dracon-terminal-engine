@@ -107,9 +107,12 @@ documenting that `App::new()` can fail if the terminal cannot be initialized.
   - ✅ `on_input` — compile-tested example (app.rs line 552)
   - ✅ lib.rs example — compile-tested example with Widget impl
   - ✅ framework/mod.rs example — compile-tested example with List widget
+- [x] Add example for `MarqueeState` usage
+  - ✅ `MarqueeState` struct — compile-tested lifecycle example
+  - ✅ `render_marquee` fn — compile-tested usage example
 - [ ] Add example for `MarqueeState` usage
 - [ ] Add example for `SceneRouter` + embedded scenes pattern
-- [ ] Currently 23 of 31 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 8 compile, 23 ignored)
+- [ ] Currently 23 of 33 doc-tests are ```` ```ignore ```` — convert some to compile-tested where feasible (now 10 compile, 23 ignored)
 
 ### 10. `text_input_base_test.rs` — 26 unit tests only
 
