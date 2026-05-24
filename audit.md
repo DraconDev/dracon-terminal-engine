@@ -119,7 +119,7 @@ All 53 framework widgets need tests. Progress:
 - [x] `Spinner` (141 LOC) — ✅ 34 tests
 - [x] `SearchInput` (135 LOC) — ✅ 30 tests
 - [x] `Tooltip` (116 LOC) — ✅ 29 tests
-- [ ] `DebugOverlay` (129 LOC) — 11 tests
+- [x] `DebugOverlay` (129 LOC) — ✅ 30 tests
 - [x] `Profiler` (176 LOC) — ✅ 27 tests
 - [x] `EventLogger` (156 LOC) — ✅ 26 tests
 - [x] `StatusBar` (186 LOC) — ✅ 31 tests
@@ -624,7 +624,7 @@ Current: 14 compile-tested, 19 ignored
 | Spinner | 141 | 34 | ⬜ |
 | SearchInput | 135 | 30 | ⬜ |
 | Tooltip | 116 | 29 | ⬜ |
-| DebugOverlay | 129 | 11 | 🔵 Partial |
+| DebugOverlay | 129 | 30 | 🔵 Partial |
 | Profiler | 176 | 27 | 🔵 Partial |
 | EventLogger | 156 | 26 | ⬜ |
 | StatusBar | 186 | 31 | 🔵 Partial |
