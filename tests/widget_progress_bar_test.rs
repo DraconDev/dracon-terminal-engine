@@ -34,14 +34,14 @@ fn test_progressbar_default_progress_zero() {
 }
 
 // ============================================================================
-// Progress Tests
+// Progress Tests (values are 0.0-1.0, not 0-100)
 // ============================================================================
 
 #[test]
 fn test_progressbar_set_progress() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
-    pb.set_progress(50.0);
-    assert_eq!(pb.progress(), 50.0);
+    pb.set_progress(0.5);
+    assert_eq!(pb.progress(), 0.5);
 }
 
 #[test]
@@ -54,30 +54,26 @@ fn test_progressbar_set_progress_zero() {
 #[test]
 fn test_progressbar_set_progress_full() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
-    pb.set_progress(100.0);
-    assert_eq!(pb.progress(), 100.0);
+    pb.set_progress(1.0);
+    assert_eq!(pb.progress(), 1.0);
 }
-
-#[test]
-
-#[test]
 
 #[test]
 fn test_progressbar_progress() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
-    pb.set_progress(75.0);
-    assert_eq!(pb.progress(), 75.0);
+    pb.set_progress(0.75);
+    assert_eq!(pb.progress(), 0.75);
 }
 
 #[test]
 fn test_progressbar_multiple_set_progress() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
-    pb.set_progress(25.0);
-    assert_eq!(pb.progress(), 25.0);
-    pb.set_progress(50.0);
-    assert_eq!(pb.progress(), 50.0);
-    pb.set_progress(75.0);
-    assert_eq!(pb.progress(), 75.0);
+    pb.set_progress(0.25);
+    assert_eq!(pb.progress(), 0.25);
+    pb.set_progress(0.5);
+    assert_eq!(pb.progress(), 0.5);
+    pb.set_progress(0.75);
+    assert_eq!(pb.progress(), 0.75);
 }
 
 // ============================================================================
@@ -137,7 +133,7 @@ fn test_progressbar_clear_dirty() {
 fn test_progressbar_clear_dirty_after_set_progress() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
     pb.clear_dirty();
-    pb.set_progress(50.0);
+    pb.set_progress(0.5);
     assert!(pb.needs_render());
 }
 
@@ -252,7 +248,7 @@ fn test_progressbar_render_twice() {
 #[test]
 fn test_progressbar_set_progress_and_render() {
     let mut pb = ProgressBar::new(WidgetId::new(1));
-    pb.set_progress(50.0);
+    pb.set_progress(0.5);
     let plane = pb.render(Rect::new(0, 0, 50, 1));
     assert!(plane.width > 0);
 }
@@ -266,3 +262,15 @@ fn test_progressbar_set_area_then_render() {
 }
 
 #[test]
+fn test_progressbar_clamp_above_max() {
+    let mut pb = ProgressBar::new(WidgetId::new(1));
+    pb.set_progress(1.5); // above 1.0
+    assert_eq!(pb.progress(), 1.0); // should clamp to 1.0
+}
+
+#[test]
+fn test_progressbar_clamp_below_min() {
+    let mut pb = ProgressBar::new(WidgetId::new(1));
+    pb.set_progress(-0.5); // below 0.0
+    assert_eq!(pb.progress(), 0.0); // should clamp to 0.0
+}
