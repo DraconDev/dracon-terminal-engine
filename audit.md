@@ -110,7 +110,7 @@ All 53 framework widgets need tests. Progress:
 - [x] `TabBar` (252 LOC) — ✅ 41 tests
 - [x] `Hud` (242 LOC) — ✅ 45 tests
 - [x] `Slider` (275 LOC) — ✅ 46 tests
-- [ ] `Radio` (215 LOC) — 0 tests
+- [x] `Radio` (215 LOC) — ✅ 41 tests
 - [ ] `Checkbox` (217 LOC) — 0 tests
 - [ ] `Toggle` (205 LOC) — 0 tests
 
@@ -617,7 +617,7 @@ Current: 14 compile-tested, 19 ignored
 | TabBar | 252 | 0 | ⬜ |
 | Hud | 242 | 45 | ✅ DONE |
 | Slider | 275 | 46 | 🔵 Partial |
-| Radio | 215 | 0 | ⬜ |
+| Radio | 215 | 41 | ⬜ |
 | Checkbox | 217 | 0 | ⬜ |
 | Toggle | 205 | 0 | ⬜ |
 | ProgressBar | 143 | 0 | ⬜ |
