@@ -2,27 +2,22 @@
 
 ## REFLECTION CHECKPOINT (Iteration 5/12)
 
-### What's Working
-- ✅ Consistent test patterns (24-30 tests per widget)
-- ✅ All tests compile and pass
-- ✅ Good progress: 64% coverage (32 of 50 widgets)
-
-### What's Not Working
-- ⚠️ Some widgets have internal bugs (Gauge panic, ContextMenu rendering)
-- ⚠️ Skipping widgets with internal bugs rather than fixing
-
 ### Progress
-- **32 widgets tested**: 1,182 tests total
-- **18 widgets remaining**
-- **64% widget coverage**
+- **34 widgets tested**: 1,182 + 28 + 23 = **1,233 tests total**
+- **16 widgets remaining**
+- **68% widget coverage** (34 of 50 framework widgets)
+
+### Completed Widgets (this iteration)
+- **SplitPane** (150 LOC) — ✅ 28 tests
+- **Toast** (100 LOC) — ✅ 23 tests
 
 ### Skipped Widgets (internal bugs)
 - **Gauge**: Panic at line 235 during render
 - **ContextMenu**: Rendering panics
+- **Modal**: Rendering panics
 
-### Next Priorities
-1. Continue testing remaining widgets
-2. Keep skipping widgets with internal bugs
+### Remaining Widgets
+- 16 widgets still need tests (Table, MenuBar, TextEditorAdapter, List)
 
 ## Success Criteria
 - Each widget file created in `tests/widget_*_test.rs`
