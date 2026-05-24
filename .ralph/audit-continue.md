@@ -4,9 +4,9 @@
 Continue adding tests for remaining widgets to achieve 100% widget test coverage.
 
 ### Progress
-- **19 widgets tested**: 823 + 30 = **853 tests total**
-- **34 widgets remaining**
-- **28% widget coverage** (19 of 68 total)
+- **20 widgets tested**: 853 + 29 = **882 tests total**
+- **33 widgets remaining**
+- **29% widget coverage** (20 of 68 total)
 
 ### Completed Widgets
 | Widget | LOC | Tests |
@@ -30,11 +30,12 @@ Continue adding tests for remaining widgets to achieve 100% widget test coverage
 | ProgressBar | 143 | 34 |
 | Spinner | 141 | 34 |
 | SearchInput | 135 | 30 |
+| Tooltip | 116 | 29 |
 
 ### Next Priority 2 Widgets (<200 LOC)
 - ~~**Spinner** (141 LOC) — ✅ 34 tests~~ — DONE
 - ~~**SearchInput** (135 LOC) — ✅ 30 tests~~ — DONE
-- **Tooltip** (116 LOC) — 0 tests — NEXT
+- ~~**Tooltip** (116 LOC) — ✅ 29 tests~~ — DONE
 
 ## Success Criteria
 - Each widget file created in `tests/widget_*_test.rs`
