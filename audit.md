@@ -121,7 +121,7 @@ All 53 framework widgets need tests. Progress:
 - [x] `Tooltip` (116 LOC) — ✅ 29 tests
 - [ ] `DebugOverlay` (129 LOC) — 11 tests
 - [ ] `Profiler` (176 LOC) — 10 tests
-- [ ] `EventLogger` (156 LOC) — 0 tests
+- [x] `EventLogger` (156 LOC) — ✅ 26 tests
 - [ ] `StatusBar` (186 LOC) — 10 tests
 - [ ] `WidgetInspector` (160 LOC) — 0 tests
 - [ ] `Breadcrumbs` (178 LOC) — 0 tests
@@ -626,7 +626,7 @@ Current: 14 compile-tested, 19 ignored
 | Tooltip | 116 | 29 | ⬜ |
 | DebugOverlay | 129 | 11 | 🔵 Partial |
 | Profiler | 176 | 10 | 🔵 Partial |
-| EventLogger | 156 | 0 | ⬜ |
+| EventLogger | 156 | 26 | ⬜ |
 | StatusBar | 186 | 10 | 🔵 Partial |
 | WidgetInspector | 160 | 0 | ⬜ |
 | Breadcrumbs | 178 | 0 | ⬜ |
