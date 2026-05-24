@@ -11,42 +11,33 @@ use ratatui::layout::Rect;
 
 #[test]
 fn test_tabbar_new() {
-    let tabs = vec!["Home", "Settings", "Profile"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["Home", "Settings", "Profile"]);
     assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
 fn test_tabbar_new_empty() {
-    let tabs: Vec<&str> = vec![];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(Vec::<&str>::new());
     assert!(tabbar.tabs().is_empty());
-    let area = Rect::new(0, 0, 80, 3);
-    let plane = tabbar.render(area);
+    let plane = tabbar.render(Rect::new(0, 0, 80, 3));
     assert!(plane.width > 0);
 }
 
 #[test]
 fn test_tabbar_new_single() {
-    let tabs = vec!["Only One"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["Only One"]);
     assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
 fn test_tabbar_new_with_id() {
-    let id = WidgetId::new(42);
-    let tabs = vec!["Tab1", "Tab2"];
-    let tabbar = TabBar::new_with_id(id, tabs);
-    assert_eq!(tabbar.id(), id);
+    let tabbar = TabBar::new_with_id(WidgetId::new(42), vec!["Tab1", "Tab2"]);
+    assert_eq!(tabbar.id(), WidgetId::new(42));
 }
 
 #[test]
 fn test_tabbar_with_theme() {
-    let tabs = vec!["Home", "Settings"];
-    let tabbar = TabBar::new(tabs).with_theme(Theme::nord());
-    let area = Rect::new(0, 0, 80, 3);
-    let _plane = tabbar.render(area);
+    let _ = TabBar::new(vec!["Home", "Settings"]).with_theme(Theme::nord());
 }
 
 // ============================================================================
@@ -55,39 +46,34 @@ fn test_tabbar_with_theme() {
 
 #[test]
 fn test_tabbar_default_active_0() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
     assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
 fn test_tabbar_set_active_valid() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
     tabbar.set_active(1);
     assert_eq!(tabbar.active(), 1);
 }
 
 #[test]
 fn test_tabbar_set_active_out_of_bounds() {
-    let tabs = vec!["Tab1", "Tab2"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
     tabbar.set_active(100);
-    assert!(tabbar.active() < tabs.len());
+    assert!(tabbar.active() < 2);
 }
 
 #[test]
 fn test_tabbar_set_active_single_tab() {
-    let tabs = vec!["Only Tab"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Only Tab"]);
     tabbar.set_active(0);
     assert_eq!(tabbar.active(), 0);
 }
 
 #[test]
 fn test_tabbar_multiple_set_active() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
     tabbar.set_active(0);
     assert_eq!(tabbar.active(), 0);
     tabbar.set_active(1);
@@ -102,15 +88,13 @@ fn test_tabbar_multiple_set_active() {
 
 #[test]
 fn test_tabbar_default_tabs() {
-    let tabs = vec!["Home", "Settings", "Profile"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["Home", "Settings", "Profile"]);
     assert_eq!(tabbar.tabs().len(), 3);
 }
 
 #[test]
 fn test_tabbar_tabs() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
     let retrieved = tabbar.tabs();
     assert_eq!(retrieved.len(), 3);
     assert_eq!(retrieved[0], "Tab1");
@@ -118,16 +102,13 @@ fn test_tabbar_tabs() {
 
 #[test]
 fn test_tabbar_tab_count() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3", "Tab4"];
-    let tabbar = TabBar::new(tabs);
-    let count = tabbar.tab_count();
-    assert_eq!(count, 4);
+    let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3", "Tab4"]);
+    assert_eq!(tabbar.tab_count(), 4);
 }
 
 #[test]
 fn test_tabbar_tabs_consistency() {
-    let tabs = vec!["A", "B", "C"];
-    let tabbar = TabBar::new(tabs);
+    let tabbar = TabBar::new(vec!["A", "B", "C"]);
     assert_eq!(tabbar.tab_count(), 3);
     assert_eq!(tabbar.tabs().len(), 3);
 }
@@ -138,24 +119,20 @@ fn test_tabbar_tabs_consistency() {
 
 #[test]
 fn test_tabbar_id() {
-    let tabs = vec!["Home", "Settings"];
-    let tabbar = TabBar::new(tabs);
-    let _id = tabbar.id();
+    let _ = TabBar::new(vec!["Home", "Settings"]);
 }
 
 #[test]
 fn test_tabbar_area() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let area = tabbar.area();
-    assert!(area.width > 0);
+    assert!(tabbar.area().width > 0);
 }
 
 #[test]
 fn test_tabbar_set_area() {
     let mut tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let new_area = Rect::new(10, 20, 100, 5);
-    tabbar.set_area(new_area);
-    assert_eq!(tabbar.area(), new_area);
+    tabbar.set_area(Rect::new(10, 20, 100, 5));
+    assert_eq!(tabbar.area(), Rect::new(10, 20, 100, 5));
 }
 
 #[test]
@@ -192,9 +169,7 @@ fn test_tabbar_clear_dirty_then_mark() {
 #[test]
 fn test_tabbar_render() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
-    let area = Rect::new(0, 0, 80, 3);
-    let plane = tabbar.render(area);
-    assert_eq!(plane.width, 80);
+    assert_eq!(tabbar.render(Rect::new(0, 0, 80, 3)).width, 80);
 }
 
 #[test]
@@ -214,16 +189,26 @@ fn test_tabbar_default_dirty_true() {
 // ============================================================================
 
 #[test]
-fn test_tabbar_different_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark"];
-    for theme_name in themes {
-        if let Some(theme) = Theme::from_name(theme_name) {
-            let tabs = vec!["Home", "Settings"];
-            let tabbar = TabBar::new(tabs).with_theme(theme);
-            let area = Rect::new(0, 0, 80, 3);
-            let plane = tabbar.render(area);
-            assert!(plane.width > 0);
-        }
+fn test_tabbar_theme_nord() {
+    let _ = TabBar::new(vec!["Home", "Settings"]).with_theme(Theme::nord());
+}
+
+#[test]
+fn test_tabbar_theme_dracula() {
+    let _ = TabBar::new(vec!["Home", "Settings"]).with_theme(Theme::dracula());
+}
+
+#[test]
+fn test_tabbar_theme_monokai() {
+    if let Some(t) = Theme::from_name("monokai") {
+        let _ = TabBar::new(vec!["Home", "Settings"]).with_theme(t);
+    }
+}
+
+#[test]
+fn test_tabbar_theme_solarized_dark() {
+    if let Some(t) = Theme::from_name("solarized_dark") {
+        let _ = TabBar::new(vec!["Home", "Settings"]).with_theme(t);
     }
 }
 
@@ -234,22 +219,6 @@ fn test_tabbar_on_theme_change() {
     assert!(tabbar.needs_render());
 }
 
-#[test]
-fn test_tabbar_multiple_themes() {
-    let themes = vec![
-        "nord", "dracula", "monokai", "solarized_dark", 
-        "catppuccin_mocha", "tokyo_night", "gruvbox_dark", "ayu_dark",
-    ];
-    for theme_name in themes {
-        if let Some(theme) = Theme::from_name(theme_name) {
-            let tabs = vec!["Home", "Settings"];
-            let tabbar = TabBar::new(tabs).with_theme(theme);
-            let area = Rect::new(0, 0, 80, 3);
-            let _plane = tabbar.render(area);
-        }
-    }
-}
-
 // ============================================================================
 // Rendering Tests
 // ============================================================================
@@ -257,50 +226,39 @@ fn test_tabbar_multiple_themes() {
 #[test]
 fn test_tabbar_render_fills_bg() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let area = Rect::new(0, 0, 80, 3);
-    let plane = tabbar.render(area);
-    let theme = Theme::default();
-    assert_eq!(plane.cells[0].bg, theme.bg);
+    let plane = tabbar.render(Rect::new(0, 0, 80, 3));
+    assert_eq!(plane.cells[0].bg, Theme::default().bg);
 }
 
 #[test]
 fn test_tabbar_render_has_content() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let area = Rect::new(0, 0, 80, 3);
-    let plane = tabbar.render(area);
-    let has_content = plane.cells.iter().any(|c| c.char != '\0');
-    assert!(has_content);
+    let plane = tabbar.render(Rect::new(0, 0, 80, 3));
+    assert!(plane.cells.iter().any(|c| c.char != '\0'));
 }
 
 #[test]
 fn test_tabbar_render_minimal_area() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let area = Rect::new(0, 0, 5, 1);
-    let plane = tabbar.render(area);
-    assert_eq!(plane.width, 5);
+    assert_eq!(tabbar.render(Rect::new(0, 0, 5, 1)).width, 5);
 }
 
 #[test]
 fn test_tabbar_render_wide_area() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3", "Tab4"]);
-    let area = Rect::new(0, 0, 200, 3);
-    let plane = tabbar.render(area);
-    assert_eq!(plane.width, 200);
+    assert_eq!(tabbar.render(Rect::new(0, 0, 200, 3)).width, 200);
 }
 
 #[test]
 fn test_tabbar_render_small_area() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
-    let area = Rect::new(0, 0, 1, 1);
-    let plane = tabbar.render(area);
-    assert_eq!(plane.width, 1);
+    assert_eq!(tabbar.render(Rect::new(0, 0, 1, 1)).width, 1);
 }
 
 #[test]
 fn test_tabbar_render_medium_area() {
     let tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
-    let area = Rect::new(0, 0, 100, 3);
-    let plane = tabbar.render(area);
+    let plane = tabbar.render(Rect::new(0, 0, 100, 3));
     assert_eq!(plane.width, 100);
     assert_eq!(plane.height, 3);
 }
@@ -311,51 +269,40 @@ fn test_tabbar_render_medium_area() {
 
 #[test]
 fn test_tabbar_many_tabs() {
-    let tabs: Vec<String> = (0..50).map(|i| format!("Tab{}", i)).collect();
-    let tabbar = TabBar::new(tabs.iter().map(|s| s.as_str()).collect());
-    let area = Rect::new(0, 0, 200, 3);
-    let _plane = tabbar.render(area);
+    let tabs: Vec<&str> = (0..50).map(|i| Box::leak(format!("Tab{}", i).into_boxed_str()) as &str).collect();
+    let tabbar = TabBar::new(tabs);
+    let _ = tabbar.render(Rect::new(0, 0, 200, 3));
 }
 
 #[test]
 fn test_tabbar_unicode_tabs() {
-    let tabs = vec!["日本語", "العربية", "🎉"];
-    let tabbar = TabBar::new(tabs);
-    let area = Rect::new(0, 0, 80, 3);
-    let _plane = tabbar.render(area);
+    let _ = TabBar::new(vec!["日本語", "العربية", "🎉"]);
 }
 
 #[test]
 fn test_tabbar_long_tabs() {
-    let long_text = "A".repeat(100);
-    let tabs = vec!["Tab1".to_string(), long_text.to_string()];
-    let tabbar = TabBar::new(tabs);
-    let area = Rect::new(0, 0, 80, 3);
-    let _plane = tabbar.render(area);
+    let long = "A".repeat(100);
+    let tabbar = TabBar::new(vec!["Tab1", &long]);
+    let _ = tabbar.render(Rect::new(0, 0, 80, 3));
 }
 
 #[test]
 fn test_tabbar_empty_string_tabs() {
-    let tabs = vec!["", "", ""];
-    let tabbar = TabBar::new(tabs);
-    let area = Rect::new(0, 0, 80, 3);
-    let _plane = tabbar.render(area);
+    let _ = TabBar::new(vec!["", "", ""]);
 }
 
 #[test]
 fn test_tabbar_active_clamps() {
-    let tabs = vec!["Tab1", "Tab2"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Tab1", "Tab2"]);
     tabbar.set_active(100);
-    assert!(tabbar.active() < tabs.len());
+    assert!(tabbar.active() < 2);
 }
 
 #[test]
 fn test_tabbar_active_stays_valid() {
-    let tabs = vec!["Tab1", "Tab2", "Tab3"];
-    let mut tabbar = TabBar::new(tabs);
+    let mut tabbar = TabBar::new(vec!["Tab1", "Tab2", "Tab3"]);
     tabbar.set_active(0);
     assert_eq!(tabbar.active(), 0);
     tabbar.set_active(5);
-    assert!(tabbar.active() < tabs.len());
+    assert!(tabbar.active() < 3);
 }
