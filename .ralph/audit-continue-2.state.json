@@ -1,7 +1,7 @@
 {
   "name": "audit-continue-2",
   "taskFile": ".ralph/audit-continue-2.md",
-  "iteration": 2,
+  "iteration": 4,
   "maxIterations": 12,
   "itemsPerIteration": 2,
   "reflectEvery": 4,

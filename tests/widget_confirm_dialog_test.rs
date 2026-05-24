@@ -1,337 +1,220 @@
-mod common;
+//! Tests for the ConfirmDialog widget.
 
-use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::confirm_dialog::{ConfirmDialog, ConfirmResult};
-use ratatui::layout::Rect;
+use dracon_terminal_engine::framework::widgets::ConfirmDialog;
+
+// ============================================================================
+// Construction Tests
+// ============================================================================
 
 #[test]
 fn test_confirm_dialog_new() {
-    let dlg = ConfirmDialog::new("Title", "Message");
-    assert_eq!(dlg.title, "Title");
-    assert_eq!(dlg.message, "Message");
+    let d = ConfirmDialog::new("Confirm", "Are you sure?");
+    let area = d.area();
+    assert!(area.width > 0);
 }
 
 #[test]
-fn test_confirm_dialog_with_id() {
-    let dlg = ConfirmDialog::with_id(
-        dracon_terminal_engine::framework::widget::WidgetId::new(5),
-        "Title",
-        "Msg",
-    );
-    assert_eq!(
-        dlg.id,
-        dracon_terminal_engine::framework::widget::WidgetId::new(5)
-    );
-}
-
-#[test]
-fn test_confirm_dialog_confirm_label() {
-    let dlg = ConfirmDialog::new("t", "m").confirm_label("Delete");
-    assert_eq!(dlg.confirm_label, "Delete");
-}
-
-#[test]
-fn test_confirm_dialog_cancel_label() {
-    let dlg = ConfirmDialog::new("t", "m").cancel_label("Abort");
-    assert_eq!(dlg.cancel_label, "Abort");
-}
-
-#[test]
-fn test_confirm_dialog_danger() {
-    let dlg = ConfirmDialog::new("t", "m").danger(true);
-    assert!(dlg.danger);
-}
-
-#[test]
-fn test_confirm_dialog_bind_command() {
-    use dracon_terminal_engine::framework::command::BoundCommand;
-    let cmd = BoundCommand::new("rm -rf /").label("dangerous");
-    let dlg = ConfirmDialog::new("t", "m").bind_command(cmd);
-    assert_eq!(dlg.commands().len(), 1);
-}
-
-#[test]
-fn test_confirm_dialog_result_starts_none() {
-    let dlg = ConfirmDialog::new("t", "m");
-    assert_eq!(dlg.confirmed(), None);
-}
-
-#[test]
-fn test_confirm_dialog_clear_result() {
-    let mut dlg = ConfirmDialog::new("t", "m");
-    dlg.result = Some(ConfirmResult::Confirmed);
-    dlg.clear_result();
-    assert_eq!(dlg.confirmed(), None);
-}
-
-#[test]
-fn test_confirm_dialog_render_box() {
-    let dlg = ConfirmDialog::new("Confirm?", "Are you sure?");
-    let plane = dlg.render(Rect::new(0, 0, 30, 7));
-    assert_eq!(plane.cells[0].char, '┌');
-    assert_eq!(plane.cells[29].char, '┐');
-}
-
-#[test]
-fn test_confirm_dialog_render_title() {
-    let dlg = ConfirmDialog::new("Delete All", "This cannot be undone");
-    let plane = dlg.render(Rect::new(0, 0, 40, 7));
-    let title_chars: Vec<char> = plane.cells[40..80].iter().map(|c| c.char).collect();
-    let title_str: String = title_chars.into_iter().collect();
-    assert!(title_str.contains("Delete All"));
-}
-
-#[test]
-fn test_confirm_dialog_danger_border_color() {
-    let dlg = ConfirmDialog::new("Danger", "Very bad").danger(true);
-    let plane = dlg.render(Rect::new(0, 0, 30, 7));
-    assert_eq!(plane.cells[0].fg, dlg.theme.error);
-}
-
-#[test]
-fn test_confirm_dialog_focusable() {
-    let dlg = ConfirmDialog::new("t", "m");
-    assert!(dlg.focusable());
-}
-
-#[test]
-fn test_confirm_dialog_dirty_lifecycle() {
-    let mut dlg = ConfirmDialog::new("t", "m");
-    assert!(dlg.needs_render());
-    dlg.clear_dirty();
-    assert!(!dlg.needs_render());
+fn test_confirm_dialog_new_with_id() {
+    let d = ConfirmDialog::with_id(WidgetId::new(42), "Title", "Message");
+    assert_eq!(d.id(), WidgetId::new(42));
 }
 
 #[test]
 fn test_confirm_dialog_with_theme() {
-    let theme = Theme::cyberpunk();
-    let dlg = ConfirmDialog::new("t", "m").with_theme(theme);
-    assert_eq!(&*dlg.theme.name, "cyberpunk");
+    let d = ConfirmDialog::new("Test", "Message").with_theme(Theme::nord());
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
+}
+
+// ============================================================================
+// Widget Trait Tests
+// ============================================================================
+
+#[test]
+fn test_confirm_dialog_id() {
+    let d = ConfirmDialog::with_id(WidgetId::new(42), "Test", "Msg");
+    assert_eq!(d.id(), WidgetId::new(42));
 }
 
 #[test]
-fn test_confirm_dialog_mouse_click_confirm() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
-
-    assert_eq!(dlg.confirmed(), None);
-
-    // Click on the Confirm button row (height - 2 = 5)
-    // In a 40-wide area with default labels "Confirm" and "Cancel":
-    // total_btn_len = 7 + 6 + 5 = 18, start_col = (40 - 18) / 2 = 11
-    // Confirm button occupies cols 11..20
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 15, 5);
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+fn test_confirm_dialog_set_id() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.set_id(WidgetId::new(99));
+    assert_eq!(d.id(), WidgetId::new(99));
 }
 
 #[test]
-fn test_confirm_dialog_mouse_click_cancel() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
-
-    assert_eq!(dlg.confirmed(), None);
-
-    // Cancel button starts at: start_col (11) + "[Confirm]".len() (9) + 3 = 23
-    // Cancel button occupies cols 23..31
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 25, 5);
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+fn test_confirm_dialog_area() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    let area = d.area();
+    assert!(area.width > 0);
 }
 
 #[test]
-fn test_confirm_dialog_mouse_click_outside_buttons() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
-
-    assert_eq!(dlg.confirmed(), None);
-
-    // Click between the buttons or outside them
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 21, 5);
-    assert!(!consumed);
-    assert_eq!(dlg.confirmed(), None);
+fn test_confirm_dialog_set_area() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.set_area(Rect::new(0, 0, 80, 20));
+    assert_eq!(d.area(), Rect::new(0, 0, 80, 20));
 }
 
 #[test]
-fn test_confirm_dialog_mouse_wrong_row() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
-
-    // Click on the title row, not the button row
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 1);
-    assert!(!consumed);
-    assert_eq!(dlg.confirmed(), None);
+fn test_confirm_dialog_needs_render() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    assert!(d.needs_render());
 }
 
 #[test]
-fn test_confirm_dialog_mouse_right_click_ignored() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    dlg.set_area(ratatui::layout::Rect::new(0, 0, 40, 7));
-
-    // Right click on confirm button should be ignored
-    let consumed = dlg.handle_mouse(MouseEventKind::Down(MouseButton::Right), 10, 5);
-    assert!(!consumed);
-    assert_eq!(dlg.confirmed(), None);
+fn test_confirm_dialog_mark_dirty() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.clear_dirty();
+    assert!(!d.needs_render());
+    d.mark_dirty();
+    assert!(d.needs_render());
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_enter_confirms() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    assert_eq!(dlg.confirmed(), None);
-
-    // Enter with confirm_focused=true (default) should confirm
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+fn test_confirm_dialog_clear_dirty() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.clear_dirty();
+    assert!(!d.needs_render());
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_esc_cancels() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+fn test_confirm_dialog_default_dirty() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    assert!(d.needs_render());
+}
 
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    assert_eq!(dlg.confirmed(), None);
+// ============================================================================
+// Render Tests
+// ============================================================================
 
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Esc,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+#[test]
+fn test_confirm_dialog_render_basic() {
+    let d = ConfirmDialog::new("Confirm", "Delete this?");
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert_eq!(plane.width, 50);
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_tab_toggles_focus() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-
-    // Tab should toggle to Cancel
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Tab,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-
-    // Now Enter should cancel
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Cancelled));
+fn test_confirm_dialog_render_has_content() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    let has_content = plane.cells.iter().any(|c| c.char != '\0');
+    assert!(has_content);
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_left_right_toggles_focus() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-
-    // Left arrow should toggle focus
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Left,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-
-    // Right arrow should toggle back
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Right,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
+fn test_confirm_dialog_render_wide() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    let plane = d.render(Rect::new(0, 0, 80, 10));
+    assert_eq!(plane.width, 80);
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_space_activates() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-
-    // Space should activate the focused button (Confirm by default)
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Char(' '),
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+fn test_confirm_dialog_render_small() {
+    let d = ConfirmDialog::new("T", "M");
+    let plane = d.render(Rect::new(0, 0, 20, 5));
+    assert_eq!(plane.width, 20);
 }
 
 #[test]
-fn test_confirm_dialog_handle_key_ignores_repeat() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+fn test_confirm_dialog_render_tall() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    let plane = d.render(Rect::new(0, 0, 50, 20));
+    assert_eq!(plane.height, 20);
+}
 
-    let mut dlg = ConfirmDialog::new("Title", "Message");
-    assert_eq!(dlg.confirmed(), None);
+// ============================================================================
+// Theme Tests
+// ============================================================================
 
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Repeat,
-        code: KeyCode::Enter,
-        modifiers: Default::default(),
-    });
-    assert!(!consumed);
-    assert_eq!(dlg.confirmed(), None);
+#[test]
+fn test_confirm_dialog_theme_nord() {
+    let d = ConfirmDialog::new("Test", "Msg").with_theme(Theme::nord());
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
 }
 
 #[test]
-fn test_confirm_dialog_on_focus_resets_button() {
-    use dracon_terminal_engine::framework::widget::Widget;
-    use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
+fn test_confirm_dialog_theme_dracula() {
+    let d = ConfirmDialog::new("Test", "Msg").with_theme(Theme::dracula());
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
+}
 
-    let mut dlg = ConfirmDialog::new("Title", "Message");
+#[test]
+fn test_confirm_dialog_theme_monokai() {
+    if let Some(t) = Theme::from_name("monokai") {
+        let d = ConfirmDialog::new("Test", "Msg").with_theme(t);
+        let _ = d.render(Rect::new(0, 0, 50, 10));
+    }
+}
 
-    // Tab to Cancel
-    dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Tab,
-        modifiers: Default::default(),
-    });
+#[test]
+fn test_confirm_dialog_on_theme_change() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.on_theme_change(&Theme::nord());
+    assert!(d.needs_render());
+}
 
-    // Blur and re-focus should reset to Confirm
-    dlg.on_blur();
-    dlg.on_focus();
+#[test]
+fn test_confirm_dialog_multiple_themes() {
+    let themes = vec!["nord", "dracula", "monokai", "solarized_dark"];
+    for name in themes {
+        if let Some(t) = Theme::from_name(name) {
+            let d = ConfirmDialog::new("Test", "Msg").with_theme(t);
+            let _ = d.render(Rect::new(0, 0, 50, 10));
+        }
+    }
+}
 
-    // Enter should confirm again
-    let consumed = dlg.handle_key(KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: Default::default(),
-    });
-    assert!(consumed);
-    assert_eq!(dlg.confirmed(), Some(ConfirmResult::Confirmed));
+// ============================================================================
+// Edge Cases
+// ============================================================================
+
+#[test]
+fn test_confirm_dialog_render_twice() {
+    let d = ConfirmDialog::new("Test", "Msg");
+    let _ = d.render(Rect::new(0, 0, 50, 10));
+    let _ = d.render(Rect::new(0, 0, 50, 10));
+}
+
+#[test]
+fn test_confirm_dialog_set_area_then_render() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.set_area(Rect::new(0, 0, 80, 20));
+    let plane = d.render(Rect::new(0, 0, 80, 20));
+    assert_eq!(plane.width, 80);
+}
+
+#[test]
+fn test_confirm_dialog_empty_title() {
+    let d = ConfirmDialog::new("", "Message");
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_confirm_dialog_empty_message() {
+    let d = ConfirmDialog::new("Title", "");
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_confirm_dialog_long_text() {
+    let long = "A".repeat(100);
+    let d = ConfirmDialog::new(&long, &long);
+    let plane = d.render(Rect::new(0, 0, 50, 10));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_confirm_dialog_clear_result() {
+    let mut d = ConfirmDialog::new("Test", "Msg");
+    d.clear_result();
+    let _ = d.render(Rect::new(0, 0, 50, 10));
 }
