@@ -108,7 +108,7 @@ All 53 framework widgets need tests. Progress:
 - [x] `Divider` (330 LOC) — ✅ 55 tests
 - [x] `Select` (294 LOC) — ✅ 39 tests
 - [x] `TabBar` (252 LOC) — ✅ 41 tests
-- [x] `Hud` (242 LOC) — 0 tests
+- [x] `Hud` (242 LOC) — ✅ 45 tests
 - [ ] `Slider` (275 LOC) — 11 tests (needs more)
 - [ ] `Radio` (215 LOC) — 0 tests
 - [ ] `Checkbox` (217 LOC) — 0 tests
@@ -615,7 +615,7 @@ Current: 14 compile-tested, 19 ignored
 | Divider | 330 | 0 | ⬜ |
 | Select | 294 | 0 | ⬜ |
 | TabBar | 252 | 0 | ⬜ |
-| Hud | 242 | 0 | ⬜ |
+| Hud | 242 | 45 | ✅ DONE |
 | Slider | 275 | 11 | 🔵 Partial |
 | Radio | 215 | 0 | ⬜ |
 | Checkbox | 217 | 0 | ⬜ |
