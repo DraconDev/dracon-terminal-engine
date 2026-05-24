@@ -1629,9 +1629,10 @@ impl TextEditor {
         self.lines.insert(self.cursor_row + 1, new_line);
         self.invalidate_from(self.cursor_row);
         self.cursor_row += 1;
-        // Fix: Account for empty lines before cursor_row
-        // cursor_col should be the column position relative to the line being inserted
-        // For empty lines, this means accounting for the +1 per empty row before insertion
+        self.cursor_col = indentation.len();
+    }
+
+    fn insert_newline_raw(&mut self) {
         let empty_lines_before = self.lines[..self.cursor_row]
             .iter()
             .filter(|l| l.is_empty())
