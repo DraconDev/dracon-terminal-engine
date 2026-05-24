@@ -116,7 +116,7 @@ All 53 framework widgets need tests. Progress:
 
 #### Priority 2: Smaller Widgets (<200 LOC)
 - [x] `ProgressBar` (143 LOC) — ✅ 34 tests
-- [ ] `Spinner` (141 LOC) — 0 tests
+- [x] `Spinner` (141 LOC) — ✅ 34 tests
 - [ ] `SearchInput` (135 LOC) — 0 tests
 - [ ] `Tooltip` (116 LOC) — 0 tests
 - [ ] `DebugOverlay` (129 LOC) — 11 tests
@@ -621,7 +621,7 @@ Current: 14 compile-tested, 19 ignored
 | Checkbox | 217 | 42 | ⬜ |
 | Toggle | 205 | 40 | ⬜ |
 | ProgressBar | 143 | 34 | ⬜ |
-| Spinner | 141 | 0 | ⬜ |
+| Spinner | 141 | 34 | ⬜ |
 | SearchInput | 135 | 0 | ⬜ |
 | Tooltip | 116 | 0 | ⬜ |
 | DebugOverlay | 129 | 11 | 🔵 Partial |
