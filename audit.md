@@ -120,9 +120,9 @@ All 53 framework widgets need tests. Progress:
 - [x] `SearchInput` (135 LOC) — ✅ 30 tests
 - [x] `Tooltip` (116 LOC) — ✅ 29 tests
 - [ ] `DebugOverlay` (129 LOC) — 11 tests
-- [ ] `Profiler` (176 LOC) — 10 tests
+- [x] `Profiler` (176 LOC) — ✅ 27 tests
 - [x] `EventLogger` (156 LOC) — ✅ 26 tests
-- [ ] `StatusBar` (186 LOC) — 10 tests
+- [x] `StatusBar` (186 LOC) — ✅ 31 tests
 - [x] `WidgetInspector` (160 LOC) — ✅ 26 tests
 - [x] `Breadcrumbs` (178 LOC) — ✅ 29 tests
 - [ ] `Form` (185 LOC) — 0 tests
@@ -625,9 +625,9 @@ Current: 14 compile-tested, 19 ignored
 | SearchInput | 135 | 30 | ⬜ |
 | Tooltip | 116 | 29 | ⬜ |
 | DebugOverlay | 129 | 11 | 🔵 Partial |
-| Profiler | 176 | 10 | 🔵 Partial |
+| Profiler | 176 | 27 | 🔵 Partial |
 | EventLogger | 156 | 26 | ⬜ |
-| StatusBar | 186 | 10 | 🔵 Partial |
+| StatusBar | 186 | 31 | 🔵 Partial |
 | WidgetInspector | 160 | 26 | ⬜ |
 | Breadcrumbs | 178 | 29 | ⬜ |
 | Form | 185 | 0 | ⬜ |
