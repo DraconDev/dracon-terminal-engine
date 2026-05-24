@@ -111,7 +111,7 @@ All 53 framework widgets need tests. Progress:
 - [x] `Hud` (242 LOC) — ✅ 45 tests
 - [x] `Slider` (275 LOC) — ✅ 46 tests
 - [x] `Radio` (215 LOC) — ✅ 41 tests
-- [ ] `Checkbox` (217 LOC) — 0 tests
+- [x] `Checkbox` (217 LOC) — ✅ 42 tests
 - [ ] `Toggle` (205 LOC) — 0 tests
 
 #### Priority 2: Smaller Widgets (<200 LOC)
@@ -618,7 +618,7 @@ Current: 14 compile-tested, 19 ignored
 | Hud | 242 | 45 | ✅ DONE |
 | Slider | 275 | 46 | 🔵 Partial |
 | Radio | 215 | 41 | ⬜ |
-| Checkbox | 217 | 0 | ⬜ |
+| Checkbox | 217 | 42 | ⬜ |
 | Toggle | 205 | 0 | ⬜ |
 | ProgressBar | 143 | 0 | ⬜ |
 | Spinner | 141 | 0 | ⬜ |
