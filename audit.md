@@ -123,8 +123,8 @@ All 53 framework widgets need tests. Progress:
 - [ ] `Profiler` (176 LOC) — 10 tests
 - [x] `EventLogger` (156 LOC) — ✅ 26 tests
 - [ ] `StatusBar` (186 LOC) — 10 tests
-- [ ] `WidgetInspector` (160 LOC) — 0 tests
-- [ ] `Breadcrumbs` (178 LOC) — 0 tests
+- [x] `WidgetInspector` (160 LOC) — ✅ 26 tests
+- [x] `Breadcrumbs` (178 LOC) — ✅ 29 tests
 - [ ] `Form` (185 LOC) — 0 tests
 - [ ] `Tree` (190 LOC) — 0 tests
 - [ ] `Table` (280 LOC) — 0 tests
@@ -628,8 +628,8 @@ Current: 14 compile-tested, 19 ignored
 | Profiler | 176 | 10 | 🔵 Partial |
 | EventLogger | 156 | 26 | ⬜ |
 | StatusBar | 186 | 10 | 🔵 Partial |
-| WidgetInspector | 160 | 0 | ⬜ |
-| Breadcrumbs | 178 | 0 | ⬜ |
+| WidgetInspector | 160 | 26 | ⬜ |
+| Breadcrumbs | 178 | 29 | ⬜ |
 | Form | 185 | 0 | ⬜ |
 | Tree | 190 | 0 | ⬜ |
 | Table | 280 | 0 | ⬜ |
