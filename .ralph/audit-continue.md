@@ -4,8 +4,8 @@
 Continue adding tests for remaining widgets to achieve 100% widget test coverage.
 
 ## Current Progress
-- **10 widgets tested**: 461 + 39 = **500 tests total**
-- **43 widgets remaining**
+- **11 widgets tested**: 500 + 41 = **541 tests total**
+- **42 widgets remaining**
 
 ### Completed This Session
 - ✅ **Select** (294 LOC) — 39 tests added
@@ -17,11 +17,35 @@ Continue adding tests for remaining widgets to achieve 100% widget test coverage
   - Edge cases (empty strings, long options, many options)
   - Bounds clamping
 
-## Next Priority Widgets (200-350 LOC)
+- ✅ **TabBar** (252 LOC) — 41 tests added
+  - Construction (new, new_with_id, with_theme)
+  - Tab state (default active, set_active)
+  - Widget trait (render, area, needs_render, dirty flags, z_index)
+  - Theme support (nord, dracula, monokai, solarized_dark, catppuccin_mocha)
+  - Rendering (various areas, fills bg, has content)
+  - Edge cases (many tabs, unicode, long tabs, empty strings, clamping)
+
+### Widget Tests (11 widgets, 541 tests)
+| Widget | LOC | Tests |
+|--------|-----|-------|
+| ColorPicker | 750 | 54 |
+| TagsInput | 691 | 52 |
+| Calendar | 628 | 56 |
+| Kanban | 744 | 64 |
+| Autocomplete | 453 | 43 |
+| RichText | 436 | 44 |
+| NotificationCenter | 342 | 40 |
+| CommandPalette | 558 | 53 |
+| Divider | 330 | 55 |
+| Select | 294 | 39 |
+| TabBar | 252 | 41 |
+| **TOTAL** | **5,478** | **541 tests** |
+
+### Next Priority Widgets (200-350 LOC)
 
 1. ~~**Select** (294 LOC) — ✅ 39 tests~~ — DONE
-2. **TabBar** (252 LOC) — 0 tests — NEXT
-3. **Hud** (242 LOC) — 0 tests
+2. ~~**TabBar** (252 LOC) — ✅ 41 tests~~ — DONE
+3. **Hud** (242 LOC) — 0 tests — NEXT
 4. **Slider** (275 LOC) — 11 tests (needs more)
 5. **Radio** (215 LOC) — 0 tests
 6. **Checkbox** (217 LOC) — 0 tests
