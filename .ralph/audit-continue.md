@@ -4,9 +4,9 @@
 Continue adding tests for remaining widgets to achieve 100% widget test coverage.
 
 ### Progress
-- **15 widgets tested**: 673 + 42 = **715 tests total**
-- **38 widgets remaining**
-- **22% widget coverage** (15 of 68 total)
+- **16 widgets tested**: 715 + 40 = **755 tests total**
+- **37 widgets remaining**
+- **24% widget coverage** (16 of 68 total)
 
 ### Completed Widgets
 | Widget | LOC | Tests |
@@ -26,10 +26,14 @@ Continue adding tests for remaining widgets to achieve 100% widget test coverage
 | Slider | 275 | 46 |
 | Radio | 215 | 41 |
 | Checkbox | 217 | 42 |
+| Toggle | 205 | 40 |
 
-### Remaining Priority 1 (200-350 LOC)
-6. ~~**Checkbox** (217 LOC) — ✅ 42 tests~~ — DONE
-7. **Toggle** (205 LOC) — 0 tests — NEXT
+### Priority 1 COMPLETE! 🎉
+All 7 widgets in Priority 1 (200-350 LOC) now have tests.
+
+### Remaining Widgets
+- Priority 2: Smaller widgets (<200 LOC)
+- Priority 3: Very small widgets (<100 LOC)
 
 ## Success Criteria
 - Each widget file created in `tests/widget_*_test.rs`
