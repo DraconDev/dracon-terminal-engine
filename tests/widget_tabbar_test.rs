@@ -39,7 +39,7 @@ fn test_tabbar_new_with_id() {
 
 #[test]
 fn test_tabbar_with_theme() {
-    let tabs = vec!["Home", "Settings"];
+    let tabs = vec!["Home".to_string(), "Settings".to_string()];
     let tabbar = TabBar::new(tabs).with_theme(Theme::nord());
     let area = Rect::new(0, 0, 80, 3);
     let _plane = tabbar.render(area);
@@ -94,7 +94,7 @@ fn test_tabbar_tab_count() {
 
 #[test]
 fn test_tabbar_id() {
-    let tabs = vec!["Home", "Settings"];
+    let tabs = vec!["Home".to_string(), "Settings".to_string()];
     let tabbar = TabBar::new(tabs);
     let _id = tabbar.id();
 }
@@ -152,7 +152,7 @@ fn test_tabbar_z_index() {
 
 #[test]
 fn test_tabbar_different_themes() {
-    let tabs = vec!["Home", "Settings"];
+    let tabs = vec!["Home".to_string(), "Settings".to_string()];
     let themes = vec!["nord", "dracula", "monokai", "solarized_dark"];
     
     for theme_name in themes {
@@ -256,7 +256,7 @@ fn test_tabbar_multiple_set_active() {
 
 #[test]
 fn test_tabbar_multiple_themes() {
-    let tabs = vec!["Home", "Settings"];
+    let tabs = vec!["Home".to_string(), "Settings".to_string()];
     let themes = vec![
         "nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha",
         "tokyo_night", "gruvbox_dark", "ayu_dark",
