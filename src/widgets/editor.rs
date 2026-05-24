@@ -1633,14 +1633,6 @@ impl TextEditor {
     }
 
     fn insert_newline_raw(&mut self) {
-        let empty_lines_before = self.lines[..self.cursor_row]
-            .iter()
-            .filter(|l| l.is_empty())
-            .count();
-        self.cursor_col = indentation.len();
-    }
-
-    fn insert_newline_raw(&mut self) {
         self.ensure_valid_cursor_col();
         let line = &mut self.lines[self.cursor_row];
         let remaining = line.split_off(self.cursor_col);
