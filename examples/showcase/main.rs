@@ -140,8 +140,11 @@ fn main() -> std::io::Result<()> {
                     }
                 }
                 let _ = std::fs::remove_file(&theme_return_path);
+            // from overlapping with new content (causes horizontal lines)
+
             // Clear terminal before resuming to prevent stale content from child process
             // from overlapping with new content (causes horizontal lines)
+            let _ = std::io::stdout().write(b"\x1b[2J\x1b[H").unwrap();
             let _ = std::io::stdout().write(b"\x1b[2J\x1b[H").unwrap();
 
 
