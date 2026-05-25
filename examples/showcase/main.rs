@@ -7,6 +7,7 @@
 //! and an interactive primitives bar demonstrating engine building blocks.
 //!
 //! Controls:
+use std::io::Write;
 //!   arrows   -  navigate cards
 //!   Enter    -  launch selected example
 //!   /        -  focus search bar
