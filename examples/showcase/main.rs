@@ -142,6 +142,10 @@ fn main() -> std::io::Result<()> {
             }
             std::env::remove_var("DTRON_THEME_FILE");
 
+                        // Clear terminal before resuming to prevent stale content from child process
+            // from overlapping with new content (causes horizontal lines)
+            let _ = std::io::stdout().write_all(b"\x1b[2J\x1b[H").unwrap();
+
             let _ = ctx.resume_terminal();
 
             // Non-blocking drain of any stray input bytes left by the child.
