@@ -499,6 +499,15 @@ impl SceneRouter {
         let height = from.height;
         let mut result = Plane::new(0, width, height);
 
+        // Safety: pre-fill result with cells from the "from" plane.
+        // During transitions, narrow gaps can occur at the sliding edges
+        // or when from/to have different dimensions, leaving cells at
+        // Cell::default() (transparent + Color::Reset). Color::Reset
+        // renders as the terminal's default background (typically white),
+        // causing visible horizontal white lines across the screen.
+        let copy_len = result.cells.len().min(from.cells.len());
+        result.cells[..copy_len].copy_from_slice(&from.cells[..copy_len]);
+
         match transition {
             SceneTransition::Fade => {
                 // Dithered crossfade: cells gradually switch from -> to
