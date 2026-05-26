@@ -18,6 +18,10 @@
             }
             // Clear terminal before resuming to prevent stale content from child process
             // from overlapping with new content (causes horizontal lines)
+            std::io::stdout().write(b"\x1b[2J\x1b[H").unwrap();
+            }
+            // Clear terminal before resuming to prevent stale content from child process
+            // from overlapping with new content (causes horizontal lines)
             std::io::stdout().write(b"\x1b[2J\x1b[H").unwrap();            }
             // Clear terminal before resuming to prevent stale content from child process
             // from overlapping with new content (causes horizontal lines)
