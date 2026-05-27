@@ -49,6 +49,7 @@ pub mod dragdrop;
 pub mod event_bus;
 pub mod event_dispatcher;
 pub mod focus;
+pub mod helpers;
 pub mod hitzone;
 pub mod i18n;
 pub mod keybindings;
@@ -84,6 +85,7 @@ pub mod prelude {
         dragdrop::{DragGhost, DragManager, DragPhase},
         event_bus::{EventBus, Reactive, SubscriptionId},
         focus::FocusManager,
+        helpers::{blit_to, draw_rounded_border, draw_text},
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         i18n::{tr, I18n, I18nError},
         keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
