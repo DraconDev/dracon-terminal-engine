@@ -203,6 +203,7 @@ impl App {
         }
 
         if self.keybindings.matches(actions::BACK, k) {
+            let pre_scene_depth = self.scene_router.stack_depth();
             let consumed = self.focus_manager.focused()
                 .and_then(|id| self.widget_mut(id))
                 .map(|mut w| w.handle_key(*k))
@@ -214,6 +215,9 @@ impl App {
                 } else {
                     running.store(false, Ordering::SeqCst);
                 }
+            }
+            if self.scene_router.stack_depth() != pre_scene_depth {
+                self.dirty_tracker.mark_all_dirty();
             }
             return;
         }

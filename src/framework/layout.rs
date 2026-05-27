@@ -179,7 +179,7 @@ impl Layout {
         for (i, c) in self.constraints.iter().enumerate() {
             match c {
                 Constraint::Fixed(f) => fixed_total += *f as u32,
-                Constraint::Min(m) => fixed_total += *m as u32,
+                Constraint::Min(_) => {} // Min handled separately after proportional split
                 Constraint::Max(_) => {}
                 Constraint::Percentage(p) => percentages.push((i, *p)),
                 Constraint::Ratio(n, d) => ratios.push((i, *n, *d)),

@@ -128,8 +128,9 @@ impl I18n {
                 match serde_json::from_str::<serde_json::Value>(&content) {
                     Ok(value) => {
                         if let Some(obj) = value.as_object() {
-                            self.translations.clear();
-                            Self::flatten_json(obj, "", &mut self.translations);
+                            let mut new_translations = HashMap::new();
+                            Self::flatten_json(obj, "", &mut new_translations);
+                            self.translations = new_translations;
                             self.locale = lang.to_string();
                             return Ok(());
                         }

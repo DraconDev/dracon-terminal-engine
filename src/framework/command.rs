@@ -83,7 +83,10 @@ impl OutputParser {
                     let parts: Vec<&str> = path.split('.').collect();
                     let mut cur = &val;
                     for part in parts {
-                        cur = cur.get(part).unwrap_or(cur);
+                        match cur.get(part) {
+                            Some(v) => cur = v,
+                            None => return ParsedOutput::None,
+                        }
                     }
                     return ParsedOutput::Scalar(cur.to_string());
                 }

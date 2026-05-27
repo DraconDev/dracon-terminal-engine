@@ -561,10 +561,54 @@ impl SceneRouter {
                     }
                 }
             }
+            SceneTransition::SlideUp => {
+                let offset = (height as f32 * progress) as u16;
+                for y in 0..height {
+                    for x in 0..width {
+                        let idx = (y * width + x) as usize;
+                        let from_y = y.saturating_add(offset);
+                        let to_y = y.saturating_sub(height - offset);
+                        if from_y < height && from_y < from.height {
+                            let from_idx = (from_y * from.width + x) as usize;
+                            if from_idx < from.cells.len() {
+                                result.cells[idx] = from.cells[from_idx];
+                            }
+                        }
+                        if to_y < height && to_y < to.height {
+                            let to_idx = (to_y * to.width + x) as usize;
+                            if to_idx < to.cells.len() {
+                                result.cells[idx] = to.cells[to_idx];
+                            }
+                        }
+                    }
+                }
+            }
+            SceneTransition::SlideDown => {
+                let offset = (height as f32 * progress) as u16;
+                for y in 0..height {
+                    for x in 0..width {
+                        let idx = (y * width + x) as usize;
+                        let from_y = y.saturating_sub(offset);
+                        let to_y = y.saturating_add(height - offset);
+                        if from_y < height && from_y < from.height {
+                            let from_idx = (from_y * from.width + x) as usize;
+                            if from_idx < from.cells.len() {
+                                result.cells[idx] = from.cells[from_idx];
+                            }
+                        }
+                        if to_y < height && to_y < to.height {
+                            let to_idx = (to_y * to.width + x) as usize;
+                            if to_idx < to.cells.len() {
+                                result.cells[idx] = to.cells[to_idx];
+                            }
+                        }
+                    }
+                }
+            }
             _ => {
-                // For other transitions, just show the target scene
+                // Instant switch — just show the target scene
                 for i in 0..from.cells.len().min(to.cells.len()) {
-                    result.cells[i] = if progress > 0.5 { to.cells[i] } else { from.cells[i] };
+                    result.cells[i] = to.cells[i];
                 }
             }
         }
