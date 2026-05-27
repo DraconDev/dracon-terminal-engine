@@ -911,8 +911,8 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Dashboard Builder")
         .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()))
         .tick_interval(1000);
+    app.set_theme(Theme::from_env_or(Theme::nord()));
 
     let env_theme = Theme::from_env_or(Theme::nord());
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
