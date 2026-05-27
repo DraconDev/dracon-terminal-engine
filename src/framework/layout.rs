@@ -193,7 +193,10 @@ impl Layout {
         for (i, c) in self.constraints.iter().enumerate() {
             match c {
                 Constraint::Fixed(f) => sizes[i] = *f,
-                Constraint::Min(m) => sizes[i] = (*m).min(remaining),
+                Constraint::Min(m) => {
+                    // Min gets max(m, proportional_share) of the remaining space
+                    sizes[i] = *m;
+                }
                 Constraint::Max(max) => {
                     let computed = if let Some(idx) = percentages.iter().position(|(j, _)| *j == i)
                     {
