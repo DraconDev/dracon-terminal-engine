@@ -185,7 +185,7 @@ fn main() -> std::io::Result<()> {
     })
     .run(|_ctx| {
         // Render loop handled by framework
-    });
+    })?;
 
     Ok(())
 }
