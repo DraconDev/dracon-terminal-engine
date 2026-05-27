@@ -497,11 +497,6 @@ impl Widget for ChatApp {
             return false;
         }
 
-        // Global actions (work even with modals open)
-        if self.keybindings.matches(actions::QUIT, &key) {
-            return true; // App framework handles quit
-        }
-
         // Dismiss overlays first
         if self.keybindings.matches(actions::BACK, &key) {
             self.dismiss_modals();
@@ -639,6 +634,49 @@ impl Widget for ChatApp {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let area = self.area.get();
+
+        // Forward mouse events to modals first (so clicking buttons works)
+        if let Some(ref mut modal) = self.emoji_modal {
+            let mw = 30u16.min(area.width);
+            let mh = 10u16.min(area.height);
+            let mx = (area.width.saturating_sub(mw)) / 2;
+            let my = (area.height.saturating_sub(mh)) / 2;
+            if col >= mx && col < mx + mw && row >= my && row < my + mh {
+                let handled = modal.handle_mouse(kind, col - mx, row - my);
+                if handled {
+                    self.dirty = true;
+                }
+                return true;
+            }
+            // Click outside modal dismisses it
+            if matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+                self.emoji_modal = None;
+                self.dirty = true;
+                return true;
+            }
+            return true;
+        }
+
+        if let Some(ref mut modal) = self.settings_modal {
+            let mw = 36u16.min(area.width);
+            let mh = 8u16.min(area.height);
+            let mx = (area.width.saturating_sub(mw)) / 2;
+            let my = (area.height.saturating_sub(mh)) / 2;
+            if col >= mx && col < mx + mw && row >= my && row < my + mh {
+                let handled = modal.handle_mouse(kind, col - mx, row - my);
+                if handled {
+                    self.dirty = true;
+                }
+                return true;
+            }
+            // Click outside modal dismisses it
+            if matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+                self.settings_modal = None;
+                self.dirty = true;
+                return true;
+            }
+            return true;
+        }
 
         // Contact sidebar click
         let sidebar_w = 18u16.min(area.width / 4);

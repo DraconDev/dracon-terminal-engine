@@ -26,6 +26,20 @@ pub struct BaseInput {
 }
 
 impl BaseInput {
+    /// Convert char-based cursor_pos to a byte index in self.text.
+    /// cursor_pos counts characters, but String::insert/remove need byte offsets.
+    fn cursor_byte_offset(&self) -> usize {
+        self.text
+            .char_indices()
+            .nth(self.cursor_pos)
+            .map(|(i, _)| i)
+            .unwrap_or(self.text.len())
+    }
+
+    /// Number of characters in the text (not bytes).
+    fn char_count(&self) -> usize {
+        self.text.chars().count()
+    }
     pub fn new(id: WidgetId, placeholder: &str) -> Self {
         Self {
             id,
@@ -156,14 +170,18 @@ impl BaseInput {
             KeyCode::Backspace => {
                 if !self.text.is_empty() && self.cursor_pos > 0 {
                     self.cursor_pos -= 1;
-                    self.text.remove(self.cursor_pos);
+                    let byte_idx = self.cursor_byte_offset();
+                    // Remove the full character at this byte position
+                    let ch = self.text[byte_idx..].chars().next().unwrap();
+                    self.text.replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
             }
             KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == crate::input::event::KeyModifiers::SHIFT => {
-                self.text.insert(self.cursor_pos, ch);
+                let byte_idx = self.cursor_byte_offset();
+                self.text.insert(byte_idx, ch);
                 self.cursor_pos += 1;
                 self.clamp_scroll();
                 self.dirty = true;
@@ -178,7 +196,7 @@ impl BaseInput {
                 true
             }
             KeyCode::Right => {
-                if self.cursor_pos < self.text.len() {
+                if self.cursor_pos < self.char_count() {
                     self.cursor_pos += 1;
                     self.clamp_scroll();
                     self.dirty = true;
@@ -186,8 +204,10 @@ impl BaseInput {
                 true
             }
             KeyCode::Delete => {
-                if self.cursor_pos < self.text.len() {
-                    self.text.remove(self.cursor_pos);
+                if self.cursor_pos < self.char_count() {
+                    let byte_idx = self.cursor_byte_offset();
+                    let ch = self.text[byte_idx..].chars().next().unwrap();
+                    self.text.replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
                     self.dirty = true;
                 }
@@ -200,7 +220,7 @@ impl BaseInput {
                 true
             }
             KeyCode::End => {
-                self.cursor_pos = self.text.len();
+                self.cursor_pos = self.char_count();
                 self.clamp_scroll();
                 self.dirty = true;
                 true
@@ -240,7 +260,7 @@ impl BaseInput {
             return true; // Consume middle-click even if no selection available
         }
 
-        let text_pos = (col as usize + self.scroll_offset).min(self.text.len());
+        let text_pos = (col as usize + self.scroll_offset).min(self.char_count());
         self.cursor_pos = text_pos;
         self.clamp_scroll();
         self.dirty = true;
@@ -249,8 +269,9 @@ impl BaseInput {
 
     /// Insert text at the current cursor position.
     fn insert_text(&mut self, text: &str) {
-        self.text.insert_str(self.cursor_pos, text);
-        self.cursor_pos += text.len();
+        let byte_idx = self.cursor_byte_offset();
+        self.text.insert_str(byte_idx, text);
+        self.cursor_pos += text.chars().count();
         self.clamp_scroll();
     }
 }
