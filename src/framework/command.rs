@@ -660,8 +660,8 @@ mod tests {
         };
         let out = parser.parse(r#"{"data": {}}"#, "", 0);
         match out {
-            ParsedOutput::Scalar(s) => assert!(!s.is_empty()),
-            other => panic!("expected scalar, got {:?}", other),
+            ParsedOutput::None => {} // Missing segment short-circuits to None
+            other => panic!("expected None, got {:?}", other),
         }
     }
 
@@ -672,8 +672,8 @@ mod tests {
         };
         let out = parser.parse(r#"{}"#, "", 0);
         match out {
-            ParsedOutput::Scalar(s) => assert!(s.contains("null") || s.is_empty() || s == "{}"),
-            other => panic!("expected scalar, got {:?}", other),
+            ParsedOutput::None => {} // Missing segments short-circuit to None
+            other => panic!("expected None, got {:?}", other),
         }
     }
 

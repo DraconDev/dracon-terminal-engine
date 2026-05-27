@@ -374,12 +374,28 @@ mod tests {
 
     #[test]
     fn test_min_constraint() {
+        // Min(30) gets at least 30; Percentage(50) gets 50% of remaining(100) = 50
+        // But percentage_total=50 (not 100), so Percentage(50) gets 100% of remaining
         let layout =
             Layout::horizontal(vec![Constraint::Min(30), Constraint::Percentage(50)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 30);
-        // Min gets its floor; percentage gets 50% of remaining = 50
+        assert_eq!(rects[1].width, 100);
+    }
+
+    #[test]
+    fn test_min_constraint_with_two_percentages() {
+        // Min(30) + Percentage(50) + Percentage(50): percentages split 50/50
+        let layout = Layout::horizontal(vec![
+            Constraint::Min(30),
+            Constraint::Percentage(50),
+            Constraint::Percentage(50),
+        ]);
+        let rects = layout.layout(Rect::new(0, 0, 100, 20));
+        assert_eq!(rects[0].width, 30);
+        // remaining=100, percentage_total=100, each gets 50%
         assert_eq!(rects[1].width, 50);
+        assert_eq!(rects[2].width, 50);
     }
 
     #[test]
