@@ -6,6 +6,10 @@
 use crate::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
 
+/// Wrapper around a `Box<dyn Widget>` that delegates trait methods.
+///
+/// Provides owned storage for a widget while maintaining the `Widget` trait
+/// interface for rendering and event handling.
 pub struct WidgetContainer {
     inner: Box<dyn Widget>,
 }
