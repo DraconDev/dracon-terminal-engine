@@ -510,13 +510,13 @@ impl Scene for ModalDemoScene {
                 _ => true,
             }
         } else if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = false;
                 self.dirty = true;
             }
             true
         } else {
-            if self.keybindings.matches(actions::HELP, &key) || key.code == KeyCode::Char('?') {
+            if self.keybindings.matches(actions::HELP, &key) {
                 self.show_help = true;
                 self.dirty = true;
                 return true;

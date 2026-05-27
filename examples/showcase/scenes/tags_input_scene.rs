@@ -317,7 +317,7 @@ impl Scene for TagsInputScene {
             if self.show_help { self.show_help = false; self.dirty = true; return true; }
             return false;
         }
-        if self.keybindings.matches(actions::HELP, &key) || key.code == dracon_terminal_engine::input::event::KeyCode::Char('?') {
+        if self.keybindings.matches(actions::HELP, &key) {
             self.show_help = !self.show_help;
             self.dirty = true;
             return true;
