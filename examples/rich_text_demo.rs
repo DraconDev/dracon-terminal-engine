@@ -15,11 +15,11 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Arc::clone(&show_help);
     let show_help_render = Arc::clone(&show_help);
 
-    App::new()?
+    let mut app = App::new()?
         .title("RichText Demo")
-        .fps(30)
-        .theme(Theme::from_env_or(Theme::nord()))
-        .on_input(move |key| {
+        .fps(30);
+    app.set_theme(Theme::from_env_or(Theme::nord()));
+    app.on_input(move |key| {
             if keybindings.matches(actions::QUIT, &key) {
                 q.store(true, Ordering::SeqCst);
                 return true;

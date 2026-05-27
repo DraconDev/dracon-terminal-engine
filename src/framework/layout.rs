@@ -238,6 +238,15 @@ impl Layout {
             }
         }
 
+        // Resolve Min constraints: Min gets at least `m` cells, but can grow
+        // if proportional allocation gives it more. Min consumes remaining space
+        // by expanding to fill whatever proportional gives it (as a floor).
+        for (i, c) in self.constraints.iter().enumerate() {
+            if let Constraint::Min(m) = c {
+                sizes[i] = sizes[i].max(*m);
+            }
+        }
+
         let mut pos = main_start;
         for (i, size) in sizes.iter().enumerate() {
             let rect = if is_vertical {
@@ -369,7 +378,8 @@ mod tests {
             Layout::horizontal(vec![Constraint::Min(30), Constraint::Percentage(50)]);
         let rects = layout.layout(Rect::new(0, 0, 100, 20));
         assert_eq!(rects[0].width, 30);
-        assert_eq!(rects[1].width, 70);
+        // Min gets its floor; percentage gets 50% of remaining = 50
+        assert_eq!(rects[1].width, 50);
     }
 
     #[test]

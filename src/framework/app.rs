@@ -461,6 +461,7 @@ impl App {
     }
 
     /// Sets the UI theme (builder-style, equivalent to `set_theme`).
+    #[deprecated(since = "0.2.0", note = "Use `set_theme()` instead for consistent API")]
     pub fn theme(mut self, theme: Theme) -> Self {
         self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
@@ -716,7 +717,9 @@ impl App {
                 let mut chunk_buf = [0u8; 1024];
                 if let Ok(n) = stdin.read(&mut chunk_buf) {
                     if n == 0 {
-                        // EOF - shouldn't happen for stdin
+                        // EOF — stdin closed (e.g., pipe broken), trigger graceful shutdown
+                        self.running.store(false, Ordering::SeqCst);
+                        return;
                     }
                     for byte in chunk_buf.iter().take(n) {
                         if let Some(event) = self.parser.advance(*byte) {
@@ -997,7 +1000,9 @@ impl App {
         }
 
         if let Ok(path) = std::env::var("DTRON_THEME_FILE") {
-            let _ = std::fs::write(&path, self.theme.name.as_bytes());
+            if let Err(e) = std::fs::write(&path, self.theme.name.as_bytes()) {
+                eprintln!("warning: failed to write theme to {}: {}", path, e);
+            }
         }
 
         Ok(())

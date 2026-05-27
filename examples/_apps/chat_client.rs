@@ -811,7 +811,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let theme = Theme::from_env_or(Theme::nord());
     let chat = ChatApp::new(theme);
 
-    let mut app = App::new()?.title("Chat Client").fps(30).theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?.title("Chat Client").fps(30);
+    app.set_theme(Theme::from_env_or(Theme::nord()));
     app.add_widget(Box::new(chat), Rect::new(0, 0, 0, 0));
     app.run(|_| {})?;
     Ok(())
