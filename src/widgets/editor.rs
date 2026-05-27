@@ -1,4 +1,3 @@
-#![allow(unused_imports)]
 use crate::error::DraconError;
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
@@ -163,12 +162,6 @@ impl TextEditor {
     /// Returns a reference to the list of extra cursor positions.
     pub fn get_extra_cursors(&self) -> &Vec<(usize, usize)> {
         &self.extra_cursors
-    }
-
-    #[allow(dead_code)]
-    fn move_cursor(&mut self, row: usize, col: usize) {
-        self.cursor_row = row;
-        self.cursor_col = col;
     }
 
     fn finish_nav_move(&mut self, has_shift: bool, area: Rect) {

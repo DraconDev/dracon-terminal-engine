@@ -7,7 +7,7 @@
 // - `stat_widget` - Displays CPU and memory statistics
 // - `welcome_widget` - Displays a welcome banner with Dracon branding
 
-#![allow(dead_code)].clone()
+#![allow(dead_code)]
 
 pub mod stat_widget;
 pub mod welcome_widget;
