@@ -5,6 +5,7 @@
 
 
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 
 /// Axis along which constraints are resolved.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
