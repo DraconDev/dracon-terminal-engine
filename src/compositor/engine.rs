@@ -455,6 +455,10 @@ impl Compositor {
 
         // Terminal setup sequences (inline for consistency)
         buf.extend_from_slice(b"\x1b[?2026h");
+        
+        // Reset all text formatting to defaults so our current_* tracking variables 
+        // match the terminal's actual state at the start of the frame.
+        buf.extend_from_slice(b"\x1b[0m");
 
         let mut current_fg = Color::Reset;
         let mut current_bg = Color::Reset;
