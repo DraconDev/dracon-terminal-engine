@@ -31,7 +31,10 @@ pub enum Constraint {
 }
 
 impl Constraint {
-    /// Resolves a constraint against the available space, given fixed amounts already consumed.
+    /// Resolves this constraint against available space, given the amount
+    /// of space already consumed by fixed constraints.
+    ///
+    /// Returns the number of cells this constraint claims along the main axis.
     pub fn resolve(self, available: u16, fixed_consumed: u16) -> u16 {
         let remaining = available.saturating_sub(fixed_consumed);
         match self {

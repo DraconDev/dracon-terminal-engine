@@ -42,6 +42,9 @@ use std::rc::Rc;
 use std::time::Instant;
 
 /// A recorded event with metadata for debugging.
+///
+/// Contains the publication timestamp, event type name, and a type-erased
+/// payload. Used by the event bus history system for diagnostics.
 #[derive(Clone)]
 pub struct EventRecord {
     /// When the event was published.
@@ -104,7 +107,9 @@ impl EventBus {
         }
     }
 
-    /// Sets the maximum history size (0 = unlimited).
+    /// Sets the maximum number of events to retain in history (0 = unlimited).
+    ///
+    /// Older events are evicted when the limit is exceeded.
     pub fn set_history_capacity(&self, capacity: usize) {
         *self.max_history.borrow_mut() = capacity;
         self.trim_history();

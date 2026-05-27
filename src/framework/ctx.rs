@@ -46,9 +46,7 @@ use std::time::Instant;
 pub struct Ctx<'a> {
     pub(crate) compositor: &'a mut Compositor,
     pub(crate) theme: &'a mut Theme,
-    #[allow(dead_code)]
     pub(crate) frame_count: u64,
-    #[allow(dead_code)]
     pub(crate) last_frame: &'a Instant,
     pub(crate) terminal: &'a mut Terminal<io::Stdout>,
     pub(crate) focus_manager: &'a mut FocusManager,
@@ -61,6 +59,16 @@ pub struct Ctx<'a> {
 }
 
 impl<'a> Ctx<'a> {
+    /// Returns the current frame count since the app started.
+    pub fn frame_count(&self) -> u64 {
+        self.frame_count
+    }
+
+    /// Returns a reference to the time of the last frame.
+    pub fn last_frame(&self) -> &Instant {
+        self.last_frame
+    }
+
     /// Adds a plane to the compositor.
     pub fn add_plane(&mut self, plane: Plane) {
         self.compositor.add_plane(plane);

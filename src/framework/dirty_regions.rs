@@ -52,7 +52,10 @@ impl DirtyRegion {
         Some(DirtyRegion::new(x, y, width, height))
     }
 
-    /// Expands this region to include a point.
+    /// Expands this region to include the given point `(x, y)`.
+    ///
+    /// The region grows outward to encompass the point while maintaining
+    /// its existing coverage. If the point is already inside, no change occurs.
     pub fn expand(&mut self, x: u16, y: u16) {
         let x2 = x.max(self.x.saturating_add(self.width));
         let y2 = y.max(self.y.saturating_add(self.height));

@@ -40,6 +40,10 @@ impl WidgetContainer {
     }
 }
 
+/// A registry of widgets managed by containers.
+///
+/// Provides centralized widget lookup by ID, iteration, and lifecycle management.
+/// Each widget is wrapped in a [`WidgetContainer`] that delegates trait methods.
 pub struct WidgetRegistry {
     containers: Vec<WidgetContainer>,
     next_id: usize,
@@ -61,36 +65,53 @@ impl WidgetRegistry {
     }
 
     /// Registers a widget by moving it into a container.
+    /// Returns the widget's ID.
     pub fn register(&mut self, widget: Box<dyn Widget>) -> WidgetId {
         let id = widget.id();
         self.containers.push(WidgetContainer::new(widget));
         id
     }
 
+    /// Removes a widget from the registry by ID.
     pub fn unregister(&mut self, id: WidgetId) {
         self.containers.retain(|c| c.id() != id);
     }
 
+    /// Returns an immutable reference to a widget container by ID.
     pub fn get(&self, id: WidgetId) -> Option<&WidgetContainer> {
         self.containers.iter().find(|c| c.id() == id)
     }
 
+    /// Returns a mutable reference to a widget container by ID.
     pub fn get_mut(&mut self, id: WidgetId) -> Option<&mut WidgetContainer> {
         self.containers.iter_mut().find(|c| c.id() == id)
     }
 
+    /// Generates the next unique widget ID.
     pub fn next_id(&mut self) -> WidgetId {
         let id = WidgetId::new(self.next_id);
         self.next_id += 1;
         id
     }
 
+    /// Returns an iterator over all registered widget containers.
     pub fn iter(&self) -> std::slice::Iter<'_, WidgetContainer> {
         self.containers.iter()
     }
 
+    /// Returns a mutable iterator over all registered widget containers.
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, WidgetContainer> {
         self.containers.iter_mut()
+    }
+
+    /// Returns the number of registered widgets.
+    pub fn len(&self) -> usize {
+        self.containers.len()
+    }
+
+    /// Returns true if no widgets are registered.
+    pub fn is_empty(&self) -> bool {
+        self.containers.is_empty()
     }
 }
 
