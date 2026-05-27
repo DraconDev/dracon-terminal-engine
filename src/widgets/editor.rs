@@ -444,7 +444,8 @@ impl TextEditor {
                 show_indent_guides: self.show_indent_guides,
                 show_status_bar: self.show_status_bar,
             };
-            let content = serde_json::to_string_pretty(&config).unwrap_or_default();
+            let content = serde_json::to_string_pretty(&config)
+                .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
             std::fs::write(cfg_path, content)?;
         }
         Ok(())
@@ -707,7 +708,7 @@ impl TextEditor {
                 }
             }
 
-            return false;
+            return true; // Consumed navigation key in filter/readonly mode
         }
 
         // Handle search/goto/replace mode
@@ -1574,7 +1575,7 @@ impl TextEditor {
 
         while r < self.lines.len() {
             let line = &self.lines[r];
-            while c > 0 {
+            loop {
                 let ch = line.chars().nth(c)?;
                 if ch == close {
                     depth += 1;
@@ -1593,7 +1594,7 @@ impl TextEditor {
                 break;
             }
             r -= 1;
-            c = self.lines[r].len();
+            c = self.lines[r].len().saturating_sub(1);
         }
         None
     }
