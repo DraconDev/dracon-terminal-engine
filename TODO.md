@@ -113,36 +113,28 @@ Tests: 297 pass · Compiler: 0 warnings · Clippy: 0 warnings
 
 ---
 
-## 🔧 Fixing Now (3 items)
+## 🔧 Fixed This Pass (6 items)
 
-### #5 — CommandRunner shell escaping
-Add manual quote-aware argument splitting (~20 lines). No new dependency.
-
-### #9 — SixelImage feature gate
-Gate `SixelImage`/`SixelRenderer` behind `#[cfg(feature = "sixel")]` so the stub doesn't pollute the public API.
-
-### #14 — replace_next multi-byte cursor
-Add `self.ensure_valid_cursor_col()` after replacement.
-
-### #20 — plugin.rs documentation
-Remove `#![allow(missing_docs)]`, add doc comments.
-
-### #31 — Component trait removal
-Remove dead `Component` trait and `Bounds` struct from `src/widgets/component.rs` if nothing uses them.
-
-### #33 — SixelRenderer documentation
-Add doc comments while gating behind feature flag.
+| # | Issue | Fix |
+|---|-------|-----|
+| 5 | `CommandRunner::spawn()` uses `split_whitespace()` | Added `split_command_args()` — handles quotes, escapes, no new dep |
+| 9 | `SixelImage::from_sixel()` is a stub | Gated behind `#[cfg(feature = "sixel")]` — doesn't pollute public API |
+| 14 | `replace_next` cursor col after multi-byte | Added `ensure_valid_cursor_col()` after replacement |
+| 20 | `plugin.rs` undoc'd with `#![allow(missing_docs)]` | Removed global allow, docs already present |
+| 31 | `Component` trait unimplemented by any widget | Deprecated with `#[deprecated]` — can't remove (public API), but signals intent |
+| 33 | `SixelRenderer` documentation | Already has doc comments; now behind feature flag |
 
 ---
 
 ## 📋 Final Tally
 
-| Action | Count |
-|--------|-------|
-| ✅ Fixed | 27 |
-| 🔧 Fixing now | 6 |
-| 🟡 Keeping (not fixing) | 22 |
-| **Total** | **55** |
+| Category | Fixed | Kept |
+|----------|-------|------|
+| High-severity bugs | 13 | 2 (#15 intentional, #9 now feature-gated) |
+| Medium code quality | 4 | 12 |
+| Medium documentation | 6 | 4 |
+| Low cleanup | 10 | 0 |
+| **Total** | **33** | **22** |
 
 ### Why 22 items are kept as-is:
 
@@ -156,4 +148,4 @@ Add doc comments while gating behind feature flag.
 
 **Build (2):** CHANGELOG format, dracon.toml validation — cosmetic.
 
-### Tests: 297 pass | Clippy: 0 warnings | Compilation: clean
+### Tests: 303 pass | Clippy: 0 warnings | Compilation: clean
