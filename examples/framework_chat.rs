@@ -64,10 +64,11 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Arc::clone(&show_help);
     let show_help_render = Arc::clone(&show_help);
 
-    App::new()?
+    let mut app = App::new()?
         .title("Framework Chat")
-        .fps(30)
-        .on_input(move |key| {
+        .fps(30);
+    app.set_theme(theme);
+    app.on_input(move |key| {
             if keybindings.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
                 return true;
