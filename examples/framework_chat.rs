@@ -131,7 +131,7 @@ fn main() -> std::io::Result<()> {
             if input_text.is_empty() {
                 text_color = theme.fg_muted;
             }
-            for (i, ch) in display_text.chars().take(w as usize - 3).enumerate() {
+            for (i, ch) in display_text.chars().take(w.saturating_sub(3) as usize).enumerate() {
                 let idx = x as usize + i;
                 if idx < input_plane.cells.len() {
                     input_plane.cells[idx].char = ch;
