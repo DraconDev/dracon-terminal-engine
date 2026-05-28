@@ -140,7 +140,7 @@ Full codebase audit covering:
 
 | # | File | Issue | Why Safe |
 |---|------|-------|----------|
-| E10 | `_apps/chat_client.rs:703` | u16 underflow in mouse coords | `SearchInput` bounds check silently catches |
+| E10 | `_apps/chat_client.rs:703` | u16 underflow in mouse coords | ✅ Fixed — bounds check + saturating_sub |
 | E11 | `_apps/chat_client.rs:611,618` | Empty contacts panic | Not reachable — contacts hardcoded non-empty |
 
 ### ⚠️ Code Smell

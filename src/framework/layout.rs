@@ -169,7 +169,7 @@ impl Layout {
         let main_start = if is_vertical { area.y + self.margin } else { area.x + self.margin };
         let cross_start = if is_vertical { area.x + self.margin } else { area.y + self.margin };
 
-        let total_spacing = self.spacing * (self.constraints.len() as u16 - 1).saturating_sub(0);
+        let total_spacing = self.spacing * (self.constraints.len() as u16 - 1);
         let available = main_axis.saturating_sub(total_spacing);
 
         let mut results = Vec::with_capacity(self.constraints.len());
