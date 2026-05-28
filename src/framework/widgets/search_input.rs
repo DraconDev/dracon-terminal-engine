@@ -40,6 +40,11 @@ impl SearchInput {
         Self { id, base }
     }
 
+    /// Sets whether the input is focused (shows cursor).
+    pub fn set_focused(&mut self, focused: bool) {
+        self.base.set_focused(focused);
+    }
+
     /// Clears the search query.
     pub fn clear(&mut self) {
         self.base.clear();

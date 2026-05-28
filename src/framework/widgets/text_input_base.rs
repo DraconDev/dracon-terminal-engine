@@ -66,6 +66,11 @@ impl BaseInput {
         self
     }
 
+    pub fn set_focused(&mut self, focused: bool) {
+        self.focused = focused;
+        self.dirty = true;
+    }
+
     pub fn clear(&mut self) {
         self.text.clear();
         self.cursor_pos = 0;
