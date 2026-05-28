@@ -59,11 +59,7 @@ fn test_spinner_with_single_frame() {
 fn test_spinner_tick() {
     let mut spinner = Spinner::new(WidgetId::new(1))
         .with_frames(vec!['1', '2', '3']);
-    let first = spinner.current_frame();
     spinner.tick();
-    let second = spinner.current_frame();
-    // Should have changed to a different frame
-    assert!(first != second || first == second); // frame could wrap around
 }
 
 #[test]
