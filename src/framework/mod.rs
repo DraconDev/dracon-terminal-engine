@@ -59,6 +59,8 @@ pub mod logging;
 pub mod marquee;
 pub mod plugin;
 pub mod scroll;
+#[cfg(feature = "sixel")]
+pub mod sixel;
 pub mod scene_router;
 pub mod theme;
 pub mod widget;
