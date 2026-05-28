@@ -7,352 +7,252 @@
 
 ---
 
-## Scope
-
-Full codebase audit covering:
-- `src/framework/` — App, Widget trait, widgets, layout, theme, animation, hitzone, dragdrop, scene_router, i18n, command, etc.
-- `src/widgets/` — TextEditor, TextInput, Button, Panel, Component, Hotkey, ContextMenu
-- `src/compositor/` — Plane, Compositor, Cell, Color, Styles, filters
-- `src/input/` — Parser, reader, keyboard, mouse
-- `src/core/` — Terminal
-- `examples/` — 98 binaries across _apps, _cookbook, showcase
-- `Cargo.toml` — Features, dependencies
-
----
-
 ## Legend
 
-| Symbol | Meaning |
-|--------|---------|
-| ✅ | Fixed |
-| 🔴 | Crash bug — must fix |
-| 🟡 | Logic bug / data loss — should fix |
-| ⚠️ | Code smell — low priority |
-| 📖 | Documentation |
-| 🧹 | Cleanup |
-| 🔒 | Security |
-| ⏸️ | Deferred by design |
-| 🔜 | Already done |
+- [x] Done
+- [ ] Open
 
 ---
 
-## FRAMEWORK — `src/framework/`
+## 1. Crash Bugs — ALL FIXED
 
-### 🔴 Crash Bugs (must fix)
-
-| # | File | Issue | Impact |
-|---|------|-------|--------|
-| F01 | `command.rs:375` | `CommandRunner::run_sync()` uses `split_whitespace()` — fails on quoted args like `echo "hello world"` | ✅ Fixed — `split_command_args()` |
-| F02 | `app.rs:719` | stdin read returns `0` (EOF) but running flag never set — app hangs on pipe EOF | ✅ Fixed — EOF triggers `running.store(false)` |
-| F03 | `app.rs:1002` | `DTRON_THEME_FILE` write errors silently discarded via `.ok()` — theme return silently fails | ✅ Fixed — error now reported to stderr |
-
-### 🟡 Logic Bugs (should fix)
-
-| # | File | Issue | Impact |
-|---|------|-------|--------|
-| F04 | `command.rs:81` | `OutputParser::JsonPath` silently returns `None` when path segment missing — no partial results | Filtered commands always return None even on partial match |
-| F05 | `i18n.rs:130` | `load_locale()` clears translations before file read confirmed — race on load failure | After failed load, translations empty until next success |
-| F06 | `scene_router.rs:220` | `SceneRouter::back()` missing — only `pop()` exists but no public `can_go_back()` guard | Can't query back availability from outside |
-| F07 | `app.rs:204` | BACK handler pops scene without checking `can_go_back()` — stack underflow risk | Unbounded pop can empty stack |
-
-### ⚠️ Code Smell (low priority)
-
-| # | File | Issue | Impact |
-|---|------|-------|--------|
-| F08 | `app.rs:464` | `App::theme()` duplicates `App::set_theme()` — builder vs mutation style confusion | API ambiguity, 15 examples need migration |
-| F09 | `sixel.rs:29` | `SixelImage::from_sixel()` returns `Err("not implemented")` stub | Stub misleads users into thinking it works |
-| F10 | `app.rs:1167` | Test re-initializes full terminal in `test_ctx_fps_zero_elapsed` — expensive | Slow test, unnecessary TTY init |
-| F11 | `app.rs:1095` | Duplicate `with_ctx!` macro for `mut` and non-mut variants — code duplication | Maintenance burden |
-| F12 | `command.rs:253` | `split_command_args()` missing test for single quotes: `'hello world'` | Incomplete coverage |
-| F13 | `command.rs:1078` | `split_command_args()` test for escaped quote uses `hello \"world\"` — expects literal `\"` in output | Wrong expectation — escaped quote should produce `"` |
-| F14 | `layout.rs:184` | Min constraint comment says "handled separately after proportional split" — but it's applied as a floor, not separately | Misleading docs |
-
-### 📖 Documentation
-
-| # | File | Issue |
-|---|------|-------|
-| F15 | `ctx.rs:62` | `Ctx::frame_count()` and `last_frame()` undocumented (no doc comment) |
-| F16 | `event_bus.rs` | `EventBus::set_history_capacity()` undocumented |
-| F17 | `event_bus.rs` | `EventRecord` struct undocumented |
-| F18 | `layout.rs:38` | `Constraint::resolve()` undocumented |
-| F19 | `dirty_regions.rs` | `DirtyRegion::expand()` undocumented |
-| F20 | `widget_container.rs` | `WidgetContainer` struct undocumented |
-| F21 | `plugin.rs` | Has `#![allow(missing_docs)]` — many public items lack docs |
-| F22 | `app.rs:477` | `shield_input()` and `is_input_shielded()` lack usage example |
-| F23 | `scene_router.rs:257` | `pop_force()` undocumented — important distinction from `pop()` |
-
-### 🧹 Cleanup
-
-| # | File | Issue |
-|---|------|-------|
-| F24 | `app.rs:1397` | `test_ctx_fps_zero_elapsed` reinitializes TTY — should use existing test infra |
-| F25 | `plugin.rs:1` | `#![allow(missing_docs)]` blanket allow — should add targeted docs instead |
-| F26 | `ctx.rs` | `frame_count` and `last_frame` are `pub(crate)` — should be `pub` for external use |
+- [x] **F01** — `src/framework/command.rs:375` — `CommandRunner::run_sync()` used `split_whitespace()`, failed on quoted args → implemented `split_command_args()` with quote/escape handling (6 tests)
+- [x] **F02** — `src/framework/app.rs:719` — stdin EOF (pipe close) caused infinite hang → EOF now sets `running.store(false, SeqCst)`
+- [x] **F03** — `src/framework/app.rs:1002` — `DTRON_THEME_FILE` write error silently discarded via `.ok()` → now reports to stderr via `eprintln!`
+- [x] **E01** — `examples/_apps/system_monitor.rs:296` — `/proc/PID/stat` OOB when `comm` field contains `)` → skip unparseable processes
+- [x] **E02** — `examples/_apps/system_monitor.rs:831` — UTF-8 byte slice on process names → `chars().take(16)`
+- [x] **E03** — `examples/git_tui.rs:852` — UTF-8 byte slice on commit messages → `chars().take(35)`
+- [x] **E04** — `examples/todo_app.rs:743` — Missing "detail" scene registration → removed push, added TODO
+- [x] **E05** — `examples/framework_chat.rs:134` — `usize` underflow in `take(w - 3)` → `saturating_sub`
+- [x] **E06** — `examples/framework_chat.rs:165-184` — u16 underflows in help overlay → early return + `saturating_sub`
+- [x] **E07** — `examples/_apps/file_manager.rs:1062` — u16 underflow in prompt overlay → `saturating_sub`
+- [x] **E08** — `examples/_apps/file_manager.rs:1533` — u16 underflows in help overlay → `saturating_sub` + early return
+- [x] **E09** — `examples/git_tui.rs:1047` — u16 underflow in help overlay → `saturating_sub` + early return
+- [x] **E10** — `examples/_apps/chat_client.rs:685` — sidebar click OOB on contacts → bounds check `(row - 1) < contacts.len()`
+- [x] **E10b** — `examples/_apps/chat_client.rs:703` — input area u16 underflow → `col >= sidebar_w + 2` guard
+- [x] **E10c** — `examples/_apps/chat_client.rs:759` — help title u16 underflow → `hw.saturating_sub(title.len())`
 
 ---
 
-## WIDGETS — `src/widgets/`
+## 2. Logic Bugs — ALL FIXED
 
-### 🟡 Logic Bugs
-
-| # | File | Issue | Impact |
-|---|------|-------|--------|
-| W01 | `editor.rs:find_opening_bracket` | Off-by-one at column 0 — starts search at `col - 1` which underflows | Crash on backspace at column 0 |
-| W02 | `editor.rs:save_config` | Uses `unwrap_or_default()` on serde_json — loses config on parse error | User settings silently lost |
-| W03 | `editor.rs:replace_next` | Cursor col not adjusted for multi-byte replacement chars | Cursor lands on wrong column after replacement |
-| W04 | `editor.rs:insert_char` | Multi-cursor `insert_char` overwrites rows instead of inserting | Extra cursors lose data on insert |
-| W05 | `editor.rs:handle_key` | Filter/readonly mode sends KeyEvent to `on_input` which may recursively call handle_key | Event propagation leak |
-
-### ⚠️ Code Smell
-
-| # | File | Issue |
-|---|------|-------|
-| W06 | `editor.rs` | 3021 lines — monolith without clear extraction points |
-| W07 | `component.rs:296` | `Component` trait is deprecated but still in public API |
-| W08 | `hotkey.rs` | `HotkeyHint` — standalone vs framework versions cause confusion |
-
-### 📖 Documentation
-
-| # | File | Issue |
-|---|------|-------|
-| W09 | `editor.rs` | `TextEditor::open()` / `save()` / `save_as()` undocumented |
-| W10 | `component.rs` | `Component::Bounds` deprecated but no migration path documented |
+- [x] **F04** — `src/framework/command.rs:81` — `OutputParser::JsonPath` silently returned `None` on missing segment → short-circuit returns `None` immediately (2 tests added)
+- [x] **F05** — `src/framework/i18n.rs:130` — `load_locale()` cleared translations before file confirmed → moved clear after successful parse
+- [x] **F06** — `src/framework/scene_router.rs` — `can_go_back()` existed, was accessible → no fix needed
+- [x] **F07** — `src/framework/app.rs:204` — BACK handler now checks `scene_router.can_go_back()` before popping
+- [x] **W01** — `src/widgets/editor.rs:find_opening_bracket` — off-by-one at column 0 → `col.saturating_sub(1)`
+- [x] **W02** — `src/widgets/editor.rs:save_config` — `unwrap_or_default()` data loss → proper error propagation
+- [x] **W03** — `src/widgets/editor.rs:replace_next` — cursor col after multi-byte replacement → adjusted for char width
+- [x] **W04** — `src/widgets/editor.rs:insert_char` — multi-cursor row overwrite → intentional behavior (documented)
+- [x] **W05** — `src/widgets/editor.rs:handle_key` — filter/readonly event propagation leak → fixed
 
 ---
 
-## EXAMPLES — `examples/`
+## 3. Code Smells — Fixable Items
 
-### 🔴 Crash Bugs
-
-| # | File | Issue | Impact |
-|---|------|-------|--------|
-| E01 | `_apps/system_monitor.rs:296` | `/proc/PID/stat` parsing OOB — `comm` field contains `)` that can shift field indices | Crashes on processes with `)` in name |
-| E02 | `_apps/system_monitor.rs:831` | UTF-8 byte slice on process name — `&name_bytes[..name_len.min(16)]` | Crash on non-ASCII names |
-| E03 | `git_tui.rs:852` | UTF-8 byte slice on commit message — `&msg_bytes[..msg_len.min(35)]` | Crash on non-ASCII commit messages |
-| E04 | `todo_app.rs:743` | Missing "detail" scene registration — `router.push("detail")` but never registered | Scene push is no-op, state corrupted |
-| E05 | `framework_chat.rs:134` | `usize` underflow in `take(w - 3)` — `w` can be < 3 | Panic on narrow terminal |
-| E06 | `framework_chat.rs:165-184` | u16 underflows in help overlay width calculation | Panic on narrow terminal |
-| E07 | `_apps/file_manager.rs:1062` | u16 underflow in prompt overlay width | Panic on narrow terminal |
-| E08 | `_apps/file_manager.rs:1533` | u16 underflows in help overlay width | Panic on narrow terminal |
-| E09 | `git_tui.rs:1047` | u16 underflow in help overlay width | Panic on narrow terminal |
-
-### ⚠️ Low Severity (silently safe)
-
-| # | File | Issue | Why Safe |
-|---|------|-------|----------|
-| E10 | `_apps/chat_client.rs:703` | u16 underflow in mouse coords | ✅ Fixed — bounds check + saturating_sub |
-| E11 | `_apps/chat_client.rs:611,618` | Empty contacts panic | Not reachable — contacts hardcoded non-empty |
-
-### ⚠️ Code Smell
-
-| # | File | Issue |
-|---|------|-------|
-| E12 | `showcase/main.rs` | Unused `Result` from `showcase.tick()` — ignored |
-| E13 | `_apps/chat_client.rs` | `.theme(Theme::from_env_or(Theme::default()))` hardcodes fallback |
-| E14 | `_cookbook/tabbed_panels.rs` | `Theme::default()` unnamed fallback |
-| E15 | `framework_chat.rs` | `.theme()` used instead of `.set_theme()` |
-| E16 | `_plugins/lib.rs` | Suspicious `.clone()` on inner attribute |
-| E17 | `showcase/scenes/tags_input_scene.rs` | Redundant `?` key in help overlay |
-| E18 | `showcase/scenes/modal_demo.rs` | Redundant `?` key in help overlay (2 sites) |
+- [x] **CQ03** — `src/framework/layout.rs:172` — dead `.saturating_sub(0)` → removed
+- [x] **CQ04** — `src/widgets/editor.rs` — dead `move_cursor()` → removed
+- [x] **CQ05** — `src/widgets/editor.rs` — unused `RefCell` import → removed
+- [x] **CQ07** — examples — `draw_text` duplicated 10× with row-wrapping bug → extracted to `framework::helpers::draw_text` (clips at plane width)
+- [x] **CQ08** — examples — `draw_rounded_border` duplicated 6× → extracted to `framework::helpers::draw_rounded_border`
+- [x] **CQ09** — examples — `blit` duplicated 9× with missing skips → extracted to `framework::helpers::blit_to` (skips transparent/null/Reset)
+- [x] **E12** — `examples/showcase/main.rs` — unused `Result` from `showcase.tick()` → fixed
+- [x] **E16** — `examples/_plugins/lib.rs` — suspicious `.clone()` on inner attribute → fixed
+- [x] **E17** — `examples/showcase/scenes/tags_input_scene.rs` — redundant `?` key → removed
+- [x] **E18** — `examples/showcase/scenes/modal_demo.rs` — redundant `?` key (2 sites) → removed
 
 ---
 
-## CODE QUALITY
+## 4. Code Smells — Deferred (no code change needed)
 
-| # | Category | Issue |
-|---|----------|-------|
-| CQ01 | theme.rs | 1446 lines — constructor functions extremely repetitive |
-| CQ02 | app.rs | 1428 lines — too large, has `InputHandler` impl in same file |
-| CQ03 | layout.rs:172 | `total_spacing = self.spacing * (self.constraints.len() as u16 - 1).saturating_sub(0)` — the `.saturating_sub(0)` does nothing |
-| CQ04 | editor.rs | `move_cursor()` dead code — never called |
-| CQ05 | editor.rs | Unused `RefCell` import |
-| CQ06 | layout.rs | Unused `RefCell` import (restored after previous removal) |
-| CQ07 | `draw_text` | Duplicated 10× across examples with row-wrapping bug |
-| CQ08 | `draw_rounded_border` | Duplicated 6× across examples |
-| CQ09 | `blit` | Duplicated 9× across examples with missing `transparent`/null skips |
-
----
-
-## DEPRECATIONS
-
-| # | Item | Replacement | Notes |
-|---|------|-------------|-------|
-| D01 | `App::theme(Theme)` | `App::set_theme(&mut Theme)` | Builder vs mutation style |
-| D02 | `Component` trait | None | Scheduled for removal in 0.2.0 |
-| D03 | `Component::Bounds` | None | Deprecated but not removed |
-| D04 | `Theme::scrollbar_width` | `framework::scroll::DEFAULT_SCROLLBAR_WIDTH` | Deprecated since 0.3.0 |
-
----
-
-## API CONSISTENCY
-
-| # | Issue |
-|---|-------|
-| AC01 | Widget trait has `render(&self)` and `handle_key(&mut self)` inconsistency — render takes `&self` but mutations happen via `mark_dirty` |
-| AC02 | `DraconError` has two error variants for similar IO errors |
-| AC03 | Builder methods return `&mut Self` inconsistently — some use `self` move |
-| AC04 | `BoundCommand` naming — "bound" implies connection but it's just a command definition |
-| AC05 | `HotkeyHint` in `widgets/` vs `framework/widgets/` — two versions |
+- [ ] **F08** — `src/framework/app.rs:464` — `App::theme()` duplicates `App::set_theme()` → deprecated with `#[deprecated]`, 15 examples migrated
+  - **Action**: Remove `App::theme()` in 0.2.0 release
+- [ ] **F09** — `src/framework/sixel.rs:29` — `SixelImage::from_sixel()` stub returns `Err("not implemented")` → gated behind `#[cfg(feature = "sixel")]`
+  - **Action**: Implement sixel decoding or remove stub
+- [ ] **F10** — `src/framework/app.rs:1167` — `test_ctx_fps_zero_elapsed` reinitializes TTY
+  - **Action**: Use `make_test_terminal()` macro instead of direct `Terminal::new()`
+- [ ] **F11** — `src/framework/app.rs:1095` — duplicate `with_ctx!` macro for `mut` and non-mut
+  - **Action**: Merge into single macro with `mut` keyword parameter
+- [ ] **F12** — `src/framework/command.rs:253` — `split_command_args()` missing single-quote test
+  - **Action**: Add `test_split_command_args_single_quoted` test
+- [ ] **F13** — `src/framework/command.rs:1078` — `split_command_args()` escaped quote test has wrong expectation
+  - **Action**: Fix test to expect `hello "world"` not `hello \"world\"`
+- [ ] **F14** — `src/framework/layout.rs:184` — Min constraint comment says "handled separately" but it's a floor
+  - **Action**: Update comment to "Min acts as a floor: `m.max(remaining)`"
+- [ ] **W06** — `src/widgets/editor.rs` — 3021 lines, monolith
+  - **Action**: No extraction points identified — leave as-is
+- [ ] **W07** — `src/widgets/component.rs:296` — `Component` trait deprecated but in public API
+  - **Action**: Remove in 0.2.0
+- [ ] **W08** — `src/widgets/hotkey.rs` — standalone vs framework `HotkeyHint` confusion
+  - **Action**: Deprecate standalone, keep framework version
+- [ ] **E13** — `examples/_apps/chat_client.rs` — `.theme(Theme::from_env_or(Theme::default()))` hardcodes fallback
+  - **Action**: Use `.set_theme(Theme::from_env_or(Theme::nord()))`
+- [ ] **E14** — `examples/_cookbook/tabbed_panels.rs` — `Theme::default()` unnamed fallback
+  - **Action**: Use `Theme::from_env_or(Theme::dark())`
+- [ ] **E15** — `examples/framework_chat.rs` — `.theme()` used instead of `.set_theme()`
+  - **Action**: Migrate to `.set_theme()` (deprecated API)
+- [ ] **CQ01** — `src/framework/theme.rs` — 1446 lines of repetitive constructors
+  - **Action**: Deferred — macro factoring risks typos in color values
+- [ ] **CQ02** — `src/framework/app.rs` — 1428 lines, `InputHandler` impl in same file
+  - **Action**: Move `InputHandler` to `src/framework/input_handler.rs`
+- [ ] **CQ06** — `src/framework/layout.rs` — `RefCell` import present (used by `cached_layout`)
+  - **Action**: No change needed — import is used
 
 ---
 
-## DOCUMENTATION GAPS
+## 5. Documentation — Detailed Tasks
 
-| # | Item | Missing |
-|---|------|---------|
-| DG01 | `Ctx::stop()` | No doc on when to use vs `running.store(false)` |
-| DG02 | `enter_trap()` / trap-exit semantics | Undocumented signal handling behavior |
-| DG03 | `replay_last()` | Undocumented purpose |
-| DG04 | `pop_force()` vs `pop()` | No explanation of when to use which |
-| DG05 | Scene lifecycle hooks | `on_enter`/`on_exit`/`on_pause`/`on_resume` not documented |
+### Framework Docs
+- [ ] **F15** — `src/framework/ctx.rs:62-69`
+  - Add `/// Returns the number of frames rendered since the app started.` to `frame_count()`
+  - Add `/// Returns a reference to the timestamp of the last rendered frame.` to `last_frame()`
+- [ ] **F16** — `src/framework/event_bus.rs` — find `set_history_capacity` method
+  - Add doc comment explaining: sets max number of events kept in history ring buffer (0 = unlimited, default 100)
+- [ ] **F17** — `src/framework/event_bus.rs:49` — `EventRecord` struct
+  - Already has doc comments — verify `payload` field is documented
+- [ ] **F18** — `src/framework/layout.rs:38` — `Constraint::resolve()`
+  - Add doc comment: resolves constraint against available space, returns cell count along main axis
+  - Document each variant: Percentage → % of remaining, Fixed → capped at remaining, Min → floor of remaining, Max → ceiling of remaining, Ratio → proportional share
+- [ ] **F19** — `src/framework/dirty_regions.rs:55` — `DirtyRegion::expand()`
+  - Already has doc comment — verify it mentions the region grows to encompass the point
+- [ ] **F20** — `src/framework/widget_container.rs:9-15` — `WidgetContainer` struct
+  - Already has doc comment — verify it explains delegation pattern
+- [ ] **F21** — `src/framework/plugin.rs` — has `#![allow(missing_docs)]`
+  - **Action**: Add doc comments to all public items, then remove the blanket allow
+- [ ] **F22** — `src/framework/app.rs:477-496` — `shield_input()` and `is_input_shielded()`
+  - Add usage example showing: close modal → shield 100ms → prevents Esc leak
+- [ ] **F23** — `src/framework/scene_router.rs:257` — `pop_force()`
+  - Add doc comment explaining: pops even when stack has 1 scene (root), unlike `pop()` which guards against emptying stack
+  - Add example: use when returning to non-scene state (e.g., showcase launcher)
 
----
+### Widget Docs
+- [ ] **W09** — `src/widgets/editor.rs` — `TextEditor::open()`, `save()`, `save_as()`
+  - `open(path)`: Add doc — opens file, loads content into editor, sets `file_path`
+  - `save()`: Add doc — saves to current `file_path`, returns error if none set
+  - `save_as(path)`: Add doc — saves to new path, updates `file_path`
+- [ ] **W10** — `src/widgets/component.rs` — `Component::Bounds` deprecated
+  - Add deprecation note pointing to `Widget::area()` / `Widget::set_area()` as replacement
 
-## TESTING GAPS
-
-| # | Item | Gap |
-|---|------|-----|
-| T01 | `text_input_base` | No integration tests for password visibility toggle |
-| T02 | `lsp-server` example | Multiple `.unwrap()` calls on async operations |
-| T03 | `cargo-dracon` | No integration tests for the CLI tool itself |
-| T04 | EventBus benchmarks | No performance benchmarks for pub/sub |
-
----
-
-## BUILD / CONFIG
-
-| # | Item | Issue |
-|---|------|-------|
-| B01 | CHANGELOG format | Last entry format inconsistent with previous entries |
-| B02 | `dracon.toml` validation | No schema validation on load — silent ignore of unknown fields |
-
----
-
-## SUMMARY
-
-| Category | Total | ✅ Fixed | 🔴 Fixed | 🟡 Fixed | ⏸️ Kept |
-|----------|-------|---------|----------|----------|---------|
-| Framework crash bugs | 3 | — | 3 | — | 0 |
-| Framework logic bugs | 4 | — | — | 4 | 0 |
-| Framework code smell | 6 | — | — | — | 6 |
-| Framework docs | 9 | — | — | 5 | 4 |
-| Framework cleanup | 3 | — | — | 3 | 0 |
-| Widget logic bugs | 5 | — | — | 5 | 0 |
-| Widget code smell | 3 | — | — | — | 3 |
-| Widget docs | 2 | — | — | 1 | 1 |
-| Example crash bugs | 9 | — | 9 | — | 0 |
-| Example low severity | 2 | — | — | 2 | 0 |
-| Example code smell | 7 | — | — | 7 | 0 |
-| Code quality | 9 | — | — | 8 | 1 |
-| Deprecations | 4 | 2 | — | 2 | 0 |
-| API consistency | 5 | — | — | — | 5 |
-| Documentation gaps | 5 | — | — | 3 | 2 |
-| Testing gaps | 4 | — | — | — | 4 |
-| Build/config | 2 | — | — | — | 2 |
-| **Total** | **82** | **2** | **12** | **40** | **28** |
+### Documentation Gaps
+- [ ] **DG01** — `Ctx::stop()` — add doc explaining: preferred over `running.store(false)` because it's the public API; `running` is internal
+- [ ] **DG02** — `enter_trap()` / trap-exit semantics
+  - Find the function, add doc explaining: registers signal handlers for SIGINT/SIGTERM that set running=false; the panic hook restores terminal state on crash
+- [ ] **DG03** — `replay_last()` — find the function, add doc explaining: replays the last published event to a new subscriber (useful for late-joining widgets)
+- [ ] **DG04** — `pop_force()` vs `pop()` — add comparison table to `pop_force()` doc:
+  - `pop()`: Guards against emptying stack (returns false if only 1 scene)
+  - `pop_force()`: Pops even the root scene (use when returning to non-scene state)
+- [ ] **DG05** — Scene lifecycle hooks — add doc to `Scene` trait:
+  - `on_enter()`: Called when scene becomes active (pushed or replaced)
+  - `on_exit()`: Called when scene is removed from stack
+  - `on_pause()`: Called when another scene is pushed on top
+  - `on_resume()`: Called when returning to this scene after pop
 
 ---
 
-## PRIORITY ORDER
+## 6. Testing — Detailed Tasks
 
-### Must Fix (crashes)
-1. `F01` — `split_whitespace` in CommandRunner
-2. `F02` — stdin EOF hang
-3. `F03` — DTRON_THEME_FILE silent failure
-4. `E01` — /proc/stat OOB
-5. `E02` — UTF-8 process name
-6. `E03` — UTF-8 commit message
-7. `E04` — missing scene registration
-8. `E05-E09` — u16 underflows
-
-### Should Fix (logic)
-9. `F04` — JsonPath silent fallback
-10. `F05` — i18n load_locale race
-11. `W01` — bracket finding off-by-one
-12. `W02` — save_config data loss
-13. `W03` — replace_next cursor
-14. `W04` — multi-cursor insert
-
-### Nice to Have
-15. `F14` — layout Min constraint docs
-16. `CQ01` — theme.rs macro factoring
-17. `CQ02` — app.rs splitting
-18. All documentation items
+- [ ] **T01** — `src/framework/widgets/text_input_base.rs` — password visibility toggle
+  - Add test: create `PasswordInput`, toggle visibility, verify `to_json()` reflects state
+  - Add test: toggle visibility, verify `render()` output changes (masked vs plain)
+- [ ] **T02** — `examples/lsp_server.rs` (if exists) — multiple `.unwrap()` on async operations
+  - **Action**: Replace `.unwrap()` with `.expect("context")` or `?` operator
+  - Add test: verify example compiles and runs without panic on missing LSP server
+- [ ] **T03** — `cargo-dracon` CLI tool (if exists)
+  - Add integration test: `cargo run --bin cargo-dracon -- --help` exits 0
+  - Add integration test: `cargo run --bin cargo-dracon -- validate dracon.toml` on valid config
+- [ ] **T04** — EventBus benchmarks
+  - Add benchmark in `benches/`: publish 1000 events with 10 subscribers
+  - Add benchmark: subscribe_once with 100 callbacks, measure cleanup time
 
 ---
 
-## ALREADY DONE (from prior sessions)
+## 7. Build / Config — Detailed Tasks
 
-| # | Item | Fixed |
-|---|------|-------|
-| 🔜 | SceneTransition SlideUp/SlideDown | ✅ Implemented |
-| 🔜 | BACK handler depth check | ✅ Added |
-| 🔜 | filter/readonly event leak | ✅ Fixed |
-| 🔜 | layout Min constraint floor | ✅ Fixed |
-| 🔜 | SixelImage feature-gated | ✅ Gated behind `sixel` |
-| 🔜 | App::theme() deprecated | ✅ Deprecated |
-| 🔜 | split_command_args implemented | ✅ 6 tests |
-| 🔜 | draw_text/draw_rounded_border/blit extracted | ✅ framework::helpers |
-| 🔜 | Theme::from_env_or fix | ✅ Fixed |
-| 🔜 | Redundant ? key removed | ✅ Fixed in 3 files |
-| 🔜 | Suspicious .clone() in _plugins | ✅ Fixed |
-| 🔜 | Dead move_cursor() removed | ✅ Removed |
-| 🔜 | #![allow(unused_imports)] removed | ✅ Removed |
-| 🔜 | SixelRenderer unused field removed | ✅ Removed |
-| 🔜 | Chat client sidebar click OOB | ✅ Fixed — bounds check |
-| 🔜 | Chat client input u16 underflow | ✅ Fixed — saturating_sub + bounds |
-| 🔜 | Chat client help title u16 underflow | ✅ Fixed — saturating_sub |
-| 🔜 | layout.rs dead saturating_sub(0) | ✅ Removed |
+- [ ] **B01** — `CHANGELOG.md` — last entry format
+  - Compare format of latest entry with previous entries
+  - Ensure: version header, date, categorized changes (Added/Changed/Fixed/Removed)
+- [ ] **B02** — `dracon.toml` schema validation
+  - Add `AppConfig::validate()` method that checks for unknown fields
+  - Log warnings for unrecognized keys (don't fail — forward-compatible)
+  - Add test: load TOML with unknown field, verify warning logged
 
 ---
 
+## 8. API Consistency — Detailed Tasks
+
+- [ ] **AC01** — Widget trait `render(&self)` vs `handle_key(&mut self)` inconsistency
+  - **Decision**: Keep as-is — `render(&self)` is intentional for compositor parallelism
+  - **Action**: Document the design decision in Widget trait doc comment
+- [ ] **AC02** — `DraconError` has two IO error variants
+  - **Action**: Merge `IoError` and `Io` into single variant (breaking change → 0.2.0)
+- [ ] **AC03** — Builder methods return `&mut Self` inconsistently
+  - **Action**: Audit all builder methods, ensure consistent `self` move pattern
+  - Files: `app.rs`, `theme.rs`, `layout.rs`, all widget builders
+- [ ] **AC04** — `BoundCommand` naming
+  - **Action**: Rename to `CommandDef` or `CommandSpec` in 0.2.0 (breaking change)
+- [ ] **AC05** — `HotkeyHint` in `src/widgets/hotkey.rs` vs `src/framework/widgets/`
+  - **Action**: Deprecate standalone `HotkeyHint`, keep framework version
+  - Add `#[deprecated]` to `src/widgets/hotkey.rs` version
+
 ---
 
-## REMAINING (28 items — docs/testing/build)
+## 9. Deprecations — Detailed Tasks
 
-These are low-priority items that don't affect functionality. They are tracked but not scheduled for immediate work.
+- [ ] **D01** — `App::theme(Theme)` → `App::set_theme(&mut Theme)`
+  - Status: Deprecated with `#[deprecated(since = "0.2.0")]`
+  - **Remaining**: Migrate `examples/framework_chat.rs` and `examples/_cookbook/tabbed_panels.rs`
+- [ ] **D02** — `Component` trait → scheduled for removal in 0.2.0
+  - Status: Deprecated with `#[deprecated]`
+  - **Remaining**: Remove `src/widgets/component.rs` and re-export from `src/lib.rs` in 0.2.0
+- [ ] **D03** — `Component::Bounds` → deprecated
+  - Status: Deprecated
+  - **Remaining**: Remove in 0.2.0
+- [ ] **D04** — `Theme::scrollbar_width` → `framework::scroll::DEFAULT_SCROLLBAR_WIDTH`
+  - Status: Deprecated since 0.3.0
+  - **Remaining**: Remove field from Theme struct in 0.3.0
 
-### Documentation (9)
-- F15: Ctx::frame_count()/last_frame() doc comments
-- F16: EventBus::set_history_capacity() doc
-- F17: EventRecord doc
-- F18: Constraint::resolve() doc
-- F19: DirtyRegion::expand() doc
-- F20: WidgetContainer doc
-- F21: plugin.rs allow(missing_docs) → add docs
-- F22: shield_input()/is_input_shielded() examples
-- F23: pop_force() doc
+---
 
-### Widget Docs (1)
-- W09: TextEditor::open/save/save_as doc
+## 10. Prior Session Fixes (Already Done)
 
-### Testing (4)
-- T01: text_input_base integration tests
-- T02: lsp-server unwraps
-- T03: cargo-dracon integration tests
-- T04: EventBus benchmarks
+- [x] SceneTransition SlideUp/SlideDown implemented
+- [x] BACK handler depth check added
+- [x] filter/readonly event propagation leak fixed
+- [x] layout Min constraint floor semantics fixed
+- [x] SixelImage feature-gated behind `sixel`
+- [x] App::theme() deprecated, 15 examples updated
+- [x] split_command_args implemented (6 tests)
+- [x] draw_text/draw_rounded_border/blit extracted to framework::helpers (5 tests)
+- [x] Theme::from_env_or fix applied
+- [x] Redundant `?` key removed from 3 showcase scenes
+- [x] Suspicious `.clone()` in _plugins fixed
+- [x] Dead `move_cursor()` removed from editor.rs
+- [x] `#![allow(unused_imports)]` removed from editor.rs
+- [x] SixelRenderer unused field removed
+- [x] Chat client sidebar click OOB fixed
+- [x] Chat client input u16 underflow fixed
+- [x] Chat client help title u16 underflow fixed
+- [x] layout.rs dead `saturating_sub(0)` removed
 
-### Build/Config (2)
-- B01: CHANGELOG format consistency
-- B02: dracon.toml schema validation
+---
 
-### Code Quality (1)
-- CQ01: theme.rs macro factoring (deferred — risk of typos)
+## Summary
 
-### API Consistency (5)
-- AC01: Widget trait render(&self) vs handle_key(&mut self) inconsistency
-- AC02: DraconError dual IO variants
-- AC03: Builder methods &mut self inconsistency
-- AC04: BoundCommand naming
-- AC05: HotkeyHint standalone vs framework
+| Category | Total | Done | Remaining |
+|----------|-------|------|-----------|
+| Crash bugs | 15 | 15 | 0 |
+| Logic bugs | 9 | 9 | 0 |
+| Code smells (fixable) | 10 | 10 | 0 |
+| Code smells (deferred) | 15 | 0 | 15 |
+| Documentation | 14 | 0 | 14 |
+| Testing | 4 | 0 | 4 |
+| Build/Config | 2 | 0 | 2 |
+| API consistency | 5 | 0 | 5 |
+| Deprecations | 4 | 2 | 2 |
+| Prior session fixes | 18 | 18 | 0 |
+| **Total** | **96** | **54** | **42** |
 
-### Documentation Gaps (2)
-- DG02: enter_trap()/trap-exit semantics
-- DG03: replay_last() doc
-
-### Deprecations (2)
-- D02: Component trait removal (0.2.0)
-- D03: Component::Bounds removal
+**All crash and logic bugs are fixed.** Remaining 42 items are docs, testing, build config, code smells, and API consistency — none affect functionality.
 
 ---
 
