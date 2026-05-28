@@ -680,12 +680,15 @@ impl Widget for ChatApp {
 
         // Contact sidebar click
         let sidebar_w = 18u16.min(area.width / 4);
-        if col < sidebar_w && row > 0 && row <= self.contacts.len() as u16
+        if col < sidebar_w && row > 0 && (row - 1) < self.contacts.len() as u16
             && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
-                self.selected_contact = (row - 1) as usize;
-                self.contacts[self.selected_contact].unread = 0;
-                self.dirty = true;
-                return true;
+                let idx = (row - 1) as usize;
+                if idx < self.contacts.len() {
+                    self.selected_contact = idx;
+                    self.contacts[self.selected_contact].unread = 0;
+                    self.dirty = true;
+                    return true;
+                }
             }
 
         // Message list click
@@ -756,7 +759,7 @@ impl ChatApp {
 
         // Title
         let title = "Chat Client Help";
-        let tx = hx + (hw - title.len() as u16) / 2;
+        let tx = hx + hw.saturating_sub(title.len() as u16) / 2;
         for (i, c) in title.chars().enumerate() {
             let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
             if idx < plane.cells.len() {
