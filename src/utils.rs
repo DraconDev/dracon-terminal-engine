@@ -5,9 +5,11 @@
 use chrono::{DateTime, Local};
 use crate::compositor::Color;
 use ratatui::{
-    style::{Modifier, Style},
+    style::Style,
     text::{Line, Span},
 };
+#[cfg(feature = "syntax-highlighting")]
+use ratatui::style::Modifier;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::time::SystemTime;
