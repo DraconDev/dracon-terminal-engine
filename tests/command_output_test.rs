@@ -526,16 +526,14 @@ mod output_parser_parse_correctness {
     }
 
     #[test]
-    fn test_parser_json_path_missing_returns_null_or_empty() {
+    fn test_parser_json_path_missing_returns_none() {
         let parser = OutputParser::JsonPath {
             path: "a.b.c".to_string(),
         };
         let out = parser.parse(r#"{}"#, "", 0);
         match out {
-            ParsedOutput::Scalar(s) => {
-                assert!(s.contains("null") || s.is_empty() || s == "{}" || s.contains("null"));
-            }
-            other => panic!("expected Scalar, got {:?}", other),
+            ParsedOutput::None => {}
+            other => panic!("expected None, got {:?}", other),
         }
     }
 
