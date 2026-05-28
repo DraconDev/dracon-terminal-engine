@@ -702,7 +702,7 @@ impl Widget for ChatApp {
 
         // Input area click
         let input_y = header_h + msg_list_h;
-        if col >= sidebar_w + 2 && row >= input_y + 1 && row < input_y + input_h {
+        if col >= sidebar_w + 2 && row > input_y && row < input_y + input_h {
             return self.input.handle_mouse(kind, col - sidebar_w - 2, row - input_y - 1);
         }
 
