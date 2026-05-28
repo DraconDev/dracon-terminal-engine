@@ -42,9 +42,9 @@ Full codebase audit covering:
 
 | # | File | Issue | Impact |
 |---|------|-------|--------|
-| F01 | `command.rs:375` | `CommandRunner::run_sync()` uses `split_whitespace()` — fails on quoted args like `echo "hello world"` | Commands with spaces embedded in quotes silently fail |
-| F02 | `app.rs:719` | stdin read returns `0` (EOF) but running flag never set — app hangs on pipe EOF | Ctrl+D or pipe closure causes infinite hang |
-| F03 | `app.rs:1002` | `DTRON_THEME_FILE` write errors silently discarded via `.ok()` — theme return silently fails | Showcase can't detect theme change |
+| F01 | `command.rs:375` | `CommandRunner::run_sync()` uses `split_whitespace()` — fails on quoted args like `echo "hello world"` | ✅ Fixed — `split_command_args()` |
+| F02 | `app.rs:719` | stdin read returns `0` (EOF) but running flag never set — app hangs on pipe EOF | ✅ Fixed — EOF triggers `running.store(false)` |
+| F03 | `app.rs:1002` | `DTRON_THEME_FILE` write errors silently discarded via `.ok()` — theme return silently fails | ✅ Fixed — error now reported to stderr |
 
 ### 🟡 Logic Bugs (should fix)
 
@@ -241,7 +241,7 @@ Full codebase audit covering:
 | Widget code smell | 3 | — | — | — | 3 |
 | Widget docs | 2 | — | — | 1 | 1 |
 | Example crash bugs | 9 | — | 9 | — | 0 |
-| Example low severity | 2 | — | — | — | 2 |
+| Example low severity | 2 | — | — | 2 | 0 |
 | Example code smell | 7 | — | — | 7 | 0 |
 | Code quality | 9 | — | — | 7 | 2 |
 | Deprecations | 4 | 2 | — | 2 | 0 |
