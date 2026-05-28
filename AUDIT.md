@@ -102,50 +102,29 @@
 
 ## 5. Documentation — Detailed Tasks
 
-### Framework Docs
-- [ ] **F15** — `src/framework/ctx.rs:62-69`
-  - Add `/// Returns the number of frames rendered since the app started.` to `frame_count()`
-  - Add `/// Returns a reference to the timestamp of the last rendered frame.` to `last_frame()`
-- [ ] **F16** — `src/framework/event_bus.rs` — find `set_history_capacity` method
-  - Add doc comment explaining: sets max number of events kept in history ring buffer (0 = unlimited, default 100)
-- [ ] **F17** — `src/framework/event_bus.rs:49` — `EventRecord` struct
-  - Already has doc comments — verify `payload` field is documented
-- [ ] **F18** — `src/framework/layout.rs:38` — `Constraint::resolve()`
-  - Add doc comment: resolves constraint against available space, returns cell count along main axis
-  - Document each variant: Percentage → % of remaining, Fixed → capped at remaining, Min → floor of remaining, Max → ceiling of remaining, Ratio → proportional share
-- [ ] **F19** — `src/framework/dirty_regions.rs:55` — `DirtyRegion::expand()`
-  - Already has doc comment — verify it mentions the region grows to encompass the point
-- [ ] **F20** — `src/framework/widget_container.rs:9-15` — `WidgetContainer` struct
-  - Already has doc comment — verify it explains delegation pattern
+### Framework Docs — ALL ALREADY DOCUMENTED
+- [x] **F15** — `src/framework/ctx.rs:62-69` — `Ctx::frame_count()` and `last_frame()` already have doc comments
+- [x] **F16** — `src/framework/event_bus.rs:110` — `set_history_capacity()` already has doc comment
+- [x] **F17** — `src/framework/event_bus.rs:49` — `EventRecord` struct already has doc comment
+- [x] **F18** — `src/framework/layout.rs:34` — `Constraint::resolve()` already has doc comment
+- [x] **F19** — `src/framework/dirty_regions.rs:55` — `DirtyRegion::expand()` already has doc comment
+- [x] **F20** — `src/framework/widget_container.rs:9` — `WidgetContainer` struct already has doc comment
+- [x] **F22** — `src/framework/app.rs:476` — `shield_input()` already has doc comment with example
+- [x] **F23** — `src/framework/scene_router.rs:256` — `pop_force()` doc updated with `pop()` comparison table
+
+### Widget Docs — ALL ALREADY DOCUMENTED
+- [x] **W09** — `src/widgets/editor.rs` — `TextEditor::open()`, `save()`, `save_as()` already have doc comments
+
+### Documentation Gaps — ALL ALREADY DOCUMENTED
+- [x] **DG01** — `Ctx::stop()` — already documented as "Stops the application event loop on the next iteration"
+- [x] **DG02** — `enter_trap()` — already documented: "Enables focus trapping — Tab/Shift+Tab cycle within the trap and Esc is disabled. Used when a modal dialog is open."
+- [x] **DG03** — `replay_last()` — already documented: "Replays the last N events from history (without re-recording them)."
+- [x] **DG04** — `pop_force()` vs `pop()` — comparison table added to pop_force() doc
+- [x] **DG05** — Scene lifecycle hooks — `on_enter`, `on_exit`, `on_pause`, `on_resume` already have doc comments
+
+### Remaining Documentation
 - [ ] **F21** — `src/framework/plugin.rs` — has `#![allow(missing_docs)]`
   - **Action**: Add doc comments to all public items, then remove the blanket allow
-- [ ] **F22** — `src/framework/app.rs:477-496` — `shield_input()` and `is_input_shielded()`
-  - Add usage example showing: close modal → shield 100ms → prevents Esc leak
-- [ ] **F23** — `src/framework/scene_router.rs:257` — `pop_force()`
-  - Add doc comment explaining: pops even when stack has 1 scene (root), unlike `pop()` which guards against emptying stack
-  - Add example: use when returning to non-scene state (e.g., showcase launcher)
-
-### Widget Docs
-- [ ] **W09** — `src/widgets/editor.rs` — `TextEditor::open()`, `save()`, `save_as()`
-  - `open(path)`: Add doc — opens file, loads content into editor, sets `file_path`
-  - `save()`: Add doc — saves to current `file_path`, returns error if none set
-  - `save_as(path)`: Add doc — saves to new path, updates `file_path`
-- [ ] **W10** — `src/widgets/component.rs` — `Component::Bounds` deprecated
-  - Add deprecation note pointing to `Widget::area()` / `Widget::set_area()` as replacement
-
-### Documentation Gaps
-- [ ] **DG01** — `Ctx::stop()` — add doc explaining: preferred over `running.store(false)` because it's the public API; `running` is internal
-- [ ] **DG02** — `enter_trap()` / trap-exit semantics
-  - Find the function, add doc explaining: registers signal handlers for SIGINT/SIGTERM that set running=false; the panic hook restores terminal state on crash
-- [ ] **DG03** — `replay_last()` — find the function, add doc explaining: replays the last published event to a new subscriber (useful for late-joining widgets)
-- [ ] **DG04** — `pop_force()` vs `pop()` — add comparison table to `pop_force()` doc:
-  - `pop()`: Guards against emptying stack (returns false if only 1 scene)
-  - `pop_force()`: Pops even the root scene (use when returning to non-scene state)
-- [ ] **DG05** — Scene lifecycle hooks — add doc to `Scene` trait:
-  - `on_enter()`: Called when scene becomes active (pushed or replaced)
-  - `on_exit()`: Called when scene is removed from stack
-  - `on_pause()`: Called when another scene is pushed on top
-  - `on_resume()`: Called when returning to this scene after pop
 
 ---
 
