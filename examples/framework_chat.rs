@@ -152,6 +152,9 @@ fn main() -> std::io::Result<()> {
             if show_help_render.load(Ordering::SeqCst) {
                 let hw = 40u16.min(w.saturating_sub(4));
                 let hh = 10u16.min(h.saturating_sub(4));
+                if hw < 3 || hh < 3 {
+                    // Terminal too small for help overlay
+                } else {
                 let _hx = (w - hw) / 2;
                 let _hy = (h - hh) / 2;
 
@@ -181,13 +184,16 @@ fn main() -> std::io::Result<()> {
                 }
 
                 let help_title = "Framework Chat Help";
-                let tx = (hw - help_title.len() as u16) / 2;
-                for (i, c) in help_title.chars().enumerate() {
-                    let idx = (hw + tx + i as u16) as usize;
-                    if idx < help_plane.cells.len() {
-                        help_plane.cells[idx].char = c;
-                        help_plane.cells[idx].fg = theme.primary;
-                        help_plane.cells[idx].style = Styles::BOLD;
+                let title_u16 = help_title.len() as u16;
+                if hw > title_u16 {
+                    let tx = (hw - title_u16) / 2;
+                    for (i, c) in help_title.chars().enumerate() {
+                        let idx = (hw + tx + i as u16) as usize;
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].char = c;
+                            help_plane.cells[idx].fg = theme.primary;
+                            help_plane.cells[idx].style = Styles::BOLD;
+                        }
                     }
                 }
 
@@ -199,6 +205,7 @@ fn main() -> std::io::Result<()> {
                 ];
                 for (i, (key, desc)) in shortcuts.iter().enumerate() {
                     let row = 3 + i as u16;
+                    if row >= hh - 1 { break; }
                     for (j, c) in key.chars().enumerate() {
                         let idx = (row * hw + 2 + j as u16) as usize;
                         if idx < help_plane.cells.len() { help_plane.cells[idx].char = c; help_plane.cells[idx].fg = theme.primary; }
