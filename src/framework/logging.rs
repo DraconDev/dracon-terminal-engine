@@ -191,8 +191,6 @@ pub use crate::input::event::{KeyEvent, MouseEvent};
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_init_logger_no_panic() {
         // We can't actually call init_logger in tests because it can only be called once,
