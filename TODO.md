@@ -84,6 +84,21 @@ Tests: 303 pass · Compiler: 0 warnings · Clippy: 0 warnings
 | `draw_rounded_border` duplicated 6× | ✅ Extracted to `framework::helpers` |
 | `blit` duplicated 9× with missing skips | ✅ Extracted to `framework::helpers` |
 
+### Audit 2026-05-28 — Bugs Fixed
+
+| # | Issue | Status |
+|---|-------|--------|
+| L | `editor.rs`: `highlight_code` calls not gated by `#[cfg(feature = "syntax-highlighting")]` | ✅ Fixed — added cfg gates |
+| M | `utils.rs`: `Modifier` import not conditional on `syntax-highlighting` feature | ✅ Fixed — moved to conditional import |
+| N | `test_parser_json_path_missing_returns_null_or_empty`: wrong assertion (expected Scalar, got None) | ✅ Fixed — renamed to `test_parser_json_path_missing_returns_none` |
+| O | `logging.rs`: unused `use super::*` in test module | ✅ Fixed — removed |
+| P | `widget_form_test.rs`: unused `ValidationRule` import | ✅ Fixed — removed |
+| Q | `widget_command_palette_test.rs`, `widget_rich_text_test.rs`, `widget_select_test.rs`: useless `z >= 0` comparisons | ✅ Fixed — removed |
+| R | `widget_spinner_test.rs`: tautological assertion `first != second || first == second` | ✅ Fixed — removed |
+| S | `showcase/main.rs`: `write()` should use `write_all()` | ✅ Fixed — changed to `write_all()` |
+| T | `dracon-macros/Cargo.toml`: missing `proc-macro = true` | ✅ Fixed — added |
+| U | `dracon-macros/src/lib.rs`: unused `state_fields` variable | ✅ Fixed — prefixed with underscore |
+
 ---
 
 ## 🟡 Remaining (Not Fixing — 22 items)
@@ -93,6 +108,42 @@ Tests: 303 pass · Compiler: 0 warnings · Clippy: 0 warnings
 ### Documentation (4): replay_last(), pop_force(), enter_trap() trap-exit, Ctx::stop()
 ### Testing (4): text_input_base integration, lsp-server unwraps, cargo-dracon tests, event bus benchmarks
 ### Build (2): CHANGELOG format, dracon.toml validation
+
+### Deprecation Warnings (Known — 30 examples)
+
+Multiple examples use the deprecated `App::theme()` method instead of `App::set_theme()`. These are warnings only, not errors:
+- `examples/_cookbook/accessibility.rs`
+- `examples/_cookbook/calendar.rs`
+- `examples/_cookbook/autocomplete.rs`
+- `examples/_cookbook/command_bindings.rs`
+- `examples/_cookbook/cell_pool.rs`
+- `examples/_cookbook/data_table.rs`
+- `examples/_cookbook/debug_overlay.rs`
+- `examples/_cookbook/form_validation.rs`
+- `examples/_cookbook/log_monitor.rs`
+- `examples/_cookbook/menu_system.rs`
+- `examples/_cookbook/notification_center.rs`
+- `examples/_cookbook/rich_text.rs`
+- `examples/_cookbook/scrollable_content.rs`
+- `examples/_cookbook/stat_widget_plugin.rs`
+- `examples/_cookbook/tabbed_panels.rs`
+- `examples/_cookbook/tree_navigator.rs`
+- `examples/_cookbook/widget_gallery.rs`
+- `examples/_apps/file_manager.rs`
+- `examples/_apps/system_monitor.rs`
+- `examples/chat_client.rs`
+- `examples/command_dashboard.rs`
+- `examples/cyberpunk_dashboard.rs`
+- `examples/form_demo.rs`
+- `examples/form_widget.rs`
+- `examples/framework_chat.rs`
+- `examples/framework_file_manager.rs`
+- `examples/ide.rs`
+- `examples/network_client.rs`
+- `examples/sqlite_browser.rs`
+- `examples/table_widget.rs`
+- `examples/text_editor_demo.rs`
+- `examples/widget_tutorial.rs`
 
 ---
 
@@ -105,7 +156,9 @@ Tests: 303 pass · Compiler: 0 warnings · Clippy: 0 warnings
 | ✅ Fixed (example crashes) | 9 |
 | ✅ Fixed (medium: docs, dead code) | 12 |
 | ✅ Fixed (low: cleanup) | 10 |
+| ✅ Fixed (audit 2026-05-28) | 11 |
 | 🟡 Kept as-is | 22 |
-| **Total** | **69** |
+| 🟡 Deprecation warnings | 30+ |
+| **Total** | **80+** |
 
-### Tests: 303 pass | Clippy: 0 warnings | Compilation: clean
+### Tests: 303 pass | Clippy: 0 errors | Compilation: clean
