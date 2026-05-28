@@ -123,8 +123,7 @@
 - [x] **DG05** — Scene lifecycle hooks — `on_enter`, `on_exit`, `on_pause`, `on_resume` already have doc comments
 
 ### Remaining Documentation
-- [ ] **F21** — `src/framework/plugin.rs` — has `#![allow(missing_docs)]`
-  - **Action**: Add doc comments to all public items, then remove the blanket allow
+- [x] **F21** — `src/framework/plugin.rs` — `#![allow(missing_docs)]` removed in prior session; all public items have doc comments
 
 ---
 
