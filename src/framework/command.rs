@@ -1056,6 +1056,42 @@ DEBUG: Test'"#,
     }
 
     #[test]
+    fn test_split_command_args_simple() {
+        let args = split_command_args("echo hello world");
+        assert_eq!(args, vec!["echo", "hello", "world"]);
+    }
+
+    #[test]
+    fn test_split_command_args_double_quoted() {
+        let args = split_command_args(r#"echo "hello world""#);
+        assert_eq!(args, vec!["echo", "hello world"]);
+    }
+
+    #[test]
+    fn test_split_command_args_single_quoted() {
+        let args = split_command_args("echo 'hello world'");
+        assert_eq!(args, vec!["echo", "hello world"]);
+    }
+
+    #[test]
+    fn test_split_command_args_escaped_quote() {
+        let args = split_command_args(r#"echo "hello \"world\"""#);
+        assert_eq!(args, vec!["echo", "hello \"world\""]);
+    }
+
+    #[test]
+    fn test_split_command_args_empty() {
+        let args = split_command_args("");
+        assert!(args.is_empty());
+    }
+
+    #[test]
+    fn test_split_command_args_whitespace_only() {
+        let args = split_command_args("   ");
+        assert!(args.is_empty());
+    }
+
+    #[test]
     fn test_command_runner_run_sync_empty() {
         let runner = CommandRunner::new("");
         let (stdout, stderr, code) = runner.run_sync();
