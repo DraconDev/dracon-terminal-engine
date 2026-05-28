@@ -217,6 +217,7 @@ fn main() -> std::io::Result<()> {
                 }
 
                 ctx.add_plane(help_plane);
+                } // end if hw >= 3 && hh >= 3
             }
 
             ctx.add_plane(input_plane);
