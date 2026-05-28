@@ -330,7 +330,7 @@ impl CommandRunner {
             ));
         }
 
-        let mut child = Command::new(parts[0])
+        let mut child = Command::new(&parts[0])
             .args(&parts[1..])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -378,7 +378,7 @@ impl CommandRunner {
             return (String::new(), String::new(), -1);
         }
 
-        let output = match Command::new(parts[0]).args(&parts[1..]).output() {
+        let output = match Command::new(&parts[0]).args(&parts[1..]).output() {
             Ok(o) => o,
             Err(_) => return (String::new(), String::new(), -1),
         };
