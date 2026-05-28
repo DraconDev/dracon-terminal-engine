@@ -67,7 +67,6 @@ fn main() -> std::io::Result<()> {
     App::new()?
         .title("Framework Chat")
         .fps(30)
-        .theme(theme)
         .on_input(move |key| {
             if keybindings.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);
