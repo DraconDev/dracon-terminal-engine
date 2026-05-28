@@ -153,7 +153,7 @@ fn main() -> std::io::Result<()> {
 
             // Clear terminal before resuming to prevent stale content from child process
             // from overlapping with new content (causes horizontal lines)
-            std::io::stdout().write(b"\x1b[2J\x1b[H").unwrap();
+            std::io::stdout().write_all(b"\x1b[2J\x1b[H").unwrap();
             let _ = ctx.resume_terminal();
 
             // Non-blocking drain of any stray input bytes left by the child.
