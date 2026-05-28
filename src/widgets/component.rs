@@ -22,6 +22,7 @@ impl Bounds {
     }
 
     /// Returns true if the given (col, row) is inside these bounds.
+    #[allow(deprecated)]
     pub fn contains(&self, col: u16, row: u16) -> bool {
         col >= self.x && col < self.x + self.w && row >= self.y && row < self.y + self.h
     }
