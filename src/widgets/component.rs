@@ -2,6 +2,7 @@ use crate::compositor::engine::Compositor;
 use crate::input::event::Event;
 
 /// Represents the rectangular bounds of a component on screen.
+#[deprecated(since = "0.2.0", note = "Use framework::layout::Layout instead")]
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Bounds {
     /// The x coordinate (column) of the top-left corner.
@@ -30,6 +31,11 @@ impl Bounds {
 ///
 /// Components encapsulate rendering logic, allowing them to be composed
 /// into complex layouts without manual cell manipulation.
+///
+/// **Deprecated:** Use the `Widget` trait from `framework::widget` instead.
+/// This trait is not implemented by any framework widget and will be
+/// removed in a future release.
+#[deprecated(since = "0.2.0", note = "Use framework::widget::Widget instead")]
 pub trait Component {
     /// Renders the component into the compositor at the specified bounds.
     ///
