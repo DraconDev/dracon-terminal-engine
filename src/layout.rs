@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use crate::compositor::engine::Compositor;
 use crate::input::event::Event;
 use crate::widgets::component::{Bounds, Component};
