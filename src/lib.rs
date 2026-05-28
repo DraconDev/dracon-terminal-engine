@@ -227,6 +227,7 @@ pub use widgets::editor::TextEditor;
 pub use widgets::input::TextInput;
 pub use widgets::button::Button as StandaloneButton;
 pub use widgets::panel::Panel;
+#[allow(deprecated)]
 pub use widgets::component::Component;
 pub use widgets::hotkey::HotkeyHint;
 pub use widgets::context_menu::ContextMenuAction;

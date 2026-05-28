@@ -15,6 +15,7 @@ pub mod input;
 /// Panel widget module
 pub mod panel;
 
+#[allow(deprecated)]
 pub use component::Component;
 
 pub use button::Button;
