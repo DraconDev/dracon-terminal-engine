@@ -595,6 +595,20 @@ impl TextEditor {
                             self.cursor_col = actual_col + replace.len();
                             self.ensure_valid_cursor_col();
                             self.modified = true;
+                            self.invalidate_from(0);
+                            return true;
+                        }
+                    }
+                } else if let Some(col) = line[search_from..].find(find) {
+                    let actual_col = search_from + col;
+                    let mut new_line = line.clone();
+                    new_line.replace_range(actual_col..actual_col + find.len(), replace);
+                    self.lines[row] = new_line;
+
+                    self.cursor_row = row;
+                    self.cursor_col = actual_col + replace.len();
+                    self.ensure_valid_cursor_col();
+                    self.modified = true;
                     self.invalidate_from(0);
                     return true;
                 }
