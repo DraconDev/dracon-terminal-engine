@@ -18,6 +18,14 @@ impl SearchInput {
         Self { id, base }
     }
 
+    /// Sets a custom placeholder text.
+    pub fn with_placeholder(self, placeholder: &str) -> Self {
+        let id = self.id;
+        let mut base = self.base;
+        base.placeholder = placeholder.to_string();
+        Self { id, base }
+    }
+
     /// Sets the theme for this widget.
     pub fn with_theme(self, theme: crate::framework::theme::Theme) -> Self {
         let id = self.id;

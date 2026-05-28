@@ -124,6 +124,7 @@ impl ChatApp {
 
         let input = SearchInput::new(WidgetId::new(2))
             .with_theme(theme.clone())
+            .with_placeholder("Type a message...")
             .on_submit(|_text| {
                 // Submit handled in handle_key after checking input.query()
             });
