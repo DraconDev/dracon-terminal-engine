@@ -1044,7 +1044,10 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, keybindings: &K
     ];
 
     let help_w = 48u16;
-    let help_h = (shortcuts.len() as u16 + 3).min(area.height - 2);
+    let help_h = (shortcuts.len() as u16 + 3).min(area.height.saturating_sub(2));
+    if help_h < 3 || help_w > area.width {
+        return; // Terminal too small for help overlay
+    }
     let help_x = (area.width.saturating_sub(help_w)) / 2;
     let help_y = (area.height.saturating_sub(help_h)) / 2;
 
