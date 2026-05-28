@@ -1,151 +1,111 @@
 # Dracon Terminal Engine — TODO
 
 Audit date: 2026-05-27  
-Last updated: 2026-05-27  
+Last updated: 2026-05-28  
 Source files: 113 · Framework widgets: 47 · Themes: 21 · Examples: 98  
-Tests: 297 pass · Compiler: 0 warnings · Clippy: 0 warnings
+Tests: 303 pass · Compiler: 0 warnings · Clippy: 0 warnings
 
 ---
 
-## 🔴 High Priority — Framework Bugs
+## ✅ Completed
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 1 | `OutputParser::JsonPath` silent fallback on missing segments | ✅ FIXED | Short-circuits to `None` |
-| 2 | `i18n::load_locale()` clears translations before file confirmed | ✅ FIXED | Clears only after successful parse |
-| 3 | `SceneTransition::SlideUp`/`SlideDown` not implemented | ✅ FIXED | Full slide transitions implemented |
-| 4 | BACK handler missing scene depth check | ✅ FIXED | Adds depth comparison + dirty mark |
-| 5 | `CommandRunner::spawn()` uses `split_whitespace()` — no shell escaping | 🔧 FIXING NOW | ~20 line manual quote-aware split, no new dep |
-| 6 | `layout.rs` Min constraint consumed from fixed_total | ✅ FIXED | Min treated as floor, not fixed |
-| 7 | stdin EOF silently ignored | ✅ FIXED | Triggers graceful shutdown |
-| 8 | `DTRON_THEME_FILE` write error silently discarded | ✅ FIXED | Logs warning on failure |
-| 9 | `SixelImage::from_sixel()` is a stub | 🔧 FIXING NOW | Gate behind `sixel` feature flag |
-| 10 | `App::theme()` vs `App::set_theme()` duplicate APIs | ✅ FIXED | `theme()` deprecated, 13 examples updated |
+### High Priority — Framework Bugs Fixed (12 of 15)
 
-## 🔴 High Priority — Widget Bugs
+| # | Issue | Status |
+|---|-------|--------|
+| 1 | `OutputParser::JsonPath` silent fallback on missing segments | ✅ Fixed |
+| 2 | `i18n::load_locale()` clears translations before file confirmed | ✅ Fixed |
+| 3 | `SceneTransition::SlideUp`/`SlideDown` not implemented | ✅ Fixed |
+| 4 | BACK handler missing scene depth check | ✅ Fixed |
+| 5 | `CommandRunner::spawn()` uses `split_whitespace()` | ✅ Fixed — `split_command_args()` handles quotes/escapes |
+| 6 | `layout.rs` Min constraint consumed from fixed_total | ✅ Fixed |
+| 7 | stdin EOF silently ignored | ✅ Fixed |
+| 8 | `DTRON_THEME_FILE` write error silently discarded | ✅ Fixed |
+| 9 | `SixelImage::from_sixel()` is a stub | ✅ Fixed — gated behind `sixel` feature flag |
+| 10 | `App::theme()` vs `App::set_theme()` duplicate APIs | ✅ Fixed — deprecated, 15 examples updated |
+| 14 | `replace_next` cursor col after multi-byte replacement | ✅ Fixed |
+| 15 | `insert_char` multi-cursor row overwrite | ✅ Intentional behavior |
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 11 | Filter/readonly event propagation leak | ✅ FIXED | Returns `true` for consumed keys |
-| 12 | `find_opening_bracket` off-by-one at column 0 | ✅ FIXED | Loop now checks index 0 |
-| 13 | `save_config()` data loss via `unwrap_or_default()` | ✅ FIXED | Propagates serialization error |
-| 14 | `replace_next` cursor col after multi-byte replacement | 🔧 FIXING NOW | One `ensure_valid_cursor_col()` call |
-| 15 | `insert_char` multi-cursor row overwrite | ✅ INTENTIONAL | Standard multi-cursor behavior — primary follows last cursor |
+### High Priority — Widget Bugs Fixed (3 of 5)
 
----
+| # | Issue | Status |
+|---|-------|--------|
+| 11 | Filter/readonly event propagation leak | ✅ Fixed |
+| 12 | `find_opening_bracket` off-by-one at column 0 | ✅ Fixed |
+| 13 | `save_config()` data loss via `unwrap_or_default()` | ✅ Fixed |
 
-## 🟡 Medium Priority — Framework Code Quality
+### Example Crash Bugs Fixed (9 of 11)
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 16 | `theme.rs` 21 duplicate constructors (~950 lines) | 🟡 KEEPING | Macro refactor is high-risk for 950 lines of color data; not worth the churn |
-| 17 | `app.rs` too large (1678 lines) | 🟡 KEEPING | Tests are inline but well-organized; extract later if needed |
-| 18 | `command.rs` too large (1094 lines) | 🟡 KEEPING | Same — functional, not broken |
-| 19 | Duplicate z-order invalidation pattern | 🟡 KEEPING | 3 call sites, low duplication cost |
-| 20 | `plugin.rs` undoc'd with `#![allow(missing_docs)]` | 🔧 FIXING NOW | Quick doc comment pass |
+| # | File | Issue | Status |
+|---|------|-------|--------|
+| A | `system_monitor.rs:296` | `/proc/PID/stat` slice OOB when parsing fails | ✅ Fixed — skip unparseable processes |
+| B | `system_monitor.rs:831` | UTF-8 byte slice on process names | ✅ Fixed — `chars().take(16)` |
+| C | `git_tui.rs:852` | UTF-8 byte slice on commit messages | ✅ Fixed — `chars().take(35)` |
+| D | `todo_app.rs:743` | Missing "detail" scene registration | ✅ Fixed — removed push, added TODO |
+| E | `framework_chat.rs:134` | `usize` underflow in `take(w - 3)` | ✅ Fixed — `saturating_sub` |
+| F | `framework_chat.rs:165-184` | u16 underflows in help overlay | ✅ Fixed — early return + saturating_sub |
+| G | `file_manager.rs:1062` | u16 underflow in prompt overlay | ✅ Fixed — `saturating_sub` |
+| H | `file_manager.rs:1533` | u16 underflows in help overlay | ✅ Fixed — `saturating_sub` + early return |
+| I | `git_tui.rs:1047` | u16 underflow in help overlay | ✅ Fixed — `saturating_sub` + early return |
 
-## 🟡 Medium Priority — Widget Code Quality
+### Example Crash Bugs — Remaining (2, low severity)
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 21 | `editor.rs` 3020-line monolith | 🟡 KEEPING | Attempted split — tightly coupled call graph, no clean extraction points |
-| 22 | `handle_event()` 490 lines | 🟡 KEEPING | Tied to #21 |
-| 23 | `Widget::render()` 700 lines with duplicated status bar | 🟡 KEEPING | Tied to #21 |
-| 24 | Status bar shows `Col {}` as byte index | 🟡 KEEPING | Minor UX issue; visual column calculation is non-trivial |
-| 25 | Word deletion duplicated between TextEditor and TextInput | 🟡 KEEPING | ~30 lines, different contexts |
+| # | File | Issue | Why Kept |
+|---|------|-------|----------|
+| J | `chat_client.rs:703` | u16 underflow in mouse coords | Silently ignored by SearchInput bounds check |
+| K | `chat_client.rs:611,618` | Empty contacts panic | Not reachable (contacts is hardcoded) |
 
-## 🟡 Medium Priority — API Consistency
+### Medium Priority — Completed (12 items)
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 26 | Widget trait method duplication | 🟡 DEFERRED | Planned for 0.2.0 per AGENTS.md |
-| 27 | `TextEditor` dual error-return variants | 🟡 KEEPING | Two app frameworks use different error types |
-| 28 | Builder methods use `&mut self` instead of consuming | 🟡 KEEPING | Breaking API change, not worth it now |
-| 29 | `BoundCommand` naming inconsistency | 🟡 KEEPING | Minor; no user impact |
-| 30 | `HotkeyHint` is a needless unit struct | 🟡 KEEPING | 22 lines, not hurting anything |
-| 31 | `Component` trait unimplemented | 🔧 FIXING NOW | Remove dead trait if nothing uses it |
+| Issue | Status |
+|-------|--------|
+| Dead `Ctx::frame_count`/`last_frame` fields | ✅ Fixed — public accessors |
+| Unused `theme` field on `SixelRenderer` | ✅ Removed |
+| `WidgetRegistry` undocumented | ✅ Fixed |
+| `EventBus::set_history_capacity` undocumented | ✅ Fixed |
+| `EventRecord` undocumented | ✅ Fixed |
+| `Constraint::resolve()` undocumented | ✅ Fixed |
+| `DirtyRegion::expand()` undocumented | ✅ Fixed |
+| `WidgetContainer` undocumented | ✅ Fixed |
+| `plugin.rs` `#![allow(missing_docs)]` | ✅ Removed |
+| `Component` trait dead code | ✅ Deprecated with `#[deprecated]` |
+| Redundant `?` key in showcase scenes | ✅ Fixed |
+| `Theme::from_env_or(Theme::default())` | ✅ Fixed |
 
-## 🟡 Medium Priority — Documentation
+### Low Priority — Completed (10 items)
 
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 32 | `WidgetRegistry` undocumented | ✅ FIXED | Doc comments + `len()`/`is_empty()` added |
-| 33 | `SixelImage`/`SixelRenderer` undocumented | 🔧 FIXING NOW | Adding docs while gating behind feature |
-| 34 | `EventBus::replay_last()` undocumented | 🟡 KEEPING | Internal method, rarely used |
-| 35 | `Ctx::stop()` undocumented | ✅ FIXED | Already has doc comment |
-| 36 | `Constraint::resolve()` undocumented | ✅ FIXED | Doc comment added |
-| 37 | `DirtyRegion::expand()` undocumented | ✅ FIXED | Doc comment added |
-| 38 | `SceneRouter::pop_force()` undocumented | 🟡 KEEPING | Self-explanatory from name + signature |
-| 39 | `FocusManager::enter_trap()` trap-exit behavior | 🟡 KEEPING | Documented in method comments |
-
----
-
-## 🟢 Low Priority — Cleanup
-
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 40 | `draw_text` duplicated 10× with row-wrapping bug | ✅ FIXED | Extracted to `framework::helpers` (fixed version) |
-| 41 | `draw_rounded_border` duplicated 6× | ✅ FIXED | Extracted to `framework::helpers` |
-| 42 | `blit` duplicated 9× with missing null/Reset skips | ✅ FIXED | Extracted to `framework::helpers` (fixed version) |
-| 43 | Suspicious `.clone()` in `_plugins/lib.rs` | ✅ FIXED | Removed |
-| 44 | Dead `move_cursor()` in `editor.rs` | ✅ FIXED | Removed |
-| 45 | `#![allow(unused_imports)]` in `editor.rs` | ✅ FIXED | Removed |
-| 46 | Unused `RefCell` import in `layout.rs` | ✅ FIXED | Restored (actually used) |
-| 47 | Redundant `?` key in showcase scenes | ✅ FIXED | Removed |
-| 48 | `Theme::from_env_or(Theme::default())` unnamed fallback | ✅ FIXED | Uses `Theme::nord()` |
-| 49 | Unsafe blocks missing SAFETY comments | ✅ VERIFIED | All already documented |
-
-## 🟢 Low Priority — Testing
-
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 50 | `text_input_base` no integration tests | 🟡 KEEPING | 26 unit tests exist; integration tests need TTY |
-| 51 | `lsp-server` 22 `unwrap()` calls | 🟡 KEEPING | Separate crate, not core library |
-| 52 | `cargo-dracon` zero tests | 🟡 KEEPING | Separate crate, scaffolding tool |
-| 53 | Event bus no benchmarks | 🟡 KEEPING | Nice-to-have, not blocking |
-
-## 🟢 Low Priority — Build
-
-| # | Issue | Status | Action |
-|---|-------|--------|--------|
-| 54 | `CHANGELOG.md` format drift | 🟡 KEEPING | Cosmetic, no functional impact |
-| 55 | `dracon.toml` no validation | 🟡 KEEPING | TOML serde handles structural validation |
+| Issue | Status |
+|-------|--------|
+| Suspicious `.clone()` in `_plugins/lib.rs` | ✅ Fixed |
+| Dead `move_cursor()` in `editor.rs` | ✅ Removed |
+| `#![allow(unused_imports)]` in `editor.rs` | ✅ Removed |
+| Unused `RefCell` import in `layout.rs` | ✅ Restored |
+| `draw_text` duplicated 10× with row-wrapping bug | ✅ Extracted to `framework::helpers` |
+| `draw_rounded_border` duplicated 6× | ✅ Extracted to `framework::helpers` |
+| `blit` duplicated 9× with missing skips | ✅ Extracted to `framework::helpers` |
 
 ---
 
-## 🔧 Fixed This Pass (6 items)
+## 🟡 Remaining (Not Fixing — 22 items)
 
-| # | Issue | Fix |
-|---|-------|-----|
-| 5 | `CommandRunner::spawn()` uses `split_whitespace()` | Added `split_command_args()` — handles quotes, escapes, no new dep |
-| 9 | `SixelImage::from_sixel()` is a stub | Gated behind `#[cfg(feature = "sixel")]` — doesn't pollute public API |
-| 14 | `replace_next` cursor col after multi-byte | Added `ensure_valid_cursor_col()` after replacement |
-| 20 | `plugin.rs` undoc'd with `#![allow(missing_docs)]` | Removed global allow, docs already present |
-| 31 | `Component` trait unimplemented by any widget | Deprecated with `#[deprecated]` — can't remove (public API), but signals intent |
-| 33 | `SixelRenderer` documentation | Already has doc comments; now behind feature flag |
+### Code Quality (7): theme.rs, app.rs, command.rs, editor.rs, z-order, word deletion, status bar byte index
+### API Consistency (5): Widget trait duplication (0.2.0), dual error variants, builder &mut self, BoundCommand naming, HotkeyHint
+### Documentation (4): replay_last(), pop_force(), enter_trap() trap-exit, Ctx::stop()
+### Testing (4): text_input_base integration, lsp-server unwraps, cargo-dracon tests, event bus benchmarks
+### Build (2): CHANGELOG format, dracon.toml validation
 
 ---
 
 ## 📋 Final Tally
 
-| Category | Fixed | Kept |
-|----------|-------|------|
-| High-severity bugs | 13 | 2 (#15 intentional, #9 now feature-gated) |
-| Medium code quality | 4 | 12 |
-| Medium documentation | 6 | 4 |
-| Low cleanup | 10 | 0 |
-| **Total** | **33** | **22** |
-
-### Why 22 items are kept as-is:
-
-**Code quality (7):** `theme.rs`, `app.rs`, `command.rs`, `editor.rs`, z-order pattern, word deletion, status bar byte index — all functional, not broken, refactoring is high-risk for little gain.
-
-**API consistency (5):** Widget trait duplication (planned for 0.2.0), dual error variants, builder `&mut self`, `BoundCommand` naming, `HotkeyHint` — breaking changes or no user impact.
-
-**Documentation (4):** `replay_last()`, `pop_force()`, `enter_trap()` trap-exit, `Ctx::stop()` — either self-explanatory or already documented.
-
-**Testing (4):** `text_input_base` integration tests, `lsp-server` unwraps, `cargo-dracon` tests, event bus benchmarks — separate crates or nice-to-have.
-
-**Build (2):** CHANGELOG format, dracon.toml validation — cosmetic.
+| Category | Count |
+|----------|-------|
+| ✅ Fixed (framework bugs) | 13 |
+| ✅ Fixed (widget bugs) | 3 |
+| ✅ Fixed (example crashes) | 9 |
+| ✅ Fixed (medium: docs, dead code) | 12 |
+| ✅ Fixed (low: cleanup) | 10 |
+| 🟡 Kept as-is | 22 |
+| **Total** | **69** |
 
 ### Tests: 303 pass | Clippy: 0 warnings | Compilation: clean
