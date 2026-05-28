@@ -281,9 +281,18 @@ impl SceneRouter {
 
     /// Pops the current scene even if it's the only one on the stack.
     ///
-    /// Unlike `pop()`, this does not guard against popping the root scene.
+    /// Unlike [`pop()`](Self::pop), this does not guard against popping the root scene.
     /// Use this when the caller wants to return to a non-scene state
     /// (e.g., the showcase launcher) by clearing the stack entirely.
+    ///
+    /// Returns `true` if a scene was popped, `false` if the stack was empty.
+    ///
+    /// # When to use `pop()` vs `pop_force()`
+    ///
+    /// | Method | Behavior when stack has 1 scene |
+    /// |--------|-------------------------------|
+    /// | `pop()` | Returns `false` (guards root) |
+    /// | `pop_force()` | Pops the root scene |
     pub fn pop_force(&mut self) -> bool {
         if self.stack.is_empty() {
             return false;
