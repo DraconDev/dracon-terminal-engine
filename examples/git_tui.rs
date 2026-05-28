@@ -849,11 +849,7 @@ impl GitTui {
             };
 
             let hash = &commit.hash;
-            let msg = if commit.message.len() > 35 {
-                &commit.message[..35]
-            } else {
-                &commit.message
-            };
+            let msg: String = commit.message.chars().take(35).collect();
             let date = &commit.date[..10.min(commit.date.len())];
 
             // Hash as colored badge

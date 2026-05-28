@@ -741,7 +741,7 @@ impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
             return true;
         }
         if key.code == KeyCode::Enter {
-            self.router.borrow_mut().push("detail");
+            // TODO: Push "detail" scene when DetailScreen is implemented
             return true;
         }
         if self.keybindings.matches(actions::NEW_ITEM, &key) {
