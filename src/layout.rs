@@ -1,6 +1,8 @@
-#![allow(deprecated)]
+#[allow(deprecated)]
 use crate::compositor::engine::Compositor;
+#[allow(deprecated)]
 use crate::input::event::Event;
+#[allow(deprecated)]
 use crate::widgets::component::{Bounds, Component};
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 
@@ -38,6 +40,7 @@ pub enum Orientation {
 ///
 /// Children are positioned sequentially, taking their preferred size or
 /// splitting the available space evenly if no preference is given.
+#[allow(deprecated)]
 pub struct Stack<'a> {
     /// The direction children are arranged.
     pub orientation: Orientation,
@@ -47,6 +50,7 @@ pub struct Stack<'a> {
     pub spacing: u16,
 }
 
+#[allow(deprecated)]
 impl<'a> Stack<'a> {
     /// Creates a new Stack with the given orientation.
     pub fn new(orientation: Orientation) -> Self {
