@@ -15,6 +15,7 @@ pub struct Bounds {
     pub h: u16,
 }
 
+#[allow(deprecated)]
 impl Bounds {
     /// Creates a new Bounds with the given coordinates and dimensions.
     pub fn new(x: u16, y: u16, w: u16, h: u16) -> Self {
@@ -22,7 +23,6 @@ impl Bounds {
     }
 
     /// Returns true if the given (col, row) is inside these bounds.
-    #[allow(deprecated)]
     pub fn contains(&self, col: u16, row: u16) -> bool {
         col >= self.x && col < self.x + self.w && row >= self.y && row < self.y + self.h
     }
@@ -43,11 +43,13 @@ pub trait Component {
     /// # Arguments
     /// * `compositor` - The target rendering engine.
     /// * `bounds` - The rectangular area to render into.
+    #[allow(deprecated)]
     fn render(&self, compositor: &mut Compositor, bounds: Bounds);
 
     /// Handles an input event.
     ///
     /// Returns `true` if the event was consumed (preventing propagation).
+    #[allow(deprecated)]
     fn on_event(&mut self, _event: &Event, _bounds: Bounds) -> bool {
         false // Default: events pass through
     }
