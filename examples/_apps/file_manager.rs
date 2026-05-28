@@ -1058,8 +1058,8 @@ impl Widget for FileManager {
         if let Some(ref prompt) = self.prompt {
             let pw = 50u16.min(area.width.saturating_sub(4));
             let ph = 3u16;
-            let px = (area.width - pw) / 2;
-            let py = (area.height - ph) / 2;
+            let px = area.width.saturating_sub(pw) / 2;
+            let py = area.height.saturating_sub(ph) / 2;
             for y in py..py + ph {
                 for x in px..px + pw {
                     let idx = (y * area.width + x) as usize;
@@ -1530,10 +1530,13 @@ fn render_box(
 }
 
 fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
-    let help_w = 44u16.min(area.width - 4);
-    let help_h = 14u16.min(area.height - 4);
-    let help_x = (area.width - help_w) / 2;
-    let help_y = (area.height - help_h) / 2;
+    let help_w = 44u16.min(area.width.saturating_sub(4));
+    let help_h = 14u16.min(area.height.saturating_sub(4));
+    if help_w < 3 || help_h < 3 {
+        return; // Terminal too small for help overlay
+    }
+    let help_x = area.width.saturating_sub(help_w) / 2;
+    let help_y = area.height.saturating_sub(help_h) / 2;
 
     render_box(
         plane,
