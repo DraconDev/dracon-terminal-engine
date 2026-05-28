@@ -293,7 +293,13 @@ impl SystemData {
                                 }
                             }
                         }
-                        let end_paren = end_paren.unwrap_or(content.len());
+                        let end_paren = match end_paren {
+                            Some(pos) => pos,
+                            None => continue, // Skip unparseable processes
+                        };
+                        if end_paren + 2 >= content.len() {
+                            continue; // Not enough data after closing paren
+                        }
                         let pname = content[paren + 1..end_paren].to_string();
                         let rest: Vec<&str> = content[end_paren + 2..].split_whitespace().collect();
                         if rest.len() >= 12 {
@@ -827,11 +833,7 @@ impl Widget for SystemMonitor {
                         } else {
                             (t.fg, t.surface)
                         };
-                        let name = if proc.name.len() > 16 {
-                            &proc.name[..16]
-                        } else {
-                            &proc.name
-                        };
+                        let name: String = proc.name.chars().take(16).collect();
                         let line = format!(
                             " {}{:>6}  {:<16} {:>6.1}%  {:>6.0}MB  {:<6}",
                             node.prefix, proc.pid, name, proc.cpu_percent, proc.mem_mb, proc.state
