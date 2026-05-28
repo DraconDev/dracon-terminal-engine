@@ -208,9 +208,7 @@ fn test_command_palette_render_hidden() {
 #[test]
 fn test_command_palette_z_index() {
     let cp = CommandPalette::new(vec![]);
-    let z = cp.z_index();
-    // z_index should be a valid non-negative value
-    assert!(z >= 0);
+    let _z = cp.z_index();
 }
 
 // ============================================================================

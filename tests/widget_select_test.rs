@@ -200,7 +200,7 @@ fn test_select_render_expanded() {
 #[test]
 fn test_select_z_index() {
     let select = make_select(vec!["Test".to_string()]);
-    assert!(select.z_index() >= 0);
+    let _z = select.z_index();
 }
 
 // ============================================================================

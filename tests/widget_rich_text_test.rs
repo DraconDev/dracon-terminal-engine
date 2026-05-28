@@ -264,9 +264,7 @@ fn test_rich_text_render_different_sizes() {
 #[test]
 fn test_rich_text_z_index() {
     let rt = RichText::new("");
-    let z = rt.z_index();
-    // z_index for RichText (verify it's a valid z-index value)
-    assert!(z >= 0);
+    let _z = rt.z_index();
 }
 
 // ============================================================================
