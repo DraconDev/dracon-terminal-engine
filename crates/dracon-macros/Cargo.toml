@@ -9,6 +9,9 @@ repository = "https://github.com/DraconDev/dracon-terminal-engine"
 keywords = ["terminal", "tui", "macros", "dracon"]
 categories = ["command-line-interface"]
 
+[lib]
+proc-macro = true
+
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"

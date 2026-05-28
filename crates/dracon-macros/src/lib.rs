@@ -41,7 +41,7 @@ pub fn derive_widget(input: TokenStream) -> TokenStream {
     };
 
     // Find fields with #[widget_state] attribute
-    let state_fields: Vec<_> = data
+    let _state_fields: Vec<_> = data
         .fields
         .iter()
         .enumerate()
