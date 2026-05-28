@@ -2194,6 +2194,7 @@ impl Widget for &TextEditor {
             let mut first_invalid = self.first_invalid_line.borrow_mut();
             let mut cache = self.highlighted_cache.borrow_mut();
 
+            #[cfg(feature = "syntax-highlighting")]
             if let Some(start_line) = *first_invalid {
                 // Determine if we can do partial update or need full re-highlight
                 // syntect's HighlightLines needs state from previous lines usually,
@@ -2242,6 +2243,12 @@ impl Widget for &TextEditor {
                         })
                         .collect();
                 }
+                *first_invalid = None;
+            }
+            #[cfg(not(feature = "syntax-highlighting"))]
+            {
+                // When syntax highlighting is disabled, populate cache with plain text lines
+                *cache = self.lines.iter().map(|l| Line::from(l.to_string())).collect();
                 *first_invalid = None;
             }
             cache.clone()
