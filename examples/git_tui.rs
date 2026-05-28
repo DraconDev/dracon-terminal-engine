@@ -865,7 +865,7 @@ impl GitTui {
                 false,
             );
             // Message
-            draw_text(plane, 24, row, msg, fg, bg, is_selected);
+            draw_text(plane, 24, row, &msg, fg, bg, is_selected);
         }
     }
 
