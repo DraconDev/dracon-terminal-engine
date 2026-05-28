@@ -1,4 +1,3 @@
-#![allow(missing_docs)]
 //! Plugin Registry — Dynamic widget loading system.
 //!
 //! Allows third-party widgets to be registered and instantiated by name,
