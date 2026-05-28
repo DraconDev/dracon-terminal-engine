@@ -269,7 +269,7 @@ impl CommandRunner {
     }
 
     pub fn spawn(&mut self) -> std::io::Result<()> {
-        let parts: Vec<&str> = self.cmd.split_whitespace().collect();
+        let parts = split_command_args(&self.cmd);
         if parts.is_empty() {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
