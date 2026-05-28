@@ -248,6 +248,59 @@ impl BoundCommand {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SHELL-ARGUMENT SPLITTING
+// ═══════════════════════════════════════════════════════════════
+
+/// Splits a command string into arguments, respecting single and double quotes.
+///
+/// Handles:
+/// - Whitespace-separated tokens
+/// - Double-quoted strings (`"hello world"`)
+/// - Single-quoted strings (`'hello world'`)
+/// - Backslash escapes inside double quotes (`\"`, `\\`)
+///
+/// Tokens inside quotes are returned as single arguments (quotes stripped).
+fn split_command_args(cmd: &str) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut current = String::new();
+    let mut in_double = false;
+    let mut in_single = false;
+    let mut chars = cmd.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        match ch {
+            '"' if !in_single => {
+                in_double = !in_double;
+            }
+            '\'' if !in_double => {
+                in_single = !in_single;
+            }
+            '\\' if in_double => {
+                // Inside double quotes, backslash escapes the next char
+                if let Some(&next) = chars.peek() {
+                    current.push(next);
+                    chars.next();
+                } else {
+                    current.push('\\');
+                }
+            }
+            c if c.is_whitespace() && !in_double && !in_single => {
+                if !current.is_empty() {
+                    args.push(std::mem::take(&mut current));
+                }
+            }
+            c => {
+                current.push(c);
+            }
+        }
+    }
+    if !current.is_empty() {
+        args.push(current);
+    }
+    args
+}
+
+// ═══════════════════════════════════════════════════════════════
 // COMMAND RUNNER
 // ═══════════════════════════════════════════════════════════════
 
@@ -320,7 +373,7 @@ impl CommandRunner {
     }
 
     pub fn run_sync(&self) -> (String, String, i32) {
-        let parts: Vec<&str> = self.cmd.split_whitespace().collect();
+        let parts = split_command_args(&self.cmd);
         if parts.is_empty() {
             return (String::new(), String::new(), -1);
         }
