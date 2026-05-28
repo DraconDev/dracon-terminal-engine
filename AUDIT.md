@@ -243,13 +243,13 @@ Full codebase audit covering:
 | Example crash bugs | 9 | — | 9 | — | 0 |
 | Example low severity | 2 | — | — | 2 | 0 |
 | Example code smell | 7 | — | — | 7 | 0 |
-| Code quality | 9 | — | — | 7 | 2 |
+| Code quality | 9 | — | — | 8 | 1 |
 | Deprecations | 4 | 2 | — | 2 | 0 |
 | API consistency | 5 | — | — | — | 5 |
 | Documentation gaps | 5 | — | — | 3 | 2 |
 | Testing gaps | 4 | — | — | — | 4 |
 | Build/config | 2 | — | — | — | 2 |
-| **Total** | **82** | **2** | **12** | **39** | **31** |
+| **Total** | **82** | **2** | **12** | **40** | **28** |
 
 ---
 
@@ -299,6 +299,60 @@ Full codebase audit covering:
 | 🔜 | Dead move_cursor() removed | ✅ Removed |
 | 🔜 | #![allow(unused_imports)] removed | ✅ Removed |
 | 🔜 | SixelRenderer unused field removed | ✅ Removed |
+| 🔜 | Chat client sidebar click OOB | ✅ Fixed — bounds check |
+| 🔜 | Chat client input u16 underflow | ✅ Fixed — saturating_sub + bounds |
+| 🔜 | Chat client help title u16 underflow | ✅ Fixed — saturating_sub |
+| 🔜 | layout.rs dead saturating_sub(0) | ✅ Removed |
+
+---
+
+---
+
+## REMAINING (28 items — docs/testing/build)
+
+These are low-priority items that don't affect functionality. They are tracked but not scheduled for immediate work.
+
+### Documentation (9)
+- F15: Ctx::frame_count()/last_frame() doc comments
+- F16: EventBus::set_history_capacity() doc
+- F17: EventRecord doc
+- F18: Constraint::resolve() doc
+- F19: DirtyRegion::expand() doc
+- F20: WidgetContainer doc
+- F21: plugin.rs allow(missing_docs) → add docs
+- F22: shield_input()/is_input_shielded() examples
+- F23: pop_force() doc
+
+### Widget Docs (1)
+- W09: TextEditor::open/save/save_as doc
+
+### Testing (4)
+- T01: text_input_base integration tests
+- T02: lsp-server unwraps
+- T03: cargo-dracon integration tests
+- T04: EventBus benchmarks
+
+### Build/Config (2)
+- B01: CHANGELOG format consistency
+- B02: dracon.toml schema validation
+
+### Code Quality (1)
+- CQ01: theme.rs macro factoring (deferred — risk of typos)
+
+### API Consistency (5)
+- AC01: Widget trait render(&self) vs handle_key(&mut self) inconsistency
+- AC02: DraconError dual IO variants
+- AC03: Builder methods &mut self inconsistency
+- AC04: BoundCommand naming
+- AC05: HotkeyHint standalone vs framework
+
+### Documentation Gaps (2)
+- DG02: enter_trap()/trap-exit semantics
+- DG03: replay_last() doc
+
+### Deprecations (2)
+- D02: Component trait removal (0.2.0)
+- D03: Component::Bounds removal
 
 ---
 
