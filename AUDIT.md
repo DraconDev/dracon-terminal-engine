@@ -222,15 +222,15 @@
 | Logic bugs | 9 | 9 | 0 |
 | Code smells (fixable) | 10 | 10 | 0 |
 | Code smells (deferred) | 15 | 0 | 15 |
-| Documentation | 14 | 0 | 14 |
+| Documentation | 15 | 15 | 0 |
 | Testing | 4 | 0 | 4 |
 | Build/Config | 2 | 0 | 2 |
 | API consistency | 5 | 0 | 5 |
 | Deprecations | 4 | 2 | 2 |
 | Prior session fixes | 18 | 18 | 0 |
-| **Total** | **96** | **54** | **42** |
+| **Total** | **97** | **69** | **28** |
 
-**All crash and logic bugs are fixed.** Remaining 42 items are docs, testing, build config, code smells, and API consistency — none affect functionality.
+**All crash bugs, logic bugs, and documentation are done.** Remaining 28 items are testing gaps, build config, code smells (deferred), and API consistency — none affect functionality.
 
 ---
 
