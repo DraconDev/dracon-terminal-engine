@@ -111,7 +111,7 @@ This backlog is based on the current working tree, existing audit notes, and liv
   - Existing audit notes say this is intentional for compositor/render scheduling.
   - Add a short note to the `Widget` trait docs explaining why render is immutable while input handlers are mutable.
 
-- [ ] Add public item docs in remaining high-use widget modules.
+- [x] Add public item docs in remaining high-use widget modules.
   - `src/framework/widgets/log_viewer.rs`
   - `src/framework/widgets/confirm_dialog.rs`
   - `src/framework/widgets/list_helpers.rs`
