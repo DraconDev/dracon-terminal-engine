@@ -1,3 +1,14 @@
+//! Visual filter effects for plane compositing.
+//!
+//! Filters implement the [`Filter`] trait to apply visual effects to cells
+//! during the compositing process. Available filters:
+//!
+//! - [`Dim`] — Reduces brightness by a factor
+//! - [`Invert`] — Inverts foreground/background colors
+//! - [`Scanline`] — Applies horizontal scanline effect
+//! - [`Pulse`] — Animates brightness with a sine wave
+//! - [`Glitch`] — Applies RGB channel offset effect
+
 use crate::compositor::plane::{Cell, Color};
 
 /// Applies a visual effect to a cell during compositing.
