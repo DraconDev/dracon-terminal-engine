@@ -8,11 +8,9 @@ use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId, WidgetState};
+use crate::framework::widgets::list_common::SelectCallback;
 use crate::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
-
-/// Callback type for suggestion selection.
-type SelectCallback = Box<dyn FnMut(&str)>;
 
 /// An autocomplete widget that wraps a text input and shows a dropdown
 /// of matching suggestions.
