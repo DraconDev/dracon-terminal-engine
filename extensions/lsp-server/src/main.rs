@@ -461,22 +461,31 @@ impl LspServer {
                 let queue = Arc::clone(&self.content_queue);
                 if let Some(stdout) = self.preview_process.as_mut().and_then(|p| p.stdout.take()) {
                     let reader = BufReader::new(stdout);
-                    thread::spawn(move || {
-                        let mut runtime = tokio::runtime::Builder::new_current_thread()
-                            .enable_all()
-                            .build()
-                            .unwrap();
+                    let runtime = match tokio::runtime::Builder::new_current_thread()
+                        .enable_all()
+                        .build()
+                    {
+                        Ok(r) => r,
+                        Err(e) => {
+                            eprintln!("lsp-server: failed to create runtime for stdout: {}", e);
+                            return;
+                        }
+                    };
 
+                    thread::spawn(move || {
                         for line in reader.lines() {
                             if let Ok(line) = line {
                                 let queue_clone = Arc::clone(&queue);
-                                runtime.block_on(async {
-                                    let mut q = queue_clone.lock().await;
-                                    q.push(serde_json::to_string(&PreviewEvent {
-                                        event: "output".to_string(),
-                                        data: line,
-                                    }).unwrap());
-                                });
+                                if let Ok(serialized) = serde_json::to_string(&PreviewEvent {
+                                    event: "output".to_string(),
+                                    data: line,
+                                }) {
+                                    let _ = runtime.block_on(async {
+                                        let mut q = queue_clone.lock().await;
+                                        q.push(serialized);
+                                        Ok(()) as Result<(), ()>
+                                    });
+                                }
                             }
                         }
                     });
@@ -486,22 +495,31 @@ impl LspServer {
                 let queue = Arc::clone(&self.content_queue);
                 if let Some(stderr) = self.preview_process.as_mut().and_then(|p| p.stderr.take()) {
                     let reader = BufReader::new(stderr);
-                    thread::spawn(move || {
-                        let mut runtime = tokio::runtime::Builder::new_current_thread()
-                            .enable_all()
-                            .build()
-                            .unwrap();
+                    let runtime = match tokio::runtime::Builder::new_current_thread()
+                        .enable_all()
+                        .build()
+                    {
+                        Ok(r) => r,
+                        Err(e) => {
+                            eprintln!("lsp-server: failed to create runtime for stderr: {}", e);
+                            return;
+                        }
+                    };
 
+                    thread::spawn(move || {
                         for line in reader.lines() {
                             if let Ok(line) = line {
                                 let queue_clone = Arc::clone(&queue);
-                                runtime.block_on(async {
-                                    let mut q = queue_clone.lock().await;
-                                    q.push(serde_json::to_string(&PreviewEvent {
-                                        event: "error".to_string(),
-                                        data: format!("\x1b[31m{}\x1b[0m", line),
-                                    }).unwrap());
-                                });
+                                if let Ok(serialized) = serde_json::to_string(&PreviewEvent {
+                                    event: "error".to_string(),
+                                    data: format!("\x1b[31m{}\x1b[0m", line),
+                                }) {
+                                    let _ = runtime.block_on(async {
+                                        let mut q = queue_clone.lock().await;
+                                        q.push(serialized);
+                                        Ok(()) as Result<(), ()>
+                                    });
+                                }
                             }
                         }
                     });
@@ -510,23 +528,32 @@ impl LspServer {
                 // Monitor process exit
                 let queue = Arc::clone(&self.content_queue);
                 let process_id = self.preview_process.as_mut().map(|p| p.id());
+                let runtime = match tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                {
+                    Ok(r) => r,
+                    Err(e) => {
+                        eprintln!("lsp-server: failed to create runtime for exit monitor: {}", e);
+                        return;
+                    }
+                };
+
                 thread::spawn(move || {
                     // Wait for process
                     thread::sleep(Duration::from_millis(100));
                     if let Some(pid) = process_id {
                         let queue_clone = Arc::clone(&queue);
-                        let mut runtime = tokio::runtime::Builder::new_current_thread()
-                            .enable_all()
-                            .build()
-                            .unwrap();
-
-                        runtime.block_on(async {
-                            let mut q = queue_clone.lock().await;
-                            q.push(serde_json::to_string(&PreviewEvent {
-                                event: "exit".to_string(),
-                                data: format!("Process {} exited", pid),
-                            }).unwrap());
-                        });
+                        if let Ok(serialized) = serde_json::to_string(&PreviewEvent {
+                            event: "exit".to_string(),
+                            data: format!("Process {} exited", pid),
+                        }) {
+                            let _ = runtime.block_on(async {
+                                let mut q = queue_clone.lock().await;
+                                q.push(serialized);
+                                Ok(()) as Result<(), ()>
+                            });
+                        }
                     }
                 });
             }
