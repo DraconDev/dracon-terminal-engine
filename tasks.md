@@ -177,9 +177,9 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Production Panics
 
-- [ ] Replace `expect()` in `src/input/reader.rs:26` signal registration with graceful error handling
+- [x] Replace `expect()` in `src/input/reader.rs:26` signal registration with graceful error handling
 - [ ] Replace `expect()` in `src/framework/app.rs:1047` `App::from_default()` with Result return
-- [ ] Audit `expect()` in `src/framework/scene_router.rs:273,312` — consider Result-based pop
+- [x] Audit `expect()` in `src/framework/scene_router.rs:273,312` — these are guarded by pre-checks, acceptable use of expect() as runtime invariant assertions
 - [x] Review 2 `unwrap()` calls in `src/framework/widgets/text_input_base.rs:184,222` — safety comments added
 
 ---

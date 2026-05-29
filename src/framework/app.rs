@@ -772,9 +772,10 @@ impl App {
 
     fn poll_and_dispatch_input(&mut self, stdin: &mut io::Stdin) {
         let running = self.running.clone();
+        const INPUT_BUF_SIZE: usize = 1024;
         match tty::poll_input(stdin.as_fd(), 1) {
             Ok(true) => {
-                let mut chunk_buf = [0u8; 1024];
+                let mut chunk_buf = [0u8; INPUT_BUF_SIZE];
                 if let Ok(n) = stdin.read(&mut chunk_buf) {
                     if n == 0 {
                         // EOF — stdin closed (e.g., pipe broken), trigger graceful shutdown
@@ -796,7 +797,7 @@ impl App {
                 for _ in 0..64 {
                     match tty::poll_input(stdin.as_fd(), 0) {
                         Ok(true) => {
-                            let mut drain_buf = [0u8; 1024];
+                            let mut drain_buf = [0u8; INPUT_BUF_SIZE];
                             if let Ok(dn) = stdin.read(&mut drain_buf) {
                                 if dn == 0 {
                                     break;

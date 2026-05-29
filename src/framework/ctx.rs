@@ -15,6 +15,9 @@ use crate::framework::widget::WidgetId;
 use crate::framework::widgets::split::SplitPane;
 use crate::Terminal;
 use ratatui::layout::Rect;
+/// Milliseconds per second, used for FPS calculation.
+const MS_PER_SEC: f64 = 1000.0;
+
 use std::cell::RefCell;
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -186,7 +189,7 @@ impl<'a> Ctx<'a> {
     pub fn fps(&self) -> u64 {
         let frame_time = self.compositor.last_frame_duration_ms();
         if frame_time > 0.0 {
-            (1000.0 / frame_time) as u64
+            (MS_PER_SEC / frame_time) as u64
         } else {
             0
         }
