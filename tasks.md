@@ -82,7 +82,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Magic Number Constants — TODO
 
-- [ ] Define named constants for Kitty protocol PUA codepoints in `src/input/kitty_key.rs`
+- [x] Define named constants for Kitty protocol PUA codepoints in `src/input/kitty_key.rs` — added `KITTY_PUA_START/END`, `modifier::*`, `event_type::*`, `key_codes::*` modules
 - [x] Define named constants for byte size thresholds in `src/utils.rs:387` (`GI_B`, `ME_B`, `KI_B`) — added `SIZE_GB`, `SIZE_MB`, `SIZE_KB`
 - [x] Define named constant for binary detection buffer size in `src/utils.rs:781` (`8192`) — added `BINARY_CHECK_SIZE`
 - [x] Define named constant for read buffer size in `src/input/reader.rs:24` (`1024`) — added `READ_BUFFER_SIZE`
@@ -110,8 +110,8 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Missing Module Docs — TODO
 
-- [ ] Add `//!` module docs to `src/backend/mod.rs`
-- [ ] Add `//!` module docs to `src/backend/tty.rs`
+- [x] Add `//!` module docs to `src/backend/mod.rs`
+- [x] Add `//!` module docs to `src/backend/tty.rs`
 - [ ] Add `//!` module docs to `src/compositor/plane.rs`
 - [ ] Add `//!` module docs to `src/compositor/filter.rs`
 - [ ] Add `//!` module docs to `src/compositor/engine.rs`
@@ -163,7 +163,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Naming Consistency
 
-- [ ] Rename `tabbar.rs` → `tab_bar.rs` for consistency with other underscore-separated names
+- [x] Rename `tabbar.rs` → `tab_bar.rs` for consistency with other underscore-separated names
 - [ ] Rename `list_common.rs` to indicate its purpose (e.g., `list_helpers.rs`)
 - [ ] Rename `text_input_base.rs` to `text_input_core.rs` or similar
 
@@ -244,11 +244,11 @@ Generated from full codebase audit. Check off items as they are completed.
 | Category | Count | Done | Remaining |
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
-| P1 — Code Quality | 52 | 14 | 38 |
-| P2 — Documentation | 30 | 8 | 22 |
+| P1 — Code Quality | 52 | 18 | 34 |
+| P2 — Documentation | 30 | 10 | 20 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
 | P5 — Testing | 17 | 10 | 7 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **60** | **77** |
+| **Total** | **137** | **64** | **73** |
