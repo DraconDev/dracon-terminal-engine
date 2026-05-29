@@ -180,8 +180,10 @@ impl BaseInput {
                 if !self.text.is_empty() && self.cursor_pos > 0 {
                     self.cursor_pos -= 1;
                     let byte_idx = self.cursor_byte_offset();
-                    // Remove the full character at this byte position
-                    let ch = self.text[byte_idx..].chars().next().unwrap();
+                    let ch = self.text[byte_idx..]
+                        .chars()
+                        .next()
+                        .expect("cursor_byte_offset guarantees valid index for non-empty text at cursor > 0");
                     self.text
                         .replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
@@ -219,7 +221,10 @@ impl BaseInput {
             KeyCode::Delete => {
                 if self.cursor_pos < self.char_count() {
                     let byte_idx = self.cursor_byte_offset();
-                    let ch = self.text[byte_idx..].chars().next().unwrap();
+                    let ch = self.text[byte_idx..]
+                        .chars()
+                        .next()
+                        .expect("cursor_byte_offset guarantees valid index for cursor < char_count");
                     self.text
                         .replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
