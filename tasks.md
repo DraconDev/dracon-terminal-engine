@@ -108,7 +108,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ## P2 — Documentation
 
-### Missing Module Docs — DONE
+### Missing Module Docs — IN PROGRESS
 
 - [x] Add `//!` module docs to `src/backend/mod.rs`
 - [x] Add `//!` module docs to `src/backend/tty.rs`
@@ -119,13 +119,13 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Add `//!` module docs to `src/input/event.rs`
 - [x] Add `//!` module docs to `src/input/parser.rs`
 - [x] Add `//!` module docs to `src/input/reader.rs`
-- [ ] Add `//!` module docs to `src/core/terminal.rs`
-- [ ] Add `//!` module docs to `src/visuals/icons.rs`
-- [ ] Add `//!` module docs to `src/visuals/osc.rs`
+- [x] Add `//!` module docs to `src/core/terminal.rs`
+- [x] Add `//!` module docs to `src/visuals/icons.rs`
+- [x] Add `//!` module docs to `src/visuals/osc.rs`
+- [x] Add `//!` module docs to `src/system.rs`
+- [x] Add `//!` module docs to `src/contracts.rs`
+- [x] Add `//!` module docs to `src/layout.rs`
 - [ ] Add `//!` module docs to `src/widgets/editor.rs`
-- [ ] Add `//!` module docs to `src/system.rs`
-- [ ] Add `//!` module docs to `src/contracts.rs`
-- [ ] Add `//!` module docs to `src/layout.rs`
 - [ ] Add `//!` module docs to all 9 files in `src/widgets/`
 
 ### Broken Doc Links
@@ -198,10 +198,10 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_slider_test.rs:164`
 - [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_hud_test.rs:283`
 
-### Test Coverage Gaps — TODO
+### Test Coverage Gaps — PARTIAL
 
 - [ ] Add unit tests for `src/compositor/engine.rs` (355-line render, zero tests)
-- [ ] Add unit tests for `src/input/parser.rs` (248-line try_parse, only 6 tests)
+- [x] Add unit tests for `src/input/parser.rs` (248-line try_parse, only 6 tests) — added 21 new tests
 - [ ] Add unit tests for `src/core/terminal.rs` (365 lines, zero tests)
 - [ ] Add unit tests for `src/visuals/icons.rs` (205-line get, zero tests)
 - [ ] Add unit tests for `src/system.rs` (289 lines, zero tests)
@@ -245,10 +245,10 @@ Generated from full codebase audit. Check off items as they are completed.
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 18 | 34 |
-| P2 — Documentation | 30 | 18 | 12 |
+| P2 — Documentation | 30 | 26 | 4 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
-| P5 — Testing | 17 | 10 | 7 |
+| P5 — Testing | 17 | 11 | 6 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **72** | **65** |
+| **Total** | **137** | **80** | **57** |
