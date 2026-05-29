@@ -23,23 +23,39 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
+/// A single log line with timestamp, level, and message.
 #[derive(Debug, Clone)]
 pub struct LogLine {
+    /// ISO timestamp or custom format.
     pub timestamp: String,
+    /// Log severity level for color coding.
     pub level: LogLevel,
+    /// The actual log message.
     pub message: String,
+    /// Raw unparsed line for advanced filtering.
     pub raw: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Log severity level for color coding.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum LogLevel {
+    /// Debug level — lowest severity.
+    #[default]
     Debug,
+    /// Info level — normal operational messages.
     Info,
+    /// Warning level — potential issues.
     Warn,
+    /// Error level — errors that need attention.
     Error,
+    /// Fatal level — critical failures.
     Fatal,
 }
 
+/// LogViewer widget — displays scrolling log lines from a CLI command.
+///
+/// Binds to a CLI command that outputs line-by-line log data.
+/// Renders as a virtualized scrolling list with auto-scroll to bottom.
 pub struct LogViewer {
     pub id: WidgetId,
     pub lines: VecDeque<LogLine>,
@@ -54,6 +70,7 @@ pub struct LogViewer {
 }
 
 impl LogViewer {
+    /// Creates a new LogViewer with default settings.
     pub fn new() -> Self {
         Self {
             id: WidgetId::next(),
@@ -69,45 +86,53 @@ impl LogViewer {
         }
     }
 
+    /// Sets the widget ID.
     pub fn with_id(id: WidgetId) -> Self {
         Self { id, ..Self::new() }
     }
 
+    /// Sets the maximum number of log lines to retain.
     pub fn max_lines(mut self, max: usize) -> Self {
         self.max_lines = max;
         self.dirty = true;
         self
     }
 
+    /// Sets whether to auto-scroll to the bottom when new lines are added.
     pub fn auto_scroll(mut self, auto: bool) -> Self {
         self.auto_scroll = auto;
         self.dirty = true;
         self
     }
 
+    /// Sets a filter pattern — only lines containing the pattern are displayed.
     pub fn filter(mut self, pattern: &str) -> Self {
         self.filter = Some(pattern.to_string());
         self.dirty = true;
         self
     }
 
+    /// Binds a command to run for log output.
     pub fn bind_command(mut self, cmd: BoundCommand) -> Self {
         self.bound_command = Some(cmd);
         self
     }
 
+    /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self.dirty = true;
         self
     }
 
+    /// Sets whether to show the scroll indicator on the right side.
     pub fn with_scroll_indicator(mut self, show: bool) -> Self {
         self.show_scroll_indicator = show;
         self.dirty = true;
         self
     }
 
+    /// Appends a single raw log line to the buffer.
     pub fn append_line(&mut self, line: &str) {
         let parsed = self.parse_line(line);
         if self.filter.is_some() && !self.matches_filter(&parsed) {
@@ -120,6 +145,7 @@ impl LogViewer {
         self.dirty = true;
     }
 
+    /// Appends parsed output from a command to the log buffer.
     pub fn append_output(&mut self, output: ParsedOutput) {
         match output {
             ParsedOutput::Lines(log_lines) => {
@@ -148,6 +174,7 @@ impl LogViewer {
         self.dirty = true;
     }
 
+    /// Clears all log lines from the buffer.
     pub fn clear(&mut self) {
         self.lines.clear();
         self.dirty = true;
@@ -188,6 +215,7 @@ impl LogViewer {
         }
     }
 
+    /// Returns the theme color for a given log level.
     pub fn level_color(&self, level: LogLevel) -> Color {
         match level {
             LogLevel::Fatal => self.theme.error,
@@ -198,6 +226,7 @@ impl LogViewer {
         }
     }
 
+    /// Returns the prefix string for a given log level.
     pub fn level_prefix(&self, level: LogLevel) -> &'static str {
         match level {
             LogLevel::Debug => "[D]",
