@@ -1,3 +1,9 @@
+//! Deprecated component bounds utilities.
+//!
+//! This module is deprecated. Use [`crate::framework::layout::Layout`] instead.
+
+#![allow(deprecated)]
+
 use crate::compositor::engine::Compositor;
 use crate::input::event::Event;
 
