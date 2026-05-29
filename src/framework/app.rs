@@ -496,6 +496,17 @@ impl App {
         self
     }
 
+    /// Applies theme to `&mut self` without consuming. Used internally by framework.
+    fn apply_theme(&mut self, theme: Theme) {
+        self.compositor.set_clear_color(theme.bg);
+        self.theme = theme;
+        self.dirty_tracker.mark_all_dirty();
+        for widget in self.widgets.borrow_mut().iter_mut() {
+            widget.on_theme_change(&self.theme);
+            widget.mark_dirty();
+        }
+    }
+
     /// Sets the UI theme (builder-style, equivalent to `set_theme`).
     #[deprecated(since = "0.2.0", note = "Use `set_theme()` instead for consistent API")]
     pub fn theme(mut self, theme: Theme) -> Self {
