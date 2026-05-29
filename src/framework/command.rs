@@ -512,6 +512,80 @@ impl AppConfig {
             ))
         }
     }
+
+    /// Validates the configuration and returns warnings for unknown or invalid fields.
+    ///
+    /// This preserves forward compatibility by warning about unknown fields rather than failing.
+    /// Warnings are collected and returned as a vector of strings.
+    pub fn validate(&self) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        // Validate theme name if specified
+        if let Some(ref theme_name) = self.theme {
+            if !Self::is_valid_theme(theme_name) {
+                warnings.push(format!(
+                    "unknown theme '{}'; falling back to default",
+                    theme_name
+                ));
+            }
+        }
+
+        // Validate FPS range
+        if let Some(fps) = self.fps {
+            if fps == 0 {
+                warnings.push("fps set to 0; using default (no limit)".to_string());
+            } else if fps > 120 {
+                warnings.push(format!(
+                    "fps {} exceeds recommended max (120); capping",
+                    fps
+                ));
+            }
+        }
+
+        // Validate widget IDs
+        let mut seen_ids: std::collections::HashSet<usize> = std::collections::HashSet::new();
+        for widget in &self.widgets {
+            if let Some(id) = widget.id {
+                if !seen_ids.insert(id) {
+                    warnings.push(format!(
+                        "duplicate widget id {}; each widget should have a unique id",
+                        id
+                    ));
+                }
+            }
+        }
+
+        warnings
+    }
+
+    /// Checks if a theme name is valid.
+    fn is_valid_theme(name: &str) -> bool {
+        matches!(
+            name.to_lowercase().as_str(),
+            "default"
+                | "nord"
+                | "dracula"
+                | "monokai"
+                | "gruvbox"
+                | "one-dark"
+                | "catppuccin"
+                | "tokyo-night"
+                | "github-dark"
+                | "solarized-dark"
+                | "solarized-light"
+                | "nord-light"
+                | "nord-polar-night"
+                | "nord-snow-storm"
+                | "catppuccin-mocha"
+                | "catppuccin-macchiato"
+                | "catppuccin-frappe"
+                | "catppuccin-latte"
+                | "cyberpunk"
+                | "synthwave"
+                | "retro"
+                | "matrix"
+        )
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1182,5 +1256,72 @@ DEBUG: Test'"#,
         let runner = CommandRunner::new("echo $HOME");
         let (stdout, _, _) = runner.run_sync();
         assert!(!stdout.is_empty() || std::env::var("HOME").is_ok());
+    }
+
+    #[test]
+    fn test_app_config_validate() {
+        // Valid config should have no warnings
+        let config = AppConfig {
+            title: "Test".to_string(),
+            theme: Some("nord".to_string()),
+            fps: Some(60),
+            ..Default::default()
+        };
+        let warnings = config.validate();
+        assert!(warnings.is_empty(), "valid config should have no warnings: {:?}", warnings);
+    }
+
+    #[test]
+    fn test_app_config_validate_unknown_theme() {
+        let config = AppConfig {
+            title: "Test".to_string(),
+            theme: Some("unknown-theme".to_string()),
+            ..Default::default()
+        };
+        let warnings = config.validate();
+        assert!(!warnings.is_empty());
+        assert!(warnings.iter().any(|w| w.contains("unknown theme")));
+    }
+
+    #[test]
+    fn test_app_config_validate_fps_zero() {
+        let config = AppConfig {
+            title: "Test".to_string(),
+            fps: Some(0),
+            ..Default::default()
+        };
+        let warnings = config.validate();
+        assert!(warnings.iter().any(|w| w.contains("fps set to 0")));
+    }
+
+    #[test]
+    fn test_app_config_validate_fps_high() {
+        let config = AppConfig {
+            title: "Test".to_string(),
+            fps: Some(200),
+            ..Default::default()
+        };
+        let warnings = config.validate();
+        assert!(warnings.iter().any(|w| w.contains("exceeds recommended max")));
+    }
+
+    #[test]
+    fn test_app_config_validate_duplicate_ids() {
+        let config = AppConfig {
+            title: "Test".to_string(),
+            widgets: vec![
+                WidgetConfig {
+                    id: Some(1),
+                    ..Default::default()
+                },
+                WidgetConfig {
+                    id: Some(1),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let warnings = config.validate();
+        assert!(warnings.iter().any(|w| w.contains("duplicate widget id")));
     }
 }
