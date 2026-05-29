@@ -293,6 +293,88 @@ fn bench_theme_creation(c: &mut Criterion) {
 // CellPool Benchmarks
 // =============================================================================
 
+fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
+    use dracon_terminal_engine::framework::event_bus::{EventBus, EventRecord};
+    use std::any::Any;
+    use std::rc::Rc;
+
+    #[derive(Clone, Debug)]
+    struct TestEvent(String);
+
+    c.bench_function("eventbus_publish_1000_events_10_subscribers", |b| {
+        let bus = EventBus::new();
+
+        // Add 10 subscribers
+        for i in 0..10 {
+            let _ = i; // suppress unused warning
+            bus.subscribe(|_: &TestEvent| {})
+        }
+
+        b.iter(|| {
+            for _ in 0..1000 {
+                bus.publish(TestEvent("benchmark".to_string()));
+            }
+        })
+    });
+
+    c.bench_function("eventbus_publish_100_events_10_subscribers", |b| {
+        let bus = EventBus::new();
+
+        // Add 10 subscribers
+        for i in 0..10 {
+            let _ = i;
+            bus.subscribe(|_: &TestEvent| {})
+        }
+
+        b.iter(|| {
+            for _ in 0..100 {
+                bus.publish(TestEvent("benchmark".to_string()));
+            }
+        })
+    });
+}
+
+fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
+    use dracon_terminal_engine::framework::event_bus::EventBus;
+
+    #[derive(Clone, Debug)]
+    struct TestEvent(String);
+
+    c.bench_function("eventbus_subscribe_once_100_callbacks", |b| {
+        let bus = EventBus::new();
+        let fired = Rc::new(std::cell::RefCell::new(Vec::new()));
+
+        // Add 100 subscribe_once callbacks
+        for i in 0..100 {
+            let fired_clone = Rc::clone(&fired);
+            bus.subscribe_once(move |_: &TestEvent| {
+                fired_clone.borrow_mut().push(i);
+            });
+        }
+
+        b.iter(|| {
+            bus.publish(TestEvent("test".to_string()));
+        })
+    });
+
+    c.bench_function("eventbus_subscribe_once_10_callbacks", |b| {
+        let bus = EventBus::new();
+        let fired = Rc::new(std::cell::RefCell::new(Vec::new()));
+
+        // Add 10 subscribe_once callbacks
+        for i in 0..10 {
+            let fired_clone = Rc::clone(&fired);
+            bus.subscribe_once(move |_: &TestEvent| {
+                fired_clone.borrow_mut().push(i);
+            });
+        }
+
+        b.iter(|| {
+            bus.publish(TestEvent("test".to_string()));
+        })
+    });
+}
+
 fn bench_cellpool_acquire_vs_plane_new(c: &mut Criterion) {
     c.bench_function("cellpool_acquire_80x24_vs_plane_new", |b| {
         b.iter(|| {
