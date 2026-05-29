@@ -366,7 +366,7 @@ impl Widget for ThemePreviewPanel {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let theme = self.set_theme();
+        let theme = self.theme();
 
         for y in 0..area.height {
             for x in 0..area.width {
@@ -1013,8 +1013,10 @@ fn main() -> Result<()> {
     let show_help = Arc::new(AtomicBool::new(false));
     let help_check = Arc::clone(&show_help);
 
-    let mut app = App::new()?.title("Theme Switcher Demo").fps(30);
-    app.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?
+        .title("Theme Switcher Demo")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     let header = ThemeHeader::new(WidgetId::new(1), should_quit, show_help.clone());
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 0, 80, 3));

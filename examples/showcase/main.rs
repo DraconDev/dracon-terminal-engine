@@ -71,8 +71,10 @@ fn main() -> std::io::Result<()> {
         env_theme.clone(),
     );
 
-    let mut app = App::new()?.title("Dracon Showcase").fps(15);
-    app.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?
+        .title("Dracon Showcase")
+        .fps(15)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
 
@@ -107,7 +109,7 @@ fn main() -> std::io::Result<()> {
 
             // Set env vars so the launched binary inherits our theme
             // and can report its final theme back via DTRON_THEME_FILE
-            std::env::set_var("DTRON_THEME", ctx.set_theme().name.as_ref());
+            std::env::set_var("DTRON_THEME", ctx.theme().name.as_ref());
             let theme_return_path = std::env::temp_dir().join("dron_theme_return");
             std::env::set_var("DTRON_THEME_FILE", theme_return_path.to_str().unwrap());
 

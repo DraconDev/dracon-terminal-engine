@@ -699,7 +699,7 @@ fn main() -> std::io::Result<()> {
         }
         let (w, h) = ctx.compositor().size();
         if help_check.load(Ordering::SeqCst) {
-            let t = ctx.set_theme();
+            let t = ctx.theme();
             let area = Rect::new(0, 0, w, h);
             let mut plane = Plane::new(0, area.width, area.height);
             plane.fill_bg(t.bg);

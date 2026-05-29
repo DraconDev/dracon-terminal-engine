@@ -1302,10 +1302,12 @@ mod tests {
         use crate::framework::widgets::Label;
         let mut app = App::new().unwrap();
         let label = Label::new("test");
-        app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
+        let id = app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
         let theme = Theme::cyberpunk();
-        app.set_theme(theme);
-        assert_eq!(&*app.theme.name, "cyberpunk");
+        app = app.set_theme(theme);
+        let w = app.widget(id).unwrap();
+        let w_theme = w.current_theme().unwrap();
+        assert_eq!(&*w_theme.name, "cyberpunk");
     }
 
     #[test]
