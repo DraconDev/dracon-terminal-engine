@@ -1736,7 +1736,7 @@ fn main() -> std::io::Result<()> {
         // Sync theme from framework
         {
             let mut fm = fm_for_tick.borrow_mut();
-            let app_theme = ctx.set_theme().clone();
+            let app_theme = ctx.theme().clone();
             if fm.theme.name != app_theme.name {
                 fm.on_theme_change(&app_theme);
             }

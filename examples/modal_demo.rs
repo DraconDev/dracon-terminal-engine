@@ -397,7 +397,7 @@ fn main() -> io::Result<()> {
         .fps(30)
         .set_theme(Theme::from_env_or(Theme::dark()));
 
-    let _app = app.set_theme(env_theme.clone());
+    app = app.set_theme(env_theme.clone());
 
     // Register input router so keyboard/mouse events reach the demo
     let router = ModalDemoRouter {

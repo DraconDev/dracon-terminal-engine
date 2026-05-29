@@ -1446,7 +1446,7 @@ fn main() -> std::io::Result<()> {
             return;
         }
         let mut m = mon_for_tick.borrow_mut();
-        let app_theme = ctx.set_theme().clone();
+        let app_theme = ctx.theme().clone();
         if m.theme.name != app_theme.name {
             m.on_theme_change(&app_theme);
         }

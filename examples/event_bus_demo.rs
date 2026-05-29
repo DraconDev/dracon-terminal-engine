@@ -451,8 +451,10 @@ fn main() -> std::io::Result<()> {
     let app_for_router = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?.title("Event Bus Demo").fps(30);
-    app_ctx.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app_ctx = App::new()?
+        .title("Event Bus Demo")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     let router = InputRouter {
         app: app_for_router,

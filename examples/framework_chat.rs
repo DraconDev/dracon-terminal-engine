@@ -95,7 +95,7 @@ fn main() -> std::io::Result<()> {
     })
     .run(move |ctx| {
         let (w, h) = ctx.compositor().size();
-        let theme = ctx.set_theme().clone();
+        let theme = ctx.theme().clone();
 
         let input_height = 3u16;
         let list_height = h.saturating_sub(input_height);

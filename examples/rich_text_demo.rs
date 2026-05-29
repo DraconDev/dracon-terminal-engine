@@ -49,7 +49,7 @@ fn main() -> std::io::Result<()> {
     })
     .run(move |ctx| {
         let (w, h) = ctx.compositor().size();
-        let theme = ctx.set_theme();
+        let theme = ctx.theme().clone();
 
         let mut plane = Plane::new(0, w, h);
         for cell in plane.cells.iter_mut() {
