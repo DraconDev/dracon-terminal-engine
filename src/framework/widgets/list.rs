@@ -11,12 +11,12 @@ use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
-use crate::framework::widgets::list_common::{render_scroll_indicator, ListNavigation};
+use crate::framework::widgets::list_common::{
+    render_scroll_indicator, ListNavigation, SelectionChangeCallback, UndoRedoCallback,
+};
 use ratatui::layout::Rect;
 
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
-pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
-pub type UndoRedoCallback = Box<dyn FnMut()>;
 
 #[derive(Clone)]
 pub struct ListState {

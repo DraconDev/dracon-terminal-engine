@@ -9,7 +9,9 @@ use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
-use crate::framework::widgets::list_common::{render_scroll_indicator, ListNavigation};
+use crate::framework::widgets::list_common::{
+    render_scroll_indicator, ListNavigation, SelectionChangeCallback, UndoRedoCallback,
+};
 use ratatui::layout::Rect;
 
 /// A column definition for a `Table`.
@@ -30,8 +32,6 @@ pub struct TableRow<T> {
 pub type SelectCallback<T> = Box<dyn FnMut(&T)>;
 pub type CellTextFn<T> = Box<dyn Fn(&T, usize) -> String>;
 pub type HeaderClickCallback = Box<dyn FnMut(usize)>;
-pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
-pub type UndoRedoCallback = Box<dyn FnMut()>;
 
 /// Inner state snapshot for undo/redo.
 #[derive(Clone)]

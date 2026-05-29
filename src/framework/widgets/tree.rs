@@ -9,6 +9,7 @@ use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
+use crate::framework::widgets::list_common::SelectCallback;
 use ratatui::layout::Rect;
 
 /// A node in the tree hierarchy with a label and optional children.
@@ -38,8 +39,6 @@ impl TreeNode {
 }
 
 /// A widget that displays hierarchical data as a collapsible tree.
-type SelectCallback = Box<dyn FnMut(&str)>;
-
 pub struct Tree {
     id: WidgetId,
     root: Vec<TreeNode>,

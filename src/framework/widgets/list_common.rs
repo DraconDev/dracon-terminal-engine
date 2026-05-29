@@ -6,14 +6,14 @@ use crate::compositor::Plane;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;
 
-/// Callback for when a selection is made.
+/// Callback for when a selection is made (Autocomplete and Tree).
 pub type SelectCallback = Box<dyn FnMut(&str)>;
 
-/// Callback for when selection changes (for Table and List widgets).
-pub type SelectionChangeCallback = Box<dyn FnMut(Option<usize>)>;
+/// Callback for when selection changes (Table and List).
+pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
 
-/// Callback for undo/redo actions (for Table and List widgets).
-pub type UndoRedoCallback = Box<dyn FnMut(bool) -> bool>;
+/// Callback for undo/redo actions (Table and List).
+pub type UndoRedoCallback = Box<dyn FnMut()>;
 
 const MAX_UNDO_STACK: usize = 50;
 
