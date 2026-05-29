@@ -1,3 +1,12 @@
+//! Input reader for terminal stdin with signal handling.
+//!
+//! This module spawns a background thread to read from stdin and parse
+//! input events. It handles:
+//!
+//! - **SIGWINCH** — Window resize signals (gracefully degrades if signal registration fails)
+//! - **Non-blocking poll** — Uses `poll()` for efficient input detection
+//! - **Timeout handling** — Processes incomplete escape sequences
+
 use signal_hook::consts::signal::SIGWINCH;
 use signal_hook::iterator::Signals;
 use std::io::Read;

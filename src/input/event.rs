@@ -1,3 +1,14 @@
+//! Input event types for keyboard, mouse, and UI events.
+//!
+//! This module defines the event types that flow through the framework:
+//!
+//! - [`Event`] — Low-level input events from the terminal ([`Event::Key`], [`Event::Mouse`], etc.)
+//! - [`UiEvent`] — High-level UI events derived from input ([`UiEvent::Tick`], [`UiEvent::Resize`], etc.)
+//! - [`KeyCode`] — Keyboard key identifiers
+//! - [`KeyModifiers`] — Modifier key flags (Shift, Ctrl, Alt, etc.)
+//! - [`KeyEventKind`] — Key event types (Press, Repeat, Release)
+//! - [`MouseEvent`], [`MouseButton`], [`MouseEventKind`] — Mouse event types
+
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;

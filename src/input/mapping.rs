@@ -1,3 +1,10 @@
+//! Key combination mapping helpers.
+//!
+//! This module provides utilities for mapping input events to UI events.
+//! Most functionality is now unified in [`Event`](crate::input::event::Event)
+//! and [`UiEvent`](crate::input::event::UiEvent), making this module largely
+//! a compatibility layer.
+
 use crate::input::event::{Event, UiEvent};
 
 /// Converts a runtime event to a UI event (identity function).

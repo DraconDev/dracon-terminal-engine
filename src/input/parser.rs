@@ -1,3 +1,14 @@
+//! ANSI escape sequence parser for terminal input.
+//!
+//! This module provides a state machine parser for ANSI escape sequences:
+//!
+//! - **CSI sequences** — SGR mouse, cursor position reports, function keys
+//! - **OSC sequences** — color palette, window title
+//! - **Bracketed paste** — safe paste mode (\x1b[201~ to \x1b[201~)
+//! - **Kitty keyboard protocol** — extended key reporting
+//!
+//! The parser is designed for performance and correctness with SGR 1006 mouse support.
+
 use crate::input::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
