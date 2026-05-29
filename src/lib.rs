@@ -41,7 +41,7 @@
 //!
 //! The engine is organized into several layers:
 //!
-//! - **App** — [`App`] and [`Ctx`] provide the one-import entry point with event loop
+//! - **App** — [`framework::app::App`] and [`framework::app::Ctx`] provide the one-import entry point with event loop
 //! - **Compositor** — [`Plane`] layers composited via [`Compositor`] with TrueColor and filters
 //! - **Widgets** — 43 framework widgets (`List`, `Table`, `Tree`, `Form`, `Button`, etc.)
 //! - **TextEditor** — Full-featured code editor with syntax highlighting via syntect
