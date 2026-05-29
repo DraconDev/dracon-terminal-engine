@@ -229,24 +229,35 @@ impl App {
         }
 
         if k.code == crate::input::event::KeyCode::Tab {
-            let old = self.focus_manager.focused();
-            if k.modifiers
-                .contains(crate::input::event::KeyModifiers::SHIFT)
-            {
-                let _ = self.focus_manager.tab_prev();
-            } else {
-                let _ = self.focus_manager.tab_next();
-            }
-            let new = self.focus_manager.focused();
-            if new != old {
-                if let Some(old_id) = old {
-                    if let Some(mut w) = self.widget_mut(old_id) {
-                        w.on_blur();
-                    }
+            // Let the focused widget try to consume Tab first (e.g., for
+            // in-widget navigation like contact switching in ChatApp).
+            // If the widget doesn't consume it, use Tab for focus cycling.
+            let consumed = self
+                .focus_manager
+                .focused()
+                .and_then(|id| self.widget_mut(id))
+                .map(|mut w| w.handle_key(*k))
+                .unwrap_or(false);
+            if !consumed {
+                let old = self.focus_manager.focused();
+                if k.modifiers
+                    .contains(crate::input::event::KeyModifiers::SHIFT)
+                {
+                    let _ = self.focus_manager.tab_prev();
+                } else {
+                    let _ = self.focus_manager.tab_next();
                 }
-                if let Some(new_id) = new {
-                    if let Some(mut w) = self.widget_mut(new_id) {
-                        w.on_focus();
+                let new = self.focus_manager.focused();
+                if new != old {
+                    if let Some(old_id) = old {
+                        if let Some(mut w) = self.widget_mut(old_id) {
+                            w.on_blur();
+                        }
+                    }
+                    if let Some(new_id) = new {
+                        if let Some(mut w) = self.widget_mut(new_id) {
+                            w.on_focus();
+                        }
                     }
                 }
             }
