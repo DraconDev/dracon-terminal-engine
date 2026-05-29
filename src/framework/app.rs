@@ -489,11 +489,14 @@ impl App {
     /// ```no_run
     /// use dracon_terminal_engine::prelude::*;
     ///
-    /// App::new()?
-    ///     .title("My App")
-    ///     .fps(60)
-    ///     .set_theme(Theme::nord())
-    ///     .run(|_ctx| {});
+    /// fn main() -> Result<(), dracon_terminal_engine::DraconError> {
+    ///     App::new()?
+    ///         .title("My App")
+    ///         .fps(60)
+    ///         .set_theme(Theme::nord())
+    ///         .run(|_ctx| {})?;
+    ///     Ok(())
+    /// }
     /// ```
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self), fields(theme_name = %theme.name)))]
     pub fn set_theme(mut self, theme: Theme) -> Self {
