@@ -11,7 +11,7 @@ use crate::framework::scroll::ScrollState;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
-use crate::framework::widgets::list_common::{
+use crate::framework::widgets::list_helpers::{
     render_scroll_indicator, ListNavigation, SelectionChangeCallback, UndoRedoCallback,
 };
 use ratatui::layout::Rect;

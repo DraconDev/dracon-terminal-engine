@@ -8,7 +8,7 @@ use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::hitzone::ScopedZoneRegistry;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId, WidgetState};
-use crate::framework::widgets::list_common::SelectCallback;
+use crate::framework::widgets::list_helpers::SelectCallback;
 use crate::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
