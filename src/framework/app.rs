@@ -265,7 +265,7 @@ impl App {
             }
             if let Some(theme) = new_theme {
                 if theme.name != self.theme.name {
-                    self.set_theme(theme);
+                    App::apply_theme(self, theme);
                 }
             }
         }
@@ -472,8 +472,20 @@ impl App {
     /// This calls `on_theme_change()` on every widget, allowing them to
     /// update internal theme-dependent state without requiring manual
     /// configuration of each widget.
+    ///
+    /// Returns `Self` to support builder-style chaining:
+    ///
+    /// ```no_run
+    /// use dracon_terminal_engine::prelude::*;
+    ///
+    /// App::new()?
+    ///     .title("My App")
+    ///     .fps(60)
+    ///     .set_theme(Theme::nord())
+    ///     .run(|_ctx| {});
+    /// ```
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self), fields(theme_name = %theme.name)))]
-    pub fn set_theme(&mut self, theme: Theme) -> &mut Self {
+    pub fn set_theme(mut self, theme: Theme) -> Self {
         self.compositor.set_clear_color(theme.bg);
         self.theme = theme;
         self.dirty_tracker.mark_all_dirty();
