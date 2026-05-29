@@ -1,9 +1,9 @@
 # Dracon Terminal Engine — Audit Tasklist
 
-**Date:** 2026-05-28
+**Date:** 2026-05-29
 **Repo:** `/home/dracon/Dev/dracon-terminal-engine`
-**Source:** 113 files · 47 framework widgets · 21 themes · 98 examples
-**Status:** 303 tests pass · 0 compiler warnings · 0 clippy warnings
+**Source:** 349 Rust files · 47 framework widgets · 21 themes · 55 examples
+**Status:** 364 tests pass (303 unit + 61 doctest) · 32 clippy warnings (deprecated `.theme()`) · 41 deprecated API call sites
 
 ---
 
