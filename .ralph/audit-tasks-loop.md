@@ -29,10 +29,16 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - input/parser.rs try_parse() (248 lines)
 - utils.rs spawn_terminal_at() (239 lines)
 
-### P2 — Documentation (22 remaining)
+### P2 — Documentation (DONE!)
 
-**Missing Module Docs:**
-- Add module docs to: backend/mod.rs, backend/tty.rs, compositor/*.rs, input/*.rs, core/terminal.rs, visuals/*.rs, widgets/*.rs, system.rs, contracts.rs, layout.rs
+**All module docs added:**
+- [x] backend/mod.rs, backend/tty.rs
+- [x] compositor/*.rs (engine, filter, plane)
+- [x] input/*.rs (event, mapping, parser, reader)
+- [x] core/terminal.rs
+- [x] visuals/*.rs (icons, osc)
+- [x] widgets/*.rs (all 9 files)
+- [x] system.rs, contracts.rs, layout.rs
 
 ### P3 — Architecture (9 remaining)
 
@@ -46,14 +52,14 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - Replace expect() in app.rs App::from_default()
 - Audit expect() in scene_router.rs
 
-### P5 — Testing (3 remaining)
+### P5 — Testing (2 remaining)
 
 - [x] Add tests for compositor/engine.rs — added 9 tests
 - [x] Add tests for compositor/plane.rs — added 20 tests
 - [x] Add tests for input/parser.rs — added 21 tests
 - [x] Add tests for visuals/icons.rs — added 23 tests
 - [ ] Add tests for core/terminal.rs
-- [ ] Add tests for system.rs
+- [x] Add tests for system.rs — added 8 tests
 
 ## Approach
 
