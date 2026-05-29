@@ -147,12 +147,11 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ---
 
-## P3 — Architecture & Organization — TODO
+## P3 — Architecture & Organization
 
 ### Module Consolidation
 
 - [ ] Resolve `src/layout.rs` vs `src/framework/layout.rs` duplication — merge into one
-- [ ] Clarify `src/widgets/` vs `src/framework/widgets/` distinction — document or consolidate
 - [ ] Move deprecated `Component` widget behind feature gate or remove from public API
 
 ### Code Organization
@@ -167,6 +166,10 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Rename `tabbar.rs` → `tab_bar.rs` for consistency with other underscore-separated names
 - [ ] Rename `list_common.rs` to indicate its purpose (e.g., `list_helpers.rs`)
 - [ ] Rename `text_input_base.rs` to `text_input_core.rs` or similar
+
+### Widget Namespace Clarification
+
+- [x] Clarify `src/widgets/` vs `src/framework/widgets/` distinction — documented in `src/widgets/mod.rs` with module-level docs explaining when to use each namespace
 
 ---
 
@@ -243,10 +246,10 @@ Generated from full codebase audit. Check off items as they are completed.
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 5 | 47 |
 | P2 — Documentation | 30 | 8 | 22 |
-| P3 — Architecture | 10 | 0 | 10 |
+| P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 1 | 3 |
 | P5 — Testing | 17 | 10 | 7 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **48** | **89** |
+| **Total** | **137** | **49** | **88** |
 | **Total** | **137** | **41** | **96** |
