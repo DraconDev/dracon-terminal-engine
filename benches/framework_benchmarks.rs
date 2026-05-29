@@ -336,6 +336,7 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
 
 fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
     use dracon_terminal_engine::framework::event_bus::EventBus;
+    use std::rc::Rc;
 
     #[derive(Clone, Debug)]
     struct TestEvent(String);
@@ -474,10 +475,6 @@ criterion_group!(
 );
 
 criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool);
-
-criterion_group!(
-    event_bus,
-    bench_eventbus_publish_10_subscribers,
 
 criterion_group!(
     event_bus,
