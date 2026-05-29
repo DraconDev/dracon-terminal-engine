@@ -1,3 +1,14 @@
+//! Deprecated layout utilities using the old `Component` trait.
+//!
+//! This module provides legacy layout helpers that predate the framework's
+//! [`Widget`](crate::framework::widget::Widget) trait. It is kept for backward
+//! compatibility but is deprecated:
+//!
+//! - [`Stack`] — Flexbox-like container using the deprecated `Component` trait
+//! - [`centered_rect()`] — Create a centered rectangle for modals/popups
+//!
+//! Consider using the framework's layout widgets instead.
+
 #[allow(deprecated)]
 use crate::compositor::engine::Compositor;
 #[allow(deprecated)]

@@ -1,3 +1,13 @@
+//! System monitoring types for CPU, memory, disk, and process information.
+//!
+//! This module provides data structures for system monitoring (behind the `system` feature):
+//!
+//! - [`DiskInfo`] — Mounted disk usage information
+//! - [`ProcessInfo`] — Running process details
+//! - [`SystemMonitor`] — Aggregated system statistics
+//!
+//! Data is obtained via the `sysinfo` crate.
+
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
 use sysinfo::{Disks, ProcessesToUpdate, System};

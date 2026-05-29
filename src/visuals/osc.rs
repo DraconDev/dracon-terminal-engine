@@ -1,3 +1,17 @@
+//! Operating System Command (OSC) sequences for terminal features.
+//!
+//! OSC sequences are escape codes that communicate with the terminal to:
+//!
+//! - [`copy_to_clipboard()`] — Copy text to system clipboard (OSC 52)
+//! - [`write_hyperlink()`] — Render clickable hyperlinks (OSC 8)
+//! - [`bell()`] — Trigger the system bell (BEL)
+//! - [`notify()`] — Send desktop notifications (OSC 777)
+//!
+//! # Note
+//!
+//! OSC 9 (notifications) and OSC 777 are supported by some terminals (iTerm2, VSCode,
+//! kitty) but are not universally supported.
+
 use std::io::{self, Write};
 
 /// copy text to the system clipboard using OSC 52.

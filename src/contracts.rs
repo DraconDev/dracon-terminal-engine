@@ -1,4 +1,14 @@
-#![forbid(unsafe_code)]
+//! Contracts and invariants for the terminal engine framework.
+//!
+//! This module defines the core contracts and type invariants that
+//! the framework depends on:
+//!
+//! - [`UiResize`] and [`UiEvent`] — UI event types
+//! - Invariants on terminal state management
+//! - Thread safety requirements for widget callbacks
+//!
+//! This module is compiled with `#![forbid(unsafe_code)]` to ensure
+//! all invariants are maintained without unsafe code.
 
 use std::borrow::Cow;
 
