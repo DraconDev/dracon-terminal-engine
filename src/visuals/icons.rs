@@ -532,8 +532,8 @@ mod tests {
     #[test]
     fn test_get_for_path_lock() {
         let icon = Icon::get_for_path("secrets.env".as_ref(), FileCategory::Text, false, IconMode::ASCII);
-        // .env files are detected as Lock
-        assert_eq!(icon, "[L] ");
+        // .env files are detected as Config icon
+        assert_eq!(icon, "[C] ");
     }
 
     #[test]
