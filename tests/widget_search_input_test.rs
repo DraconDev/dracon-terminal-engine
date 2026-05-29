@@ -130,7 +130,6 @@ fn test_search_input_render_has_content() {
 }
 
 #[test]
-#[test]
 fn test_search_input_render_wide() {
     let si = SearchInput::new(WidgetId::new(1));
     let plane = si.render(Rect::new(0, 0, 100, 1));

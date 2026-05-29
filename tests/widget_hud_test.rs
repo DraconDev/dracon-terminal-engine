@@ -280,7 +280,6 @@ fn test_hud_render_gauge_empty_label() {
 }
 
 #[test]
-#[test]
 fn test_hud_render_gauge_multiple() {
     let hud = Hud::new(100).with_size(50, 20);
     let _ = hud.render_gauge(0, 0, "HP", 50.0, 100.0, 20);

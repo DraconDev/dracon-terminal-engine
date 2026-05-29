@@ -363,7 +363,6 @@ fn test_divider_vertical_minimal_area() {
 }
 
 #[test]
-#[test]
 fn test_divider_vertical_with_label() {
     let divider = Divider::vertical().with_label("V");
     let area = Rect::new(0, 0, 1, 30);

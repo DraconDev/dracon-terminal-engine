@@ -258,7 +258,6 @@ fn test_table_set_area_then_render() {
 }
 
 #[test]
-#[test]
 fn test_table_many_rows() {
     let columns = vec![Column {
         header: "Test".to_string(),

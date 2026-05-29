@@ -161,7 +161,6 @@ fn test_slider_clear_dirty_after_set_value() {
 }
 
 #[test]
-#[test]
 fn test_slider_default_dirty() {
     let slider = Slider::new(WidgetId::new(1));
     assert!(slider.needs_render());
