@@ -15,6 +15,9 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 anyhow = "1.0"
 
+[dev-dependencies]
+tempfile = "3.12"
+
 [[bin]]
 name = "cargo-dracon"
 path = "src/main.rs"

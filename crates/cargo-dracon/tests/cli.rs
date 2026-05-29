@@ -2,15 +2,36 @@
 
 use std::process::{Command, Stdio};
 use tempfile::TempDir;
+use std::path::Path;
+
+/// Gets the path to the cargo-dracon binary by running `cargo run`.
+fn run_dracon(args: &[&str], cwd: &Path) -> std::process::Output {
+    // Get the manifest dir (cargo-dracon root)
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
+    Command::new("cargo")
+        .args(["run", "-p", "cargo-dracon", "--"])
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .current_dir(cwd)
+        .output()
+        .expect("failed to execute cargo run")
+}
 
 /// Tests that the CLI help command succeeds.
 #[test]
 fn test_cli_help() {
+    // Use manifest dir as cwd since it's in the workspace
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
     let output = Command::new("cargo")
         .args(["run", "-p", "cargo-dracon", "--", "--help"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/cargo-dracon", ""))
+        .current_dir(project_root)
         .output()
         .expect("failed to execute cargo run");
 
@@ -35,11 +56,14 @@ fn test_cli_help() {
 /// Tests that the CLI version command succeeds.
 #[test]
 fn test_cli_version() {
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
     let output = Command::new("cargo")
         .args(["run", "-p", "cargo-dracon", "--", "--version"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .current_dir(env!("CARGO_MANIFEST_DIR").replace("/crates/cargo-dracon", ""))
+        .current_dir(project_root)
         .output()
         .expect("failed to execute cargo run");
 
@@ -65,16 +89,12 @@ fn test_new_project() {
     let temp_dir = TempDir::new().expect("failed to create temp dir");
     let project_name = "test_project";
 
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
     let output = Command::new("cargo")
         .args([
-            "run",
-            "-p",
-            "cargo-dracon",
-            "--",
-            "new",
-            project_name,
-            "--template",
-            "simple",
+            "run", "-p", "cargo-dracon", "--", "new", project_name, "--template", "simple",
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -113,6 +133,9 @@ fn test_init_config() {
     // Create a minimal Cargo.toml to make it look like a Rust project
     std::fs::write(temp_dir.path().join("Cargo.toml"), "[package]\nname = \"test\"\nversion = \"0.1.0\"").expect("failed to create Cargo.toml");
 
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
     let output = Command::new("cargo")
         .args(["run", "-p", "cargo-dracon", "--", "init"])
         .stdout(Stdio::piped())
@@ -145,6 +168,9 @@ fn test_new_project_exists() {
     // Create directory first
     std::fs::create_dir(temp_dir.path().join(project_name)).expect("failed to create directory");
 
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let project_root = manifest_dir.parent().unwrap().parent().unwrap();
+    
     let output = Command::new("cargo")
         .args(["run", "-p", "cargo-dracon", "--", "new", project_name])
         .stdout(Stdio::piped())
