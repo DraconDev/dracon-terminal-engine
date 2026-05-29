@@ -2,6 +2,9 @@ use crate::input::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
 
+/// Maximum buffer size before clearing to prevent memory bloat.
+const MAX_BUFFER_SIZE: usize = 2048;
+
 #[derive(PartialEq, Eq, Debug)]
 enum ParserState {
     Normal,
@@ -35,7 +38,7 @@ impl Parser {
     /// Feeds a byte into the parser. Returns `Option<Event>` if a complete event is formed.
     pub fn advance(&mut self, byte: u8) -> Option<Event> {
         // Safety: Prevent buffer bloat
-        if self.buffer.len() > 2048 {
+        if self.buffer.len() > MAX_BUFFER_SIZE {
             self.buffer.clear();
         }
 

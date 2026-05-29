@@ -85,10 +85,10 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Define named constants for Kitty protocol PUA codepoints in `src/input/kitty_key.rs`
 - [ ] Define named constants for byte size thresholds in `src/utils.rs:387` (`GI_B`, `ME_B`, `KI_B`)
 - [ ] Define named constant for binary detection buffer size in `src/utils.rs:781` (`8192`)
-- [ ] Define named constant for read buffer size in `src/input/reader.rs:24` (`1024`)
+- [x] Define named constant for read buffer size in `src/input/reader.rs:24` (`1024`) — added `READ_BUFFER_SIZE`
 - [ ] Define named constant for parser overflow threshold in `src/input/parser.rs:38` (`2048`)
-- [ ] Replace `1000.0` FPS constant in `src/framework/ctx.rs:189` with `Duration` constant
-- [ ] Define named constants for pipe buffer sizes in `src/framework/app.rs:743,765` (`1024`)
+- [x] Replace `1000.0` FPS constant in `src/framework/ctx.rs:189` with `Duration` constant — added `MS_PER_SEC`
+- [x] Define named constants for pipe buffer sizes in `src/framework/app.rs:743,765` (`1024`) — added `INPUT_BUF_SIZE`
 
 ### Duplicated Code Extraction — TODO
 
