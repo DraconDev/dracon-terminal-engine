@@ -1,6 +1,6 @@
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -43,10 +43,22 @@ impl NotifierApp {
 
     fn trigger(&mut self, kind: NotificationKind) {
         match kind {
-            NotificationKind::Info => self.notification_center.borrow_mut().info("Info", "This is an informational message."),
-            NotificationKind::Success => self.notification_center.borrow_mut().success("Success", "Operation completed successfully!"),
-            NotificationKind::Warning => self.notification_center.borrow_mut().warn("Warning", "Something might need your attention."),
-            NotificationKind::Error => self.notification_center.borrow_mut().error("Error", "Something went wrong!"),
+            NotificationKind::Info => self
+                .notification_center
+                .borrow_mut()
+                .info("Info", "This is an informational message."),
+            NotificationKind::Success => self
+                .notification_center
+                .borrow_mut()
+                .success("Success", "Operation completed successfully!"),
+            NotificationKind::Warning => self
+                .notification_center
+                .borrow_mut()
+                .warn("Warning", "Something might need your attention."),
+            NotificationKind::Error => self
+                .notification_center
+                .borrow_mut()
+                .error("Error", "Something went wrong!"),
         }
         self.dirty = true;
     }
@@ -58,18 +70,52 @@ impl NotifierApp {
 
     fn auto_notify(&self) {
         let messages: [(&str, &str, NotificationKind); 8] = [
-            ("New email", "You have a new message from Alice.", NotificationKind::Info),
-            ("Build passed", "CI build #42 completed.", NotificationKind::Success),
-            ("Disk space", "Storage usage is at 85%.", NotificationKind::Warning),
-            ("Timeout", "Connection to server lost.", NotificationKind::Error),
-            ("Reminder", "Team standup in 5 minutes.", NotificationKind::Info),
-            ("Deployed", "v2.3.1 deployed to production.", NotificationKind::Success),
-            ("Memory", "Memory usage exceeds 90%.", NotificationKind::Warning),
-            ("Auth failed", "Invalid API key detected.", NotificationKind::Error),
+            (
+                "New email",
+                "You have a new message from Alice.",
+                NotificationKind::Info,
+            ),
+            (
+                "Build passed",
+                "CI build #42 completed.",
+                NotificationKind::Success,
+            ),
+            (
+                "Disk space",
+                "Storage usage is at 85%.",
+                NotificationKind::Warning,
+            ),
+            (
+                "Timeout",
+                "Connection to server lost.",
+                NotificationKind::Error,
+            ),
+            (
+                "Reminder",
+                "Team standup in 5 minutes.",
+                NotificationKind::Info,
+            ),
+            (
+                "Deployed",
+                "v2.3.1 deployed to production.",
+                NotificationKind::Success,
+            ),
+            (
+                "Memory",
+                "Memory usage exceeds 90%.",
+                NotificationKind::Warning,
+            ),
+            (
+                "Auth failed",
+                "Invalid API key detected.",
+                NotificationKind::Error,
+            ),
         ];
         let idx = self.auto_kind_idx.get() % messages.len();
         let (title, msg, kind) = messages[idx];
-        self.notification_center.borrow_mut().notify(title, msg, kind);
+        self.notification_center
+            .borrow_mut()
+            .notify(title, msg, kind);
         self.auto_kind_idx.set(idx + 1);
     }
 
@@ -80,19 +126,30 @@ impl NotifierApp {
             .position(|t| t.name == self.theme.name)
             .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
-        self.notification_center.borrow_mut().on_theme_change(&self.theme);
+        self.notification_center
+            .borrow_mut()
+            .on_theme_change(&self.theme);
         self.dirty = true;
     }
 }
 
 impl Widget for NotifierApp {
-    fn id(&self) -> WidgetId { self.id }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
 
-    fn area(&self) -> Rect { self.area }
+    fn area(&self) -> Rect {
+        self.area
+    }
 
     fn set_area(&mut self, area: Rect) {
         self.area = area;
-        self.notification_center.borrow_mut().set_area(Rect::new(0, 4, area.width, area.height.saturating_sub(4)));
+        self.notification_center.borrow_mut().set_area(Rect::new(
+            0,
+            4,
+            area.width,
+            area.height.saturating_sub(4),
+        ));
     }
 
     fn needs_render(&self) -> bool {
@@ -203,7 +260,12 @@ impl Widget for NotifierApp {
                 }
             }
 
-            let corners = [('╭', bx, by), ('╮', bx + btn_w - 1, by), ('╰', bx, by + btn_h - 1), ('╯', bx + btn_w - 1, by + btn_h - 1)];
+            let corners = [
+                ('╭', bx, by),
+                ('╮', bx + btn_w - 1, by),
+                ('╰', bx, by + btn_h - 1),
+                ('╯', bx + btn_w - 1, by + btn_h - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < plane.cells.len() {
@@ -240,7 +302,10 @@ impl Widget for NotifierApp {
         let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
         let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
         let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
-        let status = format!("{}: quit | {}: theme | c: clear | {}: help | {}: back", kb_quit, kb_theme, kb_help, kb_back);
+        let status = format!(
+            "{}: quit | {}: theme | c: clear | {}: help | {}: back",
+            kb_quit, kb_theme, kb_help, kb_back
+        );
         let sy = area.height.saturating_sub(1);
         for (i, c) in status.chars().enumerate() {
             let idx = (sy * area.width + i as u16) as usize;
@@ -269,7 +334,12 @@ impl Widget for NotifierApp {
                 }
             }
 
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < plane.cells.len() {
@@ -319,10 +389,22 @@ impl Widget for NotifierApp {
                 ("w", "Warning notification"),
                 ("e", "Error notification"),
                 ("c", "Clear all notifications"),
-                (self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("F1"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("Esc"),
+                    "Dismiss help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
@@ -352,7 +434,9 @@ impl Widget for NotifierApp {
         }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -402,7 +486,11 @@ impl Widget for NotifierApp {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.notification_center.borrow_mut().handle_mouse(kind, col, row) {
+        if self
+            .notification_center
+            .borrow_mut()
+            .handle_mouse(kind, col, row)
+        {
             self.dirty = true;
             return true;
         }

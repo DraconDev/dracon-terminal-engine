@@ -22,8 +22,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Breadcrumbs, CommandItem, CommandPalette, ContextAction, ContextMenu, MenuBar, MenuEntry,
-    MenuItem, Metric, Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar, TextEditorAdapter, Toast, ToastKind,
-    Tooltip, Tree, TreeNode,
+    MenuItem, Metric, Modal, Profiler, SearchInput, StatusBar, StatusSegment, TabBar,
+    TextEditorAdapter, Toast, ToastKind, Tooltip, Tree, TreeNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use dracon_terminal_engine::widgets::editor::TextEditor;
@@ -62,8 +62,6 @@ impl EditorTab {
             adapter: TextEditorAdapter::new(id, editor),
         }
     }
-
-
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -193,7 +191,8 @@ impl IdeApp {
                     (actions::HELP, "help"),
                     (actions::BACK, "dismiss"),
                     (actions::QUIT, "quit"),
-                ])).with_fg(theme.fg_muted),
+                ]))
+                .with_fg(theme.fg_muted),
             );
 
         let breadcrumbs =
@@ -421,7 +420,8 @@ impl IdeApp {
                         (actions::HELP, "help"),
                         (actions::BACK, "dismiss"),
                         (actions::QUIT, "quit"),
-                    ])).with_fg(self.theme.fg_muted),
+                    ]))
+                    .with_fg(self.theme.fg_muted),
                 );
         }
     }
@@ -440,13 +440,13 @@ impl IdeApp {
         match cmd_id {
             "new-tab" => {
                 let new_id = self.tabs.len();
-                let mut adapter = TextEditorAdapter::new(
-                    WidgetId::new(200 + new_id),
-                    TextEditor::default(),
-                );
+                let mut adapter =
+                    TextEditorAdapter::new(WidgetId::new(200 + new_id), TextEditor::default());
                 adapter.on_theme_change(&self.theme);
-                self.tabs
-                    .push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1), adapter));
+                self.tabs.push(EditorTab::new(
+                    &format!("untitled-{}.rs", new_id + 1),
+                    adapter,
+                ));
                 self.active_tab = new_id;
                 self.sync_tab_bar();
             }
@@ -718,7 +718,8 @@ impl Widget for IdeApp {
             let editor_content_w = editor_w.saturating_sub(2);
             if let Some(tab) = self.active_tab_ref() {
                 if editor_content_w > 0 && editor_content_h > 0 {
-                    let editor_area = Rect::new(editor_x + 1, editor_y, editor_content_w, editor_content_h);
+                    let editor_area =
+                        Rect::new(editor_x + 1, editor_y, editor_content_w, editor_content_h);
                     let editor_plane = tab.adapter.render(editor_area);
                     self.blit(&mut plane, &editor_plane, editor_x + 1, editor_y);
                 }
@@ -894,8 +895,7 @@ impl Widget for IdeApp {
 
         // Context menu
         if self.context_menu.is_some() {
-            if self.keybindings.matches(actions::BACK, &key)
-            {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.context_menu = None;
                 self.context_menu_pos = None;
                 return true;
@@ -916,8 +916,7 @@ impl Widget for IdeApp {
 
         // Search mode
         if self.show_search {
-            if self.keybindings.matches(actions::BACK, &key)
-            {
+            if self.keybindings.matches(actions::BACK, &key) {
                 self.show_search = false;
                 return true;
             }
@@ -961,13 +960,13 @@ impl Widget for IdeApp {
         }
         if self.keybindings.matches(actions::NEW_TAB, &key) {
             let new_id = self.tabs.len();
-            let mut adapter = TextEditorAdapter::new(
-                WidgetId::new(200 + new_id),
-                TextEditor::default(),
-            );
+            let mut adapter =
+                TextEditorAdapter::new(WidgetId::new(200 + new_id), TextEditor::default());
             adapter.on_theme_change(&self.theme);
-            self.tabs
-                .push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1), adapter));
+            self.tabs.push(EditorTab::new(
+                &format!("untitled-{}.rs", new_id + 1),
+                adapter,
+            ));
             self.active_tab = new_id;
             self.sync_tab_bar();
             return true;
@@ -1012,11 +1011,19 @@ impl Widget for IdeApp {
                     let search_h = if self.show_search { 3u16 } else { 0u16 };
                     let status_h = 1u16;
                     let content_y = menu_h + tab_h;
-                    let content_h = self.area.height.saturating_sub(content_y + status_h + search_h);
+                    let content_h = self
+                        .area
+                        .height
+                        .saturating_sub(content_y + status_h + search_h);
                     let editor_x = tree_w + 1;
                     let editor_content_h = content_h.saturating_sub(1);
                     let editor_content_w = self.area.width.saturating_sub(editor_x + 2);
-                    let editor_area = Rect::new(editor_x + 1, content_y + 1, editor_content_w, editor_content_h);
+                    let editor_area = Rect::new(
+                        editor_x + 1,
+                        content_y + 1,
+                        editor_content_w,
+                        editor_content_h,
+                    );
                     let tab = &mut self.tabs[self.active_tab];
                     tab.adapter.set_area(editor_area);
                     let handled = tab.adapter.handle_key(key);
@@ -1057,7 +1064,10 @@ impl Widget for IdeApp {
                                     TextEditor::default(),
                                 );
                                 adapter.on_theme_change(&self.theme);
-                                self.tabs.push(EditorTab::new(&format!("untitled-{}.rs", new_id + 1), adapter));
+                                self.tabs.push(EditorTab::new(
+                                    &format!("untitled-{}.rs", new_id + 1),
+                                    adapter,
+                                ));
                                 self.active_tab = new_id;
                                 self.sync_tab_bar();
                                 self.update_breadcrumbs();
@@ -1065,7 +1075,8 @@ impl Widget for IdeApp {
                             }
                             1 if self.tabs.len() > 1 => {
                                 self.tabs.remove(self.active_tab);
-                                self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
+                                self.active_tab =
+                                    self.active_tab.min(self.tabs.len().saturating_sub(1));
                                 self.sync_tab_bar();
                                 self.update_breadcrumbs();
                                 self.update_status();
@@ -1141,20 +1152,28 @@ impl Widget for IdeApp {
             let editor_w = self.area.width.saturating_sub(editor_x);
             let status_h = 1u16;
             let search_h = if self.show_search { 3u16 } else { 0u16 };
-            let content_h = self.area.height.saturating_sub(content_y + status_h + search_h);
+            let content_h = self
+                .area
+                .height
+                .saturating_sub(content_y + status_h + search_h);
             let has_tab = self.tabs.get(self.active_tab).is_some();
 
             if has_tab && editor_w > 0 && content_h > 1 {
                 let text_y = content_y + 1;
                 let text_h = content_h.saturating_sub(1);
                 let text_w = editor_w.saturating_sub(2);
-                if text_w > 0 && text_h > 0
-                    && col > editor_x && col < editor_x + 1 + text_w
-                    && row >= text_y && row < text_y + text_h
+                if text_w > 0
+                    && text_h > 0
+                    && col > editor_x
+                    && col < editor_x + 1 + text_w
+                    && row >= text_y
+                    && row < text_y + text_h
                 {
                     let rel_col = col - (editor_x + 1);
                     let rel_row = row - text_y;
-                    let handled = self.tabs[self.active_tab].adapter.handle_mouse(kind, rel_col, rel_row);
+                    let handled = self.tabs[self.active_tab]
+                        .adapter
+                        .handle_mouse(kind, rel_col, rel_row);
                     if handled {
                         self.update_status();
                     }
@@ -1171,7 +1190,8 @@ impl Widget for IdeApp {
                 (_, 1) => "Tabs\nSwitch between open files",
                 (_, _) => return false,
             };
-            self.tooltip = Some(Tooltip::new(WidgetId::new(60), text).with_theme(self.theme.clone()));
+            self.tooltip =
+                Some(Tooltip::new(WidgetId::new(60), text).with_theme(self.theme.clone()));
             self.tooltip_timer = Some(Instant::now());
             return true;
         }
@@ -1262,9 +1282,18 @@ impl IdeApp {
         }
 
         let kb_save = self.keybindings.display(actions::SAVE).unwrap_or("ctrl+s");
-        let kb_new_tab = self.keybindings.display(actions::NEW_TAB).unwrap_or("ctrl+t");
-        let kb_close_tab = self.keybindings.display(actions::CLOSE_TAB).unwrap_or("ctrl+w");
-        let kb_search = self.keybindings.display(actions::SEARCH).unwrap_or("ctrl+f");
+        let kb_new_tab = self
+            .keybindings
+            .display(actions::NEW_TAB)
+            .unwrap_or("ctrl+t");
+        let kb_close_tab = self
+            .keybindings
+            .display(actions::CLOSE_TAB)
+            .unwrap_or("ctrl+w");
+        let kb_search = self
+            .keybindings
+            .display(actions::SEARCH)
+            .unwrap_or("ctrl+f");
 
         let shortcuts: [(&str, &[(&str, &str)]); 4] = [
             (
@@ -1291,14 +1320,29 @@ impl IdeApp {
                     (kb_search, "Search"),
                     ("F12", "Profiler"),
                     ("Ctrl+P", "Palette"),
-                    (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
+                    (
+                        self.keybindings.display(actions::THEME).unwrap_or("t"),
+                        "Cycle theme",
+                    ),
                 ],
             ),
-            ("General", &[
-                (self.keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
-            ]),
+            (
+                "General",
+                &[
+                    (
+                        self.keybindings.display(actions::HELP).unwrap_or("F1"),
+                        "Toggle this help",
+                    ),
+                    (
+                        self.keybindings.display(actions::BACK).unwrap_or("Esc"),
+                        "Dismiss help",
+                    ),
+                    (
+                        self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"),
+                        "Quit",
+                    ),
+                ],
+            ),
         ];
 
         let mut row = sep_y + 1;

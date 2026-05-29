@@ -9,7 +9,7 @@ use crate::framework::dragdrop::DragManager;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
 use crate::framework::widgets::context_menu::ContextMenu;
-use crate::framework::widgets::list_common::{ListNavigation, render_scroll_indicator};
+use crate::framework::widgets::list_common::{render_scroll_indicator, ListNavigation};
 use ratatui::layout::Rect;
 
 /// A column definition for a `Table`.
@@ -401,7 +401,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         let total_rows = self.rows.len();
         for i in 0..self.nav.visible_count {
             let row_idx = self.nav.offset + i;
-            if row_idx >= total_rows { break; }
+            if row_idx >= total_rows {
+                break;
+            }
             let row = &self.rows[row_idx];
             let y = 1 + i;
             let is_selected = row_idx == self.nav.selected;
@@ -453,7 +455,14 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
 
         let total = self.rows.len();
         let visible = self.nav.visible_count;
-        render_scroll_indicator(&mut plane, area, self.nav.offset, total, visible, &self.theme);
+        render_scroll_indicator(
+            &mut plane,
+            area,
+            self.nav.offset,
+            total,
+            visible,
+            &self.theme,
+        );
 
         plane
     }
@@ -492,15 +501,27 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 }
                 true
             }
-            KeyCode::Char('z') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+            KeyCode::Char('z')
+                if key
+                    .modifiers
+                    .contains(crate::input::event::KeyModifiers::CONTROL) =>
+            {
                 self.undo();
                 true
             }
-            KeyCode::Char('y') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+            KeyCode::Char('y')
+                if key
+                    .modifiers
+                    .contains(crate::input::event::KeyModifiers::CONTROL) =>
+            {
                 self.redo();
                 true
             }
-            KeyCode::Char('a') if key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+            KeyCode::Char('a')
+                if key
+                    .modifiers
+                    .contains(crate::input::event::KeyModifiers::CONTROL) =>
+            {
                 if self.nav.allow_multi_select {
                     self.nav.push_undo(self.snapshot());
                     self.nav.select_all(self.rows.len());
@@ -531,10 +552,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
         row: u16,
     ) -> bool {
         if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
-            if menu.is_visible()
-                && menu.handle_mouse(kind, col, row) {
-                    return true;
-                }
+            if menu.is_visible() && menu.handle_mouse(kind, col, row) {
+                return true;
+            }
         }
 
         match kind {
@@ -626,7 +646,9 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             crate::input::event::MouseEventKind::Drag(_) => {
                 if self.drag_manager.borrow().is_dragging() {
                     let area = self.area.get();
-                    self.drag_manager.borrow_mut().move_ghost(area.x + col, area.y + row);
+                    self.drag_manager
+                        .borrow_mut()
+                        .move_ghost(area.x + col, area.y + row);
                 }
                 true
             }

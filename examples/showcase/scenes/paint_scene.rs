@@ -8,17 +8,17 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind, MouseButton};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
-
 
 #[derive(Clone, Copy, PartialEq)]
 enum Tool {
     Brush,
     Eraser,
     Fill,
-
 }
 
 pub struct PaintScene {
@@ -32,7 +32,7 @@ pub struct PaintScene {
     // Cursor/brush
     brush_color: Cell<Color>,
     tool: Cell<Tool>,
-    brush_size: Cell<u8>,  // 1 or 2
+    brush_size: Cell<u8>, // 1 or 2
     // Drawing state
     is_drawing: Cell<bool>,
     last_col: Cell<Option<u16>>,
@@ -68,15 +68,15 @@ impl PaintScene {
 
     fn palette_colors() -> Vec<(&'static str, Color)> {
         vec![
-            ("Red",    Color::Rgb(255, 100, 100)),
+            ("Red", Color::Rgb(255, 100, 100)),
             ("Orange", Color::Rgb(255, 165, 0)),
             ("Yellow", Color::Rgb(255, 255, 100)),
-            ("Green",  Color::Rgb(100, 255, 100)),
-            ("Cyan",   Color::Rgb(100, 255, 255)),
-            ("Blue",   Color::Rgb(100, 100, 255)),
+            ("Green", Color::Rgb(100, 255, 100)),
+            ("Cyan", Color::Rgb(100, 255, 255)),
+            ("Blue", Color::Rgb(100, 100, 255)),
             ("Purple", Color::Rgb(200, 100, 255)),
-            ("White",  Color::Rgb(255, 255, 255)),
-            ("Gray",   Color::Rgb(128, 128, 128)),
+            ("White", Color::Rgb(255, 255, 255)),
+            ("Gray", Color::Rgb(128, 128, 128)),
             ("DkGray", Color::Rgb(64, 64, 64)),
         ]
     }
@@ -128,10 +128,18 @@ impl PaintScene {
             visited[y][x] = true;
             self.canvas.borrow_mut()[y][x] = fill_color;
 
-            if x > 0 { stack.push((x - 1, y)); }
-            if x + 1 < self.canvas_w { stack.push((x + 1, y)); }
-            if y > 0 { stack.push((x, y - 1)); }
-            if y + 1 < self.canvas_h { stack.push((x, y + 1)); }
+            if x > 0 {
+                stack.push((x - 1, y));
+            }
+            if x + 1 < self.canvas_w {
+                stack.push((x + 1, y));
+            }
+            if y > 0 {
+                stack.push((x, y - 1));
+            }
+            if y + 1 < self.canvas_h {
+                stack.push((x, y + 1));
+            }
         }
     }
 
@@ -179,7 +187,15 @@ impl PaintScene {
             let fg = if is_active { t.primary } else { t.fg_muted };
             let bg = if is_active { t.hover_bg } else { t.bg };
             let prefix = if is_active { "► " } else { "  " };
-            draw_text(plane, tx, ty_i, &format!("{}{}", prefix, label), fg, bg, is_active);
+            draw_text(
+                plane,
+                tx,
+                ty_i,
+                &format!("{}{}", prefix, label),
+                fg,
+                bg,
+                is_active,
+            );
         }
 
         // Brush size
@@ -190,7 +206,15 @@ impl PaintScene {
             let is_active = self.brush_size.get() as usize == i + 1;
             let fg = if is_active { t.primary } else { t.fg_muted };
             let prefix = if is_active { "► " } else { "  " };
-            draw_text(plane, tx, sy, &format!("{}{}", prefix, label), fg, t.bg, is_active);
+            draw_text(
+                plane,
+                tx,
+                sy,
+                &format!("{}{}", prefix, label),
+                fg,
+                t.bg,
+                is_active,
+            );
         }
 
         // Color palette
@@ -291,12 +315,22 @@ impl PaintScene {
 
         // Canvas dimensions label
         let dim = format!("{}×{}", self.canvas_w, self.canvas_h);
-        draw_text(plane, canvas_x, canvas_y + ch as u16 + 1, &dim, t.fg_muted, t.bg, false);
+        draw_text(
+            plane,
+            canvas_x,
+            canvas_y + ch as u16 + 1,
+            &dim,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
     }
 }
 
 impl Scene for PaintScene {
-    fn scene_id(&self) -> &str { "paint" }
+    fn scene_id(&self) -> &str {
+        "paint"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -311,8 +345,15 @@ impl Scene for PaintScene {
         // Header
         draw_text(&mut plane, 2, 0, " Terminal Paint ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -336,7 +377,6 @@ impl Scene for PaintScene {
             Tool::Brush => "Brush",
             Tool::Eraser => "Eraser",
             Tool::Fill => "Fill",
-            
         };
         let footer = format!(
             " Tool:{} | B:brush E:erase F:fill | C:clear | {}:help | {}:back ",
@@ -355,27 +395,37 @@ impl Scene for PaintScene {
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Terminal Paint — Help", &[
-                ("B", "Brush tool"),
-                ("E", "Eraser tool"),
-                ("F", "Flood fill tool"),
-                ("1-0", "Select color from palette"),
-                ("+/-", "Toggle brush size"),
-                ("C", "Clear canvas"),
-                ("Click", "Paint / pick tool or color"),
-                ("Drag", "Continuous brush strokes"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Terminal Paint — Help",
+                &[
+                    ("B", "Brush tool"),
+                    ("E", "Eraser tool"),
+                    ("F", "Flood fill tool"),
+                    ("1-0", "Select color from palette"),
+                    ("+/-", "Toggle brush size"),
+                    ("C", "Clear canvas"),
+                    ("Click", "Paint / pick tool or color"),
+                    ("Drag", "Continuous brush strokes"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -413,7 +463,11 @@ impl Scene for PaintScene {
             }
             // Color shortcuts (1-9, 0)
             KeyCode::Char(d) if key.modifiers.is_empty() && d.is_ascii_digit() => {
-                let idx = if d == '0' { 9 } else { (d as usize) - ('1' as usize) };
+                let idx = if d == '0' {
+                    9
+                } else {
+                    (d as usize) - ('1' as usize)
+                };
                 let colors = Self::palette_colors();
                 if idx < colors.len() {
                     self.brush_color.set(colors[idx].1);
@@ -423,7 +477,8 @@ impl Scene for PaintScene {
             }
             // Brush size
             KeyCode::Char('+') | KeyCode::Char('=') => {
-                self.brush_size.set(if self.brush_size.get() < 2 { 2 } else { 1 });
+                self.brush_size
+                    .set(if self.brush_size.get() < 2 { 2 } else { 1 });
                 self.dirty = true;
                 true
             }
@@ -502,10 +557,18 @@ impl Scene for PaintScene {
                             let mut y = ly as i32;
                             loop {
                                 self.paint_brush(x as usize, y as usize);
-                                if x as usize == cx && y as usize == cy { break; }
+                                if x as usize == cx && y as usize == cy {
+                                    break;
+                                }
                                 let e2 = 2 * err;
-                                if e2 > -dy { err -= dy; x += sx; }
-                                if e2 < dx { err += dx; y += sy; }
+                                if e2 > -dy {
+                                    err -= dy;
+                                    x += sx;
+                                }
+                                if e2 < dx {
+                                    err += dx;
+                                    y += sy;
+                                }
                             }
                         }
                     }
@@ -531,9 +594,13 @@ impl Scene for PaintScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-
-

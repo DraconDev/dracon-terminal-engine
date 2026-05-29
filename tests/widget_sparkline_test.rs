@@ -32,8 +32,7 @@ fn test_sparkline_with_color() {
 
 #[test]
 fn test_sparkline_with_fill_color() {
-    let sp = Sparkline::new(vec![1.0, 2.0, 3.0])
-        .with_fill_color(Color::Ansi(24));
+    let sp = Sparkline::new(vec![1.0, 2.0, 3.0]).with_fill_color(Color::Ansi(24));
     let area = Rect::new(0, 0, 40, 5);
     let _plane = sp.render(area);
 }
@@ -70,8 +69,7 @@ fn test_sparkline_with_min_max() {
 
 #[test]
 fn test_sparkline_with_data() {
-    let sp = Sparkline::new(vec![])
-        .with_data(vec![10.0, 20.0, 15.0]);
+    let sp = Sparkline::new(vec![]).with_data(vec![10.0, 20.0, 15.0]);
     let area = Rect::new(0, 0, 40, 5);
     let _plane = sp.render(area);
 }

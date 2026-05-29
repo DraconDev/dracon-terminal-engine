@@ -162,7 +162,13 @@ fn test_label_on_theme_change() {
 
 #[test]
 fn test_label_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let l = Label::new("Test").with_theme(t);

@@ -19,31 +19,31 @@
 
 use crate::backend::tty;
 use crate::compositor::{Compositor, Plane};
+use crate::core::terminal::RESTORE_SEQ;
 use crate::framework::animation::AnimationManager;
 use crate::framework::command::{AppConfig, BoundCommand, CommandRunner};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::event_bus::EventBus;
 use crate::framework::focus::FocusManager;
+use crate::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 #[cfg(feature = "debug_events")]
 use crate::framework::logging::{log_key_event, log_mouse_event};
 use crate::framework::scene_router::SceneRouter;
-use crate::framework::keybindings::{actions, KeybindingSet, resolve_keybindings};
 use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId};
 use crate::input::event::{Event, KeyEvent};
 use crate::input::parser::Parser;
 use crate::Terminal;
-use crate::core::terminal::RESTORE_SEQ;
 use ratatui::layout::Rect;
 use signal_hook::consts::signal::{SIGINT, SIGTERM};
 use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
-use std::ops::Deref;
-use std::ops::DerefMut;
 use std::collections::HashMap;
 use std::io::{self, Read, Write};
+use std::ops::Deref;
+use std::ops::DerefMut;
 use std::os::fd::AsFd;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
@@ -196,7 +196,11 @@ impl App {
         *self.z_order_dirty.borrow_mut() = true;
     }
 
-    fn dispatch_key(&mut self, k: &crate::input::event::KeyEvent, running: &std::sync::atomic::AtomicBool) {
+    fn dispatch_key(
+        &mut self,
+        k: &crate::input::event::KeyEvent,
+        running: &std::sync::atomic::AtomicBool,
+    ) {
         if self.keybindings.matches(actions::QUIT, k) {
             running.store(false, Ordering::SeqCst);
             return;
@@ -204,7 +208,9 @@ impl App {
 
         if self.keybindings.matches(actions::BACK, k) {
             let pre_scene_depth = self.scene_router.stack_depth();
-            let consumed = self.focus_manager.focused()
+            let consumed = self
+                .focus_manager
+                .focused()
                 .and_then(|id| self.widget_mut(id))
                 .map(|mut w| w.handle_key(*k))
                 .unwrap_or(false);
@@ -224,7 +230,9 @@ impl App {
 
         if k.code == crate::input::event::KeyCode::Tab {
             let old = self.focus_manager.focused();
-            if k.modifiers.contains(crate::input::event::KeyModifiers::SHIFT) {
+            if k.modifiers
+                .contains(crate::input::event::KeyModifiers::SHIFT)
+            {
                 let _ = self.focus_manager.tab_prev();
             } else {
                 let _ = self.focus_manager.tab_next();
@@ -273,7 +281,12 @@ impl App {
         }
     }
 
-    fn dispatch_mouse(&mut self, col: u16, row: u16, mouse_event: &crate::input::event::MouseEvent) {
+    fn dispatch_mouse(
+        &mut self,
+        col: u16,
+        row: u16,
+        mouse_event: &crate::input::event::MouseEvent,
+    ) {
         self.rebuild_z_order_cache();
         let target_id = {
             let widgets = self.widgets.borrow();
@@ -328,14 +341,19 @@ impl App {
         match event {
             Event::Resize(w, h) => self.dispatch_resize(*w, *h),
             Event::Key(k) => self.dispatch_key(k, running),
-            Event::Mouse(mouse_event) => self.dispatch_mouse(mouse_event.column, mouse_event.row, mouse_event),
+            Event::Mouse(mouse_event) => {
+                self.dispatch_mouse(mouse_event.column, mouse_event.row, mouse_event)
+            }
             Event::Paste(text) => self.dispatch_paste(text),
             _ => {}
         }
     }
     /// Creates a new `App` with a linked terminal.
     /// Returns an error if the terminal cannot be initialized.
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all, fields(title = "Dracon App")))]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, fields(title = "Dracon App"))
+    )]
     pub fn new() -> io::Result<Self> {
         Self::new_impl()
     }
@@ -347,7 +365,13 @@ impl App {
         let mut compositor = Compositor::new(w, h);
         compositor.set_clear_color(Theme::default().bg);
 
-        Ok(Self::build(terminal, compositor, String::from("Dracon App"), 30, Vec::new()))
+        Ok(Self::build(
+            terminal,
+            compositor,
+            String::from("Dracon App"),
+            30,
+            Vec::new(),
+        ))
     }
 
     fn build(
@@ -640,7 +664,8 @@ impl App {
         let focusable = widget.focusable();
         let cmds = widget.commands();
         self.widgets.borrow_mut().push(widget);
-        self.compositor.set_widget_count(self.widgets.borrow().len());
+        self.compositor
+            .set_widget_count(self.widgets.borrow().len());
         self.focus_manager.register(id, focusable);
         self.invalidate_z_order_cache();
 
@@ -671,7 +696,8 @@ impl App {
             w.on_unmount();
         }
         self.widgets.borrow_mut().retain(|w| w.id() != id);
-        self.compositor.set_widget_count(self.widgets.borrow().len());
+        self.compositor
+            .set_widget_count(self.widgets.borrow().len());
         self.focus_manager.unregister(id);
         self.command_tracking.borrow_mut().remove(&id);
         self.invalidate_z_order_cache();
@@ -738,7 +764,9 @@ impl App {
                         Ok(true) => {
                             let mut drain_buf = [0u8; 1024];
                             if let Ok(dn) = stdin.read(&mut drain_buf) {
-                                if dn == 0 { break; }
+                                if dn == 0 {
+                                    break;
+                                }
                                 for byte in drain_buf.iter().take(dn) {
                                     if let Some(event) = self.parser.advance(*byte) {
                                         self.handle_event(&event, &running);
@@ -1099,7 +1127,7 @@ mod tests {
         crate::Terminal::new(io::stdout())
     }
 
-macro_rules! with_ctx {
+    macro_rules! with_ctx {
         (mut $ctx:ident, $body:expr) => {{
             let mut compositor = Compositor::new(80, 24);
             let mut focus_manager = FocusManager::new();
@@ -1305,7 +1333,9 @@ macro_rules! with_ctx {
     #[test]
     fn test_ctx_theme_access() {
         with_ctx!(ctx, {
-            assert!(ctx.theme().name == Arc::from("default") || ctx.theme().name == Arc::from("dark"));
+            assert!(
+                ctx.theme().name == Arc::from("default") || ctx.theme().name == Arc::from("dark")
+            );
         });
     }
 

@@ -137,11 +137,20 @@ impl ScrollableContent {
         if !self.tick_counter.is_multiple_of(60) {
             return;
         }
-        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        self.rng_state = self
+            .rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1);
         let lvl_idx = (self.rng_state >> 32) as usize % LOG_LEVELS.len();
-        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        self.rng_state = self
+            .rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1);
         let use_stream = (self.rng_state >> 63) & 1 == 1;
-        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+        self.rng_state = self
+            .rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1);
         let msg_idx = (self.rng_state >> 16) as usize;
         let msg = if use_stream {
             STREAM_MESSAGES[msg_idx % STREAM_MESSAGES.len()]
@@ -408,7 +417,8 @@ impl Widget for ScrollableContent {
             let is_search_match = if self.search_query.is_empty() {
                 false
             } else {
-                line.to_lowercase().contains(&self.search_query.to_lowercase())
+                line.to_lowercase()
+                    .contains(&self.search_query.to_lowercase())
             };
             let y = content_top + row;
             let max_chars = sb_x.saturating_sub(2);
@@ -416,11 +426,7 @@ impl Widget for ScrollableContent {
                 let idx = y * w + 1 + j;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = if is_search_match {
-                        t.warning
-                    } else {
-                        *color
-                    };
+                    plane.cells[idx].fg = if is_search_match { t.warning } else { *color };
                     if is_hovered {
                         plane.cells[idx].bg = t.hover_bg;
                     }
@@ -463,7 +469,9 @@ impl Widget for ScrollableContent {
             offset_display + 1,
             (offset_display + view_h).min(total),
             total,
-            self.keybindings.display(actions::SEARCH).unwrap_or("ctrl+f"),
+            self.keybindings
+                .display(actions::SEARCH)
+                .unwrap_or("ctrl+f"),
             self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
             self.keybindings.display(actions::HELP).unwrap_or("f1"),
             self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
@@ -556,13 +564,22 @@ impl Widget for ScrollableContent {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         use dracon_terminal_engine::input::event::MouseEventKind;
 
         let content_top = 2u16;
         let content_h = self.area.height.saturating_sub(4);
 
-        if row >= content_top && row < content_top + content_h && col >= 1 && col < self.area.width.saturating_sub(2) {
+        if row >= content_top
+            && row < content_top + content_h
+            && col >= 1
+            && col < self.area.width.saturating_sub(2)
+        {
             match kind {
                 MouseEventKind::Moved => {
                     let rel_row = row.saturating_sub(content_top) as usize;
@@ -630,7 +647,12 @@ impl Widget for InputRouter {
         self.target.borrow_mut().handle_key(key)
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         self.target.borrow_mut().handle_mouse(kind, col, row)
     }
 
@@ -674,51 +696,51 @@ fn main() -> Result<()> {
     app.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app.on_input(move |key| {
-            use dracon_terminal_engine::input::event::KeyEventKind;
-            if key.kind != KeyEventKind::Press {
-                return false;
-            }
-            let mut c = content_input.borrow_mut();
-            if kb_input.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else if kb_input.matches(actions::THEME, &key) {
-                c.cycle_theme();
-                true
-            } else if kb_input.matches(actions::HELP, &key) {
-                c.show_help = !c.show_help;
-                c.dirty = true;
-                true
-            } else if c.show_help && kb_input.matches(actions::BACK, &key) {
-                c.show_help = false;
-                c.dirty = true;
-                true
-            } else if kb_input.matches(actions::SEARCH, &key) && !c.search_active {
-                c.search_active = true;
-                c.search_query.clear();
-                c.dirty = true;
-                true
-            } else if c.search_active {
-                c.handle_key(key)
-            } else {
-                false
-            }
-        })
-        .on_tick(move |ctx, _tick| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-                return;
-            }
-            let mut c = content_tick.borrow_mut();
-            let (w, h) = ctx.compositor().size();
-            if c.area.width != w || c.area.height != h {
-                c.set_area(Rect::new(0, 0, w, h));
-            }
-            c.tick();
-            if c.needs_render() {
-                ctx.add_plane(c.render(c.area));
-                c.clear_dirty();
-            }
-        })
-        .run(|_| {})
+        use dracon_terminal_engine::input::event::KeyEventKind;
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        let mut c = content_input.borrow_mut();
+        if kb_input.matches(actions::QUIT, &key) {
+            should_quit.store(true, Ordering::SeqCst);
+            true
+        } else if kb_input.matches(actions::THEME, &key) {
+            c.cycle_theme();
+            true
+        } else if kb_input.matches(actions::HELP, &key) {
+            c.show_help = !c.show_help;
+            c.dirty = true;
+            true
+        } else if c.show_help && kb_input.matches(actions::BACK, &key) {
+            c.show_help = false;
+            c.dirty = true;
+            true
+        } else if kb_input.matches(actions::SEARCH, &key) && !c.search_active {
+            c.search_active = true;
+            c.search_query.clear();
+            c.dirty = true;
+            true
+        } else if c.search_active {
+            c.handle_key(key)
+        } else {
+            false
+        }
+    })
+    .on_tick(move |ctx, _tick| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
+        let mut c = content_tick.borrow_mut();
+        let (w, h) = ctx.compositor().size();
+        if c.area.width != w || c.area.height != h {
+            c.set_area(Rect::new(0, 0, w, h));
+        }
+        c.tick();
+        if c.needs_render() {
+            ctx.add_plane(c.render(c.area));
+            c.clear_dirty();
+        }
+    })
+    .run(|_| {})
 }

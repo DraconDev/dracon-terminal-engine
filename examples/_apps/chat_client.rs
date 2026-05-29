@@ -93,7 +93,6 @@ struct ChatApp {
 
     // Overlay state
 
-
     // Area cache
     area: StdCell<Rect>,
 }
@@ -104,18 +103,78 @@ impl ChatApp {
 
         // Seed messages
         let messages = vec![
-            Message { sender: "Alice", text: "Hey! How's the terminal engine going?".into(), time: "10:42", is_me: false },
-            Message { sender: "You", text: "Pretty good! Just finished the arena game.".into(), time: "10:43", is_me: true },
-            Message { sender: "Bob", text: "The game is awesome, I love the particles!".into(), time: "10:44", is_me: false },
-            Message { sender: "You", text: "Thanks! It was fun to build.".into(), time: "10:45", is_me: true },
-            Message { sender: "Alice", text: "Can you add emoji support? 😄".into(), time: "10:46", is_me: false },
-            Message { sender: "You", text: "Working on it right now!".into(), time: "10:47", is_me: true },
-            Message { sender: "Bob", text: "The widget gallery is also really nice.".into(), time: "10:48", is_me: false },
-            Message { sender: "Alice", text: "I showed it to the team, they're impressed.".into(), time: "10:49", is_me: false },
-            Message { sender: "You", text: "That's great to hear!".into(), time: "10:50", is_me: true },
-            Message { sender: "Bob", text: "Any plans for a spreadsheet widget?".into(), time: "10:51", is_me: false },
-            Message { sender: "You", text: "Maybe in 0.2.0, we'll see.".into(), time: "10:52", is_me: true },
-            Message { sender: "Alice", text: "The theme system is 🔥 btw".into(), time: "10:53", is_me: false },
+            Message {
+                sender: "Alice",
+                text: "Hey! How's the terminal engine going?".into(),
+                time: "10:42",
+                is_me: false,
+            },
+            Message {
+                sender: "You",
+                text: "Pretty good! Just finished the arena game.".into(),
+                time: "10:43",
+                is_me: true,
+            },
+            Message {
+                sender: "Bob",
+                text: "The game is awesome, I love the particles!".into(),
+                time: "10:44",
+                is_me: false,
+            },
+            Message {
+                sender: "You",
+                text: "Thanks! It was fun to build.".into(),
+                time: "10:45",
+                is_me: true,
+            },
+            Message {
+                sender: "Alice",
+                text: "Can you add emoji support? 😄".into(),
+                time: "10:46",
+                is_me: false,
+            },
+            Message {
+                sender: "You",
+                text: "Working on it right now!".into(),
+                time: "10:47",
+                is_me: true,
+            },
+            Message {
+                sender: "Bob",
+                text: "The widget gallery is also really nice.".into(),
+                time: "10:48",
+                is_me: false,
+            },
+            Message {
+                sender: "Alice",
+                text: "I showed it to the team, they're impressed.".into(),
+                time: "10:49",
+                is_me: false,
+            },
+            Message {
+                sender: "You",
+                text: "That's great to hear!".into(),
+                time: "10:50",
+                is_me: true,
+            },
+            Message {
+                sender: "Bob",
+                text: "Any plans for a spreadsheet widget?".into(),
+                time: "10:51",
+                is_me: false,
+            },
+            Message {
+                sender: "You",
+                text: "Maybe in 0.2.0, we'll see.".into(),
+                time: "10:52",
+                is_me: true,
+            },
+            Message {
+                sender: "Alice",
+                text: "The theme system is 🔥 btw".into(),
+                time: "10:53",
+                is_me: false,
+            },
         ];
 
         let message_list = List::new_with_id(WidgetId::new(1), messages)
@@ -138,10 +197,34 @@ impl ChatApp {
         let notifications = NotificationCenter::new(theme.clone());
 
         let contacts = vec![
-            Contact { name: "Alice", emoji: "👩", last_msg: "The theme system is 🔥", time: "10:53", unread: 0 },
-            Contact { name: "Bob", emoji: "👨", last_msg: "Any plans for a spreadsheet?", time: "10:51", unread: 0 },
-            Contact { name: "Team", emoji: "👥", last_msg: "Meeting at 3pm", time: "09:30", unread: 2 },
-            Contact { name: "Eve", emoji: "🦹", last_msg: "Check the new widgets!", time: "Yesterday", unread: 1 },
+            Contact {
+                name: "Alice",
+                emoji: "👩",
+                last_msg: "The theme system is 🔥",
+                time: "10:53",
+                unread: 0,
+            },
+            Contact {
+                name: "Bob",
+                emoji: "👨",
+                last_msg: "Any plans for a spreadsheet?",
+                time: "10:51",
+                unread: 0,
+            },
+            Contact {
+                name: "Team",
+                emoji: "👥",
+                last_msg: "Meeting at 3pm",
+                time: "09:30",
+                unread: 2,
+            },
+            Contact {
+                name: "Eve",
+                emoji: "🦹",
+                last_msg: "Check the new widgets!",
+                time: "Yesterday",
+                unread: 1,
+            },
         ];
 
         let mut app = Self {
@@ -163,7 +246,8 @@ impl ChatApp {
         };
 
         // Scroll to bottom
-        app.message_list.scroll_to(app.message_list.len().saturating_sub(1));
+        app.message_list
+            .scroll_to(app.message_list.len().saturating_sub(1));
         app
     }
 
@@ -171,7 +255,9 @@ impl ChatApp {
         if text.is_empty() {
             return;
         }
-        let times = ["10:54", "10:55", "10:56", "10:57", "10:58", "10:59", "11:00"];
+        let times = [
+            "10:54", "10:55", "10:56", "10:57", "10:58", "10:59", "11:00",
+        ];
         let time = times[self.message_list.len() % times.len()];
         self.message_list.push_item(Message {
             sender: "You",
@@ -179,7 +265,8 @@ impl ChatApp {
             time,
             is_me: true,
         });
-        self.message_list.scroll_to(self.message_list.len().saturating_sub(1));
+        self.message_list
+            .scroll_to(self.message_list.len().saturating_sub(1));
         self.input.clear();
         self.dirty = true;
 
@@ -189,15 +276,28 @@ impl ChatApp {
         } else if text.contains("?") {
             self.simulate_reply("Bob", "Good question, let me think about that...");
         } else {
-            let replies = ["That's cool!", "I agree!", "Nice one! 🎉", "Interesting!", "👍", "Lol 😂"];
+            let replies = [
+                "That's cool!",
+                "I agree!",
+                "Nice one! 🎉",
+                "Interesting!",
+                "👍",
+                "Lol 😂",
+            ];
             let idx = self.message_list.len() % replies.len();
-            let sender = if idx.is_multiple_of(2) { "Alice" } else { "Bob" };
+            let sender = if idx.is_multiple_of(2) {
+                "Alice"
+            } else {
+                "Bob"
+            };
             self.simulate_reply(sender, replies[idx]);
         }
     }
 
     fn simulate_reply(&mut self, sender: &'static str, text: &'static str) {
-        let times = ["10:54", "10:55", "10:56", "10:57", "10:58", "10:59", "11:00"];
+        let times = [
+            "10:54", "10:55", "10:56", "10:57", "10:58", "10:59", "11:00",
+        ];
         let time = times[self.message_list.len() % times.len()];
         self.message_list.push_item(Message {
             sender,
@@ -205,7 +305,8 @@ impl ChatApp {
             time,
             is_me: false,
         });
-        self.message_list.scroll_to(self.message_list.len().saturating_sub(1));
+        self.message_list
+            .scroll_to(self.message_list.len().saturating_sub(1));
 
         if self.notifications_enabled {
             self.notifications.info(sender, text);
@@ -220,8 +321,17 @@ impl ChatApp {
     }
 
     fn cycle_theme(&mut self) {
-        let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula(), Theme::dark(), Theme::solarized_dark()];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let themes = [
+            Theme::nord(),
+            Theme::cyberpunk(),
+            Theme::dracula(),
+            Theme::dark(),
+            Theme::solarized_dark(),
+        ];
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.propagate_theme();
         self.dirty = true;
@@ -290,15 +400,33 @@ impl ChatApp {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 impl Widget for ChatApp {
-    fn id(&self) -> WidgetId { WidgetId::new(100) }
-    fn set_id(&mut self, id: WidgetId) { let _ = id; }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(100)
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        let _ = id;
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
@@ -314,7 +442,10 @@ impl Widget for ChatApp {
 
         // ── Header ────────────────────────────────────────────────────────────
         let contact = &self.contacts[self.selected_contact];
-        let header_text = format!(" {} {}  {} — {}", contact.emoji, contact.name, contact.last_msg, contact.time);
+        let header_text = format!(
+            " {} {}  {} — {}",
+            contact.emoji, contact.name, contact.last_msg, contact.time
+        );
         let header_len = header_text.chars().count().min(msg_area_w as usize);
         for (i, c) in header_text.chars().take(header_len).enumerate() {
             let idx = sidebar_w as usize + i;
@@ -338,9 +469,15 @@ impl Widget for ChatApp {
         // ── Contacts Sidebar ──────────────────────────────────────────────────
         for (i, ct) in self.contacts.iter().enumerate() {
             let row = 1 + i as u16;
-            if row >= area.height { break; }
+            if row >= area.height {
+                break;
+            }
             let is_selected = i == self.selected_contact;
-            let bg = if is_selected { t.selection_bg } else { t.surface };
+            let bg = if is_selected {
+                t.selection_bg
+            } else {
+                t.surface
+            };
             let fg = if is_selected { t.selection_fg } else { t.fg };
 
             // Fill row background
@@ -363,9 +500,19 @@ impl Widget for ChatApp {
                 let idx = (row * area.width + 1 + j as u16) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
-                    plane.cells[idx].fg = if j == 0 { fg } else if ct.unread > 0 && !is_selected { t.primary } else { fg };
+                    plane.cells[idx].fg = if j == 0 {
+                        fg
+                    } else if ct.unread > 0 && !is_selected {
+                        t.primary
+                    } else {
+                        fg
+                    };
                     plane.cells[idx].bg = bg;
-                    plane.cells[idx].style = if ct.unread > 0 { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if ct.unread > 0 {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
         }
@@ -382,12 +529,22 @@ impl Widget for ChatApp {
         }
 
         // ── Message List ──────────────────────────────────────────────────────
-        let msg_plane = self.message_list.render(Rect::new(sidebar_w + 1, header_h, msg_area_w.saturating_sub(1), msg_list_h));
+        let msg_plane = self.message_list.render(Rect::new(
+            sidebar_w + 1,
+            header_h,
+            msg_area_w.saturating_sub(1),
+            msg_list_h,
+        ));
         plane.blit_from(&msg_plane, sidebar_w + 1, header_h);
 
         // ── Input Area ────────────────────────────────────────────────────────
         let input_y = header_h + msg_list_h;
-        let input_plane = self.input.render(Rect::new(0, 0, msg_area_w.saturating_sub(2), input_h.saturating_sub(2)));
+        let input_plane = self.input.render(Rect::new(
+            0,
+            0,
+            msg_area_w.saturating_sub(2),
+            input_h.saturating_sub(2),
+        ));
         plane.blit_from(&input_plane, sidebar_w + 2, input_y + 1);
 
         // Input border
@@ -466,8 +623,18 @@ impl Widget for ChatApp {
 
             // Render settings content inside modal
             let settings_lines = [
-                format!("Notifications: {}", if self.notifications_enabled { "ON" } else { "OFF" }),
-                format!("Sound:         {}", if self.sound_enabled { "ON" } else { "OFF" }),
+                format!(
+                    "Notifications: {}",
+                    if self.notifications_enabled {
+                        "ON"
+                    } else {
+                        "OFF"
+                    }
+                ),
+                format!(
+                    "Sound:         {}",
+                    if self.sound_enabled { "ON" } else { "OFF" }
+                ),
                 format!("Theme:         {}", self.theme.name),
             ];
             for (i, line) in settings_lines.iter().enumerate() {
@@ -524,8 +691,11 @@ impl Widget for ChatApp {
         if self.emoji_modal.is_some() {
             // Handle emoji modal button clicks via keyboard
             match key.code {
-                KeyCode::Char('1') | KeyCode::Char('2') | KeyCode::Char('3')
-                | KeyCode::Char('4') | KeyCode::Char('5') => {
+                KeyCode::Char('1')
+                | KeyCode::Char('2')
+                | KeyCode::Char('3')
+                | KeyCode::Char('4')
+                | KeyCode::Char('5') => {
                     let emojis = ["😀", "❤️", "👍", "🔥", "🎉"];
                     let idx = match key.code {
                         KeyCode::Char('1') => 0,
@@ -571,13 +741,21 @@ impl Widget for ChatApp {
         }
 
         // Emoji picker
-        if key.code == KeyCode::Char('e') && key.modifiers.contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL) {
+        if key.code == KeyCode::Char('e')
+            && key
+                .modifiers
+                .contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL)
+        {
             self.show_emoji_picker();
             return true;
         }
 
         // Settings
-        if key.code == KeyCode::Char('s') && key.modifiers.contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL) {
+        if key.code == KeyCode::Char('s')
+            && key
+                .modifiers
+                .contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL)
+        {
             self.show_settings();
             return true;
         }
@@ -616,7 +794,11 @@ impl Widget for ChatApp {
                 return true;
             }
             KeyCode::BackTab => {
-                self.selected_contact = if self.selected_contact == 0 { self.contacts.len() - 1 } else { self.selected_contact - 1 };
+                self.selected_contact = if self.selected_contact == 0 {
+                    self.contacts.len() - 1
+                } else {
+                    self.selected_contact - 1
+                };
                 self.contacts[self.selected_contact].unread = 0;
                 self.dirty = true;
                 return true;
@@ -650,7 +832,10 @@ impl Widget for ChatApp {
                 return true;
             }
             // Click outside modal dismisses it
-            if matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+            if matches!(
+                kind,
+                MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)
+            ) {
                 self.emoji_modal = None;
                 self.dirty = true;
                 return true;
@@ -671,7 +856,10 @@ impl Widget for ChatApp {
                 return true;
             }
             // Click outside modal dismisses it
-            if matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+            if matches!(
+                kind,
+                MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)
+            ) {
                 self.settings_modal = None;
                 self.dirty = true;
                 return true;
@@ -681,16 +869,22 @@ impl Widget for ChatApp {
 
         // Contact sidebar click
         let sidebar_w = 18u16.min(area.width / 4);
-        if col < sidebar_w && row > 0 && (row - 1) < self.contacts.len() as u16
-            && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
-                let idx = (row - 1) as usize;
-                if idx < self.contacts.len() {
-                    self.selected_contact = idx;
-                    self.contacts[self.selected_contact].unread = 0;
-                    self.dirty = true;
-                    return true;
-                }
+        if col < sidebar_w
+            && row > 0
+            && (row - 1) < self.contacts.len() as u16
+            && matches!(
+                kind,
+                MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)
+            )
+        {
+            let idx = (row - 1) as usize;
+            if idx < self.contacts.len() {
+                self.selected_contact = idx;
+                self.contacts[self.selected_contact].unread = 0;
+                self.dirty = true;
+                return true;
             }
+        }
 
         // Message list click
         let header_h = 1u16;
@@ -698,13 +892,17 @@ impl Widget for ChatApp {
         let status_h = 1u16;
         let msg_list_h = area.height.saturating_sub(status_h + input_h + header_h);
         if col > sidebar_w && row >= header_h && row < header_h + msg_list_h {
-            return self.message_list.handle_mouse(kind, col - sidebar_w - 1, row - header_h);
+            return self
+                .message_list
+                .handle_mouse(kind, col - sidebar_w - 1, row - header_h);
         }
 
         // Input area click
         let input_y = header_h + msg_list_h;
         if col >= sidebar_w + 2 && row > input_y && row < input_y + input_h {
-            return self.input.handle_mouse(kind, col - sidebar_w - 2, row - input_y - 1);
+            return self
+                .input
+                .handle_mouse(kind, col - sidebar_w - 2, row - input_y - 1);
         }
 
         false
@@ -737,7 +935,12 @@ impl ChatApp {
         }
 
         // Border
-        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
         for (ch, cx, cy) in corners {
             let idx = (cy * area.width + cx) as usize;
             if idx < plane.cells.len() {
@@ -748,14 +951,26 @@ impl ChatApp {
         for x in hx + 1..hx + hw - 1 {
             let top = (hy * area.width + x) as usize;
             let bot = ((hy + hh - 1) * area.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left = (y * area.width + hx) as usize;
             let right = (y * area.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Title

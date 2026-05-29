@@ -11,7 +11,9 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::Autocomplete;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -25,18 +27,90 @@ struct PackageInfo {
 }
 
 const PACKAGES: &[PackageInfo] = &[
-    PackageInfo { name: "rustacean", version: "1.4.0", downloads: "2.1M", category: "tooling", description: "Rust IDE support & analysis" },
-    PackageInfo { name: "rust-analyzer", version: "2026.5", downloads: "8.3M", category: "tooling", description: "Next-gen Rust compiler frontend" },
-    PackageInfo { name: "rustdoc", version: "1.78", downloads: "5.6M", category: "docs", description: "Documentation generator for Rust" },
-    PackageInfo { name: "rustfmt", version: "1.7", downloads: "9.1M", category: "tooling", description: "Rust code formatter" },
-    PackageInfo { name: "rustc", version: "1.78", downloads: "12M", category: "compiler", description: "The Rust compiler" },
-    PackageInfo { name: "cargo", version: "1.78", downloads: "14M", category: "tooling", description: "Rust package manager" },
-    PackageInfo { name: "clippy", version: "0.1.78", downloads: "7.2M", category: "linting", description: "Rust linter & code checker" },
-    PackageInfo { name: "miri", version: "0.1", downloads: "890K", category: "testing", description: "Undefined behavior detector" },
-    PackageInfo { name: "rls", version: "1.42", downloads: "3.4M", category: "tooling", description: "Rust Language Server (legacy)" },
-    PackageInfo { name: "rustlings", version: "5.6", downloads: "1.8M", category: "learning", description: "Interactive Rust exercises" },
-    PackageInfo { name: "rustup", version: "1.27", downloads: "11M", category: "tooling", description: "Rust toolchain installer" },
-    PackageInfo { name: "crates.io", version: "-", downloads: "-", category: "registry", description: "Rust package registry" },
+    PackageInfo {
+        name: "rustacean",
+        version: "1.4.0",
+        downloads: "2.1M",
+        category: "tooling",
+        description: "Rust IDE support & analysis",
+    },
+    PackageInfo {
+        name: "rust-analyzer",
+        version: "2026.5",
+        downloads: "8.3M",
+        category: "tooling",
+        description: "Next-gen Rust compiler frontend",
+    },
+    PackageInfo {
+        name: "rustdoc",
+        version: "1.78",
+        downloads: "5.6M",
+        category: "docs",
+        description: "Documentation generator for Rust",
+    },
+    PackageInfo {
+        name: "rustfmt",
+        version: "1.7",
+        downloads: "9.1M",
+        category: "tooling",
+        description: "Rust code formatter",
+    },
+    PackageInfo {
+        name: "rustc",
+        version: "1.78",
+        downloads: "12M",
+        category: "compiler",
+        description: "The Rust compiler",
+    },
+    PackageInfo {
+        name: "cargo",
+        version: "1.78",
+        downloads: "14M",
+        category: "tooling",
+        description: "Rust package manager",
+    },
+    PackageInfo {
+        name: "clippy",
+        version: "0.1.78",
+        downloads: "7.2M",
+        category: "linting",
+        description: "Rust linter & code checker",
+    },
+    PackageInfo {
+        name: "miri",
+        version: "0.1",
+        downloads: "890K",
+        category: "testing",
+        description: "Undefined behavior detector",
+    },
+    PackageInfo {
+        name: "rls",
+        version: "1.42",
+        downloads: "3.4M",
+        category: "tooling",
+        description: "Rust Language Server (legacy)",
+    },
+    PackageInfo {
+        name: "rustlings",
+        version: "5.6",
+        downloads: "1.8M",
+        category: "learning",
+        description: "Interactive Rust exercises",
+    },
+    PackageInfo {
+        name: "rustup",
+        version: "1.27",
+        downloads: "11M",
+        category: "tooling",
+        description: "Rust toolchain installer",
+    },
+    PackageInfo {
+        name: "crates.io",
+        version: "-",
+        downloads: "-",
+        category: "registry",
+        description: "Rust package registry",
+    },
 ];
 
 fn category_color(cat: &str, theme: &Theme) -> Color {
@@ -72,7 +146,9 @@ impl AutocompleteScene {
         let mut autocomplete = Autocomplete::new(WidgetId::new(100), suggestions)
             .with_theme(theme.clone())
             .with_max_visible(6)
-            .on_select(move |s| { *bridge_cb.borrow_mut() = Some(s.to_string()); });
+            .on_select(move |s| {
+                *bridge_cb.borrow_mut() = Some(s.to_string());
+            });
         autocomplete.set_area(Rect::new(2, 3, 28, 9));
         autocomplete.on_focus();
         autocomplete.open_dropdown();
@@ -133,24 +209,50 @@ impl AutocompleteScene {
                 let ver = format!("v{}", pkg.version);
                 let dl = format!("{} downloads", pkg.downloads);
                 draw_text_clipped(plane, x, y + 4, &ver, max_x, t.fg, t.bg, false);
-                draw_text_clipped(plane, x + ver.len() as u16 + 2, y + 4, &dl, max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x + ver.len() as u16 + 2,
+                    y + 4,
+                    &dl,
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
 
                 // Description
                 draw_text_clipped(plane, x, y + 6, pkg.description, max_x, t.fg, t.bg, false);
 
                 // Visual install bar (decorative)
-                draw_text_clipped(plane, x, y + 8, "Popularity:", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    y + 8,
+                    "Popularity:",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
                 let bar_x = x + 12;
-                let bar_w = (max_x as usize).saturating_sub(bar_x as usize).saturating_sub(2);
+                let bar_w = (max_x as usize)
+                    .saturating_sub(bar_x as usize)
+                    .saturating_sub(2);
                 let fill = match pkg.downloads {
-                    d if d.contains('M') => d.trim_end_matches('M').parse::<f32>().unwrap_or(0.0) / 15.0,
-                    d if d.contains('K') => d.trim_end_matches('K').parse::<f32>().unwrap_or(0.0) / 15000.0,
+                    d if d.contains('M') => {
+                        d.trim_end_matches('M').parse::<f32>().unwrap_or(0.0) / 15.0
+                    }
+                    d if d.contains('K') => {
+                        d.trim_end_matches('K').parse::<f32>().unwrap_or(0.0) / 15000.0
+                    }
                     _ => 0.1,
                 };
                 let filled = (fill * bar_w as f32) as usize;
                 for bx in 0..bar_w {
                     let bx_pos = bar_x + bx as u16;
-                    if bx_pos >= max_x { break; }
+                    if bx_pos >= max_x {
+                        break;
+                    }
                     let idx = ((y + 8) * plane.width + bx_pos) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = if bx < filled { '█' } else { '░' };
@@ -160,21 +262,50 @@ impl AutocompleteScene {
                 }
             } else {
                 draw_text_clipped(plane, x, y + 2, name, max_x, t.primary, t.bg, true);
-                draw_text_clipped(plane, x, y + 3, "Custom package", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    y + 3,
+                    "Custom package",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
         } else {
             draw_text_clipped(plane, x, y, "Package Details", max_x, t.primary, t.bg, true);
             for dx in 0..w {
                 let dx_pos = x + dx;
-                if dx_pos >= max_x { break; }
+                if dx_pos >= max_x {
+                    break;
+                }
                 let idx = ((y + 1) * plane.width + dx_pos) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '─';
                     plane.cells[idx].fg = t.outline;
                 }
             }
-            draw_text_clipped(plane, x, y + 2, "Select a package", max_x, t.fg_muted, t.bg, false);
-            draw_text_clipped(plane, x, y + 3, "to see details", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(
+                plane,
+                x,
+                y + 2,
+                "Select a package",
+                max_x,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
+            draw_text_clipped(
+                plane,
+                x,
+                y + 3,
+                "to see details",
+                max_x,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
     }
 
@@ -184,14 +315,24 @@ impl AutocompleteScene {
         draw_text_clipped(plane, x, y, "Recent", max_x, t.secondary, t.bg, true);
 
         if self.recent_selections.is_empty() {
-            draw_text_clipped(plane, x, y + 1, "No selections yet", max_x, t.fg_muted, t.bg, false);
+            draw_text_clipped(
+                plane,
+                x,
+                y + 1,
+                "No selections yet",
+                max_x,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         } else {
             for (i, sel) in self.recent_selections.iter().enumerate() {
                 let ry = y + 1 + i as u16;
                 let num = format!("{}.", i + 1);
                 draw_text_clipped(plane, x, ry, &num, max_x, t.fg_muted, t.bg, false);
 
-                let cat_color = self.get_package_info(sel)
+                let cat_color = self
+                    .get_package_info(sel)
                     .map(|p| category_color(p.category, t))
                     .unwrap_or(t.fg);
                 draw_text_clipped(plane, x + 3, ry, sel, max_x, cat_color, t.bg, false);
@@ -203,7 +344,11 @@ impl AutocompleteScene {
         let t = &self.theme;
         let total = PACKAGES.len();
         let categories: Vec<&str> = PACKAGES.iter().map(|p| p.category).collect();
-        let unique_cats: Vec<&&str> = categories.iter().collect::<std::collections::HashSet<_>>().into_iter().collect();
+        let unique_cats: Vec<&&str> = categories
+            .iter()
+            .collect::<std::collections::HashSet<_>>()
+            .into_iter()
+            .collect();
 
         let stats = format!("{} packages · {} categories", total, unique_cats.len());
         draw_text(plane, x, y, &stats, t.fg_muted, t.bg, false);
@@ -211,7 +356,9 @@ impl AutocompleteScene {
 }
 
 impl Scene for AutocompleteScene {
-    fn scene_id(&self) -> &str { "autocomplete" }
+    fn scene_id(&self) -> &str {
+        "autocomplete"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -228,8 +375,15 @@ impl Scene for AutocompleteScene {
         self.render_stats_bar(&mut plane, 18, 0);
 
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -242,7 +396,16 @@ impl Scene for AutocompleteScene {
 
         // Left: Search input + Autocomplete dropdown
         let left_max_x = 31u16; // vertical divider at 32, text must stop before it
-        draw_text_clipped(&mut plane, 2, 2, "Search packages:", left_max_x, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            &mut plane,
+            2,
+            2,
+            "Search packages:",
+            left_max_x,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Render autocomplete directly at position
         let ac_x = 2u16;
@@ -255,12 +418,20 @@ impl Scene for AutocompleteScene {
 
         // Category legend under the dropdown
         let legend_y = ac_y + ac_h;
-        let categories = [("tooling", t.primary), ("compiler", t.error), ("docs", t.success),
-                         ("linting", t.warning), ("testing", t.info), ("learning", t.secondary)];
+        let categories = [
+            ("tooling", t.primary),
+            ("compiler", t.error),
+            ("docs", t.success),
+            ("linting", t.warning),
+            ("testing", t.info),
+            ("learning", t.secondary),
+        ];
         let mut lx = 2u16;
         for (cat, color) in &categories {
             let pill = format!(" {} ", cat);
-            if lx + pill.len() as u16 > left_max_x { break; } // clip at divider
+            if lx + pill.len() as u16 > left_max_x {
+                break;
+            } // clip at divider
             draw_text(&mut plane, lx, legend_y, &pill, *color, t.bg, true);
             lx += pill.len() as u16 + 1;
         }
@@ -285,7 +456,10 @@ impl Scene for AutocompleteScene {
         // Footer
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let footer = format!(" Type:search | ↑↓:nav | Enter:select | Tab:complete | {}:help | {}:back ", help_key, back_key);
+        let footer = format!(
+            " Type:search | ↑↓:nav | Enter:select | Tab:complete | {}:help | {}:back ",
+            help_key, back_key
+        );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
             let idx = (fy * area.width + i as u16) as usize;
@@ -298,17 +472,32 @@ impl Scene for AutocompleteScene {
         }
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Autocomplete Help", &[("Up/Dn", "Navigate suggestions"), ("Enter", "Select item"), ("Tab", "Auto-complete"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Autocomplete Help",
+                &[
+                    ("Up/Dn", "Navigate suggestions"),
+                    ("Enter", "Select item"),
+                    ("Tab", "Auto-complete"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -353,9 +542,9 @@ impl Scene for AutocompleteScene {
         self.autocomplete.set_area(ac_area);
         let rel_col = col.saturating_sub(ac_area.x);
         let rel_row = row.saturating_sub(ac_area.y);
-        if (ac_area.x..ac_area.x + ac_area.width).contains(&col) &&
-           (ac_area.y..ac_area.y + ac_area.height).contains(&row) &&
-           self.autocomplete.handle_mouse(kind, rel_col, rel_row)
+        if (ac_area.x..ac_area.x + ac_area.width).contains(&col)
+            && (ac_area.y..ac_area.y + ac_area.height).contains(&row)
+            && self.autocomplete.handle_mouse(kind, rel_col, rel_row)
         {
             self.sync_bridge();
             if self.selected_item.is_none() {
@@ -370,7 +559,9 @@ impl Scene for AutocompleteScene {
         // Category pills (row 11): click to filter
         if let MouseEventKind::Down(_) = kind {
             if row == 11 && col >= 2 {
-                let categories = ["tooling", "compiler", "docs", "linting", "testing", "learning"];
+                let categories = [
+                    "tooling", "compiler", "docs", "linting", "testing", "learning",
+                ];
                 let mut pill_x = 2usize;
                 for cat in &categories {
                     let pill_w = cat.len() + 2; // " cat "
@@ -378,7 +569,11 @@ impl Scene for AutocompleteScene {
                         // Clear and type the category name
                         self.autocomplete.clear();
                         for c in cat.chars() {
-                            self.autocomplete.handle_key(KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press });
+                            self.autocomplete.handle_key(KeyEvent {
+                                code: KeyCode::Char(c),
+                                modifiers: KeyModifiers::empty(),
+                                kind: KeyEventKind::Press,
+                            });
                         }
                         self.sync_bridge();
                         self.dirty = true;
@@ -396,7 +591,11 @@ impl Scene for AutocompleteScene {
                     let name = self.recent_selections[idx].clone();
                     self.autocomplete.clear();
                     for c in name.chars() {
-                        self.autocomplete.handle_key(KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press });
+                        self.autocomplete.handle_key(KeyEvent {
+                            code: KeyCode::Char(c),
+                            modifiers: KeyModifiers::empty(),
+                            kind: KeyEventKind::Press,
+                        });
                     }
                     self.sync_bridge();
                     self.selected_item = Some(name);
@@ -415,8 +614,13 @@ impl Scene for AutocompleteScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-

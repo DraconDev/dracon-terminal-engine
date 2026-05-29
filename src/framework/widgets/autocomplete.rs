@@ -400,21 +400,19 @@ impl Widget for Autocomplete {
                     false
                 }
             }
-            MouseEventKind::ScrollDown
-                if self.dropdown_open => {
-                    let max_offset = self.filtered.len().saturating_sub(self.max_visible);
-                    if self.offset < max_offset {
-                        self.offset += 1;
-                        self.dirty = true;
-                    }
-                    true
-                }
-            MouseEventKind::ScrollUp
-                if self.dropdown_open => {
-                    self.offset = self.offset.saturating_sub(1);
+            MouseEventKind::ScrollDown if self.dropdown_open => {
+                let max_offset = self.filtered.len().saturating_sub(self.max_visible);
+                if self.offset < max_offset {
+                    self.offset += 1;
                     self.dirty = true;
-                    true
                 }
+                true
+            }
+            MouseEventKind::ScrollUp if self.dropdown_open => {
+                self.offset = self.offset.saturating_sub(1);
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }

@@ -33,7 +33,7 @@ use std::time::{Duration, Instant};
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const TARGET_FPS: f32 = 60.0;
-const PLAYER_SPEED: f32 = 22.0;      // cells per second
+const PLAYER_SPEED: f32 = 22.0; // cells per second
 const PLAYER_MAX_HP: i32 = 100;
 const PROJECTILE_SPEED: f32 = 45.0;
 const PROJECTILE_DAMAGE: i32 = 25;
@@ -56,13 +56,22 @@ struct Vec2 {
 }
 
 impl Vec2 {
-    fn new(x: f32, y: f32) -> Self { Self { x, y } }
-    fn len_sq(self) -> f32 { self.x * self.x + self.y * self.y }
-    fn len(self) -> f32 { self.len_sq().sqrt() }
+    fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+    fn len_sq(self) -> f32 {
+        self.x * self.x + self.y * self.y
+    }
+    fn len(self) -> f32 {
+        self.len_sq().sqrt()
+    }
     fn normalized(self) -> Self {
         let len = self.len();
         if len > 0.001 {
-            Self { x: self.x / len, y: self.y / len }
+            Self {
+                x: self.x / len,
+                y: self.y / len,
+            }
         } else {
             Self::new(1.0, 0.0)
         }
@@ -76,17 +85,23 @@ impl Vec2 {
 
 impl std::ops::Add for Vec2 {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self { Self::new(self.x + rhs.x, self.y + rhs.y) }
+    fn add(self, rhs: Self) -> Self {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
 }
 
 impl std::ops::Sub for Vec2 {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self { Self::new(self.x - rhs.x, self.y - rhs.y) }
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
 }
 
 impl std::ops::Mul<f32> for Vec2 {
     type Output = Self;
-    fn mul(self, rhs: f32) -> Self { Self::new(self.x * rhs, self.y * rhs) }
+    fn mul(self, rhs: f32) -> Self {
+        Self::new(self.x * rhs, self.y * rhs)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -231,9 +246,9 @@ impl GameState {
         let edge = rand::random::<u8>() % 4;
         let margin = 2.0;
         let pos = match edge {
-            0 => Vec2::new(margin, rand::random::<f32>() * h as f32),           // left
+            0 => Vec2::new(margin, rand::random::<f32>() * h as f32), // left
             1 => Vec2::new(w as f32 - margin, rand::random::<f32>() * h as f32), // right
-            2 => Vec2::new(rand::random::<f32>() * w as f32, margin),           // top
+            2 => Vec2::new(rand::random::<f32>() * w as f32, margin), // top
             _ => Vec2::new(rand::random::<f32>() * w as f32, h as f32 - margin), // bottom
         };
 
@@ -352,8 +367,8 @@ impl GameState {
             for _ in 0..extra_spawns {
                 self.spawn_enemy(w, h);
             }
-            self.spawn_interval = (SPAWN_BASE_INTERVAL - self.game_time * 0.02)
-                .max(SPAWN_MIN_INTERVAL);
+            self.spawn_interval =
+                (SPAWN_BASE_INTERVAL - self.game_time * 0.02).max(SPAWN_MIN_INTERVAL);
             self.spawn_timer = self.spawn_interval;
         }
 
@@ -535,9 +550,10 @@ impl GameState {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) {
         self.mouse_pos = Vec2::new(col as f32, row as f32);
         if self.phase == GamePhase::Playing
-            && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
-                self.shoot(col as f32, row as f32);
-            }
+            && matches!(kind, MouseEventKind::Down(MouseButton::Left))
+        {
+            self.shoot(col as f32, row as f32);
+        }
     }
 }
 
@@ -590,7 +606,14 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, _fps: u32, kb: 
         if dx >= 0 && dx < w as i16 && dy >= 0 && dy < h as i16 {
             let idx = (dy as u16 * w + dx as u16) as usize;
             if idx < p.cells.len() {
-                p.cells[idx] = Cell { char: ch, fg, bg, style, transparent: false, skip: false };
+                p.cells[idx] = Cell {
+                    char: ch,
+                    fg,
+                    bg,
+                    style,
+                    transparent: false,
+                    skip: false,
+                };
             }
         }
     };
@@ -600,16 +623,25 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, _fps: u32, kb: 
         let ex = enemy.pos.x as i16;
         let ey = enemy.pos.y as i16;
         let flash = enemy.flash_timer > 0.0;
-        let color = if flash { Color::Rgb(255, 255, 255) } else { enemy.color };
+        let color = if flash {
+            Color::Rgb(255, 255, 255)
+        } else {
+            enemy.color
+        };
 
         if enemy.size > 1 {
             // Tank: 2x2 block
             for dy in 0..2i16 {
                 for dx in 0..2i16 {
-                    let ch = if dx == 0 && dy == 0 { '▛' }
-                        else if dx == 1 && dy == 0 { '▜' }
-                        else if dx == 0 && dy == 1 { '▙' }
-                        else { '▟' };
+                    let ch = if dx == 0 && dy == 0 {
+                        '▛'
+                    } else if dx == 1 && dy == 0 {
+                        '▜'
+                    } else if dx == 0 && dy == 1 {
+                        '▙'
+                    } else {
+                        '▟'
+                    };
                     draw_cell(ex + dx, ey + dy, ch, color, bg, Styles::BOLD);
                 }
             }
@@ -625,10 +657,21 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, _fps: u32, kb: 
             let filled = (hp_pct * bar_w as f32).ceil() as usize;
             for i in 0..bar_w {
                 let ch = if i < filled { '█' } else { '░' };
-                let bar_color = if hp_pct > 0.5 { Color::Rgb(100, 200, 100) }
-                    else if hp_pct > 0.25 { Color::Rgb(200, 200, 100) }
-                    else { Color::Rgb(200, 80, 80) };
-                draw_cell(ex + i as i16 - 1, ey - 1, ch, bar_color, bg, Styles::empty());
+                let bar_color = if hp_pct > 0.5 {
+                    Color::Rgb(100, 200, 100)
+                } else if hp_pct > 0.25 {
+                    Color::Rgb(200, 200, 100)
+                } else {
+                    Color::Rgb(200, 80, 80)
+                };
+                draw_cell(
+                    ex + i as i16 - 1,
+                    ey - 1,
+                    ch,
+                    bar_color,
+                    bg,
+                    Styles::empty(),
+                );
             }
         }
     }
@@ -654,10 +697,38 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, _fps: u32, kb: 
         let player_color = Color::Rgb(80, 160, 255);
         draw_cell(px, py, '●', player_color, bg, Styles::BOLD);
         // Player glow
-        draw_cell(px - 1, py, '·', Color::Rgb(60, 120, 200), bg, Styles::empty());
-        draw_cell(px + 1, py, '·', Color::Rgb(60, 120, 200), bg, Styles::empty());
-        draw_cell(px, py - 1, '·', Color::Rgb(60, 120, 200), bg, Styles::empty());
-        draw_cell(px, py + 1, '·', Color::Rgb(60, 120, 200), bg, Styles::empty());
+        draw_cell(
+            px - 1,
+            py,
+            '·',
+            Color::Rgb(60, 120, 200),
+            bg,
+            Styles::empty(),
+        );
+        draw_cell(
+            px + 1,
+            py,
+            '·',
+            Color::Rgb(60, 120, 200),
+            bg,
+            Styles::empty(),
+        );
+        draw_cell(
+            px,
+            py - 1,
+            '·',
+            Color::Rgb(60, 120, 200),
+            bg,
+            Styles::empty(),
+        );
+        draw_cell(
+            px,
+            py + 1,
+            '·',
+            Color::Rgb(60, 120, 200),
+            bg,
+            Styles::empty(),
+        );
     }
 
     // Draw particles
@@ -725,9 +796,13 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, _fps: u32, kb: 
     // HP bar (left)
     let hp_pct = state.player.hp as f32 / state.player.max_hp as f32;
     let hp_filled = (hp_pct * 20.0).ceil() as usize;
-    let hp_color = if hp_pct > 0.6 { Color::Rgb(80, 200, 80) }
-        else if hp_pct > 0.3 { Color::Rgb(200, 200, 80) }
-        else { Color::Rgb(200, 60, 60) };
+    let hp_color = if hp_pct > 0.6 {
+        Color::Rgb(80, 200, 80)
+    } else if hp_pct > 0.3 {
+        Color::Rgb(200, 200, 80)
+    } else {
+        Color::Rgb(200, 60, 60)
+    };
     let hp_text = format!("HP {}/{} ", state.player.hp, state.player.max_hp);
     p.put_str(1, 0, &hp_text);
     for i in 0..hp_text.len() {
@@ -941,37 +1016,111 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let back_key = kb.display(actions::BACK).unwrap_or("esc");
 
     let lines = [
-        ("╭──────────────────────────────────────────────────────────╮", dim),
-        ("│              🎮 Terminal Arena — Help                    │", fg),
-        ("├──────────────────────────────────────────────────────────┤", dim),
-        (&format!("│  {:<10}  —  Move                                       │", "WASD / ↑↓←→"), fg),
-        ("│  Click       —  Shoot toward cursor                      │", fg),
-        ("│  Space       —  Pause / Resume                           │", fg),
-        (&format!("│  {:<10}  —  Toggle this help                           │", help_key), fg),
-        (&format!("│  {:<10}  —  Dismiss help / menu                        │", back_key), fg),
-        ("│  R           —  Restart (after game over)                │", fg),
-        (&format!("│  {:<10}  —  Quit                                       │", quit_key), fg),
-        ("├──────────────────────────────────────────────────────────┤", dim),
-        ("│  Tips:                                                   │", fg),
-        ("│    • Keep moving — enemies chase you!                    │", fg),
-        ("│    • Click rapidly to shoot in different directions      │", fg),
-        ("│    • Tanks are slow but tough — focus fire!              │", fg),
-        ("│    • Swarmers are fast but fragile — one shot kills      │", fg),
-        ("│    • Leveling up restores full HP                        │", fg),
-        ("╰──────────────────────────────────────────────────────────╯", dim),
+        (
+            "╭──────────────────────────────────────────────────────────╮",
+            dim,
+        ),
+        (
+            "│              🎮 Terminal Arena — Help                    │",
+            fg,
+        ),
+        (
+            "├──────────────────────────────────────────────────────────┤",
+            dim,
+        ),
+        (
+            &format!(
+                "│  {:<10}  —  Move                                       │",
+                "WASD / ↑↓←→"
+            ),
+            fg,
+        ),
+        (
+            "│  Click       —  Shoot toward cursor                      │",
+            fg,
+        ),
+        (
+            "│  Space       —  Pause / Resume                           │",
+            fg,
+        ),
+        (
+            &format!(
+                "│  {:<10}  —  Toggle this help                           │",
+                help_key
+            ),
+            fg,
+        ),
+        (
+            &format!(
+                "│  {:<10}  —  Dismiss help / menu                        │",
+                back_key
+            ),
+            fg,
+        ),
+        (
+            "│  R           —  Restart (after game over)                │",
+            fg,
+        ),
+        (
+            &format!(
+                "│  {:<10}  —  Quit                                       │",
+                quit_key
+            ),
+            fg,
+        ),
+        (
+            "├──────────────────────────────────────────────────────────┤",
+            dim,
+        ),
+        (
+            "│  Tips:                                                   │",
+            fg,
+        ),
+        (
+            "│    • Keep moving — enemies chase you!                    │",
+            fg,
+        ),
+        (
+            "│    • Click rapidly to shoot in different directions      │",
+            fg,
+        ),
+        (
+            "│    • Tanks are slow but tough — focus fire!              │",
+            fg,
+        ),
+        (
+            "│    • Swarmers are fast but fragile — one shot kills      │",
+            fg,
+        ),
+        (
+            "│    • Leveling up restores full HP                        │",
+            fg,
+        ),
+        (
+            "╰──────────────────────────────────────────────────────────╯",
+            dim,
+        ),
     ];
 
     let start_y = (h as usize - lines.len()) / 2;
     for (i, (line, line_fg)) in lines.iter().enumerate() {
         let y = start_y + i;
         let x = (w as usize - line.len()) / 2;
-        if y >= h as usize { continue; }
+        if y >= h as usize {
+            continue;
+        }
         for (ci, ch) in line.chars().enumerate() {
             let px = x + ci;
-            if px >= w as usize { continue; }
+            if px >= w as usize {
+                continue;
+            }
             let idx = y * w as usize + px;
             if idx < p.cells.len() {
-                let ch_fg = if "│╭╮├┤╰╯─".contains(ch) { dim } else { *line_fg };
+                let ch_fg = if "│╭╮├┤╰╯─".contains(ch) {
+                    dim
+                } else {
+                    *line_fg
+                };
                 p.cells[idx] = Cell {
                     char: ch,
                     fg: ch_fg,

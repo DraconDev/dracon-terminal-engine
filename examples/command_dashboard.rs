@@ -52,16 +52,18 @@ impl CommandDashboard {
         let disk_gauge = Gauge::new("Disk %").max(100.0).bind_command(
             BoundCommand::new("df -h / | tail -1 | awk '{print $5}' | tr -d '%'").refresh(30),
         );
-        let kv_grid = KeyValueGrid::new().separator("  ").bind_command(
-            BoundCommand::new("uname -snr").refresh(0),
-        );
+        let kv_grid = KeyValueGrid::new()
+            .separator("  ")
+            .bind_command(BoundCommand::new("uname -snr").refresh(0));
         let status = StatusBadge::new(WidgetId::new(50))
             .with_status("OK")
             .with_label("System");
         let status_bar = StatusBar::new(WidgetId::new(60))
-            .add_segment(dracon_terminal_engine::framework::widgets::StatusSegment::new(
-                "Ctrl+P: pause | Ctrl+T: theme | F1: help | Esc: dismiss | Ctrl+Q: quit",
-            ))
+            .add_segment(
+                dracon_terminal_engine::framework::widgets::StatusSegment::new(
+                    "Ctrl+P: pause | Ctrl+T: theme | F1: help | Esc: dismiss | Ctrl+Q: quit",
+                ),
+            )
             .with_theme(theme.clone());
 
         Self {
@@ -83,7 +85,10 @@ impl CommandDashboard {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.cpu_gauge.on_theme_change(&self.theme);
         self.mem_gauge.on_theme_change(&self.theme);
@@ -112,24 +117,41 @@ impl CommandDashboard {
         }
 
         let corners = [
-            ('╭', hx, hy), ('╮', hx + hw - 1, hy),
-            ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1),
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
         ];
         for (ch, cx, cy) in &corners {
             let idx = (*cy * area.width + *cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
         for x in hx + 1..hx + hw - 1 {
             let top = (hy * area.width + x) as usize;
             let bot = ((hy + hh - 1) * area.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left = (y * area.width + hx) as usize;
             let right = (y * area.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         let title = "Command Dashboard Help";
@@ -154,25 +176,48 @@ impl CommandDashboard {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }
 }
 
 impl Widget for CommandDashboard {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
@@ -195,8 +240,12 @@ impl Widget for CommandDashboard {
             let idx = 1 + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
-                    char: c, fg: t.fg_on_accent, bg: t.primary,
-                    style: Styles::BOLD, transparent: false, skip: false,
+                    char: c,
+                    fg: t.fg_on_accent,
+                    bg: t.primary,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
                 };
             }
         }
@@ -207,8 +256,12 @@ impl Widget for CommandDashboard {
                 let idx = area.width as usize - 10 + i;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
-                        char: c, fg: t.fg_on_accent, bg: t.warning,
-                        style: Styles::BOLD, transparent: false, skip: false,
+                        char: c,
+                        fg: t.fg_on_accent,
+                        bg: t.warning,
+                        style: Styles::BOLD,
+                        transparent: false,
+                        skip: false,
                     };
                 }
             }
@@ -225,14 +278,18 @@ impl Widget for CommandDashboard {
         for (i, gauge) in gauges.iter().enumerate() {
             let g_plane = gauge.render(areas[i]);
             for (ci, c) in g_plane.cells.iter().enumerate() {
-                if c.transparent || c.char == '\0' { continue; }
+                if c.transparent || c.char == '\0' {
+                    continue;
+                }
                 let row = ci / g_plane.width as usize;
                 let col = ci % g_plane.width as usize;
                 let dy = areas[i].y as usize + row;
                 let dx = areas[i].x as usize + col;
                 if dy < area.height as usize && dx < area.width as usize {
                     let idx = dy * area.width as usize + dx;
-                    if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx] = *c;
+                    }
                 }
             }
         }
@@ -240,38 +297,50 @@ impl Widget for CommandDashboard {
         let kv_area = Rect::new(0, gauge_h + 1, area.width.saturating_sub(20), 6);
         let kv_plane = self.kv_grid.render(kv_area);
         for (ci, c) in kv_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let row = ci / kv_plane.width as usize;
             let col = ci % kv_plane.width as usize;
             let dy = kv_area.y as usize + row;
             let dx = kv_area.x as usize + col;
             if dy < area.height as usize && dx < area.width as usize {
                 let idx = dy * area.width as usize + dx;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
         let sb_area = Rect::new(area.width.saturating_sub(20), gauge_h + 1, 20, 1);
         let sb_plane = self.status.render(sb_area);
         for (ci, c) in sb_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let col = ci % sb_plane.width as usize;
             let dy = sb_area.y as usize;
             let dx = sb_area.x as usize + col;
             if dy < area.height as usize && dx < area.width as usize {
                 let idx = dy * area.width as usize + dx;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
         let bar_area = Rect::new(0, area.height.saturating_sub(1), area.width, 1);
         let bar_plane = self.status_bar.render(bar_area);
         for (ci, c) in bar_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let col = ci % bar_plane.width as usize;
             if col < area.width as usize {
                 let idx = (area.height as usize - 1) * area.width as usize + col;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
@@ -283,10 +352,14 @@ impl Widget for CommandDashboard {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -323,16 +396,32 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
     }
@@ -377,29 +466,31 @@ fn main() -> Result<()> {
     app.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app.on_input(move |key| {
-            if key.kind != KeyEventKind::Press { return false; }
-            let mut d = dash_input.borrow_mut();
-            if kb.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                d.handle_key(key)
-            }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-                return;
-            }
-            let mut d = dash_tick.borrow_mut();
-            let (w, h) = ctx.compositor().size();
-            if d.area.width != w || d.area.height != h {
-                d.set_area(Rect::new(0, 0, w, h));
-            }
-            if d.needs_render() {
-                ctx.add_plane(d.render(d.area));
-                d.clear_dirty();
-            }
-        })
-        .run(|_| {})
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        let mut d = dash_input.borrow_mut();
+        if kb.matches(actions::QUIT, &key) {
+            should_quit.store(true, Ordering::SeqCst);
+            true
+        } else {
+            d.handle_key(key)
+        }
+    })
+    .on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
+        let mut d = dash_tick.borrow_mut();
+        let (w, h) = ctx.compositor().size();
+        if d.area.width != w || d.area.height != h {
+            d.set_area(Rect::new(0, 0, w, h));
+        }
+        if d.needs_render() {
+            ctx.add_plane(d.render(d.area));
+            d.clear_dirty();
+        }
+    })
+    .run(|_| {})
 }

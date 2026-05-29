@@ -161,7 +161,6 @@ fn test_slider_clear_dirty_after_set_value() {
 }
 
 #[test]
-
 #[test]
 fn test_slider_default_dirty() {
     let slider = Slider::new(WidgetId::new(1));
@@ -285,7 +284,13 @@ fn test_slider_on_theme_change() {
 
 #[test]
 fn test_slider_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let slider = Slider::new(WidgetId::new(1)).with_theme(t);

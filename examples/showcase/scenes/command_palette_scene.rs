@@ -11,14 +11,16 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{
     CommandItem, CommandPalette, MenuBar, MenuEntry, MenuItem, StatusBar, StatusSegment,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -135,22 +137,86 @@ impl CommandPaletteScene {
 
         // Build command palette items
         let commands = vec![
-            CommandItem { id: "new_file", name: "New File", category: "file" },
-            CommandItem { id: "open_file", name: "Open File", category: "file" },
-            CommandItem { id: "save_file", name: "Save File", category: "file" },
-            CommandItem { id: "close_tab", name: "Close Tab", category: "file" },
-            CommandItem { id: "undo", name: "Undo", category: "edit" },
-            CommandItem { id: "redo", name: "Redo", category: "edit" },
-            CommandItem { id: "cut", name: "Cut", category: "edit" },
-            CommandItem { id: "copy", name: "Copy", category: "edit" },
-            CommandItem { id: "paste", name: "Paste", category: "edit" },
-            CommandItem { id: "find", name: "Find in File", category: "edit" },
-            CommandItem { id: "toggle_sidebar", name: "Toggle Sidebar", category: "view" },
-            CommandItem { id: "toggle_minimap", name: "Toggle Minimap", category: "view" },
-            CommandItem { id: "zoom_in", name: "Zoom In", category: "view" },
-            CommandItem { id: "zoom_out", name: "Zoom Out", category: "view" },
-            CommandItem { id: "shortcuts", name: "Keyboard Shortcuts", category: "help" },
-            CommandItem { id: "about", name: "About Dracon IDE", category: "help" },
+            CommandItem {
+                id: "new_file",
+                name: "New File",
+                category: "file",
+            },
+            CommandItem {
+                id: "open_file",
+                name: "Open File",
+                category: "file",
+            },
+            CommandItem {
+                id: "save_file",
+                name: "Save File",
+                category: "file",
+            },
+            CommandItem {
+                id: "close_tab",
+                name: "Close Tab",
+                category: "file",
+            },
+            CommandItem {
+                id: "undo",
+                name: "Undo",
+                category: "edit",
+            },
+            CommandItem {
+                id: "redo",
+                name: "Redo",
+                category: "edit",
+            },
+            CommandItem {
+                id: "cut",
+                name: "Cut",
+                category: "edit",
+            },
+            CommandItem {
+                id: "copy",
+                name: "Copy",
+                category: "edit",
+            },
+            CommandItem {
+                id: "paste",
+                name: "Paste",
+                category: "edit",
+            },
+            CommandItem {
+                id: "find",
+                name: "Find in File",
+                category: "edit",
+            },
+            CommandItem {
+                id: "toggle_sidebar",
+                name: "Toggle Sidebar",
+                category: "view",
+            },
+            CommandItem {
+                id: "toggle_minimap",
+                name: "Toggle Minimap",
+                category: "view",
+            },
+            CommandItem {
+                id: "zoom_in",
+                name: "Zoom In",
+                category: "view",
+            },
+            CommandItem {
+                id: "zoom_out",
+                name: "Zoom Out",
+                category: "view",
+            },
+            CommandItem {
+                id: "shortcuts",
+                name: "Keyboard Shortcuts",
+                category: "help",
+            },
+            CommandItem {
+                id: "about",
+                name: "About Dracon IDE",
+                category: "help",
+            },
         ];
 
         let command_palette = CommandPalette::new(commands)
@@ -167,59 +233,85 @@ impl CommandPaletteScene {
         let file_menu = MenuEntry::new("File")
             .add_item(MenuItem::new("New File").with_action({
                 let b = bridge2.clone();
-                move || { *b.borrow_mut() = Some("new_file".into()); }
+                move || {
+                    *b.borrow_mut() = Some("new_file".into());
+                }
             }))
             .add_item(MenuItem::new("Open File").with_action({
                 let b = bridge2.clone();
-                move || { *b.borrow_mut() = Some("open_file".into()); }
+                move || {
+                    *b.borrow_mut() = Some("open_file".into());
+                }
             }))
             .add_item(MenuItem::new("Save File").with_action({
                 let b = bridge2.clone();
-                move || { *b.borrow_mut() = Some("save_file".into()); }
+                move || {
+                    *b.borrow_mut() = Some("save_file".into());
+                }
             }))
             .add_item(MenuItem::new("Close Tab").with_action({
                 let b = bridge2;
-                move || { *b.borrow_mut() = Some("close_tab".into()); }
+                move || {
+                    *b.borrow_mut() = Some("close_tab".into());
+                }
             }));
 
         let edit_menu = MenuEntry::new("Edit")
             .add_item(MenuItem::new("Undo").with_action({
                 let b = bridge3.clone();
-                move || { *b.borrow_mut() = Some("undo".into()); }
+                move || {
+                    *b.borrow_mut() = Some("undo".into());
+                }
             }))
             .add_item(MenuItem::new("Redo").with_action({
                 let b = bridge3.clone();
-                move || { *b.borrow_mut() = Some("redo".into()); }
+                move || {
+                    *b.borrow_mut() = Some("redo".into());
+                }
             }))
             .add_item(MenuItem::new("Cut").with_action({
                 let b = bridge3.clone();
-                move || { *b.borrow_mut() = Some("cut".into()); }
+                move || {
+                    *b.borrow_mut() = Some("cut".into());
+                }
             }))
             .add_item(MenuItem::new("Copy").with_action({
                 let b = bridge3.clone();
-                move || { *b.borrow_mut() = Some("copy".into()); }
+                move || {
+                    *b.borrow_mut() = Some("copy".into());
+                }
             }))
             .add_item(MenuItem::new("Paste").with_action({
                 let b = bridge3;
-                move || { *b.borrow_mut() = Some("paste".into()); }
+                move || {
+                    *b.borrow_mut() = Some("paste".into());
+                }
             }));
 
         let view_menu = MenuEntry::new("View")
             .add_item(MenuItem::new("Toggle Sidebar").with_action({
                 let b = cmd_bridge.clone();
-                move || { *b.borrow_mut() = Some("toggle_sidebar".into()); }
+                move || {
+                    *b.borrow_mut() = Some("toggle_sidebar".into());
+                }
             }))
             .add_item(MenuItem::new("Toggle Minimap").with_action({
                 let b = cmd_bridge.clone();
-                move || { *b.borrow_mut() = Some("toggle_minimap".into()); }
+                move || {
+                    *b.borrow_mut() = Some("toggle_minimap".into());
+                }
             }))
             .add_item(MenuItem::new("Zoom In").with_action({
                 let b = cmd_bridge.clone();
-                move || { *b.borrow_mut() = Some("zoom_in".into()); }
+                move || {
+                    *b.borrow_mut() = Some("zoom_in".into());
+                }
             }))
             .add_item(MenuItem::new("Zoom Out").with_action({
                 let b = cmd_bridge.clone();
-                move || { *b.borrow_mut() = Some("zoom_out".into()); }
+                move || {
+                    *b.borrow_mut() = Some("zoom_out".into());
+                }
             }));
 
         let menu_bar = MenuBar::new(WidgetId::new(200))
@@ -314,7 +406,10 @@ impl Scene for CommandPaletteScene {
 
         // ── Menu bar (row 0) ────────────────────────────────────────
         //
-        let menu_plane = self.menu_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let menu_plane = self
+            .menu_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &menu_plane, 0, 0);
 
         // ── Main content area (row 1 to height-2) ────────────────────
@@ -344,20 +439,44 @@ impl Scene for CommandPaletteScene {
                 }
             }
             // Sidebar items
-            let sidebar_items = ["Explorer", "", "  src/", "    main.rs", "    app.rs",
-                "    mod.rs", "  Cargo.toml", "  README.md", "",
-                "Search", "", "  No results", "", "",
-                "Source Control", "", "  0 changes", "  branch: main"];
+            let sidebar_items = [
+                "Explorer",
+                "",
+                "  src/",
+                "    main.rs",
+                "    app.rs",
+                "    mod.rs",
+                "  Cargo.toml",
+                "  README.md",
+                "",
+                "Search",
+                "",
+                "  No results",
+                "",
+                "",
+                "Source Control",
+                "",
+                "  0 changes",
+                "  branch: main",
+            ];
             for (i, item) in sidebar_items.iter().enumerate() {
                 let y = content_y + 1 + i as u16;
-                if y >= content_y + content_h { break; }
+                if y >= content_y + content_h {
+                    break;
+                }
                 for (j, ch) in item.chars().enumerate() {
                     let x = j as u16;
-                    if x >= sidebar_w - 1 { break; }
+                    if x >= sidebar_w - 1 {
+                        break;
+                    }
                     let idx = (y as usize) * area.width as usize + x as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = ch;
-                        plane.cells[idx].fg = if item.starts_with("  ") { t.fg_muted } else { t.primary };
+                        plane.cells[idx].fg = if item.starts_with("  ") {
+                            t.fg_muted
+                        } else {
+                            t.primary
+                        };
                         plane.cells[idx].bg = t.surface_elevated;
                         plane.cells[idx].transparent = false;
                     }
@@ -367,7 +486,10 @@ impl Scene for CommandPaletteScene {
 
         // Editor area (center) — shows action log
         let editor_x = sidebar_w;
-        let editor_w = area.width.saturating_sub(sidebar_w).saturating_sub(if self.show_minimap { 12 } else { 0 });
+        let editor_w = area
+            .width
+            .saturating_sub(sidebar_w)
+            .saturating_sub(if self.show_minimap { 12 } else { 0 });
 
         // Minimap (right 12 columns, if visible)
         if self.show_minimap {
@@ -389,15 +511,29 @@ impl Scene for CommandPaletteScene {
                 }
             }
             // Minimap content (simplified code outline)
-            let mm_lines = ["fn main()", "  app.run()", "  ok?", "",
-                "struct App", "  theme", "  widgets", "",
-                "impl Widget", "  render()", "  handle_key"];
+            let mm_lines = [
+                "fn main()",
+                "  app.run()",
+                "  ok?",
+                "",
+                "struct App",
+                "  theme",
+                "  widgets",
+                "",
+                "impl Widget",
+                "  render()",
+                "  handle_key",
+            ];
             for (i, line) in mm_lines.iter().enumerate() {
                 let y = content_y + 2 + i as u16;
-                if y >= content_y + content_h { break; }
+                if y >= content_y + content_h {
+                    break;
+                }
                 for (j, ch) in line.chars().enumerate() {
                     let x = mm_x + 1 + j as u16;
-                    if x >= area.width { break; }
+                    if x >= area.width {
+                        break;
+                    }
                     let idx = (y as usize) * area.width as usize + x as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = ch;
@@ -408,8 +544,24 @@ impl Scene for CommandPaletteScene {
         }
 
         // Action log header
-        draw_text(&mut plane, editor_x + 1, content_y + 1, "Action Log", t.primary, t.bg, false);
-        draw_text(&mut plane, editor_x + 14, content_y + 1, &format!("(zoom: {}x)", self.zoom_level), t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            editor_x + 1,
+            content_y + 1,
+            "Action Log",
+            t.primary,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            editor_x + 14,
+            content_y + 1,
+            &format!("(zoom: {}x)", self.zoom_level),
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Log entries
         let log_start_y = content_y + 3;
@@ -423,10 +575,14 @@ impl Scene for CommandPaletteScene {
             } else {
                 i
             };
-            if log_idx >= log_len { break; }
+            if log_idx >= log_len {
+                break;
+            }
             let entry = &self.log[log_idx];
             let y = log_start_y + i as u16;
-            if y >= content_y + content_h { break; }
+            if y >= content_y + content_h {
+                break;
+            }
 
             // Category badge
             let cat_color = match entry.category.as_str() {
@@ -437,30 +593,73 @@ impl Scene for CommandPaletteScene {
                 _ => t.fg_muted,
             };
             let cat_label = format!("[{}]", entry.category);
-            draw_text(&mut plane, editor_x + 1, y, &cat_label, cat_color, t.bg, false);
+            draw_text(
+                &mut plane,
+                editor_x + 1,
+                y,
+                &cat_label,
+                cat_color,
+                t.bg,
+                false,
+            );
 
             // Action name
-            draw_text(&mut plane, editor_x + 8, y, &entry.action, t.fg, t.bg, false);
+            draw_text(
+                &mut plane,
+                editor_x + 8,
+                y,
+                &entry.action,
+                t.fg,
+                t.bg,
+                false,
+            );
 
             // Shortcut
             if !entry.shortcut.is_empty() {
                 let sw = area.width.min(editor_x + editor_w);
                 let right_x = sw.saturating_sub(entry.shortcut.len() as u16 + 2);
                 if right_x > editor_x + 8 {
-                    draw_text(&mut plane, right_x, y, &entry.shortcut, t.fg_muted, t.bg, false);
+                    draw_text(
+                        &mut plane,
+                        right_x,
+                        y,
+                        &entry.shortcut,
+                        t.fg_muted,
+                        t.bg,
+                        false,
+                    );
                 }
             }
         }
 
         // Empty state
         if self.log.is_empty() {
-            draw_text(&mut plane, editor_x + 2, log_start_y + 2, "Press Ctrl+P to open command palette", t.fg_muted, t.bg, false);
-            draw_text(&mut plane, editor_x + 2, log_start_y + 4, "or click menu items above", t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                editor_x + 2,
+                log_start_y + 2,
+                "Press Ctrl+P to open command palette",
+                t.fg_muted,
+                t.bg,
+                false,
+            );
+            draw_text(
+                &mut plane,
+                editor_x + 2,
+                log_start_y + 4,
+                "or click menu items above",
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // ── Status bar (last row) ────────────────────────────────────
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         // ── Command palette overlay ──────────────────────────────────
@@ -470,13 +669,30 @@ impl Scene for CommandPaletteScene {
             let px = (area.width.saturating_sub(pw)) / 2;
             let py = 2u16;
             //
-            let cp_plane = self.command_palette.borrow().render(Rect::new(0, 0, pw, ph));
+            let cp_plane = self
+                .command_palette
+                .borrow()
+                .render(Rect::new(0, 0, pw, ph));
             blit_to(&mut plane, &cp_plane, px as usize, py as usize);
         }
 
         // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, &self.theme, "IDE Lite — Help", &[("Ctrl+P", "Open command palette"), ("Ctrl+B", "Toggle sidebar"), ("Up/Dn", "Scroll action log"), ("Click menu", "Execute menu action"), ("Click sidebar", "Open file (demo)"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "IDE Lite — Help",
+                &[
+                    ("Ctrl+P", "Open command palette"),
+                    ("Ctrl+B", "Toggle sidebar"),
+                    ("Up/Dn", "Scroll action log"),
+                    ("Click menu", "Execute menu action"),
+                    ("Click sidebar", "Open file (demo)"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
@@ -489,7 +705,9 @@ impl Scene for CommandPaletteScene {
 
         // Help overlay takes priority
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
+            if self.keybindings.matches(actions::HELP, &key)
+                || self.keybindings.matches(actions::BACK, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -569,7 +787,10 @@ impl Scene for CommandPaletteScene {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         // Command palette
         if self.command_palette.borrow().is_visible() {
-            return self.command_palette.borrow_mut().handle_mouse(kind, col, row);
+            return self
+                .command_palette
+                .borrow_mut()
+                .handle_mouse(kind, col, row);
         }
 
         // Menu bar (row 0)
@@ -598,9 +819,16 @@ impl Scene for CommandPaletteScene {
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "command_palette" }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn scene_id(&self) -> &str {
+        "command_palette"
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-

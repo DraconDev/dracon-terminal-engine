@@ -12,7 +12,9 @@
 //!   q             -  quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{
+    actions, resolve_keybindings, KeybindingConfig, KeybindingSet,
+};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -68,7 +70,10 @@ impl EventBusApp {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.dirty = true;
     }
@@ -82,14 +87,16 @@ impl EventBusApp {
             KeyCode::Up | KeyCode::Char('+') | KeyCode::Char('=') => {
                 self.counter_value += 1;
                 self.last_event = Some(format!("CounterChanged({})", self.counter_value));
-                self.messages.push(format!("Counter: {}", self.counter_value));
+                self.messages
+                    .push(format!("Counter: {}", self.counter_value));
                 self.dirty = true;
                 true
             }
             KeyCode::Down | KeyCode::Char('-') => {
                 self.counter_value -= 1;
                 self.last_event = Some(format!("CounterChanged({})", self.counter_value));
-                self.messages.push(format!("Counter: {}", self.counter_value));
+                self.messages
+                    .push(format!("Counter: {}", self.counter_value));
                 self.dirty = true;
                 true
             }
@@ -126,10 +133,15 @@ impl EventBusApp {
         self.render_counter(&mut plane, Rect::new(1, 1, half_w - 2, area.height - 2), &t);
 
         // Right panel: Event Log
-        self.render_log(&mut plane, Rect::new(half_w + 1, 1, half_w - 2, area.height - 2), &t);
+        self.render_log(
+            &mut plane,
+            Rect::new(half_w + 1, 1, half_w - 2, area.height - 2),
+            &t,
+        );
 
         // Status bar
-        let status = format!("^/v: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
+        let status = format!(
+            "^/v: counter | l: log | c: clear | {}: theme | {}: help | {}: dismiss | {}: quit",
             self.kb_config.get(actions::THEME).unwrap_or("t"),
             self.kb_config.get(actions::HELP).unwrap_or("?"),
             self.kb_config.get(actions::BACK).unwrap_or("esc"),
@@ -159,14 +171,26 @@ impl EventBusApp {
         for x in area.x..area.x + area.width {
             let top = (area.y * plane.width + x) as usize;
             let bot = ((area.y + area.height - 1) * plane.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in area.y..area.y + area.height {
             let left = (y * plane.width + area.x) as usize;
             let right = (y * plane.width + area.x + area.width - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Title
@@ -215,14 +239,26 @@ impl EventBusApp {
         for x in area.x..area.x + area.width {
             let top = (area.y * plane.width + x) as usize;
             let bot = ((area.y + area.height - 1) * plane.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in area.y..area.y + area.height {
             let left = (y * plane.width + area.x) as usize;
             let right = (y * plane.width + area.x + area.width - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Title
@@ -275,10 +311,18 @@ impl EventBusApp {
         }
 
         // Border
-        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
         for (ch, cx, cy) in corners.iter() {
             let idx = (cy * area.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
 
         // Title
@@ -298,20 +342,38 @@ impl EventBusApp {
             ("^/v or +/-", "Adjust counter"),
             ("l", "Log a message"),
             ("c", "Clear log"),
-            (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
-            (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-            (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+            (
+                self.keybindings.display(actions::THEME).unwrap_or("t"),
+                "Cycle theme",
+            ),
+            (
+                self.keybindings.display(actions::HELP).unwrap_or("?"),
+                "Toggle help",
+            ),
+            (
+                self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                "Dismiss help",
+            ),
+            (
+                self.keybindings.display(actions::QUIT).unwrap_or("q"),
+                "Quit",
+            ),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 16 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }
@@ -328,14 +390,26 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn z_index(&self) -> u16 { 0 }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.app.borrow_mut().handle_key(key)
@@ -365,7 +439,10 @@ fn main() -> std::io::Result<()> {
     let kb_config = resolve_keybindings();
     let kb_input = keybindings.clone();
 
-    let app = Rc::new(RefCell::new(EventBusApp::new(should_quit, env_theme.clone())));
+    let app = Rc::new(RefCell::new(EventBusApp::new(
+        should_quit,
+        env_theme.clone(),
+    )));
     {
         let mut a = app.borrow_mut();
         a.keybindings = keybindings;
@@ -374,9 +451,7 @@ fn main() -> std::io::Result<()> {
     let app_for_router = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?
-        .title("Event Bus Demo")
-        .fps(30);
+    let mut app_ctx = App::new()?.title("Event Bus Demo").fps(30);
     app_ctx.set_theme(Theme::from_env_or(Theme::nord()));
 
     let router = InputRouter {

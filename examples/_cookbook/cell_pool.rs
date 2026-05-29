@@ -6,8 +6,8 @@
 //! auto-allocation to show the gauge animating.
 
 use dracon_terminal_engine::compositor::pool::{acquire_plane_cells, release_plane_cells};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -249,19 +249,27 @@ impl Widget for PoolDemo {
                 plane.cells[idx].transparent = false;
             }
         }
-        self.zones.borrow_mut().register(ZONE_ACQUIRE, acquire_x, btn_y, btn_w + 2, btn_h);
+        self.zones
+            .borrow_mut()
+            .register(ZONE_ACQUIRE, acquire_x, btn_y, btn_w + 2, btn_h);
 
         let release_label = " [ Release ] ";
         for (j, c) in release_label.chars().enumerate() {
             let idx = (btn_y * area.width + release_x + j as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.held_cells.is_empty() { t.fg_muted } else { t.secondary };
+                plane.cells[idx].fg = if self.held_cells.is_empty() {
+                    t.fg_muted
+                } else {
+                    t.secondary
+                };
                 plane.cells[idx].bg = t.surface;
                 plane.cells[idx].transparent = false;
             }
         }
-        self.zones.borrow_mut().register(ZONE_RELEASE, release_x, btn_y, btn_w + 2, btn_h);
+        self.zones
+            .borrow_mut()
+            .register(ZONE_RELEASE, release_x, btn_y, btn_w + 2, btn_h);
 
         if area.height > 0 {
             let sb_y = area.height - 1;
@@ -419,7 +427,10 @@ impl Widget for PoolDemo {
         }
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = Theme::all();
-            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            let idx = themes
+                .iter()
+                .position(|t| t.name == self.theme.name)
+                .unwrap_or(0);
             self.theme = themes[(idx + 1) % themes.len()].clone();
             self.dirty = true;
             return true;
@@ -466,13 +477,19 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_clone = Arc::clone(&should_quit);
 
-    let demo = Arc::new(std::sync::Mutex::new(PoolDemo::new(theme.clone(), should_quit)));
+    let demo = Arc::new(std::sync::Mutex::new(PoolDemo::new(
+        theme.clone(),
+        should_quit,
+    )));
 
     let mut app = App::new()?;
     let demo_tick = Arc::clone(&demo);
-    app.add_widget(Box::new(PoolDemoWrapper {
-        demo: Arc::clone(&demo),
-    }), Rect::new(0, 0, 80, 24));
+    app.add_widget(
+        Box::new(PoolDemoWrapper {
+            demo: Arc::clone(&demo),
+        }),
+        Rect::new(0, 0, 80, 24),
+    );
 
     app.title("CellPool Demo")
         .fps(30)
@@ -493,22 +510,38 @@ struct PoolDemoWrapper {
 }
 
 impl Widget for PoolDemoWrapper {
-    fn id(&self) -> WidgetId { WidgetId::new(1) }
-    fn area(&self) -> Rect { Rect::default() }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(1)
+    }
+    fn area(&self) -> Rect {
+        Rect::default()
+    }
     fn set_area(&mut self, _area: Rect) {}
     fn needs_render(&self) -> bool {
         self.demo.lock().expect("cell_pool mutex poisoned").dirty
     }
     fn render(&self, area: Rect) -> Plane {
-        self.demo.lock().expect("cell_pool mutex poisoned").render(area)
+        self.demo
+            .lock()
+            .expect("cell_pool mutex poisoned")
+            .render(area)
     }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        self.demo.lock().expect("cell_pool mutex poisoned").handle_key(key)
+        self.demo
+            .lock()
+            .expect("cell_pool mutex poisoned")
+            .handle_key(key)
     }
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        self.demo.lock().expect("cell_pool mutex poisoned").handle_mouse(kind, col, row)
+        self.demo
+            .lock()
+            .expect("cell_pool mutex poisoned")
+            .handle_mouse(kind, col, row)
     }
     fn on_theme_change(&mut self, theme: &Theme) {
-        self.demo.lock().expect("cell_pool mutex poisoned").on_theme_change(theme)
+        self.demo
+            .lock()
+            .expect("cell_pool mutex poisoned")
+            .on_theme_change(theme)
     }
 }

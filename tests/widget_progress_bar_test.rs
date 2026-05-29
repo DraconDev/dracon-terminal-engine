@@ -225,7 +225,13 @@ fn test_progressbar_on_theme_change() {
 
 #[test]
 fn test_progressbar_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let pb = ProgressBar::new(WidgetId::new(1)).with_theme(t);

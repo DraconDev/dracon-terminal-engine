@@ -300,13 +300,22 @@ impl crate::framework::widget::Widget for NotificationCenter {
             }
 
             // Rounded corners
-            let corners = [('╭', x, y), ('╮', x + card_w - 1, y), ('╰', x, bottom_y), ('╯', x + card_w - 1, bottom_y)];
+            let corners = [
+                ('╭', x, y),
+                ('╮', x + card_w - 1, y),
+                ('╰', x, bottom_y),
+                ('╯', x + card_w - 1, bottom_y),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = *ch;
                     plane.cells[idx].fg = self.theme.outline;
-                    plane.cells[idx].bg = if *cy == y { accent } else { self.theme.surface_elevated };
+                    plane.cells[idx].bg = if *cy == y {
+                        accent
+                    } else {
+                        self.theme.surface_elevated
+                    };
                     plane.cells[idx].transparent = false;
                 }
             }
@@ -335,7 +344,13 @@ impl crate::framework::widget::Widget for NotificationCenter {
 }
 
 impl WidgetState for NotificationCenter {
-    fn state_id(&self) -> Option<&str> { None }
-    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
-    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+    fn state_id(&self) -> Option<&str> {
+        None
+    }
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        Ok(())
+    }
 }

@@ -1,6 +1,6 @@
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -94,13 +94,18 @@ impl Widget for AutocompleteDemo {
         self.dirty || self.autocomplete.needs_render()
     }
 
-    fn id(&self) -> WidgetId { self.id }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
 
-    fn area(&self) -> Rect { self.area }
+    fn area(&self) -> Rect {
+        self.area
+    }
 
     fn set_area(&mut self, area: Rect) {
         self.area = area;
-        self.autocomplete.set_area(Rect::new(4, 4, area.width.saturating_sub(8), 3));
+        self.autocomplete
+            .set_area(Rect::new(4, 4, area.width.saturating_sub(8), 3));
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -186,22 +191,42 @@ impl Widget for AutocompleteDemo {
                 }
             }
 
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
 
             let title = "Autocomplete Help";
@@ -232,11 +257,17 @@ impl Widget for AutocompleteDemo {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }

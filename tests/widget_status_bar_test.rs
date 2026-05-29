@@ -9,15 +9,11 @@ use dracon_terminal_engine::framework::widgets::status_bar::{StatusBar, StatusSe
 // ============================================================================
 
 #[test]
-
 #[test]
-
 #[test]
-
 // ============================================================================
 // Construction Tests
 // ============================================================================
-
 #[test]
 fn test_status_bar_new() {
     let sb = StatusBar::new(WidgetId::new(1));
@@ -40,8 +36,7 @@ fn test_status_bar_with_theme() {
 
 #[test]
 fn test_status_bar_add_segment() {
-    let sb = StatusBar::new(WidgetId::new(1))
-        .add_segment(StatusSegment::new("Home"));
+    let sb = StatusBar::new(WidgetId::new(1)).add_segment(StatusSegment::new("Home"));
     let plane = sb.render(Rect::new(0, 0, 80, 1));
     assert!(plane.width > 0);
 }
@@ -190,7 +185,13 @@ fn test_status_bar_on_theme_change() {
 
 #[test]
 fn test_status_bar_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let sb = StatusBar::new(WidgetId::new(1)).with_theme(t);

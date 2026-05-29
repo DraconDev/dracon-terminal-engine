@@ -12,7 +12,9 @@
 use dracon_terminal_engine::core::terminal::Terminal;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    Event, KeyCode, KeyEvent, KeyModifiers, MouseEventKind,
+};
 use dracon_terminal_engine::input::parser::Parser;
 use signal_hook::consts::signal::SIGINT;
 use std::collections::VecDeque;
@@ -79,10 +81,22 @@ impl InputDebugger {
 
     fn format_raw_bytes(&self, bytes: &[u8]) -> String {
         if bytes.len() <= 8 {
-            bytes.iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(" ")
+            bytes
+                .iter()
+                .map(|b| format!("{:02X}", b))
+                .collect::<Vec<_>>()
+                .join(" ")
         } else {
-            let head: String = bytes[..4].iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(" ");
-            let tail: String = bytes[bytes.len()-4..].iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(" ");
+            let head: String = bytes[..4]
+                .iter()
+                .map(|b| format!("{:02X}", b))
+                .collect::<Vec<_>>()
+                .join(" ");
+            let tail: String = bytes[bytes.len() - 4..]
+                .iter()
+                .map(|b| format!("{:02X}", b))
+                .collect::<Vec<_>>()
+                .join(" ");
             format!("{} ... {} ({}B)", head, tail, bytes.len())
         }
     }
@@ -117,7 +131,10 @@ impl InputDebugger {
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m\r\n", header, width = w));
 
         // Column headers
-        out.push_str(&format!("\x1b[1m{: <24} │ {: <48}\x1b[0m\r\n", "RAW BYTES", "EVENT"));
+        out.push_str(&format!(
+            "\x1b[1m{: <24} │ {: <48}\x1b[0m\r\n",
+            "RAW BYTES", "EVENT"
+        ));
         out.push_str(&format!("{:-<80}\r\n", ""));
 
         // History entries
@@ -159,7 +176,10 @@ impl InputDebugger {
         } else {
             format!("[{}]", total)
         };
-        let status = format!(" ^/v scroll {} │ Press keys/mouse to see events ", scroll_info);
+        let status = format!(
+            " ^/v scroll {} │ Press keys/mouse to see events ",
+            scroll_info
+        );
         out.push_str(&format!("\x1b[7m{: <width$}\x1b[0m", status, width = w));
 
         out
@@ -172,25 +192,52 @@ impl InputDebugger {
         let key_w = 10usize;
         let pad = |s: &str| -> String {
             let vis = s.len();
-            if vis >= key_w { s.to_string() } else { format!("{}{}", s, " ".repeat(key_w - vis)) }
+            if vis >= key_w {
+                s.to_string()
+            } else {
+                format!("{}{}", s, " ".repeat(key_w - vis))
+            }
         };
         let mut out = String::new();
         out.push_str("\x1b[2J\x1b[H");
         out.push_str("╭────────────────────────────────────────────────────────────╮\r\n");
         out.push_str("│                Input Debugger Help                         │\r\n");
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Quit                                         │\r\n", pad(quit_key)));
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Toggle this help                            │\r\n", pad(help_key)));
-        out.push_str(&format!("│  \x1b[1m{}\x1b[0m  -  Dismiss help                               │\r\n", pad(back_key)));
-        out.push_str("│  \x1b[1mc\x1b[0m         -  Clear event history                         │\r\n");
-        out.push_str("│  \x1b[1m^/v\x1b[0m       -  Scroll history                              │\r\n");
+        out.push_str(&format!(
+            "│  \x1b[1m{}\x1b[0m  -  Quit                                         │\r\n",
+            pad(quit_key)
+        ));
+        out.push_str(&format!(
+            "│  \x1b[1m{}\x1b[0m  -  Toggle this help                            │\r\n",
+            pad(help_key)
+        ));
+        out.push_str(&format!(
+            "│  \x1b[1m{}\x1b[0m  -  Dismiss help                               │\r\n",
+            pad(back_key)
+        ));
+        out.push_str(
+            "│  \x1b[1mc\x1b[0m         -  Clear event history                         │\r\n",
+        );
+        out.push_str(
+            "│  \x1b[1m^/v\x1b[0m       -  Scroll history                              │\r\n",
+        );
         out.push_str("├────────────────────────────────────────────────────────────┤\r\n");
         out.push_str("│  Events are color-coded:                                   │\r\n");
-        out.push_str("│    \x1b[36mKEY\x1b[0m       -  Keyboard input                               │\r\n");
-        out.push_str("│    \x1b[33mMOUSE\x1b[0m     -  Mouse clicks, drags, scroll                   │\r\n");
-        out.push_str("│    \x1b[35mFOCUS\x1b[0m     -  Window focus in/out                         │\r\n");
-        out.push_str("│    \x1b[32mPASTE\x1b[0m     -  Bracketed paste                             │\r\n");
-        out.push_str("│    \x1b[37mRESIZE\x1b[0m    -  Terminal resize                              │\r\n");
+        out.push_str(
+            "│    \x1b[36mKEY\x1b[0m       -  Keyboard input                               │\r\n",
+        );
+        out.push_str(
+            "│    \x1b[33mMOUSE\x1b[0m     -  Mouse clicks, drags, scroll                   │\r\n",
+        );
+        out.push_str(
+            "│    \x1b[35mFOCUS\x1b[0m     -  Window focus in/out                         │\r\n",
+        );
+        out.push_str(
+            "│    \x1b[32mPASTE\x1b[0m     -  Bracketed paste                             │\r\n",
+        );
+        out.push_str(
+            "│    \x1b[37mRESIZE\x1b[0m    -  Terminal resize                              │\r\n",
+        );
         out.push_str("╰────────────────────────────────────────────────────────────╯\r\n");
         out
     }
@@ -222,8 +269,12 @@ fn main() -> io::Result<()> {
     // Signal handler for clean quit on Ctrl+C
     let should_quit = Arc::new(AtomicBool::new(false));
     let sig_flag = Arc::clone(&should_quit);
-    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
-        .ok();
+    unsafe {
+        signal_hook::low_level::register(SIGINT, move || {
+            sig_flag.store(true, Ordering::SeqCst);
+        })
+    }
+    .ok();
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
@@ -277,9 +328,11 @@ fn main() -> io::Result<()> {
                     Event::Key(key_event) if keybindings.matches(actions::BACK, key_event) => {
                         debugger.show_help = false;
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Char('c'), modifiers, .. })
-                        if modifiers.contains(KeyModifiers::CONTROL) =>
-                    {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Char('c'),
+                        modifiers,
+                        ..
+                    }) if modifiers.contains(KeyModifiers::CONTROL) => {
                         let _ = write!(
                             term,
                             "\x1b[<u\x1b[?25h\x1b[?1l\x1b[?2026l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1004l\x1b[?1006l\x1b[?1007l\x1b[?2004l\x1b[?7h\x1b[?1049l"
@@ -288,16 +341,24 @@ fn main() -> io::Result<()> {
                         write_theme_file();
                         return Ok(());
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Char('c'), .. }) => {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Char('c'),
+                        ..
+                    }) => {
                         debugger.history.clear();
                         debugger.scroll_offset = 0;
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Up, .. }) => {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Up, ..
+                    }) => {
                         if debugger.scroll_offset > 0 {
                             debugger.scroll_offset -= 1;
                         }
                     }
-                    Event::Key(KeyEvent { code: KeyCode::Down, .. }) => {
+                    Event::Key(KeyEvent {
+                        code: KeyCode::Down,
+                        ..
+                    }) => {
                         let max = debugger.history.len().saturating_sub(18);
                         if debugger.scroll_offset < max {
                             debugger.scroll_offset += 1;

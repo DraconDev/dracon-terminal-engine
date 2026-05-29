@@ -23,7 +23,11 @@ fn test_select_new() {
 
 #[test]
 fn test_select_new_with_options() {
-    let options = vec!["Option 1".to_string(), "Option 2".to_string(), "Option 3".to_string()];
+    let options = vec![
+        "Option 1".to_string(),
+        "Option 2".to_string(),
+        "Option 3".to_string(),
+    ];
     let select = make_select(options);
     assert_eq!(select.selected_index(), 0);
 }
@@ -59,15 +63,14 @@ fn test_select_with_theme() {
 fn test_select_on_change_callback() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let changed = Rc::new(RefCell::new(Vec::new()));
     let changed_clone = Rc::clone(&changed);
-    
+
     let options = vec!["A".to_string(), "B".to_string()];
-    let _select = make_select(options)
-        .on_change(move |label| {
-            changed_clone.borrow_mut().push(label.to_string());
-        });
+    let _select = make_select(options).on_change(move |label| {
+        changed_clone.borrow_mut().push(label.to_string());
+    });
 }
 
 #[test]
@@ -76,7 +79,7 @@ fn test_select_chained_builders() {
     let select = make_select(options)
         .with_theme(Theme::cyberpunk())
         .on_change(|_| {});
-    
+
     let area = Rect::new(0, 0, 20, 10);
     let _plane = select.render(area);
 }
@@ -190,7 +193,11 @@ fn test_select_render() {
 
 #[test]
 fn test_select_render_expanded() {
-    let mut select = make_select(vec!["Opt 1".to_string(), "Opt 2".to_string(), "Opt 3".to_string()]);
+    let mut select = make_select(vec![
+        "Opt 1".to_string(),
+        "Opt 2".to_string(),
+        "Opt 3".to_string(),
+    ]);
     // Expanded state is internal, just verify render works
     let area = Rect::new(0, 0, 20, 20);
     let plane = select.render(area);
@@ -211,7 +218,7 @@ fn test_select_z_index() {
 fn test_select_different_themes() {
     let options = vec!["Test".to_string()];
     let themes = vec!["nord", "dracula", "monokai", "solarized_dark"];
-    
+
     for theme_name in themes {
         if let Some(theme) = Theme::from_name(theme_name) {
             let select = make_select(options.clone()).with_theme(theme);
@@ -323,13 +330,13 @@ fn test_select_all_empty_options() {
 #[test]
 fn test_select_multiple_set_selected() {
     let mut select = make_select(vec!["A".to_string(), "B".to_string(), "C".to_string()]);
-    
+
     select.set_selected(0);
     assert_eq!(select.selected_index(), 0);
-    
+
     select.set_selected(1);
     assert_eq!(select.selected_index(), 1);
-    
+
     select.set_selected(2);
     assert_eq!(select.selected_index(), 2);
 }
@@ -338,10 +345,17 @@ fn test_select_multiple_set_selected() {
 fn test_select_with_many_themes() {
     let options = vec!["Test".to_string()];
     let themes = vec![
-        "nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha",
-        "tokyo_night", "gruvbox_dark", "ayu_dark", "material_darker",
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+        "tokyo_night",
+        "gruvbox_dark",
+        "ayu_dark",
+        "material_darker",
     ];
-    
+
     for theme_name in themes {
         if let Some(theme) = Theme::from_name(theme_name) {
             let select = make_select(options.clone()).with_theme(theme);
@@ -355,11 +369,11 @@ fn test_select_with_many_themes() {
 fn test_select_clamp_to_bounds() {
     let options = vec!["First".to_string(), "Second".to_string()];
     let mut select = make_select(options);
-    
+
     // Try to set beyond bounds
     select.set_selected(100);
     assert_eq!(select.selected_index(), 1);
-    
+
     // Try very large number (should clamp)
     select.set_selected(u8::MAX as usize);
     assert_eq!(select.selected_index(), 1);

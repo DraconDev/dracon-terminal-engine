@@ -3,7 +3,9 @@
 //! Demonstrates screen reader support (OSC 99) with visual focus rings,
 //! accessibility tree, live announcements, and real input widgets.
 
-use crate::scenes::shared_helpers::{blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{
+    blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay,
+};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -11,7 +13,9 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{PasswordInput, SearchInput};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 
@@ -77,7 +81,13 @@ impl FocusTarget {
 
     fn state(&self, checked: bool) -> &'static str {
         match self {
-            FocusTarget::RememberCheck => if checked { "checked" } else { "unchecked" },
+            FocusTarget::RememberCheck => {
+                if checked {
+                    "checked"
+                } else {
+                    "unchecked"
+                }
+            }
             _ => "",
         }
     }
@@ -112,8 +122,7 @@ const FORM_Y: u16 = 2;
 
 impl AccessibilityScene {
     pub fn new(theme: Theme) -> Self {
-        let username_input = SearchInput::new(WidgetId::new(200))
-            .with_theme(theme.clone());
+        let username_input = SearchInput::new(WidgetId::new(200)).with_theme(theme.clone());
         let password_input = PasswordInput::new(WidgetId::new(201))
             .with_theme(theme.clone())
             .with_mask_char('•')
@@ -146,7 +155,11 @@ impl AccessibilityScene {
 
     fn prev_focus(&mut self) {
         let targets = FocusTarget::all();
-        self.focus_idx = if self.focus_idx == 0 { targets.len() - 1 } else { self.focus_idx - 1 };
+        self.focus_idx = if self.focus_idx == 0 {
+            targets.len() - 1
+        } else {
+            self.focus_idx - 1
+        };
         self.focused = targets[self.focus_idx];
         self.update_widget_focus();
         self.add_announcement("focus", self.focused.name(), "focused".to_string());
@@ -196,7 +209,11 @@ impl AccessibilityScene {
                 self.add_announcement("checkbox", "Remember me", format!("toggled {}", state));
             }
             _ => {
-                self.add_announcement(self.focused.role(), self.focused.name(), "activated".to_string());
+                self.add_announcement(
+                    self.focused.role(),
+                    self.focused.name(),
+                    "activated".to_string(),
+                );
             }
         }
         self.dirty = true;
@@ -223,7 +240,9 @@ impl AccessibilityScene {
         draw_text_clipped(plane, x, FORM_Y, "Login Form", max_x, t.primary, t.bg, true);
         for dx in 0..26 {
             let dx_pos = x + dx;
-            if dx_pos >= max_x { break; }
+            if dx_pos >= max_x {
+                break;
+            }
             let idx = ((FORM_Y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
@@ -236,7 +255,16 @@ impl AccessibilityScene {
         let u_input_y = FORM_Y + 3;
         let is_u_focused = self.focused == FocusTarget::UsernameField;
         let label_fg = if is_u_focused { t.primary } else { t.fg_muted };
-        draw_text_clipped(plane, x, u_label_y, "Username:", max_x, label_fg, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x,
+            u_label_y,
+            "Username:",
+            max_x,
+            label_fg,
+            t.bg,
+            false,
+        );
 
         // Render real SearchInput widget
         let u_area = Rect::new(x + 1, u_input_y, 22, 1);
@@ -254,7 +282,16 @@ impl AccessibilityScene {
         let p_input_y = p_label_y + 1;
         let is_p_focused = self.focused == FocusTarget::PasswordField;
         let label_fg = if is_p_focused { t.primary } else { t.fg_muted };
-        draw_text_clipped(plane, x, p_label_y, "Password:", max_x, label_fg, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x,
+            p_label_y,
+            "Password:",
+            max_x,
+            label_fg,
+            t.bg,
+            false,
+        );
 
         // Render real PasswordInput widget
         let p_area = Rect::new(x + 1, p_input_y, 22, 1);
@@ -280,7 +317,16 @@ impl AccessibilityScene {
                 plane.cells[idx].transparent = false;
             }
         }
-        draw_text_clipped(plane, x + 2, check_y, "Remember me", max_x, check_fg, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x + 2,
+            check_y,
+            "Remember me",
+            max_x,
+            check_fg,
+            t.bg,
+            false,
+        );
         if is_c_focused {
             // Focus highlight on the checkbox row
             draw_focus_ring(plane, x, check_y, 14, 1, t.primary);
@@ -293,7 +339,9 @@ impl AccessibilityScene {
         let btn_bg = if is_b_focused { t.primary } else { t.surface };
         for dx in 0..12u16 {
             let bx = x + dx;
-            if bx >= max_x { break; }
+            if bx >= max_x {
+                break;
+            }
             if btn_y < plane.height {
                 let idx = (btn_y * plane.width + bx) as usize;
                 if idx < plane.cells.len() {
@@ -302,9 +350,25 @@ impl AccessibilityScene {
                 }
             }
         }
-        draw_text_clipped(plane, x + 1, btn_y, "  Login  ", max_x, btn_fg, btn_bg, true);
+        draw_text_clipped(
+            plane,
+            x + 1,
+            btn_y,
+            "  Login  ",
+            max_x,
+            btn_fg,
+            btn_bg,
+            true,
+        );
         if is_b_focused {
-            draw_focus_ring(plane, x.saturating_sub(1), btn_y.saturating_sub(1), 14, 3, t.primary);
+            draw_focus_ring(
+                plane,
+                x.saturating_sub(1),
+                btn_y.saturating_sub(1),
+                14,
+                3,
+                t.primary,
+            );
         }
 
         // --- Help link ---
@@ -316,7 +380,9 @@ impl AccessibilityScene {
             // Underline for link focus
             for dx in 0..10u16 {
                 let ux = x + dx;
-                if ux >= max_x { break; }
+                if ux >= max_x {
+                    break;
+                }
                 let uy = link_y + 1;
                 if uy < plane.height {
                     let idx = (uy * plane.width + ux) as usize;
@@ -333,10 +399,21 @@ impl AccessibilityScene {
         let t = &self.theme;
         let max_x = x + w;
 
-        draw_text_clipped(plane, x, y, "Accessibility Tree", max_x, t.primary, t.bg, true);
+        draw_text_clipped(
+            plane,
+            x,
+            y,
+            "Accessibility Tree",
+            max_x,
+            t.primary,
+            t.bg,
+            true,
+        );
         for dx in 0..w {
             let dx_pos = x + dx;
-            if dx_pos >= max_x { break; }
+            if dx_pos >= max_x {
+                break;
+            }
             let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
@@ -350,22 +427,53 @@ impl AccessibilityScene {
             let is_focused = *target == self.focused;
 
             // Tree connector
-            let connector = if i + 1 < targets.len() { "├─ " } else { "└─ " };
+            let connector = if i + 1 < targets.len() {
+                "├─ "
+            } else {
+                "└─ "
+            };
             draw_text_clipped(plane, x, ty, "│", max_x, t.outline, t.bg, false);
             draw_text_clipped(plane, x + 2, ty, connector, max_x, t.outline, t.bg, false);
 
             // Role badge
             let role_color = if is_focused { t.primary } else { t.fg_muted };
             let role_badge = format!("[{}]", target.role());
-            draw_text_clipped(plane, x + 5, ty, &role_badge, max_x, role_color, t.bg, is_focused);
+            draw_text_clipped(
+                plane,
+                x + 5,
+                ty,
+                &role_badge,
+                max_x,
+                role_color,
+                t.bg,
+                is_focused,
+            );
 
             // Label
             let label_color = if is_focused { t.primary } else { t.fg };
-            draw_text_clipped(plane, x + 5 + role_badge.len() as u16, ty, target.name(), max_x, label_color, t.bg, is_focused);
+            draw_text_clipped(
+                plane,
+                x + 5 + role_badge.len() as u16,
+                ty,
+                target.name(),
+                max_x,
+                label_color,
+                t.bg,
+                is_focused,
+            );
 
             // Focus indicator
             if is_focused && x + w.saturating_sub(3) < max_x {
-                draw_text_clipped(plane, x + w.saturating_sub(3), ty, " ◄", max_x, t.primary, t.bg, true);
+                draw_text_clipped(
+                    plane,
+                    x + w.saturating_sub(3),
+                    ty,
+                    " ◄",
+                    max_x,
+                    t.primary,
+                    t.bg,
+                    true,
+                );
             }
         }
     }
@@ -377,7 +485,9 @@ impl AccessibilityScene {
         draw_text_clipped(plane, x, y, "Announcements", max_x, t.secondary, t.bg, true);
         for dx in 0..w {
             let dx_pos = x + dx;
-            if dx_pos >= max_x { break; }
+            if dx_pos >= max_x {
+                break;
+            }
             let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
@@ -387,7 +497,9 @@ impl AccessibilityScene {
 
         for (i, ann) in self.announcements.iter().rev().take(5).enumerate() {
             let ay = y + 2 + i as u16;
-            if ay >= area.height.saturating_sub(2) { break; }
+            if ay >= area.height.saturating_sub(2) {
+                break;
+            }
 
             // Role icon
             let icon = match ann.role.as_str() {
@@ -419,7 +531,9 @@ impl AccessibilityScene {
         draw_text_clipped(plane, x, y, "Focus Info", max_x, t.primary, t.bg, true);
         for dx in 0..w {
             let dx_pos = x + dx;
-            if dx_pos >= max_x { break; }
+            if dx_pos >= max_x {
+                break;
+            }
             let idx = ((y + 1) * plane.width + dx_pos) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
@@ -450,7 +564,9 @@ impl AccessibilityScene {
 }
 
 impl Scene for AccessibilityScene {
-    fn scene_id(&self) -> &str { "accessibility" }
+    fn scene_id(&self) -> &str {
+        "accessibility"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -465,8 +581,15 @@ impl Scene for AccessibilityScene {
         // Header
         draw_text(&mut plane, 2, 0, " Accessibility ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -506,13 +629,23 @@ impl Scene for AccessibilityScene {
         self.render_announcement_log(&mut plane, panel_x, log_y, panel_w, area);
 
         // OSC 99 hint
-        draw_text(&mut plane, 2, area.height.saturating_sub(3),
-                  "OSC 99: Screen reader announcements via terminal escape sequences", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            2,
+            area.height.saturating_sub(3),
+            "OSC 99: Screen reader announcements via terminal escape sequences",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Footer
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let footer = format!(" Tab:next focus | Shift+Tab:prev | Enter:activate | {}:help | {}:back ", help_key, back_key);
+        let footer = format!(
+            " Tab:next focus | Shift+Tab:prev | Enter:activate | {}:help | {}:back ",
+            help_key, back_key
+        );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
             let idx = (fy * area.width + i as u16) as usize;
@@ -526,23 +659,33 @@ impl Scene for AccessibilityScene {
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Accessibility — Help", &[
-                ("Tab", "Next focus target"),
-                ("Shift+Tab", "Previous focus target"),
-                ("Enter/Space", "Activate focused element"),
-                ("Type", "Enter text in input fields"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Accessibility — Help",
+                &[
+                    ("Tab", "Next focus target"),
+                    ("Shift+Tab", "Previous focus target"),
+                    ("Enter/Space", "Activate focused element"),
+                    ("Type", "Enter text in input fields"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -615,7 +758,9 @@ impl Scene for AccessibilityScene {
             // Forward mouse to input widget
             let rel_col = col.saturating_sub(FORM_X + 1);
             let rel_row = 0u16;
-            self.username_input.borrow_mut().handle_mouse(kind, rel_col, rel_row);
+            self.username_input
+                .borrow_mut()
+                .handle_mouse(kind, rel_col, rel_row);
             self.dirty = true;
             return true;
         }
@@ -629,7 +774,9 @@ impl Scene for AccessibilityScene {
             }
             let rel_col = col.saturating_sub(FORM_X + 1);
             let rel_row = 0u16;
-            self.password_input.borrow_mut().handle_mouse(kind, rel_col, rel_row);
+            self.password_input
+                .borrow_mut()
+                .handle_mouse(kind, rel_col, rel_row);
             self.dirty = true;
             return true;
         }
@@ -680,9 +827,15 @@ impl Scene for AccessibilityScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl AccessibilityScene {

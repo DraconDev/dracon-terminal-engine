@@ -39,8 +39,18 @@ impl KanbanScene {
         kanban.add_column("Done");
 
         let todos = [
-            ("t1", "Design API", Some("Define endpoints & schemas"), Some(Color::Rgb(100, 149, 237))),
-            ("t2", "Setup CI/CD", Some("GitHub Actions pipeline"), Some(Color::Rgb(100, 149, 237))),
+            (
+                "t1",
+                "Design API",
+                Some("Define endpoints & schemas"),
+                Some(Color::Rgb(100, 149, 237)),
+            ),
+            (
+                "t2",
+                "Setup CI/CD",
+                Some("GitHub Actions pipeline"),
+                Some(Color::Rgb(100, 149, 237)),
+            ),
             ("t3", "Write docs", Some("User guide & API ref"), None),
             ("t4", "Add tests", Some("Unit + integration tests"), None),
             ("t5", "Code review", Some("Review PRs from team"), None),
@@ -57,8 +67,18 @@ impl KanbanScene {
         }
 
         let wips = [
-            ("w1", "Kanban widget", Some("Implement drag & drop"), Some(Color::Rgb(255, 165, 0))),
-            ("w2", "Form validation", Some("Add validation rules"), Some(Color::Rgb(255, 165, 0))),
+            (
+                "w1",
+                "Kanban widget",
+                Some("Implement drag & drop"),
+                Some(Color::Rgb(255, 165, 0)),
+            ),
+            (
+                "w2",
+                "Form validation",
+                Some("Add validation rules"),
+                Some(Color::Rgb(255, 165, 0)),
+            ),
             ("w3", "Refactor core", Some("Extract framework crate"), None),
         ];
         for (id, title, desc, color) in &wips {
@@ -73,8 +93,18 @@ impl KanbanScene {
         }
 
         let dones = [
-            ("d1", "Project setup", Some("Initial scaffolding"), Some(Color::Rgb(50, 205, 50))),
-            ("d2", "Theme system", Some("Theme::nord, cyberpunk, etc."), Some(Color::Rgb(50, 205, 50))),
+            (
+                "d1",
+                "Project setup",
+                Some("Initial scaffolding"),
+                Some(Color::Rgb(50, 205, 50)),
+            ),
+            (
+                "d2",
+                "Theme system",
+                Some("Theme::nord, cyberpunk, etc."),
+                Some(Color::Rgb(50, 205, 50)),
+            ),
         ];
         for (id, title, desc, color) in &dones {
             let mut card = KanbanCard::new(*id, *title);
@@ -92,7 +122,7 @@ impl KanbanScene {
                 .add_segment(StatusSegment::new(
                     "Tab: nav | N: new | D: del | F1: help | Esc: back",
                 ))
-                .with_theme(theme.clone())
+                .with_theme(theme.clone()),
         );
 
         Self {
@@ -108,7 +138,9 @@ impl KanbanScene {
 }
 
 impl Scene for KanbanScene {
-    fn scene_id(&self) -> &str { "kanban" }
+    fn scene_id(&self) -> &str {
+        "kanban"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -118,8 +150,15 @@ impl Scene for KanbanScene {
         // Header
         draw_text(&mut plane, 2, 0, " Kanban Board ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -151,51 +190,76 @@ impl Scene for KanbanScene {
         self.kanban.borrow_mut().set_area(kanban_area);
         let k_plane = self.kanban.borrow().render(kanban_area);
         for (ci, c) in k_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let row = ci / k_plane.width as usize;
             let col = ci % k_plane.width as usize;
             let dy = kanban_area.y as usize + row;
             let dx = kanban_area.x as usize + col;
             if dy < area.height as usize && dx < area.width as usize {
                 let idx = dy * area.width as usize + dx;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
         // Selected card indicator
         if self.kanban.borrow().selected_card().is_some() {
             let info_y = area.height.saturating_sub(3);
-            draw_text(&mut plane, board_x + 1, info_y, "Card selected — use ↑↓ to navigate", t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                board_x + 1,
+                info_y,
+                "Card selected — use ↑↓ to navigate",
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, t, "Kanban Board — Help", &[
-                ("Tab/Shift+Tab", "Focus next/prev column"),
-                ("←/→", "Navigate columns"),
-                ("↑/↓", "Navigate cards"),
-                ("N", "Add new card to To Do"),
-                ("D", "Delete selected card"),
-                ("Click", "Select card"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Kanban Board — Help",
+                &[
+                    ("Tab/Shift+Tab", "Focus next/prev column"),
+                    ("←/→", "Navigate columns"),
+                    ("↑/↓", "Navigate cards"),
+                    ("N", "Add new card to To Do"),
+                    ("D", "Delete selected card"),
+                    ("Click", "Select card"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -214,8 +278,20 @@ impl Scene for KanbanScene {
             KeyCode::Char('n') if key.modifiers.is_empty() => {
                 let id = format!("new_{}", self.next_card_id);
                 self.next_card_id += 1;
-                let titles = ["New task", "Feature request", "Bug fix", "Research", "Refactor"];
-                let descs = ["Needs description", "From user feedback", "Priority fix", "Investigate options", "Clean up code"];
+                let titles = [
+                    "New task",
+                    "Feature request",
+                    "Bug fix",
+                    "Research",
+                    "Refactor",
+                ];
+                let descs = [
+                    "Needs description",
+                    "From user feedback",
+                    "Priority fix",
+                    "Investigate options",
+                    "Clean up code",
+                ];
                 let idx = self.next_card_id % titles.len();
                 let mut card = KanbanCard::new(id, titles[idx]);
                 card = card.with_description(descs[idx]);
@@ -233,7 +309,9 @@ impl Scene for KanbanScene {
             }
             _ => {
                 let handled = self.kanban.borrow_mut().handle_key(key);
-                if handled { self.dirty = true; }
+                if handled {
+                    self.dirty = true;
+                }
                 handled
             }
         }
@@ -242,7 +320,9 @@ impl Scene for KanbanScene {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         let adjusted_row = row.saturating_sub(2);
         let adjusted_col = col.saturating_sub(DIV_X + 1);
-        self.kanban.borrow_mut().handle_mouse(kind, adjusted_col, adjusted_row)
+        self.kanban
+            .borrow_mut()
+            .handle_mouse(kind, adjusted_col, adjusted_row)
     }
 
     fn on_theme_change(&mut self, theme: &Theme) {
@@ -252,9 +332,15 @@ impl Scene for KanbanScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty || self.kanban.borrow().needs_render() }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty || self.kanban.borrow().needs_render()
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl KanbanScene {
@@ -273,10 +359,18 @@ impl KanbanScene {
         for i in 0..column_count.min(3) {
             let count = k.card_count(i).unwrap_or(0);
             let label = col_labels.get(i).unwrap_or(&"Col");
-            let is_focused = k.selected_card().map(|(c,_)| c).unwrap_or(99) == i;
+            let is_focused = k.selected_card().map(|(c, _)| c).unwrap_or(99) == i;
             let fg = if is_focused { t.primary } else { t.fg };
             draw_text(plane, sx, 3 + i as u16, label, t.fg_muted, t.bg, false);
-            draw_text(plane, sx + 12, 3 + i as u16, &format!("{}", count), fg, t.bg, is_focused);
+            draw_text(
+                plane,
+                sx + 12,
+                3 + i as u16,
+                &format!("{}", count),
+                fg,
+                t.bg,
+                is_focused,
+            );
         }
 
         // Divider
@@ -291,23 +385,43 @@ impl KanbanScene {
 
         // Total
         draw_text(plane, sx, 9, "Total Cards", t.fg_muted, t.bg, false);
-        draw_text(plane, sx + 12, 9, &format!("{}", total_cards), t.info, t.bg, true);
+        draw_text(
+            plane,
+            sx + 12,
+            9,
+            &format!("{}", total_cards),
+            t.info,
+            t.bg,
+            true,
+        );
 
         // Summary
         let sum_y = 11;
         let done_pct = if total_cards > 0 {
             let done = k.card_count(2).unwrap_or(0);
             (done * 100).checked_div(total_cards).unwrap_or(0)
-        } else { 0 };
+        } else {
+            0
+        };
         draw_text(plane, sx, sum_y, "Progress", t.secondary, t.bg, true);
-        draw_text(plane, sx, sum_y + 1, &format!("{}% done", done_pct), t.success, t.bg, false);
+        draw_text(
+            plane,
+            sx,
+            sum_y + 1,
+            &format!("{}% done", done_pct),
+            t.success,
+            t.bg,
+            false,
+        );
 
         // Progress bar
         let bar_w = SIDEBAR_W.saturating_sub(4);
         let bar_y = sum_y + 2;
         let filled = if total_cards > 0 {
             (done_pct as u16 * bar_w) / 100
-        } else { 0 };
+        } else {
+            0
+        };
         for dx in 0..bar_w {
             let idx = (bar_y * plane.width + sx + dx) as usize;
             if idx < plane.cells.len() {
@@ -322,9 +436,33 @@ impl KanbanScene {
         let leg_y = area.height.saturating_sub(6);
         if leg_y > bar_y + 3 {
             draw_text(plane, sx, leg_y, "Legend", t.secondary, t.bg, true);
-            draw_text(plane, sx, leg_y + 1, "● Design", Color::Rgb(100, 149, 237), t.bg, false);
-            draw_text(plane, sx, leg_y + 2, "● Active", Color::Rgb(255, 165, 0), t.bg, false);
-            draw_text(plane, sx, leg_y + 3, "● Done", Color::Rgb(50, 205, 50), t.bg, false);
+            draw_text(
+                plane,
+                sx,
+                leg_y + 1,
+                "● Design",
+                Color::Rgb(100, 149, 237),
+                t.bg,
+                false,
+            );
+            draw_text(
+                plane,
+                sx,
+                leg_y + 2,
+                "● Active",
+                Color::Rgb(255, 165, 0),
+                t.bg,
+                false,
+            );
+            draw_text(
+                plane,
+                sx,
+                leg_y + 3,
+                "● Done",
+                Color::Rgb(50, 205, 50),
+                t.bg,
+                false,
+            );
         }
     }
 }

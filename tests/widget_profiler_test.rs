@@ -1,9 +1,9 @@
 //! Tests for the Profiler widget.
 
-use std::time::Duration;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::profiler::{Profiler, Metric};
+use dracon_terminal_engine::framework::widgets::profiler::{Metric, Profiler};
+use std::time::Duration;
 
 // ============================================================================
 // Construction Tests
@@ -45,8 +45,16 @@ fn test_profiler_record() {
 fn test_profiler_set_metrics() {
     let mut p = Profiler::new(WidgetId::new(1));
     let metrics = vec![
-        Metric { name: "a".to_string(), value: Duration::from_nanos(1000), call_count: 5 },
-        Metric { name: "b".to_string(), value: Duration::from_nanos(2000), call_count: 10 },
+        Metric {
+            name: "a".to_string(),
+            value: Duration::from_nanos(1000),
+            call_count: 5,
+        },
+        Metric {
+            name: "b".to_string(),
+            value: Duration::from_nanos(2000),
+            call_count: 10,
+        },
     ];
     p.set_metrics(metrics);
     let got = p.metrics();
@@ -187,7 +195,13 @@ fn test_profiler_on_theme_change() {
 
 #[test]
 fn test_profiler_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let p = Profiler::new(WidgetId::new(1)).with_theme(t);
@@ -219,7 +233,11 @@ fn test_profiler_set_area_then_render() {
 fn test_profiler_record_many() {
     let mut p = Profiler::new(WidgetId::new(1));
     for i in 0..10 {
-        p.record(&format!("metric{}", i), Duration::from_millis(i as u64 * 10), i as u64 + 1);
+        p.record(
+            &format!("metric{}", i),
+            Duration::from_millis(i as u64 * 10),
+            i as u64 + 1,
+        );
     }
     let plane = p.render(Rect::new(0, 0, 80, 30));
     assert!(plane.width > 0);

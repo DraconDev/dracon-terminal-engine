@@ -119,7 +119,9 @@ impl AnimationManager {
 
     /// Gets the current value of an animation by stable ID.
     pub fn value(&self, id: usize) -> Option<f64> {
-        self.slots.get(id).and_then(|slot| slot.as_ref().map(|a| a.value()))
+        self.slots
+            .get(id)
+            .and_then(|slot| slot.as_ref().map(|a| a.value()))
     }
 
     /// Returns true if an animation is done (or doesn't exist).
@@ -170,7 +172,9 @@ impl AnimationManager {
     /// remaining have already finished (they'll be cleaned up on the next
     /// [`Self::tick`] call).
     pub fn has_active(&self) -> bool {
-        self.slots.iter().any(|s| s.as_ref().is_some_and(|a| !a.is_done()))
+        self.slots
+            .iter()
+            .any(|s| s.as_ref().is_some_and(|a| !a.is_done()))
     }
 }
 
@@ -427,11 +431,17 @@ mod tests {
         assert_eq!(manager.len(), 1);
 
         let val_long = manager.value(id_long);
-        assert!(val_long.is_some(), "id_long should still be valid after cleanup");
+        assert!(
+            val_long.is_some(),
+            "id_long should still be valid after cleanup"
+        );
         assert!(!manager.is_done(id_long), "id_long should still be active");
 
         let val_short = manager.value(id_short);
-        assert!(val_short.is_none(), "id_short should be invalid after cleanup (completed)");
+        assert!(
+            val_short.is_none(),
+            "id_short should be invalid after cleanup (completed)"
+        );
     }
 
     #[test]

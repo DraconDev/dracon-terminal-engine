@@ -4,15 +4,21 @@
 //! widget preview on the right, plus color palette and contrast info.
 //! Like a theme designer tool.
 
-use crate::scenes::shared_helpers::{blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{
+    blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay,
+};
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, Toggle};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::framework::widgets::{
+    Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, Toggle,
+};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 
@@ -99,12 +105,23 @@ impl ThemeSwitcherScene {
         let themes = self.themes();
 
         // Sidebar header
-        draw_text_clipped(plane, 1, 0, " Themes ", max_x, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            1,
+            0,
+            " Themes ",
+            max_x,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
 
         // Theme list
         for (i, theme) in themes.iter().enumerate() {
             let row = i as u16 + 1;
-            if row >= area.height.saturating_sub(2) { break; }
+            if row >= area.height.saturating_sub(2) {
+                break;
+            }
 
             let is_selected = i == self.theme_index;
             let bg = if is_selected { t.primary } else { t.surface };
@@ -131,11 +148,26 @@ impl ThemeSwitcherScene {
 
             // Theme name
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            draw_text_clipped(plane, 1, row, &theme.name, max_x.saturating_sub(2), fg, bg, false);
+            draw_text_clipped(
+                plane,
+                1,
+                row,
+                &theme.name,
+                max_x.saturating_sub(2),
+                fg,
+                bg,
+                false,
+            );
 
             // Mini color swatch (5 dots)
             let swatch_x = SIDEBAR_WIDTH.saturating_sub(7);
-            let colors = [theme.primary, theme.secondary, theme.success, theme.warning, theme.error];
+            let colors = [
+                theme.primary,
+                theme.secondary,
+                theme.success,
+                theme.warning,
+                theme.error,
+            ];
             for (j, &color) in colors.iter().enumerate() {
                 let sx = swatch_x + j as u16 * 2;
                 let idx = (row * plane.width + sx) as usize;
@@ -147,13 +179,17 @@ impl ThemeSwitcherScene {
             }
 
             // Hit zone
-            self.zones.borrow_mut().register(i, 0, row, SIDEBAR_WIDTH, 1);
+            self.zones
+                .borrow_mut()
+                .register(i, 0, row, SIDEBAR_WIDTH, 1);
         }
 
         // Count footer
         let count_y = area.height.saturating_sub(1);
         let count = format!(" {} themes ", themes.len());
-        draw_text_clipped(plane, 1, count_y, &count, max_x, t.fg_muted, t.surface, false);
+        draw_text_clipped(
+            plane, 1, count_y, &count, max_x, t.fg_muted, t.surface, false,
+        );
     }
 
     fn render_preview(&self, plane: &mut Plane, area: Rect, div_x: u16) {
@@ -186,40 +222,88 @@ impl ThemeSwitcherScene {
         let col_w = card_w / 4;
 
         let cb_area = Rect::new(card_x + 2, row1_y, col_w, 1);
-        blit_to(plane, &self.checkbox.render(cb_area), cb_area.x as usize, cb_area.y as usize);
+        blit_to(
+            plane,
+            &self.checkbox.render(cb_area),
+            cb_area.x as usize,
+            cb_area.y as usize,
+        );
 
         let radio_area = Rect::new(card_x + 2 + col_w, row1_y, col_w, 1);
-        blit_to(plane, &self.radio.render(radio_area), radio_area.x as usize, radio_area.y as usize);
+        blit_to(
+            plane,
+            &self.radio.render(radio_area),
+            radio_area.x as usize,
+            radio_area.y as usize,
+        );
 
         let toggle_area = Rect::new(card_x + 2 + col_w * 2, row1_y, col_w, 1);
-        blit_to(plane, &self.toggle.render(toggle_area), toggle_area.x as usize, toggle_area.y as usize);
+        blit_to(
+            plane,
+            &self.toggle.render(toggle_area),
+            toggle_area.x as usize,
+            toggle_area.y as usize,
+        );
 
         // Button
         let btn_area = Rect::new(card_x + 2 + col_w * 3, row1_y, col_w.saturating_sub(1), 1);
-        blit_to(plane, &self.button.render(btn_area), btn_area.x as usize, btn_area.y as usize);
+        blit_to(
+            plane,
+            &self.button.render(btn_area),
+            btn_area.x as usize,
+            btn_area.y as usize,
+        );
 
         // Row 2: Slider
         let row2_y = card_y + 3;
         let slider_area = Rect::new(card_x + 2, row2_y, card_w.saturating_sub(4), 1);
-        blit_to(plane, &self.slider.render(slider_area), slider_area.x as usize, slider_area.y as usize);
+        blit_to(
+            plane,
+            &self.slider.render(slider_area),
+            slider_area.x as usize,
+            slider_area.y as usize,
+        );
 
         // Row 3: SearchInput
         let row3_y = card_y + 5;
         let search_area = Rect::new(card_x + 2, row3_y, card_w.saturating_sub(4), 1);
-        blit_to(plane, &self.search.render(search_area), search_area.x as usize, search_area.y as usize);
+        blit_to(
+            plane,
+            &self.search.render(search_area),
+            search_area.x as usize,
+            search_area.y as usize,
+        );
 
         // Row 4: Progress + Badge
         let row4_y = card_y + 7;
         let prog_area = Rect::new(card_x + 2, row4_y, card_w.saturating_sub(8), 1);
-        blit_to(plane, &self.progress.render(prog_area), prog_area.x as usize, prog_area.y as usize);
+        blit_to(
+            plane,
+            &self.progress.render(prog_area),
+            prog_area.x as usize,
+            prog_area.y as usize,
+        );
 
         let badge_area = Rect::new(card_x + 2 + card_w.saturating_sub(7), row4_y, 6, 1);
-        blit_to(plane, &self.badge.render(badge_area), badge_area.x as usize, badge_area.y as usize);
+        blit_to(
+            plane,
+            &self.badge.render(badge_area),
+            badge_area.x as usize,
+            badge_area.y as usize,
+        );
 
         // ── Section 2: Color Palette ────────────────────────────
         let palette_y = card_y + card_h + 2;
         if palette_y < area.height.saturating_sub(8) {
-            draw_text(plane, panel_x, palette_y, "Color Palette", t.primary, t.bg, true);
+            draw_text(
+                plane,
+                panel_x,
+                palette_y,
+                "Color Palette",
+                t.primary,
+                t.bg,
+                true,
+            );
 
             // Palette grid: 4 columns of color swatches
             let colors = [
@@ -247,7 +331,9 @@ impl ThemeSwitcherScene {
                 let sx = panel_x + col * gap_x;
                 let sy = palette_y + 1 + row * (swatch_h + 1);
 
-                if sy + swatch_h >= area.height.saturating_sub(4) { break; }
+                if sy + swatch_h >= area.height.saturating_sub(4) {
+                    break;
+                }
 
                 // Swatch background (colored)
                 for dy in 0..swatch_h {
@@ -268,14 +354,26 @@ impl ThemeSwitcherScene {
                 for x in sx..sx + swatch_w {
                     let top_idx = (sy * area.width + x) as usize;
                     let bot_idx = ((sy + swatch_h - 1) * area.width + x) as usize;
-                    if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = border_color; }
-                    if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = border_color; }
+                    if top_idx < plane.cells.len() {
+                        plane.cells[top_idx].char = '─';
+                        plane.cells[top_idx].fg = border_color;
+                    }
+                    if bot_idx < plane.cells.len() {
+                        plane.cells[bot_idx].char = '─';
+                        plane.cells[bot_idx].fg = border_color;
+                    }
                 }
                 for y in sy..sy + swatch_h {
                     let left_idx = (y * area.width + sx) as usize;
                     let right_idx = (y * area.width + sx + swatch_w - 1) as usize;
-                    if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = border_color; }
-                    if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = border_color; }
+                    if left_idx < plane.cells.len() {
+                        plane.cells[left_idx].char = '│';
+                        plane.cells[left_idx].fg = border_color;
+                    }
+                    if right_idx < plane.cells.len() {
+                        plane.cells[right_idx].char = '│';
+                        plane.cells[right_idx].fg = border_color;
+                    }
                 }
 
                 // Label
@@ -286,7 +384,15 @@ impl ThemeSwitcherScene {
         // ── Section 3: Contrast Info ──────────────────────────
         let contrast_y = area.height.saturating_sub(6);
         if contrast_y > 2 {
-            draw_text(plane, panel_x, contrast_y, "Contrast Ratios", t.primary, t.bg, true);
+            draw_text(
+                plane,
+                panel_x,
+                contrast_y,
+                "Contrast Ratios",
+                t.primary,
+                t.bg,
+                true,
+            );
 
             // Fake contrast ratios (just for visual)
             let ratios = [
@@ -298,23 +404,54 @@ impl ThemeSwitcherScene {
 
             for (i, (pair, ratio, level)) in ratios.iter().enumerate() {
                 let ry = contrast_y + 1 + i as u16;
-                if ry >= area.height.saturating_sub(2) { break; }
+                if ry >= area.height.saturating_sub(2) {
+                    break;
+                }
                 let level_color = match *level {
                     "AAA" => t.success,
                     "AA" => t.primary,
                     "AA Large" => t.warning,
                     _ => t.fg_muted,
                 };
-                draw_text_clipped(plane, panel_x, ry, pair, panel_w / 2, t.fg_muted, t.bg, false);
-                draw_text_clipped(plane, panel_x + 8, ry, ratio, panel_w / 2, t.fg, t.bg, false);
-                draw_text_clipped(plane, panel_x + 18, ry, level, panel_w / 2, level_color, t.bg, true);
+                draw_text_clipped(
+                    plane,
+                    panel_x,
+                    ry,
+                    pair,
+                    panel_w / 2,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    panel_x + 8,
+                    ry,
+                    ratio,
+                    panel_w / 2,
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    panel_x + 18,
+                    ry,
+                    level,
+                    panel_w / 2,
+                    level_color,
+                    t.bg,
+                    true,
+                );
             }
         }
     }
 }
 
 impl Scene for ThemeSwitcherScene {
-    fn scene_id(&self) -> &str { "theme_switcher" }
+    fn scene_id(&self) -> &str {
+        "theme_switcher"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -329,8 +466,15 @@ impl Scene for ThemeSwitcherScene {
         // Header
         draw_text(&mut plane, 2, 0, " Theme Studio ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", t.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Header divider
         for x in 0..area.width {
@@ -372,22 +516,32 @@ impl Scene for ThemeSwitcherScene {
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Theme Studio Help", &[
-                ("↑/↓", "Navigate theme list"),
-                ("Click", "Select theme"),
-                ("T", "Cycle themes"),
-                ("Esc", "Back to showcase"),
-                ("?", "Toggle this help"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Theme Studio Help",
+                &[
+                    ("↑/↓", "Navigate theme list"),
+                    ("Click", "Select theme"),
+                    ("T", "Cycle themes"),
+                    ("Esc", "Back to showcase"),
+                    ("?", "Toggle this help"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 return true;
             }
@@ -418,7 +572,9 @@ impl Scene for ThemeSwitcherScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.show_help { return true; }
+        if self.show_help {
+            return true;
+        }
 
         // Check sidebar zones
         let zone_idx = self.zones.borrow().dispatch(col, row);
@@ -445,7 +601,13 @@ impl Scene for ThemeSwitcherScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }

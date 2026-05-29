@@ -17,22 +17,22 @@ const MAP_W: usize = 16;
 const MAP_H: usize = 16;
 
 const MAP: [[u8; MAP_W]; MAP_H] = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,2,2,0,0,0,3,3,3,0,0,0,1],
-    [1,0,0,2,0,0,0,0,0,0,0,3,0,0,0,1],
-    [1,0,0,2,0,0,0,0,0,0,0,3,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,4,4,4,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,4,0,4,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,4,0,4,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,5,5,0,0,0,0,0,6,6,6,0,0,1],
-    [1,0,0,5,0,0,0,0,0,0,0,0,6,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 2, 2, 2, 0, 0, 0, 3, 3, 3, 0, 0, 0, 1],
+    [1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1],
+    [1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 5, 5, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 1],
+    [1, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
 // ASCII shading characters from far to near
@@ -41,12 +41,12 @@ const SHADE_CHARS: &[char] = &[' ', '·', '░', '▒', '▓', '█'];
 // Wall colors per wall type (1-6)
 fn wall_color(wall_type: u8, theme: &Theme) -> (Color, Color) {
     match wall_type {
-        1 => (theme.fg, theme.fg_muted),       // boundary walls
-        2 => (theme.primary, theme.primary),   // blue room
+        1 => (theme.fg, theme.fg_muted),         // boundary walls
+        2 => (theme.primary, theme.primary),     // blue room
         3 => (theme.secondary, theme.secondary), // purple room
-        4 => (theme.success, theme.success),   // green room
-        5 => (theme.warning, theme.warning),   // yellow room
-        6 => (theme.error, theme.error),       // red room
+        4 => (theme.success, theme.success),     // green room
+        5 => (theme.warning, theme.warning),     // yellow room
+        6 => (theme.error, theme.error),         // red room
         _ => (theme.fg, theme.fg_muted),
     }
 }
@@ -59,9 +59,9 @@ pub struct RaycasterScene {
     show_minimap: Cell<bool>,
     keybindings: KeybindingSet,
     // Player state
-    px: Cell<f64>,   // position x
-    py: Cell<f64>,   // position y
-    pa: Cell<f64>,   // angle (radians)
+    px: Cell<f64>, // position x
+    py: Cell<f64>, // position y
+    pa: Cell<f64>, // angle (radians)
     // Rendering
     dirty: bool,
     area: Cell<Rect>,
@@ -74,9 +74,9 @@ impl RaycasterScene {
             show_help: false,
             show_minimap: Cell::new(true),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
-            px: Cell::new(8.0),  // center of map
+            px: Cell::new(8.0), // center of map
             py: Cell::new(8.0),
-            pa: Cell::new(0.0),  // facing right
+            pa: Cell::new(0.0), // facing right
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
         }
@@ -126,8 +126,16 @@ impl RaycasterScene {
         let map_x = px as i32;
         let map_y = py as i32;
 
-        let delta_dist_x = if ray_dx == 0.0 { f64::MAX } else { (1.0 / ray_dx).abs() };
-        let delta_dist_y = if ray_dy == 0.0 { f64::MAX } else { (1.0 / ray_dy).abs() };
+        let delta_dist_x = if ray_dx == 0.0 {
+            f64::MAX
+        } else {
+            (1.0 / ray_dx).abs()
+        };
+        let delta_dist_y = if ray_dy == 0.0 {
+            f64::MAX
+        } else {
+            (1.0 / ray_dy).abs()
+        };
 
         let (step_x, side_dist_x) = if ray_dx < 0.0 {
             (-1, (px - map_x as f64) * delta_dist_x)
@@ -246,20 +254,34 @@ impl RaycasterScene {
         for x in ox..ox + size {
             let top = (oy * plane.width + x) as usize;
             let bot = ((oy + size - 1) * plane.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in oy..oy + size {
             let left = (y * plane.width + ox) as usize;
             let right = (y * plane.width + ox + size - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
     }
 }
 
 impl Scene for RaycasterScene {
-    fn scene_id(&self) -> &str { "raycaster" }
+    fn scene_id(&self) -> &str {
+        "raycaster"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -295,7 +317,11 @@ impl Scene for RaycasterScene {
 
             // Wall height based on distance
             let wall_height = (view_h as f64 / corrected_dist.max(0.1)) as u16;
-            let wall_top = if wall_height > view_h { 0 } else { (view_h - wall_height) / 2 };
+            let wall_top = if wall_height > view_h {
+                0
+            } else {
+                (view_h - wall_height) / 2
+            };
             let wall_bot = (wall_top + wall_height).min(view_h);
 
             // Determine shade based on distance
@@ -303,8 +329,10 @@ impl Scene for RaycasterScene {
             let shade_idx = if corrected_dist >= max_dist {
                 0
             } else {
-                ((1.0 - corrected_dist / max_dist) * (SHADE_CHARS.len() - 1) as f64).round() as usize
-            }.min(SHADE_CHARS.len() - 1);
+                ((1.0 - corrected_dist / max_dist) * (SHADE_CHARS.len() - 1) as f64).round()
+                    as usize
+            }
+            .min(SHADE_CHARS.len() - 1);
 
             let shade_char = SHADE_CHARS[shade_idx];
 
@@ -340,12 +368,14 @@ impl Scene for RaycasterScene {
 
             // Draw floor
             for row in wall_bot..view_h {
-                let floor_dist = view_h as f64 / (2.0 * (row as f64 - view_h as f64 / 2.0)).abs().max(0.5);
+                let floor_dist =
+                    view_h as f64 / (2.0 * (row as f64 - view_h as f64 / 2.0)).abs().max(0.5);
                 let floor_shade = if floor_dist >= max_dist {
                     0
                 } else {
                     ((1.0 - floor_dist / max_dist) * 2.0).round() as usize
-                }.min(2);
+                }
+                .min(2);
                 let floor_char = match floor_shade {
                     0 => ' ',
                     1 => '·',
@@ -395,22 +425,31 @@ impl Scene for RaycasterScene {
         // Help overlay
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "3D Raycaster — Help", &[
-                ("W/↑", "Move forward"),
-                ("S/↓", "Move backward"),
-                ("A/D", "Strafe left/right"),
-                ("←/→", "Turn left/right"),
-                ("M", "Toggle minimap"),
-                ("Scroll", "Turn with mouse wheel"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "3D Raycaster — Help",
+                &[
+                    ("W/↑", "Move forward"),
+                    ("S/↓", "Move backward"),
+                    ("A/D", "Strafe left/right"),
+                    ("←/→", "Turn left/right"),
+                    ("M", "Toggle minimap"),
+                    ("Scroll", "Turn with mouse wheel"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         // Footer with key hints
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let fy = area.height.saturating_sub(1);
-        let footer = format!(" WASD:move | ←→:turn | M:minimap | {}:help | {}:back ", help_key, back_key);
+        let footer = format!(
+            " WASD:move | ←→:turn | M:minimap | {}:help | {}:back ",
+            help_key, back_key
+        );
         for (i, c) in footer.chars().enumerate() {
             let idx = (fy * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -425,10 +464,14 @@ impl Scene for RaycasterScene {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -505,9 +548,13 @@ impl Scene for RaycasterScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-
-

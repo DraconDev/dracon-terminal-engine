@@ -624,9 +624,7 @@ fn main() -> std::io::Result<()> {
     let show_help = Arc::new(AtomicBool::new(false));
     let help_check = Arc::clone(&show_help);
 
-    let mut app = App::new()?
-        .title("Widget Tutorial: ColorPicker")
-        .fps(30);
+    let mut app = App::new()?.title("Widget Tutorial: ColorPicker").fps(30);
 
     let current_theme = Theme::from_env_or(Theme::nord());
     app = app.theme(current_theme.clone());
@@ -652,10 +650,22 @@ fn main() -> std::io::Result<()> {
     let picker_width = 25u16;
     let picker_height = 6u16;
 
-    let _id1 = app.add_widget(Box::new(red_picker), Rect::new(0, 0, picker_width, picker_height));
-    let _id2 = app.add_widget(Box::new(green_picker), Rect::new(26, 0, picker_width, picker_height));
-    let _id3 = app.add_widget(Box::new(blue_picker), Rect::new(0, 7, picker_width, picker_height));
-    let _id4 = app.add_widget(Box::new(yellow_picker), Rect::new(26, 7, picker_width, picker_height));
+    let _id1 = app.add_widget(
+        Box::new(red_picker),
+        Rect::new(0, 0, picker_width, picker_height),
+    );
+    let _id2 = app.add_widget(
+        Box::new(green_picker),
+        Rect::new(26, 0, picker_width, picker_height),
+    );
+    let _id3 = app.add_widget(
+        Box::new(blue_picker),
+        Rect::new(0, 7, picker_width, picker_height),
+    );
+    let _id4 = app.add_widget(
+        Box::new(yellow_picker),
+        Rect::new(26, 7, picker_width, picker_height),
+    );
 
     let _header_id = app.add_widget(Box::new(header), Rect::new(0, 14, 80, 1));
     let _footer_id = app.add_widget(Box::new(footer), Rect::new(0, 15, 80, 1));
@@ -706,28 +716,52 @@ fn main() -> std::io::Result<()> {
                     }
                 }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
             let title = "ColorPicker Help";
             let tx = hx + (hw - title.len() as u16) / 2;
             for (i, c) in title.chars().enumerate() {
                 let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
             }
             let shortcuts = [
                 ("</>", "Change color"),
@@ -741,11 +775,17 @@ fn main() -> std::io::Result<()> {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
             plane.z_index = 100;

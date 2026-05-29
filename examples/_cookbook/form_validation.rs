@@ -14,7 +14,7 @@ use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Form, ValidationRule, StatusBar};
+use dracon_terminal_engine::framework::widgets::{Form, StatusBar, ValidationRule};
 use dracon_terminal_engine::input::event::{KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -38,27 +38,27 @@ impl FormApp {
             .add_field("Password")
             .add_field("Bio")
             .with_theme(theme.clone())
-            .with_validation(0, vec![
-                ValidationRule::Required,
-                ValidationRule::MinLength(3),
-                ValidationRule::MaxLength(20),
-            ])
-            .with_validation(1, vec![
-                ValidationRule::Required,
-                ValidationRule::Email,
-            ])
-            .with_validation(2, vec![
-                ValidationRule::Required,
-                ValidationRule::MinLength(8),
-            ])
-            .with_validation(3, vec![
-                ValidationRule::MaxLength(200),
-            ]);
+            .with_validation(
+                0,
+                vec![
+                    ValidationRule::Required,
+                    ValidationRule::MinLength(3),
+                    ValidationRule::MaxLength(20),
+                ],
+            )
+            .with_validation(1, vec![ValidationRule::Required, ValidationRule::Email])
+            .with_validation(
+                2,
+                vec![ValidationRule::Required, ValidationRule::MinLength(8)],
+            )
+            .with_validation(3, vec![ValidationRule::MaxLength(200)]);
 
         let status = StatusBar::new(WidgetId::new(20))
-            .add_segment(dracon_terminal_engine::framework::widgets::StatusSegment::new(
-                "Ctrl+T: theme | F1: help | Esc: dismiss | Ctrl+S: submit | Ctrl+Q: quit",
-            ))
+            .add_segment(
+                dracon_terminal_engine::framework::widgets::StatusSegment::new(
+                    "Ctrl+T: theme | F1: help | Esc: dismiss | Ctrl+S: submit | Ctrl+Q: quit",
+                ),
+            )
             .with_theme(theme.clone());
 
         Self {
@@ -76,7 +76,10 @@ impl FormApp {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.form.on_theme_change(&self.theme);
         self.status.on_theme_change(&self.theme);
@@ -101,8 +104,10 @@ impl FormApp {
         }
 
         let corners = [
-            ('╭', hx, hy), ('╮', hx + hw - 1, hy),
-            ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1),
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
         ];
         for (ch, cx, cy) in &corners {
             let idx = (*cy * area.width + *cx) as usize;
@@ -114,14 +119,26 @@ impl FormApp {
         for x in hx + 1..hx + hw - 1 {
             let top = (hy * area.width + x) as usize;
             let bot = ((hy + hh - 1) * area.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left = (y * area.width + hx) as usize;
             let right = (y * area.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         let title = "Form Validation Help";
@@ -148,28 +165,48 @@ impl FormApp {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }
 }
 
 impl Widget for FormApp {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
     fn set_area(&mut self, area: Rect) {
         self.area = area;
         self.dirty = true;
     }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
@@ -188,8 +225,12 @@ impl Widget for FormApp {
             let idx = 1 + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
-                    char: c, fg: t.fg_on_accent, bg: t.primary,
-                    style: Styles::BOLD, transparent: false, skip: false,
+                    char: c,
+                    fg: t.fg_on_accent,
+                    bg: t.primary,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
                 };
             }
         }
@@ -202,14 +243,18 @@ impl Widget for FormApp {
         );
         let form_plane = self.form.render(form_area);
         for (i, c) in form_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let row = i / form_plane.width as usize;
             let col = i % form_plane.width as usize;
             let dy = form_area.y as usize + row;
             let dx = form_area.x as usize + col;
             if dy < area.height as usize && dx < area.width as usize {
                 let idx = dy * area.width as usize + dx;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
@@ -217,7 +262,9 @@ impl Widget for FormApp {
         if indicator_x >= form_area.x + form_area.width {
             let mut field_row: u16 = 0;
             for i in 0..self.form.field_count() {
-                if field_row >= form_area.height { break; }
+                if field_row >= form_area.height {
+                    break;
+                }
                 let abs_y = form_area.y + field_row;
                 if abs_y < area.height {
                     let idx = (abs_y as usize) * area.width as usize + indicator_x as usize;
@@ -243,8 +290,12 @@ impl Widget for FormApp {
                 let idx = (msg_y as usize) * area.width as usize + 2 + i;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
-                        char: c, fg: t.success, bg: t.surface_elevated,
-                        style: Styles::BOLD, transparent: false, skip: false,
+                        char: c,
+                        fg: t.success,
+                        bg: t.surface_elevated,
+                        style: Styles::BOLD,
+                        transparent: false,
+                        skip: false,
                     };
                 }
             }
@@ -253,11 +304,15 @@ impl Widget for FormApp {
         let sb_area = Rect::new(0, area.height.saturating_sub(1), area.width, 1);
         let sb_plane = self.status.render(sb_area);
         for (i, c) in sb_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let col = i % sb_plane.width as usize;
             if col < area.width as usize {
                 let idx = (area.height as usize - 1) * area.width as usize + col;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
@@ -269,10 +324,14 @@ impl Widget for FormApp {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -298,7 +357,8 @@ impl Widget for FormApp {
                     self.dirty = true;
                 }
                 Err(errors) => {
-                    self.submit_message = Some(format!("Validation failed: {} error(s)", errors.len()));
+                    self.submit_message =
+                        Some(format!("Validation failed: {} error(s)", errors.len()));
                     self.dirty = true;
                 }
             }
@@ -316,8 +376,7 @@ impl Widget for FormApp {
                 let form_y = self.area.y + 2;
                 let form_w = self.area.width.saturating_sub(4);
                 let form_h = self.area.height.saturating_sub(5);
-                if col >= form_x && col < form_x + form_w
-                    && row >= form_y && row < form_y + form_h
+                if col >= form_x && col < form_x + form_w && row >= form_y && row < form_y + form_h
                 {
                     let rel_row = row.saturating_sub(form_y);
                     if self.form.handle_mouse(kind, col, rel_row) {
@@ -339,16 +398,32 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
     }
@@ -394,7 +469,9 @@ fn main() -> Result<()> {
 
     app_ctx
         .on_input(move |key| {
-            if key.kind != KeyEventKind::Press { return false; }
+            if key.kind != KeyEventKind::Press {
+                return false;
+            }
             let mut a = app_input.borrow_mut();
             if kb.matches(actions::QUIT, &key) {
                 should_quit.store(true, Ordering::SeqCst);

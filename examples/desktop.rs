@@ -200,8 +200,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Signal handler for clean quit on Ctrl+C
     let should_quit = Arc::new(AtomicBool::new(false));
     let sig_flag = Arc::clone(&should_quit);
-    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
-        .ok();
+    unsafe {
+        signal_hook::low_level::register(SIGINT, move || {
+            sig_flag.store(true, Ordering::SeqCst);
+        })
+    }
+    .ok();
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
@@ -219,7 +223,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Loop
     loop {
         if should_quit.load(Ordering::SeqCst) {
-            write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h")?;
+            write!(
+                term,
+                "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
+            )?;
             term.flush()?;
             write_theme_file();
             return Ok(());
@@ -232,7 +239,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for &byte in &buf[..n] {
                 if let Some(event) = parser.advance(byte) {
                     match event {
-                        Event::Key(ref key_event) if keybindings.matches(actions::QUIT, key_event) => {
+                        Event::Key(ref key_event)
+                            if keybindings.matches(actions::QUIT, key_event) =>
+                        {
                             write!(
                                 term,
                                 "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?1049l\x1b[?25h"
@@ -254,7 +263,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             write_theme_file();
                             return Ok(());
                         }
-                        Event::Key(ref key_event) if keybindings.matches(actions::HELP, key_event) => {
+                        Event::Key(ref key_event)
+                            if keybindings.matches(actions::HELP, key_event) =>
+                        {
                             // Toggle help display - show help text in terminal
                             write!(term, "\x1b[2J\x1b[H")?;
                             write!(

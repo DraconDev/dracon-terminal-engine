@@ -17,7 +17,9 @@
 //! for non-blocking curl execution.
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{
+    actions, resolve_keybindings, KeybindingConfig, KeybindingSet,
+};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -63,7 +65,12 @@ const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "�
 fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, String>> + Send {
     async {
         let output = tokio::process::Command::new("curl")
-            .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+            .args([
+                "-s",
+                "-m",
+                "5",
+                "https://jsonplaceholder.typicode.com/posts?_limit=10",
+            ])
             .output()
             .await
             .map_err(|e| format!("Failed to run curl: {}", e))?;
@@ -72,7 +79,8 @@ fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, St
             return Err(format!("curl exited with code: {:?}", output.status.code()));
         }
 
-        let json_str = String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
+        let json_str =
+            String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
         let json: serde_json::Value =
             serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
 
@@ -90,7 +98,12 @@ fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, St
 #[cfg(not(feature = "async"))]
 fn fetch_posts_sync() -> Result<Vec<Post>, String> {
     let output = Command::new("curl")
-        .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+        .args([
+            "-s",
+            "-m",
+            "5",
+            "https://jsonplaceholder.typicode.com/posts?_limit=10",
+        ])
         .output()
         .map_err(|e| format!("Failed to run curl: {}", e))?;
 
@@ -166,7 +179,12 @@ impl NetworkApp {
             // Spawn async fetch using tokio::process::Command
             let handle = tokio::spawn(async move {
                 let output = tokio::process::Command::new("curl")
-                    .args(["-s", "-m", "5", "https://jsonplaceholder.typicode.com/posts?_limit=10"])
+                    .args([
+                        "-s",
+                        "-m",
+                        "5",
+                        "https://jsonplaceholder.typicode.com/posts?_limit=10",
+                    ])
                     .output()
                     .await
                     .map_err(|e| format!("Failed to run curl: {}", e))?;
@@ -175,9 +193,10 @@ impl NetworkApp {
                     return Err(format!("curl exited with code: {:?}", output.status.code()));
                 }
 
-                let json_str = String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
-                let json: serde_json::Value =
-                    serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
+                let json_str = String::from_utf8(output.stdout)
+                    .map_err(|e| format!("Invalid UTF-8: {}", e))?;
+                let json: serde_json::Value = serde_json::from_str(&json_str)
+                    .map_err(|e| format!("JSON parse error: {}", e))?;
 
                 let posts = json
                     .as_array()
@@ -260,14 +279,19 @@ impl NetworkApp {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
     }
 
     fn render_list(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         let t = self.theme.clone();
 
@@ -308,7 +332,8 @@ impl NetworkApp {
         }
 
         // Status hint
-        let hint = format!("^v:nav | Enter:detail | {}:refresh | {}:theme | {}:help | {}:dismiss | {}:quit",
+        let hint = format!(
+            "^v:nav | Enter:detail | {}:refresh | {}:theme | {}:help | {}:dismiss | {}:quit",
             self.kb_config.get(actions::REFRESH).unwrap_or("r"),
             self.kb_config.get(actions::THEME).unwrap_or("t"),
             self.kb_config.get(actions::HELP).unwrap_or("?"),
@@ -334,7 +359,12 @@ impl NetworkApp {
 
             let is_selected = i == self.selected;
             let prefix = if is_selected { "> " } else { "  " };
-            let line = format!("{}{}. {}", prefix, post.id, &post.title[..post.title.len().min(40)]);
+            let line = format!(
+                "{}{}. {}",
+                prefix,
+                post.id,
+                &post.title[..post.title.len().min(40)]
+            );
 
             let bg = if is_selected { t.selection_bg } else { t.bg };
             let fg = if is_selected { t.selection_fg } else { t.fg };
@@ -356,17 +386,34 @@ impl NetworkApp {
     fn render_help(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         let t = self.theme.clone();
         let shortcuts = [
             ("^/v", "Navigate posts"),
             ("Enter", "View post details"),
-            (self.keybindings.display(actions::REFRESH).unwrap_or("r"), "Refresh data"),
-            (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-            (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle this help"),
-            (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-            (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+            (
+                self.keybindings.display(actions::REFRESH).unwrap_or("r"),
+                "Refresh data",
+            ),
+            (
+                self.keybindings.display(actions::THEME).unwrap_or("t"),
+                "Cycle theme",
+            ),
+            (
+                self.keybindings.display(actions::HELP).unwrap_or("?"),
+                "Toggle this help",
+            ),
+            (
+                self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                "Dismiss help",
+            ),
+            (
+                self.keybindings.display(actions::QUIT).unwrap_or("q"),
+                "Quit",
+            ),
         ];
 
         let hw = 42u16.min(area.width.saturating_sub(4));
@@ -385,7 +432,12 @@ impl NetworkApp {
         }
 
         // Rounded border
-        let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+        let corners = [
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
+        ];
         for (ch, cx, cy) in corners.iter() {
             let idx = (cy * area.width + cx) as usize;
             if idx < plane.cells.len() {
@@ -463,13 +515,19 @@ impl NetworkApp {
     fn render_detail(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         let t = self.theme.clone();
         let post = &self.posts[self.selected];
 
         // Header
-        let header = format!("Post #{}  -  {}", post.id, &post.title[..post.title.len().min(50)]);
+        let header = format!(
+            "Post #{}  -  {}",
+            post.id,
+            &post.title[..post.title.len().min(50)]
+        );
         for (i, c) in header.chars().enumerate() {
             if i < area.width as usize {
                 plane.cells[i].char = c;
@@ -573,7 +631,7 @@ impl Widget for NetworkWidget {
     }
     fn render(&self, area: Rect) -> Plane {
         let mut app = self.app.borrow_mut();
-        app.dirty = false;  // Clear dirty after render
+        app.dirty = false; // Clear dirty after render
         if app.show_help {
             app.render_help(area)
         } else if app.view_detail {

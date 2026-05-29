@@ -3,8 +3,8 @@
 //! Controls: click divider=select, drag=resize, </>=A split, ^/v:B split, r=reset
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseEventKind};
 use rand::Rng;
@@ -35,7 +35,12 @@ struct SplitResizerApp {
 }
 
 impl SplitResizerApp {
-    fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>, keybindings: KeybindingSet) -> Self {
+    fn new(
+        id: WidgetId,
+        theme: Theme,
+        should_quit: Arc<AtomicBool>,
+        keybindings: KeybindingSet,
+    ) -> Self {
         Self {
             id,
             ra: DA,

@@ -37,7 +37,7 @@ fn test_notification_new() {
         created_at: Instant::now(),
         duration: Duration::from_secs(5),
     };
-    
+
     assert_eq!(notification.id, 1);
     assert_eq!(notification.title, "Test Title");
     assert_eq!(notification.message, "Test Message");
@@ -54,7 +54,7 @@ fn test_notification_is_expired_false() {
         created_at: Instant::now(),
         duration: Duration::from_secs(10),
     };
-    
+
     assert!(!notification.is_expired());
 }
 
@@ -68,7 +68,7 @@ fn test_notification_is_expired_true() {
         created_at: Instant::now() - Duration::from_secs(100),
         duration: Duration::from_secs(5),
     };
-    
+
     assert!(notification.is_expired());
 }
 
@@ -82,7 +82,7 @@ fn test_notification_is_expired_zero_duration() {
         created_at: Instant::now(),
         duration: Duration::from_secs(0),
     };
-    
+
     assert!(notification.is_expired());
 }
 
@@ -96,7 +96,7 @@ fn test_notification_long_title() {
         created_at: Instant::now(),
         duration: Duration::from_secs(5),
     };
-    
+
     assert_eq!(notification.title.len(), 1000);
 }
 
@@ -110,7 +110,7 @@ fn test_notification_long_message() {
         created_at: Instant::now(),
         duration: Duration::from_secs(5),
     };
-    
+
     assert_eq!(notification.message.len(), 1000);
 }
 
@@ -124,7 +124,7 @@ fn test_notification_empty_strings() {
         created_at: Instant::now(),
         duration: Duration::from_secs(5),
     };
-    
+
     assert_eq!(notification.title, "");
     assert_eq!(notification.message, "");
 }
@@ -139,7 +139,7 @@ fn test_notification_unicode() {
         created_at: Instant::now(),
         duration: Duration::from_secs(5),
     };
-    
+
     assert!(notification.title.len() > 0);
     assert!(notification.message.len() > 0);
 }
@@ -224,7 +224,7 @@ fn test_notification_center_error() {
 #[test]
 fn test_notification_center_multiple_notifications() {
     let mut nc = NotificationCenter::new(Theme::default());
-    
+
     nc.info("First", "First message");
     nc.success("Second", "Second message");
     nc.warn("Third", "Third message");
@@ -234,7 +234,7 @@ fn test_notification_center_multiple_notifications() {
 #[test]
 fn test_notification_center_different_kinds_same_title() {
     let mut nc = NotificationCenter::new(Theme::default());
-    
+
     nc.notify("Same Title", "Info message", NotificationKind::Info);
     nc.notify("Same Title", "Success message", NotificationKind::Success);
     nc.notify("Same Title", "Warning message", NotificationKind::Warning);
@@ -275,7 +275,7 @@ fn test_notification_center_render_empty() {
 fn test_notification_center_render_with_notifications() {
     let mut nc = NotificationCenter::new(Theme::default());
     nc.notify("Test", "Message", NotificationKind::Info);
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -288,7 +288,7 @@ fn test_notification_center_render_multiple_kinds() {
     nc.success("Success", "Success message");
     nc.warn("Warning", "Warning message");
     nc.error("Error", "Error message");
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -298,7 +298,7 @@ fn test_notification_center_render_multiple_kinds() {
 fn test_notification_center_render_max_width() {
     let mut nc = NotificationCenter::new(Theme::default()).with_max_width(50);
     nc.notify("Test", "Message", NotificationKind::Info);
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -308,7 +308,7 @@ fn test_notification_center_render_max_width() {
 fn test_notification_center_render_theme_change() {
     let mut nc = NotificationCenter::new(Theme::nord());
     nc.notify("Test", "Message", NotificationKind::Info);
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -318,7 +318,7 @@ fn test_notification_center_render_theme_change() {
 fn test_notification_center_render_small_area() {
     let mut nc = NotificationCenter::new(Theme::default());
     nc.notify("Test", "Message", NotificationKind::Info);
-    
+
     let area = Rect::new(0, 0, 20, 5);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -327,8 +327,12 @@ fn test_notification_center_render_small_area() {
 #[test]
 fn test_notification_center_render_large_notification() {
     let mut nc = NotificationCenter::new(Theme::default()).with_max_width(60);
-    nc.notify("Very Long Title", "This is a very long message that might need truncation in the rendering", NotificationKind::Info);
-    
+    nc.notify(
+        "Very Long Title",
+        "This is a very long message that might need truncation in the rendering",
+        NotificationKind::Info,
+    );
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);
@@ -367,11 +371,15 @@ fn test_notification_center_clear_dirty() {
 #[test]
 fn test_notification_center_many_notifications() {
     let mut nc = NotificationCenter::new(Theme::default());
-    
+
     for i in 0..100 {
-        nc.notify(&format!("Title {}", i), &format!("Message {}", i), NotificationKind::Info);
+        nc.notify(
+            &format!("Title {}", i),
+            &format!("Message {}", i),
+            NotificationKind::Info,
+        );
     }
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let _plane = nc.render(area);
 }
@@ -379,7 +387,7 @@ fn test_notification_center_many_notifications() {
 #[test]
 fn test_notification_center_many_kinds() {
     let mut nc = NotificationCenter::new(Theme::default());
-    
+
     for i in 0..10 {
         let kind = match i % 4 {
             0 => NotificationKind::Info,
@@ -389,7 +397,7 @@ fn test_notification_center_many_kinds() {
         };
         nc.notify(&format!("Title {}", i), &format!("Message {}", i), kind);
     }
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let _plane = nc.render(area);
 }
@@ -400,8 +408,14 @@ fn test_notification_center_many_kinds() {
 
 #[test]
 fn test_notification_center_all_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_latte"];
-    
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_latte",
+    ];
+
     for theme_name in themes {
         if let Some(theme) = Theme::from_name(theme_name) {
             let mut nc = NotificationCenter::new(theme);
@@ -417,7 +431,7 @@ fn test_notification_center_all_themes() {
 fn test_notification_center_render_fills_plane() {
     let mut nc = NotificationCenter::new(Theme::default());
     nc.info("Test", "Message");
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert_eq!(plane.width, 80);
@@ -432,7 +446,7 @@ fn test_notification_center_render_fills_plane() {
 fn test_notification_center_empty_title_and_message() {
     let mut nc = NotificationCenter::new(Theme::default());
     nc.notify("", "", NotificationKind::Info);
-    
+
     let area = Rect::new(0, 0, 80, 40);
     let plane = nc.render(area);
     assert!(plane.width > 0);

@@ -193,14 +193,32 @@ impl LogMonitor {
 
         let lines = [
             "┌─ Log Monitor Help ─────────────┐",
-            &format!("│ {:<6} Clear all logs           │", self.keybindings.display(actions::NEW_ITEM).unwrap_or("c")),
-            &format!("│ {:<6} Resume auto-scroll       │", self.keybindings.display(actions::REFRESH).unwrap_or("r")),
-            &format!("│ {:<6} Cycle theme              │", self.keybindings.display(actions::THEME).unwrap_or("t")),
-            &format!("│ {:<6} Toggle this help         │", self.keybindings.display(actions::HELP).unwrap_or("?")),
-            &format!("│ {:<6} Dismiss help             │", self.keybindings.display(actions::BACK).unwrap_or("esc")),
+            &format!(
+                "│ {:<6} Clear all logs           │",
+                self.keybindings.display(actions::NEW_ITEM).unwrap_or("c")
+            ),
+            &format!(
+                "│ {:<6} Resume auto-scroll       │",
+                self.keybindings.display(actions::REFRESH).unwrap_or("r")
+            ),
+            &format!(
+                "│ {:<6} Cycle theme              │",
+                self.keybindings.display(actions::THEME).unwrap_or("t")
+            ),
+            &format!(
+                "│ {:<6} Toggle this help         │",
+                self.keybindings.display(actions::HELP).unwrap_or("?")
+            ),
+            &format!(
+                "│ {:<6} Dismiss help             │",
+                self.keybindings.display(actions::BACK).unwrap_or("esc")
+            ),
             "│ Click  Toggle log level filter │",
             "│ Click  Pause/resume scroll      │",
-            &format!("│ {:<6} Quit application         │", self.keybindings.display(actions::QUIT).unwrap_or("q")),
+            &format!(
+                "│ {:<6} Quit application         │",
+                self.keybindings.display(actions::QUIT).unwrap_or("q")
+            ),
             "└────────────────────────────────┘",
         ];
         let start_y = y + (h - lines.len()) / 2;
@@ -595,7 +613,11 @@ fn main() -> Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app_ctx = App::new()?.title("Log Monitor").fps(30).tick_interval(200).theme(env_theme.clone());
+    let mut app_ctx = App::new()?
+        .title("Log Monitor")
+        .fps(30)
+        .tick_interval(200)
+        .theme(env_theme.clone());
 
     let router = InputRouter {
         target: mon_for_input_router,

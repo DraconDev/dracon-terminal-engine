@@ -64,97 +64,101 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Arc::clone(&show_help);
     let show_help_render = Arc::clone(&show_help);
 
-    let mut app = App::new()?
-        .title("Framework Chat")
-        .fps(30);
+    let mut app = App::new()?.title("Framework Chat").fps(30);
     app.set_theme(theme);
     app.on_input(move |key| {
-            if keybindings.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                return true;
+        if keybindings.matches(actions::QUIT, &key) {
+            should_quit.store(true, Ordering::SeqCst);
+            return true;
+        }
+        if keybindings.matches(actions::HELP, &key) {
+            show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
+            return true;
+        }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        match key.code {
+            KeyCode::Esc if show_help_input.load(Ordering::SeqCst) => {
+                show_help_input.store(false, Ordering::SeqCst);
+                true
             }
-            if keybindings.matches(actions::HELP, &key) {
-                show_help_input.store(!show_help_input.load(Ordering::SeqCst), Ordering::SeqCst);
-                return true;
+            _ => false,
+        }
+    })
+    .on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(move |ctx| {
+        let (w, h) = ctx.compositor().size();
+        let theme = ctx.theme().clone();
+
+        let input_height = 3u16;
+        let list_height = h.saturating_sub(input_height);
+
+        let list_rect = Rect::new(0, 0, w, list_height);
+        let _input_rect = Rect::new(0, list_height, w, input_height);
+
+        let mut list = List::new(chat_history.clone());
+        list.set_visible_count((list_rect.height as usize).saturating_sub(2).max(1));
+        let list_plane = list.render(list_rect);
+        ctx.add_plane(list_plane);
+
+        let mut input_plane = Plane::new(1, w, input_height);
+        input_plane.z_index = 10;
+
+        let placeholder = "Type a message... (Enter to send)";
+        let display_text = if input_text.is_empty() {
+            placeholder
+        } else {
+            &input_text
+        };
+
+        let prompt = "> ";
+        let mut x = 1u16;
+        for ch in prompt.chars() {
+            let idx = x as usize;
+            if idx < input_plane.cells.len() {
+                input_plane.cells[idx].char = ch;
+                input_plane.cells[idx].fg = theme.primary;
             }
-            if key.kind != KeyEventKind::Press { return false; }
-            match key.code {
-                KeyCode::Esc if show_help_input.load(Ordering::SeqCst) => {
-                    show_help_input.store(false, Ordering::SeqCst);
-                    true
-                }
-                _ => false,
+            x += 1;
+        }
+
+        let mut text_color = theme.fg;
+        if input_text.is_empty() {
+            text_color = theme.fg_muted;
+        }
+        for (i, ch) in display_text
+            .chars()
+            .take(w.saturating_sub(3) as usize)
+            .enumerate()
+        {
+            let idx = x as usize + i;
+            if idx < input_plane.cells.len() {
+                input_plane.cells[idx].char = ch;
+                input_plane.cells[idx].fg = text_color;
+                input_plane.cells[idx].transparent = false;
             }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
+        }
+
+        let border_y = list_height;
+        for col in 0..w {
+            let idx = (border_y * w + col) as usize;
+            if idx < input_plane.cells.len() {
+                input_plane.cells[idx].char = '─';
+                input_plane.cells[idx].fg = theme.outline;
             }
-        })
-        .run(move |ctx| {
-            let (w, h) = ctx.compositor().size();
-            let theme = ctx.theme().clone();
+        }
 
-            let input_height = 3u16;
-            let list_height = h.saturating_sub(input_height);
-
-            let list_rect = Rect::new(0, 0, w, list_height);
-            let _input_rect = Rect::new(0, list_height, w, input_height);
-
-            let mut list = List::new(chat_history.clone());
-            list.set_visible_count((list_rect.height as usize).saturating_sub(2).max(1));
-            let list_plane = list.render(list_rect);
-            ctx.add_plane(list_plane);
-
-            let mut input_plane = Plane::new(1, w, input_height);
-            input_plane.z_index = 10;
-
-            let placeholder = "Type a message... (Enter to send)";
-            let display_text = if input_text.is_empty() {
-                placeholder
+        if show_help_render.load(Ordering::SeqCst) {
+            let hw = 40u16.min(w.saturating_sub(4));
+            let hh = 10u16.min(h.saturating_sub(4));
+            if hw < 3 || hh < 3 {
+                // Terminal too small for help overlay
             } else {
-                &input_text
-            };
-
-            let prompt = "> ";
-            let mut x = 1u16;
-            for ch in prompt.chars() {
-                let idx = x as usize;
-                if idx < input_plane.cells.len() {
-                    input_plane.cells[idx].char = ch;
-                    input_plane.cells[idx].fg = theme.primary;
-                }
-                x += 1;
-            }
-
-            let mut text_color = theme.fg;
-            if input_text.is_empty() {
-                text_color = theme.fg_muted;
-            }
-            for (i, ch) in display_text.chars().take(w.saturating_sub(3) as usize).enumerate() {
-                let idx = x as usize + i;
-                if idx < input_plane.cells.len() {
-                    input_plane.cells[idx].char = ch;
-                    input_plane.cells[idx].fg = text_color;
-                    input_plane.cells[idx].transparent = false;
-                }
-            }
-
-            let border_y = list_height;
-            for col in 0..w {
-                let idx = (border_y * w + col) as usize;
-                if idx < input_plane.cells.len() {
-                    input_plane.cells[idx].char = '─';
-                    input_plane.cells[idx].fg = theme.outline;
-                }
-            }
-
-            if show_help_render.load(Ordering::SeqCst) {
-                let hw = 40u16.min(w.saturating_sub(4));
-                let hh = 10u16.min(h.saturating_sub(4));
-                if hw < 3 || hh < 3 {
-                    // Terminal too small for help overlay
-                } else {
                 let _hx = (w - hw) / 2;
                 let _hy = (h - hh) / 2;
 
@@ -168,19 +172,39 @@ fn main() -> std::io::Result<()> {
                 for x in 1..hw - 1 {
                     let top = x as usize;
                     let bot = ((hh - 1) * hw + x) as usize;
-                    if top < help_plane.cells.len() { help_plane.cells[top].char = '─'; help_plane.cells[top].fg = theme.outline; }
-                    if bot < help_plane.cells.len() { help_plane.cells[bot].char = '─'; help_plane.cells[bot].fg = theme.outline; }
+                    if top < help_plane.cells.len() {
+                        help_plane.cells[top].char = '─';
+                        help_plane.cells[top].fg = theme.outline;
+                    }
+                    if bot < help_plane.cells.len() {
+                        help_plane.cells[bot].char = '─';
+                        help_plane.cells[bot].fg = theme.outline;
+                    }
                 }
                 for y in 1..hh - 1 {
                     let left = (y * hw) as usize;
                     let right = (y * hw + hw - 1) as usize;
-                    if left < help_plane.cells.len() { help_plane.cells[left].char = '│'; help_plane.cells[left].fg = theme.outline; }
-                    if right < help_plane.cells.len() { help_plane.cells[right].char = '│'; help_plane.cells[right].fg = theme.outline; }
+                    if left < help_plane.cells.len() {
+                        help_plane.cells[left].char = '│';
+                        help_plane.cells[left].fg = theme.outline;
+                    }
+                    if right < help_plane.cells.len() {
+                        help_plane.cells[right].char = '│';
+                        help_plane.cells[right].fg = theme.outline;
+                    }
                 }
-                let corners = [('╭', 0, 0), ('╮', hw - 1, 0), ('╰', 0, hh - 1), ('╯', hw - 1, hh - 1)];
+                let corners = [
+                    ('╭', 0, 0),
+                    ('╮', hw - 1, 0),
+                    ('╰', 0, hh - 1),
+                    ('╯', hw - 1, hh - 1),
+                ];
                 for (ch, cx, cy) in corners {
                     let idx = (cy * hw + cx) as usize;
-                    if idx < help_plane.cells.len() { help_plane.cells[idx].char = ch; help_plane.cells[idx].fg = theme.outline; }
+                    if idx < help_plane.cells.len() {
+                        help_plane.cells[idx].char = ch;
+                        help_plane.cells[idx].fg = theme.outline;
+                    }
                 }
 
                 let help_title = "Framework Chat Help";
@@ -205,23 +229,31 @@ fn main() -> std::io::Result<()> {
                 ];
                 for (i, (key, desc)) in shortcuts.iter().enumerate() {
                     let row = 3 + i as u16;
-                    if row >= hh - 1 { break; }
+                    if row >= hh - 1 {
+                        break;
+                    }
                     for (j, c) in key.chars().enumerate() {
                         let idx = (row * hw + 2 + j as u16) as usize;
-                        if idx < help_plane.cells.len() { help_plane.cells[idx].char = c; help_plane.cells[idx].fg = theme.primary; }
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].char = c;
+                            help_plane.cells[idx].fg = theme.primary;
+                        }
                     }
                     for (j, c) in desc.chars().enumerate() {
                         let idx = (row * hw + 14 + j as u16) as usize;
-                        if idx < help_plane.cells.len() { help_plane.cells[idx].char = c; help_plane.cells[idx].fg = theme.fg; }
+                        if idx < help_plane.cells.len() {
+                            help_plane.cells[idx].char = c;
+                            help_plane.cells[idx].fg = theme.fg;
+                        }
                     }
                 }
 
                 ctx.add_plane(help_plane);
-                } // end if hw >= 3 && hh >= 3
-            }
+            } // end if hw >= 3 && hh >= 3
+        }
 
-            ctx.add_plane(input_plane);
-        })
+        ctx.add_plane(input_plane);
+    })
 }
 
 fn chrono_lite_timestamp() -> String {

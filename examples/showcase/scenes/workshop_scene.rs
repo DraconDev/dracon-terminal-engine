@@ -50,8 +50,8 @@ pub struct WorkshopScene {
     keybindings: KeybindingSet,
     selected_widget: Cell<usize>,
     // Live widget props
-    prop_int: Cell<i32>,    // generic int prop (progress, slider value, etc.)
-    prop_bool: Cell<bool>,  // generic bool prop (checked, toggled, etc.)
+    prop_int: Cell<i32>,   // generic int prop (progress, slider value, etc.)
+    prop_bool: Cell<bool>, // generic bool prop (checked, toggled, etc.)
     prop_label: Cell<&'static str>,
     // Widgets (RefCell for render(&self) pattern)
     button: RefCell<Button>,
@@ -69,12 +69,22 @@ pub struct WorkshopScene {
 impl WorkshopScene {
     pub fn new(theme: Theme) -> Self {
         let button = RefCell::new(Button::new("Click Me").with_theme(theme.clone()));
-        let checkbox = RefCell::new(Checkbox::new(WidgetId::new(2), "Enable feature").with_theme(theme.clone()));
-        let toggle = RefCell::new(Toggle::new(WidgetId::new(3), "Dark mode").with_theme(theme.clone()));
-        let radio = RefCell::new(Radio::new(WidgetId::new(4), "Option A").with_theme(theme.clone()));
+        let checkbox = RefCell::new(
+            Checkbox::new(WidgetId::new(2), "Enable feature").with_theme(theme.clone()),
+        );
+        let toggle =
+            RefCell::new(Toggle::new(WidgetId::new(3), "Dark mode").with_theme(theme.clone()));
+        let radio =
+            RefCell::new(Radio::new(WidgetId::new(4), "Option A").with_theme(theme.clone()));
         let slider = RefCell::new(Slider::new(WidgetId::new(5)).with_theme(theme.clone()));
-        let progress_bar = RefCell::new(ProgressBar::new(WidgetId::new(6)).with_theme(theme.clone()));
-        let progress_ring = RefCell::new(ProgressRing::new(0.5).with_theme(theme.clone()).with_size(8).show_percentage(true));
+        let progress_bar =
+            RefCell::new(ProgressBar::new(WidgetId::new(6)).with_theme(theme.clone()));
+        let progress_ring = RefCell::new(
+            ProgressRing::new(0.5)
+                .with_theme(theme.clone())
+                .with_size(8)
+                .show_percentage(true),
+        );
         let spinner = RefCell::new(Spinner::new(WidgetId::new(8)).with_theme(theme.clone()));
 
         Self {
@@ -111,7 +121,16 @@ impl WorkshopScene {
             let is_selected = i == self.selected_widget.get();
             let fg = if is_selected { t.primary } else { t.fg_muted };
             let prefix = if is_selected { "► " } else { "  " };
-            draw_text_clipped(plane, x, wy, &format!("{}{}", prefix, name), max_x, fg, t.bg, is_selected);
+            draw_text_clipped(
+                plane,
+                x,
+                wy,
+                &format!("{}{}", prefix, name),
+                max_x,
+                fg,
+                t.bg,
+                is_selected,
+            );
         }
     }
 
@@ -124,34 +143,126 @@ impl WorkshopScene {
         let py = y + 2;
 
         // Common: label
-        draw_text_clipped(plane, x, py, &format!("Label: {}", self.prop_label.get()), max_x, t.fg, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x,
+            py,
+            &format!("Label: {}", self.prop_label.get()),
+            max_x,
+            t.fg,
+            t.bg,
+            false,
+        );
 
         // Widget-specific props
         match wt {
             WidgetType::Button => {
-                draw_text_clipped(plane, x, py + 1, &format!("Pressed: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
-                draw_text_clipped(plane, x, py + 2, "↑/↓: change label | Enter: press", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Pressed: {}", self.prop_bool.get()),
+                    max_x,
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "↑/↓: change label | Enter: press",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::Checkbox => {
-                draw_text_clipped(plane, x, py + 1, &format!("Checked: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
-                draw_text_clipped(plane, x, py + 2, "Space: toggle | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Checked: {}", self.prop_bool.get()),
+                    max_x,
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "Space: toggle | ↑/↓: change label",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::Toggle => {
-                draw_text_clipped(plane, x, py + 1, &format!("On: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
-                draw_text_clipped(plane, x, py + 2, "Space: toggle | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("On: {}", self.prop_bool.get()),
+                    max_x,
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "Space: toggle | ↑/↓: change label",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::Radio => {
-                draw_text_clipped(plane, x, py + 1, &format!("Selected: {}", self.prop_bool.get()), max_x, t.fg, t.bg, false);
-                draw_text_clipped(plane, x, py + 2, "Space: select | ↑/↓: change label", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Selected: {}", self.prop_bool.get()),
+                    max_x,
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "Space: select | ↑/↓: change label",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::Slider => {
-                draw_text_clipped(plane, x, py + 1, &format!("Value: {}", self.prop_int.get()), max_x, t.primary, t.bg, true);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Value: {}", self.prop_int.get()),
+                    max_x,
+                    t.primary,
+                    t.bg,
+                    true,
+                );
                 // Visual slider
                 let bar_w = (w as usize).saturating_sub(2);
                 let filled = (self.prop_int.get() as f32 / 100.0 * bar_w as f32) as usize;
                 for bx in 0..bar_w {
                     let bx_pos = x as usize + bx;
-                    if bx_pos >= max_x as usize { break; }
+                    if bx_pos >= max_x as usize {
+                        break;
+                    }
                     let idx = (py + 2) as usize * plane.width as usize + bx_pos;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = if bx < filled { '█' } else { '░' };
@@ -159,19 +270,82 @@ impl WorkshopScene {
                         plane.cells[idx].transparent = false;
                     }
                 }
-                draw_text_clipped(plane, x, py + 3, "←/→: adjust value", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 3,
+                    "←/→: adjust value",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::ProgressBar => {
-                draw_text_clipped(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), max_x, t.primary, t.bg, true);
-                draw_text_clipped(plane, x, py + 2, "←/→: adjust progress", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Progress: {}%", self.prop_int.get()),
+                    max_x,
+                    t.primary,
+                    t.bg,
+                    true,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "←/→: adjust progress",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::ProgressRing => {
-                draw_text_clipped(plane, x, py + 1, &format!("Progress: {}%", self.prop_int.get()), max_x, t.primary, t.bg, true);
-                draw_text_clipped(plane, x, py + 2, "←/→: adjust progress", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    &format!("Progress: {}%", self.prop_int.get()),
+                    max_x,
+                    t.primary,
+                    t.bg,
+                    true,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "←/→: adjust progress",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
             WidgetType::Spinner => {
-                draw_text_clipped(plane, x, py + 1, "Spinning...", max_x, t.primary, t.bg, false);
-                draw_text_clipped(plane, x, py + 2, "Always animating", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 1,
+                    "Spinning...",
+                    max_x,
+                    t.primary,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    x,
+                    py + 2,
+                    "Always animating",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
         }
     }
@@ -256,8 +430,12 @@ impl WorkshopScene {
         let checked = self.prop_bool.get();
 
         self.progress_bar.borrow_mut().set_progress(progress);
-        self.progress_ring.borrow_mut().set_progress(progress as f64);
-        self.slider.borrow_mut().set_value(self.prop_int.get() as f32 / 100.0);
+        self.progress_ring
+            .borrow_mut()
+            .set_progress(progress as f64);
+        self.slider
+            .borrow_mut()
+            .set_value(self.prop_int.get() as f32 / 100.0);
 
         if checked {
             self.checkbox.borrow_mut().check();
@@ -276,7 +454,9 @@ impl WorkshopScene {
 }
 
 impl Scene for WorkshopScene {
-    fn scene_id(&self) -> &str { "workshop" }
+    fn scene_id(&self) -> &str {
+        "workshop"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -291,8 +471,15 @@ impl Scene for WorkshopScene {
         // Header
         draw_text(&mut plane, 2, 0, " Widget Workshop ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -360,23 +547,33 @@ impl Scene for WorkshopScene {
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Widget Workshop — Help", &[
-                ("↑/↓", "Switch between widgets"),
-                ("←/→", "Adjust numeric properties"),
-                ("Space", "Toggle boolean properties"),
-                ("Enter", "Activate/press widget"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Widget Workshop — Help",
+                &[
+                    ("↑/↓", "Switch between widgets"),
+                    ("←/→", "Adjust numeric properties"),
+                    ("Space", "Toggle boolean properties"),
+                    ("Enter", "Activate/press widget"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -444,7 +641,9 @@ impl Scene for WorkshopScene {
             MouseEventKind::Down(_) => {
                 // Widget list: rows 4..4+8 (y=2 start, +2 header)
                 let list_y = 4u16;
-                if (2..16).contains(&col) && (list_y..list_y + WIDGET_NAMES.len() as u16).contains(&row) {
+                if (2..16).contains(&col)
+                    && (list_y..list_y + WIDGET_NAMES.len() as u16).contains(&row)
+                {
                     let idx = (row - list_y) as usize;
                     if idx < WIDGET_NAMES.len() && idx != self.selected_widget.get() {
                         self.selected_widget.set(idx);
@@ -474,7 +673,10 @@ impl Scene for WorkshopScene {
                 if col >= preview_x && row >= 4 && row < area.height.saturating_sub(2) {
                     let wt = self.current_widget_type();
                     match wt {
-                        WidgetType::Button | WidgetType::Checkbox | WidgetType::Toggle | WidgetType::Radio => {
+                        WidgetType::Button
+                        | WidgetType::Checkbox
+                        | WidgetType::Toggle
+                        | WidgetType::Radio => {
                             self.prop_bool.set(!self.prop_bool.get());
                             self.dirty = true;
                         }
@@ -537,9 +739,15 @@ impl Scene for WorkshopScene {
         self.spinner.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { self.dirty || self.current_widget_type() == WidgetType::Spinner }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty || self.current_widget_type() == WidgetType::Spinner
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl WorkshopScene {
@@ -558,5 +766,3 @@ impl WorkshopScene {
         }
     }
 }
-
-

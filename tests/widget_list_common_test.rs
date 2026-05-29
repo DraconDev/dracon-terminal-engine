@@ -264,7 +264,14 @@ fn test_render_scroll_indicator_needed() {
     let theme = Theme::nord();
 
     // total > visible, should render
-    render_scroll_indicator(&mut plane, ratatui::layout::Rect::new(0, 0, 20, 5), 5, 20, 10, &theme);
+    render_scroll_indicator(
+        &mut plane,
+        ratatui::layout::Rect::new(0, 0, 20, 5),
+        5,
+        20,
+        10,
+        &theme,
+    );
 }
 
 #[test]
@@ -273,7 +280,14 @@ fn test_render_scroll_indicator_at_start() {
     plane.fill_bg(Theme::nord().bg);
     let theme = Theme::nord();
 
-    render_scroll_indicator(&mut plane, ratatui::layout::Rect::new(0, 0, 20, 5), 0, 20, 10, &theme);
+    render_scroll_indicator(
+        &mut plane,
+        ratatui::layout::Rect::new(0, 0, 20, 5),
+        0,
+        20,
+        10,
+        &theme,
+    );
 }
 
 #[test]
@@ -282,7 +296,14 @@ fn test_render_scroll_indicator_at_end() {
     plane.fill_bg(Theme::nord().bg);
     let theme = Theme::nord();
 
-    render_scroll_indicator(&mut plane, ratatui::layout::Rect::new(0, 0, 20, 5), 10, 20, 10, &theme);
+    render_scroll_indicator(
+        &mut plane,
+        ratatui::layout::Rect::new(0, 0, 20, 5),
+        10,
+        20,
+        10,
+        &theme,
+    );
 }
 
 #[test]
@@ -292,7 +313,14 @@ fn test_render_scroll_indicator_not_needed() {
     let theme = Theme::nord();
 
     // total == visible, no scroll needed
-    render_scroll_indicator(&mut plane, ratatui::layout::Rect::new(0, 0, 20, 5), 0, 10, 10, &theme);
+    render_scroll_indicator(
+        &mut plane,
+        ratatui::layout::Rect::new(0, 0, 20, 5),
+        0,
+        10,
+        10,
+        &theme,
+    );
 }
 
 #[test]
@@ -302,5 +330,12 @@ fn test_render_scroll_indicator_height_one() {
     let theme = Theme::nord();
 
     // height <= 1, should not render
-    render_scroll_indicator(&mut plane, ratatui::layout::Rect::new(0, 0, 20, 1), 0, 20, 10, &theme);
+    render_scroll_indicator(
+        &mut plane,
+        ratatui::layout::Rect::new(0, 0, 20, 1),
+        0,
+        20,
+        10,
+        &theme,
+    );
 }

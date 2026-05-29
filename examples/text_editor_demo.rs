@@ -24,7 +24,9 @@
 //!   q            -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{
+    actions, resolve_keybindings, KeybindingConfig, KeybindingSet,
+};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -72,7 +74,6 @@ struct EditorApp {
 
 impl EditorApp {
     fn new(should_quit: Arc<AtomicBool>, theme: Theme) -> Self {
-
         let tabs = vec![
             Tab {
                 title: "main.rs".to_string(),
@@ -117,7 +118,8 @@ impl EditorApp {
                 StatusSegment::new(&format!(
                     "{}: theme | {}: help | {}: dismiss | {}: quit",
                     kb_theme, kb_help, kb_back, kb_quit
-                )).with_fg(theme.fg_muted),
+                ))
+                .with_fg(theme.fg_muted),
             );
 
         let breadcrumbs = Breadcrumbs::new(vec!["src".into(), "main.rs".into()]);
@@ -293,7 +295,8 @@ impl EditorApp {
                         (actions::HELP, "help"),
                         (actions::BACK, "dismiss"),
                         (actions::QUIT, "quit"),
-                    ])).with_fg(self.theme.fg_muted),
+                    ]))
+                    .with_fg(self.theme.fg_muted),
                 );
         }
     }
@@ -570,7 +573,9 @@ impl Widget for EditorApp {
             let prof_h = 6u16;
             let prof_x = area.width.saturating_sub(prof_w);
             let prof_y = tab_h + 1;
-            let prof_plane = self.profiler.render(Rect::new(prof_x, prof_y, prof_w, prof_h));
+            let prof_plane = self
+                .profiler
+                .render(Rect::new(prof_x, prof_y, prof_w, prof_h));
             blit(&mut plane, &prof_plane, prof_x, prof_y);
         }
 
@@ -782,13 +787,18 @@ impl Widget for EditorApp {
                 let text_y = tab_h + 1;
                 let text_h = self.area.height.saturating_sub(tab_h + 3);
                 let text_w = editor_w.saturating_sub(2);
-                if text_w > 0 && text_h > 0
-                    && col > editor_x && col < editor_x + 1 + text_w
-                    && row >= text_y && row < text_y + text_h
+                if text_w > 0
+                    && text_h > 0
+                    && col > editor_x
+                    && col < editor_x + 1 + text_w
+                    && row >= text_y
+                    && row < text_y + text_h
                 {
                     let rel_col = col - (editor_x + 1);
                     let rel_row = row - text_y;
-                    let handled = self.tabs[self.active_tab].adapter.handle_mouse(kind, rel_col, rel_row);
+                    let handled = self.tabs[self.active_tab]
+                        .adapter
+                        .handle_mouse(kind, rel_col, rel_row);
                     if handled {
                         self.dirty = true;
                     }

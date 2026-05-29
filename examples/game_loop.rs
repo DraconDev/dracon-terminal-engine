@@ -98,7 +98,8 @@ impl GameState {
         ];
         let chars = ['*', '#', '*', '-', '.'];
         for i in 0..count {
-            let angle = (i as f32 / count as f32) * std::f32::consts::TAU + rand::random::<f32>() * 0.5;
+            let angle =
+                (i as f32 / count as f32) * std::f32::consts::TAU + rand::random::<f32>() * 0.5;
             let speed = 20.0 + rand::random::<f32>() * 40.0;
             self.particles.push(Particle {
                 x,
@@ -164,8 +165,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Signal handler for clean quit on Ctrl+C
     let should_quit = Arc::new(AtomicBool::new(false));
     let sig_flag = Arc::clone(&should_quit);
-    unsafe { signal_hook::low_level::register(SIGINT, move || { sig_flag.store(true, Ordering::SeqCst); }) }
-        .ok();
+    unsafe {
+        signal_hook::low_level::register(SIGINT, move || {
+            sig_flag.store(true, Ordering::SeqCst);
+        })
+    }
+    .ok();
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
@@ -192,35 +197,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if poll_input(term.as_fd(), 0)? {
             let mut buf = [0u8; 128];
             if let Ok(n) = stdin.read(&mut buf) {
-            for &byte in &buf[..n] {
-                match parser.advance(byte) {
-                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::QUIT, key_event) => {
-                        write!(
-                            term,
-                            "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h"
-                        )?;
-                        term.flush()?;
-                        write_theme_file();
-                        return Ok(());
-                    }
-                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::HELP, key_event) => {
-                        show_help = !show_help;
-                    }
-                    Some(Event::Key(ref key_event)) if keybindings.matches(actions::BACK, key_event) => {
-                        show_help = false;
-                    }
-                    Some(Event::Key(KeyEvent { code: KeyCode::Char(' '), .. })) => {
-                        state.turbo = !state.turbo;
-                    }
-                    Some(Event::Mouse(mouse)) => {
-                        if matches!(mouse.kind, MouseEventKind::Down(MouseButton::Left)) {
-                            state.spawn_burst(mouse.column as f32, mouse.row as f32, 20);
-                            state.click_count += 1;
+                for &byte in &buf[..n] {
+                    match parser.advance(byte) {
+                        Some(Event::Key(ref key_event))
+                            if keybindings.matches(actions::QUIT, key_event) =>
+                        {
+                            write!(term, "\x1b[?1000l\x1b[?1003l\x1b[?1006l\x1b[?25h")?;
+                            term.flush()?;
+                            write_theme_file();
+                            return Ok(());
                         }
+                        Some(Event::Key(ref key_event))
+                            if keybindings.matches(actions::HELP, key_event) =>
+                        {
+                            show_help = !show_help;
+                        }
+                        Some(Event::Key(ref key_event))
+                            if keybindings.matches(actions::BACK, key_event) =>
+                        {
+                            show_help = false;
+                        }
+                        Some(Event::Key(KeyEvent {
+                            code: KeyCode::Char(' '),
+                            ..
+                        })) => {
+                            state.turbo = !state.turbo;
+                        }
+                        Some(Event::Mouse(mouse)) => {
+                            if matches!(mouse.kind, MouseEventKind::Down(MouseButton::Left)) {
+                                state.spawn_burst(mouse.column as f32, mouse.row as f32, 20);
+                                state.click_count += 1;
+                            }
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
-            }
             }
         }
 
@@ -270,8 +281,8 @@ fn render_game(p: &mut Plane, state: &GameState, w: u16, h: u16, fps: u32, kb: &
     // Stars
     let t = state.frame_count as f32 * 0.05;
     for star in &state.stars {
-        let brightness = star.brightness
-            * ((t * star.twinkle_speed + star.phase).sin() * 0.5 + 0.5);
+        let brightness =
+            star.brightness * ((t * star.twinkle_speed + star.phase).sin() * 0.5 + 0.5);
         let c = (brightness * 255.0) as u8;
         let sx = star.x as u16;
         let sy = star.y as u16;
@@ -367,22 +378,79 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
     let dim = Color::Rgb(120, 120, 130);
     let box_bg = Color::Rgb(25, 25, 35);
     let help_lines = [
-        ("╭────────────────────────────────────────────────────╮", box_bg),
-        ("│              Game Loop Help                        │", box_bg),
-        ("├────────────────────────────────────────────────────┤", box_bg),
-        (&format!("│  {:<7}  -  Quit                                    │", quit_key), box_bg),
-        (&format!("│  {:<7}  -  Toggle this help                        │", help_key), box_bg),
-        (&format!("│  {:<7}  -  Dismiss help                            │", back_key), box_bg),
-        ("│  Space    -  Toggle turbo mode                       │", box_bg),
-        ("│  Click    -  Spawn particle burst                    │", box_bg),
-        ("├────────────────────────────────────────────────────┤", box_bg),
-        ("│  Features:                                         │", box_bg),
-        ("│    - 60fps animation loop                          │", box_bg),
-        ("│    - Particle physics with gravity                 │", box_bg),
-        ("│    - Starfield with twinkling                      │", box_bg),
-        ("│    - Mouse interaction                             │", box_bg),
-        ("│    - Rocket with trail effect                      │", box_bg),
-        ("╰────────────────────────────────────────────────────╯", box_bg),
+        (
+            "╭────────────────────────────────────────────────────╮",
+            box_bg,
+        ),
+        (
+            "│              Game Loop Help                        │",
+            box_bg,
+        ),
+        (
+            "├────────────────────────────────────────────────────┤",
+            box_bg,
+        ),
+        (
+            &format!(
+                "│  {:<7}  -  Quit                                    │",
+                quit_key
+            ),
+            box_bg,
+        ),
+        (
+            &format!(
+                "│  {:<7}  -  Toggle this help                        │",
+                help_key
+            ),
+            box_bg,
+        ),
+        (
+            &format!(
+                "│  {:<7}  -  Dismiss help                            │",
+                back_key
+            ),
+            box_bg,
+        ),
+        (
+            "│  Space    -  Toggle turbo mode                       │",
+            box_bg,
+        ),
+        (
+            "│  Click    -  Spawn particle burst                    │",
+            box_bg,
+        ),
+        (
+            "├────────────────────────────────────────────────────┤",
+            box_bg,
+        ),
+        (
+            "│  Features:                                         │",
+            box_bg,
+        ),
+        (
+            "│    - 60fps animation loop                          │",
+            box_bg,
+        ),
+        (
+            "│    - Particle physics with gravity                 │",
+            box_bg,
+        ),
+        (
+            "│    - Starfield with twinkling                      │",
+            box_bg,
+        ),
+        (
+            "│    - Mouse interaction                             │",
+            box_bg,
+        ),
+        (
+            "│    - Rocket with trail effect                      │",
+            box_bg,
+        ),
+        (
+            "╰────────────────────────────────────────────────────╯",
+            box_bg,
+        ),
     ];
 
     let start_y = (h as usize - help_lines.len()) / 2;
@@ -394,7 +462,15 @@ fn render_help(p: &mut Plane, w: u16, h: u16, kb: &KeybindingSet) {
                 let px = x + ci;
                 if px < w as usize {
                     let idx = y * w as usize + px;
-                    let cell_fg = if ch == '│' || ch == '╭' || ch == '╮' || ch == '├' || ch == '┤' || ch == '╰' || ch == '╯' || ch == '─' {
+                    let cell_fg = if ch == '│'
+                        || ch == '╭'
+                        || ch == '╮'
+                        || ch == '├'
+                        || ch == '┤'
+                        || ch == '╰'
+                        || ch == '╯'
+                        || ch == '─'
+                    {
                         dim
                     } else if ch == '-' {
                         accent

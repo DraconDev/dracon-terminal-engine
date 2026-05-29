@@ -64,7 +64,11 @@ impl PluginRegistry {
     ///
     /// Returns `true` if the registration was successful (name was not already in use).
     /// Returns `false` if the name was already registered.
-    pub fn register(&mut self, name: &str, factory: impl Fn(WidgetId, Theme) -> Box<dyn Widget> + Send + Sync + 'static) -> bool {
+    pub fn register(
+        &mut self,
+        name: &str,
+        factory: impl Fn(WidgetId, Theme) -> Box<dyn Widget> + Send + Sync + 'static,
+    ) -> bool {
         if self.widgets.contains_key(name) {
             return false;
         }
@@ -158,7 +162,9 @@ mod tests {
     #[test]
     fn test_create_unknown_returns_none() {
         let registry = PluginRegistry::new();
-        assert!(registry.create("unknown", WidgetId::new(1), Theme::default()).is_none());
+        assert!(registry
+            .create("unknown", WidgetId::new(1), Theme::default())
+            .is_none());
     }
 
     #[test]

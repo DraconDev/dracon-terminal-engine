@@ -237,7 +237,9 @@ fn test_tabbar_render_medium_area() {
 
 #[test]
 fn test_tabbar_many_tabs() {
-    let tabs: Vec<&str> = (0..50).map(|i| Box::leak(format!("Tab{}", i).into_boxed_str()) as &str).collect();
+    let tabs: Vec<&str> = (0..50)
+        .map(|i| Box::leak(format!("Tab{}", i).into_boxed_str()) as &str)
+        .collect();
     let tabbar = TabBar::new(tabs);
     let _ = tabbar.render(Rect::new(0, 0, 200, 3));
 }
@@ -305,7 +307,13 @@ fn test_tabbar_set_area_then_render() {
 
 #[test]
 fn test_tabbar_different_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let _ = TabBar::new(vec!["Tab1", "Tab2"]).with_theme(t);

@@ -26,7 +26,7 @@ pub struct CellPoolScene {
     tick_count: usize,
     auto_running: Cell<bool>,
     wave_history: Vec<(usize, usize)>, // (acquired, released) per tick
-    alloc_history: Vec<usize>, // size history
+    alloc_history: Vec<usize>,         // size history
     keybindings: KeybindingSet,
     dirty: bool,
 }
@@ -96,7 +96,9 @@ impl CellPoolScene {
 }
 
 impl Scene for CellPoolScene {
-    fn scene_id(&self) -> &str { "cell_pool" }
+    fn scene_id(&self) -> &str {
+        "cell_pool"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
@@ -108,12 +110,35 @@ impl Scene for CellPoolScene {
         }
 
         // ── Header ──────────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 0, " Memory Visualizer ", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            0,
+            " Memory Visualizer ",
+            t.primary,
+            t.bg,
+            true,
+        );
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
         if self.auto_running.get() {
-            draw_text(&mut plane, DIV_X.saturating_sub(6), 0, "▶ AUTO", t.primary, t.bg, true);
+            draw_text(
+                &mut plane,
+                DIV_X.saturating_sub(6),
+                0,
+                "▶ AUTO",
+                t.primary,
+                t.bg,
+                true,
+            );
         }
 
         // Divider
@@ -150,7 +175,14 @@ impl Scene for CellPoolScene {
         // Section: Pool Memory Grid
         let grid_y = chart_y + chart_h + 2;
         if grid_y + 10 < area.height.saturating_sub(4) {
-            self.render_pool_grid(&mut plane, main_x, grid_y, main_w, area.height.saturating_sub(grid_y + 4), t);
+            self.render_pool_grid(
+                &mut plane,
+                main_x,
+                grid_y,
+                main_w,
+                area.height.saturating_sub(grid_y + 4),
+                t,
+            );
         }
 
         // ── Footer ─────────────────────────────────────────────────────
@@ -174,24 +206,34 @@ impl Scene for CellPoolScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Memory Visualizer — Help", &[
-                ("SPACE", "Single allocation"),
-                ("a", "Toggle auto indicator"),
-                ("r", "Reset all stats"),
-                ("Click", "Allocate"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Memory Visualizer — Help",
+                &[
+                    ("SPACE", "Single allocation"),
+                    ("a", "Toggle auto indicator"),
+                    ("r", "Reset all stats"),
+                    ("Click", "Allocate"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -217,7 +259,7 @@ impl Scene for CellPoolScene {
                 self.dirty = true;
                 true
             }
-        KeyCode::Char('a') if key.modifiers.is_empty() => {
+            KeyCode::Char('a') if key.modifiers.is_empty() => {
                 self.auto_running.set(!self.auto_running.get());
                 self.dirty = true;
                 true
@@ -245,9 +287,15 @@ impl Scene for CellPoolScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl CellPoolScene {
@@ -269,8 +317,16 @@ impl CellPoolScene {
                 plane.cells[idx].transparent = false;
             }
         }
-        draw_text_clipped(plane, sx + 1, btn_y, btn_text, sx + SIDEBAR_W, t.bg, btn_bg, false);
-
+        draw_text_clipped(
+            plane,
+            sx + 1,
+            btn_y,
+            btn_text,
+            sx + SIDEBAR_W,
+            t.bg,
+            btn_bg,
+            false,
+        );
 
         // Reset button
         let reset_y = 5;
@@ -309,7 +365,9 @@ impl CellPoolScene {
 
         for (i, (label, _value)) in stats.iter().enumerate() {
             let sy = stats_y + 1 + i as u16;
-            if sy >= area.height.saturating_sub(4) { break; }
+            if sy >= area.height.saturating_sub(4) {
+                break;
+            }
             draw_text(plane, sx, sy, label, t.fg_muted, t.bg, false);
         }
 
@@ -319,7 +377,9 @@ impl CellPoolScene {
             draw_text(plane, sx, reuse_y, "Reuse Rate", t.secondary, t.bg, true);
             let reuse_rate = if self.acquired > 0 {
                 (self.released as f64 / self.acquired as f64 * 100.0).min(100.0)
-            } else { 0.0 };
+            } else {
+                0.0
+            };
 
             let bar_y = reuse_y + 1;
             let bar_w = SIDEBAR_W - 2;
@@ -328,7 +388,11 @@ impl CellPoolScene {
                 let idx = (bar_y * plane.width + sx + 1 + dx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
-                    plane.cells[idx].fg = if (dx as usize) < filled { t.success } else { t.fg_muted };
+                    plane.cells[idx].fg = if (dx as usize) < filled {
+                        t.success
+                    } else {
+                        t.fg_muted
+                    };
                     plane.cells[idx].transparent = false;
                 }
             }
@@ -342,7 +406,9 @@ impl CellPoolScene {
             draw_text(plane, sx, eff_y, "Pool Efficiency", t.secondary, t.bg, true);
             let pool_pct = if self.total_cells > 0 && self.acquired > 0 {
                 (self.total_cells as f64 / self.acquired.max(1) as f64 * 100.0).min(100.0)
-            } else { 0.0 };
+            } else {
+                0.0
+            };
 
             let bar_y = eff_y + 1;
             let bar_w = SIDEBAR_W - 2;
@@ -351,7 +417,11 @@ impl CellPoolScene {
                 let idx = (bar_y * plane.width + sx + 1 + dx) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = if (dx as usize) < filled { '█' } else { '░' };
-                    plane.cells[idx].fg = if (dx as usize) < filled { t.primary } else { t.fg_muted };
+                    plane.cells[idx].fg = if (dx as usize) < filled {
+                        t.primary
+                    } else {
+                        t.fg_muted
+                    };
                     plane.cells[idx].transparent = false;
                 }
             }
@@ -382,39 +452,75 @@ impl CellPoolScene {
 
     fn render_wave_chart(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16) {
         let t = &self.theme;
-        if self.wave_history.is_empty() || w < 4 || h < 3 { return; }
+        if self.wave_history.is_empty() || w < 4 || h < 3 {
+            return;
+        }
 
         // Border
         for i in 0..w {
             let top = (y * plane.width + x + i) as usize;
             let bot = ((y + h - 1) * plane.width + x + i) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for j in 0..h {
             let left = ((y + j) * plane.width + x) as usize;
             let right = ((y + j) * plane.width + x + w - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
         // Corners
-        for (ch, cx, cy) in [('╭', x, y), ('╮', x + w - 1, y), ('╰', x, y + h - 1), ('╯', x + w - 1, y + h - 1)] {
+        for (ch, cx, cy) in [
+            ('╭', x, y),
+            ('╮', x + w - 1, y),
+            ('╰', x, y + h - 1),
+            ('╯', x + w - 1, y + h - 1),
+        ] {
             let idx = (cy * plane.width + cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
 
         // Find max for scaling
-        let max_val = self.wave_history.iter().map(|(a, r)| (*a).max(*r)).max().unwrap_or(1).max(1);
+        let max_val = self
+            .wave_history
+            .iter()
+            .map(|(a, r)| (*a).max(*r))
+            .max()
+            .unwrap_or(1)
+            .max(1);
 
         // Draw bars for each tick (acquired = green, released = dim)
         let chart_w = (w as usize).saturating_sub(2);
         let chart_h = (h as usize).saturating_sub(2);
-        let data: Vec<(usize, usize)> = self.wave_history.iter().rev().take(chart_w).cloned().collect();
+        let data: Vec<(usize, usize)> = self
+            .wave_history
+            .iter()
+            .rev()
+            .take(chart_w)
+            .cloned()
+            .collect();
 
         for (i, (acq, rel)) in data.iter().enumerate() {
             let bar_x = x + 1 + (chart_w.saturating_sub(data.len()) + i) as u16;
-            let acq_h = (*acq as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
-            let rel_h = (*rel as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
+            let acq_h =
+                (*acq as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
+            let rel_h =
+                (*rel as f64 / max_val as f64 * chart_h as f64).min(chart_h as f64) as usize;
 
             // Acquired bars (green, from bottom)
             for j in 0..acq_h {
@@ -439,11 +545,29 @@ impl CellPoolScene {
         }
 
         // Title
-        draw_text_clipped(plane, x + 2, y + 1, "Allocation Waves", x + w - 2, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x + 2,
+            y + 1,
+            "Allocation Waves",
+            x + w - 2,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Legend
         let legend_x = x + w.saturating_sub(18);
-        draw_text_clipped(plane, legend_x, y + 1, "▓ Acq  ▒ Rel", x + w - 2, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            plane,
+            legend_x,
+            y + 1,
+            "▓ Acq  ▒ Rel",
+            x + w - 2,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
     }
 
     fn render_pool_grid(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
@@ -467,11 +591,17 @@ impl CellPoolScene {
         let pooled = self.total_cells;
 
         let active_slots = if self.acquired > 0 {
-            (active as f64 / self.acquired.max(1) as f64 * total_slots as f64).min(total_slots as f64) as usize
-        } else { 0 };
+            (active as f64 / self.acquired.max(1) as f64 * total_slots as f64)
+                .min(total_slots as f64) as usize
+        } else {
+            0
+        };
         let pooled_slots = if self.acquired > 0 {
-            (pooled as f64 / self.acquired.max(1) as f64 * total_slots as f64).min((total_slots - active_slots) as f64) as usize
-        } else { 0 };
+            (pooled as f64 / self.acquired.max(1) as f64 * total_slots as f64)
+                .min((total_slots - active_slots) as f64) as usize
+        } else {
+            0
+        };
 
         let mut drawn = 0;
         for gy in 0..grid_h {

@@ -13,14 +13,20 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::NotificationKind;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Clone, Copy, PartialEq)]
 enum FilterMode {
-    All, Info, Success, Warning, Error,
+    All,
+    Info,
+    Success,
+    Warning,
+    Error,
 }
 
 impl FilterMode {
@@ -90,8 +96,18 @@ impl NotificationCenterScene {
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             notifications: RefCell::new(vec![
-                NotifEntry { title: "Welcome".into(), message: "NotificationCenter demo".into(), kind: NotificationKind::Info, timestamp: "now".into() },
-                NotifEntry { title: "Ready".into(), message: "All systems operational".into(), kind: NotificationKind::Success, timestamp: "now".into() },
+                NotifEntry {
+                    title: "Welcome".into(),
+                    message: "NotificationCenter demo".into(),
+                    kind: NotificationKind::Info,
+                    timestamp: "now".into(),
+                },
+                NotifEntry {
+                    title: "Ready".into(),
+                    message: "All systems operational".into(),
+                    kind: NotificationKind::Success,
+                    timestamp: "now".into(),
+                },
             ]),
             selected_idx: None,
             focused_side: 0,
@@ -101,21 +117,69 @@ impl NotificationCenterScene {
 
     fn add_filtered_notification(&mut self) {
         let kinds = [
-            (NotificationKind::Info, "Info", vec!["New message received", "Update available", "Sync complete", "User online"]),
-            (NotificationKind::Success, "Done", vec!["File saved", "Build succeeded", "Upload complete", "Tests passed"]),
-            (NotificationKind::Warning, "Warning", vec!["Disk space low", "Rate limit approaching", "Certificate expiring", "Memory high"]),
-            (NotificationKind::Error, "Error", vec!["Connection failed", "Permission denied", "Timeout exceeded", "Disk full"]),
+            (
+                NotificationKind::Info,
+                "Info",
+                vec![
+                    "New message received",
+                    "Update available",
+                    "Sync complete",
+                    "User online",
+                ],
+            ),
+            (
+                NotificationKind::Success,
+                "Done",
+                vec![
+                    "File saved",
+                    "Build succeeded",
+                    "Upload complete",
+                    "Tests passed",
+                ],
+            ),
+            (
+                NotificationKind::Warning,
+                "Warning",
+                vec![
+                    "Disk space low",
+                    "Rate limit approaching",
+                    "Certificate expiring",
+                    "Memory high",
+                ],
+            ),
+            (
+                NotificationKind::Error,
+                "Error",
+                vec![
+                    "Connection failed",
+                    "Permission denied",
+                    "Timeout exceeded",
+                    "Disk full",
+                ],
+            ),
         ];
 
         let (kind, title_prefix, msgs) = &kinds[self.tick_count % kinds.len()];
 
         match self.filter {
-            FilterMode::All => {},
-            FilterMode::Info if *kind != NotificationKind::Info => { self.tick_count += 1; return; },
-            FilterMode::Success if *kind != NotificationKind::Success => { self.tick_count += 1; return; },
-            FilterMode::Warning if *kind != NotificationKind::Warning => { self.tick_count += 1; return; },
-            FilterMode::Error if *kind != NotificationKind::Error => { self.tick_count += 1; return; },
-            _ => {},
+            FilterMode::All => {}
+            FilterMode::Info if *kind != NotificationKind::Info => {
+                self.tick_count += 1;
+                return;
+            }
+            FilterMode::Success if *kind != NotificationKind::Success => {
+                self.tick_count += 1;
+                return;
+            }
+            FilterMode::Warning if *kind != NotificationKind::Warning => {
+                self.tick_count += 1;
+                return;
+            }
+            FilterMode::Error if *kind != NotificationKind::Error => {
+                self.tick_count += 1;
+                return;
+            }
+            _ => {}
         }
 
         let msg = msgs[self.tick_count / kinds.len() % msgs.len()];
@@ -156,7 +220,16 @@ impl NotificationCenterScene {
         let t = &self.theme;
 
         // Feed header
-        draw_text_clipped(plane, 1, 0, " Notifications ", SIDEBAR_WIDTH, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            1,
+            0,
+            " Notifications ",
+            SIDEBAR_WIDTH,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -172,12 +245,20 @@ impl NotificationCenterScene {
         let notif_h = area.height.saturating_sub(1);
         for (i, entry) in entries.iter().enumerate() {
             let row = i as u16 + 1;
-            if row >= notif_h { break; }
+            if row >= notif_h {
+                break;
+            }
 
             let is_selected = self.selected_idx == Some(i);
             let is_hovered = !is_selected && i == 0; // simple hover for first
 
-            let bg = if is_selected { t.primary } else if is_hovered { t.hover_bg } else { t.surface };
+            let bg = if is_selected {
+                t.primary
+            } else if is_hovered {
+                t.hover_bg
+            } else {
+                t.surface
+            };
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
             let icon_color = Self::kind_color(entry.kind, t);
 
@@ -202,18 +283,54 @@ impl NotificationCenterScene {
 
             // Title
             let title_x = 4u16;
-            draw_text_clipped(plane, title_x, row, &entry.title, SIDEBAR_WIDTH.saturating_sub(4), fg, bg, is_selected);
+            draw_text_clipped(
+                plane,
+                title_x,
+                row,
+                &entry.title,
+                SIDEBAR_WIDTH.saturating_sub(4),
+                fg,
+                bg,
+                is_selected,
+            );
 
             // Timestamp
             let ts_x = SIDEBAR_WIDTH.saturating_sub(entry.timestamp.len() as u16 + 1);
-            draw_text_clipped(plane, ts_x, row, &entry.timestamp, SIDEBAR_WIDTH, t.fg_muted, bg, false);
+            draw_text_clipped(
+                plane,
+                ts_x,
+                row,
+                &entry.timestamp,
+                SIDEBAR_WIDTH,
+                t.fg_muted,
+                bg,
+                false,
+            );
         }
 
         // Empty state
         if entries.is_empty() {
             let empty_y = 3;
-            draw_text_clipped(plane, 1, empty_y, "(no notifications)", SIDEBAR_WIDTH, t.fg_muted, t.surface, false);
-            draw_text_clipped(plane, 1, empty_y + 1, "Press SPACE to add one", SIDEBAR_WIDTH, t.fg_muted, t.surface, false);
+            draw_text_clipped(
+                plane,
+                1,
+                empty_y,
+                "(no notifications)",
+                SIDEBAR_WIDTH,
+                t.fg_muted,
+                t.surface,
+                false,
+            );
+            draw_text_clipped(
+                plane,
+                1,
+                empty_y + 1,
+                "Press SPACE to add one",
+                SIDEBAR_WIDTH,
+                t.fg_muted,
+                t.surface,
+                false,
+            );
         }
     }
 
@@ -222,7 +339,16 @@ impl NotificationCenterScene {
         let panel_x = SIDEBAR_WIDTH + 1;
 
         // Detail header
-        draw_text_clipped(plane, panel_x + 1, 0, " Detail ", area.width, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            0,
+            " Detail ",
+            area.width,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
 
         // Divider
         for x in panel_x..area.width {
@@ -242,9 +368,36 @@ impl NotificationCenterScene {
                 // Kind + timestamp row
                 let icon = Self::kind_icon(entry.kind);
                 draw_text(plane, panel_x + 2, 2, icon, kind_color, t.surface, true);
-                draw_text_clipped(plane, panel_x + 5, 2, entry.title.as_str(), area.width, kind_color, t.surface, true);
-                draw_text_clipped(plane, panel_x + 2, 3, &format!("Kind: {:?}", entry.kind), area.width, t.fg_muted, t.surface, false);
-                draw_text_clipped(plane, panel_x + 2, 4, &format!("Time: {}", entry.timestamp), area.width, t.fg_muted, t.surface, false);
+                draw_text_clipped(
+                    plane,
+                    panel_x + 5,
+                    2,
+                    entry.title.as_str(),
+                    area.width,
+                    kind_color,
+                    t.surface,
+                    true,
+                );
+                draw_text_clipped(
+                    plane,
+                    panel_x + 2,
+                    3,
+                    &format!("Kind: {:?}", entry.kind),
+                    area.width,
+                    t.fg_muted,
+                    t.surface,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    panel_x + 2,
+                    4,
+                    &format!("Time: {}", entry.timestamp),
+                    area.width,
+                    t.fg_muted,
+                    t.surface,
+                    false,
+                );
 
                 // Divider
                 for x in panel_x + 2..area.width.saturating_sub(2) {
@@ -256,17 +409,53 @@ impl NotificationCenterScene {
                 }
 
                 // Message
-                draw_text_clipped(plane, panel_x + 2, 6, "Message:", area.width, t.secondary, t.surface, true);
+                draw_text_clipped(
+                    plane,
+                    panel_x + 2,
+                    6,
+                    "Message:",
+                    area.width,
+                    t.secondary,
+                    t.surface,
+                    true,
+                );
                 let msg_chars: Vec<char> = entry.message.chars().collect();
                 for (i, chunk) in msg_chars.chunks(40).take(8).enumerate() {
                     let line_str: String = chunk.iter().collect();
-                    draw_text_clipped(plane, panel_x + 2, 7 + i as u16, &line_str, area.width, t.fg, t.surface, false);
+                    draw_text_clipped(
+                        plane,
+                        panel_x + 2,
+                        7 + i as u16,
+                        &line_str,
+                        area.width,
+                        t.fg,
+                        t.surface,
+                        false,
+                    );
                 }
 
                 // Actions
                 let action_y = area.height.saturating_sub(4);
-                draw_text_clipped(plane, panel_x + 2, action_y, "[D] Dismiss", area.width, t.error, t.surface, false);
-                draw_text_clipped(plane, panel_x + 2, action_y + 1, "[C] Clear all", area.width, t.warning, t.surface, false);
+                draw_text_clipped(
+                    plane,
+                    panel_x + 2,
+                    action_y,
+                    "[D] Dismiss",
+                    area.width,
+                    t.error,
+                    t.surface,
+                    false,
+                );
+                draw_text_clipped(
+                    plane,
+                    panel_x + 2,
+                    action_y + 1,
+                    "[C] Clear all",
+                    area.width,
+                    t.warning,
+                    t.surface,
+                    false,
+                );
 
                 return;
             }
@@ -274,9 +463,36 @@ impl NotificationCenterScene {
 
         // No selection state
         let empty_y = 4;
-        draw_text_clipped(plane, panel_x + 2, empty_y, "No notification selected", area.width, t.fg_muted, t.surface, false);
-        draw_text_clipped(plane, panel_x + 2, empty_y + 1, "Click one from the feed", area.width, t.fg_muted, t.surface, false);
-        draw_text_clipped(plane, panel_x + 2, empty_y + 2, "or press SPACE to add", area.width, t.fg_muted, t.surface, false);
+        draw_text_clipped(
+            plane,
+            panel_x + 2,
+            empty_y,
+            "No notification selected",
+            area.width,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
+        draw_text_clipped(
+            plane,
+            panel_x + 2,
+            empty_y + 1,
+            "Click one from the feed",
+            area.width,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
+        draw_text_clipped(
+            plane,
+            panel_x + 2,
+            empty_y + 2,
+            "or press SPACE to add",
+            area.width,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
     }
 
     fn render_top_bar(&self, plane: &mut Plane, area: Rect) {
@@ -286,20 +502,36 @@ impl NotificationCenterScene {
         let active = self.notifications.borrow().len();
         let stats = format!(
             "Active: {} | Added: {} | Dismissed: {} | {}",
-            active, self.total_added, self.total_dismissed,
-            if self.auto_running { "▶ AUTO" } else { "○ STOPPED" },
+            active,
+            self.total_added,
+            self.total_dismissed,
+            if self.auto_running {
+                "▶ AUTO"
+            } else {
+                "○ STOPPED"
+            },
         );
         draw_text_clipped(plane, 1, 1, &stats, area.width, t.fg_muted, t.bg, false);
 
         // Filter pills
-        let modes = [FilterMode::All, FilterMode::Info, FilterMode::Success, FilterMode::Warning, FilterMode::Error];
+        let modes = [
+            FilterMode::All,
+            FilterMode::Info,
+            FilterMode::Success,
+            FilterMode::Warning,
+            FilterMode::Error,
+        ];
         let colors = [t.fg, t.info, t.success, t.warning, t.error];
         let mut cx = area.width.saturating_sub(50);
         for (i, mode) in modes.iter().enumerate() {
             let label = mode.label();
             let is_active = *mode == self.filter;
             let bg = if is_active { colors[i] } else { t.surface };
-            let fg = if is_active { Color::Rgb(255, 255, 255) } else { t.fg_muted };
+            let fg = if is_active {
+                Color::Rgb(255, 255, 255)
+            } else {
+                t.fg_muted
+            };
 
             let pill = format!(" {} ", label);
             for (j, ch) in pill.chars().enumerate() {
@@ -308,7 +540,11 @@ impl NotificationCenterScene {
                     plane.cells[idx].char = ch;
                     plane.cells[idx].fg = fg;
                     plane.cells[idx].bg = bg;
-                    plane.cells[idx].style = if is_active { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_active {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                     plane.cells[idx].transparent = false;
                 }
             }
@@ -318,7 +554,9 @@ impl NotificationCenterScene {
 }
 
 impl Scene for NotificationCenterScene {
-    fn scene_id(&self) -> &str { "notification_center" }
+    fn scene_id(&self) -> &str {
+        "notification_center"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -331,10 +569,25 @@ impl Scene for NotificationCenterScene {
         }
 
         // Header
-        draw_text(&mut plane, 2, 0, " Notification Hub ", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            0,
+            " Notification Hub ",
+            t.primary,
+            t.bg,
+            true,
+        );
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -363,7 +616,12 @@ impl Scene for NotificationCenterScene {
         self.render_feed(&mut plane, feed_area);
 
         // Right: Detail panel
-        let detail_area = Rect::new(SIDEBAR_WIDTH + 1, 2, area.width.saturating_sub(SIDEBAR_WIDTH + 2), area.height.saturating_sub(3));
+        let detail_area = Rect::new(
+            SIDEBAR_WIDTH + 1,
+            2,
+            area.width.saturating_sub(SIDEBAR_WIDTH + 2),
+            area.height.saturating_sub(3),
+        );
         self.render_detail(&mut plane, detail_area);
 
         // Bottom: Action buttons
@@ -377,10 +635,26 @@ impl Scene for NotificationCenterScene {
         }
 
         let clear_label = "[C] Clear All";
-        let auto_label = if self.auto_running { "[A] Stop Auto" } else { "[A] Start Auto" };
+        let auto_label = if self.auto_running {
+            "[A] Stop Auto"
+        } else {
+            "[A] Start Auto"
+        };
         let add_label = "[SPACE] Add";
         draw_text(&mut plane, 2, btn_y, clear_label, t.error, t.surface, false);
-        draw_text(&mut plane, 20, btn_y, auto_label, if self.auto_running { t.warning } else { t.primary }, t.surface, false);
+        draw_text(
+            &mut plane,
+            20,
+            btn_y,
+            auto_label,
+            if self.auto_running {
+                t.warning
+            } else {
+                t.primary
+            },
+            t.surface,
+            false,
+        );
         draw_text(&mut plane, 40, btn_y, add_label, t.fg, t.surface, false);
 
         // Footer
@@ -396,26 +670,36 @@ impl Scene for NotificationCenterScene {
         draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Notification Hub — Help", &[
-                ("SPACE", "Add notification"),
-                ("A", "Toggle auto-generation"),
-                ("C", "Clear all notifications"),
-                ("F", "Cycle filter priority"),
-                ("D", "Dismiss selected"),
-                ("↑/↓", "Navigate feed"),
-                ("Click", "Select notification"),
-                ("Esc", "Back to showcase"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Notification Hub — Help",
+                &[
+                    ("SPACE", "Add notification"),
+                    ("A", "Toggle auto-generation"),
+                    ("C", "Clear all notifications"),
+                    ("F", "Cycle filter priority"),
+                    ("D", "Dismiss selected"),
+                    ("↑/↓", "Navigate feed"),
+                    ("Click", "Select notification"),
+                    ("Esc", "Back to showcase"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
@@ -490,16 +774,24 @@ impl Scene for NotificationCenterScene {
         let area = self.area.get();
         // Filter pills
         if row == 1 {
-            let modes = [FilterMode::All, FilterMode::Info, FilterMode::Success, FilterMode::Warning, FilterMode::Error];
+            let modes = [
+                FilterMode::All,
+                FilterMode::Info,
+                FilterMode::Success,
+                FilterMode::Warning,
+                FilterMode::Error,
+            ];
             let mut cx = area.width.saturating_sub(50);
             for mode in &modes {
                 let label = mode.label();
                 let pill_len = label.len() as u16 + 3;
-                if col >= cx && col < cx + pill_len
-                    && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
-                        self.filter = *mode;
-                        return true;
-                    }
+                if col >= cx
+                    && col < cx + pill_len
+                    && matches!(kind, MouseEventKind::Down(MouseButton::Left))
+                {
+                    self.filter = *mode;
+                    return true;
+                }
                 cx += pill_len + 1;
             }
         }
@@ -516,7 +808,9 @@ impl Scene for NotificationCenterScene {
         }
 
         // Action buttons
-        if row == area.height.saturating_sub(3) && matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+        if row == area.height.saturating_sub(3)
+            && matches!(kind, MouseEventKind::Down(MouseButton::Left))
+        {
             if (2..15).contains(&col) {
                 // Clear all
                 let cleared = self.notifications.borrow().len();
@@ -544,7 +838,13 @@ impl Scene for NotificationCenterScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }

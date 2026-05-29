@@ -8,7 +8,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -57,7 +57,9 @@ impl HudDemoScene {
         let spinner = Spinner::new(WidgetId::new(1120)).with_theme(theme.clone());
 
         let status_bar = StatusBar::new(WidgetId::new(1130))
-            .add_segment(StatusSegment::new("H/D/S/A: modify | Space: tick | F1: help | Esc: back"))
+            .add_segment(StatusSegment::new(
+                "H/D/S/A: modify | Space: tick | F1: help | Esc: back",
+            ))
             .add_segment(StatusSegment::new("HUD Demo"))
             .with_theme(theme.clone());
 
@@ -91,10 +93,20 @@ impl Scene for HudDemoScene {
         let t = &self.theme;
 
         // Title
-        let title = Label::new("HUD Demo").with_style(Styles::BOLD).with_theme(t.clone());
+        let title = Label::new("HUD Demo")
+            .with_style(Styles::BOLD)
+            .with_theme(t.clone());
         let title_plane = title.render(Rect::new(0, 0, 10, 1));
         blit_to(&mut plane, &title_plane, 1, 0);
-        draw_text(&mut plane, 12, 0, "— HUD · Gauge · Spinner (game overlay)", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            12,
+            0,
+            "— HUD · Gauge · Spinner (game overlay)",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // ── Simulated game area (center) ──────────────────────────
         let game_y = 2;
@@ -115,8 +127,24 @@ impl Scene for HudDemoScene {
         // Game content text
         let center_x = game_w / 2;
         let center_y = game_y + game_h / 2;
-        draw_text(&mut plane, center_x.saturating_sub(8), center_y, "⚡ ARENA ZONE ⚡", t.primary, Color::Rgb(10, 10, 20), true);
-        draw_text(&mut plane, center_x.saturating_sub(7), center_y + 1, "Survive the waves!", t.fg_muted, Color::Rgb(10, 10, 20), false);
+        draw_text(
+            &mut plane,
+            center_x.saturating_sub(8),
+            center_y,
+            "⚡ ARENA ZONE ⚡",
+            t.primary,
+            Color::Rgb(10, 10, 20),
+            true,
+        );
+        draw_text(
+            &mut plane,
+            center_x.saturating_sub(7),
+            center_y + 1,
+            "Survive the waves!",
+            t.fg_muted,
+            Color::Rgb(10, 10, 20),
+            false,
+        );
 
         // Enemy indicators (simple dots)
         let enemies = ["👾", "👾", "👾", "👾", "👾"];
@@ -133,9 +161,14 @@ impl Scene for HudDemoScene {
 
         // Score line
         let score_plane = hud.render_text(
-            1, game_y + 1,
-            &format!("SCORE: {:06}  LVL:{}  WAVE:{}", self.score, self.level, self.wave),
-            hud_fg, hud_bg,
+            1,
+            game_y + 1,
+            &format!(
+                "SCORE: {:06}  LVL:{}  WAVE:{}",
+                self.score, self.level, self.wave
+            ),
+            hud_fg,
+            hud_bg,
         );
         blit_to(&mut plane, &score_plane, 1, (game_y + 1) as usize);
 
@@ -149,9 +182,11 @@ impl Scene for HudDemoScene {
 
         // Ammo via HUD
         let ammo_plane = hud.render_text(
-            1, game_y + 6,
+            1,
+            game_y + 6,
             &format!("AMMO: {:.0}/30", self.ammo),
-            hud_fg, hud_bg,
+            hud_fg,
+            hud_bg,
         );
         blit_to(&mut plane, &ammo_plane, 1, (game_y + 6) as usize);
 
@@ -175,7 +210,12 @@ impl Scene for HudDemoScene {
         let sh_area = Rect::new(half_w + 1, gauge_y, half_w.saturating_sub(2), 1);
         self.shield_gauge.borrow_mut().set_area(sh_area);
         let sh_plane = self.shield_gauge.borrow().render(sh_area);
-        blit_to(&mut plane, &sh_plane, (half_w + 1) as usize, gauge_y as usize);
+        blit_to(
+            &mut plane,
+            &sh_plane,
+            (half_w + 1) as usize,
+            gauge_y as usize,
+        );
 
         // Spinner + status
         let sp_y = gauge_y + 1;
@@ -183,52 +223,117 @@ impl Scene for HudDemoScene {
         self.spinner.borrow_mut().set_area(sp_area);
         let sp_plane = self.spinner.borrow().render(sp_area);
         blit_to(&mut plane, &sp_plane, 1, sp_y as usize);
-        draw_text(&mut plane, 5, sp_y, "Game running…", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            5,
+            sp_y,
+            "Game running…",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "HUD Demo — Help", &[("H", "Take damage (-10 HP)"), ("D", "Heal (+10 HP)"), ("S", "Deplete shield (-15)"), ("A", "Fire weapon (-1 ammo)"), ("Space", "Tick + score"), ("R", "Reset all stats"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "HUD Demo — Help",
+                &[
+                    ("H", "Take damage (-10 HP)"),
+                    ("D", "Heal (+10 HP)"),
+                    ("S", "Deplete shield (-15)"),
+                    ("A", "Fire weapon (-1 ammo)"),
+                    ("Space", "Tick + score"),
+                    ("R", "Reset all stats"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
-                self.show_help = false; self.dirty = true; return true;
+            if self.keybindings.matches(actions::HELP, &key)
+                || self.keybindings.matches(actions::BACK, &key)
+            {
+                self.show_help = false;
+                self.dirty = true;
+                return true;
             }
             return true;
         }
 
-        if self.keybindings.matches(actions::HELP, &key) { self.show_help = !self.show_help; self.dirty = true; return true; }
-        if self.keybindings.matches(actions::BACK, &key) { return false; }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false;
+        }
 
         match key.code {
-            KeyCode::Char('h') if key.modifiers.is_empty() => { self.health = (self.health - 10.0).max(0.0); self.dirty = true; true }
-            KeyCode::Char('d') if key.modifiers.is_empty() => { self.health = (self.health + 10.0).min(100.0); self.dirty = true; true }
-            KeyCode::Char('s') if key.modifiers.is_empty() => { self.shield = (self.shield - 15.0).max(0.0); self.dirty = true; true }
+            KeyCode::Char('h') if key.modifiers.is_empty() => {
+                self.health = (self.health - 10.0).max(0.0);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('d') if key.modifiers.is_empty() => {
+                self.health = (self.health + 10.0).min(100.0);
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('s') if key.modifiers.is_empty() => {
+                self.shield = (self.shield - 15.0).max(0.0);
+                self.dirty = true;
+                true
+            }
             KeyCode::Char('a') if key.modifiers.is_empty() => {
-                if self.ammo > 0.0 { self.ammo -= 1.0; self.score += 100; }
-                if self.ammo <= 0.0 { self.wave += 1; self.ammo = 30.0; }
-                self.dirty = true; true
+                if self.ammo > 0.0 {
+                    self.ammo -= 1.0;
+                    self.score += 100;
+                }
+                if self.ammo <= 0.0 {
+                    self.wave += 1;
+                    self.ammo = 30.0;
+                }
+                self.dirty = true;
+                true
             }
             KeyCode::Char(' ') => {
                 self.spinner.borrow_mut().tick();
                 self.score += 10;
-                if self.score > 0 && self.score.is_multiple_of(1000) { self.level += 1; }
-                self.dirty = true; true
+                if self.score > 0 && self.score.is_multiple_of(1000) {
+                    self.level += 1;
+                }
+                self.dirty = true;
+                true
             }
             KeyCode::Char('r') if key.modifiers.is_empty() => {
-                self.health = 100.0; self.shield = 75.0; self.ammo = 30.0;
-                self.score = 0; self.level = 1; self.wave = 1;
-                self.dirty = true; true
+                self.health = 100.0;
+                self.shield = 75.0;
+                self.ammo = 30.0;
+                self.score = 0;
+                self.level = 1;
+                self.wave = 1;
+                self.dirty = true;
+                true
             }
             _ => false,
         }
@@ -249,9 +354,16 @@ impl Scene for HudDemoScene {
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "hud_demo" }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn scene_id(&self) -> &str {
+        "hud_demo"
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-

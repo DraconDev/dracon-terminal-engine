@@ -31,7 +31,12 @@ impl WidgetContainer {
         self.inner.handle_key(key)
     }
 
-    pub fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    pub fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         self.inner.handle_mouse(kind, col, row)
     }
 
@@ -146,7 +151,9 @@ mod tests {
 
     #[test]
     fn test_container_creates_and_delegates() {
-        let widget = Box::new(DummyWidget { id: WidgetId::new(1) });
+        let widget = Box::new(DummyWidget {
+            id: WidgetId::new(1),
+        });
         let container = WidgetContainer::new(widget);
         assert_eq!(container.id(), WidgetId::new(1));
     }

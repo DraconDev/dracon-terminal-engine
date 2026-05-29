@@ -58,10 +58,10 @@ pub mod layout;
 pub mod logging;
 pub mod marquee;
 pub mod plugin;
+pub mod scene_router;
 pub mod scroll;
 #[cfg(feature = "sixel")]
 pub mod sixel;
-pub mod scene_router;
 pub mod theme;
 pub mod widget;
 pub mod widget_container;
@@ -71,11 +71,13 @@ pub mod widgets;
 pub mod prelude {
     pub use crate::compositor::{Cell, CellPool, Color, Compositor, Plane, PoolConfig, Styles};
     pub use crate::error::DraconError;
-    pub use crate::framework::widget::{Commandable, Focusable, InputHandler, Renderable, Themable, Widget, WidgetId, WidgetState};
     #[cfg(feature = "tracing")]
     pub use crate::frame_span;
     #[cfg(feature = "tracing")]
     pub use crate::frame_span_debug;
+    pub use crate::framework::widget::{
+        Commandable, Focusable, InputHandler, Renderable, Themable, Widget, WidgetId, WidgetState,
+    };
     pub use crate::framework::{
         animation::{Animation, AnimationManager, Easing},
         app::{App, Ctx, WidgetRef, WidgetRefMut},
@@ -90,12 +92,12 @@ pub mod prelude {
         helpers::{blit_to, draw_rounded_border, draw_text},
         hitzone::{DragState, HitZone, HitZoneGroup, ScopedZone, ScopedZoneRegistry},
         i18n::{tr, I18n, I18nError},
-        keybindings::{KeybindingConfig, KeybindingSet, actions, resolve_keybindings},
+        keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet},
         layout::{Constraint, Direction, Layout},
-        marquee::{MarqueeRect, MarqueeState, render_marquee},
+        marquee::{render_marquee, MarqueeRect, MarqueeState},
         plugin::{PluginRegistry, WidgetFactory},
-        scroll::{ScrollContainer, ScrollState},
         scene_router::{NavigationEvent, Scene, SceneRouter},
+        scroll::{ScrollContainer, ScrollState},
         theme::Theme,
         widgets::*,
     };
@@ -103,8 +105,8 @@ pub mod prelude {
         Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent,
         MouseEventKind,
     };
-    #[cfg(feature = "tracing")]
-    pub use tracing::instrument;
     pub use crate::Terminal;
     pub use ratatui::layout::Rect;
+    #[cfg(feature = "tracing")]
+    pub use tracing::instrument;
 }

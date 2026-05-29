@@ -9,8 +9,8 @@
 //! - Press T to toggle between single and range mode
 
 use chrono::NaiveDate;
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use ratatui::layout::Rect;
 use std::cell::RefCell;
@@ -40,11 +40,9 @@ impl CalendarDemo {
         // Single selection calendar
         let sd = selected_date.clone();
         let mut cal_single = Calendar::new();
-        cal_single = cal_single
-            .with_theme(theme.clone())
-            .on_select(move |date| {
-                *sd.borrow_mut() = Some(date);
-            });
+        cal_single = cal_single.with_theme(theme.clone()).on_select(move |date| {
+            *sd.borrow_mut() = Some(date);
+        });
 
         // Range selection calendar
         let sr = selected_range.clone();
@@ -99,9 +97,7 @@ impl CalendarDemo {
 
 impl Widget for CalendarDemo {
     fn needs_render(&self) -> bool {
-        self.dirty
-            || self.calendar_single.needs_render()
-            || self.calendar_range.needs_render()
+        self.dirty || self.calendar_single.needs_render() || self.calendar_range.needs_render()
     }
 
     fn id(&self) -> WidgetId {
@@ -116,8 +112,10 @@ impl Widget for CalendarDemo {
         self.area = area;
         // Split area for two calendars side by side
         let half = area.width / 2;
-        self.calendar_single.set_area(Rect::new(0, 0, half, area.height));
-        self.calendar_range.set_area(Rect::new(half, 0, half, area.height));
+        self.calendar_single
+            .set_area(Rect::new(0, 0, half, area.height));
+        self.calendar_range
+            .set_area(Rect::new(half, 0, half, area.height));
     }
 
     fn render(&self, area: Rect) -> Plane {
@@ -235,8 +233,9 @@ impl Widget for CalendarDemo {
             if let Some((start, end)) = *self.selected_range.borrow() {
                 let info = format!("Range: {} to {}", start, end);
                 for (i, c) in info.chars().enumerate() {
-                    let idx = (info_y * area.width + half + (half - info.len() as u16) / 2 + i as u16)
-                        as usize;
+                    let idx =
+                        (info_y * area.width + half + (half - info.len() as u16) / 2 + i as u16)
+                            as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = c;
                         plane.cells[idx].fg = self.theme.success;
@@ -287,28 +286,52 @@ impl Widget for CalendarDemo {
                     }
                 }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
             let title = "Calendar Help";
             let tx = hx + (hw - title.len() as u16) / 2;
             for (i, c) in title.chars().enumerate() {
                 let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
             }
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts: [(&str, &str); 6] = [
@@ -323,11 +346,17 @@ impl Widget for CalendarDemo {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 16 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -341,7 +370,9 @@ impl Widget for CalendarDemo {
             return true;
         }
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;

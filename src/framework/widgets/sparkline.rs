@@ -343,7 +343,11 @@ impl crate::framework::widget::Widget for Sparkline {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '◉';
                     plane.cells[idx].fg = self.color;
-                    plane.cells[idx].style = if is_hovered { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_hovered {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
         }

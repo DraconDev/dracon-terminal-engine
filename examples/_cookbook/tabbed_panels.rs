@@ -9,9 +9,9 @@
 //! - Active tab highlighted with different color/style
 
 use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widgets::{
     Gauge, KeyValueGrid, List, Select, Slider, TabBar, Toggle,
 };
@@ -124,7 +124,8 @@ struct StatsState {
 
 impl StatsState {
     fn new(base_id: WidgetId) -> Self {
-        let mut grid = KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1)).with_theme(Theme::from_env_or(Theme::nord()));
+        let mut grid = KeyValueGrid::with_id(WidgetId::new(base_id.0 + 1))
+            .with_theme(Theme::from_env_or(Theme::nord()));
         let mut pairs = std::collections::BTreeMap::new();
         pairs.insert("Uptime".to_string(), "42h 17m".to_string());
         pairs.insert("Requests".to_string(), "1.2M".to_string());
@@ -650,7 +651,10 @@ fn main() -> std::io::Result<()> {
     let app_for_tick = Rc::clone(&app);
     let app_for_input = Rc::clone(&app);
 
-    let mut app_ctx = App::new()?.title("Tabbed Panels Demo").fps(30).theme(env_theme.clone());
+    let mut app_ctx = App::new()?
+        .title("Tabbed Panels Demo")
+        .fps(30)
+        .theme(env_theme.clone());
 
     // Register an InputRouter so keyboard/mouse events reach TabbedApp
     let router = InputRouter {

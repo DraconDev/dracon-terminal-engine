@@ -1,9 +1,9 @@
 //! Tests for the Breadcrumbs widget.
 
-use std::path::Path;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::Breadcrumbs;
+use std::path::Path;
 
 // ============================================================================
 // Construction Tests
@@ -18,7 +18,8 @@ fn test_breadcrumbs_new() {
 
 #[test]
 fn test_breadcrumbs_new_with_id() {
-    let crumbs = Breadcrumbs::new_with_id(WidgetId::new(42), vec!["A".to_string(), "B".to_string()]);
+    let crumbs =
+        Breadcrumbs::new_with_id(WidgetId::new(42), vec!["A".to_string(), "B".to_string()]);
     assert_eq!(crumbs.id(), WidgetId::new(42));
 }
 
@@ -188,7 +189,13 @@ fn test_breadcrumbs_on_theme_change() {
 
 #[test]
 fn test_breadcrumbs_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let crumbs = Breadcrumbs::new(vec!["Test".to_string()]).with_theme(t);

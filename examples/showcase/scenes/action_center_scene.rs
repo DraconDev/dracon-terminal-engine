@@ -7,7 +7,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -15,7 +15,9 @@ use dracon_terminal_engine::framework::widgets::{
     ConfirmDialog, ConfirmResult, ContextMenu, ContextMenuItem, StatusBar, StatusSegment, Toast,
     ToastKind,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -46,16 +48,56 @@ pub struct ActionCenterScene {
 impl ActionCenterScene {
     pub fn new(theme: Theme) -> Self {
         let files = vec![
-            FileItem { name: "src".into(), kind: "dir".into(), size: "—".into() },
-            FileItem { name: "Cargo.toml".into(), kind: "file".into(), size: "1.2K".into() },
-            FileItem { name: "README.md".into(), kind: "file".into(), size: "4.5K".into() },
-            FileItem { name: "LICENSE".into(), kind: "file".into(), size: "1.1K".into() },
-            FileItem { name: ".gitignore".into(), kind: "file".into(), size: "0.2K".into() },
-            FileItem { name: "tests".into(), kind: "dir".into(), size: "—".into() },
-            FileItem { name: "examples".into(), kind: "dir".into(), size: "—".into() },
-            FileItem { name: "Makefile".into(), kind: "file".into(), size: "0.8K".into() },
-            FileItem { name: "CHANGELOG.md".into(), kind: "file".into(), size: "12K".into() },
-            FileItem { name: "deno.json".into(), kind: "file".into(), size: "0.5K".into() },
+            FileItem {
+                name: "src".into(),
+                kind: "dir".into(),
+                size: "—".into(),
+            },
+            FileItem {
+                name: "Cargo.toml".into(),
+                kind: "file".into(),
+                size: "1.2K".into(),
+            },
+            FileItem {
+                name: "README.md".into(),
+                kind: "file".into(),
+                size: "4.5K".into(),
+            },
+            FileItem {
+                name: "LICENSE".into(),
+                kind: "file".into(),
+                size: "1.1K".into(),
+            },
+            FileItem {
+                name: ".gitignore".into(),
+                kind: "file".into(),
+                size: "0.2K".into(),
+            },
+            FileItem {
+                name: "tests".into(),
+                kind: "dir".into(),
+                size: "—".into(),
+            },
+            FileItem {
+                name: "examples".into(),
+                kind: "dir".into(),
+                size: "—".into(),
+            },
+            FileItem {
+                name: "Makefile".into(),
+                kind: "file".into(),
+                size: "0.8K".into(),
+            },
+            FileItem {
+                name: "CHANGELOG.md".into(),
+                kind: "file".into(),
+                size: "12K".into(),
+            },
+            FileItem {
+                name: "deno.json".into(),
+                kind: "file".into(),
+                size: "0.5K".into(),
+            },
         ];
 
         // Bridge for context menu on_select callback
@@ -71,10 +113,14 @@ impl ActionCenterScene {
         ])
         .with_theme(theme.clone())
         .with_width(22)
-        .on_select(Box::new(move |id: &str| { *action_bridge_cb.borrow_mut() = Some(id.to_string()); }));
+        .on_select(Box::new(move |id: &str| {
+            *action_bridge_cb.borrow_mut() = Some(id.to_string());
+        }));
 
         let status_bar = StatusBar::new(WidgetId::new(603))
-            .add_segment(StatusSegment::new("Right-click: menu | Del: delete | F1: help | Esc: back"))
+            .add_segment(StatusSegment::new(
+                "Right-click: menu | Del: delete | F1: help | Esc: back",
+            ))
             .with_theme(theme.clone());
 
         Self {
@@ -119,14 +165,20 @@ impl ActionCenterScene {
             "open" => {
                 if let Some(idx) = self.selected {
                     if idx < self.files.len() {
-                        self.add_toast(ToastKind::Info, &format!("Opened {}", self.files[idx].name));
+                        self.add_toast(
+                            ToastKind::Info,
+                            &format!("Opened {}", self.files[idx].name),
+                        );
                     }
                 }
             }
             "copy" => {
                 if let Some(idx) = self.selected {
                     if idx < self.files.len() {
-                        self.add_toast(ToastKind::Info, &format!("Copied path: {}", self.files[idx].name));
+                        self.add_toast(
+                            ToastKind::Info,
+                            &format!("Copied path: {}", self.files[idx].name),
+                        );
                     }
                 }
             }
@@ -140,7 +192,7 @@ impl ActionCenterScene {
                         *self.confirm_dialog.borrow_mut() = Some(
                             ConfirmDialog::new("Delete File", &format!("Delete \"{}\"?", name))
                                 .danger(true)
-                                .with_theme(self.theme.clone())
+                                .with_theme(self.theme.clone()),
                         );
                     }
                 }
@@ -174,22 +226,58 @@ impl Scene for ActionCenterScene {
 
         // ── Title bar ──────────────────────────────────────────────
         draw_text(&mut plane, 1, 0, "Action Center", t.primary, t.bg, true);
-        draw_text(&mut plane, 16, 0, "— ContextMenu + ConfirmDialog + Toast", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            16,
+            0,
+            "— ContextMenu + ConfirmDialog + Toast",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // ── File list ──────────────────────────────────────────────
         let list_y = 2u16;
         // Header
-        draw_text(&mut plane, 1, list_y, "  Name           Kind  Size", t.fg_muted, t.bg, true);
-        draw_text(&mut plane, 1, list_y + 1, "─".repeat(area.width as usize / 2).as_str(), t.outline, t.bg, false);
+        draw_text(
+            &mut plane,
+            1,
+            list_y,
+            "  Name           Kind  Size",
+            t.fg_muted,
+            t.bg,
+            true,
+        );
+        draw_text(
+            &mut plane,
+            1,
+            list_y + 1,
+            "─".repeat(area.width as usize / 2).as_str(),
+            t.outline,
+            t.bg,
+            false,
+        );
 
         for (i, file) in self.files.iter().enumerate() {
             let y = list_y + 2 + i as u16;
-            if y >= area.height.saturating_sub(1) { break; }
+            if y >= area.height.saturating_sub(1) {
+                break;
+            }
 
             let is_selected = self.selected == Some(i);
             let is_hovered = self.hovered == Some(i);
-            let bg = if is_selected { t.selection_bg } else if is_hovered { t.hover_bg } else { t.bg };
-            let fg = if is_selected || is_hovered { t.fg } else { t.fg_muted };
+            let bg = if is_selected {
+                t.selection_bg
+            } else if is_hovered {
+                t.hover_bg
+            } else {
+                t.bg
+            };
+            let fg = if is_selected || is_hovered {
+                t.fg
+            } else {
+                t.fg_muted
+            };
 
             // Fill row background
             for x in 0..area.width.min(40) {
@@ -201,37 +289,147 @@ impl Scene for ActionCenterScene {
             }
 
             let icon = if file.kind == "dir" { "📁" } else { "📄" };
-            let line = format!("  {} {:14} {:4} {:6}", icon, file.name, file.kind, file.size);
+            let line = format!(
+                "  {} {:14} {:4} {:6}",
+                icon, file.name, file.kind, file.size
+            );
             draw_text(&mut plane, 1, y, &line, fg, bg, false);
         }
 
         // ── Info panel (right side) ────────────────────────────────
         let info_x = area.width / 2 + 2;
-        draw_text(&mut plane, info_x, 2, "Interaction Patterns", t.primary, t.bg, true);
-        draw_text(&mut plane, info_x, 4, "This scene demonstrates three", t.fg, t.bg, false);
-        draw_text(&mut plane, info_x, 5, "interaction pattern widgets:", t.fg, t.bg, false);
+        draw_text(
+            &mut plane,
+            info_x,
+            2,
+            "Interaction Patterns",
+            t.primary,
+            t.bg,
+            true,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            4,
+            "This scene demonstrates three",
+            t.fg,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            5,
+            "interaction pattern widgets:",
+            t.fg,
+            t.bg,
+            false,
+        );
         draw_text(&mut plane, info_x, 7, "ContextMenu", t.primary, t.bg, true);
-        draw_text(&mut plane, info_x, 8, "  Right-click a file to open", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, info_x, 9, "  a context menu with actions", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, info_x, 11, "ConfirmDialog", t.primary, t.bg, true);
-        draw_text(&mut plane, info_x, 12, "  Select Delete from menu", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, info_x, 13, "  to see a confirmation dialog", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            info_x,
+            8,
+            "  Right-click a file to open",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            9,
+            "  a context menu with actions",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            11,
+            "ConfirmDialog",
+            t.primary,
+            t.bg,
+            true,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            12,
+            "  Select Delete from menu",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            13,
+            "  to see a confirmation dialog",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
         draw_text(&mut plane, info_x, 15, "Toast", t.primary, t.bg, true);
-        draw_text(&mut plane, info_x, 16, "  Actions produce toast", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, info_x, 17, "  notifications (3s auto-dismiss)", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            info_x,
+            16,
+            "  Actions produce toast",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            info_x,
+            17,
+            "  notifications (3s auto-dismiss)",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         if let Some(idx) = self.selected {
             if idx < self.files.len() {
                 let f = &self.files[idx];
-                draw_text(&mut plane, info_x, 20, "Selected File", t.primary, t.bg, true);
-                draw_text(&mut plane, info_x, 21, &format!("  {} ({})", f.name, f.kind), t.fg, t.bg, false);
-                draw_text(&mut plane, info_x, 22, &format!("  Size: {}", f.size), t.fg_muted, t.bg, false);
+                draw_text(
+                    &mut plane,
+                    info_x,
+                    20,
+                    "Selected File",
+                    t.primary,
+                    t.bg,
+                    true,
+                );
+                draw_text(
+                    &mut plane,
+                    info_x,
+                    21,
+                    &format!("  {} ({})", f.name, f.kind),
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text(
+                    &mut plane,
+                    info_x,
+                    22,
+                    &format!("  Size: {}", f.size),
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
         }
 
         // ── Status bar ─────────────────────────────────────────────
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         // ── Context menu overlay ────────────────────────────────────
@@ -274,20 +472,45 @@ impl Scene for ActionCenterScene {
                 }
             }
             // Toast text
-            draw_text(&mut plane, tx + 2, toast_y, msg, t.fg, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                tx + 2,
+                toast_y,
+                msg,
+                t.fg,
+                t.surface_elevated,
+                false,
+            );
             toast_y = toast_y.saturating_sub(1);
         }
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Action Center — Help", &[("Up/Dn", "Navigate file list"), ("Right-click", "Open context menu"), ("Del", "Delete selected file"), ("N", "New file (placeholder)"), ("Click file", "Select file"), ("Click menu", "Execute action"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Action Center — Help",
+                &[
+                    ("Up/Dn", "Navigate file list"),
+                    ("Right-click", "Open context menu"),
+                    ("Del", "Delete selected file"),
+                    ("N", "New file (placeholder)"),
+                    ("Click file", "Select file"),
+                    ("Click menu", "Execute action"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         // Confirm dialog takes priority
         if self.confirm_dialog.borrow().is_some() {
@@ -296,7 +519,9 @@ impl Scene for ActionCenterScene {
                 if let Some(ref mut dialog) = *cd {
                     dialog.handle_key(key);
                     dialog.confirmed()
-                } else { None }
+                } else {
+                    None
+                }
             };
             if let Some(result) = result {
                 match result {
@@ -328,7 +553,11 @@ impl Scene for ActionCenterScene {
             self.sync_action_bridge();
             // Also handle Enter key for context menu actions
             if key.code == KeyCode::Enter {
-                let id = self.context_menu.borrow().selected_id().map(|s| s.to_string());
+                let id = self
+                    .context_menu
+                    .borrow()
+                    .selected_id()
+                    .map(|s| s.to_string());
                 if let Some(id) = id {
                     self.execute_context_action(&id);
                 }
@@ -341,7 +570,9 @@ impl Scene for ActionCenterScene {
         }
 
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
+            if self.keybindings.matches(actions::HELP, &key)
+                || self.keybindings.matches(actions::BACK, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -463,11 +694,20 @@ impl Scene for ActionCenterScene {
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "action_center" }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn scene_id(&self) -> &str {
+        "action_center"
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
-fn area_width_hint() -> u16 { 40 }
-
+fn area_width_hint() -> u16 {
+    40
+}

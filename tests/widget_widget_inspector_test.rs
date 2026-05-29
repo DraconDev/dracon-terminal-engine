@@ -33,11 +33,9 @@ fn test_widget_inspector_with_theme() {
 // ============================================================================
 
 #[test]
-
 // ============================================================================
 // Widget Trait Tests
 // ============================================================================
-
 #[test]
 fn test_widget_inspector_id() {
     let wi = WidgetInspector::new(WidgetId::new(42));
@@ -168,7 +166,13 @@ fn test_widget_inspector_on_theme_change() {
 
 #[test]
 fn test_widget_inspector_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let wi = WidgetInspector::new(WidgetId::new(1)).with_theme(t);

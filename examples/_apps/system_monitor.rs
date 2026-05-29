@@ -15,8 +15,8 @@
 //!   q           -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Gauge, StatusBadge};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -129,7 +129,6 @@ impl SystemData {
         self.read_processes();
     }
 
-
     fn read_cpu(&mut self) {
         let mut pct = 0.0;
         if let Ok(content) = fs::read_to_string("/proc/stat") {
@@ -158,7 +157,6 @@ impl SystemData {
         self.cpu_hist.push(pct.clamp(0.0, 100.0));
     }
 
-
     fn read_memory(&mut self) {
         if let Ok(content) = fs::read_to_string("/proc/meminfo") {
             let mut total_kb = 0u64;
@@ -183,7 +181,6 @@ impl SystemData {
             }
         }
     }
-
 
     fn read_disk(&mut self) -> (f64, f64) {
         let mut read_b = 0u64;
@@ -213,7 +210,6 @@ impl SystemData {
         self.last_disk_write = write_b;
         (dr, dw)
     }
-
 
     fn read_network(&mut self) -> (f64, f64) {
         let mut rx_b = 0u64;
@@ -266,7 +262,6 @@ impl SystemData {
             })
             .unwrap_or((0.0, 0.0, 0.0))
     }
-
 
     fn read_processes(&mut self) {
         self.processes.clear();
@@ -330,12 +325,11 @@ impl SystemData {
                 }
             }
         }
-        self.processes
-            .sort_by(|a, b| {
-                b.cpu_percent
-                    .partial_cmp(&a.cpu_percent)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            });
+        self.processes.sort_by(|a, b| {
+            b.cpu_percent
+                .partial_cmp(&a.cpu_percent)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
     }
 
     fn read_hostname(&self) -> String {
@@ -450,7 +444,16 @@ fn build_process_tree(processes: &[ProcessInfo]) -> Vec<TreeNode> {
     let mut visited = std::collections::HashSet::new();
     for (i, &root) in roots.iter().enumerate() {
         let is_last = i == roots.len() - 1;
-        dfs(root, 0, is_last, &[], processes, &children, &mut result, &mut visited);
+        dfs(
+            root,
+            0,
+            is_last,
+            &[],
+            processes,
+            &children,
+            &mut result,
+            &mut visited,
+        );
     }
 
     // Add any orphaned processes not visited
@@ -548,7 +551,10 @@ impl SystemMonitor {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.theme_index = Theme::all().iter().position(|t| t.name == theme.name).unwrap_or(0);
+        self.theme_index = Theme::all()
+            .iter()
+            .position(|t| t.name == theme.name)
+            .unwrap_or(0);
         self.propagate_theme();
     }
 
@@ -779,8 +785,7 @@ impl Widget for SystemMonitor {
         render_card_border(&mut plane, 0, list_y, area.width, list_h, t);
 
         let header_y = list_y + 1;
-        let header_text =
-            " PID      NAME             CPU%    MEM     STATE  ";
+        let header_text = " PID      NAME             CPU%    MEM     STATE  ";
         draw_text(
             &mut plane,
             2,
@@ -847,9 +852,8 @@ impl Widget for SystemMonitor {
             if total_items > max_visible {
                 let sb_x = area.width - 2;
                 let content_h = max_visible as u16;
-                let thumb_h = (max_visible as f32 / total_items as f32
-                    * content_h as f32)
-                    .max(1.0) as u16;
+                let thumb_h =
+                    (max_visible as f32 / total_items as f32 * content_h as f32).max(1.0) as u16;
                 let thumb_y = (self.process_scroll as f32
                     / total_items.saturating_sub(max_visible).max(1) as f32
                     * (content_h - thumb_h) as f32) as u16
@@ -884,81 +888,85 @@ impl Widget for SystemMonitor {
         if let Some(sel_view) = self.selected_process {
             if let Some(node) = tree_view_for_detail.get(sel_view) {
                 if let Some(proc) = self.data.processes.get(node.proc_idx) {
-                let detail_x = area.width / 2;
-                let detail_w = area.width.saturating_sub(detail_x + 2);
-                let detail_y = list_y + 1;
-                if detail_w > 10 && detail_y + 6 < list_y + list_h {
-                    let mut dy = detail_y;
-                    draw_text(
-                        &mut plane,
-                        detail_x,
-                        dy,
-                        &format!(" Process: {}", proc.name),
-                        t.primary,
-                        t.surface,
-                        true,
-                    );
-                    dy += 1;
-                    draw_text(
-                        &mut plane,
-                        detail_x,
-                        dy,
-                        &format!(" PID: {}", proc.pid),
-                        t.fg,
-                        t.surface,
-                        false,
-                    );
-                    dy += 1;
-                    let ppid_str = proc.ppid.map(|p| p.to_string()).unwrap_or_else(|| "None".to_string());
-                    draw_text(
-                        &mut plane,
-                        detail_x,
-                        dy,
-                        &format!(" PPID: {}", ppid_str),
-                        t.fg,
-                        t.surface,
-                        false,
-                    );
-                    dy += 1;
-                    // Mini CPU gauge
-                    let cpu_bar =
-                        ((proc.cpu_percent / 100.0).min(1.0) * (detail_w - 10) as f32) as u16;
-                    draw_text(&mut plane, detail_x, dy, " CPU: ", t.fg, t.surface, false);
-                    for bx in 0..(detail_w - 10) {
-                        let idx = (dy * area.width + detail_x + 6 + bx) as usize;
-                        if idx < plane.cells.len() {
-                            plane.cells[idx].char = if bx < cpu_bar { '█' } else { '░' };
-                            plane.cells[idx].fg =
-                                if bx < cpu_bar { t.warning } else { t.fg_subtle };
-                            plane.cells[idx].bg = t.surface;
+                    let detail_x = area.width / 2;
+                    let detail_w = area.width.saturating_sub(detail_x + 2);
+                    let detail_y = list_y + 1;
+                    if detail_w > 10 && detail_y + 6 < list_y + list_h {
+                        let mut dy = detail_y;
+                        draw_text(
+                            &mut plane,
+                            detail_x,
+                            dy,
+                            &format!(" Process: {}", proc.name),
+                            t.primary,
+                            t.surface,
+                            true,
+                        );
+                        dy += 1;
+                        draw_text(
+                            &mut plane,
+                            detail_x,
+                            dy,
+                            &format!(" PID: {}", proc.pid),
+                            t.fg,
+                            t.surface,
+                            false,
+                        );
+                        dy += 1;
+                        let ppid_str = proc
+                            .ppid
+                            .map(|p| p.to_string())
+                            .unwrap_or_else(|| "None".to_string());
+                        draw_text(
+                            &mut plane,
+                            detail_x,
+                            dy,
+                            &format!(" PPID: {}", ppid_str),
+                            t.fg,
+                            t.surface,
+                            false,
+                        );
+                        dy += 1;
+                        // Mini CPU gauge
+                        let cpu_bar =
+                            ((proc.cpu_percent / 100.0).min(1.0) * (detail_w - 10) as f32) as u16;
+                        draw_text(&mut plane, detail_x, dy, " CPU: ", t.fg, t.surface, false);
+                        for bx in 0..(detail_w - 10) {
+                            let idx = (dy * area.width + detail_x + 6 + bx) as usize;
+                            if idx < plane.cells.len() {
+                                plane.cells[idx].char = if bx < cpu_bar { '█' } else { '░' };
+                                plane.cells[idx].fg =
+                                    if bx < cpu_bar { t.warning } else { t.fg_subtle };
+                                plane.cells[idx].bg = t.surface;
+                            }
                         }
-                    }
-                    dy += 1;
-                    // Mini MEM gauge
-                    let mem_bar = ((proc.mem_mb / self.data.memory_total_mb).min(1.0)
-                        * (detail_w - 10) as f32) as u16;
-                    draw_text(&mut plane, detail_x, dy, " MEM: ", t.fg, t.surface, false);
-                    for bx in 0..(detail_w - 10) {
-                        let idx = (dy * area.width + detail_x + 6 + bx) as usize;
-                        if idx < plane.cells.len() {
-                            plane.cells[idx].char = if bx < mem_bar { '█' } else { '░' };
-                            plane.cells[idx].fg = if bx < mem_bar { t.info } else { t.fg_subtle };
-                            plane.cells[idx].bg = t.surface;
+                        dy += 1;
+                        // Mini MEM gauge
+                        let mem_bar = ((proc.mem_mb / self.data.memory_total_mb).min(1.0)
+                            * (detail_w - 10) as f32) as u16;
+                        draw_text(&mut plane, detail_x, dy, " MEM: ", t.fg, t.surface, false);
+                        for bx in 0..(detail_w - 10) {
+                            let idx = (dy * area.width + detail_x + 6 + bx) as usize;
+                            if idx < plane.cells.len() {
+                                plane.cells[idx].char = if bx < mem_bar { '█' } else { '░' };
+                                plane.cells[idx].fg =
+                                    if bx < mem_bar { t.info } else { t.fg_subtle };
+                                plane.cells[idx].bg = t.surface;
+                            }
                         }
+                        dy += 1;
+                        draw_text(
+                            &mut plane,
+                            detail_x,
+                            dy,
+                            &format!(" State: {}", proc.state),
+                            t.fg_muted,
+                            t.surface,
+                            false,
+                        );
                     }
-                    dy += 1;
-                    draw_text(
-                        &mut plane,
-                        detail_x,
-                        dy,
-                        &format!(" State: {}", proc.state),
-                        t.fg_muted,
-                        t.surface,
-                        false,
-                    );
                 }
             }
-        }
         }
 
         // ── Footer ──
@@ -1081,11 +1089,7 @@ impl Widget for SystemMonitor {
                 {
                     let proc_row = (row - 9) as usize;
                     let idx = self.process_scroll + proc_row;
-                    self.hovered_process = if idx < view_count {
-                        Some(idx)
-                    } else {
-                        None
-                    };
+                    self.hovered_process = if idx < view_count { Some(idx) } else { None };
                 } else {
                     self.hovered_process = None;
                 }
@@ -1416,7 +1420,10 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
 
     let env_theme = Theme::from_env_or(Theme::nord());
-    let monitor = Rc::new(RefCell::new(SystemMonitor::new(should_quit, env_theme.clone())));
+    let monitor = Rc::new(RefCell::new(SystemMonitor::new(
+        should_quit,
+        env_theme.clone(),
+    )));
     let mon_for_tick = Rc::clone(&monitor);
     let mon_for_input = Rc::clone(&monitor);
 

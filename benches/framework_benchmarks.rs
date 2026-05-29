@@ -84,9 +84,18 @@ fn bench_table_render(c: &mut Criterion) {
         b.iter_with_setup(
             || {
                 Table::new(vec![
-                    Column { header: "ID".into(), width: 10 },
-                    Column { header: "Name".into(), width: 20 },
-                    Column { header: "Value".into(), width: 15 },
+                    Column {
+                        header: "ID".into(),
+                        width: 10,
+                    },
+                    Column {
+                        header: "Name".into(),
+                        width: 20,
+                    },
+                    Column {
+                        header: "Value".into(),
+                        width: 15,
+                    },
                 ])
                 .with_rows(rows_100.clone())
             },
@@ -99,9 +108,18 @@ fn bench_table_render(c: &mut Criterion) {
         b.iter_with_setup(
             || {
                 Table::new(vec![
-                    Column { header: "ID".into(), width: 10 },
-                    Column { header: "Name".into(), width: 20 },
-                    Column { header: "Value".into(), width: 15 },
+                    Column {
+                        header: "ID".into(),
+                        width: 10,
+                    },
+                    Column {
+                        header: "Name".into(),
+                        width: 20,
+                    },
+                    Column {
+                        header: "Value".into(),
+                        width: 15,
+                    },
                 ])
                 .with_rows(rows_1k.clone())
             },

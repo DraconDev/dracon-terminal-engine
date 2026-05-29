@@ -159,7 +159,11 @@ fn test_progress_ring_focusable() {
 fn test_progress_ring_handle_key_left() {
     let mut pr = ProgressRing::new(0.5);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::Left, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Left,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 0.45).abs() < 0.01);
@@ -169,7 +173,11 @@ fn test_progress_ring_handle_key_left() {
 fn test_progress_ring_handle_key_right() {
     let mut pr = ProgressRing::new(0.5);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::Right, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Right,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 0.55).abs() < 0.01);
@@ -179,7 +187,11 @@ fn test_progress_ring_handle_key_right() {
 fn test_progress_ring_handle_key_down() {
     let mut pr = ProgressRing::new(0.5);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::Down, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Down,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 0.45).abs() < 0.01);
@@ -189,7 +201,11 @@ fn test_progress_ring_handle_key_down() {
 fn test_progress_ring_handle_key_up() {
     let mut pr = ProgressRing::new(0.5);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::Up, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Up,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 0.55).abs() < 0.01);
@@ -199,7 +215,11 @@ fn test_progress_ring_handle_key_up() {
 fn test_progress_ring_handle_key_home() {
     let mut pr = ProgressRing::new(0.75);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::Home, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::Home,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 0.0).abs() < f64::EPSILON);
@@ -209,7 +229,11 @@ fn test_progress_ring_handle_key_home() {
 fn test_progress_ring_handle_key_end() {
     let mut pr = ProgressRing::new(0.25);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Press, code: KeyCode::End, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Press,
+        code: KeyCode::End,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(handled);
     assert!((pr.progress() - 1.0).abs() < f64::EPSILON);
@@ -219,7 +243,11 @@ fn test_progress_ring_handle_key_end() {
 fn test_progress_ring_handle_key_release() {
     let mut pr = ProgressRing::new(0.5);
     use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
-    let key = KeyEvent { kind: KeyEventKind::Release, code: KeyCode::Right, modifiers: Default::default() };
+    let key = KeyEvent {
+        kind: KeyEventKind::Release,
+        code: KeyCode::Right,
+        modifiers: Default::default(),
+    };
     let handled = pr.handle_key(key);
     assert!(!handled);
 }

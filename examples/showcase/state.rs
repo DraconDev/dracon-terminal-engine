@@ -117,46 +117,209 @@ impl Showcase {
     ) -> Self {
         let examples = ExampleMeta::all();
         let filtered: Vec<usize> = (0..examples.len()).collect();
-        let mut scene_router = SceneRouter::new()
-            .with_default_transition(SceneTransition::Fade);
-        scene_router.register("widget_gallery", Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(theme.clone())));
-        scene_router.register("theme_switcher", Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(theme.clone())));
-        scene_router.register("form_demo", Box::new(crate::scenes::form_demo::FormDemoScene::new(theme.clone())));
-        scene_router.register("tree_navigator", Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(theme.clone())));
-        scene_router.register("modal_demo", Box::new(crate::scenes::modal_demo::ModalDemoScene::new(theme.clone())));
-        scene_router.register("calendar", Box::new(crate::scenes::calendar_scene::CalendarScene::new(theme.clone())));
-        scene_router.register("rich_text", Box::new(crate::scenes::rich_text_scene::RichTextScene::new(theme.clone())));
-        scene_router.register("autocomplete", Box::new(crate::scenes::autocomplete_scene::AutocompleteScene::new(theme.clone())));
-        scene_router.register("notification_center", Box::new(crate::scenes::notification_center_scene::NotificationCenterScene::new(theme.clone())));
-        scene_router.register("accessibility", Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(theme.clone())));
-        scene_router.register("cell_pool", Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(theme.clone())));
-        scene_router.register("kanban", Box::new(crate::scenes::kanban_scene::KanbanScene::new(theme.clone())));
-        scene_router.register("animation", Box::new(crate::scenes::animation_scene::AnimationScene::new(theme.clone())));
-        scene_router.register("color_picker", Box::new(crate::scenes::color_picker_scene::ColorPickerScene::new(theme.clone())));
-        scene_router.register("tags_input", Box::new(crate::scenes::tags_input_scene::TagsInputScene::new(theme.clone())));
-        scene_router.register("tooltip", Box::new(crate::scenes::tooltip_scene::TooltipScene::new(theme.clone())));
-        scene_router.register("progress", Box::new(crate::scenes::progress_scene::ProgressScene::new(theme.clone())));
-        scene_router.register("password_input", Box::new(crate::scenes::password_input_scene::PasswordInputScene::new(theme.clone())));
-        scene_router.register("radio", Box::new(crate::scenes::radio_scene::RadioScene::new(theme.clone())));
-        scene_router.register("debug_overlay", Box::new(crate::scenes::debug_overlay_scene::DebugOverlayScene::new(theme.clone())));
-        scene_router.register("raycaster", Box::new(crate::scenes::raycaster_scene::RaycasterScene::new(theme.clone())));
-        scene_router.register("paint", Box::new(crate::scenes::paint_scene::PaintScene::new(theme.clone())));
-        scene_router.register("workshop", Box::new(crate::scenes::workshop_scene::WorkshopScene::new(theme.clone())));
-        scene_router.register("command_palette", Box::new(crate::scenes::command_palette_scene::CommandPaletteScene::new(theme.clone())));
-        scene_router.register("table_list", Box::new(crate::scenes::table_list_scene::TableListScene::new(theme.clone())));
-        scene_router.register("settings_panel", Box::new(crate::scenes::settings_scene::SettingsScene::new(theme.clone())));
-        scene_router.register("live_feed", Box::new(crate::scenes::live_feed_scene::LiveFeedScene::new(theme.clone())));
-        scene_router.register("action_center", Box::new(crate::scenes::action_center_scene::ActionCenterScene::new(theme.clone())));
-        scene_router.register("dev_console", Box::new(crate::scenes::dev_console_scene::DevConsoleScene::new(theme.clone())));
-        scene_router.register("metrics_hub", Box::new(crate::scenes::metrics_hub_scene::MetricsHubScene::new(theme.clone())));
-        scene_router.register("navigator", Box::new(crate::scenes::navigator_scene::NavigatorScene::new(theme.clone())));
-        scene_router.register("control_panel", Box::new(crate::scenes::control_panel_scene::ControlPanelScene::new(theme.clone())));
-        scene_router.register("hud_demo", Box::new(crate::scenes::hud_demo_scene::HudDemoScene::new(theme.clone())));
-        scene_router.register("note_editor", Box::new(crate::scenes::note_editor_scene::NoteEditorScene::new(theme.clone())));
+        let mut scene_router = SceneRouter::new().with_default_transition(SceneTransition::Fade);
+        scene_router.register(
+            "widget_gallery",
+            Box::new(crate::scenes::widget_gallery::WidgetGalleryScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "theme_switcher",
+            Box::new(crate::scenes::theme_switcher::ThemeSwitcherScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "form_demo",
+            Box::new(crate::scenes::form_demo::FormDemoScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "tree_navigator",
+            Box::new(crate::scenes::tree_navigator::TreeNavigatorScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "modal_demo",
+            Box::new(crate::scenes::modal_demo::ModalDemoScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "calendar",
+            Box::new(crate::scenes::calendar_scene::CalendarScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "rich_text",
+            Box::new(crate::scenes::rich_text_scene::RichTextScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "autocomplete",
+            Box::new(crate::scenes::autocomplete_scene::AutocompleteScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "notification_center",
+            Box::new(
+                crate::scenes::notification_center_scene::NotificationCenterScene::new(
+                    theme.clone(),
+                ),
+            ),
+        );
+        scene_router.register(
+            "accessibility",
+            Box::new(crate::scenes::accessibility_scene::AccessibilityScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "cell_pool",
+            Box::new(crate::scenes::cell_pool_scene::CellPoolScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "kanban",
+            Box::new(crate::scenes::kanban_scene::KanbanScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "animation",
+            Box::new(crate::scenes::animation_scene::AnimationScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "color_picker",
+            Box::new(crate::scenes::color_picker_scene::ColorPickerScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "tags_input",
+            Box::new(crate::scenes::tags_input_scene::TagsInputScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "tooltip",
+            Box::new(crate::scenes::tooltip_scene::TooltipScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "progress",
+            Box::new(crate::scenes::progress_scene::ProgressScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "password_input",
+            Box::new(crate::scenes::password_input_scene::PasswordInputScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "radio",
+            Box::new(crate::scenes::radio_scene::RadioScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "debug_overlay",
+            Box::new(crate::scenes::debug_overlay_scene::DebugOverlayScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "raycaster",
+            Box::new(crate::scenes::raycaster_scene::RaycasterScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "paint",
+            Box::new(crate::scenes::paint_scene::PaintScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "workshop",
+            Box::new(crate::scenes::workshop_scene::WorkshopScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "command_palette",
+            Box::new(crate::scenes::command_palette_scene::CommandPaletteScene::new(theme.clone())),
+        );
+        scene_router.register(
+            "table_list",
+            Box::new(crate::scenes::table_list_scene::TableListScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "settings_panel",
+            Box::new(crate::scenes::settings_scene::SettingsScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "live_feed",
+            Box::new(crate::scenes::live_feed_scene::LiveFeedScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "action_center",
+            Box::new(crate::scenes::action_center_scene::ActionCenterScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "dev_console",
+            Box::new(crate::scenes::dev_console_scene::DevConsoleScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "metrics_hub",
+            Box::new(crate::scenes::metrics_hub_scene::MetricsHubScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "navigator",
+            Box::new(crate::scenes::navigator_scene::NavigatorScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "control_panel",
+            Box::new(crate::scenes::control_panel_scene::ControlPanelScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "hud_demo",
+            Box::new(crate::scenes::hud_demo_scene::HudDemoScene::new(
+                theme.clone(),
+            )),
+        );
+        scene_router.register(
+            "note_editor",
+            Box::new(crate::scenes::note_editor_scene::NoteEditorScene::new(
+                theme.clone(),
+            )),
+        );
 
         let run_counts = vec![0u32; examples.len()];
 
-        let cached_themes: Vec<Theme> = Theme::all().iter().filter(|t| &*t.name != "high_contrast").cloned().collect();
+        let cached_themes: Vec<Theme> = Theme::all()
+            .iter()
+            .filter(|t| &*t.name != "high_contrast")
+            .cloned()
+            .collect();
 
         let mut showcase = Self {
             examples,
@@ -258,21 +421,24 @@ impl Showcase {
                 if self.sort_ascending {
                     self.filtered.sort_by_key(|&i| self.examples[i].name);
                 } else {
-                    self.filtered.sort_by(|&a, &b| self.examples[b].name.cmp(self.examples[a].name));
+                    self.filtered
+                        .sort_by(|&a, &b| self.examples[b].name.cmp(self.examples[a].name));
                 }
             }
             SortField::Category => {
                 if self.sort_ascending {
                     self.filtered.sort_by_key(|&i| self.examples[i].category);
                 } else {
-                    self.filtered.sort_by(|&a, &b| self.examples[b].category.cmp(self.examples[a].category));
+                    self.filtered
+                        .sort_by(|&a, &b| self.examples[b].category.cmp(self.examples[a].category));
                 }
             }
             SortField::RunCount => {
                 if self.sort_ascending {
                     self.filtered.sort_by_key(|&i| self.run_counts[i]);
                 } else {
-                    self.filtered.sort_by(|&a, &b| self.run_counts[b].cmp(&self.run_counts[a]));
+                    self.filtered
+                        .sort_by(|&a, &b| self.run_counts[b].cmp(&self.run_counts[a]));
                 }
             }
         }
@@ -289,7 +455,15 @@ impl Showcase {
         );
 
         // Recompute cached category counts
-        let categories = ["all", "apps", "input", "data", "cookbook", "tools", "accessibility"];
+        let categories = [
+            "all",
+            "apps",
+            "input",
+            "data",
+            "cookbook",
+            "tools",
+            "accessibility",
+        ];
         for (i, cat) in categories.iter().enumerate() {
             self.cached_cat_counts[i] = if *cat == "all" {
                 self.examples.len()
@@ -310,10 +484,16 @@ impl Showcase {
         let area = self.area;
         let sidebar_w = 18;
         let grid_start_y = 3; // sidebar_start_y + 1
-        let available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
-        let card_h = if (area.width as usize).saturating_sub(sidebar_w + 2) >= 90 { 16 }
-                     else if (area.width as usize).saturating_sub(sidebar_w + 2) >= 60 { 14 }
-                     else { 12 };
+        let available_h = (area.height as usize)
+            .saturating_sub(grid_start_y)
+            .saturating_sub(2);
+        let card_h = if (area.width as usize).saturating_sub(sidebar_w + 2) >= 90 {
+            16
+        } else if (area.width as usize).saturating_sub(sidebar_w + 2) >= 60 {
+            14
+        } else {
+            12
+        };
         (available_h / (card_h + 1)).max(1)
     }
 
@@ -329,7 +509,8 @@ impl Showcase {
             self.scroll_offset.set(selected_row);
         } else if selected_row >= scroll + visible {
             // Selected is below visible area — scroll down
-            self.scroll_offset.set(selected_row.saturating_sub(visible - 1));
+            self.scroll_offset
+                .set(selected_row.saturating_sub(visible - 1));
         }
     }
 
@@ -340,7 +521,43 @@ impl Showcase {
     }
 
     pub fn is_embedded(&self, name: &str) -> bool {
-        matches!(name, "widget_gallery" | "theme_switcher" | "form_demo" | "tree_navigator" | "modal_demo" | "calendar" | "rich_text" | "autocomplete" | "notification_center" | "accessibility" | "cell_pool" | "kanban" | "animation" | "color_picker" | "tags_input" | "tooltip" | "progress" | "password_input" | "radio" | "debug_overlay" | "raycaster" | "paint" | "workshop" | "action_center" | "command_palette" | "control_panel" | "dev_console" | "hud_demo" | "live_feed" | "metrics_hub" | "navigator" | "note_editor" | "settings_panel" | "table_list")
+        matches!(
+            name,
+            "widget_gallery"
+                | "theme_switcher"
+                | "form_demo"
+                | "tree_navigator"
+                | "modal_demo"
+                | "calendar"
+                | "rich_text"
+                | "autocomplete"
+                | "notification_center"
+                | "accessibility"
+                | "cell_pool"
+                | "kanban"
+                | "animation"
+                | "color_picker"
+                | "tags_input"
+                | "tooltip"
+                | "progress"
+                | "password_input"
+                | "radio"
+                | "debug_overlay"
+                | "raycaster"
+                | "paint"
+                | "workshop"
+                | "action_center"
+                | "command_palette"
+                | "control_panel"
+                | "dev_console"
+                | "hud_demo"
+                | "live_feed"
+                | "metrics_hub"
+                | "navigator"
+                | "note_editor"
+                | "settings_panel"
+                | "table_list"
+        )
     }
 
     pub fn launch_selected(&mut self) {

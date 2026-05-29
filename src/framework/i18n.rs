@@ -210,8 +210,14 @@ impl I18n {
     fn load_builtin_en(&mut self) {
         self.fallback_map = HashMap::from([
             // Common UI strings
-            ("app.title".to_string(), "Dracon Terminal Engine".to_string()),
-            ("app.subtitle".to_string(), "A terminal application framework".to_string()),
+            (
+                "app.title".to_string(),
+                "Dracon Terminal Engine".to_string(),
+            ),
+            (
+                "app.subtitle".to_string(),
+                "A terminal application framework".to_string(),
+            ),
             ("button.ok".to_string(), "OK".to_string()),
             ("button.cancel".to_string(), "Cancel".to_string()),
             ("button.apply".to_string(), "Apply".to_string()),
@@ -235,14 +241,20 @@ impl I18n {
             ("msg.warning".to_string(), "Warning".to_string()),
             ("msg.info".to_string(), "Information".to_string()),
             ("msg.confirm".to_string(), "Confirm".to_string()),
-            ("msg.delete_confirm".to_string(), "Are you sure you want to delete this?".to_string()),
+            (
+                "msg.delete_confirm".to_string(),
+                "Are you sure you want to delete this?".to_string(),
+            ),
             // Status
             ("status.loading".to_string(), "Loading".to_string()),
             ("status.ready".to_string(), "Ready".to_string()),
             ("status.error".to_string(), "Error".to_string()),
             // Widgets
             ("widget.search".to_string(), "Search...".to_string()),
-            ("widget.no_results".to_string(), "No results found".to_string()),
+            (
+                "widget.no_results".to_string(),
+                "No results found".to_string(),
+            ),
             ("widget.loading".to_string(), "Loading...".to_string()),
             ("widget.empty".to_string(), "Empty".to_string()),
             // Errors
@@ -250,7 +262,10 @@ impl I18n {
             ("error.unauthorized".to_string(), "Unauthorized".to_string()),
             ("error.timeout".to_string(), "Request timed out".to_string()),
             ("error.network".to_string(), "Network error".to_string()),
-            ("error.parse".to_string(), "Failed to parse data".to_string()),
+            (
+                "error.parse".to_string(),
+                "Failed to parse data".to_string(),
+            ),
         ]);
     }
 

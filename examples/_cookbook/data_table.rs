@@ -185,7 +185,9 @@ impl Widget for Table {
     fn render(&self, area: Rect) -> Plane {
         let mut p = Plane::new(0, area.width, area.height);
         p.fill_bg(self.theme.bg);
-        for cell in p.cells.iter_mut() { cell.transparent = false; }
+        for cell in p.cells.iter_mut() {
+            cell.transparent = false;
+        }
         p.z_index = 10;
         let (heads, widths, hh, _sh) = (
             ["Name Name", "Age Age", "Dir City", "Role Profession"],
@@ -533,10 +535,22 @@ impl Widget for Table {
                 ("^/v", "Navigate"),
                 ("Enter", "Sort column"),
                 ("Type", "Filter"),
-                (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("?"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                    "Dismiss help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;

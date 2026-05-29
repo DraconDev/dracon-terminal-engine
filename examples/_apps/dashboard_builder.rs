@@ -315,12 +315,11 @@ impl SystemData {
                 }
             }
         }
-        self.processes
-            .sort_by(|a, b| {
-                b.cpu_percent
-                    .partial_cmp(&a.cpu_percent)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            });
+        self.processes.sort_by(|a, b| {
+            b.cpu_percent
+                .partial_cmp(&a.cpu_percent)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
         self.processes.truncate(20);
     }
 }
@@ -372,7 +371,10 @@ impl Dashboard {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
-        self.theme_index = Theme::all().iter().position(|t| t.name == theme.name).unwrap_or(0);
+        self.theme_index = Theme::all()
+            .iter()
+            .position(|t| t.name == theme.name)
+            .unwrap_or(0);
         self.propagate_theme();
     }
 }
@@ -493,7 +495,9 @@ impl Widget for Dashboard {
             return false;
         }
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 return true;
             }

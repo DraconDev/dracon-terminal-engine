@@ -13,7 +13,9 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widgets::color_picker::ColorPicker;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind, MouseButton};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 
@@ -77,7 +79,11 @@ impl ColorPickerScene {
         if let Color::Rgb(r, g, b) = color {
             let to_linear = |v: u8| {
                 let v = v as f64 / 255.0;
-                if v <= 0.03928 { v / 12.92 } else { ((v + 0.055) / 1.055).powf(2.4) }
+                if v <= 0.03928 {
+                    v / 12.92
+                } else {
+                    ((v + 0.055) / 1.055).powf(2.4)
+                }
             };
             0.2126 * to_linear(r) + 0.7152 * to_linear(g) + 0.0722 * to_linear(b)
         } else {
@@ -96,13 +102,16 @@ impl ColorPickerScene {
     fn generate_shades(color: Color) -> Vec<Color> {
         if let Color::Rgb(r, g, b) = color {
             let factors = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2];
-            factors.iter().map(|f| {
-                Color::Rgb(
-                    (r as f32 * *f as f32).min(255.0) as u8,
-                    (g as f32 * *f as f32).min(255.0) as u8,
-                    (b as f32 * *f as f32).min(255.0) as u8,
-                )
-            }).collect()
+            factors
+                .iter()
+                .map(|f| {
+                    Color::Rgb(
+                        (r as f32 * *f as f32).min(255.0) as u8,
+                        (g as f32 * *f as f32).min(255.0) as u8,
+                        (b as f32 * *f as f32).min(255.0) as u8,
+                    )
+                })
+                .collect()
         } else {
             vec![color]
         }
@@ -112,7 +121,16 @@ impl ColorPickerScene {
         let t = &self.theme;
 
         // Section header
-        draw_text_clipped(plane, 1, 0, " Color Picker ", SIDEBAR_WIDTH, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            1,
+            0,
+            " Color Picker ",
+            SIDEBAR_WIDTH,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
         for x in 0..SIDEBAR_WIDTH {
             let idx = (area.width + x) as usize;
             if idx < plane.cells.len() {
@@ -122,13 +140,27 @@ impl ColorPickerScene {
         }
 
         // Large picker widget
-        let picker_area = Rect::new(1, 2, SIDEBAR_WIDTH.saturating_sub(2), area.height.saturating_sub(4));
+        let picker_area = Rect::new(
+            1,
+            2,
+            SIDEBAR_WIDTH.saturating_sub(2),
+            area.height.saturating_sub(4),
+        );
         self.picker.borrow_mut().set_area(picker_area);
         let picker_plane = self.picker.borrow().render(picker_area);
         blit_to(plane, &picker_plane, 1, 2);
 
         // Key hints below picker
-        draw_text_clipped(plane, 1, area.height.saturating_sub(2), "↑↓←→: HSL | Tab: slider | Enter: copy hex", area.width, t.fg_muted, t.surface, false);
+        draw_text_clipped(
+            plane,
+            1,
+            area.height.saturating_sub(2),
+            "↑↓←→: HSL | Tab: slider | Enter: copy hex",
+            area.width,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
     }
 
     fn render_palette_panel(&self, plane: &mut Plane, area: Rect, div_x: u16) {
@@ -137,7 +169,16 @@ impl ColorPickerScene {
         let panel_w = area.width.saturating_sub(panel_x + 1);
 
         // ── Preview Swatch ────────────────────────────────────
-        draw_text_clipped(plane, panel_x, 0, " Preview ", panel_w, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            panel_x,
+            0,
+            " Preview ",
+            panel_w,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
         for x in panel_x..panel_x + panel_w {
             let idx = (area.width + x) as usize;
             if idx < plane.cells.len() {
@@ -166,15 +207,42 @@ impl ColorPickerScene {
 
         // Color info
         let info_y = swatch_y + swatch_h + 1;
-        draw_text_clipped(plane, panel_x + 1, info_y, &format!("Hex: {}", self.selected_hex), panel_w, t.primary, t.bg, true);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            info_y,
+            &format!("Hex: {}", self.selected_hex),
+            panel_w,
+            t.primary,
+            t.bg,
+            true,
+        );
 
         if let Color::Rgb(r, g, b) = self.selected_color {
-            draw_text_clipped(plane, panel_x + 1, info_y + 1, &format!("RGB: {}, {}, {}", r, g, b), panel_w, t.fg_muted, t.bg, false);
+            draw_text_clipped(
+                plane,
+                panel_x + 1,
+                info_y + 1,
+                &format!("RGB: {}, {}, {}", r, g, b),
+                panel_w,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // ── Contrast Calculator ────────────────────────────────
         let contrast_y = info_y + 3;
-        draw_text_clipped(plane, panel_x + 1, contrast_y, "Contrast", panel_w, t.secondary, t.bg, true);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            contrast_y,
+            "Contrast",
+            panel_w,
+            t.secondary,
+            t.bg,
+            true,
+        );
 
         let bg = t.bg;
         let ratio = Self::contrast_ratio(self.selected_color, bg);
@@ -187,8 +255,26 @@ impl ColorPickerScene {
         } else {
             ("Fail", t.error)
         };
-        draw_text_clipped(plane, panel_x + 1, contrast_y + 1, &format!("{:.1}:1", ratio), panel_w, t.fg, t.bg, false);
-        draw_text_clipped(plane, panel_x + 1, contrast_y + 2, rating, panel_w, rating_color, t.bg, true);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            contrast_y + 1,
+            &format!("{:.1}:1", ratio),
+            panel_w,
+            t.fg,
+            t.bg,
+            false,
+        );
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            contrast_y + 2,
+            rating,
+            panel_w,
+            rating_color,
+            t.bg,
+            true,
+        );
 
         // Secondary contrast (with white)
         let ratio_w = Self::contrast_ratio(self.selected_color, Color::Rgb(255, 255, 255));
@@ -201,14 +287,41 @@ impl ColorPickerScene {
         } else {
             ("Fail", t.error)
         };
-        draw_text_clipped(plane, panel_x + 1, contrast_y + 4, "vs white:", panel_w, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            contrast_y + 4,
+            "vs white:",
+            panel_w,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
         let ratio_w_str = format!("{:.1}:1", ratio_w);
-        draw_text_clipped(plane, panel_x + 1, contrast_y + 5, &format!("{} ({})", ratio_w_str, rating_w), panel_w, rating_w_color, t.bg, false);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            contrast_y + 5,
+            &format!("{} ({})", ratio_w_str, rating_w),
+            panel_w,
+            rating_w_color,
+            t.bg,
+            false,
+        );
 
         // ── Generated Palette (shades) ───────────────────────
         let shades_y = contrast_y + 7;
         if shades_y + 4 < area.height.saturating_sub(6) {
-            draw_text_clipped(plane, panel_x + 1, shades_y, "Shades", panel_w, t.secondary, t.bg, true);
+            draw_text_clipped(
+                plane,
+                panel_x + 1,
+                shades_y,
+                "Shades",
+                panel_w,
+                t.secondary,
+                t.bg,
+                true,
+            );
             for x in panel_x + 1..panel_x + panel_w.saturating_sub(2) {
                 let idx = ((shades_y + 1) * area.width + x) as usize;
                 if idx < plane.cells.len() {
@@ -242,7 +355,16 @@ impl ColorPickerScene {
                 // Hex label
                 if let Some(hex) = Self::rgb_to_hex(*shade) {
                     let label = if hex.len() > 7 { &hex[..7] } else { &hex };
-                    draw_text_clipped(plane, sx, sy + 2, label, sx + swatch_w, t.fg_muted, t.bg, false);
+                    draw_text_clipped(
+                        plane,
+                        sx,
+                        sy + 2,
+                        label,
+                        sx + swatch_w,
+                        t.fg_muted,
+                        t.bg,
+                        false,
+                    );
                 }
             }
         }
@@ -250,7 +372,16 @@ impl ColorPickerScene {
         // ── CSS Output ────────────────────────────────────────
         let css_y = shades_y + 5;
         if css_y + 4 < area.height.saturating_sub(6) {
-            draw_text_clipped(plane, panel_x + 1, css_y, "CSS", panel_w, t.secondary, t.bg, true);
+            draw_text_clipped(
+                plane,
+                panel_x + 1,
+                css_y,
+                "CSS",
+                panel_w,
+                t.secondary,
+                t.bg,
+                true,
+            );
             for x in panel_x + 1..panel_x + panel_w.saturating_sub(2) {
                 let idx = ((css_y + 1) * area.width + x) as usize;
                 if idx < plane.cells.len() {
@@ -268,16 +399,43 @@ impl ColorPickerScene {
 
             for (i, line) in [css_hex.as_str(), css_rgb.as_str()].iter().enumerate() {
                 if !line.is_empty() {
-                    draw_text_clipped(plane, panel_x + 1, css_y + 2 + i as u16, line, panel_w, t.fg, t.bg, false);
+                    draw_text_clipped(
+                        plane,
+                        panel_x + 1,
+                        css_y + 2 + i as u16,
+                        line,
+                        panel_w,
+                        t.fg,
+                        t.bg,
+                        false,
+                    );
                 }
             }
-            draw_text_clipped(plane, panel_x + 1, css_y + 4, "[Enter] Copy hex", panel_w, t.fg_muted, t.bg, false);
+            draw_text_clipped(
+                plane,
+                panel_x + 1,
+                css_y + 4,
+                "[Enter] Copy hex",
+                panel_w,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // ── Recent Colors ──────────────────────────────────────
         let recent_y = area.height.saturating_sub(7);
         if recent_y > 2 {
-            draw_text_clipped(plane, panel_x + 1, recent_y, "Recent", panel_w, t.secondary, t.bg, true);
+            draw_text_clipped(
+                plane,
+                panel_x + 1,
+                recent_y,
+                "Recent",
+                panel_w,
+                t.secondary,
+                t.bg,
+                true,
+            );
 
             let recent = self.recent_colors.borrow();
             let recent_w = panel_w.saturating_sub(2) / recent.len().max(1) as u16;
@@ -301,7 +459,16 @@ impl ColorPickerScene {
 
         // ── Quick Palette ─────────────────────────────────────
         let palette_y = area.height.saturating_sub(5);
-        draw_text_clipped(plane, panel_x + 1, palette_y, "Palette", panel_w, t.secondary, t.bg, true);
+        draw_text_clipped(
+            plane,
+            panel_x + 1,
+            palette_y,
+            "Palette",
+            panel_w,
+            t.secondary,
+            t.bg,
+            true,
+        );
 
         let palette = [
             ("#ff6b6b", Color::Rgb(255, 107, 107)),
@@ -330,7 +497,9 @@ impl ColorPickerScene {
 }
 
 impl Scene for ColorPickerScene {
-    fn scene_id(&self) -> &str { "color_picker" }
+    fn scene_id(&self) -> &str {
+        "color_picker"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -345,8 +514,15 @@ impl Scene for ColorPickerScene {
         // Header
         draw_text(&mut plane, 2, 0, " Color Studio ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -372,7 +548,12 @@ impl Scene for ColorPickerScene {
         self.render_picker_panel(&mut plane, picker_area);
 
         // Right: Palette panel
-        let palette_area = Rect::new(SIDEBAR_WIDTH + 1, 1, area.width.saturating_sub(SIDEBAR_WIDTH + 2), area.height.saturating_sub(2));
+        let palette_area = Rect::new(
+            SIDEBAR_WIDTH + 1,
+            1,
+            area.width.saturating_sub(SIDEBAR_WIDTH + 2),
+            area.height.saturating_sub(2),
+        );
         self.render_palette_panel(&mut plane, palette_area, SIDEBAR_WIDTH);
 
         // Footer
@@ -388,24 +569,34 @@ impl Scene for ColorPickerScene {
         draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Color Studio Help", &[
-                ("↑/↓/←/→", "Adjust HSL values"),
-                ("Tab", "Cycle through sliders"),
-                ("Enter", "Copy hex to clipboard"),
-                ("Click", "Pick color directly"),
-                ("Palette", "Click preset colors"),
-                ("Esc", "Back to showcase"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Color Studio Help",
+                &[
+                    ("↑/↓/←/→", "Adjust HSL values"),
+                    ("Tab", "Cycle through sliders"),
+                    ("Enter", "Copy hex to clipboard"),
+                    ("Click", "Pick color directly"),
+                    ("Palette", "Click preset colors"),
+                    ("Esc", "Back to showcase"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
@@ -429,7 +620,12 @@ impl Scene for ColorPickerScene {
 
         // Forward to picker
         let area = self.area.get();
-        let picker_area = Rect::new(1, 2, SIDEBAR_WIDTH.saturating_sub(2), area.height.saturating_sub(4));
+        let picker_area = Rect::new(
+            1,
+            2,
+            SIDEBAR_WIDTH.saturating_sub(2),
+            area.height.saturating_sub(4),
+        );
         {
             let mut picker = self.picker.borrow_mut();
             picker.set_area(picker_area);
@@ -450,7 +646,12 @@ impl Scene for ColorPickerScene {
 
         // Left panel: ColorPicker
         if col < SIDEBAR_WIDTH && row >= 2 && row < area.height.saturating_sub(2) {
-            let picker_area = Rect::new(1, 2, SIDEBAR_WIDTH.saturating_sub(2), area.height.saturating_sub(4));
+            let picker_area = Rect::new(
+                1,
+                2,
+                SIDEBAR_WIDTH.saturating_sub(2),
+                area.height.saturating_sub(4),
+            );
             let mut picker = self.picker.borrow_mut();
             picker.set_area(picker_area);
             if picker.handle_mouse(kind, col, row) {
@@ -496,7 +697,13 @@ impl Scene for ColorPickerScene {
         self.picker.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }

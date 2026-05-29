@@ -1,8 +1,6 @@
 #![allow(missing_docs)]
 //! Framework demo  -  shows App, List, Breadcrumbs, SplitPane, Hud, SystemMonitor.
 
-use std::cell::RefCell;
-use std::os::fd::AsFd;
 use dracon_terminal_engine::compositor::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -11,6 +9,8 @@ use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Hud, List, Orienta
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind};
 use dracon_terminal_engine::SystemMonitor;
 use ratatui::layout::Rect;
+use std::cell::RefCell;
+use std::os::fd::AsFd;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -49,22 +49,43 @@ impl FrameworkDemo {
 
     fn cycle_theme(&mut self) {
         let themes = [Theme::nord(), Theme::cyberpunk(), Theme::dracula()];
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.dirty = true;
     }
 }
 
 impl Widget for FrameworkDemo {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 10 }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        10
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         if self.keybindings.matches(actions::HELP, &key) {
@@ -76,7 +97,9 @@ impl Widget for FrameworkDemo {
             self.cycle_theme();
             return true;
         }
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
             KeyCode::Esc if self.show_help => {
                 self.show_help = false;
@@ -134,10 +157,26 @@ impl Widget for FrameworkDemo {
             y += 1;
         };
 
-        print_line(&mut info_plane, &format!("CPU: {:.1}%", data.cpu_usage), Color::Rgb(0, 200, 120));
-        print_line(&mut info_plane, &format!("Memory: {:.1} / {:.1} GB", data.mem_usage, data.total_mem), Color::Rgb(100, 180, 255));
-        print_line(&mut info_plane, &format!("Swap: {:.1} / {:.1} GB", data.swap_usage, data.total_swap), Color::Rgb(180, 180, 200));
-        print_line(&mut info_plane, &format!("Uptime: {}s", data.uptime), Color::Rgb(150, 150, 150));
+        print_line(
+            &mut info_plane,
+            &format!("CPU: {:.1}%", data.cpu_usage),
+            Color::Rgb(0, 200, 120),
+        );
+        print_line(
+            &mut info_plane,
+            &format!("Memory: {:.1} / {:.1} GB", data.mem_usage, data.total_mem),
+            Color::Rgb(100, 180, 255),
+        );
+        print_line(
+            &mut info_plane,
+            &format!("Swap: {:.1} / {:.1} GB", data.swap_usage, data.total_swap),
+            Color::Rgb(180, 180, 200),
+        );
+        print_line(
+            &mut info_plane,
+            &format!("Uptime: {}s", data.uptime),
+            Color::Rgb(150, 150, 150),
+        );
         print_line(&mut info_plane, "", Color::Reset);
 
         if let Some(disk) = data.disks.first() {
@@ -146,7 +185,11 @@ impl Widget for FrameworkDemo {
             } else {
                 0
             };
-            print_line(&mut info_plane, &format!("Disk: {} ({}%)", disk.name, pct), Color::Rgb(255, 180, 100));
+            print_line(
+                &mut info_plane,
+                &format!("Disk: {} ({}%)", disk.name, pct),
+                Color::Rgb(255, 180, 100),
+            );
         }
 
         let hud = Hud::new(100).with_size(30, 5);
@@ -187,19 +230,39 @@ impl Widget for FrameworkDemo {
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < p.cells.len() { p.cells[top].char = '─'; p.cells[top].fg = t.outline; }
-                if bot < p.cells.len() { p.cells[bot].char = '─'; p.cells[bot].fg = t.outline; }
+                if top < p.cells.len() {
+                    p.cells[top].char = '─';
+                    p.cells[top].fg = t.outline;
+                }
+                if bot < p.cells.len() {
+                    p.cells[bot].char = '─';
+                    p.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < p.cells.len() { p.cells[left].char = '│'; p.cells[left].fg = t.outline; }
-                if right < p.cells.len() { p.cells[right].char = '│'; p.cells[right].fg = t.outline; }
+                if left < p.cells.len() {
+                    p.cells[left].char = '│';
+                    p.cells[left].fg = t.outline;
+                }
+                if right < p.cells.len() {
+                    p.cells[right].char = '│';
+                    p.cells[right].fg = t.outline;
+                }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < p.cells.len() { p.cells[idx].char = *ch; p.cells[idx].fg = t.outline; }
+                if idx < p.cells.len() {
+                    p.cells[idx].char = *ch;
+                    p.cells[idx].fg = t.outline;
+                }
             }
 
             let help_title = "Framework Demo Help";
@@ -214,20 +277,38 @@ impl Widget for FrameworkDemo {
             }
 
             let shortcuts = [
-                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                    "Dismiss help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = t.primary; }
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = c;
+                        p.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < p.cells.len() { p.cells[idx].char = c; p.cells[idx].fg = t.fg; }
+                    if idx < p.cells.len() {
+                        p.cells[idx].char = c;
+                        p.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -246,19 +327,25 @@ fn main() -> std::io::Result<()> {
 
     let mut app = App::new()?.title("Framework Demo").fps(30);
     app.set_theme(Theme::from_env_or(Theme::cyberpunk()));
-    app.add_widget(Box::new(FrameworkDemo::new(WidgetId::new(0), Theme::from_env_or(Theme::cyberpunk()))), Rect::new(0, 0, w, h));
+    app.add_widget(
+        Box::new(FrameworkDemo::new(
+            WidgetId::new(0),
+            Theme::from_env_or(Theme::cyberpunk()),
+        )),
+        Rect::new(0, 0, w, h),
+    );
     app.on_input(move |key| {
-            if key.kind == KeyEventKind::Press && keybindings.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                false
-            }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-            }
-        })
-        .run(|_ctx| {})
+        if key.kind == KeyEventKind::Press && keybindings.matches(actions::QUIT, &key) {
+            should_quit.store(true, Ordering::SeqCst);
+            true
+        } else {
+            false
+        }
+    })
+    .on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+        }
+    })
+    .run(|_ctx| {})
 }

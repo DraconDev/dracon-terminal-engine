@@ -29,43 +29,35 @@ fn test_spinner_with_theme() {
 }
 
 #[test]
-
 // ============================================================================
 // Frames Tests
 // ============================================================================
-
 #[test]
 fn test_spinner_with_frames() {
-    let spinner = Spinner::new(WidgetId::new(1))
-        .with_frames(vec!['|', '/', '-', '\\']);
+    let spinner = Spinner::new(WidgetId::new(1)).with_frames(vec!['|', '/', '-', '\\']);
     let frame = spinner.current_frame();
     assert!(frame == '|' || frame == '/' || frame == '-' || frame == '\\');
 }
 
 #[test]
 fn test_spinner_with_single_frame() {
-    let spinner = Spinner::new(WidgetId::new(1))
-        .with_frames(vec!['*']);
+    let spinner = Spinner::new(WidgetId::new(1)).with_frames(vec!['*']);
     assert_eq!(spinner.current_frame(), '*');
 }
 
 #[test]
-
 // ============================================================================
 // Tick Tests
 // ============================================================================
-
 #[test]
 fn test_spinner_tick() {
-    let mut spinner = Spinner::new(WidgetId::new(1))
-        .with_frames(vec!['1', '2', '3']);
+    let mut spinner = Spinner::new(WidgetId::new(1)).with_frames(vec!['1', '2', '3']);
     spinner.tick();
 }
 
 #[test]
 fn test_spinner_tick_wraps() {
-    let mut spinner = Spinner::new(WidgetId::new(1))
-        .with_frames(vec!['1', '2']);
+    let mut spinner = Spinner::new(WidgetId::new(1)).with_frames(vec!['1', '2']);
     let first = spinner.current_frame();
     spinner.tick();
     spinner.tick();
@@ -76,8 +68,7 @@ fn test_spinner_tick_wraps() {
 
 #[test]
 fn test_spinner_multiple_ticks() {
-    let mut spinner = Spinner::new(WidgetId::new(1))
-        .with_frames(vec!['a', 'b', 'c', 'd']);
+    let mut spinner = Spinner::new(WidgetId::new(1)).with_frames(vec!['a', 'b', 'c', 'd']);
     for _ in 0..10 {
         spinner.tick();
     }
@@ -139,7 +130,6 @@ fn test_spinner_clear_dirty() {
 }
 
 #[test]
-
 #[test]
 fn test_spinner_default_dirty() {
     let spinner = Spinner::new(WidgetId::new(1));
@@ -228,7 +218,13 @@ fn test_spinner_on_theme_change() {
 
 #[test]
 fn test_spinner_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let spinner = Spinner::new(WidgetId::new(1)).with_theme(t);

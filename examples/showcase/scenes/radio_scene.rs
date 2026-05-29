@@ -82,7 +82,11 @@ impl RadioScene {
         let x = cfg.x;
         let y = cfg.y;
         let fg = if cfg.is_focused { t.primary } else { t.fg };
-        let style = if cfg.is_focused { Styles::BOLD } else { Styles::empty() };
+        let style = if cfg.is_focused {
+            Styles::BOLD
+        } else {
+            Styles::empty()
+        };
 
         // Group label
         for (j, ch) in cfg.label.chars().enumerate() {
@@ -156,7 +160,9 @@ impl RadioScene {
 
         // Border
         for bx in x..x + w {
-            if bx >= max_x { break; }
+            if bx >= max_x {
+                break;
+            }
             let top = ((y + 1) * plane.width + bx) as usize;
             if top < plane.cells.len() {
                 plane.cells[top].char = '─';
@@ -198,7 +204,16 @@ impl RadioScene {
 
         // Simulated preview panel
         let preview_y = y + 6;
-        draw_text_clipped(plane, x, preview_y, "Simulated UI:", max_x, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            plane,
+            x,
+            preview_y,
+            "Simulated UI:",
+            max_x,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         let preview_bg = match self.theme_selected {
             1 => Color::Rgb(240, 240, 240),
@@ -282,7 +297,9 @@ impl RadioScene {
 }
 
 impl Scene for RadioScene {
-    fn scene_id(&self) -> &str { "radio" }
+    fn scene_id(&self) -> &str {
+        "radio"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -317,35 +334,60 @@ impl Scene for RadioScene {
         }
 
         // Description
-        draw_text(&mut plane, 2, 2, "Settings panel with radio button groups", t.fg, t.bg, false);
-        draw_text(&mut plane, 2, 3, "Up/Down to select, Tab to switch groups", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            2,
+            2,
+            "Settings panel with radio button groups",
+            t.fg,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            2,
+            3,
+            "Up/Down to select, Tab to switch groups",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Left column: radio groups
         let col1_x = 4u16;
-        self.render_radio_group(&mut plane, &RadioGroupConfig {
-            x: col1_x,
-            y: 5,
-            label: "Color Theme",
-            options: &self.theme_options,
-            selected: self.theme_selected,
-            is_focused: self.focused_group == 0,
-        });
-        self.render_radio_group(&mut plane, &RadioGroupConfig {
-            x: col1_x,
-            y: 10,
-            label: "Font Size",
-            options: &self.font_options,
-            selected: self.font_selected,
-            is_focused: self.focused_group == 1,
-        });
-        self.render_radio_group(&mut plane, &RadioGroupConfig {
-            x: col1_x,
-            y: 15,
-            label: "Layout Density",
-            options: &self.layout_options,
-            selected: self.layout_selected,
-            is_focused: self.focused_group == 2,
-        });
+        self.render_radio_group(
+            &mut plane,
+            &RadioGroupConfig {
+                x: col1_x,
+                y: 5,
+                label: "Color Theme",
+                options: &self.theme_options,
+                selected: self.theme_selected,
+                is_focused: self.focused_group == 0,
+            },
+        );
+        self.render_radio_group(
+            &mut plane,
+            &RadioGroupConfig {
+                x: col1_x,
+                y: 10,
+                label: "Font Size",
+                options: &self.font_options,
+                selected: self.font_selected,
+                is_focused: self.focused_group == 1,
+            },
+        );
+        self.render_radio_group(
+            &mut plane,
+            &RadioGroupConfig {
+                x: col1_x,
+                y: 15,
+                label: "Layout Density",
+                options: &self.layout_options,
+                selected: self.layout_selected,
+                is_focused: self.focused_group == 2,
+            },
+        );
 
         // Focus indicator for active group
         let group_labels = ["Color Theme", "Font Size", "Layout Density"];
@@ -397,13 +439,19 @@ impl Scene for RadioScene {
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Radio Buttons — Help", &[
-                ("Up/Down", "Change selection in group"),
-                ("Tab", "Switch between groups"),
-                ("1/2/3", "Quick-select option in group"),
-                ("Click", "Select option directly"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Radio Buttons — Help",
+                &[
+                    ("Up/Down", "Change selection in group"),
+                    ("Tab", "Switch between groups"),
+                    ("1/2/3", "Quick-select option in group"),
+                    ("Click", "Select option directly"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
@@ -544,5 +592,3 @@ impl Scene for RadioScene {
         self.dirty = false;
     }
 }
-
-

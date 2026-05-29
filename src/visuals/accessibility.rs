@@ -262,7 +262,12 @@ impl Announcer {
     }
 
     /// Announces text at the given priority level.
-    pub fn announce<W: Write>(&self, writer: &mut W, text: &str, level: AnnounceLevel) -> io::Result<()> {
+    pub fn announce<W: Write>(
+        &self,
+        writer: &mut W,
+        text: &str,
+        level: AnnounceLevel,
+    ) -> io::Result<()> {
         if self.enabled {
             announce(writer, text, level)
         } else {

@@ -47,8 +47,7 @@ fn test_rich_text_with_theme() {
 
 #[test]
 fn test_rich_text_chained_builders() {
-    let rt = RichText::new("# Title\n\nParagraph.")
-        .with_theme(Theme::cyberpunk());
+    let rt = RichText::new("# Title\n\nParagraph.").with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 80, 24);
     let _plane = rt.render(area);
 }
@@ -62,7 +61,7 @@ fn test_rich_text_header_h1() {
     let rt = RichText::new("# Header 1");
     let area = Rect::new(0, 0, 80, 24);
     let plane = rt.render(area);
-    
+
     // Header should render with different styling
     assert!(plane.width > 0);
 }
@@ -251,11 +250,11 @@ fn test_rich_text_render() {
 #[test]
 fn test_rich_text_render_different_sizes() {
     let rt = RichText::new("# Test");
-    
+
     // Small area
     let plane1 = rt.render(Rect::new(0, 0, 40, 10));
     assert_eq!(plane1.width, 40);
-    
+
     // Large area
     let plane2 = rt.render(Rect::new(0, 0, 120, 50));
     assert_eq!(plane2.width, 120);
@@ -274,7 +273,7 @@ fn test_rich_text_z_index() {
 #[test]
 fn test_rich_text_different_themes() {
     let content = "# Title\n\nParagraph with **bold** and *italic*.";
-    
+
     for theme_name in ["nord", "dracula", "monokai", "solarized_dark"] {
         if let Some(theme) = Theme::from_name(theme_name) {
             let rt = RichText::new(content).with_theme(theme);
@@ -291,7 +290,9 @@ fn test_rich_text_different_themes() {
 
 #[test]
 fn test_rich_text_word_wrap_long_line() {
-    let rt = RichText::new("This is a very long line that should wrap at the boundary of the render area.");
+    let rt = RichText::new(
+        "This is a very long line that should wrap at the boundary of the render area.",
+    );
     let area = Rect::new(0, 0, 40, 24);
     let plane = rt.render(area);
     assert!(plane.width > 0);
@@ -374,7 +375,7 @@ fn test_rich_text_markdown_edge_cases() {
         "```code with **bold** inside```",
         "[link with **bold**](http://example.com)",
     ];
-    
+
     for content in tests {
         let rt = RichText::new(content);
         let area = Rect::new(0, 0, 80, 24);

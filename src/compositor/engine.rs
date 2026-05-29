@@ -311,7 +311,7 @@ impl Compositor {
                 if !plane.visible {
                     continue;
                 }
-                
+
                 // Pre-compute bounds and strides for this plane
                 let px_end = plane.width.min(self.width.saturating_sub(plane.x)) as usize;
                 let py_end = plane.height.min(self.height.saturating_sub(plane.y)) as usize;
@@ -321,7 +321,7 @@ impl Compositor {
                 let base_x = plane.x as usize;
                 let plane_cells = &plane.cells;
                 let opacity = plane.opacity;
-                
+
                 // Ultra-fast path: fully opaque plane, no filter, no blending needed
                 if opacity >= 1.0 && plane.filter.is_none() {
                     for py in 0..py_end {
@@ -332,7 +332,7 @@ impl Compositor {
                             let dest_idx = dest_row_base + base_x + px;
                             let src_cell = &plane_cells[src_idx];
                             let dest_cell = &mut self.final_buffer[dest_idx];
-                            
+
                             // Direct copy for fully opaque, non-transparent cells
                             if !src_cell.transparent {
                                 if src_cell.skip {
@@ -374,7 +374,12 @@ impl Compositor {
                                 let dest_idx = dest_row_base + base_x + px;
                                 let mut src_cell = plane_cells[src_idx];
                                 if let Some(filter) = plane_filter {
-                                    filter.apply(&mut src_cell, (base_x + px) as u16, (base_y + py) as u16, render_time as f32);
+                                    filter.apply(
+                                        &mut src_cell,
+                                        (base_x + px) as u16,
+                                        (base_y + py) as u16,
+                                        render_time as f32,
+                                    );
                                 }
                                 blend_cells(&mut self.final_buffer[dest_idx], &src_cell, opacity);
                             }
@@ -455,8 +460,8 @@ impl Compositor {
 
         // Terminal setup sequences (inline for consistency)
         buf.extend_from_slice(b"\x1b[?2026h");
-        
-        // Reset all text formatting to defaults so our current_* tracking variables 
+
+        // Reset all text formatting to defaults so our current_* tracking variables
         // match the terminal's actual state at the start of the frame.
         buf.extend_from_slice(b"\x1b[0m");
 
@@ -466,21 +471,22 @@ impl Compositor {
 
         buf.extend_from_slice(b"\x1b[?7l");
 
-        let check_cell = |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
-            if full_refresh || regions.is_empty() {
-                return true;
-            }
-            for region in regions {
-                if x >= region.x
-                    && x < region.x + region.width
-                    && y >= region.y
-                    && y < region.y + region.height
-                {
+        let check_cell =
+            |x: u16, y: u16, regions: &[crate::framework::dirty_regions::DirtyRegion]| -> bool {
+                if full_refresh || regions.is_empty() {
                     return true;
                 }
-            }
-            false
-        };
+                for region in regions {
+                    if x >= region.x
+                        && x < region.x + region.width
+                        && y >= region.y
+                        && y < region.y + region.height
+                    {
+                        return true;
+                    }
+                }
+                false
+            };
 
         for y in 0..self.height {
             let mut line_cursor_moved = false;

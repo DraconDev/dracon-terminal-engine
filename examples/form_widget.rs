@@ -13,7 +13,9 @@
 //!   q               -  quit
 
 use dracon_terminal_engine::compositor::{Color, Plane};
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingConfig, KeybindingSet};
+use dracon_terminal_engine::framework::keybindings::{
+    actions, resolve_keybindings, KeybindingConfig, KeybindingSet,
+};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::Form;
@@ -61,7 +63,10 @@ impl FormApp {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.form.borrow_mut().on_theme_change(&self.theme);
     }
@@ -105,7 +110,12 @@ impl FormApp {
         }
 
         // Border
-        let corners = [(y, x, '╭'), (y, x + w - 1, '╮'), (y + h - 1, x, '╰'), (y + h - 1, x + w - 1, '╯')];
+        let corners = [
+            (y, x, '╭'),
+            (y, x + w - 1, '╮'),
+            (y + h - 1, x, '╰'),
+            (y + h - 1, x + w - 1, '╯'),
+        ];
         for (cy, cx, ch) in &corners {
             let idx = (*cy * plane.width + *cx) as usize;
             if idx < plane.cells.len() {
@@ -116,14 +126,26 @@ impl FormApp {
         for col in 1..w - 1 {
             let top = (y * plane.width + x + col) as usize;
             let bot = ((y + h - 1) * plane.width + x + col) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for row in 1..h - 1 {
             let left = ((y + row) * plane.width + x) as usize;
             let right = ((y + row) * plane.width + x + w - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Text
@@ -175,15 +197,27 @@ impl FormApp {
 }
 
 impl Widget for FormApp {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { self.form.borrow().area() }
-    fn set_area(&mut self, area: Rect) { self.form.borrow_mut().set_area(area); }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { true }
+    fn area(&self) -> Rect {
+        self.form.borrow().area()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.form.borrow_mut().set_area(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
@@ -225,7 +259,11 @@ impl Widget for FormApp {
             "Tab: next | Enter: submit | {}: theme | {}: help | {}: dismiss | {}: quit",
             kb_theme, kb_help, kb_back, kb_quit
         );
-        for (i, c) in hint.chars().take((area.width as usize).saturating_sub(2)).enumerate() {
+        for (i, c) in hint
+            .chars()
+            .take((area.width as usize).saturating_sub(2))
+            .enumerate()
+        {
             let idx = (status_y * plane.width + 2 + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
@@ -288,7 +326,10 @@ fn main() -> std::io::Result<()> {
 
     let theme = Theme::from_env_or(Theme::nord());
 
-    let mut app = App::new()?.title("Form Widget Demo").fps(30).theme(theme.clone());
+    let mut app = App::new()?
+        .title("Form Widget Demo")
+        .fps(30)
+        .theme(theme.clone());
     app.add_widget(
         Box::new(FormApp::new(quit_check.clone(), theme)),
         Rect::new(0, 0, 80, 24),

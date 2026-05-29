@@ -52,9 +52,13 @@ impl HelpOverlayWidget {
 }
 
 impl Widget for HelpOverlayWidget {
-    fn id(&self) -> WidgetId { WidgetId::new(1) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(1)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { Rect::new(0, 0, 80, 24) }
+    fn area(&self) -> Rect {
+        Rect::new(0, 0, 80, 24)
+    }
     fn set_area(&mut self, _area: Rect) {}
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
@@ -77,22 +81,42 @@ impl Widget for HelpOverlayWidget {
                 }
             }
 
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * plane.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * plane.width + x) as usize;
                 let bot = ((hy + hh - 1) * plane.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * plane.width + hx) as usize;
                 let right = (y * plane.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
 
             let title = "App Help";
@@ -109,20 +133,38 @@ impl Widget for HelpOverlayWidget {
             let shortcuts = [
                 ("↑/↓", "Navigate"),
                 ("Enter", "Select"),
-                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                    "Dismiss",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * plane.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * plane.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -145,8 +187,7 @@ fn test_help_overlay_background_is_surface_elevated() {
         "center idx should be in bounds"
     );
     assert_eq!(
-        plane.cells[center_idx].bg,
-        t.surface_elevated,
+        plane.cells[center_idx].bg, t.surface_elevated,
         "help overlay interior should use surface_elevated background"
     );
 }
@@ -163,10 +204,22 @@ fn test_help_overlay_has_rounded_corners() {
     let top_right = (hy * 80 + hx + hw - 1) as usize;
     let bot_left = ((hy + hh - 1) * 80 + hx) as usize;
     let bot_right = ((hy + hh - 1) * 80 + hx + hw - 1) as usize;
-    assert_eq!(plane.cells[top_left].char, '╭', "top-left corner should be ╭");
-    assert_eq!(plane.cells[top_right].char, '╮', "top-right corner should be ╮");
-    assert_eq!(plane.cells[bot_left].char, '╰', "bottom-left corner should be ╰");
-    assert_eq!(plane.cells[bot_right].char, '╯', "bottom-right corner should be ╯");
+    assert_eq!(
+        plane.cells[top_left].char, '╭',
+        "top-left corner should be ╭"
+    );
+    assert_eq!(
+        plane.cells[top_right].char, '╮',
+        "top-right corner should be ╮"
+    );
+    assert_eq!(
+        plane.cells[bot_left].char, '╰',
+        "bottom-left corner should be ╰"
+    );
+    assert_eq!(
+        plane.cells[bot_right].char, '╯',
+        "bottom-right corner should be ╯"
+    );
 }
 
 #[test]
@@ -182,8 +235,15 @@ fn test_help_overlay_title_is_centered_and_primary_bold() {
     let tx = hx + (hw - title.len() as u16) / 2;
     let first_char_idx = ((hy + 1) * 80 + tx) as usize;
     assert_eq!(plane.cells[first_char_idx].char, 'A');
-    assert_eq!(plane.cells[first_char_idx].fg, t.primary, "title should use theme.primary");
-    assert_eq!(plane.cells[first_char_idx].style, Styles::BOLD, "title should be BOLD");
+    assert_eq!(
+        plane.cells[first_char_idx].fg, t.primary,
+        "title should use theme.primary"
+    );
+    assert_eq!(
+        plane.cells[first_char_idx].style,
+        Styles::BOLD,
+        "title should be BOLD"
+    );
 }
 
 #[test]

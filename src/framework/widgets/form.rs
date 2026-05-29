@@ -215,7 +215,10 @@ impl Form {
             if field.rules.is_empty() {
                 return true;
             }
-            field.rules.iter().all(|rule| rule.validate(&field.value).is_none())
+            field
+                .rules
+                .iter()
+                .all(|rule| rule.validate(&field.value).is_none())
         } else {
             false
         }
@@ -341,13 +344,8 @@ impl crate::framework::widget::Widget for Form {
                     }
                     // Render error text with small indent
                     let indent = 2usize;
-                    for (j, c) in error
-                        .chars()
-                        .take(width.saturating_sub(indent))
-                        .enumerate()
-                    {
-                        let idx =
-                            (error_row * plane.width + (indent + j) as u16) as usize;
+                    for (j, c) in error.chars().take(width.saturating_sub(indent)).enumerate() {
+                        let idx = (error_row * plane.width + (indent + j) as u16) as usize;
                         if idx < plane.cells.len() {
                             plane.cells[idx] = Cell {
                                 char: c,
@@ -408,7 +406,9 @@ impl crate::framework::widget::Widget for Form {
                 self.dirty = true;
                 true
             }
-            KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == KeyModifiers::SHIFT => {
+            KeyCode::Char(ch)
+                if key.modifiers.is_empty() || key.modifiers == KeyModifiers::SHIFT =>
+            {
                 if let Some(ref mut field) = self.fields.get_mut(self.focused_field) {
                     field.value.push(ch);
                     field.error = None;
@@ -538,8 +538,7 @@ mod tests {
 
     #[test]
     fn test_is_field_valid_no_rules() {
-        let form = Form::new(WidgetId::new(1))
-            .add_field("Name");
+        let form = Form::new(WidgetId::new(1)).add_field("Name");
         assert!(form.is_field_valid(0));
     }
 

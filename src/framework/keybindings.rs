@@ -420,12 +420,10 @@ fn do_resolve_keybindings() -> KeybindingConfig {
 
 /// Load just the `[keybindings]` section from a TOML file.
 fn load_keybindings_from_toml(path: &std::path::Path) -> Result<KeybindingConfig, String> {
-    let content = std::fs::read_to_string(path)
-        .map_err(|e| format!("read error: {}", e))?;
+    let content = std::fs::read_to_string(path).map_err(|e| format!("read error: {}", e))?;
 
     // Parse the full TOML to extract just the keybindings section
-    let doc: toml::Value = toml::from_str(&content)
-        .map_err(|e| format!("parse error: {}", e))?;
+    let doc: toml::Value = toml::from_str(&content).map_err(|e| format!("parse error: {}", e))?;
 
     if let Some(kb_table) = doc.get("keybindings") {
         kb_table
@@ -439,8 +437,15 @@ fn load_keybindings_from_toml(path: &std::path::Path) -> Result<KeybindingConfig
 
 /// Get the XDG config directory path: `~/.config/dracon/dracon.toml`
 fn xdg_config_path() -> Option<std::path::PathBuf> {
-    let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")).ok()?;
-    Some(std::path::Path::new(&home).join(".config").join("dracon").join("dracon.toml"))
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .ok()?;
+    Some(
+        std::path::Path::new(&home)
+            .join(".config")
+            .join("dracon")
+            .join("dracon.toml"),
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -516,8 +521,12 @@ mod tests {
     #[test]
     fn test_keybinding_set_conflict_detection() {
         let mut config = KeybindingConfig::default();
-        config.bindings.insert("action1".to_string(), "q".to_string());
-        config.bindings.insert("action2".to_string(), "q".to_string());
+        config
+            .bindings
+            .insert("action1".to_string(), "q".to_string());
+        config
+            .bindings
+            .insert("action2".to_string(), "q".to_string());
 
         // Should not panic, just log warning
         let _set = KeybindingSet::from_config(&config);
@@ -527,7 +536,9 @@ mod tests {
     fn test_config_merge() {
         let mut base = KeybindingConfig::defaults();
         let mut override_config = KeybindingConfig::default();
-        override_config.bindings.insert("quit".to_string(), "ctrl+x".to_string());
+        override_config
+            .bindings
+            .insert("quit".to_string(), "ctrl+x".to_string());
 
         assert_eq!(base.get("quit"), Some("ctrl+q"));
         base.merge(override_config);
@@ -558,7 +569,9 @@ mod tests {
     #[test]
     fn test_pause_binding_uses_modifier() {
         let config = KeybindingConfig::defaults();
-        let pause_binding = config.get(super::actions::PAUSE).expect("PAUSE should have a default binding");
+        let pause_binding = config
+            .get(super::actions::PAUSE)
+            .expect("PAUSE should have a default binding");
         assert!(
             pause_binding.contains('+'),
             "PAUSE binding '{}' should use a modifier key to avoid text input conflicts",
@@ -569,7 +582,9 @@ mod tests {
     #[test]
     fn test_dismiss_not_ctrl_c() {
         let config = KeybindingConfig::defaults();
-        let dismiss_binding = config.get(super::actions::DISMISS).expect("DISMISS should have a default binding");
+        let dismiss_binding = config
+            .get(super::actions::DISMISS)
+            .expect("DISMISS should have a default binding");
         assert_ne!(
             dismiss_binding, "ctrl+c",
             "DISMISS should not be ctrl+c (conflicts with Copy/SIGINT)"

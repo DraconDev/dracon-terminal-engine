@@ -6,12 +6,16 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::Plane;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Button, PasswordInput, SearchInput, Select, Toggle};
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::framework::widgets::{
+    Button, PasswordInput, SearchInput, Select, Toggle,
+};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 const FIELD_USERNAME: usize = 0;
@@ -48,7 +52,14 @@ impl FormDemoScene {
             show_help: false,
             dirty: true,
             focused_field: 0,
-            field_order: [FIELD_USERNAME, FIELD_EMAIL, FIELD_PASSWORD, FIELD_THEME, FIELD_NOTIFICATIONS, FIELD_SUBMIT],
+            field_order: [
+                FIELD_USERNAME,
+                FIELD_EMAIL,
+                FIELD_PASSWORD,
+                FIELD_THEME,
+                FIELD_NOTIFICATIONS,
+                FIELD_SUBMIT,
+            ],
             dragging: None,
             drag_hover: None,
             username: SearchInput::new(WidgetId::new(10)).with_theme(theme.clone()),
@@ -139,7 +150,9 @@ impl FormDemoScene {
 }
 
 impl Scene for FormDemoScene {
-    fn scene_id(&self) -> &str { "form_demo" }
+    fn scene_id(&self) -> &str {
+        "form_demo"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -154,8 +167,15 @@ impl Scene for FormDemoScene {
         // Title
         draw_text(&mut plane, 2, 0, " Settings Form ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -240,7 +260,15 @@ impl Scene for FormDemoScene {
                 plane.cells[icon_idx].fg = if is_focused { t.primary } else { t.fg_muted };
             }
             if !label.is_empty() {
-                draw_text(&mut plane, 4, y, label, if is_focused { t.primary } else { t.fg }, row_bg, is_focused);
+                draw_text(
+                    &mut plane,
+                    4,
+                    y,
+                    label,
+                    if is_focused { t.primary } else { t.fg },
+                    row_bg,
+                    is_focused,
+                );
             }
 
             // Validation indicator
@@ -251,7 +279,15 @@ impl Scene for FormDemoScene {
                 _ => false,
             };
             if valid {
-                draw_text(&mut plane, form_w.saturating_sub(2), y, "✓", t.success, row_bg, false);
+                draw_text(
+                    &mut plane,
+                    form_w.saturating_sub(2),
+                    y,
+                    "✓",
+                    t.success,
+                    row_bg,
+                    false,
+                );
             }
 
             // Widget
@@ -277,7 +313,15 @@ impl Scene for FormDemoScene {
         // Reset button (below form)
         let reset_y = start_y + y_offset + 1;
         if reset_y < area.height.saturating_sub(2) {
-            draw_text(&mut plane, 2, reset_y, "r: reset form", t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                2,
+                reset_y,
+                "r: reset form",
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // ── Vertical divider ──────────────────────────────────────────────
@@ -294,7 +338,15 @@ impl Scene for FormDemoScene {
         let panel_x = form_w + 2;
         let panel_w = area.width.saturating_sub(panel_x + 2);
 
-        draw_text(&mut plane, panel_x, 2, "Profile Preview", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            panel_x,
+            2,
+            "Profile Preview",
+            t.primary,
+            t.bg,
+            true,
+        );
         for dx in 0..panel_w {
             let idx = (3 * plane.width + panel_x + dx) as usize;
             if idx < plane.cells.len() {
@@ -314,7 +366,11 @@ impl Scene for FormDemoScene {
                 }
             }
         }
-        let avatar_ch = if self.username.query().is_empty() { '?' } else { self.username.query().chars().next().unwrap_or('?') };
+        let avatar_ch = if self.username.query().is_empty() {
+            '?'
+        } else {
+            self.username.query().chars().next().unwrap_or('?')
+        };
         let av_idx = ((avatar_y + 1) * plane.width + panel_x + 3) as usize;
         if av_idx < plane.cells.len() {
             plane.cells[av_idx].char = avatar_ch;
@@ -324,21 +380,69 @@ impl Scene for FormDemoScene {
 
         // Profile info
         let username = self.username.query();
-        let display_name: &str = if username.is_empty() { "Not set" } else { username };
-        draw_text(&mut plane, panel_x + 9, avatar_y, display_name, if username.is_empty() { t.fg_muted } else { t.fg }, t.bg, true);
+        let display_name: &str = if username.is_empty() {
+            "Not set"
+        } else {
+            username
+        };
+        draw_text(
+            &mut plane,
+            panel_x + 9,
+            avatar_y,
+            display_name,
+            if username.is_empty() {
+                t.fg_muted
+            } else {
+                t.fg
+            },
+            t.bg,
+            true,
+        );
 
         let email = self.email.query();
         let display_email: &str = if email.is_empty() { "Not set" } else { email };
-        draw_text(&mut plane, panel_x + 9, avatar_y + 1, display_email, if email.is_empty() { t.fg_muted } else { t.secondary }, t.bg, false);
+        draw_text(
+            &mut plane,
+            panel_x + 9,
+            avatar_y + 1,
+            display_email,
+            if email.is_empty() {
+                t.fg_muted
+            } else {
+                t.secondary
+            },
+            t.bg,
+            false,
+        );
 
         // Status badge
         let validation = self.validate();
-        let (badge_text, badge_color) = if validation.is_none() { ("✓ Valid", t.success) } else { ("✗ Incomplete", t.error) };
-        draw_text(&mut plane, panel_x + 9, avatar_y + 2, badge_text, badge_color, t.bg, true);
+        let (badge_text, badge_color) = if validation.is_none() {
+            ("✓ Valid", t.success)
+        } else {
+            ("✗ Incomplete", t.error)
+        };
+        draw_text(
+            &mut plane,
+            panel_x + 9,
+            avatar_y + 2,
+            badge_text,
+            badge_color,
+            t.bg,
+            true,
+        );
 
         // Settings summary
         let summary_y = avatar_y + 4;
-        draw_text(&mut plane, panel_x, summary_y, "Settings", t.secondary, t.bg, true);
+        draw_text(
+            &mut plane,
+            panel_x,
+            summary_y,
+            "Settings",
+            t.secondary,
+            t.bg,
+            true,
+        );
         for dx in 0..panel_w {
             let idx = ((summary_y + 1) * plane.width + panel_x + dx) as usize;
             if idx < plane.cells.len() {
@@ -348,14 +452,44 @@ impl Scene for FormDemoScene {
         }
 
         let settings = [
-            ("Theme", self.theme_select.selected_label().unwrap_or("Dark")),
-            ("Notifications", if self.notifications.is_on() { "On" } else { "Off" }),
-            ("Password", if self.password.password().len() >= 6 { "Set" } else if self.password.password().is_empty() { "Not set" } else { "Too short" }),
-            ("Email", if self.email.query().contains('@') { "Valid" } else if self.email.query().is_empty() { "Not set" } else { "Invalid" }),
+            (
+                "Theme",
+                self.theme_select.selected_label().unwrap_or("Dark"),
+            ),
+            (
+                "Notifications",
+                if self.notifications.is_on() {
+                    "On"
+                } else {
+                    "Off"
+                },
+            ),
+            (
+                "Password",
+                if self.password.password().len() >= 6 {
+                    "Set"
+                } else if self.password.password().is_empty() {
+                    "Not set"
+                } else {
+                    "Too short"
+                },
+            ),
+            (
+                "Email",
+                if self.email.query().contains('@') {
+                    "Valid"
+                } else if self.email.query().is_empty() {
+                    "Not set"
+                } else {
+                    "Invalid"
+                },
+            ),
         ];
         for (i, (label, value)) in settings.iter().enumerate() {
             let sy = summary_y + 2 + i as u16;
-            if sy >= area.height.saturating_sub(2) { break; }
+            if sy >= area.height.saturating_sub(2) {
+                break;
+            }
             draw_text(&mut plane, panel_x, sy, label, t.fg_muted, t.bg, false);
             let val_color = match *value {
                 "Valid" | "Set" | "On" => t.success,
@@ -368,7 +502,15 @@ impl Scene for FormDemoScene {
         // Keyboard shortcuts
         let shortcuts_y = summary_y + 7;
         if shortcuts_y + 5 < area.height.saturating_sub(2) {
-            draw_text(&mut plane, panel_x, shortcuts_y, "Keyboard", t.secondary, t.bg, true);
+            draw_text(
+                &mut plane,
+                panel_x,
+                shortcuts_y,
+                "Keyboard",
+                t.secondary,
+                t.bg,
+                true,
+            );
             for dx in 0..panel_w {
                 let idx = ((shortcuts_y + 1) * plane.width + panel_x + dx) as usize;
                 if idx < plane.cells.len() {
@@ -384,7 +526,9 @@ impl Scene for FormDemoScene {
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let ky = shortcuts_y + 2 + i as u16;
-                if ky >= area.height.saturating_sub(2) { break; }
+                if ky >= area.height.saturating_sub(2) {
+                    break;
+                }
                 draw_text(&mut plane, panel_x, ky, key, t.primary, t.bg, false);
                 draw_text(&mut plane, panel_x + 8, ky, desc, t.fg_muted, t.bg, false);
             }
@@ -397,11 +541,35 @@ impl Scene for FormDemoScene {
             for x in toast_x..toast_x + msg.len() as u16 + 4 {
                 let idx = (toast_y * plane.width + x) as usize;
                 if idx < plane.cells.len() {
-                    plane.cells[idx].bg = if msg.starts_with("Error") { t.error_bg } else { t.success_bg };
-                    plane.cells[idx].fg = if msg.starts_with("Error") { t.error } else { t.success };
+                    plane.cells[idx].bg = if msg.starts_with("Error") {
+                        t.error_bg
+                    } else {
+                        t.success_bg
+                    };
+                    plane.cells[idx].fg = if msg.starts_with("Error") {
+                        t.error
+                    } else {
+                        t.success
+                    };
                 }
             }
-            draw_text(&mut plane, toast_x + 2, toast_y, msg, if msg.starts_with("Error") { t.error } else { t.success }, if msg.starts_with("Error") { t.error_bg } else { t.success_bg }, true);
+            draw_text(
+                &mut plane,
+                toast_x + 2,
+                toast_y,
+                msg,
+                if msg.starts_with("Error") {
+                    t.error
+                } else {
+                    t.success
+                },
+                if msg.starts_with("Error") {
+                    t.error_bg
+                } else {
+                    t.success_bg
+                },
+                true,
+            );
         }
 
         // Footer
@@ -418,7 +586,9 @@ impl Scene for FormDemoScene {
 
         if self.show_help {
             crate::scenes::shared_helpers::render_help_overlay(
-                &mut plane, area, t,
+                &mut plane,
+                area,
+                t,
                 "Form Demo Help",
                 &[
                     ("Tab", "Next field"),
@@ -435,10 +605,14 @@ impl Scene for FormDemoScene {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -461,8 +635,16 @@ impl Scene for FormDemoScene {
         }
 
         match key.code {
-            KeyCode::Tab => { self.cycle_focus(true); self.dirty = true; true }
-            KeyCode::BackTab => { self.cycle_focus(false); self.dirty = true; true }
+            KeyCode::Tab => {
+                self.cycle_focus(true);
+                self.dirty = true;
+                true
+            }
+            KeyCode::BackTab => {
+                self.cycle_focus(false);
+                self.dirty = true;
+                true
+            }
             KeyCode::Enter => {
                 if self.focused_field == FIELD_SUBMIT {
                     self.submit();
@@ -484,14 +666,18 @@ impl Scene for FormDemoScene {
                     FIELD_SUBMIT => self.submit.handle_key(key),
                     _ => false,
                 };
-                if handled { self.dirty = true; }
+                if handled {
+                    self.dirty = true;
+                }
                 handled
             }
         }
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.show_help { return true; }
+        if self.show_help {
+            return true;
+        }
 
         let area = self.area.get();
         let form_w = (area.width * 55 / 100).max(30);
@@ -569,8 +755,13 @@ impl Scene for FormDemoScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-

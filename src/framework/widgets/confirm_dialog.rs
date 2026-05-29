@@ -350,11 +350,7 @@ impl Widget for ConfirmDialog {
                 let is_focused = self.focused && !self.confirm_focused;
                 plane.cells[idx] = Cell {
                     char: c,
-                    fg: if is_focused {
-                        self.theme.bg
-                    } else {
-                        btn_fg
-                    },
+                    fg: if is_focused { self.theme.bg } else { btn_fg },
                     bg: if is_focused {
                         self.theme.primary
                     } else {

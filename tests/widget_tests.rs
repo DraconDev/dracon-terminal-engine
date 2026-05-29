@@ -1232,7 +1232,8 @@ fn test_context_menu_new() {
 
 #[test]
 fn test_context_menu_with_theme() {
-    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)]).with_theme(Theme::cyberpunk());
+    let menu = ContextMenu::from_actions(vec![("Open", ContextAction::Open)])
+        .with_theme(Theme::cyberpunk());
     let area = Rect::new(0, 0, 20, 10);
     let _plane = menu.render(area);
 }

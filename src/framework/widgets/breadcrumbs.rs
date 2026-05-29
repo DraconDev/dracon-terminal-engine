@@ -139,7 +139,9 @@ impl crate::framework::widget::Widget for Breadcrumbs {
         plane.fill_bg(self.theme.bg);
 
         // Calculate total width needed
-        let total_width: usize = self.segments.iter()
+        let total_width: usize = self
+            .segments
+            .iter()
             .map(|s| s.width() + 2) // +2 for padding
             .sum::<usize>()
             .saturating_sub(1); // Subtract separator overhead
@@ -260,13 +262,26 @@ impl crate::framework::widget::Widget for Breadcrumbs {
 }
 
 impl WidgetState for Breadcrumbs {
-    fn state_id(&self) -> Option<&str> { None }
-    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
-    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+    fn state_id(&self) -> Option<&str> {
+        None
+    }
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        Ok(())
+    }
 }
 
 impl Breadcrumbs {
-    fn render_segment(&self, plane: &mut Plane, i: usize, _width: u16, x: &mut u16, _is_prefix: bool) {
+    fn render_segment(
+        &self,
+        plane: &mut Plane,
+        i: usize,
+        _width: u16,
+        x: &mut u16,
+        _is_prefix: bool,
+    ) {
         let segment = &self.segments[i];
         let is_last = i == self.segments.len() - 1;
         let is_first = i == 0;

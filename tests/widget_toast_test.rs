@@ -1,9 +1,9 @@
 //! Tests for the Toast widget.
 
-use std::time::Duration;
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::toast::{Toast, ToastKind};
+use std::time::Duration;
 
 // ============================================================================
 // Construction Tests

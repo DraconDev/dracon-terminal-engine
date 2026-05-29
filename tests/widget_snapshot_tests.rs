@@ -39,7 +39,13 @@ mod widget_snapshots {
     #[test]
     fn test_list_snapshot() {
         let theme = Theme::default();
-        let items = vec!["Item One", "Item Two", "Item Three", "Item Four", "Item Five"];
+        let items = vec![
+            "Item One",
+            "Item Two",
+            "Item Three",
+            "Item Four",
+            "Item Five",
+        ];
         let list = List::new(items).with_theme(theme);
         let output = render_widget_to_string(&list, 20, 5);
         insta::assert_snapshot!("list_widget", output);
@@ -49,17 +55,21 @@ mod widget_snapshots {
     fn test_table_snapshot() {
         let theme = Theme::default();
         let columns = vec![
-            Column { header: "Name".to_string(), width: 10 },
-            Column { header: "Value".to_string(), width: 8 },
+            Column {
+                header: "Name".to_string(),
+                width: 10,
+            },
+            Column {
+                header: "Value".to_string(),
+                width: 8,
+            },
         ];
         let rows = vec![
             "Alice".to_string(),
             "Bob".to_string(),
             "Charlie".to_string(),
         ];
-        let table = Table::new(columns)
-            .with_rows(rows)
-            .with_theme(theme);
+        let table = Table::new(columns).with_rows(rows).with_theme(theme);
         let output = render_widget_to_string(&table, 20, 5);
         insta::assert_snapshot!("table_widget", output);
     }

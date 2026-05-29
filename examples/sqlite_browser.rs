@@ -14,8 +14,8 @@
 //!   q               -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Column, SearchInput, SplitPane, StatusBar, StatusSegment, Table, Toast, ToastKind,
@@ -78,9 +78,18 @@ impl SqliteBrowser {
 
         let mut kb_config = resolve_keybindings();
         // Ensure example-specific bindings are present (fallback to current hardcoded behavior)
-        kb_config.bindings.entry(actions::THEME.to_string()).or_insert_with(|| "t".to_string());
-        kb_config.bindings.entry(actions::REFRESH.to_string()).or_insert_with(|| "r".to_string());
-        kb_config.bindings.entry(actions::EDIT.to_string()).or_insert_with(|| "e".to_string());
+        kb_config
+            .bindings
+            .entry(actions::THEME.to_string())
+            .or_insert_with(|| "t".to_string());
+        kb_config
+            .bindings
+            .entry(actions::REFRESH.to_string())
+            .or_insert_with(|| "r".to_string());
+        kb_config
+            .bindings
+            .entry(actions::EDIT.to_string())
+            .or_insert_with(|| "e".to_string());
         let keybindings = KeybindingSet::from_config(&kb_config);
 
         let status_bar = StatusBar::new(WidgetId::new(4))
@@ -235,7 +244,9 @@ impl SqliteBrowser {
             })
             .collect();
         let rows: Vec<RowData> = self.results_rows.clone();
-        let mut table = Table::new(columns).with_theme(self.theme.clone()).with_rows(rows);
+        let mut table = Table::new(columns)
+            .with_theme(self.theme.clone())
+            .with_rows(rows);
         table.set_visible_count(20);
         self.results_table = Some(table);
         self.dirty = true;
@@ -326,7 +337,9 @@ impl Widget for SqliteBrowser {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(t.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         let status_h = 1u16;
         let content_h = area.height.saturating_sub(status_h);
@@ -358,11 +371,7 @@ impl Widget for SqliteBrowser {
             let row = 2 + i as u16;
             let is_selected = self.selected_table == i && left_active;
             let fg = if is_selected { t.selection_fg } else { t.fg };
-            let bg = if is_selected {
-                t.selection_bg
-            } else {
-                left_bg
-            };
+            let bg = if is_selected { t.selection_bg } else { left_bg };
             let prefix = if is_selected { "▸ " } else { "  " };
             draw_text(
                 &mut plane,
@@ -693,7 +702,8 @@ impl Widget for SqliteBrowser {
                 true
             } else if self.keybindings.matches(actions::EDIT, &key) {
                 self.editing_query = true;
-                self.search_input = SearchInput::new(WidgetId::new(3)).with_theme(self.theme.clone());
+                self.search_input =
+                    SearchInput::new(WidgetId::new(3)).with_theme(self.theme.clone());
                 self.active_panel = Panel::Query;
                 self.dirty = true;
                 true

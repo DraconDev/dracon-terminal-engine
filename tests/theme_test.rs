@@ -471,7 +471,10 @@ fn test_theme_debug() {
 
 #[test]
 fn test_default_scrollbar_width_constant() {
-    assert_eq!(DEFAULT_SCROLLBAR_WIDTH, 1, "DEFAULT_SCROLLBAR_WIDTH should be 1");
+    assert_eq!(
+        DEFAULT_SCROLLBAR_WIDTH, 1,
+        "DEFAULT_SCROLLBAR_WIDTH should be 1"
+    );
 }
 
 #[test]
@@ -717,34 +720,75 @@ fn test_from_name_all_themes_by_exact_name() {
         ("mono", Theme::mono()),
     ];
     for (name, expected) in themes.iter() {
-        let resolved = Theme::from_name(name).unwrap_or_else(|| panic!("should resolve theme: {}", name));
-        assert_eq!(&*resolved.name, &*expected.name, "name mismatch for {}", name);
+        let resolved =
+            Theme::from_name(name).unwrap_or_else(|| panic!("should resolve theme: {}", name));
+        assert_eq!(
+            &*resolved.name, &*expected.name,
+            "name mismatch for {}",
+            name
+        );
         assert_eq!(resolved.bg, expected.bg, "bg mismatch for {}", name);
     }
 }
 
 #[test]
 fn test_from_name_hyphenated_aliases() {
-    assert_eq!(&*Theme::from_name("catppuccin-mocha").unwrap().name, "catppuccin_mocha");
-    assert_eq!(&*Theme::from_name("gruvbox-dark").unwrap().name, "gruvbox_dark");
-    assert_eq!(&*Theme::from_name("solarized-dark").unwrap().name, "solarized_dark");
-    assert_eq!(&*Theme::from_name("solarized-light").unwrap().name, "solarized_light");
-    assert_eq!(&*Theme::from_name("tokyo-night").unwrap().name, "tokyo_night");
+    assert_eq!(
+        &*Theme::from_name("catppuccin-mocha").unwrap().name,
+        "catppuccin_mocha"
+    );
+    assert_eq!(
+        &*Theme::from_name("gruvbox-dark").unwrap().name,
+        "gruvbox_dark"
+    );
+    assert_eq!(
+        &*Theme::from_name("solarized-dark").unwrap().name,
+        "solarized_dark"
+    );
+    assert_eq!(
+        &*Theme::from_name("solarized-light").unwrap().name,
+        "solarized_light"
+    );
+    assert_eq!(
+        &*Theme::from_name("tokyo-night").unwrap().name,
+        "tokyo_night"
+    );
     assert_eq!(&*Theme::from_name("one-dark").unwrap().name, "one_dark");
     assert_eq!(&*Theme::from_name("rose-pine").unwrap().name, "rose_pine");
-    assert_eq!(&*Theme::from_name("high-contrast").unwrap().name, "high_contrast");
+    assert_eq!(
+        &*Theme::from_name("high-contrast").unwrap().name,
+        "high_contrast"
+    );
 }
 
 #[test]
 fn test_from_name_underscore_aliases() {
-    assert_eq!(&*Theme::from_name("catppuccin_mocha").unwrap().name, "catppuccin_mocha");
-    assert_eq!(&*Theme::from_name("gruvbox_dark").unwrap().name, "gruvbox_dark");
-    assert_eq!(&*Theme::from_name("solarized_dark").unwrap().name, "solarized_dark");
-    assert_eq!(&*Theme::from_name("solarized_light").unwrap().name, "solarized_light");
-    assert_eq!(&*Theme::from_name("tokyo_night").unwrap().name, "tokyo_night");
+    assert_eq!(
+        &*Theme::from_name("catppuccin_mocha").unwrap().name,
+        "catppuccin_mocha"
+    );
+    assert_eq!(
+        &*Theme::from_name("gruvbox_dark").unwrap().name,
+        "gruvbox_dark"
+    );
+    assert_eq!(
+        &*Theme::from_name("solarized_dark").unwrap().name,
+        "solarized_dark"
+    );
+    assert_eq!(
+        &*Theme::from_name("solarized_light").unwrap().name,
+        "solarized_light"
+    );
+    assert_eq!(
+        &*Theme::from_name("tokyo_night").unwrap().name,
+        "tokyo_night"
+    );
     assert_eq!(&*Theme::from_name("one_dark").unwrap().name, "one_dark");
     assert_eq!(&*Theme::from_name("rose_pine").unwrap().name, "rose_pine");
-    assert_eq!(&*Theme::from_name("high_contrast").unwrap().name, "high_contrast");
+    assert_eq!(
+        &*Theme::from_name("high_contrast").unwrap().name,
+        "high_contrast"
+    );
 }
 
 #[test]
@@ -752,7 +796,10 @@ fn test_from_name_case_insensitive() {
     assert_eq!(&*Theme::from_name("DARK").unwrap().name, "dark");
     assert_eq!(&*Theme::from_name("Dark").unwrap().name, "dark");
     assert_eq!(&*Theme::from_name("NORD").unwrap().name, "nord");
-    assert_eq!(&*Theme::from_name("Catppuccin-Mocha").unwrap().name, "catppuccin_mocha");
+    assert_eq!(
+        &*Theme::from_name("Catppuccin-Mocha").unwrap().name,
+        "catppuccin_mocha"
+    );
 }
 
 #[test]
@@ -763,7 +810,10 @@ fn test_from_name_unknown_returns_none() {
 
 #[test]
 fn test_from_name_short_aliases() {
-    assert_eq!(&*Theme::from_name("catppuccin").unwrap().name, "catppuccin_mocha");
+    assert_eq!(
+        &*Theme::from_name("catppuccin").unwrap().name,
+        "catppuccin_mocha"
+    );
     assert_eq!(&*Theme::from_name("gruvbox").unwrap().name, "gruvbox_dark");
 }
 
@@ -802,7 +852,9 @@ fn test_from_env_or_falls_back_when_unset() {
     std::env::remove_var("DTRON_THEME");
     let theme = Theme::from_env_or(Theme::light());
     assert_eq!(&*theme.name, "light");
-    if let Some(v) = original { std::env::set_var("DTRON_THEME", v) }
+    if let Some(v) = original {
+        std::env::set_var("DTRON_THEME", v)
+    }
 }
 
 #[test]

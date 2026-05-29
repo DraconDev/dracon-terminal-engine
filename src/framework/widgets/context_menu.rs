@@ -19,7 +19,7 @@
 use crate::compositor::plane::Plane;
 use crate::framework::theme::Theme;
 use crate::framework::widget::{WidgetId, WidgetState};
-use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind, MouseButton};
+use crate::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 // ---------------------------------------------------------------------------
@@ -308,10 +308,7 @@ impl ContextMenu {
 
     /// First non-separator index.
     fn first_selectable_index(&self) -> usize {
-        self.items
-            .iter()
-            .position(|i| !i.is_separator)
-            .unwrap_or(0)
+        self.items.iter().position(|i| !i.is_separator).unwrap_or(0)
     }
 
     /// Next selectable index after `from`, wrapping around.
@@ -422,7 +419,13 @@ impl crate::framework::widget::Widget for ContextMenu {
         for cx in 0..w {
             let idx = cx as usize;
             if idx < plane.cells.len() {
-                let ch = if cx == 0 { '╭' } else if cx == w - 1 { '╮' } else { '─' };
+                let ch = if cx == 0 {
+                    '╭'
+                } else if cx == w - 1 {
+                    '╮'
+                } else {
+                    '─'
+                };
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = fg;
                 plane.cells[idx].bg = bg;
@@ -434,7 +437,13 @@ impl crate::framework::widget::Widget for ContextMenu {
         for cx in 0..w {
             let idx = (by as usize) * w as usize + cx as usize;
             if idx < plane.cells.len() {
-                let ch = if cx == 0 { '╰' } else if cx == w - 1 { '╯' } else { '─' };
+                let ch = if cx == 0 {
+                    '╰'
+                } else if cx == w - 1 {
+                    '╯'
+                } else {
+                    '─'
+                };
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = fg;
                 plane.cells[idx].bg = bg;
@@ -605,11 +614,12 @@ impl crate::framework::widget::Widget for ContextMenu {
                     return false;
                 }
                 let item_row = row.saturating_sub(area.y + 1) as usize;
-                let new_hovered = if item_row < self.items.len() && !self.items[item_row].is_separator {
-                    Some(item_row)
-                } else {
-                    None
-                };
+                let new_hovered =
+                    if item_row < self.items.len() && !self.items[item_row].is_separator {
+                        Some(item_row)
+                    } else {
+                        None
+                    };
                 if new_hovered != self.hovered {
                     self.hovered = new_hovered;
                     self.dirty = true;
@@ -735,10 +745,9 @@ mod tests {
     fn context_menu_enter_fires_callback() {
         let selected = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
         let selected_clone = selected.clone();
-        let mut menu = ContextMenu::new(sample_items())
-            .on_select(Box::new(move |id: &str| {
-                *selected_clone.borrow_mut() = id.to_string();
-            }));
+        let mut menu = ContextMenu::new(sample_items()).on_select(Box::new(move |id: &str| {
+            *selected_clone.borrow_mut() = id.to_string();
+        }));
         menu.handle_key(KeyEvent {
             code: KeyCode::Enter,
             modifiers: Default::default(),

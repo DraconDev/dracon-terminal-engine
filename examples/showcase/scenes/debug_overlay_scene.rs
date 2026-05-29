@@ -54,11 +54,11 @@ struct GaugeBarConfig<'a> {
 
 impl DebugOverlayScene {
     pub fn new(theme: Theme) -> Self {
-        let debug_overlay = std::cell::RefCell::new(DebugOverlay::new(WidgetId::new(1))
-            .with_theme(theme.clone()));
+        let debug_overlay =
+            std::cell::RefCell::new(DebugOverlay::new(WidgetId::new(1)).with_theme(theme.clone()));
 
-        let profiler = std::cell::RefCell::new(Profiler::new(WidgetId::new(2))
-            .with_theme(theme.clone()));
+        let profiler =
+            std::cell::RefCell::new(Profiler::new(WidgetId::new(2)).with_theme(theme.clone()));
 
         Self {
             theme,
@@ -111,8 +111,8 @@ impl DebugOverlayScene {
         self.frame_time_ms.set(ft);
 
         // CPU usage fluctuation
-        let cpu = 12.0 + ((frame * 3 + 7) % 20) as f32 * 0.5
-                  + if frame % 90 < 10 { 15.0 } else { 0.0 };
+        let cpu =
+            12.0 + ((frame * 3 + 7) % 20) as f32 * 0.5 + if frame % 90 < 10 { 15.0 } else { 0.0 };
         self.cpu_usage.set(cpu.min(100.0));
 
         // Memory slowly grows then GCs
@@ -134,7 +134,13 @@ impl DebugOverlayScene {
         let wr = self.widgets_rendered.get();
         let frame = self.frame_count.get();
 
-        let fps_label = if fps >= 55 { "ok" } else if fps >= 30 { "warn" } else { "bad" };
+        let fps_label = if fps >= 55 {
+            "ok"
+        } else if fps >= 30 {
+            "warn"
+        } else {
+            "bad"
+        };
 
         self.debug_overlay.borrow_mut().set_lines(vec![
             format!("Frame: #{frame}"),
@@ -173,15 +179,25 @@ impl DebugOverlayScene {
             },
             Metric {
                 name: "gc".to_string(),
-                value: std::time::Duration::from_micros(if self.frame_count.get() % 200 > 190 { (ft * 500.0) as u64 } else { 50 }),
-                call_count: if self.frame_count.get() % 200 > 190 { 1 } else { 0 },
+                value: std::time::Duration::from_micros(if self.frame_count.get() % 200 > 190 {
+                    (ft * 500.0) as u64
+                } else {
+                    50
+                }),
+                call_count: if self.frame_count.get() % 200 > 190 {
+                    1
+                } else {
+                    0
+                },
             },
         ]);
     }
 }
 
 impl Scene for DebugOverlayScene {
-    fn scene_id(&self) -> &str { "debug_overlay" }
+    fn scene_id(&self) -> &str {
+        "debug_overlay"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -198,12 +214,35 @@ impl Scene for DebugOverlayScene {
         }
 
         // ── Header ──────────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 0, " Performance Monitor ", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            0,
+            " Performance Monitor ",
+            t.primary,
+            t.bg,
+            true,
+        );
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
         if self.paused.get() {
-            draw_text(&mut plane, DIV_X.saturating_sub(10), 0, "■ PAUSED", t.warning, t.bg, true);
+            draw_text(
+                &mut plane,
+                DIV_X.saturating_sub(10),
+                0,
+                "■ PAUSED",
+                t.warning,
+                t.bg,
+                true,
+            );
         }
 
         // Divider
@@ -234,24 +273,76 @@ impl Scene for DebugOverlayScene {
 
         // FPS history sparkline
         let spark_y = 2;
-        draw_text(&mut plane, main_x, spark_y, "FPS History", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            main_x,
+            spark_y,
+            "FPS History",
+            t.primary,
+            t.bg,
+            true,
+        );
         self.render_fps_sparkline(&mut plane, main_x, spark_y + 2, main_w.min(50), t);
 
         // Gauge bars
         if self.show_gauges.get() {
             let gauge_y = spark_y + 6;
             if gauge_y + 6 < area.height.saturating_sub(6) {
-                draw_text(&mut plane, main_x, gauge_y, "Resource Usage", t.primary, t.bg, true);
+                draw_text(
+                    &mut plane,
+                    main_x,
+                    gauge_y,
+                    "Resource Usage",
+                    t.primary,
+                    t.bg,
+                    true,
+                );
                 let gauge_w = main_w.min(50);
-                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
-                    x: main_x, y: gauge_y + 1, w: gauge_w, label: "CPU", value: self.cpu_usage.get(), color: if self.cpu_usage.get() > 80.0 { t.error } else if self.cpu_usage.get() > 50.0 { t.warning } else { t.success },
-                });
-                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
-                    x: main_x, y: gauge_y + 3, w: gauge_w, label: "MEM", value: self.mem_usage.get(), color: if self.mem_usage.get() > 80.0 { t.error } else if self.mem_usage.get() > 60.0 { t.warning } else { t.info },
-                });
-                self.render_gauge_bar(&mut plane, &GaugeBarConfig {
-                    x: main_x, y: gauge_y + 5, w: gauge_w, label: "GPU", value: (self.draw_calls.get() as f32 / 50.0 * 100.0).min(100.0), color: t.secondary,
-                });
+                self.render_gauge_bar(
+                    &mut plane,
+                    &GaugeBarConfig {
+                        x: main_x,
+                        y: gauge_y + 1,
+                        w: gauge_w,
+                        label: "CPU",
+                        value: self.cpu_usage.get(),
+                        color: if self.cpu_usage.get() > 80.0 {
+                            t.error
+                        } else if self.cpu_usage.get() > 50.0 {
+                            t.warning
+                        } else {
+                            t.success
+                        },
+                    },
+                );
+                self.render_gauge_bar(
+                    &mut plane,
+                    &GaugeBarConfig {
+                        x: main_x,
+                        y: gauge_y + 3,
+                        w: gauge_w,
+                        label: "MEM",
+                        value: self.mem_usage.get(),
+                        color: if self.mem_usage.get() > 80.0 {
+                            t.error
+                        } else if self.mem_usage.get() > 60.0 {
+                            t.warning
+                        } else {
+                            t.info
+                        },
+                    },
+                );
+                self.render_gauge_bar(
+                    &mut plane,
+                    &GaugeBarConfig {
+                        x: main_x,
+                        y: gauge_y + 5,
+                        w: gauge_w,
+                        label: "GPU",
+                        value: (self.draw_calls.get() as f32 / 50.0 * 100.0).min(100.0),
+                        color: t.secondary,
+                    },
+                );
             }
         }
 
@@ -260,14 +351,24 @@ impl Scene for DebugOverlayScene {
         if self.show_overlay.get() {
             let overlay_area = Rect::new(main_x, panel_y, 26, 9);
             let overlay_plane = self.debug_overlay.borrow().render(overlay_area);
-            blit_to(&mut plane, &overlay_plane, main_x as usize, panel_y as usize);
+            blit_to(
+                &mut plane,
+                &overlay_plane,
+                main_x as usize,
+                panel_y as usize,
+            );
         }
 
         if self.show_profiler.get() {
             let profiler_x = main_x + 28;
             let profiler_area = Rect::new(profiler_x, panel_y, main_w.saturating_sub(28), 9);
             let profiler_plane = self.profiler.borrow().render(profiler_area);
-            blit_to(&mut plane, &profiler_plane, profiler_x as usize, panel_y as usize);
+            blit_to(
+                &mut plane,
+                &profiler_plane,
+                profiler_x as usize,
+                panel_y as usize,
+            );
         }
 
         // ── Footer ─────────────────────────────────────────────────────
@@ -291,25 +392,35 @@ impl Scene for DebugOverlayScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Performance Monitor — Help", &[
-                ("SPACE", "Pause/resume metrics"),
-                ("1", "Toggle debug overlay"),
-                ("2", "Toggle profiler"),
-                ("3", "Toggle gauges"),
-                ("r", "Reset counters"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Performance Monitor — Help",
+                &[
+                    ("SPACE", "Pause/resume metrics"),
+                    ("1", "Toggle debug overlay"),
+                    ("2", "Toggle profiler"),
+                    ("3", "Toggle gauges"),
+                    ("r", "Reset counters"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -373,7 +484,8 @@ impl Scene for DebugOverlayScene {
                 }
                 // Click toggle areas
                 if col >= DIV_X {
-                    if (3..5).contains(&row) { // toggles row
+                    if (3..5).contains(&row) {
+                        // toggles row
                         self.show_overlay.set(!self.show_overlay.get());
                         self.dirty = true;
                         return true;
@@ -401,9 +513,15 @@ impl Scene for DebugOverlayScene {
         self.profiler.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl DebugOverlayScene {
@@ -425,7 +543,16 @@ impl DebugOverlayScene {
                 plane.cells[idx].transparent = false;
             }
         }
-        draw_text_clipped(plane, sx + 1, btn_y, btn_text, sx + SIDEBAR_W, t.bg, btn_bg, false);
+        draw_text_clipped(
+            plane,
+            sx + 1,
+            btn_y,
+            btn_text,
+            sx + SIDEBAR_W,
+            t.bg,
+            btn_bg,
+            false,
+        );
 
         // Reset button
         let reset_y = 5;
@@ -475,7 +602,15 @@ impl DebugOverlayScene {
         // Live metrics
         let metrics_y = area.height.saturating_sub(10);
         if metrics_y > toggle_y + 5 {
-            draw_text(plane, sx, metrics_y, "Live Metrics", t.secondary, t.bg, true);
+            draw_text(
+                plane,
+                sx,
+                metrics_y,
+                "Live Metrics",
+                t.secondary,
+                t.bg,
+                true,
+            );
 
             let fps = self.fps.get();
             let ft = self.frame_time_ms.get();
@@ -484,21 +619,58 @@ impl DebugOverlayScene {
             let dc = self.draw_calls.get();
             let wr = self.widgets_rendered.get();
 
-            let fps_color = if fps >= 55 { t.success } else if fps >= 30 { t.warning } else { t.error };
+            let fps_color = if fps >= 55 {
+                t.success
+            } else if fps >= 30 {
+                t.warning
+            } else {
+                t.error
+            };
             let metrics = [
                 ("FPS", format!("{}", fps), fps_color),
                 ("Frame", format!("{:.1}ms", ft), t.fg),
-                ("CPU", format!("{:.0}%", cpu), if cpu > 80.0 { t.error } else if cpu > 50.0 { t.warning } else { t.success }),
-                ("MEM", format!("{:.0}%", mem), if mem > 80.0 { t.error } else if mem > 60.0 { t.warning } else { t.info }),
+                (
+                    "CPU",
+                    format!("{:.0}%", cpu),
+                    if cpu > 80.0 {
+                        t.error
+                    } else if cpu > 50.0 {
+                        t.warning
+                    } else {
+                        t.success
+                    },
+                ),
+                (
+                    "MEM",
+                    format!("{:.0}%", mem),
+                    if mem > 80.0 {
+                        t.error
+                    } else if mem > 60.0 {
+                        t.warning
+                    } else {
+                        t.info
+                    },
+                ),
                 ("Draw", format!("{}", dc), t.fg),
                 ("Widgets", format!("{}", wr), t.fg),
             ];
 
             for (i, (label, value, color)) in metrics.iter().enumerate() {
                 let my = metrics_y + 1 + i as u16;
-                if my >= area.height.saturating_sub(4) { break; }
+                if my >= area.height.saturating_sub(4) {
+                    break;
+                }
                 draw_text(plane, sx, my, label, t.fg_muted, t.bg, false);
-                draw_text_clipped(plane, sx + 10, my, value, sx + SIDEBAR_W, *color, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    sx + 10,
+                    my,
+                    value,
+                    sx + SIDEBAR_W,
+                    *color,
+                    t.bg,
+                    false,
+                );
             }
         }
 
@@ -507,7 +679,16 @@ impl DebugOverlayScene {
         if frame_y > metrics_y + 8 {
             draw_text(plane, sx, frame_y, "Frame", t.secondary, t.bg, true);
             let frame_text = format!("#{}", self.frame_count.get());
-            draw_text_clipped(plane, sx, frame_y + 1, &frame_text, sx + SIDEBAR_W, t.fg, t.bg, false);
+            draw_text_clipped(
+                plane,
+                sx,
+                frame_y + 1,
+                &frame_text,
+                sx + SIDEBAR_W,
+                t.fg,
+                t.bg,
+                false,
+            );
         }
     }
 
@@ -521,14 +702,26 @@ impl DebugOverlayScene {
         for i in 0..chart_w {
             let top = (y * plane.width + x + i) as usize;
             let bot = ((y + chart_h - 1) * plane.width + x + i) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for j in 0..chart_h {
             let left = ((y + j) * plane.width + x) as usize;
             let right = ((y + j) * plane.width + x + chart_w - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         // Find min/max for scaling
@@ -542,7 +735,8 @@ impl DebugOverlayScene {
             let fps = history[pos];
 
             // Scale to chart height
-            let ratio = (fps.saturating_sub(min_fps) as f64 / (max_fps - min_fps) as f64).clamp(0.0, 1.0);
+            let ratio =
+                (fps.saturating_sub(min_fps) as f64 / (max_fps - min_fps) as f64).clamp(0.0, 1.0);
             let bar_height = (ratio * (chart_h - 2) as f64) as usize;
 
             // Draw bar from bottom
@@ -551,7 +745,13 @@ impl DebugOverlayScene {
                 let idx = (by * plane.width + x + 1 + i) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '█';
-                    plane.cells[idx].fg = if fps >= 55 { t.success } else if fps >= 30 { t.warning } else { t.error };
+                    plane.cells[idx].fg = if fps >= 55 {
+                        t.success
+                    } else if fps >= 30 {
+                        t.warning
+                    } else {
+                        t.error
+                    };
                     plane.cells[idx].transparent = false;
                 }
             }
@@ -559,7 +759,15 @@ impl DebugOverlayScene {
 
         // Scale labels
         draw_text(plane, x + 1, y + chart_h - 1, "20", t.fg_muted, t.bg, false);
-        draw_text(plane, x + chart_w - 3, y + chart_h - 1, "70", t.fg_muted, t.bg, false);
+        draw_text(
+            plane,
+            x + chart_w - 3,
+            y + chart_h - 1,
+            "70",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
     }
 
     fn render_gauge_bar(&self, plane: &mut Plane, cfg: &GaugeBarConfig) {
@@ -579,7 +787,11 @@ impl DebugOverlayScene {
             let idx = (y * plane.width + bar_x + bx) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = if (bx as usize) < filled { '█' } else { '░' };
-                plane.cells[idx].fg = if (bx as usize) < filled { cfg.color } else { t.fg_muted };
+                plane.cells[idx].fg = if (bx as usize) < filled {
+                    cfg.color
+                } else {
+                    t.fg_muted
+                };
                 plane.cells[idx].transparent = false;
             }
         }

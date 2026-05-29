@@ -12,12 +12,12 @@
 //!   Configurable  -  theme, help, back, quit (see keybindings)
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     StatusBar, StatusSegment, TabBar, Toast, ToastKind,
 };
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::os::fd::AsFd;
@@ -91,10 +91,14 @@ impl GitTui {
 
         let mut config = resolve_keybindings();
         if config.get(actions::THEME).is_none() {
-            config.bindings.insert(actions::THEME.to_string(), "t".to_string());
+            config
+                .bindings
+                .insert(actions::THEME.to_string(), "t".to_string());
         }
         if config.get(actions::REFRESH).is_none() {
-            config.bindings.insert(actions::REFRESH.to_string(), "r".to_string());
+            config
+                .bindings
+                .insert(actions::REFRESH.to_string(), "r".to_string());
         }
         let keybindings = KeybindingSet::from_config(&config);
 
@@ -1034,13 +1038,28 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, keybindings: &K
     let shortcuts = [
         ("1-4", "Switch views (Status/Log/Diff/Branches)"),
         ("^/v or j/k", "Navigate"),
-        (keybindings.display(actions::SUBMIT).unwrap_or("Enter"), "Stage/unstage or checkout"),
+        (
+            keybindings.display(actions::SUBMIT).unwrap_or("Enter"),
+            "Stage/unstage or checkout",
+        ),
         ("d", "View diff for selected file"),
         ("r", "Refresh"),
-        (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-        (keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help / go back"),
-        (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
-        (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+        (
+            keybindings.display(actions::THEME).unwrap_or("t"),
+            "Cycle theme",
+        ),
+        (
+            keybindings.display(actions::BACK).unwrap_or("Esc"),
+            "Dismiss help / go back",
+        ),
+        (
+            keybindings.display(actions::HELP).unwrap_or("F1"),
+            "Toggle this help",
+        ),
+        (
+            keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"),
+            "Quit",
+        ),
     ];
 
     let help_w = 48u16;
@@ -1213,7 +1232,6 @@ fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: Color
         }
     }
 }
-
 
 fn main() -> std::io::Result<()> {
     println!("Git TUI  -  Real Git interface");

@@ -1,6 +1,6 @@
 use dracon_terminal_engine::compositor::{Plane, Styles};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::Cell;
@@ -128,7 +128,10 @@ impl RichTextApp {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.rich_text.on_theme_change(&self.theme);
         self.dirty = true;
@@ -149,7 +152,9 @@ impl RichTextApp {
     }
 
     fn max_scroll(&self) -> u16 {
-        self.content_height.get().saturating_sub(self.visible_height())
+        self.content_height
+            .get()
+            .saturating_sub(self.visible_height())
     }
 
     fn scroll_up(&mut self, n: u16) {
@@ -170,14 +175,31 @@ impl RichTextApp {
 }
 
 impl Widget for RichTextApp {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -190,7 +212,11 @@ impl Widget for RichTextApp {
             let is_active = i == self.doc_index;
             let fg = if is_active { t.primary } else { t.fg_muted };
             let bg = if is_active { t.selection_bg } else { t.bg };
-            let style = if is_active { Styles::BOLD } else { Styles::empty() };
+            let style = if is_active {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
             let label = format!(" {} ", title);
             for (j, c) in label.chars().enumerate() {
                 let idx = (tab_x + j as u16) as usize;
@@ -235,7 +261,9 @@ impl Widget for RichTextApp {
         for row in (0..virtual_h as usize).rev() {
             let row_start = row * content_w as usize;
             let row_end = row_start + content_w as usize;
-            if row_end > rt_plane.cells.len() { continue; }
+            if row_end > rt_plane.cells.len() {
+                continue;
+            }
             for col in 0..content_w as usize {
                 let cell = &rt_plane.cells[row_start + col];
                 if cell.char != '\0' && !cell.transparent {
@@ -243,19 +271,27 @@ impl Widget for RichTextApp {
                     break;
                 }
             }
-            if last_row > 0 { break; }
+            if last_row > 0 {
+                break;
+            }
         }
         self.content_height.set(last_row);
 
         let content_y = 2u16;
         for row in 0..visible_h {
             let src_row = self.scroll_offset as usize + row as usize;
-            if src_row >= virtual_h as usize { break; }
+            if src_row >= virtual_h as usize {
+                break;
+            }
             for col in 0..content_w as usize {
                 let src_idx = src_row * content_w as usize + col;
-                if src_idx >= rt_plane.cells.len() { break; }
+                if src_idx >= rt_plane.cells.len() {
+                    break;
+                }
                 let cell = &rt_plane.cells[src_idx];
-                if cell.transparent { continue; }
+                if cell.transparent {
+                    continue;
+                }
                 let abs_x = 2 + col as u16;
                 let abs_y = content_y + row;
                 let dest_idx = (abs_y * area.width + abs_x) as usize;
@@ -271,7 +307,8 @@ impl Widget for RichTextApp {
             let thumb_h = (visible_h as f32 / content_h as f32 * visible_h as f32).max(1.0) as u16;
             let max_off = content_h.saturating_sub(visible_h).max(1);
             let thumb_y = (self.scroll_offset as f32 / max_off as f32
-                * (visible_h.saturating_sub(thumb_h)) as f32) as u16 + content_y;
+                * (visible_h.saturating_sub(thumb_h)) as f32) as u16
+                + content_y;
             for i in 0..thumb_h {
                 let y = thumb_y + i;
                 if y >= content_y && y < content_y + visible_h {
@@ -288,7 +325,8 @@ impl Widget for RichTextApp {
         let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q");
         let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1");
         let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
-        let status = format!("Tab/1-3: switch | {kb_theme}: theme | {kb_help}: help | {kb_quit}: quit");
+        let status =
+            format!("Tab/1-3: switch | {kb_theme}: theme | {kb_help}: help | {kb_quit}: quit");
         for (i, c) in status.chars().enumerate() {
             let idx = ((area.height - 1) * area.width + i as u16) as usize;
             if idx < plane.cells.len() {
@@ -313,28 +351,52 @@ impl Widget for RichTextApp {
                     }
                 }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
             let title = "RichText Help";
             let tx = hx + (hw - title.len() as u16) / 2;
             for (i, c) in title.chars().enumerate() {
                 let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
             }
             let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc");
             let shortcuts: [(&str, &str); 7] = [
@@ -350,11 +412,17 @@ impl Widget for RichTextApp {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 18 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -363,13 +431,17 @@ impl Widget for RichTextApp {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         if self.keybindings.matches(actions::QUIT, &key) {
             self.should_quit.store(true, Ordering::SeqCst);
             return true;
         }
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -393,23 +465,58 @@ impl Widget for RichTextApp {
                 self.switch_doc((self.doc_index + 1) % DOCS.len());
                 true
             }
-            KeyCode::Char('1') if key.modifiers.is_empty() => { self.switch_doc(0); true }
-            KeyCode::Char('2') if key.modifiers.is_empty() => { self.switch_doc(1); true }
-            KeyCode::Char('3') if key.modifiers.is_empty() => { self.switch_doc(2); true }
-            KeyCode::Up => { self.scroll_up(1); true }
-            KeyCode::Down => { self.scroll_down(1); true }
-            KeyCode::PageUp => { self.scroll_up(self.visible_height().saturating_sub(1).max(1)); true }
-            KeyCode::PageDown => { self.scroll_down(self.visible_height().saturating_sub(1).max(1)); true }
-            KeyCode::Home => { self.scroll_offset = 0; self.dirty = true; true }
-            KeyCode::End => { self.scroll_offset = self.max_scroll(); self.dirty = true; true }
+            KeyCode::Char('1') if key.modifiers.is_empty() => {
+                self.switch_doc(0);
+                true
+            }
+            KeyCode::Char('2') if key.modifiers.is_empty() => {
+                self.switch_doc(1);
+                true
+            }
+            KeyCode::Char('3') if key.modifiers.is_empty() => {
+                self.switch_doc(2);
+                true
+            }
+            KeyCode::Up => {
+                self.scroll_up(1);
+                true
+            }
+            KeyCode::Down => {
+                self.scroll_down(1);
+                true
+            }
+            KeyCode::PageUp => {
+                self.scroll_up(self.visible_height().saturating_sub(1).max(1));
+                true
+            }
+            KeyCode::PageDown => {
+                self.scroll_down(self.visible_height().saturating_sub(1).max(1));
+                true
+            }
+            KeyCode::Home => {
+                self.scroll_offset = 0;
+                self.dirty = true;
+                true
+            }
+            KeyCode::End => {
+                self.scroll_offset = self.max_scroll();
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, _col: u16, _row: u16) -> bool {
         match kind {
-            MouseEventKind::ScrollUp => { self.scroll_up(3); true }
-            MouseEventKind::ScrollDown => { self.scroll_down(3); true }
+            MouseEventKind::ScrollUp => {
+                self.scroll_up(3);
+                true
+            }
+            MouseEventKind::ScrollDown => {
+                self.scroll_down(3);
+                true
+            }
             _ => false,
         }
     }

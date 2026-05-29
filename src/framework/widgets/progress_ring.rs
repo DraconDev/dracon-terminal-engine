@@ -32,7 +32,7 @@ impl ProgressRing {
             id: WidgetId::next(),
             progress: progress.clamp(0.0, 1.0),
             size: 5,
-            color: Color::Ansi(12), // cyan
+            color: Color::Ansi(12),   // cyan
             bg_color: Color::Ansi(8), // dark gray
             show_percentage: true,
             label: None,
@@ -43,7 +43,7 @@ impl ProgressRing {
         }
     }
 
-/// Creates a ProgressRing with 50% progress.
+    /// Creates a ProgressRing with 50% progress.
     /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
@@ -209,7 +209,8 @@ impl crate::framework::widget::Widget for ProgressRing {
                     } else {
                         angle
                     };
-                    let segment = ((normalized_angle / (2.0 * std::f64::consts::PI)) * segments as f64) as i32;
+                    let segment = ((normalized_angle / (2.0 * std::f64::consts::PI))
+                        * segments as f64) as i32;
                     let segment = segment.min(segments - 1);
 
                     if segment < progress_segments {
@@ -336,7 +337,8 @@ impl crate::framework::widget::Widget for ProgressRing {
 
                 // Calculate angle from center
                 let angle = (-dy as f64).atan2(dx as f64);
-                let normalized = (angle + std::f64::consts::FRAC_PI_2) / (2.0 * std::f64::consts::PI);
+                let normalized =
+                    (angle + std::f64::consts::FRAC_PI_2) / (2.0 * std::f64::consts::PI);
                 let progress = if normalized < 0.0 {
                     normalized + 1.0
                 } else {
@@ -358,7 +360,8 @@ impl crate::framework::widget::Widget for ProgressRing {
                 let dy = rel_y - center_y;
 
                 let angle = (-dy as f64).atan2(dx as f64);
-                let normalized = (angle + std::f64::consts::FRAC_PI_2) / (2.0 * std::f64::consts::PI);
+                let normalized =
+                    (angle + std::f64::consts::FRAC_PI_2) / (2.0 * std::f64::consts::PI);
                 let progress = if normalized < 0.0 {
                     normalized + 1.0
                 } else {
@@ -378,7 +381,13 @@ impl crate::framework::widget::Widget for ProgressRing {
 }
 
 impl WidgetState for ProgressRing {
-    fn state_id(&self) -> Option<&str> { None }
-    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
-    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+    fn state_id(&self) -> Option<&str> {
+        None
+    }
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        Ok(())
+    }
 }

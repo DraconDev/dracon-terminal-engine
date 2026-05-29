@@ -65,48 +65,155 @@ impl TooltipScene {
     fn toolbar_items(&self) -> Vec<ToolbarItem> {
         let t = &self.theme;
         vec![
-            ToolbarItem { icon: '◈', label: "Files", tooltip: "Browse project files and folders", color: t.primary },
-            ToolbarItem { icon: '◇', label: "Search", tooltip: "Search across files, symbols, commands", color: t.secondary },
-            ToolbarItem { icon: '◈', label: "Git", tooltip: "Source control: commit, push, pull", color: t.success },
-            ToolbarItem { icon: '◆', label: "Debug", tooltip: "Launch and manage debug sessions", color: t.warning },
-            ToolbarItem { icon: '▣', label: "Ext", tooltip: "Install and manage editor extensions", color: t.info },
-            ToolbarItem { icon: '☰', label: "Config", tooltip: "Configure editor preferences", color: t.fg_muted },
-            ToolbarItem { icon: '◉', label: "Alerts", tooltip: "3 unread notifications", color: t.error },
-            ToolbarItem { icon: '⊚', label: "User", tooltip: "Signed in as user@terminal", color: t.fg },
+            ToolbarItem {
+                icon: '◈',
+                label: "Files",
+                tooltip: "Browse project files and folders",
+                color: t.primary,
+            },
+            ToolbarItem {
+                icon: '◇',
+                label: "Search",
+                tooltip: "Search across files, symbols, commands",
+                color: t.secondary,
+            },
+            ToolbarItem {
+                icon: '◈',
+                label: "Git",
+                tooltip: "Source control: commit, push, pull",
+                color: t.success,
+            },
+            ToolbarItem {
+                icon: '◆',
+                label: "Debug",
+                tooltip: "Launch and manage debug sessions",
+                color: t.warning,
+            },
+            ToolbarItem {
+                icon: '▣',
+                label: "Ext",
+                tooltip: "Install and manage editor extensions",
+                color: t.info,
+            },
+            ToolbarItem {
+                icon: '☰',
+                label: "Config",
+                tooltip: "Configure editor preferences",
+                color: t.fg_muted,
+            },
+            ToolbarItem {
+                icon: '◉',
+                label: "Alerts",
+                tooltip: "3 unread notifications",
+                color: t.error,
+            },
+            ToolbarItem {
+                icon: '⊚',
+                label: "User",
+                tooltip: "Signed in as user@terminal",
+                color: t.fg,
+            },
         ]
     }
 
     fn sidebar_items(&self) -> Vec<SidebarItem> {
         vec![
-            SidebarItem { icon: '▸', label: "Explorer", tooltip: "File tree and workspace browser", badge: None },
-            SidebarItem { icon: '▸', label: "Search", tooltip: "Find in files with regex support", badge: None },
-            SidebarItem { icon: '▸', label: "Source Control", tooltip: "Git changes and history", badge: Some("3") },
-            SidebarItem { icon: '▸', label: "Debug", tooltip: "Run and debug configurations", badge: None },
-            SidebarItem { icon: '▸', label: "Extensions", tooltip: "Installed: 12 extensions", badge: Some("1") },
-            SidebarItem { icon: '▸', label: "Output", tooltip: "View terminal and task output", badge: None },
-            SidebarItem { icon: '▸', label: "Problems", tooltip: "2 errors, 5 warnings", badge: Some("7") },
-            SidebarItem { icon: '▸', label: "Terminal", tooltip: "Integrated terminal (bash)", badge: None },
+            SidebarItem {
+                icon: '▸',
+                label: "Explorer",
+                tooltip: "File tree and workspace browser",
+                badge: None,
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Search",
+                tooltip: "Find in files with regex support",
+                badge: None,
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Source Control",
+                tooltip: "Git changes and history",
+                badge: Some("3"),
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Debug",
+                tooltip: "Run and debug configurations",
+                badge: None,
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Extensions",
+                tooltip: "Installed: 12 extensions",
+                badge: Some("1"),
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Output",
+                tooltip: "View terminal and task output",
+                badge: None,
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Problems",
+                tooltip: "2 errors, 5 warnings",
+                badge: Some("7"),
+            },
+            SidebarItem {
+                icon: '▸',
+                label: "Terminal",
+                tooltip: "Integrated terminal (bash)",
+                badge: None,
+            },
         ]
     }
 
     fn action_buttons(&self) -> Vec<ActionButton> {
         let t = &self.theme;
         vec![
-            ActionButton { label: "New File", tooltip: "Create a new file (Ctrl+N)", color: t.primary },
-            ActionButton { label: "Open Folder", tooltip: "Open a project folder", color: t.secondary },
-            ActionButton { label: "Save All", tooltip: "Save all unsaved files (Ctrl+Shift+S)", color: t.success },
-            ActionButton { label: "Format", tooltip: "Format document with formatter", color: t.info },
-            ActionButton { label: "Refactor", tooltip: "Rename symbol across workspace", color: t.warning },
-            ActionButton { label: "Run Task", tooltip: "Execute a configured task", color: t.primary },
+            ActionButton {
+                label: "New File",
+                tooltip: "Create a new file (Ctrl+N)",
+                color: t.primary,
+            },
+            ActionButton {
+                label: "Open Folder",
+                tooltip: "Open a project folder",
+                color: t.secondary,
+            },
+            ActionButton {
+                label: "Save All",
+                tooltip: "Save all unsaved files (Ctrl+Shift+S)",
+                color: t.success,
+            },
+            ActionButton {
+                label: "Format",
+                tooltip: "Format document with formatter",
+                color: t.info,
+            },
+            ActionButton {
+                label: "Refactor",
+                tooltip: "Rename symbol across workspace",
+                color: t.warning,
+            },
+            ActionButton {
+                label: "Run Task",
+                tooltip: "Execute a configured task",
+                color: t.primary,
+            },
         ]
     }
 
     fn add_history(&mut self, source: &str, text: String, color: Color) {
-        self.tooltip_history.insert(0, TooltipEntry {
-            source: source.to_string(),
-            text,
-            color,
-        });
+        self.tooltip_history.insert(
+            0,
+            TooltipEntry {
+                source: source.to_string(),
+                text,
+                color,
+            },
+        );
         if self.tooltip_history.len() > 8 {
             self.tooltip_history.pop();
         }
@@ -114,15 +221,30 @@ impl TooltipScene {
 
     fn get_tooltip_for_key(&self, key: &str) -> (&str, Color) {
         let t = &self.theme;
-        if let Some(idx) = key.strip_prefix("toolbar:").and_then(|s| s.parse::<usize>().ok()) {
+        if let Some(idx) = key
+            .strip_prefix("toolbar:")
+            .and_then(|s| s.parse::<usize>().ok())
+        {
             let items = self.toolbar_items();
-            if idx < items.len() { return (items[idx].tooltip, items[idx].color); }
-        } else if let Some(idx) = key.strip_prefix("sidebar:").and_then(|s| s.parse::<usize>().ok()) {
+            if idx < items.len() {
+                return (items[idx].tooltip, items[idx].color);
+            }
+        } else if let Some(idx) = key
+            .strip_prefix("sidebar:")
+            .and_then(|s| s.parse::<usize>().ok())
+        {
             let items = self.sidebar_items();
-            if idx < items.len() { return (items[idx].tooltip, t.primary); }
-        } else if let Some(idx) = key.strip_prefix("action:").and_then(|s| s.parse::<usize>().ok()) {
+            if idx < items.len() {
+                return (items[idx].tooltip, t.primary);
+            }
+        } else if let Some(idx) = key
+            .strip_prefix("action:")
+            .and_then(|s| s.parse::<usize>().ok())
+        {
             let buttons = self.action_buttons();
-            if idx < buttons.len() { return (buttons[idx].tooltip, buttons[idx].color); }
+            if idx < buttons.len() {
+                return (buttons[idx].tooltip, buttons[idx].color);
+            }
         }
         ("Unknown", t.fg_muted)
     }
@@ -193,7 +315,9 @@ impl TooltipScene {
         let items = self.sidebar_items();
         for (i, item) in items.iter().enumerate() {
             let iy = y + 2 + i as u16;
-            if iy >= y + h { break; }
+            if iy >= y + h {
+                break;
+            }
 
             let key = format!("sidebar:{}", i);
             let is_hovered = self.hovered.as_deref() == Some(key.as_str());
@@ -213,7 +337,15 @@ impl TooltipScene {
                 plane.cells[icon_idx].fg = fg;
             }
 
-            draw_text(plane, 4, iy, item.label, if is_hovered { t.primary } else { t.fg }, row_bg, is_hovered);
+            draw_text(
+                plane,
+                4,
+                iy,
+                item.label,
+                if is_hovered { t.primary } else { t.fg },
+                row_bg,
+                is_hovered,
+            );
 
             if let Some(badge) = item.badge {
                 let bx = w.saturating_sub(badge.len() as u16 + 2);
@@ -242,7 +374,9 @@ impl TooltipScene {
             let row = i / cols;
             let bx = x + (col * col_w as usize) as u16;
             let by = y + 2 + row as u16 * 3;
-            if by + 2 >= plane.height { break; }
+            if by + 2 >= plane.height {
+                break;
+            }
 
             let key = format!("action:{}", i);
             let is_hovered = self.hovered.as_deref() == Some(key.as_str());
@@ -263,12 +397,23 @@ impl TooltipScene {
         }
     }
 
-    fn render_tooltip_popup(&self, plane: &mut Plane, target_x: u16, target_y: u16, text: &str, color: Color) {
+    fn render_tooltip_popup(
+        &self,
+        plane: &mut Plane,
+        target_x: u16,
+        target_y: u16,
+        text: &str,
+        color: Color,
+    ) {
         let t = &self.theme;
         let tw = text.len() as u16 + 4;
         let th = 3u16;
 
-        let ty = if target_y + 1 + th < plane.height { target_y + 1 } else { target_y.saturating_sub(th) };
+        let ty = if target_y + 1 + th < plane.height {
+            target_y + 1
+        } else {
+            target_y.saturating_sub(th)
+        };
         let tx = target_x.min(plane.width.saturating_sub(tw + 1));
 
         // Shadow
@@ -308,8 +453,14 @@ impl TooltipScene {
             if px < plane.width {
                 let top = (ty * plane.width + px) as usize;
                 let bot = ((ty + th - 1) * plane.width + px) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = color; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = color; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = color;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = color;
+                }
             }
         }
         for dy in 0..th {
@@ -317,14 +468,28 @@ impl TooltipScene {
             if py < plane.height {
                 let left = (py * plane.width + tx) as usize;
                 let right = (py * plane.width + tx + tw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = color; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = color; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = color;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = color;
+                }
             }
         }
-        for (ch, cx, cy) in [('╭', tx, ty), ('╮', tx + tw - 1, ty), ('╰', tx, ty + th - 1), ('╯', tx + tw - 1, ty + th - 1)] {
+        for (ch, cx, cy) in [
+            ('╭', tx, ty),
+            ('╮', tx + tw - 1, ty),
+            ('╰', tx, ty + th - 1),
+            ('╯', tx + tw - 1, ty + th - 1),
+        ] {
             if cy < plane.height && cx < plane.width {
                 let idx = (cy * plane.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = color; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = color;
+                }
             }
         }
 
@@ -359,23 +524,38 @@ impl TooltipScene {
         if self.tooltip_history.is_empty() {
             draw_text(plane, x, y + 2, "Hover to start", t.fg_muted, t.bg, false);
         } else {
-            for (i, entry) in self.tooltip_history.iter().take((h as usize).saturating_sub(2)).enumerate() {
+            for (i, entry) in self
+                .tooltip_history
+                .iter()
+                .take((h as usize).saturating_sub(2))
+                .enumerate()
+            {
                 let hy = y + 2 + i as u16;
-                if hy >= y + h { break; }
+                if hy >= y + h {
+                    break;
+                }
 
                 draw_text(plane, x, hy, &entry.source, entry.color, t.bg, true);
                 let max_text = (w as usize).saturating_sub(entry.source.len() + 3);
                 let text: String = entry.text.chars().take(max_text).collect();
-                draw_text(plane, x + entry.source.len() as u16 + 1, hy, &text, t.fg_muted, t.bg, false);
+                draw_text(
+                    plane,
+                    x + entry.source.len() as u16 + 1,
+                    hy,
+                    &text,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
         }
     }
-
-
 }
 
 impl Scene for TooltipScene {
-    fn scene_id(&self) -> &str { "tooltip" }
+    fn scene_id(&self) -> &str {
+        "tooltip"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -390,8 +570,15 @@ impl Scene for TooltipScene {
         // Header
         draw_text(&mut plane, 2, 0, " Tooltips ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Toolbar (y=1)
         self.render_toolbar(&mut plane, 1);
@@ -431,11 +618,19 @@ impl Scene for TooltipScene {
 
         // History panel
         let hist_x = hist_div + 2;
-        self.render_history(&mut plane, hist_x, 2, history_w - 2, area.height.saturating_sub(5));
+        self.render_history(
+            &mut plane,
+            hist_x,
+            2,
+            history_w - 2,
+            area.height.saturating_sub(5),
+        );
 
         // Status indicators
         let status_y = area.height.saturating_sub(4);
-        draw_text(&mut plane, main_x, status_y, "Status", t.primary, t.bg, true);
+        draw_text(
+            &mut plane, main_x, status_y, "Status", t.primary, t.bg, true,
+        );
         for dx in 0..main_w {
             let idx = ((status_y + 1) * plane.width + main_x + dx) as usize;
             if idx < plane.cells.len() {
@@ -463,19 +658,42 @@ impl Scene for TooltipScene {
             let main_x = sidebar_w + 2;
             let main_w = area.width.saturating_sub(sidebar_w + history_w + 4);
 
-            if let Some(idx) = key.strip_prefix("toolbar:").and_then(|s| s.parse::<usize>().ok()) {
+            if let Some(idx) = key
+                .strip_prefix("toolbar:")
+                .and_then(|s| s.parse::<usize>().ok())
+            {
                 let items = self.toolbar_items();
                 if idx < items.len() {
                     let mut x = 2u16;
-                    for item in items.iter().take(idx) { x += item.label.len() as u16 + 4; }
-                    self.render_tooltip_popup(&mut plane, x, 1, items[idx].tooltip, items[idx].color);
+                    for item in items.iter().take(idx) {
+                        x += item.label.len() as u16 + 4;
+                    }
+                    self.render_tooltip_popup(
+                        &mut plane,
+                        x,
+                        1,
+                        items[idx].tooltip,
+                        items[idx].color,
+                    );
                 }
-            } else if let Some(idx) = key.strip_prefix("sidebar:").and_then(|s| s.parse::<usize>().ok()) {
+            } else if let Some(idx) = key
+                .strip_prefix("sidebar:")
+                .and_then(|s| s.parse::<usize>().ok())
+            {
                 let items = self.sidebar_items();
                 if idx < items.len() {
-                    self.render_tooltip_popup(&mut plane, 2, 4 + idx as u16, items[idx].tooltip, t.primary);
+                    self.render_tooltip_popup(
+                        &mut plane,
+                        2,
+                        4 + idx as u16,
+                        items[idx].tooltip,
+                        t.primary,
+                    );
                 }
-            } else if let Some(idx) = key.strip_prefix("action:").and_then(|s| s.parse::<usize>().ok()) {
+            } else if let Some(idx) = key
+                .strip_prefix("action:")
+                .and_then(|s| s.parse::<usize>().ok())
+            {
                 let buttons = self.action_buttons();
                 if idx < buttons.len() {
                     let col = idx % 2;
@@ -483,7 +701,13 @@ impl Scene for TooltipScene {
                     let col_w = main_w / 2;
                     let bx = main_x + (col * col_w as usize) as u16;
                     let by = 4 + row as u16 * 3;
-                    self.render_tooltip_popup(&mut plane, bx, by, buttons[idx].tooltip, buttons[idx].color);
+                    self.render_tooltip_popup(
+                        &mut plane,
+                        bx,
+                        by,
+                        buttons[idx].tooltip,
+                        buttons[idx].color,
+                    );
                 }
             }
         }
@@ -491,7 +715,10 @@ impl Scene for TooltipScene {
         // Footer
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let footer = format!(" Hover for tooltips | {}:help | {}:back ", help_key, back_key);
+        let footer = format!(
+            " Hover for tooltips | {}:help | {}:back ",
+            help_key, back_key
+        );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
             let idx = (fy * area.width + i as u16) as usize;
@@ -506,21 +733,31 @@ impl Scene for TooltipScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Tooltip Demo — Help", &[
-                ("Mouse", "Hover any element for tooltip"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Tooltip Demo — Help",
+                &[
+                    ("Mouse", "Hover any element for tooltip"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -562,9 +799,15 @@ impl Scene for TooltipScene {
         self.theme = theme.clone();
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl TooltipScene {

@@ -37,7 +37,14 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
 ///
 /// Border cells are drawn with the theme's `outline` color.
 /// Corner cells use the theme's `primary` color.
-pub fn draw_rounded_border(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &crate::framework::theme::Theme) {
+pub fn draw_rounded_border(
+    plane: &mut Plane,
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+    t: &crate::framework::theme::Theme,
+) {
     if w < 2 || h < 2 || x + w > plane.width || y + h > plane.height {
         return;
     }
@@ -144,7 +151,15 @@ mod tests {
     #[test]
     fn test_draw_text_basic() {
         let mut plane = Plane::new(0, 10, 3);
-        draw_text(&mut plane, 0, 0, "Hi", Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), false);
+        draw_text(
+            &mut plane,
+            0,
+            0,
+            "Hi",
+            Color::Rgb(255, 255, 255),
+            Color::Rgb(0, 0, 0),
+            false,
+        );
         assert_eq!(plane.cells[0].char, 'H');
         assert_eq!(plane.cells[1].char, 'i');
     }
@@ -152,7 +167,15 @@ mod tests {
     #[test]
     fn test_draw_text_clips_at_boundary() {
         let mut plane = Plane::new(0, 5, 1);
-        draw_text(&mut plane, 3, 0, "Hello", Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), false);
+        draw_text(
+            &mut plane,
+            3,
+            0,
+            "Hello",
+            Color::Rgb(255, 255, 255),
+            Color::Rgb(0, 0, 0),
+            false,
+        );
         assert_eq!(plane.cells[3].char, 'H');
         assert_eq!(plane.cells[4].char, 'e');
         // "llo" is clipped — would have wrapped to next row in the buggy version
@@ -161,7 +184,15 @@ mod tests {
     #[test]
     fn test_draw_text_out_of_bounds_y() {
         let mut plane = Plane::new(0, 10, 2);
-        draw_text(&mut plane, 0, 5, "Hi", Color::Rgb(255, 255, 255), Color::Rgb(0, 0, 0), false);
+        draw_text(
+            &mut plane,
+            0,
+            5,
+            "Hi",
+            Color::Rgb(255, 255, 255),
+            Color::Rgb(0, 0, 0),
+            false,
+        );
         // Should not panic
     }
 
@@ -169,8 +200,22 @@ mod tests {
     fn test_blit_to_skips_transparent() {
         let mut dest = Plane::new(0, 4, 2);
         let mut src = Plane::new(0, 2, 1);
-        src.cells[0] = Cell { char: 'A', fg: Color::Rgb(255, 255, 255), bg: Color::Rgb(0, 0, 0), style: Styles::empty(), transparent: false, skip: false };
-        src.cells[1] = Cell { char: 'B', fg: Color::Rgb(255, 255, 255), bg: Color::Rgb(0, 0, 0), style: Styles::empty(), transparent: true, skip: false };
+        src.cells[0] = Cell {
+            char: 'A',
+            fg: Color::Rgb(255, 255, 255),
+            bg: Color::Rgb(0, 0, 0),
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        src.cells[1] = Cell {
+            char: 'B',
+            fg: Color::Rgb(255, 255, 255),
+            bg: Color::Rgb(0, 0, 0),
+            style: Styles::empty(),
+            transparent: true,
+            skip: false,
+        };
         blit_to(&mut dest, &src, 0, 0);
         assert_eq!(dest.cells[0].char, 'A');
         // transparent cell was not copied — dest retains its initial value
@@ -181,8 +226,22 @@ mod tests {
     fn test_blit_to_skips_null() {
         let mut dest = Plane::new(0, 4, 2);
         let mut src = Plane::new(0, 2, 1);
-        src.cells[0] = Cell { char: 'A', fg: Color::Rgb(255, 255, 255), bg: Color::Rgb(0, 0, 0), style: Styles::empty(), transparent: false, skip: false };
-        src.cells[1] = Cell { char: '\0', fg: Color::Rgb(255, 255, 255), bg: Color::Rgb(0, 0, 0), style: Styles::empty(), transparent: false, skip: false };
+        src.cells[0] = Cell {
+            char: 'A',
+            fg: Color::Rgb(255, 255, 255),
+            bg: Color::Rgb(0, 0, 0),
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
+        src.cells[1] = Cell {
+            char: '\0',
+            fg: Color::Rgb(255, 255, 255),
+            bg: Color::Rgb(0, 0, 0),
+            style: Styles::empty(),
+            transparent: false,
+            skip: false,
+        };
         blit_to(&mut dest, &src, 0, 0);
         assert_eq!(dest.cells[0].char, 'A');
         // null cell was not copied — dest retains its initial value

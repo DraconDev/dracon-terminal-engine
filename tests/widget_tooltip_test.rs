@@ -190,7 +190,13 @@ fn test_tooltip_on_theme_change() {
 
 #[test]
 fn test_tooltip_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let tooltip = Tooltip::new(WidgetId::new(1), "Test").with_theme(t);

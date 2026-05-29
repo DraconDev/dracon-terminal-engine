@@ -7,7 +7,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -63,12 +63,17 @@ impl NoteEditorScene {
         )
         .with_theme(theme.clone());
 
-        let adapter = TextEditorAdapter::new(WidgetId::new(1200), editor)
-            .with_context_menu(ctx_menu);
+        let adapter =
+            TextEditorAdapter::new(WidgetId::new(1200), editor).with_context_menu(ctx_menu);
 
         let breadcrumbs = Breadcrumbs::new_with_id(
             WidgetId::new(1202),
-            vec!["home".into(), "user".into(), "notes".into(), "hello.rs".into()],
+            vec![
+                "home".into(),
+                "user".into(),
+                "notes".into(),
+                "hello.rs".into(),
+            ],
         )
         .clickable(true)
         .with_theme(theme.clone());
@@ -124,9 +129,7 @@ impl Scene for NoteEditorScene {
         blit_to(&mut plane, &bc_plane, 0, 1);
 
         // Divider (row 2)
-        let div = Divider::new()
-            .with_label("Editor")
-            .with_theme(t.clone());
+        let div = Divider::new().with_label("Editor").with_theme(t.clone());
         let div_plane = div.render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &div_plane, 0, 2);
 
@@ -140,7 +143,10 @@ impl Scene for NoteEditorScene {
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         // Cursor info on status bar
@@ -160,7 +166,9 @@ impl Scene for NoteEditorScene {
 
         if self.show_help {
             render_help_overlay(
-                &mut plane, area, t,
+                &mut plane,
+                area,
+                t,
                 "Note Editor — Help",
                 &[
                     ("Type", "Edit text at cursor"),
@@ -222,7 +230,10 @@ impl Scene for NoteEditorScene {
             if row >= ed_area.y && row < ed_area.y + ed_area.height {
                 let rel_col = col.saturating_sub(ed_area.x);
                 let rel_row = row.saturating_sub(ed_area.y);
-                let handled = self.editor.borrow_mut().handle_mouse(kind, rel_col, rel_row);
+                let handled = self
+                    .editor
+                    .borrow_mut()
+                    .handle_mouse(kind, rel_col, rel_row);
                 if handled {
                     self.dirty = true;
                 }

@@ -298,7 +298,9 @@ impl Widget for MenuApp {
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(self.theme.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
         plane.z_index = 0;
 
         let (hdr, ftr) = (1u16, 1u16);
@@ -423,10 +425,18 @@ impl Widget for MenuApp {
                 }
             }
             // Rounded corners
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = self.theme.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = self.theme.outline;
+                }
             }
             // Title
             let title = "Menu System Help";
@@ -533,25 +543,23 @@ impl Widget for MenuApp {
             }
         } else if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
-                KeyCode::Char('n')
-                    if self.keybindings.matches(actions::NEW_ITEM, &key) => {
-                        self.toast("New file created", ToastKind::Success);
-                        true
-                    }
+                KeyCode::Char('n') if self.keybindings.matches(actions::NEW_ITEM, &key) => {
+                    self.toast("New file created", ToastKind::Success);
+                    true
+                }
                 KeyCode::Char('o') => {
                     self.toast("Opened file dialog", ToastKind::Info);
                     true
                 }
-                KeyCode::Char('s')
-                    if self.keybindings.matches(actions::SAVE, &key) => {
-                        self.toast("Saved!", ToastKind::Success);
-                        true
-                    }
+                KeyCode::Char('s') if self.keybindings.matches(actions::SAVE, &key) => {
+                    self.toast("Saved!", ToastKind::Success);
+                    true
+                }
                 _ if self.keybindings.matches(actions::QUIT, &key) => {
-                        self.toast("Goodbye!", ToastKind::Info);
-                        self.should_quit.store(true, Ordering::SeqCst);
-                        true
-                    }
+                    self.toast("Goodbye!", ToastKind::Info);
+                    self.should_quit.store(true, Ordering::SeqCst);
+                    true
+                }
                 KeyCode::Char('v') => {
                     self.toast("Pasted from clipboard", ToastKind::Info);
                     true

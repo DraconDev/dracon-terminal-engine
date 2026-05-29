@@ -113,7 +113,10 @@ pub struct Theme {
     /// **Deprecated:** Layout dimensions should not live in Theme.
     /// Use [`crate::framework::scroll::DEFAULT_SCROLLBAR_WIDTH`] instead.
     /// This field is kept for backward compatibility and will be removed in a future release.
-    #[deprecated(since = "0.3.0", note = "Use framework::scroll::DEFAULT_SCROLLBAR_WIDTH instead")]
+    #[deprecated(
+        since = "0.3.0",
+        note = "Use framework::scroll::DEFAULT_SCROLLBAR_WIDTH instead"
+    )]
     #[doc(hidden)]
     pub scrollbar_width: u16,
 }
@@ -1363,7 +1366,11 @@ impl Theme {
             kind,
             bg,
             surface: Color::Rgb(surface_r, surface_g, surface_b),
-            surface_elevated: Color::Rgb(surface_elevated_r, surface_elevated_g, surface_elevated_b),
+            surface_elevated: Color::Rgb(
+                surface_elevated_r,
+                surface_elevated_g,
+                surface_elevated_b,
+            ),
             fg,
             fg_muted: Color::Rgb(fg_muted_r, fg_muted_g, fg_muted_b),
             fg_subtle: Color::Rgb(fg_subtle_r, fg_subtle_g, fg_subtle_b),

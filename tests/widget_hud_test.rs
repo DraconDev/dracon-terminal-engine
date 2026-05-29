@@ -5,11 +5,21 @@ use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::hud::Hud;
 
-fn white() -> Color { Color::Rgb(255, 255, 255) }
-fn black() -> Color { Color::Rgb(0, 0, 0) }
-fn red() -> Color { Color::Rgb(255, 0, 0) }
-fn green() -> Color { Color::Rgb(0, 255, 0) }
-fn blue() -> Color { Color::Rgb(0, 0, 255) }
+fn white() -> Color {
+    Color::Rgb(255, 255, 255)
+}
+fn black() -> Color {
+    Color::Rgb(0, 0, 0)
+}
+fn red() -> Color {
+    Color::Rgb(255, 0, 0)
+}
+fn green() -> Color {
+    Color::Rgb(0, 255, 0)
+}
+fn blue() -> Color {
+    Color::Rgb(0, 0, 255)
+}
 
 // ============================================================================
 // Construction Tests
@@ -270,7 +280,6 @@ fn test_hud_render_gauge_empty_label() {
 }
 
 #[test]
-
 #[test]
 fn test_hud_render_gauge_multiple() {
     let hud = Hud::new(100).with_size(50, 20);
@@ -330,12 +339,7 @@ fn test_hud_multiple_themes() {
 
 #[test]
 fn test_hud_size_various() {
-    let sizes = vec![
-        (10, 5),
-        (20, 10),
-        (50, 20),
-        (100, 50),
-    ];
+    let sizes = vec![(10, 5), (20, 10), (50, 20), (100, 50)];
     for (w, h) in sizes {
         let hud = Hud::new(100).with_size(w, h);
         let plane = hud.render_text(0, 0, "Test", white(), Color::Reset);

@@ -4,11 +4,11 @@
 //! and dirty region tracker for use in render and tick callbacks.
 
 use crate::compositor::{Compositor, Plane};
+use crate::framework::animation::AnimationManager;
 use crate::framework::command::{BoundCommand, CommandRunner};
+use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::event_bus::EventBus;
 use crate::framework::focus::FocusManager;
-use crate::framework::animation::AnimationManager;
-use crate::framework::dirty_regions::DirtyRegionTracker;
 use crate::framework::scene_router::SceneRouter;
 use crate::framework::theme::Theme;
 use crate::framework::widget::WidgetId;
@@ -198,8 +198,8 @@ impl<'a> Ctx<'a> {
         F: FnOnce(&mut SplitPane, &mut SplitPane),
     {
         let (w, h) = self.compositor.size();
-        let split = SplitPane::new(crate::framework::widgets::split::Orientation::Horizontal)
-            .ratio(0.5);
+        let split =
+            SplitPane::new(crate::framework::widgets::split::Orientation::Horizontal).ratio(0.5);
         let (r1, r2) = split.split(Rect::new(0, 0, w, h));
         let mut left = SplitPane::from_rect(r1);
         let mut right = SplitPane::from_rect(r2);
@@ -212,8 +212,8 @@ impl<'a> Ctx<'a> {
         F: FnOnce(&mut SplitPane, &mut SplitPane),
     {
         let (w, h) = self.compositor.size();
-        let split = SplitPane::new(crate::framework::widgets::split::Orientation::Vertical)
-            .ratio(0.5);
+        let split =
+            SplitPane::new(crate::framework::widgets::split::Orientation::Vertical).ratio(0.5);
         let (r1, r2) = split.split(Rect::new(0, 0, w, h));
         let mut top = SplitPane::from_rect(r1);
         let mut bottom = SplitPane::from_rect(r2);
@@ -228,7 +228,10 @@ impl<'a> Ctx<'a> {
     }
 
     /// Subscribes to events of type `E` on the app's event bus.
-    pub fn subscribe<E: std::any::Any + Clone, F>(&self, callback: F) -> crate::framework::event_bus::SubscriptionId
+    pub fn subscribe<E: std::any::Any + Clone, F>(
+        &self,
+        callback: F,
+    ) -> crate::framework::event_bus::SubscriptionId
     where
         F: Fn(&E) + 'static,
     {

@@ -92,8 +92,19 @@ impl Capabilities {
             return false;
         }
         let truecolor_terms = [
-            "xterm", "screen", "tmux", "rxvt", "kitty", "alacritty", "wezterm",
-            "ghostty", "foot", "konsole", "gnome", "terminology", "eterm",
+            "xterm",
+            "screen",
+            "tmux",
+            "rxvt",
+            "kitty",
+            "alacritty",
+            "wezterm",
+            "ghostty",
+            "foot",
+            "konsole",
+            "gnome",
+            "terminology",
+            "eterm",
         ];
         truecolor_terms.iter().any(|t| term_lower.contains(t))
     }
@@ -104,12 +115,19 @@ impl Capabilities {
     pub fn supports_mouse(&self) -> bool {
         let term_lower = self.term.to_lowercase();
         // Known mouse-capable terminals
-        if term_lower.contains("xterm") || term_lower.contains("screen")
-            || term_lower.contains("tmux") || term_lower.contains("rxvt")
-            || term_lower.contains("kitty") || term_lower.contains("wezterm")
-            || term_lower.contains("foot") || term_lower.contains("alacritty")
-            || term_lower.contains("ghostty") || term_lower.contains("konsole")
-            || term_lower.contains("gnome") || term_lower.contains("terminology") {
+        if term_lower.contains("xterm")
+            || term_lower.contains("screen")
+            || term_lower.contains("tmux")
+            || term_lower.contains("rxvt")
+            || term_lower.contains("kitty")
+            || term_lower.contains("wezterm")
+            || term_lower.contains("foot")
+            || term_lower.contains("alacritty")
+            || term_lower.contains("ghostty")
+            || term_lower.contains("konsole")
+            || term_lower.contains("gnome")
+            || term_lower.contains("terminology")
+        {
             return true;
         }
         // Default to likely supported for unknown modern terminals
@@ -285,7 +303,9 @@ impl<W: Write + AsFd> Terminal<W> {
     /// terminal.emit("\x1b]10;#FF0000\x07")?;
     /// ```
     pub fn emit(&mut self, seq: &str) -> io::Result<()> {
-        self.output.write_all(seq.as_bytes()).map_err(io::Error::other)
+        self.output
+            .write_all(seq.as_bytes())
+            .map_err(io::Error::other)
     }
 
     /// Set the terminal window title.

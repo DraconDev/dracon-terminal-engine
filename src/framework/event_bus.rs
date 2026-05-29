@@ -168,7 +168,11 @@ impl EventBus {
                 .get(&type_id)
                 .map(|v| v.iter().filter(|c| c.is_some()).count())
                 .unwrap_or(0);
-            eprintln!("[EventBus] publish<{}> → {} subscribers", std::any::type_name::<E>(), count);
+            eprintln!(
+                "[EventBus] publish<{}> → {} subscribers",
+                std::any::type_name::<E>(),
+                count
+            );
         }
 
         let callbacks: Vec<(usize, EventCallback)> = self
@@ -400,10 +404,8 @@ impl EventBus {
         let start = history.len().saturating_sub(n);
         for record in history.range(start..) {
             if let Some(callbacks) = self.subscribers.borrow().get(&record.payload.type_id()) {
-                let callbacks: Vec<EventCallback> = callbacks
-                    .iter()
-                    .filter_map(|c| c.clone())
-                    .collect();
+                let callbacks: Vec<EventCallback> =
+                    callbacks.iter().filter_map(|c| c.clone()).collect();
                 for cb in callbacks {
                     cb(&*record.payload);
                 }

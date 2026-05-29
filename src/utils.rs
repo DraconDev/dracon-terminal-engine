@@ -2,14 +2,14 @@
 
 //! Utility functions for terminal UI rendering, file operations, and system interactions.
 
-use chrono::{DateTime, Local};
 use crate::compositor::Color;
+use chrono::{DateTime, Local};
+#[cfg(feature = "syntax-highlighting")]
+use ratatui::style::Modifier;
 use ratatui::{
     style::Style,
     text::{Line, Span},
 };
-#[cfg(feature = "syntax-highlighting")]
-use ratatui::style::Modifier;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::time::SystemTime;
@@ -533,11 +533,10 @@ pub fn highlight_code<'a>(
             "flake.lock" | "json" | "jsonc" | "ipynb" => ps.find_syntax_by_extension("json"),
             "xml" | "svg" | "plist" | "xaml" | "csproj" | "fsproj" | "vbproj" | "pom"
             | "pom.xml" | "xsd" | "xsl" => ps.find_syntax_by_extension("xml"),
-            "nix" | "flake.nix" | "configuration.nix" | "home.nix" | "default.nix" => {
-                ps.find_syntax_by_extension("nix")
-                    .or_else(|| ps.find_syntax_by_name("Nix"))
-                    .or_else(|| ps.find_syntax_by_extension("rb"))
-            }
+            "nix" | "flake.nix" | "configuration.nix" | "home.nix" | "default.nix" => ps
+                .find_syntax_by_extension("nix")
+                .or_else(|| ps.find_syntax_by_name("Nix"))
+                .or_else(|| ps.find_syntax_by_extension("rb")),
             "yaml" | "yml" => ps.find_syntax_by_extension("yaml"),
             "gitignore" | "gitattributes" | "gitconfig" | "conf" | "config" | "env" | ".env"
             | "properties" | "prefs" => ps.find_syntax_by_extension("sh"),
@@ -742,7 +741,7 @@ pub fn draw_stat_bar(
     let ratio = (value / max).clamp(0.0, 1.0);
     let filled = (ratio * bar_width as f32).round() as usize;
 
-let mut spans = vec![Span::styled(
+    let mut spans = vec![Span::styled(
         format!("{} ", label),
         Style::default().fg(to_ratatui_color(Color::Ansi(8))),
     )];
@@ -758,7 +757,10 @@ let mut spans = vec![Span::styled(
         };
 
         if i < filled {
-            spans.push(Span::styled(symbol, Style::default().fg(to_ratatui_color(color))));
+            spans.push(Span::styled(
+                symbol,
+                Style::default().fg(to_ratatui_color(color)),
+            ));
         } else {
             spans.push(Span::styled(
                 symbol,

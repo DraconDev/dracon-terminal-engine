@@ -141,8 +141,9 @@ impl Calendar {
 
     /// Returns the first day of the displayed month.
     fn first_day_of_month(&self) -> NaiveDate {
-        NaiveDate::from_ymd_opt(self.year, self.month as u32, 1)
-            .unwrap_or_else(|| NaiveDate::from_ymd_opt(2024, 1, 1).expect("hardcoded date 2024-01-01 is always valid"))
+        NaiveDate::from_ymd_opt(self.year, self.month as u32, 1).unwrap_or_else(|| {
+            NaiveDate::from_ymd_opt(2024, 1, 1).expect("hardcoded date 2024-01-01 is always valid")
+        })
     }
 
     /// Returns the days in the current month.
@@ -347,7 +348,13 @@ impl crate::framework::widget::Widget for Calendar {
                 plane.cells[idx].fg = self.theme.primary;
                 plane.cells[idx].style = Styles::empty();
             }
-            self.zones.borrow_mut().register(ZoneId::PrevMonth, cal_x.saturating_sub(2), cal_y, 1, 1);
+            self.zones.borrow_mut().register(
+                ZoneId::PrevMonth,
+                cal_x.saturating_sub(2),
+                cal_y,
+                1,
+                1,
+            );
         }
 
         // Month/Year title
@@ -371,7 +378,9 @@ impl crate::framework::widget::Widget for Calendar {
                 plane.cells[idx].fg = self.theme.primary;
                 plane.cells[idx].style = Styles::empty();
             }
-            self.zones.borrow_mut().register(ZoneId::NextMonth, next_btn_x, cal_y, 1, 1);
+            self.zones
+                .borrow_mut()
+                .register(ZoneId::NextMonth, next_btn_x, cal_y, 1, 1);
         }
 
         // === DAY HEADERS (Mo Tu We Th Fr Sa Su) ===
@@ -403,8 +412,11 @@ impl crate::framework::widget::Widget for Calendar {
                 let cell_y = grid_start_y + week as u16;
 
                 if cell_index >= offset && day_num <= days_in_month {
-                    let date = NaiveDate::from_ymd_opt(self.year, self.month as u32, day_num as u32)
-                        .unwrap_or_else(|| NaiveDate::from_ymd_opt(2000, 1, 1).unwrap_or(NaiveDate::MIN));
+                    let date =
+                        NaiveDate::from_ymd_opt(self.year, self.month as u32, day_num as u32)
+                            .unwrap_or_else(|| {
+                                NaiveDate::from_ymd_opt(2000, 1, 1).unwrap_or(NaiveDate::MIN)
+                            });
                     let day_str = format!("{:>2}", day_num);
 
                     // Determine cell styling
@@ -416,7 +428,11 @@ impl crate::framework::widget::Widget for Calendar {
                     let is_hovered = self.hovered_day == Some(cell_index);
 
                     let (fg, bg, style) = if is_selected || is_range_start || is_range_end {
-                        (self.theme.selection_fg, self.theme.selection_bg, Styles::BOLD)
+                        (
+                            self.theme.selection_fg,
+                            self.theme.selection_bg,
+                            Styles::BOLD,
+                        )
                     } else if is_in_range {
                         (self.theme.fg, self.theme.info_bg, Styles::empty())
                     } else if is_today {
@@ -439,7 +455,9 @@ impl crate::framework::widget::Widget for Calendar {
                     }
 
                     // Register hit zone for this day
-                    self.zones.borrow_mut().register(ZoneId::Day(cell_index), cell_x, cell_y, 2, 1);
+                    self.zones
+                        .borrow_mut()
+                        .register(ZoneId::Day(cell_index), cell_x, cell_y, 2, 1);
                 } else {
                     // Empty cell
                     for j in 0..2u16 {
@@ -535,7 +553,12 @@ impl crate::framework::widget::Widget for Calendar {
         }
     }
 
-    fn handle_mouse(&mut self, kind: crate::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: crate::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         use crate::input::event::MouseEventKind;
 
         // Dispatch to hit zones - clone the zone_id to avoid borrow conflicts
@@ -555,24 +578,22 @@ impl crate::framework::widget::Widget for Calendar {
                     }
                     true
                 }
-                MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                    match zone_id {
-                        ZoneId::PrevMonth => {
-                            self.prev_month();
-                            true
-                        }
-                        ZoneId::NextMonth => {
-                            self.next_month();
-                            true
-                        }
-                        ZoneId::Day(idx) => {
-                            if let Some(date) = self.date_for_index(idx) {
-                                self.select_date(date);
-                            }
-                            true
-                        }
+                MouseEventKind::Down(crate::input::event::MouseButton::Left) => match zone_id {
+                    ZoneId::PrevMonth => {
+                        self.prev_month();
+                        true
                     }
-                }
+                    ZoneId::NextMonth => {
+                        self.next_month();
+                        true
+                    }
+                    ZoneId::Day(idx) => {
+                        if let Some(date) = self.date_for_index(idx) {
+                            self.select_date(date);
+                        }
+                        true
+                    }
+                },
                 _ => true,
             }
         } else {

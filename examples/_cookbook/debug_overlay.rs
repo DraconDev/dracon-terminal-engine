@@ -31,7 +31,9 @@ use dracon_terminal_engine::compositor::{Cell, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{EventLogger, Profiler, WidgetInspector, WidgetNode};
+use dracon_terminal_engine::framework::widgets::{
+    EventLogger, Profiler, WidgetInspector, WidgetNode,
+};
 use ratatui::layout::Rect;
 
 use std::os::fd::AsFd;
@@ -55,29 +57,27 @@ struct DebugOverlayPanel {
 impl DebugOverlayPanel {
     fn new(id: WidgetId, theme: Theme, should_quit: Arc<AtomicBool>) -> Self {
         let mut inspector = WidgetInspector::new(WidgetId::new(180));
-        let hierarchy = vec![
-            WidgetNode {
-                id: WidgetId::new(1),
-                label: "App".to_string(),
-                children: vec![
-                    WidgetNode {
-                        id: WidgetId::new(160),
-                        label: "Profiler".to_string(),
-                        children: vec![],
-                    },
-                    WidgetNode {
-                        id: WidgetId::new(180),
-                        label: "WidgetInspector".to_string(),
-                        children: vec![],
-                    },
-                    WidgetNode {
-                        id: WidgetId::new(170),
-                        label: "EventLogger".to_string(),
-                        children: vec![],
-                    },
-                ],
-            },
-        ];
+        let hierarchy = vec![WidgetNode {
+            id: WidgetId::new(1),
+            label: "App".to_string(),
+            children: vec![
+                WidgetNode {
+                    id: WidgetId::new(160),
+                    label: "Profiler".to_string(),
+                    children: vec![],
+                },
+                WidgetNode {
+                    id: WidgetId::new(180),
+                    label: "WidgetInspector".to_string(),
+                    children: vec![],
+                },
+                WidgetNode {
+                    id: WidgetId::new(170),
+                    label: "EventLogger".to_string(),
+                    children: vec![],
+                },
+            ],
+        }];
         inspector.set_hierarchy(hierarchy);
 
         Self {
@@ -187,10 +187,22 @@ impl DebugOverlayPanel {
 
         let shortcuts = [
             ("F12", "Toggle overlay"),
-            (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Close overlay"),
-            (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
-            (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
-            (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
+            (
+                self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                "Close overlay",
+            ),
+            (
+                self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                "Cycle theme",
+            ),
+            (
+                self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                "Toggle help",
+            ),
+            (
+                self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                "Quit",
+            ),
         ];
         for (i, (key, desc)) in shortcuts.iter().enumerate() {
             let row = hy + 3 + i as u16;
@@ -227,10 +239,15 @@ impl Widget for DebugOverlayPanel {
     fn set_area(&mut self, area: Rect) {
         self.area.set(area);
         self.profiler.borrow_mut().set_area(Rect::new(0, 1, 25, 8));
-        self.inspector.borrow_mut().set_area(Rect::new(26, 1, 25, 8));
-        self.event_logger
+        self.inspector
             .borrow_mut()
-            .set_area(Rect::new(0, 10, area.width, area.height.saturating_sub(11)));
+            .set_area(Rect::new(26, 1, 25, 8));
+        self.event_logger.borrow_mut().set_area(Rect::new(
+            0,
+            10,
+            area.width,
+            area.height.saturating_sub(11),
+        ));
     }
     fn z_index(&self) -> u16 {
         200
@@ -367,7 +384,8 @@ impl Widget for DebugOverlayPanel {
                     let on_vert_left = x == 0;
                     let on_vert_mid = x == 25;
                     let on_vert_right = x == area.width.saturating_sub(1);
-                    let is_corner = (on_top || on_bottom) && (on_vert_left || on_vert_mid || on_vert_right);
+                    let is_corner =
+                        (on_top || on_bottom) && (on_vert_left || on_vert_mid || on_vert_right);
                     let is_junction = on_middle && (on_vert_left || on_vert_mid);
                     let bg_color = if on_top || on_middle || on_bottom {
                         self.theme.surface_elevated
@@ -494,7 +512,8 @@ impl Widget for DebugOverlayPanel {
 
         // Status bar
         let status_y = plane.height.saturating_sub(1);
-        let hint = format!("F12: toggle | {}: theme | {}: help | {}: dismiss | {}: quit",
+        let hint = format!(
+            "F12: toggle | {}: theme | {}: help | {}: dismiss | {}: quit",
             self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
             self.keybindings.display(actions::HELP).unwrap_or("f1"),
             self.keybindings.display(actions::BACK).unwrap_or("esc"),
@@ -532,7 +551,9 @@ impl Widget for DebugOverlayPanel {
 
         // Handle help overlay first
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty.set(true);
             }

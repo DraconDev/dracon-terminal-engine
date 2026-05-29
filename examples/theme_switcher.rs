@@ -17,7 +17,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::app::App;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::theme::{Theme, ThemeKind};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use ratatui::layout::Rect;
@@ -739,7 +739,11 @@ impl Widget for WidgetDemoPanel {
         }
 
         let breadcrumb_row = area.height as usize - 1;
-        let crumbs = [("Home home", false), ("Dir projects", false), ("- demo", true)];
+        let crumbs = [
+            ("Home home", false),
+            ("Dir projects", false),
+            ("- demo", true),
+        ];
         let total_len: usize =
             crumbs.iter().map(|(s, _)| s.len()).sum::<usize>() + crumbs.len() - 1;
         let start_x = (area.width as usize / 2 - total_len / 2) as u16;

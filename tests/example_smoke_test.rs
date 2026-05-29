@@ -15,7 +15,11 @@ fn assert_example_compiles(name: &str) {
         .status()
         .unwrap_or_else(|e| panic!("failed to run cargo build for {}: {}", name, e));
 
-    assert!(status.success(), "cargo build for example '{}' failed", name);
+    assert!(
+        status.success(),
+        "cargo build for example '{}' failed",
+        name
+    );
 }
 
 #[test]

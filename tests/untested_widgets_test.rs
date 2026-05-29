@@ -35,8 +35,7 @@ fn test_autocomplete_render() {
 
 #[test]
 fn test_autocomplete_with_max_visible() {
-    let ac = Autocomplete::new(WidgetId::new(2), vec!["a".into()])
-        .with_max_visible(3);
+    let ac = Autocomplete::new(WidgetId::new(2), vec!["a".into()]).with_max_visible(3);
     let _plane = ac.render(test_area());
 }
 
@@ -111,11 +110,8 @@ fn test_kanban_new() {
 
 #[test]
 fn test_kanban_with_columns() {
-    let kb = Kanban::with_columns(vec![
-        ("Todo", vec!["Task 1"]),
-        ("Done", vec!["Task 2"]),
-    ])
-    .with_theme(Theme::nord());
+    let kb = Kanban::with_columns(vec![("Todo", vec!["Task 1"]), ("Done", vec!["Task 2"])])
+        .with_theme(Theme::nord());
     let plane = kb.render(Rect::new(0, 0, 60, 12));
     assert_eq!(plane.width, 60);
 }

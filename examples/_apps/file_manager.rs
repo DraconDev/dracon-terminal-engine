@@ -63,7 +63,7 @@ impl Widget for FileManagerRouter {
         0
     }
     fn needs_render(&self) -> bool {
-        false  // We handle rendering in on_tick
+        false // We handle rendering in on_tick
     }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
@@ -180,7 +180,9 @@ impl FsNode {
                 let meta = e.metadata().ok();
                 let is_dir = meta.as_ref().map(|m| m.is_dir()).unwrap_or(false);
                 let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
-                let modified = meta.as_ref().and_then(|m| m.modified().ok())
+                let modified = meta
+                    .as_ref()
+                    .and_then(|m| m.modified().ok())
                     .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
                     .map(|d| d.as_secs());
                 FsNode {
@@ -210,7 +212,9 @@ impl FsNode {
         let is_dir = path.is_dir();
         let meta = std::fs::metadata(path).ok();
         let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
-        let modified = meta.as_ref().and_then(|m| m.modified().ok())
+        let modified = meta
+            .as_ref()
+            .and_then(|m| m.modified().ok())
             .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
             .map(|d| d.as_secs());
 
@@ -290,7 +294,8 @@ impl FileManager {
             .components()
             .map(|c| c.as_os_str().to_string_lossy().into_owned())
             .collect();
-        let breadcrumbs = Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(theme.clone());
+        let breadcrumbs =
+            Breadcrumbs::new_with_id(WidgetId::new(3), segments).with_theme(theme.clone());
 
         let mut fm = Self {
             id,
@@ -343,9 +348,7 @@ impl FileManager {
         self.dirty = true;
 
         // Spawn async task to read directory
-        let handle = tokio::spawn(async move {
-            Self::read_dir_async(&path).await
-        });
+        let handle = tokio::spawn(async move { Self::read_dir_async(&path).await });
 
         *self.pending_operation.borrow_mut() = Some(handle);
     }
@@ -419,7 +422,9 @@ impl FileManager {
             let meta = entry.metadata().await.ok();
             let is_dir = meta.as_ref().map(|m| m.is_dir()).unwrap_or(false);
             let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
-            let modified = meta.as_ref().and_then(|m| m.modified().ok())
+            let modified = meta
+                .as_ref()
+                .and_then(|m| m.modified().ok())
                 .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
                 .map(|d| d.as_secs());
 
@@ -540,7 +545,10 @@ impl FileManager {
 
     fn rename_selected(&mut self, new_name: &str) {
         if let Some(ref path) = self.selected_path {
-            let parent_buf = path.parent().map(|p| p.to_path_buf()).unwrap_or_else(|| PathBuf::from("."));
+            let parent_buf = path
+                .parent()
+                .map(|p| p.to_path_buf())
+                .unwrap_or_else(|| PathBuf::from("."));
             let new_path = parent_buf.join(new_name);
             if std::fs::rename(path, &new_path).is_ok() {
                 self.refresh();
@@ -599,7 +607,8 @@ impl FileManager {
             ("New File", ContextAction::Copy),
             ("Delete", ContextAction::Cut),
             ("Refresh", ContextAction::Edit),
-        ].clone()
+        ]
+        .clone()
     }
 
     fn make_context_menu(&self, anchor_x: u16, anchor_y: u16) -> ContextMenu {
@@ -774,10 +783,14 @@ impl Widget for FileManager {
                         false,
                     );
 
-
                     let dx = detail_x + 1;
-                    let dy = hh + 1 + if path_str.len() > detail_w as usize { 1 } else { 0 };
-
+                    let dy = hh
+                        + 1
+                        + if path_str.len() > detail_w as usize {
+                            1
+                        } else {
+                            0
+                        };
 
                     // File icon and name
                     let sym = node.file_symbol();
@@ -792,12 +805,10 @@ impl Widget for FileManager {
                         true,
                     );
 
-
                     // Metadata with badges
                     let mut meta_y = dy + 2;
                     let icon_col = 3;
                     let label_col = 14;
-
 
                     // Type badge
                     draw_text(
@@ -959,10 +970,7 @@ impl Widget for FileManager {
                 StatusSegment::new(&format!("{} items", self.root.child_count()))
                     .with_fg(t.fg_muted),
             )
-            .add_segment(
-                StatusSegment::new(&hint)
-                    .with_fg(t.primary),
-            );
+            .add_segment(StatusSegment::new(&hint).with_fg(t.primary));
         let status_plane = status.render(Rect::new(0, status_y, area.width, fh));
         for (i, c) in status_plane.cells.iter().enumerate() {
             if !c.transparent && i < plane.cells.len() {
@@ -1001,22 +1009,42 @@ impl Widget for FileManager {
             }
 
             // Border
-            let corners = [('╭', sx, sy), ('╮', sx + sw - 1, sy), ('╰', sx, sy + sh - 1), ('╯', sx + sw - 1, sy + sh - 1)];
+            let corners = [
+                ('╭', sx, sy),
+                ('╮', sx + sw - 1, sy),
+                ('╰', sx, sy + sh - 1),
+                ('╯', sx + sw - 1, sy + sh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for x in sx + 1..sx + sw - 1 {
                 let top = (sy * area.width + x) as usize;
                 let bot = ((sy + sh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in sy + 1..sy + sh - 1 {
                 let left = (y * area.width + sx) as usize;
                 let right = (y * area.width + sx + sw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
 
             // Spinner text
@@ -1070,22 +1098,42 @@ impl Widget for FileManager {
                 }
             }
             // Border
-            let corners = [('╭', px, py), ('╮', px + pw - 1, py), ('╰', px, py + ph - 1), ('╯', px + pw - 1, py + ph - 1)];
+            let corners = [
+                ('╭', px, py),
+                ('╮', px + pw - 1, py),
+                ('╰', px, py + ph - 1),
+                ('╯', px + pw - 1, py + ph - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in px + 1..px + pw - 1 {
                 let top = (py * area.width + x) as usize;
                 let bot = ((py + ph - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in py + 1..py + ph - 1 {
                 let left = (y * area.width + px) as usize;
                 let right = (y * area.width + px + pw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
             // Message + input
             let msg = format!("{} {}", prompt.message, prompt.buffer);
@@ -1238,7 +1286,10 @@ impl Widget for FileManager {
         // 'l' key for async load
         if let KeyCode::Char('l') = key.code {
             if key.modifiers.is_empty() && !self.is_loading {
-                let path = self.selected_path.clone().unwrap_or_else(|| self.root.path.clone());
+                let path = self
+                    .selected_path
+                    .clone()
+                    .unwrap_or_else(|| self.root.path.clone());
                 self.start_async_load(path);
                 return true;
             }
@@ -1551,7 +1602,15 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb: &Keybinding
     // Title
     let title = "File Manager Help";
     let tx = help_x + (help_w - title.len() as u16) / 2;
-    draw_text(plane, tx, help_y + 1, title, t.primary, t.surface_elevated, true);
+    draw_text(
+        plane,
+        tx,
+        help_y + 1,
+        title,
+        t.primary,
+        t.surface_elevated,
+        true,
+    );
 
     // Two-column shortcuts
     let kb_quit = kb.display(actions::QUIT).unwrap_or("Ctrl+Q");
@@ -1574,8 +1633,24 @@ fn render_help_overlay(plane: &mut Plane, area: Rect, t: &Theme, kb: &Keybinding
     ];
     for (i, (key, desc)) in shortcuts.iter().enumerate() {
         let row = help_y + 3 + i as u16;
-        draw_text(plane, help_x + 2, row, key, t.primary, t.surface_elevated, false);
-        draw_text(plane, help_x + 16, row, desc, t.fg, t.surface_elevated, false);
+        draw_text(
+            plane,
+            help_x + 2,
+            row,
+            key,
+            t.primary,
+            t.surface_elevated,
+            false,
+        );
+        draw_text(
+            plane,
+            help_x + 16,
+            row,
+            desc,
+            t.fg,
+            t.surface_elevated,
+            false,
+        );
     }
 }
 

@@ -16,7 +16,9 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::password_input::PasswordInput;
 use dracon_terminal_engine::framework::widgets::search_input::SearchInput;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind, MouseButton};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 struct Requirement {
@@ -25,11 +27,29 @@ struct Requirement {
 }
 
 const REQUIREMENTS: &[Requirement] = &[
-    Requirement { label: "At least 8 characters", check: |p| p.len() >= 8 },
-    Requirement { label: "Contains uppercase (A-Z)", check: |p| p.chars().any(|c| c.is_ascii_uppercase()) },
-    Requirement { label: "Contains lowercase (a-z)", check: |p| p.chars().any(|c| c.is_ascii_lowercase()) },
-    Requirement { label: "Contains digit (0-9)", check: |p| p.chars().any(|c| c.is_ascii_digit()) },
-    Requirement { label: "Contains special (!@#$)", check: |p| p.chars().any(|c| "!@#$%^&*()_+-=[]{}|;:',.<>?/`~".contains(c)) },
+    Requirement {
+        label: "At least 8 characters",
+        check: |p| p.len() >= 8,
+    },
+    Requirement {
+        label: "Contains uppercase (A-Z)",
+        check: |p| p.chars().any(|c| c.is_ascii_uppercase()),
+    },
+    Requirement {
+        label: "Contains lowercase (a-z)",
+        check: |p| p.chars().any(|c| c.is_ascii_lowercase()),
+    },
+    Requirement {
+        label: "Contains digit (0-9)",
+        check: |p| p.chars().any(|c| c.is_ascii_digit()),
+    },
+    Requirement {
+        label: "Contains special (!@#$)",
+        check: |p| {
+            p.chars()
+                .any(|c| "!@#$%^&*()_+-=[]{}|;:',.<>?/`~".contains(c))
+        },
+    },
 ];
 
 #[allow(dead_code)]
@@ -52,7 +72,9 @@ impl PasswordInputScene {
     pub fn new(theme: Theme) -> Self {
         let username_input = SearchInput::new(WidgetId::new(1)).with_theme(theme.clone());
         let password_input = PasswordInput::new(WidgetId::new(2)).with_theme(theme.clone());
-        let confirm_input = PasswordInput::new(WidgetId::new(3)).with_theme(theme.clone()).with_mask_char('●');
+        let confirm_input = PasswordInput::new(WidgetId::new(3))
+            .with_theme(theme.clone())
+            .with_mask_char('●');
 
         Self {
             theme,
@@ -71,10 +93,14 @@ impl PasswordInputScene {
     }
 
     fn password_strength(password: &str) -> (&'static str, f32) {
-        if password.is_empty() { return ("None", 0.0); }
+        if password.is_empty() {
+            return ("None", 0.0);
+        }
         let mut score = 0u32;
         for req in REQUIREMENTS {
-            if (req.check)(password) { score += 1; }
+            if (req.check)(password) {
+                score += 1;
+            }
         }
         match score {
             0..=1 => ("Weak", 0.2),
@@ -112,7 +138,9 @@ impl PasswordInputScene {
 }
 
 impl Scene for PasswordInputScene {
-    fn scene_id(&self) -> &str { "password_input" }
+    fn scene_id(&self) -> &str {
+        "password_input"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -127,8 +155,15 @@ impl Scene for PasswordInputScene {
         // ── Header ─────────────────────────────────────────────
         draw_text(&mut plane, 2, 0, " Login Screen ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -164,11 +199,42 @@ impl Scene for PasswordInputScene {
             draw_focus_ring(&mut plane, card_x, card_y, card_w, card_h, t.primary);
 
             // Success content
-            draw_text(&mut plane, card_x + 2, card_y + 1, "✓ Login Successful!", t.success, t.surface_elevated, true);
-            draw_text(&mut plane, card_x + 2, card_y + 3, &format!("Welcome back, {}!", self.username_input.query()), t.fg, t.surface_elevated, false);
-            draw_text(&mut plane, card_x + 2, card_y + 5, "Your session is now active.", t.fg_muted, t.surface_elevated, false);
-            draw_text(&mut plane, card_x + 2, card_y + 6, "Press R to reset and try again", t.secondary, t.surface_elevated, false);
-
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 1,
+                "✓ Login Successful!",
+                t.success,
+                t.surface_elevated,
+                true,
+            );
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 3,
+                &format!("Welcome back, {}!", self.username_input.query()),
+                t.fg,
+                t.surface_elevated,
+                false,
+            );
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 5,
+                "Your session is now active.",
+                t.fg_muted,
+                t.surface_elevated,
+                false,
+            );
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 6,
+                "Press R to reset and try again",
+                t.secondary,
+                t.surface_elevated,
+                false,
+            );
         } else {
             // ── Login Form Card ──────────────────────────────────
             let card_x = 4u16;
@@ -190,14 +256,26 @@ impl Scene for PasswordInputScene {
             for dx in card_x..card_x + card_w {
                 let top_idx = (card_y * area.width + dx) as usize;
                 let bot_idx = ((card_y + card_h - 1) * area.width + dx) as usize;
-                if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = t.outline; }
-                if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = t.outline; }
+                if top_idx < plane.cells.len() {
+                    plane.cells[top_idx].char = '─';
+                    plane.cells[top_idx].fg = t.outline;
+                }
+                if bot_idx < plane.cells.len() {
+                    plane.cells[bot_idx].char = '─';
+                    plane.cells[bot_idx].fg = t.outline;
+                }
             }
             for dy in card_y..card_y + card_h {
                 let left_idx = (dy * area.width + card_x) as usize;
                 let right_idx = (dy * area.width + card_x + card_w - 1) as usize;
-                if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = t.outline; }
-                if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = t.outline; }
+                if left_idx < plane.cells.len() {
+                    plane.cells[left_idx].char = '│';
+                    plane.cells[left_idx].fg = t.outline;
+                }
+                if right_idx < plane.cells.len() {
+                    plane.cells[right_idx].char = '│';
+                    plane.cells[right_idx].fg = t.outline;
+                }
             }
             // Corners
             let corners = [
@@ -208,12 +286,31 @@ impl Scene for PasswordInputScene {
             ];
             for (cy, cx, ch) in corners {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
 
             // Form title
-            draw_text(&mut plane, card_x + 2, card_y + 1, "Sign In", t.primary, t.surface_elevated, true);
-            draw_text(&mut plane, card_x + 2, card_y + 2, "Enter your credentials below", t.fg_muted, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 1,
+                "Sign In",
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
+            draw_text(
+                &mut plane,
+                card_x + 2,
+                card_y + 2,
+                "Enter your credentials below",
+                t.fg_muted,
+                t.surface_elevated,
+                false,
+            );
 
             // ── Username field ─────────────────────────────────
             let field_x = card_x + 2;
@@ -221,54 +318,169 @@ impl Scene for PasswordInputScene {
             let field_w = card_w.saturating_sub(4);
 
             let label_x = field_x;
-            draw_text(&mut plane, label_x, field_y, "Username", if self.focused == 0 { t.primary } else { t.fg_muted }, t.surface_elevated, self.focused == 0);
+            draw_text(
+                &mut plane,
+                label_x,
+                field_y,
+                "Username",
+                if self.focused == 0 {
+                    t.primary
+                } else {
+                    t.fg_muted
+                },
+                t.surface_elevated,
+                self.focused == 0,
+            );
             if self.focused == 0 {
-                draw_text(&mut plane, label_x + 9, field_y, "◄", t.primary, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    label_x + 9,
+                    field_y,
+                    "◄",
+                    t.primary,
+                    t.surface_elevated,
+                    false,
+                );
             }
 
             let input_area = Rect::new(field_x, field_y + 1, field_w, 3);
-            blit_to(&mut plane, &self.username_input.render(input_area), field_x as usize, (field_y + 1) as usize);
+            blit_to(
+                &mut plane,
+                &self.username_input.render(input_area),
+                field_x as usize,
+                (field_y + 1) as usize,
+            );
 
             // ── Password field ─────────────────────────────────
             let pwd_y = field_y + 5;
-            draw_text(&mut plane, label_x, pwd_y, "Password", if self.focused == 1 { t.primary } else { t.fg_muted }, t.surface_elevated, self.focused == 1);
+            draw_text(
+                &mut plane,
+                label_x,
+                pwd_y,
+                "Password",
+                if self.focused == 1 {
+                    t.primary
+                } else {
+                    t.fg_muted
+                },
+                t.surface_elevated,
+                self.focused == 1,
+            );
             if self.focused == 1 {
-                draw_text(&mut plane, label_x + 9, pwd_y, "◄", t.primary, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    label_x + 9,
+                    pwd_y,
+                    "◄",
+                    t.primary,
+                    t.surface_elevated,
+                    false,
+                );
             }
 
             let pwd_input_area = Rect::new(field_x, pwd_y + 1, field_w, 3);
-            blit_to(&mut plane, &self.password_input.render(pwd_input_area), field_x as usize, (pwd_y + 1) as usize);
+            blit_to(
+                &mut plane,
+                &self.password_input.render(pwd_input_area),
+                field_x as usize,
+                (pwd_y + 1) as usize,
+            );
 
             // Visibility hint
             let toggle_text = if self.show_password { "show" } else { "hide" };
-            draw_text(&mut plane, label_x, pwd_y + 4, &format!("[Ctrl+H] {}", toggle_text), t.fg_muted, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                label_x,
+                pwd_y + 4,
+                &format!("[Ctrl+H] {}", toggle_text),
+                t.fg_muted,
+                t.surface_elevated,
+                false,
+            );
 
             // ── Confirm field ───────────────────────────────────
             let conf_y = pwd_y + 6;
-            draw_text(&mut plane, label_x, conf_y, "Confirm", if self.focused == 2 { t.primary } else { t.fg_muted }, t.surface_elevated, self.focused == 2);
+            draw_text(
+                &mut plane,
+                label_x,
+                conf_y,
+                "Confirm",
+                if self.focused == 2 {
+                    t.primary
+                } else {
+                    t.fg_muted
+                },
+                t.surface_elevated,
+                self.focused == 2,
+            );
             if self.focused == 2 {
-                draw_text(&mut plane, label_x + 8, conf_y, "◄", t.primary, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    label_x + 8,
+                    conf_y,
+                    "◄",
+                    t.primary,
+                    t.surface_elevated,
+                    false,
+                );
             }
 
             let conf_input_area = Rect::new(field_x, conf_y + 1, field_w, 3);
-            blit_to(&mut plane, &self.confirm_input.render(conf_input_area), field_x as usize, (conf_y + 1) as usize);
+            blit_to(
+                &mut plane,
+                &self.confirm_input.render(conf_input_area),
+                field_x as usize,
+                (conf_y + 1) as usize,
+            );
 
             // Match indicator
             let password = self.password_input.password();
             let confirm = self.confirm_input.password();
             if !confirm.is_empty() && password.len() >= 6 {
-                let match_icon = if password == confirm { "✓ passwords match" } else { "✗ passwords don't match" };
-                let match_color = if password == confirm { t.success } else { t.error };
-                draw_text(&mut plane, label_x, conf_y + 4, match_icon, match_color, t.surface_elevated, false);
+                let match_icon = if password == confirm {
+                    "✓ passwords match"
+                } else {
+                    "✗ passwords don't match"
+                };
+                let match_color = if password == confirm {
+                    t.success
+                } else {
+                    t.error
+                };
+                draw_text(
+                    &mut plane,
+                    label_x,
+                    conf_y + 4,
+                    match_icon,
+                    match_color,
+                    t.surface_elevated,
+                    false,
+                );
             }
 
             // Error message
             if let Some(err) = self.error_msg {
-                draw_text(&mut plane, label_x, conf_y + 5, &format!("⚠ {}", err), t.error, t.surface_elevated, true);
+                draw_text(
+                    &mut plane,
+                    label_x,
+                    conf_y + 5,
+                    &format!("⚠ {}", err),
+                    t.error,
+                    t.surface_elevated,
+                    true,
+                );
             }
 
             // Submit hint
-            draw_text(&mut plane, label_x, conf_y + 6, "Enter to submit  |  Tab to switch fields", t.fg_muted, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                label_x,
+                conf_y + 6,
+                "Enter to submit  |  Tab to switch fields",
+                t.fg_muted,
+                t.surface_elevated,
+                false,
+            );
         }
 
         // ── Side Panel ──────────────────────────────────────────
@@ -305,8 +517,24 @@ impl Scene for PasswordInputScene {
             _ => t.success,
         };
 
-        draw_text(&mut plane, panel_x, strength_y, "Strength", t.secondary, t.surface, true);
-        draw_text(&mut plane, panel_x, strength_y + 1, label, color, t.surface, true);
+        draw_text(
+            &mut plane,
+            panel_x,
+            strength_y,
+            "Strength",
+            t.secondary,
+            t.surface,
+            true,
+        );
+        draw_text(
+            &mut plane,
+            panel_x,
+            strength_y + 1,
+            label,
+            color,
+            t.surface,
+            true,
+        );
 
         let bar_y = strength_y + 3;
         let filled = (panel_w as f32 * ratio) as u16;
@@ -321,7 +549,15 @@ impl Scene for PasswordInputScene {
 
         // ── Requirements checklist ─────────────────────────────
         let req_y = strength_y + 6;
-        draw_text(&mut plane, panel_x, req_y, "Requirements", t.secondary, t.surface, true);
+        draw_text(
+            &mut plane,
+            panel_x,
+            req_y,
+            "Requirements",
+            t.secondary,
+            t.surface,
+            true,
+        );
         for dx in 0..panel_w {
             let idx = ((req_y + 1) * area.width + panel_x + dx) as usize;
             if idx < plane.cells.len() {
@@ -347,7 +583,15 @@ impl Scene for PasswordInputScene {
         // ── Security tips ──────────────────────────────────────
         let tips_y = req_y + 2 + REQUIREMENTS.len() as u16 + 1;
         if tips_y + 8 < area.height.saturating_sub(2) {
-            draw_text(&mut plane, panel_x, tips_y, "Security Tips", t.secondary, t.surface, true);
+            draw_text(
+                &mut plane,
+                panel_x,
+                tips_y,
+                "Security Tips",
+                t.secondary,
+                t.surface,
+                true,
+            );
             for dx in 0..panel_w {
                 let idx = ((tips_y + 1) * area.width + panel_x + dx) as usize;
                 if idx < plane.cells.len() {
@@ -371,7 +615,15 @@ impl Scene for PasswordInputScene {
                     plane.cells[idx].char = '●';
                     plane.cells[idx].fg = t.fg_muted;
                 }
-                draw_text(&mut plane, panel_x + 2, ty, tip_text, *tip_color, t.surface, false);
+                draw_text(
+                    &mut plane,
+                    panel_x + 2,
+                    ty,
+                    tip_text,
+                    *tip_color,
+                    t.surface,
+                    false,
+                );
             }
         }
 
@@ -388,24 +640,34 @@ impl Scene for PasswordInputScene {
         draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Login Screen Help", &[
-                ("Tab", "Switch between fields"),
-                ("Enter", "Submit form"),
-                ("Ctrl+H", "Toggle password visibility"),
-                ("Click", "Focus a field"),
-                ("R", "Reset after success"),
-                ("Esc", "Back to showcase"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Login Screen Help",
+                &[
+                    ("Tab", "Switch between fields"),
+                    ("Enter", "Submit form"),
+                    ("Ctrl+H", "Toggle password visibility"),
+                    ("Click", "Focus a field"),
+                    ("R", "Reset after success"),
+                    ("Esc", "Back to showcase"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 return true;
             }
@@ -431,10 +693,16 @@ impl Scene for PasswordInputScene {
             return true;
         }
 
-        if self.submitted { return false; }
+        if self.submitted {
+            return false;
+        }
 
         // Toggle password visibility
-        if key.code == KeyCode::Char('h') && key.modifiers.contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL) {
+        if key.code == KeyCode::Char('h')
+            && key
+                .modifiers
+                .contains(dracon_terminal_engine::input::event::KeyModifiers::CONTROL)
+        {
             self.show_password = !self.show_password;
             return true;
         }
@@ -446,7 +714,11 @@ impl Scene for PasswordInputScene {
                 return true;
             }
             KeyCode::BackTab => {
-                self.focused = if self.focused == 0 { 2 } else { self.focused - 1 };
+                self.focused = if self.focused == 0 {
+                    2
+                } else {
+                    self.focused - 1
+                };
                 return true;
             }
             KeyCode::Enter => {
@@ -470,7 +742,9 @@ impl Scene for PasswordInputScene {
     }
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
-        if self.submitted { return false; }
+        if self.submitted {
+            return false;
+        }
 
         if let MouseEventKind::Down(MouseButton::Left) = kind {
             // Check which field was clicked
@@ -524,7 +798,9 @@ impl Scene for PasswordInputScene {
         self.confirm_input.on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
 }

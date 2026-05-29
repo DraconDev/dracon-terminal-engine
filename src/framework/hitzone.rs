@@ -368,11 +368,26 @@ mod tests {
         let mut zone: HitZone<u32> = HitZone::new(1, 0, 0, 100, 100)
             .on_click(move |kind| click_kinds_clone.borrow_mut().push(kind));
 
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            5,
+            5,
+            KeyModifiers::empty(),
+        );
         std::thread::sleep(Duration::from_millis(10));
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            5,
+            5,
+            KeyModifiers::empty(),
+        );
         std::thread::sleep(Duration::from_millis(10));
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            5,
+            5,
+            KeyModifiers::empty(),
+        );
 
         let kinds = click_kinds.borrow();
         assert_eq!(kinds.len(), 3);
@@ -388,9 +403,19 @@ mod tests {
         let mut zone: HitZone<u32> = HitZone::new(1, 0, 0, 100, 100)
             .on_click(move |kind| click_kinds_clone.borrow_mut().push(kind));
 
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            5,
+            5,
+            KeyModifiers::empty(),
+        );
         std::thread::sleep(Duration::from_millis(10));
-        zone.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5, KeyModifiers::empty());
+        zone.handle_mouse(
+            MouseEventKind::Down(MouseButton::Left),
+            5,
+            5,
+            KeyModifiers::empty(),
+        );
 
         let kinds = click_kinds.borrow();
         assert_eq!(kinds.len(), 2);

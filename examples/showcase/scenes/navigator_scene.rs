@@ -55,29 +55,97 @@ impl NavState {
         let path_str = self.path.join("/");
         self.entries = match path_str.as_str() {
             "home/user" => vec![
-                FileEntry { name: "Documents", is_dir: true, size: "—" },
-                FileEntry { name: "Downloads", is_dir: true, size: "—" },
-                FileEntry { name: "Pictures", is_dir: true, size: "—" },
-                FileEntry { name: "Projects", is_dir: true, size: "—" },
-                FileEntry { name: ".bashrc", is_dir: false, size: "3.2K" },
-                FileEntry { name: ".profile", is_dir: false, size: "807B" },
-                FileEntry { name: "notes.txt", is_dir: false, size: "1.4K" },
+                FileEntry {
+                    name: "Documents",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "Downloads",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "Pictures",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "Projects",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: ".bashrc",
+                    is_dir: false,
+                    size: "3.2K",
+                },
+                FileEntry {
+                    name: ".profile",
+                    is_dir: false,
+                    size: "807B",
+                },
+                FileEntry {
+                    name: "notes.txt",
+                    is_dir: false,
+                    size: "1.4K",
+                },
             ],
             "home/user/Documents" => vec![
-                FileEntry { name: "work", is_dir: true, size: "—" },
-                FileEntry { name: "personal", is_dir: true, size: "—" },
-                FileEntry { name: "resume.pdf", is_dir: false, size: "245K" },
-                FileEntry { name: "budget.csv", is_dir: false, size: "12K" },
-                FileEntry { name: "meeting-notes.md", is_dir: false, size: "8.3K" },
+                FileEntry {
+                    name: "work",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "personal",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "resume.pdf",
+                    is_dir: false,
+                    size: "245K",
+                },
+                FileEntry {
+                    name: "budget.csv",
+                    is_dir: false,
+                    size: "12K",
+                },
+                FileEntry {
+                    name: "meeting-notes.md",
+                    is_dir: false,
+                    size: "8.3K",
+                },
             ],
             "home/user/Projects" => vec![
-                FileEntry { name: "dracon-engine", is_dir: true, size: "—" },
-                FileEntry { name: "tiles", is_dir: true, size: "—" },
-                FileEntry { name: "scripts", is_dir: true, size: "—" },
+                FileEntry {
+                    name: "dracon-engine",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "tiles",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "scripts",
+                    is_dir: true,
+                    size: "—",
+                },
             ],
             _ => vec![
-                FileEntry { name: "..", is_dir: true, size: "—" },
-                FileEntry { name: "(empty)", is_dir: false, size: "0B" },
+                FileEntry {
+                    name: "..",
+                    is_dir: true,
+                    size: "—",
+                },
+                FileEntry {
+                    name: "(empty)",
+                    is_dir: false,
+                    size: "0B",
+                },
             ],
         };
         self.apply_search();
@@ -89,8 +157,14 @@ impl NavState {
         self.filtered = if self.search_query.is_empty() {
             (0..self.entries.len()).collect()
         } else {
-            self.entries.iter().enumerate()
-                .filter(|(_, e)| e.name.to_lowercase().contains(&self.search_query.to_lowercase()))
+            self.entries
+                .iter()
+                .enumerate()
+                .filter(|(_, e)| {
+                    e.name
+                        .to_lowercase()
+                        .contains(&self.search_query.to_lowercase())
+                })
                 .map(|(i, _)| i)
                 .collect()
         };
@@ -150,24 +224,16 @@ impl NavigatorScene {
 
         let menu_bar = MenuBar::new(WidgetId::new(901))
             .with_entries(vec![
-                MenuEntry::new("File").add_item(
-                    MenuItem::new("New Tab").with_action(|| {})
-                ).add_item(
-                    MenuItem::new("Close Tab").with_action(|| {})
-                ),
-                MenuEntry::new("Edit").add_item(
-                    MenuItem::new("Copy").with_action(|| {})
-                ).add_item(
-                    MenuItem::new("Paste").with_action(|| {})
-                ),
-                MenuEntry::new("View").add_item(
-                    MenuItem::new("Toggle Hidden").with_action(|| {})
-                ).add_item(
-                    MenuItem::new("Refresh").with_action(|| {})
-                ),
-                MenuEntry::new("Help").add_item(
-                    MenuItem::new("About").with_action(|| {})
-                ),
+                MenuEntry::new("File")
+                    .add_item(MenuItem::new("New Tab").with_action(|| {}))
+                    .add_item(MenuItem::new("Close Tab").with_action(|| {})),
+                MenuEntry::new("Edit")
+                    .add_item(MenuItem::new("Copy").with_action(|| {}))
+                    .add_item(MenuItem::new("Paste").with_action(|| {})),
+                MenuEntry::new("View")
+                    .add_item(MenuItem::new("Toggle Hidden").with_action(|| {}))
+                    .add_item(MenuItem::new("Refresh").with_action(|| {})),
+                MenuEntry::new("Help").add_item(MenuItem::new("About").with_action(|| {})),
             ])
             .with_theme(theme.clone());
 
@@ -176,7 +242,7 @@ impl NavigatorScene {
                 .add_segment(StatusSegment::new(
                     "Enter: open | ↑/↓: navigate | /: search | F1: help | Esc: back",
                 ))
-                .with_theme(theme.clone())
+                .with_theme(theme.clone()),
         );
 
         Self {
@@ -201,7 +267,9 @@ impl NavigatorScene {
 }
 
 impl Scene for NavigatorScene {
-    fn scene_id(&self) -> &str { "navigator" }
+    fn scene_id(&self) -> &str {
+        "navigator"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -212,8 +280,15 @@ impl Scene for NavigatorScene {
         // Header
         draw_text(&mut plane, 2, 0, " Quick Launcher ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -248,7 +323,11 @@ impl Scene for NavigatorScene {
 
         // Search indicator
         if !nav.search_query.is_empty() {
-            let search_text = format!("Filter: \"{}\" ({} matches)", nav.search_query, nav.filtered.len());
+            let search_text = format!(
+                "Filter: \"{}\" ({} matches)",
+                nav.search_query,
+                nav.filtered.len()
+            );
             draw_text(&mut plane, main_x, 3, &search_text, t.info, t.bg, false);
         }
 
@@ -262,7 +341,10 @@ impl Scene for NavigatorScene {
         // File list
         let list_y = 5;
         let list_h = area.height.saturating_sub(8);
-        let max_scroll = nav.filtered.len().saturating_sub((list_y + list_y) as usize);
+        let max_scroll = nav
+            .filtered
+            .len()
+            .saturating_sub((list_y + list_y) as usize);
         let scroll = nav.scroll.min(max_scroll);
 
         for vi in 0u16..list_h {
@@ -274,7 +356,11 @@ impl Scene for NavigatorScene {
                     let icon = if entry.is_dir { "▶" } else { "•" };
                     let name_color = if entry.is_dir { t.primary } else { t.fg };
                     let bg = if is_selected { t.selection_bg } else { t.bg };
-                    let fg = if is_selected { t.selection_fg } else { name_color };
+                    let fg = if is_selected {
+                        t.selection_fg
+                    } else {
+                        name_color
+                    };
 
                     if is_selected {
                         for cx in 1..area.width.saturating_sub(main_x + 1) {
@@ -287,8 +373,16 @@ impl Scene for NavigatorScene {
                     }
 
                     draw_text(&mut plane, main_x, y, icon, fg, bg, false);
-                    draw_text_clipped(&mut plane, main_x + 2, y, entry.name,
-                                     area.width.saturating_sub(10), fg, bg, entry.is_dir && !is_selected);
+                    draw_text_clipped(
+                        &mut plane,
+                        main_x + 2,
+                        y,
+                        entry.name,
+                        area.width.saturating_sub(10),
+                        fg,
+                        bg,
+                        entry.is_dir && !is_selected,
+                    );
                     let size_x = area.width.saturating_sub(8);
                     draw_text(&mut plane, size_x, y, entry.size, t.fg_muted, bg, false);
                 }
@@ -298,9 +392,11 @@ impl Scene for NavigatorScene {
         // Scrollbar
         if nav.filtered.len() > list_h as usize {
             let sb_x = area.width.saturating_sub(1);
-            let thumb_h = ((list_h as f32 / nav.filtered.len() as f32) * list_h as f32).max(1.0) as u16;
+            let thumb_h =
+                ((list_h as f32 / nav.filtered.len() as f32) * list_h as f32).max(1.0) as u16;
             let max_offset = (nav.filtered.len() - list_h as usize).max(1);
-            let thumb_y = list_y + ((scroll as f32 / max_offset as f32 * (list_h as f32 - thumb_h as f32)) as u16);
+            let thumb_y = list_y
+                + ((scroll as f32 / max_offset as f32 * (list_h as f32 - thumb_h as f32)) as u16);
             for i in 0..thumb_h {
                 let y = thumb_y + i;
                 if y >= list_y && y < list_y + list_h {
@@ -315,33 +411,46 @@ impl Scene for NavigatorScene {
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, t, "Quick Launcher — Help", &[
-                ("↑/↓", "Navigate list"),
-                ("Enter", "Open directory"),
-                ("Backspace", "Go to parent"),
-                ("Ctrl+F", "Toggle search"),
-                ("/", "Quick filter"),
-                ("Esc", "Clear search"),
-                ("Click row", "Select file"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Quick Launcher — Help",
+                &[
+                    ("↑/↓", "Navigate list"),
+                    ("Enter", "Open directory"),
+                    ("Backspace", "Go to parent"),
+                    ("Ctrl+F", "Toggle search"),
+                    ("/", "Quick filter"),
+                    ("Esc", "Clear search"),
+                    ("Click row", "Select file"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -443,7 +552,8 @@ impl Scene for NavigatorScene {
             let rel_row = (row - 3) as usize;
             let entry_name: Option<String> = {
                 let nav = self.nav.borrow();
-                nav.entries.iter()
+                nav.entries
+                    .iter()
                     .filter(|e| e.is_dir)
                     .nth(rel_row)
                     .map(|e| e.name.to_string())
@@ -504,9 +614,15 @@ impl Scene for NavigatorScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl NavigatorScene {
@@ -522,12 +638,19 @@ impl NavigatorScene {
         let start_y = 3u16;
         for (i, entry) in dirs.iter().enumerate() {
             let y = start_y + i as u16;
-            if y >= area.height.saturating_sub(6) { break; }
+            if y >= area.height.saturating_sub(6) {
+                break;
+            }
 
             let is_selected = nav.selected < nav.filtered.len()
-                && nav.filtered.get(nav.selected).copied() == nav.entries.iter().position(|e| e.name == entry.name);
+                && nav.filtered.get(nav.selected).copied()
+                    == nav.entries.iter().position(|e| e.name == entry.name);
 
-            let bg = if is_selected { t.selection_bg } else { t.surface };
+            let bg = if is_selected {
+                t.selection_bg
+            } else {
+                t.surface
+            };
             for cx in 0..SIDEBAR_W {
                 let idx = (y * plane.width + sx + cx) as usize;
                 if idx < plane.cells.len() {
@@ -536,8 +659,20 @@ impl NavigatorScene {
                 }
             }
 
-            draw_text_clipped(plane, sx + 1, y, &format!(" {}{}", if entry.name == ".." { "↑ " } else { "▶ " }, entry.name),
-                             sx + SIDEBAR_W, t.primary, bg, false);
+            draw_text_clipped(
+                plane,
+                sx + 1,
+                y,
+                &format!(
+                    " {}{}",
+                    if entry.name == ".." { "↑ " } else { "▶ " },
+                    entry.name
+                ),
+                sx + SIDEBAR_W,
+                t.primary,
+                bg,
+                false,
+            );
         }
 
         // Divider
@@ -554,7 +689,16 @@ impl NavigatorScene {
         let path_y = div_y + 2;
         draw_text(plane, sx, path_y, "Current Path", t.secondary, t.bg, true);
         let path_text = nav.path.join(" / ");
-        draw_text_clipped(plane, sx, path_y + 1, &path_text, sx + SIDEBAR_W, t.fg, t.bg, false);
+        draw_text_clipped(
+            plane,
+            sx,
+            path_y + 1,
+            &path_text,
+            sx + SIDEBAR_W,
+            t.fg,
+            t.bg,
+            false,
+        );
 
         // Stats
         let stats_y = path_y + 3;
@@ -562,8 +706,24 @@ impl NavigatorScene {
             draw_text(plane, sx, stats_y, "Stats", t.secondary, t.bg, true);
             let dirs_count = nav.entries.iter().filter(|e| e.is_dir).count();
             let files_count = nav.entries.iter().filter(|e| !e.is_dir).count();
-            draw_text(plane, sx, stats_y + 1, &format!("Directories: {}", dirs_count), t.fg_muted, t.bg, false);
-            draw_text(plane, sx, stats_y + 2, &format!("Files: {}", files_count), t.fg_muted, t.bg, false);
+            draw_text(
+                plane,
+                sx,
+                stats_y + 1,
+                &format!("Directories: {}", dirs_count),
+                t.fg_muted,
+                t.bg,
+                false,
+            );
+            draw_text(
+                plane,
+                sx,
+                stats_y + 2,
+                &format!("Files: {}", files_count),
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
     }
 }

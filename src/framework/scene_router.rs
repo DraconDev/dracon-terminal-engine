@@ -207,7 +207,12 @@ impl SceneRouter {
     }
 
     /// Pushes a scene with a specific transition.
-    pub fn push_with_transition(&mut self, id: &str, transition: SceneTransition, duration_ms: f32) {
+    pub fn push_with_transition(
+        &mut self,
+        id: &str,
+        transition: SceneTransition,
+        duration_ms: f32,
+    ) {
         if !self.scenes.contains_key(id) {
             return;
         }
@@ -262,7 +267,10 @@ impl SceneRouter {
             return false;
         }
 
-        let from = self.stack.pop().expect("scene_router: stack non-empty on pop (len > 1)");
+        let from = self
+            .stack
+            .pop()
+            .expect("scene_router: stack non-empty on pop (len > 1)");
         if let Some(scene) = self.scenes.get_mut(&from) {
             scene.on_exit();
         }
@@ -298,7 +306,10 @@ impl SceneRouter {
             return false;
         }
 
-        let from = self.stack.pop().expect("scene_router: stack non-empty on pop");
+        let from = self
+            .stack
+            .pop()
+            .expect("scene_router: stack non-empty on pop");
 
         if let Some(scene) = self.scenes.get_mut(&from) {
             scene.on_exit();
@@ -441,10 +452,12 @@ impl SceneRouter {
         let dt_ms = {
             let now = Instant::now();
             let mut last = self.last_render.borrow_mut();
-            let dt = last.map(|t| {
-                let elapsed = now.duration_since(t);
-                elapsed.as_secs_f32() * 1000.0
-            }).unwrap_or(16.0); // Default 16ms on first frame
+            let dt = last
+                .map(|t| {
+                    let elapsed = now.duration_since(t);
+                    elapsed.as_secs_f32() * 1000.0
+                })
+                .unwrap_or(16.0); // Default 16ms on first frame
             *last = Some(now);
             dt
         };
@@ -455,10 +468,14 @@ impl SceneRouter {
         if transition_active {
             let trans = self.transition.borrow();
             if let Some(ref trans) = *trans {
-                let from_plane = self.scenes.get(&trans.from_scene)
+                let from_plane = self
+                    .scenes
+                    .get(&trans.from_scene)
                     .map(|s| s.render(area))
                     .unwrap_or_else(|| Plane::new(0, area.width, area.height));
-                let to_plane = self.scenes.get(&trans.to_scene)
+                let to_plane = self
+                    .scenes
+                    .get(&trans.to_scene)
                     .map(|s| s.render(area))
                     .unwrap_or_else(|| Plane::new(0, area.width, area.height));
                 return Self::blend_planes(from_plane, to_plane, trans.progress, trans.transition);

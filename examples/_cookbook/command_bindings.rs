@@ -156,7 +156,10 @@ impl CommandBindings {
 
 impl Default for CommandBindings {
     fn default() -> Self {
-        Self::new(Arc::new(AtomicBool::new(false)), Theme::from_env_or(Theme::nord()))
+        Self::new(
+            Arc::new(AtomicBool::new(false)),
+            Theme::from_env_or(Theme::nord()),
+        )
     }
 }
 
@@ -517,7 +520,8 @@ impl Widget for CommandBindings {
         };
         let status = format!(
             "  {}  |  tick: {}  |  {}: refresh | {}: theme | {}: help | {}: dismiss | {}: quit",
-            auto_str, self.tick,
+            auto_str,
+            self.tick,
             self.keybindings.display(actions::REFRESH).unwrap_or("f5"),
             self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
             self.keybindings.display(actions::HELP).unwrap_or("f1"),
@@ -658,11 +662,23 @@ impl Widget for CommandBindings {
 
             // shortcuts
             let shortcuts = [
-                (self.keybindings.display(actions::REFRESH).unwrap_or("f5"), "Refresh all commands"),
+                (
+                    self.keybindings.display(actions::REFRESH).unwrap_or("f5"),
+                    "Refresh all commands",
+                ),
                 ("p", "Pause/Resume auto-refresh"),
-                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle this help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                    "Toggle this help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let y_off = 3 + i;
@@ -696,7 +712,8 @@ impl Widget for CommandBindings {
             }
 
             // hint
-            let hint = format!(" Press {} or {} to close ",
+            let hint = format!(
+                " Press {} or {} to close ",
                 self.keybindings.display(actions::HELP).unwrap_or("f1"),
                 self.keybindings.display(actions::BACK).unwrap_or("Esc"),
             );
@@ -728,7 +745,10 @@ impl Widget for CommandBindings {
         }
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = Theme::all();
-            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            let idx = themes
+                .iter()
+                .position(|t| t.name == self.theme.name)
+                .unwrap_or(0);
             let next = themes[(idx + 1) % themes.len()].clone();
             self.on_theme_change(&next);
             return true;
@@ -763,13 +783,23 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { WidgetId::new(9999) }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(9999)
+    }
     fn set_id(&mut self, _id: WidgetId) {}
-    fn area(&self) -> Rect { Rect::new(0, 0, 0, 0) }
+    fn area(&self) -> Rect {
+        Rect::new(0, 0, 0, 0)
+    }
     fn set_area(&mut self, _area: Rect) {}
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
-    fn render(&self, area: Rect) -> Plane { Plane::new(0, area.width, area.height) }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
+    fn render(&self, area: Rect) -> Plane {
+        Plane::new(0, area.width, area.height)
+    }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
         self.view.borrow_mut().handle_key(key)
     }
@@ -788,7 +818,10 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let view = Rc::new(RefCell::new(CommandBindings::new(quit_check.clone(), env_theme.clone())));
+    let view = Rc::new(RefCell::new(CommandBindings::new(
+        quit_check.clone(),
+        env_theme.clone(),
+    )));
     view.borrow_mut().keybindings = keybindings;
     view.borrow_mut().refresh_all();
     let view_for_tick = Rc::clone(&view);
@@ -804,7 +837,9 @@ fn main() -> std::io::Result<()> {
 
     // Add InputRouter widget so framework can detect theme changes via current_theme()
     app.add_widget(
-        Box::new(InputRouter { view: Rc::clone(&view) }),
+        Box::new(InputRouter {
+            view: Rc::clone(&view),
+        }),
         Rect::new(0, 0, w, h),
     );
 

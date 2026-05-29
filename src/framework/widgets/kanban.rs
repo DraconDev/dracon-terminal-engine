@@ -346,7 +346,10 @@ impl crate::framework::widget::Widget for Kanban {
 
             // Card count badge
             let count_text = format!("({})", col.cards.len());
-            let count_x = col_x + self.column_width.saturating_sub(count_text.len() as u16 + 1);
+            let count_x = col_x
+                + self
+                    .column_width
+                    .saturating_sub(count_text.len() as u16 + 1);
             for (j, ch) in count_text.chars().enumerate() {
                 let idx = (area.width + count_x + j as u16) as usize;
                 if idx < plane.cells.len() {
@@ -470,11 +473,7 @@ impl crate::framework::widget::Widget for Kanban {
 
         // Horizontal scroll indicator
         if self.columns.len() > visible_cols {
-            let indicator = format!(
-                "< {} / {} >",
-                self.scroll_offset + 1,
-                self.columns.len()
-            );
+            let indicator = format!("< {} / {} >", self.scroll_offset + 1, self.columns.len());
             let indicator_len = indicator.len() as u16;
             let indicator_x = (area.width.saturating_sub(indicator_len)) / 2;
             let indicator_y = area.height.saturating_sub(1);
@@ -591,7 +590,8 @@ impl crate::framework::widget::Widget for Kanban {
                 if rel_row >= 4 {
                     let card_idx = ((rel_row - 4) / self.card_height) as usize;
 
-                    if col_idx < self.columns.len() && card_idx < self.columns[col_idx].cards.len() {
+                    if col_idx < self.columns.len() && card_idx < self.columns[col_idx].cards.len()
+                    {
                         let new_hovered = Some((col_idx, card_idx));
                         if self.hovered_card != new_hovered {
                             self.hovered_card = new_hovered;
@@ -663,7 +663,12 @@ impl crate::framework::widget::Widget for Kanban {
                         if to_col < self.columns.len() && to_col != from_col {
                             // Card moved to different column
                             let card_id = self.columns[from_col].cards[from_idx].id.clone();
-                            self.move_card(from_col, from_idx, to_col, self.columns[to_col].cards.len());
+                            self.move_card(
+                                from_col,
+                                from_idx,
+                                to_col,
+                                self.columns[to_col].cards.len(),
+                            );
 
                             if let Some(ref mut cb) = self.on_card_move {
                                 cb(card_id, from_col, to_col);
@@ -717,11 +722,24 @@ impl WidgetState for Kanban {
         if let Some(columns) = json.get("columns").and_then(|v| v.as_array()) {
             self.columns.clear();
             for col_val in columns {
-                let title = col_val.get("title").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let items = col_val.get("items").and_then(|v| v.as_array()).map(|arr| {
-                    arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect::<Vec<_>>()
-                }).unwrap_or_default();
-                let mut col = KanbanColumn { title, cards: Vec::new() };
+                let title = col_val
+                    .get("title")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let items = col_val
+                    .get("items")
+                    .and_then(|v| v.as_array())
+                    .map(|arr| {
+                        arr.iter()
+                            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                            .collect::<Vec<_>>()
+                    })
+                    .unwrap_or_default();
+                let mut col = KanbanColumn {
+                    title,
+                    cards: Vec::new(),
+                };
                 for (i, item) in items.iter().enumerate() {
                     col.cards.push(KanbanCard::new(i.to_string(), item));
                 }

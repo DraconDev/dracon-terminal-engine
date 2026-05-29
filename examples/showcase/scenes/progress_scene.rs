@@ -26,11 +26,26 @@ struct Stage {
 }
 
 const STAGES: &[Stage] = &[
-    Stage { name: "Initializing", weight: 10.0 },
-    Stage { name: "Loading Config", weight: 15.0 },
-    Stage { name: "Compiling", weight: 40.0 },
-    Stage { name: "Linking", weight: 15.0 },
-    Stage { name: "Optimizing", weight: 20.0 },
+    Stage {
+        name: "Initializing",
+        weight: 10.0,
+    },
+    Stage {
+        name: "Loading Config",
+        weight: 15.0,
+    },
+    Stage {
+        name: "Compiling",
+        weight: 40.0,
+    },
+    Stage {
+        name: "Linking",
+        weight: 15.0,
+    },
+    Stage {
+        name: "Optimizing",
+        weight: 20.0,
+    },
 ];
 
 pub struct ProgressScene {
@@ -51,14 +66,15 @@ pub struct ProgressScene {
 
 impl ProgressScene {
     pub fn new(theme: Theme) -> Self {
-        let ring = RefCell::new(ProgressRing::new(0.0)
-            .with_theme(theme.clone())
-            .with_size(10)
-            .show_percentage(true)
-            .with_label("Overall"));
+        let ring = RefCell::new(
+            ProgressRing::new(0.0)
+                .with_theme(theme.clone())
+                .with_size(10)
+                .show_percentage(true)
+                .with_label("Overall"),
+        );
 
-        let bar = RefCell::new(ProgressBar::new(WidgetId::new(1))
-            .with_theme(theme.clone()));
+        let bar = RefCell::new(ProgressBar::new(WidgetId::new(1)).with_theme(theme.clone()));
 
         let spinner = RefCell::new(Spinner::new(WidgetId::new(2)).with_theme(theme.clone()));
 
@@ -87,7 +103,9 @@ impl ProgressScene {
         self.progress.set(0.0);
         self.start_tick.set(self.tick_count.get());
         self.op_log.borrow_mut().clear();
-        self.op_log.borrow_mut().push(("Starting build".into(), "info".into()));
+        self.op_log
+            .borrow_mut()
+            .push(("Starting build".into(), "info".into()));
     }
 
     fn stop_loading(&self) {
@@ -113,12 +131,16 @@ impl ProgressScene {
             let new_stage = Self::stage_at(next);
             if prev_stage != new_stage {
                 let stage_name = STAGES.get(new_stage).map(|s| s.name).unwrap_or("Complete");
-                self.op_log.borrow_mut().push((format!("{}...", stage_name), "info".into()));
+                self.op_log
+                    .borrow_mut()
+                    .push((format!("{}...", stage_name), "info".into()));
             }
 
             if next >= 100.0 {
                 self.loading.set(false);
-                self.op_log.borrow_mut().push(("Build complete".into(), "done".into()));
+                self.op_log
+                    .borrow_mut()
+                    .push(("Build complete".into(), "done".into()));
             }
         }
 
@@ -148,7 +170,9 @@ impl ProgressScene {
 }
 
 impl Scene for ProgressScene {
-    fn scene_id(&self) -> &str { "progress" }
+    fn scene_id(&self) -> &str {
+        "progress"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -170,12 +194,35 @@ impl Scene for ProgressScene {
         }
 
         // ── Header ──────────────────────────────────────────────────────
-        draw_text(&mut plane, 2, 0, " Loading Dashboard ", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            0,
+            " Loading Dashboard ",
+            t.primary,
+            t.bg,
+            true,
+        );
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
         if is_loading {
-            draw_text(&mut plane, DIV_X.saturating_sub(6), 0, "▶ AUTO", t.primary, t.bg, true);
+            draw_text(
+                &mut plane,
+                DIV_X.saturating_sub(6),
+                0,
+                "▶ AUTO",
+                t.primary,
+                t.bg,
+                true,
+            );
         }
 
         // Divider
@@ -189,7 +236,15 @@ impl Scene for ProgressScene {
 
         // ── Stage Timeline (row 2-4) ─────────────────────────────────────
         let timeline_y = 2;
-        draw_text(&mut plane, 2, timeline_y, "Build Pipeline", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            timeline_y,
+            "Build Pipeline",
+            t.primary,
+            t.bg,
+            true,
+        );
 
         let total_weight: f64 = STAGES.iter().map(|s| s.weight).sum();
         let main_w = area.width.saturating_sub(DIV_X + 4);
@@ -211,7 +266,13 @@ impl Scene for ProgressScene {
                     let by = timeline_y + 1 + dy;
                     let idx = (by * area.width + bx) as usize;
                     if idx < plane.cells.len() {
-                        let bg = if is_done { t.success } else if is_current { t.primary } else { t.surface };
+                        let bg = if is_done {
+                            t.success
+                        } else if is_current {
+                            t.primary
+                        } else {
+                            t.surface
+                        };
                         plane.cells[idx].bg = bg;
                         plane.cells[idx].transparent = false;
                     }
@@ -221,8 +282,18 @@ impl Scene for ProgressScene {
             // Stage icon + name
             let icon_idx = ((timeline_y + 2) * area.width + x_offset + 1) as usize;
             if icon_idx < plane.cells.len() {
-                plane.cells[icon_idx].char = if is_done { '●' } else if is_current { '◐' } else { '○' };
-                plane.cells[icon_idx].fg = if is_done || is_current { t.bg } else { t.fg_muted };
+                plane.cells[icon_idx].char = if is_done {
+                    '●'
+                } else if is_current {
+                    '◐'
+                } else {
+                    '○'
+                };
+                plane.cells[icon_idx].fg = if is_done || is_current {
+                    t.bg
+                } else {
+                    t.fg_muted
+                };
             }
             let name_x = x_offset + 3;
             let name_text = if stage.name.len() as u16 > box_w - 4 {
@@ -230,12 +301,26 @@ impl Scene for ProgressScene {
             } else {
                 stage.name
             };
-            let fg = if is_done || is_current { t.bg } else { t.fg_muted };
-            draw_text_clipped(&mut plane, name_x, timeline_y + 2, name_text, x_offset + box_w, fg, t.bg, false);
+            let fg = if is_done || is_current {
+                t.bg
+            } else {
+                t.fg_muted
+            };
+            draw_text_clipped(
+                &mut plane,
+                name_x,
+                timeline_y + 2,
+                name_text,
+                x_offset + box_w,
+                fg,
+                t.bg,
+                false,
+            );
 
             // Progress bar for current stage
             if is_current {
-                let stage_pct = (progress - (STAGES[..i].iter().map(|s| s.weight).sum::<f64>() / total_weight * 100.0))
+                let stage_pct = (progress
+                    - (STAGES[..i].iter().map(|s| s.weight).sum::<f64>() / total_weight * 100.0))
                     / (stage.weight / total_weight * 100.0);
                 let bar_fill = (stage_pct.clamp(0.0, 1.0) * (box_w as f64 - 2.0)) as usize;
                 for dx in 1..bar_fill + 1 {
@@ -267,12 +352,25 @@ impl Scene for ProgressScene {
 
         // Section: Progress Ring
         let ring_y = 6;
-        draw_text(&mut plane, main_x, ring_y, "Overall Progress", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            main_x,
+            ring_y,
+            "Overall Progress",
+            t.primary,
+            t.bg,
+            true,
+        );
 
         let ring_size = 14u16;
         let ring_area = Rect::new(main_x + 2, ring_y + 1, ring_size, ring_size);
         let ring_plane = self.ring.borrow().render(ring_area);
-        blit_to(&mut plane, &ring_plane, ring_area.x as usize, ring_area.y as usize);
+        blit_to(
+            &mut plane,
+            &ring_plane,
+            ring_area.x as usize,
+            ring_area.y as usize,
+        );
 
         // Status text next to ring
         let status_x = main_x + ring_size + 4;
@@ -283,28 +381,69 @@ impl Scene for ProgressScene {
         } else {
             ("Idle", t.fg_muted)
         };
-        draw_text(&mut plane, status_x, ring_y + 3, status_text, status_color, t.bg, true);
+        draw_text(
+            &mut plane,
+            status_x,
+            ring_y + 3,
+            status_text,
+            status_color,
+            t.bg,
+            true,
+        );
 
         if is_loading || progress >= 100.0 {
             let current = &STAGES[stage_idx];
-            let label = if progress >= 100.0 { "All stages done" } else { current.name };
-            draw_text(&mut plane, status_x, ring_y + 5, label, t.secondary, t.bg, false);
+            let label = if progress >= 100.0 {
+                "All stages done"
+            } else {
+                current.name
+            };
+            draw_text(
+                &mut plane,
+                status_x,
+                ring_y + 5,
+                label,
+                t.secondary,
+                t.bg,
+                false,
+            );
         }
 
         // Section: Progress Bar
         let bar_y = ring_y + ring_size + 2;
         if bar_y + 3 < area.height.saturating_sub(6) {
-            draw_text(&mut plane, main_x, bar_y, "Stage Progress", t.primary, t.bg, true);
+            draw_text(
+                &mut plane,
+                main_x,
+                bar_y,
+                "Stage Progress",
+                t.primary,
+                t.bg,
+                true,
+            );
 
             let bar_area = Rect::new(main_x, bar_y + 1, main_w, 3);
             let bar_plane = self.bar.borrow().render(bar_area);
-            blit_to(&mut plane, &bar_plane, main_x as usize, (bar_y + 1) as usize);
+            blit_to(
+                &mut plane,
+                &bar_plane,
+                main_x as usize,
+                (bar_y + 1) as usize,
+            );
         }
 
         // Section: Operations Log
         let log_y = bar_y + 5;
         if log_y + 5 < area.height.saturating_sub(4) {
-            draw_text(&mut plane, main_x, log_y, "Operations Log", t.secondary, t.bg, true);
+            draw_text(
+                &mut plane,
+                main_x,
+                log_y,
+                "Operations Log",
+                t.secondary,
+                t.bg,
+                true,
+            );
             for dx in 0..main_w {
                 let idx = ((log_y + 1) * area.width + main_x + dx) as usize;
                 if idx < plane.cells.len() {
@@ -332,8 +471,26 @@ impl Scene for ProgressScene {
                     "warn" => t.warning,
                     _ => t.fg,
                 };
-                draw_text_clipped(&mut plane, main_x + 1, ly, icon, main_x + 4, icon_color, t.bg, false);
-                draw_text_clipped(&mut plane, main_x + 4, ly, op, main_x + main_w, text_color, t.bg, false);
+                draw_text_clipped(
+                    &mut plane,
+                    main_x + 1,
+                    ly,
+                    icon,
+                    main_x + 4,
+                    icon_color,
+                    t.bg,
+                    false,
+                );
+                draw_text_clipped(
+                    &mut plane,
+                    main_x + 4,
+                    ly,
+                    op,
+                    main_x + main_w,
+                    text_color,
+                    t.bg,
+                    false,
+                );
             }
         }
 
@@ -358,24 +515,34 @@ impl Scene for ProgressScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Loading Dashboard — Help", &[
-                ("SPACE", "Toggle loading simulation"),
-                ("r", "Reset progress"),
-                ("Click stage", "Jump to that stage"),
-                ("Click ring", "Toggle loading"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Loading Dashboard — Help",
+                &[
+                    ("SPACE", "Toggle loading simulation"),
+                    ("r", "Reset progress"),
+                    ("Click stage", "Jump to that stage"),
+                    ("Click ring", "Toggle loading"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -408,7 +575,9 @@ impl Scene for ProgressScene {
                 self.ring.borrow_mut().set_progress(0.0);
                 self.bar.borrow_mut().set_progress(0.0);
                 self.op_log.borrow_mut().clear();
-                self.op_log.borrow_mut().push(("Workspace reset".into(), "info".into()));
+                self.op_log
+                    .borrow_mut()
+                    .push(("Workspace reset".into(), "info".into()));
                 self.dirty = true;
                 true
             }
@@ -441,10 +610,16 @@ impl Scene for ProgressScene {
                 // Progress ring click (rows 7-20, cols main_x+2 to main_x+16)
                 let ring_y = 7;
                 let ring_size = 14u16;
-                if row >= ring_y && row < ring_y + ring_size
-                    && col >= main_x + 2 && col < main_x + 2 + ring_size
+                if row >= ring_y
+                    && row < ring_y + ring_size
+                    && col >= main_x + 2
+                    && col < main_x + 2 + ring_size
                 {
-                    if self.loading.get() { self.stop_loading(); } else { self.start_loading(); }
+                    if self.loading.get() {
+                        self.stop_loading();
+                    } else {
+                        self.start_loading();
+                    }
                     self.dirty = true;
                     return true;
                 }
@@ -455,7 +630,8 @@ impl Scene for ProgressScene {
                 if row > bar_y && row < bar_y + 4 && col >= main_x {
                     let bar_w = area.width.saturating_sub(main_x + 2);
                     if bar_w > 0 {
-                        let pct = (col.saturating_sub(main_x) as f64 / bar_w as f64 * 100.0).clamp(0.0, 100.0);
+                        let pct = (col.saturating_sub(main_x) as f64 / bar_w as f64 * 100.0)
+                            .clamp(0.0, 100.0);
                         self.progress.set(pct);
                         self.loading.set(false);
                         self.ring.borrow_mut().set_progress(pct / 100.0);
@@ -477,13 +653,27 @@ impl Scene for ProgressScene {
         self.spinner.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl ProgressScene {
-    fn render_sidebar(&self, plane: &mut Plane, area: Rect, t: &Theme, progress: f64, stage_idx: usize, is_loading: bool) {
+    fn render_sidebar(
+        &self,
+        plane: &mut Plane,
+        area: Rect,
+        t: &Theme,
+        progress: f64,
+        stage_idx: usize,
+        is_loading: bool,
+    ) {
         let sx = 2u16;
 
         // Controls section
@@ -501,7 +691,16 @@ impl ProgressScene {
                 plane.cells[idx].transparent = false;
             }
         }
-        draw_text_clipped(plane, sx + 1, btn_y, btn_text, sx + SIDEBAR_W, t.bg, btn_bg, false);
+        draw_text_clipped(
+            plane,
+            sx + 1,
+            btn_y,
+            btn_text,
+            sx + SIDEBAR_W,
+            t.bg,
+            btn_bg,
+            false,
+        );
 
         // Reset button
         let reset_y = 5;
@@ -532,18 +731,23 @@ impl ProgressScene {
             ("Progress", format!("{:.1}%", progress)),
             ("Stage", format!("{}/{}", stage_idx + 1, STAGES.len())),
             ("Elapsed", format!("{} ticks", self.elapsed_ticks())),
-            ("Status", if progress >= 100.0 {
-                "Complete".into()
-            } else if is_loading {
-                "Running".into()
-            } else {
-                "Idle".into()
-            }),
+            (
+                "Status",
+                if progress >= 100.0 {
+                    "Complete".into()
+                } else if is_loading {
+                    "Running".into()
+                } else {
+                    "Idle".into()
+                },
+            ),
         ];
 
         for (i, (label, value)) in stats.iter().enumerate() {
             let sy = 10 + i as u16;
-            if sy >= area.height.saturating_sub(4) { break; }
+            if sy >= area.height.saturating_sub(4) {
+                break;
+            }
 
             draw_text(plane, sx, sy, label, t.fg_muted, t.bg, false);
             let val_color = match *label {
@@ -551,7 +755,16 @@ impl ProgressScene {
                 "Status" if value == "Running" => t.primary,
                 _ => t.fg,
             };
-            draw_text_clipped(plane, sx, sy + 1, value, sx + SIDEBAR_W, val_color, t.bg, false);
+            draw_text_clipped(
+                plane,
+                sx,
+                sy + 1,
+                value,
+                sx + SIDEBAR_W,
+                val_color,
+                t.bg,
+                false,
+            );
         }
 
         // Spinner preview
@@ -571,15 +784,36 @@ impl ProgressScene {
                 let sy = ref_y + 1 + i as u16;
                 let is_done = i < stage_idx;
                 let is_current = i == stage_idx && is_loading;
-                let color = if is_done { t.success } else if is_current { t.primary } else { t.fg_muted };
-                let icon = if is_done { '●' } else if is_current { '◐' } else { '○' };
+                let color = if is_done {
+                    t.success
+                } else if is_current {
+                    t.primary
+                } else {
+                    t.fg_muted
+                };
+                let icon = if is_done {
+                    '●'
+                } else if is_current {
+                    '◐'
+                } else {
+                    '○'
+                };
 
                 let icon_idx = (sy * plane.width + sx) as usize;
                 if icon_idx < plane.cells.len() {
                     plane.cells[icon_idx].char = icon;
                     plane.cells[icon_idx].fg = color;
                 }
-                draw_text_clipped(plane, sx + 2, sy, stage.name, sx + SIDEBAR_W, color, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    sx + 2,
+                    sy,
+                    stage.name,
+                    sx + SIDEBAR_W,
+                    color,
+                    t.bg,
+                    false,
+                );
             }
         }
     }

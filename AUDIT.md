@@ -234,4 +234,92 @@
 
 ---
 
-*Last updated: 2026-05-28*
+---
+
+## 11. Audit 2026-05-29 — New Findings
+
+### 11.1 Code Smells — Deferred → Fixable (New)
+
+- [ ] **D05** — `.theme()` deprecated but still used in 41 call sites across examples/tests
+  - **Files affected:** `examples/_cookbook/accessibility.rs:654`, `command_bindings.rs:803`, `debug_overlay.rs:599`, `calendar.rs:419`, `tree_navigator.rs:575`, `text_editor_demo.rs:951`, `cyberpunk_dashboard.rs:489`, `table_widget.rs:1080`, `form_widget.rs:291`, `framework_file_manager.rs:578`, `data_table.rs`, `notification_center.rs:453`, `log_monitor.rs:598`, `widget_tutorial.rs`, `rich_text.rs`, `scrollable_content.rs`, `autocomplete.rs`, `menu_system.rs`, `widget_gallery.rs`, `sqlite_browser.rs`, `tabbed_panels.rs`, `ide.rs`, `network_client.rs`, plus tests `app_tick_test.rs:827,837`, `widget_hud_test.rs`, `widget_table_test.rs`, `widget_menu_bar_test.rs`, `widget_spinner_test.rs`, `widget_autocomplete_test.rs`, `widget_select_test.rs:193`
+  - **Action:** Mass-replace `.theme(` with `.set_theme(` (or `.set_theme(...)`) in examples/tests
+  - **Note:** `cargo clippy --all-targets --all-features -D warnings` currently fails on these
+
+- [ ] **D06** — `widget_notification_center_test.rs:143` — `assert!(s.len() > 0)` instead of `!s.is_empty()`
+  - **Action:** Replace `len() > 0` with `!is_empty()`; clippy flag `len_zero`
+
+- [ ] **D07** — `widget_hud_test.rs:274` — duplicate `#[test]` attribute
+  - **Action:** Remove duplicate `#[test]`
+
+- [ ] **D08** — `widget_hud_test.rs:3` — unused import `Plane`
+  - **Action:** Remove `Plane` from import
+
+- [ ] **D09** — `widget_select_test.rs:193` — unnecessary `mut` on binding
+  - **Action:** Remove `mut` qualifier
+
+- [ ] **D10** — `widget_spinner_test.rs` — 3 errors (duplicated attributes, unused imports)
+  - **Action:** Fix duplicate attributes and remove unused imports
+
+- [ ] **D11** — `widget_menu_bar_test.rs` — 3 warnings (unused imports), 1 fixable
+  - **Action:** Apply `cargo fix` suggestion for unused imports
+
+- [ ] **D12** — `examples/network_client.rs` — `fetch_posts_async` never used + unused imports
+  - **Action:** Remove dead function or add `#[allow(dead_code)]` if intentional
+
+- [ ] **D13** — `examples/menu_system.rs` — unused import `std::process::Command`
+  - **Action:** Remove unused import
+
+- [ ] **D14** — `examples/autocomplete.rs` — unused import `WidgetId`
+  - **Action:** Remove unused import
+
+### 11.2 Formatting Issues
+
+- [ ] **F01a** — `cargo fmt --check` found formatting drift in ~17 examples/tests
+  - **Files:** `form_validation.rs`, `command_bindings.rs`, `accessibility.rs`, `notification_center.rs`, `log_monitor.rs`, `tree_navigator.rs`, `cyberpunk_dashboard.rs`, `calendar.rs`, `debug_overlay.rs`, `data_table.rs`, `table_widget.rs`, `form_widget.rs`, `text_editor_demo.rs`, `widget_tutorial.rs`, `rich_text.rs`, `widget_gallery.rs`, `sqlite_browser.rs`, etc.
+  - **Action:** Run `cargo fmt` across repo to normalize formatting
+
+### 11.3 TODO/FIXME Markers
+
+- [x] **X01** — `src/widgets/editor_search.rs:64` — `TODO` in doc comment (not a code marker) — no action needed
+- [x] **X02** — `examples/todo_app.rs:744` — `TODO: Push "detail" scene when DetailScreen is implemented` — already tracked as **E04** in previous audit
+- [x] All other occurrences are `DEBUG` log level strings or doc comments — no actionable code TODOs found
+
+---
+
+## Summary (Updated)
+
+| Category | Total | Done | Remaining |
+|----------|-------|------|-----------|
+| Crash bugs | 15 | 15 | 0 |
+| Logic bugs | 9 | 9 | 0 |
+| Code smells (fixable) | 10 | 10 | 0 |
+| Code smells (deferred) | 15 | 0 | 15 |
+| New findings (2026-05-29) | 15 | 0 | 15 |
+| Documentation | 15 | 15 | 0 |
+| Testing | 4 | 0 | 4 |
+| Build/Config | 2 | 0 | 2 |
+| API consistency | 5 | 0 | 5 |
+| Deprecations | 4 | 2 | 2 |
+| Prior session fixes | 18 | 18 | 0 |
+| **Total** | **112** | **69** | **43** |
+
+**All crash bugs, logic bugs, and documentation are done.** Remaining items:
+- 15 deferred code smells (macro refactoring, file extraction — no functional impact)
+- 15 new findings from 2026-05-29 audit (deprecated API usage, formatting drift, minor clippy warnings)
+- 14 framework-level gaps (testing, build config, API consistency)
+
+**Immediate action items (easy wins):**
+1. Run `cargo fmt` to fix formatting drift
+2. Mass-replace `.theme(` → `.set_theme(` with `sed` across examples/tests
+3. Apply `cargo fix` for unused imports / `mut` / duplicated attributes
+4. Fix `widget_notification_center_test.rs` `len() > 0` → `!is_empty()`
+
+**Breaking changes scheduled for 0.2.0:**
+- Remove `App::theme()` deprecated method
+- Merge `IoError`/`Io` in `DraconError`
+- Rename `BoundCommand` → `CommandDef`
+- Remove `Component` trait and `Component::Bounds`
+
+---
+
+*Last updated: 2026-05-29*

@@ -162,15 +162,7 @@ struct RenderState {
 }
 
 /// Word render params: (plane, word, width, height, fg, bg, style)
-type WriteWordParams<'a> = (
-    &'a mut Plane,
-    &'a str,
-    u16,
-    u16,
-    Color,
-    Color,
-    Styles,
-);
+type WriteWordParams<'a> = (&'a mut Plane, &'a str, u16, u16, Color, Color, Styles);
 
 /// Inline render params: (plane, inlines, theme, state, width, height, fg, bg, style)
 type InlineRenderParams<'a> = (
@@ -234,26 +226,57 @@ fn render_inline(params: InlineRenderParams) {
                 }
             }
             Inline::Bold(children) => {
-                render_inline(
-                    (plane, children, theme, state, width, height, theme.fg, bg, style | Styles::BOLD)
-                );
+                render_inline((
+                    plane,
+                    children,
+                    theme,
+                    state,
+                    width,
+                    height,
+                    theme.fg,
+                    bg,
+                    style | Styles::BOLD,
+                ));
             }
             Inline::Italic(children) => {
-                render_inline(
-                    (plane, children, theme, state, width, height, theme.fg, bg, style | Styles::ITALIC)
-                );
+                render_inline((
+                    plane,
+                    children,
+                    theme,
+                    state,
+                    width,
+                    height,
+                    theme.fg,
+                    bg,
+                    style | Styles::ITALIC,
+                ));
             }
             Inline::Code(text) => {
                 for word in text.split_inclusive(' ') {
-                    if !state.write_word((plane, word, width, height, theme.fg, theme.secondary, style))
-                    {
+                    if !state.write_word((
+                        plane,
+                        word,
+                        width,
+                        height,
+                        theme.fg,
+                        theme.secondary,
+                        style,
+                    )) {
                         return;
                     }
                 }
             }
             Inline::Link { text, .. } => {
                 for word in text.split_inclusive(' ') {
-                    if !state.write_word((plane, word, width, height, theme.info, bg, style | Styles::UNDERLINE)) {
+                    if !state.write_word((
+                        plane,
+                        word,
+                        width,
+                        height,
+                        theme.info,
+                        bg,
+                        style | Styles::UNDERLINE,
+                    )) {
                         return;
                     }
                 }
@@ -282,9 +305,17 @@ fn render_block(
             if state.x < indent {
                 state.x = indent;
             }
-            render_inline(
-                (plane, inlines, theme, state, width, height, header_fg, theme.bg, header_style)
-            );
+            render_inline((
+                plane,
+                inlines,
+                theme,
+                state,
+                width,
+                height,
+                header_fg,
+                theme.bg,
+                header_style,
+            ));
             state.x = 0;
             state.y += 1;
             // blank line after header
@@ -293,9 +324,17 @@ fn render_block(
             }
         }
         Block::Paragraph(inlines) => {
-            render_inline(
-                (plane, inlines, theme, state, width, height, theme.fg, theme.bg, Styles::empty())
-            );
+            render_inline((
+                plane,
+                inlines,
+                theme,
+                state,
+                width,
+                height,
+                theme.fg,
+                theme.bg,
+                Styles::empty(),
+            ));
             state.x = 0;
             state.y += 1;
         }
@@ -311,9 +350,17 @@ fn render_block(
                     state.x += 1;
                 }
             }
-            render_inline(
-                (plane, inlines, theme, state, width, height, theme.fg, theme.bg, Styles::empty())
-            );
+            render_inline((
+                plane,
+                inlines,
+                theme,
+                state,
+                width,
+                height,
+                theme.fg,
+                theme.bg,
+                Styles::empty(),
+            ));
             state.x = 0;
             state.y += 1;
         }
@@ -414,7 +461,14 @@ impl Widget for RichText {
 
         let mut state = RenderState::new();
         for block in &self.blocks {
-            render_block(&mut plane, block, &self.theme, &mut state, area.width, area.height);
+            render_block(
+                &mut plane,
+                block,
+                &self.theme,
+                &mut state,
+                area.width,
+                area.height,
+            );
             if state.y >= area.height {
                 break;
             }
@@ -429,7 +483,13 @@ impl Widget for RichText {
 }
 
 impl WidgetState for RichText {
-    fn state_id(&self) -> Option<&str> { None }
-    fn to_json(&self) -> serde_json::Value { serde_json::json!({}) }
-    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> { Ok(()) }
+    fn state_id(&self) -> Option<&str> {
+        None
+    }
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+    fn apply_json(&mut self, _json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
+        Ok(())
+    }
 }

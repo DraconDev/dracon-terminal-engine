@@ -343,7 +343,9 @@ impl TextEditor {
             self.modified = false;
             Ok(())
         } else {
-            Err(DraconError::io_msg("No file path set. Use save_as_err() instead."))
+            Err(DraconError::io_msg(
+                "No file path set. Use save_as_err() instead.",
+            ))
         }
     }
 
@@ -1163,7 +1165,8 @@ impl TextEditor {
                     let screen_row = self.scroll_row + rel_row;
                     match self.source_row_from_visual(screen_row, width) {
                         Some((row, segment_idx, _)) => {
-                            let rel_col = mouse.column.saturating_sub(area.x + gutter as u16) as usize;
+                            let rel_col =
+                                mouse.column.saturating_sub(area.x + gutter as u16) as usize;
                             let visual_x = segment_idx * width + rel_col;
                             let byte_idx = self.get_byte_index_from_visual(row, visual_x);
                             (row, byte_idx)
@@ -1173,7 +1176,8 @@ impl TextEditor {
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
-                        let rel_col = (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
+                        let rel_col =
+                            (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
                         let target_visual = self.scroll_col + rel_col;
                         self.get_byte_index_from_visual(row, target_visual)
                     } else {
@@ -1231,7 +1235,8 @@ impl TextEditor {
                 } else {
                     let row = self.scroll_row + rel_row;
                     let col = if mouse.column >= area.x + gutter as u16 {
-                        let rel_col = (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
+                        let rel_col =
+                            (mouse.column.saturating_sub(area.x + gutter as u16)) as usize;
                         let target_visual = self.scroll_col + rel_col;
                         self.get_byte_index_from_visual(row, target_visual)
                     } else {
@@ -2248,7 +2253,11 @@ impl Widget for &TextEditor {
             #[cfg(not(feature = "syntax-highlighting"))]
             {
                 // When syntax highlighting is disabled, populate cache with plain text lines
-                *cache = self.lines.iter().map(|l| Line::from(l.to_string())).collect();
+                *cache = self
+                    .lines
+                    .iter()
+                    .map(|l| Line::from(l.to_string()))
+                    .collect();
                 *first_invalid = None;
             }
             cache.clone()
@@ -3013,7 +3022,12 @@ mod tests {
     #[test]
     fn insert_newline_multiple_empty_lines() {
         let mut ed = TextEditor {
-            lines: vec!["".to_string(), "".to_string(), "".to_string(), "xyz".to_string()],
+            lines: vec![
+                "".to_string(),
+                "".to_string(),
+                "".to_string(),
+                "xyz".to_string(),
+            ],
             cursor_row: 3,
             cursor_col: 1,
             ..Default::default()

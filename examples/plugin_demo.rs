@@ -20,16 +20,18 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 
 // Import plugin widgets from _plugins directory
 use crate::plugins::stat_widget::{stat_widget_factory as create_stat, STAT_WIDGET_NAME};
-use crate::plugins::welcome_widget::{welcome_widget_factory as create_welcome, WELCOME_WIDGET_NAME};
+use crate::plugins::welcome_widget::{
+    welcome_widget_factory as create_welcome, WELCOME_WIDGET_NAME,
+};
 
 // Re-export plugins module
 mod plugins {
@@ -130,7 +132,11 @@ impl Widget for ClockWidget {
         let time_str = if self.use_24h {
             format!("{:02}:{:02}:{:02}", hours, mins, s)
         } else {
-            let h12 = if hours.is_multiple_of(12) { 12 } else { hours % 12 };
+            let h12 = if hours.is_multiple_of(12) {
+                12
+            } else {
+                hours % 12
+            };
             let ampm = if hours >= 12 { "PM" } else { "AM" };
             format!("{:>2}:{:02}:{:02} {}", h12, mins, s, ampm)
         };
@@ -465,8 +471,10 @@ impl Widget for InputRouter {
         let mut state = self.state.borrow_mut();
 
         let clock_area = state.clock.area();
-        if col >= clock_area.x && col < clock_area.x + clock_area.width
-            && row >= clock_area.y && row < clock_area.y + clock_area.height
+        if col >= clock_area.x
+            && col < clock_area.x + clock_area.width
+            && row >= clock_area.y
+            && row < clock_area.y + clock_area.height
         {
             let rel_col = col - clock_area.x;
             let rel_row = row - clock_area.y;
@@ -477,8 +485,10 @@ impl Widget for InputRouter {
         }
 
         let counter_area = state.counter.area();
-        if col >= counter_area.x && col < counter_area.x + counter_area.width
-            && row >= counter_area.y && row < counter_area.y + counter_area.height
+        if col >= counter_area.x
+            && col < counter_area.x + counter_area.width
+            && row >= counter_area.y
+            && row < counter_area.y + counter_area.height
         {
             let rel_col = col - counter_area.x;
             let rel_row = row - counter_area.y;
@@ -605,7 +615,9 @@ fn render_help(plane: &mut Plane, area: Rect, t: &Theme, kb: &KeybindingSet) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 fn main() -> io::Result<()> {
-    println!("Plugin Demo  -  Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry");
+    println!(
+        "Plugin Demo  -  Clock, Counter, StatWidget, and WelcomeWidget loaded via PluginRegistry"
+    );
     println!("+/- or </> to adjust counter | t: theme | ?: help | Esc: dismiss | q: quit");
     std::thread::sleep(Duration::from_millis(300));
 
@@ -615,7 +627,11 @@ fn main() -> io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let state = Rc::new(RefCell::new(PluginDemoState::new(should_quit, keybindings, env_theme.clone())));
+    let state = Rc::new(RefCell::new(PluginDemoState::new(
+        should_quit,
+        keybindings,
+        env_theme.clone(),
+    )));
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 
@@ -707,7 +723,12 @@ fn main() -> io::Result<()> {
         if state.show_help {
             let mut plane = Plane::new(0, w, h);
             plane.fill_bg(state.theme.bg);
-            render_help(&mut plane, Rect::new(0, 0, w, h), &state.theme, &state.keybindings);
+            render_help(
+                &mut plane,
+                Rect::new(0, 0, w, h),
+                &state.theme,
+                &state.keybindings,
+            );
             ctx.add_plane(plane);
         }
     })

@@ -22,8 +22,8 @@
 //!   q            -  quit
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Column, Table};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
@@ -325,7 +325,8 @@ fn build_users() -> Vec<User> {
             email: "zack@corp.io".into(),
             join_date: "2024-01-15".into(),
         },
-    ].clone()
+    ]
+    .clone()
 }
 
 struct TableApp {

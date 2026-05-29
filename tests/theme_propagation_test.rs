@@ -53,7 +53,9 @@ impl Widget for MockWidget {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme_changes.set(self.theme_changes.get() + 1);
-        self.current_theme.borrow_mut().replace(theme.name.to_string());
+        self.current_theme
+            .borrow_mut()
+            .replace(theme.name.to_string());
     }
 }
 
@@ -371,14 +373,21 @@ impl Widget for ThemeAwareWidget {
 #[test]
 fn test_widget_current_theme_default_is_none() {
     let widget = NoopWidget;
-    assert_eq!(widget.current_theme(), None, "default current_theme should return None");
+    assert_eq!(
+        widget.current_theme(),
+        None,
+        "default current_theme should return None"
+    );
 }
 
 #[test]
 fn test_widget_current_theme_returns_managed_theme() {
     let widget = ThemeAwareWidget::new(1, Theme::nord());
     assert!(
-        widget.current_theme().map(|t| &*t.name == "nord").unwrap_or(false),
+        widget
+            .current_theme()
+            .map(|t| &*t.name == "nord")
+            .unwrap_or(false),
         "current_theme should return the widget's managed theme"
     );
 }

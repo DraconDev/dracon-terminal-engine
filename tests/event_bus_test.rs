@@ -1,6 +1,8 @@
 //! Event Bus tests
 
-use dracon_terminal_engine::framework::event_bus::{EventBus, Reactive, SubscriptionId, ValueChanged};
+use dracon_terminal_engine::framework::event_bus::{
+    EventBus, Reactive, SubscriptionId, ValueChanged,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 

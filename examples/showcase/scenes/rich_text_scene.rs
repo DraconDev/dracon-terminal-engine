@@ -161,10 +161,30 @@ struct DocInfo {
 }
 
 const DOCUMENTS: &[DocInfo] = &[
-    DocInfo { label: "README", content: DOC_README, icon: '📄', category: "Overview" },
-    DocInfo { label: "Changelog", content: DOC_CHANGELOG, icon: '📋', category: "Overview" },
-    DocInfo { label: "Guide", content: DOC_GUIDE, icon: '📖', category: "Learning" },
-    DocInfo { label: "API", content: DOC_API, icon: '⚙', category: "Reference" },
+    DocInfo {
+        label: "README",
+        content: DOC_README,
+        icon: '📄',
+        category: "Overview",
+    },
+    DocInfo {
+        label: "Changelog",
+        content: DOC_CHANGELOG,
+        icon: '📋',
+        category: "Overview",
+    },
+    DocInfo {
+        label: "Guide",
+        content: DOC_GUIDE,
+        icon: '📖',
+        category: "Learning",
+    },
+    DocInfo {
+        label: "API",
+        content: DOC_API,
+        icon: '⚙',
+        category: "Reference",
+    },
 ];
 
 pub struct RichTextScene {
@@ -193,7 +213,9 @@ impl RichTextScene {
     fn switch_doc(&mut self, idx: usize) {
         if idx < DOCUMENTS.len() && idx != self.selected_doc {
             self.selected_doc = idx;
-            self.rich_text.borrow_mut().set_content(DOCUMENTS[idx].content);
+            self.rich_text
+                .borrow_mut()
+                .set_content(DOCUMENTS[idx].content);
             self.dirty = true;
         }
     }
@@ -211,7 +233,9 @@ impl RichTextScene {
 }
 
 impl Scene for RichTextScene {
-    fn scene_id(&self) -> &str { "rich_text" }
+    fn scene_id(&self) -> &str {
+        "rich_text"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let t = &self.theme;
@@ -225,8 +249,15 @@ impl Scene for RichTextScene {
         // ── Header ──────────────────────────────────────────────────────
         draw_text(&mut plane, 2, 0, " Document Viewer ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -262,12 +293,31 @@ impl Scene for RichTextScene {
         let doc = self.current_doc().content;
         let (lines, words, chars) = self.doc_stats(doc);
         let info = format!("{} lines  {} words  {} chars", lines, words, chars);
-        draw_text_clipped(&mut plane, main_x, tab_y + 2, &info, main_x + main_w, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            &mut plane,
+            main_x,
+            tab_y + 2,
+            &info,
+            main_x + main_w,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // RichText content area
-        let content_area = Rect::new(main_x, tab_y + 4, main_w, area.height.saturating_sub(tab_y + 6));
+        let content_area = Rect::new(
+            main_x,
+            tab_y + 4,
+            main_w,
+            area.height.saturating_sub(tab_y + 6),
+        );
         let content_plane = self.rich_text.borrow().render(content_area);
-        blit_to(&mut plane, &content_plane, main_x as usize, (tab_y + 4) as usize);
+        blit_to(
+            &mut plane,
+            &content_plane,
+            main_x as usize,
+            (tab_y + 4) as usize,
+        );
 
         // ── Footer ─────────────────────────────────────────────────────
         let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
@@ -290,25 +340,35 @@ impl Scene for RichTextScene {
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, &self.theme, "Document Viewer — Help", &[
-                ("Tab", "Next document"),
-                ("Shift+Tab", "Previous document"),
-                ("1/2/3/4", "Jump to document"),
-                ("↑/↓/PgUp/PgDn", "Scroll content"),
-                ("Click tab", "Select document"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                &self.theme,
+                "Document Viewer — Help",
+                &[
+                    ("Tab", "Next document"),
+                    ("Shift+Tab", "Previous document"),
+                    ("1/2/3/4", "Jump to document"),
+                    ("↑/↓/PgUp/PgDn", "Scroll content"),
+                    ("Click tab", "Select document"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -329,14 +389,35 @@ impl Scene for RichTextScene {
                 true
             }
             KeyCode::BackTab => {
-                self.switch_doc(if self.selected_doc == 0 { DOCUMENTS.len() - 1 } else { self.selected_doc - 1 });
+                self.switch_doc(if self.selected_doc == 0 {
+                    DOCUMENTS.len() - 1
+                } else {
+                    self.selected_doc - 1
+                });
                 true
             }
-            KeyCode::Char('1') if key.modifiers.is_empty() => { self.switch_doc(0); true }
-            KeyCode::Char('2') if key.modifiers.is_empty() => { self.switch_doc(1); true }
-            KeyCode::Char('3') if key.modifiers.is_empty() => { self.switch_doc(2); true }
-            KeyCode::Char('4') if key.modifiers.is_empty() => { self.switch_doc(3); true }
-            KeyCode::Up | KeyCode::Down | KeyCode::PageUp | KeyCode::PageDown | KeyCode::Home | KeyCode::End => {
+            KeyCode::Char('1') if key.modifiers.is_empty() => {
+                self.switch_doc(0);
+                true
+            }
+            KeyCode::Char('2') if key.modifiers.is_empty() => {
+                self.switch_doc(1);
+                true
+            }
+            KeyCode::Char('3') if key.modifiers.is_empty() => {
+                self.switch_doc(2);
+                true
+            }
+            KeyCode::Char('4') if key.modifiers.is_empty() => {
+                self.switch_doc(3);
+                true
+            }
+            KeyCode::Up
+            | KeyCode::Down
+            | KeyCode::PageUp
+            | KeyCode::PageDown
+            | KeyCode::Home
+            | KeyCode::End => {
                 self.rich_text.borrow_mut().handle_key(key);
                 self.dirty = true;
                 true
@@ -348,7 +429,12 @@ impl Scene for RichTextScene {
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         // Sidebar clicks
         let sidebar_click = col < DIV_X && row >= 3;
-        if sidebar_click && matches!(kind, MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)) {
+        if sidebar_click
+            && matches!(
+                kind,
+                MouseEventKind::Down(dracon_terminal_engine::input::event::MouseButton::Left)
+            )
+        {
             let mut y = 3u16;
             for (i, doc) in DOCUMENTS.iter().enumerate() {
                 let prev_category = if i > 0 { DOCUMENTS[i - 1].category } else { "" };
@@ -376,7 +462,9 @@ impl Scene for RichTextScene {
         // Content scroll
         if row > 4 && col > DIV_X {
             let scrolled = self.rich_text.borrow_mut().handle_mouse(kind, col, row);
-            if scrolled { self.dirty = true; }
+            if scrolled {
+                self.dirty = true;
+            }
             return scrolled;
         }
 
@@ -388,9 +476,15 @@ impl Scene for RichTextScene {
         self.rich_text.borrow_mut().on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl RichTextScene {
@@ -452,7 +546,9 @@ impl RichTextScene {
             }
 
             y += 1;
-            if y >= area.height.saturating_sub(8) { break; }
+            if y >= area.height.saturating_sub(8) {
+                break;
+            }
         }
 
         // Divider
@@ -483,7 +579,9 @@ impl RichTextScene {
 
             for (i, (label, value)) in stats.iter().enumerate() {
                 let sy = details_y + 1 + i as u16;
-                if sy >= area.height.saturating_sub(4) { break; }
+                if sy >= area.height.saturating_sub(4) {
+                    break;
+                }
                 draw_text_clipped(plane, sx, sy, label, sx + 8, t.fg_muted, t.bg, false);
                 draw_text_clipped(plane, sx + 9, sy, value, sx + SIDEBAR_W, t.fg, t.bg, false);
             }
@@ -496,7 +594,10 @@ impl RichTextScene {
 
             let total_docs = DOCUMENTS.len();
             let total_lines: usize = DOCUMENTS.iter().map(|d| d.content.lines().count()).sum();
-            let total_words: usize = DOCUMENTS.iter().map(|d| d.content.split_whitespace().count()).sum();
+            let total_words: usize = DOCUMENTS
+                .iter()
+                .map(|d| d.content.split_whitespace().count())
+                .sum();
 
             let quick_stats = [
                 ("Docs", &total_docs.to_string()),
@@ -518,8 +619,16 @@ impl RichTextScene {
         for (i, doc) in DOCUMENTS.iter().enumerate() {
             let is_selected = i == self.selected_doc;
             let bg = if is_selected { t.primary } else { t.surface };
-            let fg = if is_selected { t.fg_on_accent } else { t.fg_muted };
-            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+            let fg = if is_selected {
+                t.fg_on_accent
+            } else {
+                t.fg_muted
+            };
+            let style = if is_selected {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
 
             let tab_x = x + (i as u16) * tab_w;
             let label = format!(" {} ", doc.label);

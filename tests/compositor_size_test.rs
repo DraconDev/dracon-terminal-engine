@@ -1,7 +1,7 @@
 //! Quick size check
 #![allow(dead_code)]
-use std::mem::size_of;
 use dracon_terminal_engine::compositor::{Cell, Color, Styles};
+use std::mem::size_of;
 
 pub fn check_sizes() {
     println!("Cell: {}", size_of::<Cell>());

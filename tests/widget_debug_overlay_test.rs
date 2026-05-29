@@ -43,7 +43,11 @@ fn test_debug_overlay_add_line() {
 #[test]
 fn test_debug_overlay_set_lines() {
     let mut d = DebugOverlay::new(WidgetId::new(1));
-    d.set_lines(vec!["Line1".to_string(), "Line2".to_string(), "Line3".to_string()]);
+    d.set_lines(vec![
+        "Line1".to_string(),
+        "Line2".to_string(),
+        "Line3".to_string(),
+    ]);
     let plane = d.render(Rect::new(0, 0, 80, 20));
     assert!(plane.width > 0);
 }
@@ -201,7 +205,13 @@ fn test_debug_overlay_on_theme_change() {
 
 #[test]
 fn test_debug_overlay_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let d = DebugOverlay::new(WidgetId::new(1)).with_theme(t);

@@ -38,7 +38,16 @@ pub fn draw_text(plane: &mut Plane, x: u16, y: u16, text: &str, fg: Color, bg: C
 /// Use this when rendering inside a panel/column to prevent text from bleeding into
 /// adjacent panels.
 #[allow(clippy::too_many_arguments)]
-pub fn draw_text_clipped(plane: &mut Plane, x: u16, y: u16, text: &str, max_x: u16, fg: Color, bg: Color, bold: bool) {
+pub fn draw_text_clipped(
+    plane: &mut Plane,
+    x: u16,
+    y: u16,
+    text: &str,
+    max_x: u16,
+    fg: Color,
+    bg: Color,
+    bold: bool,
+) {
     if y >= plane.height || x >= max_x {
         return;
     }
@@ -107,9 +116,10 @@ pub fn render_help_overlay(
     title: &str,
     shortcuts: &[(&str, &str)],
 ) {
-
     let min_w = 40u16;
-    let hw = min_w.max(title.len() as u16 + 6).min(area.width.saturating_sub(4));
+    let hw = min_w
+        .max(title.len() as u16 + 6)
+        .min(area.width.saturating_sub(4));
     let hh = (3 + shortcuts.len() as u16 + 2).min(area.height.saturating_sub(4));
     let hx = (area.width.saturating_sub(hw)) / 2;
     let hy = (area.height.saturating_sub(hh)) / 2;
@@ -203,7 +213,9 @@ pub fn render_help_overlay(
 /// Draws ╭╮╰╯ corners, ─ top/bottom, │ left/right in the given color.
 /// All coordinates are bounds-checked against the plane dimensions.
 pub fn draw_focus_ring(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, color: Color) {
-    if w == 0 || h == 0 { return; }
+    if w == 0 || h == 0 {
+        return;
+    }
     // Corners
     let corners = [
         ('╭', x, y),
@@ -224,29 +236,49 @@ pub fn draw_focus_ring(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, color:
     // Top and bottom borders
     for dx in 1..w.saturating_sub(1) {
         let cx = x + dx;
-        if cx >= plane.width { break; }
+        if cx >= plane.width {
+            break;
+        }
         if y < plane.height {
             let top = (y * plane.width + cx) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = color; plane.cells[top].transparent = false; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = color;
+                plane.cells[top].transparent = false;
+            }
         }
         let by = y + h.saturating_sub(1);
         if by < plane.height {
             let bot = (by * plane.width + cx) as usize;
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = color; plane.cells[bot].transparent = false; }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = color;
+                plane.cells[bot].transparent = false;
+            }
         }
     }
     // Left and right borders
     for dy in 1..h.saturating_sub(1) {
         let cy = y + dy;
-        if cy >= plane.height { break; }
+        if cy >= plane.height {
+            break;
+        }
         if x < plane.width {
             let left = (cy * plane.width + x) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = color; plane.cells[left].transparent = false; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = color;
+                plane.cells[left].transparent = false;
+            }
         }
         let rx = x + w.saturating_sub(1);
         if rx < plane.width {
             let right = (cy * plane.width + rx) as usize;
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = color; plane.cells[right].transparent = false; }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = color;
+                plane.cells[right].transparent = false;
+            }
         }
     }
 }

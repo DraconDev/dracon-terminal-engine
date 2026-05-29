@@ -198,7 +198,11 @@ fn test_framework_button_empty_label_fallback() {
 fn test_framework_button_id_method() {
     let btn = FrameworkButton::new("test");
     let id = btn.id();
-    assert_ne!(id, WidgetId::new(0), "auto-assigned WidgetId should be non-zero");
+    assert_ne!(
+        id,
+        WidgetId::new(0),
+        "auto-assigned WidgetId should be non-zero"
+    );
 }
 
 #[test]

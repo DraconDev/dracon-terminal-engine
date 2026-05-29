@@ -165,8 +165,7 @@ impl MarqueeState {
         }
 
         if let Some((sx, sy)) = self.start {
-            let dist_sq = (col as f32 - sx as f32).powi(2)
-                + (row as f32 - sy as f32).powi(2);
+            let dist_sq = (col as f32 - sx as f32).powi(2) + (row as f32 - sy as f32).powi(2);
             if dist_sq >= self.activation_threshold {
                 self.is_active = true;
                 return true;
@@ -197,7 +196,8 @@ impl MarqueeState {
     ///
     /// Returns `false` if marquee is not active.
     pub fn contains_row(&self, row: u16) -> bool {
-        self.rect().is_some_and(|r| row >= r.min_row && row <= r.max_row)
+        self.rect()
+            .is_some_and(|r| row >= r.min_row && row <= r.max_row)
     }
 
     /// Check if a screen position falls within the marquee rect.
@@ -298,7 +298,13 @@ pub fn render_marquee(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme) 
     for cx in x..x + w {
         let idx = (y as usize) * plane.width as usize + cx as usize;
         if idx < plane.cells.len() {
-            let ch = if cx == x { '╭' } else if cx == x + w - 1 { '╮' } else { '─' };
+            let ch = if cx == x {
+                '╭'
+            } else if cx == x + w - 1 {
+                '╮'
+            } else {
+                '─'
+            };
             plane.cells[idx].char = ch;
             plane.cells[idx].fg = fg;
             plane.cells[idx].style = Styles::BOLD;
@@ -311,7 +317,13 @@ pub fn render_marquee(plane: &mut Plane, marquee: &MarqueeState, theme: &Theme) 
     for cx in x..x + w {
         let idx = (by as usize) * plane.width as usize + cx as usize;
         if idx < plane.cells.len() {
-            let ch = if cx == x { '╰' } else if cx == x + w - 1 { '╯' } else { '─' };
+            let ch = if cx == x {
+                '╰'
+            } else if cx == x + w - 1 {
+                '╯'
+            } else {
+                '─'
+            };
             plane.cells[idx].char = ch;
             plane.cells[idx].fg = fg;
             plane.cells[idx].style = Styles::BOLD;
@@ -446,7 +458,7 @@ mod tests {
         m.start_tracking(2, 3);
         m.update(40, 10);
         assert!(m.contains(10, 5));
-        assert!(!m.contains(1, 5));  // Outside left
+        assert!(!m.contains(1, 5)); // Outside left
         assert!(!m.contains(10, 2)); // Above top
     }
 

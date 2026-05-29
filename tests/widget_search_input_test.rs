@@ -130,7 +130,6 @@ fn test_search_input_render_has_content() {
 }
 
 #[test]
-
 #[test]
 fn test_search_input_render_wide() {
     let si = SearchInput::new(WidgetId::new(1));
@@ -187,7 +186,13 @@ fn test_search_input_on_theme_change() {
 
 #[test]
 fn test_search_input_multiple_themes() {
-    let themes = vec!["nord", "dracula", "monokai", "solarized_dark", "catppuccin_mocha"];
+    let themes = vec![
+        "nord",
+        "dracula",
+        "monokai",
+        "solarized_dark",
+        "catppuccin_mocha",
+    ];
     for name in themes {
         if let Some(t) = Theme::from_name(name) {
             let si = SearchInput::new(WidgetId::new(1)).with_theme(t);

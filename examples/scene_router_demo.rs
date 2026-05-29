@@ -19,8 +19,8 @@
 //!   q          -  quit
 
 use dracon_terminal_engine::compositor::{Plane, Styles};
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
@@ -88,7 +88,9 @@ impl HomeScreen {
 }
 
 impl Scene for HomeScreen {
-    fn scene_id(&self) -> &str { "home" }
+    fn scene_id(&self) -> &str {
+        "home"
+    }
 
     fn on_enter(&mut self) {
         self.dirty = true;
@@ -133,7 +135,11 @@ impl Scene for HomeScreen {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_selected { t.selection_fg } else { t.fg };
                     plane.cells[idx].bg = if is_selected { t.selection_bg } else { t.bg };
-                    plane.cells[idx].style = if is_selected { Styles::BOLD } else { Styles::empty() };
+                    plane.cells[idx].style = if is_selected {
+                        Styles::BOLD
+                    } else {
+                        Styles::empty()
+                    };
                 }
             }
         }
@@ -213,9 +219,15 @@ impl Scene for HomeScreen {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -230,12 +242,18 @@ struct SettingsScreen {
 
 impl SettingsScreen {
     fn new(theme: Theme) -> Self {
-        Self { theme, dirty: true, option_enabled: false }
+        Self {
+            theme,
+            dirty: true,
+            option_enabled: false,
+        }
     }
 }
 
 impl Scene for SettingsScreen {
-    fn scene_id(&self) -> &str { "settings" }
+    fn scene_id(&self) -> &str {
+        "settings"
+    }
 
     fn on_enter(&mut self) {
         self.dirty = true;
@@ -282,13 +300,21 @@ impl Scene for SettingsScreen {
                 plane.cells[idx].fg = t.fg;
             }
         }
-        let toggle_status = if self.option_enabled { " [ON] " } else { " [OFF]" };
+        let toggle_status = if self.option_enabled {
+            " [ON] "
+        } else {
+            " [OFF]"
+        };
         let status_x = 2 + toggle_label.len() as u16 + 1;
         for (i, c) in toggle_status.chars().enumerate() {
             let idx = (toggle_y * area.width + status_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
-                plane.cells[idx].fg = if self.option_enabled { t.success } else { t.error };
+                plane.cells[idx].fg = if self.option_enabled {
+                    t.success
+                } else {
+                    t.error
+                };
                 plane.cells[idx].style = Styles::BOLD;
             }
         }
@@ -331,9 +357,15 @@ impl Scene for SettingsScreen {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -352,7 +384,9 @@ impl ProfileScreen {
 }
 
 impl Scene for ProfileScreen {
-    fn scene_id(&self) -> &str { "profile" }
+    fn scene_id(&self) -> &str {
+        "profile"
+    }
 
     fn on_enter(&mut self) {
         self.dirty = true;
@@ -419,9 +453,15 @@ impl Scene for ProfileScreen {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -460,20 +500,35 @@ impl AppRouter {
     fn cycle_theme(&self) {
         let themes = Theme::all();
         let mut theme = self.theme.borrow_mut();
-        let idx = themes.iter().position(|t| t.name == theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == theme.name)
+            .unwrap_or(0);
         *theme = themes[(idx + 1) % themes.len()].clone();
     }
 }
 
 impl dracon_terminal_engine::framework::widget::Widget for AppRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn z_index(&self) -> u16 { 0 }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         if key.kind != KeyEventKind::Press {
@@ -561,7 +616,10 @@ fn main() -> std::io::Result<()> {
     let mut router = SceneRouter::new();
     let initial_theme = theme.borrow().clone();
     router.register("home", Box::new(HomeScreen::new(initial_theme.clone())));
-    router.register("settings", Box::new(SettingsScreen::new(initial_theme.clone())));
+    router.register(
+        "settings",
+        Box::new(SettingsScreen::new(initial_theme.clone())),
+    );
     router.register("profile", Box::new(ProfileScreen::new(initial_theme)));
     router.push("home");
 
@@ -572,11 +630,15 @@ fn main() -> std::io::Result<()> {
 
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
     let keybindings_for_tick = keybindings.clone();
-    let app_router = AppRouter::new(router_for_input, theme, should_quit, show_help_for_input, keybindings);
+    let app_router = AppRouter::new(
+        router_for_input,
+        theme,
+        should_quit,
+        show_help_for_input,
+        keybindings,
+    );
 
-    let mut app = App::new()?
-        .title("Scene Router Demo")
-        .fps(30);
+    let mut app = App::new()?.title("Scene Router Demo").fps(30);
     app.set_theme(Theme::from_env_or(Theme::nord()));
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
@@ -629,7 +691,12 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+                let corners = [
+                    ('╭', hx, hy),
+                    ('╮', hx + hw - 1, hy),
+                    ('╰', hx, hy + hh - 1),
+                    ('╯', hx + hw - 1, hy + hh - 1),
+                ];
                 for (ch, cx, cy) in corners.iter() {
                     let idx = (cy * w + cx) as usize;
                     if idx < help_plane.cells.len() {
@@ -674,7 +741,8 @@ fn main() -> std::io::Result<()> {
                     if idx < help_plane.cells.len() {
                         help_plane.cells[idx].char = c;
                         help_plane.cells[idx].fg = theme.primary;
-                        help_plane.cells[idx].style = dracon_terminal_engine::compositor::Styles::BOLD;
+                        help_plane.cells[idx].style =
+                            dracon_terminal_engine::compositor::Styles::BOLD;
                         help_plane.cells[idx].transparent = false;
                     }
                 }

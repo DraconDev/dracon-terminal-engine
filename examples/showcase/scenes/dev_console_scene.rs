@@ -7,13 +7,13 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::{
-    Divider, EventLogger, Label, LogViewer, LogLevel, StatusBar, StatusSegment,
-    WidgetInspector, WidgetNode,
+    Divider, EventLogger, Label, LogLevel, LogViewer, StatusBar, StatusSegment, WidgetInspector,
+    WidgetNode,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
@@ -45,8 +45,7 @@ impl DevConsoleScene {
             .with_max_events(50)
             .with_theme(theme.clone());
 
-        let mut inspector = WidgetInspector::new(WidgetId::new(702))
-            .with_theme(theme.clone());
+        let mut inspector = WidgetInspector::new(WidgetId::new(702)).with_theme(theme.clone());
         inspector.set_hierarchy(vec![
             WidgetNode::new(WidgetId::new(1), "App"),
             WidgetNode::new(WidgetId::new(2), "  LogViewer"),
@@ -78,10 +77,16 @@ impl DevConsoleScene {
 
     fn add_log(&mut self) {
         let messages: &[(LogLevel, &str)] = &[
-            (LogLevel::Debug, "Connection pool initialized with 8 workers"),
+            (
+                LogLevel::Debug,
+                "Connection pool initialized with 8 workers",
+            ),
             (LogLevel::Info, "Request processed: GET /api/health (12ms)"),
             (LogLevel::Info, "Cache hit: /static/app.js"),
-            (LogLevel::Warn, "Slow query detected: SELECT * FROM logs (450ms)"),
+            (
+                LogLevel::Warn,
+                "Slow query detected: SELECT * FROM logs (450ms)",
+            ),
             (LogLevel::Error, "Connection refused: db-replica-2:5432"),
             (LogLevel::Debug, "Token refreshed for session abc123"),
             (LogLevel::Info, "Background job completed: cleanup"),
@@ -195,9 +200,7 @@ impl Scene for DevConsoleScene {
         }
 
         // ── Divider (row 2) ────────────────────────────────────────
-        let divider = Divider::new()
-            .with_label("Logs")
-            .with_theme(t.clone());
+        let divider = Divider::new().with_label("Logs").with_theme(t.clone());
         let div_plane = divider.render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &div_plane, 0, 2);
 
@@ -209,9 +212,7 @@ impl Scene for DevConsoleScene {
         blit_to(&mut plane, &lv_plane, 0, 3);
 
         // ── Divider (before event log) ──────────────────────────────
-        let div2 = Divider::new()
-            .with_label("Events")
-            .with_theme(t.clone());
+        let div2 = Divider::new().with_label("Events").with_theme(t.clone());
         let div2_y = 3 + lv_h;
         let div2_plane = div2.render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &div2_plane, 0, div2_y as usize);
@@ -233,12 +234,7 @@ impl Scene for DevConsoleScene {
                 el_h,
             );
             let ins_plane = self.inspector.borrow().render(ins_area);
-            blit_to(
-                &mut plane,
-                &ins_plane,
-                (half_w + 1) as usize,
-                el_y as usize,
-            );
+            blit_to(&mut plane, &ins_plane, (half_w + 1) as usize, el_y as usize);
         } else {
             let el_area = Rect::new(0, el_y, area.width, el_h);
             self.event_logger.borrow_mut().set_area(el_area);
@@ -255,7 +251,23 @@ impl Scene for DevConsoleScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Dev Console — Help", &[("Space", "Add log entry"), ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"), ("I", "Toggle widget inspector"), ("C", "Clear logs + events"), ("Up/Dn", "Scroll log viewer"), ("PgUp/Dn", "Page scroll"), ("Click filter", "Set filter level"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Dev Console — Help",
+                &[
+                    ("Space", "Add log entry"),
+                    ("1-5", "Filter: ALL/DBG/INFO/WARN/ERR"),
+                    ("I", "Toggle widget inspector"),
+                    ("C", "Clear logs + events"),
+                    ("Up/Dn", "Scroll log viewer"),
+                    ("PgUp/Dn", "Page scroll"),
+                    ("Click filter", "Set filter level"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
@@ -391,4 +403,3 @@ impl Scene for DevConsoleScene {
         self.dirty = false;
     }
 }
-

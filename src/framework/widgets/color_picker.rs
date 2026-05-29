@@ -226,14 +226,26 @@ impl crate::framework::widget::Widget for ColorPicker {
         for x in 0..swatch_width {
             let top_idx = (swatch_height * area.width + x + 1) as usize;
             let bot_idx = ((swatch_height - 1) * area.width + x + 1) as usize;
-            if top_idx < plane.cells.len() { plane.cells[top_idx].char = '─'; plane.cells[top_idx].fg = self.theme.outline; }
-            if bot_idx < plane.cells.len() { plane.cells[bot_idx].char = '─'; plane.cells[bot_idx].fg = self.theme.outline; }
+            if top_idx < plane.cells.len() {
+                plane.cells[top_idx].char = '─';
+                plane.cells[top_idx].fg = self.theme.outline;
+            }
+            if bot_idx < plane.cells.len() {
+                plane.cells[bot_idx].char = '─';
+                plane.cells[bot_idx].fg = self.theme.outline;
+            }
         }
         for y in 0..swatch_height {
             let left_idx = (y * area.width) as usize;
             let right_idx = (y * area.width + swatch_width + 1) as usize;
-            if left_idx < plane.cells.len() { plane.cells[left_idx].char = '│'; plane.cells[left_idx].fg = self.theme.outline; }
-            if right_idx < plane.cells.len() { plane.cells[right_idx].char = '│'; plane.cells[right_idx].fg = self.theme.outline; }
+            if left_idx < plane.cells.len() {
+                plane.cells[left_idx].char = '│';
+                plane.cells[left_idx].fg = self.theme.outline;
+            }
+            if right_idx < plane.cells.len() {
+                plane.cells[right_idx].char = '│';
+                plane.cells[right_idx].fg = self.theme.outline;
+            }
         }
         // Corners
         let corners = [
@@ -244,7 +256,10 @@ impl crate::framework::widget::Widget for ColorPicker {
         ];
         for (x, y, ch) in corners {
             let idx = (y * area.width + x + 1) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = self.theme.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = ch;
+                plane.cells[idx].fg = self.theme.outline;
+            }
         }
 
         // === Hex Input Display ===
@@ -284,13 +299,37 @@ impl crate::framework::widget::Widget for ColorPicker {
         let slider_width = (area.width.saturating_sub(4)).max(20);
 
         // Hue slider
-        self.render_slider((&mut plane, 0, slider_start_y, slider_width, "H", self.hue / 360.0 * 100.0, SliderKind::Hue));
+        self.render_slider((
+            &mut plane,
+            0,
+            slider_start_y,
+            slider_width,
+            "H",
+            self.hue / 360.0 * 100.0,
+            SliderKind::Hue,
+        ));
 
         // Saturation slider
-        self.render_slider((&mut plane, 1, slider_start_y + 2, slider_width, "S", self.saturation, SliderKind::Saturation));
+        self.render_slider((
+            &mut plane,
+            1,
+            slider_start_y + 2,
+            slider_width,
+            "S",
+            self.saturation,
+            SliderKind::Saturation,
+        ));
 
         // Lightness slider
-        self.render_slider((&mut plane, 2, slider_start_y + 4, slider_width, "L", self.lightness, SliderKind::Lightness));
+        self.render_slider((
+            &mut plane,
+            2,
+            slider_start_y + 4,
+            slider_width,
+            "L",
+            self.lightness,
+            SliderKind::Lightness,
+        ));
 
         // === HSL Values Display ===
         let values_y = slider_start_y + 7;
@@ -363,7 +402,11 @@ impl crate::framework::widget::Widget for ColorPicker {
             match key.code {
                 KeyCode::Tab => {
                     // Cycle through sliders
-                    let sliders = [SliderKind::Hue, SliderKind::Saturation, SliderKind::Lightness];
+                    let sliders = [
+                        SliderKind::Hue,
+                        SliderKind::Saturation,
+                        SliderKind::Lightness,
+                    ];
                     let current = self.selected_slider.unwrap_or(SliderKind::Hue);
                     let idx = sliders.iter().position(|&s| s == current).unwrap_or(0);
                     self.selected_slider = Some(sliders[(idx + 1) % sliders.len()]);
@@ -423,7 +466,14 @@ impl crate::framework::widget::Widget for ColorPicker {
                 let slider_start_y = 6u16;
                 let _slider_width = (area.width.saturating_sub(4)).max(20);
 
-                for (i, kind) in [SliderKind::Hue, SliderKind::Saturation, SliderKind::Lightness].iter().enumerate() {
+                for (i, kind) in [
+                    SliderKind::Hue,
+                    SliderKind::Saturation,
+                    SliderKind::Lightness,
+                ]
+                .iter()
+                .enumerate()
+                {
                     let slider_y = slider_start_y + (i as u16) * 2;
                     if rel_row == slider_y {
                         self.hovered_slider = Some(*kind);
@@ -443,7 +493,14 @@ impl crate::framework::widget::Widget for ColorPicker {
                 let slider_start_y = 6u16;
                 let slider_width = (area.width.saturating_sub(4)).max(20);
 
-                for (i, kind) in [SliderKind::Hue, SliderKind::Saturation, SliderKind::Lightness].iter().enumerate() {
+                for (i, kind) in [
+                    SliderKind::Hue,
+                    SliderKind::Saturation,
+                    SliderKind::Lightness,
+                ]
+                .iter()
+                .enumerate()
+                {
                     let slider_y = slider_start_y + (i as u16) * 2;
                     if rel_row == slider_y && rel_col >= 2 && rel_col < 2 + slider_width {
                         self.selected_slider = Some(*kind);
@@ -535,7 +592,9 @@ impl ColorPicker {
                 let progress = i as f32 / track_width as f32;
                 let cell_color = match kind {
                     SliderKind::Hue => hsl_to_color(progress * 360.0, 100.0, 50.0),
-                    SliderKind::Saturation => hsl_to_color(self.hue, progress * 100.0, self.lightness),
+                    SliderKind::Saturation => {
+                        hsl_to_color(self.hue, progress * 100.0, self.lightness)
+                    }
                     SliderKind::Lightness => {
                         let l = progress * 100.0;
                         Color::Rgb((l * 2.55) as u8, (l * 2.55) as u8, (l * 2.55) as u8)
@@ -729,22 +788,22 @@ fn is_valid_hex(hex: &str) -> bool {
 fn ansi_to_rgb(n: u8) -> (u8, u8, u8) {
     // Standard ANSI colors (simplified)
     match n % 16 {
-        0 => (0, 0, 0),         // Black
-        1 => (128, 0, 0),       // Red
-        2 => (0, 128, 0),       // Green
-        3 => (128, 128, 0),     // Yellow
-        4 => (0, 0, 128),       // Blue
-        5 => (128, 0, 128),     // Magenta
-        6 => (0, 128, 128),     // Cyan
-        7 => (192, 192, 192),   // White
-        8 => (128, 128, 128),   // Bright Black
-        9 => (255, 0, 0),       // Bright Red
-        10 => (0, 255, 0),      // Bright Green
-        11 => (255, 255, 0),    // Bright Yellow
-        12 => (0, 0, 255),      // Bright Blue
-        13 => (255, 0, 255),    // Bright Magenta
-        14 => (0, 255, 255),    // Bright Cyan
-        15 => (255, 255, 255),  // Bright White
+        0 => (0, 0, 0),        // Black
+        1 => (128, 0, 0),      // Red
+        2 => (0, 128, 0),      // Green
+        3 => (128, 128, 0),    // Yellow
+        4 => (0, 0, 128),      // Blue
+        5 => (128, 0, 128),    // Magenta
+        6 => (0, 128, 128),    // Cyan
+        7 => (192, 192, 192),  // White
+        8 => (128, 128, 128),  // Bright Black
+        9 => (255, 0, 0),      // Bright Red
+        10 => (0, 255, 0),     // Bright Green
+        11 => (255, 255, 0),   // Bright Yellow
+        12 => (0, 0, 255),     // Bright Blue
+        13 => (255, 0, 255),   // Bright Magenta
+        14 => (0, 255, 255),   // Bright Cyan
+        15 => (255, 255, 255), // Bright White
         _ => (128, 128, 128),
     }
 }

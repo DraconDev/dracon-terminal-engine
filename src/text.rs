@@ -26,7 +26,8 @@ pub fn grapheme_width(c: char) -> u8 {
         || c == '\u{200C}' // Zero Width Non-Joiner (ZWNJ)
         || c == '\u{200B}' // Zero Width Space
         || c == '\u{FEFF}' // Byte Order Mark
-        || c == '\u{2060}' // Word Joiner
+        || c == '\u{2060}'
+    // Word Joiner
     {
         return 0;
     }
@@ -278,7 +279,7 @@ mod tests {
         assert_eq!(indices[2].0, 2); // l
         assert_eq!(indices[3].0, 3); // l
         assert_eq!(indices[4].0, 4); // o
-        // Check visual columns
+                                     // Check visual columns
         assert_eq!(indices[0].1, 0);
         assert_eq!(indices[1].1, 1);
         assert_eq!(indices[2].1, 2);

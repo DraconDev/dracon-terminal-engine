@@ -32,9 +32,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use dracon_terminal_engine::compositor::Plane;
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::widgets::{
     Button, ConfirmDialog, ConfirmResult, Label, Modal, Toast, ToastKind,
 };
@@ -385,7 +385,10 @@ fn main() -> io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     let env_theme = Theme::from_env_or(Theme::dark());
 
-    let demo = Rc::new(RefCell::new(ModalDemoApp::new(should_quit, env_theme.clone())));
+    let demo = Rc::new(RefCell::new(ModalDemoApp::new(
+        should_quit,
+        env_theme.clone(),
+    )));
     let demo_for_render = Rc::clone(&demo);
     let demo_for_input = Rc::clone(&demo);
 

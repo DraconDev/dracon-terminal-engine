@@ -422,7 +422,11 @@ fn test_move_recursive_same_path_is_noop() {
     std::fs::write(&file, "content").unwrap();
 
     let result = move_recursive(&file, &file);
-    assert!(result.is_ok(), "move to same path should be no-op: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "move to same path should be no-op: {:?}",
+        result
+    );
     assert!(file.exists(), "file should still exist");
 
     std::fs::remove_file(&file).ok();
@@ -450,7 +454,10 @@ fn test_move_recursive_nonexistent_source_returns_error() {
     let dst = tmp.join("nonexistent_dest_12345.txt");
 
     let result = move_recursive(&src, &dst);
-    assert!(result.is_err(), "move of non-existent source should return error");
+    assert!(
+        result.is_err(),
+        "move of non-existent source should return error"
+    );
 }
 
 #[test]
@@ -461,7 +468,11 @@ fn test_move_recursive_same_filesystem_rename_works() {
     std::fs::write(&src, "test content").unwrap();
 
     let result = move_recursive(&src, &dst);
-    assert!(result.is_ok(), "same-fs rename should succeed: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "same-fs rename should succeed: {:?}",
+        result
+    );
     assert!(!src.exists(), "source should not exist after move");
     assert!(dst.exists(), "destination should exist");
     assert_eq!(std::fs::read_to_string(&dst).unwrap(), "test content");
@@ -502,10 +513,13 @@ fn test_highlight_code_with_palette_produces_styled_output() {
     let lines = highlight_code(code, "rs", Some(&palette));
     assert!(!lines.is_empty(), "should produce at least one line");
     // Output should have spans with non-default colors
-    let has_colored_spans = lines.iter().any(|l| {
-        l.spans.iter().any(|s| s.style.fg.is_some())
-    });
-    assert!(has_colored_spans, "highlighted code should have colored spans");
+    let has_colored_spans = lines
+        .iter()
+        .any(|l| l.spans.iter().any(|s| s.style.fg.is_some()));
+    assert!(
+        has_colored_spans,
+        "highlighted code should have colored spans"
+    );
 }
 
 #[cfg(feature = "syntax-highlighting")]
@@ -515,7 +529,9 @@ fn test_highlight_code_with_palette_markdown_headers() {
     let palette = HighlightPalette::from_theme(&theme);
     let md = "# Heading\n## Subheading";
     let lines = highlight_code(md, "md", Some(&palette));
-    let has_styled_spans = lines.iter().any(|l| l.spans.iter().any(|s| s.style.fg.is_some()));
+    let has_styled_spans = lines
+        .iter()
+        .any(|l| l.spans.iter().any(|s| s.style.fg.is_some()));
     assert!(has_styled_spans, "markdown should have styled spans");
 }
 
@@ -527,10 +543,13 @@ fn test_highlight_code_with_no_palette_uses_cyberpunk() {
     // Both with and without palette should produce colored output when feature is on
     #[cfg(feature = "syntax-highlighting")]
     {
-        let has_colored_spans = lines.iter().any(|l| {
-            l.spans.iter().any(|s| s.style.fg.is_some())
-        });
-        assert!(has_colored_spans, "highlighted code should have colored spans even without palette");
+        let has_colored_spans = lines
+            .iter()
+            .any(|l| l.spans.iter().any(|s| s.style.fg.is_some()));
+        assert!(
+            has_colored_spans,
+            "highlighted code should have colored spans even without palette"
+        );
     }
 }
 

@@ -123,7 +123,8 @@ impl Tree {
     }
 
     pub fn selected_label(&self) -> Option<&str> {
-        self.get_selected_node(&self.root, &self.selected_path).map(|(node, _)| node.label.as_str())
+        self.get_selected_node(&self.root, &self.selected_path)
+            .map(|(node, _)| node.label.as_str())
     }
 
     fn get_selected_node<'a>(
@@ -398,10 +399,9 @@ impl crate::framework::widget::Widget for Tree {
     ) -> bool {
         // Check if context menu is visible
         if let Some(ref mut menu) = *self.context_menu.borrow_mut() {
-            if menu.is_visible()
-                && menu.handle_mouse(kind, col, row) {
-                    return true;
-                }
+            if menu.is_visible() && menu.handle_mouse(kind, col, row) {
+                return true;
+            }
         }
 
         match kind {
@@ -458,7 +458,9 @@ impl crate::framework::widget::Widget for Tree {
             crate::input::event::MouseEventKind::Drag(_) => {
                 if self.drag_manager.borrow().is_dragging() {
                     let area = self.area.get();
-                    self.drag_manager.borrow_mut().move_ghost(area.x + col, area.y + row);
+                    self.drag_manager
+                        .borrow_mut()
+                        .move_ghost(area.x + col, area.y + row);
                 }
                 true
             }
@@ -504,10 +506,7 @@ impl WidgetState for Tree {
 
     fn apply_json(&mut self, json: &serde_json::Value) -> Result<(), crate::error::DraconError> {
         if let Some(path_str) = json.get("selected_path").and_then(|v| v.as_str()) {
-            let path: Vec<usize> = path_str
-                .split('.')
-                .filter_map(|s| s.parse().ok())
-                .collect();
+            let path: Vec<usize> = path_str.split('.').filter_map(|s| s.parse().ok()).collect();
             self.selected_path = path;
         }
         if let Some(offset) = json.get("scroll_offset").and_then(|v| v.as_u64()) {

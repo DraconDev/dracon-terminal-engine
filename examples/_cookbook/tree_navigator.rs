@@ -19,7 +19,7 @@
 //! Mouse: Click to select, click folder to expand
 
 use dracon_terminal_engine::compositor::{Color, Plane, Styles};
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -372,7 +372,9 @@ impl Widget for TreeNav {
         }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
@@ -572,7 +574,10 @@ fn main() -> std::io::Result<()> {
 
     let quit_keybindings = KeybindingSet::from_config(&resolve_keybindings());
 
-    let mut app = App::new()?.title("Tree Navigator").fps(30).theme(env_theme.clone());
+    let mut app = App::new()?
+        .title("Tree Navigator")
+        .fps(30)
+        .theme(env_theme.clone());
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

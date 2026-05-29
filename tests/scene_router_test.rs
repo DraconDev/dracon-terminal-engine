@@ -60,7 +60,12 @@ impl Scene for TestScene {
         false
     }
 
-    fn handle_mouse(&mut self, _kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, _row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        _kind: dracon_terminal_engine::input::event::MouseEventKind,
+        _col: u16,
+        _row: u16,
+    ) -> bool {
         false
     }
 

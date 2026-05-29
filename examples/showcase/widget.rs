@@ -178,10 +178,18 @@ impl Widget for Showcase {
         if self.show_fps {
             let fps_val = self.fps.load(Ordering::Relaxed);
             let fps_text = format!("{} FPS", fps_val);
-            let fps_x = (area.width as usize).saturating_sub(fps_text.len()).saturating_sub(2);
+            let fps_x = (area.width as usize)
+                .saturating_sub(fps_text.len())
+                .saturating_sub(2);
             if fps_x > title_x + title_text.len() {
                 draw_text(
-                    &mut plane, fps_x, title_y, &fps_text, t.success, t.bg, Styles::empty(),
+                    &mut plane,
+                    fps_x,
+                    title_y,
+                    &fps_text,
+                    t.success,
+                    t.bg,
+                    Styles::empty(),
                 );
                 right_x = fps_x;
             }
@@ -191,7 +199,13 @@ impl Widget for Showcase {
         let fps_toggle = if self.show_fps { "[x] FPS" } else { "[ ] FPS" };
         let toggle_x = right_x.saturating_sub(fps_toggle.len() + 2);
         draw_text(
-            &mut plane, toggle_x, title_y, fps_toggle, t.fg_muted, t.bg, Styles::empty(),
+            &mut plane,
+            toggle_x,
+            title_y,
+            fps_toggle,
+            t.fg_muted,
+            t.bg,
+            Styles::empty(),
         );
         // Zone: FPS toggle
         let mut zones = self.zones.borrow_mut();
@@ -497,7 +511,17 @@ impl Widget for Showcase {
                 t.surface
             };
             draw_text(
-                &mut plane, prim_x, prim_y, state, state_fg, state_bg, if hovered { Styles::BOLD } else { Styles::empty() },
+                &mut plane,
+                prim_x,
+                prim_y,
+                state,
+                state_fg,
+                state_bg,
+                if hovered {
+                    Styles::BOLD
+                } else {
+                    Styles::empty()
+                },
             );
             prim_x += state.len() + 4;
         }
@@ -505,14 +529,24 @@ impl Widget for Showcase {
         // Category sidebar
         let sidebar_w = 14usize;
         let sidebar_start_y = 6usize;
-        let categories = ["all", "apps", "input", "data", "cookbook", "tools", "accessibility"];
+        let categories = [
+            "all",
+            "apps",
+            "input",
+            "data",
+            "cookbook",
+            "tools",
+            "accessibility",
+        ];
         const CAT_BASE: usize = 300;
         // Determine hovered sidebar category
         let hovered_cat = self
             .mouse_pos
             .filter(|(mx, my)| {
                 let y = *my as usize;
-                (*mx as usize) < sidebar_w && y >= sidebar_start_y && y < sidebar_start_y + categories.len() * 2
+                (*mx as usize) < sidebar_w
+                    && y >= sidebar_start_y
+                    && y < sidebar_start_y + categories.len() * 2
             })
             .map(|(_, my)| (my as usize).saturating_sub(sidebar_start_y) / 2)
             .filter(|idx| *idx < categories.len());
@@ -553,7 +587,11 @@ impl Widget for Showcase {
                 icon,
                 icon_fg,
                 bg_cat,
-                if is_active || is_hovered { Styles::BOLD } else { Styles::empty() },
+                if is_active || is_hovered {
+                    Styles::BOLD
+                } else {
+                    Styles::empty()
+                },
             );
             draw_text(
                 &mut plane,
@@ -562,7 +600,11 @@ impl Widget for Showcase {
                 label,
                 fg,
                 bg_cat,
-                if is_active || is_hovered { Styles::BOLD } else { Styles::empty() },
+                if is_active || is_hovered {
+                    Styles::BOLD
+                } else {
+                    Styles::empty()
+                },
             );
             // Register zone for this category
             let mut zones = self.zones.borrow_mut();
@@ -572,14 +614,24 @@ impl Widget for Showcase {
             // Count badge (cached, no per-frame allocation)
             let count = self.cached_cat_counts[i];
             let count_str = format!("{:>2}", count);
-            draw_text(&mut plane, 12, cat_y, &count_str, t.fg_muted, bg_cat, Styles::empty());
+            draw_text(
+                &mut plane,
+                12,
+                cat_y,
+                &count_str,
+                t.fg_muted,
+                bg_cat,
+                Styles::empty(),
+            );
         }
 
         // Grid of cards  -  responsive sizing
         let grid_start_x = sidebar_w + 2;
         let grid_start_y = sidebar_start_y + 1;
         let available_w = (area.width as usize).saturating_sub(grid_start_x);
-        let _available_h = (area.height as usize).saturating_sub(grid_start_y).saturating_sub(2);
+        let _available_h = (area.height as usize)
+            .saturating_sub(grid_start_y)
+            .saturating_sub(2);
 
         // Responsive card sizing
         let (card_w, card_h) = if available_w >= 90 {
@@ -608,7 +660,9 @@ impl Widget for Showcase {
                 let x = grid_start_x + col * (card_w + 2);
                 let y = grid_start_y + (row - scroll_off) * (card_h + 1);
 
-                if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2) {
+                if x + card_w > area.width as usize
+                    || y + card_h > (area.height as usize).saturating_sub(2)
+                {
                     continue;
                 }
 
@@ -728,7 +782,9 @@ impl Widget for Showcase {
         // Mouse coordinates (right side)
         if let Some((mx, my)) = self.mouse_pos {
             let coords = format!("{}:{}", mx, my);
-            let coords_x = (area.width as usize).saturating_sub(coords.len()).saturating_sub(2);
+            let coords_x = (area.width as usize)
+                .saturating_sub(coords.len())
+                .saturating_sub(2);
             if coords_x > hint_x {
                 draw_text(
                     &mut plane,
@@ -799,7 +855,15 @@ impl Widget for Showcase {
                 );
 
                 // Message text
-                draw_text(&mut plane, msg_x + 3, msg_y, msg, t.bg, t.warning, Styles::BOLD);
+                draw_text(
+                    &mut plane,
+                    msg_x + 3,
+                    msg_y,
+                    msg,
+                    t.bg,
+                    t.warning,
+                    Styles::BOLD,
+                );
             }
         }
 
@@ -827,10 +891,25 @@ impl Widget for Showcase {
                         }
                     }
                     set_cell(&mut plane, msg_x, msg_y, '┌', t.success, t.success);
-                    set_cell(&mut plane, msg_x + msg_w - 1, msg_y, '┐', t.success, t.success);
+                    set_cell(
+                        &mut plane,
+                        msg_x + msg_w - 1,
+                        msg_y,
+                        '┐',
+                        t.success,
+                        t.success,
+                    );
 
                     // Message text
-                    draw_text(&mut plane, msg_x + 2, msg_y, &msg, t.bg, t.success, Styles::BOLD);
+                    draw_text(
+                        &mut plane,
+                        msg_x + 2,
+                        msg_y,
+                        &msg,
+                        t.bg,
+                        t.success,
+                        Styles::BOLD,
+                    );
                 } else {
                     drop(guard);
                     if let Ok(mut guard) = self.returned_from.lock() {
@@ -954,7 +1033,15 @@ impl Widget for Showcase {
                         } else {
                             t.surface_elevated
                         };
-                        draw_text(&mut plane, menu_x + 2, menu_y + 1 + i, item, fg, bg, Styles::empty());
+                        draw_text(
+                            &mut plane,
+                            menu_x + 2,
+                            menu_y + 1 + i,
+                            item,
+                            fg,
+                            bg,
+                            Styles::empty(),
+                        );
                     }
                 }
             }
@@ -963,7 +1050,11 @@ impl Widget for Showcase {
         // Tooltip on hover
         if let Some(ref text) = self.tooltip_text {
             if let Some((tx, ty)) = self.tooltip_pos {
-                let tooltip_x = (tx as usize).min((area.width as usize).saturating_sub(text.len()).saturating_sub(4));
+                let tooltip_x = (tx as usize).min(
+                    (area.width as usize)
+                        .saturating_sub(text.len())
+                        .saturating_sub(4),
+                );
                 let tooltip_y = (ty as usize).saturating_sub(2);
                 let tooltip_w = text.len() + 4;
                 let tooltip_h = 3usize;
@@ -1097,10 +1188,26 @@ impl Widget for Showcase {
             );
 
             // Content
-            let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("F2").to_string();
-            let kb_help = self.keybindings.display(actions::HELP).unwrap_or("F1").to_string();
-            let kb_quit = self.keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q").to_string();
-            let kb_back = self.keybindings.display(actions::BACK).unwrap_or("Esc").to_string();
+            let kb_theme = self
+                .keybindings
+                .display(actions::THEME)
+                .unwrap_or("F2")
+                .to_string();
+            let kb_help = self
+                .keybindings
+                .display(actions::HELP)
+                .unwrap_or("F1")
+                .to_string();
+            let kb_quit = self
+                .keybindings
+                .display(actions::QUIT)
+                .unwrap_or("Ctrl+Q")
+                .to_string();
+            let kb_back = self
+                .keybindings
+                .display(actions::BACK)
+                .unwrap_or("Esc")
+                .to_string();
             let kb_quit_back = format!("{} / {}", kb_quit, kb_back);
             let lines: Vec<(&str, &str)> = vec![
                 ("^v<>", "Navigate cards"),
@@ -1275,7 +1382,15 @@ impl Widget for Showcase {
                     set_cell(&mut plane, dbg_x + cx, dbg_y, '─', t.bg, t.error);
                 }
             }
-            draw_text(&mut plane, dbg_x + 2, dbg_y, dbg_text, t.bg, t.error, Styles::BOLD);
+            draw_text(
+                &mut plane,
+                dbg_x + 2,
+                dbg_y,
+                dbg_text,
+                t.bg,
+                t.error,
+                Styles::BOLD,
+            );
 
             let dbg_info = format!(
                 "FPS:{:>3} | Cards:{:>2} | Selected:{:>2} | Hover:{:>2?} | Search:{:>5}",
@@ -1286,7 +1401,15 @@ impl Widget for Showcase {
                 if self.search_active { "active" } else { "idle" }
             );
             let dbg_info_y = dbg_y + 2;
-            draw_text(&mut plane, 2, dbg_info_y, &dbg_info, t.error, t.bg, Styles::empty());
+            draw_text(
+                &mut plane,
+                2,
+                dbg_info_y,
+                &dbg_info,
+                t.error,
+                t.bg,
+                Styles::empty(),
+            );
         }
 
         // Input debug overlay
@@ -1382,7 +1505,12 @@ impl Widget for Showcase {
             // Border
             draw_rounded_border(
                 &mut plane,
-                Rect::new(panel_x as u16, panel_y as u16, panel_w as u16, panel_h as u16),
+                Rect::new(
+                    panel_x as u16,
+                    panel_y as u16,
+                    panel_w as u16,
+                    panel_h as u16,
+                ),
                 t.primary,
                 t.surface_elevated,
                 true,
@@ -1390,7 +1518,15 @@ impl Widget for Showcase {
 
             // Title
             let title = " PROFILER [F12] ";
-            draw_text(&mut plane, panel_x + 2, panel_y + 1, title, t.primary, t.surface_elevated, Styles::BOLD);
+            draw_text(
+                &mut plane,
+                panel_x + 2,
+                panel_y + 1,
+                title,
+                t.primary,
+                t.surface_elevated,
+                Styles::BOLD,
+            );
 
             // Get stats from cached values
             let fps = self.fps.load(Ordering::Relaxed);
@@ -1405,9 +1541,18 @@ impl Widget for Showcase {
                 ("Cards", format!("{}", cards)),
                 ("Selected", format!("{}", self.selected)),
                 ("Hover", format!("{:?}", self.hovered_card)),
-                ("Search", if self.search_active { "active" } else { "idle" }.to_string()),
-                ("Debug", if self.show_debug { "on" } else { "off" }.to_string()),
-                ("Help", if self.show_help { "on" } else { "off" }.to_string()),
+                (
+                    "Search",
+                    if self.search_active { "active" } else { "idle" }.to_string(),
+                ),
+                (
+                    "Debug",
+                    if self.show_debug { "on" } else { "off" }.to_string(),
+                ),
+                (
+                    "Help",
+                    if self.show_help { "on" } else { "off" }.to_string(),
+                ),
             ];
 
             for (i, (label, value)) in stats.iter().enumerate() {
@@ -1522,7 +1667,8 @@ impl Showcase {
         }
         let x = grid_start_x + col_idx * (card_w + 2);
         let y = grid_start_y + row_idx * (card_h + 1);
-        if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2) {
+        if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2)
+        {
             return None;
         }
         let grid_idx = row_idx * cols + col_idx;
@@ -1578,7 +1724,8 @@ impl Showcase {
                                 let slider_zone_x = 2usize;
                                 let slider_label_w = 9usize;
                                 let track_w = 10usize;
-                                let thumb_pos = (self.primitive_slider * track_w as f32).round() as usize;
+                                let thumb_pos =
+                                    (self.primitive_slider * track_w as f32).round() as usize;
                                 let thumb_x = slider_zone_x + slider_label_w + thumb_pos;
                                 if (col as usize) < thumb_x {
                                     self.primitive_slider = (self.primitive_slider - 0.1).max(0.0);
@@ -1604,9 +1751,15 @@ impl Showcase {
                         },
                         // Sidebar categories (CAT_BASE + i)
                         id if (CAT_BASE..CAT_BASE + 7).contains(&id) => {
-                            let cats: [Option<&str>; 7] =
-                                [None, Some("apps"), Some("input"), Some("data"),
-                                 Some("cookbook"), Some("tools"), Some("accessibility")];
+                            let cats: [Option<&str>; 7] = [
+                                None,
+                                Some("apps"),
+                                Some("input"),
+                                Some("data"),
+                                Some("cookbook"),
+                                Some("tools"),
+                                Some("accessibility"),
+                            ];
                             self.category_filter = cats[id - CAT_BASE];
                             self.apply_filter();
                             return true;
@@ -1622,8 +1775,7 @@ impl Showcase {
                         .last_click_time
                         .zip(self.last_click_idx)
                         .map(|(time, idx)| {
-                            idx == card_idx
-                                && now.duration_since(time).as_millis() < 300
+                            idx == card_idx && now.duration_since(time).as_millis() < 300
                         })
                         .unwrap_or(false);
                     if is_double_click {
@@ -1679,7 +1831,8 @@ impl Showcase {
                     let vis = self.visible_rows();
                     let last_visible = (self.scroll_offset.get() + vis) * cols;
                     if self.selected >= last_visible {
-                        self.selected = (last_visible.saturating_sub(1)).min(self.filtered.len().saturating_sub(1));
+                        self.selected = (last_visible.saturating_sub(1))
+                            .min(self.filtered.len().saturating_sub(1));
                     }
                 }
                 true
@@ -1694,8 +1847,7 @@ impl Showcase {
                 // Card hover  -  use grid math (no animation drift, no circular dependency)
                 if let Some(card_idx) = self.card_at_mouse(col, row) {
                     if self.hovered_card != Some(card_idx) {
-                        let anim_id =
-                            self.animations.start(0.0, 1.0, Duration::from_millis(200));
+                        let anim_id = self.animations.start(0.0, 1.0, Duration::from_millis(200));
                         if card_idx >= self.card_hover_anim.len() {
                             self.card_hover_anim.resize(card_idx + 1, None);
                         }
@@ -1712,8 +1864,7 @@ impl Showcase {
                             if time.elapsed().as_millis() >= 500 {
                                 if let Some(&ex_idx) = self.filtered.get(card_idx) {
                                     if let Some(ex) = self.examples.get(ex_idx) {
-                                        self.tooltip_text =
-                                            Some(ex.description.to_string());
+                                        self.tooltip_text = Some(ex.description.to_string());
                                         self.tooltip_pos = Some((col, row));
                                     }
                                 }
@@ -1728,7 +1879,8 @@ impl Showcase {
                     // Clear any active card hover before returning
                     if let Some(prev_hover) = self.hovered_card {
                         if prev_hover < self.card_hover_anim.len() {
-                            let anim_id = self.animations.start(1.0, 0.0, Duration::from_millis(150));
+                            let anim_id =
+                                self.animations.start(1.0, 0.0, Duration::from_millis(150));
                             self.card_hover_anim[prev_hover] = Some(anim_id);
                         }
                     }
@@ -1766,7 +1918,10 @@ impl Showcase {
             }
             if self.keybindings.matches(actions::THEME, &key) {
                 let themes = self.themes();
-                let current = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+                let current = themes
+                    .iter()
+                    .position(|t| t.name == self.theme.name)
+                    .unwrap_or(0);
                 self.pending_theme = Some((current + 1) % themes.len());
                 self.apply_filter();
                 self.scene_router.on_theme_change(&self.theme);
@@ -1784,7 +1939,9 @@ impl Showcase {
 
         // Help overlay takes priority
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 return true;
             }
@@ -1913,7 +2070,15 @@ impl Showcase {
                     true
                 }
                 KeyCode::Tab => {
-                    let categories = [None, Some("apps"), Some("input"), Some("data"), Some("cookbook"), Some("tools"), Some("accessibility")];
+                    let categories = [
+                        None,
+                        Some("apps"),
+                        Some("input"),
+                        Some("data"),
+                        Some("cookbook"),
+                        Some("tools"),
+                        Some("accessibility"),
+                    ];
                     let current = categories
                         .iter()
                         .position(|&c| c == self.category_filter)
@@ -1924,7 +2089,10 @@ impl Showcase {
                 }
                 KeyCode::Char('s') if !self.search_active => {
                     let fields = SortField::all();
-                    let cur = fields.iter().position(|f| *f == self.sort_field).unwrap_or(0);
+                    let cur = fields
+                        .iter()
+                        .position(|f| *f == self.sort_field)
+                        .unwrap_or(0);
                     self.sort_field = fields[(cur + 1) % fields.len()];
                     self.apply_filter();
                     true

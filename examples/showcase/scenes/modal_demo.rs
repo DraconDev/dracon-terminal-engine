@@ -8,7 +8,9 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 struct SettingItem {
@@ -18,16 +20,56 @@ struct SettingItem {
 }
 
 const SETTINGS: &[SettingItem] = &[
-    SettingItem { label: "Theme", value: "Nord", category: "Appearance" },
-    SettingItem { label: "Font Size", value: "14pt", category: "Appearance" },
-    SettingItem { label: "Line Numbers", value: "On", category: "Editor" },
-    SettingItem { label: "Word Wrap", value: "Off", category: "Editor" },
-    SettingItem { label: "Auto Save", value: "30s", category: "Editor" },
-    SettingItem { label: "Notifications", value: "Enabled", category: "System" },
-    SettingItem { label: "Telemetry", value: "Disabled", category: "System" },
-    SettingItem { label: "Update Channel", value: "Stable", category: "System" },
-    SettingItem { label: "Shell", value: "/bin/bash", category: "Terminal" },
-    SettingItem { label: "Scrollback", value: "10000", category: "Terminal" },
+    SettingItem {
+        label: "Theme",
+        value: "Nord",
+        category: "Appearance",
+    },
+    SettingItem {
+        label: "Font Size",
+        value: "14pt",
+        category: "Appearance",
+    },
+    SettingItem {
+        label: "Line Numbers",
+        value: "On",
+        category: "Editor",
+    },
+    SettingItem {
+        label: "Word Wrap",
+        value: "Off",
+        category: "Editor",
+    },
+    SettingItem {
+        label: "Auto Save",
+        value: "30s",
+        category: "Editor",
+    },
+    SettingItem {
+        label: "Notifications",
+        value: "Enabled",
+        category: "System",
+    },
+    SettingItem {
+        label: "Telemetry",
+        value: "Disabled",
+        category: "System",
+    },
+    SettingItem {
+        label: "Update Channel",
+        value: "Stable",
+        category: "System",
+    },
+    SettingItem {
+        label: "Shell",
+        value: "/bin/bash",
+        category: "Terminal",
+    },
+    SettingItem {
+        label: "Scrollback",
+        value: "10000",
+        category: "Terminal",
+    },
 ];
 
 struct ToastEntry {
@@ -94,11 +136,7 @@ impl ModalDemoScene {
         let bg = self.theme.bg;
         match (base, bg) {
             (Color::Rgb(r, g, b), Color::Rgb(br, bg_, bb)) => {
-                Color::Rgb(
-                    r / 3 + br * 2 / 3,
-                    g / 3 + bg_ * 2 / 3,
-                    b / 3 + bb * 2 / 3,
-                )
+                Color::Rgb(r / 3 + br * 2 / 3, g / 3 + bg_ * 2 / 3, b / 3 + bb * 2 / 3)
             }
             _ => base,
         }
@@ -109,7 +147,15 @@ impl ModalDemoScene {
 
         // Title
         draw_text(plane, x, y, "Settings", t.primary, t.bg, true);
-        draw_text(plane, x + 10, y, &format!("({} items)", SETTINGS.len()), t.fg_muted, t.bg, false);
+        draw_text(
+            plane,
+            x + 10,
+            y,
+            &format!("({} items)", SETTINGS.len()),
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Divider
         for dx in 0..w {
@@ -117,7 +163,9 @@ impl ModalDemoScene {
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
-                if dimmed { plane.cells[idx].fg = self.dim_color(t.outline); }
+                if dimmed {
+                    plane.cells[idx].fg = self.dim_color(t.outline);
+                }
             }
         }
 
@@ -125,22 +173,52 @@ impl ModalDemoScene {
         let mut last_cat = "";
         let mut row = y + 2;
         for (i, setting) in SETTINGS.iter().enumerate() {
-            if row >= y + h - 1 { break; }
+            if row >= y + h - 1 {
+                break;
+            }
 
             // Category header
             if setting.category != last_cat {
-                if !last_cat.is_empty() { row += 1; }
+                if !last_cat.is_empty() {
+                    row += 1;
+                }
                 draw_text(plane, x, row, setting.category, t.secondary, t.bg, true);
-                if dimmed { draw_text(plane, x, row, setting.category, self.dim_color(t.secondary), t.bg, true); }
+                if dimmed {
+                    draw_text(
+                        plane,
+                        x,
+                        row,
+                        setting.category,
+                        self.dim_color(t.secondary),
+                        t.bg,
+                        true,
+                    );
+                }
                 row += 1;
                 last_cat = setting.category;
             }
 
             // Setting row
             let is_selected = i == self.selected_setting && !dimmed;
-            let row_bg = if is_selected { t.hover_bg } else if dimmed { self.dim_color(t.surface) } else { t.surface };
-            let label_fg = if dimmed { self.dim_color(t.fg) } else if is_selected { t.primary } else { t.fg };
-            let value_fg = if dimmed { self.dim_color(t.fg_muted) } else { t.fg_muted };
+            let row_bg = if is_selected {
+                t.hover_bg
+            } else if dimmed {
+                self.dim_color(t.surface)
+            } else {
+                t.surface
+            };
+            let label_fg = if dimmed {
+                self.dim_color(t.fg)
+            } else if is_selected {
+                t.primary
+            } else {
+                t.fg
+            };
+            let value_fg = if dimmed {
+                self.dim_color(t.fg_muted)
+            } else {
+                t.fg_muted
+            };
 
             // Row background
             for dx in 0..w {
@@ -161,7 +239,15 @@ impl ModalDemoScene {
             }
 
             // Label + value
-            draw_text(plane, x + 2, row, setting.label, label_fg, row_bg, is_selected);
+            draw_text(
+                plane,
+                x + 2,
+                row,
+                setting.label,
+                label_fg,
+                row_bg,
+                is_selected,
+            );
             let val_x = x + w.saturating_sub(setting.value.len() as u16 + 2);
             draw_text(plane, val_x, row, setting.value, value_fg, row_bg, false);
 
@@ -210,13 +296,22 @@ impl ModalDemoScene {
 
             // Toast text with age indicator
             let age = self.tick.saturating_sub(toast.created);
-            let age_str = if age == 0 { "now".to_string() } else { format!("{}t", age) };
+            let age_str = if age == 0 {
+                "now".to_string()
+            } else {
+                format!("{}t", age)
+            };
             let label = format!("{} {}", toast.message, age_str);
             draw_text(plane, tx + 2, ty, &label, fg, bg, true);
         }
     }
 
-    fn render_dimmed_backdrop(&self, plane: &mut Plane, area: Rect, exclude: Option<(u16, u16, u16, u16)>) {
+    fn render_dimmed_backdrop(
+        &self,
+        plane: &mut Plane,
+        area: Rect,
+        exclude: Option<(u16, u16, u16, u16)>,
+    ) {
         let t = &self.theme;
         let dim_bg = self.dim_color(t.bg);
 
@@ -240,7 +335,9 @@ impl ModalDemoScene {
 }
 
 impl Scene for ModalDemoScene {
-    fn scene_id(&self) -> &str { "modal_demo" }
+    fn scene_id(&self) -> &str {
+        "modal_demo"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -255,8 +352,15 @@ impl Scene for ModalDemoScene {
         // Header
         draw_text(&mut plane, 2, 0, " Modal Dialogs ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -270,7 +374,14 @@ impl Scene for ModalDemoScene {
         // Settings panel (left ~45w)
         let settings_w = 40u16.min(area.width.saturating_sub(20));
         let has_modal = self.show_help || self.show_confirm;
-        self.render_settings(&mut plane, 2, 2, settings_w, area.height.saturating_sub(4), has_modal);
+        self.render_settings(
+            &mut plane,
+            2,
+            2,
+            settings_w,
+            area.height.saturating_sub(4),
+            has_modal,
+        );
 
         // Right panel: action buttons + description
         let rp_x = settings_w + 4;
@@ -295,7 +406,9 @@ impl Scene for ModalDemoScene {
         ];
         for (i, (key, label, desc, color)) in actions.iter().enumerate() {
             let by = 4 + i as u16 * 2;
-            if by + 1 >= area.height.saturating_sub(3) { break; }
+            if by + 1 >= area.height.saturating_sub(3) {
+                break;
+            }
 
             // Key badge
             let badge = format!(" {} ", key);
@@ -317,7 +430,15 @@ impl Scene for ModalDemoScene {
         // Description area (below actions)
         let desc_y = 4 + actions.len() as u16 * 2 + 1;
         if desc_y + 4 < area.height.saturating_sub(3) {
-            draw_text(&mut plane, rp_x, desc_y, "Modal Stack", t.secondary, t.bg, true);
+            draw_text(
+                &mut plane,
+                rp_x,
+                desc_y,
+                "Modal Stack",
+                t.secondary,
+                t.bg,
+                true,
+            );
             for dx in 0..rp_w {
                 let idx = ((desc_y + 1) * plane.width + rp_x + dx) as usize;
                 if idx < plane.cells.len() {
@@ -341,9 +462,13 @@ impl Scene for ModalDemoScene {
             let state_y = desc_y + 6;
             if state_y < area.height.saturating_sub(3) {
                 draw_text(&mut plane, rp_x, state_y, "State", t.secondary, t.bg, true);
-                let state = if self.show_confirm { "Confirm dialog open" }
-                           else if self.show_help { "Help overlay open" }
-                           else { "Base screen" };
+                let state = if self.show_confirm {
+                    "Confirm dialog open"
+                } else if self.show_help {
+                    "Help overlay open"
+                } else {
+                    "Base screen"
+                };
                 draw_text(&mut plane, rp_x, state_y + 1, state, t.fg, t.bg, false);
             }
         }
@@ -371,23 +496,51 @@ impl Scene for ModalDemoScene {
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * plane.width + x) as usize;
                 let bot = ((hy + hh - 1) * plane.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * plane.width + hx) as usize;
                 let right = (y * plane.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
-            for (ch, cx, cy) in [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)] {
+            for (ch, cx, cy) in [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ] {
                 let idx = (cy * plane.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
 
             let title = "Help Overlay (z=100)";
             let tx = hx + (hw - title.len() as u16) / 2;
-            draw_text(&mut plane, tx, hy + 1, title, t.primary, t.surface_elevated, true);
+            draw_text(
+                &mut plane,
+                tx,
+                hy + 1,
+                title,
+                t.primary,
+                t.surface_elevated,
+                true,
+            );
 
             let shortcuts = [
                 ("?", "Toggle this help"),
@@ -401,9 +554,25 @@ impl Scene for ModalDemoScene {
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
                 if !key.is_empty() {
-                    draw_text(&mut plane, hx + 2, row, key, t.primary, t.surface_elevated, false);
+                    draw_text(
+                        &mut plane,
+                        hx + 2,
+                        row,
+                        key,
+                        t.primary,
+                        t.surface_elevated,
+                        false,
+                    );
                 }
-                draw_text(&mut plane, hx + 16, row, desc, t.fg, t.surface_elevated, false);
+                draw_text(
+                    &mut plane,
+                    hx + 16,
+                    row,
+                    desc,
+                    t.fg,
+                    t.surface_elevated,
+                    false,
+                );
             }
         }
 
@@ -427,25 +596,61 @@ impl Scene for ModalDemoScene {
             for x in dx..dx + dw {
                 let top = (dy * plane.width + x) as usize;
                 let bot = ((dy + dh - 1) * plane.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.error; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.error; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.error;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.error;
+                }
             }
             for y in dy..dy + dh {
                 let left = (y * plane.width + dx) as usize;
                 let right = (y * plane.width + dx + dw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.error; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.error; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.error;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.error;
+                }
             }
-            for (ch, cx, cy) in [('╭', dx, dy), ('╮', dx + dw - 1, dy), ('╰', dx, dy + dh - 1), ('╯', dx + dw - 1, dy + dh - 1)] {
+            for (ch, cx, cy) in [
+                ('╭', dx, dy),
+                ('╮', dx + dw - 1, dy),
+                ('╰', dx, dy + dh - 1),
+                ('╯', dx + dw - 1, dy + dh - 1),
+            ] {
                 let idx = (cy * plane.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = ch; plane.cells[idx].fg = t.error; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = ch;
+                    plane.cells[idx].fg = t.error;
+                }
             }
 
             let title = &self.confirm_title;
             let tx = dx + (dw - title.len() as u16) / 2;
-            draw_text(&mut plane, tx, dy + 1, title, t.error, t.surface_elevated, true);
+            draw_text(
+                &mut plane,
+                tx,
+                dy + 1,
+                title,
+                t.error,
+                t.surface_elevated,
+                true,
+            );
 
-            draw_text(&mut plane, dx + 2, dy + 3, &self.confirm_message, t.fg, t.surface_elevated, false);
+            draw_text(
+                &mut plane,
+                dx + 2,
+                dy + 3,
+                &self.confirm_message,
+                t.fg,
+                t.surface_elevated,
+                false,
+            );
 
             // Yes button
             for (i, c) in " Yes ".chars().enumerate() {
@@ -474,7 +679,10 @@ impl Scene for ModalDemoScene {
 
         // Footer
         let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let footer = format!(" c:confirm | t/w/e/s:toasts | ↑↓:nav | ?:help | {}:back ", back_key);
+        let footer = format!(
+            " c:confirm | t/w/e/s:toasts | ↑↓:nav | ?:help | {}:back ",
+            back_key
+        );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
             let idx = (fy * area.width + i as u16) as usize;
@@ -490,18 +698,24 @@ impl Scene for ModalDemoScene {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         // Confirm dialog takes priority
         if self.show_confirm {
             match key.code {
-                KeyCode::Enter | KeyCode::Char('y') | KeyCode::Char('Y') if key.modifiers.is_empty() => {
+                KeyCode::Enter | KeyCode::Char('y') | KeyCode::Char('Y')
+                    if key.modifiers.is_empty() =>
+                {
                     self.show_confirm = false;
                     let action = self.confirm_action;
                     self.add_toast(&format!("{} completed", action), "success");
                     true
                 }
-                KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N') if key.modifiers.is_empty() => {
+                KeyCode::Esc | KeyCode::Char('n') | KeyCode::Char('N')
+                    if key.modifiers.is_empty() =>
+                {
                     self.show_confirm = false;
                     self.add_toast("Action cancelled", "info");
                     self.dirty = true;
@@ -510,7 +724,9 @@ impl Scene for ModalDemoScene {
                 _ => true,
             }
         } else if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -528,9 +744,15 @@ impl Scene for ModalDemoScene {
             match key.code {
                 KeyCode::Char('c') | KeyCode::Char('C') if key.modifiers.is_empty() => {
                     if self.selected_setting < SETTINGS.len() {
-                        self.request_confirm("Delete Setting",
-                            &format!("Remove '{}' ({})?", SETTINGS[self.selected_setting].label, SETTINGS[self.selected_setting].value),
-                            "Delete");
+                        self.request_confirm(
+                            "Delete Setting",
+                            &format!(
+                                "Remove '{}' ({})?",
+                                SETTINGS[self.selected_setting].label,
+                                SETTINGS[self.selected_setting].value
+                            ),
+                            "Delete",
+                        );
                     }
                     true
                 }
@@ -565,7 +787,10 @@ impl Scene for ModalDemoScene {
                     true
                 }
                 KeyCode::Enter => {
-                    self.add_toast(&format!("{} toggled", SETTINGS[self.selected_setting].label), "info");
+                    self.add_toast(
+                        &format!("{} toggled", SETTINGS[self.selected_setting].label),
+                        "info",
+                    );
                     true
                 }
                 _ => false,
@@ -622,7 +847,13 @@ impl Scene for ModalDemoScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }

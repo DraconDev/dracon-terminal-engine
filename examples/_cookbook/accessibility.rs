@@ -9,8 +9,8 @@
 //! terminals do). With a screen reader active, navigate with Tab/Shift+Tab
 //! and interact with the controls to hear announcements.
 
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::visuals::accessibility::{Accessibility, Role};
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -209,7 +209,11 @@ impl Accessibility for AccessibleToggle {
     }
 
     fn description(&self) -> Option<&str> {
-        Some(if self.checked { "checked" } else { "not checked" })
+        Some(if self.checked {
+            "checked"
+        } else {
+            "not checked"
+        })
     }
 
     fn checked(&self) -> Option<bool> {
@@ -340,14 +344,21 @@ impl Widget for AccessibilityDemo {
     fn set_area(&mut self, area: Rect) {
         self.area = area;
         let btn_y = area.y + area.height / 2;
-        self.submit_btn.set_area(Rect::new(area.x + 5, btn_y, 12, 3));
-        self.cancel_btn.set_area(Rect::new(area.x + 20, btn_y, 10, 3));
-        self.notifications_toggle.set_area(Rect::new(area.x + 2, area.y + 5, 30, 1));
-        self.sound_toggle.set_area(Rect::new(area.x + 2, area.y + 7, 30, 1));
+        self.submit_btn
+            .set_area(Rect::new(area.x + 5, btn_y, 12, 3));
+        self.cancel_btn
+            .set_area(Rect::new(area.x + 20, btn_y, 10, 3));
+        self.notifications_toggle
+            .set_area(Rect::new(area.x + 2, area.y + 5, 30, 1));
+        self.sound_toggle
+            .set_area(Rect::new(area.x + 2, area.y + 7, 30, 1));
     }
 
     fn needs_render(&self) -> bool {
-        let expired = self.toast_time.borrow().is_some_and(|t| t.elapsed() >= Duration::from_secs(2));
+        let expired = self
+            .toast_time
+            .borrow()
+            .is_some_and(|t| t.elapsed() >= Duration::from_secs(2));
         if expired && self.toast_msg.borrow().is_some() {
             *self.toast_msg.borrow_mut() = None;
             *self.toast_time.borrow_mut() = None;
@@ -418,7 +429,9 @@ impl Widget for AccessibilityDemo {
             }
         }
 
-        let toggle_plane = self.notifications_toggle.render(self.notifications_toggle.area);
+        let toggle_plane = self
+            .notifications_toggle
+            .render(self.notifications_toggle.area);
         for (i, cell) in toggle_plane.cells.iter().enumerate() {
             let local_y = i / toggle_plane.width as usize;
             let local_x = i % toggle_plane.width as usize;
@@ -457,7 +470,10 @@ impl Widget for AccessibilityDemo {
             }
         }
 
-        if let (Some(msg), Some(time)) = (self.toast_msg.borrow().as_ref(), self.toast_time.borrow().as_ref()) {
+        if let (Some(msg), Some(time)) = (
+            self.toast_msg.borrow().as_ref(),
+            self.toast_time.borrow().as_ref(),
+        ) {
             if time.elapsed() < Duration::from_secs(2) {
                 let msg_len = msg.len() as u16;
                 let pad = 2u16;
@@ -504,28 +520,52 @@ impl Widget for AccessibilityDemo {
                     }
                 }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
             let title = "Accessibility Help";
             let tx = hx + (hw - title.len() as u16) / 2;
             for (i, c) in title.chars().enumerate() {
                 let idx = ((hy + 1) * area.width + tx + i as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; plane.cells[idx].style = Styles::BOLD; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                    plane.cells[idx].style = Styles::BOLD;
+                }
             }
             let kb_theme = self.keybindings.display(actions::THEME).unwrap_or("Ctrl+T");
             let shortcuts = [
@@ -540,11 +580,17 @@ impl Widget for AccessibilityDemo {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -559,7 +605,10 @@ impl Widget for AccessibilityDemo {
         }
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = Theme::all();
-            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            let idx = themes
+                .iter()
+                .position(|t| t.name == self.theme.name)
+                .unwrap_or(0);
             self.theme = themes[(idx + 1) % themes.len()].clone();
             self.submit_btn.on_theme_change(&self.theme);
             self.cancel_btn.on_theme_change(&self.theme);
@@ -648,10 +697,7 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     let demo = AccessibilityDemo::new(theme.clone(), should_quit);
 
-    let mut app = App::new()?
-        .title("Accessibility Demo")
-        .fps(30)
-        .theme(theme);
+    let mut app = App::new()?.title("Accessibility Demo").fps(30).theme(theme);
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

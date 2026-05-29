@@ -127,7 +127,11 @@ impl BaseInput {
         };
 
         let visible_start = self.scroll_offset;
-        let visible_chars: String = display.chars().skip(visible_start).take(width.saturating_sub(1)).collect();
+        let visible_chars: String = display
+            .chars()
+            .skip(visible_start)
+            .take(width.saturating_sub(1))
+            .collect();
         let cursor_visual = {
             let before: String = self.text.chars().take(self.cursor_pos).collect();
             before.width()
@@ -178,13 +182,17 @@ impl BaseInput {
                     let byte_idx = self.cursor_byte_offset();
                     // Remove the full character at this byte position
                     let ch = self.text[byte_idx..].chars().next().unwrap();
-                    self.text.replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
+                    self.text
+                        .replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
                     self.dirty = true;
                 }
                 true
             }
-            KeyCode::Char(ch) if key.modifiers.is_empty() || key.modifiers == crate::input::event::KeyModifiers::SHIFT => {
+            KeyCode::Char(ch)
+                if key.modifiers.is_empty()
+                    || key.modifiers == crate::input::event::KeyModifiers::SHIFT =>
+            {
                 let byte_idx = self.cursor_byte_offset();
                 self.text.insert(byte_idx, ch);
                 self.cursor_pos += 1;
@@ -212,7 +220,8 @@ impl BaseInput {
                 if self.cursor_pos < self.char_count() {
                     let byte_idx = self.cursor_byte_offset();
                     let ch = self.text[byte_idx..].chars().next().unwrap();
-                    self.text.replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
+                    self.text
+                        .replace_range(byte_idx..byte_idx + ch.len_utf8(), "");
                     self.clamp_scroll();
                     self.dirty = true;
                 }
@@ -253,9 +262,8 @@ impl BaseInput {
         _row: u16,
     ) -> bool {
         // Middle-click paste from X11 primary selection (best-effort: X11 works, Wayland spotty)
-        if let crate::input::event::MouseEventKind::Down(
-            crate::input::event::MouseButton::Middle,
-        ) = kind
+        if let crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Middle) =
+            kind
         {
             if let Some(text) = crate::utils::get_primary_selection_text() {
                 self.insert_text(&text);

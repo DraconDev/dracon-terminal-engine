@@ -166,7 +166,7 @@ fn test_color_picker_set_hsl_blue() {
 fn test_color_picker_set_hsl_clamp_hue() {
     let mut picker = ColorPicker::new();
     picker.set_hsl(400.0, 100.0, 50.0); // Should clamp to 360
-    // Hue wraps around, so 400 = 40
+                                        // Hue wraps around, so 400 = 40
     picker.set_hsl(0.0, 100.0, 50.0); // Reset to red first
     picker.set_hsl(400.0, 100.0, 50.0);
     // After clamping: hue = 360 (max), saturation = 100, lightness = 50
@@ -183,7 +183,7 @@ fn test_color_picker_set_hsl_clamp_saturation() {
 fn test_color_picker_set_hsl_gray() {
     let mut picker = ColorPicker::new();
     picker.set_hsl(120.0, 0.0, 50.0); // Sat = 0 = gray
-    // Gray is 50% lightness = 127-128 range
+                                      // Gray is 50% lightness = 127-128 range
     assert_eq!(picker.hex(), "#7F7F7F");
 }
 
@@ -299,7 +299,7 @@ fn test_color_picker_render_size_bounds() {
     // Test minimum size
     let small_area = Rect::new(0, 0, 1, 1);
     let _plane = picker.render(small_area);
-    
+
     // Test zero dimensions (should handle gracefully)
     let zero_area = Rect::new(0, 0, 0, 0);
     let _plane = picker.render(zero_area);
@@ -349,18 +349,17 @@ fn test_color_picker_render_respects_area() {
 fn test_color_picker_on_color_change_builder() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let color_received = Rc::new(RefCell::new(None));
     let color_clone = Rc::clone(&color_received);
-    
-    let mut picker = ColorPicker::new()
-        .on_color_change(move |c| {
-            *color_clone.borrow_mut() = Some(c);
-        });
-    
+
+    let mut picker = ColorPicker::new().on_color_change(move |c| {
+        *color_clone.borrow_mut() = Some(c);
+    });
+
     // Set a color - callback registration should work
     picker.set_hex("#00FF00");
-    
+
     // Callback registration is tested by not panicking
     // Actual callback invocation depends on internal implementation
 }
@@ -369,18 +368,17 @@ fn test_color_picker_on_color_change_builder() {
 fn test_color_picker_callback_not_called_for_invalid_hex() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let call_count = Rc::new(RefCell::new(0));
     let count_clone = Rc::clone(&call_count);
-    
-    let mut picker = ColorPicker::new()
-        .on_color_change(move |_c| {
-            *count_clone.borrow_mut() += 1;
-        });
-    
+
+    let mut picker = ColorPicker::new().on_color_change(move |_c| {
+        *count_clone.borrow_mut() += 1;
+    });
+
     // Try to set invalid hex
     picker.set_hex("#INVALID");
-    
+
     // Callback should NOT have been called for invalid input
     assert_eq!(*call_count.borrow(), 0);
 }
@@ -393,7 +391,7 @@ fn test_color_picker_callback_not_called_for_invalid_hex() {
 fn test_color_picker_invalid_hex_returns_same() {
     let mut picker = ColorPicker::new();
     let original = picker.hex().to_string();
-    
+
     picker.set_hex("#ZZZZZZ");
     assert_eq!(picker.hex(), original);
 }
@@ -402,7 +400,7 @@ fn test_color_picker_invalid_hex_returns_same() {
 fn test_color_picker_invalid_hex_empty() {
     let mut picker = ColorPicker::new();
     let original = picker.hex().to_string();
-    
+
     picker.set_hex("");
     assert_eq!(picker.hex(), original);
 }
@@ -411,7 +409,7 @@ fn test_color_picker_invalid_hex_empty() {
 fn test_color_picker_invalid_hex_short() {
     let mut picker = ColorPicker::new();
     let original = picker.hex().to_string();
-    
+
     picker.set_hex("#12345");
     assert_eq!(picker.hex(), original);
 }
@@ -493,16 +491,16 @@ fn test_color_picker_roundtrip_all_grays() {
 fn test_color_picker_roundtrip_rainbow() {
     // Test a sampling of colors
     let colors = [
-        Color::Rgb(255, 0, 0),     // Red
-        Color::Rgb(255, 127, 0),   // Orange
-        Color::Rgb(255, 255, 0),   // Yellow
-        Color::Rgb(0, 255, 0),     // Green
-        Color::Rgb(0, 255, 255),   // Cyan
-        Color::Rgb(0, 0, 255),     // Blue
-        Color::Rgb(127, 0, 255),   // Violet
-        Color::Rgb(255, 0, 127),   // Pink
+        Color::Rgb(255, 0, 0),   // Red
+        Color::Rgb(255, 127, 0), // Orange
+        Color::Rgb(255, 255, 0), // Yellow
+        Color::Rgb(0, 255, 0),   // Green
+        Color::Rgb(0, 255, 255), // Cyan
+        Color::Rgb(0, 0, 255),   // Blue
+        Color::Rgb(127, 0, 255), // Violet
+        Color::Rgb(255, 0, 127), // Pink
     ];
-    
+
     for color in colors {
         let picker = ColorPicker::with_color(color);
         let result = picker.color();

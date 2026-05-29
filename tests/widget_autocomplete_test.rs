@@ -15,7 +15,11 @@ fn make_ac(suggestions: Vec<String>) -> Autocomplete {
 }
 
 fn make_key(code: KeyCode) -> KeyEvent {
-    KeyEvent { code, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press }
+    KeyEvent {
+        code,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    }
 }
 
 // ============================================================================
@@ -24,7 +28,11 @@ fn make_key(code: KeyCode) -> KeyEvent {
 
 #[test]
 fn test_autocomplete_new() {
-    let suggestions = vec!["apple".to_string(), "banana".to_string(), "cherry".to_string()];
+    let suggestions = vec![
+        "apple".to_string(),
+        "banana".to_string(),
+        "cherry".to_string(),
+    ];
     let ac = make_ac(suggestions);
     let area = Rect::new(0, 0, 30, 1);
     let _plane = ac.render(area);
@@ -162,7 +170,11 @@ fn test_autocomplete_render() {
 
 #[test]
 fn test_autocomplete_render_with_dropdown() {
-    let ac = make_ac(vec!["apple".to_string(), "banana".to_string(), "cherry".to_string()]);
+    let ac = make_ac(vec![
+        "apple".to_string(),
+        "banana".to_string(),
+        "cherry".to_string(),
+    ]);
     let area = Rect::new(0, 0, 30, 10);
     let plane = ac.render(area);
     assert_eq!(plane.width, 30);
@@ -293,7 +305,7 @@ fn test_autocomplete_handle_key_backspace() {
 #[test]
 fn test_autocomplete_handle_mouse() {
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-    
+
     let mut ac = make_ac(vec!["apple".to_string()]);
     ac.open_dropdown();
     let area = Rect::new(0, 0, 30, 10);
@@ -304,7 +316,7 @@ fn test_autocomplete_handle_mouse() {
 #[test]
 fn test_autocomplete_handle_mouse_outside() {
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-    
+
     let mut ac = make_ac(vec!["apple".to_string()]);
     ac.open_dropdown();
     let area = Rect::new(0, 0, 30, 10);
@@ -316,7 +328,7 @@ fn test_autocomplete_handle_mouse_outside() {
 #[test]
 fn test_autocomplete_handle_mouse_scroll() {
     use dracon_terminal_engine::input::event::MouseEventKind;
-    
+
     let suggestions: Vec<String> = (0..20).map(|i| format!("item_{}", i)).collect();
     let mut ac = make_ac(suggestions);
     ac.open_dropdown();
@@ -352,15 +364,14 @@ fn test_autocomplete_on_blur() {
 fn test_autocomplete_selection_callback_registration() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let selected = Rc::new(RefCell::new(Vec::new()));
     let selected_clone = Rc::clone(&selected);
-    
-    let mut ac = make_ac(vec!["apple".to_string(), "banana".to_string()])
-        .on_select(move |s| {
-            selected_clone.borrow_mut().push(s.to_string());
-        });
-    
+
+    let mut ac = make_ac(vec!["apple".to_string(), "banana".to_string()]).on_select(move |s| {
+        selected_clone.borrow_mut().push(s.to_string());
+    });
+
     ac.open_dropdown();
     // Navigate down
     for _ in 0..5 {
@@ -380,7 +391,10 @@ fn test_autocomplete_render_fills_bg() {
     let area = Rect::new(0, 0, 30, 10);
     let plane = ac.render(area);
     // Check that plane has a background (cells are filled)
-    let has_bg = plane.cells.iter().any(|c| c.bg != Theme::default().bg || c.char != '\0');
+    let has_bg = plane
+        .cells
+        .iter()
+        .any(|c| c.bg != Theme::default().bg || c.char != '\0');
     assert!(has_bg || plane.cells.len() > 0);
 }
 
@@ -411,7 +425,7 @@ fn test_autocomplete_unicode_suggestions() {
     let suggestions = vec![
         "日本語".to_string(),
         "العربية".to_string(),
-        "🎉🎊".to_string()
+        "🎉🎊".to_string(),
     ];
     let ac = make_ac(suggestions);
     let area = Rect::new(0, 0, 30, 10);

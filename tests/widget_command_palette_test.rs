@@ -12,14 +12,46 @@ use ratatui::layout::Rect;
 
 fn make_commands() -> Vec<CommandItem> {
     vec![
-        CommandItem { id: "save", name: "Save File", category: "File" },
-        CommandItem { id: "open", name: "Open File", category: "File" },
-        CommandItem { id: "new", name: "New Tab", category: "Edit" },
-        CommandItem { id: "cut", name: "Cut", category: "Edit" },
-        CommandItem { id: "copy", name: "Copy", category: "Edit" },
-        CommandItem { id: "paste", name: "Paste", category: "Edit" },
-        CommandItem { id: "search", name: "Search", category: "View" },
-        CommandItem { id: "theme", name: "Cycle Theme", category: "View" },
+        CommandItem {
+            id: "save",
+            name: "Save File",
+            category: "File",
+        },
+        CommandItem {
+            id: "open",
+            name: "Open File",
+            category: "File",
+        },
+        CommandItem {
+            id: "new",
+            name: "New Tab",
+            category: "Edit",
+        },
+        CommandItem {
+            id: "cut",
+            name: "Cut",
+            category: "Edit",
+        },
+        CommandItem {
+            id: "copy",
+            name: "Copy",
+            category: "Edit",
+        },
+        CommandItem {
+            id: "paste",
+            name: "Paste",
+            category: "Edit",
+        },
+        CommandItem {
+            id: "search",
+            name: "Search",
+            category: "View",
+        },
+        CommandItem {
+            id: "theme",
+            name: "Cycle Theme",
+            category: "View",
+        },
     ]
 }
 
@@ -45,7 +77,11 @@ fn test_command_palette_empty_commands() {
 
 #[test]
 fn test_command_palette_single_command() {
-    let commands = vec![CommandItem { id: "test", name: "Test", category: "Test" }];
+    let commands = vec![CommandItem {
+        id: "test",
+        name: "Test",
+        category: "Test",
+    }];
     let cp = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 60, 30);
     let _plane = cp.render(area);
@@ -73,15 +109,14 @@ fn test_command_palette_with_size() {
 fn test_command_palette_on_execute() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let executed = Rc::new(RefCell::new(Vec::new()));
     let executed_clone = Rc::clone(&executed);
-    
-    let cp = CommandPalette::new(make_commands())
-        .on_execute(move |id| {
-            executed_clone.borrow_mut().push(id.to_string());
-        });
-    
+
+    let cp = CommandPalette::new(make_commands()).on_execute(move |id| {
+        executed_clone.borrow_mut().push(id.to_string());
+    });
+
     let _ = cp;
 }
 
@@ -91,7 +126,7 @@ fn test_command_palette_chained_builders() {
         .with_theme(Theme::cyberpunk())
         .with_size(100, 50)
         .on_execute(|_| {});
-    
+
     let area = Rect::new(0, 0, 100, 50);
     let _plane = cp.render(area);
 }
@@ -216,14 +251,18 @@ fn test_command_palette_z_index() {
 // ============================================================================
 
 fn make_key(code: KeyCode) -> KeyEvent {
-    KeyEvent { code, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press }
+    KeyEvent {
+        code,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    }
 }
 
 #[test]
 fn test_command_palette_handle_key_up() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Navigate down first, then up
     cp.handle_key(make_key(KeyCode::Down));
     let result = cp.handle_key(make_key(KeyCode::Up));
@@ -234,7 +273,7 @@ fn test_command_palette_handle_key_up() {
 fn test_command_palette_handle_key_down() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let result = cp.handle_key(make_key(KeyCode::Down));
     assert!(result);
 }
@@ -243,7 +282,7 @@ fn test_command_palette_handle_key_down() {
 fn test_command_palette_handle_key_down_repeat() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Navigate through multiple items
     for _ in 0..5 {
         cp.handle_key(make_key(KeyCode::Down));
@@ -254,7 +293,7 @@ fn test_command_palette_handle_key_down_repeat() {
 fn test_command_palette_handle_key_enter() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let result = cp.handle_key(make_key(KeyCode::Enter));
     assert!(result);
 }
@@ -263,7 +302,7 @@ fn test_command_palette_handle_key_enter() {
 fn test_command_palette_handle_key_escape() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let result = cp.handle_key(make_key(KeyCode::Esc));
     assert!(result);
     assert!(!cp.is_visible());
@@ -273,7 +312,7 @@ fn test_command_palette_handle_key_escape() {
 fn test_command_palette_handle_key_character() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let result = cp.handle_key(make_key(KeyCode::Char('s')));
     assert!(result);
 }
@@ -282,7 +321,7 @@ fn test_command_palette_handle_key_character() {
 fn test_command_palette_handle_key_backspace() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Type something first
     cp.handle_key(make_key(KeyCode::Char('a')));
     let result = cp.handle_key(make_key(KeyCode::Backspace));
@@ -293,7 +332,7 @@ fn test_command_palette_handle_key_backspace() {
 fn test_command_palette_handle_key_tab() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let result = cp.handle_key(make_key(KeyCode::Tab));
     // Tab cycles selection
     let _ = result;
@@ -303,7 +342,7 @@ fn test_command_palette_handle_key_tab() {
 fn test_command_palette_handle_key_when_hidden() {
     let mut cp = CommandPalette::new(make_commands());
     // Don't show
-    
+
     let result = cp.handle_key(make_key(KeyCode::Down));
     assert!(!result); // Should not be handled when hidden
 }
@@ -316,7 +355,7 @@ fn test_command_palette_handle_key_when_hidden() {
 fn test_command_palette_filter_empty_query() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // With empty query, all commands should be visible
 }
 
@@ -324,7 +363,7 @@ fn test_command_palette_filter_empty_query() {
 fn test_command_palette_filter_by_name() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Type to filter
     cp.handle_key(make_key(KeyCode::Char('s')));
     // "s" should match "Save File", "Search"
@@ -334,7 +373,7 @@ fn test_command_palette_filter_by_name() {
 fn test_command_palette_filter_by_category() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Type category name to filter
     cp.handle_key(make_key(KeyCode::Char('f')));
     // Should match File category
@@ -344,7 +383,7 @@ fn test_command_palette_filter_by_category() {
 fn test_command_palette_filter_case_insensitive() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     cp.handle_key(make_key(KeyCode::Char('S')));
     // Should match uppercase S
 }
@@ -353,7 +392,7 @@ fn test_command_palette_filter_case_insensitive() {
 fn test_command_palette_filter_no_match() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     cp.handle_key(make_key(KeyCode::Char('x')));
     cp.handle_key(make_key(KeyCode::Char('x')));
     cp.handle_key(make_key(KeyCode::Char('x')));
@@ -367,13 +406,13 @@ fn test_command_palette_filter_no_match() {
 #[test]
 fn test_command_palette_handle_mouse() {
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-    
+
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let area = Rect::new(0, 0, 60, 30);
     cp.render(area);
-    
+
     // Click in the command area
     let result = cp.handle_mouse(MouseEventKind::Down(MouseButton::Left), 30, 5);
     let _ = result;
@@ -382,13 +421,13 @@ fn test_command_palette_handle_mouse() {
 #[test]
 fn test_command_palette_handle_mouse_outside() {
     use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
-    
+
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let area = Rect::new(0, 0, 60, 30);
-    cp.render(area);  // Render first to set up zones
-    
+    cp.render(area); // Render first to set up zones
+
     // Click in empty area (not on a command)
     let result = cp.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5);
     // Result depends on implementation - may or may not consume the click
@@ -398,13 +437,13 @@ fn test_command_palette_handle_mouse_outside() {
 #[test]
 fn test_command_palette_handle_mouse_scroll() {
     use dracon_terminal_engine::input::event::MouseEventKind;
-    
+
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     let area = Rect::new(0, 0, 60, 30);
     cp.render(area);
-    
+
     // Scroll in the command area
     let result = cp.handle_mouse(MouseEventKind::ScrollUp, 30, 5);
     let _ = result;
@@ -418,7 +457,7 @@ fn test_command_palette_handle_mouse_scroll() {
 fn test_command_palette_selection_wraps() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Navigate down past the end, should wrap
     for _ in 0..20 {
         cp.handle_key(make_key(KeyCode::Down));
@@ -430,7 +469,7 @@ fn test_command_palette_selection_wraps() {
 fn test_command_palette_selection_up_wraps() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Navigate up from first item, should wrap to end
     cp.handle_key(make_key(KeyCode::Up));
     // Selection should wrap to end
@@ -444,8 +483,7 @@ fn test_command_palette_selection_up_wraps() {
 fn test_command_palette_different_themes() {
     for theme_name in ["nord", "dracula", "monokai", "solarized_dark"] {
         if let Some(theme) = Theme::from_name(theme_name) {
-            let cp = CommandPalette::new(make_commands())
-                .with_theme(theme);
+            let cp = CommandPalette::new(make_commands()).with_theme(theme);
             let area = Rect::new(0, 0, 60, 30);
             let plane = cp.render(area);
             assert!(plane.width > 0);
@@ -457,7 +495,7 @@ fn test_command_palette_different_themes() {
 fn test_command_palette_on_theme_change() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     cp.on_theme_change(&Theme::cyberpunk());
     assert!(cp.needs_render());
 }
@@ -499,22 +537,21 @@ fn test_command_palette_render_large_area() {
 fn test_command_palette_execute_callback() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let executed = Rc::new(RefCell::new(Vec::new()));
     let executed_clone = Rc::clone(&executed);
-    
-    let mut cp = CommandPalette::new(make_commands())
-        .on_execute(move |id| {
-            executed_clone.borrow_mut().push(id.to_string());
-        });
-    
+
+    let mut cp = CommandPalette::new(make_commands()).on_execute(move |id| {
+        executed_clone.borrow_mut().push(id.to_string());
+    });
+
     cp.show();
     // Navigate to a command and execute
     for _ in 0..3 {
         cp.handle_key(make_key(KeyCode::Down));
     }
     cp.handle_key(make_key(KeyCode::Enter));
-    
+
     // Callback should have been called
 }
 
@@ -531,7 +568,7 @@ fn test_command_palette_many_commands() {
             category: Box::leak("Test".to_string().into_boxed_str()),
         })
         .collect();
-    
+
     let cp = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 60, 30);
     let plane = cp.render(area);
@@ -541,11 +578,23 @@ fn test_command_palette_many_commands() {
 #[test]
 fn test_command_palette_unicode_commands() {
     let commands = vec![
-        CommandItem { id: "jp", name: "日本語コマンド", category: "テスト" },
-        CommandItem { id: "ar", name: "أمر عربي", category: "اختبار" },
-        CommandItem { id: "em", name: "🎉 Command", category: "emoji" },
+        CommandItem {
+            id: "jp",
+            name: "日本語コマンド",
+            category: "テスト",
+        },
+        CommandItem {
+            id: "ar",
+            name: "أمر عربي",
+            category: "اختبار",
+        },
+        CommandItem {
+            id: "em",
+            name: "🎉 Command",
+            category: "emoji",
+        },
     ];
-    
+
     let cp = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 60, 30);
     let plane = cp.render(area);
@@ -559,7 +608,7 @@ fn test_command_palette_long_command_name() {
         name: Box::leak("A".repeat(100).into_boxed_str()),
         category: Box::leak("Test".to_string().into_boxed_str()),
     }];
-    
+
     let cp = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 60, 30);
     let plane = cp.render(area);
@@ -573,7 +622,7 @@ fn test_command_palette_long_category() {
         name: Box::leak("Test".to_string().into_boxed_str()),
         category: Box::leak("A".repeat(50).into_boxed_str()),
     }];
-    
+
     let cp = CommandPalette::new(commands);
     let area = Rect::new(0, 0, 60, 30);
     let plane = cp.render(area);
@@ -584,16 +633,16 @@ fn test_command_palette_long_category() {
 fn test_command_palette_show_clears_selection() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Navigate somewhere
     for _ in 0..5 {
         cp.handle_key(make_key(KeyCode::Down));
     }
-    
+
     // Hide and show again
     cp.hide();
     cp.show();
-    
+
     // Selection should be back at 0
 }
 
@@ -601,13 +650,13 @@ fn test_command_palette_show_clears_selection() {
 fn test_command_palette_show_clears_query() {
     let mut cp = CommandPalette::new(make_commands());
     cp.show();
-    
+
     // Type something
     cp.handle_key(make_key(KeyCode::Char('s')));
-    
+
     // Hide and show again
     cp.hide();
     cp.show();
-    
+
     // Query should be cleared
 }

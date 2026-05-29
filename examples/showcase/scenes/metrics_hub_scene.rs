@@ -12,8 +12,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::{
-    Gauge, ProgressRing, Slider, Spinner, StatusBadge,
-    StatusBar, StatusSegment,
+    Gauge, ProgressRing, Slider, Spinner, StatusBadge, StatusBar, StatusSegment,
 };
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
@@ -84,8 +83,7 @@ impl MetricsHubScene {
             .show_percentage(true)
             .with_label("Uptime");
 
-        let spinner = Spinner::new(WidgetId::new(820))
-            .with_theme(theme.clone());
+        let spinner = Spinner::new(WidgetId::new(820)).with_theme(theme.clone());
 
         let badges = vec![
             StatusBadge::new(WidgetId::new(830))
@@ -139,9 +137,15 @@ impl MetricsHubScene {
     }
 
     fn sync_gauges(&self) {
-        self.cpu_gauge.borrow_mut().set_value(self.cpu_slider.borrow().value() as f64);
-        self.mem_gauge.borrow_mut().set_value(self.mem_slider.borrow().value() as f64);
-        self.disk_gauge.borrow_mut().set_value(self.disk_slider.borrow().value() as f64);
+        self.cpu_gauge
+            .borrow_mut()
+            .set_value(self.cpu_slider.borrow().value() as f64);
+        self.mem_gauge
+            .borrow_mut()
+            .set_value(self.mem_slider.borrow().value() as f64);
+        self.disk_gauge
+            .borrow_mut()
+            .set_value(self.disk_slider.borrow().value() as f64);
     }
 
     fn update_history(&self) {
@@ -160,7 +164,9 @@ impl MetricsHubScene {
     fn tick(&mut self) {
         self.spinner.borrow_mut().tick();
         self.progress_value = (self.progress_value + 2.0) % 100.0;
-        self.progress_ring.borrow_mut().set_progress(self.progress_value / 100.0);
+        self.progress_ring
+            .borrow_mut()
+            .set_progress(self.progress_value / 100.0);
         self.update_history();
         self.dirty = true;
     }
@@ -175,7 +181,9 @@ impl MetricsHubScene {
 }
 
 impl Scene for MetricsHubScene {
-    fn scene_id(&self) -> &str { "metrics_hub" }
+    fn scene_id(&self) -> &str {
+        "metrics_hub"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -185,10 +193,25 @@ impl Scene for MetricsHubScene {
         self.sync_gauges();
 
         // Header
-        draw_text(&mut plane, 2, 0, " Metrics Dashboard ", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            2,
+            0,
+            " Metrics Dashboard ",
+            t.primary,
+            t.bg,
+            true,
+        );
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -218,17 +241,34 @@ impl Scene for MetricsHubScene {
 
         // Sparkline chart
         let chart_y = 2;
-        draw_text(&mut plane, main_x, chart_y, "Metrics History", t.primary, t.bg, true);
+        draw_text(
+            &mut plane,
+            main_x,
+            chart_y,
+            "Metrics History",
+            t.primary,
+            t.bg,
+            true,
+        );
         let chart_h = 8u16.min(area.height.saturating_sub(14));
         self.render_sparkline_chart(&mut plane, main_x, chart_y + 2, main_w.min(50), chart_h, t);
 
         // Sliders + Gauges
         let slider_y = chart_y + chart_h + 3;
         if slider_y + 8 < area.height.saturating_sub(6) {
-            draw_text(&mut plane, main_x, slider_y, "Interactive Controls", t.primary, t.bg, true);
+            draw_text(
+                &mut plane,
+                main_x,
+                slider_y,
+                "Interactive Controls",
+                t.primary,
+                t.bg,
+                true,
+            );
 
             let labels = ["CPU", "MEM", "DSK"];
-            let sliders: [&RefCell<Slider>; 3] = [&self.cpu_slider, &self.mem_slider, &self.disk_slider];
+            let sliders: [&RefCell<Slider>; 3] =
+                [&self.cpu_slider, &self.mem_slider, &self.disk_slider];
             let gauges: [&RefCell<Gauge>; 3] = [&self.cpu_gauge, &self.mem_gauge, &self.disk_gauge];
 
             for (i, label) in labels.iter().enumerate() {
@@ -250,7 +290,15 @@ impl Scene for MetricsHubScene {
                 blit_to(&mut plane, &s_plane, (main_x + 6) as usize, y as usize);
 
                 let val = sliders[i].borrow().value();
-                draw_text(&mut plane, main_x + 6 + slider_w + 1, y, &format!("{:.0}%", val), t.fg, t.bg, false);
+                draw_text(
+                    &mut plane,
+                    main_x + 6 + slider_w + 1,
+                    y,
+                    &format!("{:.0}%", val),
+                    t.fg,
+                    t.bg,
+                    false,
+                );
 
                 let gauge_x = main_x + main_w / 2 + 2;
                 let gauge_w = main_w.saturating_sub(main_w / 2 + 2);
@@ -264,16 +312,36 @@ impl Scene for MetricsHubScene {
         // Indicators section
         let ind_y = area.height.saturating_sub(12);
         if ind_y > slider_y + 8 {
-            draw_text(&mut plane, main_x, ind_y, "Indicators", t.primary, t.bg, true);
+            draw_text(
+                &mut plane,
+                main_x,
+                ind_y,
+                "Indicators",
+                t.primary,
+                t.bg,
+                true,
+            );
 
             let ring_size = 8u16.min(area.height.saturating_sub(ind_y + 3));
             if ring_size >= 4 {
                 let ring_area = Rect::new(main_x, ind_y + 1, ring_size + 2, ring_size + 2);
                 self.progress_ring.borrow_mut().set_area(ring_area);
                 let ring_plane = self.progress_ring.borrow().render(ring_area);
-                blit_to(&mut plane, &ring_plane, main_x as usize, (ind_y + 1) as usize);
-                draw_text(&mut plane, main_x, ind_y + ring_size + 2,
-                          &format!("Uptime: {:.0}%", self.progress_value), t.fg_muted, t.bg, false);
+                blit_to(
+                    &mut plane,
+                    &ring_plane,
+                    main_x as usize,
+                    (ind_y + 1) as usize,
+                );
+                draw_text(
+                    &mut plane,
+                    main_x,
+                    ind_y + ring_size + 2,
+                    &format!("Uptime: {:.0}%", self.progress_value),
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
             }
 
             let sp_x = main_x + 14;
@@ -281,10 +349,20 @@ impl Scene for MetricsHubScene {
             self.spinner.borrow_mut().set_area(spinner_area);
             let sp_plane = self.spinner.borrow().render(spinner_area);
             blit_to(&mut plane, &sp_plane, sp_x as usize, (ind_y + 3) as usize);
-            draw_text(&mut plane, sp_x + 4, ind_y + 3, "Tick", t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                sp_x + 4,
+                ind_y + 3,
+                "Tick",
+                t.fg_muted,
+                t.bg,
+                false,
+            );
 
             let badge_x = main_x + main_w / 2 + 2;
-            draw_text(&mut plane, badge_x, ind_y, "Services", t.fg_muted, t.bg, true);
+            draw_text(
+                &mut plane, badge_x, ind_y, "Services", t.fg_muted, t.bg, true,
+            );
             let badges = self.badges.borrow();
             for (i, badge) in badges.iter().enumerate() {
                 let by = ind_y + 1 + i as u16;
@@ -296,31 +374,44 @@ impl Scene for MetricsHubScene {
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
             let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-            render_help_overlay(&mut plane, area, t, "Metrics Dashboard — Help", &[
-                ("Tab", "Switch slider"),
-                ("←/→", "Adjust selected slider"),
-                ("Space", "Tick spinner + progress"),
-                ("r", "Reset metrics"),
-                ("Click", "Set slider value"),
-                (help_key, "Toggle this help"),
-                (back_key, "Back"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Metrics Dashboard — Help",
+                &[
+                    ("Tab", "Switch slider"),
+                    ("←/→", "Adjust selected slider"),
+                    ("Space", "Tick spinner + progress"),
+                    ("r", "Reset metrics"),
+                    ("Click", "Set slider value"),
+                    (help_key, "Toggle this help"),
+                    (back_key, "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -336,10 +427,22 @@ impl Scene for MetricsHubScene {
         }
 
         match key.code {
-            KeyCode::Tab => { self.selected_slider = (self.selected_slider + 1) % 3; self.dirty = true; true }
-            KeyCode::BackTab => { self.selected_slider = (self.selected_slider + 2) % 3; self.dirty = true; true }
+            KeyCode::Tab => {
+                self.selected_slider = (self.selected_slider + 1) % 3;
+                self.dirty = true;
+                true
+            }
+            KeyCode::BackTab => {
+                self.selected_slider = (self.selected_slider + 2) % 3;
+                self.dirty = true;
+                true
+            }
             KeyCode::Left => {
-                let slider = match self.selected_slider { 0 => &self.cpu_slider, 1 => &self.mem_slider, _ => &self.disk_slider };
+                let slider = match self.selected_slider {
+                    0 => &self.cpu_slider,
+                    1 => &self.mem_slider,
+                    _ => &self.disk_slider,
+                };
                 let cur = slider.borrow().value();
                 slider.borrow_mut().set_value((cur - 5.0).max(0.0));
                 self.update_history();
@@ -347,15 +450,25 @@ impl Scene for MetricsHubScene {
                 true
             }
             KeyCode::Right => {
-                let slider = match self.selected_slider { 0 => &self.cpu_slider, 1 => &self.mem_slider, _ => &self.disk_slider };
+                let slider = match self.selected_slider {
+                    0 => &self.cpu_slider,
+                    1 => &self.mem_slider,
+                    _ => &self.disk_slider,
+                };
                 let cur = slider.borrow().value();
                 slider.borrow_mut().set_value((cur + 5.0).min(100.0));
                 self.update_history();
                 self.dirty = true;
                 true
             }
-            KeyCode::Char(' ') => { self.tick(); true }
-            KeyCode::Char('r') if key.modifiers.is_empty() => { self.reset(); true }
+            KeyCode::Char(' ') => {
+                self.tick();
+                true
+            }
+            KeyCode::Char('r') if key.modifiers.is_empty() => {
+                self.reset();
+                true
+            }
             _ => false,
         }
     }
@@ -369,7 +482,11 @@ impl Scene for MetricsHubScene {
                     let sy = slider_y + i as u16 * 2;
                     if row == sy {
                         self.selected_slider = i;
-                        let slider = match i { 0 => &self.cpu_slider, 1 => &self.mem_slider, _ => &self.disk_slider };
+                        let slider = match i {
+                            0 => &self.cpu_slider,
+                            1 => &self.mem_slider,
+                            _ => &self.disk_slider,
+                        };
                         let rel_x = col.saturating_sub(main_x + 6);
                         let val = (rel_x as f32 / 30.0 * 100.0).clamp(0.0, 100.0);
                         slider.borrow_mut().set_value(val);
@@ -400,9 +517,15 @@ impl Scene for MetricsHubScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 impl MetricsHubScene {
@@ -425,7 +548,16 @@ impl MetricsHubScene {
                 }
             }
             let btn_text = format!(" {} Slider ", label);
-            draw_text_clipped(plane, sx + 1, by, &btn_text, sx + SIDEBAR_W, t.bg, bg, false);
+            draw_text_clipped(
+                plane,
+                sx + 1,
+                by,
+                &btn_text,
+                sx + SIDEBAR_W,
+                t.bg,
+                bg,
+                false,
+            );
         }
 
         // Divider
@@ -447,23 +579,71 @@ impl MetricsHubScene {
         let disk = self.disk_slider.borrow().value();
 
         let values = [
-            ("CPU", cpu, if cpu > 90.0 { t.error } else if cpu > 70.0 { t.warning } else { t.success }),
-            ("MEM", mem, if mem > 95.0 { t.error } else if mem > 80.0 { t.warning } else { t.info }),
-            ("DSK", disk, if disk > 90.0 { t.error } else if disk > 75.0 { t.warning } else { t.secondary }),
+            (
+                "CPU",
+                cpu,
+                if cpu > 90.0 {
+                    t.error
+                } else if cpu > 70.0 {
+                    t.warning
+                } else {
+                    t.success
+                },
+            ),
+            (
+                "MEM",
+                mem,
+                if mem > 95.0 {
+                    t.error
+                } else if mem > 80.0 {
+                    t.warning
+                } else {
+                    t.info
+                },
+            ),
+            (
+                "DSK",
+                disk,
+                if disk > 90.0 {
+                    t.error
+                } else if disk > 75.0 {
+                    t.warning
+                } else {
+                    t.secondary
+                },
+            ),
         ];
 
         for (i, (label, value, color)) in values.iter().enumerate() {
             let vy = vals_y + 1 + i as u16;
-            if vy >= area.height.saturating_sub(4) { break; }
+            if vy >= area.height.saturating_sub(4) {
+                break;
+            }
             draw_text(plane, sx, vy, label, t.fg_muted, t.bg, false);
-            draw_text(plane, sx + 10, vy, &format!("{:.0}%", value), *color, t.bg, true);
+            draw_text(
+                plane,
+                sx + 10,
+                vy,
+                &format!("{:.0}%", value),
+                *color,
+                t.bg,
+                true,
+            );
         }
 
         // Uptime
         let uptime_y = vals_y + 5;
         if uptime_y + 2 < area.height.saturating_sub(4) {
             draw_text(plane, sx, uptime_y, "Uptime", t.secondary, t.bg, true);
-            draw_text(plane, sx, uptime_y + 1, &format!("{:.0}%", self.progress_value), t.primary, t.bg, false);
+            draw_text(
+                plane,
+                sx,
+                uptime_y + 1,
+                &format!("{:.0}%", self.progress_value),
+                t.primary,
+                t.bg,
+                false,
+            );
         }
 
         // Legend
@@ -483,25 +663,48 @@ impl MetricsHubScene {
             let warn = badges.iter().filter(|b| b.status == "warn").count();
             let err = badges.iter().filter(|b| b.status == "error").count();
             let summary = format!("{} OK  {} warn  {} err", ok, warn, err);
-            draw_text_clipped(plane, sx, svc_y + 1, &summary, sx + SIDEBAR_W, t.fg_muted, t.bg, false);
+            draw_text_clipped(
+                plane,
+                sx,
+                svc_y + 1,
+                &summary,
+                sx + SIDEBAR_W,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
     }
 
     fn render_sparkline_chart(&self, plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme) {
-        if w < 4 || h < 3 { return; }
+        if w < 4 || h < 3 {
+            return;
+        }
 
         // Border
         for i in 0..w {
             let top = (y * plane.width + x + i) as usize;
             let bot = ((y + h - 1) * plane.width + x + i) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for j in 0..h {
             let left = ((y + j) * plane.width + x) as usize;
             let right = ((y + j) * plane.width + x + w - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         let cpu_h = self.cpu_history.borrow();
@@ -511,7 +714,9 @@ impl MetricsHubScene {
         let start = cpu_h.len().saturating_sub(chart_w);
 
         for (i, cpu_val) in cpu_h.iter().skip(start).enumerate() {
-            if i >= chart_w { break; }
+            if i >= chart_w {
+                break;
+            }
             let bar_h = (*cpu_val as f64 / 100.0 * chart_h as f64) as usize;
             for j in 0..bar_h.min(chart_h) {
                 let by = y + h - 2 - j as u16;
@@ -525,7 +730,9 @@ impl MetricsHubScene {
         }
 
         for (i, mem_val) in mem_h.iter().skip(start).enumerate() {
-            if i >= chart_w { break; }
+            if i >= chart_w {
+                break;
+            }
             let bar_h = (*mem_val as f64 / 100.0 * chart_h as f64) as usize;
             for j in 0..bar_h.min(chart_h) {
                 let by = y + h - 2 - j as u16;
@@ -540,6 +747,14 @@ impl MetricsHubScene {
 
         draw_text(plane, x + 1, y + h - 1, "0", t.fg_muted, t.bg, false);
         draw_text(plane, x + w - 3, y + h - 1, "100", t.fg_muted, t.bg, false);
-        draw_text(plane, x + w.saturating_sub(10), y + 1, "▓ CPU  ▒ MEM", t.fg_muted, t.bg, false);
+        draw_text(
+            plane,
+            x + w.saturating_sub(10),
+            y + 1,
+            "▓ CPU  ▒ MEM",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
     }
 }

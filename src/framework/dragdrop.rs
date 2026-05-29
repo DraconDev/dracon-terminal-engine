@@ -72,7 +72,9 @@ impl DragGhost {
         plane.set_z_index(9000);
         plane.set_absolute_position(x, y);
 
-        let bg = theme.map(|t| t.surface_elevated).unwrap_or(Color::Ansi(236));
+        let bg = theme
+            .map(|t| t.surface_elevated)
+            .unwrap_or(Color::Ansi(236));
         let fg = theme.map(|t| t.fg).unwrap_or(Color::Ansi(250));
 
         for i in 0..(self.width * self.height) as usize {

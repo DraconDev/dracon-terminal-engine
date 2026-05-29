@@ -6,9 +6,9 @@
 //! This plugin exposes a `StatWidget` that displays a labeled metric
 //! with a value and color-coded border.
 
-use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::plugin::PluginRegistry;
+use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
@@ -32,7 +32,7 @@ pub struct StatWidget {
 #[derive(Clone, Copy)]
 pub enum Trend {
     Up,
-    Down,  // Used by downstream consumers
+    Down, // Used by downstream consumers
     Neutral,
 }
 
@@ -50,10 +50,18 @@ impl StatWidget {
 }
 
 impl Widget for StatWidget {
-    fn id(&self) -> WidgetId { self.id }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn needs_render(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -75,7 +83,9 @@ impl Widget for StatWidget {
 
         // Value row (middle, large)
         let value_text = truncate(&self.value, inner_w as usize);
-        let value_x = area.x.saturating_add((area.width.saturating_sub(value_text.len() as u16)) / 2);
+        let value_x = area
+            .x
+            .saturating_add((area.width.saturating_sub(value_text.len() as u16)) / 2);
         let value_y = area.y + area.height / 2;
         for (i, c) in value_text.chars().enumerate() {
             let x = value_x + i as u16;
@@ -138,9 +148,15 @@ impl Widget for StatWidget {
         plane
     }
 
-    fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); }
-    fn handle_key(&mut self, _key: KeyEvent) -> bool { false }
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+    }
+    fn handle_key(&mut self, _key: KeyEvent) -> bool {
+        false
+    }
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        false
+    }
 }
 
 fn truncate(s: &str, max: usize) -> String {
@@ -212,11 +228,19 @@ impl PluginLoader {
 }
 
 impl Widget for PluginLoader {
-    fn id(&self) -> WidgetId { WidgetId::new(0) }
-    fn area(&self) -> Rect { Rect::default() }
+    fn id(&self) -> WidgetId {
+        WidgetId::new(0)
+    }
+    fn area(&self) -> Rect {
+        Rect::default()
+    }
     fn set_area(&mut self, _area: Rect) {}
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -268,7 +292,8 @@ impl Widget for PluginLoader {
         }
 
         // Footer
-        let footer = format!("  1: CPU  2: Memory  3: Disk  4: Network  |  {}: theme  |  {}: help  |  {}: quit  ",
+        let footer = format!(
+            "  1: CPU  2: Memory  3: Disk  4: Network  |  {}: theme  |  {}: help  |  {}: quit  ",
             self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
             self.keybindings.display(actions::HELP).unwrap_or("f1"),
             self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
@@ -305,19 +330,39 @@ impl Widget for PluginLoader {
             for x in hx + 1..hx + hw - 1 {
                 let top = (hy * area.width + x) as usize;
                 let bot = ((hy + hh - 1) * area.width + x) as usize;
-                if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-                if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+                if top < plane.cells.len() {
+                    plane.cells[top].char = '─';
+                    plane.cells[top].fg = t.outline;
+                }
+                if bot < plane.cells.len() {
+                    plane.cells[bot].char = '─';
+                    plane.cells[bot].fg = t.outline;
+                }
             }
             for y in hy + 1..hy + hh - 1 {
                 let left = (y * area.width + hx) as usize;
                 let right = (y * area.width + hx + hw - 1) as usize;
-                if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-                if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+                if left < plane.cells.len() {
+                    plane.cells[left].char = '│';
+                    plane.cells[left].fg = t.outline;
+                }
+                if right < plane.cells.len() {
+                    plane.cells[right].char = '│';
+                    plane.cells[right].fg = t.outline;
+                }
             }
-            let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+            let corners = [
+                ('╭', hx, hy),
+                ('╮', hx + hw - 1, hy),
+                ('╰', hx, hy + hh - 1),
+                ('╯', hx + hw - 1, hy + hh - 1),
+            ];
             for (ch, cx, cy) in corners.iter() {
                 let idx = (cy * area.width + cx) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = *ch;
+                    plane.cells[idx].fg = t.outline;
+                }
             }
 
             let help_title = "StatWidget Plugin Help";
@@ -333,20 +378,38 @@ impl Widget for PluginLoader {
 
             let shortcuts = [
                 ("1-4", "Load stat plugin"),
-                (self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("f1"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("ctrl+t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("f1"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("esc"),
+                    "Dismiss help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("ctrl+q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
                 for (j, c) in key.chars().enumerate() {
                     let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.primary;
+                    }
                 }
                 for (j, c) in desc.chars().enumerate() {
                     let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                    if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                    if idx < plane.cells.len() {
+                        plane.cells[idx].char = c;
+                        plane.cells[idx].fg = t.fg;
+                    }
                 }
             }
         }
@@ -354,13 +417,22 @@ impl Widget for PluginLoader {
         plane
     }
 
-    fn on_theme_change(&mut self, theme: &Theme) { self.theme = theme.clone(); self.dirty = true; }
-    fn current_theme(&self) -> Option<Theme> { Some(self.theme.clone()) }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.theme = theme.clone();
+        self.dirty = true;
+    }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.theme.clone())
+    }
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -374,9 +446,14 @@ impl Widget for PluginLoader {
         }
         if self.keybindings.matches(actions::THEME, &key) {
             let themes = Theme::all();
-            let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+            let idx = themes
+                .iter()
+                .position(|t| t.name == self.theme.name)
+                .unwrap_or(0);
             self.theme = themes[(idx + 1) % themes.len()].clone();
-            for w in &mut self.loaded_widgets { w.on_theme_change(&self.theme); }
+            for w in &mut self.loaded_widgets {
+                w.on_theme_change(&self.theme);
+            }
             self.dirty = true;
             return true;
         }
@@ -388,11 +465,16 @@ impl Widget for PluginLoader {
 
         use KeyCode::*;
         match key.code {
-            Char('1') | Char('2') | Char('3') | Char('4') => { self.load_plugin(); true }
+            Char('1') | Char('2') | Char('3') | Char('4') => {
+                self.load_plugin();
+                true
+            }
             _ => false,
         }
     }
-    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool { false }
+    fn handle_mouse(&mut self, _kind: MouseEventKind, _col: u16, _row: u16) -> bool {
+        false
+    }
 }
 
 fn overlay_plane(target: &mut Plane, source: &Plane, ox: u16, oy: u16) {
@@ -400,7 +482,9 @@ fn overlay_plane(target: &mut Plane, source: &Plane, ox: u16, oy: u16) {
         for sx in 0..source.width {
             let tx = ox + sx;
             let ty = oy + sy;
-            if tx >= target.width || ty >= target.height { continue; }
+            if tx >= target.width || ty >= target.height {
+                continue;
+            }
             let src_idx = (sy as usize * source.width as usize + sx as usize)
                 .min(source.cells.len().saturating_sub(1));
             let tgt_idx = (ty as usize * target.width as usize + tx as usize)
@@ -449,9 +533,11 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?
-        .theme(env_theme.clone());
-    let _ = app.add_widget(Box::new(PluginLoader::new(env_theme.clone(), should_quit)), Rect::new(0, 0, 80, 24));
+    let mut app = App::new()?.theme(env_theme.clone());
+    let _ = app.add_widget(
+        Box::new(PluginLoader::new(env_theme.clone(), should_quit)),
+        Rect::new(0, 0, 80, 24),
+    );
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();

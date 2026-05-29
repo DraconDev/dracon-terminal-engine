@@ -7,7 +7,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -45,7 +45,11 @@ impl SelectState {
     }
     fn prev(&self) {
         let mut idx = self.index.borrow_mut();
-        if *idx == 0 { *idx = self.options.len() - 1; } else { *idx -= 1; }
+        if *idx == 0 {
+            *idx = self.options.len() - 1;
+        } else {
+            *idx -= 1;
+        }
         self.widget.borrow_mut().set_selected(*idx);
     }
 }
@@ -78,20 +82,43 @@ pub struct ControlPanelScene {
 
 impl ControlPanelScene {
     pub fn new(theme: Theme) -> Self {
-        let theme_opts = vec!["Nord".into(), "Cyberpunk".into(), "Dracula".into(), "Solarized".into(), "Gruvbox".into()];
-        let font_opts = vec!["JetBrains Mono".into(), "Fira Code".into(), "Cascadia Code".into(), "Source Code Pro".into()];
-        let lang_opts = vec!["Rust".into(), "TypeScript".into(), "Python".into(), "Go".into(), "C++".into()];
+        let theme_opts = vec![
+            "Nord".into(),
+            "Cyberpunk".into(),
+            "Dracula".into(),
+            "Solarized".into(),
+            "Gruvbox".into(),
+        ];
+        let font_opts = vec![
+            "JetBrains Mono".into(),
+            "Fira Code".into(),
+            "Cascadia Code".into(),
+            "Source Code Pro".into(),
+        ];
+        let lang_opts = vec![
+            "Rust".into(),
+            "TypeScript".into(),
+            "Python".into(),
+            "Go".into(),
+            "C++".into(),
+        ];
 
         let theme_select = SelectState::new(
-            Select::new(WidgetId::new(1000)).with_options(theme_opts.clone()).with_theme(theme.clone()),
+            Select::new(WidgetId::new(1000))
+                .with_options(theme_opts.clone())
+                .with_theme(theme.clone()),
             theme_opts,
         );
         let font_select = SelectState::new(
-            Select::new(WidgetId::new(1001)).with_options(font_opts.clone()).with_theme(theme.clone()),
+            Select::new(WidgetId::new(1001))
+                .with_options(font_opts.clone())
+                .with_theme(theme.clone()),
             font_opts,
         );
         let lang_select = SelectState::new(
-            Select::new(WidgetId::new(1002)).with_options(lang_opts.clone()).with_theme(theme.clone()),
+            Select::new(WidgetId::new(1002))
+                .with_options(lang_opts.clone())
+                .with_theme(theme.clone()),
             lang_opts,
         );
 
@@ -99,14 +126,17 @@ impl ControlPanelScene {
         let auto_save = Toggle::new(WidgetId::new(1011), "Auto Save").with_theme(theme.clone());
         let telemetry = Toggle::new(WidgetId::new(1012), "Telemetry").with_theme(theme.clone());
 
-        let line_numbers = Checkbox::new(WidgetId::new(1020), "Line Numbers").with_theme(theme.clone());
+        let line_numbers =
+            Checkbox::new(WidgetId::new(1020), "Line Numbers").with_theme(theme.clone());
         let word_wrap = Checkbox::new(WidgetId::new(1021), "Word Wrap").with_theme(theme.clone());
         let minimap = Checkbox::new(WidgetId::new(1022), "Minimap").with_theme(theme.clone());
 
         let profiler = Profiler::new(WidgetId::new(1030)).with_theme(theme.clone());
 
         let status_bar = StatusBar::new(WidgetId::new(1040))
-            .add_segment(StatusSegment::new("Tab: focus | Space/↑/↓: change | P: profiler | F1: help | Esc: back"))
+            .add_segment(StatusSegment::new(
+                "Tab: focus | Space/↑/↓: change | P: profiler | F1: help | Esc: back",
+            ))
             .add_segment(StatusSegment::new("Select · Toggle · Checkbox · StatusBar"))
             .with_theme(theme.clone());
 
@@ -131,7 +161,9 @@ impl ControlPanelScene {
         }
     }
 
-    fn field_count() -> usize { 9 }
+    fn field_count() -> usize {
+        9
+    }
 }
 
 impl Scene for ControlPanelScene {
@@ -144,13 +176,25 @@ impl Scene for ControlPanelScene {
         let t = &self.theme;
 
         // Title
-        let title = Label::new("Control Panel").with_style(Styles::BOLD).with_theme(t.clone());
+        let title = Label::new("Control Panel")
+            .with_style(Styles::BOLD)
+            .with_theme(t.clone());
         let title_plane = title.render(Rect::new(0, 0, 15, 1));
         blit_to(&mut plane, &title_plane, 1, 0);
-        draw_text(&mut plane, 17, 0, "— Select · Toggle · Checkbox · StatusBar", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            17,
+            0,
+            "— Select · Toggle · Checkbox · StatusBar",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Divider: Appearance
-        let div = Divider::new().with_label("Appearance").with_theme(t.clone());
+        let div = Divider::new()
+            .with_label("Appearance")
+            .with_theme(t.clone());
         let div_plane = div.render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &div_plane, 0, 1);
 
@@ -164,7 +208,11 @@ impl Scene for ControlPanelScene {
             let y = 2 + i as u16;
             let is_focused = self.focus_field == i;
             let lbl_color = if is_focused { t.primary } else { t.fg_muted };
-            let lbl_text = if is_focused { format!("▸ {:<10}", label) } else { format!("  {:<10}", label) };
+            let lbl_text = if is_focused {
+                format!("▸ {:<10}", label)
+            } else {
+                format!("  {:<10}", label)
+            };
             draw_text(&mut plane, 2, y, &lbl_text, lbl_color, t.bg, is_focused);
 
             // Render actual Select widget (collapsed, shows current value + ▼)
@@ -224,27 +272,91 @@ impl Scene for ControlPanelScene {
 
         // Live state summary (right panel)
         let summary_x = area.width / 2 + 2;
-        draw_text(&mut plane, summary_x, 2, "Current Settings", t.fg, t.bg, true);
+        draw_text(
+            &mut plane,
+            summary_x,
+            2,
+            "Current Settings",
+            t.fg,
+            t.bg,
+            true,
+        );
         let lines = [
             format!("Theme:     {}", self.theme_select.current_label()),
             format!("Font:      {}", self.font_select.current_label()),
             format!("Language:  {}", self.lang_select.current_label()),
-            format!("Dark Mode: {}", if self.dark_mode.borrow().is_on() { "ON" } else { "OFF" }),
-            format!("Auto Save: {}", if self.auto_save.borrow().is_on() { "ON" } else { "OFF" }),
-            format!("Lines:     {}", if self.line_numbers.borrow().is_checked() { "ON" } else { "OFF" }),
-            format!("Word Wrap: {}", if self.word_wrap.borrow().is_checked() { "ON" } else { "OFF" }),
-            format!("Minimap:   {}", if self.minimap.borrow().is_checked() { "ON" } else { "OFF" }),
-            format!("Telemetry: {}", if self.telemetry.borrow().is_on() { "ON" } else { "OFF" }),
+            format!(
+                "Dark Mode: {}",
+                if self.dark_mode.borrow().is_on() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
+            format!(
+                "Auto Save: {}",
+                if self.auto_save.borrow().is_on() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
+            format!(
+                "Lines:     {}",
+                if self.line_numbers.borrow().is_checked() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
+            format!(
+                "Word Wrap: {}",
+                if self.word_wrap.borrow().is_checked() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
+            format!(
+                "Minimap:   {}",
+                if self.minimap.borrow().is_checked() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
+            format!(
+                "Telemetry: {}",
+                if self.telemetry.borrow().is_on() {
+                    "ON"
+                } else {
+                    "OFF"
+                }
+            ),
         ];
         for (i, line) in lines.iter().enumerate() {
-            draw_text(&mut plane, summary_x, 4 + i as u16, line, t.fg_muted, t.bg, false);
+            draw_text(
+                &mut plane,
+                summary_x,
+                4 + i as u16,
+                line,
+                t.fg_muted,
+                t.bg,
+                false,
+            );
         }
 
         // Profiler overlay
         if self.show_profiler {
-            self.profiler.borrow_mut().record("render", Duration::from_micros(450), 1);
-            self.profiler.borrow_mut().record("layout", Duration::from_micros(120), 1);
-            self.profiler.borrow_mut().record("input", Duration::from_micros(50), 1);
+            self.profiler
+                .borrow_mut()
+                .record("render", Duration::from_micros(450), 1);
+            self.profiler
+                .borrow_mut()
+                .record("layout", Duration::from_micros(120), 1);
+            self.profiler
+                .borrow_mut()
+                .record("input", Duration::from_micros(50), 1);
             let prof_w = 30u16.min(area.width.saturating_sub(4));
             let prof_h = 8u16.min(area.height.saturating_sub(4));
             let prof_x = area.width.saturating_sub(prof_w + 2);
@@ -256,32 +368,70 @@ impl Scene for ControlPanelScene {
 
         // Status bar
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Control Panel — Help", &[("Tab", "Cycle focus through fields"), ("Space", "Toggle / cycle select"), ("Up/Dn", "Change select option"), ("P", "Toggle profiler overlay"), ("Click", "Any field to interact"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Control Panel — Help",
+                &[
+                    ("Tab", "Cycle focus through fields"),
+                    ("Space", "Toggle / cycle select"),
+                    ("Up/Dn", "Change select option"),
+                    ("P", "Toggle profiler overlay"),
+                    ("Click", "Any field to interact"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
-                self.show_help = false; self.dirty = true; return true;
+            if self.keybindings.matches(actions::HELP, &key)
+                || self.keybindings.matches(actions::BACK, &key)
+            {
+                self.show_help = false;
+                self.dirty = true;
+                return true;
             }
             return true;
         }
 
-        if self.keybindings.matches(actions::HELP, &key) { self.show_help = !self.show_help; self.dirty = true; return true; }
-        if self.keybindings.matches(actions::BACK, &key) { return false; }
+        if self.keybindings.matches(actions::HELP, &key) {
+            self.show_help = !self.show_help;
+            self.dirty = true;
+            return true;
+        }
+        if self.keybindings.matches(actions::BACK, &key) {
+            return false;
+        }
 
         match key.code {
-            KeyCode::Tab => { self.focus_field = (self.focus_field + 1) % Self::field_count(); self.dirty = true; true }
-            KeyCode::BackTab => { self.focus_field = (self.focus_field + Self::field_count() - 1) % Self::field_count(); self.dirty = true; true }
+            KeyCode::Tab => {
+                self.focus_field = (self.focus_field + 1) % Self::field_count();
+                self.dirty = true;
+                true
+            }
+            KeyCode::BackTab => {
+                self.focus_field =
+                    (self.focus_field + Self::field_count() - 1) % Self::field_count();
+                self.dirty = true;
+                true
+            }
             KeyCode::Char(' ') => {
                 match self.focus_field {
                     0 => self.theme_select.next(),
@@ -295,7 +445,8 @@ impl Scene for ControlPanelScene {
                     8 => self.telemetry.borrow_mut().toggle(),
                     _ => {}
                 }
-                self.dirty = true; true
+                self.dirty = true;
+                true
             }
             KeyCode::Up => {
                 match self.focus_field {
@@ -304,7 +455,8 @@ impl Scene for ControlPanelScene {
                     2 => self.lang_select.prev(),
                     _ => {}
                 }
-                self.dirty = true; true
+                self.dirty = true;
+                true
             }
             KeyCode::Down => {
                 match self.focus_field {
@@ -313,9 +465,14 @@ impl Scene for ControlPanelScene {
                     2 => self.lang_select.next(),
                     _ => {}
                 }
-                self.dirty = true; true
+                self.dirty = true;
+                true
             }
-            KeyCode::Char('p') if key.modifiers.is_empty() => { self.show_profiler = !self.show_profiler; self.dirty = true; true }
+            KeyCode::Char('p') if key.modifiers.is_empty() => {
+                self.show_profiler = !self.show_profiler;
+                self.dirty = true;
+                true
+            }
             _ => false,
         }
     }
@@ -332,7 +489,8 @@ impl Scene for ControlPanelScene {
                         2 => self.lang_select.next(),
                         _ => {}
                     }
-                    self.dirty = true; return true;
+                    self.dirty = true;
+                    return true;
                 }
             }
             // Toggle clicks (rows 6-8)
@@ -345,7 +503,8 @@ impl Scene for ControlPanelScene {
                         2 => self.telemetry.borrow_mut().toggle(),
                         _ => {}
                     }
-                    self.dirty = true; return true;
+                    self.dirty = true;
+                    return true;
                 }
             }
             // Checkbox clicks (rows 10-12)
@@ -358,7 +517,8 @@ impl Scene for ControlPanelScene {
                         2 => self.minimap.borrow_mut().toggle(),
                         _ => {}
                     }
-                    self.dirty = true; return true;
+                    self.dirty = true;
+                    return true;
                 }
             }
         }
@@ -381,9 +541,16 @@ impl Scene for ControlPanelScene {
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "control_panel" }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn scene_id(&self) -> &str {
+        "control_panel"
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-

@@ -12,7 +12,7 @@
 
 use dracon_terminal_engine::compositor::{Cell, Color, Plane, Styles};
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
@@ -138,11 +138,7 @@ impl WidgetGallery {
     fn slot_rect(&self, slot: usize, area: Rect) -> Rect {
         let (row, col, _name, _icon) = WIDGET_SLOTS[slot];
         let rows = 4u16;
-        let cols = if row == 0 {
-            4u16
-        } else {
-            3u16
-        };
+        let cols = if row == 0 { 4u16 } else { 3u16 };
 
         let card_w = area.width.saturating_sub(2) / cols;
         let card_h = area.height.saturating_sub(4) / rows;
@@ -202,7 +198,9 @@ impl Widget for WidgetGallery {
         let t = &self.theme;
         let mut plane = Plane::new(0, area.width, area.height);
         plane.fill_bg(t.bg);
-        for cell in plane.cells.iter_mut() { cell.transparent = false; }
+        for cell in plane.cells.iter_mut() {
+            cell.transparent = false;
+        }
 
         // Header
         let title = " Widget Gallery ";
@@ -385,10 +383,22 @@ impl Widget for WidgetGallery {
             let shortcuts = [
                 ("^v<>", "Navigate cards"),
                 ("Enter", "Activate widget"),
-                (self.keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-                (self.keybindings.display(actions::HELP).unwrap_or("?"), "Toggle help"),
-                (self.keybindings.display(actions::BACK).unwrap_or("Esc"), "Dismiss help"),
-                (self.keybindings.display(actions::QUIT).unwrap_or("q"), "Quit"),
+                (
+                    self.keybindings.display(actions::THEME).unwrap_or("t"),
+                    "Cycle theme",
+                ),
+                (
+                    self.keybindings.display(actions::HELP).unwrap_or("?"),
+                    "Toggle help",
+                ),
+                (
+                    self.keybindings.display(actions::BACK).unwrap_or("Esc"),
+                    "Dismiss help",
+                ),
+                (
+                    self.keybindings.display(actions::QUIT).unwrap_or("q"),
+                    "Quit",
+                ),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
                 let row = hy + 3 + i as u16;
@@ -422,7 +432,9 @@ impl Widget for WidgetGallery {
         }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
             }
             return true;
@@ -454,7 +466,9 @@ impl Widget for WidgetGallery {
                 };
                 true
             }
-            KeyCode::Enter | KeyCode::Char(' ') if key.modifiers.is_empty() => self.widget_mut(self.selected).handle_key(key),
+            KeyCode::Enter | KeyCode::Char(' ') if key.modifiers.is_empty() => {
+                self.widget_mut(self.selected).handle_key(key)
+            }
             _ => self.widget_mut(self.selected).handle_key(key),
         }
     }

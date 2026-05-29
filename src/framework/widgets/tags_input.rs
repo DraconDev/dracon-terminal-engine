@@ -280,7 +280,14 @@ impl crate::framework::widget::Widget for TagsInput {
         let tag_height = 1u16;
         let input_height = 1u16;
         let suggestions_height = self.filtered_suggestions.len().min(5) as u16;
-        let _total_height = 1 + tag_height + input_height + if !self.filtered_suggestions.is_empty() { suggestions_height + 1 } else { 0 };
+        let _total_height = 1
+            + tag_height
+            + input_height
+            + if !self.filtered_suggestions.is_empty() {
+                suggestions_height + 1
+            } else {
+                0
+            };
 
         let mut y = 0u16;
 
@@ -565,7 +572,11 @@ impl crate::framework::widget::Widget for TagsInput {
                 }
                 true
             }
-            KeyCode::Char(c) if !key.modifiers.contains(crate::input::event::KeyModifiers::CONTROL) => {
+            KeyCode::Char(c)
+                if !key
+                    .modifiers
+                    .contains(crate::input::event::KeyModifiers::CONTROL) =>
+            {
                 self.input_text.push(c);
                 self.filter_suggestions();
                 if let Some(ref mut cb) = self.on_input_change {

@@ -39,9 +39,11 @@ const DATA_LEN: usize = 40;
 impl CyberpunkDashboard {
     fn new(theme: Theme) -> Self {
         let status_bar = StatusBar::new(WidgetId::new(60))
-            .add_segment(dracon_terminal_engine::framework::widgets::StatusSegment::new(
-                "Ctrl+P: pause | Ctrl+T: theme | Space: alert | F1: help | Ctrl+Q: quit",
-            ))
+            .add_segment(
+                dracon_terminal_engine::framework::widgets::StatusSegment::new(
+                    "Ctrl+P: pause | Ctrl+T: theme | Space: alert | F1: help | Ctrl+Q: quit",
+                ),
+            )
             .with_theme(theme.clone());
 
         Self {
@@ -61,7 +63,9 @@ impl CyberpunkDashboard {
     }
 
     fn update(&mut self) {
-        if self.paused { return; }
+        if self.paused {
+            return;
+        }
         self.tick += 1;
         self.data.remove(0);
         let val = (self.tick as f64 * 0.15).sin().abs() * 100.0;
@@ -73,7 +77,10 @@ impl CyberpunkDashboard {
 
     fn cycle_theme(&mut self) {
         let themes = Theme::all();
-        let idx = themes.iter().position(|t| t.name == self.theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == self.theme.name)
+            .unwrap_or(0);
         self.theme = themes[(idx + 1) % themes.len()].clone();
         self.status_bar.on_theme_change(&self.theme);
         self.dirty = true;
@@ -86,8 +93,12 @@ impl CyberpunkDashboard {
             let idx = 1 + i;
             if idx < plane.cells.len() {
                 plane.cells[idx] = Cell {
-                    char: c, fg: t.fg_on_accent, bg: t.primary,
-                    style: Styles::BOLD, transparent: false, skip: false,
+                    char: c,
+                    fg: t.fg_on_accent,
+                    bg: t.primary,
+                    style: Styles::BOLD,
+                    transparent: false,
+                    skip: false,
                 };
             }
         }
@@ -98,8 +109,12 @@ impl CyberpunkDashboard {
                 let idx = px + i;
                 if idx < plane.cells.len() {
                     plane.cells[idx] = Cell {
-                        char: c, fg: t.fg_on_accent, bg: t.warning,
-                        style: Styles::BOLD, transparent: false, skip: false,
+                        char: c,
+                        fg: t.fg_on_accent,
+                        bg: t.warning,
+                        style: Styles::BOLD,
+                        transparent: false,
+                        skip: false,
                     };
                 }
             }
@@ -135,7 +150,9 @@ impl CyberpunkDashboard {
         let mid_y = chart_y + chart_h / 2;
         for (i, &val) in self.data.iter().enumerate() {
             let x = chart_x + 1 + i as u16;
-            if x >= chart_x + chart_w - 1 { break; }
+            if x >= chart_x + chart_w - 1 {
+                break;
+            }
             let bar_h = (val / 100.0 * (chart_h as f64 - 4.0)).max(1.0) as u16;
             for dy in 0..bar_h {
                 let y = mid_y + chart_h / 2 - 2 - dy;
@@ -216,7 +233,9 @@ impl CyberpunkDashboard {
         let max_val = self.spark_data.iter().copied().max().unwrap_or(1).max(1);
         for (i, &val) in self.spark_data.iter().enumerate() {
             let x = sx + 1 + i as u16;
-            if x >= sx + sw - 1 { break; }
+            if x >= sx + sw - 1 {
+                break;
+            }
             let bar_idx = (val as f32 / max_val as f32 * (bars.len() - 1) as f32).round() as usize;
             let bar_idx = bar_idx.min(bars.len() - 1);
             let idx = ((sy + 1) as usize) * plane.width as usize + x as usize;
@@ -290,24 +309,41 @@ impl CyberpunkDashboard {
         }
 
         let corners = [
-            ('╭', hx, hy), ('╮', hx + hw - 1, hy),
-            ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1),
+            ('╭', hx, hy),
+            ('╮', hx + hw - 1, hy),
+            ('╰', hx, hy + hh - 1),
+            ('╯', hx + hw - 1, hy + hh - 1),
         ];
         for (ch, cx, cy) in &corners {
             let idx = (*cy * area.width + *cx) as usize;
-            if idx < plane.cells.len() { plane.cells[idx].char = *ch; plane.cells[idx].fg = t.outline; }
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = *ch;
+                plane.cells[idx].fg = t.outline;
+            }
         }
         for x in hx + 1..hx + hw - 1 {
             let top = (hy * area.width + x) as usize;
             let bot = ((hy + hh - 1) * area.width + x) as usize;
-            if top < plane.cells.len() { plane.cells[top].char = '─'; plane.cells[top].fg = t.outline; }
-            if bot < plane.cells.len() { plane.cells[bot].char = '─'; plane.cells[bot].fg = t.outline; }
+            if top < plane.cells.len() {
+                plane.cells[top].char = '─';
+                plane.cells[top].fg = t.outline;
+            }
+            if bot < plane.cells.len() {
+                plane.cells[bot].char = '─';
+                plane.cells[bot].fg = t.outline;
+            }
         }
         for y in hy + 1..hy + hh - 1 {
             let left = (y * area.width + hx) as usize;
             let right = (y * area.width + hx + hw - 1) as usize;
-            if left < plane.cells.len() { plane.cells[left].char = '│'; plane.cells[left].fg = t.outline; }
-            if right < plane.cells.len() { plane.cells[right].char = '│'; plane.cells[right].fg = t.outline; }
+            if left < plane.cells.len() {
+                plane.cells[left].char = '│';
+                plane.cells[left].fg = t.outline;
+            }
+            if right < plane.cells.len() {
+                plane.cells[right].char = '│';
+                plane.cells[right].fg = t.outline;
+            }
         }
 
         let title = "Cyberpunk Dashboard Help";
@@ -333,25 +369,48 @@ impl CyberpunkDashboard {
             let row = hy + 3 + i as u16;
             for (j, c) in key.chars().enumerate() {
                 let idx = (row * area.width + hx + 2 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.primary; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.primary;
+                }
             }
             for (j, c) in desc.chars().enumerate() {
                 let idx = (row * area.width + hx + 14 + j as u16) as usize;
-                if idx < plane.cells.len() { plane.cells[idx].char = c; plane.cells[idx].fg = t.fg; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx].char = c;
+                    plane.cells[idx].fg = t.fg;
+                }
             }
         }
     }
 }
 
 impl Widget for CyberpunkDashboard {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; self.dirty = true; }
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
-    fn focusable(&self) -> bool { true }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+        self.dirty = true;
+    }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
+    fn focusable(&self) -> bool {
+        true
+    }
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
@@ -371,11 +430,15 @@ impl Widget for CyberpunkDashboard {
         let bar_area = Rect::new(0, area.height.saturating_sub(1), area.width, 1);
         let bar_plane = self.status_bar.render(bar_area);
         for (ci, c) in bar_plane.cells.iter().enumerate() {
-            if c.transparent || c.char == '\0' { continue; }
+            if c.transparent || c.char == '\0' {
+                continue;
+            }
             let col = ci % bar_plane.width as usize;
             if col < area.width as usize {
                 let idx = (area.height as usize - 1) * area.width as usize + col;
-                if idx < plane.cells.len() { plane.cells[idx] = *c; }
+                if idx < plane.cells.len() {
+                    plane.cells[idx] = *c;
+                }
             }
         }
 
@@ -390,7 +453,9 @@ impl Widget for CyberpunkDashboard {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.alert_visible {
             if key.code == KeyCode::Char(' ') && key.modifiers.is_empty() {
@@ -402,7 +467,9 @@ impl Widget for CyberpunkDashboard {
         }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -444,16 +511,32 @@ struct InputRouter {
 }
 
 impl Widget for InputRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn set_id(&mut self, id: WidgetId) { self.id = id; }
-    fn area(&self) -> Rect { self.area }
-    fn set_area(&mut self, area: Rect) { self.area = area; }
-    fn z_index(&self) -> u16 { 0 }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area = area;
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn focusable(&self) -> bool { true }
-    fn render(&self, _area: Rect) -> Plane { Plane::new(0, 0, 0) }
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, _area: Rect) -> Plane {
+        Plane::new(0, 0, 0)
+    }
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.target.borrow_mut().handle_key(key)
     }
@@ -498,30 +581,32 @@ fn main() -> Result<()> {
     app.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app.on_input(move |key| {
-            if key.kind != KeyEventKind::Press { return false; }
-            let mut d = dash_input.borrow_mut();
-            if kb.matches(actions::QUIT, &key) {
-                should_quit.store(true, Ordering::SeqCst);
-                true
-            } else {
-                d.handle_key(key)
-            }
-        })
-        .on_tick(move |ctx, _| {
-            if quit_check.load(Ordering::SeqCst) {
-                ctx.stop();
-                return;
-            }
-            let mut d = dash_tick.borrow_mut();
-            d.update();
-            let (w, h) = ctx.compositor().size();
-            if d.area.width != w || d.area.height != h {
-                d.set_area(Rect::new(0, 0, w, h));
-            }
-            if d.needs_render() {
-                ctx.add_plane(d.render(d.area));
-                d.clear_dirty();
-            }
-        })
-        .run(|_| {})
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
+        let mut d = dash_input.borrow_mut();
+        if kb.matches(actions::QUIT, &key) {
+            should_quit.store(true, Ordering::SeqCst);
+            true
+        } else {
+            d.handle_key(key)
+        }
+    })
+    .on_tick(move |ctx, _| {
+        if quit_check.load(Ordering::SeqCst) {
+            ctx.stop();
+            return;
+        }
+        let mut d = dash_tick.borrow_mut();
+        d.update();
+        let (w, h) = ctx.compositor().size();
+        if d.area.width != w || d.area.height != h {
+            d.set_area(Rect::new(0, 0, w, h));
+        }
+        if d.needs_render() {
+            ctx.add_plane(d.render(d.area));
+            d.clear_dirty();
+        }
+    })
+    .run(|_| {})
 }

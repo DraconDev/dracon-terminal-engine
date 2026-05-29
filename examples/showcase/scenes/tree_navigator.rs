@@ -5,8 +5,8 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Tree, TreeNode};
@@ -33,14 +33,20 @@ impl MockFs {
     }
 
     fn total_items(&self) -> usize {
-        1 + self.children.as_ref()
+        1 + self
+            .children
+            .as_ref()
             .map(|c| c.iter().map(|ch| ch.total_items()).sum::<usize>())
             .unwrap_or(0)
     }
 
     fn find(&self, name: &str) -> Option<&MockFs> {
-        if self.name == name { return Some(self); }
-        self.children.as_ref().and_then(|c| c.iter().find_map(|ch| ch.find(name)))
+        if self.name == name {
+            return Some(self);
+        }
+        self.children
+            .as_ref()
+            .and_then(|c| c.iter().find_map(|ch| ch.find(name)))
     }
 
     fn icon(&self) -> char {
@@ -87,15 +93,54 @@ impl MockFs {
 
     fn preview_lines(&self) -> Vec<&str> {
         match self.name {
-            "main.rs" => vec!["fn main() {", "    println!(\"Hello\");", "    app::run();", "}"],
-            "lib.rs" => vec!["pub mod engine;", "pub mod compositor;", "pub mod framework;", "pub mod input;"],
+            "main.rs" => vec![
+                "fn main() {",
+                "    println!(\"Hello\");",
+                "    app::run();",
+                "}",
+            ],
+            "lib.rs" => vec![
+                "pub mod engine;",
+                "pub mod compositor;",
+                "pub mod framework;",
+                "pub mod input;",
+            ],
             "mod.rs" => vec!["pub mod app;", "pub mod widget;", "pub mod theme;"],
-            "engine.rs" => vec!["pub struct Engine {", "    running: bool,", "    theme: Theme,", "}"],
-            "event.rs" => vec!["pub enum Event {", "    Key(KeyEvent),", "    Mouse(MouseEvent),", "}"],
-            "theme.rs" => vec!["pub struct Theme {", "    pub name: &str,", "    pub bg: Color,", "}"],
-            "Cargo.toml" => vec!["[package]", "name = \"dte\"", "version = \"0.1.0\"", "edition = \"2021\""],
-            "Cargo.lock" => vec!["# This file is auto-generated", "# by Cargo.", "version = 3"],
-            "README.md" => vec!["# Dracon Terminal Engine", "", "GUI-grade terminal apps.", "Widgets + compositor."],
+            "engine.rs" => vec![
+                "pub struct Engine {",
+                "    running: bool,",
+                "    theme: Theme,",
+                "}",
+            ],
+            "event.rs" => vec![
+                "pub enum Event {",
+                "    Key(KeyEvent),",
+                "    Mouse(MouseEvent),",
+                "}",
+            ],
+            "theme.rs" => vec![
+                "pub struct Theme {",
+                "    pub name: &str,",
+                "    pub bg: Color,",
+                "}",
+            ],
+            "Cargo.toml" => vec![
+                "[package]",
+                "name = \"dte\"",
+                "version = \"0.1.0\"",
+                "edition = \"2021\"",
+            ],
+            "Cargo.lock" => vec![
+                "# This file is auto-generated",
+                "# by Cargo.",
+                "version = 3",
+            ],
+            "README.md" => vec![
+                "# Dracon Terminal Engine",
+                "",
+                "GUI-grade terminal apps.",
+                "Widgets + compositor.",
+            ],
             "LICENSE" => vec!["MIT License", "", "Copyright (c) 2024"],
             "Makefile.toml" => vec!["[tasks.build]", "command = \"cargo\"", "args = [\"build\"]"],
             ".gitignore" => vec!["/target", "**/*.rs.bk", "Cargo.lock"],
@@ -139,9 +184,27 @@ fn build_fs() -> MockFs {
                         size_kb: 0.0,
                         modified: "2024-12-08",
                         children: Some(vec![
-                            MockFs { name: "mod.rs", kind: "rs", size_kb: 0.3, modified: "2024-12-08", children: None },
-                            MockFs { name: "theme.rs", kind: "rs", size_kb: 4.2, modified: "2024-12-07", children: None },
-                            MockFs { name: "event.rs", kind: "rs", size_kb: 1.1, modified: "2024-12-06", children: None },
+                            MockFs {
+                                name: "mod.rs",
+                                kind: "rs",
+                                size_kb: 0.3,
+                                modified: "2024-12-08",
+                                children: None,
+                            },
+                            MockFs {
+                                name: "theme.rs",
+                                kind: "rs",
+                                size_kb: 4.2,
+                                modified: "2024-12-07",
+                                children: None,
+                            },
+                            MockFs {
+                                name: "event.rs",
+                                kind: "rs",
+                                size_kb: 1.1,
+                                modified: "2024-12-06",
+                                children: None,
+                            },
                         ]),
                     },
                     MockFs {
@@ -150,8 +213,20 @@ fn build_fs() -> MockFs {
                         size_kb: 0.0,
                         modified: "2024-12-10",
                         children: Some(vec![
-                            MockFs { name: "mod.rs", kind: "rs", size_kb: 0.5, modified: "2024-12-10", children: None },
-                            MockFs { name: "engine.rs", kind: "rs", size_kb: 3.7, modified: "2024-12-09", children: None },
+                            MockFs {
+                                name: "mod.rs",
+                                kind: "rs",
+                                size_kb: 0.5,
+                                modified: "2024-12-10",
+                                children: None,
+                            },
+                            MockFs {
+                                name: "engine.rs",
+                                kind: "rs",
+                                size_kb: 3.7,
+                                modified: "2024-12-09",
+                                children: None,
+                            },
                         ]),
                     },
                 ]),
@@ -161,21 +236,83 @@ fn build_fs() -> MockFs {
                 kind: "dir",
                 size_kb: 0.0,
                 modified: "2024-12-05",
-                children: Some(vec![
-                    MockFs { name: "integration.rs", kind: "rs", size_kb: 1.2, modified: "2024-12-05", children: None },
-                ]),
+                children: Some(vec![MockFs {
+                    name: "integration.rs",
+                    kind: "rs",
+                    size_kb: 1.2,
+                    modified: "2024-12-05",
+                    children: None,
+                }]),
             },
-            MockFs { name: "examples", kind: "dir", size_kb: 0.0, modified: "2024-12-10", children: Some(vec![
-                MockFs { name: "demo.rs", kind: "rs", size_kb: 5.6, modified: "2024-12-10", children: None },
-            ]) },
-            MockFs { name: "Cargo.toml", kind: "toml", size_kb: 0.5, modified: "2024-12-01", children: None },
-            MockFs { name: "Cargo.lock", kind: "lock", size_kb: 12.3, modified: "2024-12-10", children: None },
-            MockFs { name: "README.md", kind: "md", size_kb: 3.1, modified: "2024-11-28", children: None },
-            MockFs { name: "LICENSE", kind: "txt", size_kb: 1.1, modified: "2024-11-01", children: None },
-            MockFs { name: ".gitignore", kind: "txt", size_kb: 0.1, modified: "2024-11-01", children: None },
-            MockFs { name: "Makefile.toml", kind: "toml", size_kb: 0.8, modified: "2024-11-15", children: None },
-            MockFs { name: "config.json", kind: "json", size_kb: 0.2, modified: "2024-12-01", children: None },
-            MockFs { name: "run.sh", kind: "sh", size_kb: 0.1, modified: "2024-11-20", children: None },
+            MockFs {
+                name: "examples",
+                kind: "dir",
+                size_kb: 0.0,
+                modified: "2024-12-10",
+                children: Some(vec![MockFs {
+                    name: "demo.rs",
+                    kind: "rs",
+                    size_kb: 5.6,
+                    modified: "2024-12-10",
+                    children: None,
+                }]),
+            },
+            MockFs {
+                name: "Cargo.toml",
+                kind: "toml",
+                size_kb: 0.5,
+                modified: "2024-12-01",
+                children: None,
+            },
+            MockFs {
+                name: "Cargo.lock",
+                kind: "lock",
+                size_kb: 12.3,
+                modified: "2024-12-10",
+                children: None,
+            },
+            MockFs {
+                name: "README.md",
+                kind: "md",
+                size_kb: 3.1,
+                modified: "2024-11-28",
+                children: None,
+            },
+            MockFs {
+                name: "LICENSE",
+                kind: "txt",
+                size_kb: 1.1,
+                modified: "2024-11-01",
+                children: None,
+            },
+            MockFs {
+                name: ".gitignore",
+                kind: "txt",
+                size_kb: 0.1,
+                modified: "2024-11-01",
+                children: None,
+            },
+            MockFs {
+                name: "Makefile.toml",
+                kind: "toml",
+                size_kb: 0.8,
+                modified: "2024-11-15",
+                children: None,
+            },
+            MockFs {
+                name: "config.json",
+                kind: "json",
+                size_kb: 0.2,
+                modified: "2024-12-01",
+                children: None,
+            },
+            MockFs {
+                name: "run.sh",
+                kind: "sh",
+                size_kb: 0.1,
+                modified: "2024-11-20",
+                children: None,
+            },
         ]),
     }
 }
@@ -198,7 +335,11 @@ impl TreeNavigatorScene {
         let tree = Tree::new(WidgetId::new(10))
             .with_root(vec![root_node])
             .with_theme(theme.clone());
-        let segments = vec!["home".to_string(), "user".to_string(), "projects".to_string()];
+        let segments = vec![
+            "home".to_string(),
+            "user".to_string(),
+            "projects".to_string(),
+        ];
         let breadcrumbs = Breadcrumbs::new(segments).with_theme(theme.clone());
 
         Self {
@@ -215,7 +356,9 @@ impl TreeNavigatorScene {
 }
 
 impl Scene for TreeNavigatorScene {
-    fn scene_id(&self) -> &str { "tree_navigator" }
+    fn scene_id(&self) -> &str {
+        "tree_navigator"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -230,8 +373,15 @@ impl Scene for TreeNavigatorScene {
         // Title
         draw_text(&mut plane, 2, 0, " Tree Navigator ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in 0..area.width {
@@ -266,8 +416,18 @@ impl Scene for TreeNavigatorScene {
         let detail_x = split_x + 2;
         let detail_w = area.width.saturating_sub(detail_x + 2);
         let selected_label = self.tree.selected_label().map(|s| s.to_string());
-        let selected_fs = selected_label.as_deref().and_then(|name| self.fs.find(name));
-        render_detail(&mut plane, detail_x, 4, detail_w, area.height.saturating_sub(8), t, selected_fs);
+        let selected_fs = selected_label
+            .as_deref()
+            .and_then(|name| self.fs.find(name));
+        render_detail(
+            &mut plane,
+            detail_x,
+            4,
+            detail_w,
+            area.height.saturating_sub(8),
+            t,
+            selected_fs,
+        );
 
         // File type legend
         let legend_y = area.height.saturating_sub(4);
@@ -283,12 +443,25 @@ impl Scene for TreeNavigatorScene {
             }
         }
         let count = self.fs.total_items();
-        let status_text = format!(" {} items | ↑↓ nav | Enter: expand | ?: help | B: back ", count);
-        draw_text(&mut plane, 2, footer_y, &status_text, t.fg_muted, t.surface, false);
+        let status_text = format!(
+            " {} items | ↑↓ nav | Enter: expand | ?: help | B: back ",
+            count
+        );
+        draw_text(
+            &mut plane,
+            2,
+            footer_y,
+            &status_text,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
 
         if self.show_help {
             crate::scenes::shared_helpers::render_help_overlay(
-                &mut plane, area, t,
+                &mut plane,
+                area,
+                t,
                 "Tree Navigator Help",
                 &[
                     ("↑/↓", "Navigate tree"),
@@ -305,9 +478,13 @@ impl Scene for TreeNavigatorScene {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
             }
@@ -333,8 +510,11 @@ impl Scene for TreeNavigatorScene {
         let tree_area = Rect::new(0, 4, area.width * 45 / 100, area.height.saturating_sub(8));
 
         // Tree widget area
-        if col >= tree_area.x && col < tree_area.x + tree_area.width &&
-           row >= tree_area.y && row < tree_area.y + tree_area.height {
+        if col >= tree_area.x
+            && col < tree_area.x + tree_area.width
+            && row >= tree_area.y
+            && row < tree_area.y + tree_area.height
+        {
             let rel_col = col - tree_area.x;
             let rel_row = row - tree_area.y;
             if self.tree.handle_mouse(kind, rel_col, rel_row) {
@@ -367,12 +547,26 @@ impl Scene for TreeNavigatorScene {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
-fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, selected: Option<&MockFs>) {
+fn render_detail(
+    plane: &mut Plane,
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+    t: &Theme,
+    selected: Option<&MockFs>,
+) {
     // Background
     for dy in 0..h {
         for dx in 0..w {
@@ -384,7 +578,15 @@ fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, s
         }
     }
 
-    draw_text(plane, x + 1, y + 1, "File Details", t.primary, t.surface, true);
+    draw_text(
+        plane,
+        x + 1,
+        y + 1,
+        "File Details",
+        t.primary,
+        t.surface,
+        true,
+    );
     for dx in 0..w {
         let idx = ((y + 2) * plane.width + x + dx) as usize;
         if idx < plane.cells.len() {
@@ -405,12 +607,28 @@ fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, s
 
         // Type
         draw_text(plane, x + 1, y + 5, "Type:", t.fg_muted, t.surface, false);
-        draw_text(plane, x + 8, y + 5, fs.type_label(), icon_color, t.surface, false);
+        draw_text(
+            plane,
+            x + 8,
+            y + 5,
+            fs.type_label(),
+            icon_color,
+            t.surface,
+            false,
+        );
 
         // Size (with bar for files)
         draw_text(plane, x + 1, y + 6, "Size:", t.fg_muted, t.surface, false);
         if fs.kind == "dir" {
-            draw_text(plane, x + 8, y + 6, "Directory", t.fg_muted, t.surface, false);
+            draw_text(
+                plane,
+                x + 8,
+                y + 6,
+                "Directory",
+                t.fg_muted,
+                t.surface,
+                false,
+            );
         } else {
             let size_str = format!("{:.1} KB", fs.size_kb);
             draw_text(plane, x + 8, y + 6, &size_str, t.fg, t.surface, false);
@@ -427,13 +645,29 @@ fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, s
         }
 
         // Modified
-        draw_text(plane, x + 1, y + 8, "Modified:", t.fg_muted, t.surface, false);
+        draw_text(
+            plane,
+            x + 1,
+            y + 8,
+            "Modified:",
+            t.fg_muted,
+            t.surface,
+            false,
+        );
         draw_text(plane, x + 12, y + 8, fs.modified, t.fg, t.surface, false);
 
         // Children count for dirs
         if fs.kind == "dir" {
             if let Some(ref children) = fs.children {
-                draw_text(plane, x + 1, y + 9, "Children:", t.fg_muted, t.surface, false);
+                draw_text(
+                    plane,
+                    x + 1,
+                    y + 9,
+                    "Children:",
+                    t.fg_muted,
+                    t.surface,
+                    false,
+                );
                 let count_str = format!("{} items", children.len());
                 draw_text(plane, x + 12, y + 9, &count_str, t.fg, t.surface, false);
             }
@@ -442,7 +676,15 @@ fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, s
         // Content preview
         let preview_y = y + 10;
         if preview_y + 6 < y + h {
-            draw_text(plane, x + 1, preview_y, "Preview", t.secondary, t.surface, true);
+            draw_text(
+                plane,
+                x + 1,
+                preview_y,
+                "Preview",
+                t.secondary,
+                t.surface,
+                true,
+            );
             for dx in 0..w {
                 let idx = ((preview_y + 1) * plane.width + x + dx) as usize;
                 if idx < plane.cells.len() {
@@ -465,9 +707,19 @@ fn render_detail(plane: &mut Plane, x: u16, y: u16, w: u16, h: u16, t: &Theme, s
             let lines = fs.preview_lines();
             for (i, line) in lines.iter().take(4).enumerate() {
                 let ly = preview_y + 2 + i as u16;
-                if ly >= y + h { break; }
+                if ly >= y + h {
+                    break;
+                }
                 // Line number
-                draw_text(plane, x + 1, ly, &format!("{:>2}", i + 1), t.fg_muted, t.bg, false);
+                draw_text(
+                    plane,
+                    x + 1,
+                    ly,
+                    &format!("{:>2}", i + 1),
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
                 // Content
                 draw_text(plane, x + 4, ly, line, t.fg, t.bg, false);
             }
@@ -500,7 +752,9 @@ fn render_legend(plane: &mut Plane, x: u16, y: u16, w: u16, t: &Theme) {
     ];
     let mut lx = x + 12;
     for (icon, label, color) in types {
-        if lx + label.len() as u16 + 4 > x + w { break; }
+        if lx + label.len() as u16 + 4 > x + w {
+            break;
+        }
         let idx = (y * plane.width + lx) as usize;
         if idx < plane.cells.len() {
             plane.cells[idx].char = icon;
@@ -510,5 +764,3 @@ fn render_legend(plane: &mut Plane, x: u16, y: u16, w: u16, t: &Theme) {
         lx += label.len() as u16 + 4;
     }
 }
-
-

@@ -4,10 +4,12 @@
 //! in the main panel, and see live state updates in the properties inspector.
 //! Like Storybook for TUI widgets.
 
-use crate::scenes::shared_helpers::{blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay};
+use crate::scenes::shared_helpers::{
+    blit_to, draw_focus_ring, draw_text, draw_text_clipped, render_help_overlay,
+};
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::hitzone::ScopedZoneRegistry;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
@@ -15,7 +17,9 @@ use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ColorPicker, ProgressBar, ProgressRing, Radio, SearchInput, Select, Slider,
     Spinner, TagsInput, Toggle,
 };
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -75,12 +79,16 @@ impl WidgetGalleryScene {
             slider: Slider::new(WidgetId::new(12)).with_range(0.0, 100.0),
             spinner: Spinner::new(WidgetId::new(13)),
             toggle: Toggle::new(WidgetId::new(14), "Dark Mode"),
-            select: Select::new(WidgetId::new(15))
-                .with_options(vec!["Red".into(), "Green".into(), "Blue".into()]),
+            select: Select::new(WidgetId::new(15)).with_options(vec![
+                "Red".into(),
+                "Green".into(),
+                "Blue".into(),
+            ]),
             search: SearchInput::new(WidgetId::new(16)),
             progress: ProgressBar::new(WidgetId::new(17)),
-            button: Button::with_id(WidgetId::new(18), "  Click Me!  ")
-                .on_click(move || { *button_bridge_cb.borrow_mut() = true; }),
+            button: Button::with_id(WidgetId::new(18), "  Click Me!  ").on_click(move || {
+                *button_bridge_cb.borrow_mut() = true;
+            }),
             color_picker: ColorPicker::new().with_theme(theme.clone()),
             progress_ring: ProgressRing::new(0.65),
             tags_input: TagsInput::new(vec!["rust".to_string(), "tui".to_string()])
@@ -127,7 +135,10 @@ impl WidgetGalleryScene {
             2 => format!("on: {}", self.toggle.is_on()),
             3 => format!("frame: '{}'", self.spinner.current_frame()),
             4 => format!("value: {:.0}", self.slider.value()),
-            5 => format!("selected: {}", self.select.selected_label().unwrap_or("none")),
+            5 => format!(
+                "selected: {}",
+                self.select.selected_label().unwrap_or("none")
+            ),
             6 => format!("query: '{}'", self.search.query()),
             7 => format!("progress: {:.0}%", self.progress.progress() * 100.0),
             8 => format!("clicks: {}", self.button_clicks),
@@ -143,12 +154,23 @@ impl WidgetGalleryScene {
         let max_x = SIDEBAR_WIDTH;
 
         // Sidebar header
-        draw_text_clipped(plane, 1, 0, " Widgets ", max_x, t.fg_on_accent, t.primary, true);
+        draw_text_clipped(
+            plane,
+            1,
+            0,
+            " Widgets ",
+            max_x,
+            t.fg_on_accent,
+            t.primary,
+            true,
+        );
 
         // Widget list
         for (i, (icon, name, _desc)) in WIDGETS.iter().enumerate() {
             let row = i as u16 + 1;
-            if row >= area.height.saturating_sub(1) { break; }
+            if row >= area.height.saturating_sub(1) {
+                break;
+            }
 
             let is_selected = i == self.selected;
             let is_hovered = self.hovered == Some(i);
@@ -162,7 +184,11 @@ impl WidgetGalleryScene {
                 t.surface
             };
             let fg = if is_selected { t.fg_on_accent } else { t.fg };
-            let style = if is_selected { Styles::BOLD } else { Styles::empty() };
+            let style = if is_selected {
+                Styles::BOLD
+            } else {
+                Styles::empty()
+            };
 
             // Fill row background
             for x in 0..SIDEBAR_WIDTH {
@@ -177,7 +203,9 @@ impl WidgetGalleryScene {
             }
 
             // Hit zone
-            self.zones.borrow_mut().register(i, 0, row, SIDEBAR_WIDTH, 1);
+            self.zones
+                .borrow_mut()
+                .register(i, 0, row, SIDEBAR_WIDTH, 1);
 
             // Icon + name
             let entry = format!(" {} {}", icon, name);
@@ -206,7 +234,16 @@ impl WidgetGalleryScene {
         // Title: icon + name + description
         let title = format!("{} {} ", icon, name);
         draw_text_clipped(plane, panel_x, 0, &title, max_x, t.primary, t.bg, true);
-        draw_text_clipped(plane, panel_x + title.len() as u16, 0, desc, max_x, t.fg_muted, t.bg, false);
+        draw_text_clipped(
+            plane,
+            panel_x + title.len() as u16,
+            0,
+            desc,
+            max_x,
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // Divider
         for x in panel_x..max_x.min(area.width) {
@@ -226,7 +263,9 @@ impl WidgetGalleryScene {
         let card_w = panel_w;
         for y in demo_y..demo_y + demo_h {
             for x in card_x..card_x + card_w {
-                if x >= area.width { break; }
+                if x >= area.width {
+                    break;
+                }
                 let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = t.surface;
@@ -262,20 +301,45 @@ impl WidgetGalleryScene {
                 11 => self.tags_input.render(widget_area),
                 _ => Plane::new(0, 0, 0),
             };
-            blit_to(plane, &w_plane, widget_area.x as usize, widget_area.y as usize);
+            blit_to(
+                plane,
+                &w_plane,
+                widget_area.x as usize,
+                widget_area.y as usize,
+            );
         }
 
         // ── Properties Inspector ───────────────────────────────
         let props_y = demo_y + demo_h + 1;
         if props_y < area.height.saturating_sub(2) {
-            draw_text_clipped(plane, panel_x, props_y, "State: ", max_x, t.fg_muted, t.bg, false);
-            draw_text_clipped(plane, panel_x + 7, props_y, &self.widget_state(), max_x, t.primary, t.bg, true);
+            draw_text_clipped(
+                plane, panel_x, props_y, "State: ", max_x, t.fg_muted, t.bg, false,
+            );
+            draw_text_clipped(
+                plane,
+                panel_x + 7,
+                props_y,
+                &self.widget_state(),
+                max_x,
+                t.primary,
+                t.bg,
+                true,
+            );
 
             // Keyboard hints
             let hints = self.keyboard_hints();
             let hint_y = props_y + 1;
             if hint_y < area.height.saturating_sub(2) {
-                draw_text_clipped(plane, panel_x, hint_y, "Interact: ", max_x, t.fg_muted, t.bg, false);
+                draw_text_clipped(
+                    plane,
+                    panel_x,
+                    hint_y,
+                    "Interact: ",
+                    max_x,
+                    t.fg_muted,
+                    t.bg,
+                    false,
+                );
                 draw_text_clipped(plane, panel_x + 10, hint_y, hints, max_x, t.fg, t.bg, false);
             }
         }
@@ -301,7 +365,9 @@ impl WidgetGalleryScene {
 }
 
 impl Scene for WidgetGalleryScene {
-    fn scene_id(&self) -> &str { "widget_gallery" }
+    fn scene_id(&self) -> &str {
+        "widget_gallery"
+    }
 
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
@@ -316,8 +382,15 @@ impl Scene for WidgetGalleryScene {
         // Header
         draw_text(&mut plane, 2, 0, " Widget Workshop ", t.primary, t.bg, true);
         let theme_label = format!(" {} ", self.theme.name);
-        draw_text(&mut plane, area.width.saturating_sub(theme_label.len() as u16 + 2), 0,
-                  &theme_label, t.secondary, t.bg, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(theme_label.len() as u16 + 2),
+            0,
+            &theme_label,
+            t.secondary,
+            t.bg,
+            false,
+        );
 
         // Header divider
         for x in 0..area.width {
@@ -358,28 +431,45 @@ impl Scene for WidgetGalleryScene {
         let nav = " ↑/↓: navigate  |  Enter: interact  |  B/Esc: back  |  ?: help ";
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
         let count = format!(" {} widgets ", WIDGETS.len());
-        draw_text(&mut plane, area.width.saturating_sub(count.len() as u16 + 2), footer_y,
-                  &count, t.fg_muted, t.surface, false);
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(count.len() as u16 + 2),
+            footer_y,
+            &count,
+            t.fg_muted,
+            t.surface,
+            false,
+        );
 
         // Help overlay
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Widget Workshop Help", &[
-                ("↑/↓", "Navigate widget list"),
-                ("Enter", "Interact with selected widget"),
-                ("Type", "Input into text widgets"),
-                ("Esc", "Back to showcase"),
-                ("?", "Toggle this help"),
-            ]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Widget Workshop Help",
+                &[
+                    ("↑/↓", "Navigate widget list"),
+                    ("Enter", "Interact with selected widget"),
+                    ("Type", "Input into text widgets"),
+                    ("Esc", "Back to showcase"),
+                    ("?", "Toggle this help"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::BACK, &key) || self.keybindings.matches(actions::HELP, &key) {
+            if self.keybindings.matches(actions::BACK, &key)
+                || self.keybindings.matches(actions::HELP, &key)
+            {
                 self.show_help = false;
                 return true;
             }
@@ -396,7 +486,11 @@ impl Scene for WidgetGalleryScene {
 
         match key.code {
             KeyCode::Up if key.modifiers.is_empty() => {
-                self.selected = if self.selected == 0 { WIDGETS.len() - 1 } else { self.selected - 1 };
+                self.selected = if self.selected == 0 {
+                    WIDGETS.len() - 1
+                } else {
+                    self.selected - 1
+                };
                 self.hovered = None;
                 true
             }
@@ -446,12 +540,16 @@ impl Scene for WidgetGalleryScene {
             let demo_h = area.height.saturating_sub(8);
             let card_y = 2;
 
-            if col >= card_x + 2 && col < card_x + card_w - 2
-                && row > card_y && row < card_y + demo_h - 1
+            if col >= card_x + 2
+                && col < card_x + card_w - 2
+                && row > card_y
+                && row < card_y + demo_h - 1
             {
                 let rel_col = col.saturating_sub(card_x + 2);
                 let rel_row = row.saturating_sub(card_y + 1);
-                let result = self.widget_mut(self.selected).handle_mouse(kind, rel_col, rel_row);
+                let result = self
+                    .widget_mut(self.selected)
+                    .handle_mouse(kind, rel_col, rel_row);
                 self.sync_button_bridge();
                 return result;
             }
@@ -476,7 +574,9 @@ impl Scene for WidgetGalleryScene {
         self.tags_input.on_theme_change(theme);
     }
 
-    fn needs_render(&self) -> bool { true }
+    fn needs_render(&self) -> bool {
+        true
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
 }

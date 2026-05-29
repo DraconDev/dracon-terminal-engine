@@ -17,10 +17,7 @@ fn test_menu_bar_new() {
 
 #[test]
 fn test_menu_bar_with_entries() {
-    let entries = vec![
-        MenuEntry::new("File"),
-        MenuEntry::new("Edit"),
-    ];
+    let entries = vec![MenuEntry::new("File"), MenuEntry::new("Edit")];
     let mb = MenuBar::new(WidgetId::new(1)).with_entries(entries);
     let plane = mb.render(Rect::new(0, 0, 80, 1));
     assert!(plane.width > 0);
@@ -37,13 +34,10 @@ fn test_menu_bar_with_id() {
 // ============================================================================
 
 #[test]
-
 #[test]
-
 // ============================================================================
 // Widget Trait Tests
 // ============================================================================
-
 #[test]
 fn test_menu_bar_id() {
     let mb = MenuBar::new(WidgetId::new(42));
@@ -171,7 +165,9 @@ fn test_menu_bar_set_area_then_render() {
 
 #[test]
 fn test_menu_bar_many_entries() {
-    let entries: Vec<MenuEntry> = (0..10).map(|i| MenuEntry::new(&format!("Menu{}", i))).collect();
+    let entries: Vec<MenuEntry> = (0..10)
+        .map(|i| MenuEntry::new(&format!("Menu{}", i)))
+        .collect();
     let mb = MenuBar::new(WidgetId::new(1)).with_entries(entries);
     let plane = mb.render(Rect::new(0, 0, 80, 1));
     assert!(plane.width > 0);

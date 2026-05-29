@@ -156,7 +156,7 @@ fn test_divider_all_styles() {
         DividerStyle::Double,
         DividerStyle::Bold,
     ];
-    
+
     for style in styles {
         let divider = Divider::new().style(style);
         let area = Rect::new(0, 0, 80, 1);
@@ -294,7 +294,7 @@ fn test_divider_set_label_empty() {
 #[test]
 fn test_divider_different_themes() {
     let themes = vec!["nord", "dracula", "monokai", "solarized_dark"];
-    
+
     for theme_name in themes {
         if let Some(theme) = Theme::from_name(theme_name) {
             let divider = Divider::new().with_theme(theme);
@@ -378,7 +378,7 @@ fn test_divider_vertical_styles() {
         DividerStyle::Double,
         DividerStyle::Bold,
     ];
-    
+
     for style in styles {
         let divider = Divider::vertical().style(style);
         let area = Rect::new(0, 0, 1, 30);
@@ -432,10 +432,7 @@ fn test_divider_combined_options() {
 
 #[test]
 fn test_divider_direction_enum() {
-    let directions = vec![
-        DividerDirection::Horizontal,
-        DividerDirection::Vertical,
-    ];
+    let directions = vec![DividerDirection::Horizontal, DividerDirection::Vertical];
     assert_eq!(directions.len(), 2);
 }
 
@@ -484,7 +481,7 @@ fn test_divider_multiple_combinations() {
         LabelPosition::Center,
         LabelPosition::Right,
     ];
-    
+
     for dir in &directions {
         for style in &styles {
             for pos in &positions {
@@ -510,11 +507,11 @@ fn test_divider_toggle_label() {
     divider.set_label(Some("Label 1"));
     let area1 = Rect::new(0, 0, 80, 1);
     let _plane1 = divider.render(area1);
-    
+
     divider.set_label(Some("Label 2"));
     let area2 = Rect::new(0, 0, 80, 1);
     let _plane2 = divider.render(area2);
-    
+
     divider.set_label(None);
     let area3 = Rect::new(0, 0, 80, 1);
     let _plane3 = divider.render(area3);

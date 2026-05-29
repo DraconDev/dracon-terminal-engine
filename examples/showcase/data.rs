@@ -216,7 +216,6 @@ impl ExampleMeta {
                     "| lib  |{      |",
                 ],
             },
-
             // ── Apps ─────────────────────────────────────────────────────────
             ExampleMeta {
                 name: "system_monitor",
@@ -273,7 +272,6 @@ impl ExampleMeta {
                     "+-----------+--------+",
                 ],
             },
-
             // ── Input ────────────────────────────────────────────────────────
             ExampleMeta {
                 name: "form_demo",
@@ -367,7 +365,6 @@ impl ExampleMeta {
                     "  Palette: ██ ██ ██ ██",
                 ],
             },
-
             // ── Data ─────────────────────────────────────────────────────────
             ExampleMeta {
                 name: "rich_text",
@@ -386,12 +383,7 @@ impl ExampleMeta {
                 category: "data",
                 description: "Toast notification queue with filters",
                 binary_name: "notification_center",
-                preview: &[
-                    "  ╭───────╮",
-                    "  │ i Info│",
-                    "  │ Done! │",
-                    "  ╰───────╯",
-                ],
+                preview: &["  ╭───────╮", "  │ i Info│", "  │ Done! │", "  ╰───────╯"],
             },
             ExampleMeta {
                 name: "cell_pool",
@@ -439,7 +431,6 @@ impl ExampleMeta {
                     "  render  13.3ms  1x",
                 ],
             },
-
             // ── Cookbook ──────────────────────────────────────────────────────
             ExampleMeta {
                 name: "widget_gallery",
@@ -458,23 +449,14 @@ impl ExampleMeta {
                 category: "cookbook",
                 description: "Live theme cycling (21 themes)",
                 binary_name: "theme_switcher",
-                preview: &[
-                    "Theme: Nord",
-                    "+----------+",
-                    "| # # # #   |",
-                ],
+                preview: &["Theme: Nord", "+----------+", "| # # # #   |"],
             },
             ExampleMeta {
                 name: "tree_navigator",
                 category: "cookbook",
                 description: "Expandable tree widget",
                 binary_name: "tree_navigator",
-                preview: &[
-                    "v root/",
-                    "| v src/",
-                    "| | > main.rs",
-                    "| | > lib.rs",
-                ],
+                preview: &["v root/", "| v src/", "| | > main.rs", "| | > lib.rs"],
             },
             ExampleMeta {
                 name: "modal_demo",
@@ -493,33 +475,21 @@ impl ExampleMeta {
                 category: "cookbook",
                 description: "Live CLI-bound widgets",
                 binary_name: "command_bindings",
-                preview: &[
-                    "Load: 0.45 0.32",
-                    "CPU:  [####--]",
-                    "Mem:  [######]",
-                ],
+                preview: &["Load: 0.45 0.32", "CPU:  [####--]", "Mem:  [######]"],
             },
             ExampleMeta {
                 name: "split_resizer",
                 category: "cookbook",
                 description: "Drag-to-resize SplitPane",
                 binary_name: "split_resizer",
-                preview: &[
-                    "+-----+-----+",
-                    "|  A  |  B  |",
-                    "+--+--+-----+",
-                ],
+                preview: &["+-----+-----+", "|  A  |  B  |", "+--+--+-----+"],
             },
             ExampleMeta {
                 name: "menu_system",
                 category: "cookbook",
                 description: "MenuBar + ContextMenu",
                 binary_name: "menu_system",
-                preview: &[
-                    "[File][Edit][View]",
-                    "+-----------+",
-                    "| New        |",
-                ],
+                preview: &["[File][Edit][View]", "+-----------+", "| New        |"],
             },
             ExampleMeta {
                 name: "tabbed_panels",
@@ -543,7 +513,6 @@ impl ExampleMeta {
                     "> Carol   |  22 | SEA  ",
                 ],
             },
-
             // ── Tools ─────────────────────────────────────────────────────────
             ExampleMeta {
                 name: "log_monitor",
@@ -561,11 +530,7 @@ impl ExampleMeta {
                 category: "tools",
                 description: "Draggable windows + taskbar",
                 binary_name: "desktop",
-                preview: &[
-                    "+------++------+",
-                    "| Win1 || Win2  |",
-                    "+------++------+",
-                ],
+                preview: &["+------++------+", "| Win1 || Win2  |", "+------++------+"],
             },
             ExampleMeta {
                 name: "input_debug",
@@ -583,11 +548,7 @@ impl ExampleMeta {
                 category: "tools",
                 description: "Syntax-highlighted editor",
                 binary_name: "text_editor_demo",
-                preview: &[
-                    "1 | fn main() {",
-                    "2 | >  println!();",
-                    "3 | }",
-                ],
+                preview: &["1 | fn main() {", "2 | >  println!();", "3 | }"],
             },
             ExampleMeta {
                 name: "table_widget",
@@ -605,13 +566,8 @@ impl ExampleMeta {
                 category: "tools",
                 description: "Browse SQLite databases",
                 binary_name: "sqlite_browser",
-                preview: &[
-                    "Tables: [users]",
-                    "| id | name     |",
-                    "| 1  | Alice    |",
-                ],
+                preview: &["Tables: [users]", "| id | name     |", "| 1  | Alice    |"],
             },
-
             // ── Accessibility ────────────────────────────────────────────────
             ExampleMeta {
                 name: "accessibility",
@@ -625,6 +581,7 @@ impl ExampleMeta {
                     "  Screen reader: NVDA",
                 ],
             },
-        ].clone()
+        ]
+        .clone()
     }
 }

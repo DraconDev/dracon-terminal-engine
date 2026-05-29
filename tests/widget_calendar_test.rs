@@ -4,7 +4,9 @@ use chrono::Local;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::calendar::Calendar;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 // ============================================================================
@@ -23,10 +25,10 @@ fn test_calendar_new() {
 #[test]
 fn test_calendar_with_id() {
     use dracon_terminal_engine::framework::widget::WidgetId;
-    
+
     let id = WidgetId::new(42);
     let cal = Calendar::with_id(id);
-    
+
     assert_eq!(cal.id(), id);
 }
 
@@ -68,14 +70,12 @@ fn test_calendar_with_range_mode() {
 
 #[test]
 fn test_calendar_on_select() {
-    let _cal = Calendar::new()
-        .on_select(|_| {});
+    let _cal = Calendar::new().on_select(|_| {});
 }
 
 #[test]
 fn test_calendar_on_range_select() {
-    let _cal = Calendar::new()
-        .on_range_select(|_, _| {});
+    let _cal = Calendar::new().on_range_select(|_, _| {});
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn test_calendar_chained_builders() {
 fn test_calendar_set_month_valid() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Verify by rendering - the calendar should show June 2024
     let area = Rect::new(0, 0, 25, 10);
     let plane = cal.render(area);
@@ -106,7 +106,7 @@ fn test_calendar_set_month_valid() {
 fn test_calendar_set_month_january() {
     let mut cal = Calendar::new();
     cal.set_month(1, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
 }
@@ -115,7 +115,7 @@ fn test_calendar_set_month_january() {
 fn test_calendar_set_month_december() {
     let mut cal = Calendar::new();
     cal.set_month(12, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
 }
@@ -124,7 +124,7 @@ fn test_calendar_set_month_december() {
 fn test_calendar_set_month_clamp_low() {
     let mut cal = Calendar::new();
     cal.set_month(0, 2024);
-    
+
     // Should clamp to 1, verified by no panic
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
@@ -134,7 +134,7 @@ fn test_calendar_set_month_clamp_low() {
 fn test_calendar_set_month_clamp_high() {
     let mut cal = Calendar::new();
     cal.set_month(13, 2024);
-    
+
     // Should clamp to 12, verified by no panic
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
@@ -144,7 +144,7 @@ fn test_calendar_set_month_clamp_high() {
 fn test_calendar_set_month_year_change() {
     let mut cal = Calendar::new();
     cal.set_month(1, 2023);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
 }
@@ -260,7 +260,7 @@ fn test_calendar_different_themes() {
 #[test]
 fn test_calendar_february_leap_year() {
     let mut cal = Calendar::new();
-    
+
     // 2024 is a leap year - set to Feb and verify rendering
     cal.set_month(2, 2024);
     let area = Rect::new(0, 0, 25, 10);
@@ -271,7 +271,7 @@ fn test_calendar_february_leap_year() {
 #[test]
 fn test_calendar_february_non_leap_year() {
     let mut cal = Calendar::new();
-    
+
     // 2023 is not a leap year
     cal.set_month(2, 2023);
     let area = Rect::new(0, 0, 25, 10);
@@ -282,7 +282,7 @@ fn test_calendar_february_non_leap_year() {
 #[test]
 fn test_calendar_all_months() {
     let mut cal = Calendar::new();
-    
+
     for month in 1..=12 {
         cal.set_month(month, 2024);
         let area = Rect::new(0, 0, 25, 10);
@@ -296,14 +296,18 @@ fn test_calendar_all_months() {
 // ============================================================================
 
 fn make_key(code: KeyCode) -> KeyEvent {
-    KeyEvent { code, modifiers: KeyModifiers::empty(), kind: KeyEventKind::Press }
+    KeyEvent {
+        code,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    }
 }
 
 #[test]
 fn test_calendar_handle_key_arrow_right() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Arrow key handling - verify no crash
     let _ = cal.handle_key(make_key(KeyCode::Right));
 }
@@ -312,7 +316,7 @@ fn test_calendar_handle_key_arrow_right() {
 fn test_calendar_handle_key_arrow_left() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let _ = cal.handle_key(make_key(KeyCode::Left));
 }
 
@@ -320,7 +324,7 @@ fn test_calendar_handle_key_arrow_left() {
 fn test_calendar_handle_key_arrow_up() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let _ = cal.handle_key(make_key(KeyCode::Up));
 }
 
@@ -328,7 +332,7 @@ fn test_calendar_handle_key_arrow_up() {
 fn test_calendar_handle_key_arrow_down() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let _ = cal.handle_key(make_key(KeyCode::Down));
 }
 
@@ -336,7 +340,7 @@ fn test_calendar_handle_key_arrow_down() {
 fn test_calendar_handle_key_enter() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let _ = cal.handle_key(make_key(KeyCode::Enter));
 }
 
@@ -344,7 +348,7 @@ fn test_calendar_handle_key_enter() {
 fn test_calendar_handle_key_escape() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let _ = cal.handle_key(make_key(KeyCode::Esc));
 }
 
@@ -352,7 +356,7 @@ fn test_calendar_handle_key_escape() {
 fn test_calendar_handle_key_non_navigation() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Tab key should not be handled
     let result = cal.handle_key(make_key(KeyCode::Tab));
     assert!(!result);
@@ -362,7 +366,7 @@ fn test_calendar_handle_key_non_navigation() {
 fn test_calendar_handle_key_character() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Character keys should not be handled
     let result = cal.handle_key(make_key(KeyCode::Char('a')));
     assert!(!result);
@@ -376,10 +380,10 @@ fn test_calendar_handle_key_character() {
 fn test_calendar_handle_mouse_prev_month() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area); // Must render to register zones
-    
+
     // Click on prev month button area - result depends on hit detection
     let _ = cal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
 }
@@ -388,10 +392,10 @@ fn test_calendar_handle_mouse_prev_month() {
 fn test_calendar_handle_mouse_next_month() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     // Click on next month button area - result depends on hit detection
     let _ = cal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 24, 0);
 }
@@ -400,10 +404,10 @@ fn test_calendar_handle_mouse_next_month() {
 fn test_calendar_handle_mouse_outside() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     // Click far outside any zone
     let result = cal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 100, 100);
     assert!(!result);
@@ -413,10 +417,10 @@ fn test_calendar_handle_mouse_outside() {
 fn test_calendar_handle_mouse_middle_button() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     // Middle button handling - just verify no crash
     let _ = cal.handle_mouse(MouseEventKind::Down(MouseButton::Middle), 5, 5);
 }
@@ -425,10 +429,10 @@ fn test_calendar_handle_mouse_middle_button() {
 fn test_calendar_handle_mouse_right_button() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     let result = cal.handle_mouse(MouseEventKind::Down(MouseButton::Right), 5, 5);
     // Right button handling depends on implementation
     let _ = result; // Just verify no crash
@@ -438,10 +442,10 @@ fn test_calendar_handle_mouse_right_button() {
 fn test_calendar_handle_mouse_moved() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     // Move mouse over the calendar - just verify no crash
     let _ = cal.handle_mouse(MouseEventKind::Moved, 10, 6);
 }
@@ -453,12 +457,12 @@ fn test_calendar_handle_mouse_moved() {
 #[test]
 fn test_calendar_year_boundaries() {
     let mut cal = Calendar::new();
-    
+
     // Very old date
     cal.set_month(1, 1900);
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
-    
+
     // Far future date
     cal.set_month(12, 2100);
     let _plane = cal.render(area);
@@ -468,7 +472,7 @@ fn test_calendar_year_boundaries() {
 fn test_calendar_negative_year() {
     let mut cal = Calendar::new();
     cal.set_month(1, -100);
-    
+
     // Should handle gracefully
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
@@ -493,7 +497,7 @@ fn test_calendar_render_has_content() {
     let cal = Calendar::new();
     let area = Rect::new(0, 0, 25, 10);
     let plane = cal.render(area);
-    
+
     // There should be non-empty cells in the rendered plane
     let has_content = plane.cells.iter().any(|c| c.char != '\0' && c.char != ' ');
     assert!(has_content, "Calendar should render some content");
@@ -504,11 +508,12 @@ fn test_calendar_render_contains_day_headers() {
     let cal = Calendar::new();
     let area = Rect::new(0, 0, 25, 10);
     let plane = cal.render(area);
-    
+
     // Calendar should contain day header letters (M, T, W, T, F, S, S)
-    let has_headers = plane.cells.iter().any(|c| 
-        c.char == 'M' || c.char == 'T' || c.char == 'W' || c.char == 'F'
-    );
+    let has_headers = plane
+        .cells
+        .iter()
+        .any(|c| c.char == 'M' || c.char == 'T' || c.char == 'W' || c.char == 'F');
     assert!(has_headers, "Calendar should contain day headers");
 }
 
@@ -517,7 +522,7 @@ fn test_calendar_render_contains_navigation() {
     let cal = Calendar::new();
     let area = Rect::new(0, 0, 25, 10);
     let plane = cal.render(area);
-    
+
     // Calendar should contain < and > for navigation
     let has_nav = plane.cells.iter().any(|c| c.char == '<' || c.char == '>');
     assert!(has_nav, "Calendar should contain navigation arrows");
@@ -531,29 +536,28 @@ fn test_calendar_render_contains_navigation() {
 fn test_calendar_select_callback_invocation() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let selected_dates = Rc::new(RefCell::new(Vec::new()));
     let selected_clone = Rc::clone(&selected_dates);
-    
-    let mut cal = Calendar::new()
-        .on_select(move |date| {
-            selected_clone.borrow_mut().push(date);
-        });
-    
+
+    let mut cal = Calendar::new().on_select(move |date| {
+        selected_clone.borrow_mut().push(date);
+    });
+
     cal.set_month(6, 2024);
-    
+
     // Navigate and select a date
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
-    
+
     // Navigate to a date
     for _ in 0..15 {
         cal.handle_key(make_key(KeyCode::Right));
     }
-    
+
     // Press Enter to select
     cal.handle_key(make_key(KeyCode::Enter));
-    
+
     // Callback should have been called
     assert_eq!(selected_dates.borrow().len(), 1);
 }
@@ -562,16 +566,16 @@ fn test_calendar_select_callback_invocation() {
 fn test_calendar_range_callback_registration() {
     use std::cell::RefCell;
     use std::rc::Rc;
-    
+
     let ranges = Rc::new(RefCell::new(Vec::new()));
     let ranges_clone = Rc::clone(&ranges);
-    
+
     let mut cal = Calendar::new()
         .with_range_mode()
         .on_range_select(move |start, end| {
             ranges_clone.borrow_mut().push((start, end));
         });
-    
+
     // Verify callback registration works (no crash)
     cal.set_month(6, 2024);
     let area = Rect::new(0, 0, 25, 10);
@@ -586,7 +590,7 @@ fn test_calendar_range_callback_registration() {
 fn test_calendar_clear_selection() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Select a date
     let area = Rect::new(0, 0, 25, 10);
     cal.render(area);
@@ -594,10 +598,10 @@ fn test_calendar_clear_selection() {
         cal.handle_key(make_key(KeyCode::Right));
     }
     cal.handle_key(make_key(KeyCode::Enter));
-    
+
     // Clear selection
     cal.clear_selection();
-    
+
     assert!(cal.selected().is_none());
 }
 
@@ -609,10 +613,10 @@ fn test_calendar_clear_selection() {
 fn test_calendar_navigate_month_forward() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     // Press right to navigate
     cal.handle_key(make_key(KeyCode::Right));
-    
+
     // Should handle without error
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
@@ -622,9 +626,9 @@ fn test_calendar_navigate_month_forward() {
 fn test_calendar_navigate_week_up() {
     let mut cal = Calendar::new();
     cal.set_month(6, 2024);
-    
+
     cal.handle_key(make_key(KeyCode::Up));
-    
+
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
 }

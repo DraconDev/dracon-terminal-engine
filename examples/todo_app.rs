@@ -20,11 +20,11 @@
 //!   ?            -  toggle help
 //!   q            -  quit
 
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
 use dracon_terminal_engine::framework::scene_router::{Scene, SceneRouter};
-use dracon_terminal_engine::framework::widgets::{List, StatusBar, StatusSegment};
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widgets::{List, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use rusqlite::{Connection, Result as SqlResult};
@@ -78,19 +78,21 @@ impl TodoDb {
     fn get_all_tasks(&self) -> SqlResult<Vec<TodoTask>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, title, description, completed, priority, created_at
-             FROM tasks ORDER BY completed ASC, priority DESC, created_at DESC"
+             FROM tasks ORDER BY completed ASC, priority DESC, created_at DESC",
         )?;
 
-        let tasks = stmt.query_map([], |row| {
-            Ok(TodoTask {
-                id: row.get(0)?,
-                title: row.get(1)?,
-                description: row.get(2)?,
-                completed: row.get::<_, i32>(3)? != 0,
-                priority: row.get(4)?,
-                created_at: row.get(5)?,
-            })
-        })?.collect::<Result<Vec<_>, _>>()?;
+        let tasks = stmt
+            .query_map([], |row| {
+                Ok(TodoTask {
+                    id: row.get(0)?,
+                    title: row.get(1)?,
+                    description: row.get(2)?,
+                    completed: row.get::<_, i32>(3)? != 0,
+                    priority: row.get(4)?,
+                    created_at: row.get(5)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(tasks)
     }
@@ -114,11 +116,11 @@ impl TodoDb {
     }
 
     fn toggle_task(&self, id: i64) -> SqlResult<bool> {
-        let current: i32 = self.conn.query_row(
-            "SELECT completed FROM tasks WHERE id = ?1",
-            [&id],
-            |row| row.get(0),
-        )?;
+        let current: i32 =
+            self.conn
+                .query_row("SELECT completed FROM tasks WHERE id = ?1", [&id], |row| {
+                    row.get(0)
+                })?;
         let new_val = if current == 0 { 1 } else { 0 };
         self.conn.execute(
             "UPDATE tasks SET completed = ?1 WHERE id = ?2",
@@ -128,17 +130,15 @@ impl TodoDb {
     }
 
     fn delete_task(&self, id: i64) -> SqlResult<()> {
-        self.conn.execute(
-            "DELETE FROM tasks WHERE id = ?1",
-            [&id],
-        )?;
+        self.conn
+            .execute("DELETE FROM tasks WHERE id = ?1", [&id])?;
         Ok(())
     }
 
     fn get_task(&self, id: i64) -> SqlResult<Option<TodoTask>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, title, description, completed, priority, created_at
-             FROM tasks WHERE id = ?1"
+             FROM tasks WHERE id = ?1",
         )?;
 
         let mut rows = stmt.query([&id])?;
@@ -218,7 +218,13 @@ impl AppState {
         Ok(())
     }
 
-    fn update_task(&mut self, id: i64, title: &str, description: &str, priority: i32) -> SqlResult<()> {
+    fn update_task(
+        &mut self,
+        id: i64,
+        title: &str,
+        description: &str,
+        priority: i32,
+    ) -> SqlResult<()> {
         self.db.update_task(id, title, description, priority)?;
         if let Some(task) = self.tasks.iter_mut().find(|t| t.id == id) {
             task.title = title.to_string();
@@ -260,15 +266,18 @@ impl TaskListScreen {
     }
 
     fn update_tasks(&mut self, tasks: &[TodoTask]) {
-        let items: Vec<String> = tasks.iter().map(|t| {
-            let status = if t.completed { "[ok]" } else { "( )" };
-            let priority = match t.priority {
-                2 => "^",
-                0 => "v",
-                _ => " ",
-            };
-            format!("{} {} {}", status, priority, t.title)
-        }).collect();
+        let items: Vec<String> = tasks
+            .iter()
+            .map(|t| {
+                let status = if t.completed { "[ok]" } else { "( )" };
+                let priority = match t.priority {
+                    2 => "^",
+                    0 => "v",
+                    _ => " ",
+                };
+                format!("{} {} {}", status, priority, t.title)
+            })
+            .collect();
 
         self.task_list.set_items(items);
 
@@ -287,9 +296,15 @@ impl TaskListScreen {
 }
 
 impl Scene for TaskListScreen {
-    fn scene_id(&self) -> &str { "task_list" }
-    fn on_enter(&mut self) { self.dirty = true; }
-    fn on_resume(&mut self) { self.dirty = true; }
+    fn scene_id(&self) -> &str {
+        "task_list"
+    }
+    fn on_enter(&mut self) {
+        self.dirty = true;
+    }
+    fn on_resume(&mut self) {
+        self.dirty = true;
+    }
 
     fn render(&self, area: Rect) -> dracon_terminal_engine::compositor::Plane {
         let mut plane = dracon_terminal_engine::compositor::Plane::new(0, area.width, area.height);
@@ -313,17 +328,21 @@ impl Scene for TaskListScreen {
                 for x in 0..area.width {
                     let src_idx = (y * area.width + x) as usize;
                     let dst_idx = ((y + 2) * area.width + x) as usize;
-                    if src_idx < list_plane.cells.len() && dst_idx < plane.cells.len()
-                        && !list_plane.cells[src_idx].transparent {
-                            plane.cells[dst_idx] = list_plane.cells[src_idx];
-                        }
+                    if src_idx < list_plane.cells.len()
+                        && dst_idx < plane.cells.len()
+                        && !list_plane.cells[src_idx].transparent
+                    {
+                        plane.cells[dst_idx] = list_plane.cells[src_idx];
+                    }
                 }
             }
         }
 
         // Status bar
         let status_y = area.height.saturating_sub(1);
-        let status_plane = self.status_bar.render(Rect::new(0, status_y, area.width, 1));
+        let status_plane = self
+            .status_bar
+            .render(Rect::new(0, status_y, area.width, 1));
         for x in 0..area.width {
             let idx = (status_y * area.width + x) as usize;
             if idx < plane.cells.len() && (x as usize) < status_plane.cells.len() {
@@ -335,7 +354,9 @@ impl Scene for TaskListScreen {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
         match key.code {
             KeyCode::Up => {
                 if self.selected > 0 {
@@ -359,8 +380,13 @@ impl Scene for TaskListScreen {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
-        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+    fn handle_mouse(
+        &mut self,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
+        use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 let list_start_y = 2u16;
@@ -402,9 +428,15 @@ impl Scene for TaskListScreen {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -442,8 +474,12 @@ impl AddTaskScreen {
 }
 
 impl Scene for AddTaskScreen {
-    fn scene_id(&self) -> &str { "add_task" }
-    fn on_enter(&mut self) { self.clear(); }
+    fn scene_id(&self) -> &str {
+        "add_task"
+    }
+    fn on_enter(&mut self) {
+        self.clear();
+    }
 
     fn render(&self, area: Rect) -> dracon_terminal_engine::compositor::Plane {
         let mut plane = dracon_terminal_engine::compositor::Plane::new(0, area.width, area.height);
@@ -513,7 +549,11 @@ impl Scene for AddTaskScreen {
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = c;
                     plane.cells[idx].fg = if is_selected { t.primary } else { t.fg_muted };
-                    plane.cells[idx].style = if is_selected { dracon_terminal_engine::compositor::Styles::BOLD } else { dracon_terminal_engine::compositor::Styles::empty() };
+                    plane.cells[idx].style = if is_selected {
+                        dracon_terminal_engine::compositor::Styles::BOLD
+                    } else {
+                        dracon_terminal_engine::compositor::Styles::empty()
+                    };
                 }
             }
             x += label.len() as u16 + 3;
@@ -528,7 +568,9 @@ impl Scene for AddTaskScreen {
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         match key.code {
             KeyCode::Tab => {
@@ -561,8 +603,12 @@ impl Scene for AddTaskScreen {
             }
             KeyCode::Backspace => {
                 match self.editing_field {
-                    0 => { self.title_input.pop(); }
-                    1 => { self.desc_input.pop(); }
+                    0 => {
+                        self.title_input.pop();
+                    }
+                    1 => {
+                        self.desc_input.pop();
+                    }
                     _ => {}
                 }
                 self.dirty = true;
@@ -572,8 +618,13 @@ impl Scene for AddTaskScreen {
         }
     }
 
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, _col: u16, row: u16) -> bool {
-        use dracon_terminal_engine::input::event::{MouseEventKind, MouseButton};
+    fn handle_mouse(
+        &mut self,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        _col: u16,
+        row: u16,
+    ) -> bool {
+        use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
         match kind {
             MouseEventKind::Down(MouseButton::Left) => {
                 // Title input field area: y=2..=4
@@ -604,9 +655,15 @@ impl Scene for AddTaskScreen {
         self.dirty = true;
     }
 
-    fn needs_render(&self) -> bool { self.dirty }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn needs_render(&self) -> bool {
+        self.dirty
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -651,7 +708,10 @@ impl TodoRouter {
     fn cycle_theme(&self) {
         let themes = Theme::all();
         let mut theme = self.theme.borrow_mut();
-        let idx = themes.iter().position(|t| t.name == theme.name).unwrap_or(0);
+        let idx = themes
+            .iter()
+            .position(|t| t.name == theme.name)
+            .unwrap_or(0);
         *theme = themes[(idx + 1) % themes.len()].clone();
     }
 
@@ -660,7 +720,9 @@ impl TodoRouter {
             if state.refresh().is_ok() {
                 // Update the task list screen
                 if let Some(screen) = self.router.borrow_mut().get_scene_mut("task_list") {
-                    if let Some(list_screen) = (screen as &mut dyn std::any::Any).downcast_mut::<TaskListScreen>() {
+                    if let Some(list_screen) =
+                        (screen as &mut dyn std::any::Any).downcast_mut::<TaskListScreen>()
+                    {
                         list_screen.update_tasks(&state.tasks);
                     }
                 }
@@ -670,19 +732,31 @@ impl TodoRouter {
 }
 
 impl dracon_terminal_engine::framework::widget::Widget for TodoRouter {
-    fn id(&self) -> WidgetId { self.id }
-    fn area(&self) -> Rect { self.area.get() }
-    fn set_area(&mut self, area: Rect) { self.area.set(area); }
-    fn needs_render(&self) -> bool { false }
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn needs_render(&self) -> bool {
+        false
+    }
     fn mark_dirty(&mut self) {}
     fn clear_dirty(&mut self) {}
-    fn z_index(&self) -> u16 { 0 }
+    fn z_index(&self) -> u16 {
+        0
+    }
     fn render(&self, _area: Rect) -> dracon_terminal_engine::compositor::Plane {
         dracon_terminal_engine::compositor::Plane::new(0, 0, 0)
     }
 
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         // Handle overlays first
         if *self.show_help.borrow() {
@@ -801,11 +875,15 @@ fn main() -> std::io::Result<()> {
     let theme_for_tick = Rc::clone(&theme);
     let show_help_for_input = Rc::clone(&show_help);
 
-    let app_router = TodoRouter::new(router_for_input, state, theme, should_quit, show_help_for_input);
+    let app_router = TodoRouter::new(
+        router_for_input,
+        state,
+        theme,
+        should_quit,
+        show_help_for_input,
+    );
 
-    let mut app = App::new()?
-        .title("Todo App")
-        .fps(30);
+    let mut app = App::new()?.title("Todo App").fps(30);
     app.set_theme(Theme::from_env_or(Theme::nord()));
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
@@ -837,12 +915,27 @@ fn main() -> std::io::Result<()> {
 
                 let shortcuts = [
                     ("^/v", "Navigate tasks"),
-                    (keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"), "New task"),
+                    (
+                        keybindings.display(actions::NEW_ITEM).unwrap_or("Ctrl+N"),
+                        "New task",
+                    ),
                     ("Enter", "View task detail / confirm"),
-                    (keybindings.display(actions::BACK).unwrap_or("Esc"), "Go back / cancel"),
-                    (keybindings.display(actions::THEME).unwrap_or("t"), "Cycle theme"),
-                    (keybindings.display(actions::HELP).unwrap_or("F1"), "Toggle this help"),
-                    (keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"), "Quit"),
+                    (
+                        keybindings.display(actions::BACK).unwrap_or("Esc"),
+                        "Go back / cancel",
+                    ),
+                    (
+                        keybindings.display(actions::THEME).unwrap_or("t"),
+                        "Cycle theme",
+                    ),
+                    (
+                        keybindings.display(actions::HELP).unwrap_or("F1"),
+                        "Toggle this help",
+                    ),
+                    (
+                        keybindings.display(actions::QUIT).unwrap_or("Ctrl+Q"),
+                        "Quit",
+                    ),
                 ];
 
                 let hw = 42u16.min(w.saturating_sub(4));
@@ -860,7 +953,12 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
-                let corners = [('╭', hx, hy), ('╮', hx + hw - 1, hy), ('╰', hx, hy + hh - 1), ('╯', hx + hw - 1, hy + hh - 1)];
+                let corners = [
+                    ('╭', hx, hy),
+                    ('╮', hx + hw - 1, hy),
+                    ('╰', hx, hy + hh - 1),
+                    ('╯', hx + hw - 1, hy + hh - 1),
+                ];
                 for (ch, cx, cy) in corners.iter() {
                     let idx = (cy * w + cx) as usize;
                     if idx < help_plane.cells.len() {
@@ -905,7 +1003,8 @@ fn main() -> std::io::Result<()> {
                     if idx < help_plane.cells.len() {
                         help_plane.cells[idx].char = c;
                         help_plane.cells[idx].fg = theme.primary;
-                        help_plane.cells[idx].style = dracon_terminal_engine::compositor::Styles::BOLD;
+                        help_plane.cells[idx].style =
+                            dracon_terminal_engine::compositor::Styles::BOLD;
                         help_plane.cells[idx].transparent = false;
                     }
                 }

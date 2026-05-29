@@ -22,15 +22,15 @@
 //! When an example is launched, press the quit key in the example to return to the showcase.
 //! A "Returned from [example]" toast will appear when you come back.
 
-use std::io::Write;
+use dracon_terminal_engine::backend::tty::poll_input;
+use dracon_terminal_engine::framework::prelude::*;
+use ratatui::layout::Rect;
 use std::io::Read;
+use std::io::Write;
 use std::os::fd::AsRawFd;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use dracon_terminal_engine::backend::tty::poll_input;
-use dracon_terminal_engine::framework::prelude::*;
-use ratatui::layout::Rect;
 
 mod data;
 mod render;
@@ -71,9 +71,7 @@ fn main() -> std::io::Result<()> {
         env_theme.clone(),
     );
 
-    let mut app = App::new()?
-        .title("Dracon Showcase")
-        .fps(15);
+    let mut app = App::new()?.title("Dracon Showcase").fps(15);
     app.set_theme(Theme::from_env_or(Theme::nord()));
 
     let _showcase_id = app.add_widget(Box::new(showcase), Rect::new(0, 0, 80, 24));
@@ -95,7 +93,10 @@ fn main() -> std::io::Result<()> {
         // Handle pending binary launch
         if let Some(binary_name) = pending.lock().unwrap().take() {
             let exe_dir = match std::env::current_exe() {
-                Ok(p) => p.parent().map(|parent| parent.to_path_buf()).unwrap_or_default(),
+                Ok(p) => p
+                    .parent()
+                    .map(|parent| parent.to_path_buf())
+                    .unwrap_or_default(),
                 Err(_) => return,
             };
 
@@ -204,18 +205,56 @@ mod scene_construction_tests {
     fn make_scene_tests() -> Vec<(&'static str, Box<dyn Scene>)> {
         let t = Theme::nord();
         vec![
-            ("widget_gallery", Box::new(widget_gallery::WidgetGalleryScene::new(t.clone()))),
-            ("theme_switcher", Box::new(theme_switcher::ThemeSwitcherScene::new(t.clone()))),
-            ("form_demo", Box::new(form_demo::FormDemoScene::new(t.clone()))),
-            ("tree_navigator", Box::new(tree_navigator::TreeNavigatorScene::new(t.clone()))),
-            ("modal_demo", Box::new(modal_demo::ModalDemoScene::new(t.clone()))),
-            ("calendar_scene", Box::new(calendar_scene::CalendarScene::new(t.clone()))),
-            ("autocomplete_scene", Box::new(autocomplete_scene::AutocompleteScene::new(t.clone()))),
-            ("rich_text_scene", Box::new(rich_text_scene::RichTextScene::new(t.clone()))),
-            ("notification_center_scene", Box::new(notification_center_scene::NotificationCenterScene::new(t.clone()))),
-            ("kanban_scene", Box::new(kanban_scene::KanbanScene::new(t.clone()))),
-            ("cell_pool_scene", Box::new(cell_pool_scene::CellPoolScene::new(t.clone()))),
-            ("accessibility_scene", Box::new(accessibility_scene::AccessibilityScene::new(t.clone()))),
+            (
+                "widget_gallery",
+                Box::new(widget_gallery::WidgetGalleryScene::new(t.clone())),
+            ),
+            (
+                "theme_switcher",
+                Box::new(theme_switcher::ThemeSwitcherScene::new(t.clone())),
+            ),
+            (
+                "form_demo",
+                Box::new(form_demo::FormDemoScene::new(t.clone())),
+            ),
+            (
+                "tree_navigator",
+                Box::new(tree_navigator::TreeNavigatorScene::new(t.clone())),
+            ),
+            (
+                "modal_demo",
+                Box::new(modal_demo::ModalDemoScene::new(t.clone())),
+            ),
+            (
+                "calendar_scene",
+                Box::new(calendar_scene::CalendarScene::new(t.clone())),
+            ),
+            (
+                "autocomplete_scene",
+                Box::new(autocomplete_scene::AutocompleteScene::new(t.clone())),
+            ),
+            (
+                "rich_text_scene",
+                Box::new(rich_text_scene::RichTextScene::new(t.clone())),
+            ),
+            (
+                "notification_center_scene",
+                Box::new(notification_center_scene::NotificationCenterScene::new(
+                    t.clone(),
+                )),
+            ),
+            (
+                "kanban_scene",
+                Box::new(kanban_scene::KanbanScene::new(t.clone())),
+            ),
+            (
+                "cell_pool_scene",
+                Box::new(cell_pool_scene::CellPoolScene::new(t.clone())),
+            ),
+            (
+                "accessibility_scene",
+                Box::new(accessibility_scene::AccessibilityScene::new(t.clone())),
+            ),
         ]
     }
 

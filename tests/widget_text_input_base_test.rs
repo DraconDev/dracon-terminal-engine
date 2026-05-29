@@ -286,8 +286,15 @@ fn test_base_input_handle_mouse_past_text() {
         10,
         0,
     );
-    assert!(result, "click past text should return true and place cursor at end");
-    assert_eq!(base.cursor_pos, base.text.len(), "cursor should be at end of text");
+    assert!(
+        result,
+        "click past text should return true and place cursor at end"
+    );
+    assert_eq!(
+        base.cursor_pos,
+        base.text.len(),
+        "cursor should be at end of text"
+    );
 }
 
 #[test]

@@ -8,7 +8,7 @@
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
-use dracon_terminal_engine::framework::keybindings::{resolve_keybindings, KeybindingSet, actions};
+use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
@@ -39,15 +39,21 @@ impl SettingsScene {
             .add_field("Password")
             .add_field("API Key")
             .add_field("Server URL")
-            .with_validation(0, vec![
-                ValidationRule::from_regex_pattern(".+").expect("hardcoded regex .+ is always valid"),
-            ])
-            .with_validation(1, vec![
-                ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$").expect("hardcoded email regex is always valid"),
-            ])
-            .with_validation(2, vec![
-                ValidationRule::from_regex_pattern(".{8,}").expect("hardcoded regex .{8,} is always valid"),
-            ]);
+            .with_validation(
+                0,
+                vec![ValidationRule::from_regex_pattern(".+")
+                    .expect("hardcoded regex .+ is always valid")],
+            )
+            .with_validation(
+                1,
+                vec![ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$")
+                    .expect("hardcoded email regex is always valid")],
+            )
+            .with_validation(
+                2,
+                vec![ValidationRule::from_regex_pattern(".{8,}")
+                    .expect("hardcoded regex .{8,} is always valid")],
+            );
 
         let mut grid = KeyValueGrid::with_id(WidgetId::new(401))
             .with_theme(theme.clone())
@@ -65,7 +71,9 @@ impl SettingsScene {
         grid.set_pairs(pairs);
 
         let status_bar = StatusBar::new(WidgetId::new(402))
-            .add_segment(StatusSegment::new("Tab: fields | Enter: validate | S: save | F1: help | Esc: back"))
+            .add_segment(StatusSegment::new(
+                "Tab: fields | Enter: validate | S: save | F1: help | Esc: back",
+            ))
             .with_theme(theme.clone());
 
         Self {
@@ -119,7 +127,15 @@ impl Scene for SettingsScene {
 
         // ── Title bar ──────────────────────────────────────────────
         draw_text(&mut plane, 1, 0, "Settings Panel", t.primary, t.bg, true);
-        draw_text(&mut plane, 18, 0, "— Form + KeyValueGrid Demo", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            18,
+            0,
+            "— Form + KeyValueGrid Demo",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // ── Form (left half) ───────────────────────────────────────
         let form_w = (area.width / 2).max(28);
@@ -149,29 +165,82 @@ impl Scene for SettingsScene {
 
         // ── Validation hints (below form, right side) ──────────────
         let hint_y = area.height.saturating_sub(4);
-        draw_text(&mut plane, grid_x + 1, hint_y, "Validation Rules:", t.primary, t.bg, true);
-        draw_text(&mut plane, grid_x + 1, hint_y + 1, "  Username: required", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, grid_x + 1, hint_y + 2, "  Email: must contain @", t.fg_muted, t.bg, false);
-        draw_text(&mut plane, grid_x + 1, hint_y + 3, "  Password: min 8 chars", t.fg_muted, t.bg, false);
+        draw_text(
+            &mut plane,
+            grid_x + 1,
+            hint_y,
+            "Validation Rules:",
+            t.primary,
+            t.bg,
+            true,
+        );
+        draw_text(
+            &mut plane,
+            grid_x + 1,
+            hint_y + 1,
+            "  Username: required",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            grid_x + 1,
+            hint_y + 2,
+            "  Email: must contain @",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
+        draw_text(
+            &mut plane,
+            grid_x + 1,
+            hint_y + 3,
+            "  Password: min 8 chars",
+            t.fg_muted,
+            t.bg,
+            false,
+        );
 
         // ── Status bar ─────────────────────────────────────────────
         let sb_y = area.height.saturating_sub(1);
-        let sb_plane = self.status_bar.borrow().render(Rect::new(0, 0, area.width, 1));
+        let sb_plane = self
+            .status_bar
+            .borrow()
+            .render(Rect::new(0, 0, area.width, 1));
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
-            render_help_overlay(&mut plane, area, t, "Settings Panel — Help", &[("Tab", "Next form field"), ("Shift+Tab", "Previous form field"), ("Enter", "Validate form"), ("S", "Save settings"), ("Type", "Fill in form fields"), ("F1", "Toggle this help"), ("Esc", "Back")]);
+            render_help_overlay(
+                &mut plane,
+                area,
+                t,
+                "Settings Panel — Help",
+                &[
+                    ("Tab", "Next form field"),
+                    ("Shift+Tab", "Previous form field"),
+                    ("Enter", "Validate form"),
+                    ("S", "Save settings"),
+                    ("Type", "Fill in form fields"),
+                    ("F1", "Toggle this help"),
+                    ("Esc", "Back"),
+                ],
+            );
         }
 
         plane
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        if key.kind != KeyEventKind::Press { return false; }
+        if key.kind != KeyEventKind::Press {
+            return false;
+        }
 
         if self.show_help {
-            if self.keybindings.matches(actions::HELP, &key) || self.keybindings.matches(actions::BACK, &key) {
+            if self.keybindings.matches(actions::HELP, &key)
+                || self.keybindings.matches(actions::BACK, &key)
+            {
                 self.show_help = false;
                 self.dirty = true;
                 return true;
@@ -209,7 +278,10 @@ impl Scene for SettingsScene {
 
     fn handle_mouse(&mut self, kind: MouseEventKind, col: u16, row: u16) -> bool {
         if row >= 1 {
-            return self.form.borrow_mut().handle_mouse(kind, col, row.saturating_sub(1));
+            return self
+                .form
+                .borrow_mut()
+                .handle_mouse(kind, col, row.saturating_sub(1));
         }
         false
     }
@@ -222,9 +294,16 @@ impl Scene for SettingsScene {
         self.dirty = true;
     }
 
-    fn scene_id(&self) -> &str { "settings_panel" }
-    fn needs_render(&self) -> bool { true }
-    fn mark_dirty(&mut self) { self.dirty = true; }
-    fn clear_dirty(&mut self) { self.dirty = false; }
+    fn scene_id(&self) -> &str {
+        "settings_panel"
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
-
