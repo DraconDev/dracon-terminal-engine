@@ -46,13 +46,14 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - Replace expect() in app.rs App::from_default()
 - Audit expect() in scene_router.rs
 
-### P5 — Testing (7 remaining)
+### P5 — Testing (3 remaining)
 
-- Add tests for compositor/engine.rs
-- Add tests for input/parser.rs
-- Add tests for core/terminal.rs
-- Add tests for visuals/icons.rs
-- Add tests for system.rs
+- [x] Add tests for compositor/engine.rs — added 9 tests
+- [x] Add tests for compositor/plane.rs — added 20 tests
+- [x] Add tests for input/parser.rs — added 21 tests
+- [x] Add tests for visuals/icons.rs — added 23 tests
+- [ ] Add tests for core/terminal.rs
+- [ ] Add tests for system.rs
 
 ## Approach
 
