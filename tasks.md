@@ -126,7 +126,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Add `//!` module docs to `src/contracts.rs`
 - [x] Add `//!` module docs to `src/layout.rs`
 - [x] Add `//!` module docs to `src/widgets/editor.rs`
-- [ ] Add `//!` module docs to all 9 files in `src/widgets/`
+- [x] Add `//!` module docs to all 9 files in `src/widgets/` (button, component, context_menu, editor, editor_search, hotkey, input, panel, mod)
 
 ### Broken Doc Links
 
@@ -246,10 +246,10 @@ Generated from full codebase audit. Check off items as they are completed.
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 18 | 34 |
-| P2 — Documentation | 30 | 27 | 3 |
+| P2 — Documentation | 30 | 30 | 0 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
 | P5 — Testing | 17 | 15 | 2 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **87** | **50** |
+| **Total** | **137** | **90** | **47** |
