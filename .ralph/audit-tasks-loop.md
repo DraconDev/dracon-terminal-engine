@@ -39,11 +39,12 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - [x] widgets/*.rs (all 9 files)
 - [x] system.rs, contracts.rs, layout.rs
 
-### P3 — Architecture (9 remaining)
+### P3 — Architecture (7 remaining)
 
-- Resolve layout.rs duplication
-- Module consolidation suggestions
-- Naming consistency (tabbar.rs → tab_bar.rs)
+- [ ] Resolve layout.rs duplication (src/layout.rs vs framework/layout.rs)
+- [ ] Module consolidation suggestions
+- [x] Naming consistency: tabbar.rs → tab_bar.rs (done earlier)
+- [x] Naming consistency: list_common.rs → list_helpers.rs (done this iteration)
 
 ### P4 — Error Handling (DONE)
 

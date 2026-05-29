@@ -164,7 +164,7 @@ Generated from full codebase audit. Check off items as they are completed.
 ### Naming Consistency
 
 - [x] Rename `tabbar.rs` → `tab_bar.rs` for consistency with other underscore-separated names
-- [ ] Rename `list_common.rs` to indicate its purpose (e.g., `list_helpers.rs`)
+- [x] Rename `list_common.rs` → `list_helpers.rs` for clarity
 - [ ] Rename `text_input_base.rs` to `text_input_core.rs` or similar
 
 ### Widget Namespace Clarification
