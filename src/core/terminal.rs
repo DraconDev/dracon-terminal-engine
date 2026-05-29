@@ -1,3 +1,21 @@
+//! Terminal initialization, capability detection, and escape sequence utilities.
+//!
+//! This module provides:
+//!
+//! - [`Terminal`] — RAII wrapper for terminal setup/teardown with raw mode
+//! - [`Capabilities`] — Detects terminal features from environment variables
+//! - [`CursorShape`] — Terminal cursor shape variants
+//! - Escape sequences for cursor movement, visibility, bracketed paste, mouse modes
+//!
+//! # Example
+//!
+//! ```ignore
+//! let mut terminal = Terminal::new()?;
+//! terminal.enter_alternate_screen()?;
+//! // ... render UI ...
+//! drop(terminal); // Restores terminal on drop
+//! ```
+
 use crate::backend::tty::{get_terminal_attr, make_raw, set_terminal_attr, Termios};
 use std::env;
 use std::io::{self, Write};
