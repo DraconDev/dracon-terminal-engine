@@ -1,5 +1,11 @@
 //! Shared navigation, selection, and undo/redo logic for list-like widgets.
 
+use std::collections::HashSet;
+
+use crate::compositor::Plane;
+use crate::framework::theme::Theme;
+use ratatui::layout::Rect;
+
 /// Callback for when a selection is made (Autocomplete and Tree).
 pub type SelectCallback = Box<dyn FnMut(&str)>;
 
@@ -8,6 +14,8 @@ pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
 
 /// Callback for undo/redo actions (Table and List).
 pub type UndoRedoCallback = Box<dyn FnMut()>;
+
+const MAX_UNDO_STACK: usize = 50;
 
 /// State machine for list navigation, selection, and undo/redo.
 pub struct ListNavigation<S: Clone> {
@@ -30,6 +38,7 @@ impl<S: Clone> Default for ListNavigation<S> {
 }
 
 impl<S: Clone> ListNavigation<S> {
+    /// Creates a new ListNavigation with default settings.
     pub fn new() -> Self {
         Self {
             selected: 0,
@@ -45,6 +54,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Moves selection down by one item.
     pub fn move_down(&mut self, item_count: usize) -> bool {
         if self.selected + 1 < item_count {
             self.selected += 1;
@@ -57,6 +67,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Moves selection up by one item.
     pub fn move_up(&mut self) -> bool {
         if self.selected > 0 {
             self.selected -= 1;
@@ -69,18 +80,21 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Moves selection to the first item.
     pub fn move_home(&mut self) -> bool {
         self.selected = 0;
         self.offset = 0;
         true
     }
 
+    /// Moves selection to the last item.
     pub fn move_end(&mut self, item_count: usize) -> bool {
         self.selected = item_count.saturating_sub(1);
         self.offset = item_count.saturating_sub(self.visible_count);
         true
     }
 
+    /// Moves selection down by one page.
     pub fn page_down(&mut self, item_count: usize) -> bool {
         self.selected = (self.selected + self.visible_count).min(item_count.saturating_sub(1));
         if self.selected >= self.offset + self.visible_count {
@@ -89,12 +103,14 @@ impl<S: Clone> ListNavigation<S> {
         true
     }
 
+    /// Moves selection up by one page.
     pub fn page_up(&mut self) -> bool {
         self.selected = self.selected.saturating_sub(self.visible_count);
         self.offset = self.selected;
         true
     }
 
+    /// Clamps scroll offset to keep selection visible.
     pub fn clamp_scroll(&mut self) {
         if self.selected >= self.offset + self.visible_count {
             self.offset = self.selected.saturating_sub(self.visible_count) + 1;
@@ -104,6 +120,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Pushes a snapshot onto the undo stack.
     pub fn push_undo(&mut self, snapshot: S) {
         if self.enable_undo {
             self.redo_stack.clear();
@@ -114,6 +131,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Pops the last state from the undo stack.
     pub fn undo(&mut self, current_snapshot: S) -> Option<S> {
         if self.enable_undo && !self.undo_stack.is_empty() {
             let state = self.undo_stack.pop()?;
@@ -124,6 +142,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Pops the last state from the redo stack.
     pub fn redo(&mut self, current_snapshot: S) -> Option<S> {
         if self.enable_undo && !self.redo_stack.is_empty() {
             let state = self.redo_stack.pop()?;
@@ -134,6 +153,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Selects all items (only if multi-select is enabled).
     pub fn select_all(&mut self, item_count: usize) {
         if self.allow_multi_select {
             self.selected_indices.clear();
@@ -144,6 +164,7 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Clears all selected items.
     pub fn clear_selection(&mut self) -> bool {
         if !self.selected_indices.is_empty() {
             self.selected_indices.clear();
@@ -153,15 +174,18 @@ impl<S: Clone> ListNavigation<S> {
         }
     }
 
+    /// Scrolls down by one item without changing selection.
     pub fn scroll_down(&mut self, item_count: usize) {
         self.offset = (self.offset + 1).min(item_count.saturating_sub(self.visible_count));
     }
 
+    /// Scrolls up by one item without changing selection.
     pub fn scroll_up(&mut self) {
         self.offset = self.offset.saturating_sub(1);
     }
 }
 
+/// Renders a scroll indicator badge at the bottom-right of a plane.
 pub fn render_scroll_indicator(
     plane: &mut Plane,
     area: Rect,
