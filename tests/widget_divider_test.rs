@@ -431,13 +431,13 @@ fn test_divider_combined_options() {
 
 #[test]
 fn test_divider_direction_enum() {
-    let directions = vec![DividerDirection::Horizontal, DividerDirection::Vertical];
+    let directions = [DividerDirection::Horizontal, DividerDirection::Vertical];
     assert_eq!(directions.len(), 2);
 }
 
 #[test]
 fn test_divider_style_enum() {
-    let styles = vec![
+    let styles = [
         DividerStyle::Solid,
         DividerStyle::Dashed,
         DividerStyle::Double,
@@ -448,7 +448,7 @@ fn test_divider_style_enum() {
 
 #[test]
 fn test_label_position_enum() {
-    let positions = vec![
+    let positions = [
         LabelPosition::Left,
         LabelPosition::Center,
         LabelPosition::Right,

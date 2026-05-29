@@ -240,7 +240,7 @@ fn test_app_set_theme_multiple_times_accumulates() {
 
     app = app.set_theme(Theme::dark());
     app = app.set_theme(Theme::light());
-    app = app.set_theme(Theme::cyberpunk());
+    let _app = app.set_theme(Theme::cyberpunk());
 
     assert_eq!(
         count.get(),
