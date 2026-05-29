@@ -336,20 +336,22 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
 
 fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
     use dracon_terminal_engine::framework::event_bus::EventBus;
-    use std::rc::Rc;
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     #[derive(Clone, Debug)]
     struct TestEvent(String);
 
     c.bench_function("eventbus_subscribe_once_100_callbacks", |b| {
         let bus = EventBus::new();
-        let fired = Rc::new(std::cell::RefCell::new(Vec::new()));
+        // Use AtomicUsize for thread-safe counter
+        let fired_count = Arc::new(AtomicUsize::new(0));
 
         // Add 100 subscribe_once callbacks
         for i in 0..100 {
-            let fired_clone = Rc::clone(&fired);
+            let fired_clone = Arc::clone(&fired_count);
             bus.subscribe_once(move |_: &TestEvent| {
-                fired_clone.borrow_mut().push(i);
+                fired_clone.fetch_add(1, Ordering::SeqCst);
             });
         }
 
@@ -360,13 +362,13 @@ fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
 
     c.bench_function("eventbus_subscribe_once_10_callbacks", |b| {
         let bus = EventBus::new();
-        let fired = Rc::new(std::cell::RefCell::new(Vec::new()));
+        let fired_count = Arc::new(AtomicUsize::new(0));
 
         // Add 10 subscribe_once callbacks
         for i in 0..10 {
-            let fired_clone = Rc::clone(&fired);
+            let fired_clone = Arc::clone(&fired_count);
             bus.subscribe_once(move |_: &TestEvent| {
-                fired_clone.borrow_mut().push(i);
+                fired_clone.fetch_add(1, Ordering::SeqCst);
             });
         }
 
@@ -473,9 +475,6 @@ criterion_group!(
     bench_cellpool_roundtrip,
     bench_cellpool_hit_vs_miss
 );
-
-criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool);
-
 criterion_group!(
     event_bus,
     bench_eventbus_publish_10_subscribers,
