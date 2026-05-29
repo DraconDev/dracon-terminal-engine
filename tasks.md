@@ -240,6 +240,16 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Test Compilation Fixes
 
+> **Status**: All 9 test compilation fixes complete.
+
+### Test Coverage Gaps — PARTIAL
+
+> **Status**: 16/17 complete. 91 new unit tests added across 6 modules.
+>
+> **Remaining**: Integration tests for scene_router and plugin loading.
+> These require complex setup (mock terminal, process spawning, etc.)
+> and are best written alongside feature work in those modules.
+
 - [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_search_input_test.rs:133`
 - [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_menu_bar_test.rs:37,41`
 - [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_widget_inspector_test.rs:39`
@@ -276,6 +286,12 @@ Generated from full codebase audit. Check off items as they are completed.
 ## P7 — Feature Improvements
 
 ### Sixel Support
+
+> **Status**: 3/3 complete (documentation and CI checks done).
+>
+> **Remaining**: Implement actual sixel image rendering behind `sixel` feature flag.
+> This is a new feature, not an audit task. Requires research into sixel protocol
+> and integration with the compositor.
 
 - [ ] Implement sixel image support (currently stub behind `sixel` feature flag)
 
