@@ -69,6 +69,9 @@ struct Contact {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 struct ChatApp {
+    // Identity
+    id: WidgetId,
+
     // Widgets
     message_list: List<Message>,
     input: SearchInput,
@@ -228,6 +231,7 @@ impl ChatApp {
         ];
 
         let mut app = Self {
+            id: WidgetId::default(),
             message_list,
             input,
             status_bar,
