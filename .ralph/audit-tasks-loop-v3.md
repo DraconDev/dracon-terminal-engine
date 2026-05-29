@@ -10,6 +10,7 @@ Work through remaining tasks, prioritizing lower-risk items first.
 1. [x] P4 - Consolidate audit files (moved to archive/audits/)
 2. [x] P4 - Add public item docs (log_viewer, confirm_dialog, list_helpers, widget_container, mapping)
 3. [x] P5 - Add dracon.toml validation (AppConfig::validate())
+4. [x] P3 - Add cargo-dracon CLI tests (5 integration tests)
 
 ## Remaining Tasks
 
@@ -17,7 +18,6 @@ Work through remaining tasks, prioritizing lower-risk items first.
 - [ ] (none left)
 
 ### Medium Risk:
-4. [ ] P3 - Add cargo-dracon CLI tests
 5. [ ] P3 - Add event bus benchmarks
 6. [ ] P5 - Review lsp-server unwraps
 

@@ -85,9 +85,9 @@ This backlog is based on the current working tree, existing audit notes, and liv
   - Use a minimal in-repo test plugin or mock `WidgetFactory`.
   - Verify registration, widget creation, unload behavior, and failure paths.
 
-- [ ] Add `cargo-dracon` CLI integration tests.
-  - `cargo run -p cargo-dracon -- --help` exits successfully.
-  - `cargo run -p cargo-dracon -- validate dracon.toml` succeeds for the repo config.
+- [x] Add `cargo-dracon` CLI integration tests.
+  - Created tests for help, version, new, init, and error handling.
+  - Added tempfile dev dependency.
 
 - [ ] Add event bus benchmarks.
   - Publish 1000 events to 10 subscribers.
