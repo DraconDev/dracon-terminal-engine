@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::menu_bar::{MenuBar, MenuEntry, MenuItem};
+use dracon_terminal_engine::framework::widgets::menu_bar::{MenuBar, MenuEntry};
 
 // ============================================================================
 // Construction Tests

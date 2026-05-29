@@ -1,6 +1,6 @@
 //! Tests for the Hud widget.
 
-use dracon_terminal_engine::compositor::{Color, Plane};
+use dracon_terminal_engine::compositor::Color;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::hud::Hud;

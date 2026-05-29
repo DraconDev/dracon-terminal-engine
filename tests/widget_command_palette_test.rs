@@ -1,7 +1,7 @@
 //! Tests for the CommandPalette widget.
 
 use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::command_palette::{CommandItem, CommandPalette};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;

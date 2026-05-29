@@ -99,7 +99,7 @@ fn test_tags_input_no_duplicates_by_default() {
 
 #[test]
 fn test_tags_input_with_suggestions() {
-    let input = TagsInput::new(vec![]).with_suggestions(vec!["apple", "banana", "cherry"]);
+    let _input = TagsInput::new(vec![]).with_suggestions(vec!["apple", "banana", "cherry"]);
 }
 
 #[test]

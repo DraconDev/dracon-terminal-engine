@@ -1,6 +1,5 @@
 //! Tests for the Calendar widget.
 
-use chrono::Local;
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widgets::calendar::Calendar;

@@ -193,7 +193,7 @@ fn test_select_render() {
 
 #[test]
 fn test_select_render_expanded() {
-    let mut select = make_select(vec![
+    let select = make_select(vec![
         "Opt 1".to_string(),
         "Opt 2".to_string(),
         "Opt 3".to_string(),
