@@ -21,7 +21,7 @@
 //!
 //! ## Filter Mode
 //!
-//! When a filter query is set via [`filter_query`](SearchState::filter_query),
+//! When a filter query is set on the `filter_query` field,
 //! `filtered_indices` maps display-row → real-line-index. Cursor navigation
 //! uses display rows while content access uses real indices. Callers should
 //! use `get_effective_line()`, `effective_len()`, and `get_real_line_idx()`
