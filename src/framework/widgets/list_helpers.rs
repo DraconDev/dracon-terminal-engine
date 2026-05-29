@@ -1,11 +1,5 @@
 //! Shared navigation, selection, and undo/redo logic for list-like widgets.
 
-use std::collections::HashSet;
-
-use crate::compositor::Plane;
-use crate::framework::theme::Theme;
-use ratatui::layout::Rect;
-
 /// Callback for when a selection is made (Autocomplete and Tree).
 pub type SelectCallback = Box<dyn FnMut(&str)>;
 
@@ -15,8 +9,7 @@ pub type SelectionChangeCallback = Box<dyn FnMut(&HashSet<usize>)>;
 /// Callback for undo/redo actions (Table and List).
 pub type UndoRedoCallback = Box<dyn FnMut()>;
 
-const MAX_UNDO_STACK: usize = 50;
-
+/// State machine for list navigation, selection, and undo/redo.
 pub struct ListNavigation<S: Clone> {
     pub selected: usize,
     pub offset: usize,
