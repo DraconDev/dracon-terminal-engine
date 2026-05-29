@@ -4,6 +4,9 @@
 //! This module provides the [`SearchState`] struct which encapsulates all
 //! search-related state and operations for [`TextEditor`](crate::widgets::TextEditor).
 //!
+//! [`SearchState`]: crate::widgets::editor_search::SearchState
+//! [`SearchMode`]: crate::widgets::editor_search::SearchMode
+//!
 //! ## Design
 //!
 //! `SearchState` is embedded in `TextEditor` as a public field so external code
@@ -18,7 +21,7 @@
 //!
 //! ## Filter Mode
 //!
-//! When a filter query is set via [`set_filter`](SearchState::set_filter),
+//! When a filter query is set via [`filter_query`](SearchState::filter_query),
 //! `filtered_indices` maps display-row → real-line-index. Cursor navigation
 //! uses display rows while content access uses real indices. Callers should
 //! use `get_effective_line()`, `effective_len()`, and `get_real_line_idx()`
