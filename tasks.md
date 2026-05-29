@@ -124,9 +124,11 @@ This backlog is based on the current working tree, existing audit notes, and liv
 
 ## P5 - Runtime Robustness
 
-- [ ] Review `extensions/lsp-server/src/main.rs` unwrap-heavy JSON send paths.
-  - Replace production `.unwrap()` calls around serialization, locking, and channel writes with contextual errors or logged failures.
-  - Keep test-only unwraps where they express assertions.
+- [x] Review `extensions/lsp-server/src/main.rs` unwrap-heavy JSON send paths.
+  - Replaced production `.unwrap()` calls with proper error handling.
+  - JSON serialization now logs and returns on failure.
+  - Runtime building now logs and returns on failure.
+  - Kept test-only unwraps where they express assertions.
 
 - [ ] Revisit `App::default()`.
   - `src/framework/app.rs` still uses `Self::new().expect("failed to initialize terminal")` because `Default` cannot return `Result`.

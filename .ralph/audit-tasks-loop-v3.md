@@ -12,16 +12,14 @@ Work through remaining tasks, prioritizing lower-risk items first.
 3. [x] P5 - Add dracon.toml validation (AppConfig::validate())
 4. [x] P3 - Add cargo-dracon CLI tests (5 integration tests)
 5. [x] P3 - Add event bus benchmarks (4 new benchmarks)
+6. [x] P5 - Review lsp-server unwraps (replaced with proper error handling)
 
 ## Remaining Tasks
 
-### Low Risk:
-- [ ] (none left)
-
-### Medium Risk:
-6. [ ] P5 - Review lsp-server unwraps
-
 ### Higher Risk (defer):
-7. [ ] P2 - API Cleanup
-8. [ ] P6 - Maintainability Refactors
-9. [ ] P3 - SceneRouter/Plugin tests
+1. [ ] P2 - API Cleanup
+2. [ ] P6 - Maintainability Refactors
+3. [ ] P3 - SceneRouter/Plugin tests
+
+## Summary
+6 tasks completed in this round. The remaining tasks are all high-risk refactoring tasks.
