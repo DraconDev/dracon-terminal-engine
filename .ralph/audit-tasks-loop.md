@@ -13,14 +13,14 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 3. Consolidate `UndoRedoCallback` — defined in table.rs and list.rs
 4. Remove duplicate `Target` enum in `src/framework/app.rs` (lines 102 and 117)
 
-**Magic Number Constants:**
-1. Define named constants for Kitty protocol PUA codepoints in kitty_key.rs
-2. Define named constants for byte size thresholds in utils.rs (GI_B, ME_B, KI_B)
-3. Define named constant for binary detection buffer size in utils.rs (8192)
-4. Define named constant for read buffer size in reader.rs (1024)
-5. Define named constant for parser overflow threshold in parser.rs (2048)
-6. Replace `1000.0` FPS constant in ctx.rs with Duration constant
-7. Define named constants for pipe buffer sizes in app.rs (1024)
+**Magic Number Constants — DONE:**
+- [x] KITTY_PUA_START/END in kitty_key.rs
+- [x] SIZE_GB, SIZE_MB, SIZE_KB in utils.rs
+- [x] BINARY_CHECK_SIZE in utils.rs (8192)
+- [x] READ_BUFFER_SIZE in reader.rs (1024)
+- [x] MAX_BUFFER_SIZE in parser.rs (2048)
+- [x] MS_PER_SEC in ctx.rs (1000.0)
+- [x] INPUT_BUF_SIZE in app.rs (1024)
 
 **Long Functions (>100 lines) — pick 3-5 to refactor:**
 - editor.rs render() (764 lines)
