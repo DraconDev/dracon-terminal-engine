@@ -15,7 +15,7 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Arc::clone(&show_help);
     let show_help_render = Arc::clone(&show_help);
 
-    let mut app = App::new()?
+    let app = App::new()?
         .title("RichText Demo")
         .fps(30)
         .set_theme(Theme::from_env_or(Theme::nord()));
