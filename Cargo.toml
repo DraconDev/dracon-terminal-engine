@@ -15,10 +15,12 @@ categories = ["command-line-interface", "gui"]
 # Exclude files that are not part of the library
 exclude = [
     ".archive/**",
+    ".github/**",
     ".dracon/**",
     ".ralph/**",
     ".scripts/**",
     "extensions/**",
+    "rust_out",
     "rust_out/**",
     ".sisyphus/**",
     ".until-done/**",
