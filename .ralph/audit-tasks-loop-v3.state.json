@@ -1,7 +1,7 @@
 {
   "name": "audit-tasks-loop-v3",
   "taskFile": ".ralph/audit-tasks-loop-v3.md",
-  "iteration": 2,
+  "iteration": 8,
   "maxIterations": 50,
   "itemsPerIteration": 0,
   "reflectEvery": 10,
