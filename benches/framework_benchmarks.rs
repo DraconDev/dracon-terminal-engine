@@ -305,9 +305,8 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
         let bus = EventBus::new();
 
         // Add 10 subscribers
-        for i in 0..10 {
-            let _ = i; // suppress unused warning
-            bus.subscribe(|_: &TestEvent| {})
+        for _ in 0..10 {
+            let _ = bus.subscribe(|_: &TestEvent| {});
         }
 
         b.iter(|| {
@@ -321,9 +320,8 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
         let bus = EventBus::new();
 
         // Add 10 subscribers
-        for i in 0..10 {
-            let _ = i;
-            bus.subscribe(|_: &TestEvent| {})
+        for _ in 0..10 {
+            let _ = bus.subscribe(|_: &TestEvent| {});
         }
 
         b.iter(|| {
