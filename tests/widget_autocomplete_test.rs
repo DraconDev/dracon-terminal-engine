@@ -395,7 +395,7 @@ fn test_autocomplete_render_fills_bg() {
         .cells
         .iter()
         .any(|c| c.bg != Theme::default().bg || c.char != '\0');
-    assert!(has_bg || plane.cells.len() > 0);
+    assert!(has_bg || !plane.cells.is_empty());
 }
 
 #[test]

@@ -153,7 +153,7 @@ fn test_split_pane_render_tall() {
 fn test_split_pane_get_ratio() {
     let sp = SplitPane::new(Orientation::Horizontal);
     let ratio = sp.get_ratio();
-    assert!(ratio >= 0.0 && ratio <= 1.0);
+    assert!((0.0..=1.0).contains(&ratio));
 }
 
 #[test]

@@ -34,6 +34,9 @@ use std::sync::Arc;
 #[cfg(feature = "async")]
 use std::cell::RefCell as StdRefCell;
 
+#[cfg(feature = "async")]
+type PendingFetch = StdRefCell<Option<tokio::task::JoinHandle<Result<Vec<Post>, String>>>>;
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA MODEL
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -63,37 +66,34 @@ const SPINNER_FRAMES: [&str; 8] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "�
 // ═══════════════════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "async")]
-fn fetch_posts_async() -> impl std::future::Future<Output = Result<Vec<Post>, String>> + Send {
-    async {
-        let output = tokio::process::Command::new("curl")
-            .args([
-                "-s",
-                "-m",
-                "5",
-                "https://jsonplaceholder.typicode.com/posts?_limit=10",
-            ])
-            .output()
-            .await
-            .map_err(|e| format!("Failed to run curl: {}", e))?;
+async fn fetch_posts_async() -> Result<Vec<Post>, String> {
+    let output = tokio::process::Command::new("curl")
+        .args([
+            "-s",
+            "-m",
+            "5",
+            "https://jsonplaceholder.typicode.com/posts?_limit=10",
+        ])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run curl: {}", e))?;
 
-        if !output.status.success() {
-            return Err(format!("curl exited with code: {:?}", output.status.code()));
-        }
-
-        let json_str =
-            String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
-        let json: serde_json::Value =
-            serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
-
-        let posts = json
-            .as_array()
-            .ok_or("Expected JSON array")?
-            .iter()
-            .filter_map(Post::from_json)
-            .collect();
-
-        Ok(posts)
+    if !output.status.success() {
+        return Err(format!("curl exited with code: {:?}", output.status.code()));
     }
+
+    let json_str = String::from_utf8(output.stdout).map_err(|e| format!("Invalid UTF-8: {}", e))?;
+    let json: serde_json::Value =
+        serde_json::from_str(&json_str).map_err(|e| format!("JSON parse error: {}", e))?;
+
+    let posts = json
+        .as_array()
+        .ok_or("Expected JSON array")?
+        .iter()
+        .filter_map(Post::from_json)
+        .collect();
+
+    Ok(posts)
 }
 
 #[cfg(not(feature = "async"))]
@@ -145,7 +145,7 @@ struct NetworkApp {
     // Async state
     spinner_frame: usize,
     #[cfg(feature = "async")]
-    pending_fetch: StdRefCell<Option<tokio::task::JoinHandle<Result<Vec<Post>, String>>>>,
+    pending_fetch: PendingFetch,
 }
 
 impl NetworkApp {
