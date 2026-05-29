@@ -8,6 +8,10 @@ use super::event::Event;
 use super::parser::Parser;
 use crate::backend::tty;
 
+/// Buffer size for reading stdin input.
+/// This size accommodates typical input bursts and escape sequences.
+const READ_BUFFER_SIZE: usize = 1024;
+
 /// Reads terminal input events from stdin and dispatches them to a callback.
 pub struct InputReader;
 
@@ -15,10 +19,9 @@ impl InputReader {
     /// Spawns a new input reader thread that reads stdin and invokes the callback
     /// for each parsed input event (key presses, resize events, etc.).
     ///
-    /// # Panics
-    ///
-    /// Panics if signal registration fails. This is unlikely in practice but
-    /// can occur in sandboxed environments with restricted signal access.
+    /// If signal registration fails (rare, e.g., in sandboxed environments),
+    /// the reader will still function for keyboard input but won't receive
+    /// window resize events.
     pub fn spawn<F>(mut callback: F) -> thread::JoinHandle<()>
     where
         F: FnMut(Event) + Send + 'static,
@@ -26,7 +29,7 @@ impl InputReader {
         thread::spawn(move || {
             let mut parser = Parser::new();
             let mut stdin = std::io::stdin();
-            let mut buffer = [0; 1024];
+            let mut buffer = [0; READ_BUFFER_SIZE];
 
             // Register for SIGWINCH (window resize) signals.
             // This should rarely fail in practice; if it does, we simply won't
