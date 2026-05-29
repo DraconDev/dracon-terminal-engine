@@ -43,7 +43,7 @@ pub mod tab_bar;
 pub mod table;
 pub mod tags_input;
 pub mod text_editor_adapter;
-pub mod text_input_base;
+pub mod text_input_core;
 pub mod toast;
 pub mod toggle;
 pub mod tooltip;

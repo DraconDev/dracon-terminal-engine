@@ -8,13 +8,13 @@ use ratatui::layout::Rect;
 /// A search input widget with a query buffer and submit callback.
 pub struct SearchInput {
     id: WidgetId,
-    base: super::text_input_base::BaseInput,
+    base: super::text_input_core::BaseInput,
 }
 
 impl SearchInput {
     /// Creates a new search input with the given ID.
     pub fn new(id: WidgetId) -> Self {
-        let base = super::text_input_base::BaseInput::new(id, "Search...");
+        let base = super::text_input_core::BaseInput::new(id, "Search...");
         Self { id, base }
     }
 

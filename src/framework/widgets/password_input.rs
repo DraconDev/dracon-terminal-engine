@@ -6,13 +6,13 @@ use ratatui::layout::Rect;
 /// A password input widget that masks characters as they're typed.
 pub struct PasswordInput {
     pub id: WidgetId,
-    pub base: super::text_input_base::BaseInput,
+    pub base: super::text_input_core::BaseInput,
 }
 
 impl PasswordInput {
     /// Creates a new password input with the given ID.
     pub fn new(id: WidgetId) -> Self {
-        let mut base = super::text_input_base::BaseInput::new(id, "Password...");
+        let mut base = super::text_input_core::BaseInput::new(id, "Password...");
         base.mask_char = Some('*');
         Self { id, base }
     }

@@ -16,7 +16,7 @@ use ratatui::layout::Rect;
 /// of matching suggestions.
 pub struct Autocomplete {
     id: WidgetId,
-    base: super::text_input_base::BaseInput,
+    base: super::text_input_core::BaseInput,
     all_suggestions: Vec<String>,
     filtered: Vec<String>,
     selected: Option<usize>,
@@ -36,7 +36,7 @@ impl Autocomplete {
         let filtered = suggestions.clone();
         Self {
             id,
-            base: super::text_input_base::BaseInput::new(id, "Type to search..."),
+            base: super::text_input_core::BaseInput::new(id, "Type to search..."),
             all_suggestions: suggestions,
             filtered,
             selected: None,

@@ -165,7 +165,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 - [x] Rename `tabbar.rs` → `tab_bar.rs` for consistency with other underscore-separated names
 - [x] Rename `list_common.rs` → `list_helpers.rs` for clarity
-- [ ] Rename `text_input_base.rs` to `text_input_core.rs` or similar
+- [x] Rename `text_input_base.rs` to `text_input_core.rs` for clarity
 
 ### Widget Namespace Clarification
 
@@ -247,9 +247,9 @@ Generated from full codebase audit. Check off items as they are completed.
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 18 | 34 |
 | P2 — Documentation | 30 | 30 | 0 |
-| P3 — Architecture | 10 | 2 | 8 |
+| P3 — Architecture | 10 | 3 | 7 |
 | P4 — Error Handling | 4 | 3 | 1 |
 | P5 — Testing | 17 | 16 | 1 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **91** | **46** |
+| **Total** | **137** | **92** | **45** |
