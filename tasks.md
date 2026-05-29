@@ -73,12 +73,12 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Remove unused `Inline::Link` variant in `src/framework/widgets/rich_text.rs:24` — kept but `#[allow(dead_code)]`
 - [x] Remove or use `on_focus_change_internal()` in `src/framework/focus.rs:195` — kept but `#[allow(dead_code)]`
 
-### Duplicate Type Consolidation — TODO
+### Duplicate Type Consolidation — DONE
 
-- [ ] Consolidate `SelectCallback` — defined identically in `autocomplete.rs:15` and `tree.rs:41`
-- [ ] Consolidate `SelectionChangeCallback` — defined in `table.rs:33` and `list.rs:18`
-- [ ] Consolidate `UndoRedoCallback` — defined in `table.rs:34` and `list.rs:19`
-- [ ] Remove duplicate `Target` enum in `src/framework/app.rs` (lines 102 and 117)
+- [x] Consolidate `SelectCallback` — moved to `list_common.rs`, imported in `autocomplete.rs` and `tree.rs`
+- [x] Consolidate `SelectionChangeCallback` — moved to `list_common.rs`, imported in `table.rs` and `list.rs`
+- [x] Consolidate `UndoRedoCallback` — moved to `list_common.rs`, imported in `table.rs` and `list.rs`
+- [x] Remove duplicate `Target` enum — not applicable; lines 102/117 are standard Deref associated types
 
 ### Magic Number Constants — TODO
 
@@ -244,12 +244,11 @@ Generated from full codebase audit. Check off items as they are completed.
 | Category | Count | Done | Remaining |
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
-| P1 — Code Quality | 52 | 5 | 47 |
+| P1 — Code Quality | 52 | 14 | 38 |
 | P2 — Documentation | 30 | 8 | 22 |
 | P3 — Architecture | 10 | 1 | 9 |
-| P4 — Error Handling | 4 | 1 | 3 |
+| P4 — Error Handling | 4 | 3 | 1 |
 | P5 — Testing | 17 | 10 | 7 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **49** | **88** |
-| **Total** | **137** | **41** | **96** |
+| **Total** | **137** | **60** | **77** |
