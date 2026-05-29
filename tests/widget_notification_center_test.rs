@@ -14,7 +14,7 @@ use std::time::{Duration, Instant};
 
 #[test]
 fn test_notification_kind_variants() {
-    let kinds = vec![
+    let kinds = [
         NotificationKind::Info,
         NotificationKind::Success,
         NotificationKind::Warning,
@@ -140,8 +140,8 @@ fn test_notification_unicode() {
         duration: Duration::from_secs(5),
     };
 
-    assert!(notification.title.len() > 0);
-    assert!(notification.message.len() > 0);
+    assert!(!notification.title.is_empty());
+    assert!(!notification.message.is_empty());
 }
 
 // ============================================================================

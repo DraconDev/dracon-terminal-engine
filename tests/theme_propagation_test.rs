@@ -238,9 +238,9 @@ fn test_app_set_theme_multiple_times_accumulates() {
     let (tw, count) = TrackingWidget::new(1);
     app.add_widget(Box::new(tw), Rect::new(0, 0, 10, 10));
 
-    app.set_theme(Theme::dark());
-    app.set_theme(Theme::light());
-    app.set_theme(Theme::cyberpunk());
+    app = app.set_theme(Theme::dark());
+    app = app.set_theme(Theme::light());
+    app = app.set_theme(Theme::cyberpunk());
 
     assert_eq!(
         count.get(),
@@ -255,7 +255,7 @@ fn test_app_widget_persists_after_theme_change() {
     app.add_widget(Box::new(TrackingWidget::new(1).0), Rect::new(0, 0, 10, 10));
 
     assert_eq!(app.widget_count(), 1, "one widget should be added");
-    app.set_theme(Theme::cyberpunk());
+    app = app.set_theme(Theme::cyberpunk());
     assert_eq!(
         app.widget_count(),
         1,
@@ -270,7 +270,7 @@ fn test_app_remove_widget_after_theme_change() {
     app.add_widget(Box::new(TrackingWidget::new(2).0), Rect::new(10, 0, 10, 10));
 
     assert_eq!(app.widget_count(), 2, "two widgets should be added");
-    app.set_theme(Theme::nord());
+    app = app.set_theme(Theme::nord());
     app.remove_widget(id1);
 
     assert_eq!(

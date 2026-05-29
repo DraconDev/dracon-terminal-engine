@@ -418,7 +418,7 @@ mod tests {
         let caps = Capabilities::detect();
         let term = caps.term();
         // term should return a valid string
-        assert!(term.is_empty() || term.len() > 0);
+        assert_eq!(term, caps.term());
     }
 
     #[test]

@@ -44,7 +44,6 @@ fn test_spinner_with_single_frame() {
     assert_eq!(spinner.current_frame(), '*');
 }
 
-#[test]
 // ============================================================================
 // Tick Tests
 // ============================================================================
@@ -128,7 +127,6 @@ fn test_spinner_clear_dirty() {
     assert!(!spinner.needs_render());
 }
 
-#[test]
 #[test]
 fn test_spinner_default_dirty() {
     let spinner = Spinner::new(WidgetId::new(1));

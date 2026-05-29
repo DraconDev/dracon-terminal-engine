@@ -552,7 +552,7 @@ mod tests {
         plane.put_char(3, 1, 'B');
         // get_char exists in the file but is not a method on Plane
         // We can check the cell directly
-        assert_eq!(plane.cells[1 * 10 + 3].char, 'B');
+        assert_eq!(plane.cells[10 + 3].char, 'B');
     }
 
     #[test]

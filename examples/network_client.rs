@@ -25,6 +25,7 @@ use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use std::cell::RefCell;
+#[cfg(not(feature = "async"))]
 use std::process::Command;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -176,37 +177,7 @@ impl NetworkApp {
 
         #[cfg(feature = "async")]
         {
-            // Spawn async fetch using tokio::process::Command
-            let handle = tokio::spawn(async move {
-                let output = tokio::process::Command::new("curl")
-                    .args([
-                        "-s",
-                        "-m",
-                        "5",
-                        "https://jsonplaceholder.typicode.com/posts?_limit=10",
-                    ])
-                    .output()
-                    .await
-                    .map_err(|e| format!("Failed to run curl: {}", e))?;
-
-                if !output.status.success() {
-                    return Err(format!("curl exited with code: {:?}", output.status.code()));
-                }
-
-                let json_str = String::from_utf8(output.stdout)
-                    .map_err(|e| format!("Invalid UTF-8: {}", e))?;
-                let json: serde_json::Value = serde_json::from_str(&json_str)
-                    .map_err(|e| format!("JSON parse error: {}", e))?;
-
-                let posts = json
-                    .as_array()
-                    .ok_or("Expected JSON array")?
-                    .iter()
-                    .filter_map(Post::from_json)
-                    .collect();
-
-                Ok(posts)
-            });
+            let handle = tokio::spawn(fetch_posts_async());
 
             *self.pending_fetch.borrow_mut() = Some(handle);
         }
