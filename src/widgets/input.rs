@@ -1,3 +1,13 @@
+//! Reusable text input widget for ratatui.
+//!
+//! This module provides a `TextInput` widget that can be embedded in
+//! terminal applications using ratatui. It supports:
+//!
+//! - **Text editing**: Insert, delete, backspace operations
+//! - **Cursor navigation**: Left/right arrow keys, Home/End
+//! - **Placeholder text**: Shown when input is empty
+//! - **Custom styling**: Configurable text, cursor, and placeholder styles
+
 use unicode_width::UnicodeWidthChar;
 
 use crate::input::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
