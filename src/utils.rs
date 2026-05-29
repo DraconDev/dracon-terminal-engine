@@ -384,8 +384,8 @@ pub fn spawn_detached(cmd: &str, args: Vec<String>) {
 
 /// Binary size thresholds (powers of 1024).
 const SIZE_GB: u64 = 1073741824; // 1024^3
-const SIZE_MB: u64 = 1048576;    // 1024^2
-const SIZE_KB: u64 = 1024;        // 1024^1
+const SIZE_MB: u64 = 1048576; // 1024^2
+const SIZE_KB: u64 = 1024; // 1024^1
 
 /// Formats a byte size into a human-readable string (B, KB, MB, GB, TB).
 pub fn format_size(size: u64) -> String {

@@ -392,7 +392,10 @@ mod tests {
         assert_eq!(CursorShape::Underline, CursorShape::Underline);
         assert_eq!(CursorShape::Bar, CursorShape::Bar);
         assert_eq!(CursorShape::BlinkingBlock, CursorShape::BlinkingBlock);
-        assert_eq!(CursorShape::BlinkingUnderline, CursorShape::BlinkingUnderline);
+        assert_eq!(
+            CursorShape::BlinkingUnderline,
+            CursorShape::BlinkingUnderline
+        );
         assert_eq!(CursorShape::BlinkingBar, CursorShape::BlinkingBar);
     }
 

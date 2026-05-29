@@ -697,7 +697,10 @@ fn main() -> std::io::Result<()> {
     let quit_check = Arc::clone(&should_quit);
     let demo = AccessibilityDemo::new(theme.clone(), should_quit);
 
-    let mut app = App::new()?.title("Accessibility Demo").fps(30).set_theme(theme);
+    let mut app = App::new()?
+        .title("Accessibility Demo")
+        .fps(30)
+        .set_theme(theme);
     app.add_widget(Box::new(demo), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

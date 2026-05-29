@@ -340,8 +340,6 @@ impl FileManager {
 
     #[cfg(feature = "async")]
     fn start_async_load(&mut self, path: PathBuf) {
-        
-
         self.is_loading = true;
         self.loading_path = Some(path.clone());
         self.spinner_frame = 0;

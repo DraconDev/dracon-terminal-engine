@@ -617,7 +617,10 @@ fn main() -> io::Result<()> {
     debug_panel.keybindings = keybindings;
     // panel.set_area is called by add_widget which sets area from Rect
 
-    let mut app = App::new()?.title("Debug Overlay Demo").fps(60).set_theme(theme);
+    let mut app = App::new()?
+        .title("Debug Overlay Demo")
+        .fps(60)
+        .set_theme(theme);
     app.add_widget(Box::new(debug_panel), Rect::new(0, 0, w, h));
     app.run(move |ctx| {
         if quit_check.load(Ordering::SeqCst) {

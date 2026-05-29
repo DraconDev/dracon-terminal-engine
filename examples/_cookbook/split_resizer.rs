@@ -707,7 +707,7 @@ fn main() -> Result<()> {
     let app_for_tick = Rc::new(RefCell::new(app));
     let app_for_render = Rc::clone(&app_for_tick);
 
-let mut app_ctx = App::new()?
+    let mut app_ctx = App::new()?
         .title("Split Resizer Demo")
         .fps(30)
         .set_theme(Theme::from_env_or(Theme::cyberpunk()));

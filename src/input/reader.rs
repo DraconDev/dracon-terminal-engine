@@ -57,19 +57,17 @@ impl InputReader {
                     };
 
                     match polled {
-                        Ok(true) => {
-                            match stdin.read(&mut buffer) {
-                                Ok(0) => break,
-                                Ok(n) => {
-                                    for item in buffer.iter().take(n) {
-                                        if let Some(event) = parser.advance(*item) {
-                                            callback(event);
-                                        }
+                        Ok(true) => match stdin.read(&mut buffer) {
+                            Ok(0) => break,
+                            Ok(n) => {
+                                for item in buffer.iter().take(n) {
+                                    if let Some(event) = parser.advance(*item) {
+                                        callback(event);
                                     }
                                 }
-                                Err(_) => break,
                             }
-                        }
+                            Err(_) => break,
+                        },
                         Ok(false) => {
                             if let Some(evt) = parser.check_timeout() {
                                 callback(evt);
