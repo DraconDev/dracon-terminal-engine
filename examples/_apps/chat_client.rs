@@ -405,10 +405,10 @@ impl ChatApp {
 
 impl Widget for ChatApp {
     fn id(&self) -> WidgetId {
-        WidgetId::new(100)
+        self.id
     }
     fn set_id(&mut self, id: WidgetId) {
-        let _ = id;
+        self.id = id;
     }
     fn area(&self) -> Rect {
         self.area.get()
