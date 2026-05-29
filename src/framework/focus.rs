@@ -192,8 +192,7 @@ impl FocusManager {
         self.on_trap_change.push(Arc::new(Box::new(f)));
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn on_focus_change_internal<F>(&mut self, f: F)
+    fn on_focus_change_internal(&mut self, f: F)
     where
         F: Fn(Option<WidgetId>, Option<WidgetId>) + Send + Sync + 'static,
     {

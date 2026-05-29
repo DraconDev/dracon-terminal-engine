@@ -59,7 +59,6 @@ pub struct CellPool {
 
 /// A contiguous block of cells for a plane of specific dimensions.
 #[derive(Debug)]
-#[allow(dead_code)]
 struct CellBlock {
     width: u16,
     height: u16,

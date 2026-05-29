@@ -61,14 +61,8 @@ use std::fs;
 /// Internationalization state and translation lookup.
 #[derive(Debug, Clone)]
 pub struct I18n {
-    /// Current locale code (e.g., "en", "fr", "de")
     locale: String,
-    /// Translation map: key -> value
     translations: HashMap<String, String>,
-    /// Fallback locale
-    #[allow(dead_code)]
-    fallback_locale: String,
-    /// Default fallback translations (English)
     fallback_map: HashMap<String, String>,
 }
 

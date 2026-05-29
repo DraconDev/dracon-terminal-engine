@@ -20,7 +20,6 @@ pub struct Breadcrumbs {
     id: WidgetId,
     segments: Vec<String>,
     theme: Theme,
-    #[allow(dead_code)]
     height: u16,
     clickable: bool,
     on_navigate: Option<NavigateCallback>,

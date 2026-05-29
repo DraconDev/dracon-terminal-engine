@@ -21,7 +21,6 @@ enum Block {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 enum Inline {
     Text(String),
     Bold(Vec<Inline>),
