@@ -496,62 +496,68 @@ mod tests {
     }
 
     #[test]
-    fn test_render_icon_file_category() {
-        let icon = render_icon("test.rs", FileCategory::Script, IconMode::Nerd);
-        assert_eq!(icon, "󰞷 ");
+    fn test_get_for_path_rust_file() {
+        let icon = Icon::get_for_path("test.rs", FileCategory::Script, IconMode::Nerd);
+        assert_eq!(icon, "󱘗 ");
     }
 
     #[test]
-    fn test_render_icon_directory() {
-        let icon = render_icon("src", FileCategory::Directory, IconMode::Nerd);
-        assert_eq!(icon, "󰉋 ");
-    }
-
-    #[test]
-    fn test_render_icon_image() {
-        let icon = render_icon("photo.jpg", FileCategory::Image, IconMode::Nerd);
+    fn test_get_for_path_image() {
+        let icon = Icon::get_for_path("photo.jpg", FileCategory::Image, IconMode::Nerd);
         assert_eq!(icon, "󰸉 ");
     }
 
     #[test]
-    fn test_render_icon_archive() {
-        let icon = render_icon("archive.tar.gz", FileCategory::Archive, IconMode::ASCII);
+    fn test_get_for_path_archive() {
+        let icon = Icon::get_for_path("archive.tar.gz", FileCategory::Archive, IconMode::ASCII);
         assert_eq!(icon, "# ");
     }
 
     #[test]
-    fn test_render_icon_rust_file() {
-        let icon = render_icon("lib.rs", FileCategory::Script, IconMode::ASCII);
+    fn test_get_for_path_rust_ascii() {
+        let icon = Icon::get_for_path("lib.rs", FileCategory::Script, IconMode::ASCII);
         assert_eq!(icon, "[R] ");
     }
 
     #[test]
-    fn test_render_icon_json() {
-        let icon = render_icon("config.json", FileCategory::Config, IconMode::ASCII);
+    fn test_get_for_path_json() {
+        let icon = Icon::get_for_path("config.json", FileCategory::Other, IconMode::ASCII);
         assert_eq!(icon, "[J] ");
     }
 
     #[test]
-    fn test_render_icon_lock() {
-        let icon = render_icon("secrets.env", FileCategory::Config, IconMode::ASCII);
+    fn test_get_for_path_lock() {
+        let icon = Icon::get_for_path("secrets.env", FileCategory::Text, IconMode::ASCII);
         assert_eq!(icon, "[L] ");
     }
 
     #[test]
-    fn test_render_icon_markdown() {
-        let icon = render_icon("README.md", FileCategory::Document, IconMode::ASCII);
+    fn test_get_for_path_markdown() {
+        let icon = Icon::get_for_path("README.md", FileCategory::Document, IconMode::ASCII);
         assert_eq!(icon, "[M] ");
     }
 
     #[test]
-    fn test_render_icon_dockerfile() {
-        let icon = render_icon("Dockerfile", FileCategory::Config, IconMode::Nerd);
+    fn test_get_for_path_dockerfile() {
+        let icon = Icon::get_for_path("Dockerfile", FileCategory::Text, IconMode::Nerd);
         assert_eq!(icon, "󰡨 ");
     }
 
     #[test]
-    fn test_render_icon_makefile() {
-        let icon = render_icon("Makefile", FileCategory::Script, IconMode::Nerd);
+    fn test_get_for_path_makefile() {
+        let icon = Icon::get_for_path("Makefile", FileCategory::Script, IconMode::Nerd);
         assert_eq!(icon, "󱁤 ");
+    }
+
+    #[test]
+    fn test_get_for_path_go() {
+        let icon = Icon::get_for_path("main.go", FileCategory::Script, IconMode::Nerd);
+        assert_eq!(icon, "󰟓 ");
+    }
+
+    #[test]
+    fn test_get_for_path_python() {
+        let icon = Icon::get_for_path("script.py", FileCategory::Script, IconMode::ASCII);
+        assert_eq!(icon, "[Py] ");
     }
 }
