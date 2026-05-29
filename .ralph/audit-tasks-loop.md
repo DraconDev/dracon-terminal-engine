@@ -5,9 +5,9 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 
 ## Remaining Tasks (by priority)
 
-### P1 — Code Quality (47 remaining)
+### P1 — Code Quality (43 remaining)
 
-**Duplicate Type Consolidation:**
+**Duplicate Type Consolidation — TODO:**
 1. Consolidate `SelectCallback` — defined in autocomplete.rs and tree.rs
 2. Consolidate `SelectionChangeCallback` — defined in table.rs and list.rs  
 3. Consolidate `UndoRedoCallback` — defined in table.rs and list.rs
@@ -52,13 +52,13 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - Replace expect() in app.rs App::from_default()
 - Audit expect() in scene_router.rs
 
-### P5 — Testing (2 remaining)
+### P5 — Testing (DONE!)
 
 - [x] Add tests for compositor/engine.rs — added 9 tests
 - [x] Add tests for compositor/plane.rs — added 20 tests
 - [x] Add tests for input/parser.rs — added 21 tests
 - [x] Add tests for visuals/icons.rs — added 23 tests
-- [ ] Add tests for core/terminal.rs
+- [x] Add tests for core/terminal.rs — added 9 tests
 - [x] Add tests for system.rs — added 8 tests
 
 ## Approach
