@@ -159,7 +159,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Group framework modules into sub-modules (input handling: hitzone, marquee, dragdrop; rendering: animation, dirty_regions, scroll)
 - [ ] Split `src/framework/command.rs` into separate concerns (AppConfig, CommandRunner, LayoutConfig)
 - [ ] Split `src/framework/helpers.rs` catch-all into focused utility modules
-- [ ] Group 30 callback type aliases into a `callbacks` module or reduce proliferation
+- [ ] Group 19 callback type aliases into a `callbacks` module or reduce proliferation
 
 ### Naming Consistency
 
