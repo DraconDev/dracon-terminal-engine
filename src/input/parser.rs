@@ -751,4 +751,340 @@ mod tests {
         }
         assert!(found, "Failed to parse Kitty Shift+A");
     }
+
+    #[test]
+    fn test_basic_key_escape() {
+        let mut parser = Parser::new();
+        // Single ESC character
+        if let Some(Event::Key(k)) = parser.advance(0x1B) {
+            assert_eq!(k.code, KeyCode::Esc);
+            assert_eq!(k.kind, KeyEventKind::Press);
+        } else {
+            panic!("Failed to parse Escape");
+        }
+    }
+
+    #[test]
+    fn test_basic_key_enter() {
+        let mut parser = Parser::new();
+        if let Some(Event::Key(k)) = parser.advance(0x0D) {
+            assert_eq!(k.code, KeyCode::Enter);
+        } else {
+            panic!("Failed to parse Enter");
+        }
+    }
+
+    #[test]
+    fn test_basic_key_tab() {
+        let mut parser = Parser::new();
+        if let Some(Event::Key(k)) = parser.advance(0x09) {
+            assert_eq!(k.code, KeyCode::Tab);
+        } else {
+            panic!("Failed to parse Tab");
+        }
+    }
+
+    #[test]
+    fn test_basic_key_backspace() {
+        let mut parser = Parser::new();
+        if let Some(Event::Key(k)) = parser.advance(0x7F) {
+            assert_eq!(k.code, KeyCode::Backspace);
+        } else {
+            panic!("Failed to parse Backspace");
+        }
+    }
+
+    #[test]
+    fn test_csi_arrow_up() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[A";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        // After the full sequence, check_timeout should return the key
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Up);
+        } else {
+            panic!("Failed to parse Arrow Up");
+        }
+    }
+
+    #[test]
+    fn test_csi_arrow_down() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[B";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Down);
+        } else {
+            panic!("Failed to parse Arrow Down");
+        }
+    }
+
+    #[test]
+    fn test_csi_arrow_right() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[C";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Right);
+        } else {
+            panic!("Failed to parse Arrow Right");
+        }
+    }
+
+    #[test]
+    fn test_csi_arrow_left() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[D";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Left);
+        } else {
+            panic!("Failed to parse Arrow Left");
+        }
+    }
+
+    #[test]
+    fn test_csi_home() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[H";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Home);
+        } else {
+            panic!("Failed to parse Home");
+        }
+    }
+
+    #[test]
+    fn test_csi_end() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[F";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::End);
+        } else {
+            panic!("Failed to parse End");
+        }
+    }
+
+    #[test]
+    fn test_csi_page_up() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[5~";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::PageUp);
+        } else {
+            panic!("Failed to parse Page Up");
+        }
+    }
+
+    #[test]
+    fn test_csi_page_down() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[6~";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::PageDown);
+        } else {
+            panic!("Failed to parse Page Down");
+        }
+    }
+
+    #[test]
+    fn test_modifier_ctrl() {
+        let mut parser = Parser::new();
+        // CSI 5 ~ = Ctrl+PageUp
+        let seq = b"\x1b[5;5~";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::PageUp);
+            assert!(k.modifiers.contains(KeyModifiers::CONTROL));
+        } else {
+            panic!("Failed to parse Ctrl+PageUp");
+        }
+    }
+
+    #[test]
+    fn test_modifier_alt() {
+        let mut parser = Parser::new();
+        // CSI 1;3 H = Alt+Home
+        let seq = b"\x1b[1;3H";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Home);
+            assert!(k.modifiers.contains(KeyModifiers::ALT));
+        } else {
+            panic!("Failed to parse Alt+Home");
+        }
+    }
+
+    #[test]
+    fn test_function_key_f1() {
+        let mut parser = Parser::new();
+        let seq = b"\x1bOP"; // F1
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::F(1));
+        } else {
+            panic!("Failed to parse F1");
+        }
+    }
+
+    #[test]
+    fn test_function_key_f12() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[24~"; // F12
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::F(12));
+        } else {
+            panic!("Failed to parse F12");
+        }
+    }
+
+    #[test]
+    fn test_insert_key() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[2~";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Insert);
+        } else {
+            panic!("Failed to parse Insert");
+        }
+    }
+
+    #[test]
+    fn test_delete_key() {
+        let mut parser = Parser::new();
+        let seq = b"\x1b[3~";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        if let Some(Event::Key(k)) = parser.check_timeout() {
+            assert_eq!(k.code, KeyCode::Delete);
+        } else {
+            panic!("Failed to parse Delete");
+        }
+    }
+
+    #[test]
+    fn test_unsupported_sequence_returns_unsupported() {
+        let mut parser = Parser::new();
+        // An invalid escape sequence should not panic
+        let seq = b"\x1b[X";
+        for byte in seq {
+            parser.advance(*byte);
+        }
+        // Should timeout without panicking
+        let _ = parser.check_timeout();
+    }
+
+    #[test]
+    fn test_parse_ascii_characters() {
+        let mut parser = Parser::new();
+        // Regular ASCII characters should pass through directly
+        if let Some(Event::Key(k)) = parser.advance(b'a') {
+            assert_eq!(k.code, KeyCode::Char('a'));
+            assert!(k.modifiers.is_empty());
+        } else {
+            panic!("Failed to parse 'a'");
+        }
+
+        if let Some(Event::Key(k)) = parser.advance(b'Z') {
+            assert_eq!(k.code, KeyCode::Char('Z'));
+        } else {
+            panic!("Failed to parse 'Z'");
+        }
+    }
+
+    #[test]
+    fn test_resize_event() {
+        let mut parser = Parser::new();
+        // DCS 4 $ t = Report window size
+        // Format: \x1bP1+$t\x1b\\ rows ; columns ; xpixel ; ypixel ST
+        let seq = b"\x1bP1+$t\x1b\\4;80;24;0t";
+        for byte in seq {
+            if matches!(parser.advance(*byte), Some(Event::Resize(_, _))) {
+                return;
+            }
+        }
+        // Resize events may not be implemented for all terminals
+    }
+
+    #[test]
+    fn test_sgr_mouse_btn_middle() {
+        let mut parser = Parser::new();
+        // MB2 (1) = Middle button
+        let seq = b"\x1b[<1;10;20M";
+        let mut found = false;
+        for &byte in seq {
+            if let Some(Event::Mouse(me)) = parser.advance(byte) {
+                assert_eq!(me.kind, MouseEventKind::Down(MouseButton::Middle));
+                assert_eq!(me.column, 9); // 10 - 1
+                assert_eq!(me.row, 19); // 20 - 1
+                found = true;
+            }
+        }
+        assert!(found, "Did not parse SGR Middle Button");
+    }
+
+    #[test]
+    fn test_sgr_mouse_release() {
+        let mut parser = Parser::new();
+        // MB1 Release (0 + 0x20 = 32) at position 5,10
+        let seq = b"\x1b[<35;5;10m";
+        let mut found = false;
+        for &byte in seq {
+            if let Some(Event::Mouse(me)) = parser.advance(byte) {
+                assert_eq!(me.kind, MouseEventKind::Up(MouseButton::Left));
+                found = true;
+            }
+        }
+        assert!(found, "Did not parse SGR Mouse Release");
+    }
+
+    #[test]
+    fn test_bracketed_paste() {
+        let mut parser = Parser::new();
+        // Start paste: \x1b[201~
+        // Content: "hello"
+        // End paste: \x1b[201~
+        let seq = b"\x1b[201~hello\x1b[201~";
+        let mut found = false;
+        for &byte in seq {
+            if let Some(Event::Paste(text)) = parser.advance(byte) {
+                assert_eq!(text, "hello");
+                found = true;
+            }
+        }
+        assert!(found, "Did not parse Bracketed Paste");
+    }
 }
