@@ -6,6 +6,15 @@ use crate::compositor::Plane;
 use crate::framework::theme::Theme;
 use ratatui::layout::Rect;
 
+/// Callback for when a selection is made.
+pub type SelectCallback = Box<dyn FnMut(&str)>;
+
+/// Callback for when selection changes (for Table and List widgets).
+pub type SelectionChangeCallback = Box<dyn FnMut(Option<usize>)>;
+
+/// Callback for undo/redo actions (for Table and List widgets).
+pub type UndoRedoCallback = Box<dyn FnMut(bool) -> bool>;
+
 const MAX_UNDO_STACK: usize = 50;
 
 pub struct ListNavigation<S: Clone> {

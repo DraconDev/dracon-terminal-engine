@@ -382,14 +382,19 @@ pub fn spawn_detached(cmd: &str, args: Vec<String>) {
         .spawn();
 }
 
+/// Binary size thresholds (powers of 1024).
+const SIZE_GB: u64 = 1073741824; // 1024^3
+const SIZE_MB: u64 = 1048576;    // 1024^2
+const SIZE_KB: u64 = 1024;        // 1024^1
+
 /// Formats a byte size into a human-readable string (B, KB, MB, GB, TB).
 pub fn format_size(size: u64) -> String {
-    if size >= 1073741824 {
-        format!("{:.1} GB", size as f64 / 1073741824.0)
-    } else if size >= 1048576 {
-        format!("{:.1} MB", size as f64 / 1048576.0)
-    } else if size >= 1024 {
-        format!("{:.1} KB", size as f64 / 1024.0)
+    if size >= SIZE_GB {
+        format!("{:.1} GB", size as f64 / SIZE_GB as f64)
+    } else if size >= SIZE_MB {
+        format!("{:.1} MB", size as f64 / SIZE_MB as f64)
+    } else if size >= SIZE_KB {
+        format!("{:.1} KB", size as f64 / SIZE_KB as f64)
     } else {
         format!("{} B", size)
     }
@@ -775,10 +780,14 @@ pub fn draw_stat_bar(
     ));
     Line::from(spans)
 }
+
+/// Binary detection sample size (8KB is sufficient to detect binary content).
+const BINARY_CHECK_SIZE: usize = 8192;
+
 /// Returns true if the first 8KB of bytes contain any null bytes (binary content).
 pub fn is_binary_content(bytes: &[u8]) -> bool {
     // Basic binary check: check for null bytes in the first 8KB
-    bytes.iter().take(8192).any(|&b| b == 0)
+    bytes.iter().take(BINARY_CHECK_SIZE).any(|&b| b == 0)
 }
 
 /// Recursively copies a directory or file to a destination path.
