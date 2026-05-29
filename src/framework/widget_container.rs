@@ -15,22 +15,27 @@ pub struct WidgetContainer {
 }
 
 impl WidgetContainer {
+    /// Creates a new WidgetContainer wrapping the given widget.
     pub fn new(widget: Box<dyn Widget>) -> Self {
         Self { inner: widget }
     }
 
+    /// Returns the widget ID.
     pub fn id(&self) -> WidgetId {
         self.inner.id()
     }
 
+    /// Renders the widget to a plane.
     pub fn render(&self, area: Rect) -> crate::compositor::Plane {
         self.inner.render(area)
     }
 
+    /// Handles a keyboard event, returning true if handled.
     pub fn handle_key(&mut self, key: crate::input::event::KeyEvent) -> bool {
         self.inner.handle_key(key)
     }
 
+    /// Handles a mouse event, returning true if handled.
     pub fn handle_mouse(
         &mut self,
         kind: crate::input::event::MouseEventKind,
@@ -40,10 +45,12 @@ impl WidgetContainer {
         self.inner.handle_mouse(kind, col, row)
     }
 
+    /// Returns a reference to the inner widget.
     pub fn widget(&self) -> &dyn Widget {
         &*self.inner
     }
 
+    /// Returns a mutable reference to the inner widget.
     pub fn widget_mut(&mut self) -> &mut dyn Widget {
         &mut *self.inner
     }
