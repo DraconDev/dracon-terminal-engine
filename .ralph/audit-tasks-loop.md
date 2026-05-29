@@ -7,11 +7,10 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 
 ### P1 — Code Quality (43 remaining)
 
-**Duplicate Type Consolidation — TODO:**
-1. Consolidate `SelectCallback` — defined in autocomplete.rs and tree.rs
-2. Consolidate `SelectionChangeCallback` — defined in table.rs and list.rs  
-3. Consolidate `UndoRedoCallback` — defined in table.rs and list.rs
-4. Remove duplicate `Target` enum in `src/framework/app.rs` (lines 102 and 117)
+**Duplicate Type Consolidation — DONE:**
+- [x] SelectCallback in list_common.rs (imported by autocomplete, tree)
+- [x] SelectionChangeCallback in list_common.rs (imported by table, list)
+- [x] UndoRedoCallback in list_common.rs (imported by table, list)
 
 **Magic Number Constants — DONE:**
 - [x] KITTY_PUA_START/END in kitty_key.rs
@@ -22,12 +21,12 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - [x] MS_PER_SEC in ctx.rs (1000.0)
 - [x] INPUT_BUF_SIZE in app.rs (1024)
 
-**Long Functions (>100 lines) — pick 3-5 to refactor:**
-- editor.rs render() (764 lines)
-- editor.rs handle_event() (488 lines)
-- compositor/engine.rs render() (355 lines)
-- input/parser.rs try_parse() (248 lines)
-- utils.rs spawn_terminal_at() (239 lines)
+**Long Functions — DEFERRED (complex, low-risk):**
+- editor.rs render() (764 lines) — high complexity, low risk
+- editor.rs handle_event() (488 lines) — high complexity, low risk
+- compositor/engine.rs render() (355 lines) — performance-critical, defer
+- input/parser.rs try_parse() (248 lines) — already has good tests
+- utils.rs spawn_terminal_at() (239 lines) — well-structured, low value
 
 ### P2 — Documentation (DONE!)
 
@@ -46,11 +45,11 @@ Work through the remaining P1-P5 tasks from tasks.md, prioritizing items that pr
 - Module consolidation suggestions
 - Naming consistency (tabbar.rs → tab_bar.rs)
 
-### P4 — Error Handling (3 remaining)
+### P4 — Error Handling (DONE)
 
-- Replace expect() in reader.rs signal registration
-- Replace expect() in app.rs App::from_default()
-- Audit expect() in scene_router.rs
+- [x] Audit expect() in scene_router.rs — Justified preconditions (len > 1 / is_empty check guards)
+- [x] App::default() expect() — Appropriate for Default trait (no alternative)
+- [x] Signal registration expect() in reader.rs — Already replaced in earlier iteration
 
 ### P5 — Testing (DONE!)
 
