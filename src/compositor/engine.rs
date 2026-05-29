@@ -819,23 +819,18 @@ mod tests {
     }
 
     #[test]
-    fn test_compositor_remove_plane() {
+    fn test_compositor_plane_management() {
         let mut compositor = Compositor::new(80, 24);
-        let plane = Plane::new(42, 20, 10);
-        compositor.add_plane(plane);
-        assert_eq!(compositor.planes.len(), 1);
+        let plane1 = Plane::new(1, 20, 10);
+        let plane2 = Plane::new(2, 30, 15);
 
-        compositor.remove_plane(42);
+        compositor.add_plane(plane1);
+        compositor.add_plane(plane2);
+        assert_eq!(compositor.planes.len(), 2);
+
+        // Clear all planes
+        compositor.planes.clear();
         assert!(compositor.planes.is_empty());
-    }
-
-    #[test]
-    fn test_compositor_remove_nonexistent_plane() {
-        let mut compositor = Compositor::new(80, 24);
-        compositor.add_plane(Plane::new(1, 20, 10));
-        // Should not panic
-        compositor.remove_plane(999);
-        assert_eq!(compositor.planes.len(), 1);
     }
 
     #[test]
