@@ -125,7 +125,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Add `//!` module docs to `src/system.rs`
 - [x] Add `//!` module docs to `src/contracts.rs`
 - [x] Add `//!` module docs to `src/layout.rs`
-- [ ] Add `//!` module docs to `src/widgets/editor.rs`
+- [x] Add `//!` module docs to `src/widgets/editor.rs`
 - [ ] Add `//!` module docs to all 9 files in `src/widgets/`
 
 ### Broken Doc Links
@@ -203,7 +203,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Add unit tests for `src/compositor/engine.rs` (355-line render, zero tests)
 - [x] Add unit tests for `src/input/parser.rs` (248-line try_parse, only 6 tests) — added 21 new tests
 - [ ] Add unit tests for `src/core/terminal.rs` (365 lines, zero tests)
-- [ ] Add unit tests for `src/visuals/icons.rs` (205-line get, zero tests)
+- [x] Add unit tests for `src/visuals/icons.rs` (205-line get, zero tests) — added 23 new tests
 - [ ] Add unit tests for `src/system.rs` (289 lines, zero tests)
 - [ ] Add integration tests for scene_router transitions
 - [ ] Add integration tests for plugin loading/unloading
@@ -245,10 +245,10 @@ Generated from full codebase audit. Check off items as they are completed.
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 18 | 34 |
-| P2 — Documentation | 30 | 26 | 4 |
+| P2 — Documentation | 30 | 27 | 3 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
-| P5 — Testing | 17 | 11 | 6 |
+| P5 — Testing | 17 | 13 | 4 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **80** | **57** |
+| **Total** | **137** | **82** | **55** |
