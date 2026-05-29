@@ -203,7 +203,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [x] Add unit tests for `src/compositor/engine.rs` (355-line render, zero tests) — added 9 new tests
 - [x] Add unit tests for `src/compositor/plane.rs` — added 20 new tests
 - [x] Add unit tests for `src/input/parser.rs` (248-line try_parse, only 6 tests) — added 21 new tests
-- [ ] Add unit tests for `src/core/terminal.rs` (365 lines, zero tests)
+- [x] Add unit tests for `src/core/terminal.rs` (365 lines, zero tests) — added 9 new tests
 - [x] Add unit tests for `src/visuals/icons.rs` (205-line get, zero tests) — added 23 new tests
 - [x] Add unit tests for `src/system.rs` (289 lines, zero tests) — added 8 new tests
 - [ ] Add integration tests for scene_router transitions
@@ -249,7 +249,7 @@ Generated from full codebase audit. Check off items as they are completed.
 | P2 — Documentation | 30 | 30 | 0 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
-| P5 — Testing | 17 | 15 | 2 |
+| P5 — Testing | 17 | 16 | 1 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
 | **Total** | **137** | **90** | **47** |
