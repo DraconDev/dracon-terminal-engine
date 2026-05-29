@@ -108,17 +108,17 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ## P2 — Documentation
 
-### Missing Module Docs — TODO
+### Missing Module Docs — DONE
 
 - [x] Add `//!` module docs to `src/backend/mod.rs`
 - [x] Add `//!` module docs to `src/backend/tty.rs`
-- [ ] Add `//!` module docs to `src/compositor/plane.rs`
-- [ ] Add `//!` module docs to `src/compositor/filter.rs`
-- [ ] Add `//!` module docs to `src/compositor/engine.rs`
-- [ ] Add `//!` module docs to `src/input/mapping.rs`
-- [ ] Add `//!` module docs to `src/input/event.rs`
-- [ ] Add `//!` module docs to `src/input/parser.rs`
-- [ ] Add `//!` module docs to `src/input/reader.rs`
+- [x] Add `//!` module docs to `src/compositor/plane.rs`
+- [x] Add `//!` module docs to `src/compositor/filter.rs`
+- [x] Add `//!` module docs to `src/compositor/engine.rs`
+- [x] Add `//!` module docs to `src/input/mapping.rs`
+- [x] Add `//!` module docs to `src/input/event.rs`
+- [x] Add `//!` module docs to `src/input/parser.rs`
+- [x] Add `//!` module docs to `src/input/reader.rs`
 - [ ] Add `//!` module docs to `src/core/terminal.rs`
 - [ ] Add `//!` module docs to `src/visuals/icons.rs`
 - [ ] Add `//!` module docs to `src/visuals/osc.rs`
@@ -245,10 +245,10 @@ Generated from full codebase audit. Check off items as they are completed.
 |----------|-------|------|-----------|
 | P0 — Breaking/Build | 17 | 17 | 0 |
 | P1 — Code Quality | 52 | 18 | 34 |
-| P2 — Documentation | 30 | 10 | 20 |
+| P2 — Documentation | 30 | 18 | 12 |
 | P3 — Architecture | 10 | 1 | 9 |
 | P4 — Error Handling | 4 | 3 | 1 |
 | P5 — Testing | 17 | 10 | 7 |
 | P6 — CI/CD | 4 | 4 | 0 |
 | P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **64** | **73** |
+| **Total** | **137** | **72** | **65** |
