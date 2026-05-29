@@ -18,7 +18,7 @@
 
 ## What It Is
 
-`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 41 built-in widgets, 21 themes, dirty rendering, and focus management.
+`dracon-terminal-engine` is a framework for building terminal applications. Not a TUI library — a complete runtime that owns the terminal, input, rendering, and event loop. Mouse-friendly, z-indexed planes, 40+ built-in widgets, 20+ themes, dirty rendering, and focus management.
 
 **Command-driven architecture** — every widget binds a CLI command, AI can enumerate all actions via `ctx.available_commands()` and trigger them via `ctx.run_command()`.
 
@@ -30,7 +30,7 @@ use dracon_terminal_engine::framework::prelude::*;
 App::new().unwrap()
     .title("My App")
     .fps(30)
-    .theme(Theme::cyberpunk())
+    .set_theme(Theme::from_env_or(Theme::cyberpunk()))
     .on_tick(|_ctx, _tick| { /* called every 250ms */ })
     .run(|ctx| {
         let items = vec!["Files", "Search", "Git", "Settings"];
@@ -40,7 +40,7 @@ App::new().unwrap()
     });
 ```
 
-## Framework (v29)
+## Framework
 
 The `framework` module provides the complete application runtime:
 
@@ -66,7 +66,7 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`FocusManager`] | Tab-order focus ring with keyboard navigation |
 | [`ScrollContainer`] | Scrollable container with offset management + scrollbar |
 
-### 41 Framework Widgets
+### Framework Widgets
 | Widget | What |
 |---|---|
 | [`Breadcrumbs`] | Hierarchical path display with clickable segments |
@@ -119,17 +119,12 @@ let (stdout, stderr, code) = ctx.run_command("dracon-sync status --json");
 | [`DirtyRegionTracker`] | Efficient partial screen updates |
 | [`AnimationManager`] | Tweening animations with easing curves |
 | [`Layout`] | Constraint-based layout engine (percentage, fixed, min, max, ratio) |
-| [`Theme`] | 21 built-in themes |
+| [`Theme`] | 20+ built-in themes |
 
-### App Architecture (New in v29)
+### App Architecture
 
-**v29.11.0** — See [CHANGELOG](CHANGELOG.md) for full history.
+See [CHANGELOG](CHANGELOG.md) for full release history.
 
 ## License
 
-This project is dual-licensed:
-
-- **AGPL-3.0-only** — See [LICENSE](LICENSE) for the full text. This is the default license for open source use.
-- **Commercial License** — For organizations that prefer not to comply with AGPLv3's source disclosure requirements. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md) for details.
-
-By contributing to this project, you agree to the terms in [CLA.md](CLA.md).
+This project is licensed under **AGPL-3.0-only**. See [LICENSE](LICENSE) for the full text.

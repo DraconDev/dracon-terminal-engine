@@ -26,6 +26,9 @@ jobs:
       - name: Build release examples
         run: cargo build --release --examples
 
+      - name: Verify crate package
+        run: cargo publish --dry-run
+
       - name: Package example binaries
         run: |
           mkdir -p release-binaries
@@ -39,8 +42,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            LICENSE-MIT
-            LICENSE-APACHE
+            LICENSE
             README.md
             CHANGELOG.md
             release-binaries/*
@@ -48,8 +50,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # TODO: Enable when ready for crates.io publishing
-      # - name: Publish to crates.io (dry run)
-      #   run: cargo publish --dry-run
-      #
       # - name: Publish to crates.io
       #   run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

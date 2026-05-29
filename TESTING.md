@@ -22,7 +22,7 @@ cargo build --example showcase
    - **Expected:** No white horizontal lines appear
    - **Before fix:** White horizontal lines visible under input
 
-3. **Test all 29 scenes:**
+3. **Test all showcase scenes:**
    - Use arrow keys to navigate the scene list
    - Press Enter to launch each scene
    - Press Esc or B to return
@@ -43,7 +43,7 @@ cargo build --example showcase
 | Check | Pass Criteria |
 |-------|---------------|
 | No white lines after typing | Input fields render cleanly |
-| All 29 scenes launch | No crashes or silent failures |
+| All showcase scenes launch | No crashes or silent failures |
 | Theme cycling works | Colors change consistently |
 | Help overlay works | Renders centered with shortcuts |
 | Mouse interaction | Clicks register correctly |

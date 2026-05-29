@@ -68,6 +68,10 @@ impl WidgetId {
 /// Automatically implemented for any type that implements [`Widget`].
 pub trait Renderable {
     /// Renders the widget into a `Plane` at the given area.
+    ///
+    /// Rendering is intentionally immutable: widgets should update their state
+    /// in input handlers, tick hooks, layout setters, or theme callbacks, then
+    /// allow the compositor to call `render()` freely without side effects.
     fn render(&self, area: Rect) -> Plane;
 
     /// Returns true if this widget needs to be rendered.
