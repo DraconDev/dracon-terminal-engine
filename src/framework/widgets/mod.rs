@@ -50,6 +50,21 @@ pub mod tooltip;
 pub mod tree;
 pub mod widget_inspector;
 
+#[deprecated(since = "0.2.0", note = "Use `tab_bar` instead")]
+pub mod tabbar {
+    pub use super::tab_bar::*;
+}
+
+#[deprecated(since = "0.2.0", note = "Use `list_helpers` instead")]
+pub mod list_common {
+    pub use super::list_helpers::*;
+}
+
+#[deprecated(since = "0.2.0", note = "Use `text_input_core` instead")]
+pub mod text_input_base {
+    pub use super::text_input_core::*;
+}
+
 pub use autocomplete::Autocomplete;
 pub use breadcrumbs::Breadcrumbs;
 pub use button::Button;
