@@ -420,3 +420,138 @@ impl Icon {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_icon_get_nerd() {
+        let icon = Icon::File;
+        let s = icon.get(IconMode::Nerd);
+        assert_eq!(s, "󰈔 ");
+    }
+
+    #[test]
+    fn test_icon_get_ascii() {
+        let icon = Icon::File;
+        let s = icon.get(IconMode::ASCII);
+        assert_eq!(s, "- ");
+    }
+
+    #[test]
+    fn test_icon_get_unicode() {
+        let icon = Icon::File;
+        let s = icon.get(IconMode::Unicode);
+        assert_eq!(s, "- ");
+    }
+
+    #[test]
+    fn test_icon_get_box_drawing() {
+        let icon = Icon::File;
+        let s = icon.get(IconMode::BoxDrawing);
+        assert_eq!(s, "-");
+    }
+
+    #[test]
+    fn test_icon_get_all_variants() {
+        // Test that all icon variants have a string for each mode
+        let modes = [IconMode::Nerd, IconMode::ASCII, IconMode::Unicode, IconMode::BoxDrawing];
+        let variants = [
+            Icon::File,
+            Icon::Folder,
+            Icon::Git,
+            Icon::Config,
+            Icon::Markdown,
+        ];
+        for icon in variants {
+            for mode in modes {
+                let s = icon.get(mode);
+                assert!(!s.is_empty(), "Icon {:?} should have content for mode {:?}", icon, mode);
+            }
+        }
+    }
+
+    #[test]
+    fn test_icon_width_nerd() {
+        let icon = Icon::File;
+        assert_eq!(icon.width(IconMode::Nerd), 2);
+    }
+
+    #[test]
+    fn test_icon_width_ascii() {
+        let icon = Icon::File;
+        assert_eq!(icon.width(IconMode::ASCII), 1);
+    }
+
+    #[test]
+    fn test_icon_width_unicode() {
+        let icon = Icon::File;
+        assert_eq!(icon.width(IconMode::Unicode), 2);
+    }
+
+    #[test]
+    fn test_icon_mode_default() {
+        assert_eq!(IconMode::default(), IconMode::Nerd);
+    }
+
+    #[test]
+    fn test_render_icon_file_category() {
+        let icon = render_icon("test.rs", FileCategory::Script, IconMode::Nerd);
+        assert_eq!(icon, "󰞷 ");
+    }
+
+    #[test]
+    fn test_render_icon_directory() {
+        let icon = render_icon("src", FileCategory::Directory, IconMode::Nerd);
+        assert_eq!(icon, "󰉋 ");
+    }
+
+    #[test]
+    fn test_render_icon_image() {
+        let icon = render_icon("photo.jpg", FileCategory::Image, IconMode::Nerd);
+        assert_eq!(icon, "󰸉 ");
+    }
+
+    #[test]
+    fn test_render_icon_archive() {
+        let icon = render_icon("archive.tar.gz", FileCategory::Archive, IconMode::ASCII);
+        assert_eq!(icon, "# ");
+    }
+
+    #[test]
+    fn test_render_icon_rust_file() {
+        let icon = render_icon("lib.rs", FileCategory::Script, IconMode::ASCII);
+        assert_eq!(icon, "[R] ");
+    }
+
+    #[test]
+    fn test_render_icon_json() {
+        let icon = render_icon("config.json", FileCategory::Config, IconMode::ASCII);
+        assert_eq!(icon, "[J] ");
+    }
+
+    #[test]
+    fn test_render_icon_lock() {
+        let icon = render_icon("secrets.env", FileCategory::Config, IconMode::ASCII);
+        assert_eq!(icon, "[L] ");
+    }
+
+    #[test]
+    fn test_render_icon_markdown() {
+        let icon = render_icon("README.md", FileCategory::Document, IconMode::ASCII);
+        assert_eq!(icon, "[M] ");
+    }
+
+    #[test]
+    fn test_render_icon_dockerfile() {
+        let icon = render_icon("Dockerfile", FileCategory::Config, IconMode::Nerd);
+        assert_eq!(icon, "󰡨 ");
+    }
+
+    #[test]
+    fn test_render_icon_makefile() {
+        let icon = render_icon("Makefile", FileCategory::Script, IconMode::Nerd);
+        assert_eq!(icon, "󱁤 ");
+    }
+}
