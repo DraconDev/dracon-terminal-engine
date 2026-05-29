@@ -136,10 +136,11 @@ This backlog is based on the current working tree, existing audit notes, and liv
   - `sixel` is feature-gated but decoding remains a stub by design.
   - Either implement decoding with tests or make the feature's limitations explicit in docs and examples.
 
-- [ ] Add `dracon.toml` validation.
-  - Create `AppConfig::validate()`.
-  - Warn on unknown fields rather than failing, preserving forward compatibility.
-  - Add tests for valid config, unknown fields, and malformed config.
+- [x] Add `dracon.toml` validation.
+  - Created `AppConfig::validate()` method.
+  - Validates theme names, FPS range, and duplicate widget IDs.
+  - Returns warnings rather than failing for forward compatibility.
+  - Added 5 tests for validation.
 
 ## P6 - Maintainability Refactors
 
