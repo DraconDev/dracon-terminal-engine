@@ -310,14 +310,105 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ## Stats
 
-| Category | Count | Done | Remaining |
-|----------|-------|------|-----------|
-| P0 — Breaking/Build | 17 | 17 | 0 |
-| P1 — Code Quality | 52 | 18 | 34 |
-| P2 — Documentation | 30 | 30 | 0 |
-| P3 — Architecture | 10 | 4 | 6 |
-| P4 — Error Handling | 4 | 3 | 1 |
-| P5 — Testing | 17 | 16 | 1 |
-| P6 — CI/CD | 4 | 4 | 0 |
-| P7 — Features | 3 | 3 | 0 |
-| **Total** | **137** | **92** | **45** |
+| Category | Count | Done | Remaining | Status |
+|----------|-------|------|-----------|--------|
+| P0 — Breaking/Build | 17 | 17 | 0 | ✅ 100% |
+| P1 — Code Quality | 52 | 18 | 34 | ⚠️ 35% |
+| P2 — Documentation | 30 | 30 | 0 | ✅ 100% |
+| P3 — Architecture | 10 | 4 | 6 | ⚠️ 40% |
+| P4 — Error Handling | 4 | 3 | 1 | ✅ 75% |
+| P5 — Testing | 17 | 16 | 1 | ✅ 94% |
+| P6 — CI/CD | 4 | 4 | 0 | ✅ 100% |
+| P7 — Features | 3 | 3 | 0 | ✅ 100% |
+| **Total** | **137** | **92** | **45** | **67%** |
+
+---
+
+## 📋 Remaining Tasks Detail (45 tasks)
+
+### P1 — Code Quality (34 remaining)
+
+**Long Functions (26 functions >100 lines):**
+- `editor.rs render()` — 764 lines (largest function in codebase)
+- `editor.rs handle_event()` — 488 lines
+- `compositor/engine.rs render()` — 355 lines (performance-critical)
+- `input/parser.rs try_parse()` — 248 lines
+- `utils.rs spawn_terminal_at()` — 239 lines
+- `tags_input.rs render()` — 231 lines
+- `input/parser.rs parse_csi_normal()` — 205 lines
+- `visuals/icons.rs get()` — 205 lines
+- `kanban.rs render()` — 202 lines
+- `command_palette.rs render()` — 197 lines
+- `sparkline.rs render()` — 176 lines
+- `calendar.rs render()` — 176 lines
+- `editor.rs handle_mouse_event()` — 173 lines
+- `confirm_dialog.rs render()` — 168 lines
+- `color_picker.rs render()` — 161 lines
+- `log_viewer.rs render()` — 156 lines
+- `context_menu.rs render()` — 132 lines
+- `framework/layout.rs layout()` — 131 lines
+- `notification_center.rs render()` — 125 lines
+- `progress_ring.rs render()` — 125 lines
+- `scene_router.rs blend_planes()` — 120 lines
+- `table.rs render()` — 119 lines
+- `input.rs handle_event()` — 109 lines
+- `system.rs get_disk_data()` — 108 lines
+- `form.rs render()` — 107 lines
+- `modal.rs render()` — 101 lines
+
+**Duplicated Code Extraction (5 patterns):**
+- Extract shared `on_theme_change` default implementation (46 files repeat identical boilerplate)
+- Add `Plane::with_bg(width, height, color)` constructor to replace 48 `fill_bg` occurrences
+- Extract shared rounded border rendering (4 files duplicate `helpers.rs` function)
+- Extract shared scrollbar indicator helper (5 files implement identical logic)
+- Extract shared selection handling pattern (6 widgets duplicate toggle logic)
+
+**Unsafe Code Audit (3 blocks):**
+- Review `src/compositor/plane.rs` unsafe `next_char_unchecked()` — consider safe fallback for debug builds
+- Review `src/backend/tty.rs` libc calls — ensure all unsafe blocks have SAFETY comments
+- Review `src/framework/app.rs:934-940` signal handler registration safety
+
+### P3 — Architecture (6 remaining)
+
+**Module Consolidation (2 items):**
+- Resolve `src/layout.rs` vs `src/framework/layout.rs` duplication — merge into one (breaking)
+- Move deprecated `Component` widget behind feature gate or remove from public API (breaking)
+
+**Code Organization (4 items):**
+- Group framework modules into sub-modules (input handling: hitzone, marquee, dragdrop; rendering: animation, dirty_regions, scroll)
+- Split `src/framework/command.rs` into separate concerns (AppConfig, CommandRunner, LayoutConfig)
+- Split `src/framework/helpers.rs` catch-all into focused utility modules
+- Group 19 callback type aliases into a `callbacks` module or reduce proliferation
+
+### P4 — Error Handling (1 remaining)
+
+**Breaking API Change:**
+- Replace `expect()` in `src/framework/app.rs:1047` `App::from_default()` with Result return
+  - Current: `impl Default for App { fn default() -> Self { Self::new().expect(...) } }`
+  - Would need: New `App::from_defaults() -> Result<Self, Error>` method
+  - All callers of `App::default()` would need updating
+
+### P5 — Testing (1 remaining)
+
+**Integration Tests:**
+- Add integration tests for scene_router transitions (complex setup: mock terminal, process spawning)
+- Add integration tests for plugin loading/unloading (requires plugin mock)
+- Add tests for all 50 framework widgets (many currently untested)
+
+### P2 — Documentation (0 remaining for module docs)
+
+**Remaining Pub Item Docs (171 items):**
+- Add doc comments to all 17 pub items in `src/framework/widgets/log_viewer.rs`
+- Add doc comments to all 9 pub items in `src/framework/widgets/confirm_dialog.rs`
+- Add doc comments to `src/framework/widgets/list_helpers.rs` pub items
+- Add doc comments to `src/framework/widget_container.rs` 7 pub items
+- Add doc comments to `src/input/mapping.rs` pub functions
+- Add doc comments to remaining framework widget pub items (~130+ items)
+
+### P7 — Features (1 remaining)
+
+**New Feature (not audit):**
+- Implement sixel image support (currently stub behind `sixel` feature flag)
+  - Requires research into sixel protocol
+  - Integration with compositor for image rendering
+  - Feature flag to avoid bloat for users who don't need it
