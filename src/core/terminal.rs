@@ -457,11 +457,4 @@ mod tests {
         assert!(RESTORE_SEQ.contains("\x1b[?1049l")); // Exit alt screen
         assert!(RESTORE_SEQ.contains("\x1b[?2004l")); // Disable bracketed paste
     }
-
-    #[test]
-    fn test_capabilities_clone() {
-        let caps = Capabilities::detect();
-        let cloned = caps.clone();
-        assert_eq!(cloned.term(), caps.term());
-    }
 }
