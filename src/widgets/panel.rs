@@ -1,3 +1,8 @@
+//! Panel widget with title and border.
+//!
+//! This module provides a panel widget that wraps content with a bordered
+//! frame and optional title. Useful for grouping related UI elements.
+
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};

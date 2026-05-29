@@ -1,3 +1,8 @@
+//! Context menu action types for file operations.
+//!
+//! This module defines the actions available in context menus for file
+//! management operations such as open, copy, cut, paste, rename, and delete.
+
 use crate::utils::FileColumn;
 use serde::{Deserialize, Serialize};
 

@@ -1,3 +1,8 @@
+//! Hotkey hint rendering utilities.
+//!
+//! This module provides utilities for rendering keyboard shortcut indicators
+//! with styled key badges (e.g., `[Ctrl+C] Copy`).
+
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 

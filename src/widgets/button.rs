@@ -1,3 +1,9 @@
+//! Simple button widget for ratatui.
+//!
+//! This module provides a basic button widget that can be rendered using
+//! ratatui's Widget trait. Buttons support active/inactive states with
+//! different styling.
+
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
