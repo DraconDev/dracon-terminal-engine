@@ -1,3 +1,13 @@
+//! File-type icon rendering for file managers and explorers.
+//!
+//! This module provides:
+//!
+//! - [`Icon`] enum — Icon types for files, folders, and UI elements
+//! - [`IconMode`] — Rendering mode (Nerd Font, emoji, ASCII, box-drawing)
+//! - [`render_icon()`] — Get icon string for a file category
+//!
+//! Icons are rendered based on file type detection and the selected icon mode.
+
 use crate::utils::{FileCategory, IconMode};
 use serde::{Deserialize, Serialize};
 
