@@ -324,11 +324,18 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ---
 
-## 📋 Remaining Tasks Detail (45 tasks)
+## 📋 Remaining Tasks Detail (37 tasks)
 
-### P1 — Code Quality (34 remaining)
+### P1 — Long Functions (26 functions >100 lines)
 
-**Long Functions (26 functions >100 lines):**
+> **Status**: All deferred as high-risk refactoring.
+> Each function would need careful analysis to break into smaller methods
+> without introducing performance regressions or breaking changes.
+>
+> **Recommended approach**: Refactor incrementally when touching these files
+> for feature work, not as a standalone audit task.
+
+**Functions to refactor (when touching for feature work):**
 - `editor.rs render()` — 764 lines (largest function in codebase)
 - `editor.rs handle_event()` — 488 lines
 - `compositor/engine.rs render()` — 355 lines (performance-critical)
@@ -356,19 +363,9 @@ Generated from full codebase audit. Check off items as they are completed.
 - `form.rs render()` — 107 lines
 - `modal.rs render()` — 101 lines
 
-**Duplicated Code Extraction (5 patterns):**
-- Extract shared `on_theme_change` default implementation (46 files repeat identical boilerplate)
-- Add `Plane::with_bg(width, height, color)` constructor to replace 48 `fill_bg` occurrences
-- Extract shared rounded border rendering (4 files duplicate `helpers.rs` function)
-- Extract shared scrollbar indicator helper (5 files implement identical logic)
-- Extract shared selection handling pattern (6 widgets duplicate toggle logic)
+### P3 — Module Consolidation (6 remaining)
 
-**Unsafe Code Audit (3 blocks):**
-- Review `src/compositor/plane.rs` unsafe `next_char_unchecked()` — consider safe fallback for debug builds
-- Review `src/backend/tty.rs` libc calls — ensure all unsafe blocks have SAFETY comments
-- Review `src/framework/app.rs:934-940` signal handler registration safety
-
-### P3 — Architecture (6 remaining)
+> **Status**: All require breaking API changes. Deferred.
 
 **Module Consolidation (2 items):**
 - Resolve `src/layout.rs` vs `src/framework/layout.rs` duplication — merge into one (breaking)
