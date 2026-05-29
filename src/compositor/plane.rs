@@ -1,3 +1,11 @@
+//! Plane-based rendering types for the terminal compositor.
+//!
+//! This module provides the core types for compositing-based rendering:
+//! - [`Color`] for terminal-aware color representation (Reset, ANSI 256, RGB)
+//! - [`Styles`] for text styling flags (bold, italic, underline, etc.)
+//! - [`Cell`] for a single terminal cell (character + color + style)
+//! - [`Plane`] for a 2D buffer of cells that can be composited
+
 use bitflags::bitflags;
 use ratatui::layout::Rect;
 

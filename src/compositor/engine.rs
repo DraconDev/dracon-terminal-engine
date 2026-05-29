@@ -1,3 +1,14 @@
+//! Compositor engine for z-indexed plane compositing.
+//!
+//! The compositor takes multiple [`Plane`] instances with different z-indices and
+//! composites them into a single framebuffer for terminal output. It handles:
+//!
+//! - **Z-index ordering**: Planes are sorted by z-index before rendering
+//! - **Dirty region tracking**: Only re-renders regions that have changed
+//! - **Color blending**: Supports opacity and transparent cells
+//! - **Filter effects**: Applies visual filters (Dim, Invert, Scanline, Pulse, Glitch)
+//! - **Performance**: Uses delta-compression and per-frame cell reuse
+
 use crate::compositor::plane::{Cell, Color, Plane, Styles};
 use crate::framework::dirty_regions::DirtyRegionTracker;
 use std::io::{self, Write};
