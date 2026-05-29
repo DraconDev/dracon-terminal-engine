@@ -78,7 +78,6 @@ impl I18n {
         let mut i18n = Self {
             locale: locale.to_string(),
             translations: HashMap::new(),
-            fallback_locale: "en".to_string(),
             fallback_map: HashMap::new(),
         };
         // Load default English translations
