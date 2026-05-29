@@ -1,3 +1,17 @@
+//! POSIX terminal operations for raw mode and window size.
+//!
+//! This module wraps libc functions for terminal control:
+//! - `tcgetattr`/`tcsetattr` for terminal attribute control
+//! - `cfmakeraw` for enabling raw mode
+//! - `ioctl(TIOCGWINSZ)` for querying terminal dimensions
+//! - `poll` for non-blocking stdin input
+//!
+//! # Safety
+//!
+//! All functions that interact with raw file descriptors are marked unsafe
+//! because misuse can corrupt terminal state. Ensure file descriptors are
+//! valid and owned appropriately.
+
 use std::io;
 use std::os::fd::AsRawFd;
 use std::os::fd::BorrowedFd;
