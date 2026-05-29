@@ -497,67 +497,85 @@ mod tests {
 
     #[test]
     fn test_get_for_path_rust_file() {
-        let icon = Icon::get_for_path("test.rs", FileCategory::Script, IconMode::Nerd);
+        let icon = Icon::get_for_path("test.rs".as_ref(), FileCategory::Script, false, IconMode::Nerd);
         assert_eq!(icon, "󱘗 ");
     }
 
     #[test]
     fn test_get_for_path_image() {
-        let icon = Icon::get_for_path("photo.jpg", FileCategory::Image, IconMode::Nerd);
+        let icon = Icon::get_for_path("photo.jpg".as_ref(), FileCategory::Image, false, IconMode::Nerd);
         assert_eq!(icon, "󰸉 ");
     }
 
     #[test]
     fn test_get_for_path_archive() {
-        let icon = Icon::get_for_path("archive.tar.gz", FileCategory::Archive, IconMode::ASCII);
+        let icon = Icon::get_for_path("archive.tar.gz".as_ref(), FileCategory::Archive, false, IconMode::ASCII);
         assert_eq!(icon, "# ");
     }
 
     #[test]
     fn test_get_for_path_rust_ascii() {
-        let icon = Icon::get_for_path("lib.rs", FileCategory::Script, IconMode::ASCII);
+        let icon = Icon::get_for_path("lib.rs".as_ref(), FileCategory::Script, false, IconMode::ASCII);
         assert_eq!(icon, "[R] ");
     }
 
     #[test]
     fn test_get_for_path_json() {
-        let icon = Icon::get_for_path("config.json", FileCategory::Other, IconMode::ASCII);
+        let icon = Icon::get_for_path("config.json".as_ref(), FileCategory::Other, false, IconMode::ASCII);
         assert_eq!(icon, "[J] ");
     }
 
     #[test]
     fn test_get_for_path_lock() {
-        let icon = Icon::get_for_path("secrets.env", FileCategory::Text, IconMode::ASCII);
+        let icon = Icon::get_for_path("secrets.env".as_ref(), FileCategory::Text, false, IconMode::ASCII);
         assert_eq!(icon, "[L] ");
     }
 
     #[test]
     fn test_get_for_path_markdown() {
-        let icon = Icon::get_for_path("README.md", FileCategory::Document, IconMode::ASCII);
+        let icon = Icon::get_for_path("README.md".as_ref(), FileCategory::Document, false, IconMode::ASCII);
         assert_eq!(icon, "[M] ");
     }
 
     #[test]
     fn test_get_for_path_dockerfile() {
-        let icon = Icon::get_for_path("Dockerfile", FileCategory::Text, IconMode::Nerd);
+        let icon = Icon::get_for_path("Dockerfile".as_ref(), FileCategory::Text, false, IconMode::Nerd);
         assert_eq!(icon, "󰡨 ");
     }
 
     #[test]
     fn test_get_for_path_makefile() {
-        let icon = Icon::get_for_path("Makefile", FileCategory::Script, IconMode::Nerd);
+        let icon = Icon::get_for_path("Makefile".as_ref(), FileCategory::Script, false, IconMode::Nerd);
         assert_eq!(icon, "󱁤 ");
     }
 
     #[test]
     fn test_get_for_path_go() {
-        let icon = Icon::get_for_path("main.go", FileCategory::Script, IconMode::Nerd);
+        let icon = Icon::get_for_path("main.go".as_ref(), FileCategory::Script, false, IconMode::Nerd);
         assert_eq!(icon, "󰟓 ");
     }
 
     #[test]
     fn test_get_for_path_python() {
-        let icon = Icon::get_for_path("script.py", FileCategory::Script, IconMode::ASCII);
+        let icon = Icon::get_for_path("script.py".as_ref(), FileCategory::Script, false, IconMode::ASCII);
         assert_eq!(icon, "[Py] ");
+    }
+
+    #[test]
+    fn test_get_for_path_directory() {
+        let icon = Icon::get_for_path("src".as_ref(), FileCategory::Other, true, IconMode::Nerd);
+        assert_eq!(icon, "󰉋 ");
+    }
+
+    #[test]
+    fn test_get_for_path_directory_home() {
+        let icon = Icon::get_for_path("home".as_ref(), FileCategory::Other, true, IconMode::Nerd);
+        assert_eq!(icon, "󰋜 ");
+    }
+
+    #[test]
+    fn test_get_for_path_directory_downloads() {
+        let icon = Icon::get_for_path("Downloads".as_ref(), FileCategory::Other, true, IconMode::Nerd);
+        assert_eq!(icon, "󰇚 ");
     }
 }
