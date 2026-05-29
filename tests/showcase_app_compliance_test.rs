@@ -327,7 +327,7 @@ fn test_ctrl_char_does_not_match_bare_char() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TEST 4: Pattern 2 apps must sync theme from ctx.theme() in on_tick
+// TEST 4: Pattern 2 apps must sync theme from ctx.set_theme() in on_tick
 // ═══════════════════════════════════════════════════════════════════════════════
 
 #[test]

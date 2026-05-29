@@ -686,7 +686,7 @@ fn main() -> Result<()> {
     let mut app = App::new()?
         .title("Scrollable Content")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let router = InputRouter {
         target: content_router,

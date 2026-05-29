@@ -1724,7 +1724,7 @@ fn main() -> std::io::Result<()> {
         area: std::cell::Cell::new(Rect::new(0, 0, w, h)),
     };
 
-    let mut app = App::new()?.title("File Manager").fps(30).theme(theme);
+    let mut app = App::new()?.title("File Manager").fps(30).set_theme(theme);
     app.add_widget(Box::new(router), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {
@@ -1736,7 +1736,7 @@ fn main() -> std::io::Result<()> {
         // Sync theme from framework
         {
             let mut fm = fm_for_tick.borrow_mut();
-            let app_theme = ctx.theme().clone();
+            let app_theme = ctx.set_theme().clone();
             if fm.theme.name != app_theme.name {
                 fm.on_theme_change(&app_theme);
             }

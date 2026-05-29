@@ -609,7 +609,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Widget Gallery")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     app.add_widget(Box::new(gallery), Rect::new(0, 0, 80, 24));
 

@@ -686,7 +686,7 @@ fn main() -> std::io::Result<()> {
     let mut app_widget = MenuApp::new(WidgetId::new(0), should_quit, theme.clone());
     app_widget.set_area(Rect::new(0, 0, w, h));
 
-    let mut app = App::new()?.title("Menu System Demo").fps(30).theme(theme);
+    let mut app = App::new()?.title("Menu System Demo").fps(30).set_theme(theme);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, w, h));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

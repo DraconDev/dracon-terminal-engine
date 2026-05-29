@@ -454,7 +454,7 @@ fn main() -> Result<()> {
     let mut app = App::new()?
         .title("Command Dashboard")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let kb = dash_input.borrow().keybindings.clone();
 

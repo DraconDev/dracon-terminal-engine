@@ -456,7 +456,7 @@ fn main() -> Result<()> {
     let mut app_ctx = App::new()?
         .title("Form Validation")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let kb = app_input.borrow().keybindings.clone();
 

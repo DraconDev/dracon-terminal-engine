@@ -533,7 +533,7 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
-    let mut app = App::new()?.theme(env_theme.clone());
+    let mut app = App::new()?.set_theme(env_theme.clone());
     let _ = app.add_widget(
         Box::new(PluginLoader::new(env_theme.clone(), should_quit)),
         Rect::new(0, 0, 80, 24),

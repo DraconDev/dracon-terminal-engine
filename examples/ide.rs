@@ -1505,7 +1505,7 @@ fn main() -> std::io::Result<()> {
     let app = Rc::new(RefCell::new(IdeApp::new(should_quit, theme.clone())));
     let app_for_tick = Rc::clone(&app);
 
-    let mut app_widget = App::new()?.title("Dracon IDE").fps(30).theme(theme);
+    let mut app_widget = App::new()?.title("Dracon IDE").fps(30).set_theme(theme);
 
     let router = IdeInputRouter {
         app: Rc::clone(&app),

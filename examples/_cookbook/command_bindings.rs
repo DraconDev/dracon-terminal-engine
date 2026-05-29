@@ -833,7 +833,7 @@ fn main() -> std::io::Result<()> {
         .title("Command Bindings")
         .fps(20)
         .tick_interval(1000)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     // Add InputRouter widget so framework can detect theme changes via current_theme()
     app.add_widget(

@@ -958,7 +958,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Text Editor Demo")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {

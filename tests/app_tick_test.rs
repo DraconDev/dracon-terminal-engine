@@ -824,7 +824,7 @@ fn test_app_builder_fps_clamped() {
 
 #[test]
 fn test_app_builder_theme() {
-    let _app = App::new().unwrap().theme(Theme::cyberpunk());
+    let _app = App::new().unwrap().set_theme(Theme::cyberpunk());
 }
 
 #[test]
@@ -834,7 +834,7 @@ fn test_app_builder_chained() {
         .title("Chained App")
         .fps(45)
         .tick_interval(500)
-        .theme(Theme::nord())
+        .set_theme(Theme::nord())
         .on_tick(|_ctx, _tick| {});
 }
 

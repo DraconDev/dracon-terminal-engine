@@ -681,7 +681,7 @@ fn main() -> std::io::Result<()> {
     let mut framework = App::new()?
         .title("Network Client")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let widget = NetworkWidget {
         app: app_for_widget,

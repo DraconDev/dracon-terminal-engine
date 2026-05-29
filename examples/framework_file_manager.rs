@@ -577,7 +577,7 @@ fn main() -> std::io::Result<()> {
     let mut app = FileManagerApp::new(theme.clone(), should_quit);
     app.set_area(Rect::new(0, 0, w, h));
 
-    let mut app_widget = App::new()?.title("File Manager").fps(30).theme(theme);
+    let mut app_widget = App::new()?.title("File Manager").fps(30).set_theme(theme);
     app_widget.add_widget(Box::new(app), Rect::new(0, 0, w, h));
     app_widget
         .on_tick(move |ctx, _| {

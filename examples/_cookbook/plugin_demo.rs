@@ -494,7 +494,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     App::new()?
         .title("Plugin Demo")
-        .theme(env_theme)
+        .set_theme(env_theme)
         .add_widget(Box::new(app), Rect::new(0, 0, 80, 24))
         .on_tick(move |ctx, _| {
             if quit_check.load(Ordering::SeqCst) {

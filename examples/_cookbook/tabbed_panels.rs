@@ -654,7 +654,7 @@ fn main() -> std::io::Result<()> {
     let mut app_ctx = App::new()?
         .title("Tabbed Panels Demo")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     // Register an InputRouter so keyboard/mouse events reach TabbedApp
     let router = InputRouter {

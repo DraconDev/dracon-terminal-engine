@@ -493,7 +493,7 @@ fn main() -> std::io::Result<()> {
 
     app.title("CellPool Demo")
         .fps(30)
-        .theme(theme)
+        .set_theme(theme)
         .on_tick(move |ctx, tick| {
             if quit_clone.load(Ordering::SeqCst) {
                 ctx.stop();

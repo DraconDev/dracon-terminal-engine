@@ -627,7 +627,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?.title("Widget Tutorial: ColorPicker").fps(30);
 
     let current_theme = Theme::from_env_or(Theme::nord());
-    app = app.theme(current_theme.clone());
+    app = app.set_theme(current_theme.clone());
 
     let kb_config = resolve_keybindings();
     let keybindings = KeybindingSet::from_config(&kb_config);
@@ -699,7 +699,7 @@ fn main() -> std::io::Result<()> {
         }
         let (w, h) = ctx.compositor().size();
         if help_check.load(Ordering::SeqCst) {
-            let t = ctx.theme();
+            let t = ctx.set_theme();
             let area = Rect::new(0, 0, w, h);
             let mut plane = Plane::new(0, area.width, area.height);
             plane.fill_bg(t.bg);

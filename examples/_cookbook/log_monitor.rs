@@ -617,7 +617,7 @@ fn main() -> Result<()> {
         .title("Log Monitor")
         .fps(30)
         .tick_interval(200)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let router = InputRouter {
         target: mon_for_input_router,

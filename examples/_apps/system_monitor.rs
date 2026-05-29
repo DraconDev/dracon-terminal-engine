@@ -1431,7 +1431,7 @@ fn main() -> std::io::Result<()> {
         .title("System Monitor")
         .fps(30)
         .tick_interval(2000)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
 
     let router = InputRouter {
         monitor: mon_for_input,
@@ -1446,7 +1446,7 @@ fn main() -> std::io::Result<()> {
             return;
         }
         let mut m = mon_for_tick.borrow_mut();
-        let app_theme = ctx.theme().clone();
+        let app_theme = ctx.set_theme().clone();
         if m.theme.name != app_theme.name {
             m.on_theme_change(&app_theme);
         }

@@ -538,7 +538,7 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let app = RichTextApp::new(theme.clone(), should_quit);
 
-    let mut a = App::new()?.title("Rich Text Demo").fps(30).theme(theme);
+    let mut a = App::new()?.title("Rich Text Demo").fps(30).set_theme(theme);
     a.add_widget(Box::new(app), Rect::new(0, 0, 80, 24));
     a.run(move |ctx| {
         if quit_check.load(Ordering::SeqCst) {

@@ -366,7 +366,7 @@ impl Widget for ThemePreviewPanel {
         let mut plane = Plane::new(0, area.width, area.height);
         plane.z_index = 10;
 
-        let theme = self.theme();
+        let theme = self.set_theme();
 
         for y in 0..area.height {
             for x in 0..area.width {

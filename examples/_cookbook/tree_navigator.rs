@@ -577,7 +577,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Tree Navigator")
         .fps(30)
-        .theme(env_theme.clone());
+        .set_theme(env_theme.clone());
     app.add_widget(Box::new(nav), Rect::new(0, 0, w, h));
     app = app
         .on_input(move |key| {

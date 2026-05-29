@@ -538,7 +538,7 @@ fn main() -> std::io::Result<()> {
     let mut app = App::new()?
         .title("Notification Center")
         .fps(30)
-        .theme(theme);
+        .set_theme(theme);
     app.add_widget(Box::new(app_widget), Rect::new(0, 0, 80, 24));
     app.run(|ctx| {
         if should_quit.load(Ordering::SeqCst) {

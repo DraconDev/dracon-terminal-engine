@@ -330,7 +330,7 @@ fn main() -> std::io::Result<()> {
     let q = should_quit;
     app.title("Autocomplete Demo")
         .fps(30)
-        .theme(theme)
+        .set_theme(theme)
         .run(move |ctx| {
             if q.load(Ordering::SeqCst) {
                 ctx.stop();
