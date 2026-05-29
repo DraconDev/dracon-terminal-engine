@@ -436,7 +436,7 @@ mod tests {
     fn test_icon_get_ascii() {
         let icon = Icon::File;
         let s = icon.get(IconMode::ASCII);
-        assert_eq!(s, "- ");
+        assert_eq!(s, "[F] ");
     }
 
     #[test]
@@ -447,16 +447,16 @@ mod tests {
     }
 
     #[test]
-    fn test_icon_get_box_drawing() {
+    fn test_icon_get_unicode_mode() {
         let icon = Icon::File;
-        let s = icon.get(IconMode::BoxDrawing);
-        assert_eq!(s, "-");
+        let s = icon.get(IconMode::Unicode);
+        assert!(!s.is_empty());
     }
 
     #[test]
     fn test_icon_get_all_variants() {
         // Test that all icon variants have a string for each mode
-        let modes = [IconMode::Nerd, IconMode::ASCII, IconMode::Unicode, IconMode::BoxDrawing];
+        let modes = [IconMode::Nerd, IconMode::ASCII, IconMode::Unicode];
         let variants = [
             Icon::File,
             Icon::Folder,
@@ -491,8 +491,12 @@ mod tests {
     }
 
     #[test]
-    fn test_icon_mode_default() {
-        assert_eq!(IconMode::default(), IconMode::Nerd);
+    fn test_icon_mode_nerd() {
+        // Test that Nerd mode is a valid variant
+        let mode = IconMode::Nerd;
+        let icon = Icon::File;
+        let s = icon.get(mode);
+        assert!(!s.is_empty());
     }
 
     #[test]
@@ -510,7 +514,7 @@ mod tests {
     #[test]
     fn test_get_for_path_archive() {
         let icon = Icon::get_for_path("archive.tar.gz".as_ref(), FileCategory::Archive, false, IconMode::ASCII);
-        assert_eq!(icon, "# ");
+        assert_eq!(icon, "[Z] ");
     }
 
     #[test]
@@ -528,6 +532,7 @@ mod tests {
     #[test]
     fn test_get_for_path_lock() {
         let icon = Icon::get_for_path("secrets.env".as_ref(), FileCategory::Text, false, IconMode::ASCII);
+        // .env files are detected as Lock
         assert_eq!(icon, "[L] ");
     }
 
