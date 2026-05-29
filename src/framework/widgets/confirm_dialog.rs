@@ -23,12 +23,17 @@ use crate::framework::theme::Theme;
 use crate::framework::widget::{Widget, WidgetId, WidgetState};
 use ratatui::layout::Rect;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Result of a confirmation dialog.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ConfirmResult {
+    /// User confirmed the action.
+    #[default]
     Confirmed,
+    /// User cancelled the action.
     Cancelled,
 }
 
+/// A modal confirmation dialog with Confirm/Cancel buttons.
 pub struct ConfirmDialog {
     pub id: WidgetId,
     pub title: String,
@@ -46,6 +51,7 @@ pub struct ConfirmDialog {
 }
 
 impl ConfirmDialog {
+    /// Creates a new ConfirmDialog with the given title and message.
     pub fn new(title: &str, message: &str) -> Self {
         Self {
             id: WidgetId::next(),
@@ -64,6 +70,7 @@ impl ConfirmDialog {
         }
     }
 
+    /// Creates a new ConfirmDialog with a specific widget ID.
     pub fn with_id(id: WidgetId, title: &str, message: &str) -> Self {
         Self {
             id,
@@ -82,39 +89,46 @@ impl ConfirmDialog {
         }
     }
 
+    /// Sets the label for the confirm button.
     pub fn confirm_label(mut self, label: &str) -> Self {
         self.confirm_label = label.to_string();
         self.dirty = true;
         self
     }
 
+    /// Sets the label for the cancel button.
     pub fn cancel_label(mut self, label: &str) -> Self {
         self.cancel_label = label.to_string();
         self.dirty = true;
         self
     }
 
+    /// Marks this dialog as dangerous (e.g., destructive action).
     pub fn danger(mut self, danger: bool) -> Self {
         self.danger = danger;
         self.dirty = true;
         self
     }
 
+    /// Binds a command to execute when confirmed.
     pub fn bind_command(mut self, cmd: BoundCommand) -> Self {
         self.bound_command = Some(cmd);
         self
     }
 
+    /// Sets the theme for this widget.
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
         self.dirty = true;
         self
     }
 
+    /// Returns the result if the user has made a choice.
     pub fn confirmed(&self) -> Option<ConfirmResult> {
         self.result
     }
 
+    /// Clears the result, allowing the dialog to be reused.
     pub fn clear_result(&mut self) {
         self.result = None;
     }
