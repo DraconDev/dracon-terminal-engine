@@ -118,9 +118,9 @@ This backlog is based on the current working tree, existing audit notes, and liv
   - `src/framework/widget_container.rs`
   - `src/input/mapping.rs`
 
-- [ ] Consolidate audit files.
+- [x] Consolidate audit files.
   - The repo currently contains `AUDIT.md`, `TODO.md`, `audit.md`, `audit-tastlist.md`, `tasklist.md`, and this `tasks.md`.
-  - Keep one current backlog and move old audits to an archive or remove them before release.
+  - Moved all old audits to `archive/audits/` to keep the repo root clean.
 
 ## P5 - Runtime Robustness
 
