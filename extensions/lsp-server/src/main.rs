@@ -346,40 +346,81 @@ impl LspServer {
             match output {
                 Ok(result) => {
                     let queue_clone = Arc::clone(&queue);
-                    let mut runtime = tokio::runtime::Builder::new_current_thread()
+
+                    // Try to serialize success event
+                    let success_event = match serde_json::to_string(&PreviewEvent {
+                        event: "compile_success".to_string(),
+                        data: format!("Compiled successfully: {}", example),
+                    }) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            eprintln!("lsp-server: failed to serialize success event: {}", e);
+                            return;
+                        }
+                    };
+
+                    // Try to serialize error event (for fallback)
+                    let error_event = serde_json::to_string(&PreviewEvent {
+                        event: "compile_error".to_string(),
+                        data: String::new(), // Will be replaced if needed
+                    });
+
+                    let mut runtime = match tokio::runtime::Builder::new_current_thread()
                         .enable_all()
                         .build()
-                        .unwrap();
+                    {
+                        Ok(r) => r,
+                        Err(e) => {
+                            eprintln!("lsp-server: failed to create runtime: {}", e);
+                            return;
+                        }
+                    };
 
-                    runtime.block_on(async {
+                    let _ = runtime.block_on(async {
                         let mut q = queue_clone.lock().await;
                         if result.status.success() {
-                            q.push(serde_json::to_string(&PreviewEvent {
-                                event: "compile_success".to_string(),
-                                data: format!("Compiled successfully: {}", example),
-                            }).unwrap());
+                            q.push(success_event);
                         } else {
                             let stderr = String::from_utf8_lossy(&result.stderr);
-                            q.push(serde_json::to_string(&PreviewEvent {
+                            if let Ok(err_event) = serde_json::to_string(&PreviewEvent {
                                 event: "compile_error".to_string(),
                                 data: stderr.to_string(),
-                            }).unwrap());
+                            }) {
+                                q.push(err_event);
+                            }
                         }
+                        Ok(()) as Result<(), ()>
                     });
                 }
                 Err(e) => {
                     let queue_clone = Arc::clone(&queue);
-                    let mut runtime = tokio::runtime::Builder::new_current_thread()
+
+                    let error_event = match serde_json::to_string(&PreviewEvent {
+                        event: "compile_error".to_string(),
+                        data: format!("Failed to run cargo: {}", e),
+                    }) {
+                        Ok(s) => s,
+                        Err(ser_err) => {
+                            eprintln!("lsp-server: failed to serialize error event: {}", ser_err);
+                            return;
+                        }
+                    };
+
+                    let mut runtime = match tokio::runtime::Builder::new_current_thread()
                         .enable_all()
                         .build()
-                        .unwrap();
+                    {
+                        Ok(r) => r,
+                        Err(rt_err) => {
+                            eprintln!("lsp-server: failed to create runtime: {}", rt_err);
+                            return;
+                        }
+                    };
 
-                    runtime.block_on(async {
+                    let _ = runtime.block_on(async {
                         let mut q = queue_clone.lock().await;
-                        q.push(serde_json::to_string(&PreviewEvent {
-                            event: "compile_error".to_string(),
-                            data: format!("Failed to run cargo: {}", e),
-                        }).unwrap());
+                        q.push(error_event);
+                        Ok(()) as Result<(), ()>
                     });
                 }
             }
@@ -517,28 +558,60 @@ impl LspServer {
 
     fn queue_event(&self, event: PreviewEvent) {
         let queue = Arc::clone(&self.content_queue);
-        let mut runtime = tokio::runtime::Builder::new_current_thread()
+
+        // Try to serialize the event, log and return on failure
+        let serialized = match serde_json::to_string(&event) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("lsp-server: failed to serialize event: {}", e);
+                return;
+            }
+        };
+
+        // Build a runtime, log and return on failure
+        let runtime = match tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .unwrap();
+        {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("lsp-server: failed to create runtime: {}", e);
+                return;
+            }
+        };
 
-        runtime.block_on(async {
+        // Execute the async block, log and return on failure
+        if let Err(e) = runtime.block_on(async {
             let mut q = queue.lock().await;
-            q.push(serde_json::to_string(&event).unwrap());
-        });
+            q.push(serialized);
+            Ok(()) as Result<(), ()>
+        }) {
+            eprintln!("lsp-server: runtime error: {:?}", e);
+        }
     }
 
     fn process_queue(&self) -> Vec<String> {
         let queue = Arc::clone(&self.content_queue);
-        let mut runtime = tokio::runtime::Builder::new_current_thread()
+
+        // Build a runtime, return empty vec on failure
+        let runtime = match tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .unwrap();
+        {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("lsp-server: failed to create runtime: {}", e);
+                return Vec::new();
+            }
+        };
 
+        // Execute the async block, return empty vec on failure
         runtime.block_on(async {
             let mut q = queue.lock().await;
-            let events = q.drain(..).collect();
-            events
+            q.drain(..).collect::<Vec<_>>()
+        }).unwrap_or_else(|e| {
+            eprintln!("lsp-server: runtime error: {:?}", e);
+            Vec::new()
         })
     }
 }
