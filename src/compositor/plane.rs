@@ -497,3 +497,200 @@ unsafe fn next_char_unchecked(bytes: &[u8], offset: usize) -> (char, usize) {
     let c = s.chars().next().unwrap_or('\0');
     (c, c.len_utf8())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_plane_new() {
+        let plane = Plane::new(1, 80, 24);
+        assert_eq!(plane.id, 1);
+        assert_eq!(plane.width, 80);
+        assert_eq!(plane.height, 24);
+        assert_eq!(plane.cells.len(), 80 * 24);
+        assert!(plane.visible);
+        assert_eq!(plane.opacity, 1.0);
+    }
+
+    #[test]
+    fn test_plane_new_minimum_dimensions() {
+        // Minimum dimensions should be enforced
+        let plane = Plane::new(1, 0, 0);
+        assert_eq!(plane.width, 1);
+        assert_eq!(plane.height, 1);
+        assert_eq!(plane.cells.len(), 1);
+    }
+
+    #[test]
+    fn test_plane_clear() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.put_char(2, 2, 'X');
+        assert_eq!(plane.cells[2 * 10 + 2].char, 'X');
+
+        plane.clear();
+        assert_eq!(plane.cells[2 * 10 + 2].char, ' ');
+    }
+
+    #[test]
+    fn test_plane_put_char() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.put_char(5, 2, 'A');
+        assert_eq!(plane.cells[2 * 10 + 5].char, 'A');
+    }
+
+    #[test]
+    fn test_plane_put_char_out_of_bounds() {
+        let mut plane = Plane::new(1, 10, 5);
+        // Should not panic
+        plane.put_char(100, 100, 'X');
+    }
+
+    #[test]
+    fn test_plane_get_char() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.put_char(3, 1, 'B');
+        assert_eq!(plane.get_char(3, 1), Some('B'));
+    }
+
+    #[test]
+    fn test_plane_get_char_out_of_bounds() {
+        let plane = Plane::new(1, 10, 5);
+        assert_eq!(plane.get_char(100, 100), None);
+    }
+
+    #[test]
+    fn test_plane_resize() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.put_char(5, 2, 'X');
+
+        plane.resize(20, 10);
+        assert_eq!(plane.width, 20);
+        assert_eq!(plane.height, 10);
+        assert_eq!(plane.cells.len(), 200);
+    }
+
+    #[test]
+    fn test_plane_set_cell_bg() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.set_cell_bg(2, 1, Color::Rgb(255, 0, 0));
+        assert_eq!(plane.cells[1 * 10 + 2].bg, Color::Rgb(255, 0, 0));
+    }
+
+    #[test]
+    fn test_plane_fill_bg() {
+        let mut plane = Plane::new(1, 10, 5);
+        plane.fill_bg(Color::Ansi(21));
+        for cell in &plane.cells {
+            assert_eq!(cell.bg, Color::Ansi(21));
+        }
+    }
+
+    #[test]
+    fn test_plane_blit_from() {
+        let mut dest = Plane::new(1, 20, 10);
+        let mut src = Plane::new(2, 5, 3);
+        src.put_char(1, 1, 'T');
+
+        dest.blit_from(&src, 2, 2);
+        assert_eq!(dest.get_char(3, 3), Some('T'));
+    }
+
+    #[test]
+    fn test_plane_blit_from_fast_opaque() {
+        let mut dest = Plane::new(1, 10, 5);
+        let src = Plane::new(2, 10, 5);
+
+        // Fast blit should work for fully opaque planes
+        dest.blit_from_fast(&src);
+    }
+
+    #[test]
+    fn test_plane_crop() {
+        let mut plane = Plane::new(1, 20, 10);
+        plane.put_char(15, 5, 'C');
+
+        let cropped = plane.crop(Rect::new(10, 3, 10, 5));
+        assert_eq!(cropped.width, 10);
+        assert_eq!(cropped.height, 5);
+        assert_eq!(cropped.x, 10);
+        assert_eq!(cropped.y, 3);
+        assert_eq!(cropped.get_char(5, 2), Some('C'));
+    }
+
+    #[test]
+    fn test_plane_crop_out_of_bounds() {
+        let plane = Plane::new(1, 10, 5);
+        // Should clamp to plane bounds
+        let cropped = plane.crop(Rect::new(100, 100, 50, 50));
+        assert_eq!(cropped.width, 10);
+        assert_eq!(cropped.height, 5);
+    }
+
+    #[test]
+    fn test_plane_set_position() {
+        let mut plane = Plane::new(1, 20, 10);
+        plane.set_position(50, 30);
+        assert_eq!(plane.x, 50);
+        assert_eq!(plane.y, 30);
+    }
+
+    #[test]
+    fn test_plane_z_index() {
+        let mut plane = Plane::new(1, 20, 10);
+        assert_eq!(plane.z_index, 0);
+
+        plane.z_index = 5;
+        assert_eq!(plane.z_index, 5);
+    }
+
+    #[test]
+    fn test_plane_visibility() {
+        let mut plane = Plane::new(1, 20, 10);
+        assert!(plane.visible);
+
+        plane.visible = false;
+        assert!(!plane.visible);
+    }
+
+    #[test]
+    fn test_plane_opacity() {
+        let mut plane = Plane::new(1, 20, 10);
+        assert_eq!(plane.opacity, 1.0);
+
+        plane.opacity = 0.5;
+        assert_eq!(plane.opacity, 0.5);
+    }
+
+    #[test]
+    fn test_plane_id() {
+        let plane = Plane::new(42, 20, 10);
+        assert_eq!(plane.id, 42);
+    }
+
+    #[test]
+    fn test_cell_default() {
+        let cell = Cell::default();
+        assert_eq!(cell.char, ' ');
+        assert_eq!(cell.fg, Color::Reset);
+        assert_eq!(cell.bg, Color::Reset);
+        assert!(cell.transparent);
+        assert!(!cell.skip);
+        assert_eq!(cell.style, Styles::empty());
+    }
+
+    #[test]
+    fn test_cell_clone() {
+        let cell = Cell {
+            char: 'X',
+            fg: Color::Rgb(255, 0, 0),
+            bg: Color::Rgb(0, 0, 255),
+            transparent: false,
+            skip: false,
+            style: Styles::BOLD,
+        };
+        let cloned = cell;
+        assert_eq!(cloned.char, 'X');
+        assert_eq!(cloned.fg, Color::Rgb(255, 0, 0));
+    }
+}
