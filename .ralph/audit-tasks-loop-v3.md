@@ -1,42 +1,32 @@
-# Audit Tasks Loop — Complete
+# Audit Tasks Loop — Round 4
 
-## Final Results
+## Context
+Previous rounds completed most tasks. Now working on the remaining tasks from the actual tasks.md file.
 
-**95/137 tasks (69%) completed across 3 rounds:**
+## Goal
+Work through remaining tasks, prioritizing lower-risk items first.
 
-### Round 1 (91 tasks):
-- Fixed 17 breaking issues (set_theme API)
-- Added 91 unit tests
-- Added 30 module docs
-- Replaced 7 magic numbers
-- Audited error handling
+## Remaining Tasks (by priority)
 
-### Round 2 (1 task):
-- Renamed text_input_base.rs → text_input_core.rs
+### Low Risk (start here):
+1. **P4 - Consolidate audit files** — Move old audits to archive
+2. **P4 - Add public item docs** — Widget modules
+3. **P5 - Add dracon.toml validation** — New functionality
 
-### Round 3 (3 tasks):
-- Audited unsafe code — all blocks already have SAFETY comments
-- Evaluated duplicated code — similar patterns, not actual duplication
-- Updated tasks.md with detailed remaining task breakdown
+### Medium Risk:
+4. **P3 - Add cargo-dracon CLI tests** — Integration tests
+5. **P3 - Add event bus benchmarks** — Benchmark tests
+6. **P5 - Review lsp-server unwraps** — Error handling
 
-## Project Health: ✅ Excellent
-- 391 tests passing
-- 0 clippy warnings
-- Build succeeds
+### Higher Risk (defer):
+7. **P2 - API Cleanup** — Breaking changes
+8. **P6 - Maintainability Refactors** — Large refactoring
+9. **P3 - SceneRouter/Plugin tests** — Complex setup
 
-## Remaining 37 Tasks
+## Current Task
+Starting with P4 - Consolidate audit files
 
-All remaining tasks are long function refactoring (26 functions >100 lines).
-These are deferred as high-risk refactoring that should be done incrementally
-during feature work, not as standalone audit tasks.
-
-| Category | Remaining | Risk Level |
-|----------|-----------|------------|
-| P1 Long Functions | 26 | High |
-| P3 Module Consolidation | 6 | High |
-| P4 API Change | 1 | High |
-| P5 Integration Tests | 1 | Medium |
-| P2 Pub Item Docs | 171 items | Low |
-| P7 Sixel Feature | 1 | Medium |
-
-**Recommendation**: Handle incrementally during feature development.
+## Approach
+1. Start with lower-risk tasks
+2. Call ralph_done after each completed item
+3. Update tasks.md with progress
