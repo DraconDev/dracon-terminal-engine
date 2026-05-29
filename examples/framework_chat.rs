@@ -64,7 +64,7 @@ fn main() -> std::io::Result<()> {
     let show_help_input = Arc::clone(&show_help);
     let show_help_render = Arc::clone(&show_help);
 
-    let mut app = App::new()?
+    let app = App::new()?
         .title("Framework Chat")
         .fps(30)
         .set_theme(theme);
