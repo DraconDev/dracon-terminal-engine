@@ -6,31 +6,23 @@ Repo: `/home/dracon/Dev/dracon-terminal-engine`
 This backlog is based on the current working tree, existing audit notes, and live verification commands:
 
 - `cargo check --lib --all-features` passes.
-- `cargo check --all-targets --all-features` fails.
-- `cargo clippy --all-targets --all-features` fails.
-- `cargo fmt --check` fails.
+- `cargo check --all-targets --all-features` passes.
+- `cargo clippy --all-targets --all-features -- -D warnings` passes.
+- `cargo fmt --all -- --check` passes.
+- `cargo test --all-features` passes.
 
 ## P0 - Restore Build And CI Health
 
-- [ ] Fix stale renamed-module imports in tests so `cargo check --all-targets --all-features` passes.
-  - `tests/widget_text_input_base_test.rs` imports `framework::widgets::text_input_base::BaseInput`; update to `framework::widgets::text_input_core::BaseInput`.
-  - `tests/widget_tabbar_test.rs` imports `framework::widgets::tabbar::TabBar`; update to `framework::widgets::tab_bar::TabBar` or the public `framework::widgets::TabBar` re-export.
-  - `tests/widget_list_common_test.rs` imports `framework::widgets::list_common`; update to `framework::widgets::list_helpers`.
+- [x] Fix stale renamed-module imports in tests so `cargo check --all-targets --all-features` passes.
+  - Preserved compatibility by keeping deprecated aliases for `text_input_base`, `tabbar`, and `list_common`.
 
-- [ ] Remove duplicate `#[test]` attributes that still emit warnings.
-  - `tests/widget_widget_inspector_test.rs:39`
-  - `tests/widget_status_bar_test.rs:15`
-  - Re-run `rg -n "#\\[test\\]" tests src` or use a small script to detect adjacent duplicate attributes.
+- [x] Remove duplicate `#[test]` attributes that still emit warnings.
 
-- [ ] Run `cargo fmt --all` and commit the formatting-only drift.
-  - `cargo fmt --check` currently reports drift in source, examples, and tests including `examples/_apps/file_manager.rs`, multiple `_cookbook` examples, `examples/framework_chat.rs`, `examples/git_tui.rs`, `src/core/terminal.rs`, `src/input/reader.rs`, `src/utils.rs`, and `src/visuals/icons.rs`.
+- [x] Run `cargo fmt --all` and commit the formatting-only drift.
 
-- [ ] Fix current clippy warnings after the test imports compile.
-  - `src/compositor/plane.rs:555`: replace identity expression `1 * 10 + 3` with `10 + 3` or a named index expression.
-  - `src/core/terminal.rs:418`: replace `term.len() > 0` with `!term.is_empty()`.
-  - Re-run `cargo clippy --all-targets --all-features -- -D warnings`.
+- [x] Fix current clippy warnings after the test imports compile.
 
-- [ ] Run the full verification suite after P0 fixes.
+- [x] Run the full verification suite after P0 fixes.
   - `cargo fmt --all -- --check`
   - `cargo check --all-targets --all-features`
   - `cargo clippy --all-targets --all-features -- -D warnings`
@@ -38,27 +30,27 @@ This backlog is based on the current working tree, existing audit notes, and liv
 
 ## P1 - Release And Metadata Correctness
 
-- [ ] Fix release workflow packaging.
+- [x] Fix release workflow packaging.
   - `.github/workflows/release.yml` uploads `LICENSE-MIT` and `LICENSE-APACHE`, but the repo currently has `LICENSE` and package metadata says `AGPL-3.0-only`.
   - Update release files to match the actual license files, or add the missing license files if dual licensing is intentional.
 
-- [ ] Reconcile README, changelog, and crate metadata.
+- [x] Reconcile README, changelog, and crate metadata.
   - `Cargo.toml` version is `0.1.10`.
   - `README.md` still references framework "v29", `v29.11.0`, 41 widgets, and 21 themes.
   - Existing audits claim 47 framework widgets and 55+ examples.
   - Decide the canonical public counts and version language, then update `README.md`, `CHANGELOG.md`, and any generated docs consistently.
 
-- [ ] Add a release dry-run gate before publishing tags.
+- [x] Add a release dry-run gate before publishing tags.
   - Add `cargo publish --dry-run` to release workflow once package metadata and exclude/include lists are correct.
   - Keep crates.io publish manual or token-gated until release contents are verified.
 
-- [ ] Review package exclusions.
+- [x] Review package exclusions.
   - `Cargo.toml` excludes `extensions/**`, `rust_out/**`, `.sisyphus/**`, and `plans/**`, but local audit/task files and generated artifacts remain package candidates.
   - Run `cargo package --list` and exclude non-release audit files if they should not ship.
 
 ## P2 - API Cleanup And Compatibility
 
-- [ ] Remove or preserve compatibility aliases for renamed modules.
+- [x] Remove or preserve compatibility aliases for renamed modules.
   - Renames from `tabbar` to `tab_bar`, `list_common` to `list_helpers`, and `text_input_base` to `text_input_core` broke tests.
   - Decide whether these were intended breaking changes. If not, add deprecated module aliases that re-export the new modules.
 
@@ -81,7 +73,7 @@ This backlog is based on the current working tree, existing audit notes, and liv
 
 ## P3 - Testing Gaps
 
-- [ ] Add regression tests for renamed module compatibility.
+- [x] Add regression tests for renamed module compatibility.
   - If deprecated aliases are kept, add compile-time import tests for old and new paths.
   - If aliases are removed, update tests and document the breaking change.
 
@@ -107,15 +99,15 @@ This backlog is based on the current working tree, existing audit notes, and liv
 
 ## P4 - Documentation And Examples
 
-- [ ] Update example count and widget count docs.
+- [x] Update example count and widget count docs.
   - README and testing docs still mention older counts such as 29 scenes and 41 widgets.
   - Make counts either generated or deliberately approximate to avoid constant drift.
 
-- [ ] Update quick-start examples to current APIs.
+- [x] Update quick-start examples to current APIs.
   - README still shows `.theme(Theme::cyberpunk())`; use `.set_theme(Theme::from_env_or(Theme::cyberpunk()))`.
   - Make all new example snippets follow the AGENTS.md theme inheritance rule.
 
-- [ ] Document the `Widget::render(&self)` design decision.
+- [x] Document the `Widget::render(&self)` design decision.
   - Existing audit notes say this is intentional for compositor/render scheduling.
   - Add a short note to the `Widget` trait docs explaining why render is immutable while input handlers are mutable.
 
@@ -176,11 +168,17 @@ cargo check --lib --all-features
 PASS
 
 cargo check --all-targets --all-features
-FAIL: stale test imports for text_input_base
+PASS
 
-cargo clippy --all-targets --all-features
-FAIL: stale test imports for tabbar/list_common; clippy warnings pending
+cargo clippy --all-targets --all-features -- -D warnings
+PASS
 
-cargo fmt --check
-FAIL: formatting drift across source, examples, and tests
+cargo fmt --all -- --check
+PASS
+
+cargo test --all-features
+PASS
+
+cargo publish --dry-run --allow-dirty
+PASS
 ```
