@@ -744,8 +744,10 @@ fn main() -> std::io::Result<()> {
         show_help_for_input,
     );
 
-    let mut app = App::new()?.title("Task Manager Tutorial").fps(30);
-    app.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?
+        .title("Task Manager Tutorial")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 

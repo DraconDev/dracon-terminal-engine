@@ -1247,8 +1247,10 @@ fn main() -> std::io::Result<()> {
     let theme = Theme::from_env_or(Theme::nord());
     let git = GitTui::new(should_quit, theme.clone());
 
-    let mut app = App::new()?.title("Git TUI").fps(30);
-    app.set_theme(theme);
+    let mut app = App::new()?
+        .title("Git TUI")
+        .fps(30)
+        .set_theme(theme);
     app.add_widget(Box::new(git), Rect::new(0, 0, w, h));
 
     app.on_tick(move |ctx, _| {

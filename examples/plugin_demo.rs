@@ -635,8 +635,10 @@ fn main() -> io::Result<()> {
     let state_for_tick = Rc::clone(&state);
     let state_for_input = Rc::clone(&state);
 
-    let mut app = App::new()?.title("Plugin Demo").fps(30);
-    app.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?
+        .title("Plugin Demo")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     let router = InputRouter {
         state: state_for_input,

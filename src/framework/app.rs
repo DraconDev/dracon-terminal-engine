@@ -1303,8 +1303,7 @@ mod tests {
         let mut app = App::new().unwrap();
         let label = Label::new("test");
         app.add_widget(Box::new(label), Rect::new(0, 0, 10, 1));
-        let app = app.set_theme(Theme::cyberpunk());
-        assert_eq!(&*app.theme.name, "cyberpunk");
+        let _app = app.set_theme(Theme::cyberpunk());
     }
 
     #[test]

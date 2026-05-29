@@ -392,10 +392,12 @@ fn main() -> io::Result<()> {
     let demo_for_render = Rc::clone(&demo);
     let demo_for_input = Rc::clone(&demo);
 
-    let mut app = App::new()?.title("Modal Demo").fps(30);
-    app.set_theme(Theme::from_env_or(Theme::dark()));
+    let mut app = App::new()?
+        .title("Modal Demo")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::dark()));
 
-    app.set_theme(env_theme.clone());
+    let _app = app.set_theme(env_theme.clone());
 
     // Register input router so keyboard/mouse events reach the demo
     let router = ModalDemoRouter {

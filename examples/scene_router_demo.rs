@@ -638,8 +638,10 @@ fn main() -> std::io::Result<()> {
         keybindings,
     );
 
-    let mut app = App::new()?.title("Scene Router Demo").fps(30);
-    app.set_theme(Theme::from_env_or(Theme::nord()));
+    let mut app = App::new()?
+        .title("Scene Router Demo")
+        .fps(30)
+        .set_theme(Theme::from_env_or(Theme::nord()));
 
     app.add_widget(Box::new(app_router), Rect::new(0, 0, 80, 24));
 
