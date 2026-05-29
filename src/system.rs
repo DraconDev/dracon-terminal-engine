@@ -296,3 +296,181 @@ impl SystemMonitor {
         final_disks
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_disk_info_creation() {
+        let disk = DiskInfo {
+            name: "/".to_string(),
+            device: "/dev/sda1".to_string(),
+            used_space: 50_000_000_000.0,
+            available_space: 450_000_000_000.0,
+            total_space: 500_000_000_000.0,
+            is_mounted: true,
+        };
+        assert_eq!(disk.name, "/");
+        assert_eq!(disk.device, "/dev/sda1");
+        assert!(disk.is_mounted);
+        assert!(disk.total_space > disk.used_space);
+    }
+
+    #[test]
+    fn test_disk_info_clone() {
+        let disk = DiskInfo {
+            name: "/home".to_string(),
+            device: "/dev/sda2".to_string(),
+            used_space: 100_000_000_000.0,
+            available_space: 400_000_000_000.0,
+            total_space: 500_000_000_000.0,
+            is_mounted: true,
+        };
+        let cloned = disk.clone();
+        assert_eq!(cloned.name, disk.name);
+        assert_eq!(cloned.total_space, disk.total_space);
+    }
+
+    #[test]
+    fn test_process_info_creation() {
+        let proc = ProcessInfo {
+            pid: 1234,
+            ppid: Some(1),
+            name: "test_process".to_string(),
+            cpu: 25.5,
+            mem: 128.0,
+            user: "testuser".to_string(),
+            status: "Running".to_string(),
+        };
+        assert_eq!(proc.pid, 1234);
+        assert_eq!(proc.ppid, Some(1));
+        assert_eq!(proc.name, "test_process");
+        assert!(proc.cpu >= 0.0);
+        assert!(proc.mem >= 0.0);
+    }
+
+    #[test]
+    fn test_process_info_no_ppid() {
+        let proc = ProcessInfo {
+            pid: 1,
+            ppid: None,
+            name: "init".to_string(),
+            cpu: 0.0,
+            mem: 10.0,
+            user: "root".to_string(),
+            status: "Sleeping".to_string(),
+        };
+        assert_eq!(proc.ppid, None);
+    }
+
+    #[test]
+    fn test_process_info_clone() {
+        let proc = ProcessInfo {
+            pid: 5678,
+            ppid: Some(1000),
+            name: "clone_test".to_string(),
+            cpu: 50.0,
+            mem: 256.0,
+            user: "admin".to_string(),
+            status: "Running".to_string(),
+        };
+        let cloned = proc.clone();
+        assert_eq!(cloned.pid, proc.pid);
+        assert_eq!(cloned.name, proc.name);
+    }
+
+    #[test]
+    fn test_system_data_creation() {
+        let data = SystemData {
+            cpu_usage: 45.0,
+            cpu_cores: vec![40.0, 50.0, 45.0, 45.0],
+            mem_usage: 8.5,
+            total_mem: 16.0,
+            swap_usage: 0.0,
+            total_swap: 32.0,
+            disks: vec![],
+            processes: vec![],
+            net_in: 1_000_000,
+            net_out: 500_000,
+            uptime: 3600,
+            os_name: "Linux".to_string(),
+            os_version: "6.1.0".to_string(),
+            kernel_version: "6.1.0-amd64".to_string(),
+            hostname: "localhost".to_string(),
+        };
+        assert_eq!(data.cpu_usage, 45.0);
+        assert_eq!(data.cpu_cores.len(), 4);
+        assert_eq!(data.mem_usage, 8.5);
+        assert!(data.uptime > 0);
+    }
+
+    #[test]
+    fn test_system_data_with_disks_and_processes() {
+        let disk = DiskInfo {
+            name: "/".to_string(),
+            device: "/dev/sda1".to_string(),
+            used_space: 100_000_000_000.0,
+            available_space: 400_000_000_000.0,
+            total_space: 500_000_000_000.0,
+            is_mounted: true,
+        };
+
+        let proc = ProcessInfo {
+            pid: 1000,
+            ppid: Some(1),
+            name: "systemd".to_string(),
+            cpu: 0.5,
+            mem: 50.0,
+            user: "root".to_string(),
+            status: "Sleeping".to_string(),
+        };
+
+        let data = SystemData {
+            cpu_usage: 10.0,
+            cpu_cores: vec![10.0],
+            mem_usage: 4.0,
+            total_mem: 16.0,
+            swap_usage: 2.0,
+            total_swap: 8.0,
+            disks: vec![disk],
+            processes: vec![proc],
+            net_in: 0,
+            net_out: 0,
+            uptime: 86400,
+            os_name: "Linux".to_string(),
+            os_version: "5.15.0".to_string(),
+            kernel_version: "5.15.0-generic".to_string(),
+            hostname: "server".to_string(),
+        };
+
+        assert_eq!(data.disks.len(), 1);
+        assert_eq!(data.processes.len(), 1);
+        assert_eq!(data.disks[0].name, "/");
+        assert_eq!(data.processes[0].name, "systemd");
+    }
+
+    #[test]
+    fn test_system_data_clone() {
+        let data = SystemData {
+            cpu_usage: 25.0,
+            cpu_cores: vec![25.0, 25.0],
+            mem_usage: 8.0,
+            total_mem: 32.0,
+            swap_usage: 0.0,
+            total_swap: 16.0,
+            disks: vec![],
+            processes: vec![],
+            net_in: 1_000_000_000,
+            net_out: 500_000_000,
+            uptime: 100000,
+            os_name: "Linux".to_string(),
+            os_version: "6.0.0".to_string(),
+            kernel_version: "6.0.0".to_string(),
+            hostname: "test".to_string(),
+        };
+        let cloned = data.clone();
+        assert_eq!(cloned.cpu_usage, data.cpu_usage);
+        assert_eq!(cloned.uptime, data.uptime);
+    }
+}
