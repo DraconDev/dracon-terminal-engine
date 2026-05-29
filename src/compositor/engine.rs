@@ -769,3 +769,91 @@ pub fn map_color(c: ratatui::style::Color) -> Color {
         RColor::Rgb(r, g, b) => Color::Rgb(r, g, b),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compositor_new() {
+        let compositor = Compositor::new(80, 24);
+        assert_eq!(compositor.width, 80);
+        assert_eq!(compositor.height, 24);
+        assert!(compositor.planes.is_empty());
+        assert_eq!(compositor.widget_count(), 0);
+    }
+
+    #[test]
+    fn test_compositor_clear_color() {
+        let mut compositor = Compositor::new(80, 24);
+        assert_eq!(compositor.clear_color(), Color::Reset);
+
+        compositor.set_clear_color(Color::Rgb(10, 20, 30));
+        assert_eq!(compositor.clear_color(), Color::Rgb(10, 20, 30));
+    }
+
+    #[test]
+    fn test_compositor_frame_duration() {
+        let mut compositor = Compositor::new(80, 24);
+        assert_eq!(compositor.last_frame_duration_ms(), 0.0);
+
+        compositor.set_last_frame_duration(16.5);
+        assert_eq!(compositor.last_frame_duration_ms(), 16.5);
+    }
+
+    #[test]
+    fn test_compositor_add_plane() {
+        let mut compositor = Compositor::new(80, 24);
+        let plane = Plane::new(1, 40, 12);
+        compositor.add_plane(plane);
+        assert_eq!(compositor.planes.len(), 1);
+    }
+
+    #[test]
+    fn test_compositor_add_multiple_planes() {
+        let mut compositor = Compositor::new(80, 24);
+        compositor.add_plane(Plane::new(1, 20, 10));
+        compositor.add_plane(Plane::new(2, 30, 15));
+        compositor.add_plane(Plane::new(3, 25, 20));
+        assert_eq!(compositor.planes.len(), 3);
+    }
+
+    #[test]
+    fn test_compositor_remove_plane() {
+        let mut compositor = Compositor::new(80, 24);
+        let plane = Plane::new(42, 20, 10);
+        compositor.add_plane(plane);
+        assert_eq!(compositor.planes.len(), 1);
+
+        compositor.remove_plane(42);
+        assert!(compositor.planes.is_empty());
+    }
+
+    #[test]
+    fn test_compositor_remove_nonexistent_plane() {
+        let mut compositor = Compositor::new(80, 24);
+        compositor.add_plane(Plane::new(1, 20, 10));
+        // Should not panic
+        compositor.remove_plane(999);
+        assert_eq!(compositor.planes.len(), 1);
+    }
+
+    #[test]
+    fn test_compositor_size() {
+        let compositor = Compositor::new(100, 50);
+        assert_eq!(compositor.width, 100);
+        assert_eq!(compositor.height, 50);
+    }
+
+    #[test]
+    fn test_compositor_set_widget_count() {
+        let mut compositor = Compositor::new(80, 24);
+        assert_eq!(compositor.widget_count(), 0);
+
+        compositor.set_widget_count(5);
+        assert_eq!(compositor.widget_count(), 5);
+
+        compositor.set_widget_count(10);
+        assert_eq!(compositor.widget_count(), 10);
+    }
+}
