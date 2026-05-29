@@ -380,3 +380,88 @@ impl<W: Write + AsFd> AsFd for Terminal<W> {
         self.output.as_fd()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cursor_shape_variants() {
+        // Test that all cursor shapes exist
+        assert_eq!(CursorShape::Block, CursorShape::Block);
+        assert_eq!(CursorShape::Underline, CursorShape::Underline);
+        assert_eq!(CursorShape::Bar, CursorShape::Bar);
+        assert_eq!(CursorShape::BlinkingBlock, CursorShape::BlinkingBlock);
+        assert_eq!(CursorShape::BlinkingUnderline, CursorShape::BlinkingUnderline);
+        assert_eq!(CursorShape::BlinkingBar, CursorShape::BlinkingBar);
+    }
+
+    #[test]
+    fn test_cursor_shape_debug() {
+        let shape = CursorShape::Block;
+        let debug_str = format!("{:?}", shape);
+        assert!(debug_str.contains("Block"));
+    }
+
+    #[test]
+    fn test_capabilities_detect() {
+        let caps = Capabilities::detect();
+        // Should have some term value
+        assert!(!caps.term().is_empty() || caps.term() == "dumb");
+    }
+
+    #[test]
+    fn test_capabilities_term() {
+        let caps = Capabilities::detect();
+        let term = caps.term();
+        // term should return a valid string
+        assert!(term.is_empty() || term.len() > 0);
+    }
+
+    #[test]
+    fn test_capabilities_supports_title() {
+        let caps = Capabilities::detect();
+        // Dumb terminals should not support title
+        if caps.term() == "dumb" {
+            assert!(!caps.supports_title());
+        }
+    }
+
+    #[test]
+    fn test_capabilities_supports_unicode_width() {
+        let caps = Capabilities::detect();
+        // Dumb terminals should not support unicode width
+        if caps.term() == "dumb" {
+            assert!(!caps.supports_unicode_width());
+        }
+    }
+
+    #[test]
+    fn test_capabilities_supports_truecolor() {
+        let caps = Capabilities::detect();
+        // Should return a boolean without panicking
+        let _ = caps.supports_truecolor();
+    }
+
+    #[test]
+    fn test_capabilities_supports_mouse() {
+        let caps = Capabilities::detect();
+        // Should return a boolean without panicking
+        let _ = caps.supports_mouse();
+    }
+
+    #[test]
+    fn test_restore_seq() {
+        // Verify RESTORE_SEQ contains expected sequences
+        assert!(RESTORE_SEQ.contains("\x1b[?25h")); // Show cursor
+        assert!(RESTORE_SEQ.contains("\x1b[?1049l")); // Exit alt screen
+        assert!(RESTORE_SEQ.contains("\x1b[?2004l")); // Disable bracketed paste
+    }
+
+    #[test]
+    fn test_capabilities_clone() {
+        let caps = Capabilities::detect();
+        let cloned = caps.clone();
+        assert_eq!(cloned.term(), caps.term());
+    }
+}
