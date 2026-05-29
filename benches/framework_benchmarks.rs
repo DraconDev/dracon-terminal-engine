@@ -474,3 +474,12 @@ criterion_group!(
 );
 
 criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool);
+
+criterion_group!(
+    event_bus,
+    bench_eventbus_publish_10_subscribers,
+    bench_eventbus_subscribe_once
+);
+
+criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool, event_bus);
+

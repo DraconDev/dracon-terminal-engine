@@ -89,9 +89,9 @@ This backlog is based on the current working tree, existing audit notes, and liv
   - Created tests for help, version, new, init, and error handling.
   - Added tempfile dev dependency.
 
-- [ ] Add event bus benchmarks.
-  - Publish 1000 events to 10 subscribers.
-  - `subscribe_once` with 100 callbacks and cleanup.
+- [x] Add event bus benchmarks.
+  - Added publish benchmarks for 1000 and 100 events with 10 subscribers.
+  - Added subscribe_once benchmarks for 100 and 10 callbacks.
 
 - [ ] Expand widget interaction tests where coverage is still shallow.
   - Prioritize mouse hover clearing, focus styling, theme propagation, and bounded text clipping.
