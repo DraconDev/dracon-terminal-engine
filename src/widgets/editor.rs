@@ -1,3 +1,24 @@
+//! Standalone TextEditor widget for viewing and editing text.
+//!
+//! This module provides a standalone text editor widget, independent of the
+//! framework's Widget trait. It supports:
+//!
+//! - **Text editing**: Insert, delete, cut, copy, paste operations
+//! - **Navigation**: Arrow keys, Page Up/Down, Home/End
+//! - **Selection**: Mouse selection, Shift+arrow, Ctrl+A
+//! - **Search**: Find, filter, goto line (see [`SearchState`])
+//! - **Syntax highlighting**: Via `syntect` crate (behind `syntax-highlighting` feature)
+//! - **Line numbers**: Optional line number gutter
+//! - **Undo/Redo**: Full edit history
+//!
+//! # Example
+//!
+//! ```ignore
+//! let mut editor = TextEditor::new();
+//! editor.set_content("Hello, world!");
+//! // Use as a widget...
+//! ```
+
 use crate::error::DraconError;
 use crate::input::event::{
     Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
