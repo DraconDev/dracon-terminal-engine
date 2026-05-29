@@ -231,7 +231,7 @@ impl crate::framework::widget::Widget for TabBar {
 
 impl WidgetState for TabBar {
     fn state_id(&self) -> Option<&str> {
-        Some("tabbar")
+        Some("tab_bar")
     }
 
     fn to_json(&self) -> serde_json::Value {
