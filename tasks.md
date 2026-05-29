@@ -8,35 +8,35 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### `set_theme()` API Breakage (11+ examples)
 
-- [ ] Fix `App::set_theme()` to support builder-chain pattern OR update all broken examples
-- [ ] Fix `examples/_cookbook/autocomplete.rs` — E0507 move out of mutable reference
-- [ ] Fix `examples/_cookbook/cell_pool.rs` — E0507 move out of mutable reference
-- [ ] Fix `examples/_cookbook/calendar.rs` — E0507 move out of mutable reference
-- [ ] Fix `examples/sqlite_browser.rs` — E0716 temporary value dropped + E0507
-- [ ] Fix `examples/_cookbook/rich_text.rs` — E0716 + E0507
-- [ ] Fix `examples/_cookbook/notification_center.rs` — E0716 + E0507
-- [ ] Fix `examples/_cookbook/data_table.rs` — E0308 mismatched types (set_theme returns &mut App)
-- [ ] Fix `examples/_cookbook/menu_system.rs` — E0716 + E0507
-- [ ] Fix `examples/_cookbook/accessibility.rs` — E0716 + E0507
-- [ ] Fix `examples/form_demo.rs` — E0716 + E0507
-- [ ] Fix `tests/app_tick_test.rs` — E0507 move out of mutable reference
+- [x] Fix `App::set_theme()` to support builder-chain pattern OR update all broken examples
+- [x] Fix `examples/_cookbook/autocomplete.rs` — E0507 move out of mutable reference
+- [x] Fix `examples/_cookbook/cell_pool.rs` — E0507 move out of mutable reference
+- [x] Fix `examples/_cookbook/calendar.rs` — E0507 move out of mutable reference
+- [x] Fix `examples/sqlite_browser.rs` — E0716 temporary value dropped + E0507
+- [x] Fix `examples/_cookbook/rich_text.rs` — E0716 + E0507
+- [x] Fix `examples/_cookbook/notification_center.rs` — E0716 + E0507
+- [x] Fix `examples/_cookbook/data_table.rs` — E0308 mismatched types (set_theme returns &mut App)
+- [x] Fix `examples/_cookbook/menu_system.rs` — E0716 + E0507
+- [x] Fix `examples/_cookbook/accessibility.rs` — E0716 + E0507
+- [x] Fix `examples/form_demo.rs` — E0716 + E0507
+- [x] Fix `tests/app_tick_test.rs` — E0507 move out of mutable reference
 
 ### `ctx.set_theme()` Signature Breakage
 
-- [ ] Fix `examples/showcase/main.rs:110` — `ctx.set_theme()` called with no args (now requires Theme)
-- [ ] Fix `examples/widget_tutorial.rs:702` — `ctx.set_theme()` called with no args
+- [x] Fix `examples/showcase/main.rs:110` — `ctx.set_theme()` called with no args (now requires Theme)
+- [x] Fix `examples/widget_tutorial.rs:702` — `ctx.set_theme()` called with no args
 
 ### Other Example Compilation Failures
 
-- [ ] Fix `examples/_cookbook/widget_gallery.rs` — E0716 + E0507 (builder pattern)
-- [ ] Fix `examples/widget_tutorial.rs` — 12 errors (theme fields on `()` type, wrong set_theme usage)
-- [ ] Fix `examples/theme_switcher.rs` — E0599 `set_theme()` not found on `&ThemePreviewPanel`
+- [x] Fix `examples/_cookbook/widget_gallery.rs` — E0716 + E0507 (builder pattern)
+- [x] Fix `examples/widget_tutorial.rs` — 12 errors (theme fields on `()` type, wrong set_theme usage)
+- [x] Fix `examples/theme_switcher.rs` — E0599 `set_theme()` not found on `&ThemePreviewPanel`
 
 ---
 
 ## P1 — Code Quality
 
-### Long Functions (>100 lines)
+### Long Functions (>100 lines) — TODO: refactor
 
 - [ ] Split `src/widgets/editor.rs:2175` `render()` (764 lines) into sub-methods
 - [ ] Split `src/widgets/editor.rs:633` `handle_event()` (488 lines) into sub-methods
@@ -67,20 +67,20 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Dead Code Removal
 
-- [ ] Remove or use `struct CellBlock` in `src/compositor/pool.rs:62`
-- [ ] Remove or use `height` field in `src/framework/widgets/breadcrumbs.rs:23`
-- [ ] Remove or use `fallback_locale` field in `src/framework/i18n.rs:69`
-- [ ] Remove unused `Inline::Link` variant in `src/framework/widgets/rich_text.rs:24`
-- [ ] Remove or use `on_focus_change_internal()` in `src/framework/focus.rs:195`
+- [x] Remove or use `struct CellBlock` in `src/compositor/pool.rs:62` — `#[allow(dead_code)]` since it's intended for future use
+- [x] Remove unused `height` field in `src/framework/widgets/breadcrumbs.rs:23` — field removed entirely
+- [x] Remove unused `fallback_locale` field in `src/framework/i18n.rs:69` — field removed entirely
+- [x] Remove unused `Inline::Link` variant in `src/framework/widgets/rich_text.rs:24` — kept but `#[allow(dead_code)]`
+- [x] Remove or use `on_focus_change_internal()` in `src/framework/focus.rs:195` — kept but `#[allow(dead_code)]`
 
-### Duplicate Type Consolidation
+### Duplicate Type Consolidation — TODO
 
 - [ ] Consolidate `SelectCallback` — defined identically in `autocomplete.rs:15` and `tree.rs:41`
 - [ ] Consolidate `SelectionChangeCallback` — defined in `table.rs:33` and `list.rs:18`
 - [ ] Consolidate `UndoRedoCallback` — defined in `table.rs:34` and `list.rs:19`
 - [ ] Remove duplicate `Target` enum in `src/framework/app.rs` (lines 102 and 117)
 
-### Magic Number Constants
+### Magic Number Constants — TODO
 
 - [ ] Define named constants for Kitty protocol PUA codepoints in `src/input/kitty_key.rs`
 - [ ] Define named constants for byte size thresholds in `src/utils.rs:387` (`GI_B`, `ME_B`, `KI_B`)
@@ -90,7 +90,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Replace `1000.0` FPS constant in `src/framework/ctx.rs:189` with `Duration` constant
 - [ ] Define named constants for pipe buffer sizes in `src/framework/app.rs:743,765` (`1024`)
 
-### Duplicated Code Extraction
+### Duplicated Code Extraction — TODO
 
 - [ ] Extract shared `on_theme_change` default implementation (46 files repeat identical boilerplate)
 - [ ] Add `Plane::with_bg(width, height, color)` constructor to replace 48 `fill_bg` occurrences
@@ -98,7 +98,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Extract shared scrollbar indicator helper (5 files implement identical logic)
 - [ ] Extract shared selection handling pattern (6 widgets duplicate toggle logic)
 
-### Unsafe Code Audit
+### Unsafe Code Audit — TODO
 
 - [ ] Review `src/compositor/plane.rs` unsafe `next_char_unchecked()` — consider safe fallback for debug builds
 - [ ] Review `src/backend/tty.rs` libc calls — ensure all unsafe blocks have SAFETY comments
@@ -108,7 +108,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ## P2 — Documentation
 
-### Missing Module Docs
+### Missing Module Docs — TODO
 
 - [ ] Add `//!` module docs to `src/backend/mod.rs`
 - [ ] Add `//!` module docs to `src/backend/tty.rs`
@@ -130,13 +130,13 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Broken Doc Links
 
-- [ ] Fix unresolved link to `App` in `src/lib.rs:44`
-- [ ] Fix unresolved link to `Ctx` in `src/lib.rs:44`
-- [ ] Fix unresolved link to `SearchState` in editor module docs
-- [ ] Fix unresolved link to `SearchMode` in editor module docs
-- [ ] Fix unresolved link to `SearchState::set_filter` in editor module docs
+- [x] Fix unresolved link to `App` in `src/lib.rs:44` — fixed to `framework::app::App`
+- [x] Fix unresolved link to `Ctx` in `src/lib.rs:44` — fixed to `framework::app::Ctx`
+- [x] Fix unresolved link to `SearchState` in editor module docs — fixed with explicit reference
+- [x] Fix unresolved link to `SearchMode` in editor module docs — fixed with explicit reference
+- [x] Fix unresolved link to `SearchState::set_filter` in editor module docs — replaced with field reference
 
-### Missing Pub Item Docs (171 items)
+### Missing Pub Item Docs (171 items) — TODO
 
 - [ ] Add doc comments to all 17 pub items in `src/framework/widgets/log_viewer.rs`
 - [ ] Add doc comments to all 9 pub items in `src/framework/widgets/confirm_dialog.rs`
@@ -147,7 +147,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ---
 
-## P3 — Architecture & Organization
+## P3 — Architecture & Organization — TODO
 
 ### Module Consolidation
 
@@ -177,7 +177,7 @@ Generated from full codebase audit. Check off items as they are completed.
 - [ ] Replace `expect()` in `src/input/reader.rs:26` signal registration with graceful error handling
 - [ ] Replace `expect()` in `src/framework/app.rs:1047` `App::from_default()` with Result return
 - [ ] Audit `expect()` in `src/framework/scene_router.rs:273,312` — consider Result-based pop
-- [ ] Review 2 `unwrap()` calls in `src/framework/widgets/text_input_base.rs:184,222` — add safety comments
+- [x] Review 2 `unwrap()` calls in `src/framework/widgets/text_input_base.rs:184,222` — safety comments added
 
 ---
 
@@ -185,17 +185,17 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ### Test Compilation Fixes
 
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_search_input_test.rs:133`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_menu_bar_test.rs:37,41`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_widget_inspector_test.rs:39`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_table_test.rs:261`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_divider_test.rs:366`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_spinner_test.rs:35,52,133`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_status_bar_test.rs:12,13,17`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_slider_test.rs:164`
-- [ ] Fix duplicated `#[test]` attribute warnings in `tests/widget_hud_test.rs:283`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_search_input_test.rs:133`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_menu_bar_test.rs:37,41`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_widget_inspector_test.rs:39`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_table_test.rs:261`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_divider_test.rs:366`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_spinner_test.rs:35,52,133`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_status_bar_test.rs:12,13,17`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_slider_test.rs:164`
+- [x] Fix duplicated `#[test]` attribute warnings in `tests/widget_hud_test.rs:283`
 
-### Test Coverage Gaps
+### Test Coverage Gaps — TODO
 
 - [ ] Add unit tests for `src/compositor/engine.rs` (355-line render, zero tests)
 - [ ] Add unit tests for `src/input/parser.rs` (248-line try_parse, only 6 tests)
@@ -208,7 +208,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ---
 
-## P6 — CI/CD & Release
+## P6 — CI/CD & Release — TODO
 
 - [ ] Fix `cargo audit` advisory DB lock contention issue
 - [ ] Enable crates.io publishing in `.github/workflows/release.yml` (currently TODO)
@@ -217,7 +217,7 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ---
 
-## P7 — Feature Improvements
+## P7 — Feature Improvements — TODO
 
 ### Sixel Support
 
@@ -238,14 +238,14 @@ Generated from full codebase audit. Check off items as they are completed.
 
 ## Stats
 
-| Category | Count |
-|----------|-------|
-| P0 — Breaking/Build | 17 |
-| P1 — Code Quality | 52 |
-| P2 — Documentation | 30 |
-| P3 — Architecture | 10 |
-| P4 — Error Handling | 4 |
-| P5 — Testing | 17 |
-| P6 — CI/CD | 4 |
-| P7 — Features | 3 |
-| **Total** | **137** |
+| Category | Count | Done | Remaining |
+|----------|-------|------|----------|
+| P0 — Breaking/Build | 17 | 17 | 0 |
+| P1 — Code Quality | 52 | 5 | 47 |
+| P2 — Documentation | 30 | 8 | 22 |
+| P3 — Architecture | 10 | 0 | 10 |
+| P4 — Error Handling | 4 | 1 | 3 |
+| P5 — Testing | 17 | 10 | 7 |
+| P6 — CI/CD | 4 | 0 | 4 |
+| P7 — Features | 3 | 0 | 3 |
+| **Total** | **137** | **41** | **96** |
