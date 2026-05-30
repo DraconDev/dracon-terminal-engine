@@ -3,8 +3,6 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
 
-use unicode_width::UnicodeWidthStr;
-
 use crate::compositor::{Cell, Plane, Styles};
 use crate::framework::dragdrop::DragManager;
 use crate::framework::scroll::ScrollState;
@@ -339,7 +337,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for List<T> {
 
             let item = &self.items[idx];
             let text = item.to_string();
-            let label_len = text.width().min((area.width as usize).saturating_sub(2));
+            let label_len = text.chars().count().min((area.width as usize).saturating_sub(2));
             for (j, ch) in text.chars().take(label_len).enumerate() {
                 let cell_idx = (row * area.width + 1 + j as u16) as usize;
                 if cell_idx < plane.cells.len() {

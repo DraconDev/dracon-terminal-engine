@@ -294,9 +294,9 @@ fn bench_theme_creation(c: &mut Criterion) {
 // =============================================================================
 
 fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
-    use dracon_terminal_engine::framework::event_bus::{EventBus, EventRecord};
-    use std::any::Any;
-    use std::rc::Rc;
+    use dracon_terminal_engine::framework::event_bus::EventBus;
+    
+    
 
     #[derive(Clone, Debug)]
     struct TestEvent(String);
@@ -346,7 +346,7 @@ fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
         let fired_count = Arc::new(AtomicUsize::new(0));
 
         // Add 100 subscribe_once callbacks
-        for i in 0..100 {
+        for _i in 0..100 {
             let fired_clone = Arc::clone(&fired_count);
             bus.subscribe_once(move |_: &TestEvent| {
                 fired_clone.fetch_add(1, Ordering::SeqCst);
@@ -363,7 +363,7 @@ fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
         let fired_count = Arc::new(AtomicUsize::new(0));
 
         // Add 10 subscribe_once callbacks
-        for i in 0..10 {
+        for _i in 0..10 {
             let fired_clone = Arc::clone(&fired_count);
             bus.subscribe_once(move |_: &TestEvent| {
                 fired_clone.fetch_add(1, Ordering::SeqCst);

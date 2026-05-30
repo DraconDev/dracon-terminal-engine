@@ -1,7 +1,7 @@
 # Dracon Terminal Engine — Audit Tasklist
 
-**Status**: 22/31 tasks complete (71%)
-**Last Updated**: 2026-05-29
+**Status**: 22/31 tasks complete + 2 new bugs found (71%)
+**Last Updated**: 2026-05-30
 **Repo**: `/home/dracon/Dev/dracon-terminal-engine`
 
 ---
@@ -21,10 +21,48 @@
 
 ---
 
+## 🐛 NEW — Bug Fixes (P-BUGS) — 2/??? Found
+
+> Issues found during 2026-05-30 audit. Both affect user-facing functionality.
+
+### 🔴 HIGH — Chat Messages Not Displaying
+
+**File**: `src/framework/widgets/list.rs` (lines 340-350)
+
+**Problem**: `List::render()` calls `item.to_string()` to convert items to text, then uses `UnicodeWidthStr::width()` to measure. The `Message` struct has `Display` implemented correctly, but the List widget's `render()` uses `text.width()` which returns **glyph width**, not character count.
+
+**Impact**: Messages with wide characters (emoji, CJK) render incorrectly or may be truncated to 0 width.
+
+**Fix Required**:
+1. Option A: Use `text.chars().count()` instead of `text.width()` for message display
+2. Option B: Create a dedicated `ChatMessageList` widget that knows about `Message` type
+3. Option C: Pass a text-extraction closure to `List::new()` instead of relying on `ToString`
+
+**Severity**: High — affects core chat functionality
+
+### 🔴 HIGH — ColorPicker Hex Input Row Mismatch
+
+**File**: `src/framework/widgets/color_picker.rs` (lines 266-295)
+
+**Problem**: The hex input display is positioned at `y=1` but slider start is at `y=6`. The rendering uses `area.width + hex_x` (treating `area.width` as an offset from width, which is wrong). This causes:
+- Hex label to render at wrong column position
+- Hex value display to overlap/corrupt the swatch border
+- Y-coordinate bug: using `area.width` instead of row offset
+
+**Impact**: Color picker UI is visually broken — hex display doesn't align with its label, may overwrite swatch.
+
+**Fix Required**:
+1. Change index calculation from `(area.width + hex_x + i as u16)` to `(y * plane.width + x)` pattern
+2. Align hex display properly with swatch area
+
+**Severity**: High — affects color selection workflow
+
+---
+
 ## ✅ P0 — Build & CI Health (6/6 Complete)
 
 - [x] Fix stale renamed-module imports in tests
-- [x] Remove duplicate `#[test]` attributes  
+- [x] Remove duplicate `#[test]` attributes
 - [x] Run `cargo fmt --all` and commit formatting drift
 - [x] Fix clippy warnings after test imports compile
 - [x] Run full verification suite after P0 fixes
