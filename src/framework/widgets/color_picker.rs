@@ -266,7 +266,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         let hex_x = swatch_width + 4;
         let hex_label = "Hex: ";
         for (i, ch) in hex_label.chars().enumerate() {
-            let idx = (1 * area.width + hex_x + i as u16) as usize;
+            let idx = (area.width + hex_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = self.theme.fg_muted;
@@ -282,7 +282,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         };
 
         for (i, ch) in hex_display.chars().enumerate().take(8) {
-            let idx = (1 * area.width + hex_start + i as u16) as usize;
+            let idx = (area.width + hex_start + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = if self.input_focused {
