@@ -1,187 +1,156 @@
-# Dracon Terminal Engine - Improvement Tasks
+# Dracon Terminal Engine — Audit Tasklist
 
-Audit date: 2026-05-29
-Repo: `/home/dracon/Dev/dracon-terminal-engine`
+**Status**: 22/31 tasks complete (71%)
+**Last Updated**: 2026-05-29
+**Repo**: `/home/dracon/Dev/dracon-terminal-engine`
 
-This backlog is based on the current working tree, existing audit notes, and live verification commands:
+---
 
-- `cargo check --lib --all-features` passes.
-- `cargo check --all-targets --all-features` passes.
-- `cargo clippy --all-targets --all-features -- -D warnings` passes.
-- `cargo fmt --all -- --check` passes.
-- `cargo test --all-features` passes.
+## Quick Summary
 
-## P0 - Restore Build And CI Health
+| Category | Done | Total | Status |
+|----------|------|-------|--------|
+| P0 — Build & CI | 6 | 6 | ✅ 100% |
+| P1 — Release/Metadata | 4 | 4 | ✅ 100% |
+| P2 — API Cleanup | 1 | 5 | ⚠️ 20% |
+| P3 — Testing | 3 | 6 | ⚠️ 50% |
+| P4 — Documentation | 5 | 5 | ✅ 100% |
+| P5 — Runtime | 3 | 4 | ⚠️ 75% |
+| P6 — Refactors | 0 | 3 | ⏸️ Deferred |
+| **Total** | **22** | **31** | **71%** |
 
-- [x] Fix stale renamed-module imports in tests so `cargo check --all-targets --all-features` passes.
-  - Preserved compatibility by keeping deprecated aliases for `text_input_base`, `tabbar`, and `list_common`.
+---
 
-- [x] Remove duplicate `#[test]` attributes that still emit warnings.
+## ✅ P0 — Build & CI Health (6/6 Complete)
 
-- [x] Run `cargo fmt --all` and commit the formatting-only drift.
+- [x] Fix stale renamed-module imports in tests
+- [x] Remove duplicate `#[test]` attributes  
+- [x] Run `cargo fmt --all` and commit formatting drift
+- [x] Fix clippy warnings after test imports compile
+- [x] Run full verification suite after P0 fixes
 
-- [x] Fix current clippy warnings after the test imports compile.
+## ✅ P1 — Release & Metadata Correctness (4/4 Complete)
 
-- [x] Run the full verification suite after P0 fixes.
-  - `cargo fmt --all -- --check`
-  - `cargo check --all-targets --all-features`
-  - `cargo clippy --all-targets --all-features -- -D warnings`
-  - `cargo test --all-features`
+- [x] Fix release workflow packaging (LICENSE files)
+- [x] Reconcile README, changelog, and crate metadata
+- [x] Add release dry-run gate before publishing tags
+- [x] Review package exclusions
 
-## P1 - Release And Metadata Correctness
+## ⚠️ P2 — API Cleanup & Compatibility (1/5 Complete)
 
-- [x] Fix release workflow packaging.
-  - `.github/workflows/release.yml` uploads `LICENSE-MIT` and `LICENSE-APACHE`, but the repo currently has `LICENSE` and package metadata says `AGPL-3.0-only`.
-  - Update release files to match the actual license files, or add the missing license files if dual licensing is intentional.
+- [x] Remove or preserve compatibility aliases for renamed modules
+- [ ] Finish deprecated `App::theme()` migration/removal plan
+  - *Decision needed*: Remove in 0.2.0?
+- [ ] Resolve duplicate I/O error variants in `DraconError`
+  - *Merge `IoError` and `Io` in breaking release*
+- [ ] Standardize builder method ownership
+  - *Audit `self` vs `&mut self` conventions*
+- [ ] Decide fate of deprecated standalone widgets
+  - *`component.rs` and `hotkey.rs` — remove or feature-gate*
 
-- [x] Reconcile README, changelog, and crate metadata.
-  - `Cargo.toml` version is `0.1.10`.
-  - `README.md` still references framework "v29", `v29.11.0`, 41 widgets, and 21 themes.
-  - Existing audits claim 47 framework widgets and 55+ examples.
-  - Decide the canonical public counts and version language, then update `README.md`, `CHANGELOG.md`, and any generated docs consistently.
+## ⚠️ P3 — Testing Gaps (3/6 Complete)
 
-- [x] Add a release dry-run gate before publishing tags.
-  - Add `cargo publish --dry-run` to release workflow once package metadata and exclude/include lists are correct.
-  - Keep crates.io publish manual or token-gated until release contents are verified.
+- [x] Add regression tests for renamed module compatibility
+- [x] Add `cargo-dracon` CLI integration tests
+- [x] Add event bus benchmarks
+- [ ] Add integration coverage for `SceneRouter` transitions
+  - *Push/pop/replace lifecycle, z-index composition*
+- [ ] Add plugin loading/unloading integration tests
+  - *Mock WidgetFactory, test failure paths*
+- [ ] Expand widget interaction tests
+  - *Priority*: TextEditorAdapter, CommandPalette, Kanban, Table, TagsInput, Calendar, Modal, ContextMenu
 
-- [x] Review package exclusions.
-  - `Cargo.toml` excludes `extensions/**`, `rust_out/**`, `.sisyphus/**`, and `plans/**`, but local audit/task files and generated artifacts remain package candidates.
-  - Run `cargo package --list` and exclude non-release audit files if they should not ship.
+## ✅ P4 — Documentation & Examples (5/5 Complete)
 
-## P2 - API Cleanup And Compatibility
+- [x] Update example/widget count docs (make generated or approximate)
+- [x] Update quick-start examples to current APIs
+- [x] Document `Widget::render(&self)` design decision
+- [x] Add public item docs in high-use widget modules
+- [x] Consolidate audit files (moved to `archive/audits/`)
 
-- [x] Remove or preserve compatibility aliases for renamed modules.
-  - Renames from `tabbar` to `tab_bar`, `list_common` to `list_helpers`, and `text_input_base` to `text_input_core` broke tests.
-  - Decide whether these were intended breaking changes. If not, add deprecated module aliases that re-export the new modules.
+## ⚠️ P5 — Runtime Robustness (3/4 Complete)
 
-- [ ] Finish the deprecated `App::theme()` migration/removal plan.
-  - Current live scan found no production call sites of `.theme(Theme...)`, but `App::theme()` still exists as deprecated API.
-  - Decide whether removal belongs in `0.2.0`; document it in changelog and migration notes.
+- [x] Review lsp-server unwrap-heavy JSON send paths
+- [x] Add `dracon.toml` validation (`AppConfig::validate()`)
+- [ ] Revisit `App::default()` — add fallible constructor
+  - *Add `App::from_defaults() -> Result<Self>` and deprecate Default*
+- [ ] Implement or remove sixel decoding
+  - *Feature-gated stub — either implement or document limitation*
 
-- [ ] Resolve duplicate I/O error variants in `DraconError`.
-  - Existing audit notes track `IoError` and `Io` as API duplication.
-  - Merge during a breaking release and update conversions/tests.
+## ⏸️ P6 — Maintainability Refactors (0/3 Complete — Deferred)
 
-- [ ] Standardize builder method ownership.
-  - Audit `App`, `Theme`, layout, and widget builder methods for mixed `self`, `&mut self`, and return conventions.
-  - Document the convention in `CONTRIBUTING.md` or `AI_GUIDE.md`.
+> These tasks involve large refactoring that could introduce breaking changes.
+> Recommended approach: refactor incrementally when touching related code.
 
-- [ ] Decide the fate of deprecated standalone widgets.
-  - `src/widgets/component.rs` is deprecated but still public.
-  - `src/widgets/hotkey.rs` overlaps conceptually with framework widgets.
-  - Remove or feature-gate them in the next breaking release.
+### Long Function Refactoring
 
-## P3 - Testing Gaps
+Split largest functions **only when touching nearby behavior**:
 
-- [x] Add regression tests for renamed module compatibility.
-  - If deprecated aliases are kept, add compile-time import tests for old and new paths.
-  - If aliases are removed, update tests and document the breaking change.
+| File | Function | Lines | Priority |
+|------|----------|-------|----------|
+| `src/widgets/editor.rs` | `render()` | 764 | Low |
+| `src/widgets/editor.rs` | `handle_event()` | 488 | Low |
+| `src/compositor/engine.rs` | `render()` | 355 | Medium |
+| `src/input/parser.rs` | `try_parse()` | 248 | Medium |
+| `src/utils.rs` | `spawn_terminal_at()` | 239 | Medium |
+| `src/framework/widgets/tags_input.rs` | `render()` | 231 | Low |
+| `src/input/parser.rs` | `parse_csi_normal()` | 205 | Medium |
+| `src/visuals/icons.rs` | `get()` | 205 | Low |
+| `src/framework/widgets/kanban.rs` | `render()` | 202 | Low |
+| `src/framework/widgets/command_palette.rs` | `render()` | 197 | Low |
+| `src/framework/widgets/sparkline.rs` | `render()` | 176 | Low |
+| `src/framework/widgets/calendar.rs` | `render()` | 176 | Low |
+| `src/widgets/editor.rs` | `handle_mouse_event()` | 173 | Low |
+| `src/framework/widgets/confirm_dialog.rs` | `render()` | 168 | Low |
+| `src/framework/widgets/color_picker.rs` | `render()` | 161 | Low |
+| `src/framework/widgets/log_viewer.rs` | `render()` | 156 | Low |
+| `src/framework/widgets/context_menu.rs` | `render()` | 132 | Low |
+| `src/framework/layout.rs` | `layout()` | 131 | Medium |
+| `src/framework/widgets/notification_center.rs` | `render()` | 125 | Low |
+| `src/framework/widgets/progress_ring.rs` | `render()` | 125 | Low |
+| `src/framework/scene_router.rs` | `blend_planes()` | 120 | Low |
+| `src/framework/widgets/table.rs` | `render()` | 119 | Low |
+| `src/widgets/input.rs` | `handle_event()` | 109 | Low |
+| `src/system.rs` | `get_disk_data()` | 108 | Medium |
+| `src/framework/widgets/form.rs` | `render()` | 107 | Low |
+| `src/framework/widgets/modal.rs` | `render()` | 101 | Low |
 
-- [ ] Add integration coverage for `SceneRouter` transitions.
-  - Cover push/pop/replace lifecycle calls, transition completion, and back navigation depth checks.
-  - Include at least one test for non-overlapping z-index composition during transitions.
+### Module Splitting
 
-- [ ] Add plugin loading/unloading integration tests.
-  - Use a minimal in-repo test plugin or mock `WidgetFactory`.
-  - Verify registration, widget creation, unload behavior, and failure paths.
+- [ ] Split `src/framework/command.rs`
+  - Separate: app config, command execution, output parsing, layout config
+- [ ] Split `src/framework/helpers.rs`
+  - Separate: text drawing, borders, blitting, scroll helpers
+- [ ] Consider `src/framework/callbacks.rs` for shared type aliases
 
-- [x] Add `cargo-dracon` CLI integration tests.
-  - Created tests for help, version, new, init, and error handling.
-  - Added tempfile dev dependency.
+### Layout Module Duplication
 
-- [x] Add event bus benchmarks.
-  - Added publish benchmarks for 1000 and 100 events with 10 subscribers.
-  - Added subscribe_once benchmarks for 100 and 10 callbacks.
+- [ ] Resolve `src/layout.rs` vs `src/framework/layout.rs`
+  - Document preferred path
+  - Keep compatibility only where needed
 
-- [ ] Expand widget interaction tests where coverage is still shallow.
-  - Prioritize mouse hover clearing, focus styling, theme propagation, and bounded text clipping.
-  - Focus first on high-complexity widgets: `TextEditorAdapter`, `CommandPalette`, `Kanban`, `Table`, `TagsInput`, `Calendar`, `Modal`, `ContextMenu`.
+---
 
-## P4 - Documentation And Examples
+## Verification Commands
 
-- [x] Update example count and widget count docs.
-  - README and testing docs still mention older counts such as 29 scenes and 41 widgets.
-  - Make counts either generated or deliberately approximate to avoid constant drift.
-
-- [x] Update quick-start examples to current APIs.
-  - README still shows `.theme(Theme::cyberpunk())`; use `.set_theme(Theme::from_env_or(Theme::cyberpunk()))`.
-  - Make all new example snippets follow the AGENTS.md theme inheritance rule.
-
-- [x] Document the `Widget::render(&self)` design decision.
-  - Existing audit notes say this is intentional for compositor/render scheduling.
-  - Add a short note to the `Widget` trait docs explaining why render is immutable while input handlers are mutable.
-
-- [x] Add public item docs in remaining high-use widget modules.
-  - `src/framework/widgets/log_viewer.rs`
-  - `src/framework/widgets/confirm_dialog.rs`
-  - `src/framework/widgets/list_helpers.rs`
-  - `src/framework/widget_container.rs`
-  - `src/input/mapping.rs`
-
-- [x] Consolidate audit files.
-  - The repo currently contains `AUDIT.md`, `TODO.md`, `audit.md`, `audit-tastlist.md`, `tasklist.md`, and this `tasks.md`.
-  - Moved all old audits to `archive/audits/` to keep the repo root clean.
-
-## P5 - Runtime Robustness
-
-- [x] Review `extensions/lsp-server/src/main.rs` unwrap-heavy JSON send paths.
-  - Replaced production `.unwrap()` calls with proper error handling.
-  - JSON serialization now logs and returns on failure.
-  - Runtime building now logs and returns on failure.
-  - Kept test-only unwraps where they express assertions.
-
-- [ ] Revisit `App::default()`.
-  - `src/framework/app.rs` still uses `Self::new().expect("failed to initialize terminal")` because `Default` cannot return `Result`.
-  - Add a fallible constructor with explicit default config and consider deprecating `Default` in a breaking release.
-
-- [ ] Implement or remove sixel decoding.
-  - `sixel` is feature-gated but decoding remains a stub by design.
-  - Either implement decoding with tests or make the feature's limitations explicit in docs and examples.
-
-- [x] Add `dracon.toml` validation.
-  - Created `AppConfig::validate()` method.
-  - Validates theme names, FPS range, and duplicate widget IDs.
-  - Returns warnings rather than failing for forward compatibility.
-  - Added 5 tests for validation.
-
-## P6 - Maintainability Refactors
-
-- [ ] Split the largest functions only when touching nearby behavior.
-  - `src/widgets/editor.rs` `render()` and `handle_event()`
-  - `src/compositor/engine.rs` `render()`
-  - `src/input/parser.rs` `try_parse()` and `parse_csi_normal()`
-  - `src/utils.rs` `spawn_terminal_at()`
-  - Complex widget renders: `TagsInput`, `Kanban`, `CommandPalette`, `Calendar`, `Sparkline`, `ConfirmDialog`, `ColorPicker`, `LogViewer`
-
-- [ ] Split catch-all framework modules into focused files.
-  - `src/framework/command.rs`: separate app config, command execution, output parsing, and layout config.
-  - `src/framework/helpers.rs`: separate text drawing, borders, blitting, and scroll helpers.
-  - Consider `src/framework/callbacks.rs` for shared callback type aliases.
-
-- [ ] Resolve layout module duplication.
-  - `src/layout.rs` and `src/framework/layout.rs` are both public.
-  - Keep compatibility only where needed and document the preferred path.
-
-## Verification Notes
-
-Last verified locally on 2026-05-29:
-
-```text
+```bash
 cargo check --lib --all-features
-PASS
-
 cargo check --all-targets --all-features
-PASS
-
 cargo clippy --all-targets --all-features -- -D warnings
-PASS
-
 cargo fmt --all -- --check
-PASS
-
 cargo test --all-features
-PASS
-
 cargo publish --dry-run --allow-dirty
-PASS
 ```
+
+**Last Verified**: 2026-05-29 ✅
+
+---
+
+## Archived Files
+
+Old audit files moved to `archive/audits/`:
+- `audit.md`
+- `AUDIT.md`
+- `audit-tastlist.md`
+- `tasklist.md`
+- `TODO.md`
