@@ -533,7 +533,10 @@ impl crate::framework::widget::Widget for ColorPicker {
             }
             crate::input::event::MouseEventKind::Drag(_) => {
                 if let Some(slider) = self.selected_slider {
-                    let slider_start_y = 6u16;
+                    let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                    let border_bottom = swatch_height + 1;
+                    let hex_y = border_bottom + 1;
+                    let slider_start_y = hex_y + 2;
                     let slider_width = (area.width.saturating_sub(4)).max(20);
                     let slider_y = match slider {
                         SliderKind::Hue => slider_start_y,
