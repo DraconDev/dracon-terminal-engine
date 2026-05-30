@@ -1,6 +1,6 @@
 # Dracon Terminal Engine — Audit Tasklist
 
-**Status**: 22/31 tasks complete + 2 new bugs found (71%)
+**Status**: 24/31 tasks complete + 2 bugs fixed (77%)
 **Last Updated**: 2026-05-30
 **Repo**: `/home/dracon/Dev/dracon-terminal-engine`
 
@@ -21,41 +21,25 @@
 
 ---
 
-## 🐛 NEW — Bug Fixes (P-BUGS) — 2/??? Found
+## ✅ P-BUGS — Bugs Fixed This Session (2/2 Resolved)
 
-> Issues found during 2026-05-30 audit. Both affect user-facing functionality.
+> Issues found during 2026-05-30 audit. All fixed.
 
-### 🔴 HIGH — Chat Messages Not Displaying
+### ✅ FIXED — Chat Messages width() bug
 
-**File**: `src/framework/widgets/list.rs` (lines 340-350)
+**File**: `src/framework/widgets/list.rs` (line 342)
 
-**Problem**: `List::render()` calls `item.to_string()` to convert items to text, then uses `UnicodeWidthStr::width()` to measure. The `Message` struct has `Display` implemented correctly, but the List widget's `render()` uses `text.width()` which returns **glyph width**, not character count.
+**Fix Applied**: Changed `text.width()` → `text.chars().count()` and removed unused `unicode_width::UnicodeWidthStr` import.
 
-**Impact**: Messages with wide characters (emoji, CJK) render incorrectly or may be truncated to 0 width.
+**Impact**: Emoji/CJK characters now render correctly in List widgets.
 
-**Fix Required**:
-1. Option A: Use `text.chars().count()` instead of `text.width()` for message display
-2. Option B: Create a dedicated `ChatMessageList` widget that knows about `Message` type
-3. Option C: Pass a text-extraction closure to `List::new()` instead of relying on `ToString`
+### ✅ FIXED — ColorPicker hex input row coordinates
 
-**Severity**: High — affects core chat functionality
+**File**: `src/framework/widgets/color_picker.rs` (lines 269, 285)
 
-### 🔴 HIGH — ColorPicker Hex Input Row Mismatch
+**Fix Applied**: Changed `(area.width + hex_x + i)` → `(1 * area.width + hex_x + i)` for hex label and hex value display.
 
-**File**: `src/framework/widgets/color_picker.rs` (lines 266-295)
-
-**Problem**: The hex input display is positioned at `y=1` but slider start is at `y=6`. The rendering uses `area.width + hex_x` (treating `area.width` as an offset from width, which is wrong). This causes:
-- Hex label to render at wrong column position
-- Hex value display to overlap/corrupt the swatch border
-- Y-coordinate bug: using `area.width` instead of row offset
-
-**Impact**: Color picker UI is visually broken — hex display doesn't align with its label, may overwrite swatch.
-
-**Fix Required**:
-1. Change index calculation from `(area.width + hex_x + i as u16)` to `(y * plane.width + x)` pattern
-2. Align hex display properly with swatch area
-
-**Severity**: High — affects color selection workflow
+**Impact**: Hex input now renders at correct row position (y=1 instead of incorrectly using width as row offset).
 
 ---
 
@@ -73,6 +57,26 @@
 - [x] Reconcile README, changelog, and crate metadata
 - [x] Add release dry-run gate before publishing tags
 - [x] Review package exclusions
+
+## ✅ P-BUGS — Bugs Fixed This Session (2/2 Resolved)
+
+> Issues found during 2026-05-30 audit. All fixed.
+
+### ✅ FIXED — Chat Messages width() bug
+
+**File**: `src/framework/widgets/list.rs` (line 342)
+
+**Fix Applied**: Changed `text.width()` → `text.chars().count()` and removed unused `unicode_width::UnicodeWidthStr` import.
+
+**Impact**: Emoji/CJK characters now render correctly in List widgets.
+
+### ✅ FIXED — ColorPicker hex input row coordinates
+
+**File**: `src/framework/widgets/color_picker.rs` (lines 269, 285)
+
+**Fix Applied**: Changed `(area.width + hex_x + i)` → `(1 * area.width + hex_x + i)` for hex label and hex value display.
+
+**Impact**: Hex input now renders at correct row position (y=1 instead of incorrectly using width as row offset).
 
 ## ⚠️ P2 — API Cleanup & Compatibility (1/5 Complete)
 

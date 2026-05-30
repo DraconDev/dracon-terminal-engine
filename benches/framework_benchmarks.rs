@@ -295,8 +295,6 @@ fn bench_theme_creation(c: &mut Criterion) {
 
 fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
     use dracon_terminal_engine::framework::event_bus::EventBus;
-    
-    
 
     #[derive(Clone, Debug)]
     struct TestEvent(String);
