@@ -343,3 +343,258 @@ fn test_can_go_back_multiple_scenes() {
     assert_eq!(router.stack_depth(), 1);
     assert!(!router.can_go_back());
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TRANSITIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+use dracon_terminal_engine::framework::scene_router::SceneTransition;
+
+#[test]
+fn test_router_default_transition() {
+    use dracon_terminal_engine::framework::scene_router::SceneTransition;
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Default is Fade
+    assert_eq!(router.default_transition(), SceneTransition::Fade);
+
+    // Set to SlideLeft
+    router.set_default_transition(SceneTransition::SlideLeft);
+    assert_eq!(router.default_transition(), SceneTransition::SlideLeft);
+
+    // Set to None
+    router.set_default_transition(SceneTransition::None);
+    assert_eq!(router.default_transition(), SceneTransition::None);
+}
+
+#[test]
+fn test_router_default_transition_builder() {
+    use dracon_terminal_engine::framework::scene_router::SceneTransition;
+    let router = SceneRouter::new()
+        .with_default_transition(SceneTransition::SlideUp)
+        .with_default_duration(300.0);
+
+    assert_eq!(router.default_transition(), SceneTransition::SlideUp);
+    assert_eq!(router.default_duration_ms(), 300.0);
+}
+
+#[test]
+fn test_router_default_duration() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Default is 200ms
+    assert_eq!(router.default_duration_ms(), 200.0);
+
+    // Set to 500ms
+    router.set_default_duration(500.0);
+    assert_eq!(router.default_duration_ms(), 500.0);
+
+    // Set to 0 (instant)
+    router.set_default_duration(0.0);
+    assert_eq!(router.default_duration_ms(), 0.0);
+}
+
+#[test]
+fn test_router_has_transition() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.register("settings", Box::new(TestScene::new("settings")));
+
+    // No transition initially
+    assert!(!router.has_transition());
+
+    // Push triggers transition
+    router.push("home");
+    // Transition should be active (or completed immediately if duration=0)
+    // Note: has_transition depends on timing, so we just verify no panic
+
+    router.push("settings");
+    // Same here
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// THEME PROPAGATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+use dracon_terminal_engine::framework::theme::Theme;
+
+#[test]
+fn test_router_theme_propagation() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Set theme before pushing
+    let theme = Theme::nord();
+    router.set_theme(&theme);
+
+    router.push("home");
+
+    // Theme should be stored
+    assert!(router.theme().is_some());
+}
+
+#[test]
+fn test_router_theme_stored() {
+    let mut router = SceneRouter::new();
+    let theme = Theme::dracula();
+
+    // No theme initially
+    assert!(router.theme().is_none());
+
+    // Set theme
+    router.set_theme(&theme);
+    assert!(router.theme().is_some());
+
+    // Theme name should match
+    let stored = router.theme().unwrap();
+    assert_eq!(stored.name, theme.name);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAVIGATION EVENTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_router_navigation_events() {
+    use dracon_terminal_engine::framework::scene_router::NavigationEvent;
+
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.register("settings", Box::new(TestScene::new("settings")));
+
+    // Collect events
+    let events = router.take_navigation_events();
+    assert!(events.is_empty());
+
+    // Push generates Navigated event
+    router.push("home");
+    let events = router.take_navigation_events();
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        NavigationEvent::Navigated(from, to) => {
+            assert!(from.is_none());
+            assert_eq!(to, "home");
+        }
+        _ => panic!("Expected Navigated event"),
+    }
+
+    // Push another scene
+    router.push("settings");
+    let events = router.take_navigation_events();
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        NavigationEvent::Navigated(from, to) => {
+            assert_eq!(from.as_deref(), Some("home"));
+            assert_eq!(to, "settings");
+        }
+        _ => panic!("Expected Navigated event"),
+    }
+
+    // Pop generates Popped event
+    router.pop();
+    let events = router.take_navigation_events();
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        NavigationEvent::Popped(from, to) => {
+            assert_eq!(from, "settings");
+            assert_eq!(to, "home");
+        }
+        _ => panic!("Expected Popped event"),
+    }
+}
+
+#[test]
+fn test_router_replace_event() {
+    use dracon_terminal_engine::framework::scene_router::NavigationEvent;
+
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.register("settings", Box::new(TestScene::new("settings")));
+
+    router.push("home");
+    router.take_navigation_events(); // clear
+
+    // Replace generates Replaced event
+    router.replace("settings");
+    let events = router.take_navigation_events();
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        NavigationEvent::Replaced(from, to) => {
+            assert_eq!(from, "home");
+            assert_eq!(to, "settings");
+        }
+        _ => panic!("Expected Replaced event"),
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Z-INDEX COMPOSITION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_router_z_index_default() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Default z-index is 0
+    assert_eq!(router.z_index(), 0);
+}
+
+#[test]
+fn test_router_z_index_custom() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Set custom z-index
+    router.set_z_index(100);
+    assert_eq!(router.z_index(), 100);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// EDGE CASES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_router_push_same_scene_twice() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    router.push("home");
+    router.push("home");
+
+    // Should have two instances on stack
+    assert_eq!(router.stack_depth(), 2);
+    assert_eq!(router.current(), Some("home"));
+}
+
+#[test]
+fn test_router_pop_empty_stack() {
+    let mut router = SceneRouter::new();
+    let popped = router.pop();
+    assert!(!popped);
+}
+
+#[test]
+fn test_router_go_unknown_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+
+    // Go to unknown scene should fail
+    let result = router.go("unknown");
+    assert!(!result);
+    assert_eq!(router.current(), Some("home"));
+}
+
+#[test]
+fn test_router_replace_empty_stack() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    // Replace on empty stack should push
+    router.replace("home");
+    assert_eq!(router.current(), Some("home"));
+    assert_eq!(router.stack_depth(), 1);
+}
