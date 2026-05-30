@@ -207,14 +207,15 @@ impl crate::framework::widget::Widget for ColorPicker {
 
         // === Color Preview Swatch ===
         let swatch_width = 8u16.min(area.width.saturating_sub(2));
-        let swatch_height = 4u16.min(area.height.saturating_sub(2));
-        if swatch_height == 0 || area.width < 2 {
+        let swatch_height = 4u16.min(area.height.saturating_sub(4)); // Reserve space for hex + sliders
+        if swatch_height == 0 || area.width < 12 {
             return plane;
         }
 
-        for y in 0..swatch_height {
-            for x in 0..swatch_width {
-                let idx = (y * area.width + x + 1) as usize;
+        // Swatch fill (rows 1..=swatch_height, inside border)
+        for y in 1..=swatch_height {
+            for x in 1..=swatch_width {
+                let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = current_color;
                     plane.cells[idx].char = ' ';
@@ -222,21 +223,26 @@ impl crate::framework::widget::Widget for ColorPicker {
             }
         }
 
-        // Swatch border
-        for x in 0..swatch_width {
-            let top_idx = (swatch_height * area.width + x + 1) as usize;
-            let bot_idx = ((swatch_height - 1) * area.width + x + 1) as usize;
-            if top_idx < plane.cells.len() {
-                plane.cells[top_idx].char = '─';
-                plane.cells[top_idx].fg = self.theme.outline;
-            }
-            if bot_idx < plane.cells.len() {
-                plane.cells[bot_idx].char = '─';
-                plane.cells[bot_idx].fg = self.theme.outline;
+        // Top border (row 0)
+        for x in 1..=swatch_width {
+            let idx = (0 * area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = self.theme.outline;
             }
         }
-        for y in 0..swatch_height {
-            let left_idx = (y * area.width) as usize;
+        // Bottom border (row swatch_height + 1)
+        let border_bottom = swatch_height + 1;
+        for x in 1..=swatch_width {
+            let idx = (border_bottom * area.width + x) as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '─';
+                plane.cells[idx].fg = self.theme.outline;
+            }
+        }
+        // Left/right borders (rows 1..=swatch_height)
+        for y in 1..=swatch_height {
+            let left_idx = (y * area.width + 0) as usize;
             let right_idx = (y * area.width + swatch_width + 1) as usize;
             if left_idx < plane.cells.len() {
                 plane.cells[left_idx].char = '│';
@@ -251,11 +257,11 @@ impl crate::framework::widget::Widget for ColorPicker {
         let corners = [
             (0, 0, '┌'),
             (swatch_width + 1, 0, '┐'),
-            (0, swatch_height, '└'),
-            (swatch_width + 1, swatch_height, '┘'),
+            (0, border_bottom, '└'),
+            (swatch_width + 1, border_bottom, '┘'),
         ];
         for (x, y, ch) in corners {
-            let idx = (y * area.width + x + 1) as usize;
+            let idx = (y * area.width + x) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = self.theme.outline;
@@ -263,7 +269,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         }
 
         // === Hex Input Display ===
-        let hex_y = swatch_height + 1; // Below the swatch border
+        let hex_y = border_bottom + 1; // Below the swatch border
         let hex_x = swatch_width + 4;
         let hex_label = "Hex: ";
         for (i, ch) in hex_label.chars().enumerate() {
@@ -296,7 +302,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         }
 
         // === Sliders ===
-        let slider_start_y = swatch_height + 2;
+        let slider_start_y = hex_y + 2; // Below hex display
         let slider_width = (area.width.saturating_sub(4)).max(20);
 
         // Hue slider
@@ -464,7 +470,10 @@ impl crate::framework::widget::Widget for ColorPicker {
         match kind {
             crate::input::event::MouseEventKind::Moved => {
                 // Determine which slider is hovered
-                let slider_start_y = 6u16;
+                let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                let border_bottom = swatch_height + 1;
+                let hex_y = border_bottom + 1;
+                let slider_start_y = hex_y + 2;
                 let _slider_width = (area.width.saturating_sub(4)).max(20);
 
                 for (i, kind) in [
@@ -483,8 +492,6 @@ impl crate::framework::widget::Widget for ColorPicker {
 
                 // Check if over hex input
                 let swatch_width = 8u16.min(area.width.saturating_sub(2));
-                let swatch_height = 4u16.min(area.height.saturating_sub(2));
-                let hex_y = swatch_height + 1; // Below swatch border
                 let hex_x = swatch_width + 4 + 5; // After "Hex: " label
                 if rel_row == hex_y && rel_col >= hex_x && rel_col < hex_x + 8 {
                     self.input_focused = true;
@@ -493,7 +500,10 @@ impl crate::framework::widget::Widget for ColorPicker {
                 true
             }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                let slider_start_y = 6u16;
+                let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                let border_bottom = swatch_height + 1;
+                let hex_y = border_bottom + 1;
+                let slider_start_y = hex_y + 2;
                 let slider_width = (area.width.saturating_sub(4)).max(20);
 
                 for (i, kind) in [
@@ -514,8 +524,6 @@ impl crate::framework::widget::Widget for ColorPicker {
 
                 // Click on hex input
                 let swatch_width = 8u16.min(area.width.saturating_sub(2));
-                let swatch_height = 4u16.min(area.height.saturating_sub(2));
-                let hex_y = swatch_height + 1;
                 let hex_x = swatch_width + 4 + 5;
                 if rel_row == hex_y && rel_col >= hex_x && rel_col < hex_x + 8 {
                     self.input_focused = true;
