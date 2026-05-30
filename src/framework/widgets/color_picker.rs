@@ -263,10 +263,11 @@ impl crate::framework::widget::Widget for ColorPicker {
         }
 
         // === Hex Input Display ===
+        let hex_y = swatch_height + 1; // Below the swatch border
         let hex_x = swatch_width + 4;
         let hex_label = "Hex: ";
         for (i, ch) in hex_label.chars().enumerate() {
-            let idx = (area.width + hex_x + i as u16) as usize;
+            let idx = (hex_y * area.width + hex_x + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = self.theme.fg_muted;
@@ -282,7 +283,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         };
 
         for (i, ch) in hex_display.chars().enumerate().take(8) {
-            let idx = (area.width + hex_start + i as u16) as usize;
+            let idx = (hex_y * area.width + hex_start + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = ch;
                 plane.cells[idx].fg = if self.input_focused {
@@ -482,8 +483,10 @@ impl crate::framework::widget::Widget for ColorPicker {
 
                 // Check if over hex input
                 let swatch_width = 8u16.min(area.width.saturating_sub(2));
+                let swatch_height = 4u16.min(area.height.saturating_sub(2));
+                let hex_y = swatch_height + 1; // Below swatch border
                 let hex_x = swatch_width + 4 + 5; // After "Hex: " label
-                if rel_row == 1 && rel_col >= hex_x && rel_col < hex_x + 8 {
+                if rel_row == hex_y && rel_col >= hex_x && rel_col < hex_x + 8 {
                     self.input_focused = true;
                     self.dirty = true;
                 }
@@ -511,8 +514,10 @@ impl crate::framework::widget::Widget for ColorPicker {
 
                 // Click on hex input
                 let swatch_width = 8u16.min(area.width.saturating_sub(2));
+                let swatch_height = 4u16.min(area.height.saturating_sub(2));
+                let hex_y = swatch_height + 1;
                 let hex_x = swatch_width + 4 + 5;
-                if rel_row == 1 && rel_col >= hex_x && rel_col < hex_x + 8 {
+                if rel_row == hex_y && rel_col >= hex_x && rel_col < hex_x + 8 {
                     self.input_focused = true;
                     self.dirty = true;
                 }
