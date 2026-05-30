@@ -50,6 +50,7 @@
 - [x] Run `cargo fmt --all` and commit formatting drift
 - [x] Fix clippy warnings after test imports compile
 - [x] Run full verification suite after P0 fixes
+- [x] Full codebase audit completed (audit.md)
 
 ## ✅ P1 — Release & Metadata Correctness (4/4 Complete)
 
