@@ -359,12 +359,12 @@ fn test_router_default_transition() {
     // Default is Fade
     assert_eq!(router.default_transition(), SceneTransition::Fade);
 
-    // Set to SlideLeft
-    router.set_default_transition(SceneTransition::SlideLeft);
+    // Set to SlideLeft via builder
+    router = router.with_default_transition(SceneTransition::SlideLeft);
     assert_eq!(router.default_transition(), SceneTransition::SlideLeft);
 
     // Set to None
-    router.set_default_transition(SceneTransition::None);
+    router = router.with_default_transition(SceneTransition::None);
     assert_eq!(router.default_transition(), SceneTransition::None);
 }
 
@@ -387,31 +387,29 @@ fn test_router_default_duration() {
     // Default is 200ms
     assert_eq!(router.default_duration_ms(), 200.0);
 
-    // Set to 500ms
-    router.set_default_duration(500.0);
+    // Set to 500ms via builder
+    router = router.with_default_duration(500.0);
     assert_eq!(router.default_duration_ms(), 500.0);
 
     // Set to 0 (instant)
-    router.set_default_duration(0.0);
+    router = router.with_default_duration(0.0);
     assert_eq!(router.default_duration_ms(), 0.0);
 }
 
 #[test]
-fn test_router_has_transition() {
+fn test_router_is_transitioning() {
     let mut router = SceneRouter::new();
     router.register("home", Box::new(TestScene::new("home")));
     router.register("settings", Box::new(TestScene::new("settings")));
 
     // No transition initially
-    assert!(!router.has_transition());
+    assert!(!router.is_transitioning());
 
     // Push triggers transition
     router.push("home");
-    // Transition should be active (or completed immediately if duration=0)
-    // Note: has_transition depends on timing, so we just verify no panic
+    // is_transitioning depends on timing, just verify no panic
 
     router.push("settings");
-    // Same here
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -425,9 +423,9 @@ fn test_router_theme_propagation() {
     let mut router = SceneRouter::new();
     router.register("home", Box::new(TestScene::new("home")));
 
-    // Set theme before pushing
+    // Set theme via on_theme_change
     let theme = Theme::nord();
-    router.set_theme(&theme);
+    router.on_theme_change(&theme);
 
     router.push("home");
 
@@ -444,7 +442,7 @@ fn test_router_theme_stored() {
     assert!(router.theme().is_none());
 
     // Set theme
-    router.set_theme(&theme);
+    router.on_theme_change(&theme);
     assert!(router.theme().is_some());
 
     // Theme name should match
@@ -530,29 +528,6 @@ fn test_router_replace_event() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Z-INDEX COMPOSITION
-// ═══════════════════════════════════════════════════════════════════════════════
-
-#[test]
-fn test_router_z_index_default() {
-    let mut router = SceneRouter::new();
-    router.register("home", Box::new(TestScene::new("home")));
-
-    // Default z-index is 0
-    assert_eq!(router.z_index(), 0);
-}
-
-#[test]
-fn test_router_z_index_custom() {
-    let mut router = SceneRouter::new();
-    router.register("home", Box::new(TestScene::new("home")));
-
-    // Set custom z-index
-    router.set_z_index(100);
-    assert_eq!(router.z_index(), 100);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // EDGE CASES
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -582,9 +557,8 @@ fn test_router_go_unknown_scene() {
     router.register("home", Box::new(TestScene::new("home")));
     router.push("home");
 
-    // Go to unknown scene should fail
-    let result = router.go("unknown");
-    assert!(!result);
+    // Go to unknown scene should be ignored (no panic)
+    router.go("unknown");
     assert_eq!(router.current(), Some("home"));
 }
 
