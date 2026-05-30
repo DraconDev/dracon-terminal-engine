@@ -334,8 +334,8 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
 
 fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
     use dracon_terminal_engine::framework::event_bus::EventBus;
-    use std::sync::Arc;
     use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
 
     #[derive(Clone, Debug)]
     struct TestEvent(String);
@@ -480,4 +480,3 @@ criterion_group!(
 );
 
 criterion_main!(compositor, widgets, focus, animation, hitzone, theme, cell_pool, event_bus);
-

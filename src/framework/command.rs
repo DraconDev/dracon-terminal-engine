@@ -1268,7 +1268,11 @@ DEBUG: Test'"#,
             ..Default::default()
         };
         let warnings = config.validate();
-        assert!(warnings.is_empty(), "valid config should have no warnings: {:?}", warnings);
+        assert!(
+            warnings.is_empty(),
+            "valid config should have no warnings: {:?}",
+            warnings
+        );
     }
 
     #[test]
@@ -1302,7 +1306,9 @@ DEBUG: Test'"#,
             ..Default::default()
         };
         let warnings = config.validate();
-        assert!(warnings.iter().any(|w| w.contains("exceeds recommended max")));
+        assert!(warnings
+            .iter()
+            .any(|w| w.contains("exceeds recommended max")));
     }
 
     #[test]
