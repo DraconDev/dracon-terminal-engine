@@ -123,6 +123,13 @@ pub struct KeybindingConfig {
 impl KeybindingConfig {
     /// Create with conservative defaults — no customization needed.
     /// Uses modifier keys to avoid conflicts with text input.
+    ///
+    /// # Keybinding Conflicts
+    ///
+    /// Some actions share the same key by design:
+    /// - `back` and `dismiss` both use `escape` — they are semantically equivalent
+    ///   (dismiss overlay, go back, close modal). The conflict warning is informational,
+    ///   not an error. Both actions perform the same operation.
     pub fn defaults() -> Self {
         let mut bindings = HashMap::new();
         // Core (always safe)
