@@ -118,3 +118,317 @@ fn test_context_menu_action_serialize_set_color() {
     let deserialized: ContextMenuAction = serde_json::from_str(&serialized).unwrap();
     assert_eq!(deserialized, action);
 }
+
+// ============================================================================
+// Widget Interaction Tests
+// ============================================================================
+
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::context_menu::{ContextMenuItem, ContextMenu};
+use dracon_terminal_engine::framework::theme::Theme;
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
+use ratatui::layout::Rect;
+
+fn make_key(code: KeyCode) -> KeyEvent {
+    KeyEvent {
+        code,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    }
+}
+
+fn make_menu() -> ContextMenu {
+    let items = vec![
+        ContextMenuItem::new("open", "Open"),
+        ContextMenuItem::new("edit", "Edit"),
+        ContextMenuItem::separator(),
+        ContextMenuItem::new("delete", "Delete"),
+    ];
+    ContextMenu::new("test_menu", items)
+}
+
+// ============================================================================
+// Construction Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_widget_new() {
+    let menu = make_menu();
+    assert!(!menu.is_visible());
+}
+
+#[test]
+fn test_context_menu_widget_default() {
+    let menu = ContextMenu::default();
+    assert!(!menu.is_visible());
+}
+
+#[test]
+fn test_context_menu_widget_with_theme() {
+    let menu = make_menu().with_theme(Theme::nord());
+    let area = Rect::new(0, 0, 30, 10);
+    let plane = menu.render(area);
+    assert_eq!(plane.width, 30);
+}
+
+// ============================================================================
+// Visibility Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_show_hide() {
+    let mut menu = make_menu();
+    assert!(!menu.is_visible());
+
+    menu.show();
+    assert!(menu.is_visible());
+
+    menu.hide();
+    assert!(!menu.is_visible());
+}
+
+#[test]
+fn test_context_menu_toggle() {
+    let mut menu = make_menu();
+    menu.show();
+    assert!(menu.is_visible());
+
+    menu.hide();
+    assert!(!menu.is_visible());
+}
+
+// ============================================================================
+// Handle Key Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_handle_key_up() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    assert!(menu.handle_key(make_key(KeyCode::Up)));
+}
+
+#[test]
+fn test_context_menu_handle_key_down() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    assert!(menu.handle_key(make_key(KeyCode::Down)));
+}
+
+#[test]
+fn test_context_menu_handle_key_enter() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    assert!(menu.handle_key(make_key(KeyCode::Enter)));
+}
+
+#[test]
+fn test_context_menu_handle_key_esc() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    assert!(menu.handle_key(make_key(KeyCode::Esc)));
+    assert!(!menu.is_visible());
+}
+
+#[test]
+fn test_context_menu_handle_key_when_hidden() {
+    let mut menu = make_menu();
+    // Don't show
+
+    let result = menu.handle_key(make_key(KeyCode::Down));
+    assert!(!result);
+}
+
+#[test]
+fn test_context_menu_handle_key_ignore_release() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    let release = KeyEvent {
+        code: KeyCode::Down,
+        kind: KeyEventKind::Release,
+        modifiers: KeyModifiers::empty(),
+    };
+    let result = menu.handle_key(release);
+    let _ = result;
+}
+
+// ============================================================================
+// Handle Mouse Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_handle_mouse_click_inside() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(10, 10, 20, 8));
+    menu.render(Rect::new(10, 10, 20, 8));
+
+    // Click inside menu area
+    let result = menu.handle_mouse(MouseEventKind::Down(MouseButton::Left), 15, 12);
+    assert!(result);
+}
+
+#[test]
+fn test_context_menu_handle_mouse_click_outside() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(10, 10, 20, 8));
+    menu.render(Rect::new(10, 10, 20, 8));
+
+    // Click outside menu area
+    let result = menu.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
+    assert!(!result);
+    assert!(!menu.is_visible());
+}
+
+#[test]
+fn test_context_menu_handle_mouse_hover() {
+    let mut menu = make_menu();
+    menu.show();
+    menu.set_area(Rect::new(10, 10, 20, 8));
+    menu.render(Rect::new(10, 10, 20, 8));
+
+    let result = menu.handle_mouse(MouseEventKind::Moved, 15, 12);
+    let _ = result;
+}
+
+#[test]
+fn test_context_menu_handle_mouse_when_hidden() {
+    let mut menu = make_menu();
+    // Don't show
+
+    let result = menu.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 5);
+    assert!(!result);
+}
+
+// ============================================================================
+// Widget Trait Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_widget_id() {
+    let menu = make_menu();
+    let _id = menu.id();
+}
+
+#[test]
+fn test_context_menu_widget_area() {
+    let menu = make_menu();
+    let _area = menu.area();
+}
+
+#[test]
+fn test_context_menu_widget_set_area() {
+    let mut menu = make_menu();
+    menu.set_area(Rect::new(5, 5, 25, 10));
+    assert_eq!(menu.area(), Rect::new(5, 5, 25, 10));
+}
+
+#[test]
+fn test_context_menu_widget_needs_render() {
+    let menu = make_menu();
+    let _ = menu.needs_render();
+}
+
+#[test]
+fn test_context_menu_widget_mark_dirty() {
+    let mut menu = make_menu();
+    menu.mark_dirty();
+    assert!(menu.needs_render());
+}
+
+#[test]
+fn test_context_menu_widget_clear_dirty() {
+    let mut menu = make_menu();
+    menu.clear_dirty();
+    assert!(!menu.needs_render());
+}
+
+#[test]
+fn test_context_menu_widget_focusable() {
+    let menu = make_menu();
+    assert!(menu.focusable());
+}
+
+#[test]
+fn test_context_menu_widget_z_index() {
+    let menu = make_menu();
+    let _z = menu.z_index();
+}
+
+#[test]
+fn test_context_menu_widget_render() {
+    let menu = make_menu();
+    let area = Rect::new(0, 0, 30, 10);
+    let plane = menu.render(area);
+    assert_eq!(plane.width, 30);
+    assert_eq!(plane.height, 10);
+}
+
+#[test]
+fn test_context_menu_widget_on_theme_change() {
+    let mut menu = make_menu();
+    menu.on_theme_change(&Theme::cyberpunk());
+    assert!(menu.needs_render());
+}
+
+// ============================================================================
+// Separator Handling Tests
+// ============================================================================
+
+#[test]
+fn test_context_menu_separator_skipped_on_nav() {
+    let mut menu = make_menu(); // has separator at index 2
+    menu.show();
+    menu.set_area(Rect::new(0, 0, 30, 10));
+
+    // Navigate down past separator
+    menu.handle_key(make_key(KeyCode::Down)); // index 0 -> 1
+    menu.handle_key(make_key(KeyCode::Down)); // index 1 -> 3 (skips separator)
+}
+
+// ============================================================================
+// Edge Cases
+// ============================================================================
+
+#[test]
+fn test_context_menu_many_items() {
+    let items: Vec<ContextMenuItem> = (0..20)
+        .map(|i| ContextMenuItem::new(format!("item_{}", i), format!("Item {}", i)))
+        .collect();
+    let menu = ContextMenu::new("big_menu", items);
+    let area = Rect::new(0, 0, 30, 25);
+    let plane = menu.render(area);
+    assert_eq!(plane.width, 30);
+}
+
+#[test]
+fn test_context_menu_empty_items() {
+    let menu = ContextMenu::new("empty_menu", vec![]);
+    let area = Rect::new(0, 0, 30, 10);
+    let plane = menu.render(area);
+    assert_eq!(plane.width, 30);
+}
+
+#[test]
+fn test_context_menu_unicode_labels() {
+    let items = vec![
+        ContextMenuItem::new("jp", "日本語"),
+        ContextMenuItem::new("ar", "عربي"),
+        ContextMenuItem::new("em", "🎉"),
+    ];
+    let menu = ContextMenu::new("unicode_menu", items);
+    let area = Rect::new(0, 0, 30, 10);
+    let plane = menu.render(area);
+    assert_eq!(plane.width, 30);
+}

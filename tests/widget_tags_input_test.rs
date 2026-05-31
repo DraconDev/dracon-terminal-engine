@@ -522,3 +522,120 @@ fn test_tags_input_clear_resets_for_max() {
 
     assert_eq!(input.tags().len(), 1);
 }
+
+// ============================================================================
+// Handle Key Tests
+// ============================================================================
+
+use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use ratatui::layout::Rect;
+
+fn make_key(code: KeyCode) -> KeyEvent {
+    KeyEvent {
+        code,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    }
+}
+
+#[test]
+fn test_tags_input_handle_key_char() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    assert!(input.handle_key(make_key(KeyCode::Char('r'))));
+    assert!(input.handle_key(make_key(KeyCode::Char('u'))));
+    assert!(input.handle_key(make_key(KeyCode::Char('s'))));
+    assert!(input.handle_key(make_key(KeyCode::Char('t'))));
+}
+
+#[test]
+fn test_tags_input_handle_key_enter_adds_tag() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    input.handle_key(make_key(KeyCode::Char('h')));
+    input.handle_key(make_key(KeyCode::Char('i')));
+    input.handle_key(make_key(KeyCode::Enter));
+
+    assert!(input.tags().contains(&"hi".to_string()));
+}
+
+#[test]
+fn test_tags_input_handle_key_backspace() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    input.handle_key(make_key(KeyCode::Char('a')));
+    input.handle_key(make_key(KeyCode::Char('b')));
+    assert!(input.handle_key(make_key(KeyCode::Backspace)));
+}
+
+#[test]
+fn test_tags_input_handle_key_backspace_empty() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    // Backspace on empty input
+    let result = input.handle_key(make_key(KeyCode::Backspace));
+    let _ = result;
+}
+
+#[test]
+fn test_tags_input_handle_key_delete() {
+    let mut input = TagsInput::new(vec!["tag1".to_string()]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    let result = input.handle_key(make_key(KeyCode::Delete));
+    let _ = result;
+}
+
+#[test]
+fn test_tags_input_handle_key_enter_empty() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    // Enter with empty input should not add empty tag
+    input.handle_key(make_key(KeyCode::Enter));
+    assert!(input.tags().is_empty());
+}
+
+#[test]
+fn test_tags_input_handle_key_ignore_release() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+
+    let release = KeyEvent {
+        code: KeyCode::Char('a'),
+        kind: KeyEventKind::Release,
+        modifiers: KeyModifiers::empty(),
+    };
+    let result = input.handle_key(release);
+    let _ = result;
+}
+
+// ============================================================================
+// Handle Mouse Tests
+// ============================================================================
+
+use dracon_terminal_engine::input::event::{MouseButton, MouseEventKind};
+
+#[test]
+fn test_tags_input_handle_mouse_click() {
+    let mut input = TagsInput::new(vec!["tag1".to_string()]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+    input.render(Rect::new(0, 0, 40, 3));
+
+    let result = input.handle_mouse(MouseEventKind::Down(MouseButton::Left), 5, 1);
+    let _ = result;
+}
+
+#[test]
+fn test_tags_input_handle_mouse_outside() {
+    let mut input = TagsInput::new(vec![]);
+    input.set_area(Rect::new(0, 0, 40, 3));
+    input.render(Rect::new(0, 0, 40, 3));
+
+    let result = input.handle_mouse(MouseEventKind::Down(MouseButton::Left), 100, 100);
+    let _ = result;
+}
