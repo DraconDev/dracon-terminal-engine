@@ -132,7 +132,7 @@ impl ColorPickerScene {
             true,
         );
         for x in 0..SIDEBAR_WIDTH {
-            let idx = (area.width + x) as usize;
+            let idx = plane.width as usize + x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -163,10 +163,10 @@ impl ColorPickerScene {
         );
     }
 
-    fn render_palette_panel(&self, plane: &mut Plane, area: Rect, div_x: u16) {
+    fn render_palette_panel(&self, plane: &mut Plane, area: Rect, _div_x: u16) {
         let t = &self.theme;
-        let panel_x = div_x + 1;
-        let panel_w = area.width.saturating_sub(panel_x + 1);
+        let panel_x = area.x;
+        let panel_w = area.width;
 
         // ── Preview Swatch ────────────────────────────────────
         draw_text_clipped(
@@ -174,13 +174,13 @@ impl ColorPickerScene {
             panel_x,
             0,
             " Preview ",
-            panel_w,
+            panel_x + panel_w,
             t.fg_on_accent,
             t.primary,
             true,
         );
         for x in panel_x..panel_x + panel_w {
-            let idx = (area.width + x) as usize;
+            let idx = plane.width as usize + x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -188,14 +188,14 @@ impl ColorPickerScene {
         }
 
         // Large color swatch
-        let swatch_y = 1;
+        let swatch_y = area.y;
         let swatch_h = 4u16;
         for dy in 0..swatch_h {
             for dx in 0..panel_w.saturating_sub(2) {
                 let px = panel_x + 1 + dx;
                 let py = swatch_y + dy;
-                if px < area.width && py < area.height.saturating_sub(10) {
-                    let idx = (py * area.width + px) as usize;
+                if px < plane.width && py < plane.height {
+                    let idx = py as usize * plane.width as usize + px as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].bg = self.selected_color;
                         plane.cells[idx].char = ' ';
@@ -212,7 +212,7 @@ impl ColorPickerScene {
             panel_x + 1,
             info_y,
             &format!("Hex: {}", self.selected_hex),
-            panel_w,
+            panel_x + panel_w,
             t.primary,
             t.bg,
             true,
@@ -224,7 +224,7 @@ impl ColorPickerScene {
                 panel_x + 1,
                 info_y + 1,
                 &format!("RGB: {}, {}, {}", r, g, b),
-                panel_w,
+                panel_x + panel_w,
                 t.fg_muted,
                 t.bg,
                 false,
@@ -238,7 +238,7 @@ impl ColorPickerScene {
             panel_x + 1,
             contrast_y,
             "Contrast",
-            panel_w,
+            panel_x + panel_w,
             t.secondary,
             t.bg,
             true,
@@ -260,7 +260,7 @@ impl ColorPickerScene {
             panel_x + 1,
             contrast_y + 1,
             &format!("{:.1}:1", ratio),
-            panel_w,
+            panel_x + panel_w,
             t.fg,
             t.bg,
             false,
@@ -270,7 +270,7 @@ impl ColorPickerScene {
             panel_x + 1,
             contrast_y + 2,
             rating,
-            panel_w,
+            panel_x + panel_w,
             rating_color,
             t.bg,
             true,
@@ -292,7 +292,7 @@ impl ColorPickerScene {
             panel_x + 1,
             contrast_y + 4,
             "vs white:",
-            panel_w,
+            panel_x + panel_w,
             t.fg_muted,
             t.bg,
             false,
@@ -303,7 +303,7 @@ impl ColorPickerScene {
             panel_x + 1,
             contrast_y + 5,
             &format!("{} ({})", ratio_w_str, rating_w),
-            panel_w,
+            panel_x + panel_w,
             rating_w_color,
             t.bg,
             false,
@@ -317,13 +317,13 @@ impl ColorPickerScene {
                 panel_x + 1,
                 shades_y,
                 "Shades",
-                panel_w,
+                panel_x + panel_w,
                 t.secondary,
                 t.bg,
                 true,
             );
             for x in panel_x + 1..panel_x + panel_w.saturating_sub(2) {
-                let idx = ((shades_y + 1) * area.width + x) as usize;
+                let idx = (shades_y + 1) as usize * plane.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '─';
                     plane.cells[idx].fg = t.outline;
@@ -341,8 +341,8 @@ impl ColorPickerScene {
                     for dx in 0..swatch_w.saturating_sub(1) {
                         let px = sx + dx;
                         let py = sy + dy;
-                        if px < panel_x + panel_w && py < area.height.saturating_sub(6) {
-                            let idx = (py * area.width + px) as usize;
+                        if px < panel_x + panel_w && py < plane.height {
+                            let idx = py as usize * plane.width as usize + px as usize;
                             if idx < plane.cells.len() {
                                 plane.cells[idx].bg = *shade;
                                 plane.cells[idx].char = ' ';
@@ -377,13 +377,13 @@ impl ColorPickerScene {
                 panel_x + 1,
                 css_y,
                 "CSS",
-                panel_w,
+                panel_x + panel_w,
                 t.secondary,
                 t.bg,
                 true,
             );
             for x in panel_x + 1..panel_x + panel_w.saturating_sub(2) {
-                let idx = ((css_y + 1) * area.width + x) as usize;
+                let idx = (css_y + 1) as usize * plane.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '─';
                     plane.cells[idx].fg = t.outline;
@@ -404,7 +404,7 @@ impl ColorPickerScene {
                         panel_x + 1,
                         css_y + 2 + i as u16,
                         line,
-                        panel_w,
+                        panel_x + panel_w,
                         t.fg,
                         t.bg,
                         false,
@@ -416,7 +416,7 @@ impl ColorPickerScene {
                 panel_x + 1,
                 css_y + 4,
                 "[Enter] Copy hex",
-                panel_w,
+                panel_x + panel_w,
                 t.fg_muted,
                 t.bg,
                 false,
@@ -431,7 +431,7 @@ impl ColorPickerScene {
                 panel_x + 1,
                 recent_y,
                 "Recent",
-                panel_w,
+                panel_x + panel_w,
                 t.secondary,
                 t.bg,
                 true,
@@ -445,8 +445,8 @@ impl ColorPickerScene {
 
                 for dx in 0..recent_w.saturating_sub(1) {
                     let px = rx + dx;
-                    if px < panel_x + panel_w && ry < area.height.saturating_sub(4) {
-                        let idx = (ry * area.width + px) as usize;
+                    if px < panel_x + panel_w && ry < plane.height {
+                        let idx = ry as usize * plane.width as usize + px as usize;
                         if idx < plane.cells.len() {
                             plane.cells[idx].bg = *color;
                             plane.cells[idx].char = ' ';
@@ -464,7 +464,7 @@ impl ColorPickerScene {
             panel_x + 1,
             palette_y,
             "Palette",
-            panel_w,
+            panel_x + panel_w,
             t.secondary,
             t.bg,
             true,
@@ -484,7 +484,7 @@ impl ColorPickerScene {
             if px + 6 < panel_x + panel_w && py < area.height.saturating_sub(2) {
                 // Color swatch
                 for dx in 0..6u16 {
-                    let idx = (py * area.width + px + dx) as usize;
+                    let idx = py as usize * plane.width as usize + (px + dx) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].bg = *color;
                         plane.cells[idx].char = ' ';

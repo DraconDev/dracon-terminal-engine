@@ -192,10 +192,10 @@ impl ThemeSwitcherScene {
         );
     }
 
-    fn render_preview(&self, plane: &mut Plane, area: Rect, div_x: u16) {
+    fn render_preview(&self, plane: &mut Plane, area: Rect, _div_x: u16) {
         let t = &self.theme;
-        let panel_x = div_x + 1;
-        let panel_w = area.width.saturating_sub(panel_x + 1);
+        let panel_x = area.x;
+        let panel_w = area.width;
 
         // ── Section 1: Widget Preview ──────────────────────────
         draw_text(plane, panel_x, 0, "Widget Preview", t.primary, t.bg, true);
@@ -208,7 +208,7 @@ impl ThemeSwitcherScene {
 
         for y in card_y..card_y + card_h {
             for x in card_x..card_x + card_w {
-                let idx = (y * area.width + x) as usize;
+                let idx = y as usize * plane.width as usize + x as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].bg = t.surface;
                     plane.cells[idx].transparent = false;
@@ -318,6 +318,7 @@ impl ThemeSwitcherScene {
                 ("muted", t.fg_muted),
                 ("selection", t.selection_bg),
                 ("hover", t.hover_bg),
+                ("bg_elev", t.surface_elevated),
             ];
 
             let swatch_w = 3u16;
@@ -340,7 +341,7 @@ impl ThemeSwitcherScene {
                     for dx in 0..swatch_w {
                         let cx = sx + dx;
                         let cy = sy + dy;
-                        let idx = (cy * area.width + cx) as usize;
+                        let idx = cy as usize * plane.width as usize + cx as usize;
                         if idx < plane.cells.len() {
                             plane.cells[idx].char = ' ';
                             plane.cells[idx].bg = *color;
@@ -352,8 +353,8 @@ impl ThemeSwitcherScene {
                 // Border
                 let border_color = if *name == "bg" { t.outline } else { *color };
                 for x in sx..sx + swatch_w {
-                    let top_idx = (sy * area.width + x) as usize;
-                    let bot_idx = ((sy + swatch_h - 1) * area.width + x) as usize;
+                    let top_idx = sy as usize * plane.width as usize + x as usize;
+                    let bot_idx = (sy + swatch_h - 1) as usize * plane.width as usize + x as usize;
                     if top_idx < plane.cells.len() {
                         plane.cells[top_idx].char = '─';
                         plane.cells[top_idx].fg = border_color;
@@ -364,8 +365,8 @@ impl ThemeSwitcherScene {
                     }
                 }
                 for y in sy..sy + swatch_h {
-                    let left_idx = (y * area.width + sx) as usize;
-                    let right_idx = (y * area.width + sx + swatch_w - 1) as usize;
+                    let left_idx = y as usize * plane.width as usize + sx as usize;
+                    let right_idx = y as usize * plane.width as usize + (sx + swatch_w - 1) as usize;
                     if left_idx < plane.cells.len() {
                         plane.cells[left_idx].char = '│';
                         plane.cells[left_idx].fg = border_color;
@@ -418,7 +419,7 @@ impl ThemeSwitcherScene {
                     panel_x,
                     ry,
                     pair,
-                    panel_w / 2,
+                    panel_x + 8,
                     t.fg_muted,
                     t.bg,
                     false,
@@ -428,7 +429,7 @@ impl ThemeSwitcherScene {
                     panel_x + 8,
                     ry,
                     ratio,
-                    panel_w / 2,
+                    panel_x + 18,
                     t.fg,
                     t.bg,
                     false,
@@ -438,7 +439,7 @@ impl ThemeSwitcherScene {
                     panel_x + 18,
                     ry,
                     level,
-                    panel_w / 2,
+                    panel_x + panel_w,
                     level_color,
                     t.bg,
                     true,
