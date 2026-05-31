@@ -207,7 +207,8 @@ impl crate::framework::widget::Widget for ColorPicker {
 
         // === Color Preview Swatch ===
         let swatch_width = 8u16.min(area.width.saturating_sub(2));
-        let swatch_height = 4u16.min(area.height.saturating_sub(4)); // Reserve space for hex + sliders
+        // Reserve: border_top(1) + swatch(4) + border_bottom(1) + hex(1) + gap(1) + sliders(6) + values(1) + instructions(1) = 16
+        let swatch_height = 4u16.min(area.height.saturating_sub(12).max(1));
         if swatch_height == 0 || area.width < 12 {
             return plane;
         }
@@ -470,7 +471,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         match kind {
             crate::input::event::MouseEventKind::Moved => {
                 // Determine which slider is hovered
-                let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                let swatch_height = 4u16.min(area.height.saturating_sub(12).max(1));
                 let border_bottom = swatch_height + 1;
                 let hex_y = border_bottom + 1;
                 let slider_start_y = hex_y + 2;
@@ -500,7 +501,7 @@ impl crate::framework::widget::Widget for ColorPicker {
                 true
             }
             crate::input::event::MouseEventKind::Down(crate::input::event::MouseButton::Left) => {
-                let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                let swatch_height = 4u16.min(area.height.saturating_sub(12).max(1));
                 let border_bottom = swatch_height + 1;
                 let hex_y = border_bottom + 1;
                 let slider_start_y = hex_y + 2;
@@ -533,7 +534,7 @@ impl crate::framework::widget::Widget for ColorPicker {
             }
             crate::input::event::MouseEventKind::Drag(_) => {
                 if let Some(slider) = self.selected_slider {
-                    let swatch_height = 4u16.min(area.height.saturating_sub(4));
+                    let swatch_height = 4u16.min(area.height.saturating_sub(12).max(1));
                     let border_bottom = swatch_height + 1;
                     let hex_y = border_bottom + 1;
                     let slider_start_y = hex_y + 2;
