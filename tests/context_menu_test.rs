@@ -144,7 +144,7 @@ fn make_menu() -> ContextMenu {
         ContextMenuItem::separator(),
         ContextMenuItem::new("delete", "Delete"),
     ];
-    ContextMenu::new("test_menu", items)
+    ContextMenu::new(items)
 }
 
 // ============================================================================
@@ -406,7 +406,7 @@ fn test_context_menu_many_items() {
     let items: Vec<ContextMenuItem> = (0..20)
         .map(|i| ContextMenuItem::new(format!("item_{}", i), format!("Item {}", i)))
         .collect();
-    let menu = ContextMenu::new("big_menu", items);
+    let menu = ContextMenu::new(items);
     let area = Rect::new(0, 0, 30, 25);
     let plane = menu.render(area);
     assert_eq!(plane.width, 30);
@@ -414,7 +414,7 @@ fn test_context_menu_many_items() {
 
 #[test]
 fn test_context_menu_empty_items() {
-    let menu = ContextMenu::new("empty_menu", vec![]);
+    let menu = ContextMenu::new(vec![]);
     let area = Rect::new(0, 0, 30, 10);
     let plane = menu.render(area);
     assert_eq!(plane.width, 30);
@@ -427,7 +427,7 @@ fn test_context_menu_unicode_labels() {
         ContextMenuItem::new("ar", "عربي"),
         ContextMenuItem::new("em", "🎉"),
     ];
-    let menu = ContextMenu::new("unicode_menu", items);
+    let menu = ContextMenu::new(items);
     let area = Rect::new(0, 0, 30, 10);
     let plane = menu.render(area);
     assert_eq!(plane.width, 30);
