@@ -1086,6 +1086,21 @@ impl Default for App {
     }
 }
 
+impl App {
+    /// Creates a new App with default settings.
+    ///
+    /// This is a fallible constructor that returns `Result` instead of panicking.
+    /// Prefer this over `App::default()` which will panic if the terminal
+    /// cannot be initialized.
+    ///
+    /// # Errors
+    ///
+    /// Returns `io::Error` if the terminal cannot be initialized (e.g., not a TTY).
+    pub fn from_defaults() -> io::Result<Self> {
+        Self::new()
+    }
+}
+
 /// Application context, passed to every render and tick callback.
 ///
 /// Provides access to the compositor, theme, animation manager, focus manager,

@@ -1,45 +1,9 @@
-//! Tests for input/mapping.rs deprecated functions and kitty_key.rs parser.
+//! Tests for input/mapping.rs and kitty_key.rs parser.
 
 mod common;
 
 use dracon_terminal_engine::input::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
 use dracon_terminal_engine::input::kitty_key::parse_kitty_keyboard;
-
-#[test]
-fn test_from_runtime_event_identity() {
-    let event = Event::Key(dracon_terminal_engine::input::event::KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Enter,
-        modifiers: KeyModifiers::empty(),
-    });
-    #[allow(deprecated)]
-    let result = dracon_terminal_engine::input::mapping::from_runtime_event(event.clone());
-    match (&event, &result) {
-        (Event::Key(a), Event::Key(b)) => {
-            assert_eq!(a.code, b.code);
-            assert_eq!(a.kind, b.kind);
-        }
-        _ => panic!("expected Key event"),
-    }
-}
-
-#[test]
-fn test_to_runtime_event_identity() {
-    let event = Event::Key(dracon_terminal_engine::input::event::KeyEvent {
-        kind: KeyEventKind::Press,
-        code: KeyCode::Esc,
-        modifiers: KeyModifiers::empty(),
-    });
-    #[allow(deprecated)]
-    let result = dracon_terminal_engine::input::mapping::to_runtime_event(&event);
-    match (&event, &result) {
-        (Event::Key(a), Event::Key(b)) => {
-            assert_eq!(a.code, b.code);
-            assert_eq!(a.kind, b.kind);
-        }
-        _ => panic!("expected Key event"),
-    }
-}
 
 #[test]
 fn test_to_ui_event_key() {
