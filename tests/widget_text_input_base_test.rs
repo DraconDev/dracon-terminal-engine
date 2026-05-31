@@ -2,7 +2,7 @@ mod common;
 
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::text_input_base::BaseInput;
+use dracon_terminal_engine::framework::widgets::text_input_core::BaseInput;
 use ratatui::layout::Rect;
 
 #[test]

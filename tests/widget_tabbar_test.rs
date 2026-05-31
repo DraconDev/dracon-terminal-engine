@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::framework::theme::Theme;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::tabbar::TabBar;
+use dracon_terminal_engine::framework::widgets::tab_bar::TabBar;
 use ratatui::layout::Rect;
 
 // ============================================================================

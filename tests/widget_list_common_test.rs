@@ -2,7 +2,7 @@
 
 use dracon_terminal_engine::compositor::Plane;
 use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::framework::widgets::list_common::{
+use dracon_terminal_engine::framework::widgets::list_helpers::{
     render_scroll_indicator, ListNavigation,
 };
 
