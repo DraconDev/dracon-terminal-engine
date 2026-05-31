@@ -366,7 +366,8 @@ impl ThemeSwitcherScene {
                 }
                 for y in sy..sy + swatch_h {
                     let left_idx = y as usize * plane.width as usize + sx as usize;
-                    let right_idx = y as usize * plane.width as usize + (sx + swatch_w - 1) as usize;
+                    let right_idx =
+                        y as usize * plane.width as usize + (sx + swatch_w - 1) as usize;
                     if left_idx < plane.cells.len() {
                         plane.cells[left_idx].char = '│';
                         plane.cells[left_idx].fg = border_color;
