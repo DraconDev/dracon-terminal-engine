@@ -3,6 +3,27 @@
 //! Provides types and utilities for rendering sixel-encoded images
 //! in the terminal. Sixel is a bitmap graphics format using
 //! six-element encoded patterns.
+//!
+//! # Current Limitations
+//!
+//! **Sixel decoding is NOT implemented.** The [`SixelImage::from_sixel`] method
+//! returns `Err("Sixel decoding not yet implemented")`. You can:
+//!
+//! - Create images programmatically via [`SixelImage::new`] + [`set_pixel`](SixelImage::set_pixel)
+//! - Use the [`SixelRenderer`] widget to display pixel data
+//!
+//! To decode actual sixel data, integrate an external crate such as
+//! `sixel-rs` or `libimagequant` and feed the resulting RGB buffer
+//! into `SixelImage::new` + `set_pixel`.
+//!
+//! # Feature Gate
+//!
+//! This module is behind the `sixel` feature flag. Enable it in `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! dracon-terminal-engine = { version = "0.1", features = ["sixel"] }
+//! ```
 
 use crate::compositor::{Cell, Color, Plane, Styles};
 use crate::framework::widget::WidgetId;
