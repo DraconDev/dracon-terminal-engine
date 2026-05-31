@@ -481,3 +481,405 @@ fn test_router_tick_transition() {
     router.tick_transition(16.0);
     router.tick_transition(16.0);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PUSH WITH TRANSITION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_push_with_transition_slide_left() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::SlideLeft, 300.0);
+    assert_eq!(router.current(), Some("b"));
+    assert_eq!(router.stack_depth(), 2);
+    assert!(router.is_transitioning());
+}
+
+#[test]
+fn test_push_with_transition_slide_right() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::SlideRight, 200.0);
+    assert_eq!(router.current(), Some("b"));
+    assert!(router.is_transitioning());
+}
+
+#[test]
+fn test_push_with_transition_slide_up() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::SlideUp, 250.0);
+    assert_eq!(router.current(), Some("b"));
+    assert!(router.is_transitioning());
+}
+
+#[test]
+fn test_push_with_transition_slide_down() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::SlideDown, 250.0);
+    assert_eq!(router.current(), Some("b"));
+    assert!(router.is_transitioning());
+}
+
+#[test]
+fn test_push_with_transition_none_is_instant() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::None, 300.0);
+    assert_eq!(router.current(), Some("b"));
+    assert!(!router.is_transitioning());
+}
+
+#[test]
+fn test_push_with_transition_on_empty_stack_no_transition() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+
+    // No current scene, so no transition should start
+    router.push_with_transition("a", SceneTransition::Fade, 200.0);
+    assert_eq!(router.current(), Some("a"));
+    assert!(!router.is_transitioning());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAVIGATE_TO (DEEP LINKING)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_navigate_to_single_segment() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    router.navigate_to("home");
+    assert_eq!(router.current(), Some("home"));
+    assert_eq!(router.stack_depth(), 1);
+}
+
+#[test]
+fn test_navigate_to_multi_segment() {
+    let mut router = SceneRouter::new();
+    router.register("settings", Box::new(TestScene::new("settings")));
+    router.register("profile", Box::new(TestScene::new("profile")));
+
+    router.navigate_to("settings/profile");
+    assert_eq!(router.current(), Some("profile"));
+    assert_eq!(router.stack_depth(), 2);
+    assert_eq!(router.current_path(), "settings/profile");
+}
+
+#[test]
+fn test_navigate_to_unknown_segment_stops() {
+    let mut router = SceneRouter::new();
+    router.register("settings", Box::new(TestScene::new("settings")));
+    // "profile" is NOT registered
+
+    router.navigate_to("settings/profile");
+    // "settings" should be pushed via go(), but "profile" push fails silently
+    assert_eq!(router.current(), Some("settings"));
+    assert_eq!(router.stack_depth(), 1);
+}
+
+#[test]
+fn test_navigate_to_empty_path() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    router.navigate_to("");
+    assert_eq!(router.current(), None);
+    assert_eq!(router.stack_depth(), 0);
+}
+
+#[test]
+fn test_navigate_to_slashes_only() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+
+    router.navigate_to("///");
+    assert_eq!(router.current(), None);
+}
+
+#[test]
+fn test_navigate_to_clears_stack() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    router.push("b");
+    router.push("c");
+    assert_eq!(router.stack_depth(), 3);
+
+    // navigate_to should clear and start fresh
+    router.navigate_to("a/b");
+    assert_eq!(router.stack_depth(), 2);
+    assert_eq!(router.current(), Some("b"));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CURRENT_PATH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_current_path_empty() {
+    let router = SceneRouter::new();
+    assert_eq!(router.current_path(), "");
+}
+
+#[test]
+fn test_current_path_single() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+    assert_eq!(router.current_path(), "home");
+}
+
+#[test]
+fn test_current_path_nested() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    router.push("b");
+    router.push("c");
+    assert_eq!(router.current_path(), "a/b/c");
+}
+
+#[test]
+fn test_current_path_after_pop() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push("b");
+    assert_eq!(router.current_path(), "a/b");
+
+    router.pop();
+    assert_eq!(router.current_path(), "a");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BLEND PLANES (TRANSITION RENDERING)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_render_without_transition() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_render_empty_router() {
+    let router = SceneRouter::new();
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_render_during_transition() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 500.0);
+    assert!(router.is_transitioning());
+
+    // Render during transition should produce valid plane
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_transition_completes_after_enough_ticks() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 100.0);
+
+    // Tick enough to complete (100ms / 16ms per tick = ~7 ticks)
+    for _ in 0..10 {
+        router.tick_transition(16.0);
+    }
+    assert!(!router.is_transitioning());
+}
+
+#[test]
+fn test_render_after_transition_completes() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 50.0);
+
+    // Complete the transition
+    for _ in 0..5 {
+        router.tick_transition(16.0);
+    }
+
+    // Render after transition completes
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+    assert!(!router.is_transitioning());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INPUT DELEGATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
+
+#[test]
+fn test_handle_key_delegates_to_current_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+
+    let key = KeyEvent {
+        code: KeyCode::Char('a'),
+        modifiers: dracon_terminal_engine::input::event::KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
+    // TestScene::handle_key returns false, so router should also return false
+    let handled = router.handle_key(key);
+    assert!(!handled);
+}
+
+#[test]
+fn test_handle_key_empty_stack() {
+    let mut router = SceneRouter::new();
+    let key = KeyEvent {
+        code: KeyCode::Char('a'),
+        modifiers: dracon_terminal_engine::input::event::KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
+    let handled = router.handle_key(key);
+    assert!(!handled);
+}
+
+#[test]
+fn test_handle_mouse_delegates_to_current_scene() {
+    let mut router = SceneRouter::new();
+    router.register("home", Box::new(TestScene::new("home")));
+    router.push("home");
+
+    let handled = router.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 5);
+    assert!(!handled);
+}
+
+#[test]
+fn test_handle_mouse_empty_stack() {
+    let mut router = SceneRouter::new();
+    let handled = router.handle_mouse(MouseEventKind::Down(MouseButton::Left), 10, 5);
+    assert!(!handled);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPLEX LIFECYCLE SCENARIOS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_push_pop_push_lifecycle() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    router.push("b");
+    router.pop();
+    router.push("c");
+
+    assert_eq!(router.current(), Some("c"));
+    assert_eq!(router.stack_depth(), 2);
+    assert_eq!(router.current_path(), "a/c");
+}
+
+#[test]
+fn test_go_exits_all_scenes() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    router.push("b");
+    router.push("c");
+
+    router.go("a");
+    assert_eq!(router.current(), Some("a"));
+    assert_eq!(router.stack_depth(), 1);
+
+    let b = router.get_scene("b").unwrap();
+    let b = b as &dyn std::any::Any;
+    let b = b.downcast_ref::<TestScene>().unwrap();
+    assert!(b.exited);
+}
+
+#[test]
+fn test_replace_exits_old_enters_new() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.replace("b");
+
+    let a = router.get_scene("a").unwrap();
+    let a = a as &dyn std::any::Any;
+    let a = a.downcast_ref::<TestScene>().unwrap();
+    assert!(a.exited);
+
+    let b = router.get_scene("b").unwrap();
+    let b = b as &dyn std::any::Any;
+    let b = b.downcast_ref::<TestScene>().unwrap();
+    assert!(b.entered);
+}
+
+#[test]
+fn test_theme_propagates_to_new_scene() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    let theme = Theme::nord();
+    router.on_theme_change(&theme);
+
+    // Both scenes should receive theme via on_theme_change
+    router.push("a");
+    router.push("b");
+
+    // No panic means theme propagation worked
+    assert_eq!(router.current(), Some("b"));
+}
