@@ -528,7 +528,6 @@ fn test_tags_input_clear_resets_for_max() {
 // ============================================================================
 
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use ratatui::layout::Rect;
 
 fn make_key(code: KeyCode) -> KeyEvent {
     KeyEvent {
