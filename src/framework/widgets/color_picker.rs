@@ -226,7 +226,7 @@ impl crate::framework::widget::Widget for ColorPicker {
 
         // Top border (row 0)
         for x in 1..=swatch_width {
-            let idx = (0 * area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = self.theme.outline;
@@ -243,7 +243,7 @@ impl crate::framework::widget::Widget for ColorPicker {
         }
         // Left/right borders (rows 1..=swatch_height)
         for y in 1..=swatch_height {
-            let left_idx = (y * area.width + 0) as usize;
+            let left_idx = (y * area.width) as usize;
             let right_idx = (y * area.width + swatch_width + 1) as usize;
             if left_idx < plane.cells.len() {
                 plane.cells[left_idx].char = '│';
