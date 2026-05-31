@@ -123,10 +123,12 @@ fn test_context_menu_action_serialize_set_color() {
 // Widget Interaction Tests
 // ============================================================================
 
-use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::context_menu::{ContextMenuItem, ContextMenu};
 use dracon_terminal_engine::framework::theme::Theme;
-use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind};
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::context_menu::{ContextMenu, ContextMenuItem};
+use dracon_terminal_engine::input::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
 use ratatui::layout::Rect;
 
 fn make_key(code: KeyCode) -> KeyEvent {
@@ -262,7 +264,7 @@ fn test_context_menu_handle_key_ignore_release() {
 fn test_context_menu_handle_mouse_click_inside() {
     let mut menu = make_menu();
     // Menu auto-sizes — render to establish internal area
-    let plane = menu.render(Rect::new(10, 10, 30, 15));
+    let _plane = menu.render(Rect::new(10, 10, 30, 15));
     // Click inside the rendered area
     let result = menu.handle_mouse(MouseEventKind::Down(MouseButton::Left), 15, 12);
     let _ = result;

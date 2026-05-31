@@ -118,10 +118,12 @@ fn register_empty_name_succeeds() {
 #[test]
 fn register_special_characters_name() {
     let mut registry = PluginRegistry::new();
-    assert!(registry.register(
-        "my-widget.v2!@#$%",
-        |id, theme| Box::new(AlphaWidget { id, theme })
-    ));
+    assert!(
+        registry.register("my-widget.v2!@#$%", |id, theme| Box::new(AlphaWidget {
+            id,
+            theme
+        }))
+    );
     assert!(registry.has("my-widget.v2!@#$%"));
 }
 
@@ -186,7 +188,9 @@ fn create_multiple_instances_same_plugin() {
 #[test]
 fn create_unknown_plugin_returns_none() {
     let registry = PluginRegistry::new();
-    assert!(registry.create("nonexistent", WidgetId::new(1), Theme::default()).is_none());
+    assert!(registry
+        .create("nonexistent", WidgetId::new(1), Theme::default())
+        .is_none());
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -310,10 +314,7 @@ fn factory_receives_correct_id() {
     let mut registry = PluginRegistry::new();
     registry.register("spy_id", move |id, theme| {
         *captured_id_clone.lock().unwrap() = Some(id);
-        Box::new(AlphaWidget {
-            id,
-            theme,
-        })
+        Box::new(AlphaWidget { id, theme })
     });
 
     let _ = registry.create("spy_id", WidgetId::new(999), Theme::default());
@@ -350,7 +351,9 @@ fn create_after_unregister_returns_none() {
     registry.register("temp", |id, theme| Box::new(AlphaWidget { id, theme }));
     registry.unregister("temp");
 
-    assert!(registry.create("temp", WidgetId::new(1), Theme::default()).is_none());
+    assert!(registry
+        .create("temp", WidgetId::new(1), Theme::default())
+        .is_none());
 }
 
 #[test]
