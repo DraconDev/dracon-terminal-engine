@@ -35,6 +35,16 @@ pub struct LiveFeedScene {
     cpu_data: Vec<f64>,
     mem_data: Vec<f64>,
     last_feed: Instant,
+    // Time-based auto-update state (mutable-from-render via Cell)
+    last_auto_tick: std::cell::Cell<Instant>,
+    render_dirty: std::cell::Cell<bool>,
+    // Live mode toggle (paused by default, but tab switches and Space force updates)
+    live_mode: bool,
+    // Burst counter for visual feedback
+    burst_count: u32,
+    // Peak values for stats panel
+    peak_cpu: f64,
+    peak_mem: f64,
     dirty: bool,
 }
 
@@ -74,6 +84,9 @@ impl LiveFeedScene {
             ))
             .with_theme(theme.clone());
 
+        let peak_cpu_init = cpu_data.last().copied().unwrap_or(0.0);
+        let peak_mem_init = mem_data.last().copied().unwrap_or(0.0);
+
         Self {
             theme,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -88,6 +101,12 @@ impl LiveFeedScene {
             cpu_data,
             mem_data,
             last_feed: Instant::now(),
+            last_auto_tick: std::cell::Cell::new(Instant::now()),
+            render_dirty: std::cell::Cell::new(false),
+            live_mode: false,
+            burst_count: 0,
+            peak_cpu: peak_cpu_init,
+            peak_mem: peak_mem_init,
             dirty: true,
         }
     }
@@ -450,6 +469,8 @@ impl Scene for LiveFeedScene {
                     ("1/2/3", "Switch tab (Logs/CPU/Memory)"),
                     ("Tab", "Cycle tabs"),
                     ("Space", "Add log entry + update metrics"),
+                    ("b", "Burst — emit 5 log entries rapidly"),
+                    ("L", "Toggle live auto-tick mode"),
                     ("Left/Right", "Resize split pane"),
                     ("Click tab", "Switch tab"),
                     ("Drag divider", "Resize split pane"),
@@ -506,6 +527,23 @@ impl Scene for LiveFeedScene {
             KeyCode::Char(' ') => {
                 self.add_log_entry();
                 self.update_metrics();
+                true
+            }
+            KeyCode::Char('b') if key.modifiers.is_empty() => {
+                // Burst mode: emit 5 log entries in rapid succession to
+                // demonstrate the streaming log and sparkline tracking.
+                for _ in 0..5 {
+                    self.add_log_entry();
+                    self.update_metrics();
+                }
+                self.burst_count += 1;
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('L') if key.modifiers.is_empty() => {
+                self.live_mode = !self.live_mode;
+                self.last_auto_tick.set(Instant::now());
+                self.dirty = true;
                 true
             }
             KeyCode::Tab => {
@@ -593,6 +631,10 @@ impl Scene for LiveFeedScene {
         "live_feed"
     }
     fn needs_render(&self) -> bool {
+        if self.render_dirty.get() {
+            self.render_dirty.set(false);
+            return true;
+        }
         true
     }
     fn mark_dirty(&mut self) {

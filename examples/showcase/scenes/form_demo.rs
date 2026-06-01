@@ -186,6 +186,44 @@ impl Scene for FormDemoScene {
             }
         }
 
+        // ── Validation summary bar (top-right) ───────────────────────
+        let username = self.username.query();
+        let email_q = self.email.query();
+        let password = self.password.password();
+        let mut errors: Vec<&str> = Vec::new();
+        if username.is_empty() {
+            errors.push("username required");
+        } else if username.len() < 3 {
+            errors.push("username ≥3 chars");
+        }
+        if email_q.is_empty() {
+            errors.push("email required");
+        } else if !email_q.contains('@') || !email_q.contains('.') {
+            errors.push("invalid email");
+        }
+        if password.len() < 6 {
+            errors.push("password ≥6 chars");
+        }
+        let summary_text = if errors.is_empty() {
+            "✓ All fields valid".to_string()
+        } else {
+            format!("✗ {}", errors.join(" · "))
+        };
+        let summary_color = if errors.is_empty() {
+            t.success
+        } else {
+            t.error
+        };
+        draw_text(
+            &mut plane,
+            area.width.saturating_sub(summary_text.len() as u16 + 2),
+            1,
+            &summary_text,
+            summary_color,
+            t.bg,
+            true,
+        );
+
         // ── Left panel: Form fields ──────────────────────────────────────
         let form_w = (area.width * 55 / 100).max(30);
         let start_y = 2u16;
@@ -271,12 +309,39 @@ impl Scene for FormDemoScene {
                 );
             }
 
-            // Validation indicator
-            let valid = match field_id {
-                FIELD_USERNAME => !self.username.query().is_empty(),
-                FIELD_EMAIL => self.email.query().contains('@'),
-                FIELD_PASSWORD => self.password.password().len() >= 6,
-                _ => false,
+            // Validation indicator + inline error
+            let (valid, error_msg): (bool, &str) = match field_id {
+                FIELD_USERNAME => {
+                    let q = self.username.query();
+                    if q.is_empty() {
+                        (false, "required")
+                    } else if q.len() < 3 {
+                        (false, "≥3 chars")
+                    } else {
+                        (true, "")
+                    }
+                }
+                FIELD_EMAIL => {
+                    let q = self.email.query();
+                    if q.is_empty() {
+                        (false, "required")
+                    } else if !q.contains('@') || !q.contains('.') {
+                        (false, "must contain @ and .")
+                    } else {
+                        (true, "")
+                    }
+                }
+                FIELD_PASSWORD => {
+                    let p = self.password.password();
+                    if p.is_empty() {
+                        (false, "required")
+                    } else if p.len() < 6 {
+                        (false, "≥6 chars")
+                    } else {
+                        (true, "")
+                    }
+                }
+                _ => (true, ""),
             };
             if valid {
                 draw_text(
@@ -288,6 +353,9 @@ impl Scene for FormDemoScene {
                     row_bg,
                     false,
                 );
+            } else {
+                // Show inline error message in red next to the field
+                draw_text(&mut plane, 16, y + 1, error_msg, t.error, t.bg, false);
             }
 
             // Widget
@@ -595,6 +663,7 @@ impl Scene for FormDemoScene {
                     ("Shift+Tab", "Previous field"),
                     ("Enter", "Submit form"),
                     ("r", "Reset form"),
+                    ("Live validation", "Errors shown in red under fields"),
                     ("Drag =", "Reorder fields"),
                     ("Esc", "Back"),
                 ],

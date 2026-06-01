@@ -30,6 +30,15 @@ pub struct HudDemoScene {
     score: u32,
     level: u32,
     wave: u32,
+    // Enemies: (x, y, hp, max_hp, kind)
+    enemies: Vec<(u16, u16, f32, f32, u8)>,
+    // Active damage flash (column, row, frames_remaining, intensity)
+    damage_flashes: RefCell<Vec<(u16, u16, u8)>>,
+    // Combat log
+    combat_log: Vec<String>,
+    // Hit counter for visual feedback
+    hits_taken: u32,
+    hits_dealt: u32,
     // Widgets
     health_gauge: RefCell<Gauge>,
     shield_gauge: RefCell<Gauge>,
@@ -37,6 +46,8 @@ pub struct HudDemoScene {
     status_bar: RefCell<StatusBar>,
     show_help: bool,
     dirty: bool,
+    // mutable-from-render flag for time-based updates (e.g. flash decay)
+    render_dirty: std::cell::Cell<bool>,
 }
 
 impl HudDemoScene {
@@ -73,11 +84,24 @@ impl HudDemoScene {
             score: 0,
             level: 1,
             wave: 1,
+            // Five enemies, varied HP and positions
+            enemies: vec![
+                (8, 5, 30.0, 30.0, 0),
+                (24, 5, 45.0, 45.0, 1),
+                (40, 6, 25.0, 25.0, 2),
+                (56, 5, 60.0, 60.0, 3),
+                (72, 5, 35.0, 35.0, 4),
+            ],
+            damage_flashes: RefCell::new(Vec::new()),
+            combat_log: vec!["[SYS] Arena initialized.".to_string()],
+            hits_taken: 0,
+            hits_dealt: 0,
             health_gauge: RefCell::new(health_gauge),
             shield_gauge: RefCell::new(shield_gauge),
             spinner: RefCell::new(spinner),
             status_bar: RefCell::new(status_bar),
             show_help: false,
+            render_dirty: std::cell::Cell::new(false),
             dirty: true,
         }
     }
@@ -146,12 +170,98 @@ impl Scene for HudDemoScene {
             false,
         );
 
-        // Enemy indicators (simple dots)
-        let enemies = ["👾", "👾", "👾", "👾", "👾"];
-        for (i, e) in enemies.iter().enumerate() {
-            let ex = 5 + i as u16 * 8;
-            let ey = game_y + 3;
-            draw_text(&mut plane, ex, ey, e, t.fg, Color::Rgb(10, 10, 20), false);
+        // Enemy indicators with HP bars
+        let enemy_chars = ['Z', 'X', 'B', 'Q', 'M'];
+        for (i, (ex, ey, hp, max_hp, kind)) in self.enemies.iter().enumerate() {
+            let ch = enemy_chars.get(*kind as usize).copied().unwrap_or('?');
+            // Enemy glyph
+            let color = if *hp > *max_hp * 0.5 {
+                t.fg
+            } else if *hp > *max_hp * 0.25 {
+                t.warning
+            } else {
+                t.error
+            };
+            draw_text(
+                &mut plane,
+                *ex,
+                *ey,
+                &ch.to_string(),
+                color,
+                Color::Rgb(10, 10, 20),
+                true,
+            );
+            // HP bar underneath
+            let bar_w = 6u16;
+            let filled = ((*hp / *max_hp) * bar_w as f32) as u16;
+            let mut bar = String::new();
+            for j in 0..bar_w {
+                if j < filled {
+                    bar.push('█');
+                } else {
+                    bar.push('░');
+                }
+            }
+            draw_text(
+                &mut plane,
+                ex.saturating_sub(1),
+                ey + 1,
+                &bar,
+                color,
+                Color::Rgb(10, 10, 20),
+                false,
+            );
+            // HP number
+            let _ = i; // suppress unused warning
+        }
+
+        // Damage flashes (overlay)
+        for (fx, fy, intensity) in self.damage_flashes.borrow().iter() {
+            let color = match intensity {
+                0..=2 => t.error,
+                3..=5 => t.warning,
+                _ => t.fg,
+            };
+            let idx = (*fy as usize) * area.width as usize + *fx as usize;
+            if idx < plane.cells.len() {
+                plane.cells[idx].char = '!';
+                plane.cells[idx].fg = color;
+                plane.cells[idx].bg = Color::Rgb(10, 10, 20);
+                plane.cells[idx].style = Styles::BOLD;
+            }
+        }
+
+        // Decay flash intensities
+        if !self.damage_flashes.borrow().is_empty() {
+            self.damage_flashes
+                .borrow_mut()
+                .retain_mut(|(_, _, intensity)| {
+                    *intensity = intensity.saturating_sub(1);
+                    *intensity > 0
+                });
+            self.render_dirty.set(true);
+        }
+
+        // Combat log (bottom of game area)
+        let log_y = game_y + game_h.saturating_sub(2);
+        let visible_log: Vec<&String> = self.combat_log.iter().rev().take(2).collect();
+        for (i, entry) in visible_log.iter().enumerate() {
+            let color = if entry.starts_with("[HIT]") {
+                t.success
+            } else if entry.starts_with("[DMG]") {
+                t.error
+            } else {
+                t.fg_muted
+            };
+            draw_text(
+                &mut plane,
+                1,
+                log_y + i as u16,
+                entry,
+                color,
+                Color::Rgb(10, 10, 20),
+                false,
+            );
         }
 
         // ── HUD overlay (top-left of game area) ───────────────────
@@ -291,27 +401,55 @@ impl Scene for HudDemoScene {
         match key.code {
             KeyCode::Char('h') if key.modifiers.is_empty() => {
                 self.health = (self.health - 10.0).max(0.0);
+                self.hits_taken += 1;
+                self.damage_flashes.borrow_mut().push((2, 3, 8));
+                self.combat_log
+                    .push(format!("[DMG] Took 10 damage (HP: {:.0})", self.health));
                 self.dirty = true;
                 true
             }
             KeyCode::Char('d') if key.modifiers.is_empty() => {
                 self.health = (self.health + 10.0).min(100.0);
+                self.combat_log
+                    .push(format!("[HEAL] +10 HP (now {:.0})", self.health));
                 self.dirty = true;
                 true
             }
             KeyCode::Char('s') if key.modifiers.is_empty() => {
                 self.shield = (self.shield - 15.0).max(0.0);
+                self.damage_flashes.borrow_mut().push((2, 4, 6));
+                self.combat_log
+                    .push(format!("[DMG] Shield -15 (now {:.0})", self.shield));
                 self.dirty = true;
                 true
             }
             KeyCode::Char('a') if key.modifiers.is_empty() => {
                 if self.ammo > 0.0 {
                     self.ammo -= 1.0;
-                    self.score += 100;
+                    // Damage the leftmost alive enemy
+                    if let Some(enemy) = self.enemies.iter_mut().find(|e| e.2 > 0.0) {
+                        let dmg = 8.0 + (self.level as f32 * 2.0);
+                        enemy.2 = (enemy.2 - dmg).max(0.0);
+                        self.score += 100;
+                        self.hits_dealt += 1;
+                        self.damage_flashes.borrow_mut().push((enemy.0, enemy.1, 5));
+                        let kind = enemy.4;
+                        let enemy_chars = ['Z', 'X', 'B', 'Q', 'M'];
+                        let ch = enemy_chars.get(kind as usize).copied().unwrap_or('?');
+                        if enemy.2 <= 0.0 {
+                            self.score += 500;
+                            self.combat_log
+                                .push(format!("[HIT] Killed {} +500 score", ch));
+                        } else {
+                            self.combat_log.push(format!("[HIT] {} -{:.0} HP", ch, dmg));
+                        }
+                    }
                 }
                 if self.ammo <= 0.0 {
                     self.wave += 1;
                     self.ammo = 30.0;
+                    self.combat_log
+                        .push(format!("[SYS] Wave {} starting", self.wave));
                 }
                 self.dirty = true;
                 true
@@ -321,6 +459,12 @@ impl Scene for HudDemoScene {
                 self.score += 10;
                 if self.score > 0 && self.score.is_multiple_of(1000) {
                     self.level += 1;
+                    self.combat_log
+                        .push(format!("[SYS] Level up! Now level {}", self.level));
+                }
+                // Auto-regen shield slowly on idle tick
+                if self.shield < 100.0 {
+                    self.shield = (self.shield + 1.0).min(100.0);
                 }
                 self.dirty = true;
                 true
@@ -332,6 +476,13 @@ impl Scene for HudDemoScene {
                 self.score = 0;
                 self.level = 1;
                 self.wave = 1;
+                self.hits_taken = 0;
+                self.hits_dealt = 0;
+                self.damage_flashes.borrow_mut().clear();
+                self.combat_log = vec!["[SYS] Arena reset.".to_string()];
+                for enemy in self.enemies.iter_mut() {
+                    enemy.2 = enemy.3;
+                }
                 self.dirty = true;
                 true
             }
@@ -358,6 +509,10 @@ impl Scene for HudDemoScene {
         "hud_demo"
     }
     fn needs_render(&self) -> bool {
+        if self.render_dirty.get() {
+            self.render_dirty.set(false);
+            return true;
+        }
         true
     }
     fn mark_dirty(&mut self) {
