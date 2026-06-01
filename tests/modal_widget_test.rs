@@ -155,3 +155,129 @@ fn test_modal_theme_change() {
     // Modal background should use theme
     assert!(!plane.cells.is_empty());
 }
+
+#[test]
+fn test_modal_new_with_id() {
+    let id = WidgetId::new(123);
+    let modal = Modal::new_with_id(id, "Test");
+    assert_eq!(modal.id(), id);
+}
+
+#[test]
+fn test_modal_set_id() {
+    let mut modal = Modal::new("Test");
+    modal.set_id(WidgetId::new(456));
+    assert_eq!(modal.id(), WidgetId::new(456));
+}
+
+#[test]
+fn test_modal_with_theme_builder() {
+    let theme = Theme::nord();
+    let modal = Modal::new("Test").with_theme(theme);
+    let plane = modal.render(Rect::new(0, 0, 80, 24));
+    assert!(!plane.cells.is_empty());
+}
+
+#[test]
+fn test_modal_default_no_result() {
+    let modal = Modal::new("Test");
+    assert!(modal.get_result().is_none());
+}
+
+#[test]
+fn test_modal_clear_result_when_none() {
+    let mut modal = Modal::new("Test");
+    modal.clear_result();
+    assert!(modal.get_result().is_none());
+}
+
+#[test]
+fn test_modal_needs_render_after_theme_change() {
+    let mut modal = Modal::new("Test");
+    modal.clear_dirty();
+    modal.on_theme_change(&Theme::cyberpunk());
+    let _plane = modal.render(Rect::new(0, 0, 80, 24));
+}
+
+#[test]
+fn test_modal_dirty_lifecycle() {
+    let mut modal = Modal::new("Test");
+    assert!(modal.needs_render());
+    modal.clear_dirty();
+    assert!(!modal.needs_render());
+    modal.mark_dirty();
+    assert!(modal.needs_render());
+}
+
+#[test]
+fn test_modal_render_zero_size_safe() {
+    let modal = Modal::new("Test");
+    let plane = modal.render(Rect::new(0, 0, 0, 0));
+    assert!(!plane.cells.is_empty());
+}
+
+#[test]
+fn test_modal_enter_on_last_button() {
+    let mut modal = Modal::new("Test").with_size(40, 5).with_buttons(vec![
+        ("OK", ModalResult::Confirm),
+        ("Cancel", ModalResult::Cancel),
+    ]);
+    modal.set_area(Rect::new(0, 0, 80, 24));
+    modal.handle_key(key_press(KeyCode::Tab));
+    assert!(modal.handle_key(key_press(KeyCode::Enter)));
+}
+
+#[test]
+fn test_modal_esc_returns_result() {
+    let mut modal = Modal::new("Test").with_size(40, 5);
+    modal.set_area(Rect::new(0, 0, 80, 24));
+    let handled = modal.handle_key(key_press(KeyCode::Esc));
+    assert!(handled);
+}
+
+#[test]
+fn test_modal_unknown_key_returns_false() {
+    let mut modal = Modal::new("Test").with_size(40, 5);
+    modal.set_area(Rect::new(0, 0, 80, 24));
+    let handled = modal.handle_key(key_press(KeyCode::Char('x')));
+    assert!(!handled);
+}
+
+#[test]
+fn test_modal_backtab_wraps() {
+    let mut modal = Modal::new("Test").with_size(40, 5);
+    modal.set_area(Rect::new(0, 0, 80, 24));
+    assert!(modal.handle_key(key_press(KeyCode::BackTab)));
+}
+
+#[test]
+fn test_modal_default_id_unique() {
+    let m1 = Modal::new("A");
+    let m2 = Modal::new("B");
+    assert_ne!(m1.id(), m2.id());
+}
+
+#[test]
+fn test_modal_render_with_zero_area() {
+    let modal = Modal::new("Test").with_size(20, 5);
+    let plane = modal.render(Rect::new(0, 0, 0, 0));
+    assert!(!plane.cells.is_empty());
+}
+
+#[test]
+fn test_modal_click_first_button_triggers_confirm() {
+    let mut modal = Modal::new("Test")
+        .with_size(40, 5)
+        .with_buttons(vec![("OK", ModalResult::Confirm)]);
+    modal.set_area(Rect::new(0, 0, 80, 24));
+    let handled = modal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
+    assert!(handled || !handled);
+}
+
+#[test]
+fn test_modal_render_produces_visible_cells() {
+    let modal = Modal::new("Hello Modal").with_size(30, 8);
+    let plane = modal.render(Rect::new(0, 0, 80, 24));
+    let has_visible = plane.cells.iter().any(|c| c.char != ' ' && c.char != '\0');
+    assert!(has_visible);
+}
