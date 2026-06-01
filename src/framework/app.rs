@@ -522,6 +522,10 @@ impl App {
     }
 
     /// Sets the UI theme (builder-style, equivalent to `set_theme`).
+    ///
+    /// **Deprecated**: Use [`App::set_theme()`] instead for consistent API.
+    /// This method is only available with the `legacy` feature flag.
+    #[cfg(feature = "legacy")]
     #[deprecated(since = "0.2.0", note = "Use `set_theme()` instead for consistent API")]
     pub fn theme(mut self, theme: Theme) -> Self {
         self.compositor.set_clear_color(theme.bg);

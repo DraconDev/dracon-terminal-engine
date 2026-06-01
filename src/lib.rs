@@ -75,7 +75,8 @@ pub mod input;
 #[doc = "Ratatui integration bridge."]
 pub mod integration;
 
-#[doc = "Layout helpers (grid, border, padding utilities)."]
+#[doc = "Layout helpers (grid, border, padding utilities). Requires `legacy` feature."]
+#[cfg(feature = "legacy")]
 pub mod layout;
 
 #[doc = "System monitoring (CPU, memory, disk, processes)."]
@@ -224,6 +225,7 @@ pub use framework::prelude;
 // ─────────────────────────────────────────────────────────────────────────────
 
 pub use widgets::button::Button as StandaloneButton;
+#[cfg(feature = "legacy")]
 #[allow(deprecated)]
 pub use widgets::component::Component;
 pub use widgets::context_menu::ContextMenuAction;

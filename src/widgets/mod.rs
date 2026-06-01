@@ -41,7 +41,8 @@
 
 /// Button widget module
 pub mod button;
-/// Component widget module
+/// Component widget module (deprecated — requires `legacy` feature)
+#[cfg(feature = "legacy")]
 pub mod component;
 /// Context menu widget module
 pub mod context_menu;
@@ -56,6 +57,7 @@ pub mod input;
 /// Panel widget module
 pub mod panel;
 
+#[cfg(feature = "legacy")]
 #[allow(deprecated)]
 pub use component::Component;
 

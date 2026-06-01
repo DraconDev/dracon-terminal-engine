@@ -48,6 +48,9 @@ syntax-highlighting = ["dep:syntect"]
 sixel = []
 # Enable SQLite support via rusqlite
 sqlite = ["dep:rusqlite"]
+# Enable legacy/deprecated APIs scheduled for removal in 0.2.0
+# (currently: component::Bounds, component::Component, App::theme())
+legacy = []
 # Default features: system + syntax highlighting for backward compatibility
 default = ["system", "syntax-highlighting"]
 
