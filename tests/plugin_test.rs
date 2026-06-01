@@ -379,3 +379,285 @@ fn many_plugins_performance() {
     }
     assert!(registry.is_empty());
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FAILURE PATH TESTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn reuse_name_after_unregister_succeeds() {
+    let mut registry = PluginRegistry::new();
+    assert!(
+        registry.register("recyclable", |id, theme| Box::new(AlphaWidget {
+            id,
+            theme
+        }))
+    );
+    assert!(!registry.register("recyclable", |id, theme| Box::new(BetaWidget { id, theme })));
+    assert!(registry.unregister("recyclable"));
+    assert!(registry.register("recyclable", |id, theme| Box::new(BetaWidget { id, theme })));
+    assert!(registry.has("recyclable"));
+    assert_eq!(registry.len(), 1);
+}
+
+#[test]
+fn unregister_empty_string_returns_false() {
+    let mut registry = PluginRegistry::new();
+    assert!(!registry.unregister(""));
+    assert!(registry.is_empty());
+}
+
+#[test]
+fn unregister_after_multiple_registrations() {
+    let mut registry = PluginRegistry::new();
+    registry.register("a", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("b", |id, theme| Box::new(BetaWidget { id, theme }));
+    registry.register("c", |id, theme| Box::new(GammaWidget { id, theme }));
+
+    assert!(registry.unregister("b"));
+    assert!(!registry.has("b"));
+    assert!(registry.has("a"));
+    assert!(registry.has("c"));
+    assert_eq!(registry.len(), 2);
+}
+
+#[test]
+fn create_with_empty_name_returns_none() {
+    let registry = PluginRegistry::new();
+    assert!(registry
+        .create("", WidgetId::new(1), Theme::default())
+        .is_none());
+}
+
+#[test]
+fn create_with_unknown_name_returns_none() {
+    let registry = PluginRegistry::new();
+    assert!(registry
+        .create("nonexistent", WidgetId::new(1), Theme::default())
+        .is_none());
+}
+
+#[test]
+fn has_returns_false_for_unknown() {
+    let mut registry = PluginRegistry::new();
+    registry.register("real", |id, theme| Box::new(AlphaWidget { id, theme }));
+    assert!(!registry.has("fake"));
+    assert!(!registry.has(""));
+}
+
+#[test]
+fn default_constructor_creates_empty_registry() {
+    let registry: PluginRegistry = PluginRegistry::default();
+    assert!(registry.is_empty());
+    assert_eq!(registry.len(), 0);
+    assert!(!registry.has("anything"));
+    assert!(registry.list().is_empty());
+}
+
+#[test]
+fn list_returns_all_registered_names() {
+    let mut registry = PluginRegistry::new();
+    let names = vec!["first", "second", "third", "fourth"];
+    for name in &names {
+        registry.register(name, |id, theme| Box::new(AlphaWidget { id, theme }));
+    }
+    let listed = registry.list();
+    assert_eq!(listed.len(), 4);
+    for name in &names {
+        assert!(listed.contains(&name.to_string()));
+    }
+}
+
+#[test]
+fn list_after_partial_unregister() {
+    let mut registry = PluginRegistry::new();
+    registry.register("a", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("b", |id, theme| Box::new(BetaWidget { id, theme }));
+    registry.register("c", |id, theme| Box::new(GammaWidget { id, theme }));
+    registry.unregister("b");
+
+    let listed = registry.list();
+    assert_eq!(listed.len(), 2);
+    assert!(!listed.contains(&"b".to_string()));
+}
+
+#[test]
+fn register_overwrites_keeps_old_count() {
+    let mut registry = PluginRegistry::new();
+    registry.register("widget", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("widget", |id, theme| Box::new(BetaWidget { id, theme }));
+    assert_eq!(registry.len(), 1);
+
+    let widget = registry.create("widget", WidgetId::new(1), Theme::default());
+    assert!(widget.is_some());
+    assert_eq!(widget.unwrap().id().0, 1);
+}
+
+#[test]
+fn unregister_returns_true_then_false_for_same_name() {
+    let mut registry = PluginRegistry::new();
+    registry.register("x", |id, theme| Box::new(AlphaWidget { id, theme }));
+    assert!(registry.unregister("x"));
+    assert!(!registry.unregister("x"));
+}
+
+#[test]
+fn create_widget_can_be_rendered() {
+    let mut registry = PluginRegistry::new();
+    registry.register("alpha", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    let widget = registry
+        .create("alpha", WidgetId::new(7), Theme::nord())
+        .unwrap();
+    let plane = widget.render(Rect::new(0, 0, 20, 10));
+    assert_eq!(plane.width, 20);
+    assert_eq!(plane.height, 10);
+}
+
+#[test]
+fn register_after_many_unregisters_still_works() {
+    let mut registry = PluginRegistry::new();
+    for i in 0..50 {
+        let name = format!("plugin_{}", i);
+        registry.register(&name, |id, theme| Box::new(AlphaWidget { id, theme }));
+    }
+    for i in 0..50 {
+        let name = format!("plugin_{}", i);
+        registry.unregister(&name);
+    }
+    assert!(registry.is_empty());
+
+    assert!(registry.register("new_one", |id, theme| Box::new(BetaWidget { id, theme })));
+    assert_eq!(registry.len(), 1);
+    assert!(registry.has("new_one"));
+}
+
+#[test]
+fn thread_safe_create() {
+    use std::sync::Arc;
+    use std::thread;
+
+    let mut registry = PluginRegistry::new();
+    registry.register("shared", |id, theme| Box::new(AlphaWidget { id, theme }));
+    let registry = Arc::new(registry);
+
+    let mut handles = vec![];
+    for i in 0..4 {
+        let reg = Arc::clone(&registry);
+        let handle = thread::spawn(move || {
+            reg.create("shared", WidgetId::new(i as usize), Theme::default())
+                .is_some()
+        });
+        handles.push(handle);
+    }
+
+    for h in handles {
+        assert!(h.join().unwrap());
+    }
+}
+
+#[test]
+fn thread_safe_register_and_unregister() {
+    use std::sync::Arc;
+    use std::thread;
+
+    let registry = Arc::new(std::sync::Mutex::new(PluginRegistry::new()));
+    let mut handles = vec![];
+
+    for i in 0..4 {
+        let reg = Arc::clone(&registry);
+        let handle = thread::spawn(move || {
+            let mut r = reg.lock().unwrap();
+            let name = format!("widget_{}", i);
+            r.register(&name, |id, theme| Box::new(AlphaWidget { id, theme }));
+        });
+        handles.push(handle);
+    }
+
+    for h in handles {
+        h.join().unwrap();
+    }
+
+    let r = registry.lock().unwrap();
+    assert_eq!(r.len(), 4);
+}
+
+#[test]
+fn empty_name_lookup_after_registration() {
+    let mut registry = PluginRegistry::new();
+    registry.register("", |id, theme| Box::new(AlphaWidget { id, theme }));
+    let widget = registry.create("", WidgetId::new(1), Theme::default());
+    assert!(widget.is_some());
+    assert!(registry.has(""));
+}
+
+#[test]
+fn widget_id_passthrough() {
+    let mut registry = PluginRegistry::new();
+    registry.register("passthrough", |id, theme| {
+        Box::new(AlphaWidget { id, theme })
+    });
+
+    let widget = registry
+        .create("passthrough", WidgetId::new(12345), Theme::default())
+        .unwrap();
+    assert_eq!(widget.id().0, 12345);
+}
+
+#[test]
+fn register_unicode_name() {
+    let mut registry = PluginRegistry::new();
+    assert!(
+        registry.register("🎨_paint", |id, theme| Box::new(AlphaWidget {
+            id,
+            theme
+        }))
+    );
+    assert!(
+        registry.register("日本語_widget", |id, theme| Box::new(BetaWidget {
+            id,
+            theme
+        }))
+    );
+    assert!(registry.has("🎨_paint"));
+    assert!(registry.has("日本語_widget"));
+    assert_eq!(registry.len(), 2);
+}
+
+#[test]
+fn unregister_does_not_affect_other_widgets() {
+    let mut registry = PluginRegistry::new();
+    registry.register("keep", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("drop", |id, theme| Box::new(BetaWidget { id, theme }));
+
+    let keep_widget = registry
+        .create("keep", WidgetId::new(1), Theme::default())
+        .unwrap();
+    let original_id = keep_widget.id();
+    drop(keep_widget);
+
+    registry.unregister("drop");
+
+    let keep_widget_again = registry
+        .create("keep", WidgetId::new(1), Theme::default())
+        .unwrap();
+    assert_eq!(keep_widget_again.id(), original_id);
+}
+
+#[test]
+fn many_creates_from_one_plugin() {
+    let mut registry = PluginRegistry::new();
+    registry.register("multi", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    let mut widgets = vec![];
+    for i in 0..50 {
+        widgets.push(
+            registry
+                .create("multi", WidgetId::new(i), Theme::default())
+                .unwrap(),
+        );
+    }
+    for (i, w) in widgets.iter().enumerate() {
+        assert_eq!(w.id().0, i);
+    }
+}
