@@ -364,7 +364,7 @@ impl Scene for ModalDemoScene {
 
         // Divider
         for x in 0..area.width {
-            let idx = (area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -685,7 +685,7 @@ impl Scene for ModalDemoScene {
         );
         let fy = area.height.saturating_sub(1);
         for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
+            let idx = (fy * plane.width + i as u16) as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = c;
                 plane.cells[idx].fg = t.fg_muted;

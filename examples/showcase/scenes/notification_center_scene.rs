@@ -233,7 +233,7 @@ impl NotificationCenterScene {
 
         // Divider
         for x in 0..area.width {
-            let idx = (area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -352,7 +352,7 @@ impl NotificationCenterScene {
 
         // Divider
         for x in panel_x..area.width {
-            let idx = (area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
@@ -591,7 +591,7 @@ impl Scene for NotificationCenterScene {
 
         // Divider
         for x in 0..area.width {
-            let idx = (area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;

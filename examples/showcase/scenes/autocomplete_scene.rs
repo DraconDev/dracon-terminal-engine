@@ -387,7 +387,7 @@ impl Scene for AutocompleteScene {
 
         // Divider
         for x in 0..area.width {
-            let idx = (area.width + x) as usize;
+            let idx = x as usize;
             if idx < plane.cells.len() {
                 plane.cells[idx].char = '─';
                 plane.cells[idx].fg = t.outline;
