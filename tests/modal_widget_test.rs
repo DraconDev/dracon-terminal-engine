@@ -270,8 +270,7 @@ fn test_modal_click_first_button_triggers_confirm() {
         .with_size(40, 5)
         .with_buttons(vec![("OK", ModalResult::Confirm)]);
     modal.set_area(Rect::new(0, 0, 80, 24));
-    let handled = modal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
-    assert!(handled || !handled);
+    let _ = modal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 0, 0);
 }
 
 #[test]
