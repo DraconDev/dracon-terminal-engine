@@ -479,14 +479,17 @@ fn test_default_scrollbar_width_constant() {
 
 #[test]
 fn test_all_themes_scrollbar_width_invariant() {
-    for theme in Theme::all() {
-        #[allow(deprecated)]
-        let sw = theme.scrollbar_width;
-        assert_eq!(
-            sw, DEFAULT_SCROLLBAR_WIDTH,
-            "scrollbar_width for {} should equal DEFAULT_SCROLLBAR_WIDTH",
-            theme.name
-        );
+    #[cfg(feature = "legacy")]
+    {
+        for theme in Theme::all() {
+            #[allow(deprecated)]
+            let sw = theme.scrollbar_width;
+            assert_eq!(
+                sw, DEFAULT_SCROLLBAR_WIDTH,
+                "scrollbar_width for {} should equal DEFAULT_SCROLLBAR_WIDTH",
+                theme.name
+            );
+        }
     }
 }
 

@@ -124,6 +124,7 @@ pub struct Theme {
 
 #[allow(deprecated)]
 impl Theme {
+    #[cfg(feature = "legacy")]
     #[allow(deprecated)]
     #[inline]
     fn default_scrollbar_width() -> u16 {
