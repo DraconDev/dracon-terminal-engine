@@ -238,8 +238,11 @@ impl Widget for Gauge {
         if area.height >= 2 {
             let bar_row = 1usize;
             let bar_cells = self.render_bar(area.width);
-            let max_cells = (plane.cells.len().saturating_sub(bar_row * area.width as usize))
-                .min(area.width as usize);
+            let max_cells = (plane
+                .cells
+                .len()
+                .saturating_sub(bar_row * area.width as usize))
+            .min(area.width as usize);
             for (i, cell) in bar_cells.into_iter().enumerate().take(max_cells) {
                 plane.cells[bar_row * area.width as usize + i] = cell;
             }
