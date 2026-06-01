@@ -256,9 +256,18 @@ impl PaintScene {
         let canvas_x = 20u16;
         let canvas_y = 2u16;
 
+        // Guard: skip rendering if area is too small
+        if area.width <= canvas_x + 4 || area.height <= canvas_y + 4 {
+            return;
+        }
+
         // Canvas border
-        let cw = self.canvas_w.min((area.width - canvas_x) as usize);
-        let ch = self.canvas_h.min((area.height - canvas_y - 1) as usize);
+        let cw = self
+            .canvas_w
+            .min(area.width.saturating_sub(canvas_x) as usize);
+        let ch = self
+            .canvas_h
+            .min(area.height.saturating_sub(canvas_y + 1) as usize);
 
         // Top border
         for x in 0..=cw as u16 {

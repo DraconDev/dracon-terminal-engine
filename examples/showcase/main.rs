@@ -376,4 +376,149 @@ mod scene_construction_tests {
             }
         }
     }
+
+    #[test]
+    fn test_all_scenes_lifecycle_methods() {
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            scene.on_pause();
+            scene.on_resume();
+            scene.on_exit();
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_render_small_area() {
+        // Ensure no panic on very small areas
+        let small = Rect::new(0, 0, 10, 5);
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            let _plane = scene.render(small);
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_render_large_area() {
+        // Ensure no panic on very large areas
+        let large = Rect::new(0, 0, 200, 100);
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            let _plane = scene.render(large);
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_handle_key_no_panic() {
+        let keys = [
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Up,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Down,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Left,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Right,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Enter,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Esc,
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Char('?'),
+                modifiers: KeyModifiers::empty(),
+            },
+            KeyEvent {
+                kind: KeyEventKind::Press,
+                code: KeyCode::Tab,
+                modifiers: KeyModifiers::empty(),
+            },
+        ];
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            // render once first so internal area cache is set
+            let _plane = scene.render(test_area());
+            for key in &keys {
+                scene.handle_key(*key);
+            }
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_handle_mouse_no_panic() {
+        let mouse_events = [
+            (MouseEventKind::Moved, 10, 5),
+            (MouseEventKind::Down(MouseButton::Left), 10, 5),
+            (MouseEventKind::Up(MouseButton::Left), 10, 5),
+            (MouseEventKind::Drag(MouseButton::Left), 12, 7),
+            (MouseEventKind::ScrollDown, 10, 5),
+            (MouseEventKind::ScrollUp, 10, 5),
+        ];
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            let _plane = scene.render(test_area());
+            for (kind, col, row) in &mouse_events {
+                scene.handle_mouse(*kind, *col, *row);
+            }
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_scene_id_non_empty() {
+        for (name, scene) in make_scene_tests() {
+            let id = scene.scene_id();
+            assert!(!id.is_empty(), "Scene '{}' returned empty scene_id", name);
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_render_offset_area() {
+        // Verify scenes don't panic when area has non-zero x/y origin
+        let offset_area = Rect::new(5, 3, 60, 18);
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            let _plane = scene.render(offset_area);
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_repeated_renders_stable() {
+        // Render multiple times to check for state corruption
+        for (_name, mut scene) in make_scene_tests() {
+            scene.on_enter();
+            for _ in 0..5 {
+                let _plane = scene.render(test_area());
+            }
+        }
+    }
+
+    #[test]
+    fn test_all_scenes_construct_with_all_themes() {
+        // Construct scene with each theme to verify Theme::all() compatibility
+        let themes = Theme::all();
+        for theme in themes.iter() {
+            // Use a couple representative scenes to keep test fast
+            let _s1 = widget_gallery::WidgetGalleryScene::new(theme.clone());
+            let _s2 = form_demo::FormDemoScene::new(theme.clone());
+            let _s3 = modal_demo::ModalDemoScene::new(theme.clone());
+            let _s4 = paint_scene::PaintScene::new(theme.clone());
+        }
+    }
 }

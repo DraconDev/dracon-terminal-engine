@@ -375,7 +375,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
             } else {
                 col.header.clone()
             };
-            let label_len = label.len().min(w as usize - 2);
+            let label_len = label.len().min((w as usize).saturating_sub(2));
             let start = (w.saturating_sub(label_len as u16)) / 2;
             for (j, ch) in label.chars().take(label_len).enumerate() {
                 let idx = start as usize + j;
@@ -435,7 +435,7 @@ impl<T: Clone + ToString> crate::framework::widget::Widget for Table<T> {
                 }
 
                 let text = self.cell_text(row, j);
-                let label_len = text.len().min(w as usize - 1);
+                let label_len = text.len().min((w as usize).saturating_sub(1));
                 for (k, ch) in text.chars().take(label_len).enumerate() {
                     let idx = y * area.width as usize + row_x as usize + 1 + k;
                     if idx < plane.cells.len() {

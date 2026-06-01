@@ -250,6 +250,11 @@ impl Scene for ProgressScene {
         let main_w = area.width.saturating_sub(DIV_X + 4);
         let main_x = DIV_X + 2;
 
+        // Guard: skip pipeline rendering if there's not enough room.
+        if main_w < STAGES.len() as u16 * 4 {
+            return plane;
+        }
+
         // Stage pipeline
         for (i, stage) in STAGES.iter().enumerate() {
             let x_offset = main_x + (i as u16) * (main_w / STAGES.len() as u16);
@@ -257,7 +262,7 @@ impl Scene for ProgressScene {
             let is_current = i == stage_idx && is_loading;
 
             // Stage box
-            let box_w = main_w / STAGES.len() as u16 - 2;
+            let box_w = (main_w / STAGES.len() as u16).saturating_sub(2);
             let box_h = 3u16;
 
             for dy in 0..box_h {
@@ -296,8 +301,8 @@ impl Scene for ProgressScene {
                 };
             }
             let name_x = x_offset + 3;
-            let name_text = if stage.name.len() as u16 > box_w - 4 {
-                &stage.name[..(box_w as usize - 5).max(1)]
+            let name_text = if stage.name.len() as u16 > box_w.saturating_sub(4) {
+                &stage.name[..(box_w as usize).saturating_sub(5).max(1)]
             } else {
                 stage.name
             };
