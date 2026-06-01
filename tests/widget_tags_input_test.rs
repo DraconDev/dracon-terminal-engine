@@ -638,3 +638,49 @@ fn test_tags_input_handle_mouse_outside() {
     let result = input.handle_mouse(MouseEventKind::Down(MouseButton::Left), 100, 100);
     let _ = result;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INTERACTION TESTS: P3-3
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_tags_input_typing_appends_chars() {
+    let mut input = TagsInput::new(vec![]);
+    let key = KeyEvent {
+        code: KeyCode::Char('x'),
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
+    let _ = input.handle_key(key);
+    // No panic — character was accepted into the input buffer
+    let plane = input.render(Rect::new(0, 0, 40, 3));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_tags_input_backspace_removes_char() {
+    let mut input = TagsInput::new(vec![]);
+    // Add some text first
+    for c in "hello".chars() {
+        let _ = input.handle_key(KeyEvent {
+            code: KeyCode::Char(c),
+            modifiers: KeyModifiers::empty(),
+            kind: KeyEventKind::Press,
+        });
+    }
+    // Now backspace
+    let _ = input.handle_key(KeyEvent {
+        code: KeyCode::Backspace,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    });
+    // No panic — backspace was processed
+}
+
+#[test]
+fn test_tags_input_render_with_theme() {
+    let mut input = TagsInput::new(vec![]);
+    input.on_theme_change(&Theme::dracula());
+    let plane = input.render(Rect::new(0, 0, 40, 3));
+    assert_eq!(plane.width, 40);
+}

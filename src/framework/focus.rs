@@ -192,6 +192,9 @@ impl FocusManager {
         self.on_trap_change.push(Arc::new(Box::new(f)));
     }
 
+    // Internal subscription API for focus-change events. Not yet wired into
+    // any caller — kept as scaffolding for the planned focus event bus
+    // integration so we don't churn this signature once it's needed.
     #[allow(dead_code)]
     fn on_focus_change_internal<F>(&mut self, f: F)
     where

@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Notes
+
+- **Sixel decoding stub now `#[deprecated]`** (P5-2) — `SixelImage::from_sixel` and `SixelRenderer::load_sixel` in `src/framework/sixel.rs` are now marked `#[deprecated]` with notes pointing at the documented limitation. The module, types, and widget are preserved (no public type removed) to avoid breaking downstream imports. Users who need real sixel decoding should integrate `sixel-rs` or `libimagequant` externally and feed the resulting RGB buffer into `SixelImage::new` + `set_pixel`.
+- **`App::from_defaults()` already exists** (P5-1) — the fallible `App::from_defaults() -> io::Result<Self>` constructor is at `src/framework/app.rs:1092` and is already used by 4 test cases in `tests/app_tick_test.rs` (lines 1159, 1167, 1174, 1182). The P5-1 task wanted to add this and migrate internal callers; both are done. **Cannot mark `App::default()` with `#[deprecated]`** because Rust forbids the attribute on trait method overrides. The doc comment on `Default::default` already directs users to `from_defaults()`; that is the migration signal.
+- **No duplicate I/O error variants in `DraconError`** — the P2-2 audit found a single `Io(io::Error)` variant. The earlier task description confused `DraconError::Io` with `I18nError::IoError` (in `src/framework/i18n.rs:306`), which lives in a separate type. Future consolidation: consider wrapping `I18nError` in `DraconError` to unify error types across the i18n subsystem and the rest of the engine.
+- **Builder method ownership is already consistent** — P2-3 audit found that builder methods use `mut self -> Self` (chainable, used for app-level construction: `App::title`, `App::fps`, `App::set_theme`, `App::tick_interval`, `CommandConfig::parser`/`confirm`/`refresh`/`label`/`description`) and mutator methods use `&mut self` (single op, used for widget manipulation: `set_*`, `add_*`, `remove_*`, action methods). The two categories are not interchangeable; they serve different intents. Improvement: added `#[must_use]` to 9 builder methods so users get a warning if they accidentally drop the chained return value.
+- **Standalone widgets (`src/widgets/`)** — P2-4 audit found:
+  - `component.rs` is already `#[cfg(feature = "legacy")]`-gated. It is the only data model used by `src/layout.rs` (which is also legacy-gated). Decision: **retain under `legacy`**. Removal in 0.2.0 will require co-removing `src/layout.rs` and any downstream consumer migrating to the framework's `Widget` trait.
+  - `hotkey.rs` is **not deprecated** — the P2-4 task description mischaracterized it. It is a small active utility (renders `[Ctrl+C] Copy` keyboard shortcut badges) re-exported from `src/lib.rs:233`. Decision: **no change**.
+
+### Removed
+
+- **`App::theme()` builder method** (`src/framework/app.rs`) — deprecated since 0.2.0, now removed. Use `App::set_theme()` instead. The method had zero in-tree callers and was only kept under the `legacy` feature flag for downstream users. Downstream users should migrate to `App::set_theme()` before upgrading.
+- **`src/framework/command.rs` (single file, 1338 lines) split into a directory** (P6-1) — replaced with `src/framework/command/{mod.rs, parser.rs, exec.rs, config.rs}`. The new layout groups concerns: `parser.rs` (output parsing: `OutputParser`, `ParsedOutput`, `LoggedLine`), `exec.rs` (command execution: `BoundCommand`, `CommandRunner`, `split_command_args`), `config.rs` (TOML config: `AppConfig`, `WidgetConfig`, `LayoutConfig`, `AreaConfig`, `ParserConfig`). `mod.rs` is a thin re-export wrapper, so all downstream imports of `crate::framework::command::*` continue to work unchanged. All 394 lib tests + 25 integration tests pass.
+- **`src/framework/helpers.rs` (single file, 250 lines) split into a directory** (P6-2) — replaced with `src/framework/helpers/{mod.rs, text.rs, borders.rs, blit.rs}`. The new layout groups concerns: `text.rs` (text drawing: `draw_text`), `borders.rs` (border rendering: `draw_rounded_border`), `blit.rs` (plane blitting: `blit_to`). `mod.rs` re-exports all three. All 5 original tests migrated. All tests pass.
+- **Layout module duplication resolved** (P6-3) — the two layout modules serve different APIs and are not interchangeable. Decision documented in the module doc of `src/layout.rs` (legacy, `Component`-based, `legacy`-gated) and the existing `src/framework/layout.rs` (preferred, constraint-based, `Widget`-based). The legacy module is scheduled for 0.2.0 removal alongside the `Component` trait. No code change required; the legacy module is already feature-gated and contains unique types (`Stack`, `centered_rect`, `Orientation`) that have no framework equivalent.
+
+### Deprecated
+
+The following items remain available under the `legacy` Cargo feature flag and are scheduled for removal in 0.2.0:
+
+- `widgets::component::Bounds` (`src/widgets/component.rs:11`) — Use `framework::layout::Layout` instead
+- `widgets::component::Component` trait (`src/widgets/component.rs:45`) — Use `framework::widget::Widget` instead
+- `App::theme()` builder (`src/framework/app.rs:529`) — Use `App::set_theme()` instead
+- `Theme::scrollbar_width` field (`src/framework/theme.rs:117`) — Use `framework::scroll::DEFAULT_SCROLLBAR_WIDTH` instead
+
+### Notes
+
+- The `legacy` feature in `Cargo.toml` is the single switch for all deprecated APIs; it controls `widgets::component`, `src/layout.rs`, `App::theme()`, and the `Theme::scrollbar_width` field
+- No deprecated items were removed in this release; all remain reachable via `--features legacy` for downstream users on 0.1.x
+
 ## [0.1.10] - 2026-05-13
 
 ### Fixed

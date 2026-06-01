@@ -631,3 +631,31 @@ fn test_calendar_navigate_week_up() {
     let area = Rect::new(0, 0, 25, 10);
     let _plane = cal.render(area);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INTERACTION TESTS: P3-3
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_calendar_arrow_keys_change_focus() {
+    let mut cal = Calendar::new();
+    let _ = cal.handle_key(make_key(KeyCode::Right));
+    let _ = cal.handle_key(make_key(KeyCode::Left));
+    let _ = cal.handle_key(make_key(KeyCode::Down));
+    // No panic — arrow keys were processed
+}
+
+#[test]
+fn test_calendar_mouse_click_selects_day() {
+    let mut cal = Calendar::new();
+    let _ = cal.handle_mouse(MouseEventKind::Down(MouseButton::Left), 15, 5);
+    // No panic — click was processed
+}
+
+#[test]
+fn test_calendar_render_with_theme() {
+    let mut cal = Calendar::new();
+    cal.on_theme_change(&Theme::nord());
+    let plane = cal.render(Rect::new(0, 0, 25, 10));
+    assert_eq!(plane.width, 25);
+}

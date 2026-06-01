@@ -883,3 +883,232 @@ fn test_theme_propagates_to_new_scene() {
     // No panic means theme propagation worked
     assert_eq!(router.current(), Some("b"));
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIFECYCLE CALLBACKS: on_pause / on_resume
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_on_pause_called_when_pushing_onto_stack() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    let a_before = router.get_scene("a").unwrap();
+    let a_before = a_before as &dyn std::any::Any;
+    let a_before = a_before.downcast_ref::<TestScene>().unwrap();
+    assert!(!a_before.paused);
+
+    router.push("b");
+    let a_after = router.get_scene("a").unwrap();
+    let a_after = a_after as &dyn std::any::Any;
+    let a_after = a_after.downcast_ref::<TestScene>().unwrap();
+    assert!(
+        a_after.paused,
+        "Scene A should be paused when B is pushed on top"
+    );
+}
+
+#[test]
+fn test_on_resume_called_when_popping() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push("b");
+
+    let a_while_paused = router.get_scene("a").unwrap();
+    let a_while_paused = a_while_paused as &dyn std::any::Any;
+    let a_while_paused = a_while_paused.downcast_ref::<TestScene>().unwrap();
+    assert!(a_while_paused.paused);
+
+    router.pop();
+
+    let a_after_pop = router.get_scene("a").unwrap();
+    let a_after_pop = a_after_pop as &dyn std::any::Any;
+    let a_after_pop = a_after_pop.downcast_ref::<TestScene>().unwrap();
+    assert!(
+        a_after_pop.resumed,
+        "Scene A should be resumed when B is popped"
+    );
+}
+
+#[test]
+fn test_on_pause_not_called_for_root_scene() {
+    let mut router = SceneRouter::new();
+    router.register("root", Box::new(TestScene::new("root")));
+
+    router.push("root");
+    let root = router.get_scene("root").unwrap();
+    let root = root as &dyn std::any::Any;
+    let root = root.downcast_ref::<TestScene>().unwrap();
+    assert!(root.entered);
+    assert!(
+        !root.paused,
+        "Root scene should not be paused on initial push"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TRANSITION CANCELLATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_push_during_transition_cancels_old_transition() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 1000.0);
+    assert!(router.is_transitioning());
+
+    // Pushing C during transition should replace transition target
+    router.push_with_transition("c", SceneTransition::SlideLeft, 2000.0);
+    assert!(router.is_transitioning());
+    assert_eq!(router.current(), Some("c"));
+}
+
+#[test]
+fn test_pop_during_transition_clears_transition() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 1000.0);
+    assert!(router.is_transitioning());
+
+    // Popping during transition
+    router.pop();
+    // The transition state may remain until next tick, but current should be A
+    assert_eq!(router.current(), Some("a"));
+}
+
+#[test]
+fn test_zero_duration_transition_completes_immediately() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 0.0);
+
+    // 0ms transition should complete on first tick
+    router.tick_transition(1.0);
+    assert!(!router.is_transitioning());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Z-INDEX COMPOSITION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_render_uses_top_scene_z_index() {
+    let mut router = SceneRouter::new();
+    router.register("bottom", Box::new(TestScene::new("bottom")));
+    router.register("top", Box::new(TestScene::new("top")));
+
+    router.push("bottom");
+    router.push("top");
+
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    // After push, the top scene's render is used; verify it produced a valid plane
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_render_during_transition_uses_blended_plane() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 100.0);
+
+    // Render at 50% progress
+    router.tick_transition(50.0);
+    assert!(router.is_transitioning());
+    let plane = router.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+    assert_eq!(plane.height, 24);
+}
+
+#[test]
+fn test_render_z_index_increases_per_scene() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+    router.register("c", Box::new(TestScene::new("c")));
+
+    router.push("a");
+    let z_a = router.render(Rect::new(0, 0, 10, 10)).z_index;
+    router.push("b");
+    let z_b = router.render(Rect::new(0, 0, 10, 10)).z_index;
+    router.push("c");
+    let z_c = router.render(Rect::new(0, 0, 10, 10)).z_index;
+
+    // Each subsequent scene should have higher or equal z_index
+    assert!(
+        z_b >= z_a,
+        "z_index should not decrease when stacking scenes (a={}, b={})",
+        z_a,
+        z_b
+    );
+    assert!(
+        z_c >= z_b,
+        "z_index should not decrease when stacking scenes (b={}, c={})",
+        z_b,
+        z_c
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TRANSITION PROGRESS EDGE CASES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_transition_with_negative_dt_does_not_crash() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 100.0);
+
+    // Negative dt should not crash; progress should remain clamped
+    router.tick_transition(-10.0);
+    assert!(router.is_transitioning());
+}
+
+#[test]
+fn test_tick_transition_no_active_transition() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.push("a");
+    // No transition active
+    assert!(!router.is_transitioning());
+    // Ticking should be a no-op
+    assert!(!router.tick_transition(100.0));
+    assert!(!router.is_transitioning());
+}
+
+#[test]
+fn test_tick_transition_clamps_progress_to_one() {
+    let mut router = SceneRouter::new();
+    router.register("a", Box::new(TestScene::new("a")));
+    router.register("b", Box::new(TestScene::new("b")));
+
+    router.push("a");
+    router.push_with_transition("b", SceneTransition::Fade, 50.0);
+
+    // Ticking way past duration should still complete cleanly
+    for _ in 0..100 {
+        router.tick_transition(100.0);
+    }
+    assert!(!router.is_transitioning());
+}

@@ -20,6 +20,10 @@ enum Block {
     ListItem(Vec<Inline>),
 }
 
+// The `Inline` AST is the data model for rich text; only the `Text` variant
+// is currently constructed by the parser, but `Bold`/`Italic`/`Code` are part
+// of the public model and will be constructed by upcoming rich-text parsing
+// paths. Suppress dead_code until those paths land.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 enum Inline {

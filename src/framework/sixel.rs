@@ -47,6 +47,16 @@ impl SixelImage {
     }
 
     /// Creates a sixel image from encoded data.
+    ///
+    /// **Not yet implemented.** This method always returns
+    /// `Err("Sixel decoding not yet implemented")`. To load actual sixel
+    /// data, decode it externally (e.g. with `sixel-rs` or `libimagequant`)
+    /// and feed the resulting RGB buffer into [`SixelImage::new`] and
+    /// [`SixelImage::set_pixel`].
+    #[deprecated(
+        since = "0.2.0",
+        note = "Sixel decoding is not implemented. Decode externally and use SixelImage::new + set_pixel to populate the buffer."
+    )]
     pub fn from_sixel(_data: &[u8]) -> Result<Self, &'static str> {
         Err("Sixel decoding not yet implemented")
     }
@@ -111,6 +121,13 @@ impl SixelRenderer {
     }
 
     /// Loads a sixel image from encoded data.
+    ///
+    /// **Not yet implemented.** See [`SixelImage::from_sixel`].
+    #[allow(deprecated)]
+    #[deprecated(
+        since = "0.2.0",
+        note = "Sixel decoding is not implemented. Decode externally and use with_image/set_image with a programmatically-populated SixelImage."
+    )]
     pub fn load_sixel(&mut self, data: &[u8]) -> Result<(), &'static str> {
         self.image = Some(SixelImage::from_sixel(data)?);
         Ok(())

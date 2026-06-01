@@ -1121,6 +1121,7 @@ fn test_app_new_succeeds() {
 
 #[test]
 fn test_app_default_succeeds() {
+    #[allow(deprecated)]
     let app = App::default();
     assert_eq!(app.widget_count(), 0);
 }
@@ -1179,7 +1180,6 @@ fn test_app_from_defaults_allows_widget_addition() {
 
 #[test]
 fn test_app_default_and_from_defaults_equivalent_when_tty_available() {
-    #[allow(deprecated)]
     let default_app = App::default();
     let defaults_app = App::from_defaults().unwrap();
     assert_eq!(default_app.widget_count(), defaults_app.widget_count());

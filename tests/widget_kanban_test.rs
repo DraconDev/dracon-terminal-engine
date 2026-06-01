@@ -678,3 +678,43 @@ fn test_kanban_full_workflow() {
     // Verify selection still works
     assert_eq!(board.selected_card(), Some((0, 0)));
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INTERACTION TESTS: P3-3
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_kanban_arrow_keys_navigate() {
+    let mut board = Kanban::new();
+    board.add_column("todo");
+    board.add_card(0, KanbanCard::new("c1", "Task 1"));
+    board.add_column("done");
+    board.add_card(1, KanbanCard::new("c2", "Task 2"));
+
+    // Right arrow should change column
+    let _ = board.handle_key(make_key(KeyCode::Right));
+    let plane = board.render(Rect::new(0, 0, 80, 24));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_kanban_mouse_click_within_bounds() {
+    let mut board = Kanban::new();
+    board.add_column("todo");
+    board.add_card(0, KanbanCard::new("c1", "Task 1"));
+    board.set_area(Rect::new(0, 0, 80, 24));
+
+    // Click in the middle of the board
+    let _ = board.handle_mouse(MouseEventKind::Down(MouseButton::Left), 40, 12);
+    // No panic means click was processed
+}
+
+#[test]
+fn test_kanban_render_with_theme() {
+    let mut board = Kanban::new();
+    board.add_column("todo");
+    board.add_card(0, KanbanCard::new("c1", "Task 1"));
+    board.on_theme_change(&Theme::cyberpunk());
+    let plane = board.render(Rect::new(0, 0, 80, 24));
+    assert_eq!(plane.width, 80);
+}

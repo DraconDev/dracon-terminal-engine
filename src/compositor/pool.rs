@@ -60,6 +60,9 @@ pub struct CellPool {
 /// A contiguous block of cells for a plane of specific dimensions.
 #[derive(Debug)]
 struct CellBlock {
+    // Dimensions are part of the public data shape; downstream consumers
+    // (debugging, future resize logic) may inspect them even though the
+    // current pool bookkeeping only iterates `cells`.
     #[allow(dead_code)]
     width: u16,
     #[allow(dead_code)]

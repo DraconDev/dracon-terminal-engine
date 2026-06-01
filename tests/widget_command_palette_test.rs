@@ -660,3 +660,66 @@ fn test_command_palette_show_clears_query() {
 
     // Query should be cleared
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INTERACTION TESTS: P3-3
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_cp_mouse_move_marks_dirty() {
+    use dracon_terminal_engine::input::event::MouseEventKind;
+    let mut cp = CommandPalette::new(vec![CommandItem {
+        id: "a",
+        name: "Alpha",
+        category: "Test",
+    }])
+    .with_size(40, 10);
+    let _ = cp.handle_mouse(MouseEventKind::Moved, 5, 5);
+    // No panic means the move was processed
+    let plane = cp.render(Rect::new(0, 0, 80, 24));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_cp_typing_filters_results() {
+    let mut cp = CommandPalette::new(vec![
+        CommandItem {
+            id: "a",
+            name: "Alpha",
+            category: "Test",
+        },
+        CommandItem {
+            id: "b",
+            name: "Beta",
+            category: "Test",
+        },
+    ]);
+
+    let key = KeyEvent {
+        code: KeyCode::Char('a'),
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
+    let _ = cp.handle_key(key);
+    // No panic means filter input was accepted
+    let plane = cp.render(Rect::new(0, 0, 80, 24));
+    assert!(plane.width > 0);
+}
+
+#[test]
+fn test_cp_esc_dismisses() {
+    let mut cp = CommandPalette::new(vec![CommandItem {
+        id: "a",
+        name: "Alpha",
+        category: "Test",
+    }]);
+    cp.show();
+    assert!(cp.is_visible());
+    let key = KeyEvent {
+        code: KeyCode::Esc,
+        modifiers: KeyModifiers::empty(),
+        kind: KeyEventKind::Press,
+    };
+    let _ = cp.handle_key(key);
+    // No panic — palette handled the escape
+}

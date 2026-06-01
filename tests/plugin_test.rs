@@ -661,3 +661,153 @@ fn many_creates_from_one_plugin() {
         assert_eq!(w.id().0, i);
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLUGIN LOAD FAILURE PATHS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn create_unknown_plugin_returns_none_v2() {
+    let registry = PluginRegistry::new();
+    let result = registry.create("does_not_exist_v2", WidgetId::new(1), Theme::default());
+    assert!(result.is_none());
+}
+
+#[test]
+fn has_returns_false_for_unknown_plugin() {
+    let registry = PluginRegistry::new();
+    assert!(!registry.has("nope"));
+    assert!(registry.is_empty());
+}
+
+#[test]
+fn unregister_unknown_plugin_returns_false() {
+    let mut registry = PluginRegistry::new();
+    assert!(!registry.unregister("nope"));
+    assert_eq!(registry.len(), 0);
+}
+
+#[test]
+fn register_same_plugin_twice_overwrites() {
+    let mut registry = PluginRegistry::new();
+    registry.register("p", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("p", |id, theme| Box::new(BetaWidget { id, theme }));
+
+    assert_eq!(
+        registry.len(),
+        1,
+        "Duplicate register should overwrite, not duplicate"
+    );
+    assert!(registry.has("p"));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLUGIN UNLOAD LIFECYCLE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn unregister_removes_plugin_from_registry() {
+    let mut registry = PluginRegistry::new();
+    registry.register("temp", |id, theme| Box::new(AlphaWidget { id, theme }));
+    assert!(registry.has("temp"));
+    assert_eq!(registry.len(), 1);
+
+    assert!(registry.unregister("temp"));
+    assert!(!registry.has("temp"));
+    assert!(registry.is_empty());
+}
+
+#[test]
+fn unregister_one_plugin_keeps_others() {
+    let mut registry = PluginRegistry::new();
+    registry.register("a", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("b", |id, theme| Box::new(BetaWidget { id, theme }));
+    registry.register("c", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    assert!(registry.unregister("b"));
+    assert_eq!(registry.len(), 2);
+    assert!(registry.has("a"));
+    assert!(!registry.has("b"));
+    assert!(registry.has("c"));
+}
+
+#[test]
+fn create_after_unregister_returns_none_v2() {
+    let mut registry = PluginRegistry::new();
+    registry.register("temp_v2", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.unregister("temp_v2");
+
+    let result = registry.create("temp_v2", WidgetId::new(1), Theme::default());
+    assert!(result.is_none());
+}
+
+#[test]
+fn [DRACON_SECRET:YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBLSi91MVllWTJuQWdBczB1dzZkY1d4cktGS1FPMXUvbjlRQjNSRTh3dEVZCjd5Ylk1V2ttb1JleFkzNXpuTE5oenI2Wm4zL3VEVm4rUGlaWjJtdjViTlEKLT4gXjFILWdyZWFzZSAqRWouKXlFNyA1eWMgelE5XjU6ejwKZEpEcWhCcEJYYzNZblBsK09rejl6Ky9FdCtWVFI2WHkyTi82YzVmM0ZiWWJ1RllvQUZzZGtHVm1IaGphaVhiVgoyT2czTlJtS3ZDQjBtLzBpQ3lGUk9VOG1FZ0g5WFEKLS0tIHJ2dWxqM0Rza0w4SnpYL3hVbTJiQlgxd0tKdnM5dHVNSWJxempvWGtMeFUKyOHCjUCdiqmu8lCSf6gzjRUH97LXBUwFcXkB0+BnsKmLEZ+IDYQ11M/LHZknixAtbYLyDmedGoeLyYjP8EAckgER]() {
+    let mut registry = PluginRegistry::new();
+    registry.register("p", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.unregister("p");
+    registry.register("p", |id, theme| Box::new(BetaWidget { id, theme }));
+
+    let widget = registry
+        .create("p", WidgetId::new(1), Theme::default())
+        .unwrap();
+    // BetaWidget has area 30x15 (different from AlphaWidget 20x10)
+    assert_eq!(widget.area().width, 30);
+    assert_eq!(widget.area().height, 15);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLUGIN DEPENDENCY / INTERACTION PATTERNS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn list_returns_all_registered_plugin_names() {
+    let mut registry = PluginRegistry::new();
+    registry.register("alpha", |id, theme| Box::new(AlphaWidget { id, theme }));
+    registry.register("beta", |id, theme| Box::new(BetaWidget { id, theme }));
+    registry.register("gamma", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    let names = registry.list();
+    assert_eq!(names.len(), 3);
+    assert!(names.contains(&"alpha".to_string()));
+    assert!(names.contains(&"beta".to_string()));
+    assert!(names.contains(&"gamma".to_string()));
+}
+
+#[test]
+fn multiple_widgets_from_same_plugin_get_unique_ids() {
+    let mut registry = PluginRegistry::new();
+    registry.register("p", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    let w1 = registry
+        .create("p", WidgetId::new(100), Theme::default())
+        .unwrap();
+    let w2 = registry
+        .create("p", WidgetId::new(200), Theme::default())
+        .unwrap();
+    let w3 = registry
+        .create("p", WidgetId::new(300), Theme::default())
+        .unwrap();
+
+    assert_eq!(w1.id().0, 100);
+    assert_eq!(w2.id().0, 200);
+    assert_eq!(w3.id().0, 300);
+}
+
+#[test]
+fn unregister_does_not_invalidate_already_created_widgets() {
+    let mut registry = PluginRegistry::new();
+    registry.register("p", |id, theme| Box::new(AlphaWidget { id, theme }));
+
+    let widget = registry
+        .create("p", WidgetId::new(42), Theme::default())
+        .unwrap();
+    let original_id = widget.id();
+
+    // Unregister the factory — existing widget instances should still be valid
+    registry.unregister("p");
+    assert_eq!(widget.id(), original_id);
+    // And still renderable
+    let plane = widget.render(Rect::new(0, 0, 10, 5));
+    assert_eq!(plane.width, 10);
+}

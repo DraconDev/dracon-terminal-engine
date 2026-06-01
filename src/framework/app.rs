@@ -473,6 +473,7 @@ impl App {
     }
 
     /// Sets the target frames per second (clamped to 1–120).
+    #[must_use = "builder methods return the modified App; the result must be used"]
     pub fn fps(mut self, fps: u32) -> Self {
         self.fps = fps.clamp(1, 120);
         self
@@ -519,23 +520,6 @@ impl App {
             widget.on_theme_change(&self.theme);
             widget.mark_dirty();
         }
-    }
-
-    /// Sets the UI theme (builder-style, equivalent to `set_theme`).
-    ///
-    /// **Deprecated**: Use [`App::set_theme()`] instead for consistent API.
-    /// This method is only available with the `legacy` feature flag.
-    #[cfg(feature = "legacy")]
-    #[deprecated(since = "0.2.0", note = "Use `set_theme()` instead for consistent API")]
-    pub fn theme(mut self, theme: Theme) -> Self {
-        self.compositor.set_clear_color(theme.bg);
-        self.theme = theme;
-        self.dirty_tracker.mark_all_dirty();
-        for widget in self.widgets.borrow_mut().iter_mut() {
-            widget.on_theme_change(&self.theme);
-            widget.mark_dirty();
-        }
-        self
     }
 
     /// Activate the input shield for the given duration.
@@ -1090,6 +1074,10 @@ impl Default for App {
     /// **Note**: This constructor calls `expect()` and panics if the terminal
     /// cannot be initialized (e.g., not a TTY). Prefer [`App::from_defaults()`]
     /// which returns `io::Result<Self>` and allows graceful error handling.
+    ///
+    /// This method is **not** marked `#[deprecated]` because Rust does not
+    /// allow deprecation attributes on trait method overrides; the doc
+    /// comment serves as the migration signal.
     fn default() -> Self {
         Self::new().expect("failed to initialize terminal")
     }
@@ -1258,6 +1246,7 @@ mod tests {
 
     #[test]
     fn test_app_default() {
+        #[allow(deprecated)]
         let app = App::default();
         assert_eq!(app.widget_count(), 0);
         assert_eq!(app.title, "Dracon App");

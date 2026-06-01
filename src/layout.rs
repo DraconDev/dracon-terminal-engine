@@ -11,6 +11,18 @@
 //! - [`Stack`] — Flexbox-like container using the deprecated `Component` trait
 //! - [`centered_rect()`] — Create a centered rectangle for modals/popups
 //!
+//! # Migration: use `crate::framework::layout` instead
+//!
+//! This top-level `crate::layout` module is the **legacy** layout API. The
+//! **preferred** layout engine is at [`crate::framework::layout`], which provides
+//! a constraint-based layout engine (`Constraint`, `Direction`, `Layout`)
+//! inspired by CSS flexbox and ratatui's Layout.
+//!
+//! The two modules are NOT compatible: the legacy `Stack` and `centered_rect`
+//! work with the deprecated `Component` trait, while `framework::layout` works
+//! with the `Widget` trait. New code should use `framework::layout` directly.
+//! This module will be removed when the `Component` trait is removed in 0.2.0.
+//!
 //! Consider using the framework's layout widgets instead.
 
 #![cfg(feature = "legacy")]

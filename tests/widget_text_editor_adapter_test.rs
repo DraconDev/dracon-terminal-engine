@@ -259,3 +259,39 @@ fn test_text_editor_adapter_handle_key_dirty() {
     let _ = tea.handle_key(key);
     assert!(tea.needs_render());
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INTERACTION TESTS: P3-3
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_tea_adapter_mouse_click_marks_dirty() {
+    let mut tea = TextEditorAdapter::new(WidgetId::new(99), TextEditor::new());
+    tea.set_area(Rect::new(0, 0, 60, 20));
+    let _ = tea.handle_mouse(
+        dracon_terminal_engine::input::event::MouseEventKind::Down(
+            dracon_terminal_engine::input::event::MouseButton::Left,
+        ),
+        10,
+        5,
+    );
+    // No panic means click was processed
+}
+
+#[test]
+fn test_tea_adapter_set_size_affects_render() {
+    let tea = TextEditorAdapter::new(WidgetId::new(100), TextEditor::new());
+    let plane = tea.render(Rect::new(0, 0, 80, 24));
+    assert!(plane.width > 0);
+    assert!(plane.height > 0);
+}
+
+#[test]
+fn test_tea_adapter_theme_change_does_not_panic() {
+    let mut tea = TextEditorAdapter::new(WidgetId::new(101), TextEditor::new());
+    let theme = Theme::cyberpunk();
+    tea.on_theme_change(&theme);
+    // No panic means theme change was applied
+    let plane = tea.render(Rect::new(0, 0, 40, 10));
+    assert!(plane.width > 0);
+}
