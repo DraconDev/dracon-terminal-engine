@@ -1081,6 +1081,11 @@ impl App {
 }
 
 impl Default for App {
+    /// Returns a default App.
+    ///
+    /// **Note**: This constructor calls `expect()` and panics if the terminal
+    /// cannot be initialized (e.g., not a TTY). Prefer [`App::from_defaults()`]
+    /// which returns `io::Result<Self>` and allows graceful error handling.
     fn default() -> Self {
         Self::new().expect("failed to initialize terminal")
     }
