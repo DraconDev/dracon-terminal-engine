@@ -563,16 +563,7 @@ pub fn render_card(config: &CardConfig, plane: &mut Plane, offset_x: usize, offs
             card_w_usize,
             card_h_usize,
         ),
-        "form_demo" | "form_widget" => render_form_preview(
-            plane,
-            config.theme,
-            card_phase,
-            offset_x,
-            offset_y,
-            card_w_usize,
-            card_h_usize,
-        ),
-        "framework_file_manager" => render_framework_fm_preview(
+        "form_demo" => render_form_preview(
             plane,
             config.theme,
             card_phase,
@@ -2328,129 +2319,6 @@ fn render_form_preview(
             fg,
             t.surface,
             Styles::BOLD,
-            ox + 1,
-            max_x,
-            oy + 1,
-            max_y,
-        );
-    }
-}
-
-fn render_framework_fm_preview(
-    plane: &mut Plane,
-    t: &Theme,
-    phase: f64,
-    ox: usize,
-    oy: usize,
-    card_w: usize,
-    card_h: usize,
-) {
-    let max_x = ox + card_w - 2;
-    let max_y = oy + card_h - 2;
-    draw_text_bounded(
-        plane,
-        ox + 2,
-        oy + 5,
-        "/ home/ user/",
-        t.primary,
-        t.surface,
-        Styles::empty(),
-        ox + 1,
-        max_x,
-        oy + 1,
-        max_y,
-    );
-    set_cell_bounded(
-        plane,
-        ox + 1,
-        oy + 6,
-        '├',
-        t.outline,
-        t.surface,
-        ox + 1,
-        max_x,
-        oy + 1,
-        max_y,
-    );
-    let line_w = (card_w - 4).clamp(4, 22);
-    for cx in ox + 2..ox + line_w + 2 {
-        set_cell_bounded(
-            plane,
-            cx,
-            oy + 6,
-            '─',
-            t.outline,
-            t.surface,
-            ox + 1,
-            max_x,
-            oy + 1,
-            max_y,
-        );
-    }
-    set_cell_bounded(
-        plane,
-        ox + line_w + 2,
-        oy + 6,
-        '┤',
-        t.outline,
-        t.surface,
-        ox + 1,
-        max_x,
-        oy + 1,
-        max_y,
-    );
-    let rows = [
-        ("src/", "  -   "),
-        ("main.rs", " 1.2KB"),
-        ("lib.rs", "  842B"),
-    ];
-    for (i, (name, size)) in rows.iter().enumerate() {
-        let y = oy + 7 + i;
-        if y > max_y {
-            break;
-        }
-        let fg = if name.ends_with('/') {
-            t.primary
-        } else {
-            t.fg_subtle
-        };
-        let name_max = max_x - (ox + 2) + 1;
-        let name_trunc: String = name.chars().take(name_max).collect();
-        draw_text_bounded(
-            plane,
-            ox + 2,
-            y,
-            &name_trunc,
-            fg,
-            t.surface,
-            Styles::empty(),
-            ox + 1,
-            max_x,
-            oy + 1,
-            max_y,
-        );
-        draw_text_bounded(
-            plane,
-            ox + 14,
-            y,
-            size,
-            t.fg_muted,
-            t.surface,
-            Styles::empty(),
-            ox + 1,
-            max_x,
-            oy + 1,
-            max_y,
-        );
-    }
-    if (phase * 2.0).sin() > 0.0 {
-        set_cell_bounded(
-            plane,
-            ox + 2,
-            oy + 8,
-            '█',
-            t.primary,
-            t.surface,
             ox + 1,
             max_x,
             oy + 1,

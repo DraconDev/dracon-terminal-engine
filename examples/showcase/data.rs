@@ -88,18 +88,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "settings_panel",
-                category: "apps",
-                description: "Settings panel: Form validation + KeyValueGrid",
-                binary_name: "settings_panel",
-                preview: &[
-                    "  Username  [________]       app.name : Dracon",
-                    "  Email     [________]       app.version : 0.1",
-                    "  Password  [________]      server.port : 8080",
-                    "  API Key   [________]      cache.ttl : 3600s",
-                ],
-            },
-            ExampleMeta {
                 name: "live_feed",
                 category: "apps",
                 description: "Live feed: SplitPane + TabBar + StreamingText + Sparkline",
@@ -549,17 +537,6 @@ impl ExampleMeta {
                 description: "Syntax-highlighted editor",
                 binary_name: "text_editor_demo",
                 preview: &["1 | fn main() {", "2 | >  println!();", "3 | }"],
-            },
-            ExampleMeta {
-                name: "table_widget",
-                category: "tools",
-                description: "Advanced table with sorting",
-                binary_name: "table_widget",
-                preview: &[
-                    "ID | Name    | Score",
-                    "---|---------|------",
-                    " 1 | Alpha   |  98",
-                ],
             },
             ExampleMeta {
                 name: "sqlite_browser",

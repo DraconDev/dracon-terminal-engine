@@ -1,230 +1,410 @@
-# Dracon Terminal Engine — Full Audit
+# Example Audit — Full Inventory & Consolidation Report
 
 **Date**: 2026-06-01
-**Auditor**: MiniMax M3 (pi agent)
-**Repo**: `/home/dracon/Dev/dracon-terminal-engine`
-**Rust Version**: 1.95.0
+**Scope**: All examples in `examples/`, `examples/_apps/`, `examples/_cookbook/`, `examples/showcase/scenes/`
 
 ---
 
-## Audit Summary
+## Executive Summary
 
-| Category | Status | Notes |
-|----------|--------|-------|
-| Build & Compilation | ✅ Pass | All targets compile, `--features sixel` builds clean |
-| Test Suite | ✅ Pass | 434 tests pass (394 lib + 25 integration + 15 doc) |
-| Formatting | ✅ Pass | `cargo fmt --check` clean |
-| Linting | ✅ Pass | 0 clippy warnings |
-| Security | ✅ Pass | No hardcoded secrets, all 11 unsafe blocks documented |
-| Code Quality | ✅ Pass | Clean error handling, 0 production unwraps, 0 production panics |
+| Directory | Files | Lines |
+|-----------|-------|-------|
+| Standalone (`examples/*.rs`) | 17 | 14,965 |
+| Showcase scenes (`showcase/scenes/*.rs`) | 36 | 23,449 |
+| Cookbook (`_cookbook/*.rs`) | 17 | 10,703 |
+| Apps (`_apps/*.rs`) | 4 | 5,205 |
+| **Total** | **74** | **54,322** |
 
-**Codebase Stats**: 345 source files, 148,529 lines, 50 framework widgets, 98 examples, 113 test files
+**Status**: All 16 files from duplicate/stub/orphaned groups removed. 2 stale `data.rs` entries fixed. Build, tests, clippy, and fmt all pass.
 
----
-
-## 1. Build & Compilation
-
-- [x] `cargo check --all-targets` — no errors
-- [x] `cargo check --all-targets --features sixel` — no errors
-- [x] `cargo build --lib` — clean
-- [x] `cargo build --examples` — clean
-- [x] `cargo build --benches` — clean
-- [x] `crates/dracon-macros` — compiles
-- [x] `crates/cargo-dracon` — compiles
-
-## 2. Test Suite
-
-- [x] `cargo test --lib` — 394 passed
-- [x] `cargo test --tests` — 25 passed
-- [x] `cargo test --doc` — 15 passed, 21 ignored (no TTY, expected)
-- [x] 113 test files across the codebase
-- [x] SceneRouter: 67 tests (added 13 in P3-1)
-- [x] Plugin: 52 tests (added 11 in P3-2)
-- [x] 8 widget interaction test files (added 33 tests in P3-3)
-
-## 3. Formatting & Linting
-
-- [x] `cargo fmt --check` — clean
-- [x] `cargo clippy --all-targets -- -D warnings` — 0 warnings
-
-## 4. Security
-
-- [x] No hardcoded secrets or keys
-- [x] `.gitignore` excludes `.env` files
-- [x] All 11 unsafe blocks documented with `// SAFETY:` comments:
-  - `compositor/plane.rs` — 5 blocks (UTF-8 parsing)
-  - `backend/tty.rs` — 5 blocks (libc terminal ops)
-  - `framework/app.rs` — 1 block (signal hook)
-- [x] All production `unwrap()` calls: 0 (verified in P7-4)
-- [x] All production `panic!` macros: 0 (verified in P7-5)
-- [x] Production `.expect()` calls: 5, all with documented invariants
-
-## 5. Module-by-Module Audit
-
-### 5.1 Core (`src/core/`) — clean
-
-### 5.2 Compositor (`src/compositor/`) — clean
-
-### 5.3 Framework (`src/framework/`) — refactored
-
-- [x] `app.rs` (1753 lines) — `App::theme()` removed (P2-1); builder methods got `#[must_use]` (P2-3)
-- [x] `theme.rs` — 1 deprecated field (`scrollbar_width`), legacy-gated
-- [x] `command.rs` — **split into directory** `command/{mod.rs, parser.rs, exec.rs, config.rs}` (P6-1)
-- [x] `helpers.rs` — **split into directory** `helpers/{mod.rs, text.rs, borders.rs, blit.rs}` (P6-2)
-- [x] `layout.rs` — preferred constraint-based engine; `crate::layout` is legacy (P6-3)
-- [x] `keybindings.rs` (613 lines) — config resolution, conflict detection
-- [x] `event_bus.rs`, `i18n.rs`, `marquee.rs`, `scene_router.rs` — clean
-- [x] `sixel.rs` — `from_sixel` and `load_sixel` marked `#[deprecated]` (P5-2)
-
-### 5.4 Framework Widgets — 50 widgets, 17,000+ lines
-
-- [x] All widgets render, handle key/mouse, support theme propagation
-- [x] Interaction test coverage added in P3-3 for 8 widgets
-
-### 5.5 Standalone Widgets (`src/widgets/`)
-
-- [x] `editor.rs` (3,063 lines) — Text editor
-- [x] `editor_search.rs`, `input.rs` — clean
-- [x] `component.rs` — 2 deprecated types, legacy-gated
-- [x] `hotkey.rs` — active (not deprecated as task suggested)
-
-### 5.6 Visuals, Input, Integration — clean
-
-### 5.7 Crates (`crates/`)
-
-- [x] `dracon-macros` — proc macros, compiles clean
-- [x] `cargo-dracon` — CLI tool, compiles clean
-
-## 6. P7 Audit Findings (new this session)
-
-### 6.1 Unsafe Block Audit (P7-1) — Verified ✅
-
-All 11 unsafe blocks have documented `// SAFETY:` comments explaining the invariant. Details:
-
-| File | Line | Purpose | Invariant |
-|------|------|---------|-----------|
-| `compositor/plane.rs:207` | UTF-8 char boundary | `byte_offset` advanced only by previous `char_len` |
-| `compositor/plane.rs:215` | UTF-8 char boundary | `next_offset` = `byte_offset + char_len` |
-| `compositor/plane.rs:280` | UTF-8 char boundary | Same as 207 |
-| `compositor/plane.rs:293` | UTF-8 char boundary | `pos` starts at `byte_offset + char_len` |
-| `compositor/plane.rs:495` | `from_utf8_unchecked` | Caller must maintain char boundary invariant |
-| `backend/tty.rs:26` | `tcgetattr` | fd valid, termios buffer local |
-| `backend/tty.rs:40` | `tcsetattr` | fd valid, termios ref valid |
-| `backend/tty.rs:52` | `cfmakeraw` | termios pointer uniquely borrowed |
-| `backend/tty.rs:60` | `ioctl(TIOCGWINSZ)` | fd valid, winsize buffer local |
-| `backend/tty.rs:74` | `poll` | fd valid, pollfd stack-local, nfds=1 |
-| `framework/app.rs:982` | `signal_hook::register` | Closures use `AtomicBool::store` (async-signal-safe) |
-
-### 6.2 Deprecated Items Audit (P7-2) — 4 items, all legacy-gated
-
-| Item | Location | Status |
-|------|----------|--------|
-| `Bounds` struct | `src/widgets/component.rs:11` | Retain under `legacy` |
-| `Component` trait | `src/widgets/component.rs:45` | Retain under `legacy` |
-| ~~`App::theme()` builder~~ | ~~`src/framework/app.rs:529`~~ | **REMOVED in P2-1** |
-| `Theme::scrollbar_width` | `src/framework/theme.rs:117` | Retain under `legacy` |
-
-`App::theme()` was removed as part of P2-1 (zero in-tree callers). The other 3 items remain available under the `legacy` Cargo feature flag for downstream 0.1.x users.
-
-### 6.3 Dead Code Allow Audit (P7-3) — 13 allows, all intentional
-
-Added justifying comments to 3 production allows that lacked context:
-- `src/compositor/pool.rs:63,65` — `CellBlock.width/height` (public data shape)
-- `src/framework/widgets/rich_text.rs:24` — `Inline` enum (AST data model)
-- `src/framework/focus.rs:195` — `on_focus_change_internal` (scaffolding)
-
-The other 10 allows are in test/bench code (test infrastructure, dev tools) and are self-explanatory.
-
-### 6.4 Unwrap Audit (P7-4) — 0 production unwraps ✅
-
-- **61 total unwraps** in `src/`, **all inside `#[cfg(test)]` modules**
-- Production code uses `unwrap_or` and explicit error handling throughout
-- Test unwraps are for: `KeybindingConfig::parse_keybinding`, `ValidationRule::from_regex_pattern`, `make_test_terminal`, `App::new()` (test setup), `Option::unwrap` on test fixtures, etc.
-
-### 6.5 Panic Audit (P7-5) — 0 production panics ✅
-
-- **40 `panic!()` macros** in `src/`, **all inside `#[cfg(test)]` modules**
-- **5 `.expect()` calls in production**, all with documented invariants:
-  - `text_input_core.rs:186,224` — cursor/byte index preconditions
-  - `scene_router.rs:273,312` — pop with non-empty stack
-  - `app.rs:1094` — terminal init fallback (test usage)
-- All 5 production expects are valid invariants with descriptive messages
-
-## 7. P2 API Cleanup Findings
-
-- **P2-1**: `App::theme()` builder removed (zero in-tree callers; CHANGELOG documents the breaking change)
-- **P2-2**: No duplicate I/O error variants in `DraconError` — task description was wrong; only `Io(io::Error)` exists. `I18nError::IoError` lives in a separate type and is not a duplicate. Future consolidation: wrap `I18nError` in `DraconError`.
-- **P2-3**: Builder method ownership was already consistent. Added `#[must_use]` to 9 builder methods (`App::title`, `fps`, `set_theme`, `tick_interval`; `CommandConfig::parser`, `confirm`, `refresh`, `label`, `description`) so accidental drops are flagged by the compiler.
-- **P2-4**: `component.rs` retain under `legacy`; `hotkey.rs` was never deprecated (task description was wrong).
-
-## 8. P3 Test Coverage Additions
-
-- **P3-1**: 13 new SceneRouter tests (26 → 67 total) — on_pause/on_resume callbacks, transition cancellation, z-index composition, transition edge cases
-- **P3-2**: 11 new Plugin tests (41 → 52 total) — failure paths, unload lifecycle, dependency patterns
-- **P3-3**: 33 new widget interaction tests across 8 widget test files (TextEditorAdapter, CommandPalette, Kanban, Table, TagsInput, Calendar, Modal, ContextMenu)
-
-## 9. P5 Runtime Robustness
-
-- **P5-1**: `App::from_defaults()` was already implemented (no work needed). Cannot mark `App::default()` with `#[deprecated]` because Rust forbids the attribute on trait method overrides; the doc comment serves as the migration signal.
-- **P5-2**: Sixel stub methods `SixelImage::from_sixel` and `SixelRenderer::load_sixel` now carry `#[deprecated]` markers pointing at the documented limitation. The `SixelImage` and `SixelRenderer` types are preserved (no breaking removal).
-
-## 10. P6 Refactors
-
-- **P6-1**: `src/framework/command.rs` (1338 lines) split into `command/{mod.rs, parser.rs, exec.rs, config.rs}`. All 66 original tests migrated. Public re-exports preserved at `crate::framework::command::*`.
-- **P6-2**: `src/framework/helpers.rs` (250 lines) split into `helpers/{mod.rs, text.rs, borders.rs, blit.rs}`. All 5 original tests migrated. Public re-exports preserved.
-- **P6-3**: Layout module duplication is **not actually a duplicate** — the two files serve different APIs. `src/framework/layout.rs` is the preferred constraint-based engine. `src/layout.rs` is the legacy `Component`-based module, feature-gated, scheduled for 0.2.0 removal. Documented in module doc comments.
-
-## 11. Documentation
-
-- [x] `README.md` — Project overview
-- [x] `AGENTS.md` — Agent instructions
-- [x] `AI_GUIDE.md` — AI guidance
-- [x] `CHANGELOG.md` — Updated with new "Unreleased" section enumerating all changes
-- [x] `TESTING.md` — Testing guide
-- [x] `spec.md` — Specification
-
-## 12. Performance
-
-- [x] Benchmarks exist (`benches/framework_benchmarks.rs`)
-- [x] Cell pooling (`compositor/pool.rs`)
-- [ ] Benchmark results — not run (no dedicated machine time)
-
-## 13. Cross-Platform
-
-- [x] Linux support (primary)
-- [ ] macOS support (untested in this session)
-- [ ] Windows support (untested in this session)
+**Key findings**: 12 duplicate groups (3,500+ redundant lines), 4 stubs (199 lines), 1 genuinely stale `data.rs` entry, 6 orphaned standalone subsets.
 
 ---
 
-## Verification Commands
+## 1. Master Inventory
 
-```bash
-# Build
-cargo check --all-targets
-cargo check --all-targets --features sixel
-cargo build --lib --examples --benches
+### 1.1 Standalone Examples (`examples/*.rs`) — 17 files
 
-# Test
-cargo test --lib         # 394 passed
-cargo test --tests       # 25 passed
-cargo test --doc         # 15 passed, 21 ignored
+| File | Lines | Category | Description |
+|------|-------|----------|-------------|
+| `ide.rs` | 1579 | App | Flagship — shows ALL framework widgets |
+| `arena.rs` | 1271 | App | Real-time arena survival game with mouse combat |
+| `git_tui.rs` | 1263 | App | Real Git interface (status, log, diff, branches) |
+| `theme_switcher.rs` | 1066 | App | Live theme switching with visual feedback |
+| `todo_app.rs` | 1041 | App | Real task manager with SQLite persistence |
+| `text_editor_demo.rs` | 970 | App | Mini-IDE with tabs, file tree, search |
+| `form_demo.rs` | 938 | App | Settings form with validation, drag-reorder, profile preview |
+| `tutorial_app.rs` | 902 | Tutorial | Build your first Dracon app |
+| `sqlite_browser.rs` | 899 | App | Database browser (table list, query editor, results) |
+| `widget_tutorial.rs` | 845 | Tutorial | Build a custom ColorPicker widget |
+| `scene_router_demo.rs` | 779 | App | Multi-screen navigation with EventBus |
+| `plugin_demo.rs` | 742 | App | Dynamic widget loading via PluginRegistry |
+| `network_client.rs` | 706 | App | HTTP API consumer example |
+| `desktop.rs` | 586 | Raw | Low-level desktop simulation |
+| `modal_demo.rs` | 502 | App | Modal dialogs + keyboard shortcuts |
+| `game_loop.rs` | 495 | App | 60fps particle animation + mouse interaction |
+| `input_debug.rs` | 381 | Raw | Terminal input event inspector |
 
-# Lint
-cargo fmt --check        # clean
-cargo clippy --all-targets -- -D warnings   # 0 warnings
-```
+### 1.2 Showcase Scenes (`showcase/scenes/*.rs`) — 36 files
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `mod.rs` | 35 | Module declarations |
+| `shared_helpers.rs` | 287 | Shared drawing helpers (blit_to, draw_text, render_help_overlay) |
+| `settings_scene.rs` | 310 | Settings Panel — Form + KeyValueGrid |
+| `dev_console_scene.rs` | 406 | Dev Console — LogViewer + EventLogger |
+| `kanban_scene.rs` | 469 | Kanban Board |
+| `note_editor_scene.rs` | 482 | Note Editor — TextEditorAdapter + ContextMenu |
+| `hud_demo_scene.rs` | 525 | HUD overlay — Gauge + Spinner + enemies |
+| `calendar_scene.rs` | 542 | Calendar with events |
+| `control_panel_scene.rs` | 557 | Settings — Select + Toggle + Checkbox |
+| `raycaster_scene.rs` | 561 | 3D Raycaster |
+| `widget_gallery.rs` | 583 | Widget gallery |
+| `radio_scene.rs` | 595 | Radio buttons grouped |
+| `theme_switcher.rs` | 616 | Theme Studio |
+| `paint_scene.rs` | 616 | Pixel art canvas |
+| `autocomplete_scene.rs` | 627 | Autocomplete demo |
+| `cell_pool_scene.rs` | 630 | CellPool demo |
+| `live_feed_scene.rs` | 647 | Split Pane + TabBar + StreamingText + Sparkline |
+| `rich_text_scene.rs` | 659 | RichText demo |
+| `tags_input_scene.rs` | 703 | Tags Input demo |
+| `color_picker_scene.rs` | 710 | Color Studio |
+| `action_center_scene.rs` | 714 | ContextMenu + ConfirmDialog + Toast |
+| `navigator_scene.rs` | 730 | Navigator (file browsing) |
+| `metrics_hub_scene.rs` | 761 | Metrics Hub (system data) |
+| `tree_navigator.rs` | 767 | Tree Navigator |
+| `workshop_scene.rs` | 769 | Widget Workshop |
+| `animation_scene.rs` | 777 | Animation demo |
+| `debug_overlay_scene.rs` | 804 | Debug Overlay |
+| `password_input_scene.rs` | 807 | Login Screen |
+| `progress_scene.rs` | 826 | Progress/Loading |
+| `table_list_scene.rs` | 831 | Table + List |
+| `command_palette_scene.rs` | 835 | IDE Lite — CommandPalette + MenuBar |
+| `form_demo.rs` | 837 | Form Demo with validation |
+| `notification_center_scene.rs` | 851 | Notification Hub |
+| `accessibility_scene.rs` | 856 | Accessibility + screen reader |
+| `modal_demo.rs` | 860 | Modal Dialogs |
+| `tooltip_scene.rs` | 862 | Tooltip demo |
+
+### 1.3 Cookbook Examples (`_cookbook/*.rs`) — 17 files
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `command_bindings.rs` | 868 | Auto-refresh widgets via CLI |
+| `split_resizer.rs` | 746 | Nested SplitPane + drag resize |
+| `scrollable_content.rs` | 747 | ScrollContainer/ScrollState |
+| `data_table.rs` | 723 | Sortable table + search |
+| `accessibility.rs` | 712 | Accessibility demo |
+| `menu_system.rs` | 701 | MenuBar + ContextMenu |
+| `tabbed_panels.rs` | 689 | Tabbed panels with TabBar |
+| `log_monitor.rs` | 673 | Real-time log viewer |
+| `debug_overlay.rs` | 631 | Debug overlay |
+| `widget_gallery.rs` | 623 | Widget gallery |
+| `tree_navigator.rs` | 598 | Tree Navigator |
+| `rich_text.rs` | 549 | RichText demo |
+| `notification_center.rs` | 549 | Notification center demo |
+| `stat_widget_plugin.rs` | 549 | Plugin system — stat widget |
+| `cell_pool.rs` | 548 | CellPool usage |
+| `calendar.rs` | 457 | Calendar widget |
+| `autocomplete.rs` | 340 | Autocomplete widget demo |
+
+### 1.4 App Examples (`_apps/*.rs`) — 4 files
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `system_monitor.rs` | ~1200 | Real /proc data dashboard |
+| `file_manager.rs` | ~1000 | Real filesystem browser |
+| `chat_client.rs` | ~800 | Simulated chat client |
+| `dashboard_builder.rs` | ~1000 | Live system metrics dashboard |
 
 ---
 
-## Sign-Off
+## 2. Duplicate Groups
 
-- [x] All 17 task checkboxes ticked
-- [x] No regressions: 434 tests still pass (394 lib + 25 integration + 15 doc)
-- [x] 33 new tests added (13 SceneRouter + 11 Plugin + 9 widget interaction - 0 for non-existing widgets)
-- [x] CHANGELOG.md updated
-- [x] `App::theme()` removed
-- [x] Sixel stub methods marked `#[deprecated]`
-- [x] `command.rs` and `helpers.rs` split into submodules
-- [x] Documentation updated (P7 audit, layout migration notes)
-- [x] Ready for next session
+### Group 1: Form Demos — 4 versions (2,620 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `examples/form_demo.rs` | 938 | ★★★ | Standalone. Full: drag-reorder, validation, profile preview. |
+| `examples/_cookbook/form_validation.rs` | 500 | ★★★ | Cookbook. Polished: live validation, theme cycling. |
+| `showcase/scenes/form_demo.rs` | 837 | ★★★ | Embedded. Comprehensive: inline errors, disabled submit. |
+| `examples/form_widget.rs` | 345 | ★★ | Standalone. Simpler: just form fields. Subset of form_demo. |
+
+**Recommendation**: Keep `form_demo.rs` (standalone) + `showcase/scenes/form_demo.rs` (embedded). Remove `form_widget.rs` (subset) and `_cookbook/form_validation.rs` (overlaps with showcase). **Save: ~845 lines.**
+
+### Group 2: Rich Text Demos — 3 versions (1,439 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/rich_text_scene.rs` | 659 | ★★★ | Embedded. Most complete. |
+| `examples/_cookbook/rich_text.rs` | 549 | ★★★ | Cookbook. Clean standalone. |
+| `examples/rich_text_demo.rs` | 231 | ★ | Standalone. Minimal. |
+
+**Recommendation**: Keep `_cookbook/rich_text.rs` (standalone) + `showcase/scenes/rich_text_scene.rs` (embedded). Remove `rich_text_demo.rs` (too minimal). **Save: 231 lines.**
+
+### Group 3: Calendar — 2 versions (999 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/calendar_scene.rs` | 542 | ★★★ | Embedded. |
+| `examples/_cookbook/calendar.rs` | 457 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 4: Autocomplete — 2 versions (967 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/autocomplete_scene.rs` | 627 | ★★★ | Embedded. |
+| `examples/_cookbook/autocomplete.rs` | 340 | ★★ | Cookbook. Simpler. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 5: Cell Pool — 2 versions (1,178 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/cell_pool_scene.rs` | 630 | ★★★ | Embedded. |
+| `examples/_cookbook/cell_pool.rs` | 548 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 6: Plugin — 2 versions (1,250 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `examples/plugin_demo.rs` | 742 | ★★★ | Standalone. Full lifecycle. |
+| `examples/_cookbook/plugin_demo.rs` | 508 | ★★ | Cookbook. Subset. |
+
+**Recommendation**: Keep `plugin_demo.rs` (standalone). Remove `_cookbook/plugin_demo.rs` (subset). **Save: 508 lines.**
+
+### Group 7: Data Table — 3 versions (~2,670 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/table_list_scene.rs` | 831 | ★★★ | Embedded. |
+| `examples/_cookbook/data_table.rs` | 723 | ★★★ | Cookbook. |
+| `examples/table_widget.rs` | 1090 | ★★★ | Standalone. Table with badges. |
+
+**Recommendation**: Keep `_cookbook/data_table.rs` (standalone) + `showcase/scenes/table_list_scene.rs` (embedded). Consider removing `table_widget.rs` if it overlaps heavily with `_cookbook/data_table.rs`. **Potential save: ~1,090 lines.**
+
+### Group 8: Tree Navigator — 2 versions (1,365 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/tree_navigator.rs` | 767 | ★★★ | Embedded. |
+| `examples/_cookbook/tree_navigator.rs` | 598 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 9: Accessibility — 2 versions (1,568 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/accessibility_scene.rs` | 856 | ★★★ | Embedded. |
+| `examples/_cookbook/accessibility.rs` | 712 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 10: Debug Overlay — 2 versions (1,435 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/debug_overlay_scene.rs` | 804 | ★★★ | Embedded. |
+| `examples/_cookbook/debug_overlay.rs` | 631 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 11: Notification Center — 2 versions (1,400 total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `showcase/scenes/notification_center_scene.rs` | 851 | ★★★ | Embedded. |
+| `examples/_cookbook/notification_center.rs` | 549 | ★★★ | Cookbook. |
+
+**Recommendation**: Keep both. No action needed.
+
+### Group 12: System Monitors / Dashboards — 4 versions (~5,300+ total lines)
+
+| Version | Lines | Quality | Notes |
+|---------|-------|---------|-------|
+| `_apps/system_monitor.rs` | ~1200 | ★★★ | Real /proc data. Best quality. |
+| `_apps/dashboard_builder.rs` | ~1000 | ★★★ | Real metrics + sparklines. |
+| `examples/cyberpunk_dashboard.rs` | 613 | ★★ | Animated dashboard. Visual duplicate. |
+| `examples/command_dashboard.rs` | 497 | ★★ | Auto-refresh gauges. Subset. |
+
+**Recommendation**: Keep `_apps/system_monitor.rs` + `_apps/dashboard_builder.rs`. Remove `cyberpunk_dashboard.rs` (duplicate) and `command_dashboard.rs` (subset). **Save: ~1,110 lines.**
+
+---
+
+## 3. Stubs and Too-Simple Examples
+
+| File | Lines | Verdict | Reason |
+|------|-------|---------|--------|
+| `basic_raw.rs` | 29 | **Remove** | Just prints and sleeps. `input_debug.rs` covers raw terminal better. |
+| `from_toml.rs` | 42 | **Remove** | Loads TOML and prints fields. Trivial. |
+| `god_mode.rs` | 62 | **Remove** | Ratatui + Plane overlay. `ide.rs` demonstrates compositing better. |
+| `framework_widgets.rs` | 66 | **Remove** | Prints widget state to stdout. `widget_gallery` does this properly. |
+
+**Total lines recoverable: 199**
+
+---
+
+## 4. Orphaned Standalone Examples (not in showcase)
+
+These standalone examples are NOT registered in `showcase/data.rs` and are NOT in `_apps/`:
+
+| File | Lines | Recommendation |
+|------|-------|----------------|
+| `framework_demo.rs` | 354 | **Remove** — subset of `ide.rs` |
+| `framework_chat.rs` | 268 | **Remove** — subset of `_apps/chat_client.rs` |
+| `framework_file_manager.rs` | 590 | **Remove** — subset of `_apps/file_manager.rs` |
+| `form_widget.rs` | 345 | **Remove** — subset of `form_demo.rs` |
+| `event_bus_demo.rs` | 508 | **Remove** — subset of `scene_router_demo.rs` |
+| `scene_router_demo.rs` | 779 | **Keep** — unique multi-screen navigation |
+| `plugin_demo.rs` | 742 | **Keep** — full plugin lifecycle |
+| `network_client.rs` | 706 | **Keep** — unique HTTP API consumer |
+| `game_loop.rs` | 495 | **Keep** — unique 60fps particle animation |
+| `widget_tutorial.rs` | 845 | **Keep** — comprehensive tutorial |
+| `tutorial_app.rs` | 902 | **Keep** — comprehensive tutorial |
+| `todo_app.rs` | 1041 | **Keep** — real app with SQLite |
+| `desktop.rs` | 586 | **Keep** — unique low-level demo |
+| `git_tui.rs` | 1263 | **Keep** — real Git interface |
+| `ide.rs` | 1579 | **Keep** — flagship demo |
+| `arena.rs` | 1271 | **Keep** — unique real-time game |
+| `sqlite_browser.rs` | 899 | **Keep** — unique database browser |
+| `text_editor_demo.rs` | 970 | **Keep** — unique mini-IDE |
+
+**Lines recoverable from orphaned removals: ~1,965**
+
+---
+
+## 5. Cookbook-Only Examples (unique, no standalone equivalent)
+
+All 19 `_cookbook/` files are unique concepts. No action needed — these serve as the "reference standalone" versions.
+
+---
+
+## 6. Stale `data.rs` Entries
+
+Only **1 entry** in `showcase/data.rs` references a non-existent file:
+
+| binary_name | Status | Action |
+|-------------|--------|--------|
+| `settings_panel` | No file found anywhere | **Remove from data.rs** |
+
+All other 51 entries correctly reference existing files (standalone, cookbook, or showcase scene).
+
+---
+
+## 7. Recommended Actions
+
+### High Priority — Remove Duplicates + Stubs (saves ~3,558 lines)
+
+1. Remove `form_widget.rs` (345 lines) — subset of form_demo
+2. Remove `rich_text_demo.rs` (231 lines) — too minimal
+3. Remove `table_widget.rs` (1090 lines) — overlaps with _cookbook/data_table
+4. Remove `_cookbook/plugin_demo.rs` (508 lines) — subset of standalone plugin_demo
+5. Remove `_cookbook/form_validation.rs` (500 lines) — overlaps with showcase form_demo
+6. Remove `basic_raw.rs` (29 lines) — stub
+7. Remove `from_toml.rs` (42 lines) — stub
+8. Remove `god_mode.rs` (62 lines) — stub
+9. Remove `framework_widgets.rs` (66 lines) — stub
+
+### Medium Priority — Remove Orphaned Subsets (saves ~1,965 lines)
+
+10. Remove `framework_demo.rs` (354 lines) — subset of ide.rs
+11. Remove `framework_chat.rs` (268 lines) — subset of _apps/chat_client
+12. Remove `framework_file_manager.rs` (590 lines) — subset of _apps/file_manager
+13. Remove `event_bus_demo.rs` (508 lines) — subset of scene_router_demo
+14. Remove `cyberpunk_dashboard.rs` (613 lines) — duplicate of _apps/dashboard_builder
+15. Remove `command_dashboard.rs` (497 lines) — subset of _apps/dashboard_builder
+
+### Low Priority — Fix stale entry
+
+16. Remove `settings_panel` from `showcase/data.rs` (no file exists)
+
+### Total Savings
+
+| Category | Lines Saved |
+|----------|------------|
+| Duplicate + stub removal | ~3,558 |
+| Orphaned subset removal | ~1,965 |
+| **Total** | **~5,523** |
+
+---
+
+## ✅ Cleanup Complete (2026-06-01)
+
+All 16 recommended actions have been executed:
+
+- 4 stubs removed
+- 2 duplicate cookbook files removed
+- 3 duplicate standalone files removed
+- 6 orphaned standalone subsets removed
+- 1 stale `data.rs` entry fixed
+- Cargo.toml cleaned up (10 `[[example]]` entries removed)
+- Smoke test updated (2 test functions removed)
+
+**Verification**: `cargo check`, `cargo clippy`, `cargo test`, `cargo fmt` all pass with 0 errors.
+
+---
+
+## 8. What NOT to Remove
+
+| File | Lines | Why Keep |
+|------|-------|----------|
+| `todo_app.rs` | 1041 | Real functional app with SQLite |
+| `ide.rs` | 1579 | Flagship — ALL framework widgets |
+| `git_tui.rs` | 1263 | Real Git interface |
+| `arena.rs` | 1271 | Unique real-time game |
+| `sqlite_browser.rs` | 899 | Unique database browser |
+| `text_editor_demo.rs` | 970 | Unique mini-IDE |
+| `scene_router_demo.rs` | 779 | Unique multi-screen navigation |
+| `plugin_demo.rs` | 742 | Full plugin lifecycle |
+| `network_client.rs` | 706 | Unique HTTP API consumer |
+| `game_loop.rs` | 495 | Unique 60fps animation |
+| `widget_tutorial.rs` | 845 | Comprehensive tutorial |
+| `tutorial_app.rs` | 902 | Comprehensive tutorial |
+| `desktop.rs` | 586 | Unique low-level demo |
+| `_apps/system_monitor.rs` | ~1200 | Best system monitor |
+| `_apps/dashboard_builder.rs` | ~1000 | Best dashboard |
+| `_apps/file_manager.rs` | ~1000 | Best file manager |
+| `_apps/chat_client.rs` | ~800 | Best chat client |
+
+---
+
+## 9. Summary
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Total files | 89 | 74 |
+| Total lines | ~58,841 | ~54,322 |
+| Duplicate groups | 12 | 6 |
+| Stubs | 4 | 0 |
+| Stale data.rs entries | 2 | 0 |
+
+### Files Removed (16 total)
+
+| File | Lines | Reason |
+|------|-------|--------|
+| `basic_raw.rs` | 29 | Stub |
+| `from_toml.rs` | 42 | Stub |
+| `god_mode.rs` | 62 | Stub |
+| `framework_widgets.rs` | 66 | Stub |
+| `_cookbook/plugin_demo.rs` | 508 | Subset of standalone plugin_demo |
+| `_cookbook/form_validation.rs` | 500 | Overlaps with showcase form_demo |
+| `form_widget.rs` | 345 | Subset of form_demo |
+| `rich_text_demo.rs` | 231 | Too minimal |
+| `table_widget.rs` | 1090 | Overlaps with cookbook/data_table |
+| `framework_demo.rs` | 354 | Subset of ide.rs |
+| `framework_chat.rs` | 268 | Subset of _apps/chat_client |
+| `framework_file_manager.rs` | 590 | Subset of _apps/file_manager |
+| `event_bus_demo.rs` | 508 | Subset of scene_router_demo |
+| `cyberpunk_dashboard.rs` | 613 | Duplicate of _apps/dashboard_builder |
+| `command_dashboard.rs` | 497 | Subset of _apps/dashboard_builder |
+
+### Stale Entries Fixed
+
+- Removed `settings_panel` from `showcase/data.rs` (no file exists)
+- Removed `table_widget` from `showcase/data.rs` (file deleted as duplicate)

@@ -58,16 +58,6 @@ fn test_sqlite_browser_compiles() {
 }
 
 #[test]
-fn test_form_widget_compiles() {
-    assert_example_compiles("form_widget");
-}
-
-#[test]
 fn test_dashboard_builder_compiles() {
     assert_example_compiles("dashboard_builder");
-}
-
-#[test]
-fn test_table_widget_compiles() {
-    assert_example_compiles("table_widget");
 }

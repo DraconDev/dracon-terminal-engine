@@ -4737,26 +4737,15 @@ The `extensions/` directory contains non-workspace projects:
 
 ### 16.1 Complete Example Inventory (57 Binaries)
 
-**Group 1: Root Examples (34)**
+**Group 1: Root Examples (21)**
 
 | Example | File | Pattern | LOC (est.) | Key Features |
 |---------|------|---------|------------|--------------|
 | `arena` | arena.rs | Pattern 2 | 780 | Real-time game, compositor direct |
-| `basic_raw` | basic_raw.rs | Raw | <100 | Minimal raw terminal demo |
-| `command_dashboard` | command_dashboard.rs | Pattern 1 | ~300 | Command-driven dashboard |
-| `cyberpunk_dashboard` | cyberpunk_dashboard.rs | Pattern 1 | ~300 | Themed dashboard |
 | `desktop` | desktop.rs | Raw | ~400 | Window manager metaphor |
-| `event_bus_demo` | event_bus_demo.rs | Pattern 2 | ~300 | Pub/sub demo |
 | `form_demo` | form_demo.rs | Pattern 1 | ~400 | Form widget demo |
-| `form_widget` | form_widget.rs | Pattern 1 | ~300 | Form standalone |
-| `framework_chat` | framework_chat.rs | Pattern 1 | ~350 | Chat app |
-| `framework_demo` | framework_demo.rs | Pattern 1 | ~300 | General demo (requires `system`) |
-| `framework_file_manager` | framework_file_manager.rs | Pattern 1 | ~500 | File browser |
-| `framework_widgets` | framework_widgets.rs | Pattern 1 | ~400 | Widget showcase |
-| `from_toml` | from_toml.rs + .toml | TOML | ~100 | TOML-configured app |
 | `game_loop` | game_loop.rs | Raw | ~300 | Game loop demo |
 | `git_tui` | git_tui.rs | Pattern 1 | ~600 | Git interface |
-| `god_mode` | god_mode.rs | — | ~300 | Advanced features |
 | `ide` | ide.rs | Pattern 2 | ~800 | IDE with CommandPalette |
 | `input_debug` | input_debug.rs | Raw | ~200 | Raw input debugging |
 | `modal_demo` | modal_demo.rs | Pattern 2 | ~400 | Modal stacking + toasts |
@@ -4764,7 +4753,6 @@ The `extensions/` directory contains non-workspace projects:
 | `plugin_demo` | plugin_demo.rs | Pattern 2 | ~300 | Plugin system |
 | `scene_router_demo` | scene_router_demo.rs | Pattern 2 | ~350 | Scene navigation |
 | `sqlite_browser` | sqlite_browser.rs | Pattern 1 | ~600 | SQLite DB (requires `sqlite`) |
-| `table_widget` | table_widget.rs | Pattern 1 | ~400 | Table widget standalone |
 | `text_editor_demo` | text_editor_demo.rs | Pattern 1 | ~200 | TextEditor demo |
 | `theme_switcher` | theme_switcher.rs | Pattern 1 | ~300 | Theme cycling |
 | `todo_app` | todo_app.rs | Pattern 2 | ~400 | SQLite todo (requires `sqlite`) |
@@ -4791,11 +4779,9 @@ The `extensions/` directory contains non-workspace projects:
 | `command_bindings` | command_bindings.rs | Pattern 1 | ~300 | BoundCommand, parsers |
 | `data_table` | data_table.rs | Pattern 1 | ~400 | Table with sorting |
 | `debug_overlay` | debug_overlay.rs | Pattern 1 | 445 | DebugOverlay + gauges |
-| `form_validation` | form_validation.rs | Pattern 1 | ~300 | Form validation |
 | `log_monitor` | log_monitor.rs | Pattern 2 | ~350 | LogViewer |
 | `menu_system` | menu_system.rs | Pattern 1 | ~300 | MenuBar, ContextMenu |
 | `notification_center` | notification_center.rs | Pattern 1 | 389 | NotificationCenter |
-| `plugin_demo` | plugin_demo.rs | Pattern 2 | ~300 | Plugin system |
 | `rich_text` | rich_text.rs | Pattern 1 | 366 | RichText rendering |
 | `scrollable_content` | scrollable_content.rs | Pattern 1 | ~300 | ScrollContainer |
 | `split_resizer` | split_resizer.rs | Pattern 2 | ~300 | SplitPane drag |
@@ -4894,8 +4880,6 @@ examples/showcase/
 | `modal_widget_test.rs` | 12 | Modal show/hide, result, backdrop |
 | `widget_confirm_dialog_test.rs` | 11 | Confirm yes/no/cancel, danger styling |
 | `menu_test.rs` | 14 | MenuBar/ContextMenu open/close, selection |
-| `form_widget_test.rs` | 16 | Form rendering, tab navigation, validation |
-| `form_validation_test.rs` | 10 | All validation rule types |
 | `widget_password_input_test.rs` | 15 | Masking, submit, show/hide |
 | `widget_slider_test.rs` | 12 | Slider min/max/step, keyboard, mouse drag |
 | `widget_status_badge_test.rs` | 10 | Status colors, bind_command |
@@ -4958,7 +4942,7 @@ examples/showcase/
 | DebugOverlay | 0 | 0 | 0 | 0 |
 | Divider | 0 | 0 | 0 | 0 |
 | EventLogger | 0 | 0 (in phase tests) | 0 | ~2 |
-| Form | 0 | 16 (form_widget_test) | 0 | 16 |
+| Form | 0 | 0 (in phase tests) | 0 | ~3 |
 | Gauge | 0 | 27 (gauge_test + widget_gauge_test) | 0 | 27 |
 | Hud | 0 | 0 | 0 | 0 |
 | Kanban | 0 | 0 (in phase tests) | 0 | ~3 |
@@ -5287,7 +5271,7 @@ pub use framework::prelude;
 | In default | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Adds dep | `sysinfo` | `syntect`, `regex` | `rusqlite` | `tokio`, `reqwest` | `tracing`, `tracing-subscriber` | — |
 | Enables | SystemMonitor | TextEditor highlight | SQLite examples | Network client | Frame spans, logging | Stderr debug output |
-| Excluded examples | framework_demo | All editor examples | todo_app, sqlite_browser | network_client | — | — |
+| Excluded examples | — | All editor examples | todo_app, sqlite_browser | network_client | — | — |
 
 ### Appendix F: Test Command Reference
 

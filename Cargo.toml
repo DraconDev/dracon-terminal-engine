@@ -148,10 +148,6 @@ name = "autocomplete"
 path = "examples/_cookbook/autocomplete.rs"
 
 [[example]]
-name = "form_validation"
-path = "examples/_cookbook/form_validation.rs"
-
-[[example]]
 name = "scrollable_content"
 path = "examples/_cookbook/scrollable_content.rs"
 
@@ -166,10 +162,6 @@ path = "examples/desktop.rs"
 [[example]]
 name = "form_demo"
 path = "examples/form_demo.rs"
-
-[[example]]
-name = "framework_file_manager"
-path = "examples/framework_file_manager.rs"
 
 [[example]]
 name = "game_loop"
@@ -194,14 +186,6 @@ path = "examples/theme_switcher.rs"
 [[example]]
 name = "widget_tutorial"
 path = "examples/widget_tutorial.rs"
-
-[[example]]
-name = "form_widget"
-path = "examples/form_widget.rs"
-
-[[example]]
-name = "table_widget"
-path = "examples/table_widget.rs"
 
 [[example]]
 name = "ide"
@@ -236,10 +220,6 @@ name = "notification_center"
 path = "examples/_cookbook/notification_center.rs"
 
 [[example]]
-name = "event_bus_demo"
-path = "examples/event_bus_demo.rs"
-
-[[example]]
 name = "network_client"
 path = "examples/network_client.rs"
 
@@ -255,11 +235,6 @@ required-features = ["sqlite"]
 [[example]]
 name = "tutorial_app"
 path = "examples/tutorial_app.rs"
-
-[[example]]
-name = "framework_demo"
-path = "examples/framework_demo.rs"
-required-features = ["system"]
 
 [[bench]]
 name = "framework_benchmarks"
