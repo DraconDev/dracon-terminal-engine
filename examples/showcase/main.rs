@@ -198,6 +198,9 @@ mod scene_construction_tests {
     use super::scenes::*;
     use dracon_terminal_engine::framework::scene_router::Scene;
     use dracon_terminal_engine::framework::theme::Theme;
+    use dracon_terminal_engine::input::event::{
+        KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+    };
     use ratatui::layout::Rect;
 
     fn test_area() -> Rect {
