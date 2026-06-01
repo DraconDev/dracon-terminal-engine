@@ -110,7 +110,7 @@ fn main() -> std::io::Result<()> {
             // Set env vars so the launched binary inherits our theme
             // and can report its final theme back via DTRON_THEME_FILE
             std::env::set_var("DTRON_THEME", ctx.theme().name.as_ref());
-            let theme_return_path = std::env::temp_dir().join("dron_theme_return");
+            let theme_return_path = std::env::temp_dir().join("dtron_theme_return");
             std::env::set_var("DTRON_THEME_FILE", theme_return_path.to_str().unwrap());
 
             let _ = ctx.suspend_terminal();
