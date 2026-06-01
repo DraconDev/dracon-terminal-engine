@@ -297,6 +297,7 @@ fn bench_eventbus_publish_10_subscribers(c: &mut criterion::Criterion) {
     use dracon_terminal_engine::framework::event_bus::EventBus;
 
     #[derive(Clone, Debug)]
+    #[allow(dead_code)]
     struct TestEvent(String);
 
     c.bench_function("eventbus_publish_1000_events_10_subscribers", |b| {
@@ -336,6 +337,7 @@ fn bench_eventbus_subscribe_once(c: &mut criterion::Criterion) {
     use std::sync::Arc;
 
     #[derive(Clone, Debug)]
+    #[allow(dead_code)]
     struct TestEvent(String);
 
     c.bench_function("eventbus_subscribe_once_100_callbacks", |b| {
