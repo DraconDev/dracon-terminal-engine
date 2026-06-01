@@ -125,20 +125,24 @@ impl Gauge {
     }
 
     fn render_bar(&self, width: u16) -> Vec<Cell> {
-        let fill_width = ((self.percentage() / 100.0) * (width - 2) as f64).round() as usize;
+        let inner = width.saturating_sub(2) as usize;
+        let fill_width = ((self.percentage() / 100.0) * inner as f64).round() as usize;
+        let fill_width = fill_width.min(inner);
         let fg = self.fill_color();
 
-        let mut cells = Vec::with_capacity(width as usize);
-        cells.push(Cell {
-            char: '[',
-            fg: self.theme.fg,
-            bg: self.theme.bg,
-            style: Styles::empty(),
-            transparent: false,
-            skip: false,
-        });
+        let mut cells = Vec::with_capacity(inner + 2);
+        if width >= 1 {
+            cells.push(Cell {
+                char: '[',
+                fg: self.theme.fg,
+                bg: self.theme.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            });
+        }
 
-        for i in 0..(width - 2) as usize {
+        for i in 0..inner {
             if i < fill_width {
                 cells.push(Cell {
                     char: '█',
@@ -160,14 +164,16 @@ impl Gauge {
             }
         }
 
-        cells.push(Cell {
-            char: ']',
-            fg: self.theme.fg,
-            bg: self.theme.bg,
-            style: Styles::empty(),
-            transparent: false,
-            skip: false,
-        });
+        if width >= 2 {
+            cells.push(Cell {
+                char: ']',
+                fg: self.theme.fg,
+                bg: self.theme.bg,
+                style: Styles::empty(),
+                transparent: false,
+                skip: false,
+            });
+        }
         cells
     }
 }
@@ -229,10 +235,14 @@ impl Widget for Gauge {
             };
         }
 
-        let bar_row = 1usize;
-        let bar_cells = self.render_bar(area.width);
-        for (i, cell) in bar_cells.into_iter().enumerate().take(area.width as usize) {
-            plane.cells[bar_row * area.width as usize + i] = cell;
+        if area.height >= 2 {
+            let bar_row = 1usize;
+            let bar_cells = self.render_bar(area.width);
+            let max_cells = (plane.cells.len().saturating_sub(bar_row * area.width as usize))
+                .min(area.width as usize);
+            for (i, cell) in bar_cells.into_iter().enumerate().take(max_cells) {
+                plane.cells[bar_row * area.width as usize + i] = cell;
+            }
         }
 
         plane

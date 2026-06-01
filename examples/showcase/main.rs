@@ -257,13 +257,101 @@ mod scene_construction_tests {
                 "accessibility_scene",
                 Box::new(accessibility_scene::AccessibilityScene::new(t.clone())),
             ),
+            (
+                "animation_scene",
+                Box::new(animation_scene::AnimationScene::new(t.clone())),
+            ),
+            (
+                "color_picker_scene",
+                Box::new(color_picker_scene::ColorPickerScene::new(t.clone())),
+            ),
+            (
+                "tags_input_scene",
+                Box::new(tags_input_scene::TagsInputScene::new(t.clone())),
+            ),
+            (
+                "tooltip_scene",
+                Box::new(tooltip_scene::TooltipScene::new(t.clone())),
+            ),
+            (
+                "progress_scene",
+                Box::new(progress_scene::ProgressScene::new(t.clone())),
+            ),
+            (
+                "password_input_scene",
+                Box::new(password_input_scene::PasswordInputScene::new(t.clone())),
+            ),
+            (
+                "radio_scene",
+                Box::new(radio_scene::RadioScene::new(t.clone())),
+            ),
+            (
+                "debug_overlay_scene",
+                Box::new(debug_overlay_scene::DebugOverlayScene::new(t.clone())),
+            ),
+            (
+                "raycaster_scene",
+                Box::new(raycaster_scene::RaycasterScene::new(t.clone())),
+            ),
+            (
+                "paint_scene",
+                Box::new(paint_scene::PaintScene::new(t.clone())),
+            ),
+            (
+                "workshop_scene",
+                Box::new(workshop_scene::WorkshopScene::new(t.clone())),
+            ),
+            (
+                "command_palette_scene",
+                Box::new(command_palette_scene::CommandPaletteScene::new(t.clone())),
+            ),
+            (
+                "table_list_scene",
+                Box::new(table_list_scene::TableListScene::new(t.clone())),
+            ),
+            (
+                "settings_scene",
+                Box::new(settings_scene::SettingsScene::new(t.clone())),
+            ),
+            (
+                "live_feed_scene",
+                Box::new(live_feed_scene::LiveFeedScene::new(t.clone())),
+            ),
+            (
+                "action_center_scene",
+                Box::new(action_center_scene::ActionCenterScene::new(t.clone())),
+            ),
+            (
+                "dev_console_scene",
+                Box::new(dev_console_scene::DevConsoleScene::new(t.clone())),
+            ),
+            (
+                "metrics_hub_scene",
+                Box::new(metrics_hub_scene::MetricsHubScene::new(t.clone())),
+            ),
+            (
+                "navigator_scene",
+                Box::new(navigator_scene::NavigatorScene::new(t.clone())),
+            ),
+            (
+                "control_panel_scene",
+                Box::new(control_panel_scene::ControlPanelScene::new(t.clone())),
+            ),
+            (
+                "hud_demo_scene",
+                Box::new(hud_demo_scene::HudDemoScene::new(t.clone())),
+            ),
+            (
+                "note_editor_scene",
+                Box::new(note_editor_scene::NoteEditorScene::new(t.clone())),
+            ),
         ]
     }
 
     #[test]
     fn test_all_scenes_construct() {
         let scenes = make_scene_tests();
-        assert_eq!(scenes.len(), 12);
+        assert_eq!(scenes.len(), 34);
     }
 
     #[test]
