@@ -11,7 +11,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, PasswordInput, SearchInput, Select, Toggle, StatusBar, StatusSegment,
+    Button, PasswordInput, SearchInput, Select, StatusBar, StatusSegment, Toggle,
 };
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
@@ -158,7 +158,6 @@ impl FormDemoScene {
 }
 
 impl Scene for FormDemoScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -167,7 +166,6 @@ impl Scene for FormDemoScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "form_demo"

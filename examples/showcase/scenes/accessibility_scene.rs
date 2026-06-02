@@ -12,7 +12,9 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::{PasswordInput, SearchInput, StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widgets::{
+    PasswordInput, SearchInput, StatusBar, StatusSegment,
+};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
 };
@@ -571,7 +573,6 @@ impl AccessibilityScene {
 }
 
 impl Scene for AccessibilityScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -580,7 +581,6 @@ impl Scene for AccessibilityScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "accessibility"

@@ -267,7 +267,6 @@ impl NavigatorScene {
 }
 
 impl Scene for NavigatorScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -276,7 +275,6 @@ impl Scene for NavigatorScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "navigator"

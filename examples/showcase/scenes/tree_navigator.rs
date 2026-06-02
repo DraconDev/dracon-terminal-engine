@@ -9,7 +9,9 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
-use dracon_terminal_engine::framework::widgets::{Breadcrumbs, Tree, TreeNode, StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widgets::{
+    Breadcrumbs, StatusBar, StatusSegment, Tree, TreeNode,
+};
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -364,7 +366,6 @@ impl TreeNavigatorScene {
 }
 
 impl Scene for TreeNavigatorScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -373,7 +374,6 @@ impl Scene for TreeNavigatorScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "tree_navigator"

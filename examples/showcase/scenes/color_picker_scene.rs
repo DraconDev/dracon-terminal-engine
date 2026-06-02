@@ -12,7 +12,9 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widgets::{color_picker::ColorPicker, StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widgets::{
+    color_picker::ColorPicker, StatusBar, StatusSegment,
+};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -504,7 +506,6 @@ impl ColorPickerScene {
 }
 
 impl Scene for ColorPickerScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -513,7 +514,6 @@ impl Scene for ColorPickerScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "color_picker"

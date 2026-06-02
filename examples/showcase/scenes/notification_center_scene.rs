@@ -556,7 +556,6 @@ impl NotificationCenterScene {
 }
 
 impl Scene for NotificationCenterScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -565,7 +564,6 @@ impl Scene for NotificationCenterScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "notification_center"

@@ -14,7 +14,8 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, Toggle, StatusBar, StatusSegment,
+    Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, StatusBar,
+    StatusSegment, Toggle,
 };
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
@@ -458,7 +459,6 @@ impl ThemeSwitcherScene {
 }
 
 impl Scene for ThemeSwitcherScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -467,7 +467,6 @@ impl Scene for ThemeSwitcherScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "theme_switcher"

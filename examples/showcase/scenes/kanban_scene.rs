@@ -138,7 +138,6 @@ impl KanbanScene {
 }
 
 impl Scene for KanbanScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -147,7 +146,6 @@ impl Scene for KanbanScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "kanban"

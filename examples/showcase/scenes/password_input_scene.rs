@@ -14,7 +14,9 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::{password_input::PasswordInput, search_input::SearchInput, StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widgets::{
+    password_input::PasswordInput, search_input::SearchInput, StatusBar, StatusSegment,
+};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -144,7 +146,6 @@ impl PasswordInputScene {
 }
 
 impl Scene for PasswordInputScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -153,7 +154,6 @@ impl Scene for PasswordInputScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "password_input"

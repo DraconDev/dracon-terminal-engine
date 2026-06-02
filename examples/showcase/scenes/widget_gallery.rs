@@ -15,7 +15,7 @@ use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
     Button, Checkbox, ColorPicker, ProgressBar, ProgressRing, Radio, SearchInput, Select, Slider,
-    Spinner, TagsInput, Toggle, StatusBar, StatusSegment,
+    Spinner, StatusBar, StatusSegment, TagsInput, Toggle,
 };
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
@@ -374,7 +374,6 @@ impl WidgetGalleryScene {
 }
 
 impl Scene for WidgetGalleryScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -383,7 +382,6 @@ impl Scene for WidgetGalleryScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "widget_gallery"

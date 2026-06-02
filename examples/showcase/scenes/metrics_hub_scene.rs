@@ -181,7 +181,6 @@ impl MetricsHubScene {
 }
 
 impl Scene for MetricsHubScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -190,7 +189,6 @@ impl Scene for MetricsHubScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "metrics_hub"

@@ -9,7 +9,11 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::{debug_overlay::DebugOverlay, profiler::{Metric, Profiler}, StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widgets::{
+    debug_overlay::DebugOverlay,
+    profiler::{Metric, Profiler},
+    StatusBar, StatusSegment,
+};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::Cell;
@@ -203,7 +207,6 @@ impl DebugOverlayScene {
 }
 
 impl Scene for DebugOverlayScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -212,7 +215,6 @@ impl Scene for DebugOverlayScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "debug_overlay"

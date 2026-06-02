@@ -8,8 +8,8 @@ use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
-use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::framework::scene_router::Scene;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -54,9 +54,7 @@ pub struct TooltipScene {
 impl TooltipScene {
     pub fn new(theme: Theme) -> Self {
         let status_bar = StatusBar::new(WidgetId::new(2016))
-            .add_segment(StatusSegment::new(
-                "Hover:tooltip | F1:help | Esc:back",
-            ))
+            .add_segment(StatusSegment::new("Hover:tooltip | F1:help | Esc:back"))
             .with_theme(theme.clone());
         Self {
             theme,
@@ -561,7 +559,6 @@ impl TooltipScene {
 }
 
 impl Scene for TooltipScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -570,7 +567,6 @@ impl Scene for TooltipScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "tooltip"

@@ -464,7 +464,6 @@ impl WorkshopScene {
 }
 
 impl Scene for WorkshopScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -473,7 +472,6 @@ impl Scene for WorkshopScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "workshop"

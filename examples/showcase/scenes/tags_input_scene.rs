@@ -161,7 +161,6 @@ impl TagsInputScene {
 }
 
 impl Scene for TagsInputScene {
-
     fn on_enter(&mut self) {
         self.show_help = false;
         self.dirty = true;
@@ -170,7 +169,6 @@ impl Scene for TagsInputScene {
     fn on_exit(&mut self) {
         self.show_help = false;
     }
-
 
     fn scene_id(&self) -> &str {
         "tags_input"
