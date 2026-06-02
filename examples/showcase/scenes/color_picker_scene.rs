@@ -12,7 +12,7 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widgets::color_picker::ColorPicker;
+use dracon_terminal_engine::framework::widgets::{color_picker::ColorPicker, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -32,6 +32,7 @@ pub struct ColorPickerScene {
     area: std::cell::Cell<Rect>,
     // Track recent color picks
     recent_colors: RefCell<Vec<Color>>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl ColorPickerScene {

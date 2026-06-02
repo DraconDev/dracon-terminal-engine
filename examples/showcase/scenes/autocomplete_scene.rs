@@ -10,7 +10,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::Autocomplete;
+use dracon_terminal_engine::framework::widgets::{Autocomplete, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
 };
@@ -136,6 +136,7 @@ pub struct AutocompleteScene {
     area: std::cell::Cell<Rect>,
     dirty: bool,
     selection_bridge: Rc<RefCell<Option<String>>>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl AutocompleteScene {
@@ -152,6 +153,11 @@ impl AutocompleteScene {
         autocomplete.set_area(Rect::new(2, 3, 28, 9));
         autocomplete.on_focus();
         autocomplete.open_dropdown();
+        let status_bar = StatusBar::new(WidgetId::new(2003))
+            .add_segment(StatusSegment::new(
+                "Type:search | ↑↓:nav | Enter:select | Tab:complete | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             autocomplete,
             theme,
@@ -162,6 +168,7 @@ impl AutocompleteScene {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             dirty: true,
             selection_bridge: bridge,
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -486,6 +493,13 @@ impl Scene for AutocompleteScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -611,6 +625,7 @@ impl Scene for AutocompleteScene {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
         self.autocomplete.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
