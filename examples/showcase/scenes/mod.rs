@@ -6,7 +6,6 @@ pub mod calendar_scene;
 pub mod cell_pool_scene;
 pub mod color_picker_scene;
 pub mod command_palette_scene;
-pub mod control_panel_scene;
 pub mod debug_overlay_scene;
 pub mod dev_console_scene;
 pub mod form_demo;

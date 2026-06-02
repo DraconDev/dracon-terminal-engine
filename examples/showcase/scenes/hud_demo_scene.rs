@@ -34,6 +34,8 @@ pub struct HudDemoScene {
     enemies: Vec<(u16, u16, f32, f32, u8)>,
     // Active damage flash (column, row, frames_remaining, intensity)
     damage_flashes: RefCell<Vec<(u16, u16, u8)>>,
+    // Damage numbers (x, y, text, frames_remaining)
+    damage_numbers: RefCell<Vec<(u16, u16, String, u8)>>,
     // Combat log
     combat_log: Vec<String>,
     // Hit counter for visual feedback
@@ -93,6 +95,7 @@ impl HudDemoScene {
                 (72, 5, 35.0, 35.0, 4),
             ],
             damage_flashes: RefCell::new(Vec::new()),
+            damage_numbers: RefCell::new(Vec::new()),
             combat_log: vec!["[SYS] Arena initialized.".to_string()],
             hits_taken: 0,
             hits_dealt: 0,
@@ -108,8 +111,19 @@ impl HudDemoScene {
 }
 
 impl Scene for HudDemoScene {
-    fn on_enter(&mut self) {}
-    fn on_exit(&mut self) {}
+    fn on_enter(&mut self) {
+        // Reset game state when entering the scene
+        self.health = 100.0;
+        self.ammo = 30.0;
+        self.shield = 75.0;
+        self.score = 0;
+        self.level = 1;
+        self.wave = 1;
+        self.dirty = true;
+    }
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);
@@ -238,6 +252,34 @@ impl Scene for HudDemoScene {
                 .retain_mut(|(_, _, intensity)| {
                     *intensity = intensity.saturating_sub(1);
                     *intensity > 0
+                });
+            self.render_dirty.set(true);
+        }
+
+        // Damage numbers
+        for (dx, dy, text, _frames) in self.damage_numbers.borrow().iter() {
+            let color = if text.starts_with('+') {
+                t.success
+            } else {
+                t.error
+            };
+            draw_text(
+                &mut plane,
+                *dx,
+                *dy,
+                text,
+                color,
+                Color::Rgb(10, 10, 20),
+                true,
+            );
+        }
+        // Decay damage numbers
+        if !self.damage_numbers.borrow().is_empty() {
+            self.damage_numbers
+                .borrow_mut()
+                .retain_mut(|(_, _, _, frames)| {
+                    *frames = frames.saturating_sub(1);
+                    *frames > 0
                 });
             self.render_dirty.set(true);
         }
@@ -440,8 +482,17 @@ impl Scene for HudDemoScene {
                             self.score += 500;
                             self.combat_log
                                 .push(format!("[HIT] Killed {} +500 score", ch));
+                            self.damage_numbers
+                                .borrow_mut()
+                                .push((enemy.0, enemy.1, "+500".to_string(), 6));
                         } else {
                             self.combat_log.push(format!("[HIT] {} -{:.0} HP", ch, dmg));
+                            self.damage_numbers.borrow_mut().push((
+                                enemy.0,
+                                enemy.1,
+                                format!("-{:.0}", dmg),
+                                5,
+                            ));
                         }
                     }
                 }
@@ -450,6 +501,16 @@ impl Scene for HudDemoScene {
                     self.ammo = 30.0;
                     self.combat_log
                         .push(format!("[SYS] Wave {} starting", self.wave));
+                }
+                // Add particle effect at enemy position when hit
+                if let Some(enemy) = self.enemies.iter().find(|e| e.2 > 0.0) {
+                    for dx in -1..=1 {
+                        for dy in -1..=1 {
+                            let px = (enemy.0 as i16 + dx).max(0) as u16;
+                            let py = (enemy.1 as i16 + dy).max(0) as u16;
+                            self.damage_flashes.borrow_mut().push((px, py, 4));
+                        }
+                    }
                 }
                 self.dirty = true;
                 true
@@ -464,7 +525,8 @@ impl Scene for HudDemoScene {
                 }
                 // Auto-regen shield slowly on idle tick
                 if self.shield < 100.0 {
-                    self.shield = (self.shield + 1.0).min(100.0);
+                    self.shield = (self.shield + 2.0).min(100.0);
+                    self.damage_flashes.borrow_mut().push((1, 4, 3));
                 }
                 self.dirty = true;
                 true

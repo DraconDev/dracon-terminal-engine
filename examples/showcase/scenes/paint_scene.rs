@@ -3,11 +3,13 @@
 //! Mouse-driven pixel art canvas with brush tools, color palette,
 //! and fill/erase/clear operations. Demonstrates the mouse-first philosophy.
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -40,6 +42,7 @@ pub struct PaintScene {
     // Scroll offset for large canvases
     dirty: bool,
     area: Cell<Rect>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl PaintScene {
@@ -49,7 +52,7 @@ impl PaintScene {
         let canvas = RefCell::new(vec![vec![Color::Reset; canvas_w]; canvas_h]);
 
         Self {
-            theme,
+            theme: theme.clone(),
             show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             canvas,
@@ -63,6 +66,11 @@ impl PaintScene {
             last_row: Cell::new(None),
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: RefCell::new(
+                StatusBar::new(WidgetId::new(300))
+                    .add_segment(StatusSegment::new("B:brush | E:eraser | F:fill | Click:paint | F1:help | Esc:back"))
+                    .with_theme(theme),
+            ),
         }
     }
 
@@ -379,28 +387,12 @@ impl Scene for PaintScene {
         // Canvas (right of toolbar)
         self.render_canvas(&mut plane, area);
 
-        // Footer
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let tool_name = match self.tool.get() {
-            Tool::Brush => "Brush",
-            Tool::Eraser => "Eraser",
-            Tool::Fill => "Fill",
-        };
-        let footer = format!(
-            " Tool:{} | B:brush E:erase F:fill | C:clear | {}:help | {}:back ",
-            tool_name, help_key, back_key,
-        );
-        let fy = area.height.saturating_sub(1);
-        for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.fg_muted;
-                plane.cells[idx].bg = t.surface;
-                plane.cells[idx].transparent = false;
-            }
-        }
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");

@@ -147,17 +147,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "control_panel",
-                category: "input",
-                description: "Control Panel: Select + Toggle + Checkbox + Profiler + StatusBar",
-                binary_name: "control_panel",
-                preview: &[
-                    "  ▸ Theme      [Nord]      ▲▼",
-                    "  ▸ Font       [Fira Code] ▲▼",
-                    "    Dark Mode  [●━━━]     ◀",
-                ],
-            },
-            ExampleMeta {
                 name: "hud_demo",
                 category: "cookbook",
                 description: "HUD Demo: HUD overlay + Gauge + Spinner (game HUD)",

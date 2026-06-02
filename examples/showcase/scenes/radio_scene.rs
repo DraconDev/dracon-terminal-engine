@@ -18,7 +18,6 @@ struct RadioGroupConfig<'a> {
     y: u16,
     label: &'a str,
     options: &'a [Radio],
-    selected: usize,
     is_focused: bool,
 }
 
@@ -99,53 +98,20 @@ impl RadioScene {
             }
         }
 
-        // Radio options
-        for (i, _radio) in cfg.options.iter().enumerate() {
+        // Radio options - use widget render
+        for (i, radio) in cfg.options.iter().enumerate() {
             let oy = y + 1 + i as u16;
-            let is_selected = i == cfg.selected;
-
-            // Radio indicator
-            let indicator = if is_selected { '◉' } else { '○' };
-            let ind_fg = if is_selected { t.primary } else { t.fg_muted };
-
-            let idx = (oy * plane.width + x) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = indicator;
-                plane.cells[idx].fg = ind_fg;
-                plane.cells[idx].bg = t.bg;
-                plane.cells[idx].transparent = false;
-            }
-
-            // Label text
-            let label_text = match i {
-                0 => match cfg.label {
-                    "Color Theme" => "Dark",
-                    "Font Size" => "Small (12pt)",
-                    "Layout Density" => "Compact",
-                    _ => "",
-                },
-                1 => match cfg.label {
-                    "Color Theme" => "Light",
-                    "Font Size" => "Medium (14pt)",
-                    "Layout Density" => "Comfortable",
-                    _ => "",
-                },
-                2 => match cfg.label {
-                    "Color Theme" => "High Contrast",
-                    "Font Size" => "Large (18pt)",
-                    "Layout Density" => "Spacious",
-                    _ => "",
-                },
-                _ => "",
-            };
-
-            for (j, ch) in label_text.chars().enumerate() {
-                let idx = (oy * plane.width + x + 2 + j as u16) as usize;
-                if idx < plane.cells.len() {
-                    plane.cells[idx].char = ch;
-                    plane.cells[idx].fg = if is_selected { t.primary } else { t.fg };
-                    plane.cells[idx].bg = t.bg;
-                    plane.cells[idx].transparent = false;
+            let radio_area = Rect::new(x, oy, 20, 1);
+            let radio_plane = radio.render(radio_area);
+            // Blit the radio plane into the main plane
+            for cell_idx in 0..radio_plane.cells.len().min(20) {
+                let main_x = x + cell_idx as u16;
+                let main_y = oy;
+                if main_x < plane.width && main_y < plane.height {
+                    let idx = (main_y * plane.width + main_x) as usize;
+                    if idx < plane.cells.len() {
+                        plane.cells[idx] = radio_plane.cells[cell_idx].clone();
+                    }
                 }
             }
         }
@@ -362,7 +328,6 @@ impl Scene for RadioScene {
                 y: 5,
                 label: "Color Theme",
                 options: &self.theme_options,
-                selected: self.theme_selected,
                 is_focused: self.focused_group == 0,
             },
         );
@@ -373,7 +338,6 @@ impl Scene for RadioScene {
                 y: 10,
                 label: "Font Size",
                 options: &self.font_options,
-                selected: self.font_selected,
                 is_focused: self.focused_group == 1,
             },
         );
@@ -384,7 +348,6 @@ impl Scene for RadioScene {
                 y: 15,
                 label: "Layout Density",
                 options: &self.layout_options,
-                selected: self.layout_selected,
                 is_focused: self.focused_group == 2,
             },
         );

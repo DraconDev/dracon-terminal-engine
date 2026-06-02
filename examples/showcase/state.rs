@@ -295,12 +295,6 @@ impl Showcase {
             )),
         );
         scene_router.register(
-            "control_panel",
-            Box::new(crate::scenes::control_panel_scene::ControlPanelScene::new(
-                theme.clone(),
-            )),
-        );
-        scene_router.register(
             "hud_demo",
             Box::new(crate::scenes::hud_demo_scene::HudDemoScene::new(
                 theme.clone(),

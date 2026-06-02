@@ -160,8 +160,14 @@ impl NoteEditorScene {
 }
 
 impl Scene for NoteEditorScene {
-    fn on_enter(&mut self) {}
-    fn on_exit(&mut self) {}
+    fn on_enter(&mut self) {
+        // Reset editor state when entering the scene
+        self.show_help = false;
+        self.dirty = true;
+    }
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
 
     fn render(&self, area: Rect) -> Plane {
         let mut plane = Plane::new(0, area.width, area.height);

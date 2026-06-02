@@ -17,6 +17,8 @@ use dracon_terminal_engine::framework::widgets::radio::Radio;
 use dracon_terminal_engine::framework::widgets::slider::Slider;
 use dracon_terminal_engine::framework::widgets::spinner::Spinner;
 use dracon_terminal_engine::framework::widgets::toggle::Toggle;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
@@ -64,6 +66,7 @@ pub struct WorkshopScene {
     spinner: RefCell<Spinner>,
     dirty: bool,
     area: Cell<Rect>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl WorkshopScene {
@@ -88,7 +91,7 @@ impl WorkshopScene {
         let spinner = RefCell::new(Spinner::new(WidgetId::new(8)).with_theme(theme.clone()));
 
         Self {
-            theme,
+            theme: theme.clone(),
             show_help: false,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             selected_widget: Cell::new(0),
@@ -104,6 +107,11 @@ impl WorkshopScene {
             progress_ring,
             spinner,
             dirty: true,
+            status_bar: RefCell::new(
+                StatusBar::new(WidgetId::new(500))
+                    .add_segment(StatusSegment::new("↑↓:pick widget | ←→:adjust | Space:toggle | F1:help | Esc:back"))
+                    .with_theme(theme),
+            ),
             area: Cell::new(Rect::new(0, 0, 80, 24)),
         }
     }
@@ -526,24 +534,12 @@ impl Scene for WorkshopScene {
         let preview_h = area.height.saturating_sub(4);
         self.render_preview(&mut plane, preview_x, 2, preview_w, preview_h);
 
-        // Footer
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let _current_name = WIDGET_NAMES[self.selected_widget.get()].0;
-        let footer = format!(
-            " ↑/↓:pick widget | ←/→:adjust | Space:toggle | {}:help | {}:back ",
-            help_key, back_key,
-        );
-        let fy = area.height.saturating_sub(1);
-        for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = t.fg_muted;
-                plane.cells[idx].bg = t.surface;
-                plane.cells[idx].transparent = false;
-            }
-        }
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
             let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");

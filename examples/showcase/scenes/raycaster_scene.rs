@@ -4,11 +4,13 @@
 //! Uses brute-force raycasting against a grid map, then maps wall distances
 //! to ASCII shading characters.
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
+use dracon_terminal_engine::framework::widget::Widget;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::Cell;
@@ -51,8 +53,6 @@ fn wall_color(wall_type: u8, theme: &Theme) -> (Color, Color) {
     }
 }
 
-use dracon_terminal_engine::compositor::plane::Color;
-
 pub struct RaycasterScene {
     theme: Theme,
     show_help: bool,
@@ -65,12 +65,13 @@ pub struct RaycasterScene {
     // Rendering
     dirty: bool,
     area: Cell<Rect>,
+    status_bar: std::cell::RefCell<StatusBar>,
 }
 
 impl RaycasterScene {
     pub fn new(theme: Theme) -> Self {
         Self {
-            theme,
+            theme: theme.clone(),
             show_help: false,
             show_minimap: Cell::new(true),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -79,6 +80,11 @@ impl RaycasterScene {
             pa: Cell::new(0.0), // facing right
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: std::cell::RefCell::new(
+                StatusBar::new(WidgetId::new(200))
+                    .add_segment(StatusSegment::new("WASD:move | ←→:turn | M:minimap | F1:help | Esc:back"))
+                    .with_theme(theme),
+            ),
         }
     }
 
@@ -442,23 +448,12 @@ impl Scene for RaycasterScene {
             );
         }
 
-        // Footer with key hints
-        let help_key = self.keybindings.display(actions::HELP).unwrap_or("f1");
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
-        let fy = area.height.saturating_sub(1);
-        let footer = format!(
-            " WASD:move | ←→:turn | M:minimap | {}:help | {}:back ",
-            help_key, back_key
-        );
-        for (i, c) in footer.chars().enumerate() {
-            let idx = (fy * area.width + i as u16) as usize;
-            if idx < plane.cells.len() {
-                plane.cells[idx].char = c;
-                plane.cells[idx].fg = self.theme.fg_muted;
-                plane.cells[idx].bg = self.theme.surface;
-                plane.cells[idx].transparent = false;
-            }
-        }
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         plane
     }

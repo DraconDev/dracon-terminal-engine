@@ -41,18 +41,15 @@ impl SettingsScene {
             .add_field("Server URL")
             .with_validation(
                 0,
-                vec![ValidationRule::from_regex_pattern(".+")
-                    .expect("hardcoded regex .+ is always valid")],
+                vec![ValidationRule::from_regex_pattern(".+").unwrap_or(ValidationRule::Required)],
             )
             .with_validation(
                 1,
-                vec![ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$")
-                    .expect("hardcoded email regex is always valid")],
+                vec![ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$").unwrap_or(ValidationRule::Required)],
             )
             .with_validation(
                 2,
-                vec![ValidationRule::from_regex_pattern(".{8,}")
-                    .expect("hardcoded regex .{8,} is always valid")],
+                vec![ValidationRule::from_regex_pattern(".{8,}").unwrap_or(ValidationRule::Required)],
             );
 
         let mut grid = KeyValueGrid::with_id(WidgetId::new(401))

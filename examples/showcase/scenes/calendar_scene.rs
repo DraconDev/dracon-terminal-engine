@@ -9,9 +9,10 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
-use dracon_terminal_engine::framework::widgets::Calendar;
+use dracon_terminal_engine::framework::widgets::{Calendar, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 
 struct CalendarEvent {
     date: &'static str, // "2026-05-17"
@@ -119,10 +120,10 @@ fn category_color(cat: &str, theme: &Theme) -> Color {
 
 fn category_icon(cat: &str) -> char {
     match cat {
-        "meeting" => '📅',
-        "deadline" => '🔴',
-        "holiday" => '🎉',
-        "reminder" => '🔔',
+        "meeting" => 'M',
+        "deadline" => 'D',
+        "holiday" => 'H',
+        "reminder" => 'R',
         _ => '•',
     }
 }
@@ -134,6 +135,8 @@ pub struct CalendarScene {
     selected_date: Option<String>,
     keybindings: KeybindingSet,
     area: std::cell::Cell<Rect>,
+    dirty: bool,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl CalendarScene {
@@ -141,10 +144,16 @@ impl CalendarScene {
         Self {
             theme: theme.clone(),
             show_help: false,
-            calendar: Calendar::new().with_theme(theme),
+            calendar: Calendar::new().with_theme(theme.clone()),
             selected_date: None,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            dirty: true,
+            status_bar: RefCell::new(
+                StatusBar::new(WidgetId::new(100))
+                    .add_segment(StatusSegment::new("←→:month | Enter:select | c:clear | F1:help | Esc:back"))
+                    .with_theme(theme),
+            ),
         }
     }
 
@@ -186,7 +195,7 @@ impl CalendarScene {
             }
         }
 
-        let after = self.selected_date.as_deref().unwrap_or("2026-05-17");
+        let after = self.selected_date.as_deref().unwrap_or(EVENTS[0].date);
         let upcoming = self.upcoming_events(after);
         let max_events = ((area.height.saturating_sub(y + 6)) / 2) as usize;
 
@@ -326,6 +335,18 @@ impl Scene for CalendarScene {
         "calendar"
     }
 
+    fn on_enter(&mut self) {
+        // Reset selected date when entering the scene
+        self.selected_date = None;
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        // Clean up state when leaving the scene
+        self.show_help = false;
+    }
+
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
         let t = &self.theme;
@@ -408,10 +429,10 @@ impl Scene for CalendarScene {
         let legend_y = cal_area.y + cal_area.height + 1;
         if legend_y < area.height.saturating_sub(3) {
             let legends = [
-                ("📅 Meeting", t.primary),
-                ("🔴 Deadline", t.error),
-                ("🎉 Holiday", t.success),
-                ("🔔 Reminder", t.warning),
+                ("M Meeting", t.primary),
+                ("D Deadline", t.error),
+                ("H Holiday", t.success),
+                ("R Reminder", t.warning),
             ];
             let mut lx = 2u16;
             for (label, color) in legends {
@@ -457,6 +478,13 @@ impl Scene for CalendarScene {
                 ],
             );
         }
+
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         plane
     }
@@ -515,9 +543,11 @@ impl Scene for CalendarScene {
         if let MouseEventKind::Down(_) = kind {
             let sidebar_x = cal_w + 5;
             if col >= sidebar_x && row >= 6 {
-                let event_idx = (row - 6) as usize;
-                if event_idx < EVENTS.len() {
-                    let event = &EVENTS[event_idx];
+                let event_idx = ((row - 6) / 2) as usize;
+                let after = self.selected_date.as_deref().unwrap_or(EVENTS[0].date);
+                let upcoming = self.upcoming_events(after);
+                if event_idx < upcoming.len() {
+                    let event = upcoming[event_idx];
                     self.selected_date = Some(event.date.to_string());
                     self.mark_dirty();
                     return true;
@@ -536,6 +566,10 @@ impl Scene for CalendarScene {
     fn needs_render(&self) -> bool {
         true
     }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }
