@@ -569,6 +569,7 @@ impl Scene for ColorPickerScene {
         draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -580,7 +581,7 @@ impl Scene for ColorPickerScene {
                     ("Enter", "Copy hex to clipboard"),
                     ("Click", "Pick color directly"),
                     ("Palette", "Click preset colors"),
-                    ("Esc", "Back to showcase"),
+                    (back_key, "Back"),
                 ],
             );
         }
@@ -598,6 +599,7 @@ impl Scene for ColorPickerScene {
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }

@@ -342,6 +342,7 @@ impl Scene for ModalDemoScene {
     fn render(&self, area: Rect) -> Plane {
         self.area.set(area);
         let t = &self.theme;
+        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let mut plane = Plane::new(0, area.width, area.height);
         for cell in plane.cells.iter_mut() {
             cell.bg = t.bg;
@@ -548,7 +549,7 @@ impl Scene for ModalDemoScene {
                 ("t/w/e/s", "Toast variants"),
                 ("↑/↓", "Navigate settings"),
                 ("Enter", "Toggle setting value"),
-                ("Esc", "Back"),
+                (back_key, "Back"),
                 ("", "Click outside to dismiss"),
             ];
             for (i, (key, desc)) in shortcuts.iter().enumerate() {
@@ -678,7 +679,6 @@ impl Scene for ModalDemoScene {
         self.render_toasts(&mut plane, area);
 
         // Footer
-        let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
         let footer = format!(
             " c:confirm | t/w/e/s:toasts | ↑↓:nav | ?:help | {}:back ",
             back_key

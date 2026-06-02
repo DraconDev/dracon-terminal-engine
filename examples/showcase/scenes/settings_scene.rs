@@ -212,6 +212,7 @@ impl Scene for SettingsScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -224,7 +225,7 @@ impl Scene for SettingsScene {
                     ("S", "Save settings"),
                     ("Type", "Fill in form fields"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

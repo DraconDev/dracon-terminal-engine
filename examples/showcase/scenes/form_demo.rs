@@ -653,6 +653,7 @@ impl Scene for FormDemoScene {
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             crate::scenes::shared_helpers::render_help_overlay(
                 &mut plane,
                 area,
@@ -665,7 +666,7 @@ impl Scene for FormDemoScene {
                     ("r", "Reset form"),
                     ("Live validation", "Errors shown in red under fields"),
                     ("Drag =", "Reorder fields"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

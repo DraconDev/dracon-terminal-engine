@@ -60,6 +60,7 @@ pub struct WidgetGalleryScene {
     tags_input: TagsInput,
     theme: Theme,
     show_help: bool,
+    dirty: bool,
     zones: RefCell<ScopedZoneRegistry<usize>>,
     area: std::cell::Cell<Rect>,
     keybindings: KeybindingSet,
@@ -95,6 +96,7 @@ impl WidgetGalleryScene {
                 .with_theme(theme.clone()),
             theme,
             show_help: false,
+            dirty: true,
             zones: RefCell::new(ScopedZoneRegistry::new()),
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
@@ -443,6 +445,7 @@ impl Scene for WidgetGalleryScene {
 
         // Help overlay
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -452,7 +455,7 @@ impl Scene for WidgetGalleryScene {
                     ("↑/↓", "Navigate widget list"),
                     ("Enter", "Interact with selected widget"),
                     ("Type", "Input into text widgets"),
-                    ("Esc", "Back to showcase"),
+                    (back_key, "Back"),
                     ("?", "Toggle this help"),
                 ],
             );
@@ -471,6 +474,7 @@ impl Scene for WidgetGalleryScene {
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
+                self.dirty = true;
                 return true;
             }
             return true;
@@ -575,8 +579,12 @@ impl Scene for WidgetGalleryScene {
     }
 
     fn needs_render(&self) -> bool {
-        true
+        self.dirty
     }
-    fn mark_dirty(&mut self) {}
-    fn clear_dirty(&mut self) {}
+    fn mark_dirty(&mut self) {
+        self.dirty = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty = false;
+    }
 }

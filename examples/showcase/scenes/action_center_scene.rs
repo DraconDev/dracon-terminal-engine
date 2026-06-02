@@ -486,6 +486,7 @@ impl Scene for ActionCenterScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -499,7 +500,7 @@ impl Scene for ActionCenterScene {
                     ("Click file", "Select file"),
                     ("Click menu", "Execute action"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

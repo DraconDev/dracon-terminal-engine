@@ -257,6 +257,7 @@ impl Scene for NoteEditorScene {
         );
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -277,7 +278,7 @@ impl Scene for NoteEditorScene {
                     ("Ctrl+S", "Save current tab to /tmp/dracon_<name>"),
                     ("Ctrl+O", "Load file from /tmp/dracon_<name>"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

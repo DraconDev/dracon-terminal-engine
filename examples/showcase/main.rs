@@ -337,10 +337,6 @@ mod scene_construction_tests {
                 Box::new(navigator_scene::NavigatorScene::new(t.clone())),
             ),
             (
-                "control_panel_scene",
-                Box::new(control_panel_scene::ControlPanelScene::new(t.clone())),
-            ),
-            (
                 "hud_demo_scene",
                 Box::new(hud_demo_scene::HudDemoScene::new(t.clone())),
             ),
@@ -354,7 +350,7 @@ mod scene_construction_tests {
     #[test]
     fn test_all_scenes_construct() {
         let scenes = make_scene_tests();
-        assert_eq!(scenes.len(), 34);
+        assert_eq!(scenes.len(), 33);
     }
 
     #[test]

@@ -251,6 +251,7 @@ impl Scene for DevConsoleScene {
         blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -265,7 +266,7 @@ impl Scene for DevConsoleScene {
                     ("PgUp/Dn", "Page scroll"),
                     ("Click filter", "Set filter level"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

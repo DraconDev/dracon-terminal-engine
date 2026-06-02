@@ -678,6 +678,7 @@ impl Scene for CommandPaletteScene {
 
         // ── Help overlay ─────────────────────────────────────────────
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -690,7 +691,7 @@ impl Scene for CommandPaletteScene {
                     ("Click menu", "Execute menu action"),
                     ("Click sidebar", "Open file (demo)"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

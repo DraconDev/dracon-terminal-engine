@@ -542,7 +542,6 @@ impl Showcase {
                 | "workshop"
                 | "action_center"
                 | "command_palette"
-                | "control_panel"
                 | "dev_console"
                 | "hud_demo"
                 | "live_feed"

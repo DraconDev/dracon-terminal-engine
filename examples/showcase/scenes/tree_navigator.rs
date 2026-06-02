@@ -458,6 +458,7 @@ impl Scene for TreeNavigatorScene {
         );
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             crate::scenes::shared_helpers::render_help_overlay(
                 &mut plane,
                 area,
@@ -468,7 +469,7 @@ impl Scene for TreeNavigatorScene {
                     ("Enter/>", "Expand folder"),
                     ("<", "Collapse folder"),
                     ("Click", "Select item"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                     ("?", "Toggle help"),
                 ],
             );

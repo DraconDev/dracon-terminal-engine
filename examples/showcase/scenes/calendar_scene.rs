@@ -476,7 +476,7 @@ impl Scene for CalendarScene {
                     ("Enter", "Select date"),
                     ("c", "Clear selection"),
                     ("Click", "Select date on calendar"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }
@@ -501,6 +501,7 @@ impl Scene for CalendarScene {
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
+                self.dirty = true;
             }
             return true;
         }

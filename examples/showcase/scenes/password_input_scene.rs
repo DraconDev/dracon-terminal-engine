@@ -640,6 +640,7 @@ impl Scene for PasswordInputScene {
         draw_text(&mut plane, 2, fy, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -651,7 +652,7 @@ impl Scene for PasswordInputScene {
                     ("Ctrl+H", "Toggle password visibility"),
                     ("Click", "Focus a field"),
                     ("R", "Reset after success"),
-                    ("Esc", "Back to showcase"),
+                    (back_key, "Back"),
                 ],
             );
         }
@@ -669,6 +670,7 @@ impl Scene for PasswordInputScene {
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
+                self.dirty = true;
                 return true;
             }
             return true;

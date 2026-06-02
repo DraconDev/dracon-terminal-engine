@@ -518,6 +518,7 @@ impl Scene for ThemeSwitcherScene {
         draw_text(&mut plane, 2, footer_y, nav, t.fg_muted, t.surface, false);
 
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -527,7 +528,7 @@ impl Scene for ThemeSwitcherScene {
                     ("↑/↓", "Navigate theme list"),
                     ("Click", "Select theme"),
                     ("T", "Cycle themes"),
-                    ("Esc", "Back to showcase"),
+                    (back_key, "Back"),
                     ("?", "Toggle this help"),
                 ],
             );
@@ -545,6 +546,7 @@ impl Scene for ThemeSwitcherScene {
                 || self.keybindings.matches(actions::HELP, &key)
             {
                 self.show_help = false;
+                self.dirty = true;
                 return true;
             }
             return true;

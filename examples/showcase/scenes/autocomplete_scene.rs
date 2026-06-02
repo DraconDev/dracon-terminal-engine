@@ -481,7 +481,7 @@ impl Scene for AutocompleteScene {
                     ("Up/Dn", "Navigate suggestions"),
                     ("Enter", "Select item"),
                     ("Tab", "Auto-complete"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

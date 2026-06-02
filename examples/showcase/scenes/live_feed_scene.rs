@@ -588,6 +588,7 @@ impl Scene for LiveFeedScene {
 
         // ── Help overlay ───────────────────────────────────────────
         if self.show_help {
+            let back_key = self.keybindings.display(actions::BACK).unwrap_or("esc");
             render_help_overlay(
                 &mut plane,
                 area,
@@ -605,7 +606,7 @@ impl Scene for LiveFeedScene {
                     ("Click tab", "Switch tab"),
                     ("Drag divider", "Resize split pane"),
                     ("F1", "Toggle this help"),
-                    ("Esc", "Back"),
+                    (back_key, "Back"),
                 ],
             );
         }

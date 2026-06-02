@@ -110,7 +110,7 @@ impl RadioScene {
                 if main_x < plane.width && main_y < plane.height {
                     let idx = (main_y * plane.width + main_x) as usize;
                     if idx < plane.cells.len() {
-                        plane.cells[idx] = radio_plane.cells[cell_idx].clone();
+                        plane.cells[idx] = radio_plane.cells[cell_idx];
                     }
                 }
             }
