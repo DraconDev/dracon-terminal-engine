@@ -18,7 +18,6 @@ use dracon_terminal_engine::input::event::{
 };
 use ratatui::layout::Rect;
 use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Clone, Copy, PartialEq)]
 enum FilterMode {
@@ -60,7 +59,6 @@ struct NotifEntry {
 
 const SIDEBAR_WIDTH: u16 = 38;
 
-#[allow(dead_code)]
 pub struct NotificationCenterScene {
     theme: Theme,
     show_help: bool,
@@ -78,8 +76,6 @@ pub struct NotificationCenterScene {
     selected_idx: Option<usize>,
     focused_side: usize, // 0 = feed, 1 = detail
 
-    // Add notification bridge
-    add_bridge: Rc<RefCell<Option<(String, String, NotificationKind)>>>,
     status_bar: RefCell<StatusBar>,
 }
 
@@ -117,7 +113,6 @@ impl NotificationCenterScene {
             ]),
             selected_idx: None,
             focused_side: 0,
-            add_bridge: Rc::new(RefCell::new(None)),
             status_bar: RefCell::new(status_bar),
         }
     }
@@ -561,6 +556,17 @@ impl NotificationCenterScene {
 }
 
 impl Scene for NotificationCenterScene {
+
+    fn on_enter(&mut self) {
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
+
+
     fn scene_id(&self) -> &str {
         "notification_center"
     }

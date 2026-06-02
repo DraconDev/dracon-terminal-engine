@@ -51,7 +51,6 @@ const REQUIREMENTS: &[Requirement] = &[
     },
 ];
 
-#[allow(dead_code)]
 pub struct PasswordInputScene {
     theme: Theme,
     show_help: bool,
@@ -145,6 +144,17 @@ impl PasswordInputScene {
 }
 
 impl Scene for PasswordInputScene {
+
+    fn on_enter(&mut self) {
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
+
+
     fn scene_id(&self) -> &str {
         "password_input"
     }

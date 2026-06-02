@@ -158,6 +158,17 @@ impl FormDemoScene {
 }
 
 impl Scene for FormDemoScene {
+
+    fn on_enter(&mut self) {
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
+
+
     fn scene_id(&self) -> &str {
         "form_demo"
     }

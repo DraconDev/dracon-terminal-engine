@@ -105,6 +105,17 @@ impl CellPoolScene {
 }
 
 impl Scene for CellPoolScene {
+
+    fn on_enter(&mut self) {
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
+
+
     fn scene_id(&self) -> &str {
         "cell_pool"
     }

@@ -190,6 +190,17 @@ impl AnimationScene {
 }
 
 impl Scene for AnimationScene {
+
+    fn on_enter(&mut self) {
+        self.show_help = false;
+        self.dirty = true;
+    }
+
+    fn on_exit(&mut self) {
+        self.show_help = false;
+    }
+
+
     fn scene_id(&self) -> &str {
         "animation"
     }
