@@ -17,6 +17,7 @@ use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::progress_bar::ProgressBar;
 use dracon_terminal_engine::framework::widgets::progress_ring::ProgressRing;
 use dracon_terminal_engine::framework::widgets::spinner::Spinner;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
@@ -55,6 +56,7 @@ pub struct AnimationScene {
     dirty: bool,
     area: Cell<Rect>,
     zones: RefCell<Vec<ZoneRect>>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl AnimationScene {
@@ -95,6 +97,12 @@ impl AnimationScene {
 
         let spinner = Spinner::new(WidgetId::new(2)).with_theme(theme.clone());
 
+        let status_bar = StatusBar::new(WidgetId::new(2002))
+            .add_segment(StatusSegment::new(
+                "1-3:demo | SPACE:auto | r:reset | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
+
         Self {
             theme,
             show_help: false,
@@ -114,6 +122,7 @@ impl AnimationScene {
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
             zones: RefCell::new(Vec::new()),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -520,6 +529,13 @@ impl Scene for AnimationScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -651,6 +667,7 @@ impl Scene for AnimationScene {
         self.progress_bar.borrow_mut().on_theme_change(theme);
         self.progress_ring.borrow_mut().on_theme_change(theme);
         self.spinner.borrow_mut().on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
