@@ -486,7 +486,7 @@ impl Scene for MetricsHubScene {
             if col >= main_x {
                 let slider_y = 13;
                 for i in 0..3 {
-                    let sy = slider_y + i as u16 * 2;
+                    let sy = slider_y + 1 + i as u16 * 2;
                     if row == sy {
                         self.selected_slider = i;
                         let slider = match i {
