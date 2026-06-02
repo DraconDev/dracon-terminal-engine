@@ -82,7 +82,9 @@ impl RaycasterScene {
             area: Cell::new(Rect::new(0, 0, 80, 24)),
             status_bar: std::cell::RefCell::new(
                 StatusBar::new(WidgetId::new(200))
-                    .add_segment(StatusSegment::new("WASD:move | ←→:turn | M:minimap | F1:help | Esc:back"))
+                    .add_segment(StatusSegment::new(
+                        "WASD:move | ←→:turn | M:minimap | F1:help | Esc:back",
+                    ))
                     .with_theme(theme),
             ),
         }

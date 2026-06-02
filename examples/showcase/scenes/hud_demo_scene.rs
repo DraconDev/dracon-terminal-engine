@@ -482,9 +482,12 @@ impl Scene for HudDemoScene {
                             self.score += 500;
                             self.combat_log
                                 .push(format!("[HIT] Killed {} +500 score", ch));
-                            self.damage_numbers
-                                .borrow_mut()
-                                .push((enemy.0, enemy.1, "+500".to_string(), 6));
+                            self.damage_numbers.borrow_mut().push((
+                                enemy.0,
+                                enemy.1,
+                                "+500".to_string(),
+                                6,
+                            ));
                         } else {
                             self.combat_log.push(format!("[HIT] {} -{:.0} HP", ch, dmg));
                             self.damage_numbers.borrow_mut().push((

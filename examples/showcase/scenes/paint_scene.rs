@@ -68,7 +68,9 @@ impl PaintScene {
             area: Cell::new(Rect::new(0, 0, 80, 24)),
             status_bar: RefCell::new(
                 StatusBar::new(WidgetId::new(300))
-                    .add_segment(StatusSegment::new("B:brush | E:eraser | F:fill | Click:paint | F1:help | Esc:back"))
+                    .add_segment(StatusSegment::new(
+                        "B:brush | E:eraser | F:fill | Click:paint | F1:help | Esc:back",
+                    ))
                     .with_theme(theme),
             ),
         }

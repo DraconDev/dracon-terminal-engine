@@ -8,6 +8,7 @@ use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
+use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
 use dracon_terminal_engine::framework::widgets::button::Button;
 use dracon_terminal_engine::framework::widgets::checkbox::Checkbox;
@@ -18,7 +19,6 @@ use dracon_terminal_engine::framework::widgets::slider::Slider;
 use dracon_terminal_engine::framework::widgets::spinner::Spinner;
 use dracon_terminal_engine::framework::widgets::toggle::Toggle;
 use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
-use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
@@ -109,7 +109,9 @@ impl WorkshopScene {
             dirty: true,
             status_bar: RefCell::new(
                 StatusBar::new(WidgetId::new(500))
-                    .add_segment(StatusSegment::new("↑↓:pick widget | ←→:adjust | Space:toggle | F1:help | Esc:back"))
+                    .add_segment(StatusSegment::new(
+                        "↑↓:pick widget | ←→:adjust | Space:toggle | F1:help | Esc:back",
+                    ))
                     .with_theme(theme),
             ),
             area: Cell::new(Rect::new(0, 0, 80, 24)),

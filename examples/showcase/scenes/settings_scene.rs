@@ -45,11 +45,14 @@ impl SettingsScene {
             )
             .with_validation(
                 1,
-                vec![ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$").unwrap_or(ValidationRule::Required)],
+                vec![ValidationRule::from_regex_pattern(r"^[^@]+@[^@]+\.[^@]+$")
+                    .unwrap_or(ValidationRule::Required)],
             )
             .with_validation(
                 2,
-                vec![ValidationRule::from_regex_pattern(".{8,}").unwrap_or(ValidationRule::Required)],
+                vec![
+                    ValidationRule::from_regex_pattern(".{8,}").unwrap_or(ValidationRule::Required)
+                ],
             );
 
         let mut grid = KeyValueGrid::with_id(WidgetId::new(401))

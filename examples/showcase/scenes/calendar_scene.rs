@@ -151,7 +151,9 @@ impl CalendarScene {
             dirty: true,
             status_bar: RefCell::new(
                 StatusBar::new(WidgetId::new(100))
-                    .add_segment(StatusSegment::new("←→:month | Enter:select | c:clear | F1:help | Esc:back"))
+                    .add_segment(StatusSegment::new(
+                        "←→:month | Enter:select | c:clear | F1:help | Esc:back",
+                    ))
                     .with_theme(theme),
             ),
         }

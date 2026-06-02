@@ -29,6 +29,8 @@ pub struct LiveFeedScene {
     stream: RefCell<StreamingText>,
     sparkline_cpu: RefCell<Sparkline>,
     sparkline_mem: RefCell<Sparkline>,
+    sparkline_net_in: RefCell<Sparkline>,
+    sparkline_net_out: RefCell<Sparkline>,
     status_bar: RefCell<StatusBar>,
     show_help: bool,
     tick: u64,
@@ -46,6 +48,15 @@ pub struct LiveFeedScene {
     peak_cpu: f64,
     peak_mem: f64,
     dirty: bool,
+    // Network metrics
+    net_in_data: Vec<f64>,
+    net_out_data: Vec<f64>,
+    latency_data: Vec<f64>,
+    error_count: u32,
+    // Severity filter (None = show all, Some("INFO") etc.)
+    severity_filter: Option<String>,
+    // Export state
+    export_path: Option<String>,
 }
 
 impl LiveFeedScene {
@@ -78,6 +89,23 @@ impl LiveFeedScene {
             .with_height(6)
             .with_min_max(true);
 
+        let net_in_data: Vec<f64> = (0..40)
+            .map(|i| 100.0 + 80.0 * (i as f64 / 20.0).sin())
+            .collect();
+        let net_out_data: Vec<f64> = (0..40)
+            .map(|i| 80.0 + 60.0 * (i as f64 / 25.0).cos())
+            .collect();
+
+        let sparkline_net_in = Sparkline::new(net_in_data.clone())
+            .with_theme(theme.clone())
+            .with_height(4)
+            .with_min_max(true);
+
+        let sparkline_net_out = Sparkline::new(net_out_data.clone())
+            .with_theme(theme.clone())
+            .with_height(4)
+            .with_min_max(true);
+
         let status_bar = StatusBar::new(WidgetId::new(503))
             .add_segment(StatusSegment::new(
                 "1/2/3: tabs | Space: add log | F1: help | Esc: back",
@@ -95,6 +123,8 @@ impl LiveFeedScene {
             stream: RefCell::new(stream),
             sparkline_cpu: RefCell::new(sparkline_cpu),
             sparkline_mem: RefCell::new(sparkline_mem),
+            sparkline_net_in: RefCell::new(sparkline_net_in),
+            sparkline_net_out: RefCell::new(sparkline_net_out),
             status_bar: RefCell::new(status_bar),
             show_help: false,
             tick: 0,
@@ -108,6 +138,12 @@ impl LiveFeedScene {
             peak_cpu: peak_cpu_init,
             peak_mem: peak_mem_init,
             dirty: true,
+            net_in_data: Vec::new(),
+            net_out_data: Vec::new(),
+            latency_data: Vec::new(),
+            error_count: 0,
+            severity_filter: None,
+            export_path: None,
         }
     }
 
@@ -125,7 +161,33 @@ impl LiveFeedScene {
             "[INFO] Scheduled task started: backup",
         ];
         let idx = (self.tick as usize) % messages.len();
-        self.stream.borrow_mut().append(messages[idx]);
+        let msg = messages[idx];
+
+        // Apply severity filter
+        if let Some(ref filter) = self.severity_filter {
+            let severity = if msg.starts_with("[ERROR]") {
+                "ERROR"
+            } else if msg.starts_with("[WARN]") {
+                "WARN"
+            } else if msg.starts_with("[INFO]") {
+                "INFO"
+            } else if msg.starts_with("[DEBUG]") {
+                "DEBUG"
+            } else {
+                "INFO"
+            };
+            if severity != filter.as_str() {
+                self.tick += 1;
+                return;
+            }
+        }
+
+        // Track error count
+        if msg.starts_with("[ERROR]") {
+            self.error_count += 1;
+        }
+
+        self.stream.borrow_mut().append(msg);
         self.tick += 1;
         self.dirty = true;
     }
@@ -134,14 +196,30 @@ impl LiveFeedScene {
         let t = self.tick as f64;
         let cpu = 30.0 + 20.0 * (t * 0.1).sin() + 5.0 * (t * 0.3).sin();
         let mem = 45.0 + 10.0 * (t * 0.05).cos() + 3.0 * (t * 0.2).sin();
+        let net_in = 100.0 + 80.0 * (t * 0.2).sin() + 20.0 * (t * 0.5).sin();
+        let net_out = 80.0 + 60.0 * (t * 0.15).cos() + 15.0 * (t * 0.4).cos();
+        let latency = 10.0 + 5.0 * (t * 0.3).sin() + 2.0 * (t * 0.7).cos();
 
         self.cpu_data.push(cpu);
         self.mem_data.push(mem);
+        self.net_in_data.push(net_in);
+        self.net_out_data.push(net_out);
+        self.latency_data.push(latency);
+
         if self.cpu_data.len() > 60 {
             self.cpu_data.remove(0);
         }
         if self.mem_data.len() > 60 {
             self.mem_data.remove(0);
+        }
+        if self.net_in_data.len() > 60 {
+            self.net_in_data.remove(0);
+        }
+        if self.net_out_data.len() > 60 {
+            self.net_out_data.remove(0);
+        }
+        if self.latency_data.len() > 60 {
+            self.latency_data.remove(0);
         }
 
         self.sparkline_cpu
@@ -193,7 +271,7 @@ impl Scene for LiveFeedScene {
                 let stream_plane = self.stream.borrow().render(left);
                 blit_to(&mut plane, &stream_plane, left.x as usize, left.y as usize);
 
-                // Right panel: metrics overview
+                // Right panel: metrics overview with network metrics
                 draw_text(
                     &mut plane,
                     right.x + 1,
@@ -225,67 +303,117 @@ impl Scene for LiveFeedScene {
                     &mut plane,
                     right.x + 1,
                     right.y + 5,
+                    &format!(
+                        "Net In: {:.1} KB/s",
+                        self.net_in_data.last().unwrap_or(&0.0)
+                    ),
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text(
+                    &mut plane,
+                    right.x + 1,
+                    right.y + 6,
+                    &format!(
+                        "Net Out: {:.1} KB/s",
+                        self.net_out_data.last().unwrap_or(&0.0)
+                    ),
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text(
+                    &mut plane,
+                    right.x + 1,
+                    right.y + 7,
+                    &format!(
+                        "Latency: {:.1} ms",
+                        self.latency_data.last().unwrap_or(&0.0)
+                    ),
+                    t.fg,
+                    t.bg,
+                    false,
+                );
+                draw_text(
+                    &mut plane,
+                    right.x + 1,
+                    right.y + 8,
                     &format!("Lines: {}", self.tick),
                     t.fg_muted,
                     t.bg,
                     false,
                 );
+                // Severity filter indicator
+                if let Some(ref filter) = self.severity_filter {
+                    draw_text(
+                        &mut plane,
+                        right.x + 1,
+                        right.y + 10,
+                        &format!("Filter: {}", filter),
+                        t.warning,
+                        t.bg,
+                        true,
+                    );
+                }
 
                 // Mini sparklines
+                // Network In sparkline
                 draw_text(
                     &mut plane,
                     right.x + 1,
-                    right.y + 7,
-                    "CPU History",
+                    right.y + 20,
+                    "Net In",
                     t.primary,
                     t.bg,
                     true,
                 );
-                self.sparkline_cpu.borrow_mut().set_area(Rect::new(
+                self.sparkline_net_in.borrow_mut().set_area(Rect::new(
                     right.x + 1,
-                    right.y + 8,
+                    right.y + 21,
                     right.width.saturating_sub(2),
-                    6,
+                    4,
                 ));
-                let cpu_plane = self.sparkline_cpu.borrow().render(Rect::new(
+                let net_in_plane = self.sparkline_net_in.borrow().render(Rect::new(
                     0,
                     0,
                     right.width.saturating_sub(2),
-                    6,
+                    4,
                 ));
                 blit_to(
                     &mut plane,
-                    &cpu_plane,
+                    &net_in_plane,
                     (right.x + 1) as usize,
-                    (right.y + 8) as usize,
+                    (right.y + 21) as usize,
                 );
 
+                // Network Out sparkline
                 draw_text(
                     &mut plane,
                     right.x + 1,
-                    right.y + 15,
-                    "Memory History",
+                    right.y + 26,
+                    "Net Out",
                     t.primary,
                     t.bg,
                     true,
                 );
-                self.sparkline_mem.borrow_mut().set_area(Rect::new(
+                self.sparkline_net_out.borrow_mut().set_area(Rect::new(
                     right.x + 1,
-                    right.y + 16,
+                    right.y + 27,
                     right.width.saturating_sub(2),
-                    6,
+                    4,
                 ));
-                let mem_plane = self.sparkline_mem.borrow().render(Rect::new(
+                let net_out_plane = self.sparkline_net_out.borrow().render(Rect::new(
                     0,
                     0,
                     right.width.saturating_sub(2),
-                    6,
+                    4,
                 ));
                 blit_to(
                     &mut plane,
-                    &mem_plane,
+                    &net_out_plane,
                     (right.x + 1) as usize,
-                    (right.y + 16) as usize,
+                    (right.y + 27) as usize,
                 );
             }
             1 => {
@@ -471,6 +599,8 @@ impl Scene for LiveFeedScene {
                     ("Space", "Add log entry + update metrics"),
                     ("b", "Burst — emit 5 log entries rapidly"),
                     ("L", "Toggle live auto-tick mode"),
+                    ("F", "Cycle severity filter (INFO/WARN/ERROR/DEBUG)"),
+                    ("E", "Export logs to file"),
                     ("Left/Right", "Resize split pane"),
                     ("Click tab", "Switch tab"),
                     ("Drag divider", "Resize split pane"),
@@ -543,6 +673,25 @@ impl Scene for LiveFeedScene {
             KeyCode::Char('L') if key.modifiers.is_empty() => {
                 self.live_mode = !self.live_mode;
                 self.last_auto_tick.set(Instant::now());
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('F') if key.modifiers.is_empty() => {
+                // Cycle severity filter: None -> INFO -> WARN -> ERROR -> DEBUG -> None
+                self.severity_filter = match self.severity_filter.as_deref() {
+                    None => Some("INFO".to_string()),
+                    Some("INFO") => Some("WARN".to_string()),
+                    Some("WARN") => Some("ERROR".to_string()),
+                    Some("ERROR") => Some("DEBUG".to_string()),
+                    Some("DEBUG") => None,
+                    _ => None,
+                };
+                self.dirty = true;
+                true
+            }
+            KeyCode::Char('E') if key.modifiers.is_empty() => {
+                // Export logs to file
+                self.export_logs();
                 self.dirty = true;
                 true
             }
@@ -642,5 +791,28 @@ impl Scene for LiveFeedScene {
     }
     fn clear_dirty(&mut self) {
         self.dirty = false;
+    }
+}
+
+impl LiveFeedScene {
+    fn export_logs(&mut self) {
+        // Export current log entries to a file
+        let filename = format!("live_feed_export_{}.log", self.tick);
+        let binding = self.stream.borrow();
+        let content = binding.content();
+        match std::fs::write(&filename, content) {
+            Ok(_) => {
+                self.export_path = Some(filename.clone());
+                self.stream
+                    .borrow_mut()
+                    .append(&format!("[SYSTEM] Logs exported to {}", filename));
+            }
+            Err(e) => {
+                self.stream
+                    .borrow_mut()
+                    .append(&format!("[ERROR] Export failed: {}", e));
+            }
+        }
+        self.dirty = true;
     }
 }
