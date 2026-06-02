@@ -12,7 +12,7 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widgets::NotificationKind;
+use dracon_terminal_engine::framework::widgets::{NotificationKind, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -80,6 +80,7 @@ pub struct NotificationCenterScene {
 
     // Add notification bridge
     add_bridge: Rc<RefCell<Option<(String, String, NotificationKind)>>>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl NotificationCenterScene {
@@ -112,6 +113,13 @@ impl NotificationCenterScene {
             selected_idx: None,
             focused_side: 0,
             add_bridge: Rc::new(RefCell::new(None)),
+            status_bar: RefCell::new(
+                StatusBar::new(WidgetId::new(2009))
+                    .add_segment(StatusSegment::new(
+                        "SPACE:add | A:auto | C:clear | F:filter | F1:help | Esc:back",
+                    ))
+                    .with_theme(theme.clone()),
+            ),
         }
     }
 
