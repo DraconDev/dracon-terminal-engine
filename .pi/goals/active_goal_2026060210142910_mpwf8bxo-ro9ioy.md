@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 823681,
-    "activeSeconds": 9140
+    "tokensUsed": 846243,
+    "activeSeconds": 9781
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T09:14:29.100Z",
-  "updatedAt": "2026-06-02T11:48:23.862Z",
+  "updatedAt": "2026-06-02T11:59:07.743Z",
   "activePath": ".pi/goals/active_goal_2026060210142910_mpwf8bxo-ro9ioy.md"
 }
 
@@ -48,5 +48,5 @@ Let me read the current calendar_scene.rs to find the exact locations.]<]minimax
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 2h32m20s
-- Tokens used: 824K (823,681) tokens
+- Time spent: 2h43m01s
+- Tokens used: 846K (846,243) tokens
