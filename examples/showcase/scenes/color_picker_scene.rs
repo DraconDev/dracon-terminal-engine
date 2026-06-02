@@ -39,6 +39,11 @@ impl ColorPickerScene {
     pub fn new(theme: Theme) -> Self {
         let initial_color = Color::Rgb(88, 166, 255);
         let picker = ColorPicker::with_color(initial_color).with_theme(theme.clone());
+        let status_bar = StatusBar::new(WidgetId::new(2005))
+            .add_segment(StatusSegment::new(
+                "↑↓←→:adjust | Tab:cycle | Enter:copy | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
 
         Self {
             theme: theme.clone(),
@@ -54,6 +59,7 @@ impl ColorPickerScene {
                 Color::Rgb(208, 135, 112),
                 Color::Rgb(163, 190, 140),
             ]),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -587,6 +593,13 @@ impl Scene for ColorPickerScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -698,6 +711,7 @@ impl Scene for ColorPickerScene {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
         self.picker.borrow_mut().on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {

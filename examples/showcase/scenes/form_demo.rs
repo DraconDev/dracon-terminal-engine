@@ -11,12 +11,13 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, PasswordInput, SearchInput, Select, Toggle,
+    Button, PasswordInput, SearchInput, Select, Toggle, StatusBar, StatusSegment,
 };
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 
 const FIELD_USERNAME: usize = 0;
 const FIELD_EMAIL: usize = 1;
@@ -43,10 +44,16 @@ pub struct FormDemoScene {
     toast: Option<String>,
     area: std::cell::Cell<Rect>,
     keybindings: KeybindingSet,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl FormDemoScene {
     pub fn new(theme: Theme) -> Self {
+        let status_bar = StatusBar::new(WidgetId::new(2007))
+            .add_segment(StatusSegment::new(
+                "Tab:field | Enter:submit | r:reset | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             theme: theme.clone(),
             show_help: false,
@@ -73,6 +80,7 @@ impl FormDemoScene {
             toast: None,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -671,6 +679,13 @@ impl Scene for FormDemoScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -822,6 +837,7 @@ impl Scene for FormDemoScene {
         self.theme_select.on_theme_change(theme);
         self.notifications.on_theme_change(theme);
         self.submit.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 

@@ -3,7 +3,7 @@
 //! Demonstrates ConfirmDialog, Modal, and Toast with z-index layering.
 //! Rich settings panel base screen with dimmed backdrop when modals open.
 
-use crate::scenes::shared_helpers::draw_text;
+use crate::scenes::shared_helpers::{blit_to, draw_text};
 use dracon_terminal_engine::compositor::plane::{Color, Plane, Styles};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
@@ -12,6 +12,7 @@ use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
 use ratatui::layout::Rect;
+use std::cell::RefCell;
 
 struct SettingItem {
     label: &'static str,
@@ -91,10 +92,16 @@ pub struct ModalDemoScene {
     keybindings: KeybindingSet,
     tick: u64,
     selected_setting: usize,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl ModalDemoScene {
     pub fn new(theme: Theme) -> Self {
+        let status_bar = StatusBar::new(WidgetId::new(2008))
+            .add_segment(StatusSegment::new(
+                "c:confirm | t/w/e/s:toasts | ↑↓:nav | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             theme,
             show_help: false,
@@ -108,6 +115,7 @@ impl ModalDemoScene {
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             tick: 0,
             selected_setting: 0,
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -694,6 +702,13 @@ impl Scene for ModalDemoScene {
             }
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -844,6 +859,7 @@ impl Scene for ModalDemoScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 

@@ -9,11 +9,11 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::debug_overlay::DebugOverlay;
-use dracon_terminal_engine::framework::widgets::profiler::{Metric, Profiler};
+use dracon_terminal_engine::framework::widgets::{debug_overlay::DebugOverlay, profiler::{Metric, Profiler}, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::Cell;
+use std::cell::RefCell;
 
 const SIDEBAR_W: u16 = 22;
 const DIV_X: u16 = SIDEBAR_W + 2;
@@ -41,6 +41,7 @@ pub struct DebugOverlayScene {
     show_gauges: Cell<bool>,
     dirty: bool,
     area: Cell<Rect>,
+    status_bar: RefCell<StatusBar>,
 }
 
 struct GaugeBarConfig<'a> {
@@ -59,6 +60,12 @@ impl DebugOverlayScene {
 
         let profiler =
             std::cell::RefCell::new(Profiler::new(WidgetId::new(2)).with_theme(theme.clone()));
+
+        let status_bar = StatusBar::new(WidgetId::new(2006))
+            .add_segment(StatusSegment::new(
+                "SPACE:pause | 1/2/3:toggle | r:reset | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
 
         Self {
             theme,
@@ -81,6 +88,7 @@ impl DebugOverlayScene {
             show_gauges: Cell::new(true),
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -409,6 +417,13 @@ impl Scene for DebugOverlayScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -511,6 +526,7 @@ impl Scene for DebugOverlayScene {
         self.theme = theme.clone();
         self.debug_overlay.borrow_mut().on_theme_change(theme);
         self.profiler.borrow_mut().on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
