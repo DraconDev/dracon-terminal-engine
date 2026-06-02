@@ -9,7 +9,7 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::radio::Radio;
+use dracon_terminal_engine::framework::widgets::{radio::Radio, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -34,6 +34,7 @@ pub struct RadioScene {
     focused_group: usize, // 0=theme, 1=font, 2=layout
     dirty: bool,
     area: std::cell::Cell<Rect>,
+    status_bar: std::cell::RefCell<StatusBar>,
 }
 
 impl RadioScene {
@@ -69,6 +70,13 @@ impl RadioScene {
             focused_group: 0,
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: std::cell::RefCell::new(
+                StatusBar::new(WidgetId::new(2012))
+                    .add_segment(StatusSegment::new(
+                        "↑↓:select | Tab:group | 1/2/3:quick | F1:help | Esc:back",
+                    ))
+                    .with_theme(theme.clone()),
+            ),
         };
         scene.theme_options[0].select();
         scene.font_options[1].select();
@@ -417,6 +425,13 @@ impl Scene for RadioScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = ratatui::layout::Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -543,6 +558,7 @@ impl Scene for RadioScene {
         for radio in self.layout_options.iter_mut() {
             radio.on_theme_change(theme);
         }
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
