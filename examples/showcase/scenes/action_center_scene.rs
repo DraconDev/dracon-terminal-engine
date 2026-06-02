@@ -3,7 +3,6 @@
 //! Right-click for context menu, confirm before delete, toast notifications.
 //! All three interaction-pattern widgets working together in a realistic app.
 
-
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};

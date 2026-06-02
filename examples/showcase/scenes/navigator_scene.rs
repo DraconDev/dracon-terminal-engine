@@ -3,7 +3,6 @@
 //! A file explorer UI demonstrating breadcrumb navigation, menu bar with
 //! dropdowns, and interactive path traversal.
 
-
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -196,10 +195,6 @@ impl NavState {
         self.apply_search();
         self.selected = 0;
         self.scroll = 0;
-    }
-
-    fn visible_count(&self, total_height: u16) -> usize {
-        (total_height as usize).saturating_sub(8)
     }
 }
 

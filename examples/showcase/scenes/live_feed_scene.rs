@@ -4,7 +4,6 @@
 //! streaming text log, and sparkline metric charts. A realistic multi-panel
 //! dashboard layout.
 
-
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -122,7 +121,6 @@ impl LiveFeedScene {
             tick: 0,
             cpu_data,
             mem_data,
-            last_feed: Instant::now(),
             last_auto_tick: std::cell::Cell::new(Instant::now()),
             render_dirty: std::cell::Cell::new(false),
             live_mode: false,

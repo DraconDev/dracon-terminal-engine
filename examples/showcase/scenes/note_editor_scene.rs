@@ -3,7 +3,6 @@
 //! A note editor demonstrating the TextEditorAdapter widget with full
 //! editing, built-in context menu (right-click), and breadcrumb navigation.
 
-
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
@@ -26,7 +25,6 @@ pub struct NoteEditorScene {
     status_bar: RefCell<StatusBar>,
     show_help: bool,
     // File I/O
-    current_path: RefCell<Option<String>>,
     save_status: RefCell<Option<String>>,
     // Multi-file tabs
     tabs: RefCell<Vec<Tab>>,
@@ -44,17 +42,6 @@ impl Tab {
     fn new(name: &str) -> Self {
         let mut editor = TextEditor::new();
         editor.lines = vec![String::new()];
-        let adapter = TextEditorAdapter::new(WidgetId::new(0), editor);
-        Self {
-            name: name.to_string(),
-            adapter,
-            path: None,
-        }
-    }
-
-    fn from_content(name: &str, content: Vec<String>) -> Self {
-        let mut editor = TextEditor::new();
-        editor.lines = content;
         let adapter = TextEditorAdapter::new(WidgetId::new(0), editor);
         Self {
             name: name.to_string(),
@@ -121,7 +108,6 @@ impl NoteEditorScene {
             breadcrumbs: RefCell::new(breadcrumbs),
             status_bar: RefCell::new(status_bar),
             show_help: false,
-            current_path: RefCell::new(None),
             save_status: RefCell::new(None),
             tabs: RefCell::new(vec![
                 make_tab(
