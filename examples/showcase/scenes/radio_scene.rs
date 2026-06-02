@@ -57,6 +57,12 @@ impl RadioScene {
             Radio::new(WidgetId::new(9), "Spacious").with_theme(theme.clone()),
         ];
 
+        let status_bar = StatusBar::new(WidgetId::new(2012))
+            .add_segment(StatusSegment::new(
+                "↑↓:select | Tab:group | 1/2/3:quick | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
+
         let mut scene = Self {
             theme,
             show_help: false,
@@ -70,13 +76,7 @@ impl RadioScene {
             focused_group: 0,
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
-            status_bar: std::cell::RefCell::new(
-                StatusBar::new(WidgetId::new(2012))
-                    .add_segment(StatusSegment::new(
-                        "↑↓:select | Tab:group | 1/2/3:quick | F1:help | Esc:back",
-                    ))
-                    .with_theme(theme.clone()),
-            ),
+            status_bar: std::cell::RefCell::new(status_bar),
         };
         scene.theme_options[0].select();
         scene.font_options[1].select();

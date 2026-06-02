@@ -11,7 +11,7 @@ use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
-use dracon_terminal_engine::framework::widgets::tags_input::TagsInput;
+use dracon_terminal_engine::framework::widgets::{tags_input::TagsInput, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 
@@ -94,6 +94,7 @@ pub struct TagsInputScene {
     dirty: bool,
     area: std::cell::Cell<Rect>,
     hovered_tag: Option<usize>,
+    status_bar: std::cell::RefCell<StatusBar>,
 }
 
 impl TagsInputScene {
@@ -128,6 +129,12 @@ impl TagsInputScene {
             .on_tag_add(|_tag| {})
             .on_tag_remove(|_idx| {});
 
+        let status_bar = StatusBar::new(WidgetId::new(2014))
+            .add_segment(StatusSegment::new(
+                "Enter:add | Bksp:remove | ↑↓:suggest | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
+
         Self {
             theme: theme.clone(),
             show_help: false,
@@ -137,6 +144,7 @@ impl TagsInputScene {
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             hovered_tag: None,
+            status_bar: std::cell::RefCell::new(status_bar),
         }
     }
 
