@@ -343,6 +343,12 @@ impl TreeNavigatorScene {
         ];
         let breadcrumbs = Breadcrumbs::new(segments).with_theme(theme.clone());
 
+        let status_bar = StatusBar::new(WidgetId::new(2017))
+            .add_segment(StatusSegment::new(
+                "↑↓:navigate | Enter:expand | <:collapse | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
+
         Self {
             tree,
             breadcrumbs,
@@ -352,13 +358,7 @@ impl TreeNavigatorScene {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             dirty: true,
-            status_bar: std::cell::RefCell::new(
-                StatusBar::new(WidgetId::new(2017))
-                    .add_segment(StatusSegment::new(
-                        "↑↓:navigate | Enter:expand | <:collapse | F1:help | Esc:back",
-                    ))
-                    .with_theme(theme.clone()),
-            ),
+            status_bar: std::cell::RefCell::new(status_bar),
         }
     }
 }
@@ -560,6 +560,7 @@ impl Scene for TreeNavigatorScene {
         self.theme = theme.clone();
         self.tree.on_theme_change(theme);
         self.breadcrumbs.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
