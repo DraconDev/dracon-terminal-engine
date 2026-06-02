@@ -5,19 +5,20 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 335763,
-    "activeSeconds": 632
+    "tokensUsed": 346002,
+    "activeSeconds": 741
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:16:41.056Z",
+  "updatedAt": "2026-06-02T23:18:38.728Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
       {
         "id": "fix-hud-demo",
         "title": "Fix hud_demo scene - investigate and fix broken rendering/interaction",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:17:47.087Z",
         "verificationContract": "hud_demo renders correctly, keyboard/mouse interactions work, no visual glitches."
       },
       {
@@ -37,7 +38,8 @@
       {
         "id": "fix-git-tui",
         "title": "Fix git_tui example - investigate minimal/broken display",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:18:25.090Z",
         "verificationContract": "git_tui shows git status, navigation works, displays meaningful content."
       },
       {
@@ -85,15 +87,15 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 10m32s
-- Tokens used: 336K (335,763) tokens
+- Time spent: 12m21s
+- Tokens used: 346K (346,002) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
-- [ ] fix-hud-demo: Fix hud_demo scene - investigate and fix broken rendering/interaction — contract: hud_demo renders correctly, keyboard/mouse interactions work, no visual glitches.
+- [x] fix-hud-demo: Fix hud_demo scene - investigate and fix broken rendering/interaction
 - [x] fix-metrics-hub: Fix metrics_hub scene - fix bad click handling and interaction issues
 - [x] fix-dashboard-builder: Fix dashboard_builder example - investigate frozen/unresponsive behavior
-- [ ] fix-git-tui: Fix git_tui example - investigate minimal/broken display — contract: git_tui shows git status, navigation works, displays meaningful content.
+- [x] fix-git-tui: Fix git_tui example - investigate minimal/broken display
 - [ ] fix-ide: Fix ide example - fix typing/input not working — contract: ide allows typing in editor, keyboard shortcuts work, file operations function.
 - [ ] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling — contract: All scenes use keybindings.matches(actions::BACK) for ESC, no hardcoded KeyCode::Esc for back action.
 - [ ] fix-mouse-hover: Fix mouse hover zones not updating when content scrolls — contract: Hover zones update correctly after scrolling, clickable areas match visible content.
