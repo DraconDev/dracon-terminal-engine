@@ -12,7 +12,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::Widget;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::{PasswordInput, SearchInput};
+use dracon_terminal_engine::framework::widgets::{PasswordInput, SearchInput, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind,
 };
@@ -114,6 +114,7 @@ pub struct AccessibilityScene {
     // Real input widgets (wrapped in RefCell for render(&self) mutability)
     username_input: RefCell<SearchInput>,
     password_input: RefCell<PasswordInput>,
+    status_bar: RefCell<StatusBar>,
 }
 
 // Layout constants — form element vertical positions computed in render_form
@@ -127,6 +128,11 @@ impl AccessibilityScene {
             .with_theme(theme.clone())
             .with_mask_char('•')
             .with_placeholder("type here…");
+        let status_bar = StatusBar::new(WidgetId::new(2001))
+            .add_segment(StatusSegment::new(
+                "Tab:navigate | Enter:activate | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
 
         Self {
             theme,
@@ -141,6 +147,7 @@ impl AccessibilityScene {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             username_input: RefCell::new(username_input),
             password_input: RefCell::new(password_input),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
