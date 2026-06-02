@@ -48,10 +48,16 @@ pub struct TooltipScene {
     tooltip_history: Vec<TooltipEntry>,
     dirty: bool,
     area: std::cell::Cell<Rect>,
+    status_bar: std::cell::RefCell<StatusBar>,
 }
 
 impl TooltipScene {
     pub fn new(theme: Theme) -> Self {
+        let status_bar = StatusBar::new(WidgetId::new(2016))
+            .add_segment(StatusSegment::new(
+                "Hover:tooltip | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             theme,
             show_help: false,
@@ -60,6 +66,7 @@ impl TooltipScene {
             tooltip_history: Vec::new(),
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: std::cell::RefCell::new(status_bar),
         }
     }
 
@@ -747,6 +754,13 @@ impl Scene for TooltipScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = ratatui::layout::Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -798,6 +812,7 @@ impl Scene for TooltipScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
