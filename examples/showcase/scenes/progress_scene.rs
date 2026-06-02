@@ -77,6 +77,12 @@ impl ProgressScene {
 
         let spinner = RefCell::new(Spinner::new(WidgetId::new(2)).with_theme(theme.clone()));
 
+        let status_bar = StatusBar::new(WidgetId::new(2011))
+            .add_segment(StatusSegment::new(
+                "SPACE:toggle | r:reset | Click:jump | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
+
         Self {
             theme,
             show_help: false,
@@ -94,6 +100,7 @@ impl ProgressScene {
             ]),
             dirty: true,
             area: Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -534,6 +541,13 @@ impl Scene for ProgressScene {
                 ],
             );
         }
+
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         plane
     }
