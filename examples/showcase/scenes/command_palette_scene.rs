@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! IDE Lite scene — CommandPalette + MenuBar demonstration.
 //!
 //! Shows a miniature IDE-like interface with:

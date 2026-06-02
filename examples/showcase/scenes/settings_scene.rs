@@ -4,7 +4,6 @@
 //! showing configuration values. Users can fill in the form, validate,
 //! and see the config grid update.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

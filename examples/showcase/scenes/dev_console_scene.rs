@@ -3,7 +3,6 @@
 //! Shows a log viewer with filtered levels, an event logger tracking UI actions,
 //! styled labels, dividers for visual separation, and a widget inspector toggle.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

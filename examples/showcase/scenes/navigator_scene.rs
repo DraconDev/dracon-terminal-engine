@@ -3,7 +3,6 @@
 //! A file explorer UI demonstrating breadcrumb navigation, menu bar with
 //! dropdowns, and interactive path traversal.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

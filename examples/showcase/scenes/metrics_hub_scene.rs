@@ -3,7 +3,6 @@
 //! A system metrics dashboard with interactive sliders controlling gauges,
 //! spinning indicators, progress rings for circular metrics, and status badges.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, draw_text_clipped, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

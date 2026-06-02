@@ -3,7 +3,6 @@
 //! A note editor demonstrating the TextEditorAdapter widget with full
 //! editing, built-in context menu (right-click), and breadcrumb navigation.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

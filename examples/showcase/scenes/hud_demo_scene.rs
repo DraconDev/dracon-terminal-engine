@@ -4,7 +4,6 @@
 //! Demonstrates the HUD widget's render_text and render_gauge methods
 //! overlaid on a simulated game view.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;

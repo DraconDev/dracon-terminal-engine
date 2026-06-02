@@ -4,7 +4,6 @@
 //! streaming text log, and sparkline metric charts. A realistic multi-panel
 //! dashboard layout.
 
-#![allow(dead_code)]
 
 use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::Plane;
