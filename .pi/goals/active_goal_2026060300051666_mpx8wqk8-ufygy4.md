@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 296032,
-    "activeSeconds": 200
+    "tokensUsed": 298069,
+    "activeSeconds": 219
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:08:51.347Z",
+  "updatedAt": "2026-06-02T23:09:12.675Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
@@ -83,8 +83,8 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 3m20s
-- Tokens used: 296K (296,032) tokens
+- Time spent: 3m39s
+- Tokens used: 298K (298,069) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
