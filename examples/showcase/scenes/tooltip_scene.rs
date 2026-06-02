@@ -8,6 +8,7 @@ use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;
+use dracon_terminal_engine::framework::widgets::{StatusBar, StatusSegment};
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::input::event::{KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
