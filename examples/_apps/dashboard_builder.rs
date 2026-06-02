@@ -26,6 +26,8 @@ use dracon_terminal_engine::framework::widgets::SplitPane;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
 use std::collections::VecDeque;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::fs;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -376,6 +378,17 @@ impl Dashboard {
             .position(|t| t.name == theme.name)
             .unwrap_or(0);
         self.propagate_theme();
+    }
+
+    fn tick(&mut self) {
+        if self.paused {
+            return;
+        }
+        // Refresh data every second
+        if self.last_update.elapsed() >= Duration::from_secs(1) {
+            self.data.refresh();
+            self.last_update = Instant::now();
+        }
     }
 }
 
@@ -912,24 +925,82 @@ fn main() -> std::io::Result<()> {
     let should_quit = Arc::new(AtomicBool::new(false));
     let quit_check = Arc::clone(&should_quit);
 
+    let env_theme = Theme::from_env_or(Theme::nord());
+    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
+    let dashboard = Rc::new(RefCell::new(Dashboard::new(should_quit, keybindings, env_theme.clone())));
+    let dashboard_for_tick = Rc::clone(&dashboard);
+
     let mut app = App::new()?
         .title("Dashboard Builder")
         .fps(30)
         .tick_interval(1000)
-        .set_theme(Theme::from_env_or(Theme::nord()));
+        .set_theme(env_theme);
 
-    let env_theme = Theme::from_env_or(Theme::nord());
-    let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let dashboard = Dashboard::new(should_quit, keybindings, env_theme.clone());
-    app.add_widget(Box::new(dashboard), Rect::new(0, 0, 80, 24));
+    // Create a simple router widget that delegates to the dashboard
+    let router = DashboardRouter {
+        dashboard: Rc::clone(&dashboard),
+        id: WidgetId::new(1),
+        area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+    };
+    app.add_widget(Box::new(router), Rect::new(0, 0, 80, 24));
 
     app.on_tick(move |ctx, _| {
         if quit_check.load(Ordering::SeqCst) {
             ctx.stop();
+            return;
         }
+        // Refresh data periodically
+        dashboard_for_tick.borrow_mut().tick();
     })
     .run(|ctx| {
         let (w, h) = ctx.compositor().size();
         ctx.mark_dirty(0, 0, w, h);
     })
+}
+
+struct DashboardRouter {
+    dashboard: Rc<RefCell<Dashboard>>,
+    id: WidgetId,
+    area: std::cell::Cell<Rect>,
+}
+
+impl Widget for DashboardRouter {
+    fn id(&self) -> WidgetId {
+        self.id
+    }
+    fn set_id(&mut self, id: WidgetId) {
+        self.id = id;
+    }
+    fn area(&self) -> Rect {
+        self.area.get()
+    }
+    fn set_area(&mut self, area: Rect) {
+        self.area.set(area);
+    }
+    fn z_index(&self) -> u16 {
+        0
+    }
+    fn needs_render(&self) -> bool {
+        true
+    }
+    fn mark_dirty(&mut self) {}
+    fn clear_dirty(&mut self) {}
+    fn focusable(&self) -> bool {
+        true
+    }
+    fn render(&self, area: Rect) -> Plane {
+        self.dashboard.borrow().render(area)
+    }
+    fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
+        self.dashboard.borrow_mut().handle_key(key)
+    }
+    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+        self.dashboard.borrow_mut().handle_mouse(kind, col, row)
+    }
+    fn on_theme_change(&mut self, theme: &Theme) {
+        self.dashboard.borrow_mut().on_theme_change(theme);
+    }
+    fn current_theme(&self) -> Option<Theme> {
+        Some(self.dashboard.borrow().theme.clone())
+    }
 }
