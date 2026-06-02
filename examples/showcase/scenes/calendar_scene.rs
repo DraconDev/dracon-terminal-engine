@@ -564,6 +564,7 @@ impl Scene for CalendarScene {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
         self.calendar.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
