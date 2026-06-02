@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 326982,
-    "activeSeconds": 499
+    "tokensUsed": 334564,
+    "activeSeconds": 584
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:14:21.637Z",
+  "updatedAt": "2026-06-02T23:15:52.544Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
@@ -23,13 +23,15 @@
       {
         "id": "fix-metrics-hub",
         "title": "Fix metrics_hub scene - fix bad click handling and interaction issues",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:14:28.311Z",
         "verificationContract": "metrics_hub click handling works correctly, slider/gauge interactions respond properly."
       },
       {
         "id": "fix-dashboard-builder",
         "title": "Fix dashboard_builder example - investigate frozen/unresponsive behavior",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:14:33.890Z",
         "verificationContract": "dashboard_builder launches, renders widgets, responds to input, drag-and-drop works."
       },
       {
@@ -83,14 +85,14 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 8m19s
-- Tokens used: 327K (326,982) tokens
+- Time spent: 9m44s
+- Tokens used: 335K (334,564) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [ ] fix-hud-demo: Fix hud_demo scene - investigate and fix broken rendering/interaction — contract: hud_demo renders correctly, keyboard/mouse interactions work, no visual glitches.
-- [ ] fix-metrics-hub: Fix metrics_hub scene - fix bad click handling and interaction issues — contract: metrics_hub click handling works correctly, slider/gauge interactions respond properly.
-- [ ] fix-dashboard-builder: Fix dashboard_builder example - investigate frozen/unresponsive behavior — contract: dashboard_builder launches, renders widgets, responds to input, drag-and-drop works.
+- [x] fix-metrics-hub: Fix metrics_hub scene - fix bad click handling and interaction issues
+- [x] fix-dashboard-builder: Fix dashboard_builder example - investigate frozen/unresponsive behavior
 - [ ] fix-git-tui: Fix git_tui example - investigate minimal/broken display — contract: git_tui shows git status, navigation works, displays meaningful content.
 - [ ] fix-ide: Fix ide example - fix typing/input not working — contract: ide allows typing in editor, keyboard shortcuts work, file operations function.
 - [ ] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling — contract: All scenes use keybindings.matches(actions::BACK) for ESC, no hardcoded KeyCode::Esc for back action.
