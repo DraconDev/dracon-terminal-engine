@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 352772,
-    "activeSeconds": 830
+    "tokensUsed": 358685,
+    "activeSeconds": 914
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:20:17.138Z",
+  "updatedAt": "2026-06-02T23:21:48.160Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
@@ -59,13 +59,15 @@
       {
         "id": "fix-mouse-hover",
         "title": "Fix mouse hover zones not updating when content scrolls",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:20:30.962Z",
         "verificationContract": "Hover zones update correctly after scrolling, clickable areas match visible content."
       },
       {
         "id": "fix-arrow-nav",
         "title": "Fix arrow key navigation inconsistency - ensure predictable cursor/list movement",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:21:48.159Z",
         "verificationContract": "Arrow keys move selection predictably in lists, trees, and other navigable widgets."
       },
       {
@@ -89,8 +91,8 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 13m50s
-- Tokens used: 353K (352,772) tokens
+- Time spent: 15m14s
+- Tokens used: 359K (358,685) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -100,7 +102,7 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - [x] fix-git-tui: Fix git_tui example - investigate minimal/broken display
 - [x] fix-ide: Fix ide example - fix typing/input not working
 - [x] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling
-- [ ] fix-mouse-hover: Fix mouse hover zones not updating when content scrolls — contract: Hover zones update correctly after scrolling, clickable areas match visible content.
-- [ ] fix-arrow-nav: Fix arrow key navigation inconsistency - ensure predictable cursor/list movement — contract: Arrow keys move selection predictably in lists, trees, and other navigable widgets.
+- [x] fix-mouse-hover: Fix mouse hover zones not updating when content scrolls
+- [x] fix-arrow-nav: Fix arrow key navigation inconsistency - ensure predictable cursor/list movement
 - [ ] verify: Full verification: cargo check, cargo clippy, cargo test, manual testing of fixed scenes — contract: All compilation passes, no new warnings, all fixed scenes function correctly.
 
