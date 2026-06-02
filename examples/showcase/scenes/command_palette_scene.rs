@@ -23,88 +23,13 @@ use dracon_terminal_engine::input::event::{
 use ratatui::layout::Rect;
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::time::Instant;
 
 // ── Action types ────────────────────────────────────────────────────────────
-
-#[derive(Clone, Debug)]
-enum IdeAction {
-    NewFile,
-    OpenFile,
-    SaveFile,
-    CloseTab,
-    Undo,
-    Redo,
-    Cut,
-    Copy,
-    Paste,
-    Find,
-    ToggleSidebar,
-    ToggleMinimap,
-    ZoomIn,
-    ZoomOut,
-    ShowShortcuts,
-    About,
-}
-
-impl IdeAction {
-    fn label(&self) -> &'static str {
-        match self {
-            Self::NewFile => "New File",
-            Self::OpenFile => "Open File",
-            Self::SaveFile => "Save File",
-            Self::CloseTab => "Close Tab",
-            Self::Undo => "Undo",
-            Self::Redo => "Redo",
-            Self::Cut => "Cut",
-            Self::Copy => "Copy",
-            Self::Paste => "Paste",
-            Self::Find => "Find",
-            Self::ToggleSidebar => "Toggle Sidebar",
-            Self::ToggleMinimap => "Toggle Minimap",
-            Self::ZoomIn => "Zoom In",
-            Self::ZoomOut => "Zoom Out",
-            Self::ShowShortcuts => "Keyboard Shortcuts",
-            Self::About => "About Dracon IDE",
-        }
-    }
-
-    fn category(&self) -> &'static str {
-        match self {
-            Self::NewFile | Self::OpenFile | Self::SaveFile | Self::CloseTab => "file",
-            Self::Undo | Self::Redo | Self::Cut | Self::Copy | Self::Paste | Self::Find => "edit",
-            Self::ToggleSidebar | Self::ToggleMinimap | Self::ZoomIn | Self::ZoomOut => "view",
-            Self::ShowShortcuts | Self::About => "help",
-        }
-    }
-
-    fn shortcut(&self) -> &'static str {
-        match self {
-            Self::NewFile => "Ctrl+N",
-            Self::OpenFile => "Ctrl+O",
-            Self::SaveFile => "Ctrl+S",
-            Self::CloseTab => "Ctrl+W",
-            Self::Undo => "Ctrl+Z",
-            Self::Redo => "Ctrl+Shift+Z",
-            Self::Cut => "Ctrl+X",
-            Self::Copy => "Ctrl+C",
-            Self::Paste => "Ctrl+V",
-            Self::Find => "Ctrl+F",
-            Self::ToggleSidebar => "Ctrl+B",
-            Self::ToggleMinimap => "",
-            Self::ZoomIn => "Ctrl++",
-            Self::ZoomOut => "Ctrl+-",
-            Self::ShowShortcuts => "F1",
-            Self::About => "",
-        }
-    }
-}
 
 // ── Log entry ──────────────────────────────────────────────────────────────
 
 #[derive(Clone)]
 struct LogEntry {
-    time: Instant,
     action: String,
     category: String,
     shortcut: String,
@@ -370,7 +295,6 @@ impl CommandPaletteScene {
         }
 
         self.log.push(LogEntry {
-            time: Instant::now(),
             action: name.to_string(),
             category: cat.to_string(),
             shortcut: shortcut.to_string(),
