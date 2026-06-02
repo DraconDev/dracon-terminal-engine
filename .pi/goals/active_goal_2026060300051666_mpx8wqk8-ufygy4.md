@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 347436,
-    "activeSeconds": 756
+    "tokensUsed": 351569,
+    "activeSeconds": 820
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:18:56.250Z",
+  "updatedAt": "2026-06-02T23:20:06.773Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
@@ -45,13 +45,15 @@
       {
         "id": "fix-ide",
         "title": "Fix ide example - fix typing/input not working",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:19:08.901Z",
         "verificationContract": "ide allows typing in editor, keyboard shortcuts work, file operations function."
       },
       {
         "id": "fix-esc-consistency",
         "title": "Ensure all scenes use actions::BACK consistently for ESC key handling",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:19:23.156Z",
         "verificationContract": "All scenes use keybindings.matches(actions::BACK) for ESC, no hardcoded KeyCode::Esc for back action."
       },
       {
@@ -87,8 +89,8 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 12m36s
-- Tokens used: 347K (347,436) tokens
+- Time spent: 13m40s
+- Tokens used: 352K (351,569) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -96,8 +98,8 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - [x] fix-metrics-hub: Fix metrics_hub scene - fix bad click handling and interaction issues
 - [x] fix-dashboard-builder: Fix dashboard_builder example - investigate frozen/unresponsive behavior
 - [x] fix-git-tui: Fix git_tui example - investigate minimal/broken display
-- [ ] fix-ide: Fix ide example - fix typing/input not working — contract: ide allows typing in editor, keyboard shortcuts work, file operations function.
-- [ ] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling — contract: All scenes use keybindings.matches(actions::BACK) for ESC, no hardcoded KeyCode::Esc for back action.
+- [x] fix-ide: Fix ide example - fix typing/input not working
+- [x] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling
 - [ ] fix-mouse-hover: Fix mouse hover zones not updating when content scrolls — contract: Hover zones update correctly after scrolling, clickable areas match visible content.
 - [ ] fix-arrow-nav: Fix arrow key navigation inconsistency - ensure predictable cursor/list movement — contract: Arrow keys move selection predictably in lists, trees, and other navigable widgets.
 - [ ] verify: Full verification: cargo check, cargo clippy, cargo test, manual testing of fixed scenes — contract: All compilation passes, no new warnings, all fixed scenes function correctly.
