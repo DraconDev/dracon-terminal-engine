@@ -4,7 +4,7 @@
 //! sidebar menu items, status indicators, and action buttons.
 //! Includes tooltip history sidebar.
 
-use crate::scenes::shared_helpers::{draw_text, render_help_overlay};
+use crate::scenes::shared_helpers::{blit_to, draw_text, render_help_overlay};
 use dracon_terminal_engine::compositor::plane::{Color, Plane};
 use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybindings, KeybindingSet};
 use dracon_terminal_engine::framework::prelude::*;

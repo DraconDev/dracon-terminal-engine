@@ -576,6 +576,7 @@ impl Scene for TagsInputScene {
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
         self.tags_input.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {

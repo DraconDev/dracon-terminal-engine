@@ -14,7 +14,7 @@ use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::{Widget, WidgetId};
 use dracon_terminal_engine::framework::widgets::{
-    Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, Toggle,
+    Button, Checkbox, Gauge, ProgressBar, Radio, SearchInput, Slider, StatusBadge, Toggle, StatusBar, StatusSegment,
 };
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
@@ -44,10 +44,16 @@ pub struct ThemeSwitcherScene {
     badge: StatusBadge,
 
     keybindings: KeybindingSet,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl ThemeSwitcherScene {
     pub fn new(theme: Theme) -> Self {
+        let status_bar = StatusBar::new(WidgetId::new(2015))
+            .add_segment(StatusSegment::new(
+                "↑↓:navigate | Click:select | T:cycle | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             theme_index: 0,
             theme,
@@ -73,6 +79,7 @@ impl ThemeSwitcherScene {
             badge: StatusBadge::new(WidgetId::new(18)).with_status("Running"),
 
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -534,6 +541,13 @@ impl Scene for ThemeSwitcherScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -602,6 +616,7 @@ impl Scene for ThemeSwitcherScene {
         self.progress.on_theme_change(theme);
         self.search.on_theme_change(theme);
         self.badge.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
         self.dirty = true;
     }
 
