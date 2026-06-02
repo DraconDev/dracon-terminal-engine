@@ -208,10 +208,6 @@ impl ActionCenterScene {
         self.toasts.push(toast);
         self.dirty = true;
     }
-
-    fn expire_toasts(&mut self) {
-        self.toasts.retain(|t| !t.is_expired());
-    }
 }
 
 impl Scene for ActionCenterScene {
