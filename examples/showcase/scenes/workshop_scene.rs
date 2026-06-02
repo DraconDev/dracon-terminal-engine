@@ -746,6 +746,7 @@ impl Scene for WorkshopScene {
         self.progress_bar.borrow_mut().on_theme_change(theme);
         self.progress_ring.borrow_mut().on_theme_change(theme);
         self.spinner.borrow_mut().on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
