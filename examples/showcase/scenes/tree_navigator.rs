@@ -352,6 +352,13 @@ impl TreeNavigatorScene {
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
             dirty: true,
+            status_bar: std::cell::RefCell::new(
+                StatusBar::new(WidgetId::new(2017))
+                    .add_segment(StatusSegment::new(
+                        "↑↓:navigate | Enter:expand | <:collapse | F1:help | Esc:back",
+                    ))
+                    .with_theme(theme.clone()),
+            ),
         }
     }
 }
@@ -475,6 +482,13 @@ impl Scene for TreeNavigatorScene {
                 ],
             );
         }
+
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = ratatui::layout::Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
 
         plane
     }
