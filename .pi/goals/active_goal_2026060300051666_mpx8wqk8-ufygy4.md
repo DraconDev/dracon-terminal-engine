@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 358685,
-    "activeSeconds": 914
+    "tokensUsed": 359922,
+    "activeSeconds": 932
   },
   "sisyphus": false,
   "createdAt": "2026-06-02T23:05:16.664Z",
-  "updatedAt": "2026-06-02T23:21:48.160Z",
+  "updatedAt": "2026-06-02T23:22:07.265Z",
   "activePath": ".pi/goals/active_goal_2026060300051666_mpx8wqk8-ufygy4.md",
   "taskList": {
     "tasks": [
@@ -73,7 +73,8 @@
       {
         "id": "verify",
         "title": "Full verification: cargo check, cargo clippy, cargo test, manual testing of fixed scenes",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-02T23:22:07.264Z",
         "verificationContract": "All compilation passes, no new warnings, all fixed scenes function correctly."
       }
     ],
@@ -91,8 +92,8 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 15m14s
-- Tokens used: 359K (358,685) tokens
+- Time spent: 15m32s
+- Tokens used: 360K (359,922) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -104,5 +105,5 @@ Fix comprehensive showcase bugs: broken scenes (dashboard_builder, git_tui, ide,
 - [x] fix-esc-consistency: Ensure all scenes use actions::BACK consistently for ESC key handling
 - [x] fix-mouse-hover: Fix mouse hover zones not updating when content scrolls
 - [x] fix-arrow-nav: Fix arrow key navigation inconsistency - ensure predictable cursor/list movement
-- [ ] verify: Full verification: cargo check, cargo clippy, cargo test, manual testing of fixed scenes — contract: All compilation passes, no new warnings, all fixed scenes function correctly.
+- [x] verify: Full verification: cargo check, cargo clippy, cargo test, manual testing of fixed scenes
 
