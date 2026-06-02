@@ -107,9 +107,6 @@ impl LiveFeedScene {
             ))
             .with_theme(theme.clone());
 
-        let peak_cpu_init = cpu_data.last().copied().unwrap_or(0.0);
-        let peak_mem_init = mem_data.last().copied().unwrap_or(0.0);
-
         Self {
             theme,
             keybindings: KeybindingSet::from_config(&resolve_keybindings()),
