@@ -14,8 +14,7 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::password_input::PasswordInput;
-use dracon_terminal_engine::framework::widgets::search_input::SearchInput;
+use dracon_terminal_engine::framework::widgets::{password_input::PasswordInput, search_input::SearchInput, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{
     KeyCode, KeyEvent, KeyEventKind, MouseButton, MouseEventKind,
 };
@@ -66,6 +65,7 @@ pub struct PasswordInputScene {
     show_password: bool,
     dirty: bool,
     area: std::cell::Cell<Rect>,
+    status_bar: std::cell::RefCell<StatusBar>,
 }
 
 impl PasswordInputScene {
@@ -75,6 +75,12 @@ impl PasswordInputScene {
         let confirm_input = PasswordInput::new(WidgetId::new(3))
             .with_theme(theme.clone())
             .with_mask_char('●');
+
+        let status_bar = StatusBar::new(WidgetId::new(2010))
+            .add_segment(StatusSegment::new(
+                "Tab:field | Enter:submit | Ctrl+H:visibility | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
 
         Self {
             theme,
@@ -89,6 +95,7 @@ impl PasswordInputScene {
             show_password: false,
             dirty: true,
             area: std::cell::Cell::new(Rect::new(0, 0, 80, 24)),
+            status_bar: std::cell::RefCell::new(status_bar),
         }
     }
 
@@ -657,6 +664,13 @@ impl Scene for PasswordInputScene {
             );
         }
 
+        // Status bar
+        let sb_y = area.height.saturating_sub(1);
+        let sb_area = ratatui::layout::Rect::new(0, sb_y, area.width, 1);
+        self.status_bar.borrow_mut().set_area(sb_area);
+        let sb_plane = self.status_bar.borrow().render(sb_area);
+        blit_to(&mut plane, &sb_plane, 0, sb_y as usize);
+
         plane
     }
 
@@ -798,6 +812,7 @@ impl Scene for PasswordInputScene {
         self.username_input.on_theme_change(theme);
         self.password_input.on_theme_change(theme);
         self.confirm_input.on_theme_change(theme);
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {

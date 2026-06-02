@@ -10,9 +10,7 @@ use dracon_terminal_engine::framework::keybindings::{actions, resolve_keybinding
 use dracon_terminal_engine::framework::prelude::*;
 use dracon_terminal_engine::framework::scene_router::Scene;
 use dracon_terminal_engine::framework::widget::WidgetId;
-use dracon_terminal_engine::framework::widgets::progress_bar::ProgressBar;
-use dracon_terminal_engine::framework::widgets::progress_ring::ProgressRing;
-use dracon_terminal_engine::framework::widgets::spinner::Spinner;
+use dracon_terminal_engine::framework::widgets::{progress_bar::ProgressBar, progress_ring::ProgressRing, spinner::Spinner, StatusBar, StatusSegment};
 use dracon_terminal_engine::input::event::{KeyCode, KeyEvent, KeyEventKind, MouseEventKind};
 use ratatui::layout::Rect;
 use std::cell::{Cell, RefCell};
@@ -62,6 +60,7 @@ pub struct ProgressScene {
     op_log: RefCell<Vec<(String, String)>>,
     dirty: bool,
     area: Cell<Rect>,
+    status_bar: RefCell<StatusBar>,
 }
 
 impl ProgressScene {

@@ -85,6 +85,11 @@ pub struct NotificationCenterScene {
 
 impl NotificationCenterScene {
     pub fn new(theme: Theme) -> Self {
+        let status_bar = StatusBar::new(WidgetId::new(2009))
+            .add_segment(StatusSegment::new(
+                "SPACE:add | A:auto | C:clear | F:filter | F1:help | Esc:back",
+            ))
+            .with_theme(theme.clone());
         Self {
             theme,
             show_help: false,
@@ -113,13 +118,7 @@ impl NotificationCenterScene {
             selected_idx: None,
             focused_side: 0,
             add_bridge: Rc::new(RefCell::new(None)),
-            status_bar: RefCell::new(
-                StatusBar::new(WidgetId::new(2009))
-                    .add_segment(StatusSegment::new(
-                        "SPACE:add | A:auto | C:clear | F:filter | F1:help | Esc:back",
-                    ))
-                    .with_theme(theme.clone()),
-            ),
+            status_bar: RefCell::new(status_bar),
         }
     }
 
@@ -853,6 +852,7 @@ impl Scene for NotificationCenterScene {
 
     fn on_theme_change(&mut self, theme: &Theme) {
         self.theme = theme.clone();
+        self.status_bar.borrow_mut().on_theme_change(theme);
     }
 
     fn needs_render(&self) -> bool {
