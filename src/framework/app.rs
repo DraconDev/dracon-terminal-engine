@@ -832,10 +832,10 @@ impl App {
         #[cfg(feature = "tracing")]
         let _widget_span = tracing::debug_span!("widget_dispatch").entered();
         self.rebuild_z_order_cache();
-        let cache = self.z_order_cache.borrow().clone();
+        let cache = self.z_order_cache.borrow();
         let mut widgets = self.widgets.borrow_mut();
-        for id in cache {
-            let w = match widgets.iter_mut().find(|w| w.id() == id) {
+        for id in cache.iter() {
+            let w = match widgets.iter_mut().find(|w| w.id() == *id) {
                 Some(w) => w,
                 None => continue,
             };
