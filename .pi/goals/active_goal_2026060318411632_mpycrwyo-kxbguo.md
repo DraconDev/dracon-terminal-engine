@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 524575,
-    "activeSeconds": 151
+    "tokensUsed": 524811,
+    "activeSeconds": 191
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:43:49.034Z",
+  "updatedAt": "2026-06-03T17:44:29.816Z",
   "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
   "taskList": {
     "tasks": [
@@ -61,8 +61,8 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 2m31s
-- Tokens used: 525K (524,575) tokens
+- Time spent: 3m11s
+- Tokens used: 525K (524,811) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
