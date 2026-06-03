@@ -1661,7 +1661,7 @@ impl Showcase {
             return None;
         }
         let col_idx = rel_x / (card_w + 2);
-        let row_idx = rel_y / (card_h + 1);
+        let row_idx = rel_y / (card_h + 1) + self.scroll_offset.get();
         if col_idx >= cols {
             return None;
         }
