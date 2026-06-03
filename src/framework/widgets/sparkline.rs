@@ -98,6 +98,27 @@ impl Sparkline {
         self
     }
 
+    /// Enables or disables the exponential right-to-left color gradient.
+    /// When enabled, recent data points (right) are bright and older points (left) fade subtly.
+    pub fn with_gradient(mut self, enabled: bool) -> Self {
+        self.gradient_enabled = enabled;
+        self
+    }
+
+    /// Sets the minimum opacity for the oldest data point.
+    /// Range: 0.0 (invisible) to 1.0 (full color). Default: 0.15.
+    pub fn with_fade_opacity(mut self, opacity: f64) -> Self {
+        self.fade_opacity = opacity.clamp(0.0, 1.0);
+        self
+    }
+
+    /// Sets the exponential factor for the gradient curve.
+    /// Higher values make recent points stand out more sharply. Default: 2.0.
+    pub fn with_exponential_factor(mut self, factor: f64) -> Self {
+        self.exponential_factor = factor.max(0.5);
+        self
+    }
+
     /// Sets the data and recomputes the range.
     pub fn with_data(mut self, data: Vec<f64>) -> Self {
         let (min, max) = Self::compute_range(&data);
@@ -177,6 +198,19 @@ impl Sparkline {
         let normalized = (value - self.min_value) / range;
         let y = height.saturating_sub(1) - (normalized * (height - 1) as f64).round() as u16;
         y.min(height.saturating_sub(1))
+    }
+
+    /// Computes gradient opacity for a point at the given index.
+    /// Returns a value between `fade_opacity` and 1.0 using an exponential curve.
+    fn gradient_opacity(&self, index: usize, num_points: usize) -> f64 {
+        if !self.gradient_enabled || num_points <= 1 {
+            return 1.0;
+        }
+        // Position: 0.0 = oldest (left), 1.0 = newest (right)
+        let position = index as f64 / (num_points - 1) as f64;
+        // Exponential curve: recent points are bright, older fade
+        let curve = position.powf(self.exponential_factor);
+        self.fade_opacity + (1.0 - self.fade_opacity) * curve
     }
 }
 
