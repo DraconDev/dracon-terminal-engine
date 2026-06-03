@@ -1,8 +1,7 @@
 //! Deprecated layout utilities using the old `Component` trait.
 //!
 //! This module is only available with the `legacy` feature flag, as it depends
-//! on the deprecated [`Bounds`](crate::widgets::component::Bounds) and
-//! [`Component`](crate::widgets::component::Component) types scheduled for
+//! on the deprecated `Bounds` and `Component` types scheduled for
 //! removal in 0.2.0.
 //!
 //! It provides legacy layout helpers that predate the framework's

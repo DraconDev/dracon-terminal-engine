@@ -36,7 +36,7 @@
 //!
 //! ## Deprecated
 //!
-//! [`Component`](crate::widgets::component::Component) is deprecated.
+//! `Component` is deprecated.
 //! Use `crate::framework::widgets` equivalents instead.
 
 /// Button widget module
