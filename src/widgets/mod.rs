@@ -25,7 +25,7 @@
 //!
 //! ### `crate::framework::widgets` — Framework-integrated
 //!
-//! Widgets in `crate::framework::widgets` implement the [`Widget`] trait and are
+//! Widgets in `crate::framework::widgets` implement the [`Widget`](crate::framework::widget::Widget) trait and are
 //! fully integrated with the framework: theme propagation, mouse handling,
 //! hit zones, animations, focus management, and the event loop.
 //!
