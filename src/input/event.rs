@@ -2,12 +2,12 @@
 //!
 //! This module defines the event types that flow through the framework:
 //!
-//! - [`Event`] — Low-level input events from the terminal ([`Event::Key`], [`Event::Mouse`], etc.)
-//! - [`UiEvent`] — High-level UI events derived from input ([`UiEvent::Tick`], [`UiEvent::Resize`], etc.)
-//! - [`KeyCode`] — Keyboard key identifiers
-//! - [`KeyModifiers`] — Modifier key flags (Shift, Ctrl, Alt, etc.)
-//! - [`KeyEventKind`] — Key event types (Press, Repeat, Release)
-//! - [`MouseEvent`], [`MouseButton`], [`MouseEventKind`] — Mouse event types
+//! - [`Event`](crate::input::event::Event) — Low-level input events from the terminal ([`Event::Key`](crate::input::event::Event::Key), [`Event::Mouse`](crate::input::event::Event::Mouse), etc.)
+//! - [`UiEvent`](crate::input::event::UiEvent) — High-level UI events derived from input ([`UiEvent::Tick`](crate::input::event::UiEvent::Tick), [`UiEvent::Resize`](crate::input::event::UiEvent::Resize), etc.)
+//! - [`KeyCode`](crate::input::event::KeyCode) — Keyboard key identifiers
+//! - [`KeyModifiers`](crate::input::event::KeyModifiers) — Modifier key flags (Shift, Ctrl, Alt, etc.)
+//! - [`KeyEventKind`](crate::input::event::KeyEventKind) — Key event types (Press, Repeat, Release)
+//! - [`MouseEvent`](crate::input::event::MouseEvent), [`MouseButton`](crate::input::event::MouseButton), [`MouseEventKind`](crate::input::event::MouseEventKind) — Mouse event types
 
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
