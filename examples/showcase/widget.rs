@@ -277,6 +277,23 @@ impl Widget for Showcase {
                     set_cell(&mut plane, x + dx, palette_y, ch, fg, bg);
                 }
             }
+            // Show theme name on hover
+            if is_hovered {
+                let name_x = (x + square_w + 1).min(area.width as usize);
+                let name_text = &theme.name;
+                let name_w = name_text.len();
+                if name_x + name_w < area.width as usize {
+                    draw_text(
+                        &mut plane,
+                        name_x,
+                        palette_y,
+                        name_text,
+                        t.fg,
+                        t.surface_elevated,
+                        Styles::BOLD,
+                    );
+                }
+            }
             // Register zone for this palette swatch
             let mut zones = self.zones.borrow_mut();
             zones.register(
