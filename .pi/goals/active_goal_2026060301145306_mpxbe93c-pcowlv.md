@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 788439,
-    "activeSeconds": 1155
+    "tokensUsed": 788668,
+    "activeSeconds": 1170
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:34:47.722Z",
+  "updatedAt": "2026-06-03T00:35:03.309Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -38,7 +38,8 @@
       {
         "id": "audit-integration",
         "title": "Audit integration layer (ratatui compatibility) for bugs and missing features",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T00:35:03.307Z",
         "verificationContract": "Integration tests pass, ratatui compatibility verified."
       },
       {
@@ -92,15 +93,15 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 19m15s
-- Tokens used: 788K (788,439) tokens
+- Time spent: 19m30s
+- Tokens used: 789K (788,668) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] audit-framework: Audit framework core (widgets, scene router, app framework) for bugs, edge cases, and API consistency
 - [x] audit-compositor: Audit compositor + rendering pipeline for correctness, memory safety, and edge cases
 - [x] audit-input: Audit input system (key parsing, mouse events, kitty protocol) for correctness
-- [ ] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features — contract: Integration tests pass, ratatui compatibility verified.
+- [x] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features
 - [ ] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks — contract: Backend handles errors gracefully, no resource leaks, proper cleanup on exit.
 - [ ] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness — contract: Visual elements render correctly, OSC sequences properly formatted.
 - [ ] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy — contract: All public APIs have rustdoc, examples are up-to-date, no broken links.
