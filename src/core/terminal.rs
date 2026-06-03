@@ -2,9 +2,9 @@
 //!
 //! This module provides:
 //!
-//! - [`Terminal`] — RAII wrapper for terminal setup/teardown with raw mode
-//! - [`Capabilities`] — Detects terminal features from environment variables
-//! - [`CursorShape`] — Terminal cursor shape variants
+//! - [`Terminal`](self::Terminal) — RAII wrapper for terminal setup/teardown with raw mode
+//! - [`Capabilities`](self::Capabilities) — Detects terminal features from environment variables
+//! - [`CursorShape`](self::CursorShape) — Terminal cursor shape variants
 //! - Escape sequences for cursor movement, visibility, bracketed paste, mouse modes
 //!
 //! # Example
