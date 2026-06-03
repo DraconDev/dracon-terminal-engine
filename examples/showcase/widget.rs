@@ -141,7 +141,7 @@ impl Widget for Showcase {
         self.zones.borrow_mut().clear();
 
         // Title bar with decorative border
-        let title_text = " * Dracon Terminal Engine ";
+        let title_text = " Dracon Terminal Engine ";
         let title_x = 2usize;
         let title_y = 0usize;
 
