@@ -2,9 +2,9 @@
 //!
 //! This module provides:
 //!
-//! - [`Terminal`](self::Terminal) — RAII wrapper for terminal setup/teardown with raw mode
-//! - [`Capabilities`](self::Capabilities) — Detects terminal features from environment variables
-//! - [`CursorShape`](self::CursorShape) — Terminal cursor shape variants
+//! - [`Terminal`](crate::core::terminal::Terminal) — RAII wrapper for terminal setup/teardown with raw mode
+//! - [`Capabilities`](crate::core::terminal::Capabilities) — Detects terminal features from environment variables
+//! - [`CursorShape`](crate::core::terminal::CursorShape) — Terminal cursor shape variants
 //! - Escape sequences for cursor movement, visibility, bracketed paste, mouse modes
 //!
 //! # Example
