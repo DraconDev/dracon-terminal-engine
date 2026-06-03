@@ -1666,8 +1666,9 @@ impl Showcase {
             return None;
         }
         let x = grid_start_x + col_idx * (card_w + 2);
-        let y = grid_start_y + row_idx * (card_h + 1);
-        if x + card_w > area.width as usize || y + card_h > (area.height as usize).saturating_sub(2)
+        // Use the visual y position (accounting for scroll) for bounds check
+        let visual_y = grid_start_y + (row_idx - self.scroll_offset.get()) * (card_h + 1);
+        if x + card_w > area.width as usize || visual_y + card_h > (area.height as usize).saturating_sub(2)
         {
             return None;
         }
