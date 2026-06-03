@@ -7,8 +7,8 @@
 //! It provides legacy layout helpers that predate the framework's
 //! [`Widget`](crate::framework::widget::Widget) trait:
 //!
-//! - [`Stack`] — Flexbox-like container using the deprecated `Component` trait
-//! - [`centered_rect()`] — Create a centered rectangle for modals/popups
+//! - `Stack` — Flexbox-like container using the deprecated `Component` trait
+//! - `centered_rect()` — Create a centered rectangle for modals/popups
 //!
 //! # Migration: use `crate::framework::layout` instead
 //!
