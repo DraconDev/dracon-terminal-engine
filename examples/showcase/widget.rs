@@ -2150,7 +2150,7 @@ impl Showcase {
                             self.selected = next;
                         } else {
                             // Wrap to same column in first row
-                            self.selected = self.selected % cols;
+                            self.selected %= cols;
                             if self.selected >= self.filtered.len() {
                                 self.selected = 0;
                             }
