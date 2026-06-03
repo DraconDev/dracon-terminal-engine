@@ -3,7 +3,7 @@
 //! This module defines the core contracts and type invariants that
 //! the framework depends on:
 //!
-//! - [`UiResize`](self::UiResize) and [`UiEvent`](self::UiEvent) — UI event types
+//! - [`UiResize`](crate::contracts::UiResize) and [`UiEvent`](crate::contracts::UiEvent) — UI event types
 //! - Invariants on terminal state management
 //! - Thread safety requirements for widget callbacks
 //!
