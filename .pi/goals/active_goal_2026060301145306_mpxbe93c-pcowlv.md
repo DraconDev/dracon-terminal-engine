@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 1243274,
-    "activeSeconds": 3977
+    "tokensUsed": 1244631,
+    "activeSeconds": 4098
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T05:18:46.487Z",
+  "updatedAt": "2026-06-03T05:20:51.989Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -59,7 +59,8 @@
       {
         "id": "audit-docs",
         "title": "Audit documentation (rustdoc, examples, README) for completeness and accuracy",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T05:20:20.645Z",
         "verificationContract": "All public APIs have rustdoc, examples are up-to-date, no broken links."
       },
       {
@@ -95,8 +96,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1h06m17s
-- Tokens used: 1.2M (1,243,274) tokens
+- Time spent: 1h08m18s
+- Tokens used: 1.2M (1,244,631) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -106,7 +107,7 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - [x] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features
 - [x] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks
 - [x] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness
-- [ ] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy — contract: All public APIs have rustdoc, examples are up-to-date, no broken links.
+- [x] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy
 - [ ] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots — contract: Performance bottlenecks identified, unnecessary allocations removed.
 - [ ] fix-found: Fix all bugs and issues found during the audit — contract: All documented bugs fixed, no regressions, tests pass.
 - [ ] verify: Full verification: cargo check, cargo clippy, cargo test, cargo fmt, all example tests — contract: All 5 commands pass with 0 errors and 0 failures.

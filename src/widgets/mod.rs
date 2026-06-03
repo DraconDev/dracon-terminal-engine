@@ -16,12 +16,12 @@
 //! - You want tight control over the widget's internal state and rendering
 //!
 //! **Included widgets:**
-//! - [`TextEditor`](crate::widgets::editor::TextEditor) — Full code editor with syntax highlighting
-//! - [`TextInput`](crate::widgets::input::TextInput) — Text input field
+//! - [`TextEditor`] — Full code editor with syntax highlighting
+//! - [`TextInput`] — Text input field
 //! - [`Button`](crate::widgets::button::Button) — Standalone button
-//! - [`HotkeyHint`](crate::widgets::hotkey::HotkeyHint) — Keyboard shortcut display
-//! - [`Panel`](crate::widgets::panel::Panel) — Panel container
-//! - [`ContextMenuAction`](crate::widgets::context_menu::ContextMenuAction) — Context menu action
+//! - [`HotkeyHint`] — Keyboard shortcut display
+//! - [`Panel`] — Panel container
+//! - [`ContextMenuAction`] — Context menu action
 //!
 //! ### `crate::framework::widgets` — Framework-integrated
 //!
