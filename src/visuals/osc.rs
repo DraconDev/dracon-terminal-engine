@@ -2,10 +2,10 @@
 //!
 //! OSC sequences are escape codes that communicate with the terminal to:
 //!
-//! - [`copy_to_clipboard()`] — Copy text to system clipboard (OSC 52)
-//! - [`write_hyperlink()`] — Render clickable hyperlinks (OSC 8)
-//! - [`bell()`] — Trigger the system bell (BEL)
-//! - [`notify()`] — Send desktop notifications (OSC 777)
+//! - [`copy_to_clipboard()`](crate::visuals::osc::copy_to_clipboard) — Copy text to system clipboard (OSC 52)
+//! - [`write_hyperlink()`](crate::visuals::osc::write_hyperlink) — Render clickable hyperlinks (OSC 8)
+//! - [`bell()`](crate::visuals::osc::bell) — Trigger the system bell (BEL)
+//! - [`notify()`](crate::visuals::osc::notify) — Send desktop notifications (OSC 777)
 //!
 //! # Note
 //!
