@@ -2,9 +2,8 @@
 //!
 //! This module provides:
 //!
-//! - [`Icon`] enum — Icon types for files, folders, and UI elements
-//! - [`IconMode`] — Rendering mode (Nerd Font, emoji, ASCII, box-drawing)
-//! - [`render_icon()`] — Get icon string for a file category
+//! - [`Icon`](crate::visuals::icons::Icon) enum — Icon types for files, folders, and UI elements
+//! - [`IconMode`](crate::visuals::icons::IconMode) — Rendering mode (Nerd Font, emoji, ASCII, box-drawing)
 //!
 //! Icons are rendered based on file type detection and the selected icon mode.
 
