@@ -2124,37 +2124,67 @@ impl Showcase {
                     true
                 }
                 KeyCode::Down => {
-                    if self.selected + 1 < self.filtered.len() {
-                        self.selected += 1;
-                    } else if !self.filtered.is_empty() {
-                        self.selected = 0;
+                    // Move down one row (advance by cols)
+                    let cols = self.cols.get().max(1);
+                    if !self.filtered.is_empty() {
+                        let next = self.selected + cols;
+                        if next < self.filtered.len() {
+                            self.selected = next;
+                        } else {
+                            // Wrap to same column in first row
+                            self.selected = self.selected % cols;
+                            if self.selected >= self.filtered.len() {
+                                self.selected = 0;
+                            }
+                        }
                     }
                     self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Up => {
-                    if self.selected > 0 {
-                        self.selected -= 1;
-                    } else if !self.filtered.is_empty() {
-                        self.selected = self.filtered.len() - 1;
+                    // Move up one row (subtract cols)
+                    let cols = self.cols.get().max(1);
+                    if !self.filtered.is_empty() {
+                        if self.selected >= cols {
+                            self.selected -= cols;
+                        } else {
+                            // Wrap to same column in last row
+                            let total = self.filtered.len();
+                            let last_row_start = (total - 1) / cols * cols;
+                            self.selected = (last_row_start + self.selected % cols).min(total - 1);
+                        }
                     }
                     self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Right => {
+                    // Move right one card (advance by 1, wrapping at row end)
                     let cols = self.cols.get().max(1);
                     if !self.filtered.is_empty() {
-                        self.selected = (self.selected + cols) % self.filtered.len();
+                        let row_start = (self.selected / cols) * cols;
+                        let row_end = (row_start + cols).min(self.filtered.len());
+                        if self.selected + 1 < row_end {
+                            self.selected += 1;
+                        } else {
+                            // Wrap to start of same row
+                            self.selected = row_start;
+                        }
                     }
                     self.ensure_selected_visible();
                     true
                 }
                 KeyCode::Left => {
+                    // Move left one card (subtract 1, wrapping at row start)
                     let cols = self.cols.get().max(1);
                     if !self.filtered.is_empty() {
-                        self.selected = (self.selected + self.filtered.len()
-                            - cols % self.filtered.len())
-                            % self.filtered.len();
+                        let row_start = (self.selected / cols) * cols;
+                        if self.selected > row_start {
+                            self.selected -= 1;
+                        } else {
+                            // Wrap to end of same row
+                            let row_end = (row_start + cols).min(self.filtered.len());
+                            self.selected = row_end - 1;
+                        }
                     }
                     self.ensure_selected_visible();
                     true
