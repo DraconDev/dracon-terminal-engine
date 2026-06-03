@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 1246471,
-    "activeSeconds": 4232
+    "tokensUsed": 1246751,
+    "activeSeconds": 4272
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T05:23:09.076Z",
+  "updatedAt": "2026-06-03T05:23:49.356Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -66,7 +66,8 @@
       {
         "id": "audit-perf",
         "title": "Audit performance: identify hot paths, unnecessary clones, allocation hotspots",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T05:23:27.076Z",
         "verificationContract": "Performance bottlenecks identified, unnecessary allocations removed."
       },
       {
@@ -96,8 +97,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1h10m32s
-- Tokens used: 1.2M (1,246,471) tokens
+- Time spent: 1h11m12s
+- Tokens used: 1.2M (1,246,751) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -108,7 +109,7 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - [x] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks
 - [x] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness
 - [x] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy
-- [ ] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots — contract: Performance bottlenecks identified, unnecessary allocations removed.
+- [x] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots
 - [ ] fix-found: Fix all bugs and issues found during the audit — contract: All documented bugs fixed, no regressions, tests pass.
 - [ ] verify: Full verification: cargo check, cargo clippy, cargo test, cargo fmt, all example tests — contract: All 5 commands pass with 0 errors and 0 failures.
 
