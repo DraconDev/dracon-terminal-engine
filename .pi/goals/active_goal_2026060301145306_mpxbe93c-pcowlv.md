@@ -5,19 +5,20 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 730474,
-    "activeSeconds": 607
+    "tokensUsed": 760416,
+    "activeSeconds": 691
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:25:23.252Z",
+  "updatedAt": "2026-06-03T00:26:51.012Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
       {
         "id": "audit-framework",
         "title": "Audit framework core (widgets, scene router, app framework) for bugs, edge cases, and API consistency",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T00:26:36.586Z",
         "verificationContract": "All framework files reviewed, bugs documented and fixed, tests pass."
       },
       {
@@ -89,12 +90,12 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 10m07s
-- Tokens used: 730K (730,474) tokens
+- Time spent: 11m31s
+- Tokens used: 760K (760,416) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
-- [ ] audit-framework: Audit framework core (widgets, scene router, app framework) for bugs, edge cases, and API consistency — contract: All framework files reviewed, bugs documented and fixed, tests pass.
+- [x] audit-framework: Audit framework core (widgets, scene router, app framework) for bugs, edge cases, and API consistency
 - [ ] audit-compositor: Audit compositor + rendering pipeline for correctness, memory safety, and edge cases — contract: Compositor code reviewed, unsafe blocks audited, no panics on edge cases.
 - [ ] audit-input: Audit input system (key parsing, mouse events, kitty protocol) for correctness — contract: Input parsing handles all edge cases, no panics on malformed input.
 - [ ] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features — contract: Integration tests pass, ratatui compatibility verified.
