@@ -27,6 +27,14 @@ pub struct Sparkline {
     dirty: bool,
     hovered_point: Option<usize>,
     on_point_click: Option<PointClickCallback>,
+    /// Enable exponential right-to-left color gradient.
+    /// Recent data points (right) are bright, older points (left) fade subtly.
+    gradient_enabled: bool,
+    /// Minimum opacity for the oldest data point (0.0 = invisible, 1.0 = full).
+    fade_opacity: f64,
+    /// Exponential factor controlling fade curve.
+    /// Higher values make recent points stand out more sharply.
+    exponential_factor: f64,
 }
 
 impl Sparkline {
@@ -48,6 +56,9 @@ impl Sparkline {
             dirty: true,
             hovered_point: None,
             on_point_click: None,
+            gradient_enabled: true,
+            fade_opacity: 0.15,
+            exponential_factor: 2.0,
         }
     }
 
