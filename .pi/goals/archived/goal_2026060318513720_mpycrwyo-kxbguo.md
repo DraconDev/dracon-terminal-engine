@@ -2,7 +2,7 @@
   "version": 3,
   "id": "mpycrwyo-kxbguo",
   "objective": "Fix confusing UI elements in the main showcase page: title bar, theme palette labels, features bar icons, and category sidebar icons",
-  "status": "active",
+  "status": "complete",
   "autoContinue": true,
   "usage": {
     "tokensUsed": 529984,
@@ -10,8 +10,8 @@
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:46:19.301Z",
-  "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
+  "updatedAt": "2026-06-03T17:51:37.209Z",
+  "stopReason": "agent",
   "taskList": {
     "tasks": [
       {
@@ -52,7 +52,8 @@
     ],
     "blockCompletion": false,
     "proposedAt": "2026-06-03T17:41:16.322Z"
-  }
+  },
+  "archivedPath": ".pi/goals/archived/goal_2026060318513720_mpycrwyo-kxbguo.md"
 }
 
 # Goal Prompt
@@ -61,7 +62,7 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 
 ## Progress
 
-- Status: running
+- Status: complete
 - Auto-continue: on
 - Sisyphus mode: no
 - Time spent: 4m54s
