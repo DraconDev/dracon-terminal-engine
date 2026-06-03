@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 789823,
-    "activeSeconds": 1212
+    "tokensUsed": 790001,
+    "activeSeconds": 1228
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:35:47.324Z",
+  "updatedAt": "2026-06-03T00:36:03.567Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -45,7 +45,8 @@
       {
         "id": "audit-backend",
         "title": "Audit backend (terminal I/O, tty) for error handling and resource leaks",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T00:36:03.566Z",
         "verificationContract": "Backend handles errors gracefully, no resource leaks, proper cleanup on exit."
       },
       {
@@ -93,8 +94,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 20m12s
-- Tokens used: 790K (789,823) tokens
+- Time spent: 20m28s
+- Tokens used: 790K (790,001) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -102,7 +103,7 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - [x] audit-compositor: Audit compositor + rendering pipeline for correctness, memory safety, and edge cases
 - [x] audit-input: Audit input system (key parsing, mouse events, kitty protocol) for correctness
 - [x] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features
-- [ ] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks — contract: Backend handles errors gracefully, no resource leaks, proper cleanup on exit.
+- [x] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks
 - [ ] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness — contract: Visual elements render correctly, OSC sequences properly formatted.
 - [ ] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy — contract: All public APIs have rustdoc, examples are up-to-date, no broken links.
 - [ ] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots — contract: Performance bottlenecks identified, unnecessary allocations removed.
