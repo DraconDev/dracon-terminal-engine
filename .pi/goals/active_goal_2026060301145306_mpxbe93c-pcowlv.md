@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 1246751,
-    "activeSeconds": 4272
+    "tokensUsed": 1247820,
+    "activeSeconds": 4395
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T05:23:49.356Z",
+  "updatedAt": "2026-06-03T05:25:55.990Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -73,7 +73,8 @@
       {
         "id": "fix-found",
         "title": "Fix all bugs and issues found during the audit",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T05:25:55.987Z",
         "verificationContract": "All documented bugs fixed, no regressions, tests pass."
       },
       {
@@ -97,8 +98,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1h11m12s
-- Tokens used: 1.2M (1,246,751) tokens
+- Time spent: 1h13m15s
+- Tokens used: 1.2M (1,247,820) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -110,6 +111,6 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - [x] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness
 - [x] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy
 - [x] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots
-- [ ] fix-found: Fix all bugs and issues found during the audit — contract: All documented bugs fixed, no regressions, tests pass.
+- [x] fix-found: Fix all bugs and issues found during the audit
 - [ ] verify: Full verification: cargo check, cargo clippy, cargo test, cargo fmt, all example tests — contract: All 5 commands pass with 0 errors and 0 failures.
 

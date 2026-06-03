@@ -114,7 +114,7 @@ impl<W: io::Write + std::os::fd::AsFd> Backend for RatatuiBackend<W> {
 
     fn clear(&mut self) -> io::Result<()> {
         self.compositor.force_clear();
-        write!(self.inner, "\x1b[48;2;0;0;0m\x1b[2J")
+        write!(self.inner, "\x1b[2J")
     }
 
     fn size(&self) -> io::Result<Size> {
