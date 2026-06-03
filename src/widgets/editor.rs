@@ -6,7 +6,7 @@
 //! - **Text editing**: Insert, delete, cut, copy, paste operations
 //! - **Navigation**: Arrow keys, Page Up/Down, Home/End
 //! - **Selection**: Mouse selection, Shift+arrow, Ctrl+A
-//! - **Search**: Find, filter, goto line (see [`SearchState`])
+//! - **Search**: Find, filter, goto line (see [`SearchState`](crate::widgets::editor_search::SearchState))
 //! - **Syntax highlighting**: Via `syntect` crate (behind `syntax-highlighting` feature)
 //! - **Line numbers**: Optional line number gutter
 //! - **Undo/Redo**: Full edit history
