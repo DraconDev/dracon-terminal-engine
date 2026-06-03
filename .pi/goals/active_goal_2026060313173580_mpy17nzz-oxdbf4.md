@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 476143,
-    "activeSeconds": 187
+    "tokensUsed": 476768,
+    "activeSeconds": 201
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T12:17:35.807Z",
-  "updatedAt": "2026-06-03T12:20:47.974Z",
+  "updatedAt": "2026-06-03T12:21:03.314Z",
   "activePath": ".pi/goals/active_goal_2026060313173580_mpy17nzz-oxdbf4.md",
   "taskList": {
     "tasks": [
@@ -24,13 +24,15 @@
       {
         "id": "add-gradient-config",
         "title": "Add builder methods for gradient configuration (enable/disable, fade intensity, exponential factor)",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T12:20:55.396Z",
         "verificationContract": "New methods: with_gradient(bool), with_fade_opacity(f64), with_exponential_factor(f64). Defaults: enabled, 0.15 min opacity, 2.0 exponential factor."
       },
       {
         "id": "verify-compile",
         "title": "Verify: cargo check, cargo clippy, cargo test",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T12:21:03.313Z",
         "verificationContract": "All pass with 0 errors and 0 warnings."
       }
     ],
@@ -48,12 +50,12 @@ Add exponential right-to-left color gradient to Sparkline widget so recent data 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 3m07s
-- Tokens used: 476K (476,143) tokens
+- Time spent: 3m21s
+- Tokens used: 477K (476,768) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] add-gradient-rendering: Implement exponential color gradient in Sparkline render() method — right side bright, left side fades to subtle
-- [ ] add-gradient-config: Add builder methods for gradient configuration (enable/disable, fade intensity, exponential factor) — contract: New methods: with_gradient(bool), with_fade_opacity(f64), with_exponential_factor(f64). Defaults: enabled, 0.15 min opacity, 2.0 exponential factor.
-- [ ] verify-compile: Verify: cargo check, cargo clippy, cargo test — contract: All pass with 0 errors and 0 warnings.
+- [x] add-gradient-config: Add builder methods for gradient configuration (enable/disable, fade intensity, exponential factor)
+- [x] verify-compile: Verify: cargo check, cargo clippy, cargo test
 
