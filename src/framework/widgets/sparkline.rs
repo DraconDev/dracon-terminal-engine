@@ -212,6 +212,42 @@ impl Sparkline {
         let curve = position.powf(self.exponential_factor);
         self.fade_opacity + (1.0 - self.fade_opacity) * curve
     }
+
+    /// Blends two colors based on an opacity factor.
+    /// Returns a color that is `opacity` of `fg` mixed with `(1-opacity)` of `bg`.
+    fn blend_color(fg: Color, bg: Color, opacity: f64) -> Color {
+        match (fg, bg) {
+            (Color::Rgb(r1, g1, b1), Color::Rgb(r2, g2, b2)) => {
+                let r = (r2 as f64 + (r1 as f64 - r2 as f64) * opacity) as u8;
+                let g = (g2 as f64 + (g1 as f64 - g2 as f64) * opacity) as u8;
+                let b = (b2 as f64 + (b1 as f64 - b2 as f64) * opacity) as u8;
+                Color::Rgb(r, g, b)
+            }
+            (Color::Rgb(r, g, b), _) => {
+                // Blend RGB with a dimmed version for non-RGB backgrounds
+                let factor = opacity;
+                Color::Rgb(
+                    (r as f64 * factor) as u8,
+                    (g as f64 * factor) as u8,
+                    (b as f64 * factor) as u8,
+                )
+            }
+            (_, Color::Rgb(r, g, b)) => {
+                // Blend non-RGB foreground with RGB background
+                let factor = opacity;
+                Color::Rgb(
+                    (r as f64 * (1.0 - factor)) as u8,
+                    (g as f64 * (1.0 - factor)) as u8,
+                    (b as f64 * (1.0 - factor)) as u8,
+                )
+            }
+            _ => {
+                // Both non-RGB: use ANSI 256 color approximation
+                // For simplicity, just return the foreground with dimmed effect
+                fg
+            }
+        }
+    }
 }
 
 impl crate::framework::widget::Widget for Sparkline {
@@ -316,6 +352,7 @@ impl crate::framework::widget::Widget for Sparkline {
             for i in 0..points.len().saturating_sub(1) {
                 let (x1, y1) = points[i];
                 let (x2, y2) = points[i + 1];
+                let opacity = self.gradient_opacity(i, num_points);
 
                 let start_x = x1.min(x2);
                 let end_x = x1.max(x2);
@@ -333,16 +370,23 @@ impl crate::framework::widget::Widget for Sparkline {
                         if idx < plane.cells.len() {
                             plane.cells[idx].bg = fill;
                             plane.cells[idx].transparent = false;
+                            // Apply opacity by blending fill with background
+                            if opacity < 1.0 {
+                                let blended = Self::blend_color(fill, self.theme.bg, opacity);
+                                plane.cells[idx].bg = blended;
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Draw line segments
+        // Draw line segments with gradient
         for i in 0..points.len().saturating_sub(1) {
             let (x1, y1) = points[i];
             let (x2, y2) = points[i + 1];
+            let opacity = self.gradient_opacity(i, num_points);
+            let line_color = Self::blend_color(self.color, self.theme.bg, opacity);
 
             // Draw line using Bresenham's algorithm
             let dx = (x2 as i32 - x1 as i32).abs();
@@ -359,7 +403,7 @@ impl crate::framework::widget::Widget for Sparkline {
                     let idx = (y as u16 * area.width + x as u16) as usize;
                     if idx < plane.cells.len() {
                         plane.cells[idx].char = '●';
-                        plane.cells[idx].fg = self.color;
+                        plane.cells[idx].fg = line_color;
                         plane.cells[idx].bg = self.theme.bg;
                     }
                 }
@@ -384,10 +428,12 @@ impl crate::framework::widget::Widget for Sparkline {
         if self.show_dots {
             for (i, &(x, y)) in points.iter().enumerate() {
                 let is_hovered = self.hovered_point == Some(i);
+                let opacity = self.gradient_opacity(i, num_points);
+                let dot_color = Self::blend_color(self.color, self.theme.bg, opacity);
                 let idx = (y * area.width + x) as usize;
                 if idx < plane.cells.len() {
                     plane.cells[idx].char = '◉';
-                    plane.cells[idx].fg = self.color;
+                    plane.cells[idx].fg = dot_color;
                     plane.cells[idx].style = if is_hovered {
                         Styles::BOLD
                     } else {

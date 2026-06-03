@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 467337,
-    "activeSeconds": 87
+    "tokensUsed": 472759,
+    "activeSeconds": 120
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T12:17:35.807Z",
-  "updatedAt": "2026-06-03T12:19:04.173Z",
+  "updatedAt": "2026-06-03T12:19:37.875Z",
   "activePath": ".pi/goals/active_goal_2026060313173580_mpy17nzz-oxdbf4.md",
   "taskList": {
     "tasks": [
@@ -47,8 +47,8 @@ Add exponential right-to-left color gradient to Sparkline widget so recent data 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1m27s
-- Tokens used: 467K (467,337) tokens
+- Time spent: 2m00s
+- Tokens used: 473K (472,759) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
