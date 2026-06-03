@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 6478,
-    "activeSeconds": 0
+    "tokensUsed": 483414,
+    "activeSeconds": 51
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T14:07:46.134Z",
-  "updatedAt": "2026-06-03T14:07:46.138Z",
+  "updatedAt": "2026-06-03T14:08:37.946Z",
   "activePath": ".pi/goals/active_goal_2026060315074613_mpy55ck6-rznuik.md",
   "taskList": {
     "tasks": [
@@ -41,8 +41,8 @@ Fix showcase keyboard navigation to follow intuitive grid direction: Up/Down mov
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 0s
-- Tokens used: 6.5K (6,478) tokens
+- Time spent: 51s
+- Tokens used: 483K (483,414) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
