@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 767858,
-    "activeSeconds": 906
+    "tokensUsed": 768602,
+    "activeSeconds": 958
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:30:32.463Z",
+  "updatedAt": "2026-06-03T00:31:25.797Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -24,7 +24,8 @@
       {
         "id": "audit-compositor",
         "title": "Audit compositor + rendering pipeline for correctness, memory safety, and edge cases",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T00:31:25.795Z",
         "verificationContract": "Compositor code reviewed, unsafe blocks audited, no panics on edge cases."
       },
       {
@@ -90,13 +91,13 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 15m06s
-- Tokens used: 768K (767,858) tokens
+- Time spent: 15m58s
+- Tokens used: 769K (768,602) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] audit-framework: Audit framework core (widgets, scene router, app framework) for bugs, edge cases, and API consistency
-- [ ] audit-compositor: Audit compositor + rendering pipeline for correctness, memory safety, and edge cases — contract: Compositor code reviewed, unsafe blocks audited, no panics on edge cases.
+- [x] audit-compositor: Audit compositor + rendering pipeline for correctness, memory safety, and edge cases
 - [ ] audit-input: Audit input system (key parsing, mouse events, kitty protocol) for correctness — contract: Input parsing handles all edge cases, no panics on malformed input.
 - [ ] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features — contract: Integration tests pass, ratatui compatibility verified.
 - [ ] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks — contract: Backend handles errors gracefully, no resource leaks, proper cleanup on exit.
