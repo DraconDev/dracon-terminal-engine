@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 526446,
-    "activeSeconds": 215
+    "tokensUsed": 527986,
+    "activeSeconds": 234
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:44:55.387Z",
+  "updatedAt": "2026-06-03T17:45:14.882Z",
   "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
   "taskList": {
     "tasks": [
@@ -38,7 +38,8 @@
       {
         "id": "fix-category-icons",
         "title": "Replace cryptic category sidebar icons with intuitive labels",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T17:45:14.881Z",
         "verificationContract": "Categories show clear labels: 'All', 'Apps', 'Input', 'Data', 'Cookbook', 'Tools', 'Accessibility'. No cryptic single-char icons."
       },
       {
@@ -62,14 +63,14 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 3m35s
-- Tokens used: 526K (526,446) tokens
+- Time spent: 3m54s
+- Tokens used: 528K (527,986) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] fix-title-bar: Remove confusing asterisk from title bar text
 - [x] fix-theme-palette: Add theme name labels to theme palette swatches
 - [x] fix-features-bar: Replace cryptic feature bar icons with readable labels
-- [ ] fix-category-icons: Replace cryptic category sidebar icons with intuitive labels — contract: Categories show clear labels: 'All', 'Apps', 'Input', 'Data', 'Cookbook', 'Tools', 'Accessibility'. No cryptic single-char icons.
+- [x] fix-category-icons: Replace cryptic category sidebar icons with intuitive labels
 - [ ] verify: Verify: cargo check, cargo clippy, cargo test — contract: All verification commands pass with 0 errors and 0 failures.
 

@@ -579,13 +579,13 @@ impl Widget for Showcase {
                 (t.fg_muted, t.bg)
             };
             let (icon, label) = match *cat {
-                "all" => ("*", " ALL "),
+                "all" => (">>", " ALL "),
                 "apps" => ("#", " APPS "),
-                "input" => ("=", " INPUT "),
-                "data" => ("d", " DATA "),
-                "cookbook" => ("o", " COOK "),
-                "tools" => ("-", " TOOLS "),
-                "accessibility" => ("+", " A11Y "),
+                "input" => (">", " INPUT "),
+                "data" => ("|", " DATA "),
+                "cookbook" => ("*", " COOK "),
+                "tools" => (">>", " TOOLS "),
+                "accessibility" => ("@", " A11Y "),
                 _ => (".", *cat),
             };
             let icon_fg = if is_hovered || is_active {
