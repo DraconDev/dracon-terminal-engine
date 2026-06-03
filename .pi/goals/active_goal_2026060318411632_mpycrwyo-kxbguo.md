@@ -5,19 +5,20 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 522079,
-    "activeSeconds": 97
+    "tokensUsed": 522768,
+    "activeSeconds": 119
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:42:53.760Z",
+  "updatedAt": "2026-06-03T17:43:16.560Z",
   "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
   "taskList": {
     "tasks": [
       {
         "id": "fix-title-bar",
         "title": "Remove confusing asterisk from title bar text",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T17:43:02.216Z",
         "verificationContract": "Title bar shows 'Dracon Terminal Engine' without asterisk. Visual verification."
       },
       {
@@ -59,12 +60,12 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1m37s
-- Tokens used: 522K (522,079) tokens
+- Time spent: 1m59s
+- Tokens used: 523K (522,768) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
-- [ ] fix-title-bar: Remove confusing asterisk from title bar text — contract: Title bar shows 'Dracon Terminal Engine' without asterisk. Visual verification.
+- [x] fix-title-bar: Remove confusing asterisk from title bar text
 - [ ] fix-theme-palette: Add theme name labels to theme palette swatches — contract: Each theme swatch shows its name on hover or as a tooltip. Users can identify themes without guessing colors.
 - [ ] fix-features-bar: Replace cryptic feature bar icons with readable labels — contract: Features bar shows '43 Widgets' not just '43', 'Drag & Drop' not 'DnD', etc. All 6 features have clear readable labels.
 - [ ] fix-category-icons: Replace cryptic category sidebar icons with intuitive labels — contract: Categories show clear labels: 'All', 'Apps', 'Input', 'Data', 'Cookbook', 'Tools', 'Accessibility'. No cryptic single-char icons.
