@@ -25,10 +25,10 @@ use dracon_terminal_engine::framework::widgets::split::Orientation;
 use dracon_terminal_engine::framework::widgets::SplitPane;
 use dracon_terminal_engine::input::event::{KeyCode, KeyEventKind, MouseButton, MouseEventKind};
 use ratatui::layout::Rect;
-use std::collections::VecDeque;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::collections::VecDeque;
 use std::fs;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -927,7 +927,11 @@ fn main() -> std::io::Result<()> {
 
     let env_theme = Theme::from_env_or(Theme::nord());
     let keybindings = KeybindingSet::from_config(&resolve_keybindings());
-    let dashboard = Rc::new(RefCell::new(Dashboard::new(should_quit, keybindings, env_theme.clone())));
+    let dashboard = Rc::new(RefCell::new(Dashboard::new(
+        should_quit,
+        keybindings,
+        env_theme.clone(),
+    )));
     let dashboard_for_tick = Rc::clone(&dashboard);
 
     let mut app = App::new()?
@@ -994,7 +998,12 @@ impl Widget for DashboardRouter {
     fn handle_key(&mut self, key: dracon_terminal_engine::input::event::KeyEvent) -> bool {
         self.dashboard.borrow_mut().handle_key(key)
     }
-    fn handle_mouse(&mut self, kind: dracon_terminal_engine::input::event::MouseEventKind, col: u16, row: u16) -> bool {
+    fn handle_mouse(
+        &mut self,
+        kind: dracon_terminal_engine::input::event::MouseEventKind,
+        col: u16,
+        row: u16,
+    ) -> bool {
         self.dashboard.borrow_mut().handle_mouse(kind, col, row)
     }
     fn on_theme_change(&mut self, theme: &Theme) {
