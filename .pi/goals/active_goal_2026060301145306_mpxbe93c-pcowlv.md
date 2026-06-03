@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 792107,
-    "activeSeconds": 1315
+    "tokensUsed": 792595,
+    "activeSeconds": 1330
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:37:34.042Z",
+  "updatedAt": "2026-06-03T00:37:49.177Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -52,7 +52,8 @@
       {
         "id": "audit-visuals",
         "title": "Audit visuals (icons, OSC sequences, sync) for correctness",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T00:37:49.175Z",
         "verificationContract": "Visual elements render correctly, OSC sequences properly formatted."
       },
       {
@@ -94,8 +95,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 21m55s
-- Tokens used: 792K (792,107) tokens
+- Time spent: 22m10s
+- Tokens used: 793K (792,595) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
@@ -104,7 +105,7 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - [x] audit-input: Audit input system (key parsing, mouse events, kitty protocol) for correctness
 - [x] audit-integration: Audit integration layer (ratatui compatibility) for bugs and missing features
 - [x] audit-backend: Audit backend (terminal I/O, tty) for error handling and resource leaks
-- [ ] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness — contract: Visual elements render correctly, OSC sequences properly formatted.
+- [x] audit-visuals: Audit visuals (icons, OSC sequences, sync) for correctness
 - [ ] audit-docs: Audit documentation (rustdoc, examples, README) for completeness and accuracy — contract: All public APIs have rustdoc, examples are up-to-date, no broken links.
 - [ ] audit-perf: Audit performance: identify hot paths, unnecessary clones, allocation hotspots — contract: Performance bottlenecks identified, unnecessary allocations removed.
 - [ ] fix-found: Fix all bugs and issues found during the audit — contract: All documented bugs fixed, no regressions, tests pass.
