@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 524811,
-    "activeSeconds": 191
+    "tokensUsed": 526166,
+    "activeSeconds": 208
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:44:29.816Z",
+  "updatedAt": "2026-06-03T17:44:47.925Z",
   "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
   "taskList": {
     "tasks": [
@@ -31,7 +31,8 @@
       {
         "id": "fix-features-bar",
         "title": "Replace cryptic feature bar icons with readable labels",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T17:44:47.923Z",
         "verificationContract": "Features bar shows '43 Widgets' not just '43', 'Drag & Drop' not 'DnD', etc. All 6 features have clear readable labels."
       },
       {
@@ -61,14 +62,14 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 3m11s
-- Tokens used: 525K (524,811) tokens
+- Time spent: 3m28s
+- Tokens used: 526K (526,166) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] fix-title-bar: Remove confusing asterisk from title bar text
 - [x] fix-theme-palette: Add theme name labels to theme palette swatches
-- [ ] fix-features-bar: Replace cryptic feature bar icons with readable labels — contract: Features bar shows '43 Widgets' not just '43', 'Drag & Drop' not 'DnD', etc. All 6 features have clear readable labels.
+- [x] fix-features-bar: Replace cryptic feature bar icons with readable labels
 - [ ] fix-category-icons: Replace cryptic category sidebar icons with intuitive labels — contract: Categories show clear labels: 'All', 'Apps', 'Input', 'Data', 'Cookbook', 'Tools', 'Accessibility'. No cryptic single-char icons.
 - [ ] verify: Verify: cargo check, cargo clippy, cargo test — contract: All verification commands pass with 0 errors and 0 failures.
 

@@ -170,9 +170,9 @@ pub fn render_features_bar(plane: &mut Plane, theme: &Theme, y: usize, phase: f6
         ("43", "Widgets", theme.info),
         ("21", "Themes", theme.secondary),
         ("~", "Animations", theme.warning),
-        ("DnD", "Drag & Drop", theme.success),
-        ("KEY", "Keyboard", theme.primary),
-        ("SIX", "Sixel", theme.info),
+        (">>", "Drag & Drop", theme.success),
+        ("<>", "Keyboard", theme.primary),
+        ("##", "Sixel", theme.info),
     ];
 
     let mut x = 2usize;
