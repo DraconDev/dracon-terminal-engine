@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 523992,
-    "activeSeconds": 130
+    "tokensUsed": 524575,
+    "activeSeconds": 151
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T17:41:16.320Z",
-  "updatedAt": "2026-06-03T17:43:27.924Z",
+  "updatedAt": "2026-06-03T17:43:49.034Z",
   "activePath": ".pi/goals/active_goal_2026060318411632_mpycrwyo-kxbguo.md",
   "taskList": {
     "tasks": [
@@ -24,7 +24,8 @@
       {
         "id": "fix-theme-palette",
         "title": "Add theme name labels to theme palette swatches",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-03T17:43:49.032Z",
         "verificationContract": "Each theme swatch shows its name on hover or as a tooltip. Users can identify themes without guessing colors."
       },
       {
@@ -60,13 +61,13 @@ Fix confusing UI elements in the main showcase page: title bar, theme palette la
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 2m10s
-- Tokens used: 524K (523,992) tokens
+- Time spent: 2m31s
+- Tokens used: 525K (524,575) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] fix-title-bar: Remove confusing asterisk from title bar text
-- [ ] fix-theme-palette: Add theme name labels to theme palette swatches — contract: Each theme swatch shows its name on hover or as a tooltip. Users can identify themes without guessing colors.
+- [x] fix-theme-palette: Add theme name labels to theme palette swatches
 - [ ] fix-features-bar: Replace cryptic feature bar icons with readable labels — contract: Features bar shows '43 Widgets' not just '43', 'Drag & Drop' not 'DnD', etc. All 6 features have clear readable labels.
 - [ ] fix-category-icons: Replace cryptic category sidebar icons with intuitive labels — contract: Categories show clear labels: 'All', 'Apps', 'Input', 'Data', 'Cookbook', 'Tools', 'Accessibility'. No cryptic single-char icons.
 - [ ] verify: Verify: cargo check, cargo clippy, cargo test — contract: All verification commands pass with 0 errors and 0 failures.
