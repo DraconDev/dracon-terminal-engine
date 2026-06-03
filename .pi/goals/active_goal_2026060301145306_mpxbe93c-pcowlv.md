@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 809024,
-    "activeSeconds": 1817
+    "tokensUsed": 809286,
+    "activeSeconds": 1835
   },
   "sisyphus": false,
   "createdAt": "2026-06-03T00:14:53.064Z",
-  "updatedAt": "2026-06-03T00:46:10.033Z",
+  "updatedAt": "2026-06-03T00:46:28.173Z",
   "activePath": ".pi/goals/active_goal_2026060301145306_mpxbe93c-pcowlv.md",
   "taskList": {
     "tasks": [
@@ -95,8 +95,8 @@ Run a comprehensive deep audit across framework core, compositor, input system, 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 30m17s
-- Tokens used: 809K (809,024) tokens
+- Time spent: 30m35s
+- Tokens used: 809K (809,286) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
