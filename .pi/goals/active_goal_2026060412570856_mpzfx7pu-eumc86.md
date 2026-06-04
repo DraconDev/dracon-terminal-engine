@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 127418,
-    "activeSeconds": 569
+    "tokensUsed": 127917,
+    "activeSeconds": 588
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T12:07:04.719Z",
+  "updatedAt": "2026-06-04T12:07:24.432Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -44,7 +44,8 @@
           {
             "id": "task-2c",
             "title": "Verify: cargo check, cargo test, no dangling references",
-            "status": "pending",
+            "status": "complete",
+            "completedAt": "2026-06-04T12:07:24.431Z",
             "lightweightSubtasks": true
           }
         ]
@@ -96,8 +97,8 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 9m29s
-- Tokens used: 127K (127,418) tokens
+- Time spent: 9m48s
+- Tokens used: 128K (127,917) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
