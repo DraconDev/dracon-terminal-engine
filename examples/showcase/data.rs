@@ -334,6 +334,37 @@ impl ExampleMeta {
                 binary_name: "theme_switcher",
                 preview: &["Theme: Nord", "+----------+", "| # # # #   |"],
             },
+            ExampleMeta {
+                name: "modal_demo",
+                category: "cookbook",
+                description: "Modal dialogs + focus trapping",
+                binary_name: "modal_demo",
+                preview: &[
+                    "+---------------+",
+                    "| Confirm?     |",
+                    "| [Yes] [No]   |",
+                    "+---------------+",
+                ],
+            },
+            ExampleMeta {
+                name: "tree_navigator",
+                category: "cookbook",
+                description: "Expandable tree widget with detail pane",
+                binary_name: "tree_navigator",
+                preview: &["v root/", "| v src/", "| | > main.rs", "| | > lib.rs"],
+            },
+            ExampleMeta {
+                name: "settings_panel",
+                category: "cookbook",
+                description: "Form + KeyValueGrid configuration panel",
+                binary_name: "settings_panel",
+                preview: &[
+                    "Username: [____]",
+                    "Email:    [____]",
+                    "Password: [____]",
+                    "API Key:  [____]",
+                ],
+            },
             // ── Tools ─────────────────────────────────────────────────────────
             ExampleMeta {
                 name: "accessibility",
