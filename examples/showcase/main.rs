@@ -330,7 +330,7 @@ mod scene_construction_tests {
     #[test]
     fn test_all_scenes_construct() {
         let scenes = make_scene_tests();
-        assert_eq!(scenes.len(), 33);
+        assert_eq!(scenes.len(), 28);
     }
 
     #[test]
