@@ -231,10 +231,6 @@ mod scene_construction_tests {
                 Box::new(modal_demo::ModalDemoScene::new(t.clone())),
             ),
             (
-                "calendar_scene",
-                Box::new(calendar_scene::CalendarScene::new(t.clone())),
-            ),
-            (
                 "autocomplete_scene",
                 Box::new(autocomplete_scene::AutocompleteScene::new(t.clone())),
             ),
@@ -277,16 +273,8 @@ mod scene_construction_tests {
                 Box::new(tooltip_scene::TooltipScene::new(t.clone())),
             ),
             (
-                "progress_scene",
-                Box::new(progress_scene::ProgressScene::new(t.clone())),
-            ),
-            (
                 "password_input_scene",
                 Box::new(password_input_scene::PasswordInputScene::new(t.clone())),
-            ),
-            (
-                "radio_scene",
-                Box::new(radio_scene::RadioScene::new(t.clone())),
             ),
             (
                 "debug_overlay_scene",
@@ -307,10 +295,6 @@ mod scene_construction_tests {
             (
                 "command_palette_scene",
                 Box::new(command_palette_scene::CommandPaletteScene::new(t.clone())),
-            ),
-            (
-                "table_list_scene",
-                Box::new(table_list_scene::TableListScene::new(t.clone())),
             ),
             (
                 "settings_scene",
@@ -339,10 +323,6 @@ mod scene_construction_tests {
             (
                 "hud_demo_scene",
                 Box::new(hud_demo_scene::HudDemoScene::new(t.clone())),
-            ),
-            (
-                "note_editor_scene",
-                Box::new(note_editor_scene::NoteEditorScene::new(t.clone())),
             ),
         ]
     }
