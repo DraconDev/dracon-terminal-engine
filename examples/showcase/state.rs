@@ -493,7 +493,6 @@ impl Showcase {
                 | "form_demo"
                 | "tree_navigator"
                 | "modal_demo"
-                | "calendar"
                 | "rich_text"
                 | "autocomplete"
                 | "notification_center"
@@ -504,9 +503,7 @@ impl Showcase {
                 | "color_picker"
                 | "tags_input"
                 | "tooltip"
-                | "progress"
                 | "password_input"
-                | "radio"
                 | "debug_overlay"
                 | "raycaster"
                 | "paint"
@@ -518,9 +515,7 @@ impl Showcase {
                 | "live_feed"
                 | "metrics_hub"
                 | "navigator"
-                | "note_editor"
                 | "settings_panel"
-                | "table_list"
         )
     }
 
