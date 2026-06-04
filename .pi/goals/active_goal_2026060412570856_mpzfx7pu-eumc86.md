@@ -1,0 +1,105 @@
+{
+  "version": 3,
+  "id": "mpzfx7pu-eumc86",
+  "objective": "Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup to ~30-35, and polish the remaining star scenes for maximum impressiveness.",
+  "status": "active",
+  "autoContinue": true,
+  "usage": {
+    "tokensUsed": 3059,
+    "activeSeconds": 0
+  },
+  "sisyphus": false,
+  "createdAt": "2026-06-04T11:57:08.562Z",
+  "updatedAt": "2026-06-04T11:57:08.585Z",
+  "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
+  "taskList": {
+    "tasks": [
+      {
+        "id": "task-1",
+        "title": "Audit all 49 examples — classify each as Star / Solid / Weak / Duplicate, with reasoning",
+        "status": "pending",
+        "verificationContract": "Produce a written classification table with all 49 examples and a clear recommendation (keep/cut) for each."
+      },
+      {
+        "id": "task-2",
+        "title": "Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files",
+        "status": "pending",
+        "verificationContract": "Run cargo check --example showcase (0 errors), cargo test --example showcase (12/12 pass), grep for any remaining references to removed scene IDs.",
+        "subtasks": [
+          {
+            "id": "task-2a",
+            "title": "Identify cut candidates: cookbook entry scenes (split_resizer, menu_system, tabbed_panels, data_table, command_bindings), small tools (settings, input_debug, desktop), and overlapping apps (table_list vs data_table, note_editor vs text_editor_demo)",
+            "status": "pending",
+            "lightweightSubtasks": true
+          },
+          {
+            "id": "task-2b",
+            "title": "Remove scene files and registration from data.rs + scenes/mod.rs",
+            "status": "pending",
+            "lightweightSubtasks": true
+          },
+          {
+            "id": "task-2c",
+            "title": "Verify: cargo check, cargo test, no dangling references",
+            "status": "pending",
+            "lightweightSubtasks": true
+          }
+        ]
+      },
+      {
+        "id": "task-3",
+        "title": "Polish star scenes — meaningful improvements to the top ~8-10 scenes",
+        "status": "pending",
+        "verificationContract": "Each polished scene must compile (cargo check) and pass tests (cargo test). Visual + interaction improvements visible in code diff.",
+        "subtasks": [
+          {
+            "id": "task-3a",
+            "title": "Fix bugs: inconsistent ESC handling, missing mouse support, missing theme propagation, broken layouts",
+            "status": "pending",
+            "lightweightSubtasks": true
+          },
+          {
+            "id": "task-3b",
+            "title": "Visual polish: spacing, alignment, border consistency, color usage on star scenes",
+            "status": "pending",
+            "lightweightSubtasks": true
+          },
+          {
+            "id": "task-3c",
+            "title": "Interaction polish: add mouse scroll to scrollable views, hover feedback where missing",
+            "status": "pending",
+            "lightweightSubtasks": true
+          }
+        ]
+      },
+      {
+        "id": "task-4",
+        "title": "Final verification — cargo check, clippy, test, showcase test suite all green",
+        "status": "pending",
+        "verificationContract": "cargo check --example showcase (0 errors), cargo clippy --example showcase (0 warnings), cargo test --example showcase (12/12 pass), cargo test --test showcase_smoke_test (1 pass)"
+      }
+    ],
+    "blockCompletion": false,
+    "proposedAt": "2026-06-04T11:57:08.574Z"
+  }
+}
+
+# Goal Prompt
+
+Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup to ~30-35, and polish the remaining star scenes for maximum impressiveness.
+
+## Progress
+
+- Status: running
+- Auto-continue: on
+- Sisyphus mode: no
+- Time spent: 0s
+- Tokens used: 3.1K (3,059) tokens
+## Tasks
+
+<!-- blockCompletion: false -->
+- [ ] task-1: Audit all 49 examples — classify each as Star / Solid / Weak / Duplicate, with reasoning — contract: Produce a written classification table with all 49 examples and a clear recommendation (keep/cut) for each.
+- [ ] task-2: Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files — contract: Run cargo check --example showcase (0 errors), cargo test --example showcase (12/12 pass), grep for any remaining references to removed scene IDs.
+- [ ] task-3: Polish star scenes — meaningful improvements to the top ~8-10 scenes — contract: Each polished scene must compile (cargo check) and pass tests (cargo test). Visual + interaction improvements visible in code diff.
+- [ ] task-4: Final verification — cargo check, clippy, test, showcase test suite all green — contract: cargo check --example showcase (0 errors), cargo clippy --example showcase (0 warnings), cargo test --example showcase (12/12 pass), cargo test --test showcase_smoke_test (1 pass)
+
