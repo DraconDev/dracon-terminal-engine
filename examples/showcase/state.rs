@@ -147,12 +147,6 @@ impl Showcase {
             )),
         );
         scene_router.register(
-            "calendar",
-            Box::new(crate::scenes::calendar_scene::CalendarScene::new(
-                theme.clone(),
-            )),
-        );
-        scene_router.register(
             "rich_text",
             Box::new(crate::scenes::rich_text_scene::RichTextScene::new(
                 theme.clone(),
@@ -213,18 +207,8 @@ impl Showcase {
             )),
         );
         scene_router.register(
-            "progress",
-            Box::new(crate::scenes::progress_scene::ProgressScene::new(
-                theme.clone(),
-            )),
-        );
-        scene_router.register(
             "password_input",
             Box::new(crate::scenes::password_input_scene::PasswordInputScene::new(theme.clone())),
-        );
-        scene_router.register(
-            "radio",
-            Box::new(crate::scenes::radio_scene::RadioScene::new(theme.clone())),
         );
         scene_router.register(
             "debug_overlay",
@@ -251,12 +235,6 @@ impl Showcase {
         scene_router.register(
             "command_palette",
             Box::new(crate::scenes::command_palette_scene::CommandPaletteScene::new(theme.clone())),
-        );
-        scene_router.register(
-            "table_list",
-            Box::new(crate::scenes::table_list_scene::TableListScene::new(
-                theme.clone(),
-            )),
         );
         scene_router.register(
             "settings_panel",
@@ -300,13 +278,6 @@ impl Showcase {
                 theme.clone(),
             )),
         );
-        scene_router.register(
-            "note_editor",
-            Box::new(crate::scenes::note_editor_scene::NoteEditorScene::new(
-                theme.clone(),
-            )),
-        );
-
         let run_counts = vec![0u32; examples.len()];
 
         let cached_themes: Vec<Theme> = Theme::all()
