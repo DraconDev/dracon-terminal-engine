@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 169841,
-    "activeSeconds": 928
+    "tokensUsed": 171959,
+    "activeSeconds": 938
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T12:13:27.262Z",
+  "updatedAt": "2026-06-04T12:13:38.100Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -74,7 +74,8 @@
           {
             "id": "task-3c",
             "title": "Interaction polish: add mouse scroll to scrollable views, hover feedback where missing",
-            "status": "pending",
+            "status": "complete",
+            "completedAt": "2026-06-04T12:13:38.097Z",
             "lightweightSubtasks": true
           }
         ]
@@ -100,8 +101,8 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 15m28s
-- Tokens used: 170K (169,841) tokens
+- Time spent: 15m38s
+- Tokens used: 172K (171,959) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
