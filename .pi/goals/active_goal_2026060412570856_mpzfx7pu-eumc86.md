@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 127917,
-    "activeSeconds": 588
+    "tokensUsed": 128211,
+    "activeSeconds": 594
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T12:07:24.432Z",
+  "updatedAt": "2026-06-04T12:07:30.532Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -24,7 +24,8 @@
       {
         "id": "task-2",
         "title": "Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-04T12:07:30.530Z",
         "verificationContract": "Run cargo check --example showcase (0 errors), cargo test --example showcase (12/12 pass), grep for any remaining references to removed scene IDs.",
         "subtasks": [
           {
@@ -97,13 +98,13 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 9m48s
-- Tokens used: 128K (127,917) tokens
+- Time spent: 9m54s
+- Tokens used: 128K (128,211) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] task-1: Audit all 49 examples — classify each as Star / Solid / Weak / Duplicate, with reasoning
-- [ ] task-2: Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files — contract: Run cargo check --example showcase (0 errors), cargo test --example showcase (12/12 pass), grep for any remaining references to removed scene IDs.
+- [x] task-2: Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files
 - [ ] task-3: Polish star scenes — meaningful improvements to the top ~8-10 scenes — contract: Each polished scene must compile (cargo check) and pass tests (cargo test). Visual + interaction improvements visible in code diff.
 - [ ] task-4: Final verification — cargo check, clippy, test, showcase test suite all green — contract: cargo check --example showcase (0 errors), cargo clippy --example showcase (0 warnings), cargo test --example showcase (12/12 pass), cargo test --test showcase_smoke_test (1 pass)
 
