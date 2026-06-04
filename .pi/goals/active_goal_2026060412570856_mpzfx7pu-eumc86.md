@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 90153,
-    "activeSeconds": 114
+    "tokensUsed": 90861,
+    "activeSeconds": 128
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T11:59:06.358Z",
+  "updatedAt": "2026-06-04T11:59:21.392Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -30,7 +30,8 @@
           {
             "id": "task-2a",
             "title": "Identify cut candidates: cookbook entry scenes (split_resizer, menu_system, tabbed_panels, data_table, command_bindings), small tools (settings, input_debug, desktop), and overlapping apps (table_list vs data_table, note_editor vs text_editor_demo)",
-            "status": "pending",
+            "status": "complete",
+            "completedAt": "2026-06-04T11:59:17.529Z",
             "lightweightSubtasks": true
           },
           {
@@ -94,8 +95,8 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 1m54s
-- Tokens used: 90K (90,153) tokens
+- Time spent: 2m08s
+- Tokens used: 91K (90,861) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
