@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 91433,
-    "activeSeconds": 131
+    "tokensUsed": 96636,
+    "activeSeconds": 150
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T11:59:25.368Z",
+  "updatedAt": "2026-06-04T11:59:45.914Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -95,8 +95,8 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 2m11s
-- Tokens used: 91K (91,433) tokens
+- Time spent: 2m30s
+- Tokens used: 97K (96,636) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
