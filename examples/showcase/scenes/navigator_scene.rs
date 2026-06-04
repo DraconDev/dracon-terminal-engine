@@ -146,6 +146,21 @@ impl NavState {
                 },
             ],
         };
+        // Sort: folders first, then files; alphabetically within each group (case-insensitive)
+        self.entries.sort_by(|a, b| {
+            let a_is_dir = a.is_dir;
+            let b_is_dir = b.is_dir;
+            if a_is_dir != b_is_dir {
+                // Folders first
+                return if a_is_dir {
+                    std::cmp::Ordering::Less
+                } else {
+                    std::cmp::Ordering::Greater
+                };
+            }
+            // Same type: sort alphabetically (case-insensitive)
+            a.name.to_lowercase().cmp(&b.name.to_lowercase())
+        });
         self.apply_search();
         self.selected = 0;
         self.scroll = 0;
