@@ -28,18 +28,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "arena",
-                category: "apps",
-                description: "Real-time arena survival game with mouse combat",
-                binary_name: "arena",
-                preview: &[
-                    "  HP[████████░░] Score: 420  ",
-                    "     ·  g        T          ",
-                    "  ●     s              s    ",
-                    "  Wave: 5  Kills: 42  Lv: 3 ",
-                ],
-            },
-            ExampleMeta {
                 name: "paint",
                 category: "apps",
                 description: "Mouse-driven pixel art canvas with brushes",
@@ -73,18 +61,6 @@ impl ExampleMeta {
                     "  ┌────Command Palette────┐  ",
                     "  │ > New File       file │  ",
                     "  │   Save File      file │  ",
-                ],
-            },
-            ExampleMeta {
-                name: "table_list",
-                category: "apps",
-                description: "Server dashboard: sortable Table + List",
-                binary_name: "table_list",
-                preview: &[
-                    "  all │ PID  Name     CPU%  ",
-                    "  net │ 502  cargo    45.3 ",
-                    "  bld │ 603  r-a      12.8 ",
-                    "  db  │ 710  firefox   8.5 ",
                 ],
             },
             ExampleMeta {
@@ -158,18 +134,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "note_editor",
-                category: "apps",
-                description: "Note Editor: TextEditorAdapter + ContextMenu + Breadcrumbs",
-                binary_name: "note_editor",
-                preview: &[
-                    "  home > user > notes > hello.rs",
-                    "  ── Editor ──────────────────────",
-                    "  // Welcome to Dracon Note Editor",
-                    "  fn main() {",
-                ],
-            },
-            ExampleMeta {
                 name: "animation",
                 category: "data",
                 description: "Animation & easing curves",
@@ -179,18 +143,6 @@ impl ExampleMeta {
                     "    ●    ●  ",
                     "  Linear EaseIn",
                     "  EaseOut EaseInOut",
-                ],
-            },
-            ExampleMeta {
-                name: "ide",
-                category: "apps",
-                description: "Full IDE with menus, tabs, tree, editor",
-                binary_name: "ide",
-                preview: &[
-                    "[File][Edit][View]",
-                    "+-src/ +--------+",
-                    "| main |fn main|",
-                    "| lib  |{      |",
                 ],
             },
             // ── Apps ─────────────────────────────────────────────────────────
@@ -223,18 +175,6 @@ impl ExampleMeta {
                     "[10:43] Bob: Hi",
                     "[10:44] Alice: Hi!",
                     "> _",
-                ],
-            },
-            ExampleMeta {
-                name: "git_tui",
-                category: "apps",
-                description: "Real Git status/log/diff/branches",
-                binary_name: "git_tui",
-                preview: &[
-                    "[Status][Log][Diff]",
-                    " M src/main.rs",
-                    " A Cargo.toml",
-                    "?? README.md",
                 ],
             },
             ExampleMeta {
