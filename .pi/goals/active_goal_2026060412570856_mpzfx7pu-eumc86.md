@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 155630,
-    "activeSeconds": 835
+    "tokensUsed": 156915,
+    "activeSeconds": 848
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T12:11:49.759Z",
+  "updatedAt": "2026-06-04T12:12:03.637Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -60,7 +60,8 @@
           {
             "id": "task-3a",
             "title": "Fix bugs: inconsistent ESC handling, missing mouse support, missing theme propagation, broken layouts",
-            "status": "pending",
+            "status": "complete",
+            "completedAt": "2026-06-04T12:12:03.635Z",
             "lightweightSubtasks": true
           },
           {
@@ -98,8 +99,8 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 13m55s
-- Tokens used: 156K (155,630) tokens
+- Time spent: 14m08s
+- Tokens used: 157K (156,915) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
