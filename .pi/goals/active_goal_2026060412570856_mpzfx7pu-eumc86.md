@@ -5,12 +5,12 @@
   "status": "active",
   "autoContinue": true,
   "usage": {
-    "tokensUsed": 173292,
-    "activeSeconds": 951
+    "tokensUsed": 174328,
+    "activeSeconds": 963
   },
   "sisyphus": false,
   "createdAt": "2026-06-04T11:57:08.562Z",
-  "updatedAt": "2026-06-04T12:13:51.817Z",
+  "updatedAt": "2026-06-04T12:14:05.498Z",
   "activePath": ".pi/goals/active_goal_2026060412570856_mpzfx7pu-eumc86.md",
   "taskList": {
     "tasks": [
@@ -84,7 +84,8 @@
       {
         "id": "task-4",
         "title": "Final verification — cargo check, clippy, test, showcase test suite all green",
-        "status": "pending",
+        "status": "complete",
+        "completedAt": "2026-06-04T12:14:05.496Z",
         "verificationContract": "cargo check --example showcase (0 errors), cargo clippy --example showcase (0 warnings), cargo test --example showcase (12/12 pass), cargo test --test showcase_smoke_test (1 pass)"
       }
     ],
@@ -102,13 +103,13 @@ Audit the 49 showcase examples, cut weak/duplicate scenes to tighten the lineup 
 - Status: running
 - Auto-continue: on
 - Sisyphus mode: no
-- Time spent: 15m51s
-- Tokens used: 173K (173,292) tokens
+- Time spent: 16m03s
+- Tokens used: 174K (174,328) tokens
 ## Tasks
 
 <!-- blockCompletion: false -->
 - [x] task-1: Audit all 49 examples — classify each as Star / Solid / Weak / Duplicate, with reasoning
 - [x] task-2: Cut weak/duplicate scenes — remove from data.rs, scenes/mod.rs, scenes/*.rs files
 - [x] task-3: Polish star scenes — meaningful improvements to the top ~8-10 scenes
-- [ ] task-4: Final verification — cargo check, clippy, test, showcase test suite all green — contract: cargo check --example showcase (0 errors), cargo clippy --example showcase (0 warnings), cargo test --example showcase (12/12 pass), cargo test --test showcase_smoke_test (1 pass)
+- [x] task-4: Final verification — cargo check, clippy, test, showcase test suite all green
 
