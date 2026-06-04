@@ -202,18 +202,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "calendar",
-                category: "input",
-                description: "Date picker with month navigation",
-                binary_name: "calendar",
-                preview: &[
-                    "  May 2026    ",
-                    "Mo Tu We Th Fr Sa Su",
-                    "10 11 12 13 14 15 16",
-                    "Selected: 2026-05-12",
-                ],
-            },
-            ExampleMeta {
                 name: "autocomplete",
                 category: "input",
                 description: "Search input with suggestions",
@@ -257,17 +245,6 @@ impl ExampleMeta {
                     "  Username: [admin____]",
                     "  Password: [••••••____]",
                     "  Strength: Strong",
-                ],
-            },
-            ExampleMeta {
-                name: "radio",
-                category: "input",
-                description: "Settings panel with radio button groups",
-                binary_name: "radio",
-                preview: &[
-                    "  ◉ Dark    ○ Light   ○ HC",
-                    "  ○ Small  ◉ Medium   ○ Large",
-                    "  Preview │ Dark 14pt Comfort",
                 ],
             },
             ExampleMeta {
@@ -327,17 +304,6 @@ impl ExampleMeta {
                 ],
             },
             ExampleMeta {
-                name: "progress",
-                category: "data",
-                description: "Progress indicators & loading simulation",
-                binary_name: "progress",
-                preview: &[
-                    "  ◜ ProgressRing  65%",
-                    "  [████████████░░░░░]",
-                    "  ◠ Loading...",
-                ],
-            },
-            ExampleMeta {
                 name: "debug_overlay",
                 category: "data",
                 description: "Performance metrics, FPS, frame time, profiler",
@@ -368,113 +334,7 @@ impl ExampleMeta {
                 binary_name: "theme_switcher",
                 preview: &["Theme: Nord", "+----------+", "| # # # #   |"],
             },
-            ExampleMeta {
-                name: "tree_navigator",
-                category: "cookbook",
-                description: "Expandable tree widget",
-                binary_name: "tree_navigator",
-                preview: &["v root/", "| v src/", "| | > main.rs", "| | > lib.rs"],
-            },
-            ExampleMeta {
-                name: "modal_demo",
-                category: "cookbook",
-                description: "Modal dialogs + focus trapping",
-                binary_name: "modal_demo",
-                preview: &[
-                    "+---------------+",
-                    "| Confirm?     |",
-                    "| [Yes] [No]   |",
-                    "+---------------+",
-                ],
-            },
-            ExampleMeta {
-                name: "command_bindings",
-                category: "cookbook",
-                description: "Live CLI-bound widgets",
-                binary_name: "command_bindings",
-                preview: &["Load: 0.45 0.32", "CPU:  [####--]", "Mem:  [######]"],
-            },
-            ExampleMeta {
-                name: "split_resizer",
-                category: "cookbook",
-                description: "Drag-to-resize SplitPane",
-                binary_name: "split_resizer",
-                preview: &["+-----+-----+", "|  A  |  B  |", "+--+--+-----+"],
-            },
-            ExampleMeta {
-                name: "menu_system",
-                category: "cookbook",
-                description: "MenuBar + ContextMenu",
-                binary_name: "menu_system",
-                preview: &["[File][Edit][View]", "+-----------+", "| New        |"],
-            },
-            ExampleMeta {
-                name: "tabbed_panels",
-                category: "cookbook",
-                description: "Tab bar with panel switching",
-                binary_name: "tabbed_panels",
-                preview: &[
-                    "[Tab1][Tab2][Tab3]+",
-                    "+---------------+",
-                    "|   Panel       |",
-                ],
-            },
-            ExampleMeta {
-                name: "data_table",
-                category: "cookbook",
-                description: "Sortable table with selection",
-                binary_name: "data_table",
-                preview: &[
-                    " Name     | Age | City ",
-                    "----------|-----|------",
-                    "> Carol   |  22 | SEA  ",
-                ],
-            },
             // ── Tools ─────────────────────────────────────────────────────────
-            ExampleMeta {
-                name: "log_monitor",
-                category: "tools",
-                description: "Live log viewer with filters",
-                binary_name: "log_monitor",
-                preview: &[
-                    "[ERROR][WARN][INFO]",
-                    "10:42 ERROR connection",
-                    "10:40 INFO ready",
-                ],
-            },
-            ExampleMeta {
-                name: "desktop",
-                category: "tools",
-                description: "Draggable windows + taskbar",
-                binary_name: "desktop",
-                preview: &["+------++------+", "| Win1 || Win2  |", "+------++------+"],
-            },
-            ExampleMeta {
-                name: "input_debug",
-                category: "tools",
-                description: "Key/mouse event visualizer",
-                binary_name: "input_debug",
-                preview: &[
-                    "Key: ArrowUp  0x2191",
-                    "Mod: Ctrl+Shift",
-                    "Mouse: 45, 12 [L-down]",
-                ],
-            },
-            ExampleMeta {
-                name: "text_editor_demo",
-                category: "tools",
-                description: "Syntax-highlighted editor",
-                binary_name: "text_editor_demo",
-                preview: &["1 | fn main() {", "2 | >  println!();", "3 | }"],
-            },
-            ExampleMeta {
-                name: "sqlite_browser",
-                category: "tools",
-                description: "Browse SQLite databases",
-                binary_name: "sqlite_browser",
-                preview: &["Tables: [users]", "| id | name     |", "| 1  | Alice    |"],
-            },
-            // ── Accessibility ────────────────────────────────────────────────
             ExampleMeta {
                 name: "accessibility",
                 category: "accessibility",
